@@ -96,6 +96,19 @@ export async function logRequest(
       return { data: null, error: `No task found for id ${request.nodeId}` };
     }
 
+    const getModelFromRequest = () => {
+      if (requestBody && (requestBody as any).model) {
+        return (requestBody as any).model;
+      }
+
+      const modelFromPath = getModelFromPath(request.path);
+      if (modelFromPath) {
+        return modelFromPath;
+      }
+
+      return null;
+    };
+
     const createdAt = request.startTime ?? new Date();
     const requestData = {
       id: request.requestId,
@@ -119,6 +132,8 @@ export async function logRequest(
       helicone_org_id: authParams.organizationId,
       provider: request.provider,
       helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
+      model: getModelFromRequest(),
+      model_override: request.modelOverride ?? null,
       created_at: createdAt.toISOString(),
     };
 
@@ -169,5 +184,16 @@ export async function logRequest(
     };
   } catch (e) {
     return { data: null, error: JSON.stringify(e) };
+  }
+
+  function getModelFromPath(path: string) {
+    const regex = /\/engines\/([^/]+)/;
+    const match = path.match(regex);
+
+    if (match && match[1]) {
+      return match[1];
+    } else {
+      return undefined;
+    }
   }
 }

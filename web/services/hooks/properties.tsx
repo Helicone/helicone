@@ -20,7 +20,7 @@ const useGetProperties = () => {
   });
 
   const allProperties: string[] =
-    data?.data.map((property: Property) => {
+    data?.data?.map((property: Property) => {
       return property.property;
     }) ?? [];
 
