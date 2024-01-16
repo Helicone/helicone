@@ -294,6 +294,9 @@ app.post(
       }
 
       const url = `https://platform.openai.com/finetune/${fineTuneJob.data.id}?filter=all`;
+      Sentry.captureMessage(
+        `fine-tune job created - ${fineTuneJob.data.id} - ${authParams.organizationId}`
+      );
       res.json({
         success: true,
         data: {
@@ -301,6 +304,7 @@ app.post(
         },
       });
     } catch (e) {
+      Sentry.captureException(e);
       res.status(500).json({
         error:
           "Sorry the fine tuning job you requested failed. Right now it is in beta and only support gpt3.5 and gpt4 requests",
