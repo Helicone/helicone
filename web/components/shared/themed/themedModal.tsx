@@ -18,7 +18,7 @@ const ThemedModal = (props: ThemedModalProps) => {
     <Transition.Root show={open} as={Fragment}>
       <Dialog
         as="div"
-        className={clsx(themeContext?.theme ?? "light", "relative z-20")}
+        className={clsx(themeContext?.theme ?? "light", "relative z-50")}
         onClose={setOpen}
       >
         <Transition.Child
