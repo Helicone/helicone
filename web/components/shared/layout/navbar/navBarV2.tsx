@@ -9,6 +9,7 @@ import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { clsx } from "../../clsx";
 import SolutionsButton from "./solutionsButton";
 import DeveloperButton from "./developerButton";
+import { BsGithub } from "react-icons/bs";
 
 interface NavBarV2Props {}
 
@@ -83,7 +84,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
               </div>
             </Link>
           </div>
-          <div className="hidden md:flex md:gap-x-4 items-center text-sm">
+          <div className="hidden md:flex gap-x-1 lg:gap-x-4 items-center text-sm">
             <SolutionsButton />
             <DeveloperButton />
             <Link
@@ -112,7 +113,9 @@ const NavBarV2 = (props: NavBarV2Props) => {
             >
               <StarIcon className="h-3 w-3 text-gray-900 " />
               <div className="hidden lg:block">Star us on Github</div>
-              <div className="lg:hidden">Github</div>
+              <div className="lg:hidden">
+                <BsGithub className="h-4 w-4" />
+              </div>
             </Link>
             {user ? (
               <button
