@@ -54,14 +54,22 @@ const DeveloperPage = (props: DeveloperPageProps) => {
               <GraphQLPage />
             </div>
           </TabPanel>
-          <TabPanel>
-            <div className="p-4">
-              <WebhooksPage user={user!} />
-            </div>
-          </TabPanel>
-          <TabPanel>
-            <VaultPage />
-          </TabPanel>
+          {hasFlag ? (
+            <TabPanel>
+              <div className="p-4">
+                <WebhooksPage user={user!} />
+              </div>
+            </TabPanel>
+          ) : (
+            <></>
+          )}
+          {isPaidPlan ? (
+            <TabPanel>
+              <VaultPage />
+            </TabPanel>
+          ) : (
+            <></>
+          )}
         </TabPanels>
       </TabGroup>
     </div>
