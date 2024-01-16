@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { clsx } from "../../../shared/clsx";
 import Image from "next/image";
+import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
 
 interface UserSettingsProps {
   nextStep: () => void;
@@ -29,14 +30,20 @@ const UserSettings = (props: UserSettingsProps) => {
       <p className="text-2xl md:text-5xl font-semibold mt-8">
         Select your theme
       </p>
-      <p className="text-md md:text-lg text-gray-700 font-light mt-5">
-        The easiest way to monitor your LLM-powered applications at scale
-      </p>
+      <div className="flex flex-col md:flex-row gap-4 mt-8">
+        <div className="flex flex-col items-center justify-center gap-2 border border-gray-300">
+          <SunIcon className="w-36 h-36 text-black" />
+        </div>
+        <div className="flex flex-col items-center justify-center gap-2 border border-gray-300">
+          <MoonIcon className="w-36 h-36 text-black" />
+        </div>
+      </div>
+
       <button
         onClick={nextStep}
         className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl mt-8"
       >
-        Get Started
+        Next
       </button>
     </div>
   );
