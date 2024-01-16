@@ -72,6 +72,7 @@ const useRequestsPageV2 = (
     refetch: requests.refetch,
     searchPropertyFilters,
     filterMap,
+    filter,
   };
 };
 
