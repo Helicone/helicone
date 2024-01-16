@@ -103,11 +103,7 @@ export function withAuth<T>(
       });
       return;
     }
-    console.log(
-      "ORG_ID_COOKIE_KEY",
 
-      data.org
-    );
     // Check permissions
     if (
       permissions &&
