@@ -15,6 +15,7 @@ import useSearchParams from "../../utils/useSearchParams";
 import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
 import ViewButton from "./viewButton";
 import { RequestViews } from "./themedTableV5";
+import { useOrg } from "../../layout/organizationContext";
 
 interface ThemedTableHeaderProps<T> {
   rows: T[];
@@ -49,10 +50,12 @@ interface ThemedTableHeaderProps<T> {
     currentView: RequestViews;
     onViewChange: (value: RequestViews) => void;
   };
+  onFineTune?: () => void;
 }
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
   const { setNotification } = useNotification();
+  const org = useOrg();
 
   const { rows, columnsFilter, timeFilter, advancedFilters, viewToggle } =
     props;
@@ -104,6 +107,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
         ) : (
           <div />
         )}
+
         <div className="flex flex-row gap-2">
           {advancedFilters && (
             <button
@@ -118,6 +122,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               </p>
             </button>
           )}
+
           {columnsFilter && (
             <ViewColumns
               columns={columnsFilter.columns}
@@ -135,6 +140,26 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
             />
           )}
         </div>
+      </div>
+      <div className="flex flex-row gap-2 lg:justify-end">
+        {advancedFilters &&
+          props.onFineTune &&
+          org?.currentOrg?.tier !== "free" && (
+            <button
+              onClick={() => {
+                if (props.onFineTune) {
+                  props.onFineTune();
+                }
+              }}
+              className={clsx(
+                "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+              )}
+            >
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
+                {"🎉 Fine-tune 🎉"}
+              </p>
+            </button>
+          )}
       </div>
       {advancedFilters && showFilters && (
         <AdvancedFilters

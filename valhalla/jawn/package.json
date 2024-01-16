@@ -21,15 +21,18 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-openapi-validator": "^5.1.1",
+    "fs": "^0.0.1-security",
     "gpt-tokenizer": "^2.1.2",
     "js-tiktoken": "^1.0.8",
     "lodash": "^4.17.21",
     "lodash.merge": "^4.6.2",
     "morgan": "^1.10.0",
+    "openai": "^4.24.7",
     "pg": "^8.11.3",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2",
-    "uuidv4": "^6.2.13"
+    "uuidv4": "^6.2.13",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/dateformat": "^5.0.2",
