@@ -437,7 +437,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
           </div>
         </div>
 
-        <div className={clsx("flex flex-1 flex-col md:ml-56")}>
+        <div className={clsx("flex flex-1 flex-col md:pl-56")}>
           <div className="sticky top-0 z-20 h-16 flex md:hidden flex-shrink-0 bg-white dark:bg-black border-b border-gray-300 dark:border-gray-700">
             <button
               type="button"
