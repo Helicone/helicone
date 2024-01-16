@@ -994,6 +994,8 @@ export interface Database {
           helicone_proxy_key_id: string | null
           helicone_user: string | null
           id: string
+          model: string | null
+          model_override: string | null
           path: string
           prompt_id: string | null
           prompt_values: Json | null
@@ -1011,6 +1013,8 @@ export interface Database {
           helicone_proxy_key_id?: string | null
           helicone_user?: string | null
           id?: string
+          model?: string | null
+          model_override?: string | null
           path: string
           prompt_id?: string | null
           prompt_values?: Json | null
@@ -1028,6 +1032,8 @@ export interface Database {
           helicone_proxy_key_id?: string | null
           helicone_user?: string | null
           id?: string
+          model?: string | null
+          model_override?: string | null
           path?: string
           prompt_id?: string | null
           prompt_values?: Json | null
@@ -1128,6 +1134,7 @@ export interface Database {
           delay_ms: number | null
           feedback: Json | null
           id: string
+          model: string | null
           prompt_tokens: number | null
           request: string
           status: number | null
@@ -1139,6 +1146,7 @@ export interface Database {
           delay_ms?: number | null
           feedback?: Json | null
           id?: string
+          model?: string | null
           prompt_tokens?: number | null
           request: string
           status?: number | null
@@ -1150,6 +1158,7 @@ export interface Database {
           delay_ms?: number | null
           feedback?: Json | null
           id?: string
+          model?: string | null
           prompt_tokens?: number | null
           request?: string
           status?: number | null

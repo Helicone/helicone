@@ -126,6 +126,9 @@ const getModelFromPath = (path: string) => {
 
 const getRequestBuilder = (request: HeliconeRequest, useRosetta: boolean) => {
   let model =
+    request.model_override ||
+    request.response_model ||
+    request.request_model ||
     request.response_body?.model ||
     request.request_body?.model ||
     request.response_body?.body?.model || // anthropic
