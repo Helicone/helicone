@@ -141,6 +141,7 @@ export const FineTuneModal = (props: FineTuneModalProps) => {
                         if (res.ok) {
                           setResultLink(x?.data?.url);
                         } else {
+                          console.error(x);
                           setError(x.error);
                         }
                       });
