@@ -81,13 +81,14 @@ const model = new ChatOpenAI({
 
 # Supported Headers
 
-| Header Name              | Type          | Description                                                    | Example                                               |
-| ------------------------ | ------------- | -------------------------------------------------------------- | ----------------------------------------------------- |
-| Helicone-Target-URL      | string (url)  | The URL to proxy the request to when using gateway.hconeai.com | https://api.openai.com/v1/engines/davinci/completions |
-| Helicone-OpenAI-Api-Base | string (url)  | The URL to proxy the request to when using oai.hconeai.com     | https://[YOUR_AZURE_DOMAIN].openai.azure.com          |
-| Helicone-Request-Id      | string (uuid) | The ID of the request                                          | 123e4567-e89b-12d3-a456-426614174000                  |
-| Helicone-Omit-Response   | boolean       | Whether to exclude the response from the request               | true                                                  |
-| Helicone-Omit-Request    | boolean       | Whether to exclude the request from the response               | true                                                  |
+| Header Name              | Type           | Description                                                                                                                   | Example                                               |
+| ------------------------ | -------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Helicone-Target-URL      | string (url)   | The URL to proxy the request to when using gateway.hconeai.com                                                                | https://api.openai.com/v1/engines/davinci/completions |
+| Helicone-OpenAI-Api-Base | string (url)   | The URL to proxy the request to when using oai.hconeai.com                                                                    | https://[YOUR_AZURE_DOMAIN].openai.azure.com          |
+| Helicone-Request-Id      | string (uuid)  | The ID of the request                                                                                                         | 123e4567-e89b-12d3-a456-426614174000                  |
+| Helicone-Omit-Response   | boolean        | Whether to exclude the response from the request                                                                              | true                                                  |
+| Helicone-Omit-Request    | boolean        | Whether to exclude the request from the response                                                                              | true                                                  |
+| Helicone-Model-Override  | string (model) | Overrides the model used to calculate costs and mapping. Useful for when the model does not exist in url, request or response | gpt-4-1106-preview                                    |
 
 # Feature Flags
 
