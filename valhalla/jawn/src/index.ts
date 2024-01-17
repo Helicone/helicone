@@ -18,6 +18,7 @@ import { withAuth } from "./lib/routers/withAuth";
 import { getRequests, getRequestsCached } from "./lib/shared/request/request";
 import { withDB } from "./lib/routers/withDB";
 import { FineTuningManager } from "./lib/managers/FineTuningManager";
+import { RequestManager } from "./lib/managers/RequestManager";
 
 // This prevents the application from crashing when an unhandled error occurs
 const errorHandler: ErrorRequestHandler = (
@@ -352,6 +353,52 @@ app.post(
       orgId: supabaseClient.organizationId,
       responseId,
     });
+  })
+);
+
+app.post(
+  "/v1/requests/export",
+  withAuth<
+    paths["/v1/requests/export"]["post"]["requestBody"]["content"]["application/json"]
+  >(async ({ request, res, supabaseClient, db, authParams }) => {
+    const { data: org, error: orgError } = await supabaseClient.client
+      .from("organization")
+      .select("*")
+      .eq("id", authParams.organizationId ?? "")
+      .single();
+    if (orgError) {
+      res.status(500).json({
+        error: "Must be on pro or higher plan to export requests",
+      });
+      return;
+    }
+    if (!org.tier || org.tier === "free") {
+      res.status(405).json({
+        error: "Must be on pro or higher plan to export requests",
+      });
+      return;
+    }
+    const body = await request.getRawBody<any>();
+    const { filter } = body;
+
+    const requestManager = new RequestManager(supabaseClient);
+
+    const requestCsv = await requestManager.exportRequests(
+      filter,
+      authParams.organizationId
+    );
+
+    if (requestCsv.error || !requestCsv.data) {
+      res.status(500).json({
+        error: requestCsv.error,
+      });
+      return;
+    }
+
+    res.header("Content-Type", "text/csv");
+    res.attachment("export.csv");
+    res.send(requestCsv.data);
+    return;
   })
 );
 

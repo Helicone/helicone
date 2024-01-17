@@ -47,6 +47,35 @@ export interface paths {
       };
     };
   };
+  "/v1/requests/export": {
+    /**
+     * Retrieves all requests and responses for given filters and exports as CSV
+     * @description Retrieves all requests and responses for given filters and exports them as a CSV file.
+     */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      responses: {
+        /** @description Successfully retrieved and exported the requests and responses as a CSV file. */
+        200: {
+          content: {
+            "text/csv": string;
+          };
+        };
+        /** @description Invalid input. */
+        400: {
+          content: never;
+        };
+        /** @description Internal server error. */
+        500: {
+          content: never;
+        };
+      };
+    };
+  };
   "/v1/tokens/anthropic": {
     /**
      * Get a token for the Anthropic API

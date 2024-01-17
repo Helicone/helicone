@@ -56,6 +56,36 @@ paths:
         - authorization: []
         - helicone-authorization: []
 
+  /v1/requests/export:
+    post:
+      tags:
+        - request
+      summary: Retrieves all requests and responses for given filters and exports as CSV
+      description: Retrieves all requests and responses for given filters and exports them as a CSV file.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+      responses:
+        "200":
+          description: Successfully retrieved and exported the requests and responses as a CSV file.
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+                description: CSV file containing the requested data.
+        "400":
+          description: Invalid input.
+        "500":
+          description: Internal server error.
+      security:
+        - authorization: []
+        - helicone-authorization: []
+
   /v1/tokens/anthropic:
     post:
       tags:
