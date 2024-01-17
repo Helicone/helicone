@@ -81,12 +81,12 @@ const EventListen = (props: EventListenProps) => {
           <p className="text-2xl md:text-5xl font-semibold text-center mt-4">
             Successfully received an event
           </p>
-          <p className="text-md md:text-lg text-gray-700 font-light mt-5 text-center">
+          <p className="text-md md:text-lg text-gray-500 font-light mt-5 text-center">
             You&apos;re all set to use Helicone! Click below to get started.
           </p>
           <button
             onClick={nextStepHandler}
-            className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl mt-8"
+            className="px-28 py-3 bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 dark:text-black font-medium text-white rounded-xl mt-8"
           >
             {loading && (
               <ArrowPathIcon className="w-5 h-5 inline-block mr-2 animate-pulse" />
@@ -99,7 +99,7 @@ const EventListen = (props: EventListenProps) => {
           <p className="text-2xl md:text-5xl font-semibold text-center">
             Listening for Events
           </p>
-          <p className="text-md md:text-lg text-gray-700 font-light mt-5 text-center">
+          <p className="text-md md:text-lg text-gray-500 font-light mt-5 text-center">
             Send your first event through Helicone to view your dashboard
           </p>
           <div className="flex flex-col w-full">
