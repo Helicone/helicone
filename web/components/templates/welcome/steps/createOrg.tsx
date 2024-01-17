@@ -151,7 +151,7 @@ const CreateOrg = (props: CreateOrgProps) => {
         <p className="text-lg md:text-3xl font-semibold">
           Create a new organization
         </p>
-        <p className="text-md md:text-lg text-gray-700 font-light">
+        <p className="text-md md:text-lg text-gray-500 font-light">
           Join thousands of developers and organizations using Helicone today to
           monitor their applications.
         </p>
@@ -163,7 +163,7 @@ const CreateOrg = (props: CreateOrgProps) => {
         <div className="flex flex-col space-y-2">
           <label
             htmlFor="org-name"
-            className="block text-md font-semibold leading-6 text-gray-900"
+            className="block text-md font-semibold leading-6"
           >
             Organization Name
           </label>
@@ -174,7 +174,7 @@ const CreateOrg = (props: CreateOrgProps) => {
               id="org-name"
               required
               className={clsx(
-                "block w-full rounded-md border-0 px-4 py-4 text-md text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
+                "bg-white dark:bg-black block w-full rounded-md border-0 px-4 py-4 text-md shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
               placeholder={orgContext?.currentOrg?.name}
             />
@@ -183,7 +183,7 @@ const CreateOrg = (props: CreateOrgProps) => {
         <div className="flex flex-col space-y-2 pt-4">
           <label
             htmlFor="org-size"
-            className="block text-md font-semibold leading-6 text-gray-900"
+            className="block text-md font-semibold leading-6"
           >
             How large is your company?
           </label>
@@ -195,7 +195,7 @@ const CreateOrg = (props: CreateOrgProps) => {
                 orgContext?.currentOrg?.size || "Select company size"
               }
               className={clsx(
-                "block w-full rounded-md border-0 px-4 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
+                "bg-white dark:bg-black block w-full rounded-md border-0 px-4 py-2 text-sm shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
               required
             >
@@ -208,7 +208,7 @@ const CreateOrg = (props: CreateOrgProps) => {
         <div className="flex flex-col space-y-2">
           <label
             htmlFor="org-referral"
-            className="block text-md font-semibold leading-6 text-gray-900"
+            className="block text-md font-semibold leading-6"
           >
             How did you hear about us?
           </label>
@@ -220,7 +220,7 @@ const CreateOrg = (props: CreateOrgProps) => {
                 orgContext?.currentOrg?.referral || "Select referral source"
               }
               className={clsx(
-                "block w-full rounded-md border-0 px-4 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
+                "bg-white dark:bg-black block w-full rounded-md border-0 px-4 py-2 text-sm shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
               required
               onChange={(e) => setReferralType(e.target.value)}
@@ -243,7 +243,7 @@ const CreateOrg = (props: CreateOrgProps) => {
           <div className="flex flex-col space-y-2">
             <label
               htmlFor="referral-code"
-              className="block text-md font-semibold leading-6 text-gray-900"
+              className="block text-md font-semibold leading-6"
             >
               Referral Code (optional)
             </label>
@@ -253,7 +253,7 @@ const CreateOrg = (props: CreateOrgProps) => {
                 name="referral-code"
                 placeholder={"Referral code"}
                 className={clsx(
-                  "block w-full rounded-md border-0 px-4 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
+                  "bg-white dark:bg-black block w-full rounded-md border-0 px-4 py-2 text-sm shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
                 )}
               />
             </div>
@@ -262,7 +262,7 @@ const CreateOrg = (props: CreateOrgProps) => {
 
         <button
           type="submit"
-          className="px-28 py-3 mt-11 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl"
+          className="px-28 py-3 bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 dark:text-black font-medium text-white rounded-xl mt-8"
         >
           {isLoading && (
             <ArrowPathIcon className="animate-spin h-5 w-5 mr-2 inline" />
