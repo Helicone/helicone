@@ -109,6 +109,14 @@
       "group": "Features",
       "pages": [
         {
+          "group": "Customer Portal",
+          "pages": [
+            "features/customer_portal/intro",
+            "features/customer_portal/getting-started-proxy",
+            "features/customer_portal/getting-started-async"
+          ]
+        },
+        {
           "group": "Jobs",
           "pages": ["features/jobs/quick-start", "features/jobs/example"]
         },

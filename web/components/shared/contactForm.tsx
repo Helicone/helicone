@@ -15,10 +15,11 @@ export type ContactFormData = {
 interface ContactFormProps {
   contactTag: string;
   buttonText: string;
+  defaultText?: string;
 }
 
 const ContactForm = (props: ContactFormProps) => {
-  const { contactTag, buttonText } = props;
+  const { contactTag, buttonText, defaultText } = props;
 
   const router = useRouter();
   const { setNotification } = useNotification();
@@ -179,6 +180,7 @@ const ContactForm = (props: ContactFormProps) => {
             name="company-description"
             required
             rows={4}
+            value={defaultText}
             className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
           />
         </div>
