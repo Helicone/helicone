@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { clsx } from "../../../shared/clsx";
 import Image from "next/image";
 import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
+import { useTheme } from "../../../shared/theme/themeContext";
 
 interface UserSettingsProps {
   nextStep: () => void;
@@ -11,6 +12,10 @@ const UserSettings = (props: UserSettingsProps) => {
   const { nextStep } = props;
 
   const [loaded, setLoaded] = useState(false);
+
+  const themeContext = useTheme();
+
+  const currentTheme = themeContext?.theme;
 
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 500); // delay of 500ms
@@ -24,24 +29,46 @@ const UserSettings = (props: UserSettingsProps) => {
         `transition-all duration-700 ease-in-out ${
           loaded ? "opacity-100" : "opacity-0"
         }`,
-        "flex flex-col items-center text-center w-full px-2"
+        "flex flex-col items-center text-center w-full px-2 space-y-4"
       )}
     >
-      <p className="text-2xl md:text-5xl font-semibold mt-8">
-        Select your theme
-      </p>
-      <div className="flex flex-col md:flex-row gap-4 mt-8">
-        <div className="flex flex-col items-center justify-center gap-2 border border-gray-300">
-          <SunIcon className="w-36 h-36 text-black" />
-        </div>
-        <div className="flex flex-col items-center justify-center gap-2 border border-gray-300">
-          <MoonIcon className="w-36 h-36 text-black" />
-        </div>
+      <p className="text-2xl md:text-5xl font-semibold">Select your theme</p>
+      <div className="flex flex-col md:flex-row gap-4 py-8">
+        <button
+          onClick={() => themeContext?.setTheme("light")}
+          className={clsx(
+            currentTheme === "light" ? "ring-2 ring-sky-500" : "",
+            "rounded-lg border border-gray-300 flex flex-col items-center justify-center p-4 space-y-4 bg-white"
+          )}
+        >
+          <Image
+            src={"/assets/welcome/light.png"}
+            alt={"Light Mode"}
+            width={250}
+            height={250}
+          />
+          <p className="font-semibold text-black">Light</p>
+        </button>
+        <button
+          onClick={() => themeContext?.setTheme("dark")}
+          className={clsx(
+            currentTheme === "dark" ? "ring-2 ring-sky-500" : "",
+            "rounded-lg border border-gray-300 flex flex-col items-center justify-center p-4 space-y-4 bg-black"
+          )}
+        >
+          <Image
+            src={"/assets/welcome/dark.png"}
+            alt={"Dark Mode"}
+            width={250}
+            height={250}
+          />
+          <p className="font-semibold text-white">Dark</p>
+        </button>
       </div>
 
       <button
         onClick={nextStep}
-        className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl mt-8"
+        className="px-28 py-3 bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 dark:text-black font-medium text-white rounded-xl mt-8"
       >
         Next
       </button>

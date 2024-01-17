@@ -96,13 +96,13 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
       <p className="text-2xl md:text-5xl font-semibold text-center">
         Simple Integration
       </p>
-      <p className="text-md md:text-lg text-gray-700 font-light mt-5 text-center">
+      <p className="text-md md:text-lg text-gray-500 font-light mt-5 text-center">
         Please generate an API key and store it somewhere safe
       </p>
       <div className="flex flex-col w-full md:w-[450px] mt-16">
         <label
           htmlFor="key-name"
-          className="block text-md font-semibold leading-6 text-gray-900"
+          className="block text-md font-semibold leading-6"
         >
           API Key Name
         </label>
@@ -115,7 +115,7 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
             onChange={(e) => setName(e.target.value)}
             className={clsx(
               apiKey !== "" && "bg-gray-300 hover:cursor-not-allowed",
-              "block w-full rounded-md border-0 px-4 py-4 text-md text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
+              "bg-white dark:bg-black block w-full rounded-md border-0 px-4 py-4 text-md shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
             )}
             placeholder="Your Shiny API Key Name"
             value={name}
@@ -134,7 +134,7 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
                 }
                 onGenerateKeyHandler();
               }}
-              className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl mt-8"
+              className="px-28 py-3 bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 dark:text-black font-medium text-white rounded-xl mt-8"
             >
               Generate API Key
             </button>
@@ -143,7 +143,7 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
           <>
             <label
               htmlFor="generated-key"
-              className="block text-md font-semibold leading-6 text-gray-900 mt-8"
+              className="block text-md font-semibold leading-6 mt-8"
             >
               Your Generated Helicone API Key
             </label>
@@ -154,7 +154,7 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
                 name="generated-key"
                 id="generated-key"
                 value={apiKey}
-                className="block w-full rounded-md border-0 px-4 py-4 text-md text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
+                className="bg-white dark:bg-black block w-full rounded-md border-0 px-4 py-4 text-md shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               />
             </div>
             <button
@@ -163,7 +163,7 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
                 setNotification("Copied API key to clipboard", "success");
                 nextStep();
               }}
-              className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl mt-8"
+              className="px-28 py-3 bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 dark:text-black font-medium text-white rounded-xl mt-8"
             >
               Copy and Continue
             </button>
