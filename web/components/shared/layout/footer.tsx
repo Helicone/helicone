@@ -60,7 +60,7 @@ const Footer = (props: FooterProps) => {
         </div>
         <div className="mt-8 md:order-1 md:mt-0 space-x-4 flex flex-row">
           <p className="text-center text-xs leading-5 text-gray-500">
-            &copy; 2023 Helicone, Inc. All rights reserved.
+            &copy; 2024 Helicone, Inc. All rights reserved.
           </p>
           <Link
             href="/privacy"
@@ -73,6 +73,12 @@ const Footer = (props: FooterProps) => {
             className="text-center text-xs leading-5 text-gray-500"
           >
             Terms of Use
+          </Link>
+          <Link
+            href="/career"
+            className="text-center text-xs leading-5 text-gray-500"
+          >
+            Work with us
           </Link>
         </div>
       </div>

@@ -42,6 +42,7 @@ export interface DBLoggableProps {
     omitLog: boolean;
     provider: Provider;
     nodeId: string | null;
+    modelOverride?: string;
   };
   timing: {
     startTime: Date;
@@ -72,6 +73,8 @@ export function dbLoggableRequestFromProxyRequest(
     omitLog: proxyRequest.omitOptions.omitRequest,
     provider: proxyRequest.provider,
     nodeId: proxyRequest.nodeId,
+    modelOverride:
+      proxyRequest.requestWrapper.heliconeHeaders.modelOverride ?? undefined,
   };
 }
 
@@ -112,6 +115,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
     providerResponseHeaders,
     provider,
   } = props;
+
   return new DBLoggable({
     request: {
       requestId: providerRequestHeaders.requestId ?? crypto.randomUUID(),
@@ -128,6 +132,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       omitLog: false,
       provider,
       nodeId: requestWrapper.getNodeId(),
+      modelOverride: requestWrapper.heliconeHeaders.modelOverride ?? undefined,
     },
     response: {
       responseId: crypto.randomUUID(),
@@ -264,6 +269,8 @@ export class DBLoggable {
           status: await this.response.status(),
           completion_tokens: parsedResponse.data.usage?.completion_tokens,
           prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          model: (parsedResponse.data as any)?.model ?? undefined,
           delay_ms,
         }
       : {
@@ -275,6 +282,12 @@ export class DBLoggable {
             parse_response_error: parsedResponse.error,
             body: this.tryJsonParse(responseBody),
           },
+          model:
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (parsedResponse.data as any)?.model ??
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (parsedResponse.data as any)?.body?.model ?? // anthropic
+            undefined,
           status: await this.response.status(),
         };
   }
