@@ -28,12 +28,11 @@ const CodeIntegration = (props: CodeIntegrationProps) => {
         "flex flex-col items-center w-full px-2"
       )}
     >
-      <p className="text-2xl md:text-5xl font-semibold text-center">
+      <p className="text-lg md:text-3xl font-semibold">
         OpenAI Proxy Integration
       </p>
-      <div className="text-md md:text-lg text-gray-700 font-light mt-5 text-center max-w-3xl">
-        We recommend using the proxy integration, but we also support
-        OpenAI&apos;s packages{" "}
+      <div className="text-md md:text-lg text-gray-500 font-light mt-5 text-center max-w-3xl">
+        We recommend using the proxy, but we also support OpenAI&apos;s packages{" "}
         <Link
           href={
             "https://docs.helicone.ai/getting-started/integration-method/openai"
@@ -70,7 +69,7 @@ const CodeIntegration = (props: CodeIntegrationProps) => {
         onClick={() => {
           nextStep();
         }}
-        className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl mt-8"
+        className="px-28 py-3 bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 dark:text-black font-medium text-white rounded-xl mt-8"
       >
         Ready to go!
       </button>

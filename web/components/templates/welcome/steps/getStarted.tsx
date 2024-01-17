@@ -36,12 +36,12 @@ const GetStarted = (props: GetStartedProps) => {
       <p className="text-2xl md:text-5xl font-semibold mt-8">
         Welcome to Helicone
       </p>
-      <p className="text-md md:text-lg text-gray-700 font-light mt-5">
+      <p className="text-md md:text-lg text-gray-500 font-light mt-5">
         The easiest way to monitor your LLM-powered applications at scale
       </p>
       <button
         onClick={nextStep}
-        className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl mt-8"
+        className="px-28 py-3 bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 dark:text-black font-medium text-white rounded-xl mt-8"
       >
         Get Started
       </button>
