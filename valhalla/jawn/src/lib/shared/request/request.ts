@@ -14,8 +14,7 @@ import { LlmSchema } from "../requestResponseModel";
 import { Database, Json } from "../../db/database.types";
 
 export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
-const MAX_TOTAL_BODY_SIZE = 3900000 / 10;
-
+const MAX_TOTAL_BODY_SIZE = 3145728;
 export interface HeliconeRequest {
   response_id: string;
   response_created_at: string;
@@ -296,18 +295,77 @@ function truncLargeData(
   data: HeliconeRequest[],
   maxBodySize: number
 ): HeliconeRequest[] {
-  const trunced = data.map((d) => {
+  const maxKeySize = maxBodySize / 2; // or set a different limit for individual keys
+
+  return data.map((d) => {
+    // Truncate large values in request_body
+    if (d.request_body && typeof d.request_body === "object") {
+      d.request_body = truncateValues(d.request_body);
+    }
+
+    // Truncate large values in response_body
+    if (d.response_body && typeof d.response_body === "object") {
+      d.response_body = truncateValues(d.response_body);
+    }
+
+    // Truncate the whole body if it's still too large
     return {
       ...d,
-      response_prompt: d.response_prompt,
-      request_prompt: d.request_prompt,
-      request_body: d.request_body,
-      response_body: d.response_body,
-      llmSchema: d.llmSchema,
+      response_prompt:
+        JSON.stringify(d.response_prompt).length > maxBodySize
+          ? "Response prompt too large"
+          : d.response_prompt,
+      request_prompt:
+        JSON.stringify(d.request_prompt).length > maxBodySize
+          ? "Request prompt too large"
+          : d.request_prompt,
+      request_body:
+        JSON.stringify(d.request_body).length > maxBodySize
+          ? {
+              model: d.request_body?.model,
+              heliconeMessage: "Request body too large",
+              tooLarge: true,
+            }
+          : d.request_body,
+      response_body:
+        JSON.stringify(d.response_body).length > maxBodySize
+          ? {
+              heliconeMessage: "Response body too large",
+              model: d.response_body?.model,
+              tooLarge: true,
+            }
+          : d.response_body,
+      llmSchema: d.llmSchema, // llmSchema handling remains as is
     };
   });
+}
 
-  return trunced;
+function truncateValues(obj: any): any {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+
+  if (typeof obj === "string" && obj.length > MAX_TOTAL_BODY_SIZE) {
+    return `TRUNCATED: ${obj.substring(0, 100)} ... ${obj.substring(
+      obj.length - 100
+    )}`;
+  }
+
+  if (typeof obj === "number" || typeof obj === "boolean") {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => truncateValues(item));
+  }
+
+  if (typeof obj === "object") {
+    return Object.fromEntries(
+      Object.entries(obj).map(([key, val]) => [key, truncateValues(val)])
+    );
+  }
+
+  return obj;
 }
 
 export async function getRequestCountCached(
