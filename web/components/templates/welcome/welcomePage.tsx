@@ -119,8 +119,8 @@ const WelcomePage = (props: WelcomePageProps) => {
         </defs>
         <rect width="100%" height="100%" strokeWidth={0} fill="url(#abc)" />
       </svg>
-      <div className="flex flex-col h-full w-full relative items-center justify-center">
-        <div className="flex flex-row justify-between items-center w-full top-0 absolute">
+      <div className="flex flex-col h-full w-full items-center justify-between overflow-auto">
+        <div className="flex flex-row justify-between items-center w-full">
           <button
             onClick={() => {
               supabaseClient.auth.signOut().then(() => {
@@ -150,7 +150,7 @@ const WelcomePage = (props: WelcomePageProps) => {
           </button>
         </div>
         {stepArray[step]}
-        <div className="w-full mx-auto bottom-8 absolute flex bg-white dark:bg-black">
+        <div className="w-full mx-auto flex bg-white dark:bg-black py-4">
           <ul className="flex flex-row gap-6 items-center w-full mx-auto justify-center">
             <button className="mr-6">
               <ChevronLeftIcon
