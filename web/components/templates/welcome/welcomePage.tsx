@@ -3,7 +3,7 @@ import {
   ArrowRightIcon,
   ChevronLeftIcon,
 } from "@heroicons/react/20/solid";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { clsx } from "../../shared/clsx";
@@ -14,7 +14,6 @@ import GetStarted from "./steps/getStarted";
 import { IntegrationMethods, Providers } from "./steps/methodFork";
 import MfsCoupon from "./steps/mfsCoupon";
 import CreateOrg from "./steps/createOrg";
-import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { useOrg } from "../../shared/layout/organizationContext";
 import UserSettings from "./steps/userSettings";
 

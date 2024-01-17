@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { clsx } from "../../../shared/clsx";
 import Image from "next/image";
-import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
 import { useTheme } from "../../../shared/theme/themeContext";
 
 interface UserSettingsProps {
