@@ -296,12 +296,10 @@ function truncLargeData(
   maxBodySize: number
 ): HeliconeRequest[] {
   return data.map((d) => {
-    // Truncate large values in request_body
     if (d.request_body && typeof d.request_body === "object") {
       d.request_body = truncateValues(d.request_body);
     }
 
-    // Truncate large values in response_body
     if (d.response_body && typeof d.response_body === "object") {
       d.response_body = truncateValues(d.response_body);
     }
@@ -333,7 +331,7 @@ function truncLargeData(
               tooLarge: true,
             }
           : d.response_body,
-      llmSchema: d.llmSchema, // llmSchema handling remains as is
+      llmSchema: d.llmSchema,
     };
   });
 }
