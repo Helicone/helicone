@@ -1,9 +1,9 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
-import MetaData from "../../../components/shared/metaData";
 import AuthLayout from "../../../components/shared/layout/authLayout";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 import PortalPage from "../../../components/templates/enterprise/portal/portalPage";
+import { ReactElement } from "react";
 
 interface PortalProps {
   user: User;
@@ -13,13 +13,11 @@ interface PortalProps {
 const Portal = (props: PortalProps) => {
   const { user, searchQuery } = props;
 
-  return (
-    <MetaData title="Customer Portal">
-      <AuthLayout user={user}>
-        <PortalPage searchQuery={searchQuery} />
-      </AuthLayout>
-    </MetaData>
-  );
+  return <PortalPage searchQuery={searchQuery} />;
+};
+
+Portal.getLayout = function getLayout(page: ReactElement) {
+  return <AuthLayout>{page}</AuthLayout>;
 };
 
 export default Portal;

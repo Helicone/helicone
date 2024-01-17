@@ -21,7 +21,10 @@ export interface HeliconeRequest {
   response_created_at: string;
   response_body?: any;
   response_status: number;
+  response_model: string | null;
   request_id: string;
+  request_model: string | null;
+  model_override: string | null;
   request_created_at: string;
   request_body: any;
   request_path: string;
@@ -85,14 +88,15 @@ export async function getRequests(
     request.formatted_prompt_id as request_formatted_prompt_id,
     request.prompt_values as request_prompt_values,
     request.provider as provider,
+    request.model as request_model,
+    request.model_override as model_override,
+    response.model as response_model,
     response.feedback as request_feedback,
     request.helicone_user as helicone_user,
     response.delay_ms as delay_ms,
     (response.prompt_tokens + response.completion_tokens) as total_tokens,
     response.completion_tokens as completion_tokens,
     response.prompt_tokens as prompt_tokens,
-    prompt.name AS prompt_name,
-    prompt.prompt AS prompt_regex,
     job_node_request.node_id as node_id,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
@@ -101,7 +105,6 @@ export async function getRequests(
     (coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text as response_prompt
   FROM request
     left join response on request.id = response.request
-    left join prompt on request.formatted_prompt_id = prompt.id
     left join feedback on response.id = feedback.response_id
     left join job_node_request on request.id = job_node_request.request_id
   WHERE (
@@ -159,6 +162,9 @@ export async function getRequestsCached(
     request.formatted_prompt_id as request_formatted_prompt_id,
     request.prompt_values as request_prompt_values,
     request.provider as provider,
+    request.model as request_model,
+    request.model_override as model_override,
+    response.model as response_model,
     response.feedback as request_feedback,
     request.helicone_user as helicone_user,
     response.delay_ms as delay_ms,
@@ -206,6 +212,9 @@ async function mapLLMCalls(
     heliconeRequests?.map(async (heliconeRequest) => {
       // Extract the model from various possible locations.
       const model =
+        heliconeRequest.model_override ||
+        heliconeRequest.response_model ||
+        heliconeRequest.request_model ||
         heliconeRequest.response_body?.model ||
         heliconeRequest.request_body?.model ||
         heliconeRequest.response_body?.body?.model || // anthropic
@@ -290,50 +299,11 @@ function truncLargeData(
   const trunced = data.map((d) => {
     return {
       ...d,
-      response_prompt:
-        JSON.stringify(d.response_prompt).length > maxBodySize / 2
-          ? "Response prompt too large"
-          : d.response_prompt,
-      request_prompt:
-        JSON.stringify(d.request_prompt).length > maxBodySize / 2
-          ? "Request prompt too large"
-          : d.request_prompt,
-      request_body:
-        JSON.stringify(d.request_body).length > maxBodySize / 2
-          ? {
-              model: d.request_body.model,
-              heliconeMessage: "Request body too large",
-              tooLarge: true,
-            }
-          : d.request_body,
-      response_body:
-        JSON.stringify(d.response_body).length > maxBodySize / 2
-          ? {
-              heliconeMessage: "Response body too large",
-              model: d.response_body.model,
-              tooLarge: true,
-            }
-          : {
-              ...d.response_body,
-            },
-      llmSchema: {
-        request:
-          JSON.stringify(d.llmSchema?.request ?? {}).length > maxBodySize / 2
-            ? {
-                model: d.llmSchema?.request.model,
-                heliconeMessage: "Request schema too large",
-                tooLarge: true,
-              }
-            : d.llmSchema?.request ?? {},
-        response:
-          JSON.stringify(d.llmSchema?.response ?? {}).length > maxBodySize / 2
-            ? {
-                model: d.llmSchema?.request?.model,
-                heliconeMessage: "Response body too large",
-                tooLarge: true,
-              }
-            : d.llmSchema?.response,
-      },
+      response_prompt: d.response_prompt,
+      request_prompt: d.request_prompt,
+      request_body: d.request_body,
+      response_body: d.response_body,
+      llmSchema: d.llmSchema,
     };
   });
 

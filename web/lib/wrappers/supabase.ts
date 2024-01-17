@@ -57,6 +57,7 @@ export class SupabaseServerWrapper<T> {
       .from("organization")
       .select("*")
       .eq("id", this.ctx.req.cookies[ORG_ID_COOKIE_KEY]);
+
     if (orgAccessCheck.data?.length === 0) {
       return ok({
         userId: user.data.user.id,
@@ -115,6 +116,7 @@ export class SupabaseServerWrapper<T> {
         orgHasOnboarded: org.has_onboarded,
         user: user.data.user,
         role: role,
+        org: org,
       },
       error: null,
     };

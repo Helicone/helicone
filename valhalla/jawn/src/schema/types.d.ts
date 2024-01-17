@@ -5,6 +5,48 @@
 
 
 export interface paths {
+  "/v1/fine-tune": {
+    /**
+     * Insert a new request and its response
+     * @description Adds a new entry to the 'request' and 'response' tables.
+     */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      responses: {
+        /** @description Successfully inserted the new request and response. */
+        201: {
+          content: {
+            "application/json": {
+              /**
+               * Format: uuid
+               * @description The unique ID of the newly inserted request.
+               */
+              requestId?: string;
+              /**
+               * Format: uuid
+               * @description The unique ID of the associated response.
+               */
+              responseId?: string;
+              /** @example Request and Response successfully inserted. */
+              message?: string;
+            };
+          };
+        };
+        /** @description Invalid input. */
+        400: {
+          content: never;
+        };
+        /** @description Internal server error. */
+        500: {
+          content: never;
+        };
+      };
+    };
+  };
   "/v1/tokens/anthropic": {
     /**
      * Get a token for the Anthropic API
