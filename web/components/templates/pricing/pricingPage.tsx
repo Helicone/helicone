@@ -2,6 +2,7 @@ import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
 import Footer from "../../shared/layout/footer";
 import NavBarV2 from "../../shared/layout/navbar/navBarV2";
+import Link from "next/link";
 
 const tiers = [
   {
@@ -95,17 +96,21 @@ const tiers = [
 ];
 
 const includedFeatures = [
-  "Dedicated Discord or Slack channel",
-  "Helm chart for easy deployment",
-  "Priority feature requests",
-  "Access to our support team",
-  "Support for self-deployed Helicone instances",
-  "Custom ETL integrations",
+  "API Authentication",
+  "Custom Domains",
+  "White labeled Helicone",
+  "Per customer rate limiting",
+  "Customer facing dashboards",
+  "Billing APIs",
+  "Custom cost calculations",
+  "White glove onboarding",
 ];
+
 export default function PricingPage() {
   return (
     <>
       <NavBarV2 />
+
       <div className="bg-white">
         <div className="relative isolate">
           <svg
@@ -149,6 +154,7 @@ export default function PricingPage() {
             </p>
           </div>
         </div>
+
         <div className="flow-root flex-col mx-auto max-w-6xl p-4 md:px-8 pb-24 sm:pb-32 lg:flex antialiased">
           <div className="isolate -mt-16 grid max-w-sm grid-cols-1 gap-y-16 divide-y divide-gray-200 sm:mx-auto lg:-mx-8 lg:mt-0 lg:max-w-none lg:grid-cols-3 lg:divide-x lg:divide-y-0 xl:-mx-14">
             {tiers.map((tier) => (
@@ -190,6 +196,73 @@ export default function PricingPage() {
                 </ul>
               </div>
             ))}
+          </div>
+        </div>
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 antialiased pb-24 sm:pb-32">
+          <div className="bg-white mx-auto max-w-2xl rounded-3xl border border-gray-200 shadow-sm  lg:mx-0 lg:flex lg:items-center lg:max-w-none">
+            <div className="p-8 sm:p-10 lg:flex-auto">
+              <h3 className="text-2xl font-bold tracking-tight text-gray-900">
+                Customer Portal
+              </h3>
+              <p className="mt-6 text-base leading-7 text-gray-600">
+                Helicone&apos;s Customer Portal is a fully customizable
+                customer-facing dashboard that allows your customers to interact
+                with your API. It&apos;s a great way to show off your API&apos;s
+                capabilities and build trust with your customers.
+                <Link
+                  href="https://docs.helicone.ai/features/customer-portal"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-8 block w-56 rounded-md bg-black px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                  Learn more
+                </Link>
+              </p>
+              <div className="mt-10 flex items-center gap-x-4">
+                <h4 className="flex-none text-sm font-semibold leading-6 text-indigo-600">
+                  What&apos;s included
+                </h4>
+                <div className="h-px flex-auto bg-gray-100" />
+              </div>
+              <ul
+                role="list"
+                className="mt-6 grid grid-cols-1 gap-4 text-sm leading-6 text-gray-600 sm:grid-cols-2 sm:gap-4"
+              >
+                {includedFeatures.map((feature) => (
+                  <li key={feature} className="flex gap-x-3">
+                    <CheckCircleIcon
+                      className="h-6 w-5 flex-none text-indigo-600"
+                      aria-hidden="true"
+                    />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className=" p-10 lg:mt-0 lg:w-full lg:max-w-md lg:flex-shrink-0">
+              <div className="rounded-2xl bg-indigo-50 shadow-sm py-10 text-center ring-1 ring-inset ring-gray-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16">
+                <div className="mx-auto max-w-xs px-8">
+                  <p className="text-base font-semibold text-gray-600">
+                    Starting at
+                  </p>
+                  <p className="mt-8 flex items-baseline justify-center gap-x-2">
+                    <span className="text-5xl font-bold tracking-tight text-gray-900">
+                      $799
+                    </span>
+                    <span className="text-sm font-semibold leading-6 tracking-wide text-gray-600">
+                      /month
+                    </span>
+                  </p>
+                  <Link
+                    href="/sales?customer-portal=true"
+                    rel="noopener noreferrer"
+                    className="mt-8 block w-56 rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  >
+                    Get started
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
