@@ -670,6 +670,7 @@ export interface Database {
         Row: {
           color: string
           created_at: string | null
+          domain: string | null
           has_onboarded: boolean
           icon: string
           id: string
@@ -692,6 +693,7 @@ export interface Database {
         Insert: {
           color?: string
           created_at?: string | null
+          domain?: string | null
           has_onboarded?: boolean
           icon?: string
           id?: string
@@ -714,6 +716,7 @@ export interface Database {
         Update: {
           color?: string
           created_at?: string | null
+          domain?: string | null
           has_onboarded?: boolean
           icon?: string
           id?: string
