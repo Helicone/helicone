@@ -295,8 +295,6 @@ function truncLargeData(
   data: HeliconeRequest[],
   maxBodySize: number
 ): HeliconeRequest[] {
-  const maxKeySize = maxBodySize / 2; // or set a different limit for individual keys
-
   return data.map((d) => {
     // Truncate large values in request_body
     if (d.request_body && typeof d.request_body === "object") {
