@@ -162,14 +162,14 @@ const WelcomePage = (props: WelcomePageProps) => {
                 )}
                 onClick={() => {
                   if (step === 0) return;
-                  setStep(step - 1);
+                  stepHandler(step - 1);
                 }}
               />
             </button>
             {Array.from({ length: stepArray.length }).map((_, i) => (
               <li
                 key={i}
-                onClick={() => setStep(i)}
+                onClick={() => stepHandler(i)}
                 className={clsx(
                   step >= i
                     ? "bg-gray-700 dark:bg-gray-300"
@@ -188,7 +188,7 @@ const WelcomePage = (props: WelcomePageProps) => {
                 )}
                 onClick={() => {
                   if (step === stepArray.length - 1) return;
-                  setStep(step + 1);
+                  stepHandler(step + 1);
                 }}
               />
             </button>
