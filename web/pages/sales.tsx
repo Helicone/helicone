@@ -4,6 +4,7 @@ import MetaData from "../components/shared/metaData";
 import Link from "next/link";
 import ContactForm from "../components/shared/contactForm";
 import { useRouter } from "next/router";
+import Image from "next/image";
 
 const Sales = () => {
   const router = useRouter();
@@ -22,20 +23,39 @@ const Sales = () => {
           </h1>
           {isCustomerPortal ? (
             <>
-              <p className="mt-6 w-full text-xl leading-8 text-gray-700 text-center max-w-xl mx-auto">
-                Helicone{"'"}s just released their new{" "}
+              <p className="mt-6 w-full text-xl leading-8 text-gray-700 text-left max-w-xl mx-auto">
+                Share your Helicone dashboards easily with your customers
+                <ul className="list-disc list-inside text-base mt-5 ml-5">
+                  <li>Billing/Usage APIs</li>
+                  <li>White labeling</li>
+                  <li>Embeddable dashboards</li>
+                  <li>Alerts</li>
+                  <li>Customer ratelimiting</li>
+                  <li>Customer facing API tokens</li>
+                  <li>Custom domains</li>
+                </ul>
+              </p>
+              <p className="mt-6 w-full text-xl leading-8 text-gray-700 text-left max-w-xl mx-auto">
+                <Image
+                  src="/assets/customer-portal/created-customer.png"
+                  alt="Customer Portal"
+                  width={600}
+                  height={400}
+                  layout="responsive"
+                />
+              </p>
+              <p className="mt-6 w-full text-xl leading-8 text-gray-700 text-center ">
                 <Link
                   href={"https://docs.helicone.ai/features/customer-portal"}
-                  className="text-blue-500 hover:text-blue-600 underline"
+                  className=" mx-auto justify-center rounded-md border border-transparent bg-gradient-to-r from-sky-600 to-indigo-500  py-2 px-4 text-md font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Customer Portal
-                </Link>{" "}
-                feature.
+                  🚀 Customer Portal Docs 🚀
+                </Link>
               </p>
               <p className="mt-6 w-full text-xl leading-8 text-gray-700 text-center max-w-xl mx-auto">
-                <b>Get access:</b> meet{" "}
+                <b>To get access:</b> meet{" "}
                 <Link
                   href={
                     "https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call"

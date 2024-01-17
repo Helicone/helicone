@@ -112,10 +112,8 @@
           "group": "Customer Portal",
           "pages": [
             "features/customer_portal/intro",
-            "features/customer_portal/getting-started",
-            "features/customer_portal/use-case-custom-llm-deployments",
-            "features/customer_portal/use-case-application",
-            "features/customer_portal/roadmap"
+            "features/customer_portal/getting-started-proxy",
+            "features/customer_portal/getting-started-async"
           ]
         },
         {

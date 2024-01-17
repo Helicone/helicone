@@ -210,7 +210,7 @@ export default function PricingPage() {
                 with your API. It&apos;s a great way to show off your API&apos;s
                 capabilities and build trust with your customers.
                 <Link
-                  href="https://docs.helicone.ai/features/customer-porta"
+                  href="https://docs.helicone.ai/features/customer-portal"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-8 block w-56 rounded-md bg-black px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"

@@ -1,0 +1,91 @@
+---
+title: "Reselling a Model Example"
+description: ""
+---
+
+In the following example we are going to show you what it looks like to resell a model using Helicone as your platform.
+
+Let's say you are finetuning a model and it is hosted on hugging and you want to be able to sell that model to certain customers.
+However, you don't want to build out
+
+- dashboards to monitor the model
+- API management
+- rate limits
+- billing
+- authentication
+- etc
+
+How would you go about using Helicone's platform to do this?
+
+### Step 1: Create a Model and deploy to an endpoint
+
+You can do this using HuggingFace or any other model hosting platform.
+
+### Step 2: Add your own top level domain on Helicone
+
+You will need to register a domain that you can give your customers to access your model.
+Right now this process is manual, but we are working on automating it.
+
+The domain will look something like `my-startup.hconeai.com`.
+
+### Step 3: Create a new customer that you are going to sell the model to
+
+You can do this by going to the `Customer Portal` tab and clicking `Add Customer`.
+
+![](/images/customer-portal/add-customer.png)
+
+Here you can create a new customer and give them access to your model, and set different limits on that customer, like spend or request limits
+
+### Step 4: Authenticate your customer
+
+Since our proxy lives on the edge and not within a secure network, we need to authenticate the customer before they can access the model.
+
+You can do this by providing a `Provider Key`, which is simply a Bearer token that you will receive from the proxy when a customer makes a request.
+
+The `Provider Key` can be anything you want! This is just a way to protect your public endpoint.
+
+### Step 5: Give your customer access to your model
+
+Once you created a `Customer Account` you can add your customers to their new account.
+
+<Note>
+  Optionally if you opt in, you can register your own deployment for the
+  dashboard they can use to login. For example `dashboard.mystartup.com`.
+</Note>
+
+You can do this by clicking into a customer and clicking `Invite Members`.
+
+![](/images/customer-portal/invite-members.png)
+
+### Step 6: Customer makes a request to your model
+
+Now that you have a customer account, a customer can make a request to your model, by logging into their dashboard.
+You can preview their dashboard by clicking `View` on the customer account.
+
+![](/images/customer-portal/preview.png)
+
+Once you click view, you will be brought to a version of the Helicone that only your customer can see.
+
+![](/images/customer-portal/customer-view.png)
+
+Customers can now navigate to the `Developer` tab and mint a new key they can use to access your model.
+
+<Tip>
+  To go back to editting the customer, click the `Back to Portal` button on the
+  top left.
+</Tip>
+
+### Step 7: How your customers will use your model
+
+Now that your customer has a key, they can make a request simply by changing the baseUrl.
+
+Here is an example of an OpenAI compatible model:
+
+```python
+client = OpenAI(
+  api_key="your-api-key-here", # The api key they generated in the previous step
+  base_url="http://my-startup.hconeai.com/v1",
+)
+```
+
+That's it! Now your customers can use your model and you can charge them for it.

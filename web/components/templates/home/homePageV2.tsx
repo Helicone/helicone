@@ -126,12 +126,12 @@ export default function Example() {
   return (
     <div className="bg-white">
       <Link
-        href="https://docs.helicone.ai/features/customer-porta"
+        href="/sales?customer-portal=true"
         className="w-full bg-black text-white flex flex-col items-center p-3 hover:bg-slate-900 hover:cursor-pointer"
       >
         <div className="flex flex-row items-end gap-2">
           <div>🎉 Customer Portal Release 🎉</div>
-          <i className="text-xs text-gray-600">Jan 15, 2024</i>
+          <i className="text-xs text-gray-600">Jan 17, 2024</i>
         </div>
       </Link>
       <NavBarV2 />

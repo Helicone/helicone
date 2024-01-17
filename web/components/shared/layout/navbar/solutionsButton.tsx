@@ -18,7 +18,7 @@ const solutions = [
   {
     name: "Customer Portal",
     description: "Share Helicone usage with customers",
-    href: "/use-cases/customer-portal",
+    href: "/sales?customer-portal=true",
     icon: UserGroupIcon,
     color: "text-violet-500",
   },
