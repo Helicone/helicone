@@ -90,7 +90,7 @@ const WelcomePage = (props: WelcomePageProps) => {
   }
 
   return (
-    <div className="bg-white h-screen w-screen overflow-hidden items-center justify-center align-middle flex flex-col text-gray-900 relative isolate">
+    <div className="bg-white dark:bg-black h-screen w-screen overflow-hidden items-center justify-center align-middle flex flex-col text-gray-900 dark:text-gray-100 relative isolate">
       <svg
         className="absolute inset-0 -z-10 h-full w-full stroke-gray-200 dark:stroke-gray-800 [mask-image:radial-gradient(100%_60%_at_top_center,white,transparent)]"
         aria-hidden="true"
@@ -127,7 +127,7 @@ const WelcomePage = (props: WelcomePageProps) => {
                 router.push("/");
               });
             }}
-            className="p-8 flex flex-row gap-1 text-xs items-center underline underline-offset-2 font-semibold text-gray-900"
+            className="p-8 flex flex-row gap-1 text-xs items-center underline underline-offset-2 font-semibold"
           >
             <ArrowLeftIcon className="h-3 w-3 inline" />
             Sign Out
@@ -143,21 +143,21 @@ const WelcomePage = (props: WelcomePageProps) => {
 
               router.push("/dashboard");
             }}
-            className="p-8 flex flex-row gap-1 text-xs items-center underline underline-offset-2 font-semibold text-gray-900"
+            className="p-8 flex flex-row gap-1 text-xs items-center underline underline-offset-2 font-semibold"
           >
             Skip Onboarding
             <ArrowRightIcon className="h-3 w-3 inline" />
           </button>
         </div>
         {stepArray[step]}
-        <div className="w-full mx-auto bottom-8 absolute flex bg-white">
+        <div className="w-full mx-auto bottom-8 absolute flex bg-white dark:bg-black">
           <ul className="flex flex-row gap-6 items-center w-full mx-auto justify-center">
             <button className="mr-6">
               <ChevronLeftIcon
                 className={clsx(
                   step === 0
-                    ? "text-gray-300"
-                    : "text-gray-900 hover:cursor-pointer",
+                    ? "text-gray-300 dark:text-gray-700"
+                    : "text-gray-900 dark:text-gray-100 hover:cursor-pointer",
                   "h-6 w-6"
                 )}
                 onClick={() => {
@@ -171,7 +171,9 @@ const WelcomePage = (props: WelcomePageProps) => {
                 key={i}
                 onClick={() => setStep(i)}
                 className={clsx(
-                  step >= i ? "bg-gray-700" : "bg-gray-300",
+                  step >= i
+                    ? "bg-gray-700 dark:bg-gray-300"
+                    : "bg-gray-300 dark:bg-gray-700",
                   "h-2.5 w-2.5 rounded-full hover:cursor-pointer"
                 )}
               />
@@ -180,8 +182,8 @@ const WelcomePage = (props: WelcomePageProps) => {
               <ChevronLeftIcon
                 className={clsx(
                   step === stepArray.length - 1
-                    ? "text-gray-300"
-                    : "text-gray-900 hover:cursor-pointer",
+                    ? "text-gray-300 dark:text-gray-700"
+                    : "text-gray-900 dark:text-gray-100 hover:cursor-pointer",
                   "h-6 w-6 rotate-180"
                 )}
                 onClick={() => {
