@@ -5,7 +5,7 @@ import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafUsers } from "../lib/sorts/users/sorts";
 import { Tier } from "../../pages/api/organization/tier";
-import { useOrg } from "../../components/shared/layout/organizationContext";
+import { useOrg } from "../../components/layout/organizationContext";
 
 const useGetTopUsers = (
   currentPage: number,

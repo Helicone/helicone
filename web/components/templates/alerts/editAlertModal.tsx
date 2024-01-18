@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { useOrg } from "../../shared/layout/organizationContext";
+import { useOrg } from "../../layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import AlertForm, { AlertRequest } from "./alertForm";
 import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";

@@ -1,7 +1,7 @@
 import { StarIcon } from "@heroicons/react/20/solid";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import BasePageV2 from "../components/shared/layout/basePageV2";
+import BasePageV2 from "../components/layout/basePageV2";
 import LoadingAnimation from "../components/shared/loadingAnimation";
 import MetaData from "../components/shared/metaData";
 import { HeliconeIssuesResolvedType } from "./api/issues";

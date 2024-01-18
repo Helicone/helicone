@@ -15,7 +15,7 @@ import useSearchParams from "../../utils/useSearchParams";
 import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
 import ViewButton from "./viewButton";
 import { RequestViews } from "./themedTableV5";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../../layout/organizationContext";
 
 interface ThemedTableHeaderProps<T> {
   rows: T[];

@@ -1,6 +1,6 @@
 import { User } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
-import AuthLayout from "../../components/shared/layout/authLayout";
+import AuthLayout from "../../components/layout/authLayout";
 import JobsPage from "../../components/templates/jobs/jobsPage";
 import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 import { SortDirection } from "../../services/lib/sorts/requests/sorts";

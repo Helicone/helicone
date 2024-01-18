@@ -1,4 +1,4 @@
-import BasePageV2 from "../components/shared/layout/basePageV2";
+import BasePageV2 from "../components/layout/basePageV2";
 import MetaData from "../components/shared/metaData";
 
 const Privacy = () => {

@@ -5,7 +5,7 @@ import { Owner } from "../../pages/api/organization/[id]/owner";
 import { Database } from "../../supabase/database.types";
 import { useCallback, useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import { OrgContextValue } from "../../components/shared/layout/organizationContext";
+import { OrgContextValue } from "../../components/layout/organizationContext";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
 
 const useGetOrgMembers = (orgId: string) => {
