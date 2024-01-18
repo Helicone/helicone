@@ -35,16 +35,16 @@ const Sales = () => {
       <NavBarV2 />
       <div className="bg-white h-full min-h-screen">
         <GridBackground>
-          <div className="flex flex-row mx-auto w-full gap-8 max-w-6xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
+          <div className="flex flex-col sm:flex-row mx-auto w-full gap-8 max-w-6xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
             <div className="flex flex-col w-full">
-              <h1 className="text-xl sm:text-4xl font-semibold leading-tight sm:leading-snug max-w-4xl">
+              <h1 className="text-2xl sm:text-4xl font-semibold leading-tight sm:leading-snug max-w-4xl">
                 {isCustomerPortal ? (
                   <>
                     Launch:{" "}
                     <span className="md:border-2 border-sky-500 border-dashed text-sky-500 md:py-2 md:px-4">
                       Customer Portal
                     </span>
-                    <p className="text-lg font-normal text-gray-500 pt-4">
+                    <p className="text-sm sm:text-lg font-normal text-gray-500 pt-4">
                       Easily share your Helicone dashboards and analytics with
                       your customers
                     </p>
@@ -58,10 +58,10 @@ const Sales = () => {
                 {bullets[isCustomerPortal ? "customerPortal" : "contact"].map(
                   (bullet, idx) => (
                     <li
-                      className="flex items-center text-gray-500 gap-2"
+                      className="flex items-center text-gray-500 gap-2 text-sm sm:text-md"
                       key={idx}
                     >
-                      <CheckCircleIcon className="h-6 w-6 text-sky-500" />
+                      <CheckCircleIcon className="h-4 w-4 sm:h-6 sm:w-6 text-sky-500" />
                       {bullet}
                     </li>
                   )
