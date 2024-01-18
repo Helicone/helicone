@@ -80,7 +80,7 @@ export default function DraggableColumnHeader<T>(props: {
         },
       }}
       ref={dropRef}
-      className="text-left py-2 font-semibold text-gray-900 dark:text-gray-100"
+      className="text-left py-2 font-semibold text-gray-900 dark:text-gray-100 relative"
     >
       <div className="flex flex-row items-center gap-0.5">
         <button
