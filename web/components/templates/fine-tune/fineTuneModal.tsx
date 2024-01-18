@@ -104,6 +104,11 @@ export const FineTuneModal = (props: FineTuneModalProps) => {
             <button
               className="mx-auto text-center items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               onClick={() => {
+                setNotification(
+                  "Sorry, our fine tuning service is down right now",
+                  "error"
+                );
+                return;
                 if (!accepted) {
                   setNotification("please accept before continuing", "error");
                   return;
