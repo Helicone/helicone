@@ -13,6 +13,8 @@ const lemonFox = /^https:\/\/api\.lemonfox\.ai/;
 const fireworks = /^https:\/\/api\.fireworks\.ai/;
 const perplexity = /^https:\/\/api\.perplexity\.ai/;
 const googleapis = /^https:\/\/(.*\.)?googleapis\.com/;
+// openrouter.ai
+const openRouter = /^https:\/\/api\.openrouter\.ai/;
 
 export const approvedDomains = [
   openAiPattern,
@@ -29,4 +31,5 @@ export const approvedDomains = [
   fireworks,
   perplexity,
   googleapis,
+  openRouter,
 ];
