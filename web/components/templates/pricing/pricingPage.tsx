@@ -21,13 +21,13 @@ const tiers = [
     ),
     description: "Everything necessary to get started.",
     features: [
-      "Up to 100,000 requests per month",
+      "Up to 50,000 requests per month",
       "Monitoring and Dashboards",
       "Custom Properties",
       "Basic Exporting",
-      "5 Seats",
+      "3 Seats",
       "Unlimited Proxy Requests per minute",
-      "1,000 logs per minute",
+      "100 logs per minute",
     ],
     buttonText: "Try for free",
     backgroundColor: "bg-sky-600",
@@ -41,7 +41,7 @@ const tiers = [
     price: (
       <p className="mt-6 flex items-baseline gap-x-1">
         <span className="text-5xl font-bold tracking-tight text-gray-900">
-          $25
+          $80
         </span>
         <span className="text-sm font-semibold leading-6 text-gray-600">
           / month per organization
@@ -51,16 +51,17 @@ const tiers = [
     description:
       "Everything in Free, plus essential tools for scaling up your business.",
     features: [
-      "Unlimited Requests",
-      "Bucket Caching",
-      "User Management and Rate Limiting",
-      "GraphQL API",
+      "500,000 Requests",
+      "100mb of Bucket Caching",
+      "10 User Rate Limits",
+      "1,000 GraphQL API request/day",
       "Request Retries",
-      "Key Vault",
-      "10 Seats",
-      "Up to 2GB of storage",
+      "Model Load Balancing (up to 2 models)",
+      "Key Vault (5 keys)",
+      "8 Seats",
+      "Up to 500mb of storage",
       "Unlimited Proxy Requests per minute",
-      "10,000 logs per minute",
+      "1,000 logs per minute",
     ],
     buttonText: "Get Started",
     backgroundColor: "bg-pink-600",
