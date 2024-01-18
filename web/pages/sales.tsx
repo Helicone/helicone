@@ -44,6 +44,10 @@ const Sales = () => {
                     <span className="md:border-2 border-sky-500 border-dashed text-sky-500 md:py-2 md:px-4">
                       Customer Portal
                     </span>
+                    <p className="text-lg font-normal text-gray-500 pt-4">
+                      Easily share your Helicone dashboards and analytics with
+                      your customers
+                    </p>
                   </>
                 ) : (
                   "Contact Us"
