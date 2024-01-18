@@ -18,6 +18,13 @@ import { withAuth } from "./lib/routers/withAuth";
 import { getRequests, getRequestsCached } from "./lib/shared/request/request";
 import { withDB } from "./lib/routers/withDB";
 import { FineTuningManager } from "./lib/managers/FineTuningManager";
+import { PostHog } from "posthog-node";
+
+const ph_project_api_key = process.env.PUBLIC_POSTHOG_API_KEY ?? "";
+
+const postHogClient = new PostHog(ph_project_api_key, {
+  host: "https://app.posthog.com",
+});
 
 // This prevents the application from crashing when an unhandled error occurs
 const errorHandler: ErrorRequestHandler = (
@@ -62,7 +69,31 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb" }));
 
 // for logs
-app.use(morgan("combined"));
+app.use(
+  morgan(function (tokens, req, res) {
+    // Check if the request is for the specific route
+    if (req.url === "/v1/tokens/anthropic" && req.method === "POST") {
+      // Skip logging and return null
+      return null;
+    }
+
+    if (req.url === "/v1/tokens/gpt3" && req.method === "POST") {
+      // Skip logging and return null
+      return null;
+    }
+
+    // Default Morgan combined format
+    return [
+      tokens.method(req, res),
+      tokens.url(req, res),
+      tokens.status(req, res),
+      tokens.res(req, res, "content-length"),
+      "-",
+      tokens["response-time"](req, res),
+      "ms",
+    ].join(" ");
+  })
+);
 app.use(express.json()); // for parsing application/json
 
 app.use(errorHandler);
@@ -297,6 +328,14 @@ app.post(
       Sentry.captureMessage(
         `fine-tune job created - ${fineTuneJob.data.id} - ${authParams.organizationId}`
       );
+      postHogClient.capture({
+        distinctId: `${fineTuneJob.data.id}-${authParams.organizationId}`,
+        event: "fine_tune_job_created",
+        properties: {
+          id: fineTuneJob.data.id,
+          org_id: authParams.organizationId,
+        },
+      });
       res.json({
         success: true,
         data: {
@@ -305,6 +344,13 @@ app.post(
       });
     } catch (e) {
       Sentry.captureException(e);
+      postHogClient.capture({
+        distinctId: `${authParams.organizationId}`,
+        event: "fine_tune_job_failed",
+        properties: {
+          org_id: authParams.organizationId,
+        },
+      });
       res.status(500).json({
         error:
           "Sorry the fine tuning job you requested failed. Right now it is in beta and only support gpt3.5 and gpt4 requests",
@@ -448,3 +494,4 @@ server.on("error", console.error);
 
 // This
 server.setTimeout(1000 * 60 * 10); // 10 minutes
+postHogClient.shutdown(); // new
