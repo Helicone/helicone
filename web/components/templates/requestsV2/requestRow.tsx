@@ -22,7 +22,7 @@ import {
   updateRequestFeedback,
 } from "../../../services/lib/requests";
 import useNotification from "../../shared/notification/useNotification";
-import { useOrg } from "../../shared/layout/organizationContext";
+import { useOrg } from "../../layout/organizationContext";
 
 function getPathName(url: string) {
   try {

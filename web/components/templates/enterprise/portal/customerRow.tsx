@@ -6,7 +6,7 @@ import { Database } from "../../../../supabase/database.types";
 import { useGetOrgMembers } from "../../../../services/hooks/organizations";
 import { formatISO } from "date-fns";
 import { useRequestsOverTime } from "../../organization/plan/renderOrgPlan";
-import { useOrg } from "../../../shared/layout/organizationContext";
+import { useOrg } from "../../../layout/organizationContext";
 import { useRouter } from "next/router";
 import {
   ORGANIZATION_COLORS,

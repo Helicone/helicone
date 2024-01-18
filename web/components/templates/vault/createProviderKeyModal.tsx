@@ -5,7 +5,7 @@ import { Result } from "../../../lib/result";
 import { DecryptedProviderKey } from "../../../services/lib/keys";
 import { clsx } from "../../shared/clsx";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { useOrg } from "../../shared/layout/organizationContext";
+import { useOrg } from "../../layout/organizationContext";
 
 interface CreateProviderKeyModalProps {
   open: boolean;

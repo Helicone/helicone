@@ -11,7 +11,7 @@ import { useState } from "react";
 import { DEMO_EMAIL } from "../../../lib/constants";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
-import { useOrg } from "../../shared/layout/organizationContext";
+import { useOrg } from "../../layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import ProviderKeyList from "../enterprise/portal/id/providerKeyList";
 import CreateProviderKeyModal from "../vault/createProviderKeyModal";

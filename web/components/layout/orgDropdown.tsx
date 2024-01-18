@@ -3,13 +3,13 @@ import { Fragment, useState } from "react";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { useOrg } from "./organizationContext";
 import { useUser } from "@supabase/auth-helpers-react";
-import { clsx } from "../clsx";
+import { clsx } from "../shared/clsx";
 import CreateOrgForm, {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
-} from "../../templates/organization/createOrgForm";
-import ThemedModal from "../themed/themedModal";
-import AddMemberModal from "../../templates/organization/addMemberModal";
+} from "../templates/organization/createOrgForm";
+import ThemedModal from "../shared/themed/themedModal";
+import AddMemberModal from "../templates/organization/addMemberModal";
 
 interface OrgDropdownProps {}
 

@@ -4,7 +4,7 @@ import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useGetOrgMembers } from "../../../services/hooks/organizations";
-import { useOrg } from "../../shared/layout/organizationContext";
+import { useOrg } from "../../layout/organizationContext";
 
 interface AddMemberModalProps {
   orgId: string;

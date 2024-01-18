@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import LoginButton from "../auth/loginButton";
+import LoginButton from "../shared/auth/loginButton";
 
 interface NavBarProps {}
 

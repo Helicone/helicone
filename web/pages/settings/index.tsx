@@ -3,7 +3,7 @@ import { NextPageWithLayout } from "../_app";
 import { GetServerSidePropsContext } from "next";
 import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 import SettingsPage from "../../components/templates/settings/settingsPage";
-import AuthLayout from "../../components/shared/layout/authLayout";
+import AuthLayout from "../../components/layout/authLayout";
 
 const Settings: NextPageWithLayout = () => {
   return <SettingsPage />;

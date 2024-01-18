@@ -15,11 +15,11 @@ export type ContactFormData = {
 interface ContactFormProps {
   contactTag: string;
   buttonText: string;
-  defaultText?: string;
+  defaultPlaceholder?: string;
 }
 
 const ContactForm = (props: ContactFormProps) => {
-  const { contactTag, buttonText, defaultText } = props;
+  const { contactTag, buttonText, defaultPlaceholder } = props;
 
   const router = useRouter();
   const { setNotification } = useNotification();
@@ -96,7 +96,7 @@ const ContactForm = (props: ContactFormProps) => {
       action="#"
       method="POST"
       onSubmit={formSubmitHandler}
-      className="border border-gray-300 bg-gray-200 shadow-xl rounded-xl p-8 h-full space-y-4 w-[600px] mt-16 lg:mt-0"
+      className="border border-gray-300 bg-gray-50 shadow-xl rounded-xl p-8 h-full space-y-4 w-full mt-16 lg:mt-0"
     >
       <div>
         <label
@@ -180,7 +180,7 @@ const ContactForm = (props: ContactFormProps) => {
             name="company-description"
             required
             rows={4}
-            value={defaultText}
+            placeholder={defaultPlaceholder}
             className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
           />
         </div>

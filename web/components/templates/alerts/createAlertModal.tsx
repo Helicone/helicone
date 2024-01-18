@@ -1,5 +1,5 @@
 import { getHeliconeCookie } from "../../../lib/cookies";
-import { useOrg } from "../../shared/layout/organizationContext";
+import { useOrg } from "../../layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import AlertForm, { AlertRequest } from "./alertForm";

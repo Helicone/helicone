@@ -6,7 +6,7 @@ import {
 } from "../../../../services/hooks/organizations";
 import { useState } from "react";
 import OrgMemberItem from "../orgMemberItem";
-import { useOrg } from "../../../shared/layout/organizationContext";
+import { useOrg } from "../../../layout/organizationContext";
 import AddMemberModal from "../addMemberModal";
 import { clsx } from "../../../shared/clsx";
 

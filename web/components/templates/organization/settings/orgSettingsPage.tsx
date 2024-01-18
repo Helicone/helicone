@@ -5,7 +5,7 @@ import CreateOrgForm from "../createOrgForm";
 import { useState } from "react";
 import useNotification from "../../../shared/notification/useNotification";
 import { useRouter } from "next/router";
-import { useOrg } from "../../../shared/layout/organizationContext";
+import { useOrg } from "../../../layout/organizationContext";
 import { DeleteOrgModal } from "../deleteOrgModal";
 
 interface OrgSettingsPageProps {

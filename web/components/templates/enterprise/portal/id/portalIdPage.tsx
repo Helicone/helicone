@@ -15,7 +15,7 @@ import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react";
 import { useState } from "react";
 import LoadingAnimation from "../../../../shared/loadingAnimation";
 import ProviderKeyList from "./providerKeyList";
-import { useOrg } from "../../../../shared/layout/organizationContext";
+import { useOrg } from "../../../../layout/organizationContext";
 import { useRouter } from "next/router";
 import { DeleteOrgModal } from "../../../organization/deleteOrgModal";
 import EditCustomerOrgModal from "../editCustomerOrgModal";

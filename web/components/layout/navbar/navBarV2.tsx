@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import { useState } from "react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { clsx } from "../../clsx";
+import { clsx } from "../../shared/clsx";
 import SolutionsButton from "./solutionsButton";
 import DeveloperButton from "./developerButton";
 import { BsGithub } from "react-icons/bs";

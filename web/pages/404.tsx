@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
-import BasePageV2 from "../components/shared/layout/basePageV2";
+import BasePageV2 from "../components/layout/basePageV2";
 import MetaData from "../components/shared/metaData";
 
 const ErrorPage = () => {
