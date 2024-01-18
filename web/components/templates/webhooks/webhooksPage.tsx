@@ -2,7 +2,7 @@ import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { Database } from "../../../supabase/database.types";
 import { useQuery } from "@tanstack/react-query";
 import useNotification from "../../shared/notification/useNotification";
-import { useOrg } from "../../shared/layout/organizationContext";
+import { useOrg } from "../../layout/organizationContext";
 import ThemedTable from "../../shared/themed/themedTable";
 import { useState } from "react";
 import { getUSDateFromString } from "../../shared/utils/utils";

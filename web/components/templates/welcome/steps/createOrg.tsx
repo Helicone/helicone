@@ -3,7 +3,7 @@ import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
 import { Database } from "../../../../supabase/database.types";
 import { clsx } from "../../../shared/clsx";
-import { useOrg } from "../../../shared/layout/organizationContext";
+import { useOrg } from "../../../layout/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
 import { PostgrestError } from "@supabase/supabase-js";
 

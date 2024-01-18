@@ -4,7 +4,7 @@ import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
 import { getHeliconeCookie } from "../../lib/cookies";
-import { useOrg } from "../../components/shared/layout/organizationContext";
+import { useOrg } from "../../components/layout/organizationContext";
 
 const useGetRequest = (requestId: string) => {
   const org = useOrg();

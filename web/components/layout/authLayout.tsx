@@ -25,19 +25,19 @@ import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, useState } from "react";
-import { DEMO_EMAIL } from "../../../lib/constants";
-import { Database } from "../../../supabase/database.types";
-import { clsx } from "../clsx";
-import ThemedDropdown from "../themed/themedDropdown";
+import { DEMO_EMAIL } from "../../lib/constants";
+import { Database } from "../../supabase/database.types";
+import { clsx } from "../shared/clsx";
+import ThemedDropdown from "../shared/themed/themedDropdown";
 import OrgContext, { useOrg } from "./organizationContext";
 
-import UpgradeProModal from "../upgradeProModal";
+import UpgradeProModal from "../shared/upgradeProModal";
 import OrgDropdown from "./orgDropdown";
 
-import { ThemedSwitch } from "../themed/themedSwitch";
-import { useTheme } from "../theme/themeContext";
-import ReferralModal from "../../common/referralModal";
-import MetaData from "../metaData";
+import { ThemedSwitch } from "../shared/themed/themedSwitch";
+import { useTheme } from "../shared/theme/themeContext";
+import ReferralModal from "../common/referralModal";
+import MetaData from "../shared/metaData";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }

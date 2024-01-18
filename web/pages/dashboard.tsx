@@ -2,7 +2,7 @@ import { User } from "@supabase/auth-helpers-react";
 import { init } from "commandbar";
 import { ReactElement, useEffect } from "react";
 
-import AuthLayout from "../components/shared/layout/authLayout";
+import AuthLayout from "../components/layout/authLayout";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { useTheme } from "../components/shared/theme/themeContext";

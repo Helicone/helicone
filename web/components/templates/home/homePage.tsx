@@ -34,8 +34,8 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/solid";
 import CodeSnippet from "./codeSnippet";
-import Footer from "../../shared/layout/footer";
-import NavBarV2 from "../../shared/layout/navbar/navBarV2";
+import Footer from "../../layout/footer";
+import NavBarV2 from "../../layout/navbar/navBarV2";
 import ManageHostedButton from "./manageHostedButton";
 import ContactForm from "../../shared/contactForm";
 import Image from "next/image";

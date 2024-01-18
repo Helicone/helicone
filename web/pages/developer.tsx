@@ -3,7 +3,7 @@ import { NextPageWithLayout } from "./_app";
 import { GetServerSidePropsContext } from "next";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import DeveloperPage from "../components/templates/developer/developerPage";
-import AuthLayout from "../components/shared/layout/authLayout";
+import AuthLayout from "../components/layout/authLayout";
 
 const Developer: NextPageWithLayout = () => {
   return <DeveloperPage />;

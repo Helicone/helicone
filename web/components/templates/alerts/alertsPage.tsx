@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { useOrg } from "../../shared/layout/organizationContext";
+import { useOrg } from "../../layout/organizationContext";
 import useAlertsPage from "./useAlertsPage";
 import CreateAlertModal from "./createAlertModal";
 import { BellIcon, NewspaperIcon } from "@heroicons/react/24/outline";
