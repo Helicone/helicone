@@ -52,8 +52,11 @@ const Sales = () => {
 
               <ul className="py-8 flex flex-col space-y-4">
                 {bullets[isCustomerPortal ? "customerPortal" : "contact"].map(
-                  (bullet) => (
-                    <li className="flex items-center text-gray-500 gap-2">
+                  (bullet, idx) => (
+                    <li
+                      className="flex items-center text-gray-500 gap-2"
+                      key={idx}
+                    >
                       <CheckCircleIcon className="h-6 w-6 text-sky-500" />
                       {bullet}
                     </li>
