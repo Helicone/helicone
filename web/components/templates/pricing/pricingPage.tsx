@@ -4,30 +4,35 @@ import { clsx } from "../../shared/clsx";
 import GridBackground from "../../layout/public-pages/gridBackground";
 import NavBarV2 from "../../layout/navbar/navBarV2";
 import Footer from "../../layout/footer";
+import Link from "next/link";
+import { Tooltip } from "@mui/material";
 
 const tiers = [
   {
     name: "Free",
-    id: "tier-basic",
-    href: "#",
+    id: "tier-Free",
+    href: "/signup",
     priceMonthly: "$0",
+    text: "Try for free",
     description: "Everything necessary to get started",
     mostPopular: false,
   },
   {
     name: "Pro",
-    id: "tier-essential",
-    href: "#",
+    id: "tier-Pro",
+    href: "/signup",
     priceMonthly: "$25",
+    text: "Get Started",
     description:
       "Everything in Free, plus essential tools for scaling up your business.",
     mostPopular: true,
   },
   {
     name: "Custom",
-    id: "tier-premium",
-    href: "#",
+    id: "tier-Custom",
+    href: "/sales",
     priceMonthly: "Enterprise",
+    text: "Contact us",
     description:
       "Everything in Pro, plus features needed for larger enterprises.",
     mostPopular: false,
@@ -38,57 +43,123 @@ const sections: {
   features: {
     name: string;
     tiers: Record<string, boolean | string>;
+    href?: string;
   }[];
 }[] = [
+  {
+    name: "Core Functionality",
+    features: [
+      {
+        name: "Request Logs",
+        tiers: {
+          Free: "Up to 50,000 / mo",
+          Pro: "Up to half a million / mo",
+          Custom: "Unlimited",
+        },
+      },
+      {
+        name: "Dashboards",
+        tiers: { Free: true, Pro: true, Custom: true },
+      },
+      {
+        name: "Request Labeling / Tagging",
+        tiers: { Free: true, Pro: true, Custom: true },
+      },
+      {
+        name: "User Analytics",
+        tiers: { Free: true, Pro: true, Custom: true },
+      },
+      {
+        name: "SOC-2 Compliance",
+        tiers: { Custom: true },
+      },
+      {
+        name: "Self-Deployment Management",
+        tiers: { Custom: true },
+      },
+      {
+        name: "Organization Seats",
+        tiers: {
+          Free: "Up to 3",
+          Pro: "Up to 8",
+          Custom: "Unlimited",
+        },
+      },
+    ],
+  },
   {
     name: "Features",
     features: [
       {
-        name: "Integrations",
-        tiers: { Basic: true, Essential: true, Premium: true },
+        name: "Caching",
+        tiers: {
+          Free: false,
+          Pro: "Up to 100mb",
+          Custom: "Unlimited",
+        },
       },
       {
-        name: "Shared links",
-        tiers: { Basic: true, Essential: true, Premium: true },
+        name: "User Rate Limiting",
+        tiers: {
+          Free: true,
+          Pro: true,
+          Custom: true,
+        },
       },
       {
-        name: "Importing and exporting",
-        tiers: { Essential: true, Premium: true },
+        name: "Request Retries",
+        tiers: {
+          Free: true,
+          Pro: true,
+          Custom: true,
+        },
       },
       {
-        name: "Team members",
-        tiers: { Essential: "Up to 20 users", Premium: "Up to 50 users" },
+        name: "Model Load Balancing",
+        tiers: {
+          Free: false,
+          Pro: "Up to 2 models",
+          Custom: "Unlimited",
+        },
+      },
+      {
+        name: "Key Vault",
+        tiers: {
+          Free: false,
+          Pro: "Up to 5 keys",
+          Custom: "Unlimited keys",
+        },
+      },
+      {
+        name: "Webhooks",
+        tiers: {
+          Custom: true,
+        },
+      },
+      {
+        name: "Customer Portal",
+        href: "sales?customer-portal=true",
+        tiers: {
+          Custom: true,
+        },
       },
     ],
   },
   {
-    name: "Reporting",
+    name: "Exporting and Integrations",
     features: [
       {
-        name: "Advanced analytics",
-        tiers: { Basic: true, Essential: true, Premium: true },
-      },
-      { name: "Basic reports", tiers: { Essential: true, Premium: true } },
-      { name: "Professional reports", tiers: { Premium: true } },
-      { name: "Custom report builder", tiers: { Premium: true } },
-    ],
-  },
-  {
-    name: "Support",
-    features: [
-      {
-        name: "24/7 online support",
-        tiers: { Basic: true, Essential: true, Premium: true },
+        name: "CSV Export",
+        tiers: { Free: true, Pro: true, Custom: true },
       },
       {
-        name: "Quarterly product workshops",
-        tiers: { Essential: true, Premium: true },
+        name: "GraphQL API",
+        tiers: { Free: false, Pro: "1,000 reqs / day", Custom: "Unlimited" },
       },
       {
-        name: "Priority phone support",
-        tiers: { Essential: true, Premium: true },
+        name: "Custom ETL Integrations",
+        tiers: { Custom: true },
       },
-      { name: "1:1 onboarding tour", tiers: { Premium: true } },
     ],
   },
 ];
@@ -102,7 +173,7 @@ export default function Example() {
           <div className="flex flex-col max-w-6xl mx-auto p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
             <h1 className="text-4xl sm:text-6xl font-semibold leading-tight sm:leading-snug max-w-4xl">
               Pricing that&apos;s{" "}
-              <span className="md:border-2 border-pink-600 border-dashed text-pink-600 md:py-2 md:px-4">
+              <span className="md:border-2 border-sky-600 border-dashed text-sky-600 md:py-2 md:px-4">
                 simple
               </span>
             </h1>
@@ -146,7 +217,7 @@ export default function Example() {
                   "mt-8 block rounded-md py-2 px-3 text-center text-sm font-semibold leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
                 )}
               >
-                Buy plan
+                {tier.text}
               </a>
               <ul
                 role="list"
@@ -182,7 +253,7 @@ export default function Example() {
         </div>
 
         {/* lg+ */}
-        <div className="isolate mt-8 hidden lg:block max-w-6xl mx-auto">
+        <div className="isolate mt-8 mb-32 hidden lg:block max-w-6xl mx-auto">
           <div className="relative">
             {tiers.some((tier) => tier.mostPopular) ? (
               <div className="absolute inset-x-4 inset-y-0 -z-10 flex">
@@ -249,7 +320,7 @@ export default function Example() {
                           "mt-8 block rounded-md py-2 px-3 text-center text-sm font-semibold leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
                         )}
                       >
-                        Buy plan
+                        {tier.text}
                       </a>
                     </td>
                   ))}
@@ -275,12 +346,24 @@ export default function Example() {
                           scope="row"
                           className="py-4 text-sm font-normal leading-6 text-gray-900"
                         >
-                          {feature.name}
-                          <div className="absolute inset-x-8 mt-4 h-px bg-gray-900/5" />
+                          {feature.href ? (
+                            <Tooltip
+                              title="Share your Helicone dashboards with your customers"
+                              placement="top"
+                            >
+                              <Link href={feature.href} className="underline">
+                                {feature.name}
+                              </Link>
+                            </Tooltip>
+                          ) : (
+                            <>
+                              {feature.name}
+                              <div className="absolute inset-x-8 mt-4 h-px bg-gray-900/5" />
+                            </>
+                          )}
                         </th>
                         {tiers.map((tier) => (
                           <td key={tier.id} className="px-6 py-4 xl:px-8">
-                            fsdf
                             {typeof feature.tiers[tier.name] === "string" ? (
                               <div className="text-center text-sm leading-6 text-gray-500">
                                 {feature.tiers[tier.name]}
