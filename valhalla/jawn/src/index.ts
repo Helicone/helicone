@@ -18,6 +18,13 @@ import { withAuth } from "./lib/routers/withAuth";
 import { getRequests, getRequestsCached } from "./lib/shared/request/request";
 import { withDB } from "./lib/routers/withDB";
 import { FineTuningManager } from "./lib/managers/FineTuningManager";
+import { PostHog } from "posthog-node";
+
+const ph_project_api_key = process.env.PUBLIC_POSTHOG_API_KEY ?? "";
+
+const postHogClient = new PostHog(ph_project_api_key, {
+  host: "https://app.posthog.com",
+});
 
 // This prevents the application from crashing when an unhandled error occurs
 const errorHandler: ErrorRequestHandler = (
@@ -227,96 +234,107 @@ app.post(
   withAuth<
     paths["/v1/fine-tune"]["post"]["requestBody"]["content"]["application/json"]
   >(async ({ request, res, supabaseClient, db, authParams }) => {
-    res.status(404).json({
-      error: "No implemented yet",
-    });
-    return;
-  //   const { data: org, error: orgError } = await supabaseClient.client
-  //     .from("organization")
-  //     .select("*")
-  //     .eq("id", authParams.organizationId ?? "")
-  //     .single();
-  //   if (orgError) {
-  //     res.status(500).json({
-  //       error: "Must be on pro or higher plan to use fine-tuning",
-  //     });
-  //     return;
-  //   }
-  //   if (!org.tier || org.tier === "free") {
-  //     res.status(405).json({
-  //       error: "Must be on pro or higher plan to use fine-tuning",
-  //     });
-  //     return;
-  //   }
-  //   const body = await request.getRawBody<any>();
-  //   console.log("body", body);
-  //   const { filter, providerKeyId } = body;
+    const { data: org, error: orgError } = await supabaseClient.client
+      .from("organization")
+      .select("*")
+      .eq("id", authParams.organizationId ?? "")
+      .single();
+    if (orgError) {
+      res.status(500).json({
+        error: "Must be on pro or higher plan to use fine-tuning",
+      });
+      return;
+    }
+    if (!org.tier || org.tier === "free") {
+      res.status(405).json({
+        error: "Must be on pro or higher plan to use fine-tuning",
+      });
+      return;
+    }
+    const body = await request.getRawBody<any>();
+    console.log("body", body);
+    const { filter, providerKeyId } = body;
 
-  //   const metrics = await getRequests(
-  //     authParams.organizationId,
-  //     filter,
-  //     0,
-  //     1000,
-  //     {},
-  //     supabaseClient.client
-  //   );
+    const metrics = await getRequests(
+      authParams.organizationId,
+      filter,
+      0,
+      1000,
+      {},
+      supabaseClient.client
+    );
 
-  //   if (metrics.error || !metrics.data || metrics.data.length === 0) {
-  //     res.status(500).json({
-  //       error: "No requests found",
-  //     });
-  //     return;
-  //   }
+    if (metrics.error || !metrics.data || metrics.data.length === 0) {
+      res.status(500).json({
+        error: "No requests found",
+      });
+      return;
+    }
 
-  //   const { data: key, error: keyError } = await supabaseClient.client
-  //     .from("decrypted_provider_keys")
-  //     .select("decrypted_provider_key")
-  //     .eq("id", providerKeyId)
-  //     .eq("org_id", authParams.organizationId)
-  //     .single();
+    const { data: key, error: keyError } = await supabaseClient.client
+      .from("decrypted_provider_keys")
+      .select("decrypted_provider_key")
+      .eq("id", providerKeyId)
+      .eq("org_id", authParams.organizationId)
+      .single();
 
-  //   if (keyError || !key || !key.decrypted_provider_key) {
-  //     res.status(500).json({
-  //       error: "No Provider Key found",
-  //     });
-  //     return;
-  //   }
+    if (keyError || !key || !key.decrypted_provider_key) {
+      res.status(500).json({
+        error: "No Provider Key found",
+      });
+      return;
+    }
 
-  //   const fineTuningManager = new FineTuningManager(key.decrypted_provider_key);
-  //   try {
-  //     const fineTuneJob = await fineTuningManager.createFineTuneJob(
-  //       metrics.data,
-  //       "model",
-  //       "suffix"
-  //     );
+    const fineTuningManager = new FineTuningManager(key.decrypted_provider_key);
+    try {
+      const fineTuneJob = await fineTuningManager.createFineTuneJob(
+        metrics.data,
+        "model",
+        "suffix"
+      );
 
-  //     if (fineTuneJob.error || !fineTuneJob.data) {
-  //       res.status(500).json({
-  //         error: fineTuneJob.error,
-  //       });
-  //       return;
-  //     }
+      if (fineTuneJob.error || !fineTuneJob.data) {
+        res.status(500).json({
+          error: fineTuneJob.error,
+        });
+        return;
+      }
 
-  //     const url = `https://platform.openai.com/finetune/${fineTuneJob.data.id}?filter=all`;
-  //     Sentry.captureMessage(
-  //       `fine-tune job created - ${fineTuneJob.data.id} - ${authParams.organizationId}`
-  //     );
-  //     res.json({
-  //       success: true,
-  //       data: {
-  //         url: url,
-  //       },
-  //     });
-  //   } catch (e) {
-  //     Sentry.captureException(e);
-  //     res.status(500).json({
-  //       error:
-  //         "Sorry the fine tuning job you requested failed. Right now it is in beta and only support gpt3.5 and gpt4 requests",
-  //       message: e,
-  //     });
-  //     return;
-  //   }
-  // })
+      const url = `https://platform.openai.com/finetune/${fineTuneJob.data.id}?filter=all`;
+      Sentry.captureMessage(
+        `fine-tune job created - ${fineTuneJob.data.id} - ${authParams.organizationId}`
+      );
+      postHogClient.capture({
+        distinctId: `${fineTuneJob.data.id}-${authParams.organizationId}`,
+        event: "fine_tune_job_created",
+        properties: {
+          id: fineTuneJob.data.id,
+          org_id: authParams.organizationId,
+        },
+      });
+      res.json({
+        success: true,
+        data: {
+          url: url,
+        },
+      });
+    } catch (e) {
+      Sentry.captureException(e);
+      postHogClient.capture({
+        distinctId: `${authParams.organizationId}`,
+        event: "fine_tune_job_failed",
+        properties: {
+          org_id: authParams.organizationId,
+        },
+      });
+      res.status(500).json({
+        error:
+          "Sorry the fine tuning job you requested failed. Right now it is in beta and only support gpt3.5 and gpt4 requests",
+        message: e,
+      });
+      return;
+    }
+  })
 );
 
 app.post("/v1/tokens/anthropic", async (req, res) => {
@@ -452,3 +470,4 @@ server.on("error", console.error);
 
 // This
 server.setTimeout(1000 * 60 * 10); // 10 minutes
+postHogClient.shutdown(); // new
