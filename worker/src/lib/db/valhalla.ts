@@ -62,42 +62,46 @@ export class Valhalla {
     body: string,
     timeout = 5000
   ): Promise<Result<T, string>> {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    return {
+      error: "not implemented",
+      data: null,
+    };
+    // const controller = new AbortController();
+    // const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-    try {
-      const response = await fetch(this.route(path), {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          "Helicone-Authorization": JSON.stringify(this.heliconeAuth),
-        },
-        body: body,
-        signal: controller.signal,
-      });
+    // try {
+    //   const response = await fetch(this.route(path), {
+    //     method,
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       "Helicone-Authorization": JSON.stringify(this.heliconeAuth),
+    //     },
+    //     body: body,
+    //     signal: controller.signal,
+    //   });
 
-      clearTimeout(timeoutId);
-      const responseText = await response.text();
-      if (response.status !== 200) {
-        return err(`Failed to send request to Valhalla ${responseText}`);
-      }
+    //   clearTimeout(timeoutId);
+    //   const responseText = await response.text();
+    //   if (response.status !== 200) {
+    //     return err(`Failed to send request to Valhalla ${responseText}`);
+    //   }
 
-      if (responseText === "") {
-        return err("Failed to send request to Valhalla");
-      }
+    //   if (responseText === "") {
+    //     return err("Failed to send request to Valhalla");
+    //   }
 
-      try {
-        return ok(JSON.parse(responseText) as T);
-      } catch (e) {
-        return err(`Failed to parse ${JSON.stringify(e)}`);
-      }
-    } catch (e: any) {
-      clearTimeout(timeoutId);
+    //   try {
+    //     return ok(JSON.parse(responseText) as T);
+    //   } catch (e) {
+    //     return err(`Failed to parse ${JSON.stringify(e)}`);
+    //   }
+    // } catch (e: any) {
+    //   clearTimeout(timeoutId);
 
-      if (e?.name === "AbortError") {
-        return err("Request timed out");
-      }
-      return err(`Failed to send request to Valhalla ${JSON.stringify(e)}`);
-    }
+    //   if (e?.name === "AbortError") {
+    //     return err("Request timed out");
+    //   }
+    //   return err(`Failed to send request to Valhalla ${JSON.stringify(e)}`);
+    // }
   }
 }
