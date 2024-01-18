@@ -1,272 +1,324 @@
-import { CheckCircleIcon } from "@heroicons/react/20/solid";
+import { Fragment } from "react";
+import { CheckIcon, MinusIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
-import Footer from "../../layout/footer";
+import GridBackground from "../../layout/public-pages/gridBackground";
 import NavBarV2 from "../../layout/navbar/navBarV2";
-import Link from "next/link";
+import Footer from "../../layout/footer";
 
 const tiers = [
   {
     name: "Free",
-    id: "tier-free",
-    href: "/signup",
-    price: (
-      <p className="mt-6 flex items-baseline gap-x-1">
-        <span className="text-5xl font-bold tracking-tight text-gray-900">
-          $0
-        </span>
-        <span className="text-sm font-semibold leading-6 text-gray-600">
-          / month per organization
-        </span>
-      </p>
-    ),
-    description: "Everything necessary to get started.",
-    features: [
-      "Up to 50,000 requests per month",
-      "Monitoring and Dashboards",
-      "Custom Properties",
-      "Basic Exporting",
-      "3 Seats",
-      "Unlimited Proxy Requests per minute",
-      "100 logs per minute",
-    ],
-    buttonText: "Try for free",
-    backgroundColor: "bg-sky-600",
-    hoverBackgroundColor: "hover:bg-sky-500",
-    textColor: "text-sky-600",
+    id: "tier-basic",
+    href: "#",
+    priceMonthly: "$0",
+    description: "Everything necessary to get started",
+    mostPopular: false,
   },
   {
     name: "Pro",
-    id: "tier-pro",
-    href: "/signup",
-    price: (
-      <p className="mt-6 flex items-baseline gap-x-1">
-        <span className="text-5xl font-bold tracking-tight text-gray-900">
-          $80
-        </span>
-        <span className="text-sm font-semibold leading-6 text-gray-600">
-          / month per organization
-        </span>
-      </p>
-    ),
+    id: "tier-essential",
+    href: "#",
+    priceMonthly: "$25",
     description:
       "Everything in Free, plus essential tools for scaling up your business.",
-    features: [
-      "500,000 Requests",
-      "100mb of Bucket Caching",
-      "10 User Rate Limits",
-      "1,000 GraphQL API request/day",
-      "Request Retries",
-      "Model Load Balancing (up to 2 models)",
-      "Key Vault (5 keys)",
-      "8 Seats",
-      "Up to 500mb of storage",
-      "Unlimited Proxy Requests per minute",
-      "1,000 logs per minute",
-    ],
-    buttonText: "Get Started",
-    backgroundColor: "bg-pink-600",
-    hoverBackgroundColor: "hover:bg-pink-500",
-    textColor: "text-pink-600",
+    mostPopular: true,
   },
   {
     name: "Custom",
-    id: "tier-enterprise",
-    href: "/sales",
-    price: (
-      <p className="mt-6 flex items-baseline gap-x-1">
-        <span className="text-5xl font-bold tracking-tight text-gray-900">
-          Enterprise
-        </span>
-      </p>
-    ),
+    id: "tier-premium",
+    href: "#",
+    priceMonthly: "Enterprise",
     description:
       "Everything in Pro, plus features needed for larger enterprises.",
+    mostPopular: false,
+  },
+];
+const sections: {
+  name: string;
+  features: {
+    name: string;
+    tiers: Record<string, boolean | string>;
+  }[];
+}[] = [
+  {
+    name: "Features",
     features: [
-      "SOC-2 Compliance",
-      "Self-Deployment Management",
-      "Dedicated Support Channel (24/7 access)",
-      "Custom ETL integrations",
-      "Priority Feature Requests",
-      "Higher Rate Limits",
+      {
+        name: "Integrations",
+        tiers: { Basic: true, Essential: true, Premium: true },
+      },
+      {
+        name: "Shared links",
+        tiers: { Basic: true, Essential: true, Premium: true },
+      },
+      {
+        name: "Importing and exporting",
+        tiers: { Essential: true, Premium: true },
+      },
+      {
+        name: "Team members",
+        tiers: { Essential: "Up to 20 users", Premium: "Up to 50 users" },
+      },
     ],
-    buttonText: "Contact us",
-    backgroundColor: "bg-purple-600",
-    hoverBackgroundColor: "hover:bg-purple-500",
-    textColor: "text-purple-600",
+  },
+  {
+    name: "Reporting",
+    features: [
+      {
+        name: "Advanced analytics",
+        tiers: { Basic: true, Essential: true, Premium: true },
+      },
+      { name: "Basic reports", tiers: { Essential: true, Premium: true } },
+      { name: "Professional reports", tiers: { Premium: true } },
+      { name: "Custom report builder", tiers: { Premium: true } },
+    ],
+  },
+  {
+    name: "Support",
+    features: [
+      {
+        name: "24/7 online support",
+        tiers: { Basic: true, Essential: true, Premium: true },
+      },
+      {
+        name: "Quarterly product workshops",
+        tiers: { Essential: true, Premium: true },
+      },
+      {
+        name: "Priority phone support",
+        tiers: { Essential: true, Premium: true },
+      },
+      { name: "1:1 onboarding tour", tiers: { Premium: true } },
+    ],
   },
 ];
 
-const includedFeatures = [
-  "API Authentication",
-  "Custom Domains",
-  "White labeled Helicone",
-  "Per customer rate limiting",
-  "Customer facing dashboards",
-  "Billing APIs",
-  "Custom cost calculations",
-  "White glove onboarding",
-];
-
-export default function PricingPage() {
+export default function Example() {
   return (
-    <>
+    <div className="bg-white">
       <NavBarV2 />
-      <div className="bg-white">
-        <div className="relative isolate">
-          <svg
-            className="absolute inset-0 -z-10 h-full w-full stroke-gray-200 [mask-image:radial-gradient(100%_100%_at_top_center,white,transparent)]"
-            aria-hidden="true"
-          >
-            <defs>
-              <pattern
-                id="abc"
-                width={25}
-                height={25}
-                x="50%"
-                y={-1}
-                patternUnits="userSpaceOnUse"
-              >
-                <path d="M25 200V.5M.5 .5H200" fill="none" />
-              </pattern>
-              <defs>
-                <pattern
-                  id="123"
-                  width="12.5"
-                  height="12.5"
-                  patternUnits="userSpaceOnUse"
-                >
-                  <path d="M12.5 0V12.5M0 12.5H12.5" fill="none" />
-                </pattern>
-              </defs>
-            </defs>
-            <rect width="100%" height="100%" strokeWidth={0} fill="url(#abc)" />
-          </svg>
-          <div className="flex flex-col mx-auto max-w-6xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased text-center">
-            <h1 className="text-4xl sm:text-6xl font-semibold leading-tight sm:leading-snug max-w-4xl mx-auto">
+      <div className="bg-white mx-auto px-6 lg:px-8">
+        <GridBackground>
+          <div className="flex flex-col max-w-6xl mx-auto p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
+            <h1 className="text-4xl sm:text-6xl font-semibold leading-tight sm:leading-snug max-w-4xl">
               Pricing that&apos;s{" "}
-              <span className="md:border-2 border-emerald-500 border-dashed text-emerald-500 md:py-2 md:px-4">
+              <span className="md:border-2 border-pink-600 border-dashed text-pink-600 md:py-2 md:px-4">
                 simple
               </span>
             </h1>
-            <p className="mt-6 w-full text-xl leading-8 text-gray-700 max-w-2xl mx-auto">
-              Free to get started, and easy to scale when you need to.
-              We&apos;re here to help you grow at whatever stage you&apos;re at.
+            <p className="mt-6 w-full text-xl leading-8 text-gray-700 max-w-2xl">
+              Free to get started, and easy to scale when you need to - all with
+              a <span className="font-semibold">one-line</span> code
+              integration.
             </p>
           </div>
-        </div>
+        </GridBackground>
 
-        <div className="flow-root flex-col mx-auto max-w-6xl p-4 md:px-8 pb-24 sm:pb-32 lg:flex antialiased">
-          <div className="isolate -mt-16 grid max-w-sm grid-cols-1 gap-y-16 divide-y divide-gray-200 sm:mx-auto lg:-mx-8 lg:mt-0 lg:max-w-none lg:grid-cols-3 lg:divide-x lg:divide-y-0 xl:-mx-14">
-            {tiers.map((tier) => (
-              <div key={tier.id} className="pt-16 lg:px-8 lg:pt-0 xl:px-14">
-                <h3
-                  id={tier.id}
-                  className="text-base font-semibold leading-7 text-gray-900"
-                >
-                  {tier.name}
-                </h3>
-                {tier.price}
-                <a
-                  href={tier.href}
-                  aria-describedby={tier.id}
-                  className={clsx(
-                    tier.backgroundColor,
-                    tier.hoverBackgroundColor,
-                    "mt-10 block rounded-md px-3 py-2 text-center text-sm font-semibold leading-6 text-white shadow-smfocus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                  )}
-                >
-                  {tier.buttonText}
-                </a>
-                <p className="mt-10 text-sm font-semibold leading-6 text-gray-900 h-12">
-                  {tier.description}
-                </p>
-                <ul
-                  role="list"
-                  className="mt-6 space-y-3 text-sm leading-6 text-gray-600"
-                >
-                  {tier.features.map((feature) => (
-                    <li key={feature} className="flex gap-x-3">
-                      <CheckCircleIcon
-                        className={clsx(tier.textColor, "h-6 w-5 flex-none")}
-                        aria-hidden="true"
-                      />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 antialiased pb-24 sm:pb-32">
-          <div className="bg-white mx-auto max-w-2xl rounded-3xl border border-gray-200 shadow-sm  lg:mx-0 lg:flex lg:items-center lg:max-w-none">
-            <div className="p-8 sm:p-10 lg:flex-auto">
-              <h3 className="text-2xl font-bold tracking-tight text-gray-900">
-                Customer Portal
+        {/* xs to lg */}
+        <div className="mx-auto mt-12 max-w-md space-y-8 sm:mt-16 lg:hidden">
+          {tiers.map((tier) => (
+            <section
+              key={tier.id}
+              className={clsx(
+                tier.mostPopular
+                  ? "rounded-xl bg-gray-400/5 ring-1 ring-inset ring-gray-200"
+                  : "",
+                "p-8"
+              )}
+            >
+              <h3
+                id={tier.id}
+                className="text-sm font-semibold leading-6 text-gray-900"
+              >
+                {tier.name}
               </h3>
-              <p className="mt-6 text-base leading-7 text-gray-600">
-                Helicone&apos;s Customer Portal is a fully customizable
-                customer-facing dashboard that allows your customers to interact
-                with your API. It&apos;s a great way to show off your API&apos;s
-                capabilities and build trust with your customers.
-                <Link
-                  href="https://docs.helicone.ai/features/customer_portal"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-8 block w-56 rounded-md bg-black px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                >
-                  Learn more
-                </Link>
+              <p className="mt-2 flex items-baseline gap-x-1 text-gray-900">
+                <span className="text-4xl font-bold">{tier.priceMonthly}</span>
+                <span className="text-sm font-semibold">/month</span>
               </p>
-              <div className="mt-10 flex items-center gap-x-4">
-                <h4 className="flex-none text-sm font-semibold leading-6 text-indigo-600">
-                  What&apos;s included
-                </h4>
-                <div className="h-px flex-auto bg-gray-100" />
-              </div>
+              <a
+                href={tier.href}
+                aria-describedby={tier.id}
+                className={clsx(
+                  tier.mostPopular
+                    ? "bg-sky-600 text-white hover:bg-sky-500"
+                    : "text-sky-600 ring-1 ring-inset ring-sky-200 hover:ring-sky-300",
+                  "mt-8 block rounded-md py-2 px-3 text-center text-sm font-semibold leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
+                )}
+              >
+                Buy plan
+              </a>
               <ul
                 role="list"
-                className="mt-6 grid grid-cols-1 gap-4 text-sm leading-6 text-gray-600 sm:grid-cols-2 sm:gap-4"
+                className="mt-10 space-y-4 text-sm leading-6 text-gray-900"
               >
-                {includedFeatures.map((feature) => (
-                  <li key={feature} className="flex gap-x-3">
-                    <CheckCircleIcon
-                      className="h-6 w-5 flex-none text-indigo-600"
-                      aria-hidden="true"
-                    />
-                    {feature}
+                {sections.map((section) => (
+                  <li key={section.name}>
+                    <ul role="list" className="space-y-4">
+                      {section.features.map((feature) =>
+                        feature.tiers[tier.name] ? (
+                          <li key={feature.name} className="flex gap-x-3">
+                            <CheckIcon
+                              className="h-6 w-5 flex-none text-sky-600"
+                              aria-hidden="true"
+                            />
+                            <span>
+                              {feature.name}{" "}
+                              {typeof feature.tiers[tier.name] === "string" ? (
+                                <span className="text-sm leading-6 text-gray-500">
+                                  ({feature.tiers[tier.name]})
+                                </span>
+                              ) : null}
+                            </span>
+                          </li>
+                        ) : null
+                      )}
+                    </ul>
                   </li>
                 ))}
               </ul>
-            </div>
-            <div className=" p-10 lg:mt-0 lg:w-full lg:max-w-md lg:flex-shrink-0">
-              <div className="rounded-2xl bg-indigo-50 shadow-sm py-10 text-center ring-1 ring-inset ring-gray-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16">
-                <div className="mx-auto max-w-xs px-8">
-                  <p className="text-base font-semibold text-gray-600">
-                    Starting at
-                  </p>
-                  <p className="mt-8 flex items-baseline justify-center gap-x-2">
-                    <span className="text-5xl font-bold tracking-tight text-gray-900">
-                      $799
-                    </span>
-                    <span className="text-sm font-semibold leading-6 tracking-wide text-gray-600">
-                      /month
-                    </span>
-                  </p>
-                  <Link
-                    href="/sales?customer-portal=true"
-                    rel="noopener noreferrer"
-                    className="mt-8 block w-56 rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  >
-                    Get started
-                  </Link>
+            </section>
+          ))}
+        </div>
+
+        {/* lg+ */}
+        <div className="isolate mt-8 hidden lg:block max-w-6xl mx-auto">
+          <div className="relative">
+            {tiers.some((tier) => tier.mostPopular) ? (
+              <div className="absolute inset-x-4 inset-y-0 -z-10 flex">
+                <div
+                  className="flex w-1/4 px-4"
+                  aria-hidden="true"
+                  style={{
+                    marginLeft: `${
+                      (tiers.findIndex((tier) => tier.mostPopular) + 1) * 25
+                    }%`,
+                  }}
+                >
+                  <div className="w-full rounded-t-xl border-x border-t border-gray-900/10 bg-gray-400/5" />
                 </div>
               </div>
-            </div>
+            ) : null}
+            <table className="w-full table-fixed border-separate border-spacing-x-8 text-left">
+              <caption className="sr-only">Pricing plan comparison</caption>
+              <colgroup>
+                <col className="w-1/4" />
+                <col className="w-1/4" />
+                <col className="w-1/4" />
+                <col className="w-1/4" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <td />
+                  {tiers.map((tier) => (
+                    <th
+                      key={tier.id}
+                      scope="col"
+                      className="px-6 pt-6 xl:px-8 xl:pt-8"
+                    >
+                      <div className="text-sm font-semibold leading-7 text-gray-900">
+                        {tier.name}
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">
+                    <span className="sr-only">Price</span>
+                  </th>
+                  {tiers.map((tier) => (
+                    <td key={tier.id} className="px-6 pt-2 xl:px-8">
+                      <div className="flex items-baseline gap-x-1 text-gray-900">
+                        <span className="text-4xl font-bold">
+                          {tier.priceMonthly}
+                        </span>
+                        {tier.name !== "Custom" && (
+                          <span className="text-sm font-semibold leading-6">
+                            /month
+                          </span>
+                        )}
+                      </div>
+                      <a
+                        href={tier.href}
+                        className={clsx(
+                          tier.mostPopular
+                            ? "bg-sky-600 text-white hover:bg-sky-500"
+                            : "text-sky-600 ring-1 ring-inset ring-sky-200 hover:ring-sky-300",
+                          "mt-8 block rounded-md py-2 px-3 text-center text-sm font-semibold leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
+                        )}
+                      >
+                        Buy plan
+                      </a>
+                    </td>
+                  ))}
+                </tr>
+                {sections.map((section, sectionIdx) => (
+                  <Fragment key={section.name}>
+                    <tr>
+                      <th
+                        scope="colgroup"
+                        colSpan={4}
+                        className={clsx(
+                          sectionIdx === 0 ? "pt-8" : "pt-16",
+                          "pb-4 text-sm font-semibold leading-6 text-gray-900"
+                        )}
+                      >
+                        {section.name}
+                        <div className="absolute inset-x-8 mt-4 h-px bg-gray-900/10" />
+                      </th>
+                    </tr>
+                    {section.features.map((feature) => (
+                      <tr key={feature.name}>
+                        <th
+                          scope="row"
+                          className="py-4 text-sm font-normal leading-6 text-gray-900"
+                        >
+                          {feature.name}
+                          <div className="absolute inset-x-8 mt-4 h-px bg-gray-900/5" />
+                        </th>
+                        {tiers.map((tier) => (
+                          <td key={tier.id} className="px-6 py-4 xl:px-8">
+                            fsdf
+                            {typeof feature.tiers[tier.name] === "string" ? (
+                              <div className="text-center text-sm leading-6 text-gray-500">
+                                {feature.tiers[tier.name]}
+                              </div>
+                            ) : (
+                              <>
+                                {feature.tiers[tier.name] === true ? (
+                                  <CheckIcon
+                                    className="mx-auto h-5 w-5 text-sky-600"
+                                    aria-hidden="true"
+                                  />
+                                ) : (
+                                  <MinusIcon
+                                    className="mx-auto h-5 w-5 text-gray-400"
+                                    aria-hidden="true"
+                                  />
+                                )}
+
+                                <span className="sr-only">
+                                  {feature.tiers[tier.name] === true
+                                    ? "Included"
+                                    : "Not included"}{" "}
+                                  in {tier.name}
+                                </span>
+                              </>
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
       <Footer />
-    </>
+    </div>
   );
 }
