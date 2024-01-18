@@ -18,6 +18,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { ThemeContextProvider } from "../components/shared/theme/themeContext";
 import { NextPage } from "next";
+import Script from "next/script";
 
 if (
   typeof window !== "undefined" &&
@@ -76,6 +77,10 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
         </ApolloProvider>
       </SessionContextProvider>
       <Analytics />
+      <Script
+        id="octolane-script"
+        src="https://cdn.octolane.com/tag.js?pk=2777c36a1af860ec5a67"
+      />
     </>
   );
 }
