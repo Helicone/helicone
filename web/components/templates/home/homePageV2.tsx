@@ -14,8 +14,8 @@ import {
   UserIcon,
 } from "@heroicons/react/24/outline";
 import { HeartIcon } from "@heroicons/react/20/solid";
-import NavBarV2 from "../../shared/layout/navbar/navBarV2";
-import Footer from "../../shared/layout/footer";
+import NavBarV2 from "../../layout/navbar/navBarV2";
+import Footer from "../../layout/footer";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";

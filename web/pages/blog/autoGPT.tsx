@@ -2,8 +2,8 @@ import {
   CheckCircleIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import Footer from "../../components/shared/layout/footer";
-import NavBarV2 from "../../components/shared/layout/navbar/navBarV2";
+import Footer from "../../components/layout/footer";
+import NavBarV2 from "../../components/layout/navbar/navBarV2";
 import MetaData from "../../components/shared/metaData";
 import Image from "next/image";
 

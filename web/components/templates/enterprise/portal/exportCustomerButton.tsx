@@ -3,7 +3,7 @@ import { useState } from "react";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { TextInput } from "@tremor/react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useOrg } from "../../../shared/layout/organizationContext";
+import { useOrg } from "../../../layout/organizationContext";
 import Papa from "papaparse";
 
 interface ExportCustomerButtonProps {

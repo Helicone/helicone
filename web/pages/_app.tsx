@@ -12,7 +12,7 @@ import "../node_modules/react-grid-layout/css/styles.css";
 import "../node_modules/react-resizable/css/styles.css";
 
 import posthog from "posthog-js";
-import { OrgContextProvider } from "../components/shared/layout/organizationContext";
+import { OrgContextProvider } from "../components/layout/organizationContext";
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";

@@ -30,7 +30,7 @@ import { TimeFilter } from "../dashboard/dashboardPage";
 import RequestCard from "./requestCard";
 import getNormalizedRequest from "./builder/requestBuilder";
 import { getHeliconeCookie } from "../../../lib/cookies";
-import { useOrg } from "../../shared/layout/organizationContext";
+import { useOrg } from "../../layout/organizationContext";
 import { FineTuneModal } from "../fine-tune/fineTuneModal";
 
 interface RequestsPageV2Props {

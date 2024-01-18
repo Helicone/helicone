@@ -13,7 +13,7 @@ import CreateProviderKeyModal from "./createProviderKeyModal";
 import CreateProxyKeyModal from "./createProxyKeyModal";
 import { LimitCell } from "./limitsCell";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
-import { useOrg } from "../../shared/layout/organizationContext";
+import { useOrg } from "../../layout/organizationContext";
 
 const VaultPage = ({
   variant = "basic",

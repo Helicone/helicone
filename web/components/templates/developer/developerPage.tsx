@@ -5,7 +5,7 @@ import {
   KeyIcon,
 } from "@heroicons/react/24/outline";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react";
-import { useOrg } from "../../shared/layout/organizationContext";
+import { useOrg } from "../../layout/organizationContext";
 import KeyPage from "../keys/keyPage";
 import GraphQLPage from "../graphql/graphqlPage";
 import WebhooksPage from "../webhooks/webhooksPage";

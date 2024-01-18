@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { useOrg } from "../../shared/layout/organizationContext";
+import { useOrg } from "../../layout/organizationContext";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useGetOrgMembers } from "../../../services/hooks/organizations";
 import useNotification from "../../shared/notification/useNotification";

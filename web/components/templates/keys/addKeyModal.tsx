@@ -4,7 +4,7 @@ import ThemedModal from "../../shared/themed/themedModal";
 import generateApiKey from "generate-api-key";
 import { hashAuth } from "../../../lib/hashClient";
 import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
-import { OrgContextValue } from "../../shared/layout/organizationContext";
+import { OrgContextValue } from "../../layout/organizationContext";
 import {
   ArrowPathIcon,
   ClipboardDocumentListIcon,

@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
-import { Database } from "../../../supabase/database.types";
-import { useOrgsContextManager } from "../../../services/hooks/organizations";
+import { Database } from "../../supabase/database.types";
+import { useOrgsContextManager } from "../../services/hooks/organizations";
 
 export interface OrgContextValue {
   currentOrg?: Database["public"]["Tables"]["organization"]["Row"];

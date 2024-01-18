@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { hashAuth } from "../../../../lib/hashClient";
 import { Database } from "../../../../supabase/database.types";
 import { clsx } from "../../../shared/clsx";
-import { useOrg } from "../../../shared/layout/organizationContext";
+import { useOrg } from "../../../layout/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
 
 interface GenerateAPIKeyProps {

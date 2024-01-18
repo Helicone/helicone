@@ -4,7 +4,7 @@ import {
   CreditCardIcon,
 } from "@heroicons/react/24/outline";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react";
-import { useOrg } from "../../shared/layout/organizationContext";
+import { useOrg } from "../../layout/organizationContext";
 import OrgSettingsPage from "../organization/settings/orgSettingsPage";
 import OrgPlanPage from "../organization/plan/orgPlanPage";
 import OrgMembersPage from "../organization/members/orgMembersPage";

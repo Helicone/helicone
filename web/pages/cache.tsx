@@ -1,4 +1,4 @@
-import AuthLayout from "../components/shared/layout/authLayout";
+import AuthLayout from "../components/layout/authLayout";
 
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { User } from "@supabase/auth-helpers-react";

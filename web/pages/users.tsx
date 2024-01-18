@@ -1,6 +1,6 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
-import AuthLayout from "../components/shared/layout/authLayout";
+import AuthLayout from "../components/layout/authLayout";
 import UsersPageV2 from "../components/templates/users/usersPageV2";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { SortDirection } from "../services/lib/sorts/users/sorts";

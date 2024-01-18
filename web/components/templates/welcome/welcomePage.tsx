@@ -14,7 +14,7 @@ import GetStarted from "./steps/getStarted";
 import { IntegrationMethods, Providers } from "./steps/methodFork";
 import MfsCoupon from "./steps/mfsCoupon";
 import CreateOrg from "./steps/createOrg";
-import { useOrg } from "../../shared/layout/organizationContext";
+import { useOrg } from "../../layout/organizationContext";
 import UserSettings from "./steps/userSettings";
 
 interface WelcomePageProps {
