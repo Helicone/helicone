@@ -57,10 +57,10 @@ export class Valhalla {
   }
 
   private async send<T>(
-    path: string,
-    method: string,
-    body: string,
-    timeout = 5000
+    _path: string,
+    _method: string,
+    _body: string,
+    _timeout = 5000
   ): Promise<Result<T, string>> {
     return {
       error: "not implemented",
