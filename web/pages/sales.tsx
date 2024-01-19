@@ -44,9 +44,9 @@ const Sales = () => {
                     <span className="md:border-2 border-sky-500 border-dashed text-sky-500 md:py-2 md:px-4">
                       Customer Portal
                     </span>
-                    <p className="text-sm sm:text-lg font-normal text-gray-500 pt-4">
+                    <p className="text-sm sm:text-lg font-normal text-gray-700 pt-4">
                       Easily share your Helicone dashboards and analytics with
-                      your customers
+                      your customers. All for only $799 per month.
                     </p>
                   </>
                 ) : (
@@ -58,7 +58,7 @@ const Sales = () => {
                 {bullets[isCustomerPortal ? "customerPortal" : "contact"].map(
                   (bullet, idx) => (
                     <li
-                      className="flex items-center text-gray-500 gap-2 text-sm sm:text-md"
+                      className="flex items-center text-gray-700 gap-2 text-sm sm:text-md"
                       key={idx}
                     >
                       <CheckCircleIcon className="h-4 w-4 sm:h-6 sm:w-6 text-sky-500" />
