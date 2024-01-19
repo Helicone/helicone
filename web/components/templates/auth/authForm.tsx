@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { CustomerPortalContent } from "../../../pages/signin";
 import GridBackground from "../../layout/public-pages/gridBackground";
-import Image from "next/image";
 
 interface AuthFormProps {
   handleEmailSubmit: (email: string, password: string) => void;
@@ -57,7 +56,7 @@ const AuthForm = (props: AuthFormProps) => {
         <div className="h-screen flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24 relative">
           <div className="left-4 sm:left-16 top-4 absolute">
             {customerPortalContent !== undefined ? (
-              <Image
+              <img
                 src={customerPortalContent.logo}
                 alt={"portal-logo"}
                 width={80}
