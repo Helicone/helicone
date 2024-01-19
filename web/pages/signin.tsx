@@ -7,6 +7,11 @@ import { isCustomerDomain } from "../lib/customerPortalHelpers";
 import { supabaseServer } from "../lib/supabaseServer";
 import { Result, err, ok } from "../lib/result";
 
+export type CustomerPortalContent = {
+  domain: string;
+  logo: string;
+};
+
 const SignIn = ({
   customerPortal,
 }: {
@@ -21,8 +26,8 @@ const SignIn = ({
   const router = useRouter();
   const supabase = useSupabaseClient();
   const { setNotification } = useNotification();
-  //TODO - can you add the customer portal stuff based on this notion? https://www.notion.so/helicone/Customer-Portal-Custom-domain-934fb9543c984759858a973a010882e4#555635f5240743bda03f6b77312efcc5
-  console.log(customerPortal);
+
+  const customerPortalContent = customerPortal?.data || undefined;
 
   return (
     <AuthForm
@@ -63,6 +68,7 @@ const SignIn = ({
         setNotification("Successfully signed in.", "success");
       }}
       authFormType={"signin"}
+      customerPortalContent={customerPortalContent}
     />
   );
 };
