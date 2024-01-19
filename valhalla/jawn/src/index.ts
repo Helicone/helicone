@@ -19,6 +19,7 @@ import { getRequests, getRequestsCached } from "./lib/shared/request/request";
 import { withDB } from "./lib/routers/withDB";
 import { FineTuningManager } from "./lib/managers/FineTuningManager";
 import { PostHog } from "posthog-node";
+import { hashAuth } from "./lib/db/hash";
 
 const ph_project_api_key = process.env.PUBLIC_POSTHOG_API_KEY ?? "";
 
@@ -177,6 +178,15 @@ app.post(
           sort,
           supabaseClient.client
         );
+    postHogClient.capture({
+      distinctId: `${await hashAuth(body)}-${authParams.organizationId}`,
+      event: "fetch_requests",
+      properties: {
+        success: metrics.error === null,
+        org_id: authParams.organizationId,
+        request_body: body,
+      },
+    });
     res
       .header("Access-Control-Allow-Origin", "*")
       .header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE")
