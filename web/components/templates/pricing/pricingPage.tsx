@@ -21,7 +21,7 @@ const tiers = [
     name: "Pro",
     id: "tier-Pro",
     href: "/signup",
-    priceMonthly: "$80",
+    priceMonthly: "$25",
     text: "Get Started",
     description:
       "Everything in Free, plus essential tools for scaling up your business.",
