@@ -22,6 +22,7 @@ const bullets = {
     "Customer ratelimiting",
     "Customer facing API tokens",
     "Custom domains",
+    "Custom Proxy Endpoint",
   ],
 };
 
