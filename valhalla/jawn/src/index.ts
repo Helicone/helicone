@@ -330,9 +330,10 @@ app.post(
       );
       postHogClient.capture({
         distinctId: `${fineTuneJob.data.id}-${authParams.organizationId}`,
-        event: "fine_tune_job_created",
+        event: "fine_tune_job",
         properties: {
           id: fineTuneJob.data.id,
+          success: true,
           org_id: authParams.organizationId,
         },
       });
@@ -346,8 +347,9 @@ app.post(
       Sentry.captureException(e);
       postHogClient.capture({
         distinctId: `${authParams.organizationId}`,
-        event: "fine_tune_job_failed",
+        event: "fine_tune_job",
         properties: {
+          success: false,
           org_id: authParams.organizationId,
         },
       });
