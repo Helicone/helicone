@@ -101,6 +101,14 @@ const NavBarV2 = (props: NavBarV2Props) => {
             >
               Blog
             </Link>
+            <Link
+              href="/sales"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-row items-center font-semibold hover:bg-gray-200 rounded-lg px-4 py-2 focus:outline-none"
+            >
+              Contact
+            </Link>
           </div>
           <div className="flex-1 hidden md:flex items-center justify-end gap-x-4">
             <Link
