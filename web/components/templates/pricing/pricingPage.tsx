@@ -52,8 +52,8 @@ const sections: {
       {
         name: "Request Logs",
         tiers: {
-          Free: "Up to 50,000 / mo",
-          Pro: "Up to half a million / mo",
+          Free: "50,000 / mo",
+          Pro: "500,000 / mo",
           Custom: "Unlimited",
         },
       },
@@ -80,8 +80,8 @@ const sections: {
       {
         name: "Organization Seats",
         tiers: {
-          Free: "Up to 3",
-          Pro: "Up to 8",
+          Free: "3 seats",
+          Pro: "8 seats",
           Custom: "Unlimited",
         },
       },
@@ -94,7 +94,7 @@ const sections: {
         name: "Caching",
         tiers: {
           Free: false,
-          Pro: "Up to 100mb",
+          Pro: "100mb",
           Custom: "Unlimited",
         },
       },
@@ -118,7 +118,7 @@ const sections: {
         name: "Model Load Balancing",
         tiers: {
           Free: false,
-          Pro: "Up to 2 models",
+          Pro: "2 models",
           Custom: "Unlimited",
         },
       },
@@ -126,7 +126,7 @@ const sections: {
         name: "Key Vault",
         tiers: {
           Free: false,
-          Pro: "Up to 5 keys",
+          Pro: "5 keys",
           Custom: "Unlimited keys",
         },
       },
