@@ -46,7 +46,7 @@ const Sales = () => {
                     </span>
                     <p className="text-sm sm:text-lg font-normal text-gray-700 pt-4">
                       Easily share your Helicone dashboards and analytics with
-                      your customers. All for only $800 per month.
+                      your customers. All for only $799 per month.
                     </p>
                   </>
                 ) : (
