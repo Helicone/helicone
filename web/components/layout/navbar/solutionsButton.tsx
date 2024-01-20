@@ -9,25 +9,50 @@ import {
   ChartPieIcon,
   CircleStackIcon,
   UserGroupIcon,
+  CommandLineIcon,
 } from "@heroicons/react/20/solid";
 import { Fragment } from "react";
 import { clsx } from "../../shared/clsx";
 import Link from "next/link";
 
-const solutions = [
+const solutions: {
+  name: string;
+  description: string;
+  href: string;
+  icon: React.ForwardRefExoticComponent<
+    React.SVGProps<SVGSVGElement> & {
+      title?: string | undefined;
+      titleId?: string | undefined;
+    }
+  >;
+  color: string;
+  new?: boolean;
+  target?: string;
+}[] = [
   {
     name: "Customer Portal",
     description: "Share Helicone usage with customers",
-    href: "/sales?customer-portal=true",
+    href: "/features/customer-portal",
     icon: UserGroupIcon,
-    color: "text-violet-500",
+    color: "text-sky-500",
+    new: true,
+    target: "_self",
+  },
+  {
+    name: "Fine-Tuning",
+    description: "Reduce costs and improve quality",
+    href: "/features/fine-tuning",
+    icon: CommandLineIcon,
+    color: "text-rose-500",
+    new: true,
+    target: "_self",
   },
   {
     name: "Data Segmentation",
     description: "Get insights into costs & behaviors.",
     href: "https://docs.helicone.ai/use-cases/segmentation",
     icon: ChartPieIcon,
-    color: "text-sky-500",
+    color: "text-violet-500",
   },
   {
     name: "Debugging",
@@ -41,7 +66,7 @@ const solutions = [
     description: "Turn Helicone into a data warehouse.",
     href: "https://docs.helicone.ai/use-cases/etl",
     icon: CircleStackIcon,
-    color: "text-zinc-500",
+    color: "text-slate-500",
   },
   {
     name: "Internal Auditing",
@@ -52,10 +77,10 @@ const solutions = [
   },
   {
     name: "Github Actions",
-    description: "Automate and cache in your CI pipelines.",
+    description: "Automate and cache your CI pipelines.",
     href: "https://docs.helicone.ai/use-cases/github-actions",
     icon: CodeBracketSquareIcon,
-    color: "text-green-500",
+    color: "text-indigo-500",
   },
 ];
 
@@ -86,17 +111,17 @@ export default function SolutionsButton() {
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-1"
             >
-              <Popover.Panel className="absolute z-10 mt-3 w-[400px] transform px-4 sm:px-0">
+              <Popover.Panel className="absolute z-10 mt-3 w-[600px] transform px-4 sm:px-0">
                 <div className="overflow-hidden rounded-lg shadow-2xl ring-1 ring-black ring-opacity-10">
-                  <div className="relative grid gap-8 bg-white p-7 lg:grid-cols-1">
-                    <p className="-mb-2 text-sm font-medium text-gray-700">
+                  <div className="relative grid gap-8 bg-white p-7 grid-cols-1 lg:grid-cols-2">
+                    <p className="-mb-2 text-sm font-medium text-gray-700 col-span-2">
                       Use Cases
                     </p>
                     {solutions.map((item) => (
                       <Link
                         key={item.name}
                         href={item.href}
-                        target="_blank"
+                        target={item.target || "_blank"}
                         rel="noopener noreferrer"
                         className="-m-3 flex items-center rounded-lg p-2 transition duration-150 ease-in-out hover:bg-gray-200 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
                       >
@@ -107,10 +132,15 @@ export default function SolutionsButton() {
                           />
                         </div>
                         <div className="ml-4">
-                          <p className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-gray-900 items-center">
                             {item.name}
-                          </p>
-                          <p className="text-sm text-gray-500">
+                            {item.new && (
+                              <span className="text-xs font-semibold text-green-500 ml-1">
+                                New
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-500">
                             {item.description}
                           </p>
                         </div>

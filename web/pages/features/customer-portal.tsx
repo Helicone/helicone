@@ -1,24 +1,25 @@
-import Footer from "../components/layout/footer";
-import NavBarV2 from "../components/layout/navbar/navBarV2";
-import MetaData from "../components/shared/metaData";
-import Link from "next/link";
-import ContactForm from "../components/shared/contactForm";
-import { useRouter } from "next/router";
-import GridBackground from "../components/layout/public-pages/gridBackground";
 import { CheckCircleIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
+import { useRouter } from "next/router";
+import MetaData from "../../components/shared/metaData";
+import NavBarV2 from "../../components/layout/navbar/navBarV2";
+import GridBackground from "../../components/layout/public-pages/gridBackground";
+import Link from "next/link";
+import ContactForm from "../../components/shared/contactForm";
+import Image from "next/image";
+import Footer from "../../components/layout/footer";
 
 const bullets = [
-  "Billing/Usage APIs",
+  "Billing / Usage APIs",
   "White labeling",
   "Embeddable dashboards",
   "Alerts",
-  "Customer ratelimiting",
+  "Customer rate-limiting",
   "Customer facing API tokens",
   "Custom domains",
-  "Custom Proxy Endpoint",
+  "Custom proxy endpoint",
 ];
 
-const Sales = () => {
+const CustomerPortal = () => {
   const router = useRouter();
 
   return (
@@ -29,7 +30,14 @@ const Sales = () => {
           <div className="flex flex-col sm:flex-row mx-auto w-full gap-8 max-w-6xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
             <div className="flex flex-col w-full">
               <h1 className="text-2xl sm:text-4xl font-semibold leading-tight sm:leading-snug max-w-4xl">
-                Contact Us
+                Launch:{" "}
+                <span className="md:border-2 border-sky-500 border-dashed text-sky-500 md:py-2 md:px-4">
+                  Customer Portal
+                </span>
+                <p className="text-sm sm:text-lg font-normal text-gray-700 pt-4">
+                  Easily share your Helicone dashboards and analytics with your
+                  customers. All for only $799 per month.
+                </p>
               </h1>
 
               <ul className="py-8 flex flex-col space-y-4">
@@ -62,15 +70,29 @@ const Sales = () => {
               contactTag={""}
               buttonText={"Contact Us"}
               defaultPlaceholder={
-                "I am interested in using Helicone for my business..."
+                "I am interested in Helicone's Customer Portal feature!"
               }
             />
           </div>
         </GridBackground>
+
+        <div className="mx-auto max-w-6xl px-6 py-12 sm:py-18 flex flex-col space-y-4 md:space-y-8 items-center justify-center text-center lg:gap-x-10 lg:px-8 antialiased">
+          <div className="flex flex-col">
+            <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2.5 lg:rounded-xl lg:p-2.5">
+              <Image
+                src="/assets/customer-portal/created-customer.png"
+                alt="App screenshot"
+                width={2720}
+                height={1844}
+                className="w-[70rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
+              />
+            </div>
+          </div>
+        </div>
       </div>
       <Footer />
     </MetaData>
   );
 };
 
-export default Sales;
+export default CustomerPortal;
