@@ -4,7 +4,6 @@ import MetaData from "../components/shared/metaData";
 import Link from "next/link";
 import ContactForm from "../components/shared/contactForm";
 import { useRouter } from "next/router";
-import Image from "next/image";
 import GridBackground from "../components/layout/public-pages/gridBackground";
 import { CheckCircleIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 

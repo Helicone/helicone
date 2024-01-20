@@ -5,7 +5,6 @@ import NavBarV2 from "../../components/layout/navbar/navBarV2";
 import GridBackground from "../../components/layout/public-pages/gridBackground";
 import Link from "next/link";
 import ContactForm from "../../components/shared/contactForm";
-import Image from "next/image";
 import Footer from "../../components/layout/footer";
 
 const bullets = [
