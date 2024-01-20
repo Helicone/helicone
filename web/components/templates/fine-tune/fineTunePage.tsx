@@ -186,6 +186,9 @@ const FineTuningPage = (props: FineTuningPageProps) => {
           onCancel={() => {
             setFineTuneOpen(false);
           }}
+          onSuccess={() => {
+            setFineTuneOpen(false);
+          }}
         />
       </ThemedModal>
       <ThemedDrawer open={jobOpen} setOpen={setJobOpen}>

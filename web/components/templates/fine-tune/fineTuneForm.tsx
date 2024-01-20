@@ -8,9 +8,11 @@ import { PlusCircleIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { Tooltip } from "@mui/material";
 import { CircleStackIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
+import ProviderKeyList from "../enterprise/portal/id/providerKeyList";
 
 interface FineTurnFormProps {
   onCancel: () => void;
+  onSuccess: () => void;
 }
 
 const FineTurnForm = (props: FineTurnFormProps) => {
@@ -40,15 +42,20 @@ const FineTurnForm = (props: FineTurnFormProps) => {
     refetchOnWindowFocus: false,
   });
 
+  const onSubmitFineTuneHandler = () => {
+    // do the fine tune stuff here
+    // on success
+  };
+
   return (
-    <form className="w-[450px] h-full flex flex-col space-y-8">
+    <div className="w-[450px] h-full flex flex-col space-y-8">
       <h3 className="text-xl font-semibold text-black dark:text-white">
         Create a fine-tuned model
       </h3>
       <div className="flex flex-col space-y-1">
         <label
           htmlFor="alert-metric"
-          className="text-gray-500 text-xs font-semibold"
+          className="text-gray-900 text-xs font-semibold"
         >
           Base Model
         </label>
@@ -56,11 +63,18 @@ const FineTurnForm = (props: FineTurnFormProps) => {
           <SelectItem value="gpt-3.5-turbo-1106">gpt-3.5-turbo-1106</SelectItem>
         </Select>
       </div>
+      <ProviderKeyList
+        orgId={orgContext?.currentOrg?.id}
+        setProviderKeyCallback={(x) => {
+          // setProviderKeyId(x);
+        }}
+        variant="basic"
+      />
       <div className="flex flex-col space-y-1.5">
         <div className="flex flex-row space-x-1 items-center">
           <label
             htmlFor="alert-metric"
-            className="text-gray-500 text-xs font-semibold"
+            className="text-gray-900 text-xs font-semibold"
           >
             Data Sets
           </label>
@@ -69,7 +83,7 @@ const FineTurnForm = (props: FineTurnFormProps) => {
               onClick={() => {
                 // setFineTuneOpen(true);
               }}
-              className="items-center rounded-lg text-xs flex font-medium text-gray-500 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="items-center rounded-lg text-xs flex font-medium text-gray-900 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               <PlusCircleIcon className="h-4 w-4" />
             </button>
@@ -95,7 +109,7 @@ const FineTurnForm = (props: FineTurnFormProps) => {
               className="relative block w-full rounded-lg border bg-gray-50 hover:bg-gray-100 dark:bg-gray-950 dark:hover:bg-gray-900 hover:cursor-pointer border-gray-300 dark:border-gray-700 p-8 text-center"
             >
               <div className="w-full justify-center align-middle items-center">
-                <CircleStackIcon className="h-6 w-6 mx-auto text-gray-500" />
+                <CircleStackIcon className="h-6 w-6 mx-auto text-gray-900" />
               </div>
               <span className="mt-2 block text-xs font-medium text-gray-700 dark:text-gray-300">
                 Click here to generate a new data set
@@ -134,13 +148,13 @@ const FineTurnForm = (props: FineTurnFormProps) => {
           Cancel
         </button>
         <button
-          type="submit"
+          onClick={onSubmitFineTuneHandler}
           className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           Create
         </button>
       </div>
-    </form>
+    </div>
   );
 };
 

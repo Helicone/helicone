@@ -85,6 +85,7 @@ export const SecretInput = (props: {
               e.stopPropagation();
               setShow(!show);
             }}
+            type="button"
           >
             {show ? (
               <EyeSlashIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
@@ -102,6 +103,7 @@ export const SecretInput = (props: {
                     navigator.clipboard.writeText(value);
                     setNotification("Copied to clipboard", "success");
                   }}
+                  type="button"
                   className={clsx(
                     variant === "primary"
                       ? "bg-gray-200 dark:bg-gray-800 text-xs hover:cursor-pointer"
