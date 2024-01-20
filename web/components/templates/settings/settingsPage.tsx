@@ -29,17 +29,21 @@ const SettingsPage = (props: SettingsPageProps) => {
           <Tab icon={CreditCardIcon}>Plan</Tab>
           <Tab icon={UserGroupIcon}>Members</Tab>
         </TabList>
-        <TabPanels>
-          <TabPanel>
-            <OrgSettingsPage org={orgContext?.currentOrg!} />
-          </TabPanel>
-          <TabPanel>
-            <OrgPlanPage org={orgContext?.currentOrg!} />
-          </TabPanel>
-          <TabPanel>
-            <OrgMembersPage org={orgContext?.currentOrg!} />
-          </TabPanel>
-        </TabPanels>
+        {orgContext?.currentOrg ? (
+          <TabPanels>
+            <TabPanel>
+              <OrgSettingsPage org={orgContext?.currentOrg} />
+            </TabPanel>
+            <TabPanel>
+              <OrgPlanPage org={orgContext?.currentOrg} />
+            </TabPanel>
+            <TabPanel>
+              <OrgMembersPage org={orgContext?.currentOrg} />
+            </TabPanel>
+          </TabPanels>
+        ) : (
+          <></>
+        )}
       </TabGroup>
     </div>
   );
