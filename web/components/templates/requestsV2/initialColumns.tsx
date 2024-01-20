@@ -139,6 +139,9 @@ export const getInitialColumns: (
     cell: (info) => (
       <span>${isCached ? 0 : formatNumber(Number(info.getValue()))}</span>
     ),
+    meta: {
+      sortKey: "cost",
+    },
   },
   {
     id: "feedback",
