@@ -84,6 +84,7 @@ paths:
         "500":
           description: Internal server error.
       security:
+        - helicone-authorization: []
         - authorization: []
 
   /v1/tokens/anthropic:

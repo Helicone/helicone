@@ -31,12 +31,13 @@ import JobRow from "./jobRow";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedModal from "../../shared/themed/themedModal";
 import FineTuneForm from "./fineTuneForm";
+import { useJawn } from "../../../services/hooks/useJawn";
 
 interface FineTuningPageProps {}
 
 const FineTuningPage = (props: FineTuningPageProps) => {
   const {} = props;
-
+  const { fetchJawn } = useJawn();
   const [fineTuneOpen, setFineTuneOpen] = useState(false);
   const [jobOpen, setJobOpen] = useState(false);
   const [selectedJob, setSelectedJob] =
@@ -58,7 +59,15 @@ const FineTuningPage = (props: FineTuningPageProps) => {
         console.error(error);
         return [];
       }
-      return data;
+      return await Promise.all(
+        data.map(async (x) => ({
+          ...x,
+          dataFromOpenAI: await fetchJawn({
+            path: `/v1/fine-tune/${x.id}/stats`,
+            method: "GET",
+          }).then((x) => x.json()),
+        }))
+      );
     },
     refetchOnWindowFocus: false,
   });

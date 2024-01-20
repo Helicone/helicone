@@ -7,10 +7,21 @@ import {
   EyeIcon,
 } from "@heroicons/react/20/solid";
 import { Database } from "../../../supabase/database.types";
+import {
+  FineTuningJob,
+  FineTuningJobEventsPage,
+} from "openai/resources/fine-tuning/jobs";
+
+type FineTuneJob = Database["public"]["Tables"]["finetune_job"]["Row"] & {
+  dataFromOpenAI: {
+    job: FineTuningJob;
+    events: FineTuningJobEventsPage;
+  };
+};
 
 interface JobRowProps {
-  job: Database["public"]["Tables"]["finetune_job"]["Row"];
-  onSelect: (job: Database["public"]["Tables"]["finetune_job"]["Row"]) => void;
+  job: FineTuneJob;
+  onSelect: (job: FineTuneJob) => void;
 }
 
 const JobRow = (props: JobRowProps) => {

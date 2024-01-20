@@ -277,9 +277,17 @@ app.get(
           .single();
 
       if (!fineTuneJob || fineTuneJobError) {
-        res.status(500).json({
-          error: "No fine tune job found",
-        });
+        res
+          .status(500)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE")
+          .header(
+            "Access-Control-Allow-Headers",
+            "Content-Type, helicone-authorization"
+          )
+          .json({
+            error: "No fine tune job found",
+          });
         return;
       }
 
@@ -291,9 +299,17 @@ app.get(
         .single();
 
       if (keyError || !key || !key.decrypted_provider_key) {
-        res.status(500).json({
-          error: "No Provider Key found",
-        });
+        res
+          .status(500)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE")
+          .header(
+            "Access-Control-Allow-Headers",
+            "Content-Type, helicone-authorization"
+          )
+          .json({
+            error: "No Provider Key found",
+          });
         return;
       }
 
@@ -306,13 +322,29 @@ app.get(
       );
 
       if (fineTuneJobData.error || !fineTuneJobData.data) {
-        res.status(500).json({
-          error: fineTuneJobData.error,
-        });
+        res
+          .status(500)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE")
+          .header(
+            "Access-Control-Allow-Headers",
+            "Content-Type, helicone-authorization"
+          )
+          .json({
+            error: fineTuneJobData.error,
+          });
         return;
       }
 
-      res.status(200).json(fineTuneJobData.data);
+      res
+        .status(200)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE")
+        .header(
+          "Access-Control-Allow-Headers",
+          "Content-Type, helicone-authorization"
+        )
+        .json(fineTuneJobData.data);
     }
   )
 );

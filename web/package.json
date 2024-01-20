@@ -58,7 +58,7 @@
     "nextjs-cors": "^2.1.2",
     "node-vault": "^0.10.2",
     "octokit": "^2.0.14",
-    "openai": "^3.2.1",
+    "openai": "^4.24.7",
     "papaparse": "^5.4.1",
     "pg": "^8.9.0",
     "posthog-js": "^1.89.0",
