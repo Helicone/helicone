@@ -133,7 +133,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
         <Transition.Root show={sidebarOpen} as={Fragment}>
           <Dialog
             as="div"
-            className="relative z-40 md:hidden"
+            className="relative z-30 md:hidden"
             onClose={setSidebarOpen}
           >
             <Transition.Child
@@ -148,7 +148,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
               <div className="fixed inset-0 bg-gray-600 bg-opacity-75" />
             </Transition.Child>
 
-            <div className="fixed inset-0 z-40 flex">
+            <div className="fixed inset-0 z-30 flex">
               <Transition.Child
                 as={Fragment}
                 enter="transition ease-in-out duration-300 transform"
@@ -257,7 +257,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
         </Transition.Root>
 
         {/* Static sidebar for desktop */}
-        <div className="hidden md:fixed md:inset-y-0 md:flex md:w-56 md:flex-col z-50">
+        <div className="hidden md:fixed md:inset-y-0 md:flex md:w-56 md:flex-col z-30">
           {/* Sidebar component, swap this element with another sidebar if you like */}
           <div className="w-full flex flex-grow flex-col overflow-y-auto border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
             <div className="p-2 flex items-center gap-4 h-14 border-b border-gray-300 dark:border-gray-700 absolute w-full">
@@ -278,7 +278,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   leaveFrom="transform opacity-100 scale-100"
                   leaveTo="transform opacity-0 scale-95"
                 >
-                  <Menu.Items className="absolute -left-2 mt-2 w-[12.5rem] z-20 origin-top-left divide-y divide-gray-200 dark:divide-gray-800 rounded-md bg-white dark:bg-black border border-gray-300 dark:border-gray-700 shadow-2xl">
+                  <Menu.Items className="absolute -left-2 mt-2 w-[12.5rem] z-40 origin-top-left divide-y divide-gray-200 dark:divide-gray-800 rounded-md bg-white dark:bg-black border border-gray-300 dark:border-gray-700 shadow-2xl">
                     <div className="flex flex-row justify-between items-center divide-x divide-gray-300 dark:divide-gray-700">
                       <p className="text-gray-900 dark:text-gray-100 text-sm w-full truncate pl-4 p-2">
                         {user?.email}
@@ -502,7 +502,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    <Menu.Items className="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <Menu.Items className="absolute right-0 z-40 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
                       <Menu.Item key="user-email">
                         {({ active }) => (
                           <p className="truncate block px-4 py-2 text-sm text-black font-bold border-b border-gray-300">

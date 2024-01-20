@@ -123,9 +123,9 @@ export const FineTuneModal = (props: FineTuneModalProps) => {
                   fetchJawn({
                     path: "/v1/fine-tune",
                     body: JSON.stringify({
-                      filter: filter,
+                      filter: filter, // "all"
                       providerKeyId,
-                      uiFilter,
+                      uiFilter, // []
                     }),
                     method: "POST",
                   })

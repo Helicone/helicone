@@ -46,7 +46,11 @@ const FineTuningPage = (props: FineTuningPageProps) => {
   const supabaseClient = useSupabaseClient<Database>();
   const orgContext = useOrg();
 
-  const { data: jobs, isLoading: isJobsLoading } = useQuery({
+  const {
+    data: jobs,
+    isLoading: isJobsLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["fine-tune-jobs", orgContext?.currentOrg?.id],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
@@ -55,12 +59,16 @@ const FineTuningPage = (props: FineTuningPageProps) => {
         .select("*")
         .eq("organization_id", orgId);
 
-      if (error) {
+      const sortedData = data?.sort((a, b) =>
+        a.created_at > b.created_at ? -1 : 1
+      );
+
+      if (error || !sortedData) {
         console.error(error);
         return [];
       }
       return await Promise.all(
-        data.map(async (x) => ({
+        sortedData.map(async (x) => ({
           ...x,
           dataFromOpenAI: await fetchJawn({
             path: `/v1/fine-tune/${x.id}/stats`,
@@ -196,6 +204,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
             setFineTuneOpen(false);
           }}
           onSuccess={() => {
+            refetch();
             setFineTuneOpen(false);
           }}
         />
