@@ -270,6 +270,147 @@ export interface Database {
           }
         ]
       }
+      finetune_dataset: {
+        Row: {
+          created_at: string
+          filters: string | null
+          id: string
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          filters?: string | null
+          id?: string
+          name: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          filters?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finetune_dataset_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      finetune_dataset_data: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          request_id: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          organization_id: string
+          request_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finetune_dataset_data_id_fkey"
+            columns: ["id"]
+            isOneToOne: false
+            referencedRelation: "finetune_dataset"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finetune_dataset_data_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finetune_dataset_data_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finetune_dataset_data_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request_rbac"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      finetune_job: {
+        Row: {
+          created_at: string
+          dataset_id: string
+          finetune_job_id: string
+          id: string
+          organization_id: string
+          provider_key_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          dataset_id: string
+          finetune_job_id: string
+          id?: string
+          organization_id: string
+          provider_key_id: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          dataset_id?: string
+          finetune_job_id?: string
+          id?: string
+          organization_id?: string
+          provider_key_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finetune_job_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "finetune_dataset"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finetune_job_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finetune_job_provider_key_id_fkey"
+            columns: ["provider_key_id"]
+            isOneToOne: false
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finetune_job_provider_key_id_fkey"
+            columns: ["provider_key_id"]
+            isOneToOne: false
+            referencedRelation: "provider_keys"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       helicone_api_keys: {
         Row: {
           api_key_hash: string
