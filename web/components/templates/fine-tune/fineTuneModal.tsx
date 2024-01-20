@@ -12,6 +12,7 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import { useJawn } from "../../../services/hooks/useJawn";
 
 interface FineTuneModalProps {
   open: boolean;
@@ -35,6 +36,7 @@ export const FineTuneModal = (props: FineTuneModalProps) => {
   const [loading, setLoading] = useState(false);
 
   const [accepted, setAccepted] = useState(false);
+  const { fetchJawn } = useJawn();
 
   return (
     <ThemedDrawer open={isOpen} setOpen={setOpen}>
@@ -117,27 +119,16 @@ export const FineTuneModal = (props: FineTuneModalProps) => {
                   setError("");
                   setLoading(true);
                   setResultLink("");
-                  const authFromCookie = getHeliconeCookie();
 
-                  fetch(
-                    `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/fine-tune`,
-                    {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                        "helicone-authorization": JSON.stringify({
-                          _type: "jwt",
-                          token: authFromCookie.data?.jwtToken,
-                          orgId: org?.currentOrg?.id,
-                        }),
-                      },
-                      body: JSON.stringify({
-                        filter: filter,
-                        providerKeyId,
-                        uiFilter,
-                      }),
-                    }
-                  )
+                  fetchJawn({
+                    path: "/v1/fine-tune",
+                    body: JSON.stringify({
+                      filter: filter,
+                      providerKeyId,
+                      uiFilter,
+                    }),
+                    method: "POST",
+                  })
                     .then((res) => {
                       setLoading(false);
                       res.json().then((x) => {

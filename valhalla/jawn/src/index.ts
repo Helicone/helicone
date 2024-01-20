@@ -262,7 +262,60 @@ app.put(
     });
   })
 );
+app.get(
+  "/v1/fine-tune/:jobId/stats",
+  withAuth<paths["/v1/fine-tune/{jobId}/stats"]["get"]>(
+    async ({ request, res, supabaseClient, db, authParams }) => {
+      const { jobId } = request.getParams();
 
+      const { data: fineTuneJob, error: fineTuneJobError } =
+        await supabaseClient.client
+          .from("finetune_job")
+          .select("*")
+          .eq("id", jobId ?? "")
+          .eq("organization_id", authParams.organizationId)
+          .single();
+
+      if (!fineTuneJob || fineTuneJobError) {
+        res.status(500).json({
+          error: "No fine tune job found",
+        });
+        return;
+      }
+
+      const { data: key, error: keyError } = await supabaseClient.client
+        .from("decrypted_provider_keys")
+        .select("decrypted_provider_key")
+        .eq("id", fineTuneJob.provider_key_id)
+        .eq("org_id", authParams.organizationId)
+        .single();
+
+      if (keyError || !key || !key.decrypted_provider_key) {
+        res.status(500).json({
+          error: "No Provider Key found",
+        });
+        return;
+      }
+
+      const fineTuningManager = new FineTuningManager(
+        key.decrypted_provider_key
+      );
+
+      const fineTuneJobData = await fineTuningManager.getFineTuneJob(
+        fineTuneJob.finetune_job_id
+      );
+
+      if (fineTuneJobData.error || !fineTuneJobData.data) {
+        res.status(500).json({
+          error: fineTuneJobData.error,
+        });
+        return;
+      }
+
+      res.status(200).json(fineTuneJobData.data);
+    }
+  )
+);
 app.post(
   "/v1/fine-tune",
   withAuth<

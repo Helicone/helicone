@@ -47,6 +47,40 @@ export interface paths {
       };
     };
   };
+  "/v1/fine-tune/{jobId}/stats": {
+    /**
+     * Get fine-tune job statistics
+     * @description Retrieves statistics for a specified fine-tuning job.
+     */
+    get: {
+      parameters: {
+        path: {
+          /** @description The unique ID of the fine-tuning job */
+          jobId: string;
+        };
+      };
+      responses: {
+        /** @description Successfully retrieved job statistics. */
+        200: {
+          content: {
+            "application/json": Record<string, never>;
+          };
+        };
+        /** @description Invalid job ID provided. */
+        400: {
+          content: never;
+        };
+        /** @description Job not found. */
+        404: {
+          content: never;
+        };
+        /** @description Internal server error. */
+        500: {
+          content: never;
+        };
+      };
+    };
+  };
   "/v1/tokens/anthropic": {
     /**
      * Get a token for the Anthropic API

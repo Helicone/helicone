@@ -56,6 +56,36 @@ paths:
         - authorization: []
         - helicone-authorization: []
 
+  /v1/fine-tune/{jobId}/stats:
+    get:
+      tags:
+        - stats
+      summary: Get fine-tune job statistics
+      description: Retrieves statistics for a specified fine-tuning job.
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+          description: The unique ID of the fine-tuning job
+      responses:
+        "200":
+          description: Successfully retrieved job statistics.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Any JSON object representing the job statistics.
+        "400":
+          description: Invalid job ID provided.
+        "404":
+          description: Job not found.
+        "500":
+          description: Internal server error.
+      security:
+        - authorization: []
+
   /v1/tokens/anthropic:
     post:
       tags:
