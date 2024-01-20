@@ -1,24 +1,24 @@
-import Footer from "../components/layout/footer";
-import NavBarV2 from "../components/layout/navbar/navBarV2";
-import MetaData from "../components/shared/metaData";
-import Link from "next/link";
-import ContactForm from "../components/shared/contactForm";
-import { useRouter } from "next/router";
-import GridBackground from "../components/layout/public-pages/gridBackground";
 import { CheckCircleIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
+import { useRouter } from "next/router";
+import MetaData from "../../components/shared/metaData";
+import NavBarV2 from "../../components/layout/navbar/navBarV2";
+import GridBackground from "../../components/layout/public-pages/gridBackground";
+import Link from "next/link";
+import ContactForm from "../../components/shared/contactForm";
+import Footer from "../../components/layout/footer";
 
 const bullets = [
-  "Billing/Usage APIs",
-  "White labeling",
-  "Embeddable dashboards",
-  "Alerts",
-  "Customer ratelimiting",
-  "Customer facing API tokens",
-  "Custom domains",
-  "Custom Proxy Endpoint",
+  "Evaluations",
+  "A/B Testing",
+  "Automated Fine-Tuning",
+  "Dataset Collection",
+  "JSONL Exports",
+  "Cost Comparisons",
+  "Performance Measurements",
+  "Drift Analysis",
 ];
 
-const Sales = () => {
+const FineTuning = () => {
   const router = useRouter();
 
   return (
@@ -29,7 +29,14 @@ const Sales = () => {
           <div className="flex flex-col sm:flex-row mx-auto w-full gap-8 max-w-6xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
             <div className="flex flex-col w-full">
               <h1 className="text-2xl sm:text-4xl font-semibold leading-tight sm:leading-snug max-w-4xl">
-                Contact Us
+                Beta:{" "}
+                <span className="md:border-2 border-rose-500 border-dashed text-rose-500 md:py-2 md:px-4">
+                  Fine-Tuning
+                </span>
+                <p className="text-sm sm:text-lg font-normal text-gray-700 pt-4">
+                  Reduce your costs and improve your applications performance
+                  with our fine-tuning service.
+                </p>
               </h1>
 
               <ul className="py-8 flex flex-col space-y-4">
@@ -38,7 +45,7 @@ const Sales = () => {
                     className="flex items-center text-gray-700 gap-2 text-sm sm:text-md"
                     key={idx}
                   >
-                    <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-sky-500" />
+                    <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-rose-500" />
                     {bullet}
                   </li>
                 ))}
@@ -62,7 +69,7 @@ const Sales = () => {
               contactTag={""}
               buttonText={"Contact Us"}
               defaultPlaceholder={
-                "I am interested in using Helicone for my business..."
+                "I am interested in Helicone's Customer Portal feature!"
               }
             />
           </div>
@@ -73,4 +80,4 @@ const Sales = () => {
   );
 };
 
-export default Sales;
+export default FineTuning;
