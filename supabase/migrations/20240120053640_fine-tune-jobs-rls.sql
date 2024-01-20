@@ -1,5 +1,3 @@
-drop index if exists "public"."finetune_dataset_data_oir_idx";
-
 create policy "org_members_can_select_finetune_dataset"
 on "public"."finetune_dataset"
 as permissive
