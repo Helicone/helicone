@@ -7,6 +7,7 @@ import { useOrg } from "../../layout/organizationContext";
 import { PlusCircleIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { Tooltip } from "@mui/material";
 import {
+  ArrowPathIcon,
   CircleStackIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
@@ -33,8 +34,9 @@ const FineTurnForm = (props: FineTurnFormProps) => {
   const [selectedDataSetId, setSelectedDataSetId] = useState<string>();
   const [step, setStep] = useState<"config" | "confirm">("config");
   const [providerKeyId, setProviderKeyId] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading: isDataLoading } = useQuery({
     queryKey: ["fine-tune-data-sets", orgContext?.currentOrg?.id],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
@@ -71,6 +73,7 @@ const FineTurnForm = (props: FineTurnFormProps) => {
   };
 
   const onConfirmSubmitHandler = () => {
+    setIsLoading(true);
     fetchJawn({
       path: "/v1/fine-tune",
       body: JSON.stringify({
@@ -81,27 +84,19 @@ const FineTurnForm = (props: FineTurnFormProps) => {
       method: "POST",
     })
       .then((res) => {
-        // setLoading(false);
-        // res.json().then((x) => {
-        //   if (res.ok) {
-        //     setResultLink(x?.data?.url);
-        //   } else {
-        //     console.error(x);
-        //     setError(x.error);
-        //   }
-        // });
-
+        setIsLoading(false);
         if (res.ok) {
-          setNotification("fine tune job started!", "success");
+          setNotification("Fine-tuning job successfully started!", "success");
           onSuccess();
         } else {
-          setNotification("error see console", "error");
+          setNotification(
+            "Please try again or contact help@helicone.ai",
+            "error"
+          );
           onCancel();
         }
       })
       .catch((res: any) => {
-        // setLoading(false);
-        // setError(JSON.stringify(res));
         onCancel();
         setNotification("error see console", "error");
       });
@@ -263,6 +258,9 @@ const FineTurnForm = (props: FineTurnFormProps) => {
           }
           className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
+          {isLoading && (
+            <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+          )}
           {step === "config" ? "Create" : "Confirm"}
         </button>
       </div>
