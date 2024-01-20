@@ -7,6 +7,7 @@ import Footer from "../../components/layout/footer";
 import NavBarV2 from "../../components/layout/navbar/navBarV2";
 import MetaData from "../../components/shared/metaData";
 import useNotification from "../../components/shared/notification/useNotification";
+import { GetServerSidePropsContext } from "next";
 
 const faqs = [
   {
@@ -286,3 +287,15 @@ const OpenPipe = () => {
 };
 
 export default OpenPipe;
+
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  // redirect the user to `/features/customer-portal`
+  return {
+    redirect: {
+      destination: "/features/customer-portal",
+      permanent: false,
+    },
+  };
+};

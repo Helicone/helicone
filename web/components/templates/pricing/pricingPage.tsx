@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { CheckIcon, MinusIcon } from "@heroicons/react/20/solid";
+import { CheckCircleIcon, MinusIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
 import GridBackground from "../../layout/public-pages/gridBackground";
 import NavBarV2 from "../../layout/navbar/navBarV2";
@@ -229,7 +229,7 @@ export default function Example() {
                       {section.features.map((feature) =>
                         feature.tiers[tier.name] ? (
                           <li key={feature.name} className="flex gap-x-3">
-                            <CheckIcon
+                            <CheckCircleIcon
                               className="h-6 w-5 flex-none text-sky-600"
                               aria-hidden="true"
                             />
@@ -371,7 +371,7 @@ export default function Example() {
                             ) : (
                               <>
                                 {feature.tiers[tier.name] === true ? (
-                                  <CheckIcon
+                                  <CheckCircleIcon
                                     className="mx-auto h-5 w-5 text-sky-600"
                                     aria-hidden="true"
                                   />
