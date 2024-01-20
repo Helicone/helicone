@@ -9,6 +9,7 @@ import { Tooltip } from "@mui/material";
 import { CircleStackIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import ProviderKeyList from "../enterprise/portal/id/providerKeyList";
+import useNotification from "../../shared/notification/useNotification";
 
 interface FineTurnFormProps {
   onCancel: () => void;
@@ -18,11 +19,14 @@ interface FineTurnFormProps {
 const FineTurnForm = (props: FineTurnFormProps) => {
   const { onCancel } = props;
 
-  const [step, setStep] = useState(0);
-
   const supabaseClient = useSupabaseClient<Database>();
   const orgContext = useOrg();
+  const { setNotification } = useNotification();
   const [selectAllRequests, setSelectAllRequests] = useState(false);
+  const [selectedDataSetId, setSelectedDataSetId] = useState<string>();
+
+  // form states
+  const [providerKeyId, setProviderKeyId] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: ["fine-tune-data-sets", orgContext?.currentOrg?.id],
@@ -44,11 +48,31 @@ const FineTurnForm = (props: FineTurnFormProps) => {
 
   const onSubmitFineTuneHandler = () => {
     // do the fine tune stuff here
+    if (!providerKeyId) {
+      setNotification("Please select a provider key", "error");
+      return;
+    }
+    if (selectAllRequests) {
+      // fetch the data with all of the requests
+      alert("all selected");
+    }
+    if (!selectedDataSetId) {
+      setNotification("Please select a data set", "error");
+      return;
+    }
+    console.log(
+      "providerKeyId",
+      providerKeyId,
+      "selectAllRequests",
+      selectAllRequests,
+      "selectedDataSetId",
+      selectedDataSetId
+    );
     // on success
   };
 
   return (
-    <div className="w-[450px] h-full flex flex-col space-y-8">
+    <div className="w-full sm:w-[450px] h-full flex flex-col space-y-8">
       <h3 className="text-xl font-semibold text-black dark:text-white">
         Create a fine-tuned model
       </h3>
@@ -66,7 +90,7 @@ const FineTurnForm = (props: FineTurnFormProps) => {
       <ProviderKeyList
         orgId={orgContext?.currentOrg?.id}
         setProviderKeyCallback={(x) => {
-          // setProviderKeyId(x);
+          setProviderKeyId(x);
         }}
         variant="basic"
       />
@@ -91,7 +115,11 @@ const FineTurnForm = (props: FineTurnFormProps) => {
         </div>
 
         {data && data.length > 0 ? (
-          <Select value="gpt-3.5-turbo-1106" enableClear={false}>
+          <Select
+            onValueChange={(value) => setSelectedDataSetId(value)}
+            value={selectedDataSetId}
+            enableClear={false}
+          >
             {data.map((set) => (
               <SelectItem key={set.id} value={set.id}>
                 {set.name}
@@ -118,26 +146,33 @@ const FineTurnForm = (props: FineTurnFormProps) => {
           </>
         )}
         <Divider className="text-xs py-2">Or</Divider>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setSelectAllRequests(!selectAllRequests);
-          }}
-          type="button"
-          className={clsx(
-            selectAllRequests
-              ? "ring-1 ring-gray-700 bg-gray-300"
-              : "bg-gray-50 hover:bg-gray-100",
-            "relative block w-full rounded-lg border dark:bg-gray-950 dark:hover:bg-gray-900 hover:cursor-pointer border-gray-300 dark:border-gray-700 p-8 text-center"
-          )}
-        >
-          <div className="w-full justify-center align-middle items-center">
-            <CircleStackIcon className="h-6 w-6 mx-auto text-gray-700" />
+        <fieldset>
+          <legend className="sr-only">Notifications</legend>
+          <div className="space-y-5">
+            <div className="relative flex items-start">
+              <div className="flex h-6 items-center">
+                <input
+                  id="comments"
+                  aria-describedby="comments-description"
+                  name="comments"
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+                  onChange={(e) => {
+                    setSelectAllRequests(e.currentTarget.checked);
+                  }}
+                />
+              </div>
+              <div className="ml-3 text-sm leading-6">
+                <label htmlFor="comments" className="font-medium text-gray-900">
+                  Select All Requests
+                </label>{" "}
+                <span id="comments-description" className="text-gray-500">
+                  Up to 100
+                </span>
+              </div>
+            </div>
           </div>
-          <span className="mt-2 block text-xs font-medium text-gray-700 dark:text-gray-300">
-            Select All Requests (up to 100)
-          </span>
-        </button>
+        </fieldset>
       </div>
       <div className="col-span-4 flex justify-end gap-2">
         <button

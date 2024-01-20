@@ -128,7 +128,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 </div>
                 <div className="flex flex-col w-full space-y-4">
                   <Card className="py-1 px-2">
-                    <Table className="overflow-auto lg:overflow-visible">
+                    <Table className="overflow-auto">
                       <TableHead className="border-b border-gray-300 dark:border-gray-700">
                         <TableRow>
                           <TableHeaderCell className="text-black dark:text-white">
