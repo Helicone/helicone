@@ -20,6 +20,7 @@ import {
   CodeBracketIcon,
   SunIcon,
   MoonIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
@@ -89,6 +90,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/properties",
       icon: TagIcon,
       current: pathname.includes("/properties"),
+    },
+    {
+      name: "Fine-Tune",
+      href: "/fine-tune",
+      icon: SparklesIcon,
+      current: pathname.includes("/fine-tune"),
     },
     {
       name: "Cache",
