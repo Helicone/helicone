@@ -11,14 +11,16 @@ import { getHeliconeCookie } from "../../../lib/cookies";
 import ThemedModal from "../../shared/themed/themedModal";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 
 interface FineTuneModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   filter: FilterNode;
+  uiFilter: UIFilterRow[];
 }
 export const FineTuneModal = (props: FineTuneModalProps) => {
-  const { open: isOpen, setOpen, filter } = props;
+  const { open: isOpen, setOpen, filter, uiFilter } = props;
 
   const { setNotification } = useNotification();
   const orgContext = useOrg();
@@ -132,6 +134,7 @@ export const FineTuneModal = (props: FineTuneModalProps) => {
                       body: JSON.stringify({
                         filter: filter,
                         providerKeyId,
+                        uiFilter,
                       }),
                     }
                   )

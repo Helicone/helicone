@@ -287,7 +287,7 @@ app.post(
     }
     const body = await request.getRawBody<any>();
     console.log("body", body);
-    const { filter, providerKeyId } = body;
+    const { filter, providerKeyId, uiFilter } = body;
 
     const metrics = await getRequests(
       authParams.organizationId,
@@ -353,7 +353,7 @@ app.post(
         .from("finetune_dataset")
         .insert({
           name: `Automated Dataset for ${fineTuneJob.data.id}`,
-          filters: JSON.stringify(filter),
+          filters: JSON.stringify(uiFilter),
           organization_id: authParams.organizationId,
         })
         .select("*")

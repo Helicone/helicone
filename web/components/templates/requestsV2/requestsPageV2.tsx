@@ -506,6 +506,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         filter={builtFilter}
         setOpen={setFineTuneModalOpen}
         open={fineTuneModalOpen}
+        uiFilter={advancedFilters}
       />
     </div>
   );
