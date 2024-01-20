@@ -253,6 +253,7 @@ const FineTurnForm = (props: FineTurnFormProps) => {
           {step === "config" ? "Cancel" : "Back"}
         </button>
         <button
+          disabled={isLoading}
           onClick={
             step === "config" ? onConfigSubmitHandler : onConfirmSubmitHandler
           }
