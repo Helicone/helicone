@@ -338,6 +338,7 @@ app.post(
       Sentry.captureMessage(
         `fine-tune job created - ${fineTuneJob.data.id} - ${authParams.organizationId}`
       );
+
       postHogClient.capture({
         distinctId: `${fineTuneJob.data.id}-${authParams.organizationId}`,
         event: "fine_tune_job",
@@ -347,9 +348,39 @@ app.post(
           org_id: authParams.organizationId,
         },
       });
+
+      const dataset = await supabaseClient.client
+        .from("finetune_dataset")
+        .insert({
+          name: `Automated Dataset for ${fineTuneJob.data.id}`,
+          filters: JSON.stringify(filter),
+          organization_id: authParams.organizationId,
+        })
+        .select("*")
+        .single();
+      if (dataset.error || !dataset.data) {
+        res.status(500).json({
+          error: dataset.error,
+        });
+        return;
+      }
+
+      const fineTunedJobId = await supabaseClient.client
+        .from("finetune_job")
+        .insert({
+          dataset_id: dataset.data.id,
+          finetune_job_id: fineTuneJob.data.id,
+          provider_key_id: providerKeyId,
+          status: "created",
+          organization_id: authParams.organizationId,
+        })
+        .select("*")
+        .single();
+
       res.json({
         success: true,
         data: {
+          fineTuneJob: fineTunedJobId.data?.id,
           url: url,
         },
       });
