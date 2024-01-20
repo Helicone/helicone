@@ -9,7 +9,7 @@ export async function getTokenCount(
 
   if (provider === "OPENAI") {
     if (!inputText) return 0;
-    const url = new URL("https://jawn.helicone.ai");
+    const url = new URL("https://tokens.jawn.helicone.ai");
     url.pathname = "/v1/tokens/gpt3";
     const urlBuilt = url.toString();
 
