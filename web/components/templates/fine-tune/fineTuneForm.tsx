@@ -168,7 +168,10 @@ const FineTurnForm = (props: FineTurnFormProps) => {
 
           {data && data.length > 0 ? (
             <Select
-              onValueChange={(value) => setSelectedDataSetId(value)}
+              onValueChange={(value) => {
+                setSelectedDataSetId(value);
+                setSelectAllRequests(false);
+              }}
               value={selectedDataSetId}
               enableClear={false}
             >
@@ -208,6 +211,7 @@ const FineTurnForm = (props: FineTurnFormProps) => {
                     aria-describedby="comments-description"
                     name="comments"
                     type="checkbox"
+                    checked={selectAllRequests}
                     className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
                     onChange={(e) => {
                       setSelectedDataSetId("");
