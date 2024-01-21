@@ -360,23 +360,23 @@ async function hasAccessToFineTune(supabaseClient: SupabaseConnector) {
   if (orgError) {
     return false;
   }
+
+  if (!org.tier) {
+    return false;
+  }
   if (org.tier === "free") {
-    const jobsCount = (
-      await supabaseClient.client
-        .from("finetune_job")
-        .select("*", { count: "exact" })
-    ).count;
-    if (!jobsCount) {
-      return false;
-    }
-    if (jobsCount > 1) {
+    const jobCountQuery = await supabaseClient.client
+      .from("finetune_job")
+      .select("*", { count: "exact" })
+      .eq("organization_id", supabaseClient.organizationId ?? "");
+    console.log("jobCountQuery", jobCountQuery);
+    const jobsCount = jobCountQuery.count ?? 1;
+    console.log("jobsCount", jobsCount);
+    if (jobsCount >= 1) {
       return false;
     } else {
       return true;
     }
-  }
-  if (!org.tier) {
-    return false;
   }
   return true;
 }
