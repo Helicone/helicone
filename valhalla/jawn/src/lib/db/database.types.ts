@@ -273,24 +273,24 @@ export interface Database {
       finetune_dataset: {
         Row: {
           created_at: string
+          filter_node: string | null
           filters: string | null
-          fitler_node: string | null
           id: string
           name: string
           organization_id: string
         }
         Insert: {
           created_at?: string
+          filter_node?: string | null
           filters?: string | null
-          fitler_node?: string | null
           id?: string
           name: string
           organization_id: string
         }
         Update: {
           created_at?: string
+          filter_node?: string | null
           filters?: string | null
-          fitler_node?: string | null
           id?: string
           name?: string
           organization_id?: string
