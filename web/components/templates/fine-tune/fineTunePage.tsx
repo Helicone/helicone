@@ -45,6 +45,7 @@ import useNotification from "../../shared/notification/useNotification";
 import JobStatus from "./jobStatus";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { REQUEST_TABLE_FILTERS } from "../../../services/lib/filters/frontendFilterDefs";
+import { DiffHighlight } from "../welcome/diffHighlight";
 
 interface FineTuningPageProps {}
 
@@ -355,6 +356,35 @@ const FineTuningPage = (props: FineTuningPageProps) => {
               name. The following snippet is an example for a request using
               Python.
             </p>
+            <DiffHighlight
+              code={`
+import OpenAI
+
+# client config
+client = OpenAI(
+  api_key="your-api-key-here",
+  base_url="http://oai.hconeai.com/v1", 
+  default_headers= {  
+    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+  }
+)
+
+# send the request
+chat_completion = client.chat.completions.create(
+  model="${selectedJob?.dataFromOpenAI.job.fine_tuned_model}",
+  messages=[
+    {"role": "user", "content": "Hello world!"}
+  ],
+  extra_headers={ # Can also attach headers per request
+    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+  },
+)
+              `}
+              language="bash"
+              newLines={[13]}
+              oldLines={[]}
+              minHeight={false}
+            />
           </div>
         </div>
       </ThemedDrawer>
