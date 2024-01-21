@@ -81,6 +81,56 @@ export interface paths {
       };
     };
   };
+  "/v1/dataset/{datasetId}/fine-tune": {
+    /**
+     * Fine-tune a model with a specified dataset
+     * @description This endpoint allows for the fine-tuning of a model using the specified dataset.
+     */
+    post: {
+      parameters: {
+        path: {
+          /** @description The unique ID of the dataset to be used for fine-tuning. */
+          datasetId: string;
+        };
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            /** @description Key ID for the provider used in this fine-tuning process. */
+            providerKeyId?: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Fine-tuning process started successfully. */
+        202: {
+          content: {
+            "application/json": {
+              /**
+               * Format: uuid
+               * @description The unique ID of the fine-tuning job initiated.
+               */
+              jobId?: string;
+              /** @example Fine-tuning job started successfully. */
+              message?: string;
+            };
+          };
+        };
+        /** @description Invalid input or missing parameters. */
+        400: {
+          content: never;
+        };
+        /** @description Dataset not found. */
+        404: {
+          content: never;
+        };
+        /** @description Internal server error. */
+        500: {
+          content: never;
+        };
+      };
+    };
+  };
   "/v1/tokens/anthropic": {
     /**
      * Get a token for the Anthropic API

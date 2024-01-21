@@ -50,7 +50,7 @@ interface ThemedTableHeaderProps<T> {
     currentView: RequestViews;
     onViewChange: (value: RequestViews) => void;
   };
-  onFineTune?: () => void;
+  onDataSet?: () => void;
 }
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
@@ -140,12 +140,12 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
             />
           )}
           {advancedFilters &&
-            props.onFineTune &&
+            props.onDataSet &&
             org?.currentOrg?.tier !== "free" && (
               <button
                 onClick={() => {
-                  if (props.onFineTune) {
-                    props.onFineTune();
+                  if (props.onDataSet) {
+                    props.onDataSet();
                   }
                 }}
                 className={clsx(
@@ -153,7 +153,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                 )}
               >
                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-                  {"🎉 Fine-tune 🎉"}
+                  {"Create Dataset"}
                 </p>
               </button>
             )}

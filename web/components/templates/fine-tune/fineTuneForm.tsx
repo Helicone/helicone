@@ -74,32 +74,59 @@ const FineTurnForm = (props: FineTurnFormProps) => {
 
   const onConfirmSubmitHandler = () => {
     setIsLoading(true);
-    fetchJawn({
-      path: "/v1/fine-tune",
-      body: JSON.stringify({
-        filter: "all", // "all"
-        providerKeyId,
-        uiFilter: [], // []
-      }),
-      method: "POST",
-    })
-      .then((res) => {
-        setIsLoading(false);
-        if (res.ok) {
-          setNotification("Fine-tuning job successfully started!", "success");
-          onSuccess();
-        } else {
-          setNotification(
-            "Please try again or contact help@helicone.ai",
-            "error"
-          );
-          onCancel();
-        }
+    if (selectedDataSetId) {
+      fetchJawn({
+        path: `/v1/dataset/${selectedDataSetId}/fine-tune`,
+        body: JSON.stringify({
+          providerKeyId,
+        }),
+        method: "POST",
       })
-      .catch((res: any) => {
-        onCancel();
-        setNotification("error see console", "error");
-      });
+        .then((res) => {
+          setIsLoading(false);
+          if (res.ok) {
+            setNotification("Fine-tuning job successfully started!", "success");
+            onSuccess();
+          } else {
+            setNotification(
+              "Please try again or contact help@helicone.ai",
+              "error"
+            );
+            onCancel();
+          }
+        })
+        .catch((res: any) => {
+          onCancel();
+          setNotification("error see console", "error");
+        });
+    } else {
+      fetchJawn({
+        path: "/v1/fine-tune",
+        body: JSON.stringify({
+          filter: "all", // "all"
+          providerKeyId,
+          uiFilter: [], // []
+        }),
+        method: "POST",
+      })
+        .then((res) => {
+          setIsLoading(false);
+          if (res.ok) {
+            setNotification("Fine-tuning job successfully started!", "success");
+            onSuccess();
+          } else {
+            setNotification(
+              "Please try again or contact help@helicone.ai",
+              "error"
+            );
+            onCancel();
+          }
+        })
+        .catch((res: any) => {
+          onCancel();
+          setNotification("error see console", "error");
+        });
+    }
   };
 
   const stepArray = {

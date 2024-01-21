@@ -274,6 +274,7 @@ export interface Database {
         Row: {
           created_at: string
           filters: string | null
+          fitler_node: string | null
           id: string
           name: string
           organization_id: string
@@ -281,6 +282,7 @@ export interface Database {
         Insert: {
           created_at?: string
           filters?: string | null
+          fitler_node?: string | null
           id?: string
           name: string
           organization_id: string
@@ -288,6 +290,7 @@ export interface Database {
         Update: {
           created_at?: string
           filters?: string | null
+          fitler_node?: string | null
           id?: string
           name?: string
           organization_id?: string

@@ -20,6 +20,7 @@ import { withDB } from "./lib/routers/withDB";
 import { FineTuningManager } from "./lib/managers/FineTuningManager";
 import { PostHog } from "posthog-node";
 import { hashAuth } from "./lib/db/hash";
+import { FilterNode } from "./lib/shared/filters/filterDefs";
 
 const ph_project_api_key = process.env.PUBLIC_POSTHOG_API_KEY ?? "";
 
@@ -348,6 +349,159 @@ app.get(
     }
   )
 );
+
+app.post(
+  "/v1/dataset/:datasetId/fine-tune",
+  withAuth<
+    paths["/v1/dataset/{datasetId}/fine-tune"]["post"]["requestBody"]["content"]["application/json"]
+  >(async ({ request, res, supabaseClient, db, authParams }) => {
+    const { data: org, error: orgError } = await supabaseClient.client
+      .from("organization")
+      .select("*")
+      .eq("id", authParams.organizationId ?? "")
+      .single();
+    if (orgError) {
+      res.status(500).json({
+        error: "Must be on pro or higher plan to use fine-tuning",
+      });
+      return;
+    }
+    if (!org.tier || org.tier === "free") {
+      res.status(405).json({
+        error: "Must be on pro or higher plan to use fine-tuning",
+      });
+      return;
+    }
+
+    const { providerKeyId } = await request.getBody();
+
+    if (!providerKeyId) {
+      res.status(500).json({
+        error: "No provider key id provided",
+      });
+      return;
+    }
+    const { datasetId } = request.getParams();
+    const { data: dataset, error: datasetError } = await supabaseClient.client
+      .from("finetune_dataset")
+      .select("*")
+      .eq("id", datasetId)
+      .single();
+    let filterNode: FilterNode;
+    try {
+      filterNode = JSON.parse(dataset?.fitler_node ?? "");
+    } catch (e) {
+      res.status(500).json({
+        error: "No dataset found",
+      });
+      return;
+    }
+    if (datasetError || !dataset) {
+      res.status(500).json({
+        error: "No dataset found",
+      });
+      return;
+    }
+
+    const metrics = await getRequests(
+      authParams.organizationId,
+      filterNode,
+      0,
+      1000,
+      {},
+      supabaseClient.client
+    );
+
+    if (metrics.error || !metrics.data || metrics.data.length === 0) {
+      res.status(500).json({
+        error: "No requests found",
+      });
+      return;
+    }
+
+    const { data: key, error: keyError } = await supabaseClient.client
+      .from("decrypted_provider_keys")
+      .select("decrypted_provider_key")
+      .eq("id", providerKeyId)
+      .eq("org_id", authParams.organizationId)
+      .single();
+
+    if (keyError || !key || !key.decrypted_provider_key) {
+      res.status(500).json({
+        error: "No Provider Key found",
+      });
+      return;
+    }
+
+    const fineTuningManager = new FineTuningManager(key.decrypted_provider_key);
+    try {
+      const fineTuneJob = await fineTuningManager.createFineTuneJob(
+        metrics.data,
+        "model",
+        "suffix"
+      );
+
+      if (fineTuneJob.error || !fineTuneJob.data) {
+        res.status(500).json({
+          error: fineTuneJob.error,
+        });
+        return;
+      }
+
+      const url = `https://platform.openai.com/finetune/${fineTuneJob.data.id}?filter=all`;
+      Sentry.captureMessage(
+        `fine-tune job created - ${fineTuneJob.data.id} - ${authParams.organizationId}`
+      );
+
+      postHogClient.capture({
+        distinctId: `${fineTuneJob.data.id}-${authParams.organizationId}`,
+        event: "fine_tune_job",
+        properties: {
+          id: fineTuneJob.data.id,
+          success: true,
+          org_id: authParams.organizationId,
+        },
+      });
+
+      const fineTunedJobId = await supabaseClient.client
+        .from("finetune_job")
+        .insert({
+          dataset_id: dataset.id,
+          finetune_job_id: fineTuneJob.data.id,
+          provider_key_id: providerKeyId,
+          status: "created",
+          organization_id: authParams.organizationId,
+        })
+        .select("*")
+        .single();
+
+      res.json({
+        success: true,
+        data: {
+          fineTuneJob: fineTunedJobId.data?.id,
+          url: url,
+        },
+      });
+    } catch (e) {
+      Sentry.captureException(e);
+      postHogClient.capture({
+        distinctId: `${authParams.organizationId}`,
+        event: "fine_tune_job",
+        properties: {
+          success: false,
+          org_id: authParams.organizationId,
+        },
+      });
+      res.status(500).json({
+        error:
+          "Sorry the fine tuning job you requested failed. Right now it is in beta and only support gpt3.5 and gpt4 requests",
+        message: e,
+      });
+      return;
+    }
+  })
+);
+
 app.post(
   "/v1/fine-tune",
   withAuth<
