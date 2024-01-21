@@ -253,23 +253,27 @@ const FineTuningPage = (props: FineTuningPageProps) => {
       </ThemedModal>
       <ThemedDrawer open={jobOpen} setOpen={setJobOpen}>
         <div className="flex flex-col py-2">
-          <p className="text-gray-500 text-sm">Model</p>
-          <button
-            onClick={() => {
-              if (selectedJob?.dataFromOpenAI.job.fine_tuned_model) {
-                navigator.clipboard.writeText(
-                  selectedJob?.dataFromOpenAI.job.fine_tuned_model
-                );
-                setNotification("Copied to clipboard", "success");
-              }
-            }}
-            className="flex flex-row items-center"
-          >
-            <h3 className="text-xl font-semibold">
-              {selectedJob?.dataFromOpenAI.job.fine_tuned_model}
-            </h3>
-            <ClipboardDocumentListIcon className="w-5 h-5 ml-2 text-gray-500" />
-          </button>
+          {selectedJob?.dataFromOpenAI.job.status === "succeeded" && (
+            <>
+              <p className="text-gray-500 text-sm">Model</p>
+              <button
+                onClick={() => {
+                  if (selectedJob?.dataFromOpenAI.job.fine_tuned_model) {
+                    navigator.clipboard.writeText(
+                      selectedJob?.dataFromOpenAI.job.fine_tuned_model
+                    );
+                    setNotification("Copied to clipboard", "success");
+                  }
+                }}
+                className="flex flex-row items-center"
+              >
+                <h3 className="text-xl font-semibold">
+                  {selectedJob?.dataFromOpenAI.job.fine_tuned_model}
+                </h3>
+                <ClipboardDocumentListIcon className="w-5 h-5 ml-2 text-gray-500" />
+              </button>
+            </>
+          )}
 
           <ul
             className={clsx(
@@ -349,43 +353,45 @@ const FineTuningPage = (props: FineTuningPageProps) => {
               </p>
             </li>
           </ul>
-          <div className="mt-8">
-            <p className="font-semibold text-xl">How to integrate</p>
-            <p className="text-gray-500 text-sm mt-1 leading-5">
-              Replace the model name in your API call with the fine-tuned model
-              name. The following snippet is an example for a request using
-              Python.
-            </p>
-            <DiffHighlight
-              code={`
+          {selectedJob?.dataFromOpenAI.job.status === "succeeded" && (
+            <div className="mt-8">
+              <p className="font-semibold text-xl">How to integrate</p>
+              <p className="text-gray-500 text-sm mt-1 leading-5">
+                Replace the model name in your API call with the fine-tuned
+                model name. The following snippet is an example for a request
+                using Python.
+              </p>
+              <DiffHighlight
+                code={`
 import OpenAI
 
 # client config
 client = OpenAI(
-  api_key="your-api-key-here",
-  base_url="http://oai.hconeai.com/v1", 
-  default_headers= {  
-    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-  }
+api_key="your-api-key-here",
+base_url="http://oai.hconeai.com/v1", 
+default_headers= {  
+  "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+}
 )
 
 # send the request
 chat_completion = client.chat.completions.create(
-  model="${selectedJob?.dataFromOpenAI.job.fine_tuned_model}",
-  messages=[
-    {"role": "user", "content": "Hello world!"}
-  ],
-  extra_headers={ # Can also attach headers per request
-    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-  },
+model="${selectedJob?.dataFromOpenAI.job.fine_tuned_model}",
+messages=[
+  {"role": "user", "content": "Hello world!"}
+],
+extra_headers={ # Can also attach headers per request
+  "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+},
 )
-              `}
-              language="bash"
-              newLines={[13]}
-              oldLines={[]}
-              minHeight={false}
-            />
-          </div>
+            `}
+                language="bash"
+                newLines={[13]}
+                oldLines={[]}
+                minHeight={false}
+              />
+            </div>
+          )}
         </div>
       </ThemedDrawer>
       <ThemedModal open={open} setOpen={setOpen}>
