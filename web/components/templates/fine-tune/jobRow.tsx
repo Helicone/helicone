@@ -63,7 +63,8 @@ const JobRow = (props: JobRowProps) => {
           <TableCell>
             <Tooltip title="Copy" placement="top">
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   if (job.dataFromOpenAI.job.fine_tuned_model) {
                     navigator.clipboard.writeText(
                       job.dataFromOpenAI.job.fine_tuned_model
