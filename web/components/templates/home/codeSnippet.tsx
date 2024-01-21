@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Tab } from "@headlessui/react";
-import { clsx } from "../../shared/clsx";
 import { DiffHighlight } from "../welcome/diffHighlight";
+import { Tab, TabGroup, TabList } from "@tremor/react";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
@@ -107,45 +106,20 @@ export default function CodeSnippet(props: CodeSnippetProps) {
 
   return (
     <div className="w-full flex flex-col">
-      <Tab.Group defaultIndex={1}>
-        <Tab.List
-          className={clsx(
-            variant === "themed" ? "bg-sky-900" : "bg-gray-500",
-            "flex space-x-1 rounded-xl p-1"
-          )}
-        >
+      <TabGroup>
+        <TabList className="font-semibold" variant="solid">
           {Object.entries(NAMES).map(([key, name]) => (
-            <Tab
-              key={key}
-              className={({ selected }) =>
-                clsx(
-                  "w-full rounded-lg py-2.5 text-sm font-medium leading-5",
-                  "ring-white ring-opacity-60 ring-offset-2 focus:outline-none focus:ring-2",
-                  variant === "themed"
-                    ? "ring-offset-sky-300"
-                    : "ring-offset-gray-700",
-                  selected
-                    ? variant === "themed"
-                      ? "bg-sky-500 shadow text-white"
-                      : "bg-gray-900 text-white"
-                    : variant === "themed"
-                    ? "text-sky-100 hover:bg-sky-700 hover:text-white"
-                    : "text-gray-100 hover:bg-gray-700 hover:text-white"
-                )
-              }
-              onClick={() => setLang(key as SupportedLanguages)}
-            >
-              {name}
-            </Tab>
+            <Tab onClick={() => setLang(key as SupportedLanguages)}>{name}</Tab>
           ))}
-        </Tab.List>
-        <DiffHighlight
-          code={CODE_CONVERTS[lang](apiKey)}
-          language="bash"
-          newLines={DIFF_LINES[lang]}
-          oldLines={[]}
-        />
-      </Tab.Group>
+        </TabList>
+      </TabGroup>
+      <DiffHighlight
+        code={CODE_CONVERTS[lang](apiKey)}
+        language="bash"
+        newLines={DIFF_LINES[lang]}
+        oldLines={[]}
+      />
+      {/* </Tab.Group> */}
     </div>
   );
 }

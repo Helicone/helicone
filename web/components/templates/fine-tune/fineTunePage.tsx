@@ -367,28 +367,29 @@ import OpenAI
 
 # client config
 client = OpenAI(
-api_key="your-api-key-here",
-base_url="http://oai.hconeai.com/v1", 
-default_headers= {  
-  "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-}
+  api_key="your-api-key-here",
+  base_url="http://oai.hconeai.com/v1", 
+  default_headers= {  
+    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+  }
 )
 
 # send the request
 chat_completion = client.chat.completions.create(
-model="${selectedJob?.dataFromOpenAI.job.fine_tuned_model}",
-messages=[
-  {"role": "user", "content": "Hello world!"}
-],
-extra_headers={ # Can also attach headers per request
-  "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-},
+  model="${selectedJob?.dataFromOpenAI.job.fine_tuned_model}",
+  messages=[
+    {"role": "user", "content": "Hello world!"}
+  ],
+  extra_headers={ # Can also attach headers per request
+    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+  },
 )
             `}
                 language="bash"
                 newLines={[13]}
                 oldLines={[]}
                 minHeight={false}
+                textSize="sm"
               />
             </div>
           )}
