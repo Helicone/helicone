@@ -21,6 +21,7 @@ import { FineTuningManager } from "./lib/managers/FineTuningManager";
 import { PostHog } from "posthog-node";
 import { hashAuth } from "./lib/db/hash";
 import { FilterNode } from "./lib/shared/filters/filterDefs";
+import { SupabaseConnector } from "./lib/db/supabase";
 
 const ph_project_api_key = process.env.PUBLIC_POSTHOG_API_KEY ?? "";
 
@@ -350,23 +351,42 @@ app.get(
   )
 );
 
+async function hasAccessToFineTune(supabaseClient: SupabaseConnector) {
+  const { data: org, error: orgError } = await supabaseClient.client
+    .from("organization")
+    .select("*")
+    .eq("id", supabaseClient.organizationId ?? "")
+    .single();
+  if (orgError) {
+    return false;
+  }
+  if (org.tier === "free") {
+    const jobsCount = (
+      await supabaseClient.client
+        .from("finetune_job")
+        .select("*", { count: "exact" })
+    ).count;
+    if (!jobsCount) {
+      return false;
+    }
+    if (jobsCount > 1) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+  if (!org.tier) {
+    return false;
+  }
+  return true;
+}
+
 app.post(
   "/v1/dataset/:datasetId/fine-tune",
   withAuth<
     paths["/v1/dataset/{datasetId}/fine-tune"]["post"]["requestBody"]["content"]["application/json"]
   >(async ({ request, res, supabaseClient, db, authParams }) => {
-    const { data: org, error: orgError } = await supabaseClient.client
-      .from("organization")
-      .select("*")
-      .eq("id", authParams.organizationId ?? "")
-      .single();
-    if (orgError) {
-      res.status(500).json({
-        error: "Must be on pro or higher plan to use fine-tuning",
-      });
-      return;
-    }
-    if (!org.tier || org.tier === "free") {
+    if (!(await hasAccessToFineTune(supabaseClient))) {
       res.status(405).json({
         error: "Must be on pro or higher plan to use fine-tuning",
       });
@@ -507,23 +527,13 @@ app.post(
   withAuth<
     paths["/v1/fine-tune"]["post"]["requestBody"]["content"]["application/json"]
   >(async ({ request, res, supabaseClient, db, authParams }) => {
-    const { data: org, error: orgError } = await supabaseClient.client
-      .from("organization")
-      .select("*")
-      .eq("id", authParams.organizationId ?? "")
-      .single();
-    if (orgError) {
-      res.status(500).json({
-        error: "Must be on pro or higher plan to use fine-tuning",
-      });
-      return;
-    }
-    if (!org.tier || org.tier === "free") {
+    if (!(await hasAccessToFineTune(supabaseClient))) {
       res.status(405).json({
         error: "Must be on pro or higher plan to use fine-tuning",
       });
       return;
     }
+
     const body = await request.getRawBody<any>();
     console.log("body", body);
     const { filter, providerKeyId, uiFilter } = body;
