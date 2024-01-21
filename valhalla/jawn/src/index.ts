@@ -389,7 +389,7 @@ app.post(
       .single();
     let filterNode: FilterNode;
     try {
-      filterNode = JSON.parse(dataset?.fitler_node ?? "");
+      filterNode = JSON.parse(dataset?.filter_node ?? "");
     } catch (e) {
       res.status(500).json({
         error: "No dataset found",

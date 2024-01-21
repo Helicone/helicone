@@ -58,7 +58,7 @@ export const CreateDataSetModal = (props: CreateDataSetModalProps) => {
                     name: datasetName,
                     organization_id: org?.currentOrg?.id,
                     filters: JSON.stringify(uiFilter),
-                    fitler_node: JSON.stringify(filter),
+                    filter_node: JSON.stringify(filter),
                   },
                 ])
                 .then((x) => {
