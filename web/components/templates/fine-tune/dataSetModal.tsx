@@ -6,7 +6,9 @@ import { Database } from "../../../supabase/database.types";
 import { useOrg } from "../../layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import ThemedDrawer from "../../shared/themed/themedDrawer";
+import ThemedModal from "../../shared/themed/themedModal";
+import { CircleStackIcon } from "@heroicons/react/24/outline";
+import { TextInput } from "@tremor/react";
 
 interface CreateDataSetModalProps {
   open: boolean;
@@ -29,25 +31,32 @@ export const CreateDataSetModal = (props: CreateDataSetModalProps) => {
   const { fetchJawn } = useJawn();
 
   return (
-    <ThemedDrawer open={isOpen} setOpen={setOpen}>
-      <div className="flex flex-col gap-4 w-full">
-        <p className="font-semibold text-lg">Create Dataset</p>
-        This will fine tune your request with a limit of 1,000 rows using your
-        openAPI key.
-        <p className="text-gray-700 w-[400px] whitespace-pre-wrap text-sm">
-          {/* Organization {` "${orgName}" `} will be deleted from your account. */}
+    <ThemedModal open={isOpen} setOpen={setOpen}>
+      <div className="flex flex-col gap-4 w-[450px]">
+        <div className="flex flex-row items-center gap-2">
+          <CircleStackIcon className="w-6 h-6" />
+          <p className="font-semibold text-xl">Create Dataset</p>
+        </div>
+        <p className="text-gray-500 whitespace-pre-wrap text-sm">
+          This will create a new dataset with the current filters applied. This
+          will allow you to use this dataset to fine-tune a model.
         </p>
-        <p className="text-gray-700 w-[400px] whitespace-pre-wrap text-sm">
-          This will create a fine-tuned model on your account and you will be
-          charged. Are you sure you want to continue?
-        </p>
-        <input
-          type="text"
-          placeholder="dataset name"
-          className="border border-gray-300 dark:border-gray-700 rounded-md p-2"
-          value={datasetName}
-          onChange={(e) => setDatasetName(e.target.value)}
-        />
+        <div className="flex flex-col space-y-1">
+          <label
+            htmlFor="alert-metric"
+            className="text-gray-900 text-xs font-semibold"
+          >
+            Data Set Name
+          </label>
+          <TextInput
+            placeholder="My shiny new data set"
+            value={datasetName}
+            onChange={(e) => {
+              setDatasetName(e.target.value);
+            }}
+          />
+        </div>
+
         <button
           onClick={() => {
             if (org?.currentOrg?.id) {
@@ -80,6 +89,6 @@ export const CreateDataSetModal = (props: CreateDataSetModalProps) => {
         {error && <div className="text-red-500">{error}</div>}
         {loading && <div className="animate-pulse">...loading</div>}
       </div>
-    </ThemedDrawer>
+    </ThemedModal>
   );
 };
