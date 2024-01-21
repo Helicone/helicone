@@ -29,9 +29,6 @@ export default async function handler(
   }
 
   try {
-    // Fetch organization from Supabase
-    // get the user id
-
     const { data: org, error: orgError } = resultMap(
       await dbExecute<{
         stripe_customer_id: string;

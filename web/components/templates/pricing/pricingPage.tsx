@@ -21,7 +21,7 @@ const tiers = [
     name: "Pro",
     id: "tier-Pro",
     href: "/signup",
-    priceMonthly: "$25",
+    priceMonthly: "$80",
     text: "Get Started",
     description:
       "Everything in Free, plus essential tools for scaling up your business.",
@@ -186,7 +186,7 @@ export default function Example() {
         </GridBackground>
 
         {/* xs to lg */}
-        <div className="mx-auto mt-12 max-w-md space-y-8 sm:mt-16 lg:hidden">
+        <div className="mx-auto mt-4 max-w-md space-y-8 sm:mt-8 lg:hidden">
           {tiers.map((tier) => (
             <section
               key={tier.id}
@@ -253,7 +253,7 @@ export default function Example() {
         </div>
 
         {/* lg+ */}
-        <div className="isolate mt-8 mb-32 hidden lg:block max-w-6xl mx-auto">
+        <div className="isolate mt-4 mb-32 hidden lg:block max-w-6xl mx-auto">
           <div className="relative">
             {tiers.some((tier) => tier.mostPopular) ? (
               <div className="absolute inset-x-4 inset-y-0 -z-10 flex">
@@ -400,6 +400,9 @@ export default function Example() {
             </table>
           </div>
         </div>
+        {/* <div className="flex flex-col max-w-6xl mx-auto p-4 md:px-8 lg:flex antialiased">
+          hello
+        </div> */}
       </div>
       <Footer />
     </div>
