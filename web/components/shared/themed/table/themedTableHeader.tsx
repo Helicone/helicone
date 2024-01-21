@@ -130,7 +130,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               visibleColumns={columnsFilter.visibleColumns}
             />
           )}
-          {rows.length > 0 && <ExportButton rows={rows} />}
+          <ExportButton rows={rows} />
           {viewToggle && (
             <ViewButton
               currentView={viewToggle.currentView}
