@@ -145,13 +145,7 @@ const FineTurnForm = (props: FineTurnFormProps) => {
             </SelectItem>
           </Select>
         </div>
-        <ProviderKeyList
-          orgId={orgContext?.currentOrg?.id}
-          setProviderKeyCallback={(x) => {
-            setProviderKeyId(x);
-          }}
-          variant="basic"
-        />
+
         <div className="flex flex-col space-y-1.5">
           <div className="flex flex-row space-x-1 items-center">
             <label
@@ -236,6 +230,13 @@ const FineTurnForm = (props: FineTurnFormProps) => {
             </div>
           </fieldset>
         </div>
+        <ProviderKeyList
+          orgId={orgContext?.currentOrg?.id}
+          setProviderKeyCallback={(x) => {
+            setProviderKeyId(x);
+          }}
+          variant="basic"
+        />
       </>
     ),
     confirm: (
