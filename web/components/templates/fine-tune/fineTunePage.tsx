@@ -22,6 +22,7 @@ import {
   ClipboardDocumentListIcon,
   MagnifyingGlassIcon,
   PlusIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -170,6 +171,29 @@ const FineTuningPage = (props: FineTuningPageProps) => {
           <div className="flex flex-col w-full space-y-4">
             {isJobsLoading || isDatasetsLoading ? (
               <LoadingAnimation title="Loading Data..." />
+            ) : jobs?.length === 0 ? (
+              <div className="flex flex-col w-full h-96 justify-center items-center">
+                <div className="flex flex-col w-2/5">
+                  <SparklesIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+                  <p className="text-xl text-black dark:text-white font-semibold mt-8">
+                    No Fine-Tune Jobs
+                  </p>
+                  <p className="text-sm text-gray-500 max-w-sm mt-2">
+                    Create a fine-tune job to get started.
+                  </p>
+                  <div className="mt-4">
+                    <button
+                      onClick={() => {
+                        setFineTuneOpen(true);
+                      }}
+                      className="items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    >
+                      <PlusIcon className="h-4 w-4" />
+                      Create
+                    </button>
+                  </div>
+                </div>
+              </div>
             ) : (
               <Card className="py-1 px-2">
                 <Table className="overflow-auto">
