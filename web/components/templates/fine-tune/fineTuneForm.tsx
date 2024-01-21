@@ -77,10 +77,6 @@ const FineTurnForm = (props: FineTurnFormProps) => {
   const onConfirmSubmitHandler = () => {
     // if the org is a free org and has 1 fine-tuned model, do not allow
     if (numberOfModels === 1 && orgContext?.currentOrg?.tier === "free") {
-      // setNotification(
-      // "You have reached the maximum number of fine-tuned models for your plan. Please upgrade to create more.",
-      //   "error"
-      // );
       setAllowAccess(false);
       return;
     }
@@ -282,8 +278,8 @@ const FineTurnForm = (props: FineTurnFormProps) => {
             <ExclamationTriangleIcon className="h-6 w-6 text-red-500" />
             <div className="flex flex-col space-y-4 w-full">
               <div className="text-sm">
-                ou have reached the maximum number of fine-tuned models for your
-                plan. Please upgrade to create more.
+                You have reached the maximum number of fine-tuned models for
+                your plan. Please upgrade your organizations plan to Pro.
               </div>
             </div>
           </>
@@ -316,15 +312,21 @@ const FineTurnForm = (props: FineTurnFormProps) => {
         </button>
         <button
           disabled={isLoading}
-          onClick={
-            step === "config" ? onConfigSubmitHandler : onConfirmSubmitHandler
-          }
+          onClick={() => {
+            if (!allowAccess) {
+              onCancel();
+              return;
+            }
+            step === "config"
+              ? onConfigSubmitHandler()
+              : onConfirmSubmitHandler();
+          }}
           className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           {isLoading && (
             <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
           )}
-          {step === "config" ? "Create" : "Confirm"}
+          {!allowAccess ? "Close" : step === "config" ? "Create" : "Confirm"}
         </button>
       </div>
     </div>

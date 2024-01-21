@@ -92,6 +92,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
       );
     },
     refetchOnWindowFocus: false,
+    refetchInterval: 5_000,
   });
 
   const { data: datasets, isLoading: isDatasetsLoading } = useQuery({
@@ -164,7 +165,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 className="items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 <PlusIcon className="h-4 w-4" />
-                Create
+                Create New
               </button>
             </div>
           </div>
