@@ -1,19 +1,15 @@
+import { ArrowRightIcon } from "@heroicons/react/20/solid";
+import { ArrowPathIcon, CircleStackIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { TextInput } from "@tremor/react";
 import { useState } from "react";
-import { useJawn } from "../../../services/hooks/useJawn";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
 import { Database } from "../../../supabase/database.types";
 import { useOrg } from "../../layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedModal from "../../shared/themed/themedModal";
-import { ArrowPathIcon, CircleStackIcon } from "@heroicons/react/24/outline";
-import { TextInput } from "@tremor/react";
-import {
-  REQUEST_TABLE_FILTERS,
-  SingleFilterDef,
-} from "../../../services/lib/filters/frontendFilterDefs";
-import { ArrowRightIcon } from "@heroicons/react/20/solid";
 
 interface CreateDataSetModalProps {
   open: boolean;
@@ -44,7 +40,7 @@ export const CreateDataSetModal = (props: CreateDataSetModalProps) => {
             htmlFor="alert-metric"
             className="text-gray-900 text-xs font-semibold"
           >
-            Data Set Name
+            Dataset Name
           </label>
           <TextInput
             placeholder="My shiny new data set"
@@ -69,8 +65,11 @@ export const CreateDataSetModal = (props: CreateDataSetModalProps) => {
             {uiFilter.length === 0 ? (
               <p className="text-sm">None</p>
             ) : (
-              uiFilter.map((_filter) => (
-                <li className="flex flex-row text-sm space-x-1 items-center">
+              uiFilter.map((_filter, i) => (
+                <li
+                  className="flex flex-row text-sm space-x-1 items-center"
+                  key={`filer_${i}`}
+                >
                   <ArrowRightIcon className="w-3 h-3" />
                   <span className="font-semibold">
                     {filterMap[_filter.filterMapIdx]?.label}
@@ -102,7 +101,9 @@ export const CreateDataSetModal = (props: CreateDataSetModalProps) => {
           <button
             disabled={isLoading}
             onClick={async () => {
-              if (org?.currentOrg?.id) {
+              if (!datasetName) {
+                setNotification("Must provide a dataset name", "error");
+              } else if (org?.currentOrg?.id) {
                 setIsLoading(true);
                 await supabaseClient
                   .from("finetune_dataset")
