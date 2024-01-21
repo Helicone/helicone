@@ -139,25 +139,23 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               }}
             />
           )}
-          {advancedFilters &&
-            props.onDataSet &&
-            org?.currentOrg?.tier !== "free" && (
-              <button
-                onClick={() => {
-                  if (props.onDataSet) {
-                    props.onDataSet();
-                  }
-                }}
-                className={clsx(
-                  "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
-                )}
-              >
-                <CircleStackIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-                  {"Create Dataset"}
-                </p>
-              </button>
-            )}
+          {advancedFilters && props.onDataSet && (
+            <button
+              onClick={() => {
+                if (props.onDataSet) {
+                  props.onDataSet();
+                }
+              }}
+              className={clsx(
+                "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+              )}
+            >
+              <CircleStackIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
+                {"Create Dataset"}
+              </p>
+            </button>
+          )}
         </div>
       </div>
 

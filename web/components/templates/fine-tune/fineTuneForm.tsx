@@ -18,12 +18,13 @@ import Link from "next/link";
 import { useJawn } from "../../../services/hooks/useJawn";
 
 interface FineTurnFormProps {
+  numberOfModels: number;
   onCancel: () => void;
   onSuccess: () => void;
 }
 
 const FineTurnForm = (props: FineTurnFormProps) => {
-  const { onCancel, onSuccess } = props;
+  const { numberOfModels, onCancel, onSuccess } = props;
 
   const supabaseClient = useSupabaseClient<Database>();
   const orgContext = useOrg();
@@ -35,6 +36,7 @@ const FineTurnForm = (props: FineTurnFormProps) => {
   const [step, setStep] = useState<"config" | "confirm">("config");
   const [providerKeyId, setProviderKeyId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [allowAccess, setAllowAccess] = useState(true);
 
   const { data, isLoading: isDataLoading } = useQuery({
     queryKey: ["fine-tune-data-sets", orgContext?.currentOrg?.id],
@@ -73,6 +75,15 @@ const FineTurnForm = (props: FineTurnFormProps) => {
   };
 
   const onConfirmSubmitHandler = () => {
+    // if the org is a free org and has 1 fine-tuned model, do not allow
+    if (numberOfModels === 1 && orgContext?.currentOrg?.tier === "free") {
+      // setNotification(
+      // "You have reached the maximum number of fine-tuned models for your plan. Please upgrade to create more.",
+      //   "error"
+      // );
+      setAllowAccess(false);
+      return;
+    }
     setIsLoading(true);
     if (selectedDataSetId) {
       fetchJawn({
@@ -152,17 +163,21 @@ const FineTurnForm = (props: FineTurnFormProps) => {
               htmlFor="alert-metric"
               className="text-gray-900 text-xs font-semibold"
             >
-              Data Sets
+              Data Sets{" "}
+              <span className="text-gray-500">
+                (must have at least 10 requests)
+              </span>
             </label>
-            <Tooltip title="Add a new data set" placement="top">
-              <button
-                onClick={() => {
-                  // setFineTuneOpen(true);
-                }}
+            <Tooltip
+              title="Please go to the requests tab to create a data set."
+              placement="top"
+            >
+              <Link
+                href="/requests"
                 className="items-center rounded-lg text-xs flex font-medium text-gray-900 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 <PlusCircleIcon className="h-4 w-4" />
-              </button>
+              </Link>
             </Tooltip>
           </div>
 
@@ -245,19 +260,34 @@ const FineTurnForm = (props: FineTurnFormProps) => {
     ),
     confirm: (
       <div className="flex flex-row w-full gap-4">
-        <ExclamationTriangleIcon className="h-6 w-6 text-yellow-500" />
-        <div className="flex flex-col space-y-4 w-full">
-          <div className="text-sm">
-            I understand that this fine-tuning job will be run using my OpenAI
-            API key. To learn more about fine-tuning and pricing, please see{" "}
-            <Link
-              className="text-blue-500 underline"
-              href="https://platform.openai.com/docs/guides/fine-tuning"
-            >
-              OpenAI&apos;s fine-tuning documentation
-            </Link>
-          </div>
-        </div>
+        {allowAccess ? (
+          <>
+            <ExclamationTriangleIcon className="h-6 w-6 text-yellow-500" />
+            <div className="flex flex-col space-y-4 w-full">
+              <div className="text-sm">
+                I understand that this fine-tuning job will be run using my
+                OpenAI API key. To learn more about fine-tuning and pricing,
+                please see{" "}
+                <Link
+                  className="text-blue-500 underline"
+                  href="https://platform.openai.com/docs/guides/fine-tuning"
+                >
+                  OpenAI&apos;s fine-tuning documentation
+                </Link>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <ExclamationTriangleIcon className="h-6 w-6 text-red-500" />
+            <div className="flex flex-col space-y-4 w-full">
+              <div className="text-sm">
+                ou have reached the maximum number of fine-tuned models for your
+                plan. Please upgrade to create more.
+              </div>
+            </div>
+          </>
+        )}
       </div>
     ),
   };

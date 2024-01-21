@@ -239,6 +239,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
       </div>
       <ThemedModal open={fineTuneOpen} setOpen={setFineTuneOpen}>
         <FineTuneForm
+          numberOfModels={jobs?.length || 0}
           onCancel={() => {
             setFineTuneOpen(false);
           }}
