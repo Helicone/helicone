@@ -39,6 +39,7 @@ import { ThemedSwitch } from "../shared/themed/themedSwitch";
 import { useTheme } from "../shared/theme/themeContext";
 import ReferralModal from "../common/referralModal";
 import MetaData from "../shared/metaData";
+import { Badge } from "@tremor/react";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
@@ -60,7 +61,13 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const [referOpen, setReferOpen] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const NAVIGATION = [
+  const NAVIGATION: {
+    name: string;
+    href: string;
+    icon: any;
+    current: boolean;
+    featured?: boolean;
+  }[] = [
     {
       name: "Dashboard",
       href: "/dashboard",
@@ -86,17 +93,19 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname.includes("/alerts"),
     },
     {
+      name: "Fine-Tune",
+      href: "/fine-tune",
+      icon: SparklesIcon,
+      current: pathname.includes("/fine-tune"),
+      featured: true,
+    },
+    {
       name: "Properties",
       href: "/properties",
       icon: TagIcon,
       current: pathname.includes("/properties"),
     },
-    {
-      name: "Fine-Tune",
-      href: "/fine-tune",
-      icon: SparklesIcon,
-      current: pathname.includes("/fine-tune"),
-    },
+
     {
       name: "Cache",
       href: "/cache",
@@ -399,6 +408,11 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   >
                     <nav.icon className="h-4 w-4" />
                     {nav.name}
+                    {nav.featured && (
+                      <Badge size="xs">
+                        <p className="text-xs">New</p>
+                      </Badge>
+                    )}
                   </Link>
                 ))}
               </nav>
