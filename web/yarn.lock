@@ -5218,15 +5218,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^0.26.0":
-  version: 0.26.1
-  resolution: "axios@npm:0.26.1"
-  dependencies:
-    follow-redirects: "npm:^1.14.8"
-  checksum: 77ad7f1e6ca04fcd3fa8af1795b09d8b7c005b71a31f28d99ba40cda0bdcc12a4627801d7fac5efa62b9f667a8402bd54c669039694373bc8d44f6be611f785c
-  languageName: node
-  linkType: hard
-
 "axobject-query@npm:^3.1.1":
   version: 3.1.1
   resolution: "axobject-query@npm:3.1.1"
@@ -7468,16 +7459,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.14.8":
-  version: 1.15.2
-  resolution: "follow-redirects@npm:1.15.2"
-  peerDependenciesMeta:
-    debug:
-      optional: true
-  checksum: da5932b70e63944d38eecaa16954bac4347036f08303c913d166eda74809d8797d38386e3a0eb1d2fe37d2aaff2764cce8e9dbd99459d860cf2cdfa237923b5f
-  languageName: node
-  linkType: hard
-
 "for-each@npm:^0.3.3":
   version: 0.3.3
   resolution: "for-each@npm:0.3.3"
@@ -8202,7 +8183,7 @@ __metadata:
     nextjs-cors: "npm:^2.1.2"
     node-vault: "npm:^0.10.2"
     octokit: "npm:^2.0.14"
-    openai: "npm:^3.2.1"
+    openai: "npm:^4.24.7"
     papaparse: "npm:^5.4.1"
     pg: "npm:^8.9.0"
     postcss: "npm:^8.4.31"
@@ -10064,16 +10045,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openai@npm:^3.2.1":
-  version: 3.2.1
-  resolution: "openai@npm:3.2.1"
-  dependencies:
-    axios: "npm:^0.26.0"
-    form-data: "npm:^4.0.0"
-  checksum: 6a342e412a301594ba019ae4a3015248a03f29eab8679af00705a80564a95de0e8433514ae21f113cdcf1e9019f3b758dfb6dc421c417294c0cbb117c9c5fc5b
-  languageName: node
-  linkType: hard
-
 "openai@npm:^4.11.1":
   version: 4.16.1
   resolution: "openai@npm:4.16.1"
@@ -10090,6 +10061,25 @@ __metadata:
   bin:
     openai: bin/cli
   checksum: 42d0101d51bb83b2b62215c37069562ceaa02f28648a97c2e628cbf0b9f1ccd57f94257c9a55ff7358d1e099ca1a2f7327053b8512bfb2dd1b4dafd901623434
+  languageName: node
+  linkType: hard
+
+"openai@npm:^4.24.7":
+  version: 4.24.7
+  resolution: "openai@npm:4.24.7"
+  dependencies:
+    "@types/node": "npm:^18.11.18"
+    "@types/node-fetch": "npm:^2.6.4"
+    abort-controller: "npm:^3.0.0"
+    agentkeepalive: "npm:^4.2.1"
+    digest-fetch: "npm:^1.3.0"
+    form-data-encoder: "npm:1.7.2"
+    formdata-node: "npm:^4.3.2"
+    node-fetch: "npm:^2.6.7"
+    web-streams-polyfill: "npm:^3.2.1"
+  bin:
+    openai: bin/cli
+  checksum: 702bf1830901680f6da092d82b18d10c4d79928d3e7375af4fb5c0eb1d3146a7bfde461a8e800f0af1df247a92af26b7aeb8631a87294a9e3f5c1a41eff48c8a
   languageName: node
   linkType: hard
 

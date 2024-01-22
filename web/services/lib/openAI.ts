@@ -1,11 +1,11 @@
 import {
-  ChatCompletionRequestMessage,
-  CreateChatCompletionResponse,
-} from "openai";
+  ChatCompletion,
+  ChatCompletionCreateParams,
+} from "openai/resources/chat";
 import { Result } from "../../lib/result";
 
 export const fetchOpenAI = async (
-  messages: ChatCompletionRequestMessage[],
+  messages: ChatCompletionCreateParams[],
   requestId: string,
   temperature: number,
   model: string,
@@ -23,9 +23,7 @@ export const fetchOpenAI = async (
       model,
       maxTokens,
     }),
-  }).then(
-    (res) => res.json() as Promise<Result<CreateChatCompletionResponse, string>>
-  );
+  }).then((res) => res.json() as Promise<Result<ChatCompletion, string>>);
 
   return completion;
 };

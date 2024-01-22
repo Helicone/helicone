@@ -31,7 +31,7 @@ const CodeIntegration = (props: CodeIntegrationProps) => {
       <p className="text-lg md:text-3xl font-semibold">
         OpenAI Proxy Integration
       </p>
-      <div className="text-md md:text-lg text-gray-500 font-light mt-5 text-center max-w-3xl">
+      <div className="text-sm md:text-lg text-gray-500 font-light mt-5 text-center max-w-3xl">
         We recommend using the proxy, but we also support OpenAI&apos;s packages{" "}
         <Link
           href={

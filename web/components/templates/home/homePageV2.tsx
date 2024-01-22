@@ -23,6 +23,7 @@ import { DEMO_EMAIL } from "../../../lib/constants";
 import Image from "next/image";
 import { clsx } from "../../shared/clsx";
 import Globe from "./globe";
+import { Database } from "../../../supabase/database.types";
 
 const features: {
   title: string;
@@ -118,7 +119,8 @@ export default function Example() {
   const router = useRouter();
   const user = useUser();
 
-  const supabaseClient = useSupabaseClient();
+  const supabaseClient = useSupabaseClient<Database>();
+
   if (!demoLoading && user?.email === DEMO_EMAIL) {
     supabaseClient.auth.signOut();
   }

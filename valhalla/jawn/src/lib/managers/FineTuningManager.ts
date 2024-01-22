@@ -1,4 +1,7 @@
-import { FineTuningJob } from "openai/resources/fine-tuning/jobs";
+import {
+  FineTuningJob,
+  FineTuningJobEventsPage,
+} from "openai/resources/fine-tuning/jobs";
 import { OpenAIClient } from "../clients/OpenAIClient";
 import { HeliconeRequest } from "../shared/request/request";
 import { Result, err, ok } from "../shared/result";
@@ -7,12 +10,41 @@ import fs from "fs";
 import { chatCompletionMessage } from "./types";
 import { ChatCompletionMessageParam } from "openai/resources";
 import { ChatCompletionCreateParamsBase } from "openai/resources/chat/completions";
+import OpenAI from "openai";
 
 export class FineTuningManager {
   private openAIClient: OpenAIClient;
+  private openai: OpenAI;
 
   constructor(apiKey: string) {
     this.openAIClient = new OpenAIClient(apiKey);
+    this.openai = new OpenAI({
+      apiKey,
+    });
+  }
+
+  async getFineTuneJob(id: string): Promise<
+    Result<
+      {
+        job: FineTuningJob;
+        events: FineTuningJobEventsPage;
+      },
+      string
+    >
+  > {
+    try {
+      let fineTune = await this.openai.fineTuning.jobs.retrieve(id);
+      let events = await this.openai.fineTuning.jobs.listEvents(id, {
+        limit: 10,
+      });
+      return ok({
+        job: fineTune,
+        events,
+      });
+    } catch (e) {
+      console.error("Failed to get openai training", e);
+      return err("Failed to get openai training" + e);
+    }
   }
 
   async createFineTuneJob(

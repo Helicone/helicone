@@ -1,22 +1,22 @@
 import { NextApiRequest, NextApiResponse } from "next";
+
+import OpenAI from "openai";
 import {
-  ChatCompletionRequestMessage,
-  Configuration,
-  CreateChatCompletionResponse,
-  OpenAIApi,
-} from "openai";
+  ChatCompletion,
+  ChatCompletionMessageParam,
+} from "openai/resources/chat";
 import { DEMO_EMAIL } from "../../../../lib/constants";
 import { Result } from "../../../../lib/result";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Result<CreateChatCompletionResponse, string>>
+  res: NextApiResponse<Result<ChatCompletion, string>>
 ) {
   const client = new SupabaseServerWrapper({ req, res }).getClient();
   const user = await client.auth.getUser();
   const { messages, requestId, temperature, model, maxTokens } = req.body as {
-    messages: ChatCompletionRequestMessage[];
+    messages: ChatCompletionMessageParam[];
     requestId: string;
     temperature: number;
     model: string;
@@ -31,21 +31,17 @@ export default async function handler(
     return;
   }
 
-  const configuration = new Configuration({
+  const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
-    basePath: "https://oai.hconeai.com/v1",
-    baseOptions: {
-      headers: {
-        "OpenAI-Organization": "",
-        "Helicone-Property-Tag": "experiment",
-        "Helicone-Auth": `Bearer ${process.env.TEST_HELICONE_API_KEY}`,
-        user: user.data.user?.id || "",
-        "Helicone-Property-RequestId": requestId,
-      },
+    baseURL: "https://oai.hconeai.com/v1",
+    defaultHeaders: {
+      "OpenAI-Organization": "",
+      "Helicone-Property-Tag": "experiment",
+      "Helicone-Auth": `Bearer ${process.env.TEST_HELICONE_API_KEY}`,
+      user: user.data.user?.id || "",
+      "Helicone-Property-RequestId": requestId,
     },
   });
-
-  const openai = new OpenAIApi(configuration);
 
   if (!user.data || !user.data.user) {
     res.status(401).json({ error: "Unauthorized", data: null });
@@ -57,14 +53,14 @@ export default async function handler(
   }
 
   try {
-    const completion = await openai.createChatCompletion({
+    const completion = await openai.chat.completions.create({
       model: model,
       messages: messages,
       user: user.data.user.email,
       temperature: temperature,
       max_tokens: maxTokens,
     });
-    res.status(200).json({ error: null, data: completion.data });
+    res.status(200).json({ error: null, data: completion });
     return;
   } catch (err) {
     res.status(500).json({ error: `${err}`, data: null });

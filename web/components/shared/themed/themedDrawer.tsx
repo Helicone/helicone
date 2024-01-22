@@ -31,7 +31,7 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
     <Transition.Root show={open} as={Fragment}>
       <Dialog
         as="div"
-        className={clsx(themeContext?.theme ?? "light", "relative z-50")}
+        className={clsx(themeContext?.theme ?? "light", "relative z-40")}
         onClose={setOpen}
       >
         <Transition.Child
