@@ -40,84 +40,52 @@ import { DiffHighlight } from "../welcome/diffHighlight";
 import { useRouter } from "next/router";
 import { useDebounce } from "../../../services/hooks/debounce";
 
-interface FineTuningPageProps {
-  searchQuery: string | null;
-}
+interface FineTuningPageProps {}
 
 const FineTuningPage = (props: FineTuningPageProps) => {
-  const { searchQuery } = props;
+  const {} = props;
   const { fetchJawn } = useJawn();
   const [fineTuneOpen, setFineTuneOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [jobOpen, setJobOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<FineTuneJob>();
-  const [currentSearch, setCurrentSearch] = useState<string | null>(null);
 
   const supabaseClient = useSupabaseClient<Database>();
   const orgContext = useOrg();
   const router = useRouter();
   const { setNotification } = useNotification();
 
-  const debouncedSearch = useDebounce(currentSearch, 700);
-
   const {
     data: jobs,
     isLoading: isJobsLoading,
     refetch,
   } = useQuery({
-    queryKey: ["fine-tune-jobs", orgContext?.currentOrg?.id, debouncedSearch],
+    queryKey: ["fine-tune-jobs", orgContext?.currentOrg?.id],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
-      const newSearch = query.queryKey[2];
 
-      if (newSearch) {
-        const { data, error } = await supabaseClient
-          .from("finetune_job")
-          .select("*")
-          .eq("organization_id", orgId)
-          .ilike("name", `%${newSearch}%`);
+      const { data, error } = await supabaseClient
+        .from("finetune_job")
+        .select("*")
+        .eq("organization_id", orgId);
 
-        const sortedData = data?.sort((a, b) =>
-          a.created_at > b.created_at ? -1 : 1
-        );
+      const sortedData = data?.sort((a, b) =>
+        a.created_at > b.created_at ? -1 : 1
+      );
 
-        if (error || !sortedData) {
-          console.error(error);
-          return [];
-        }
-        return await Promise.all(
-          sortedData.map(async (x) => ({
-            ...x,
-            dataFromOpenAI: await fetchJawn({
-              path: `/v1/fine-tune/${x.id}/stats`,
-              method: "GET",
-            }).then((x) => x.json()),
-          }))
-        );
-      } else {
-        const { data, error } = await supabaseClient
-          .from("finetune_job")
-          .select("*")
-          .eq("organization_id", orgId);
-
-        const sortedData = data?.sort((a, b) =>
-          a.created_at > b.created_at ? -1 : 1
-        );
-
-        if (error || !sortedData) {
-          console.error(error);
-          return [];
-        }
-        return await Promise.all(
-          sortedData.map(async (x) => ({
-            ...x,
-            dataFromOpenAI: await fetchJawn({
-              path: `/v1/fine-tune/${x.id}/stats`,
-              method: "GET",
-            }).then((x) => x.json()),
-          }))
-        );
+      if (error || !sortedData) {
+        console.error(error);
+        return [];
       }
+      return await Promise.all(
+        sortedData.map(async (x) => ({
+          ...x,
+          dataFromOpenAI: await fetchJawn({
+            path: `/v1/fine-tune/${x.id}/stats`,
+            method: "GET",
+          }).then((x) => x.json()),
+        }))
+      );
     },
     refetchOnWindowFocus: false,
     refetchInterval: 5_000,
