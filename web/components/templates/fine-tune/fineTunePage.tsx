@@ -5,14 +5,12 @@ import {
   TableHead,
   TableHeaderCell,
   TableRow,
-  TextInput,
 } from "@tremor/react";
 import {
   ArrowRightIcon,
   ArrowTopRightOnSquareIcon,
   CircleStackIcon,
   ClipboardDocumentListIcon,
-  MagnifyingGlassIcon,
   PlusIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
@@ -37,6 +35,7 @@ import JobStatus from "./jobStatus";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { REQUEST_TABLE_FILTERS } from "../../../services/lib/filters/frontendFilterDefs";
 import { DiffHighlight } from "../welcome/diffHighlight";
+import { useRouter } from "next/router";
 
 interface FineTuningPageProps {}
 
@@ -50,6 +49,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
 
   const supabaseClient = useSupabaseClient<Database>();
   const orgContext = useOrg();
+  const router = useRouter();
   const { setNotification } = useNotification();
 
   const {
@@ -60,6 +60,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
     queryKey: ["fine-tune-jobs", orgContext?.currentOrg?.id],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
+
       const { data, error } = await supabaseClient
         .from("finetune_job")
         .select("*")
@@ -124,31 +125,32 @@ const FineTuningPage = (props: FineTuningPageProps) => {
 
         <div className="flex flex-col mt-8">
           <div className="flex flex-row justify-between items-center mb-4">
-            <TextInput
+            <div />
+            {/* <TextInput
               icon={MagnifyingGlassIcon}
               placeholder="Search Job Id..."
               className="max-w-sm"
               onChange={(e) => {
-                // // add this into query params as search
-                // const search = e.target.value as string;
-                // setCurrentSearch(search);
-                // if (search === "") {
-                //   // delete the query param from the url
-                //   delete router.query.q;
-                //   router.push({
-                //     pathname: router.pathname,
-                //     query: { ...router.query },
-                //   });
-                //   refetch();
-                //   return;
-                // }
-                // router.push({
-                //   pathname: router.pathname,
-                //   query: { ...router.query, q: search },
-                // });
-                // refetch();
+                // add this into query params as search
+                const search = e.target.value as string;
+                setCurrentSearch(search);
+                if (search === "") {
+                  // delete the query param from the url
+                  delete router.query.q;
+                  router.push({
+                    pathname: router.pathname,
+                    query: { ...router.query },
+                  });
+                  refetch();
+                  return;
+                }
+                router.push({
+                  pathname: router.pathname,
+                  query: { ...router.query, q: search },
+                });
+                refetch();
               }}
-            />
+            /> */}
             <div className="flex flex-row space-x-2 items-center">
               <button
                 onClick={() => {
