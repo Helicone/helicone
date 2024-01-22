@@ -1,4 +1,4 @@
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import useNotification from "../components/shared/notification/useNotification";
 import AuthForm from "../components/templates/auth/authForm";
@@ -23,12 +23,16 @@ const SignIn = ({
     string
   >;
 }) => {
+  const user = useUser();
   const router = useRouter();
   const supabase = useSupabaseClient();
   const { setNotification } = useNotification();
 
   const customerPortalContent = customerPortal?.data || undefined;
 
+  if (user) {
+    router.push("/dashboard");
+  }
   return (
     <AuthForm
       handleEmailSubmit={async (email: string, password: string) => {
