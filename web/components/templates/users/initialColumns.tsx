@@ -33,7 +33,7 @@ export const INITIAL_COLUMNS: ColumnDef<UserMetric>[] = [
   {
     accessorKey: "cost",
     header: "Total Cost",
-    cell: (info) => <span>${formatNumber(Number(info.getValue()))}</span>,
+    cell: (info) => <span>${formatNumber(Number(info.getValue()), 6)}</span>,
     meta: {
       sortKey: "cost",
     },
