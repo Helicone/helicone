@@ -5,8 +5,13 @@ import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { GetServerSidePropsContext } from "next";
 import FineTunePage from "../components/templates/fine-tune/fineTunePage";
 
-const FineTuning: NextPageWithLayout = () => {
-  return <FineTunePage />;
+interface FineTuningProps {
+  searchQuery: string | null;
+}
+
+const FineTuning = (props: FineTuningProps) => {
+  const { searchQuery } = props;
+  return <FineTunePage searchQuery={searchQuery} />;
 };
 
 FineTuning.getLayout = function getLayout(page: ReactElement) {
@@ -18,6 +23,7 @@ export default FineTuning;
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   // Create authenticated Supabase Client
   const supabase = new SupabaseServerWrapper(ctx).getClient();
+
   // Check if we have a session
   const {
     data: { session },
@@ -31,10 +37,13 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
       },
     };
 
+  const { q } = ctx.query;
+
   return {
     props: {
       initialSession: session,
       user: session.user,
+      searchQuery: q || null,
     },
   };
 };

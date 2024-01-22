@@ -37,51 +37,87 @@ import JobStatus from "./jobStatus";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { REQUEST_TABLE_FILTERS } from "../../../services/lib/filters/frontendFilterDefs";
 import { DiffHighlight } from "../welcome/diffHighlight";
+import { useRouter } from "next/router";
+import { useDebounce } from "../../../services/hooks/debounce";
 
-interface FineTuningPageProps {}
+interface FineTuningPageProps {
+  searchQuery: string | null;
+}
 
 const FineTuningPage = (props: FineTuningPageProps) => {
-  const {} = props;
+  const { searchQuery } = props;
   const { fetchJawn } = useJawn();
   const [fineTuneOpen, setFineTuneOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [jobOpen, setJobOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<FineTuneJob>();
+  const [currentSearch, setCurrentSearch] = useState<string | null>(null);
 
   const supabaseClient = useSupabaseClient<Database>();
   const orgContext = useOrg();
+  const router = useRouter();
   const { setNotification } = useNotification();
+
+  const debouncedSearch = useDebounce(currentSearch, 700);
 
   const {
     data: jobs,
     isLoading: isJobsLoading,
     refetch,
   } = useQuery({
-    queryKey: ["fine-tune-jobs", orgContext?.currentOrg?.id],
+    queryKey: ["fine-tune-jobs", orgContext?.currentOrg?.id, debouncedSearch],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
-      const { data, error } = await supabaseClient
-        .from("finetune_job")
-        .select("*")
-        .eq("organization_id", orgId);
+      const newSearch = query.queryKey[2];
 
-      const sortedData = data?.sort((a, b) =>
-        a.created_at > b.created_at ? -1 : 1
-      );
+      if (newSearch) {
+        const { data, error } = await supabaseClient
+          .from("finetune_job")
+          .select("*")
+          .eq("organization_id", orgId)
+          .ilike("name", `%${newSearch}%`);
 
-      if (error || !sortedData) {
-        console.error(error);
-        return [];
+        const sortedData = data?.sort((a, b) =>
+          a.created_at > b.created_at ? -1 : 1
+        );
+
+        if (error || !sortedData) {
+          console.error(error);
+          return [];
+        }
+        return await Promise.all(
+          sortedData.map(async (x) => ({
+            ...x,
+            dataFromOpenAI: await fetchJawn({
+              path: `/v1/fine-tune/${x.id}/stats`,
+              method: "GET",
+            }).then((x) => x.json()),
+          }))
+        );
+      } else {
+        const { data, error } = await supabaseClient
+          .from("finetune_job")
+          .select("*")
+          .eq("organization_id", orgId);
+
+        const sortedData = data?.sort((a, b) =>
+          a.created_at > b.created_at ? -1 : 1
+        );
+
+        if (error || !sortedData) {
+          console.error(error);
+          return [];
+        }
+        return await Promise.all(
+          sortedData.map(async (x) => ({
+            ...x,
+            dataFromOpenAI: await fetchJawn({
+              path: `/v1/fine-tune/${x.id}/stats`,
+              method: "GET",
+            }).then((x) => x.json()),
+          }))
+        );
       }
-      return await Promise.all(
-        sortedData.map(async (x) => ({
-          ...x,
-          dataFromOpenAI: await fetchJawn({
-            path: `/v1/fine-tune/${x.id}/stats`,
-            method: "GET",
-          }).then((x) => x.json()),
-        }))
-      );
     },
     refetchOnWindowFocus: false,
     refetchInterval: 5_000,
@@ -124,31 +160,31 @@ const FineTuningPage = (props: FineTuningPageProps) => {
 
         <div className="flex flex-col mt-8">
           <div className="flex flex-row justify-between items-center mb-4">
-            <TextInput
+            {/* <TextInput
               icon={MagnifyingGlassIcon}
               placeholder="Search Job Id..."
               className="max-w-sm"
               onChange={(e) => {
-                // // add this into query params as search
-                // const search = e.target.value as string;
-                // setCurrentSearch(search);
-                // if (search === "") {
-                //   // delete the query param from the url
-                //   delete router.query.q;
-                //   router.push({
-                //     pathname: router.pathname,
-                //     query: { ...router.query },
-                //   });
-                //   refetch();
-                //   return;
-                // }
-                // router.push({
-                //   pathname: router.pathname,
-                //   query: { ...router.query, q: search },
-                // });
-                // refetch();
+                // add this into query params as search
+                const search = e.target.value as string;
+                setCurrentSearch(search);
+                if (search === "") {
+                  // delete the query param from the url
+                  delete router.query.q;
+                  router.push({
+                    pathname: router.pathname,
+                    query: { ...router.query },
+                  });
+                  refetch();
+                  return;
+                }
+                router.push({
+                  pathname: router.pathname,
+                  query: { ...router.query, q: search },
+                });
+                refetch();
               }}
-            />
+            /> */}
             <div className="flex flex-row space-x-2 items-center">
               <button
                 onClick={() => {
