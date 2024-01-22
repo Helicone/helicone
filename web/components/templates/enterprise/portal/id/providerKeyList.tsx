@@ -1,9 +1,5 @@
 import { RadioGroup } from "@headlessui/react";
-import {
-  CheckIcon,
-  InformationCircleIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
+import { CheckIcon, KeyIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { SecretInput } from "../../../../shared/themed/themedTable";
 import { useVaultPage } from "../../../vault/useVaultPage";
 import { clsx } from "../../../../shared/clsx";
@@ -14,6 +10,7 @@ import ThemedModal from "../../../../shared/themed/themedModal";
 import { DecryptedProviderKey } from "../../../../../services/lib/keys";
 import useNotification from "../../../../shared/notification/useNotification";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { PlusCircleIcon } from "@heroicons/react/20/solid";
 
 interface ProviderKeyListProps {
   variant?: "portal" | "basic";
@@ -82,94 +79,116 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
   return (
     <>
       <div className="w-full">
-        <div className="mx-auto w-full space-y-4 mt-8">
+        <div className="mx-auto w-full space-y-2">
           <div className="flex flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 py-2">
-              <h3 className="text-lg font-semibold text-black dark:text-white">
-                Provider Keys
-              </h3>
-              <Tooltip title="This key is securely stored using our vault technologies, with the state of the art encryption.">
-                <InformationCircleIcon className="h-4 w-4 inline text-gray-500" />
+            <div className="flex items-center space-x-1">
+              <Tooltip title="Provider Keys are used to authenticate your requests to the API. This key is securely stored using our vault technologies, with the state of the art encryption.">
+                <label
+                  htmlFor="alert-metric"
+                  className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
+                >
+                  Provider Keys
+                </label>
               </Tooltip>
-            </div>
-
-            <div className="flex flex-row space-x-4">
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setIsProviderOpen(true);
                 }}
-                className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="items-center rounded-lg text-xs flex font-medium text-gray-900 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
-                Create New Key
+                <PlusCircleIcon className="h-4 w-4" />
               </button>
             </div>
           </div>
-          <RadioGroup
-            value={providerKey}
-            onChange={(keyId: string) => {
-              changeProviderKeyHandler(keyId);
-            }}
-          >
-            <RadioGroup.Label className="sr-only">Server size</RadioGroup.Label>
-            <div className="space-y-2">
-              {providerKeys.map((key) => (
-                <RadioGroup.Option
-                  key={key.id}
-                  value={key.id}
-                  className={({ active, checked }) =>
-                    clsx(
-                      checked
-                        ? "bg-sky-100 ring-sky-300 dark:bg-sky-900 dark:ring-sky-700"
-                        : "bg-white ring-gray-300 dark:bg-black dark:ring-gray-700",
-                      "ring-1 relative flex cursor-pointer rounded-lg p-4 shadow-sm focus:outline-none"
-                    )
-                  }
-                >
-                  {({ active, checked }) => (
-                    <>
-                      <div className="flex w-full items-center justify-between">
-                        <div className="flex items-center">
-                          <div className="text-sm flex space-x-2 items-center">
-                            <RadioGroup.Label
-                              as="p"
-                              className={`font-medium text-black dark:text-white`}
-                            >
-                              {key.provider_key_name}
-                            </RadioGroup.Label>
-                            <RadioGroup.Description
-                              as="span"
-                              className={`inline text-gray-500 text-xs pl-2`}
-                            >
-                              <SecretInput
-                                value={key.provider_key || ""}
-                                variant="secondary"
-                              />
-                            </RadioGroup.Description>
+          {providerKeys.length === 0 ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsProviderOpen(true);
+              }}
+              className="p-6 flex flex-col w-full h-full justify-center items-center border border-gray-300 dark:border-gay-700 rounded-md"
+            >
+              <KeyIcon className="h-4 w-4 text-black dark:text-white" />
+              <p className="text-xs text-gray-500 font-semibold pt-2">
+                Please create a provider key.{" "}
+                <Tooltip title="Provider Keys are used to authenticate your requests to the API. This key is securely stored using our vault technologies, with the state of the art encryption.">
+                  <span className="underline cursor-pointer">Learn more.</span>
+                </Tooltip>
+              </p>
+            </button>
+          ) : (
+            <RadioGroup
+              value={providerKey}
+              onChange={(keyId: string) => {
+                changeProviderKeyHandler(keyId);
+              }}
+            >
+              <RadioGroup.Label className="sr-only">
+                Server size
+              </RadioGroup.Label>
+              <div className="space-y-2">
+                {providerKeys.map((key) => (
+                  <RadioGroup.Option
+                    key={key.id}
+                    value={key.id}
+                    className={({ active, checked }) =>
+                      clsx(
+                        checked
+                          ? "bg-sky-100 ring-sky-300 dark:bg-sky-900 dark:ring-sky-700"
+                          : "bg-white ring-gray-300 dark:bg-black dark:ring-gray-700",
+                        "ring-1 relative flex cursor-pointer rounded-lg py-1.5 px-3 shadow-sm focus:outline-none"
+                      )
+                    }
+                  >
+                    {({ active, checked }) => (
+                      <>
+                        <div className="flex w-full items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="text-sm flex space-x-2 items-center">
+                              <RadioGroup.Label
+                                as="p"
+                                className={`font-medium text-black dark:text-white`}
+                              >
+                                {key.provider_key_name}
+                              </RadioGroup.Label>
+                              <RadioGroup.Description
+                                as="span"
+                                className={`inline text-gray-500 text-xs pl-2`}
+                              >
+                                <SecretInput
+                                  value={key.provider_key || ""}
+                                  variant="secondary"
+                                />
+                              </RadioGroup.Description>
+                            </div>
                           </div>
-                        </div>
 
-                        {checked ? (
-                          <CheckIcon
-                            className="h-5 w-5 text-sky-500"
-                            aria-hidden="true"
-                          />
-                        ) : (
-                          <button
-                            onClick={(e) => {
-                              setSelectedProviderKey(key);
-                              setDeleteProviderOpen(true);
-                            }}
-                          >
-                            <TrashIcon className="h-6 w-6 text-red-500 hover:bg-red-100 p-1 rounded-md" />
-                          </button>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </RadioGroup.Option>
-              ))}
-            </div>
-          </RadioGroup>
+                          {checked ? (
+                            <CheckIcon
+                              className="h-5 w-5 text-sky-500"
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedProviderKey(key);
+                                setDeleteProviderOpen(true);
+                              }}
+                              type="button"
+                            >
+                              <TrashIcon className="h-6 w-6 text-red-500 hover:bg-red-100 p-1 rounded-md" />
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </RadioGroup.Option>
+                ))}
+              </div>
+            </RadioGroup>
+          )}
         </div>
       </div>
       <CreateProviderKeyModal
