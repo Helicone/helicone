@@ -36,7 +36,7 @@ const AddMemberModal = (props: AddMemberModalProps) => {
   const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    if (orgContext?.currentOrg?.tier === "free" && members.length >= 5) {
+    if (orgContext?.currentOrg?.tier === "free" && members.length >= 3) {
       setNotification(
         "You have reached the maximum number of members for the free plan.",
         "error"
@@ -45,7 +45,7 @@ const AddMemberModal = (props: AddMemberModalProps) => {
       return;
     }
 
-    if (orgContext?.currentOrg?.tier === "pro" && members.length >= 10) {
+    if (orgContext?.currentOrg?.tier === "pro" && members.length >= 8) {
       setNotification(
         "You have reached the maximum number of members for the pro plan.",
         "error"

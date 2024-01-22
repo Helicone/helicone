@@ -14,6 +14,8 @@ import ModelPill from "../requestsV2/modelPill";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { TimeFilter } from "../../../lib/api/handlerWrappers";
 import { useCachePageClickHouse } from "./useCachePage";
+import { useOrg } from "../../layout/organizationContext";
+import UpgradeProModal from "../../shared/upgradeProModal";
 
 interface CachePageProps {
   currentPage: number;
@@ -43,6 +45,8 @@ const CachePage = (props: CachePageProps) => {
     dbIncrement,
   });
 
+  const orgContext = useOrg();
+
   const [selectedRequest, setSelectedRequest] = useState<{
     request_id: string;
     count: number;
@@ -52,6 +56,7 @@ const CachePage = (props: CachePageProps) => {
     model: string;
   }>();
   const [open, setOpen] = useState<boolean>(false);
+  const [openUpgradeModal, setOpenUpgradeModal] = useState<boolean>(false);
 
   const hasCache = chMetrics.totalCacheHits.data?.data
     ? +chMetrics.totalCacheHits.data?.data === 0
@@ -133,6 +138,28 @@ const CachePage = (props: CachePageProps) => {
               Click here to view our docs on how to enable caching
             </span>
           </a>
+        ) : orgContext?.currentOrg?.tier === "free" ? (
+          <div className="flex flex-col w-full h-[80vh] justify-center items-center">
+            <div className="flex flex-col w-2/5">
+              <CircleStackIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+              <p className="text-xl text-black dark:text-white font-semibold mt-8">
+                Cache is a paid feature
+              </p>
+              <p className="text-sm text-gray-500 max-w-sm mt-2">
+                Upgrade your plan to get access to this feature.
+              </p>
+              <div className="mt-4">
+                <button
+                  onClick={() => {
+                    setOpenUpgradeModal(true);
+                  }}
+                  className="items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  Upgrade
+                </button>
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="gap-4 grid grid-cols-8">
             <div className="col-span-8 md:col-span-3 grid grid-cols-1 text-gray-900 gap-4">
@@ -253,6 +280,7 @@ const CachePage = (props: CachePageProps) => {
           </div>
         </div>
       </ThemedDrawer>
+      <UpgradeProModal open={openUpgradeModal} setOpen={setOpenUpgradeModal} />
     </>
   );
 };
