@@ -1,13 +1,7 @@
 import {
   Card,
-  Tab,
-  TabGroup,
-  TabList,
-  TabPanel,
-  TabPanels,
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeaderCell,
   TableRow,
@@ -16,8 +10,6 @@ import {
 import {
   ArrowRightIcon,
   ArrowTopRightOnSquareIcon,
-  BuildingStorefrontIcon,
-  ChartPieIcon,
   CircleStackIcon,
   ClipboardDocumentListIcon,
   MagnifyingGlassIcon,
@@ -31,7 +23,6 @@ import { useOrg } from "../../layout/organizationContext";
 import { Database } from "../../../supabase/database.types";
 import { getUSDate, getUSDateFromString } from "../../shared/utils/utils";
 import { middleTruncString } from "../../../lib/stringHelpers";
-import { ChevronRightIcon } from "@heroicons/react/20/solid";
 import JobRow, { FineTuneJob } from "./jobRow";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedModal from "../../shared/themed/themedModal";
@@ -422,8 +413,11 @@ chat_completion = client.chat.completions.create(
                 !Array.isArray(jobFilters) ? (
                   <p className="text-sm">None</p>
                 ) : (
-                  jobFilters.map((_filter) => (
-                    <li className="flex flex-row text-sm space-x-1 items-center">
+                  jobFilters.map((_filter, i) => (
+                    <li
+                      className="flex flex-row text-sm space-x-1 items-center"
+                      key={`_filter_${i}`}
+                    >
                       <ArrowRightIcon className="w-3 h-3" />
                       <span className="font-semibold">
                         {filterMap[_filter.filterMapIdx]?.label}

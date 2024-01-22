@@ -3,9 +3,7 @@ import { getUSDate, getUSDateFromString } from "../../shared/utils/utils";
 import { middleTruncString } from "../../../lib/stringHelpers";
 import {
   ArrowRightIcon,
-  ChevronRightIcon,
   EllipsisHorizontalIcon,
-  EyeIcon,
 } from "@heroicons/react/20/solid";
 import { Database } from "../../../supabase/database.types";
 import {
@@ -14,13 +12,9 @@ import {
 } from "openai/resources/fine-tuning/jobs";
 import ThemedModal from "../../shared/themed/themedModal";
 import { useState } from "react";
-import {
-  ArrowTopRightOnSquareIcon,
-  CircleStackIcon,
-} from "@heroicons/react/24/outline";
+import { CircleStackIcon } from "@heroicons/react/24/outline";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { REQUEST_TABLE_FILTERS } from "../../../services/lib/filters/frontendFilterDefs";
-import Link from "next/link";
 import ModelPill from "../requestsV2/modelPill";
 import useNotification from "../../shared/notification/useNotification";
 import { Tooltip } from "@mui/material";
@@ -131,8 +125,11 @@ const JobRow = (props: JobRowProps) => {
                 !Array.isArray(jobFilters) ? (
                   <p className="text-sm">None</p>
                 ) : (
-                  jobFilters.map((_filter) => (
-                    <li className="flex flex-row text-sm space-x-1 items-center">
+                  jobFilters.map((_filter, i) => (
+                    <li
+                      className="flex flex-row text-sm space-x-1 items-center"
+                      key={`job_row_filter_${i}`}
+                    >
                       <ArrowRightIcon className="w-3 h-3" />
                       <span className="font-semibold">
                         {filterMap[_filter.filterMapIdx]?.label}

@@ -4,14 +4,13 @@ import { useState } from "react";
 import { Database } from "../../../supabase/database.types";
 import { useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../layout/organizationContext";
-import { PlusCircleIcon, PlusIcon } from "@heroicons/react/20/solid";
+import { PlusCircleIcon } from "@heroicons/react/20/solid";
 import { Tooltip } from "@mui/material";
 import {
   ArrowPathIcon,
   CircleStackIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
-import { clsx } from "../../shared/clsx";
 import ProviderKeyList from "../enterprise/portal/id/providerKeyList";
 import useNotification from "../../shared/notification/useNotification";
 import Link from "next/link";

@@ -108,8 +108,13 @@ export default function CodeSnippet(props: CodeSnippetProps) {
     <div className="w-full flex flex-col">
       <TabGroup>
         <TabList className="font-semibold" variant="solid">
-          {Object.entries(NAMES).map(([key, name]) => (
-            <Tab onClick={() => setLang(key as SupportedLanguages)}>{name}</Tab>
+          {Object.entries(NAMES).map(([key, name], i) => (
+            <Tab
+              onClick={() => setLang(key as SupportedLanguages)}
+              key={`code_snip_tab_${i}`}
+            >
+              {name}
+            </Tab>
           ))}
         </TabList>
       </TabGroup>

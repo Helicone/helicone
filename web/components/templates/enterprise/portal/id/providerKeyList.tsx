@@ -1,10 +1,5 @@
 import { RadioGroup } from "@headlessui/react";
-import {
-  CheckIcon,
-  InformationCircleIcon,
-  KeyIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
+import { CheckIcon, KeyIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { SecretInput } from "../../../../shared/themed/themedTable";
 import { useVaultPage } from "../../../vault/useVaultPage";
 import { clsx } from "../../../../shared/clsx";
