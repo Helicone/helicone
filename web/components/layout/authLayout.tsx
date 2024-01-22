@@ -410,7 +410,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     {nav.name}
                     {nav.featured && (
                       <Badge size="xs">
-                        <div className="text-xs">New</div>
+                        <span className="text-xs">New</span>
                       </Badge>
                     )}
                   </Link>

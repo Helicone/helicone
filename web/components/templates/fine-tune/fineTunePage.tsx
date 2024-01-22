@@ -160,6 +160,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
 
         <div className="flex flex-col mt-8">
           <div className="flex flex-row justify-between items-center mb-4">
+            <div />
             {/* <TextInput
               icon={MagnifyingGlassIcon}
               placeholder="Search Job Id..."
