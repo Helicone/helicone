@@ -150,7 +150,7 @@ const WelcomePage = (props: WelcomePageProps) => {
           </button>
         </div>
         {stepArray[step]}
-        <div className="w-full mx-auto flex bg-white dark:bg-black py-4">
+        <div className="w-full mx-auto flex bg-white dark:bg-black py-8">
           <ul className="flex flex-row gap-6 items-center w-full mx-auto justify-center">
             <button className="mr-6">
               <ChevronLeftIcon

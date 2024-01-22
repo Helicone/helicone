@@ -273,6 +273,7 @@ export interface Database {
       finetune_dataset: {
         Row: {
           created_at: string
+          filter_node: string | null
           filters: string | null
           id: string
           name: string
@@ -280,6 +281,7 @@ export interface Database {
         }
         Insert: {
           created_at?: string
+          filter_node?: string | null
           filters?: string | null
           id?: string
           name: string
@@ -287,6 +289,7 @@ export interface Database {
         }
         Update: {
           created_at?: string
+          filter_node?: string | null
           filters?: string | null
           id?: string
           name?: string

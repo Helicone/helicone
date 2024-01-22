@@ -31,7 +31,7 @@ import RequestCard from "./requestCard";
 import getNormalizedRequest from "./builder/requestBuilder";
 import { getHeliconeCookie } from "../../../lib/cookies";
 import { useOrg } from "../../layout/organizationContext";
-import { FineTuneModal } from "../fine-tune/fineTuneModal";
+import { CreateDataSetModal } from "../fine-tune/dataSetModal";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -426,7 +426,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             setAdvancedFilters: onSetAdvancedFilters,
             searchPropertyFilters: searchPropertyFilters,
           }}
-          onFineTune={() => {
+          onDataSet={() => {
             setFineTuneModalOpen(true);
           }}
           exportData={requests.map((request) => {
@@ -502,10 +502,12 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           }
         }}
       />
-      <FineTuneModal
+      <CreateDataSetModal
         filter={builtFilter}
         setOpen={setFineTuneModalOpen}
         open={fineTuneModalOpen}
+        uiFilter={advancedFilters}
+        filterMap={filterMap}
       />
     </div>
   );

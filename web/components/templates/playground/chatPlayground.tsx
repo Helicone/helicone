@@ -3,14 +3,15 @@ import {
   PaperAirplaneIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
-import { clsx } from "../../shared/clsx";
 import { useState } from "react";
+import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
-import { ChatCompletionRequestMessage } from "openai";
-import ChatRow from "./chatRow";
+
+import { ChatCompletionCreateParams } from "openai/resources/chat";
 import { fetchOpenAI } from "../../../services/lib/openAI";
 import { Message } from "../requests/chat";
 import ModelPill from "../requestsV2/modelPill";
+import ChatRow from "./chatRow";
 
 interface ChatPlaygroundProps {
   requestId: string;
@@ -52,7 +53,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
 
         // Perform the OpenAI request
         const { data, error } = await fetchOpenAI(
-          historyWithoutId as ChatCompletionRequestMessage[],
+          historyWithoutId as unknown as ChatCompletionCreateParams[],
           requestId,
           temperature,
           model,
