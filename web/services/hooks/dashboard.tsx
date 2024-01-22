@@ -72,34 +72,32 @@ const useGetUnauthorized = (userId: string) => {
   }
   const org = useOrg();
 
-  // const { data: count, isLoading: isCountLoading } = useQuery({
-  //   queryKey: [`requestCount`],
-  //   queryFn: async (query) => {
-  //     const data = await fetch(`/api/request/ch/count`, {
-  //       method: "POST",
-  //       body: JSON.stringify({
-  //         filter: {
-  //           left: {
-  //             response_copy_v3: {
-  //               request_created_at: {
-  //                 gte: getBeginningOfMonth(),
-  //               },
-  //             },
-  //           },
-  //           operator: "and",
-  //           right: "all",
-  //         },
-  //       }),
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //     }).then((res) => res.json() as Promise<Result<number, string>>);
-  //     return data;
-  //   },
-  //   refetchOnWindowFocus: false,
-  // });
-
-  let count = { data: 1_000_000 };
+  const { data: count, isLoading: isCountLoading } = useQuery({
+    queryKey: [`requestCount`],
+    queryFn: async (query) => {
+      const data = await fetch(`/api/request/ch/count`, {
+        method: "POST",
+        body: JSON.stringify({
+          filter: {
+            left: {
+              response_copy_v3: {
+                request_created_at: {
+                  gte: getBeginningOfMonth(),
+                },
+              },
+            },
+            operator: "and",
+            right: "all",
+          },
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then((res) => res.json() as Promise<Result<number, string>>);
+      return data;
+    },
+    refetchOnWindowFocus: false,
+  });
 
   const checkAuthorizedByTier = () => {
     const currentTier = org?.currentOrg?.tier;
