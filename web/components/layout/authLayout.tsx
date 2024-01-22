@@ -21,6 +21,7 @@ import {
   SunIcon,
   MoonIcon,
   SparklesIcon,
+  CircleStackIcon,
 } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
@@ -109,7 +110,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     {
       name: "Cache",
       href: "/cache",
-      icon: BellIcon,
+      icon: CircleStackIcon,
       current: pathname.includes("/cache"),
     },
     {
