@@ -6,7 +6,6 @@ import { GetServerSidePropsContext } from "next";
 import { isCustomerDomain } from "../lib/customerPortalHelpers";
 import { supabaseServer } from "../lib/supabaseServer";
 import { Result, err, ok } from "../lib/result";
-import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 
 export type CustomerPortalContent = {
   domain: string;
@@ -77,19 +76,6 @@ const SignIn = ({
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const supabase = new SupabaseServerWrapper(context).getClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (session) {
-    return {
-      redirect: {
-        destination: "/dashboard",
-        permanent: false,
-      },
-    };
-  }
   if (isCustomerDomain(context.req.headers.host ?? "")) {
     const org = await supabaseServer
       .from("organization")
