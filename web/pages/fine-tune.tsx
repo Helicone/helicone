@@ -10,7 +10,7 @@ interface FineTuningProps {
 
 const FineTuning = (props: FineTuningProps) => {
   const { searchQuery } = props;
-  return <FineTunePage searchQuery={searchQuery} />;
+  return <FineTunePage />;
 };
 
 FineTuning.getLayout = function getLayout(page: ReactElement) {
