@@ -193,21 +193,17 @@ const FineTurnForm = (props: FineTurnFormProps) => {
             </Select>
           ) : (
             <>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectAllRequests(false);
-                }}
-                type="button"
+              <Link
+                href="/requests"
                 className="relative block w-full rounded-lg border bg-gray-50 hover:bg-gray-100 dark:bg-gray-950 dark:hover:bg-gray-900 hover:cursor-pointer border-gray-300 dark:border-gray-700 p-8 text-center"
               >
                 <div className="w-full justify-center align-middle items-center">
                   <CircleStackIcon className="h-6 w-6 mx-auto text-gray-900" />
                 </div>
                 <span className="mt-2 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                  Click here to generate a new data set
+                  Go to the requests tab to create a data set
                 </span>
-              </button>
+              </Link>
             </>
           )}
           <Divider className="text-xs py-2">Or</Divider>
