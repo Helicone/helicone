@@ -2,7 +2,6 @@ import {
   BanknotesIcon,
   CircleStackIcon,
   ClockIcon,
-  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { MetricsPanel } from "../../shared/metrics/metricsPanel";
