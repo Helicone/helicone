@@ -64,7 +64,7 @@ const useOrgTier = () => {
   });
 };
 
-const useGetAuthorized = (userId: string) => {
+const useGetUnauthorized = (userId: string) => {
   function getBeginningOfMonth() {
     const today = new Date();
     const firstDateOfMonth = format(today, "yyyy-MM-01");
@@ -72,38 +72,54 @@ const useGetAuthorized = (userId: string) => {
   }
   const org = useOrg();
 
-  const { data: count, isLoading: isCountLoading } = useQuery({
-    queryKey: [`requestCount`],
-    queryFn: async (query) => {
-      const data = await fetch(`/api/request/ch/count`, {
-        method: "POST",
-        body: JSON.stringify({
-          filter: {
-            left: {
-              response_copy_v3: {
-                request_created_at: {
-                  gte: getBeginningOfMonth(),
-                },
-              },
-            },
-            operator: "and",
-            right: "all",
-          },
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }).then((res) => res.json() as Promise<Result<number, string>>);
-      return data;
-    },
-    refetchOnWindowFocus: false,
-  });
+  // const { data: count, isLoading: isCountLoading } = useQuery({
+  //   queryKey: [`requestCount`],
+  //   queryFn: async (query) => {
+  //     const data = await fetch(`/api/request/ch/count`, {
+  //       method: "POST",
+  //       body: JSON.stringify({
+  //         filter: {
+  //           left: {
+  //             response_copy_v3: {
+  //               request_created_at: {
+  //                 gte: getBeginningOfMonth(),
+  //               },
+  //             },
+  //           },
+  //           operator: "and",
+  //           right: "all",
+  //         },
+  //       }),
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     }).then((res) => res.json() as Promise<Result<number, string>>);
+  //     return data;
+  //   },
+  //   refetchOnWindowFocus: false,
+  // });
+
+  let count = { data: 1_000_000 };
+
+  const checkAuthorizedByTier = () => {
+    const currentTier = org?.currentOrg?.tier;
+
+    if (currentTier === "free") {
+      return Number(count?.data || 0) > 50_000;
+    }
+
+    if (currentTier === "pro") {
+      return Number(count?.data || 0) > 500_000;
+    }
+
+    return false;
+  };
 
   return {
-    authorized:
-      org?.currentOrg?.tier === "free" && Number(count?.data || 0) > 100_000,
-    isLoading: isCountLoading,
+    unauthorized: checkAuthorizedByTier(),
+    isLoading: false,
+    currentTier: org?.currentOrg?.tier,
   };
 };
 
-export { useGetTopUsers, useGetAuthorized };
+export { useGetTopUsers, useGetUnauthorized };
