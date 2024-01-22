@@ -64,7 +64,7 @@ const useOrgTier = () => {
   });
 };
 
-const useGetAuthorized = (userId: string) => {
+const useGetUnauthorized = (userId: string) => {
   function getBeginningOfMonth() {
     const today = new Date();
     const firstDateOfMonth = format(today, "yyyy-MM-01");
@@ -99,11 +99,25 @@ const useGetAuthorized = (userId: string) => {
     refetchOnWindowFocus: false,
   });
 
+  const checkAuthorizedByTier = () => {
+    const currentTier = org?.currentOrg?.tier;
+
+    if (currentTier === "free") {
+      return Number(count?.data || 0) > 50_000;
+    }
+
+    if (currentTier === "pro") {
+      return Number(count?.data || 0) > 500_000;
+    }
+
+    return false;
+  };
+
   return {
-    authorized:
-      org?.currentOrg?.tier === "free" && Number(count?.data || 0) > 100_000,
-    isLoading: isCountLoading,
+    unauthorized: checkAuthorizedByTier(),
+    isLoading: false,
+    currentTier: org?.currentOrg?.tier,
   };
 };
 
-export { useGetTopUsers, useGetAuthorized };
+export { useGetTopUsers, useGetUnauthorized };

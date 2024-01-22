@@ -28,7 +28,7 @@ import OpenAI from "openai";
 
 const openai = new OpenAI({
   apiKey: request.env.OPENAI_API_KEY,
-  baseURL: "https://oai.hconeai.com/v1",
+  baseURL: "${BASE_PATH}",
   defaultHeaders: {
     "Helicone-Auth": "Bearer ${key}",
   },
@@ -51,10 +51,10 @@ client = OpenAI(
 openai.api_base = "${BASE_PATH}"
 
 llm = ChatOpenAI(
-    openai_api_key='<>',
-    headers={
-        "Helicone-Auth": f"Bearer ${key}"
-    },
+  openai_api_key='<>',
+  headers={
+    "Helicone-Auth": f"Bearer ${key}"
+  },
 )
   
 `,
@@ -64,7 +64,7 @@ import OpenAI from "openai";
 const llm = new OpenAI({
   modelName: "gpt-3.5-turbo",
   configuration: {
-    basePath: "https://oai.hconeai.com/v1",
+    baseUrl: "${BASE_PATH}",
     defaultHeaders: {
       "Helicone-Auth": "Bearer ${key}",
     },
