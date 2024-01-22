@@ -5,14 +5,12 @@ import {
   TableHead,
   TableHeaderCell,
   TableRow,
-  TextInput,
 } from "@tremor/react";
 import {
   ArrowRightIcon,
   ArrowTopRightOnSquareIcon,
   CircleStackIcon,
   ClipboardDocumentListIcon,
-  MagnifyingGlassIcon,
   PlusIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
@@ -38,7 +36,6 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { REQUEST_TABLE_FILTERS } from "../../../services/lib/filters/frontendFilterDefs";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import { useRouter } from "next/router";
-import { useDebounce } from "../../../services/hooks/debounce";
 
 interface FineTuningPageProps {}
 

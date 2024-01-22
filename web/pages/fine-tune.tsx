@@ -1,5 +1,4 @@
 import { ReactElement } from "react";
-import { NextPageWithLayout } from "./_app";
 import AuthLayout from "../components/layout/authLayout";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { GetServerSidePropsContext } from "next";
