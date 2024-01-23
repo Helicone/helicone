@@ -77,11 +77,11 @@
     {
       "group": "Integrations",
       "pages": [
-        "getting-started/integration-method/gateway",
-        "getting-started/integration-method/gateway-fallbacks",
         {
           "group": "Proxy",
           "pages": [
+            "getting-started/integration-method/gateway",
+            "getting-started/integration-method/gateway-fallbacks",
             "getting-started/integration-method/openai-proxy",
             "getting-started/integration-method/anthropic",
             "getting-started/integration-method/azure",
@@ -92,10 +92,16 @@
           "group": "Async",
           "pages": [
             "getting-started/integration-method/openai",
-            "getting-started/integration-method/litellm"
+            "getting-started/integration-method/custom"
           ]
         },
-        "getting-started/integration-method/custom"
+        {
+          "group": "Community",
+          "pages": [
+            "getting-started/integration-method/openrouter",
+            "getting-started/integration-method/litellm"
+          ]
+        }
       ]
     },
     {
