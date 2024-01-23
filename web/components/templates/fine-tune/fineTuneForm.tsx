@@ -141,7 +141,7 @@ const FineTurnForm = (props: FineTurnFormProps) => {
         <div className="flex flex-col space-y-1">
           <label
             htmlFor="alert-metric"
-            className="text-gray-900 text-xs font-semibold"
+            className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
           >
             Base Model
           </label>
@@ -156,7 +156,7 @@ const FineTurnForm = (props: FineTurnFormProps) => {
           <div className="flex flex-row space-x-1 items-center">
             <label
               htmlFor="alert-metric"
-              className="text-gray-900 text-xs font-semibold"
+              className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
             >
               Data Sets{" "}
               <span className="text-gray-500">
@@ -171,7 +171,7 @@ const FineTurnForm = (props: FineTurnFormProps) => {
                 href="/requests"
                 className="items-center rounded-lg text-xs flex font-medium text-gray-900 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
-                <PlusCircleIcon className="h-4 w-4" />
+                <PlusCircleIcon className="h-4 w-4 dark:text-gray-100" />
               </Link>
             </Tooltip>
           </div>
@@ -198,7 +198,7 @@ const FineTurnForm = (props: FineTurnFormProps) => {
                 className="relative block w-full rounded-lg border bg-gray-50 hover:bg-gray-100 dark:bg-gray-950 dark:hover:bg-gray-900 hover:cursor-pointer border-gray-300 dark:border-gray-700 p-8 text-center"
               >
                 <div className="w-full justify-center align-middle items-center">
-                  <CircleStackIcon className="h-6 w-6 mx-auto text-gray-900" />
+                  <CircleStackIcon className="h-6 w-6 mx-auto text-gray-900 dark:text-gray-100" />
                 </div>
                 <span className="mt-2 block text-xs font-medium text-gray-700 dark:text-gray-300">
                   Go to the requests tab to create a data set
@@ -228,7 +228,7 @@ const FineTurnForm = (props: FineTurnFormProps) => {
                 <div className="ml-3 text-sm leading-6">
                   <label
                     htmlFor="comments"
-                    className="font-medium text-gray-900"
+                    className="font-medium text-gray-900 dark:text-gray-100"
                   >
                     Select All Requests
                   </label>{" "}
