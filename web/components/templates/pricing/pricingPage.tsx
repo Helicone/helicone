@@ -408,48 +408,73 @@ export default function Example() {
           id="startup"
           className="flex flex-col max-w-6xl mx-auto p-4 lg:px-8 mt-8 mb-32 lg:flex antialiased"
         >
-          <div className="border border-gray-300 rounded-lg shadow-lg p-12">
-            <section className="font-semibold text-4xl">
+          <div className="border border-gray-300 rounded-lg shadow-lg p-6 sm:p-12">
+            <section className="font-semibold text-3xl sm:text-4xl">
               Helicone for{" "}
               <span className="md:border border-sky-600 border-dashed text-sky-600 md:py-1 md:px-2">
                 startups
               </span>
             </section>
-            <p className="mt-4 text-lg text-gray-700">
+            <p className="mt-4 text-sm sm:text-lg text-gray-700">
               If your startup is under two years old and has raised less than
               $5m, consider our startup program.
             </p>
-            <p className="mt-8 text-md font-semibold text-gray-700">Benefits</p>
+            <p className="mt-8 text-sm sm:text-md font-semibold text-gray-700">
+              Benefits
+            </p>
             <div className="flex flex-col md:flex-row justify-between w-full py-4">
-              <div className="flex flex-col gap-4 w-full">
+              <div className="flex flex-col gap-4 w-full text-sm sm:text-md">
                 <div className="flex items-center gap-4 col-span-1">
                   <CheckCircleIcon
-                    className="h-5 w-5 text-sky-600"
+                    className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600"
                     aria-hidden="true"
                   />
                   Discount on Pro plan
                 </div>
                 <div className="flex items-center gap-4 col-span-1">
                   <CheckCircleIcon
-                    className="h-5 w-5 text-sky-600"
+                    className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600"
                     aria-hidden="true"
                   />
                   Customer Success Channel
                 </div>
                 <div className="flex items-center gap-4 col-span-1">
                   <CheckCircleIcon
-                    className="h-5 w-5 text-sky-600"
+                    className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600"
                     aria-hidden="true"
                   />
                   Helicone Merch
                 </div>
                 <div className="flex items-center gap-4 col-span-1">
                   <CheckCircleIcon
-                    className="h-5 w-5 text-sky-600"
+                    className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600"
                     aria-hidden="true"
                   />
                   Startup Spotlight
                 </div>
+                <figure className="mt-8 sm:mt-32 border-l border-gray-200 pl-4 pr-4 sm:pl-8 sm:pr-16 text-gray-600">
+                  <blockquote className="text-xs sm:text-base leading-7">
+                    <p>
+                      “Vel ultricies morbi odio facilisi ultrices accumsan donec
+                      lacus purus. Lectus nibh ullamcorper ac dictum justo in
+                      euismod. Risus aenean ut elit massa. In amet aliquet eget
+                      cras. Sem volutpat enim tristique.”
+                    </p>
+                  </blockquote>
+                  <figcaption className="mt-6 flex gap-x-4 text-xs sm:text-sm leading-6">
+                    <img
+                      src="https://images.unsplash.com/photo-1509783236416-c9ad59bae472?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80"
+                      alt=""
+                      className="h-6 w-6 flex-none rounded-full"
+                    />
+                    <div>
+                      <span className="font-semibold text-gray-900">
+                        Maria Hill
+                      </span>{" "}
+                      – Marketing Manager
+                    </div>
+                  </figcaption>
+                </figure>
               </div>
               <div className="w-full -mt-8">
                 <ContactForm
