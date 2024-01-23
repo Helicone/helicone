@@ -9,6 +9,15 @@ import OrgMemberItem from "../orgMemberItem";
 import { useOrg } from "../../../layout/organizationContext";
 import AddMemberModal from "../addMemberModal";
 import { clsx } from "../../../shared/clsx";
+import { Card, Flex, ProgressCircle, Badge } from "@tremor/react";
+import {
+  BuildingOffice2Icon,
+  CloudArrowUpIcon,
+  CreditCardIcon,
+} from "@heroicons/react/24/outline";
+import UpgradeProModal from "../../../shared/upgradeProModal";
+import Link from "next/link";
+import useNotification from "../../../shared/notification/useNotification";
 
 interface OrgMembersPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -16,8 +25,9 @@ interface OrgMembersPageProps {
 }
 
 const OrgMembersPage = (props: OrgMembersPageProps) => {
-  const { org, wFull = false } = props;
-
+  const { org, wFull = true } = props;
+  const { setNotification } = useNotification();
+  const [open, setOpen] = useState(false);
   const { data, isLoading, refetch } = useGetOrgMembers(org.id);
 
   const { data: orgOwner, isLoading: isOrgOwnerLoading } = useGetOrgOwner(
@@ -64,12 +74,37 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
   const isUserAdmin =
     isOwner || members.find((m) => m.member === user?.id)?.org_role === "admin";
 
+  let tierBadgeText = "";
+  let maxSeats = 0;
+  let tierColor = "";
+
+  org.tier = "free";
+
+  if (org.tier === "enterprise") {
+    tierBadgeText = "Enterprise";
+    tierColor = "purple";
+    maxSeats = 100;
+  } else if (org.tier === "pro") {
+    tierBadgeText = "Pro";
+    tierColor = "pink";
+    maxSeats = 8;
+  } else {
+    tierBadgeText = "Free";
+    tierColor = "";
+    maxSeats = 3;
+  }
+
+  // Calculate the percentage of used seats
+  const usedSeatsPercentage = members.length
+    ? (members.length / maxSeats) * 100
+    : 0;
+
   return (
     <>
       <div
         className={clsx(
           wFull ? "w-full" : "max-w-2xl",
-          "flex flex-col text-gray-900 dark:text-gray-100 space-y-8"
+          "flex flex-row text-gray-900 dark:text-gray-100 space-y-8 space-x-2"
         )}
       >
         <div className="flex flex-col h-full space-y-4 w-full mt-8">
@@ -112,7 +147,187 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
             </ul>
           )}
         </div>
+        <div className="flex flex-auto">
+          {isLoading || isOrgOwnerLoading ? (
+            <Card className="w-full mx-auto animate-pulse">
+              <Flex className="space-y-5 min-w-20">
+                <div className="flex-1 space-y-6 py-1">
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="h-4 bg-slate-200 rounded col-span-2"></div>
+                      <div className="h-4 bg-slate-200 rounded col-span-1"></div>
+                    </div>
+                    <div className="h-12 bg-slate-200 rounded"></div>
+                    <div className="rounded-full bg-slate-200 h-40 w-40 mx-auto"></div>
+                    <div className="h-24 bg-slate-200 rounded"></div>
+                  </div>
+                </div>
+              </Flex>
+            </Card>
+          ) : (
+            <Card className="w-full mx-auto">
+              <Flex className="space-y-5 flex flex-col" justifyContent="center">
+                <div>
+                  <p>
+                    <span className="font-semibold dark:text-white">
+                      Organization Plan
+                    </span>{" "}
+                    <Badge size="md" color={tierColor}>
+                      {tierBadgeText}
+                    </Badge>
+                  </p>
+                  <p className="font-small text-gray-600 dark:text-gray-300">
+                    This organization can only have {maxSeats} seats.{" "}
+                    {org.tier === "free" ? (
+                      <>
+                        <button
+                          onClick={() => setOpen(true)}
+                          className="font-bold underline"
+                        >
+                          Upgrade
+                        </button>{" "}
+                        to add more.
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                  </p>
+                </div>
+                <ProgressCircle
+                  value={usedSeatsPercentage}
+                  color={tierColor}
+                  size="xl"
+                >
+                  <span className="text-xs text-gray-700 dark:text-gray-200 font-medium flex flex-col items-center">
+                    {Math.round(usedSeatsPercentage)}%
+                    <br />
+                    <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                      {members.length} / {maxSeats} seats used
+                    </span>
+                  </span>
+                </ProgressCircle>
+                {/* Button to upgrade */}
+                <div className="flex flex-col space-y-2">
+                  {org.tier === "free" && (
+                    <div className="relative flex items-center space-x-4 rounded-xl p-3 focus-within:ring-2 focus-within:ring-sky-500 hover:bg-gray-100 dark:hover:bg-gray-900">
+                      <div
+                        className={clsx(
+                          "bg-pink-500",
+                          "flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg"
+                        )}
+                      >
+                        <CloudArrowUpIcon
+                          className="h-6 w-6 text-white"
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          <button
+                            onClick={() => setOpen(true)}
+                            className="focus:outline-none"
+                          >
+                            <span
+                              className="absolute inset-0"
+                              aria-hidden="true"
+                            />
+                            <span>Upgrade to Pro</span>
+                            <span aria-hidden="true"> &rarr;</span>
+                          </button>
+                        </h3>
+                        <p className="mt-1 text-sm text-gray-500">
+                          Unlimited requests and essential tooling for a low
+                          price.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {org.tier !== "free" && (
+                    <div className="relative flex items-center space-x-4 rounded-xl p-3 focus-within:ring-2 focus-within:ring-sky-500 hover:bg-gray-100 dark:hover:bg-gray-900">
+                      <div
+                        className={clsx(
+                          "bg-green-500",
+                          "flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg"
+                        )}
+                      >
+                        <CreditCardIcon
+                          className="h-6 w-6 text-white dark:text-black"
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          <button
+                            className="focus:outline-none"
+                            onClick={async () => {
+                              const x = await fetch(
+                                "/api/subscription/get_portal_link"
+                              ).then((res) => res.json());
+                              if (!x.data) {
+                                setNotification("Error getting link", "error");
+                                return;
+                              }
+
+                              window.open(x.data, "_blank");
+                            }}
+                          >
+                            <span
+                              className="absolute inset-0"
+                              aria-hidden="true"
+                            />
+                            <span>Manage Plan</span>
+                            <span aria-hidden="true"> &rarr;</span>
+                          </button>
+                        </h3>
+                        <p className="mt-1 text-sm text-gray-500">
+                          Unlimited requests and essential tooling for a low
+                          price.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {org.tier !== "enterprise" && (
+                    <div className="relative flex items-center space-x-4 rounded-xl p-3 focus-within:ring-2 focus-within:ring-sky-500 hover:bg-gray-100 dark:hover:bg-gray-900">
+                      <div
+                        className={clsx(
+                          "bg-purple-500",
+                          "flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg"
+                        )}
+                      >
+                        <BuildingOffice2Icon
+                          className="h-6 w-6 text-white"
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          <Link
+                            className="focus:outline-none"
+                            href={
+                              "https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call"
+                            }
+                          >
+                            <span
+                              className="absolute inset-0"
+                              aria-hidden="true"
+                            />
+                            <span>Enterprise</span>
+                            <span aria-hidden="true"> &rarr;</span>
+                          </Link>
+                        </h3>
+                        <p className="mt-1 text-sm text-gray-500">
+                          Need a custom plan? Contact us to learn more.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Flex>
+            </Card>
+          )}
+        </div>
       </div>
+      <UpgradeProModal open={open} setOpen={setOpen} />
       <AddMemberModal
         orgId={org.id}
         orgOwnerId={org.owner}
