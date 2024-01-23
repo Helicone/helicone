@@ -1,0 +1,39 @@
+---
+title: "OpenRouter"
+---
+
+[OpenRouter](https://openrouter.ai/) is a tool that helps you integrate multiple NLP APIs in your application. It provides a single API endpoint that you can use to call multiple NLP APIs.
+
+You can follow their documentation here: [https://openrouter.ai/docs#quick-start](https://openrouter.ai/docs#quick-start)
+
+Just replace the following URLs in their documentation with the ones below:
+
+`https://openrouter.ai/api/v1/chat/completions` -> `https://gateway.hconeai.com/v1/chat/completions`
+
+and then depending on how you are calling openrouter, you can add the following header
+
+`Helicone-Target-Url: "https://openrouter.ai/"`
+
+now you are integrated with OpenRouter and Helicone in 2 lines of code!
+
+For more information on how to use headers, see [Helicone Headers](https://docs.helicone.ai/helicone-headers/intro#utilizing-headers) docs.
+
+## Example
+
+```typescript
+fetch("https://gateway.hconeai.com/api/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+    "Helicone-Target-Url": "https://openrouter.ai/",
+    "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
+    "HTTP-Referer": `${YOUR_SITE_URL}`, // Optional, for including your app on openrouter.ai rankings.
+    "X-Title": `${YOUR_SITE_NAME}`, // Optional. Shows in rankings on openrouter.ai.
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "openai/gpt-3.5-turbo", // Optional (user controls the default),
+    messages: [{ role: "user", content: "What is the meaning of life?" }],
+  }),
+});
+```
