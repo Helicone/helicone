@@ -28,6 +28,7 @@ export interface DBLoggableProps {
     status: () => Promise<number>;
     responseHeaders: Headers;
     omitLog: boolean;
+    forceModel: string | null;
   };
   request: {
     requestId: string;
@@ -141,6 +142,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       responseHeaders: providerResponseHeaders,
       status: async () => asyncLogModel.providerResponse.status,
       omitLog: false,
+      forceModel: props.requestWrapper.heliconeHeaders.forceModel,
     },
     timing: {
       startTime: new Date(
@@ -302,12 +304,14 @@ export class DBLoggable {
       const { error } = await queue.updateResponse(
         this.response.responseId,
         this.request.requestId,
-        response
+        response,
+        this.response.forceModel
       );
       if (error !== null) {
         console.error("Error updating response", error);
         // return err(error);
       }
+
       return ok(response);
     } catch (e) {
       const { error } = await queue.updateResponse(
@@ -321,7 +325,8 @@ export class DBLoggable {
               await this.response.getResponseBody()
             ).body,
           },
-        }
+        },
+        this.response.forceModel
       );
       if (error !== null) {
         return err(error);
@@ -491,7 +496,8 @@ export class DBLoggable {
       responseResult.data,
       requestResult.data.properties,
       requestResult.data.node,
-      db.clickhouse
+      db.clickhouse,
+      this.response.forceModel
     );
 
     // TODO We should probably move the webhook stuff out of dbLogger

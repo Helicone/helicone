@@ -9,7 +9,8 @@ export function formatTimeString(timeString: string): string {
 function buildPropertyWithResponseInserts(
   request: Database["public"]["Tables"]["request"]["Row"],
   response: Database["public"]["Tables"]["response"]["Insert"],
-  properties: Database["public"]["Tables"]["properties"]["Insert"][]
+  properties: Database["public"]["Tables"]["properties"]["Insert"][],
+  model: string
 ): ClickhouseDB["Tables"]["property_with_response_v1"][] {
   return properties.map((p) => ({
     response_id: response.id ?? "",
@@ -20,7 +21,7 @@ function buildPropertyWithResponseInserts(
     status: response.status ?? 0,
     completion_tokens: response.completion_tokens ?? 0,
     prompt_tokens: response.prompt_tokens ?? 0,
-    model: ((response.body as { model?: string })?.model as string) || "",
+    model,
     request_id: request.id,
     request_created_at: formatTimeString(request.created_at),
     auth_hash: request.auth_hash,
@@ -40,8 +41,12 @@ export async function logInClickhouse(
     id: string | null;
     job: string | null;
   },
-  clickhouseDb: ClickhouseClientWrapper
+  clickhouseDb: ClickhouseClientWrapper,
+  forceModel: string | null
 ) {
+  const model = forceModel
+    ? forceModel
+    : ((response.body as { model?: string })?.model as string) || null;
   return Promise.all([
     clickhouseDb.dbInsertClickhouse("response_copy_v1", [
       {
@@ -50,7 +55,7 @@ export async function logInClickhouse(
         request_id: request.id,
         completion_tokens: response.completion_tokens ?? null,
         latency: response.delay_ms ?? null,
-        model: ((response.body as { model?: string })?.model as string) || null,
+        model,
         prompt_tokens: response.prompt_tokens ?? null,
         request_created_at: formatTimeString(request.created_at),
         response_created_at: response.created_at
@@ -67,7 +72,7 @@ export async function logInClickhouse(
         request_id: request.id,
         completion_tokens: response.completion_tokens ?? null,
         latency: response.delay_ms ?? null,
-        model: ((response.body as { model?: string })?.model as string) || null,
+        model,
         prompt_tokens: response.prompt_tokens ?? null,
         request_created_at: formatTimeString(request.created_at),
         response_created_at: response.created_at
@@ -86,7 +91,7 @@ export async function logInClickhouse(
         request_id: request.id,
         completion_tokens: response.completion_tokens ?? null,
         latency: response.delay_ms ?? null,
-        model: ((response.body as { model?: string })?.model as string) || null,
+        model,
         prompt_tokens: response.prompt_tokens ?? null,
         request_created_at: formatTimeString(request.created_at),
         response_created_at: response.created_at
@@ -129,7 +134,12 @@ export async function logInClickhouse(
     ),
     clickhouseDb.dbInsertClickhouse(
       "property_with_response_v1",
-      buildPropertyWithResponseInserts(request, response, properties)
+      buildPropertyWithResponseInserts(
+        request,
+        response,
+        properties,
+        model ?? ""
+      )
     ),
   ]);
 }

@@ -41,6 +41,7 @@ export interface HeliconeProxyRequest {
   requestWrapper: RequestWrapper;
   requestId: string;
   nodeId: string | null;
+  forceModel: string | null;
 }
 
 const providerBaseUrlMappings: Record<Provider, string> = {
@@ -91,6 +92,7 @@ export class HeliconeProxyRequestMapper {
           this.request.heliconeHeaders.requestId ?? crypto.randomUUID(),
         requestWrapper: this.request,
         nodeId: this.request.heliconeHeaders.nodeId ?? null,
+        forceModel: this.request.heliconeHeaders.forceModel ?? null,
       },
       error: null,
     };

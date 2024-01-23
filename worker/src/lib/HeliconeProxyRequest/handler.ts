@@ -106,6 +106,7 @@ export async function handleProxyRequest(
           omitLog:
             proxyRequest.requestWrapper.heliconeHeaders.omitHeaders
               .omitResponse,
+          forceModel: proxyRequest.forceModel,
         },
         timing: {
           startTime: proxyRequest.startTime,

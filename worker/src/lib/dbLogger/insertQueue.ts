@@ -287,7 +287,8 @@ export class InsertQueue {
   async updateResponse(
     responseId: string,
     requestId: string,
-    response: Database["public"]["Tables"]["response"]["Update"]
+    response: Database["public"]["Tables"]["response"]["Update"],
+    forceModel: string | null
   ): Promise<Result<null, string>> {
     const payload: ResponsePayload = {
       responseId,
@@ -297,7 +298,7 @@ export class InsertQueue {
     const res = await updateResponse(this.database, payload);
 
     const responseUpdate = await this.valhalla.patch("/v1/response", {
-      model: this.getModelFromResponse(response),
+      model: forceModel ? forceModel : this.getModelFromResponse(response),
       response_id: responseId,
       heliconeRequestId: requestId,
       http_status: response.status ?? null,
