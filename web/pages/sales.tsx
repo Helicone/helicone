@@ -59,7 +59,7 @@ const Sales = () => {
               </Link>
             </div>
             <ContactForm
-              contactTag={""}
+              contactTag={"contact-us"}
               buttonText={"Contact Us"}
               defaultPlaceholder={
                 "I am interested in using Helicone for my business..."
