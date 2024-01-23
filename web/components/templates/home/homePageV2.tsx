@@ -24,6 +24,7 @@ import Image from "next/image";
 import { clsx } from "../../shared/clsx";
 import Globe from "./globe";
 import { Database } from "../../../supabase/database.types";
+import { usePublicStats } from "../../../services/hooks/publicStats";
 
 const features: {
   title: string;
@@ -115,6 +116,7 @@ const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 export default function Example() {
   const [demoLoading, setDemoLoading] = useState(false);
+  const stats = usePublicStats();
 
   const router = useRouter();
   const user = useUser();
@@ -137,7 +139,14 @@ export default function Example() {
         </div>
       </Link>
       <NavBarV2 />
-
+      <div>
+        <p>Trusted by {stats.stats?.monthlyActiveCompanies}+ companies</p>
+        <p>Join over {stats.stats?.totalUsers}+ developers using Helicone</p>
+        <p>
+          Over {stats.stats?.monthlyRequests}+ requests made in the last month!
+        </p>
+        <p>{stats.stats?.totalRequests}+ Requests made</p>
+      </div>
       <div className="relative isolate">
         <svg
           className="absolute inset-0 -z-10 h-full w-full stroke-gray-200 [mask-image:radial-gradient(100%_60%_at_top_center,white,transparent)]"
@@ -705,7 +714,6 @@ export default function Example() {
           </div>
         </div>
       </section>
-
       <section id="faq" className="bg-white pt-36 pb-48 antialiased">
         <div className="mx-auto px-4 md:px-8 max-w-6xl divide-y divide-gray-900/10">
           <div className="flex flex-col space-y-4 text-center">
