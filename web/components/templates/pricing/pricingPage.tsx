@@ -451,7 +451,7 @@ export default function Example() {
                   Startup Spotlight
                 </div>
               </div>
-              <div className="w-full">
+              <div className="w-full -mt-8">
                 <ContactForm
                   contactTag={"startups"}
                   buttonText={"Contact Us"}
