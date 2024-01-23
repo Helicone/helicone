@@ -2,12 +2,9 @@ import {
   FilterLeaf,
   FilterNode,
 } from "../../../services/lib/filters/filterDefs";
-import {
-  buildFilterWithAuthClickHousePropResponse,
-  buildFilterWithAuthClickHouseProperties,
-} from "../../../services/lib/filters/filters";
+import { buildFilterWithAuthClickHousePropResponse } from "../../../services/lib/filters/filters";
 import { Result } from "../../result";
-import { dbQueryClickhouse, printRunnableQuery } from "../db/dbExecute";
+import { dbQueryClickhouse } from "../db/dbExecute";
 
 export interface PropertyParam {
   property_param: string;
