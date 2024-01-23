@@ -67,7 +67,7 @@ const CustomerPortal = () => {
               </Link>
             </div>
             <ContactForm
-              contactTag={""}
+              contactTag={"customer-portal"}
               buttonText={"Contact Us"}
               defaultPlaceholder={
                 "I am interested in Helicone's Customer Portal feature!"

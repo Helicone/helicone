@@ -127,15 +127,23 @@ export default function Example() {
 
   return (
     <div className="bg-white">
-      <Link
-        href="/sales?customer-portal=true"
-        className="w-full bg-black text-white flex flex-col items-center p-3 hover:bg-slate-900 hover:cursor-pointer"
-      >
-        <div className="flex flex-row items-end gap-2">
-          <div>🎉 Customer Portal Release 🎉</div>
-          <i className="text-xs text-gray-600">Jan 17, 2024</i>
-        </div>
-      </Link>
+      <div className="flex items-center gap-x-6 bg-black hover:bg-gray-900 px-6 py-2.5 sm:px-3.5 sm:before:flex-1">
+        <p className="text-sm leading-6 text-white">
+          <Link href="/features/fine-tuning">
+            <strong className="font-semibold">Launch: Fine-Tuning</strong>
+            <svg
+              viewBox="0 0 2 2"
+              className="mx-2 inline h-0.5 w-0.5 fill-current"
+              aria-hidden="true"
+            >
+              <circle cx={1} cy={1} r={1} />
+            </svg>
+            Reduce your costs and improve your applications performance{" "}
+            <span aria-hidden="true">&rarr;</span>
+          </Link>
+        </p>
+        <div className="flex flex-1 justify-end"></div>
+      </div>
       <NavBarV2 />
 
       <div className="relative isolate">

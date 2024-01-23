@@ -6,6 +6,7 @@ import NavBarV2 from "../../layout/navbar/navBarV2";
 import Footer from "../../layout/footer";
 import Link from "next/link";
 import { Tooltip } from "@mui/material";
+import ContactForm from "../../shared/contactForm";
 
 const tiers = [
   {
@@ -180,7 +181,10 @@ export default function Example() {
             <p className="mt-6 w-full text-xl leading-8 text-gray-700 max-w-2xl">
               Free to get started, and easy to scale when you need to - all with
               a <span className="font-semibold">one-line</span> code
-              integration.
+              integration. Are you a startup?{" "}
+              <Link href="#startup" className="text-blue-500 underline">
+                Click here
+              </Link>
             </p>
           </div>
         </GridBackground>
@@ -400,9 +404,63 @@ export default function Example() {
             </table>
           </div>
         </div>
-        {/* <div className="flex flex-col max-w-6xl mx-auto p-4 md:px-8 lg:flex antialiased">
-          hello
-        </div> */}
+        <div
+          id="startup"
+          className="flex flex-col max-w-6xl mx-auto p-4 lg:px-8 mt-8 mb-32 lg:flex antialiased"
+        >
+          <div className="border border-gray-300 rounded-lg shadow-lg p-12">
+            <section className="font-semibold text-4xl">
+              Helicone for{" "}
+              <span className="md:border border-sky-600 border-dashed text-sky-600 md:py-1 md:px-2">
+                startups
+              </span>
+            </section>
+            <p className="mt-4 text-lg text-gray-700">
+              If your startup is under two years old and has raised less than
+              $5m, consider our startup program.
+            </p>
+            <p className="mt-8 text-md font-semibold text-gray-700">Benefits</p>
+            <div className="flex flex-col md:flex-row justify-between w-full py-4">
+              <div className="flex flex-col gap-4 w-full">
+                <div className="flex items-center gap-4 col-span-1">
+                  <CheckCircleIcon
+                    className="h-5 w-5 text-sky-600"
+                    aria-hidden="true"
+                  />
+                  Discount on Pro plan
+                </div>
+                <div className="flex items-center gap-4 col-span-1">
+                  <CheckCircleIcon
+                    className="h-5 w-5 text-sky-600"
+                    aria-hidden="true"
+                  />
+                  Customer Success Channel
+                </div>
+                <div className="flex items-center gap-4 col-span-1">
+                  <CheckCircleIcon
+                    className="h-5 w-5 text-sky-600"
+                    aria-hidden="true"
+                  />
+                  Helicone Merch
+                </div>
+                <div className="flex items-center gap-4 col-span-1">
+                  <CheckCircleIcon
+                    className="h-5 w-5 text-sky-600"
+                    aria-hidden="true"
+                  />
+                  Startup Spotlight
+                </div>
+              </div>
+              <div className="w-full">
+                <ContactForm
+                  contactTag={"startups"}
+                  buttonText={"Contact Us"}
+                  defaultPlaceholder="I am interested in the Helicone startup program..."
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <Footer />
     </div>
