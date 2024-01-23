@@ -455,10 +455,10 @@ export default function Example() {
                 <figure className="mt-8 sm:mt-32 border-l border-gray-200 pl-4 pr-4 sm:pl-8 sm:pr-16 text-gray-600">
                   <blockquote className="text-xs sm:text-base leading-7">
                     <p>
-                      "It makes everything from tracking usage, to debugging,
-                      even getting data exports for fine-tuning 100x easier. If
-                      you&apos;re serious about building with LLMs, I am begging
-                      you to use Helicone."
+                      &quot;It makes everything from tracking usage, to
+                      debugging, even getting data exports for fine-tuning 100x
+                      easier. If you&apos;re serious about building with LLMs, I
+                      am begging you to use Helicone.&quot;
                     </p>
                   </blockquote>
                   <figcaption className="mt-6 flex gap-x-4 text-xs sm:text-sm leading-6 items-center">
