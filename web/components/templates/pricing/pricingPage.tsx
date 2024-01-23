@@ -455,23 +455,31 @@ export default function Example() {
                 <figure className="mt-8 sm:mt-32 border-l border-gray-200 pl-4 pr-4 sm:pl-8 sm:pr-16 text-gray-600">
                   <blockquote className="text-xs sm:text-base leading-7">
                     <p>
-                      “Vel ultricies morbi odio facilisi ultrices accumsan donec
-                      lacus purus. Lectus nibh ullamcorper ac dictum justo in
-                      euismod. Risus aenean ut elit massa. In amet aliquet eget
-                      cras. Sem volutpat enim tristique.”
+                      "It makes everything from tracking usage, to debugging,
+                      even getting data exports for fine-tuning 100x easier. If
+                      you&apos;re serious about building with LLMs, I am begging
+                      you to use Helicone."
                     </p>
                   </blockquote>
-                  <figcaption className="mt-6 flex gap-x-4 text-xs sm:text-sm leading-6">
+                  <figcaption className="mt-6 flex gap-x-4 text-xs sm:text-sm leading-6 items-center">
                     <img
-                      src="https://images.unsplash.com/photo-1509783236416-c9ad59bae472?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80"
+                      src="/assets/pricing/daksh.png"
                       alt=""
-                      className="h-6 w-6 flex-none rounded-full"
+                      className="h-8 w-8 flex-none rounded-full"
                     />
                     <div>
                       <span className="font-semibold text-gray-900">
-                        Maria Hill
+                        Daksh Gupta
                       </span>{" "}
-                      – Marketing Manager
+                      – Founder of{" "}
+                      <Link
+                        href={"https://app.getonboardai.com/"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        Onboard AI
+                      </Link>
                     </div>
                   </figcaption>
                 </figure>
