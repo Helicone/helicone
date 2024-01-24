@@ -65,13 +65,13 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    const displayFilters = window.localStorage.getItem("showFilters") || null;
+    const displayFilters = window.sessionStorage.getItem("showFilters") || null;
     setShowFilters(displayFilters ? JSON.parse(displayFilters) : false);
   }, []);
 
   const showFilterHandler = () => {
     setShowFilters(!showFilters);
-    window.localStorage.setItem("showFilters", JSON.stringify(!showFilters));
+    window.sessionStorage.setItem("showFilters", JSON.stringify(!showFilters));
   };
 
   const getDefaultValue = () => {
