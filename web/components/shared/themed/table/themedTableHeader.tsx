@@ -108,12 +108,12 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           <div />
         )}
 
-        <div className="flex flex-row gap-2">
+        <div className="flex flex-wrap justify-start lg:justify-end gap-2">
           {advancedFilters && (
             <button
               onClick={showFilterHandler}
               className={clsx(
-                "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+                "w-max bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
               )}
             >
               <FunnelIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
