@@ -32,9 +32,9 @@ class ClaudeBuilder extends AbstractRequestBuilder {
           this.response.request_body.messages.slice(-1)[0].content ||
           "",
       responseText: getResponseText(),
-      render:
-        this.response.response_status === 0 ||
-        this.response.response_status === null ? (
+      render: () => {
+        return this.response.response_status === 0 ||
+          this.response.response_status === null ? (
           <p>Pending...</p>
         ) : this.response.response_status === 200 ? (
           <Completion
@@ -65,7 +65,8 @@ class ClaudeBuilder extends AbstractRequestBuilder {
             rawRequest={this.response.request_body}
             rawResponse={this.response.response_body}
           />
-        ),
+        );
+      },
     };
   }
 }

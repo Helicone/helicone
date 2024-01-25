@@ -144,7 +144,7 @@ const RequestCard = (props: RequestCardProps) => {
             )}
         </div>
       </div>
-      <div className="w-full max-w-3xl">{request.render}</div>
+      <div className="w-full max-w-3xl">{request.render()}</div>
     </div>
   );
 };

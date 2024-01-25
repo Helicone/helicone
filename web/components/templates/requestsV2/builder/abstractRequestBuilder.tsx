@@ -37,7 +37,7 @@ export type NormalizedRequest = CommonFields & {
   responseText: string;
 
   // Value to display in request drawer
-  render: ReactNode;
+  render(): JSX.Element;
 };
 
 export type SpecificFields = Omit<NormalizedRequest, keyof CommonFields>;
