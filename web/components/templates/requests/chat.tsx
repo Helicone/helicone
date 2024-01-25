@@ -259,7 +259,7 @@ export const SingleChat = (props: {
                 style={{ maxHeight: expanded ? "none" : "10.5rem" }}
               >
                 {/* render the string or stringify the array/object */}
-                NAMASTE:
+
                 {isJSON(formattedMessageContent)
                   ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
                   : formattedMessageContent}
