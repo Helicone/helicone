@@ -14,9 +14,9 @@ class CustomBuilder extends AbstractRequestBuilder {
     return {
       requestText: requestText,
       responseText: responseText,
-      render:
-        this.response.response_status === 0 ||
-        this.response.response_status === null ? (
+      render: () => {
+        return this.response.response_status === 0 ||
+          this.response.response_status === null ? (
           <p>Pending...</p>
         ) : this.response.response_status === 200 ? (
           <Completion
@@ -38,7 +38,8 @@ class CustomBuilder extends AbstractRequestBuilder {
             rawRequest={this.response.request_body}
             rawResponse={this.response.response_body}
           />
-        ),
+        );
+      },
     };
   }
 }

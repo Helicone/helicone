@@ -7,11 +7,10 @@ import {
 } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { LlmSchema } from "../../../lib/api/models/requestResponseModel";
-import useNotification from "../../shared/notification/useNotification";
 
 export type Message = {
   id: string;
@@ -46,7 +45,7 @@ export const SingleChat = (props: {
   const [showButton, setShowButton] = useState(true);
   const textContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const calculateContentHeight = () => {
       const current = textContainerRef.current;
       if (current) {
@@ -56,16 +55,11 @@ export const SingleChat = (props: {
       }
     };
 
-    // Use requestAnimationFrame to ensure measurements occur after the DOM has updated
-    requestAnimationFrame(() => {
+    const interval = setInterval(() => {
       calculateContentHeight();
-    });
+    }, 10);
 
-    // Add resize listener to recalculate on window resize
-    window.addEventListener("resize", calculateContentHeight);
-
-    // Cleanup resize listener on component unmount
-    return () => window.removeEventListener("resize", calculateContentHeight);
+    return () => clearInterval(interval);
   }, []);
 
   const handleToggle = () => {
@@ -128,8 +122,6 @@ export const SingleChat = (props: {
       return null;
     }
   };
-
-  const { setNotification } = useNotification();
 
   const hasImage = () => {
     const arr = message.content;
@@ -257,7 +249,7 @@ export const SingleChat = (props: {
           ) : hasImage() ? (
             renderImageRow()
           ) : (
-            <div className="relative h-full">
+            <>
               <div
                 ref={textContainerRef}
                 className={clsx(
@@ -267,6 +259,7 @@ export const SingleChat = (props: {
                 style={{ maxHeight: expanded ? "none" : "10.5rem" }}
               >
                 {/* render the string or stringify the array/object */}
+                NAMASTE:
                 {isJSON(formattedMessageContent)
                   ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
                   : formattedMessageContent}
@@ -282,7 +275,7 @@ export const SingleChat = (props: {
                   </button>
                 </div>
               )}
-            </div>
+            </>
           )}
         </div>
       </div>
