@@ -116,6 +116,14 @@ const sections: {
         },
       },
       {
+        name: "Fine-Tuning",
+        tiers: {
+          Free: "1 model",
+          Pro: "500 models",
+          Custom: "Unlimited",
+        },
+      },
+      {
         name: "Model Load Balancing",
         tiers: {
           Free: false,
