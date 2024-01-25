@@ -125,9 +125,9 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
     return {
       requestText: getRequestText(),
       responseText: getResponseText(),
-      render:
-        this.response.response_status === 0 ||
-        this.response.response_status === null ? (
+      render: () => {
+        return this.response.response_status === 0 ||
+          this.response.response_status === null ? (
           <p>Pending...</p>
         ) : this.response.response_status === 200 ? (
           <Chat
@@ -159,7 +159,8 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
               </p>
             </div>
           </div>
-        ),
+        );
+      },
     };
   }
 }

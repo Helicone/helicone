@@ -76,7 +76,7 @@ export class DalleBuilder extends AbstractRequestBuilder {
     return {
       requestText: this.getRequestText(),
       responseText: this.getResponseText(),
-      render: this.getRender(),
+      render: this.getRender,
     };
   }
 }

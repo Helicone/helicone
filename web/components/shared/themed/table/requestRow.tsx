@@ -26,9 +26,11 @@ const RequestRow = (props: RequestRowProps) => {
       className={clsx(
         index === length - 1 && "border-b",
         index === 0 && "border-t",
-        isSelected ? "bg-gray-100 dark:bg-gray-900" : "bg-white dark:bg-black",
-        isSelected && "sticky top-0 bottom-0 ring-1 ring-gray-500 shadow-md",
-        "text-gray-900 dark:text-gray-100 flex flex-col space-y-4 w-full p-4 border-l border-r border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-900 hover:cursor-pointer"
+        isSelected ? "bg-gray-200 dark:bg-gray-800" : "bg-white dark:bg-black",
+        isSelected
+          ? "sticky top-0 bottom-0 border-gray-500"
+          : "border-gray-300",
+        "text-gray-900 dark:text-gray-100 flex flex-col space-y-4 w-full p-4 border-l border-r  hover:bg-gray-200 dark:border-gray-800 dark:hover:bg-gray-900 hover:cursor-pointer"
       )}
       onClick={() => {
         if (isSelected) {
