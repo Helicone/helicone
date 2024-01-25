@@ -14,9 +14,9 @@ class ModerationBuilder extends AbstractRequestBuilder {
           : this.response.response_status === 200
           ? JSON.stringify(this.response.response_body.results || "", null, 4)
           : this.response.response_body?.error?.message || "",
-      render:
-        this.response.response_status === 0 ||
-        this.response.response_status === null ? (
+      render: () => {
+        return this.response.response_status === 0 ||
+          this.response.response_status === null ? (
           <p>Pending...</p>
         ) : this.response.response_status === 200 ? (
           <Completion
@@ -42,7 +42,8 @@ class ModerationBuilder extends AbstractRequestBuilder {
             rawRequest={this.response.request_body}
             rawResponse={this.response.response_body}
           />
-        ),
+        );
+      },
     };
   }
 }
