@@ -55,23 +55,11 @@ export const SingleChat = (props: {
       }
     };
 
-    // every 2 seconds, recalculate the content height
     const interval = setInterval(() => {
       calculateContentHeight();
-    }, 100);
+    }, 10);
 
     return () => clearInterval(interval);
-
-    // // Use requestAnimationFrame to ensure measurements occur after the DOM has updated
-    // requestAnimationFrame(() => {
-    //   requestAnimationFrame(calculateContentHeight);
-    // });
-
-    // // Add resize listener to recalculate on window resize
-    // window.addEventListener("resize", calculateContentHeight);
-
-    // // Cleanup resize listener on component unmount
-    // return () => window.removeEventListener("resize", calculateContentHeight);
   }, []);
 
   const handleToggle = () => {
