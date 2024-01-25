@@ -92,12 +92,15 @@ export function modelCost(modelRow: ModelMetrics): number {
     ? OPENAI_FINETUNE_COSTS_COMPLETIONS
     : COSTS_COMPLETIONS;
 
+  const lowerCaseModelPrefix = model_prefix.toLowerCase();
+
   const promptCost = Object.entries(promptCosts).find(
-    ([key]) => key === model_prefix
+    ([key]) => key === lowerCaseModelPrefix
   )?.[1];
   const completionCost = Object.entries(completionCosts).find(
-    ([key]) => key === model_prefix
+    ([key]) => key === lowerCaseModelPrefix
   )?.[1];
+
   if (!promptCost || !completionCost) {
     return 0;
   }
