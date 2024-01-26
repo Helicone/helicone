@@ -4,7 +4,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Footer from "../../components/layout/footer";
 import NavBarV2 from "../../components/layout/navbar/navBarV2";
-import MetaData from "../../components/shared/metaData";
+import MetaData from "../../components/layout/public/authMetaData";
 import Image from "next/image";
 
 const ExampleBlog = () => {

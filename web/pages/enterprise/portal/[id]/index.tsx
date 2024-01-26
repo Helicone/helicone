@@ -1,6 +1,6 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
-import MetaData from "../../../../components/shared/metaData";
+import MetaData from "../../../../components/layout/public/authMetaData";
 import AuthLayout from "../../../../components/layout/authLayout";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 

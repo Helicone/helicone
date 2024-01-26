@@ -1,28 +1,28 @@
 import Footer from "../components/layout/footer";
 import NavBarV2 from "../components/layout/navbar/navBarV2";
-import MetaData from "../components/shared/metaData";
 import Link from "next/link";
 import ContactForm from "../components/shared/contactForm";
 import { useRouter } from "next/router";
-import GridBackground from "../components/layout/public-pages/gridBackground";
+import GridBackground from "../components/layout/public/gridBackground";
 import { CheckCircleIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
+import PublicMetaData from "../components/layout/public/publicMetaData";
 
 const bullets = [
-  "Billing/Usage APIs",
-  "White labeling",
-  "Embeddable dashboards",
-  "Alerts",
-  "Customer ratelimiting",
-  "Customer facing API tokens",
-  "Custom domains",
-  "Custom Proxy Endpoint",
+  "Request a demo",
+  "Learn more about our product",
+  "Learn about our pricing, features, and integrations",
+  "Request a SOC-2 report or our on-premise solution",
+  "Get onboarding support",
 ];
 
 const Sales = () => {
   const router = useRouter();
 
   return (
-    <MetaData title={"Contact Us"}>
+    <PublicMetaData
+      description={"The easiest way to monitor your LLM-application at scale."}
+      ogImageUrl={"https://www.helicone.ai/static/helicone-landing.png"}
+    >
       <NavBarV2 />
       <div className="bg-white h-full min-h-screen">
         <GridBackground>
@@ -69,7 +69,7 @@ const Sales = () => {
         </GridBackground>
       </div>
       <Footer />
-    </MetaData>
+    </PublicMetaData>
   );
 };
 
