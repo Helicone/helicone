@@ -37,16 +37,10 @@ export const Home = () => {
         <meta
           property="og:image"
           content={"https://www.helicone.ai/static/helicone-cover.png"}
-          //             "https://www.helicone.ai/_next/image?url=%2Fstatic%2Fhelicone-cover.png&w=1600&q=75"
         />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-        {/* <meta name="twitter:title" content="Helicone" />
-        <meta
-          name="twitter:description"
-          content="The easiest way to monitor your LLM-application at scale."
-        /> */}
         <meta
           name="twitter:image"
           content="https://www.helicone.ai/static/helicone-cover.png"
