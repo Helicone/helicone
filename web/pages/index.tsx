@@ -23,24 +23,33 @@ export const Home = () => {
     <>
       <Head>
         <title>{`Helicone - The easiest way to monitor your LLM-application at scale`}</title>
-        <link rel="icon" href="/assets/landing/helicone-mobile.webp" />
+        <link rel="icon" href="/static/helicone-logo.png" />
+        <meta property="og:title" content={"Helicone"} />
         <meta
-          property="og:title"
-          content={
-            "Helicone - The easiest way to monitor your LLM-application at scale"
-          }
+          name="description"
+          content="The easiest way to monitor your LLM-application at scale."
         />
         <meta
           property="og:description"
-          name="description"
-          content="Monitoring usage and costs for language models shouldn't be a hassle. With Helicone, you can focus on building your product, not building and maintaining your own analytics solution."
-          key="desc"
+          content="The easiest way to monitor your LLM-application at scale."
         />
         <meta
           property="og:image"
           content={
             "https://www.helicone.ai/_next/image?url=%2Fassets%2Flanding%2Fhelicone-mobile.webp&w=384&q=75"
           }
+        />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Helicone" />
+        <meta
+          name="twitter:description"
+          content="The easiest way to monitor your LLM-application at scale."
+        />
+        <meta
+          name="twitter:image"
+          content="https://www.helicone.ai/_next/image?url=%2Fassets%2Flanding%2Fhelicone-mobile.webp&w=384&q=75"
         />
       </Head>
       <HomePageV2 />
