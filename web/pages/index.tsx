@@ -25,6 +25,7 @@ export const Home = () => {
         <title>{`Helicone - The easiest way to monitor your LLM-application at scale`}</title>
         <link rel="icon" href="/static/helicone-logo.png" />
         <meta property="og:title" content={"Helicone"} />
+        <meta content="https://helicone.ai" property="og:url" />
         <meta
           name="description"
           content="The easiest way to monitor your LLM-application at scale."
@@ -36,20 +37,21 @@ export const Home = () => {
         <meta
           property="og:image"
           content={
-            "https://www.helicone.ai/_next/image?url=%2Fassets%2Flanding%2Fhelicone-mobile.webp&w=384&q=75"
+            "https://www.helicone.ai/_next/image?url=%2Fstatic%2Fhelicone-cover.png&w=384&q=100"
           }
+          //             "https://www.helicone.ai/_next/image?url=%2Fstatic%2Fhelicone-cover.png&w=1600&q=75"
         />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Helicone" />
+        {/* <meta name="twitter:title" content="Helicone" />
         <meta
           name="twitter:description"
           content="The easiest way to monitor your LLM-application at scale."
-        />
+        /> */}
         <meta
           name="twitter:image"
-          content="https://www.helicone.ai/_next/image?url=%2Fassets%2Flanding%2Fhelicone-mobile.webp&w=384&q=75"
+          content="https://www.helicone.ai/_next/image?url=%2Fstatic%2Fhelicone-cover.png&w=384&q=100"
         />
       </Head>
       <HomePageV2 />
