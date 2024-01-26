@@ -16,7 +16,7 @@ import {
 import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
 import { withAuth } from "./lib/routers/withAuth";
 import { getRequests, getRequestsCached } from "./lib/shared/request/request";
-import { withDB } from "./lib/routers/withDB";
+
 import { FineTuningManager } from "./lib/managers/FineTuningManager";
 import { PostHog } from "posthog-node";
 import { hashAuth } from "./lib/db/hash";
@@ -158,7 +158,7 @@ app.post(
   "/v1/request/query",
   withAuth<
     paths["/v1/request/query"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, db, authParams }) => {
+  >(async ({ request, res, supabaseClient, authParams }) => {
     const body = await request.getRawBody<any>();
     console.log("body", body);
     const { filter, offset, limit, sort, isCached } = body;
@@ -201,73 +201,10 @@ app.post(
   })
 );
 
-app.post(
-  "/v1/request",
-  withAuth<
-    paths["/v1/request"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, db }) => {
-    // Handle your logic here
-    const heliconeRequest = await request.getBody();
-    const heliconeRequestID = heliconeRequest.request_id;
-    const insertRequestResult = await db.insertRequest({
-      body: heliconeRequest.body,
-      createdAt: new Date(),
-      requestReceivedAt: new Date(heliconeRequest.requestReceivedAt),
-      heliconeApiKeyID: null,
-      heliconeOrgID: supabaseClient.organizationId ?? null,
-      heliconeProxyKeyID: null,
-      id: heliconeRequestID,
-      properties: heliconeRequest.properties,
-      provider: heliconeRequest.provider,
-      urlHref: heliconeRequest.url_href,
-      userId: heliconeRequest.user_id ?? null,
-      model: heliconeRequest.model ?? null,
-    });
-    if (insertRequestResult.error) {
-      res.status(500).json({
-        error: insertRequestResult.error,
-        trace: "insertRequestResult.error",
-      });
-      return;
-    }
-
-    res.json({
-      message: "Request received! :)",
-      orgId: supabaseClient.organizationId,
-      requestId: heliconeRequestID,
-    });
-  })
-);
-app.put(
-  "/v1/feedback",
-  withAuth<
-    paths["/v1/feedback"]["put"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, db }) => {
-    // Handle your logic here
-    const heliconeFeedback = await request.getBody();
-
-    const insertFeedbackResult = await db.upsertFeedback({
-      createdAt: new Date(),
-      rating: heliconeFeedback.rating,
-      responseID: heliconeFeedback.response_id,
-    });
-
-    if (insertFeedbackResult.error) {
-      res.status(500).json({
-        error: insertFeedbackResult.error,
-        trace: "insertFeedbackResult.error",
-      });
-      return;
-    }
-    res.json({
-      message: "Feedback received! :)",
-    });
-  })
-);
 app.get(
   "/v1/fine-tune/:jobId/stats",
   withAuth<paths["/v1/fine-tune/{jobId}/stats"]["get"]>(
-    async ({ request, res, supabaseClient, db, authParams }) => {
+    async ({ request, res, supabaseClient, authParams }) => {
       const { jobId } = request.getParams();
 
       const { data: fineTuneJob, error: fineTuneJobError } =
@@ -385,7 +322,7 @@ app.post(
   "/v1/dataset/:datasetId/fine-tune",
   withAuth<
     paths["/v1/dataset/{datasetId}/fine-tune"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, db, authParams }) => {
+  >(async ({ request, res, supabaseClient, authParams }) => {
     if (!(await hasAccessToFineTune(supabaseClient))) {
       res.status(405).json({
         error: "Must be on pro or higher plan to use fine-tuning",
@@ -526,7 +463,7 @@ app.post(
   "/v1/fine-tune",
   withAuth<
     paths["/v1/fine-tune"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, db, authParams }) => {
+  >(async ({ request, res, supabaseClient, authParams }) => {
     if (!(await hasAccessToFineTune(supabaseClient))) {
       res.status(405).json({
         error: "Must be on pro or higher plan to use fine-tuning",
@@ -667,112 +604,11 @@ app.post("/v1/tokens/gpt3", async (req, res) => {
   res.json({ tokens });
 });
 
-app.post(
-  "/v1/response",
-  withAuth<
-    paths["/v1/response"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, db }) => {
-    // Handle your logic here
-    const heliconeResponse = await request.getBody();
-
-    const responseId = heliconeResponse.response_id ?? uuid();
-
-    const insertResponseResult = await db.insertResponse({
-      body: heliconeResponse.body,
-      createdAt: new Date(),
-      responseReceivedAt: new Date(heliconeResponse.responseReceivedAt),
-      delayMs: heliconeResponse.delay_ms ?? 0,
-      http_status: heliconeResponse.http_status ?? null,
-      id: responseId,
-      model: heliconeResponse.model ?? null,
-      promptTokens: heliconeResponse.prompt_tokens ?? null,
-      completionTokens: heliconeResponse.completion_tokens ?? null,
-      request: heliconeResponse.heliconeRequestId,
-      heliconeOrgID: supabaseClient.organizationId,
-    });
-    if (insertResponseResult.error) {
-      res.status(500).json({
-        error: insertResponseResult.error,
-        trace: "insertResponseResult.error",
-      });
-      return;
-    }
-    res.json({
-      message: "Response received! :)",
-      orgId: supabaseClient.organizationId,
-      responseId,
-    });
-  })
-);
-
-app.patch(
-  "/v1/response",
-  withAuth<
-    paths["/v1/response"]["patch"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, db }) => {
-    // Handle your logic here
-    const heliconeResponse = await request.getBody();
-
-    const responseId = heliconeResponse.response_id ?? uuid();
-
-    const insertResponseResult = await db.updateResponse({
-      body: heliconeResponse.body,
-      createdAt: new Date(),
-      responseReceivedAt: new Date(heliconeResponse.responseReceivedAt),
-      delayMs: heliconeResponse.delay_ms ?? 0,
-      http_status: heliconeResponse.http_status ?? null,
-      id: responseId,
-      model: heliconeResponse.model ?? null,
-      promptTokens: heliconeResponse.prompt_tokens ?? null,
-      completionTokens: heliconeResponse.completion_tokens ?? null,
-      request: heliconeResponse.heliconeRequestId,
-    });
-    if (insertResponseResult.error) {
-      res.status(500).json({
-        error: insertResponseResult.error,
-        trace: "patch.insertResponseResult.error",
-      });
-      return;
-    }
-    res.json({
-      message: "Response received! :)",
-      orgId: supabaseClient.organizationId,
-      responseId,
-    });
-  })
-);
-
-app.get(
-  "/healthcheck",
-  withDB(async ({ db, request, res }) => {
-    const now = await db.now();
-    if (now.error) {
-      res.json({ status: "unhealthy :(", error: now.error });
-      return;
-    }
-    res.json({
-      status: "healthy :)",
-      dataBase: now.data?.rows,
-      version: "jawn prod - pools",
-    });
-  })
-);
-
-app.get(
-  "/healthcheck-auth",
-  withAuth(async ({ db, request, res, supabaseClient }) => {
-    const now = await db.now();
-    if (now.error) {
-      res.json({ status: "unhealthy :(", error: now.error });
-      return;
-    }
-    res.json({
-      status: "healthy :)",
-      dataBase: now.data?.rows,
-      orgId: supabaseClient.organizationId,
-    });
-  })
-);
+app.get("/healthcheck", (req, res) => {
+  res.json({
+    status: "healthy :)",
+  });
+});
 
 const server = app.listen(
   parseInt(process.env.PORT ?? "8585"),
