@@ -8,14 +8,10 @@ import GridBackground from "../components/layout/public/gridBackground";
 import { CheckCircleIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 
 const bullets = [
-  "Billing/Usage APIs",
-  "White labeling",
-  "Embeddable dashboards",
-  "Alerts",
-  "Customer ratelimiting",
-  "Customer facing API tokens",
-  "Custom domains",
-  "Custom Proxy Endpoint",
+  "Request a demo",
+  "Learn more about our product",
+  "Get onboarding support",
+  "Talk with the founders",
 ];
 
 const Sales = () => {
