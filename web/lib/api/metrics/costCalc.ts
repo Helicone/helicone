@@ -19,6 +19,7 @@ const COSTS_PROMPT = {
   "gpt-3.5-turbo-0613": 0.0015,
   "gpt-35-turbo-16k": 0.003,
   "gpt-3.5-turbo-16k-0613": 0.003,
+  "text-embedding-ada-002": 0.0001,
   "text-embedding-ada-002-v2": 0.0001,
   // Latest anthropic pricing from July 2023 (https://www-files.anthropic.com/production/images/model_pricing_july2023.pdf)
   "claude-instant-1	": 0.00163,
