@@ -6,6 +6,7 @@ import ContactForm from "../components/shared/contactForm";
 import { useRouter } from "next/router";
 import GridBackground from "../components/layout/public/gridBackground";
 import { CheckCircleIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
+import PublicMetaData from "../components/layout/public/publicMetaData";
 
 const bullets = [
   "Request a demo",
@@ -18,7 +19,10 @@ const Sales = () => {
   const router = useRouter();
 
   return (
-    <MetaData title={"Contact Us"}>
+    <PublicMetaData
+      description={"The easiest way to monitor your LLM-application at scale."}
+      ogImageUrl={"https://www.helicone.ai/static/helicone-landing.png"}
+    >
       <NavBarV2 />
       <div className="bg-white h-full min-h-screen">
         <GridBackground>
@@ -65,7 +69,7 @@ const Sales = () => {
         </GridBackground>
       </div>
       <Footer />
-    </MetaData>
+    </PublicMetaData>
   );
 };
 
