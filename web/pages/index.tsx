@@ -36,14 +36,14 @@ export const Home = () => {
         />
         <meta
           property="og:image"
-          content={"https://www.helicone.ai/static/helicone-cover.png"}
+          content={"https://www.helicone.ai/static/helicone-landing.png"}
         />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta
           name="twitter:image"
-          content="https://www.helicone.ai/static/helicone-cover.png"
+          content="https://www.helicone.ai/static/helicone-landing.png"
         />
       </Head>
       <HomePageV2 />
