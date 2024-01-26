@@ -8,7 +8,7 @@ RUN apt install python3 python3-pip -y
 WORKDIR /app
 # TODO Make sure the docker build and push commands are still working
 
-COPY ./clickhouse/ /app
+COPY . /app
 
 
 CMD python3 ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT}
