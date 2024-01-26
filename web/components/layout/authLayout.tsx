@@ -39,7 +39,7 @@ import OrgDropdown from "./orgDropdown";
 import { ThemedSwitch } from "../shared/themed/themedSwitch";
 import { useTheme } from "../shared/theme/themeContext";
 import ReferralModal from "../common/referralModal";
-import MetaData from "../shared/metaData";
+import MetaData from "./public/authMetaData";
 import { Badge } from "@tremor/react";
 interface AuthLayoutProps {
   children: React.ReactNode;

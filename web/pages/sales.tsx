@@ -1,10 +1,10 @@
 import Footer from "../components/layout/footer";
 import NavBarV2 from "../components/layout/navbar/navBarV2";
-import MetaData from "../components/shared/metaData";
+import MetaData from "../components/layout/public/authMetaData";
 import Link from "next/link";
 import ContactForm from "../components/shared/contactForm";
 import { useRouter } from "next/router";
-import GridBackground from "../components/layout/public-pages/gridBackground";
+import GridBackground from "../components/layout/public/gridBackground";
 import { CheckCircleIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 
 const bullets = [

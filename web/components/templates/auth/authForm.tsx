@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { CustomerPortalContent } from "../../../pages/signin";
-import GridBackground from "../../layout/public-pages/gridBackground";
+import GridBackground from "../../layout/public/gridBackground";
 
 interface AuthFormProps {
   handleEmailSubmit: (email: string, password: string) => void;
