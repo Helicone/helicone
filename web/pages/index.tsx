@@ -36,9 +36,7 @@ export const Home = () => {
         />
         <meta
           property="og:image"
-          content={
-            "https://www.helicone.ai/_next/image?url=%2Fstatic%2Fhelicone-cover.png&w=384&q=100"
-          }
+          content={"https://www.helicone.ai/static/helicone-cover.png"}
           //             "https://www.helicone.ai/_next/image?url=%2Fstatic%2Fhelicone-cover.png&w=1600&q=75"
         />
 
@@ -51,7 +49,7 @@ export const Home = () => {
         /> */}
         <meta
           name="twitter:image"
-          content="https://www.helicone.ai/_next/image?url=%2Fstatic%2Fhelicone-cover.png&w=384&q=100"
+          content="https://www.helicone.ai/static/helicone-cover.png"
         />
       </Head>
       <HomePageV2 />
