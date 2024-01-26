@@ -6,6 +6,7 @@ import { GetServerSidePropsContext } from "next";
 import { isCustomerDomain } from "../lib/customerPortalHelpers";
 import { supabaseServer } from "../lib/supabaseServer";
 import { Result, err, ok } from "../lib/result";
+import PublicMetaData from "../components/layout/public/publicMetaData";
 
 export type CustomerPortalContent = {
   domain: string;
@@ -33,47 +34,53 @@ const SignIn = ({
   if (user) {
     router.push("/dashboard");
   }
-  return (
-    <AuthForm
-      handleEmailSubmit={async (email: string, password: string) => {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: email,
-          password: password,
-        });
 
-        if (error) {
-          setNotification("Error logging in. Please try again.", "error");
-          console.error(error);
-          return;
-        }
-        setNotification("Success. Redirecting...", "success");
-        router.push("/dashboard");
-      }}
-      handleGoogleSubmit={async () => {
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: "google",
-        });
-        if (error) {
-          setNotification("Error logging in. Please try again.", "error");
-          console.error(error);
-          return;
-        }
-        setNotification("Successfully signed in.", "success");
-      }}
-      handleGithubSubmit={async () => {
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: "github",
-        });
-        if (error) {
-          setNotification("Error logging in. Please try again.", "error");
-          console.error(error);
-          return;
-        }
-        setNotification("Successfully signed in.", "success");
-      }}
-      authFormType={"signin"}
-      customerPortalContent={customerPortalContent}
-    />
+  return (
+    <PublicMetaData
+      description={"The easiest way to monitor your LLM-application at scale."}
+      ogImageUrl={"https://www.helicone.ai/static/helicone-landing.png"}
+    >
+      <AuthForm
+        handleEmailSubmit={async (email: string, password: string) => {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+          });
+
+          if (error) {
+            setNotification("Error logging in. Please try again.", "error");
+            console.error(error);
+            return;
+          }
+          setNotification("Success. Redirecting...", "success");
+          router.push("/dashboard");
+        }}
+        handleGoogleSubmit={async () => {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: "google",
+          });
+          if (error) {
+            setNotification("Error logging in. Please try again.", "error");
+            console.error(error);
+            return;
+          }
+          setNotification("Successfully signed in.", "success");
+        }}
+        handleGithubSubmit={async () => {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: "github",
+          });
+          if (error) {
+            setNotification("Error logging in. Please try again.", "error");
+            console.error(error);
+            return;
+          }
+          setNotification("Successfully signed in.", "success");
+        }}
+        authFormType={"signin"}
+        customerPortalContent={customerPortalContent}
+      />
+    </PublicMetaData>
   );
 };
 

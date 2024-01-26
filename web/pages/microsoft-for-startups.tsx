@@ -1,4 +1,4 @@
-import MetaData from "../components/shared/metaData";
+import MetaData from "../components/layout/public/authMetaData";
 import HomePage from "../components/templates/home/homePage";
 
 const MicrosoftForStartups = () => {
