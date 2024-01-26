@@ -1,11 +1,10 @@
-import { IRouterWrapperAuth, IRouterWrapperDB } from "./iRouterWrapper";
 import {
   Request as ExpressRequest,
   Response as ExpressResponse,
 } from "express";
-import { withDB } from "./withDB";
-import { SupabaseConnector, supabaseServer } from "../db/supabase";
+import { SupabaseConnector } from "../db/supabase";
 import { RequestWrapper } from "../requestWrapper";
+import { IRouterWrapperAuth } from "./iRouterWrapper";
 const supabaseClient = new SupabaseConnector();
 
 class AuthError extends Error {
@@ -15,14 +14,10 @@ class AuthError extends Error {
 }
 
 export function withAuth<T>(
-  fn: ({
-    db,
-    request,
-    res,
-    supabaseClient,
-  }: IRouterWrapperAuth<T>) => Promise<void>
+  fn: ({ request, res, supabaseClient }: IRouterWrapperAuth<T>) => Promise<void>
 ) {
-  return withDB<T>(async ({ db, request, res }) => {
+  return async (req: ExpressRequest, res: ExpressResponse) => {
+    const request = new RequestWrapper<T>(req);
     const authorization = request.authHeader();
 
     if (authorization.error) {
@@ -54,11 +49,10 @@ export function withAuth<T>(
     }
 
     return await fn({
-      db,
       request,
       res,
       authParams: authParams.data!,
       supabaseClient: supabaseClient,
     });
-  });
+  };
 }
