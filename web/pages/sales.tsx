@@ -1,6 +1,5 @@
 import Footer from "../components/layout/footer";
 import NavBarV2 from "../components/layout/navbar/navBarV2";
-import MetaData from "../components/layout/public/authMetaData";
 import Link from "next/link";
 import ContactForm from "../components/shared/contactForm";
 import { useRouter } from "next/router";

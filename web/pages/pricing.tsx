@@ -1,4 +1,3 @@
-import Head from "next/head";
 import PricingPage from "../components/templates/pricing/pricingPage";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 
