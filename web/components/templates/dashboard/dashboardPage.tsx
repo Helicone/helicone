@@ -565,7 +565,9 @@ const DashboardPage = (props: DashboardPageProps) => {
               You have reached your monthly limit.
             </p>
             <p className="text-sm text-gray-500 max-w-sm mt-2">
-              Upgrade your plan to view your dashboard.
+              Upgrade your plan to view your dashboard. Your requests are still
+              being processed, but you will not be able to view them until you
+              upgrade.
             </p>
             <div className="mt-4">
               <button
