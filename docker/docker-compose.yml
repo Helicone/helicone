@@ -463,11 +463,65 @@ services:
       dockerfile: ../docker/dockerfiles/dockerfile_worker
     restart: unless-stopped
     ports:
-      - 8787:8787
-      - 8788:8788
+      - ${OPENAI_PROXY_PORT}:${OPENAI_PROXY_PORT}
     environment:
       WORKER_TYPE: OPENAI_PROXY
       WORKER_PORT: ${OPENAI_PROXY_PORT}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
+      CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+
+  worker-api:
+    container_name: helicone-worker-api
+    build:
+      context: ../worker
+      dockerfile: ../docker/dockerfiles/dockerfile_worker
+    restart: unless-stopped
+    ports:
+      - ${HELICONE_API_PORT}:${HELICONE_API_PORT}
+    environment:
+      WORKER_TYPE: HELICONE_API
+      WORKER_PORT: ${HELICONE_API_PORT}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
+      CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+
+
+  worker-anthropic-proxy:
+    container_name: helicone-worker-anthropic-proxy
+    build:
+      context: ../worker
+      dockerfile: ../docker/dockerfiles/dockerfile_worker
+    restart: unless-stopped
+    ports:
+      - ${ANTHROPIC_PROXY_PORT}:${ANTHROPIC_PROXY_PORT}
+    environment:
+      WORKER_TYPE: ANTHROPIC_PROXY
+      WORKER_PORT: ${ANTHROPIC_PROXY_PORT}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
+      CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+
+  worker-gateway:
+    container_name: helicone-worker-gateway
+    build:
+      context: ../worker
+      dockerfile: ../docker/dockerfiles/dockerfile_worker
+    restart: unless-stopped
+    ports:
+      - ${GATEWAY_API_PORT}:${GATEWAY_API_PORT}
+    environment:
+      WORKER_TYPE: HELICONE_API
+      WORKER_PORT: ${GATEWAY_API_PORT}
       SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
       SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
       CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
@@ -491,7 +545,6 @@ services:
           "service_role_key": "${SERVICE_ROLE_KEY}"
         }
       SUPABASE_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${PGBOUNCER_PORT}/${POSTGRES_DB}
-      PUBLIC_POSTHOG_API_KEY: "phc_jeluwNoJNpc7zEzkQrPbjyMOqdnJQjFAVr849LaEaPG"
 
     
 

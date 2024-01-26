@@ -23,11 +23,14 @@ import { hashAuth } from "./lib/db/hash";
 import { FilterNode } from "./lib/shared/filters/filterDefs";
 import { SupabaseConnector } from "./lib/db/supabase";
 
-const ph_project_api_key = process.env.PUBLIC_POSTHOG_API_KEY ?? "";
+const ph_project_api_key = process.env.PUBLIC_POSTHOG_API_KEY;
 
-const postHogClient = new PostHog(ph_project_api_key, {
-  host: "https://app.posthog.com",
-});
+let postHogClient: PostHog | undefined = undefined;
+if (ph_project_api_key) {
+  postHogClient = new PostHog(ph_project_api_key, {
+    host: "https://app.posthog.com",
+  });
+}
 
 // This prevents the application from crashing when an unhandled error occurs
 const errorHandler: ErrorRequestHandler = (
@@ -180,7 +183,7 @@ app.post(
           sort,
           supabaseClient.client
         );
-    postHogClient.capture({
+    postHogClient?.capture({
       distinctId: `${await hashAuth(body)}-${authParams.organizationId}`,
       event: "fetch_requests",
       properties: {
@@ -410,7 +413,7 @@ app.post(
         `fine-tune job created - ${fineTuneJob.data.id} - ${authParams.organizationId}`
       );
 
-      postHogClient.capture({
+      postHogClient?.capture({
         distinctId: `${fineTuneJob.data.id}-${authParams.organizationId}`,
         event: "fine_tune_job",
         properties: {
@@ -441,7 +444,7 @@ app.post(
       });
     } catch (e) {
       Sentry.captureException(e);
-      postHogClient.capture({
+      postHogClient?.capture({
         distinctId: `${authParams.organizationId}`,
         event: "fine_tune_job",
         properties: {
@@ -525,7 +528,7 @@ app.post(
         `fine-tune job created - ${fineTuneJob.data.id} - ${authParams.organizationId}`
       );
 
-      postHogClient.capture({
+      postHogClient?.capture({
         distinctId: `${fineTuneJob.data.id}-${authParams.organizationId}`,
         event: "fine_tune_job",
         properties: {
@@ -572,7 +575,7 @@ app.post(
       });
     } catch (e) {
       Sentry.captureException(e);
-      postHogClient.capture({
+      postHogClient?.capture({
         distinctId: `${authParams.organizationId}`,
         event: "fine_tune_job",
         properties: {
@@ -620,6 +623,6 @@ const server = app.listen(
 
 server.on("error", console.error);
 
-// This
+// Thisp
 server.setTimeout(1000 * 60 * 10); // 10 minutes
-postHogClient.shutdown(); // new
+postHogClient?.shutdown(); // new

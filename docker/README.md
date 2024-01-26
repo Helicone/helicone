@@ -11,7 +11,9 @@ You can use this account to sign into Helicone at localhost:3000 via your browse
 Default URLs:
 
 - Helicone Webpage: localhost:3000
-- Helicone Worker: localhost:8787
+- Helicone OpenAI Proxy: localhost:8787
+- Helicone API: localhost:8788
+- Helicone GATEWAY: localhost:8790
 
 # Maintenance
 
