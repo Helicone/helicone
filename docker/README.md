@@ -5,7 +5,7 @@ cp .env.example .env
 docker compose up
 ```
 
-NOTE: To create a user go to http://localhost:8989/project/default/auth/users and add your account.
+NOTE: To create a user go to http://localhost:54323/project/default/auth/users and add your account.
 You can use this account to sign into Helicone at localhost:3000 via your browser.
 
 Default URLs:
