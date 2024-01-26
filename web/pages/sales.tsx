@@ -11,8 +11,9 @@ import PublicMetaData from "../components/layout/public/publicMetaData";
 const bullets = [
   "Request a demo",
   "Learn more about our product",
+  "Learn about our pricing, features, and integrations",
+  "Request a SOC-2 report or our on-premise solution",
   "Get onboarding support",
-  "Talk with the founders",
 ];
 
 const Sales = () => {
