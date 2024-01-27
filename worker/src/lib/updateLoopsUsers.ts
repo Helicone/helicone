@@ -118,6 +118,11 @@ export async function updateLoopUsers(env: Env) {
   // console.log(
   //   `Found ${newestUser.filter((u) => !u.msft).length} non-msft users`
   // );
+  const newCache = cachedUserEmails.filter((u) =>
+    newestUser.find((nu) => {
+      return nu.email !== u.email || u.tags.every((t) => nu.tags.includes(t));
+    })
+  );
 
   for (const user of newestUser) {
     console.log(`Updating user ${user.email}`);
@@ -147,10 +152,6 @@ export async function updateLoopUsers(env: Env) {
       body: JSON.stringify(body),
     });
 
-    const newCache = cachedUserEmails.filter(
-      (u) =>
-        u.email !== user.email || u.tags.every((t) => user.tags.includes(t))
-    );
     newCache.push({
       email: user.email,
       tags: user.tags,
