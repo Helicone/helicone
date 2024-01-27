@@ -111,7 +111,7 @@ export async function updateLoopUsers(env: Env) {
       });
       return !found;
     })
-    .splice(0, 10);
+    .splice(0, 100);
 
   console.log(`Adding ${newestUser.length} users`);
   // console.log(`Found ${newestUser.filter((u) => u.msft).length} msft users`);
