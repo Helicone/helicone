@@ -110,8 +110,7 @@ export async function updateLoopUsers(env: Env) {
         return u.email === user.email && allTagsMatch;
       });
       return !found;
-    })
-    .splice(0, 100);
+    });
 
   console.log(`Adding ${newestUser.length} users`);
   // console.log(`Found ${newestUser.filter((u) => u.msft).length} msft users`);
