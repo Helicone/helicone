@@ -76,28 +76,51 @@ export async function updateLoopUsers(env: Env) {
   );
   const allUsers = await getAllUser(supabaseServer);
 
-  const cachedUserEmails: string[] = JSON.parse(
-    (await env.UTILITY_KV.get("loop_user_emails")) ?? "[]"
-  );
+  const cachedUserEmails: {
+    email: string;
+    tags: string[];
+  }[] = JSON.parse((await env.UTILITY_KV.get("loop_user_emails_v10")) ?? "[]");
 
+  console.log("Found", cachedUserEmails.length, "cached emails");
   const newestUser = allUsers
-    .filter((user) => cachedUserEmails.includes(user.email) === false)
-    .filter((user) => {
-      if (user.created_at === undefined) {
-        return false;
+    .reduce((acc, user) => {
+      const existingUser = acc.find((u) => u.email === user.email);
+      if (existingUser) {
+        existingUser.tags.push(user.tag ?? "");
+        return acc;
+      } else {
+        const tags = user.tag ? [user.tag] : [];
+        if (user.msft) {
+          tags.push("msft");
+        }
+        acc.push({
+          email: user.email,
+          tags: [user.tag ?? ""],
+          firstName: user.first_name ?? "",
+          lastName: user.last_name ?? "",
+          created_at: user.created_at ?? new Date().toISOString(),
+          updated_at: user.updated_at ?? new Date().toISOString(),
+        });
       }
-      const createdAt = new Date(user.created_at);
-      // Get new users in the last 7 days
-      return createdAt.getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000;
-    });
+      return acc;
+    }, [] as { email: string; tags: string[]; firstName: string; lastName: string; created_at: string; updated_at: string }[])
+    .filter((user) => {
+      const found = cachedUserEmails.find((u) => {
+        const allTagsMatch = u.tags.every((t) => user.tags.includes(t));
+        return u.email === user.email && allTagsMatch;
+      });
+      return !found;
+    })
+    .splice(0, 100);
 
-  console.log(`Found ${newestUser.length} users`);
-  console.log(`Found ${newestUser.filter((u) => u.msft).length} msft users`);
-  console.log(
-    `Found ${newestUser.filter((u) => !u.msft).length} non-msft users`
-  );
+  console.log(`Adding ${newestUser.length} users`);
+  // console.log(`Found ${newestUser.filter((u) => u.msft).length} msft users`);
+  // console.log(
+  //   `Found ${newestUser.filter((u) => !u.msft).length} non-msft users`
+  // );
 
   for (const user of newestUser) {
+    console.log(`Updating user ${user.email}`);
     const sleepPadding = 0.1;
     const sleepTime = 1000 / MAX_REQUESTS_PER_SECOND;
     await new Promise((resolve) =>
@@ -106,17 +129,17 @@ export async function updateLoopUsers(env: Env) {
 
     const body: Record<string, unknown> = {
       email: user.email,
-      firstName: user.first_name,
-      lastName: user.last_name,
-      created_at: new Date(user.created_at ?? 0).toISOString(),
-      updated_at: new Date(user.updated_at ?? 0).toISOString(),
+      firstName: user.firstName,
+      lastName: user.lastName,
+      created_at: user.created_at,
     };
-    if (user.tag) {
-      body[user.tag] = true;
+
+    for (const tag of user.tags) {
+      body[tag] = true;
     }
 
     const result = await fetch("https://app.loops.so/api/v1/contacts/update", {
-      method: "POST",
+      method: "PUT",
       headers: {
         Authorization: `Bearer ${env.LOOPS_API_KEY}`,
         "Content-Type": "application/json",
@@ -124,24 +147,22 @@ export async function updateLoopUsers(env: Env) {
       body: JSON.stringify(body),
     });
 
-    const resultJson = await result.json<{
-      message?: string;
-      result: "success" | "error";
-    }>();
-
-    if (
-      resultJson.result === "success" ||
-      resultJson.message?.includes("Email already on list")
-    ) {
-      cachedUserEmails.push(user.email);
-    }
-
-    await env.UTILITY_KV.put(
-      "loop_user_emails_v2",
-      JSON.stringify(cachedUserEmails),
-      {
-        expirationTtl: 60 * 60 * 24,
-      }
+    const newCache = cachedUserEmails.filter(
+      (u) =>
+        u.email !== user.email || u.tags.every((t) => user.tags.includes(t))
     );
+    newCache.push({
+      email: user.email,
+      tags: user.tags,
+    });
+
+    console.log(
+      `Updated user ${user.email} with result ${await result.text()}`
+    );
+    console.log(`adding back cached emails`, newCache.length);
+
+    await env.UTILITY_KV.put("loop_user_emails_v10", JSON.stringify(newCache), {
+      expirationTtl: 60 * 60 * 24, // 1 day
+    });
   }
 }
