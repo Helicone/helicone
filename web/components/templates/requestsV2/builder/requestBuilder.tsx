@@ -54,6 +54,10 @@ export const getBuilderType = (
     return "DalleBuilder";
   }
 
+  if (model === "gemini-pro" || model === "gemini-pro-vision") {
+    return "GeminiBuilder";
+  }
+
   // mistralai/Mistral-7B-Instruct-v[number].[number]
   if (/^mistralai\/Mistral-7B-Instruct-v\d+\.\d+$/.test(model)) {
     return "ChatBuilder";
