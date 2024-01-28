@@ -266,7 +266,6 @@ const getModelFromPath = (path: string) => {
   } else {
     return undefined;
   }
-  cop;
 };
 
 export async function getRequestsDateRange(
