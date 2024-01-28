@@ -13,6 +13,7 @@ import CompletionBuilder from "./completionBuilder";
 import { LlmType } from "../../../../lib/api/models/requestResponseModel";
 import ChatBuilder from "./chatBuilder";
 import { DalleBuilder } from "./dalleBuilder";
+import GeminiBuilder from "./geminiBuilder";
 
 export type BuilderType =
   | "ChatBuilder"
@@ -24,6 +25,7 @@ export type BuilderType =
   | "ClaudeBuilder"
   | "CustomBuilder"
   | "DalleBuilder"
+  | "GeminiBuilder"
   | "UnknownBuilder";
 
 export const getBuilderType = (
@@ -110,12 +112,19 @@ const builders: {
   ClaudeBuilder: ClaudeBuilder,
   CustomBuilder: CustomBuilder,
   DalleBuilder: DalleBuilder,
+  GeminiBuilder: GeminiBuilder,
   UnknownBuilder: UnknownBuilder,
 };
 
 const getModelFromPath = (path: string) => {
-  let regex = /\/engines\/([^\/]+)/;
-  let match = path.match(regex);
+  const regex1 = /\/engines\/([^/]+)/;
+  const regex2 = /models\/([^/:]+)/;
+
+  let match = path.match(regex1);
+
+  if (!match) {
+    match = path.match(regex2);
+  }
 
   if (match && match[1]) {
     return match[1];
