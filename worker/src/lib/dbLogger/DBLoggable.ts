@@ -326,6 +326,7 @@ export class DBLoggable {
             parse_response_error: parsedResponse.error,
             body: parsedResponse.data,
           },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           model: (parsedResponse.data as any)?.model ?? undefined,
           status: await this.response.status(),
         };
