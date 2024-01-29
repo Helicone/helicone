@@ -187,8 +187,14 @@ export async function logRequest(
   }
 
   function getModelFromPath(path: string) {
-    const regex = /\/engines\/([^/]+)/;
-    const match = path.match(regex);
+    const regex1 = /\/engines\/([^/]+)/;
+    const regex2 = /models\/([^/:]+)/;
+
+    let match = path.match(regex1);
+
+    if (!match) {
+      match = path.match(regex2);
+    }
 
     if (match && match[1]) {
       return match[1];

@@ -220,6 +220,22 @@ export class DBLoggable {
             helicone_calculated: true,
           },
         });
+      } else if (!isStream && this.provider === "GOOGLE") {
+        const responseJson = JSON.parse(result);
+        const usageMetadataItem = responseJson.find(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (item: any) => item.usageMetadata
+        );
+
+        return ok({
+          usage: {
+            total_tokens: usageMetadataItem?.usageMetadata?.totalTokenCount,
+            prompt_tokens: usageMetadataItem?.usageMetadata?.promptTokenCount,
+            completion_tokens:
+              usageMetadataItem?.usageMetadata?.candidatesTokenCount,
+            helicone_calculated: false,
+          },
+        });
       } else if (isStream && this.provider === "ANTHROPIC") {
         return anthropicAIStream(result, tokenCounter, requestBody);
       } else if (isStream) {
@@ -254,6 +270,8 @@ export class DBLoggable {
     const delay_ms = endTime.getTime() - this.timing.startTime.getTime();
     const status = await this.response.status();
     const parsedResponse = await this.parseResponse(responseBody, status);
+    const body = this.tryJsonParse(responseBody);
+    const model = body?.model ?? body?.body?.model ?? undefined;
 
     return parsedResponse.error === null
       ? {
@@ -263,14 +281,14 @@ export class DBLoggable {
           body: this.response.omitLog
             ? {
                 usage: parsedResponse.data?.usage,
-                model: parsedResponse.data?.model,
+                model,
               }
-            : parsedResponse.data,
+            : body,
           status: await this.response.status(),
           completion_tokens: parsedResponse.data.usage?.completion_tokens,
           prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          model: (parsedResponse.data as any)?.model ?? undefined,
+          model,
           delay_ms,
         }
       : {
@@ -280,14 +298,9 @@ export class DBLoggable {
           body: {
             helicone_error: "error parsing response",
             parse_response_error: parsedResponse.error,
-            body: this.tryJsonParse(responseBody),
+            body: body,
           },
-          model:
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (parsedResponse.data as any)?.model ??
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (parsedResponse.data as any)?.body?.model ?? // anthropic
-            undefined,
+          model,
           status: await this.response.status(),
         };
   }

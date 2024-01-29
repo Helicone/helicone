@@ -168,16 +168,22 @@ export class InsertQueue {
     return { data: null, error: null };
   }
 
-  private getModelFromPath = (path: string) => {
-    const regex = /\/engines\/([^/]+)/;
-    const match = path.match(regex);
+  private getModelFromPath(path: string) {
+    const regex1 = /\/engines\/([^/]+)/;
+    const regex2 = /models\/([^/:]+)/;
+
+    let match = path.match(regex1);
+
+    if (!match) {
+      match = path.match(regex2);
+    }
 
     if (match && match[1]) {
       return match[1];
     } else {
       return undefined;
     }
-  };
+  }
 
   private getModelFromRequest(
     requestData: Database["public"]["Tables"]["request"]["Insert"]

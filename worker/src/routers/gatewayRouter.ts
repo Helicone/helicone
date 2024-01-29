@@ -121,6 +121,8 @@ async function getProvider(
     targetBaseUrlLowerCase.includes("openai")
   ) {
     provider = "OPENAI";
+  } else if (targetBaseUrlLowerCase.includes("googleapis")) {
+    provider = "GOOGLE";
   } else {
     provider = targetBaseUrlHost ?? "CUSTOM";
   }
