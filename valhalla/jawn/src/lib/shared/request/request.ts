@@ -12,6 +12,7 @@ import { RosettaWrapper } from "../rosetta/rosettaWrapper";
 import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { LlmSchema } from "../requestResponseModel";
 import { Database, Json } from "../../db/database.types";
+import { mapGeminiPro } from "./mappers";
 
 export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 3900000 / 10;
@@ -223,6 +224,12 @@ async function mapLLMCalls(
 
       let mappedSchema: LlmSchema | null = null;
       try {
+        if (model === "gemini-pro" || model === "gemini-pro-vision") {
+          const mappedSchema = mapGeminiPro(heliconeRequest, model);
+          heliconeRequest.llmSchema = mappedSchema;
+          return heliconeRequest;
+        }
+
         const requestPath = new URL(heliconeRequest.request_path).pathname;
         const schemaJson = await rosettaWrapper.mapLLMCall(
           {
@@ -252,8 +259,14 @@ async function mapLLMCalls(
 }
 
 const getModelFromPath = (path: string) => {
-  let regex = /\/engines\/([^\/]+)/;
-  let match = path.match(regex);
+  const regex1 = /\/engines\/([^/]+)/;
+  const regex2 = /models\/([^/:]+)/;
+
+  let match = path.match(regex1);
+
+  if (!match) {
+    match = path.match(regex2);
+  }
 
   if (match && match[1]) {
     return match[1];
