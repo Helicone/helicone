@@ -157,7 +157,6 @@ def test_openai_proxy():
     assert response_data, "Response data not found in the database for the given request ID"
     print("passed")
 
-
 def test_helicone_proxy_key():
     print("\n---------Running test_helicone_proxy_key---------")
 
