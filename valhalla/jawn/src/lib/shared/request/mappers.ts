@@ -35,7 +35,7 @@ export function mapGeminiPro(
       : [candidate.content];
     return contents.some((content: any) =>
       Array.isArray(content.parts)
-        ? content.parts.some((part: any) => part.text)
+        ? content.parts.some((part: any) => part.text || part.functionCall)
         : content.parts.text
     );
   });
@@ -44,12 +44,21 @@ export function mapGeminiPro(
     ? firstCandidate.content.find((content: any) => content.parts)
     : firstCandidate?.content;
   const firstPart = Array.isArray(firstContent?.parts)
-    ? firstContent.parts.find((part: any) => part.text)
+    ? firstContent.parts.find((part: any) => part.text || part.functionCall)
     : firstContent?.parts;
 
   const responseMessages = firstPart
-    ? { role: firstContent.role ?? "user", content: firstPart.text }
-    : {};
+    ? {
+        role: firstContent.role ?? "user",
+        content: firstPart.text,
+        function_call: firstPart.functionCall
+          ? {
+              name: firstPart.functionCall?.name,
+              arguments: firstPart.functionCall?.args,
+            }
+          : undefined,
+      }
+    : null;
 
   const schema: LlmSchema = {
     request: {
@@ -82,6 +91,5 @@ export function mapGeminiPro(
     },
   };
 
-  console.log(`Mapped request to schema: ${JSON.stringify(schema)}`);
   return schema;
 }
