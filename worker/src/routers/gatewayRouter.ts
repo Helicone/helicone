@@ -113,7 +113,19 @@ async function getProvider(
 
   setBaseURLOverride(targetBaseUrl);
 
-  const provider = targetBaseUrlHost ?? "CUSTOM";
+  const targetBaseUrlLowerCase = targetBaseUrl.toLowerCase();
+
+  let provider;
+  if (
+    targetBaseUrlLowerCase.includes("azure") ||
+    targetBaseUrlLowerCase.includes("openai")
+  ) {
+    provider = "OPENAI";
+  } else if (targetBaseUrlLowerCase.includes("googleapis")) {
+    provider = "GOOGLE";
+  } else {
+    provider = targetBaseUrlHost ?? "CUSTOM";
+  }
   return ok({
     provider,
   });

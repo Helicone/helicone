@@ -1,12 +1,12 @@
 import Head from "next/head";
 
-interface MetaDataProps {
+interface AuthMetaDataProps {
   children: React.ReactNode;
   title: string;
   image?: string;
 }
 
-const MetaData = (props: MetaDataProps) => {
+const AuthMetaData = (props: AuthMetaDataProps) => {
   const { children, title, image } = props;
 
   return (
@@ -35,4 +35,4 @@ const MetaData = (props: MetaDataProps) => {
   );
 };
 
-export default MetaData;
+export default AuthMetaData;

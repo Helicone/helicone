@@ -19,7 +19,10 @@ const COSTS_PROMPT = {
   "gpt-3.5-turbo-0613": 0.0015,
   "gpt-35-turbo-16k": 0.003,
   "gpt-3.5-turbo-16k-0613": 0.003,
+  "text-embedding-ada-002": 0.0001,
   "text-embedding-ada-002-v2": 0.0001,
+  "gemini-pro": 0.00025,
+  "gemini-pro-vision": 0.00025,
   // Latest anthropic pricing from July 2023 (https://www-files.anthropic.com/production/images/model_pricing_july2023.pdf)
   "claude-instant-1	": 0.00163,
   "claude-instant-1.2": 0.00163,
@@ -45,6 +48,8 @@ const COSTS_COMPLETIONS = {
   "gpt-3.5-turbo-0613": 0.002,
   "gpt-3.5-turbo-16k-0613": 0.004,
   "gpt-35-turbo-16k": 0.004,
+  "gemini-pro": 0.0005,
+  "gemini-pro-vision": 0.0005,
   // Latest anthropic pricing from July 2023 (https://www-files.anthropic.com/production/images/model_pricing_july2023.pdf)
   "claude-instant-1	": 0.00551,
   "claude-instant-1.2": 0.00551,
@@ -92,12 +97,15 @@ export function modelCost(modelRow: ModelMetrics): number {
     ? OPENAI_FINETUNE_COSTS_COMPLETIONS
     : COSTS_COMPLETIONS;
 
+  const lowerCaseModelPrefix = model_prefix.toLowerCase();
+
   const promptCost = Object.entries(promptCosts).find(
-    ([key]) => key === model_prefix
+    ([key]) => key === lowerCaseModelPrefix
   )?.[1];
   const completionCost = Object.entries(completionCosts).find(
-    ([key]) => key === model_prefix
+    ([key]) => key === lowerCaseModelPrefix
   )?.[1];
+
   if (!promptCost || !completionCost) {
     return 0;
   }

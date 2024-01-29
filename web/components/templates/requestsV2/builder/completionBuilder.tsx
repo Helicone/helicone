@@ -63,7 +63,7 @@ class CompletionBuilder extends AbstractRequestBuilder {
     return {
       requestText: requestBody?.prompt || "",
       responseText: getResponseText(),
-      render: getRenderContent(),
+      render: getRenderContent,
     };
   }
 }

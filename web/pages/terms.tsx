@@ -1,5 +1,5 @@
 import BasePageV2 from "../components/layout/basePageV2";
-import MetaData from "../components/shared/metaData";
+import MetaData from "../components/layout/public/authMetaData";
 
 const Terms = () => {
   const privacyPageSection = (

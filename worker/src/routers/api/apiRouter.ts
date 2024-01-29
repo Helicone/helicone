@@ -11,6 +11,7 @@ import { logAsync } from "../../api/helpers/logAsync";
 import { createAPIClient } from "../../api/lib/apiClient";
 import { CustomerGet } from "../../api/routes/customer-portal/customer/get";
 import { CustomerUsageGet } from "../../api/routes/customer-portal/customer/usage/get";
+import { ProviderKeyGet } from "../../api/routes/customer-portal/customer/provderKey/get";
 
 function getOpenAPIRouter(
   router: OpenAPIRouterType<
@@ -20,6 +21,8 @@ function getOpenAPIRouter(
 ) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   router.get("/v1/customer/:customerId/usage", CustomerUsageGet as any);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  router.get("/v1/customer/:customerId/provider-key", ProviderKeyGet as any);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   router.get("/v1/customers", CustomerGet as any);
 }

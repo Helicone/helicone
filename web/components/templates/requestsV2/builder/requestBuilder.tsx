@@ -114,8 +114,14 @@ const builders: {
 };
 
 const getModelFromPath = (path: string) => {
-  let regex = /\/engines\/([^\/]+)/;
-  let match = path.match(regex);
+  const regex1 = /\/engines\/([^/]+)/;
+  const regex2 = /models\/([^/:]+)/;
+
+  let match = path.match(regex1);
+
+  if (!match) {
+    match = path.match(regex2);
+  }
 
   if (match && match[1]) {
     return match[1];

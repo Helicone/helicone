@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import { HeliconeRequest, Provider } from "../../../../lib/api/request/request";
 import { Json } from "../../../../supabase/database.types";
 import { modelCost } from "../../../../lib/api/metrics/costCalc";
@@ -37,7 +36,7 @@ export type NormalizedRequest = CommonFields & {
   responseText: string;
 
   // Value to display in request drawer
-  render: ReactNode;
+  render(): JSX.Element;
 };
 
 export type SpecificFields = Omit<NormalizedRequest, keyof CommonFields>;

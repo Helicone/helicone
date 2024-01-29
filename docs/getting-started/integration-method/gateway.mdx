@@ -124,12 +124,8 @@ const model = new ChatOpenAI({
 
 ```python
 from langchain.chat_models import AzureChatOpenAI
-helicone_headers = {
-    "Helicone-Auth": f"Bearer {helicone_api_key}",
-    "Helicone-Target-Url":
-}
 llm = ChatOpenAI(
-    openai_api_key='<>',
+    openai_api_key='<OPENAI_API_KEY>',
     headers={
         "Helicone-Auth": f"Bearer {env.HELICONE_API_KEY}"
         "Helicone-Target-Url": "https://api.lemonfox.ai",
