@@ -270,8 +270,34 @@ export class DBLoggable {
     const delay_ms = endTime.getTime() - this.timing.startTime.getTime();
     const status = await this.response.status();
     const parsedResponse = await this.parseResponse(responseBody, status);
-    const body = this.tryJsonParse(responseBody);
-    const model = body?.model ?? body?.body?.model ?? undefined;
+    const isStream = this.request.isStream;
+
+    if (
+      !isStream &&
+      this.provider === "GOOGLE" &&
+      parsedResponse.error === null
+    ) {
+      const body = this.tryJsonParse(responseBody);
+      const model = body?.model ?? body?.body?.model ?? undefined;
+
+      return {
+        id: this.response.responseId,
+        created_at: endTime.toISOString(),
+        request: this.request.requestId,
+        body: this.response.omitLog
+          ? {
+              usage: parsedResponse.data?.usage,
+              model,
+            }
+          : body,
+        status: await this.response.status(),
+        completion_tokens: parsedResponse.data.usage?.completion_tokens,
+        prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        model: model,
+        delay_ms,
+      };
+    }
 
     return parsedResponse.error === null
       ? {
@@ -281,14 +307,14 @@ export class DBLoggable {
           body: this.response.omitLog
             ? {
                 usage: parsedResponse.data?.usage,
-                model,
+                model: parsedResponse.data?.model,
               }
-            : body,
+            : parsedResponse.data,
           status: await this.response.status(),
           completion_tokens: parsedResponse.data.usage?.completion_tokens,
           prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          model,
+          model: (parsedResponse.data as any)?.model ?? undefined,
           delay_ms,
         }
       : {
@@ -298,9 +324,9 @@ export class DBLoggable {
           body: {
             helicone_error: "error parsing response",
             parse_response_error: parsedResponse.error,
-            body: body,
+            body: parsedResponse.data,
           },
-          model,
+          model: (parsedResponse.data as any)?.model ?? undefined,
           status: await this.response.status(),
         };
   }
