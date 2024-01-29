@@ -222,8 +222,8 @@ export class DBLoggable {
         });
       } else if (!isStream && this.provider === "GOOGLE") {
         const responseJson = JSON.parse(result);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const usageMetadataItem = responseJson.find(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (item: any) => item.usageMetadata
         );
 
