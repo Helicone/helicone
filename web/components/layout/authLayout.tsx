@@ -41,6 +41,7 @@ import { useTheme } from "../shared/theme/themeContext";
 import ReferralModal from "../common/referralModal";
 import MetaData from "./public/authMetaData";
 import { Badge } from "@tremor/react";
+import { useLocalStorage } from "../../services/hooks/localStorage";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
@@ -61,6 +62,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [referOpen, setReferOpen] = useState(false);
   const [open, setOpen] = useState(false);
+  const [showBanner, setShowBanner] = useLocalStorage("showBanner", true);
 
   const NAVIGATION: {
     name: string;
@@ -599,6 +601,41 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   className="py-4 sm:py-8 mx-auto w-full max-w-[100rem]"
                   key={org?.renderKey}
                 >
+                  {showBanner && (
+                    <div className="pointer-events-none fixed inset-x-0 bottom-0 right-0 sm:flex sm:justify-end sm:px-6 sm:pb-5 lg:px-8 z-50">
+                      <div className="pointer-events-auto flex items-start justify-between gap-x-6 bg-gray-900 px-6 py-2.5 sm:rounded-xl sm:py-3 sm:pl-4 sm:pr-3.5">
+                        <div className="text-sm leading-6 text-white flex flex-col w-full max-w-lg space-y-4">
+                          <strong className="font-semibold">
+                            We had a small issue with parsing streamed responses
+                            from 12:30am PST to 8:30am PST
+                          </strong>
+                          <p>
+                            Our parser was not working correctly to build back
+                            the response objects. We have a fix in place that
+                            will backfill the data between this time, but for
+                            now we are missing response bodies between this time
+                            period, we will update you with more information
+                            shortly. &nbsp;
+                            <span aria-hidden="true">&rarr;</span>
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          className="-m-1.5 flex-none p-1.5"
+                          onClick={() => {
+                            setShowBanner(false);
+                          }}
+                        >
+                          <span className="sr-only">Dismiss</span>
+                          <XMarkIcon
+                            className="h-5 w-5 text-white"
+                            aria-hidden="true"
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {children}
                 </div>
               </OrgContext.Provider>
