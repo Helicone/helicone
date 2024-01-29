@@ -26,7 +26,7 @@ import {
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import { DEMO_EMAIL } from "../../lib/constants";
 import { Database } from "../../supabase/database.types";
 import { clsx } from "../shared/clsx";
