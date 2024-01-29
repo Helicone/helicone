@@ -1,4 +1,3 @@
-import { Chat } from "../../requests/chat";
 import { Completion } from "../../requests/completion";
 import AbstractRequestBuilder, {
   SpecificFields,
