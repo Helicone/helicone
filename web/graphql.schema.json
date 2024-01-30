@@ -1023,6 +1023,18 @@
             "deprecationReason": null
           },
           {
+            "name": "model",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "TextOperators",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "prompt",
             "description": null,
             "type": {
