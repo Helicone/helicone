@@ -5,35 +5,52 @@ import AbstractRequestBuilder, {
 
 class CustomBuilder extends AbstractRequestBuilder {
   protected buildSpecific(): SpecificFields {
-    const responseText = this.response.response_body?.text
-      ? JSON.stringify(this.response.response_body?.text, null, 2)
-      : JSON.stringify(this.response.response_body, null, 2);
-    const requestText = this.response.request_body?.prompt
-      ? JSON.stringify(this.response.request_body?.prompt, null, 2)
-      : JSON.stringify(this.response.request_body, null, 2);
+    const getRequestText = () => {
+      if (this.response.request_body?.prompt) {
+        if (typeof this.response.request_body?.prompt === "string") {
+          return this.response.request_body?.prompt;
+        } else {
+          return JSON.stringify(this.response.request_body?.prompt, null, 2);
+        }
+      } else {
+        return JSON.stringify(this.response.request_body, null, 2);
+      }
+    };
+    const getResponseText = () => {
+      if (this.response.response_body?.text) {
+        if (typeof this.response.response_body?.text === "string") {
+          return this.response.response_body?.text;
+        } else {
+          return JSON.stringify(this.response.response_body?.text, null, 2);
+        }
+      } else {
+        return JSON.stringify(this.response.response_body, null, 2);
+      }
+    };
+
     return {
-      requestText: requestText,
-      responseText: responseText,
+      requestText: getRequestText(),
+      responseText: getResponseText(),
       render: () => {
         return this.response.response_status === 0 ||
           this.response.response_status === null ? (
           <p>Pending...</p>
         ) : this.response.response_status === 200 ? (
           <Completion
-            request={requestText}
+            request={getRequestText()}
             response={{
               title: "Response",
-              text: responseText,
+              text: getResponseText(),
             }}
             rawRequest={this.response.request_body}
             rawResponse={this.response.response_body}
           />
         ) : (
           <Completion
-            request={requestText}
+            request={getRequestText()}
             response={{
               title: "Error",
-              text: responseText,
+              text: getResponseText(),
             }}
             rawRequest={this.response.request_body}
             rawResponse={this.response.response_body}
