@@ -86,7 +86,22 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
               return false;
             };
 
-            if (hasFunctionCall()) {
+            const hasText = () => {
+              // check if message.text is an object
+              if (
+                message?.text &&
+                typeof message.text === "object" &&
+                message.text !== null
+              ) {
+                return true;
+              }
+
+              return false;
+            };
+
+            if (hasText()) {
+              return JSON.stringify(message.text);
+            } else if (hasFunctionCall()) {
               const tools = message.tool_calls;
               const functionTools = tools?.find(
                 (tool: { type: string }) => tool.type === "function"
