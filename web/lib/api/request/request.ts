@@ -15,7 +15,7 @@ import { RosettaWrapper } from "../../wrappers/rosetta/rosettaWrapper";
 import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { LlmSchema } from "../models/requestResponseModel";
 
-export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
+export type Provider = "OPENAI" | "ANTHROPIC" | "TOGETHERAI" | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 3900000 / 10;
 
 export interface HeliconeRequest {
