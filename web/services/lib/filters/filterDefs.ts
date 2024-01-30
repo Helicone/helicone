@@ -47,6 +47,8 @@ export type RequestTableToOperators = {
   org_id: SingleKey<TextOperators>;
   id: SingleKey<TextOperators>;
   node_id: SingleKey<TextOperators>;
+  model: SingleKey<TextOperators>;
+  modelOverride: SingleKey<TextOperators>;
 };
 
 export type FilterLeafRequest = SingleKey<RequestTableToOperators>;
@@ -91,6 +93,7 @@ type ResponseTableToOperators = {
   body_model: SingleKey<TextOperators>;
   body_completion: SingleKey<TextOperators>;
   status: SingleKey<NumberOperators>;
+  model: SingleKey<TextOperators>;
 };
 
 export type FilterLeafResponse = SingleKey<ResponseTableToOperators>;
