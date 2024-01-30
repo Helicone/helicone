@@ -95,6 +95,7 @@ input HeliconeRequestFilter {
   property: PropertyFilter
   createdAt: DateOperators
   feedback: FeedbackFilter
+  model: TextOperators
 }
 
 input FeedbackFilter {
