@@ -5,12 +5,12 @@ import AbstractRequestBuilder, {
 
 class CustomBuilder extends AbstractRequestBuilder {
   protected buildSpecific(): SpecificFields {
-    const responseText =
-      this.response.response_body?.text ??
-      JSON.stringify(this.response.response_body, null, 2);
-    const requestText =
-      this.response.request_body?.prompt ??
-      JSON.stringify(this.response.request_body, null, 2);
+    const responseText = this.response.response_body?.text
+      ? JSON.stringify(this.response.response_body?.text, null, 2)
+      : JSON.stringify(this.response.response_body, null, 2);
+    const requestText = this.response.request_body?.prompt
+      ? JSON.stringify(this.response.request_body?.prompt, null, 2)
+      : JSON.stringify(this.response.request_body, null, 2);
     return {
       requestText: requestText,
       responseText: responseText,
