@@ -44,7 +44,11 @@ export const getBuilderType = (
     return "CustomBuilder";
   }
 
-  if (model == "gpt-4-vision-preview" || model == "gpt-4-1106-vision-preview") {
+  if (
+    provider === "TOGETHERAI" ||
+    model == "gpt-4-vision-preview" ||
+    model == "gpt-4-1106-vision-preview"
+  ) {
     return "ChatGPTBuilder";
   }
 

@@ -123,6 +123,8 @@ async function getProvider(
     provider = "OPENAI";
   } else if (targetBaseUrlLowerCase.includes("googleapis")) {
     provider = "GOOGLE";
+  } else if (targetBaseUrlLowerCase.includes("together.xyz")) {
+    provider = "TOGETHERAI";
   } else {
     provider = targetBaseUrlHost ?? "CUSTOM";
   }
