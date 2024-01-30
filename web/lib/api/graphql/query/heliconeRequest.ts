@@ -17,7 +17,7 @@ import { convertTextOperators, convertTimeOperators } from "./helper";
 const filterInputToFilterLeaf: {
   [key in keyof HeliconeRequestFilter]: (
     filter: HeliconeRequestFilter[key]
-  ) => FilterLeaf | undefined;
+  ) => FilterNode | undefined;
 } = {
   feedback: (feedback) => {
     if (
@@ -93,6 +93,32 @@ const filterInputToFilterLeaf: {
       request: {
         created_at: convertTimeOperators(createdAt),
       },
+    };
+  },
+  model: (model) => {
+    if (model === undefined || model === null) {
+      return undefined;
+    }
+    return {
+      left: {
+        left: {
+          request: {
+            model: convertTextOperators(model),
+          },
+        },
+        right: {
+          response: {
+            model: convertTextOperators(model),
+          },
+        },
+        operator: "or",
+      },
+      right: {
+        request: {
+          modelOverride: convertTextOperators(model),
+        },
+      },
+      operator: "or",
     };
   },
 };
