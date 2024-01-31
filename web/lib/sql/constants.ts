@@ -9,7 +9,6 @@ sum(
     -- Non-finetuned
     WHEN (${table}.model LIKE '%gpt-4-32k-0314%') THEN 0.06 * ${table}.prompt_tokens + 0.12 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%gpt-4-32k-0613%') THEN 0.06 * ${table}.prompt_tokens + 0.12 * ${table}.completion_tokens
-    WHEN (${table}.model LIKE '%gpt-4-0125-preview%') THEN 0.01 * ${table}.prompt_tokens + 0.03 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%gpt-4-1106-preview%') THEN 0.01 * ${table}.prompt_tokens + 0.03 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%gpt-4-1106-preview-vision%') THEN 0.01 * ${table}.prompt_tokens + 0.03 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%gpt-3.5-turbo-0613%') THEN 0.0015 * ${table}.prompt_tokens + 0.002 * ${table}.completion_tokens
@@ -32,6 +31,7 @@ sum(
     WHEN (${table}.model LIKE '%claude-instant-1.2%') THEN 0.00163 * ${table}.prompt_tokens + 0.00551 * ${table}.completion_tokens
     
     -- New
+    WHEN (${table}.model LIKE '%gpt-4-0125-preview%') THEN 0.01 * ${table}.prompt_tokens + 0.03 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%gpt-4-32k%') THEN 0.06 * ${table}.prompt_tokens + 0.12 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%gpt-4-0613%') THEN 0.03 * ${table}.prompt_tokens + 0.06 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%gpt-3.5-turbo-1106%') THEN 0.001 * ${table}.prompt_tokens + 0.002 * ${table}.completion_tokens
