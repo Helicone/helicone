@@ -119,7 +119,7 @@ const sections: {
         name: "Fine-Tuning",
         tiers: {
           Free: "1 model",
-          Pro: "500 models",
+          Pro: "10 models",
           Custom: "Unlimited",
         },
       },
