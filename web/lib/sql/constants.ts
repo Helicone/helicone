@@ -30,6 +30,13 @@ sum(
     WHEN (${table}.model LIKE '%claude-instant-1%') THEN 0.00163 * ${table}.prompt_tokens + 0.00551 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%claude-2.0%') THEN 0.01102 * ${table}.prompt_tokens + 0.03268 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%claude-instant-1.2%') THEN 0.00163 * ${table}.prompt_tokens + 0.00551 * ${table}.completion_tokens
+    
+    -- New
+    WHEN (${table}.model LIKE '%gpt-4-32k%') THEN 0.06 * ${table}.prompt_tokens + 0.12 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%gpt-4-0613%') THEN 0.03 * ${table}.prompt_tokens + 0.06 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%gpt-3.5-turbo-1106%') THEN 0.001 * ${table}.prompt_tokens + 0.002 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%gemini-pro%') THEN 0.00025 * ${table}.prompt_tokens + 0.0005 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%gemini-pro-vision%') THEN 0.00025 * ${table}.prompt_tokens + 0.0005 * ${table}.completion_tokens
     ELSE 0
   END
   ) / 1000
