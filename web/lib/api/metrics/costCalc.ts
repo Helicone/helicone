@@ -51,7 +51,7 @@ const COSTS_COMPLETIONS = {
   "gpt-3.5-turbo-16k-0613": 0.004,
   "gpt-35-turbo-16k": 0.004,
   "gemini-pro": 0.0005,
-  "gemini-pro-visionc": 0.0005,
+  "gemini-pro-vision": 0.0005,
   // Latest anthropic pricing from July 2023 (https://www-files.anthropic.com/production/images/model_pricing_july2023.pdf)
   "claude-instant-1	": 0.00551,
   "claude-instant-1.2": 0.00551,
