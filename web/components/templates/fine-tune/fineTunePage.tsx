@@ -166,7 +166,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
           <div className="flex flex-col w-full space-y-4">
             {isJobsLoading || isDatasetsLoading ? (
               <LoadingAnimation title="Loading Data..." />
-            ) : jobs?.length === 0 ? (
+            ) : jobs === undefined || jobs?.length === 0 ? (
               <div className="flex flex-col w-full h-96 justify-center items-center">
                 <div className="flex flex-col w-2/5">
                   <SparklesIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
