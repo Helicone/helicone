@@ -852,9 +852,8 @@ const DashboardPage = (props: DashboardPageProps) => {
               <div key="users">
                 <StyledAreaChart
                   title={"Users"}
-                  value={metrics.activeUsers.data?.data ?? 0}
+                  value={metrics.activeUsers.data?.data?.toString() ?? "0"}
                   isDataOverTimeLoading={overTimeData.users.isLoading}
-                  // height={"212px"}
                 >
                   <BarChart
                     className="h-[14rem]"

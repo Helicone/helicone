@@ -191,7 +191,7 @@ export default function Example() {
             </span>
           </h1>
           <p className="text-lg sm:text-2xl text-gray-600 leading-8 sm:leading-relaxed max-w-4xl">
-            Join thousands of developers and companies who have streamlined
+            Join thousands of startups and enterprises who have streamlined
             their{" "}
             <span className="block">
               LLM-powered application infrastructure with Helicone&apos;s

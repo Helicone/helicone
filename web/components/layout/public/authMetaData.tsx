@@ -12,7 +12,7 @@ const AuthMetaData = (props: AuthMetaDataProps) => {
   return (
     <>
       <Head>
-        <title>{`${title} | Helicone - Monitoring for Generative AI`}</title>
+        <title>{`${title} - Helicone`}</title>
         <link rel="icon" href="/assets/landing/helicone-mobile.webp" />
         <meta property="og:title" content={title} />
         <meta
