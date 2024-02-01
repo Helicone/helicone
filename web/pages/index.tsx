@@ -8,6 +8,7 @@ import HomePageV2 from "../components/templates/home/homePageV2";
 import RedirectingScreen from "../components/templates/home/redirectingScreen";
 import { isCustomerDomain } from "../lib/customerPortalHelpers";
 import PublicMetaData from "../components/layout/public/publicMetaData";
+import HomePageV3 from "../components/templates/home/homePageV3";
 
 export const Home = () => {
   const router = useRouter();
@@ -27,7 +28,8 @@ export const Home = () => {
         }
         ogImageUrl={"https://www.helicone.ai/static/helicone-landing.png"}
       >
-        <HomePageV2 />
+        {/* <HomePageV2 /> */}
+        <HomePageV3 />
       </PublicMetaData>
     </>
   );

@@ -92,7 +92,7 @@ export default function SolutionsButton() {
           <>
             <Popover.Button
               className={clsx(
-                "flex flex-row items-center font-semibold hover:bg-gray-200 rounded-lg px-4 py-2 focus:outline-none"
+                "flex flex-row items-center font-semibold hover:bg-gray-100 rounded-lg px-3 py-1.5 focus:outline-none"
               )}
             >
               <span>Solutions</span>
@@ -111,7 +111,7 @@ export default function SolutionsButton() {
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-1"
             >
-              <Popover.Panel className="absolute z-10 mt-3 w-[600px] transform px-4 sm:px-0">
+              <Popover.Panel className="absolute z-10 mt-2 w-[600px] transform px-4 sm:px-0">
                 <div className="overflow-hidden rounded-lg shadow-2xl ring-1 ring-black ring-opacity-10">
                   <div className="relative grid gap-8 bg-white p-7 grid-cols-1 lg:grid-cols-2">
                     <p className="-mb-2 text-sm font-medium text-gray-700 col-span-2">

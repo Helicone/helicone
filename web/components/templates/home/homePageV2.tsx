@@ -24,6 +24,7 @@ import Image from "next/image";
 import { clsx } from "../../shared/clsx";
 import Globe from "./globe";
 import { Database } from "../../../supabase/database.types";
+import GridBackground from "../../layout/public/gridBackground";
 
 const features: {
   title: string;
@@ -127,7 +128,7 @@ export default function Example() {
 
   return (
     <div className="bg-white">
-      <div className="flex items-center gap-x-6 bg-black hover:bg-gray-900 px-6 py-2.5 sm:px-3.5 sm:before:flex-1">
+      {/* <div className="flex items-center gap-x-6 bg-black hover:bg-gray-900 px-6 py-2.5 sm:px-3.5 sm:before:flex-1">
         <p className="text-sm leading-6 text-white">
           <Link href="/features/fine-tuning">
             <strong className="font-semibold">Launch: Fine-Tuning</strong>
@@ -143,168 +144,133 @@ export default function Example() {
           </Link>
         </p>
         <div className="flex flex-1 justify-end"></div>
-      </div>
+      </div> */}
       <NavBarV2 />
 
-      <div className="relative isolate">
-        <svg
-          className="absolute inset-0 -z-10 h-full w-full stroke-gray-200 [mask-image:radial-gradient(100%_60%_at_top_center,white,transparent)]"
-          aria-hidden="true"
-        >
-          <defs>
-            <pattern
-              id="abc"
-              width={25}
-              height={25}
-              x="50%"
-              y={-1}
-              patternUnits="userSpaceOnUse"
-            >
-              <path d="M25 200V.5M.5 .5H200" fill="none" />
-            </pattern>
-            <defs>
-              <pattern
-                id="123"
-                width="12.5"
-                height="12.5"
-                patternUnits="userSpaceOnUse"
-              >
-                <path d="M12.5 0V12.5M0 12.5H12.5" fill="none" />
-              </pattern>
-            </defs>
-          </defs>
-          <rect width="100%" height="100%" strokeWidth={0} fill="url(#abc)" />
-        </svg>
-        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-36 flex flex-col space-y-4 md:space-y-8 items-center justify-center text-center lg:gap-x-10 lg:px-8 antialiased">
-          <h1 className="text-4xl sm:text-6xl font-semibold leading-tight sm:leading-relaxed tracking-tight max-w-6xl">
-            The{" "}
-            <span className="md:border border-sky-600 border-dashed text-sky-600 md:py-1.5 md:px-3">
-              trusted
-            </span>{" "}
-            Generative AI platform for modern{" "}
-            <span className="md:border border-pink-700 border-dashed text-pink-700 md:py-1.5 md:px-3">
-              startups
-            </span>{" "}
-            and{" "}
-            <span className="md:border border-violet-700 border-dashed text-violet-700 md:py-1.5 md:px-3">
-              enterprises
-            </span>
-          </h1>
-          <p className="text-lg sm:text-2xl text-gray-600 leading-8 sm:leading-relaxed max-w-4xl">
-            Join thousands of startups and enterprises who have streamlined
-            their{" "}
-            <span className="block">
-              LLM-powered application infrastructure with Helicone&apos;s
-              solutions.
-            </span>
-          </p>
+      <div className="">
+        <GridBackground>
+          <div className="mx-auto max-w-6xl px-6 py-16 sm:py-32 flex flex-row space-y-4 md:space-y-6 items-center justify-center lg:gap-x-10 lg:px-8 antialiased">
+            <h1 className="text-4xl sm:text-6xl font-medium leading-tight sm:leading-relaxed tracking-tight max-w-6xl w-1/2">
+              The{" "}
+              <span className="md:border border-sky-600 border-dashed text-sky-600 md:py-1.5 md:px-3">
+                lightweight
+              </span>{" "}
+              Generative AI platform for modern{" "}
+              <span className="md:border border-pink-700 border-dashed text-pink-700 md:py-1.5 md:px-3">
+                startups
+              </span>{" "}
+              and{" "}
+              <span className="md:border border-violet-700 border-dashed text-violet-700 md:py-1.5 md:px-3">
+                enterprises
+              </span>
+            </h1>
+            <div className="w-1/2 bg-red-500">hello</div>
+            {/* </h1>
+            <p className="text-lg sm:text-2xl text-gray-600 leading-8 sm:leading-relaxed max-w-4xl">
+              Meet the lightweight, yet powerful platform purpose-built for the
+              next generation of AI applications. Join thousands of companies
+              who use Helicone today.
+            </p>
 
-          <div className="flex flex-row gap-8 pt-8">
-            <button
-              onClick={() => {
-                router.push("/signup");
-              }}
-              className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-xl px-6 py-3 text-md md:text-lg font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-            >
-              Get Started
-            </button>
-          </div>
-          <div className="flex flex-col md:flex-row pt-4 md:divide-x-2 gap-[14px] justify-center w-full items-center divide-gray-300">
-            <Link
-              href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex space-x-6 font-semibold text-gray-600 md:w-52"
-            >
-              Backed by{" "}
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="mr-1 ml-2"
+            <div className="flex flex-row gap-8 pt-6">
+              <button
+                onClick={() => {
+                  router.push("/signup");
+                }}
+                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-xl px-6 py-3 text-md md:text-lg font-semibold text-white shadow-md shadow-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
               >
-                <g clipPath="url(#clip0_24_57)">
-                  <rect width="24" height="24" rx="5.4" fill="#FF5100"></rect>
+                Get Started
+              </button>
+            </div>
+            <div className="flex flex-col md:flex-row pt-4 md:divide-x-2 gap-[14px] justify-center w-full items-center divide-gray-300">
+              <Link
+                href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex space-x-6 font-semibold text-gray-500 md:w-52"
+              >
+                Backed by{" "}
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="mr-1 ml-2"
+                >
+                  <g clipPath="url(#clip0_24_57)">
+                    <rect width="24" height="24" rx="5.4" fill="#FF5100"></rect>
+                    <rect
+                      x="0.5"
+                      y="0.5"
+                      width="23"
+                      height="23"
+                      rx="4.9"
+                      stroke="#FF844B"
+                    ></rect>
+                    <path
+                      d="M7.54102 7.31818H9.28604L11.9458 11.9467H12.0552L14.715 7.31818H16.46L12.7662 13.5028V17.5H11.2349V13.5028L7.54102 7.31818Z"
+                      fill="white"
+                    ></path>
+                  </g>
                   <rect
                     x="0.5"
                     y="0.5"
                     width="23"
                     height="23"
                     rx="4.9"
-                    stroke="#FF844B"
+                    stroke="#FF5100"
+                    strokeOpacity="0.1"
                   ></rect>
-                  <path
-                    d="M7.54102 7.31818H9.28604L11.9458 11.9467H12.0552L14.715 7.31818H16.46L12.7662 13.5028V17.5H11.2349V13.5028L7.54102 7.31818Z"
-                    fill="white"
-                  ></path>
-                </g>
-                <rect
-                  x="0.5"
-                  y="0.5"
-                  width="23"
-                  height="23"
-                  rx="4.9"
-                  stroke="#FF5100"
-                  strokeOpacity="0.1"
-                ></rect>
-                <rect
-                  x="0.5"
-                  y="0.5"
-                  width="23"
-                  height="23"
-                  rx="4.9"
-                  stroke="url(#paint0_radial_24_57)"
-                ></rect>
-                <defs>
-                  <radialGradient
-                    id="paint0_radial_24_57"
-                    cx="0"
-                    cy="0"
-                    r="1"
-                    gradientUnits="userSpaceOnUse"
-                    gradientTransform="translate(7.35) rotate(58.475) scale(34.1384)"
-                  >
-                    <stop stopColor="white" stopOpacity="0.56"></stop>
-                    <stop
-                      offset="0.28125"
-                      stopColor="white"
-                      stopOpacity="0"
-                    ></stop>
-                  </radialGradient>
-                  <clipPath id="clip0_24_57">
-                    <rect width="24" height="24" rx="5.4" fill="white"></rect>
-                  </clipPath>
-                </defs>
-              </svg>{" "}
-              Combinator
-            </Link>
-            <div className="font-semibold text-gray-600 pl-4 flex items-center md:w-56">
-              Fully open-source{" "}
-              <HeartIcon className="h-4 w-4 inline ml-2 text-pink-500" />
+                  <rect
+                    x="0.5"
+                    y="0.5"
+                    width="23"
+                    height="23"
+                    rx="4.9"
+                    stroke="url(#paint0_radial_24_57)"
+                  ></rect>
+                  <defs>
+                    <radialGradient
+                      id="paint0_radial_24_57"
+                      cx="0"
+                      cy="0"
+                      r="1"
+                      gradientUnits="userSpaceOnUse"
+                      gradientTransform="translate(7.35) rotate(58.475) scale(34.1384)"
+                    >
+                      <stop stopColor="white" stopOpacity="0.56"></stop>
+                      <stop
+                        offset="0.28125"
+                        stopColor="white"
+                        stopOpacity="0"
+                      ></stop>
+                    </radialGradient>
+                    <clipPath id="clip0_24_57">
+                      <rect width="24" height="24" rx="5.4" fill="white"></rect>
+                    </clipPath>
+                  </defs>
+                </svg>{" "}
+                Combinator
+              </Link>
+              <div className="font-semibold text-gray-500 pl-4 flex items-center md:w-56">
+                Fully open-source{" "}
+                <HeartIcon className="h-4 w-4 inline ml-2 text-pink-500" />
+              </div>
             </div>
+          </div> */}
           </div>
-
-          <div className="flex flex-col pt-24">
-            <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2.5 lg:rounded-xl lg:p-2.5">
+        </GridBackground>
+        <div className="mx-auto max-w-6xl px-6 flex flex-col space-y-4 md:space-y-6 items-center justify-center text-center lg:gap-x-10 lg:px-8 antialiased">
+          <div className="mx-auto px-6 lg:px-8">
+            <div className="w-full mx-auto grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:gap-x-10 lg:mx-0 lg:max-w-none">
               <Image
-                src="/assets/home/request-preview.webp"
-                alt="App screenshot"
-                width={2720}
-                height={1844}
-                className="w-[70rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
+                className="col-span-2 max-h-10 w-full object-contain lg:col-span-1"
+                src="/assets/home/logos/logo.svg"
+                alt="filevine"
+                width={158}
+                height={48}
               />
-            </div>
-          </div>
-          <div className="mx-auto px-6 lg:px-8 pt-32">
-            <h2 className="text-center text-lg font-medium text-gray-600">
-              Unlocking the full potential of LLM&apos;s.
-            </h2>
-            <h2 className="text-center text-lg font-medium text-gray-900">
-              Modern startups and enterprises use Helicone.
-            </h2>
-            <div className="w-full mx-auto mt-10 grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:gap-x-10 lg:mx-0 lg:max-w-none">
               <Image
                 className="col-span-2 max-h-24 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/upenn.png"
@@ -334,9 +300,9 @@ export default function Example() {
                 height={48}
               />
               <Image
-                className="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/commandbar.svg"
-                alt="commandbar"
+                className="col-span-2 max-h-10 w-full object-contain lg:col-span-1"
+                src="/assets/home/logos/qawolf.png"
+                alt="qawolf"
                 width={100}
                 height={48}
               />
@@ -354,12 +320,17 @@ export default function Example() {
                 width={300}
                 height={100}
               />
+            </div>
+          </div>
+
+          <div className="flex flex-col pt-24">
+            <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2.5 lg:rounded-xl lg:p-2.5">
               <Image
-                className="col-span-2 max-h-16 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/autogpt.png"
-                alt="autogpt"
-                width={158}
-                height={48}
+                src="/assets/home/request-preview.webp"
+                alt="App screenshot"
+                width={2720}
+                height={1844}
+                className="w-[70rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
               />
             </div>
           </div>
