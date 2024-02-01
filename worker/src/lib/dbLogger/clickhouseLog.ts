@@ -43,7 +43,8 @@ export async function logInClickhouse(
   },
   clickhouseDb: ClickhouseClientWrapper
 ) {
-  const model = request.model_override ?? response.model ?? request.model ?? "";
+  const model =
+    request.model_override ?? response.model ?? request.model ?? null;
   return Promise.all([
     clickhouseDb.dbInsertClickhouse("response_copy_v1", [
       {
