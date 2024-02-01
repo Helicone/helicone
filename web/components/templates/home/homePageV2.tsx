@@ -176,14 +176,18 @@ export default function Example() {
           <rect width="100%" height="100%" strokeWidth={0} fill="url(#abc)" />
         </svg>
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-36 flex flex-col space-y-4 md:space-y-8 items-center justify-center text-center lg:gap-x-10 lg:px-8 antialiased">
-          <h1 className="text-4xl sm:text-6xl font-semibold leading-tight sm:leading-snug max-w-4xl">
+          <h1 className="text-4xl sm:text-6xl font-semibold leading-tight sm:leading-relaxed tracking-tight max-w-6xl">
             The{" "}
-            <span className="md:border-2 border-violet-700 border-dashed text-violet-700 md:py-2 md:px-4">
-              easiest
+            <span className="md:border border-sky-600 border-dashed text-sky-600 md:py-1.5 md:px-3">
+              trusted
             </span>{" "}
-            way to monitor your LLM-applications at{" "}
-            <span className="md:border-2 border-pink-700 border-dashed text-pink-700 md:py-2 md:px-4">
-              scale
+            Generative AI platform for modern{" "}
+            <span className="md:border border-pink-700 border-dashed text-pink-700 md:py-1.5 md:px-3">
+              startups
+            </span>{" "}
+            and{" "}
+            <span className="md:border border-violet-700 border-dashed text-violet-700 md:py-1.5 md:px-3">
+              enterprises
             </span>
           </h1>
           <p className="text-lg sm:text-2xl text-gray-600 leading-8 sm:leading-relaxed max-w-4xl">
