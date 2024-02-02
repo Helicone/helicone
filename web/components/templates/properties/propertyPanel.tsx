@@ -102,7 +102,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
 
   return (
     <div className="flex flex-col space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-8">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-8">
         <ThemedTableHeader
           isFetching={false}
           timeFilter={{
