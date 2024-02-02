@@ -24,6 +24,7 @@ const AuthForm = (props: AuthFormProps) => {
   } = props;
 
   const [isLoading, setIsLoading] = useState(false);
+  const stats = usePublicStats();
 
   const handleEmailSubmitHandler = async (
     event: FormEvent<HTMLFormElement>
@@ -115,7 +116,19 @@ const AuthForm = (props: AuthFormProps) => {
           </div>
           <div className="flex flex-row w-full h-[70vh] my-auto justify-center items-center max-w-6xl">
             <div className="w-full flex flex-col h-fit p-8 sm:p-16 justify-start items-start text-start">
-              <p>hello</p>
+              <div>
+                <p>
+                  Trusted by {stats.stats?.monthlyActiveCompanies}+ companies
+                </p>
+                <p>
+                  Join over {stats.stats?.totalUsers}+ developers using Helicone
+                </p>
+                <p>
+                  Over {stats.stats?.monthlyRequests}+ requests made in the last
+                  month!
+                </p>
+                <p>{stats.stats?.totalRequests}+ Requests made</p>
+              </div>
             </div>
             <div className="bg-white h-fit mx-auto w-full p-8 sm:p-16 rounded-xl shadow-xl border border-gray-200">
               <div>
