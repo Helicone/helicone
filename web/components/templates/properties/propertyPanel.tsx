@@ -3,7 +3,6 @@ import {
   ArrowsPointingOutIcon,
   ClockIcon,
   CurrencyDollarIcon,
-  PlusIcon,
   TableCellsIcon,
   TagIcon,
 } from "@heroicons/react/24/outline";
@@ -23,10 +22,8 @@ import {
   REQUEST_TABLE_FILTERS,
   SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
-import { MetricsPanelProps } from "../../shared/metrics/metricsPanel";
 import { formatNumber } from "../users/initialColumns";
 import { encodeFilter } from "../requestsV2/requestsPageV2";
-import ThemedModal from "../../shared/themed/themedModal";
 import { useState } from "react";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import {
@@ -35,7 +32,6 @@ import {
 } from "../../../lib/timeCalculations/time";
 import ExportButton from "../../shared/themed/table/exportButton";
 import useSearchParams from "../../shared/utils/useSearchParams";
-import Link from "next/link";
 
 interface PropertyPanelProps {
   property: string;
@@ -232,6 +228,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                 ) : (
                   cleanedValueData.map((propertyValue, i) => (
                     <TableRow
+                      key={i}
                       onClick={() => {
                         const value = propertyValue.property_value;
 

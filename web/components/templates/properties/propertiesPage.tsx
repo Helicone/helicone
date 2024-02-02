@@ -1,41 +1,12 @@
 import { useState } from "react";
 
-import {
-  getTimeIntervalAgo,
-  TimeInterval,
-} from "../../../lib/timeCalculations/time";
-import {
-  Card,
-  MultiSelect,
-  MultiSelectItem,
-  Table,
-  TableBody,
-  TableHead,
-  TableHeaderCell,
-  TableRow,
-  TextInput,
-} from "@tremor/react";
-
 import AuthHeader from "../../shared/authHeader";
 import { useGetProperties } from "../../../services/hooks/properties";
-import { useLocalStorage } from "../../../services/hooks/localStorage";
-import PropertyCard from "./propertyCard";
-import {
-  ArrowPathIcon,
-  ClockIcon,
-  CurrencyDollarIcon,
-  MagnifyingGlassIcon,
-  PlusIcon,
-  TableCellsIcon,
-  TagIcon,
-} from "@heroicons/react/24/outline";
+import { PlusIcon, TagIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
-import ThemedTableHeader from "../../shared/themed/themedTableHeader";
-import useSearchParams from "../../shared/utils/useSearchParams";
 import React from "react";
 import Link from "next/link";
 import PropertyPanel from "./propertyPanel";
-import ExportButton from "../../shared/themed/table/exportButton";
 
 const PropertiesPage = (props: {}) => {
   const {
