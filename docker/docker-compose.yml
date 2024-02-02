@@ -415,26 +415,3 @@ services:
           "service_role_key": "${SERVICE_ROLE_KEY}"
         }
       SUPABASE_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-
-    
-
-
-
-  # worker-helicone-api:
-  #   container_name: helicone-worker-helicone-api
-  #   image: helicone/worker-helicone-api:latest
-  #   restart: unless-stopped
-  #   ports:
-  #     # Pass down internal port because it's set dynamically by other services
-  #     - 8788:8788
-  #   environment:
-  #     SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
-  #     SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
-  #     CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
-  #     NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
-  #     CLICKHOUSE_USER: ${CLICKHOUSE_USER}
-  #     CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
-  #     STORAGE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${PGBOUNCER_PORT}/${POSTGRES_DB}
-
-
-    # If you want to use logging, please run with `docker compose -f docker-compose.yml -f docker-compose-logging.yml up`
