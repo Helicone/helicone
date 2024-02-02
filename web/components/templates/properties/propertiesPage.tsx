@@ -50,7 +50,7 @@ const PropertiesPage = (props: {}) => {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col md:flex-row md:divide-x md:divide-gray-300 gap-4 min-h-[80vh] h-full">
+            <div className="flex flex-col xl:flex-row xl:divide-x xl:divide-gray-300 gap-8 xl:gap-4 min-h-[80vh] h-full">
               <div className="flex flex-col space-y-6 w-full min-w-[350px] max-w-[350px]">
                 <h3 className="font-semibold text-md">Your Properties</h3>
 
@@ -78,7 +78,7 @@ const PropertiesPage = (props: {}) => {
                 </ul>
               </div>
 
-              <div className="w-full md:pl-4 flex flex-col space-y-4">
+              <div className="w-full xl:pl-4 flex flex-col space-y-4">
                 <PropertyPanel property={selectedProperty} />
               </div>
             </div>
