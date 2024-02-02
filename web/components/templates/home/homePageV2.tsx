@@ -94,7 +94,7 @@ const features: {
 
 const faqs = [
   {
-    question: "Is their a latency impact to my requests with Helicone's Proxy?",
+    question: "Is there a latency impact to my requests with Helicone's Proxy?",
     answer:
       "Helicone leverages Cloudflare’s global network of servers as proxies for efficient web traffic routing. Cloudflare workers maintain extremely low latency through their worldwide distribution. This results in a fast and reliable proxy for your LLM requests with less than a fraction of a millisecond of latency impact.",
   },
