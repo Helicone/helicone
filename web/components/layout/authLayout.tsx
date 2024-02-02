@@ -140,7 +140,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     pathname.split("/")[1].substring(1);
 
   return (
-    <MetaData title={`${currentPage} ${"| " + (org?.currentOrg?.name || "")}`}>
+    <MetaData title={`${currentPage} ${"- " + (org?.currentOrg?.name || "")}`}>
       <div>
         <Transition.Root show={sidebarOpen} as={Fragment}>
           <Dialog
