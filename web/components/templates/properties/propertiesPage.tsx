@@ -7,6 +7,7 @@ import { clsx } from "../../shared/clsx";
 import React from "react";
 import Link from "next/link";
 import PropertyPanel from "./propertyPanel";
+import LoadingAnimation from "../../shared/loadingAnimation";
 
 const PropertiesPage = (props: {}) => {
   const {
@@ -23,7 +24,9 @@ const PropertiesPage = (props: {}) => {
       <AuthHeader title={"Properties"} subtitle="" />
       <div className="flex flex-col gap-4">
         <>
-          {properties.length < 1 ? (
+          {isPropertiesLoading ? (
+            <LoadingAnimation title="Loading Properties" />
+          ) : properties.length < 1 ? (
             <div className="flex flex-col w-full h-96 justify-center items-center">
               <div className="flex flex-col w-2/5">
                 <TagIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />

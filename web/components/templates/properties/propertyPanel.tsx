@@ -209,7 +209,9 @@ const PropertyPanel = (props: PropertyPanelProps) => {
 
           <Card className="py-1 px-2">
             {isAnyLoading ? (
-              <LoadingAnimation title="Loading Values..." />
+              <div className="py-8">
+                <LoadingAnimation title="Loading Data..." />
+              </div>
             ) : (
               <Table className="overflow-auto">
                 <TableHead className="border-b border-gray-300 dark:border-gray-700">
