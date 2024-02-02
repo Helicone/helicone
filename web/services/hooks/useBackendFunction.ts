@@ -13,6 +13,7 @@ export interface BackendMetricsCall<T> {
     userFilters: FilterLeaf[];
     dbIncrement?: TimeIncrement;
     timeZoneDifference: number;
+    limit?: number;
   };
   endpoint: string;
   key?: string;
@@ -56,6 +57,7 @@ export function useBackendMetricCall<T>({
           },
           dbIncrement,
           timeZoneDifference,
+          limit: params.limit,
         } as MetricsBackendBody),
       }).then((res) => res.json() as Promise<T>);
       if (postProcess === undefined) {

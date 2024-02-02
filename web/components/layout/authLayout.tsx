@@ -41,7 +41,6 @@ import { useTheme } from "../shared/theme/themeContext";
 import ReferralModal from "../common/referralModal";
 import MetaData from "./public/authMetaData";
 import { Badge } from "@tremor/react";
-import { useLocalStorage } from "../../services/hooks/localStorage";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
