@@ -5,7 +5,6 @@
 #   Destroy:        docker compose -f docker-compose.yml -f ./dev/docker-compose.dev.yml down -v --remove-orphans
 
 version: "3.8"
-
 services:
 
   studio:
@@ -347,7 +346,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-
+    depends_on:
+      vector:
+        condition: service_healthy
     command:
       - postgres
       - -c
@@ -380,6 +381,30 @@ services:
       - ./volumes/db/data:/var/lib/postgresql/data:Z
       # Changes required for Analytics support
       - ./volumes/db/logs.sql:/docker-entrypoint-initdb.d/migrations/99-logs.sql:Z
+
+  vector:
+    container_name: supabase-vector
+    image: timberio/vector:0.28.1-alpine
+    healthcheck:
+      test:
+        [
+
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://vector:9001/health"
+        ]
+      timeout: 5s
+      interval: 5s
+      retries: 3
+    volumes:
+      - ./volumes/logs/vector.yml:/etc/vector/vector.yml:ro
+      - ${DOCKER_SOCKET_LOCATION}:/var/run/docker.sock:ro
+
+    command: [ "--config", "etc/vector/vector.yml" ]
+
 
 
   web:
