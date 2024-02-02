@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { CustomerPortalContent } from "../../../pages/signin";
 import GridBackground from "../../layout/public/gridBackground";
+import { usePublicStats } from "../../../services/hooks/publicStats";
 
 interface AuthFormProps {
   handleEmailSubmit: (email: string, password: string) => void;
@@ -24,7 +25,7 @@ const AuthForm = (props: AuthFormProps) => {
   } = props;
 
   const [isLoading, setIsLoading] = useState(false);
-  const stats = usePublicStats();
+  const { stats, isLoading: isStatsLoading } = usePublicStats();
 
   const handleEmailSubmitHandler = async (
     event: FormEvent<HTMLFormElement>
@@ -115,9 +116,41 @@ const AuthForm = (props: AuthFormProps) => {
             )}
           </div>
           <div className="flex flex-row w-full h-[70vh] my-auto justify-center items-center max-w-6xl">
-            <div className="w-full flex flex-col h-fit p-8 sm:p-16 justify-start items-start text-start">
-              <div>
-                <p>
+            <div className="w-full h-full hidden sm:flex flex-col space-y-8 p-8 sm:p-16 justify-start items-start text-start">
+              <h1 className="font-semibold text-2xl">
+                Trusted by startups and enterprises
+              </h1>
+              <div className="flex flex-col">
+                <dt className="text-gray-500 text-md">Requests per month</dt>
+                {isStatsLoading ? (
+                  <div className="animate-pulse h-4 bg-gray-200 rounded w-20"></div>
+                ) : (
+                  <dd className="text-gray-900 dark:text-gray-100 text-4xl font-semibold">
+                    {stats?.monthlyRequests}+
+                  </dd>
+                )}
+              </div>
+              <div className="flex flex-col">
+                <dt className="text-gray-500 text-md">Total Requests Logged</dt>
+                {isStatsLoading ? (
+                  <div className="animate-pulse h-4 bg-gray-200 rounded w-20"></div>
+                ) : (
+                  <dd className="text-gray-900 dark:text-gray-100 text-4xl font-semibold">
+                    {stats?.totalRequests}+
+                  </dd>
+                )}
+              </div>
+              <div className="flex flex-col">
+                <dt className="text-gray-500 text-md">Total Users</dt>
+                {isStatsLoading ? (
+                  <div className="animate-pulse h-4 bg-gray-200 rounded w-20"></div>
+                ) : (
+                  <dd className="text-gray-900 dark:text-gray-100 text-4xl font-semibold">
+                    {stats?.totalUsers}+
+                  </dd>
+                )}
+              </div>
+              {/* <p>
                   Trusted by {stats.stats?.monthlyActiveCompanies}+ companies
                 </p>
                 <p>
@@ -127,8 +160,7 @@ const AuthForm = (props: AuthFormProps) => {
                   Over {stats.stats?.monthlyRequests}+ requests made in the last
                   month!
                 </p>
-                <p>{stats.stats?.totalRequests}+ Requests made</p>
-              </div>
+                <p>{stats.stats?.totalRequests}+ Requests made</p> */}
             </div>
             <div className="bg-white h-fit mx-auto w-full p-8 sm:p-16 rounded-xl shadow-xl border border-gray-200">
               <div>

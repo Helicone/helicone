@@ -116,7 +116,6 @@ const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 export default function Example() {
   const [demoLoading, setDemoLoading] = useState(false);
-  const stats = usePublicStats();
 
   const router = useRouter();
   const user = useUser();
@@ -147,14 +146,6 @@ export default function Example() {
         <div className="flex flex-1 justify-end"></div>
       </div> */}
       <NavBarV2 />
-      <div>
-        <p>Trusted by {stats.stats?.monthlyActiveCompanies}+ companies</p>
-        <p>Join over {stats.stats?.totalUsers}+ developers using Helicone</p>
-        <p>
-          Over {stats.stats?.monthlyRequests}+ requests made in the last month!
-        </p>
-        <p>{stats.stats?.totalRequests}+ Requests made</p>
-      </div>
       <div className="relative isolate">
         <svg
           className="absolute inset-0 -z-10 h-full w-full stroke-gray-200 [mask-image:radial-gradient(100%_60%_at_top_center,white,transparent)]"
