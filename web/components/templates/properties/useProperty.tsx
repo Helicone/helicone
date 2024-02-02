@@ -14,10 +14,11 @@ export interface PropertyPageData {
     end: Date;
   };
   property: string;
+  limit?: number;
 }
 
 export const usePropertyCard = (props: PropertyPageData) => {
-  const { timeFilter, property } = props;
+  const { timeFilter, property, limit = 10 } = props;
   const params: BackendMetricsCall<any>["params"] = {
     timeFilter,
     userFilters: [
@@ -31,6 +32,7 @@ export const usePropertyCard = (props: PropertyPageData) => {
     ],
     dbIncrement: "day",
     timeZoneDifference: 0,
+    limit,
   };
 
   const keyMetrics = {
@@ -73,9 +75,17 @@ export const usePropertyCard = (props: PropertyPageData) => {
     Object.values(keyMetrics).some(isLoading) ||
     Object.values(valueMetrics).some(isLoading);
 
+  const refetch = () => {
+    Object.values(valueMetrics).forEach((x) => x.refetch());
+  };
+
+  const isRefetching = Object.values(valueMetrics).some((x) => x.isFetching);
+
   return {
     keyMetrics,
     valueMetrics,
     isAnyLoading,
+    refetch,
+    isRefetching,
   };
 };

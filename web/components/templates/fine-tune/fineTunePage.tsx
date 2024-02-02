@@ -36,6 +36,7 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { REQUEST_TABLE_FILTERS } from "../../../services/lib/filters/frontendFilterDefs";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import { useRouter } from "next/router";
+import AuthHeader from "../../shared/authHeader";
 
 interface FineTuningPageProps {}
 
@@ -117,40 +118,11 @@ const FineTuningPage = (props: FineTuningPageProps) => {
   return (
     <>
       <div className="flex flex-col space-y-4">
-        <div className="flex flex-row items-center justify-between">
-          <h1 className="font-semibold text-3xl text-black dark:text-white">
-            Fine-Tune
-          </h1>
-        </div>
+        <AuthHeader title={"Fine-Tune"} />
 
-        <div className="flex flex-col mt-8">
+        <div className="flex flex-col">
           <div className="flex flex-row justify-between items-center mb-4">
             <div />
-            {/* <TextInput
-              icon={MagnifyingGlassIcon}
-              placeholder="Search Job Id..."
-              className="max-w-sm"
-              onChange={(e) => {
-                // add this into query params as search
-                const search = e.target.value as string;
-                setCurrentSearch(search);
-                if (search === "") {
-                  // delete the query param from the url
-                  delete router.query.q;
-                  router.push({
-                    pathname: router.pathname,
-                    query: { ...router.query },
-                  });
-                  refetch();
-                  return;
-                }
-                router.push({
-                  pathname: router.pathname,
-                  query: { ...router.query, q: search },
-                });
-                refetch();
-              }}
-            /> */}
             <div className="flex flex-row space-x-2 items-center">
               <button
                 onClick={() => {
