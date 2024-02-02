@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64  ubuntu:20.04
+FROM --platform=linux/amd64 node:18.18.0
 
 WORKDIR /app
 RUN apt update -y
