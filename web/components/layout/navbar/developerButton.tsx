@@ -67,7 +67,7 @@ export default function DeveloperButton() {
           <>
             <Popover.Button
               className={clsx(
-                "flex flex-row items-center font-semibold hover:bg-gray-200 rounded-lg px-4 py-2 focus:outline-none"
+                "flex flex-row items-center font-semibold hover:bg-gray-100 rounded-lg px-3 py-1.5 focus:outline-none"
               )}
             >
               <span>Developer</span>
@@ -86,7 +86,7 @@ export default function DeveloperButton() {
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-1"
             >
-              <Popover.Panel className="absolute z-10 mt-3 w-[400px] transform px-4 sm:px-0">
+              <Popover.Panel className="absolute z-10 mt-2 w-[400px] transform px-4 sm:px-0">
                 <div className="overflow-hidden rounded-lg shadow-2xl ring-1 ring-black ring-opacity-10">
                   <div className="bg-gray-50 p-4">
                     <Link

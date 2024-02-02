@@ -25,7 +25,8 @@ async function handler(
   const metrics = await getAggregatedKeyMetrics(
     filter,
     timeFilter,
-    userData.orgId
+    userData.orgId,
+    req.body.limit
   );
   res.status(200).json(metrics);
 }

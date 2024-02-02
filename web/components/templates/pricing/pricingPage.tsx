@@ -417,81 +417,84 @@ export default function Example() {
           className="flex flex-col max-w-6xl mx-auto p-4 lg:px-8 mt-8 mb-32 lg:flex antialiased"
         >
           <div className="border border-gray-300 rounded-lg shadow-lg p-6 sm:p-12">
-            <section className="font-semibold text-3xl sm:text-4xl">
-              Helicone for{" "}
-              <span className="md:border border-sky-600 border-dashed text-sky-600 md:py-1 md:px-2">
-                startups
-              </span>
-            </section>
-            <p className="mt-4 text-sm sm:text-lg text-gray-700">
-              If your startup is under two years old and has raised less than
-              $5m, consider our startup program.
-            </p>
-            <p className="mt-8 text-sm sm:text-md font-semibold text-gray-700">
-              Benefits
-            </p>
-            <div className="flex flex-col md:flex-row justify-between w-full py-4">
-              <div className="flex flex-col gap-4 w-full text-sm sm:text-md">
-                <div className="flex items-center gap-4 col-span-1">
-                  <CheckCircleIcon
-                    className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600"
-                    aria-hidden="true"
-                  />
-                  Discount on Pro plan
-                </div>
-                <div className="flex items-center gap-4 col-span-1">
-                  <CheckCircleIcon
-                    className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600"
-                    aria-hidden="true"
-                  />
-                  Customer Success Channel
-                </div>
-                <div className="flex items-center gap-4 col-span-1">
-                  <CheckCircleIcon
-                    className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600"
-                    aria-hidden="true"
-                  />
-                  Helicone Merch
-                </div>
-                <div className="flex items-center gap-4 col-span-1">
-                  <CheckCircleIcon
-                    className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600"
-                    aria-hidden="true"
-                  />
-                  Startup Spotlight
-                </div>
-                <figure className="mt-8 sm:mt-32 border-l border-gray-200 pl-4 pr-4 sm:pl-8 sm:pr-16 text-gray-600">
-                  <blockquote className="text-xs sm:text-base leading-7">
-                    <p>
-                      &quot;It makes everything from tracking usage, to
-                      debugging, even getting data exports for fine-tuning 100x
-                      easier. If you&apos;re serious about building with LLMs, I
-                      am begging you to use Helicone.&quot;
-                    </p>
-                  </blockquote>
-                  <figcaption className="mt-6 flex gap-x-4 text-xs sm:text-sm leading-6 items-center">
-                    <img
-                      src="/assets/pricing/daksh.png"
-                      alt=""
-                      className="h-8 w-8 flex-none rounded-full"
+            <div className="flex flex-col md:flex-row gap-4 justify-between w-full py-4">
+              <div className="flex flex-col w-full">
+                <section className="font-semibold text-3xl sm:text-4xl">
+                  Helicone for{" "}
+                  <span className="md:border border-sky-600 border-dashed text-sky-600 md:py-1 md:px-2">
+                    startups
+                  </span>
+                </section>
+                <p className="mt-4 text-sm sm:text-lg text-gray-700">
+                  If your startup is under two years old and has raised less
+                  than $5m, consider our startup program.
+                </p>
+                <p className="mt-8 text-sm sm:text-md font-semibold text-gray-700">
+                  Benefits
+                </p>
+                <div className="flex flex-col gap-4 w-full text-sm sm:text-md mt-4">
+                  <div className="flex items-center gap-4 col-span-1">
+                    <CheckCircleIcon
+                      className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600"
+                      aria-hidden="true"
                     />
-                    <div>
-                      <span className="font-semibold text-gray-900">
-                        Daksh Gupta
-                      </span>{" "}
-                      – Founder of{" "}
-                      <Link
-                        href={"https://app.getonboardai.com/"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline"
-                      >
-                        Onboard AI
-                      </Link>
-                    </div>
-                  </figcaption>
-                </figure>
+                    Discount on Pro plan
+                  </div>
+                  <div className="flex items-center gap-4 col-span-1">
+                    <CheckCircleIcon
+                      className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600"
+                      aria-hidden="true"
+                    />
+                    Customer Success Channel
+                  </div>
+                  <div className="flex items-center gap-4 col-span-1">
+                    <CheckCircleIcon
+                      className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600"
+                      aria-hidden="true"
+                    />
+                    Helicone Merch
+                  </div>
+                  <div className="flex items-center gap-4 col-span-1">
+                    <CheckCircleIcon
+                      className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600"
+                      aria-hidden="true"
+                    />
+                    Startup Spotlight
+                  </div>
+                  <figure className="mt-8 sm:mt-8 border-l border-gray-200 pl-4 pr-4 sm:pl-8 sm:pr-16 text-gray-600">
+                    <blockquote className="text-xs sm:text-base leading-7">
+                      <p>
+                        &quot;It makes everything from tracking usage, to
+                        debugging, even getting data exports for fine-tuning
+                        100x easier. If you&apos;re serious about building with
+                        LLMs, I am begging you to use Helicone.&quot;
+                      </p>
+                    </blockquote>
+                    <figcaption className="mt-6 flex gap-x-4 text-xs sm:text-sm leading-6 items-center">
+                      <img
+                        src="/assets/pricing/daksh.png"
+                        alt=""
+                        className="h-8 w-8 flex-none rounded-full"
+                      />
+                      <div>
+                        <span className="font-semibold text-gray-900">
+                          Daksh Gupta
+                        </span>{" "}
+                        – Founder of{" "}
+                        <Link
+                          href={"https://app.getonboardai.com/"}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline"
+                        >
+                          Onboard AI
+                        </Link>
+                      </div>
+                    </figcaption>
+                  </figure>
+                </div>
               </div>
+
               <div className="w-full -mt-8">
                 <ContactForm
                   contactTag={"startups"}

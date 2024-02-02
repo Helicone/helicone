@@ -226,6 +226,49 @@ curl --request POST \
 ```
 </Accordion>
 
+<Accordion title="Gemini Vertex Examples">
+Gemini Pro
+
+```bash
+curl --request POST \
+  --url https://gateway.hconeai.com/v1/projects/<PROJECT_ID>/locations/<LOCATION>/publishers/google/models/gemini-pro:streamGenerateContent \
+  --header 'Authorization: Bearer <GEMINI_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --header 'Helicone-Auth: Bearer <HELICONE_API_KEY>' \
+  --header 'Helicone-Target-Url: https://<LOCATION>-aiplatform.googleapis.com' \
+  --data '{
+  "contents": {
+    "role": "user",
+    "parts": {
+      "text": "Which theaters in Mountain View show Barbie movie?"
+    }
+  },
+}'
+```
+
+Gemini Pro Vision
+
+```bash
+curl --request POST \
+  --url https://gateway.hconeai.com/v1/projects/<PROJECT_ID>/locations/<LOCATION>/publishers/google/models/gemini-pro-vision:streamGenerateContent \
+  --header 'Authorization: Bearer <GEMINI_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --header 'Helicone-Auth: Bearer <HELICONE_API_KEY>' \
+  --header 'Helicone-Target-Url: https://<LOCATION>-aiplatform.googleapis.com' \
+  --data '{
+  "contents": {
+    "role": "user",
+    "parts": [
+      {
+        "text": "What is the capital of France?"
+      }
+    ]
+  }
+}'
+```
+
+</Accordion>
+
 # Approved Domains
 
 | Provider    | Domain Name                  | Cost Support | Dedicated Domain        |
