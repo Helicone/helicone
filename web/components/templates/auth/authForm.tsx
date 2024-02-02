@@ -25,7 +25,6 @@ const AuthForm = (props: AuthFormProps) => {
   } = props;
 
   const [isLoading, setIsLoading] = useState(false);
-  const { stats, isLoading: isStatsLoading } = usePublicStats();
 
   const handleEmailSubmitHandler = async (
     event: FormEvent<HTMLFormElement>
@@ -124,45 +123,25 @@ const AuthForm = (props: AuthFormProps) => {
                 <dt className="text-gray-500 text-md">
                   Requests logged per month
                 </dt>
-                {isStatsLoading ? (
-                  <div className="animate-pulse h-4 bg-gray-200 rounded w-20"></div>
-                ) : (
-                  <dd className="text-gray-900 dark:text-gray-100 text-4xl font-semibold">
-                    124,000,000+
-                  </dd>
-                )}
+
+                <dd className="text-gray-900 dark:text-gray-100 text-4xl font-semibold">
+                  124,000,000+
+                </dd>
               </div>
               <div className="flex flex-col">
                 <dt className="text-gray-500 text-md">Total Requests Logged</dt>
-                {isStatsLoading ? (
-                  <div className="animate-pulse h-4 bg-gray-200 rounded w-20"></div>
-                ) : (
-                  <dd className="text-gray-900 dark:text-gray-100 text-4xl font-semibold">
-                    828,000,00+
-                  </dd>
-                )}
+
+                <dd className="text-gray-900 dark:text-gray-100 text-4xl font-semibold">
+                  828,000,000+
+                </dd>
               </div>
               <div className="flex flex-col">
                 <dt className="text-gray-500 text-md">Total Users</dt>
-                {isStatsLoading ? (
-                  <div className="animate-pulse h-4 bg-gray-200 rounded w-20"></div>
-                ) : (
-                  <dd className="text-gray-900 dark:text-gray-100 text-4xl font-semibold">
-                    5,000+
-                  </dd>
-                )}
+
+                <dd className="text-gray-900 dark:text-gray-100 text-4xl font-semibold">
+                  5,000+
+                </dd>
               </div>
-              {/* <p>
-                  Trusted by {stats.stats?.monthlyActiveCompanies}+ companies
-                </p>
-                <p>
-                  Join over {stats.stats?.totalUsers}+ developers using Helicone
-                </p>
-                <p>
-                  Over {stats.stats?.monthlyRequests}+ requests made in the last
-                  month!
-                </p>
-                <p>{stats.stats?.totalRequests}+ Requests made</p> */}
             </div>
             <div className="bg-white h-fit mx-auto w-full p-8 sm:p-16 rounded-xl shadow-xl border border-gray-200">
               <div>
