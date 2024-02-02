@@ -28,8 +28,8 @@ export const Home = () => {
         }
         ogImageUrl={"https://www.helicone.ai/static/helicone-landing.png"}
       >
-        {/* <HomePageV2 /> */}
-        <HomePageV3 />
+        <HomePageV2 />
+        {/* <HomePageV3 /> */}
       </PublicMetaData>
     </>
   );

@@ -13,7 +13,7 @@ import {
   TagIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
-import { HeartIcon } from "@heroicons/react/20/solid";
+import { ChevronRightIcon, HeartIcon } from "@heroicons/react/20/solid";
 import NavBarV2 from "../../layout/navbar/navBarV2";
 import Footer from "../../layout/footer";
 import Link from "next/link";
@@ -24,7 +24,6 @@ import Image from "next/image";
 import { clsx } from "../../shared/clsx";
 import Globe from "./globe";
 import { Database } from "../../../supabase/database.types";
-import GridBackground from "../../layout/public/gridBackground";
 
 const features: {
   title: string;
@@ -147,191 +146,184 @@ export default function Example() {
       </div> */}
       <NavBarV2 />
 
-      <div className="">
-        <GridBackground>
-          <div className="mx-auto max-w-6xl px-6 py-16 sm:py-32 flex flex-row space-y-4 md:space-y-6 items-center justify-center lg:gap-x-10 lg:px-8 antialiased">
-            <h1 className="text-4xl sm:text-6xl font-medium leading-tight sm:leading-relaxed tracking-tight max-w-6xl w-1/2">
-              The{" "}
-              <span className="md:border border-sky-600 border-dashed text-sky-600 md:py-1.5 md:px-3">
-                lightweight
-              </span>{" "}
-              Generative AI platform for modern{" "}
-              <span className="md:border border-pink-700 border-dashed text-pink-700 md:py-1.5 md:px-3">
-                startups
-              </span>{" "}
-              and{" "}
-              <span className="md:border border-violet-700 border-dashed text-violet-700 md:py-1.5 md:px-3">
-                enterprises
-              </span>
-            </h1>
-            <div className="w-1/2 bg-red-500">hello</div>
-            {/* </h1>
-            <p className="text-lg sm:text-2xl text-gray-600 leading-8 sm:leading-relaxed max-w-4xl">
-              Meet the lightweight, yet powerful platform purpose-built for the
-              next generation of AI applications. Join thousands of companies
-              who use Helicone today.
-            </p>
-
-            <div className="flex flex-row gap-8 pt-6">
-              <button
-                onClick={() => {
-                  router.push("/signup");
-                }}
-                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-xl px-6 py-3 text-md md:text-lg font-semibold text-white shadow-md shadow-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+      <div className="relative isolate">
+        <svg
+          className="absolute inset-0 -z-10 h-full w-full stroke-gray-200 [mask-image:radial-gradient(100%_60%_at_top_center,white,transparent)]"
+          aria-hidden="true"
+        >
+          <defs>
+            <pattern
+              id="abc"
+              width={25}
+              height={25}
+              x="50%"
+              y={-1}
+              patternUnits="userSpaceOnUse"
+            >
+              <path d="M25 200V.5M.5 .5H200" fill="none" />
+            </pattern>
+            <defs>
+              <pattern
+                id="123"
+                width="12.5"
+                height="12.5"
+                patternUnits="userSpaceOnUse"
               >
-                Get Started
-              </button>
+                <path d="M12.5 0V12.5M0 12.5H12.5" fill="none" />
+              </pattern>
+            </defs>
+          </defs>
+          <rect width="100%" height="100%" strokeWidth={0} fill="url(#abc)" />
+        </svg>
+        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-36 flex flex-col space-y-4 md:space-y-8 items-center justify-center text-center lg:gap-x-10 lg:px-8 antialiased">
+          <h1 className="text-4xl sm:text-7xl font-medium leading-tight tracking-tight sm:leading-snug max-w-5xl">
+            The{" "}
+            <span className="md:border-2 border-violet-700 border-dashed text-violet-700 md:py-2 md:px-4">
+              easiest
+            </span>{" "}
+            way to build your LLM-applications at{" "}
+            <span className="md:border-2 border-pink-700 border-dashed text-pink-700 md:py-2 md:px-4">
+              scale
+            </span>
+          </h1>
+          <div className="text-lg sm:text-2xl text-gray-600 leading-8 sm:leading-relaxed max-w-4xl">
+            Join thousands of startups and enterprises who use Helicone&apos;s
+            Generative AI
+            <div>
+              platform to monitor, collect data, and scale their LLM-powered
+              applications.
             </div>
-            <div className="flex flex-col md:flex-row pt-4 md:divide-x-2 gap-[14px] justify-center w-full items-center divide-gray-300">
-              <Link
-                href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex space-x-6 font-semibold text-gray-500 md:w-52"
+          </div>
+
+          <div className="flex flex-row gap-8 pt-8">
+            <button
+              onClick={() => {
+                router.push("/signup");
+              }}
+              className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-xl px-6 py-3 text-md md:text-lg font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+            >
+              Get Started
+            </button>
+          </div>
+          <div className="flex flex-col md:flex-row pt-4 md:divide-x-2 gap-[14px] justify-center w-full items-center divide-gray-300">
+            <Link
+              href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex space-x-6 font-semibold text-gray-600 md:w-52"
+            >
+              Backed by{" "}
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="mr-1 ml-2"
               >
-                Backed by{" "}
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="mr-1 ml-2"
-                >
-                  <g clipPath="url(#clip0_24_57)">
-                    <rect width="24" height="24" rx="5.4" fill="#FF5100"></rect>
-                    <rect
-                      x="0.5"
-                      y="0.5"
-                      width="23"
-                      height="23"
-                      rx="4.9"
-                      stroke="#FF844B"
-                    ></rect>
-                    <path
-                      d="M7.54102 7.31818H9.28604L11.9458 11.9467H12.0552L14.715 7.31818H16.46L12.7662 13.5028V17.5H11.2349V13.5028L7.54102 7.31818Z"
-                      fill="white"
-                    ></path>
-                  </g>
+                <g clipPath="url(#clip0_24_57)">
+                  <rect width="24" height="24" rx="5.4" fill="#FF5100"></rect>
                   <rect
                     x="0.5"
                     y="0.5"
                     width="23"
                     height="23"
                     rx="4.9"
-                    stroke="#FF5100"
-                    strokeOpacity="0.1"
+                    stroke="#FF844B"
                   ></rect>
-                  <rect
-                    x="0.5"
-                    y="0.5"
-                    width="23"
-                    height="23"
-                    rx="4.9"
-                    stroke="url(#paint0_radial_24_57)"
-                  ></rect>
-                  <defs>
-                    <radialGradient
-                      id="paint0_radial_24_57"
-                      cx="0"
-                      cy="0"
-                      r="1"
-                      gradientUnits="userSpaceOnUse"
-                      gradientTransform="translate(7.35) rotate(58.475) scale(34.1384)"
-                    >
-                      <stop stopColor="white" stopOpacity="0.56"></stop>
-                      <stop
-                        offset="0.28125"
-                        stopColor="white"
-                        stopOpacity="0"
-                      ></stop>
-                    </radialGradient>
-                    <clipPath id="clip0_24_57">
-                      <rect width="24" height="24" rx="5.4" fill="white"></rect>
-                    </clipPath>
-                  </defs>
-                </svg>{" "}
-                Combinator
-              </Link>
-              <div className="font-semibold text-gray-500 pl-4 flex items-center md:w-56">
-                Fully open-source{" "}
-                <HeartIcon className="h-4 w-4 inline ml-2 text-pink-500" />
+                  <path
+                    d="M7.54102 7.31818H9.28604L11.9458 11.9467H12.0552L14.715 7.31818H16.46L12.7662 13.5028V17.5H11.2349V13.5028L7.54102 7.31818Z"
+                    fill="white"
+                  ></path>
+                </g>
+                <rect
+                  x="0.5"
+                  y="0.5"
+                  width="23"
+                  height="23"
+                  rx="4.9"
+                  stroke="#FF5100"
+                  strokeOpacity="0.1"
+                ></rect>
+                <rect
+                  x="0.5"
+                  y="0.5"
+                  width="23"
+                  height="23"
+                  rx="4.9"
+                  stroke="url(#paint0_radial_24_57)"
+                ></rect>
+                <defs>
+                  <radialGradient
+                    id="paint0_radial_24_57"
+                    cx="0"
+                    cy="0"
+                    r="1"
+                    gradientUnits="userSpaceOnUse"
+                    gradientTransform="translate(7.35) rotate(58.475) scale(34.1384)"
+                  >
+                    <stop stopColor="white" stopOpacity="0.56"></stop>
+                    <stop
+                      offset="0.28125"
+                      stopColor="white"
+                      stopOpacity="0"
+                    ></stop>
+                  </radialGradient>
+                  <clipPath id="clip0_24_57">
+                    <rect width="24" height="24" rx="5.4" fill="white"></rect>
+                  </clipPath>
+                </defs>
+              </svg>{" "}
+              Combinator
+            </Link>
+            <div className="font-semibold text-gray-600 pl-4 flex items-center md:w-56">
+              Fully open-source{" "}
+              <HeartIcon className="h-4 w-4 inline ml-2 text-pink-500" />
+            </div>
+          </div>
+          <div className="w-full max-w-6xl mx-auto h-full pt-36 justify-between gap-16 grid grid-cols-8 text-left">
+            <div className="w-full flex flex-col col-span-4">
+              <h3 className="mt-8 text-5xl font-semibold w-full flex flex-col tracking-tighter leading-tight">
+                Modern startups and enterprises use Helicone
+              </h3>
+              <p className="text-lg text-gray-600 max-w-2xl md:leading-normal mt-4">
+                Our startup customers love Helicone for its easy integration and
+                powerful insights. Our enterprise customers love Helicone for
+                its scalability and reliability.
+              </p>
+              <div className="flex items-center gap-4 mt-8">
+                <button className="flex items-center bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-lg pl-3 pr-2 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500">
+                  Get Started <ChevronRightIcon className="w-5 h-5 inline" />
+                </button>
+                <button className="font-semibold text-sm flex items-center">
+                  Contact Sales <ChevronRightIcon className="w-5 h-5 inline" />
+                </button>
               </div>
             </div>
-          </div> */}
-          </div>
-        </GridBackground>
-        <div className="mx-auto max-w-6xl px-6 flex flex-col space-y-4 md:space-y-6 items-center justify-center text-center lg:gap-x-10 lg:px-8 antialiased">
-          <div className="mx-auto px-6 lg:px-8">
-            <div className="w-full mx-auto grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:gap-x-10 lg:mx-0 lg:max-w-none">
-              <Image
-                className="col-span-2 max-h-10 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/logo.svg"
-                alt="filevine"
-                width={158}
-                height={48}
-              />
-              <Image
-                className="col-span-2 max-h-24 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/upenn.png"
-                alt="upenn"
-                width={400}
-                height={100}
-              />
-              <Image
-                className="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/carta.png"
-                alt="carta"
-                width={400}
-                height={100}
-              />
-              <Image
-                className="col-span-2 max-h-14 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/lex.svg"
-                alt="lex"
-                width={158}
-                height={48}
-              />
-              <Image
-                className="col-span-2 max-h-10 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/particl.png"
-                alt="particle"
-                width={158}
-                height={48}
-              />
-              <Image
-                className="col-span-2 max-h-10 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/qawolf.png"
-                alt="qawolf"
-                width={100}
-                height={48}
-              />
-              <Image
-                className="col-span-2 max-h-10 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/mintlify.svg"
-                alt="mintlify"
-                width={125}
-                height={48}
-              />
-              <Image
-                className="col-span-2 max-h-24 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/onboard.png"
-                alt="onboard"
-                width={300}
-                height={100}
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col pt-24">
-            <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2.5 lg:rounded-xl lg:p-2.5">
-              <Image
-                src="/assets/home/request-preview.webp"
-                alt="App screenshot"
-                width={2720}
-                height={1844}
-                className="w-[70rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
-              />
+            <div className="w-fit h-fit mt-8 col-span-4 grid grid-cols-3 gap-8 relative">
+              {[
+                "/assets/home/logos/logo.svg",
+                "/assets/home/logos/qawolf.png",
+                "/assets/home/logos/upenn.png",
+                "/assets/home/logos/carta.png",
+                "/assets/home/logos/lex.svg",
+                "/assets/home/logos/particl.png",
+                "/assets/home/logos/mintlify.svg",
+                "/assets/home/logos/onboard.png",
+                "/assets/home/logos/autogpt.png",
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className={clsx(
+                    i === 1 && "rotate-12 translate-x-8 -translate-y-8",
+                    i === 2 && "translate-x-16 -translate-y-20",
+                    i === 5 && "-rotate-12 translate-x-8 -translate-y-8",
+                    `h-28 w-28 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+                  )}
+                >
+                  <Image src={item} alt={""} width={80} height={80} />
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -355,30 +347,9 @@ export default function Example() {
                 onClick={() => {
                   router.push("/signup");
                 }}
-                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-xl px-6 py-3 text-sm md:text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-xl px-6 py-3 text-md md:text-lg font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
               >
                 Get Started
-              </button>
-              <button
-                onClick={() => {
-                  setDemoLoading(true);
-                  supabaseClient.auth.signOut().then(() => {
-                    supabaseClient.auth
-                      .signInWithPassword({
-                        email: DEMO_EMAIL,
-                        password: "valyrdemo",
-                      })
-                      .then((res) => {
-                        router.push("/demo").then(() => {
-                          setDemoLoading(false);
-                        });
-                      });
-                  });
-                }}
-                className="bg-white hover:bg-gray-200 whitespace-nowrap border border-gray-900 rounded-xl px-6 py-3 text-sm md:text-md font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-              >
-                {demoLoading && <ArrowPathIcon className="h-4 w-4 inline" />}
-                View Demo
               </button>
             </div>
             <div className="grid grid-cols-8 gap-4 w-full py-8">

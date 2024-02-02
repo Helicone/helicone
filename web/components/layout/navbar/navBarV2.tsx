@@ -129,7 +129,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                   Sign In
                 </Link>
                 <Link
-                  href="/signin"
+                  href="/signup"
                   className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 >
                   Sign Up

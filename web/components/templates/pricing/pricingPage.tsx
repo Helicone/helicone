@@ -182,7 +182,7 @@ export default function Example() {
           <div className="flex flex-col max-w-6xl mx-auto p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
             <h1 className="text-4xl sm:text-6xl font-semibold leading-tight sm:leading-snug max-w-4xl">
               Pricing that&apos;s{" "}
-              <span className="md:border-2 border-sky-600 border-dashed text-sky-600 md:py-2 md:px-4">
+              <span className="md:border-4 border-sky-600 text-sky-600 md:py-2 md:px-4">
                 simple
               </span>
             </h1>
