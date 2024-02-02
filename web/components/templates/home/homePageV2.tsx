@@ -336,7 +336,7 @@ export default function Example() {
       </div>
       <section
         id="features"
-        className="bg-gradient-to-b from-white to-gray-200 mt-24 pb-24 antialiased"
+        className="bg-gradient-to-b from-gray-50 to-gray-200 mt-24 pb-24 antialiased"
       >
         <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
           <div className="flex flex-col space-y-4 w-full">
@@ -463,7 +463,7 @@ export default function Example() {
       </section>
       <section
         id="integration"
-        className="bg-gradient-to-b from-gray-200 to-white py-36 antialiased"
+        className="bg-gradient-to-b from-gray-200 to-gray-50 py-36 antialiased"
       >
         <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
           <div className="flex flex-col space-y-4">
@@ -599,7 +599,7 @@ export default function Example() {
           </div>
         </div>
       </section>
-      <section id="tooling" className="bg-white py-24 antialiased">
+      <section id="tooling" className="bg-gray-50 py-24 antialiased">
         <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
           <div className="flex flex-col space-y-4">
             <h2 className="text-4xl md:text-5xl font-semibold tracking-tighter leading-tight">
@@ -665,7 +665,7 @@ export default function Example() {
           </div>
         </div>
       </section>
-      <section id="faq" className="bg-white pt-36 pb-48 antialiased">
+      <section id="faq" className="bg-gray-50 pt-36 pb-48 antialiased">
         <div className="mx-auto px-4 md:px-8 max-w-6xl divide-y divide-gray-900/10 ">
           <div className="flex flex-col space-y-4  text-left sm:text-center ">
             <h2 className="text-4xl md:text-5xl font-semibold tracking-tighter leading-tight">
