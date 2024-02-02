@@ -1,15 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 import { Dialog } from "@headlessui/react";
-import { Bars3Icon, StarIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { useState } from "react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { clsx } from "../../shared/clsx";
 import SolutionsButton from "./solutionsButton";
 import DeveloperButton from "./developerButton";
-import { BsGithub } from "react-icons/bs";
 
 interface NavBarV2Props {}
 

@@ -24,7 +24,6 @@ import Image from "next/image";
 import { clsx } from "../../shared/clsx";
 import Globe from "./globe";
 import { Database } from "../../../supabase/database.types";
-import { usePublicStats } from "../../../services/hooks/publicStats";
 
 const features: {
   title: string;
