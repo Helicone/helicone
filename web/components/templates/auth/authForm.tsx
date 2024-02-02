@@ -117,9 +117,9 @@ const AuthForm = (props: AuthFormProps) => {
           </div>
           <div className="flex flex-row w-full h-[70vh] my-auto justify-center items-center max-w-6xl">
             <div className="w-full h-full hidden sm:flex flex-col space-y-8 p-8 sm:p-16 justify-start items-start text-start">
-              <h1 className="font-semibold text-2xl">
+              <h2 className="text-2xl lg:text-3xl font-semibold leading-9 tracking-tight text-gray-900">
                 Trusted by startups and enterprises
-              </h1>
+              </h2>
               <div className="flex flex-col">
                 <dt className="text-gray-500 text-md">Requests per month</dt>
                 {isStatsLoading ? (
