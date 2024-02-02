@@ -37,7 +37,7 @@ const SignIn = ({
 
   return (
     <PublicMetaData
-      description={"The easiest way to monitor your LLM-application at scale."}
+      description={"The easiest way to build your LLM-application at scale."}
       ogImageUrl={"https://www.helicone.ai/static/helicone-landing.png"}
     >
       <AuthForm
