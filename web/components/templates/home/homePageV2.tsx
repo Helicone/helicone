@@ -175,24 +175,25 @@ export default function Example() {
           </defs>
           <rect width="100%" height="100%" strokeWidth={0} fill="url(#abc)" />
         </svg>
-        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-36 flex flex-col space-y-4 md:space-y-8 items-center justify-center text-center lg:gap-x-10 lg:px-8 antialiased">
-          <h1 className="text-4xl sm:text-7xl font-medium leading-tight tracking-tight sm:leading-snug max-w-5xl">
+        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-36 flex flex-col space-y-4 md:space-y-8 items-center justify-center text-left sm:text-center lg:gap-x-10 lg:px-8 antialiased">
+          <h1 className="text-5xl sm:text-7xl font-semibold sm:font-medium leading-tight tracking-tight sm:leading-snug max-w-5xl">
             The{" "}
             <span className="md:border-2 border-violet-700 border-dashed text-violet-700 md:py-2 md:px-4">
               easiest
             </span>{" "}
-            way to build your LLM-applications at{" "}
+            way to build your{" "}
+            <span className="block sm:inline-flex">LLM-applications</span> at{" "}
             <span className="md:border-2 border-pink-700 border-dashed text-pink-700 md:py-2 md:px-4">
               scale
             </span>
           </h1>
-          <div className="text-lg sm:text-2xl text-gray-600 leading-8 sm:leading-relaxed max-w-4xl">
+          <div className="text-lg sm:text-2xl text-gray-600 md:leading-normal mt-4">
             Join thousands of startups and enterprises who use Helicone&apos;s
-            Generative AI
-            <div>
+            Generative AI{" "}
+            <span className="flex-none sm:block">
               platform to monitor, collect data, and scale their LLM-powered
               applications.
-            </div>
+            </span>
           </div>
 
           <div className="flex flex-row gap-8 pt-8">
@@ -281,12 +282,12 @@ export default function Example() {
               <HeartIcon className="h-4 w-4 inline ml-2 text-pink-500" />
             </div>
           </div>
-          <div className="w-full max-w-6xl mx-auto h-full pt-36 justify-between gap-16 grid grid-cols-8 text-left">
-            <div className="w-full flex flex-col col-span-4">
-              <h3 className="mt-8 text-5xl font-semibold w-full flex flex-col tracking-tighter leading-tight">
+          <div className="w-full grid grid-cols-8 max-w-6xl mx-auto h-full pt-36 justify-between gap-8 sm:gap-16 text-left">
+            <div className="w-full flex flex-col col-span-8 sm:col-span-4">
+              <h3 className="mt-8 text-4xl md:text-5xl font-semibold flex flex-col tracking-tighter leading-tight">
                 Modern startups and enterprises use Helicone
               </h3>
-              <p className="text-lg text-gray-600 max-w-2xl md:leading-normal mt-4">
+              <p className="text-lg text-gray-600 md:leading-normal mt-4">
                 Our startup customers love Helicone for its easy integration and
                 powerful insights. Our enterprise customers love Helicone for
                 its scalability and reliability.
@@ -300,7 +301,7 @@ export default function Example() {
                 </button>
               </div>
             </div>
-            <div className="w-fit h-fit mt-8 col-span-4 grid grid-cols-3 gap-8 relative">
+            <div className="w-fit h-fit mt-16 sm:mt-8 grid grid-cols-3 gap-8 relative col-span-8 sm:col-span-4">
               {[
                 "/assets/home/logos/logo.svg",
                 "/assets/home/logos/qawolf.png",
@@ -318,7 +319,7 @@ export default function Example() {
                     i === 1 && "rotate-12 translate-x-8 -translate-y-8",
                     i === 2 && "translate-x-16 -translate-y-20",
                     i === 5 && "-rotate-12 translate-x-8 -translate-y-8",
-                    `h-28 w-28 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+                    `h-20 w-20 sm:h-28 sm:w-28 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
                   )}
                 >
                   <Image src={item} alt={""} width={80} height={80} />
@@ -332,9 +333,9 @@ export default function Example() {
         id="features"
         className="bg-gradient-to-b from-white to-gray-200 mt-24 pb-24 antialiased"
       >
-        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-center flex flex-col mx-auto w-full space-y-8">
+        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
           <div className="flex flex-col space-y-4 w-full">
-            <h2 className="text-4xl md:text-5xl font-semibold">
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-tighter leading-tight">
               Monitoring has never been easier
             </h2>
             <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto md:leading-normal">
@@ -342,7 +343,7 @@ export default function Example() {
               insights that help you understand your applications performance in
               real-time.
             </p>
-            <div className="flex flex-row gap-6 pt-4 w-full justify-center">
+            <div className="flex flex-row gap-6 pt-4 w-full sm:justify-center">
               <button
                 onClick={() => {
                   router.push("/signup");
@@ -459,9 +460,9 @@ export default function Example() {
         id="integration"
         className="bg-gradient-to-b from-gray-200 to-white py-36 antialiased"
       >
-        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-center flex flex-col mx-auto w-full space-y-8">
+        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
           <div className="flex flex-col space-y-4">
-            <h2 className="text-4xl md:text-5xl font-semibold">
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-tighter leading-tight">
               Any model, any scale
             </h2>
             <p className="text-lg md:text-xl text-gray-600 max-w-2xl">
@@ -594,9 +595,9 @@ export default function Example() {
         </div>
       </section>
       <section id="tooling" className="bg-white py-24 antialiased">
-        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-center flex flex-col mx-auto w-full space-y-8">
+        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
           <div className="flex flex-col space-y-4">
-            <h2 className="text-4xl md:text-5xl font-semibold">
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-tighter leading-tight">
               Purpose-built tooling for LLM developers.
             </h2>
             <p className="text-lg md:text-xl text-gray-600">
@@ -661,9 +662,9 @@ export default function Example() {
       </section>
 
       <section id="faq" className="bg-white pt-36 pb-48 antialiased">
-        <div className="mx-auto px-4 md:px-8 max-w-6xl divide-y divide-gray-900/10">
-          <div className="flex flex-col space-y-4 text-center">
-            <h2 className="text-4xl md:text-5xl font-semibold">
+        <div className="mx-auto px-4 md:px-8 max-w-6xl divide-y divide-gray-900/10 ">
+          <div className="flex flex-col space-y-4  text-left sm:text-center ">
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-tighter leading-tight">
               Frequently asked questions
             </h2>
           </div>
