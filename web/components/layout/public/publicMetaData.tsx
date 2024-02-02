@@ -12,7 +12,7 @@ const PublicMetaData = (props: PublicMetaDataProps) => {
   return (
     <>
       <Head>
-        <title>{`Generative AI Platform for the future - Helicone`}</title>
+        <title>{`Helicone - The easiest way to build your LLM-applications at scale`}</title>
         <link rel="icon" href="/static/helicone-logo.png" />
         <meta property="og:title" content={"Helicone"} />
         <meta content="https://helicone.ai" property="og:url" />

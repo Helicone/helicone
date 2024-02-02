@@ -293,12 +293,18 @@ export default function Example() {
                 its scalability and reliability.
               </p>
               <div className="flex items-center gap-4 mt-8">
-                <button className="flex items-center bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-lg pl-3 pr-2 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500">
+                <Link
+                  href="/signup"
+                  className="flex items-center bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-lg pl-3 pr-2 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                >
                   Get Started <ChevronRightIcon className="w-5 h-5 inline" />
-                </button>
-                <button className="font-semibold text-sm flex items-center">
+                </Link>
+                <Link
+                  href="/sales"
+                  className="font-semibold text-sm flex items-center"
+                >
                   Contact Sales <ChevronRightIcon className="w-5 h-5 inline" />
-                </button>
+                </Link>
               </div>
             </div>
             <div className="w-fit h-fit mt-16 sm:mt-8 grid grid-cols-3 gap-8 relative col-span-8 sm:col-span-4">
