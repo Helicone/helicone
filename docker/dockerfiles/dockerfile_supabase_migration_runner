@@ -6,22 +6,11 @@ RUN apt install curl git -y
 # Install gcc
 RUN apt install build-essential -y
 
-
-# RUN  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-
-
-
-# USER root
-# ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
-
-# RUN brew install supabase/tap/supabase
-
 COPY . /app/supabase
 
 WORKDIR /app
 
 
 RUN npm i supabase
-# CMD [ "supabase", "db", "push", "--db-url", ${DATABASE_URL} ]
+
 CMD npx supabase db push --db-url ${DATABASE_URL}
-# CMD echo ${DATABASE_URL}
