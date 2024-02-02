@@ -464,6 +464,8 @@ services:
       clickhouse-db:
         # Disable this if you are using an external Postgres database
         condition: service_healthy
+    analytics:
+        condition: service_healthy
     environment:
       CLICKHOUSE_HOST: ${CLICKHOUSE_HOST}
       CLICKHOUSE_PORT: ${CLICKHOUSE_PORT}
@@ -476,6 +478,8 @@ services:
       # target: linux/amd64
     depends_on:
       db:
+        condition: service_healthy
+      analytics:
         condition: service_healthy
     environment:
       DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
@@ -569,7 +573,7 @@ services:
           "url": "http://kong:${KONG_HTTP_PORT}",
           "service_role_key": "${SERVICE_ROLE_KEY}"
         }
-      SUPABASE_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${PGBOUNCER_PORT}/${POSTGRES_DB}
+      SUPABASE_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
 
     
 
