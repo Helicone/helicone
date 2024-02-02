@@ -464,8 +464,7 @@ services:
       clickhouse-db:
         # Disable this if you are using an external Postgres database
         condition: service_healthy
-    analytics:
-        condition: service_healthy
+
     environment:
       CLICKHOUSE_HOST: ${CLICKHOUSE_HOST}
       CLICKHOUSE_PORT: ${CLICKHOUSE_PORT}
@@ -477,8 +476,6 @@ services:
       dockerfile: ../docker/dockerfiles/dockerfile_supabase_migration_runner
       # target: linux/amd64
     depends_on:
-      db:
-        condition: service_healthy
       analytics:
         condition: service_healthy
     environment:
