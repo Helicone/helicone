@@ -13,7 +13,7 @@ import {
   TagIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
-import { HeartIcon } from "@heroicons/react/20/solid";
+import { ChevronRightIcon, HeartIcon } from "@heroicons/react/20/solid";
 import NavBarV2 from "../../layout/navbar/navBarV2";
 import Footer from "../../layout/footer";
 import Link from "next/link";
@@ -94,7 +94,7 @@ const features: {
 
 const faqs = [
   {
-    question: "Is their a latency impact to my requests with Helicone's Proxy?",
+    question: "Is there a latency impact to my requests with Helicone's Proxy?",
     answer:
       "Helicone leverages Cloudflare’s global network of servers as proxies for efficient web traffic routing. Cloudflare workers maintain extremely low latency through their worldwide distribution. This results in a fast and reliable proxy for your LLM requests with less than a fraction of a millisecond of latency impact.",
   },
@@ -126,8 +126,8 @@ export default function Example() {
   }
 
   return (
-    <div className="bg-white">
-      <div className="flex items-center gap-x-6 bg-black hover:bg-gray-900 px-6 py-2.5 sm:px-3.5 sm:before:flex-1">
+    <div className="bg-gray-50">
+      {/* <div className="flex items-center gap-x-6 bg-black hover:bg-gray-900 px-6 py-2.5 sm:px-3.5 sm:before:flex-1">
         <p className="text-sm leading-6 text-white">
           <Link href="/features/fine-tuning">
             <strong className="font-semibold">Launch: Fine-Tuning</strong>
@@ -143,9 +143,8 @@ export default function Example() {
           </Link>
         </p>
         <div className="flex flex-1 justify-end"></div>
-      </div>
+      </div> */}
       <NavBarV2 />
-
       <div className="relative isolate">
         <svg
           className="absolute inset-0 -z-10 h-full w-full stroke-gray-200 [mask-image:radial-gradient(100%_60%_at_top_center,white,transparent)]"
@@ -175,25 +174,26 @@ export default function Example() {
           </defs>
           <rect width="100%" height="100%" strokeWidth={0} fill="url(#abc)" />
         </svg>
-        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-36 flex flex-col space-y-4 md:space-y-8 items-center justify-center text-center lg:gap-x-10 lg:px-8 antialiased">
-          <h1 className="text-4xl sm:text-6xl font-semibold leading-tight sm:leading-snug max-w-4xl">
+        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-36 flex flex-col space-y-4 md:space-y-8 items-center justify-center text-left sm:text-center lg:gap-x-10 lg:px-8 antialiased">
+          <h1 className="text-5xl sm:text-7xl font-semibold sm:font-medium leading-tight tracking-tight sm:leading-snug max-w-5xl">
             The{" "}
             <span className="md:border-2 border-violet-700 border-dashed text-violet-700 md:py-2 md:px-4">
               easiest
             </span>{" "}
-            way to monitor your LLM-applications at{" "}
+            way to build your{" "}
+            <span className="block sm:inline-flex">LLM-applications</span> at{" "}
             <span className="md:border-2 border-pink-700 border-dashed text-pink-700 md:py-2 md:px-4">
               scale
             </span>
           </h1>
-          <p className="text-lg sm:text-2xl text-gray-600 leading-8 sm:leading-relaxed max-w-4xl">
-            Join thousands of developers and companies who have streamlined
-            their{" "}
-            <span className="block">
-              LLM-powered application infrastructure with Helicone&apos;s
-              solutions.
+          <div className="text-lg sm:text-2xl text-gray-600 md:leading-normal mt-4">
+            Join thousands of startups and enterprises who use Helicone&apos;s
+            Generative AI{" "}
+            <span className="flex-none sm:block">
+              platform to monitor, collect data, and scale their LLM-powered
+              applications.
             </span>
-          </p>
+          </div>
 
           <div className="flex flex-row gap-8 pt-8">
             <button
@@ -281,93 +281,66 @@ export default function Example() {
               <HeartIcon className="h-4 w-4 inline ml-2 text-pink-500" />
             </div>
           </div>
-
-          <div className="flex flex-col pt-24">
-            <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2.5 lg:rounded-xl lg:p-2.5">
-              <Image
-                src="/assets/home/request-preview.webp"
-                alt="App screenshot"
-                width={2720}
-                height={1844}
-                className="w-[70rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
-              />
+          <div className="w-full grid grid-cols-8 max-w-6xl mx-auto h-full pt-36 justify-between gap-8 sm:gap-16 text-left">
+            <div className="w-full flex flex-col col-span-8 sm:col-span-4">
+              <h3 className="mt-8 text-4xl md:text-5xl font-semibold flex flex-col tracking-tighter leading-tight">
+                Modern startups and enterprises use Helicone
+              </h3>
+              <p className="text-lg text-gray-600 md:leading-normal mt-4">
+                Our startup customers love Helicone for its easy integration and
+                powerful insights. Our enterprise customers love Helicone for
+                its scalability and reliability.
+              </p>
+              <div className="flex items-center gap-4 mt-8">
+                <Link
+                  href="/signup"
+                  className="flex items-center bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-lg pl-3 pr-2 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                >
+                  Get Started <ChevronRightIcon className="w-5 h-5 inline" />
+                </Link>
+                <Link
+                  href="/sales"
+                  className="font-semibold text-sm flex items-center"
+                >
+                  Contact Sales <ChevronRightIcon className="w-5 h-5 inline" />
+                </Link>
+              </div>
             </div>
-          </div>
-          <div className="mx-auto px-6 lg:px-8 pt-32">
-            <h2 className="text-center text-lg font-medium text-gray-600">
-              Unlocking the full potential of LLM&apos;s.
-            </h2>
-            <h2 className="text-center text-lg font-medium text-gray-900">
-              Modern startups and enterprises use Helicone.
-            </h2>
-            <div className="w-full mx-auto mt-10 grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:gap-x-10 lg:mx-0 lg:max-w-none">
-              <Image
-                className="col-span-2 max-h-24 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/upenn.png"
-                alt="upenn"
-                width={400}
-                height={100}
-              />
-              <Image
-                className="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/carta.png"
-                alt="carta"
-                width={400}
-                height={100}
-              />
-              <Image
-                className="col-span-2 max-h-14 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/lex.svg"
-                alt="lex"
-                width={158}
-                height={48}
-              />
-              <Image
-                className="col-span-2 max-h-10 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/particl.png"
-                alt="particle"
-                width={158}
-                height={48}
-              />
-              <Image
-                className="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/commandbar.svg"
-                alt="commandbar"
-                width={100}
-                height={48}
-              />
-              <Image
-                className="col-span-2 max-h-10 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/mintlify.svg"
-                alt="mintlify"
-                width={125}
-                height={48}
-              />
-              <Image
-                className="col-span-2 max-h-24 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/onboard.png"
-                alt="onboard"
-                width={300}
-                height={100}
-              />
-              <Image
-                className="col-span-2 max-h-16 w-full object-contain lg:col-span-1"
-                src="/assets/home/logos/autogpt.png"
-                alt="autogpt"
-                width={158}
-                height={48}
-              />
+            <div className="w-fit h-fit mt-16 sm:mt-8 grid grid-cols-3 gap-8 relative col-span-8 sm:col-span-4">
+              {[
+                "/assets/home/logos/logo.svg",
+                "/assets/home/logos/qawolf.png",
+                "/assets/home/logos/upenn.png",
+                "/assets/home/logos/carta.png",
+                "/assets/home/logos/lex.svg",
+                "/assets/home/logos/particl.png",
+                "/assets/home/logos/mintlify.svg",
+                "/assets/home/logos/onboard.png",
+                "/assets/home/logos/autogpt.png",
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className={clsx(
+                    i === 1 && "rotate-12 translate-x-8 -translate-y-8",
+                    i === 2 && "translate-x-16 -translate-y-20",
+                    i === 5 && "-rotate-12 translate-x-8 -translate-y-8",
+                    `h-20 w-20 sm:h-28 sm:w-28 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+                  )}
+                >
+                  <Image src={item} alt={""} width={80} height={80} />
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
       <section
         id="features"
-        className="bg-gradient-to-b from-white to-gray-200 mt-24 pb-24 antialiased"
+        className="bg-gradient-to-b from-gray-50 to-gray-200 mt-24 pb-24 antialiased"
       >
-        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-center flex flex-col mx-auto w-full space-y-8">
+        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
           <div className="flex flex-col space-y-4 w-full">
-            <h2 className="text-4xl md:text-5xl font-semibold">
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-tighter leading-tight">
               Monitoring has never been easier
             </h2>
             <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto md:leading-normal">
@@ -375,35 +348,14 @@ export default function Example() {
               insights that help you understand your applications performance in
               real-time.
             </p>
-            <div className="flex flex-row gap-6 pt-4 w-full justify-center">
+            <div className="flex flex-row gap-6 pt-4 w-full sm:justify-center">
               <button
                 onClick={() => {
                   router.push("/signup");
                 }}
-                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-xl px-6 py-3 text-sm md:text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-xl px-6 py-3 text-md md:text-lg font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
               >
                 Get Started
-              </button>
-              <button
-                onClick={() => {
-                  setDemoLoading(true);
-                  supabaseClient.auth.signOut().then(() => {
-                    supabaseClient.auth
-                      .signInWithPassword({
-                        email: DEMO_EMAIL,
-                        password: "valyrdemo",
-                      })
-                      .then((res) => {
-                        router.push("/demo").then(() => {
-                          setDemoLoading(false);
-                        });
-                      });
-                  });
-                }}
-                className="bg-white hover:bg-gray-200 whitespace-nowrap border border-gray-900 rounded-xl px-6 py-3 text-sm md:text-md font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-              >
-                {demoLoading && <ArrowPathIcon className="h-4 w-4 inline" />}
-                View Demo
               </button>
             </div>
             <div className="grid grid-cols-8 gap-4 w-full py-8">
@@ -511,11 +463,11 @@ export default function Example() {
       </section>
       <section
         id="integration"
-        className="bg-gradient-to-b from-gray-200 to-white py-36 antialiased"
+        className="bg-gradient-to-b from-gray-200 to-gray-50 py-36 antialiased"
       >
-        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-center flex flex-col mx-auto w-full space-y-8">
+        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
           <div className="flex flex-col space-y-4">
-            <h2 className="text-4xl md:text-5xl font-semibold">
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-tighter leading-tight">
               Any model, any scale
             </h2>
             <p className="text-lg md:text-xl text-gray-600 max-w-2xl">
@@ -647,10 +599,10 @@ export default function Example() {
           </div>
         </div>
       </section>
-      <section id="tooling" className="bg-white py-24 antialiased">
-        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-center flex flex-col mx-auto w-full space-y-8">
+      <section id="tooling" className="bg-gray-50 py-24 antialiased">
+        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
           <div className="flex flex-col space-y-4">
-            <h2 className="text-4xl md:text-5xl font-semibold">
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-tighter leading-tight">
               Purpose-built tooling for LLM developers.
             </h2>
             <p className="text-lg md:text-xl text-gray-600">
@@ -713,11 +665,10 @@ export default function Example() {
           </div>
         </div>
       </section>
-
-      <section id="faq" className="bg-white pt-36 pb-48 antialiased">
-        <div className="mx-auto px-4 md:px-8 max-w-6xl divide-y divide-gray-900/10">
-          <div className="flex flex-col space-y-4 text-center">
-            <h2 className="text-4xl md:text-5xl font-semibold">
+      <section id="faq" className="bg-gray-50 pt-36 pb-48 antialiased">
+        <div className="mx-auto px-4 md:px-8 max-w-6xl divide-y divide-gray-900/10 ">
+          <div className="flex flex-col space-y-4  text-left sm:text-center ">
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-tighter leading-tight">
               Frequently asked questions
             </h2>
           </div>
