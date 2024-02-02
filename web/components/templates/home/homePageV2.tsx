@@ -126,7 +126,7 @@ export default function Example() {
   }
 
   return (
-    <div className="bg-white">
+    <div className="bg-gray-50">
       {/* <div className="flex items-center gap-x-6 bg-black hover:bg-gray-900 px-6 py-2.5 sm:px-3.5 sm:before:flex-1">
         <p className="text-sm leading-6 text-white">
           <Link href="/features/fine-tuning">
