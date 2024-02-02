@@ -261,7 +261,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                       className="text-black dark:text-white border-b border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-900 hover:cursor-pointer"
                     >
                       <>
-                        <TableCell className="font-semibold max-w-[200px] truncate">
+                        <TableCell className="font-semibold max-w-[200px] 2xl:max-w-full truncate">
                           {propertyValue.property_value} fsdjlf jklfjdkls
                           jfkldsajlkfdkl jfklasdjklfjklsadfjkl
                         </TableCell>
