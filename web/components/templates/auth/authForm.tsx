@@ -121,12 +121,14 @@ const AuthForm = (props: AuthFormProps) => {
                 Trusted by startups and enterprises
               </h2>
               <div className="flex flex-col">
-                <dt className="text-gray-500 text-md">Requests per month</dt>
+                <dt className="text-gray-500 text-md">
+                  Requests logged per month
+                </dt>
                 {isStatsLoading ? (
                   <div className="animate-pulse h-4 bg-gray-200 rounded w-20"></div>
                 ) : (
                   <dd className="text-gray-900 dark:text-gray-100 text-4xl font-semibold">
-                    {stats?.monthlyRequests}+
+                    124,000,000+
                   </dd>
                 )}
               </div>
@@ -136,7 +138,7 @@ const AuthForm = (props: AuthFormProps) => {
                   <div className="animate-pulse h-4 bg-gray-200 rounded w-20"></div>
                 ) : (
                   <dd className="text-gray-900 dark:text-gray-100 text-4xl font-semibold">
-                    {stats?.totalRequests}+
+                    828,000,00+
                   </dd>
                 )}
               </div>
@@ -146,7 +148,7 @@ const AuthForm = (props: AuthFormProps) => {
                   <div className="animate-pulse h-4 bg-gray-200 rounded w-20"></div>
                 ) : (
                   <dd className="text-gray-900 dark:text-gray-100 text-4xl font-semibold">
-                    {stats?.totalUsers}+
+                    5,000+
                   </dd>
                 )}
               </div>
