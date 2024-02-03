@@ -162,7 +162,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
       ) : (
         <div className="flex flex-col space-y-4">
           <ul className="flex flex-col md:flex-row items-center gap-4">
-            <li className="w-full border border-gray-300 bg-white p-4 flex flex-row rounded-lg items-center gap-4">
+            <li className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-4 flex flex-row rounded-lg items-center gap-4">
               <CurrencyDollarIcon className="h-6 w-6 text-sky-500" />
               <div className="flex flex-col">
                 <dt className="text-gray-500 text-sm">Cost</dt>
@@ -177,7 +177,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                 )}
               </div>
             </li>
-            <li className="w-full border border-gray-300 bg-white p-4 flex flex-row rounded-lg items-center gap-4">
+            <li className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-4 flex flex-row rounded-lg items-center gap-4">
               <TableCellsIcon className="h-6 w-6 text-pink-500" />
               <div className="flex flex-col">
                 <dt className="text-gray-500 text-sm">Requests</dt>
@@ -190,7 +190,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                 )}
               </div>
             </li>{" "}
-            <li className="w-full border border-gray-300 bg-white p-4 flex flex-row rounded-lg items-center gap-4">
+            <li className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-4 flex flex-row rounded-lg items-center gap-4">
               <ClockIcon className="h-6 w-6 text-violet-500" />
               <div className="flex flex-col">
                 <dt className="text-gray-500 text-sm">Average Latency / Req</dt>
@@ -314,7 +314,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                     setShowMore(true);
                     refetch();
                   }}
-                  className="border p-2 border-gray-300 bg-white hover:bg-gray-100 rounded-lg font-semibold flex flex-row gap-2 items-center text-sm"
+                  className="text-black dark:text-white border p-2 border-gray-300 bg-white hover:bg-gray-100 dark:border-gray-700 dark:bg-black dark:hover:bg-gray-900 rounded-lg font-semibold flex flex-row gap-2 items-center text-sm"
                 >
                   {isRefetching ? (
                     <div className="animate-spin h-4 w-4">
