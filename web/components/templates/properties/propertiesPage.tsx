@@ -50,11 +50,13 @@ const PropertiesPage = (props: {}) => {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col xl:flex-row xl:divide-x xl:divide-gray-300 gap-8 xl:gap-4 min-h-[80vh] h-full">
+            <div className="flex flex-col xl:flex-row xl:divide-x xl:divide-gray-200 dark:xl:divide-gray-800 gap-8 xl:gap-4 min-h-[80vh] h-full">
               <div className="flex flex-col space-y-6 w-full min-w-[350px] max-w-[350px]">
-                <h3 className="font-semibold text-md">Your Properties</h3>
+                <h3 className="font-semibold text-md text-black dark:text-white">
+                  Your Properties
+                </h3>
 
-                <ul className="w-full bg-white h-fit border border-gray-300 rounded-lg">
+                <ul className="w-full bg-white h-fit border border-gray-300 dark:border-gray-700 rounded-lg">
                   {properties.map((property, i) => (
                     <li key={i}>
                       <button
@@ -65,13 +67,15 @@ const PropertiesPage = (props: {}) => {
                           selectedProperty === property
                             ? "bg-sky-200 dark:bg-sky-800"
                             : "bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-950",
-                          i === 0 ? "rounded-t-lg" : "",
-                          i === properties.length - 1 ? "rounded-b-lg" : "",
-                          "w-full flex flex-row items-center space-x-2 p-4 border-b border-gray-200"
+                          i === 0 ? "rounded-t-md" : "",
+                          i === properties.length - 1 ? "rounded-b-md" : "",
+                          "w-full flex flex-row items-center space-x-2 p-4 border-b border-gray-200 dark:border-gray-800"
                         )}
                       >
                         <TagIcon className="h-4 w-4 text-black dark:text-white" />
-                        <p className="text-md font-semibold">{property}</p>
+                        <p className="text-md font-semibold text-black dark:text-white">
+                          {property}
+                        </p>
                       </button>
                     </li>
                   ))}
