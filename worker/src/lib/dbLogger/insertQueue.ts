@@ -411,6 +411,7 @@ export class InsertQueue {
         created_at: formatTimeString(new Date().toISOString()),
       },
     ]);
+
     await this.clickhouseWrapper.dbInsertClickhouse("properties_v3", [
       {
         id: 1,
