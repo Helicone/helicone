@@ -411,5 +411,15 @@ export class InsertQueue {
         created_at: formatTimeString(new Date().toISOString()),
       },
     ]);
+    await this.clickhouseWrapper.dbInsertClickhouse("properties_v3", [
+      {
+        id: 1,
+        request_id: requestId,
+        key: property.key,
+        value: property.value,
+        organization_id: orgId,
+        created_at: formatTimeString(new Date().toISOString()),
+      },
+    ]);
   }
 }
