@@ -2,7 +2,7 @@ import {
   FilterLeaf,
   FilterNode,
 } from "../../../services/lib/filters/filterDefs";
-import { buildFilterWithAuthClickHousePropResponse } from "../../../services/lib/filters/filters";
+import { buildFilterWithAuthClickHouseProperties } from "../../../services/lib/filters/filters";
 import { Result } from "../../result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
@@ -16,8 +16,8 @@ function getFilterSearchFilterNode(
   search: string
 ): FilterNode {
   const propertyFilter: FilterLeaf = {
-    property_with_response_v1: {
-      property_key: {
+    properties_v3: {
+      key: {
         equals: property,
       },
     },
@@ -26,8 +26,8 @@ function getFilterSearchFilterNode(
     return propertyFilter;
   }
   const searchFilter: FilterLeaf = {
-    property_with_response_v1: {
-      property_value: {
+    properties_v3: {
+      value: {
         contains: search,
       },
     },
@@ -44,15 +44,15 @@ export async function getPropertyParams(
   property: string,
   search: string
 ): Promise<Result<PropertyParam[], string>> {
-  const builtFilter = await buildFilterWithAuthClickHousePropResponse({
+  const builtFilter = await buildFilterWithAuthClickHouseProperties({
     org_id,
     filter: getFilterSearchFilterNode(property, search),
     argsAcc: [],
   });
 
   const query = `
-  SELECT distinct property_key, property_value as property_param
-  from property_with_response_v1
+  SELECT distinct key as property_key, value as property_param
+  from properties_v3
   where (
     ${builtFilter.filter}
   )
