@@ -32,7 +32,7 @@ const useGetProperties = () => {
     property: "",
     search: "",
   });
-  const debouncedPropertySearch = useDebounce(propertySearch, 5000);
+  const debouncedPropertySearch = useDebounce(propertySearch, 300);
 
   useEffect(() => {
     setPropertyFilters(getPropertyFilters(allProperties, []));
