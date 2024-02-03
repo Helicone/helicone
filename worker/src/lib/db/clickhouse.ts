@@ -175,6 +175,7 @@ interface PropertiesCopyV2 {
   value: string;
   organization_id: string;
 }
+type PropertiesV3 = PropertiesCopyV2;
 
 export interface PropertyWithResponseV1 {
   response_id: Nullable<string>;
@@ -209,6 +210,7 @@ export interface ClickhouseDB {
     properties_copy_v1: PropertiesCopyV1;
     response_copy_v2: ResponseCopyV2;
     properties_copy_v2: PropertiesCopyV2;
+    properties_v3: PropertiesV3;
     response_copy_v3: ResponseCopyV3;
     property_with_response_v1: PropertyWithResponseV1;
     cache_hits: CacheHits;
