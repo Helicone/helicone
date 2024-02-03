@@ -211,6 +211,7 @@ export type TablesAndViews = {
   users_view: FilterLeafUserView;
   properties_copy_v1: FilterLeafPropertiesTable;
   properties_copy_v2: FilterLeafPropertiesCopyV2;
+  properties_v3: FilterLeafPropertiesCopyV2;
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
   job: FilterLeafJob;
   job_node: FilterLeafNode;

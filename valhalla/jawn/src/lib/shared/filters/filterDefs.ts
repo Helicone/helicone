@@ -140,6 +140,8 @@ type PropertiesCopyV2ToOperators = {
 
 export type FilterLeafPropertiesCopyV2 = SingleKey<PropertiesCopyV2ToOperators>;
 
+export type FilterLeafPropertiesV3 = FilterLeafPropertiesCopyV2;
+
 type PropertyWithResponseV1ToOperators = {
   property_key: SingleKey<TextOperators>;
   property_value: SingleKey<TextOperators>;
@@ -213,6 +215,7 @@ export type TablesAndViews = {
   users_view: FilterLeafUserView;
   properties_copy_v1: FilterLeafPropertiesTable;
   properties_copy_v2: FilterLeafPropertiesCopyV2;
+  properties_v3: FilterLeafPropertiesV3;
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
   job: FilterLeafJob;
   job_node: FilterLeafNode;
