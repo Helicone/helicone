@@ -16,7 +16,7 @@ export async function getProperties(
   });
   const query = `
   select distinct key as property
-  from properties_copy_v2
+  from properties_v3
   where (
     ${builtFilter.filter}
   )

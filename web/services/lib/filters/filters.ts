@@ -208,6 +208,11 @@ const whereKeyMappings: KeyMappings = {
     value: "properties_copy_v2.value",
     organization_id: "properties_copy_v2.organization_id",
   }),
+  properties_v3: easyKeyMappings<"properties_v3">({
+    key: "properties_v3.key",
+    value: "properties_v3.value",
+    organization_id: "properties_v3.organization_id",
+  }),
   property_with_response_v1: easyKeyMappings<"property_with_response_v1">({
     property_key: "property_with_response_v1.property_key",
     property_value: "property_with_response_v1.property_value",
@@ -292,6 +297,7 @@ const havingKeyMappings: KeyMappings = {
   response_copy_v2: NOT_IMPLEMENTED,
   response_copy_v3: NOT_IMPLEMENTED,
   properties_copy_v2: NOT_IMPLEMENTED,
+  properties_v3: NOT_IMPLEMENTED,
   property_with_response_v1: NOT_IMPLEMENTED,
   job: NOT_IMPLEMENTED,
   job_node: NOT_IMPLEMENTED,
@@ -519,7 +525,7 @@ export async function buildFilterWithAuthClickHouseProperties(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
-    properties_copy_v2: {
+    properties_v3: {
       organization_id: {
         equals: orgId,
       },
