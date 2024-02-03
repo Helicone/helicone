@@ -131,6 +131,20 @@ export async function logInClickhouse(
       }))
     ),
     clickhouseDb.dbInsertClickhouse(
+      "properties_v3",
+      properties.map((p) => ({
+        id: p.id ?? 0,
+        created_at: p.created_at
+          ? formatTimeString(p.created_at)
+          : formatTimeString(new Date().toISOString()),
+        request_id: request.id,
+        key: p.key,
+        value: p.value,
+        organization_id:
+          request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
+      }))
+    ),
+    clickhouseDb.dbInsertClickhouse(
       "property_with_response_v1",
       buildPropertyWithResponseInserts(request, response, properties)
     ),
