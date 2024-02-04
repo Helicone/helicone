@@ -24,7 +24,6 @@ import { useCachePageClickHouse } from "./useCachePage";
 import { useOrg } from "../../layout/organizationContext";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import Link from "next/link";
-import LoadingAnimation from "../../shared/loadingAnimation";
 
 interface CachePageProps {
   currentPage: number;
