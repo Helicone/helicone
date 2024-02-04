@@ -136,33 +136,29 @@ const CachePage = (props: CachePageProps) => {
           </Link>
         </div>
         {!hasCache ? (
-          isAnyLoading ? (
-            <LoadingAnimation />
-          ) : (
-            <div className="flex flex-col w-full h-96 justify-center items-center">
-              <div className="flex flex-col w-2/5">
-                <CircleStackIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
-                <p className="text-xl text-black dark:text-white font-semibold mt-8">
-                  No cache data available
-                </p>
-                <p className="text-sm text-gray-500 max-w-sm mt-2">
-                  Please view our documentation to learn how to enable cache for
-                  your requests.
-                </p>
-                <div className="mt-4">
-                  <Link
-                    href="https://docs.helicone.ai/features/advanced-usage/caching"
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                  >
-                    <BookOpenIcon className="h-4 w-4" />
-                    View Docs
-                  </Link>
-                </div>
+          <div className="flex flex-col w-full h-96 justify-center items-center">
+            <div className="flex flex-col w-2/5">
+              <CircleStackIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+              <p className="text-xl text-black dark:text-white font-semibold mt-8">
+                No cache data available
+              </p>
+              <p className="text-sm text-gray-500 max-w-sm mt-2">
+                Please view our documentation to learn how to enable cache for
+                your requests.
+              </p>
+              <div className="mt-4">
+                <Link
+                  href="https://docs.helicone.ai/features/advanced-usage/caching"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  <BookOpenIcon className="h-4 w-4" />
+                  View Docs
+                </Link>
               </div>
             </div>
-          )
+          </div>
         ) : (
           <div className="flex flex-col">
             <TabGroup>
