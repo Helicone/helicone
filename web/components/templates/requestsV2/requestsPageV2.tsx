@@ -390,29 +390,36 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   return (
     <div>
-      <AuthHeader
-        title={isCached ? "Cached Requests" : "Requests"}
-        headerActions={
-          <div className="flex flex-row gap-2">
-            <button
-              onClick={() => refetch()}
-              className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
-            >
-              <ArrowPathIcon
-                className={clsx(
-                  isDataLoading ? "animate-spin" : "",
-                  "h-5 w-5 inline"
-                )}
+      {!isCached && (
+        <AuthHeader
+          title={isCached ? "Cached Requests" : "Requests"}
+          headerActions={
+            <div className="flex flex-row gap-2">
+              <button
+                onClick={() => refetch()}
+                className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
+              >
+                <ArrowPathIcon
+                  className={clsx(
+                    isDataLoading ? "animate-spin" : "",
+                    "h-5 w-5 inline"
+                  )}
+                />
+              </button>
+            </div>
+          }
+          actions={
+            <>
+              <ThemedSwitch
+                checked={isLive}
+                onChange={setIsLive}
+                label="Live"
               />
-            </button>
-          </div>
-        }
-        actions={
-          <>
-            <ThemedSwitch checked={isLive} onChange={setIsLive} label="Live" />
-          </>
-        }
-      />
+            </>
+          }
+        />
+      )}
+
       <div className="flex flex-col space-y-4">
         <ThemedTableV5
           defaultData={requests || []}

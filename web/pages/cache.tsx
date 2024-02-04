@@ -21,7 +21,6 @@ const Cache = (props: CacheProps) => {
   const { currentPage, pageSize, sort } = props;
   return (
     <>
-      <AuthHeader title={"Cache"} />
       <CachePage currentPage={currentPage} pageSize={pageSize} sort={sort} />
     </>
   );
