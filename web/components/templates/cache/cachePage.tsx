@@ -68,7 +68,7 @@ const CachePage = (props: CachePageProps) => {
 
   const hasCache = chMetrics.totalCacheHits.data?.data
     ? +chMetrics.totalCacheHits.data?.data > 0
-    : false;
+    : true;
 
   const metrics = [
     {
