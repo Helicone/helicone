@@ -13,34 +13,29 @@ const InvalidPage = (props: InvalidPageProps) => {
   return (
     <>
       <NavBarV2 />
-      <div className="flex flex-col items-center justify-center h-[85vh] bg-gray-50">
-        <div className="w-full grid grid-cols-8 max-w-5xl mx-auto h-full pt-36 justify-between gap-8 sm:gap-16 text-left">
-          <div className="w-fit h-fit mt-16 sm:mt-8 grid grid-cols-3 gap-8 relative col-span-8 sm:col-span-4">
-            {[
-              "/assets/home/logos/logo.svg",
-              "/assets/home/logos/qawolf.png",
-              "/assets/home/logos/upenn.png",
-              "/assets/home/logos/carta.png",
-              "/assets/home/logos/lex.svg",
-              "/assets/home/logos/particl.png",
-              "/assets/home/logos/mintlify.svg",
-              "/assets/home/logos/onboard.png",
-              "/assets/home/logos/autogpt.png",
-            ].map((item, i) => (
+      <div className="flex flex-col items-center justify-center h-full lg:min-h-[85vh] bg-gray-50 px-4 py-16 lg:py-36">
+        <div className="w-full grid grid-cols-8 max-w-5xl mx-auto h-full justify-between gap-8 lg:gap-16 text-left">
+          <div className="w-fit h-fit mt-16 lg:mt-8 hidden sm:grid grid-cols-3 gap-8 relative col-span-8 lg:col-span-4">
+            {Array.from(Array(9).keys()).map((item, i) => (
               <div
                 key={i}
                 className={clsx(
                   i === 1 && "rotate-12 translate-x-8 -translate-y-8",
                   i === 2 && "translate-x-16 -translate-y-20",
                   i === 5 && "-rotate-12 translate-x-8 -translate-y-8",
-                  `h-20 w-20 sm:h-28 sm:w-28 border-4 border-black rounded-md shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+                  `h-20 w-20 lg:h-28 lg:w-28 border-4 border-black rounded-md shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
                 )}
               >
-                <Image src={item} alt={""} width={80} height={80} />
+                <Image
+                  src={"/assets/random/doge.png"}
+                  alt={""}
+                  width={80}
+                  height={80}
+                />
               </div>
             ))}
           </div>
-          <div className="w-full flex flex-col col-span-8 sm:col-span-4 h-full pt-16">
+          <div className="w-full flex flex-col col-span-8 lg:col-span-4 h-full pt-16">
             <h1 className="text-4xl font-semibold">404 Error</h1>
             <p className="text-lg mt-4 text-gray-500">
               The page you are looking for does not exist. What does it mean to
