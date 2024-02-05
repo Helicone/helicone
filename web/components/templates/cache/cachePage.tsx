@@ -3,8 +3,9 @@ import {
   BookOpenIcon,
   CircleStackIcon,
   ClockIcon,
+  TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { ElementType, useState } from "react";
 import {
   BarChart,
   Tab,
@@ -24,6 +25,7 @@ import { useCachePageClickHouse } from "./useCachePage";
 import { useOrg } from "../../layout/organizationContext";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 interface CachePageProps {
   currentPage: number;
@@ -33,15 +35,34 @@ interface CachePageProps {
     sortDirection: SortDirection | null;
     isCustomProperty: boolean;
   };
+  defaultIndex?: number;
 }
 
+const tabs: {
+  id: number;
+  title: string;
+  icon: ElementType<any>;
+}[] = [
+  {
+    id: 0,
+    title: "Cache Analytics",
+    icon: CircleStackIcon,
+  },
+  {
+    id: 1,
+    title: "Logs",
+    icon: TableCellsIcon,
+  },
+];
+
 const CachePage = (props: CachePageProps) => {
-  const { currentPage, pageSize, sort } = props;
+  const { currentPage, pageSize, sort, defaultIndex = 0 } = props;
   const [timeFilter, _] = useState<TimeFilter>({
     start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 30),
     end: new Date(),
   });
   const timeZoneDifference = new Date().getTimezoneOffset();
+  const router = useRouter();
   const dbIncrement = "day";
   const {
     overTimeData,
@@ -52,8 +73,6 @@ const CachePage = (props: CachePageProps) => {
     timeZoneDifference,
     dbIncrement,
   });
-
-  const orgContext = useOrg();
 
   const [selectedRequest, setSelectedRequest] = useState<{
     request_id: string;
@@ -160,10 +179,25 @@ const CachePage = (props: CachePageProps) => {
           </div>
         ) : (
           <div className="flex flex-col">
-            <TabGroup>
+            <TabGroup defaultIndex={defaultIndex}>
               <TabList className="font-semibold" variant="line">
-                <Tab>Cache Analytics</Tab>
-                <Tab>Logs</Tab>
+                {tabs.map((tab) => (
+                  <Tab
+                    key={tab.id}
+                    icon={tab.icon}
+                    onClick={() => {
+                      router.push(
+                        {
+                          query: { tab: tab.id },
+                        },
+                        undefined,
+                        { shallow: true }
+                      );
+                    }}
+                  >
+                    {tab.title}
+                  </Tab>
+                ))}
               </TabList>
               <TabPanels>
                 <TabPanel>

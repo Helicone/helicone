@@ -15,12 +15,19 @@ interface CacheProps {
     sortDirection: SortDirection | null;
     isCustomProperty: boolean;
   };
+  defaultIndex: number;
 }
+
 const Cache = (props: CacheProps) => {
-  const { currentPage, pageSize, sort } = props;
+  const { currentPage, pageSize, sort, defaultIndex } = props;
   return (
     <>
-      <CachePage currentPage={currentPage} pageSize={pageSize} sort={sort} />
+      <CachePage
+        currentPage={currentPage}
+        pageSize={pageSize}
+        sort={sort}
+        defaultIndex={defaultIndex}
+      />
     </>
   );
 };
@@ -32,7 +39,7 @@ Cache.getLayout = function getLayout(page: ReactElement) {
 export default Cache;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
-  const { page, page_size, sortKey, sortDirection, isCustomProperty } =
+  const { page, page_size, sortKey, sortDirection, isCustomProperty, tab } =
     options.context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
@@ -48,6 +55,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
         sortDirection: sortDirection ? (sortDirection as SortDirection) : null,
         isCustomProperty: isCustomProperty === "true",
       },
+      defaultIndex: tab ? parseInt(tab as string) : 0,
     },
   };
 });
