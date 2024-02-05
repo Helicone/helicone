@@ -22,7 +22,6 @@ import ModelPill from "../requestsV2/modelPill";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { TimeFilter } from "../../../lib/api/handlerWrappers";
 import { useCachePageClickHouse } from "./useCachePage";
-import { useOrg } from "../../layout/organizationContext";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import Link from "next/link";
 import { useRouter } from "next/router";
