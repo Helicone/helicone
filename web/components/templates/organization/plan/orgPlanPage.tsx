@@ -301,9 +301,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
                   <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
                     <Link
                       className="focus:outline-none"
-                      href={
-                        "https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call"
-                      }
+                      href={"https://cal.com/team/helicone/helicone-discovery"}
                     >
                       <span className="absolute inset-0" aria-hidden="true" />
                       <span>Enterprise</span>

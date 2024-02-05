@@ -8,13 +8,40 @@ import { useOrg } from "../../layout/organizationContext";
 import OrgSettingsPage from "../organization/settings/orgSettingsPage";
 import OrgPlanPage from "../organization/plan/orgPlanPage";
 import OrgMembersPage from "../organization/members/orgMembersPage";
+import { ElementType } from "react";
+import { useRouter } from "next/router";
 
-interface SettingsPageProps {}
+interface SettingsPageProps {
+  defaultIndex?: number;
+}
+
+const tabs: {
+  id: number;
+  title: string;
+  icon: ElementType<any>;
+}[] = [
+  {
+    id: 0,
+    title: "Organization",
+    icon: BuildingOfficeIcon,
+  },
+  {
+    id: 1,
+    title: "Plan",
+    icon: CreditCardIcon,
+  },
+  {
+    id: 2,
+    title: "Members",
+    icon: UserGroupIcon,
+  },
+];
 
 const SettingsPage = (props: SettingsPageProps) => {
-  const {} = props;
+  const { defaultIndex = 0 } = props;
 
   const orgContext = useOrg();
+  const router = useRouter();
 
   return (
     <div className="flex flex-col space-y-4">
@@ -25,9 +52,23 @@ const SettingsPage = (props: SettingsPageProps) => {
       </div>
       <TabGroup>
         <TabList className="font-semibold" variant="line">
-          <Tab icon={BuildingOfficeIcon}>Organization</Tab>
-          <Tab icon={CreditCardIcon}>Plan</Tab>
-          <Tab icon={UserGroupIcon}>Members</Tab>
+          {tabs.map((tab) => (
+            <Tab
+              key={tab.id}
+              icon={tab.icon}
+              onClick={() => {
+                router.push(
+                  {
+                    query: { tab: tab.id },
+                  },
+                  undefined,
+                  { shallow: true }
+                );
+              }}
+            >
+              <span>{tab.title}</span>
+            </Tab>
+          ))}
         </TabList>
         {orgContext?.currentOrg ? (
           <TabPanels>
