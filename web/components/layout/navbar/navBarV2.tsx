@@ -87,7 +87,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
             <DeveloperButton />
             <Link
               href="/pricing"
-              className="flex flex-row items-center font-semibold hover:bg-gray-100 rounded-lg px-3 py-1.5 focus:outline-none"
+              className="flex flex-row items-center font-semibold hover:bg-gray-100 rounded-md px-3 py-1.5 focus:outline-none"
             >
               Pricing
             </Link>
@@ -95,13 +95,13 @@ const NavBarV2 = (props: NavBarV2Props) => {
               href="https://blog.helicone.ai/"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-row items-center font-semibold hover:bg-gray-100 rounded-lg px-3 py-1.5 focus:outline-none"
+              className="flex flex-row items-center font-semibold hover:bg-gray-100 rounded-md px-3 py-1.5 focus:outline-none"
             >
               Blog
             </Link>
             <Link
               href="/sales"
-              className="flex flex-row items-center font-semibold hover:bg-gray-100 rounded-lg px-3 py-1.5 focus:outline-none"
+              className="flex flex-row items-center font-semibold hover:bg-gray-100 rounded-md px-3 py-1.5 focus:outline-none"
             >
               Contact
             </Link>
@@ -114,7 +114,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                     router.push("/");
                   });
                 }}
-                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-lg px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
               >
                 Sign Out
               </button>
@@ -122,13 +122,13 @@ const NavBarV2 = (props: NavBarV2Props) => {
               <>
                 <Link
                   href="/signin"
-                  className="bg-white hover:bg-gray-100 border border-black whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                  className="bg-white hover:bg-gray-100 border border-black whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/signup"
-                  className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                  className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 >
                   Sign Up
                 </Link>
@@ -173,7 +173,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                 <a href="#" className="-m-1.5 p-1.5">
                   <span className="sr-only">Helicone</span>
                   <Image
-                    className="block rounded-lg"
+                    className="block rounded-md"
                     src="/assets/landing/helicone.webp"
                     width={150}
                     height={150 / (1876 / 528)}
@@ -238,14 +238,14 @@ const NavBarV2 = (props: NavBarV2Props) => {
                             router.push("/");
                           });
                         }}
-                        className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap flex w-full justify-center rounded-lg px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                        className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap flex w-full justify-center rounded-md px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                       >
                         Sign Out
                       </button>
                     ) : (
                       <Link
                         href="/signin"
-                        className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap flex w-full justify-center rounded-lg px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                        className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap flex w-full justify-center rounded-md px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                       >
                         Sign In
                       </Link>
