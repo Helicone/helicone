@@ -136,7 +136,7 @@ GROUP BY ${groupByColumns.concat([dateTrunc]).join(", ")}
 ORDER BY ${dateTrunc} ASC ${fill}
 `;
 
-  if (true) {
+  if (printQuery) {
     await printRunnableQuery(query, argsAcc);
   }
 
