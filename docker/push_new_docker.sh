@@ -26,10 +26,10 @@ DATE="v$DATE"
 # Docker images to build and push
 declare -a docker_images=( \
       "helicone/supabase-migration-runner" \
-      "helicone/worker-helicone-api" \
-      "helicone/worker-openai-proxy" \
+      "helicone/worker" \
       "helicone/web" \
       "helicone/clickhouse-migration-runner" \
+      "helicone/jawn"
 )
 
 
@@ -57,7 +57,14 @@ for image in "${docker_images[@]}"; do
   # Replace dash "-" with underscore "_" in Dockerfile name
   dockerfile_name=$(basename $image | tr '-' '_')
 
-  run_or_echo docker build --platform linux/amd64 -t ${image}:$tag -f dockerfiles/dockerfile_${dockerfile_name} ..
+  # Special handling for the jawn image
+  if [[ "$dockerfile_name" == "jawn" ]]; then
+    DOCKERFILE_PATH="../valhalla/dockerfile"
+  else
+    DOCKERFILE_PATH="dockerfiles/dockerfile_${dockerfile_name}"
+  fi
+
+  run_or_echo docker build --platform linux/amd64 -t ${image}:$tag -f $DOCKERFILE_PATH ..
   run_or_echo docker push ${image}:$tag
   run_or_echo docker tag ${image}:$tag ${image}:latest
   run_or_echo docker push ${image}:latest
