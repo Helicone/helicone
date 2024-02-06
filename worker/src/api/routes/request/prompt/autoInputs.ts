@@ -44,7 +44,7 @@ type ReturnBodyType = z.infer<typeof ReturnBody>;
 
 export class AutoPromptInputs extends BaseAPIRoute {
   static schema = {
-    tags: ["Customer Portal"],
+    tags: ["Prompt", "Request"],
     summary: "Gets the provider key for a customer",
     // requestBody: BodyOpenAPI,
     parameters: {

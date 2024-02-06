@@ -22,6 +22,7 @@ import {
   MoonIcon,
   SparklesIcon,
   CircleStackIcon,
+  TvIcon,
 } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
@@ -81,6 +82,16 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: TableCellsIcon,
       current: pathname.includes("/requests"),
     },
+    ...(tier === "enterprise"
+      ? [
+          {
+            name: "Prompts",
+            href: "/prompts",
+            icon: TvIcon,
+            current: pathname.includes("/prompts"),
+          },
+        ]
+      : []),
     {
       name: "Users",
       href: "/users",
