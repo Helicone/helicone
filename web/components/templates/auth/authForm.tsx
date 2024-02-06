@@ -123,23 +123,21 @@ const AuthForm = (props: AuthFormProps) => {
                   Requests logged per month
                 </dt>
 
-                <dd className="text-gray-900 dark:text-gray-100 text-4xl font-semibold">
+                <dd className="text-gray-900 text-4xl font-semibold">
                   124,000,000+
                 </dd>
               </div>
               <div className="flex flex-col">
                 <dt className="text-gray-500 text-md">Total Requests Logged</dt>
 
-                <dd className="text-gray-900 dark:text-gray-100 text-4xl font-semibold">
+                <dd className="text-gray-900 text-4xl font-semibold">
                   828,000,000+
                 </dd>
               </div>
               <div className="flex flex-col">
                 <dt className="text-gray-500 text-md">Total Users</dt>
 
-                <dd className="text-gray-900 dark:text-gray-100 text-4xl font-semibold">
-                  5,000+
-                </dd>
+                <dd className="text-gray-900 text-4xl font-semibold">5,000+</dd>
               </div>
             </div>
             <div className="bg-white h-fit mx-auto w-full p-8 sm:p-16 rounded-xl shadow-xl border border-gray-200">
