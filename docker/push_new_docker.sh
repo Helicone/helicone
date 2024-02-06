@@ -32,7 +32,6 @@ declare -a docker_images=( \
       "helicone/jawn"
 )
 
-
 run_or_echo() {
   if [[ $TEST_MODE -eq 1 ]]; then
     echo "$@"
