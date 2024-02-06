@@ -345,7 +345,7 @@ export class InsertQueue {
       return { data: null, error: promptAlreadyExists.error.message };
     }
 
-    let version = promptAlreadyExists.data[0].version;
+    let version = promptAlreadyExists.data?.[0]?.version ?? 0;
     if (promptAlreadyExists.data.length > 0) {
       if (
         !deepCompare(
