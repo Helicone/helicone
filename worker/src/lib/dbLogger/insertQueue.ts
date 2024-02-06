@@ -6,6 +6,7 @@ import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { ResponseCopyV3 } from "../db/clickhouse";
 import { formatTimeString } from "./clickhouseLog";
 import { Valhalla } from "../db/valhalla";
+import { deepCompare } from "../../helpers";
 
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];
@@ -326,30 +327,108 @@ export class InsertQueue {
     return { data: null, error: null };
   }
 
+  async upsertPrompt(
+    heliconeTemplate: Json,
+    promptId: string,
+    request: Database["public"]["Tables"]["request"]["Row"],
+    orgId: string
+  ): Promise<Result<null, string>> {
+    const promptAlreadyExists = await this.database
+      .from("prompts")
+      .select("*")
+      .eq("organization_id", orgId)
+      .eq("id", promptId)
+      .order("version", { ascending: false })
+      .limit(1);
+
+    if (promptAlreadyExists.error) {
+      return { data: null, error: promptAlreadyExists.error.message };
+    }
+
+    let version = promptAlreadyExists.data[0].version;
+    if (promptAlreadyExists.data.length > 0) {
+      if (
+        !deepCompare(
+          promptAlreadyExists.data[0].heliconeTemplate,
+          heliconeTemplate
+        )
+      ) {
+        version = promptAlreadyExists.data[0].version + 1;
+      }
+    }
+    if (
+      promptAlreadyExists.data.length === 0 ||
+      version !== promptAlreadyExists.data[0].version
+    ) {
+      const insertResult = await this.database.from("prompts").insert([
+        {
+          id: promptId,
+          organization_id: orgId,
+          heliconeTemplate,
+          status: "active",
+          version,
+        },
+      ]);
+      if (insertResult.error) {
+        return { data: null, error: insertResult.error.message };
+      }
+    }
+    return { data: null, error: null };
+  }
+
+  public async waitForResponse(
+    requestId: string,
+    orgId: string,
+    timeout: number
+  ) {
+    while (timeout > 0) {
+      const query = `
+      SELECT * 
+      FROM response_copy_v3
+      WHERE (
+        request_id={val_0: UUID} AND
+        organization_id={val_1: UUID}
+      )
+  `;
+      const { data, error } = await this.clickhouseWrapper.dbQuery(query, [
+        requestId,
+        orgId,
+      ]);
+      if (error || data === null || data?.length == 0) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        timeout -= 1000;
+        continue;
+      } else {
+        return;
+      }
+    }
+  }
   async putRequestProperty(
     requestId: string,
-    properties: Json,
-    property: {
+    allProperties: Record<string, any>,
+    newProperties: {
       key: string;
       value: string;
-    },
+    }[],
     orgId: string,
     values: Database["public"]["Tables"]["request"]["Row"]
   ): Promise<void> {
     await this.database
       .from("request")
-      .update({ properties: properties })
+      .update({ properties: allProperties })
       .match({
         id: requestId,
       })
       .eq("helicone_org_id", orgId);
 
-    await this.database.from("properties").insert({
-      request_id: requestId,
-      key: property.key,
-      value: property.value,
-      auth_hash: values.auth_hash,
-    });
+    await this.database.from("properties").insert(
+      newProperties.map((p) => ({
+        request_id: requestId,
+        key: p.key,
+        value: p.value,
+        auth_hash: values.auth_hash,
+      }))
+    );
 
     const query = `
         SELECT * 
@@ -379,48 +458,44 @@ export class InsertQueue {
 
     const { error: e } = await this.clickhouseWrapper.dbInsertClickhouse(
       "property_with_response_v1",
-      [
-        {
+      newProperties.map((p) => {
+        return {
           response_id: response.response_id,
           response_created_at: response.response_created_at,
           latency: response.latency,
-          status: response.status,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          status: response.status!,
           completion_tokens: response.completion_tokens,
           prompt_tokens: response.prompt_tokens,
-          model: response.model,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          model: response.model!,
           request_id: values.id,
           request_created_at: formatTimeString(values.created_at),
           auth_hash: values.auth_hash,
-          user_id: response.user_id,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          user_id: response.user_id!,
           organization_id: orgId,
-          property_key: property.key,
-          property_value: property.value,
-        },
-      ]
+          property_key: p.key,
+          property_value: p.value,
+        };
+      })
     );
     if (e) {
       console.error("Error inserting into clickhouse:", e);
     }
-    await this.clickhouseWrapper.dbInsertClickhouse("properties_copy_v2", [
-      {
-        id: 1,
-        request_id: requestId,
-        key: property.key,
-        value: property.value,
-        organization_id: orgId,
-        created_at: formatTimeString(new Date().toISOString()),
-      },
-    ]);
 
-    await this.clickhouseWrapper.dbInsertClickhouse("properties_v3", [
-      {
-        id: 1,
-        request_id: requestId,
-        key: property.key,
-        value: property.value,
-        organization_id: orgId,
-        created_at: formatTimeString(new Date().toISOString()),
-      },
-    ]);
+    await this.clickhouseWrapper.dbInsertClickhouse(
+      "properties_v3",
+      newProperties.map((p) => {
+        return {
+          id: 1,
+          request_id: requestId,
+          key: p.key,
+          value: p.value,
+          organization_id: orgId,
+          created_at: formatTimeString(new Date().toISOString()),
+        };
+      })
+    );
   }
 }
