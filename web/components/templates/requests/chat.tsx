@@ -218,7 +218,7 @@ export const SingleChat = (props: {
       <div
         className={clsx(
           getBgColor(),
-          "items-start py-4 px-8 text-left flex flex-row space-x-4 text-black dark:text-white",
+          "items-start p-4 text-left flex flex-row space-x-4 text-black dark:text-white",
           isSystem && "font-semibold",
           isLast && "rounded-b-md"
         )}
@@ -540,6 +540,62 @@ export const Chat = (props: ChatProps) => {
       </div>
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="w-[80vw] border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
+          <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100">
+            <div className="flex flex-row items-center space-x-2">
+              <button
+                onClick={() => {
+                  setExpandedChildren(
+                    Object.fromEntries(
+                      Object.keys(expandedChildren).map((key) => [
+                        key,
+                        !allExpanded,
+                      ])
+                    )
+                  );
+                }}
+                className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+              >
+                {allExpanded ? (
+                  <EyeSlashIcon className="h-4 w-4" />
+                ) : (
+                  <EyeIcon className="h-4 w-4" />
+                )}
+                <p className="text-xs font-semibold">
+                  {allExpanded ? "Shrink All" : "Expand All"}
+                </p>
+              </button>
+              {!(
+                model === "gpt-4-vision-preview" ||
+                model === "gpt-4-1106-vision-preview" ||
+                /^claude/.test(model)
+              ) && (
+                <button
+                  onClick={() => {
+                    if (requestMessages) {
+                      router.push("/playground?request=" + requestId);
+                    }
+                  }}
+                  className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+                >
+                  <BeakerIcon className="h-4 w-4" />
+                  <p className="text-xs font-semibold">Playground</p>
+                </button>
+              )}
+            </div>
+            <div className="flex flex-row items-center space-x-2">
+              <button
+                onClick={() => {
+                  setMode(mode === "pretty" ? "json" : "pretty");
+                }}
+                className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+              >
+                <ChevronUpDownIcon className="h-4 w-4" />
+                <p className="text-xs font-semibold">
+                  {mode === "pretty" ? "JSON" : "Pretty"}
+                </p>
+              </button>
+            </div>
+          </div>
           {mode === "json" ? (
             <div className="flex flex-col space-y-8 bg-gray-50 dark:bg-black relative text-black dark:text-white">
               <div className="flex flex-col space-y-2 p-4">
