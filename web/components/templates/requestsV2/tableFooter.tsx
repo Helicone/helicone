@@ -38,11 +38,14 @@ const TableFooter = (props: TableFooterProps) => {
 
   const [page, setPage] = useState<number>(currentPage);
 
-  const debouncedPage = useDebounce(page, 1000);
+  const debouncedPage = useDebounce(page, 2000);
 
   // once the debouncedPage changes, update the page using onPageChange and update the router
   useEffect(() => {
     onPageChange(debouncedPage);
+    router.query.page = debouncedPage.toString();
+    // update the url, but don't trigger a new fetch
+    router.replace(router);
   }, [debouncedPage]);
 
   return (
@@ -85,18 +88,11 @@ const TableFooter = (props: TableFooterProps) => {
 
                   if (value < 1) {
                     setPage(1);
-                    router.query.page_size = e.target.value;
-                    router.push(router);
                   } else if (value > totalPages) {
                     setPage(totalPages);
-                    router.query.page_size = e.target.value;
-                    router.push(router);
                   } else {
                     setPage(value);
                   }
-
-                  router.query.page_size = e.target.value;
-                  router.push(router);
                 }}
                 min={1}
                 max={Math.ceil((count as number) / Number(pageSize || 10))}
