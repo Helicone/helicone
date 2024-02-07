@@ -13,6 +13,7 @@ import { CustomerGet } from "../../api/routes/customer-portal/customer/get";
 import { CustomerUsageGet } from "../../api/routes/customer-portal/customer/usage/get";
 import { ProviderKeyGet } from "../../api/routes/customer-portal/customer/provderKey/get";
 import { AutoPromptInputs } from "../../api/routes/request/prompt/autoInputs";
+import { PromptsGet } from "../../api/routes/prompts/get";
 
 function getOpenAPIRouter(
   router: OpenAPIRouterType<
@@ -30,6 +31,12 @@ function getOpenAPIRouter(
     "/v1/request/:requestId/prompt/:promptId/inputs",
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     AutoPromptInputs as any
+  );
+
+  router.get(
+    "/v1/prompts",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    PromptsGet as any
   );
 }
 
