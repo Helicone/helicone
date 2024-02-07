@@ -60,7 +60,8 @@ def insert_into_db(query, params):
 
 def fetch(base_url, endpoint, method="GET", json=None, headers=None, stream=False):
     url = f"{base_url}/{endpoint}"
-    response = requests.request(method, url, json=json, headers=headers, stream=stream)
+    response = requests.request(
+        method, url, json=json, headers=headers, stream=stream)
     try:
         response.raise_for_status()
     except requests.exceptions.HTTPError as e:
@@ -160,6 +161,7 @@ def test_openai_proxy():
     assert response_data[0]["body"]["choices"], "Response data not found in the database for the given request ID"
     print("passed")
 
+
 def test_openai_proxy_stream():
     print("\n---------Running test_proxy---------")
     requestId = str(uuid.uuid4())
@@ -201,9 +203,10 @@ def test_openai_proxy_stream():
 
     query = "SELECT * FROM response WHERE request = %s LIMIT 1"
     response_data = fetch_from_db(query, (latest_request["id"],))
-    
+
     assert response_data[0]["body"]["choices"], "Response data not found in the database for the given request ID"
     print("passed")
+
 
 def test_helicone_proxy_key():
     print("\n---------Running test_helicone_proxy_key---------")
@@ -311,3 +314,19 @@ def test_openai_async():
     response_data = fetch_from_db(query, (latest_request["id"],))
     assert response_data, "Response data not found in the database for the given request ID"
     print("passed")
+
+
+def test_properties_async():
+    print("---------Running test_properties_async---------")
+
+    # Set the API key for Helicone
+
+    res = requests.post(f"{helicone_async_url}/v1/properties", json={
+        "key": "test_key",
+        "value": "test_value"
+    }, headers={
+        "Helicone-Auth": f"Bearer {helicone_api_key}"
+    })
+    res.raise_for_status()
+    res = res.json()
+    print(res)
