@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import SolutionsButton from "./solutionsButton";
 import DeveloperButton from "./developerButton";
+import { ChevronRightIcon } from "@heroicons/react/20/solid";
 
 interface NavBarV2Props {}
 
@@ -21,10 +22,10 @@ const NavBarV2 = (props: NavBarV2Props) => {
   const supabaseClient = useSupabaseClient();
 
   return (
-    <header className="bg-white top-0 sticky z-30 border-b border-gray-200">
+    <header className="bg-white top-0 sticky z-30 border-b border-gray-100">
       {!mobileMenuOpen && (
         <nav
-          className="mx-auto flex max-w-5xl items-center md:gap-x-8 gap-x-16 py-2"
+          className="mx-auto flex max-w-5xl items-center md:gap-x-8 gap-x-16 py-4"
           aria-label="Global"
         >
           <div className="flex items-center">
@@ -99,38 +100,28 @@ const NavBarV2 = (props: NavBarV2Props) => {
             >
               Blog
             </Link>
-            <Link
-              href="/sales"
-              className="flex flex-row items-center font-semibold hover:bg-gray-100 rounded-md px-3 py-1.5 focus:outline-none"
-            >
-              Contact
-            </Link>
           </div>
           <div className="flex-1 hidden md:flex items-center justify-end gap-x-4">
             {user ? (
-              <button
-                onClick={() => {
-                  supabaseClient.auth.signOut().then(() => {
-                    router.push("/");
-                  });
-                }}
-                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+              <Link
+                href="/dashboard"
+                className="flex items-center bg-white hover:bg-gray-100 border border-black whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
               >
-                Sign Out
-              </button>
+                Dashboard <ChevronRightIcon className="h-5 w-5" />
+              </Link>
             ) : (
               <>
                 <Link
-                  href="/signin"
-                  className="bg-white hover:bg-gray-100 border border-black whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                  href="/sales"
+                  className="flex items-center bg-white hover:bg-gray-100 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 >
-                  Sign In
+                  Contact Sales <ChevronRightIcon className="h-5 w-5" />
                 </Link>
                 <Link
-                  href="/signup"
+                  href="/signin"
                   className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 >
-                  Sign Up
+                  Sign In
                 </Link>
               </>
             )}

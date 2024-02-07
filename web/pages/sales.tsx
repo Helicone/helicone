@@ -26,7 +26,7 @@ const Sales = () => {
       <NavBarV2 />
       <div className="bg-white h-full min-h-screen">
         <GridBackground>
-          <div className="flex flex-col sm:flex-row mx-auto w-full gap-8 max-w-6xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
+          <div className="flex flex-col sm:flex-row mx-auto w-full gap-8 max-w-5xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
             <div className="flex flex-col w-full">
               <h1 className="text-2xl sm:text-4xl font-semibold leading-tight sm:leading-snug max-w-4xl">
                 Contact Us

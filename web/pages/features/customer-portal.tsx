@@ -27,7 +27,7 @@ const CustomerPortal = () => {
       <NavBarV2 />
       <div className="bg-white h-full min-h-screen">
         <GridBackground>
-          <div className="flex flex-col sm:flex-row mx-auto w-full gap-8 max-w-6xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
+          <div className="flex flex-col sm:flex-row mx-auto w-full gap-8 max-w-5xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
             <div className="flex flex-col w-full">
               <h1 className="text-2xl sm:text-4xl font-semibold leading-tight sm:leading-snug max-w-4xl">
                 Launch:{" "}
@@ -74,7 +74,7 @@ const CustomerPortal = () => {
           </div>
         </GridBackground>
 
-        <div className="mx-auto max-w-6xl px-6 py-12 sm:py-18 flex flex-col space-y-4 md:space-y-8 items-center justify-center text-center lg:gap-x-10 lg:px-8 antialiased">
+        <div className="mx-auto max-w-5xl px-6 py-12 sm:py-18 flex flex-col space-y-4 md:space-y-8 items-center justify-center text-center lg:gap-x-10 lg:px-8 antialiased">
           <div className="flex flex-col">
             <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2.5 lg:rounded-xl lg:p-2.5">
               <Image

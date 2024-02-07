@@ -179,7 +179,7 @@ export default function Example() {
       <NavBarV2 />
       <div className="bg-white mx-auto px-6 lg:px-8">
         <GridBackground>
-          <div className="flex flex-col max-w-6xl mx-auto p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
+          <div className="flex flex-col max-w-5xl mx-auto p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
             <h1 className="text-4xl sm:text-6xl font-semibold leading-tight sm:leading-snug max-w-4xl">
               Pricing that&apos;s{" "}
               <span className="md:border-2 border-sky-600 border-dashed text-sky-600 md:py-2 md:px-4">
@@ -265,7 +265,7 @@ export default function Example() {
         </div>
 
         {/* lg+ */}
-        <div className="isolate mt-4 mb-32 hidden lg:block max-w-6xl mx-auto">
+        <div className="isolate mt-4 mb-32 hidden lg:block max-w-5xl mx-auto">
           <div className="relative">
             {tiers.some((tier) => tier.mostPopular) ? (
               <div className="absolute inset-x-4 inset-y-0 -z-10 flex">
@@ -414,7 +414,7 @@ export default function Example() {
         </div>
         <div
           id="startup"
-          className="flex flex-col max-w-6xl mx-auto p-4 lg:px-8 mt-8 mb-32 lg:flex antialiased"
+          className="flex flex-col max-w-5xl mx-auto p-4 lg:px-8 mt-8 mb-32 lg:flex antialiased"
         >
           <div className="border border-gray-300 rounded-lg shadow-lg p-6 sm:p-12">
             <div className="flex flex-col md:flex-row gap-4 justify-between w-full py-4">

@@ -113,7 +113,7 @@ const AuthForm = (props: AuthFormProps) => {
               </svg>
             )}
           </div>
-          <div className="flex flex-row w-full h-[70vh] my-auto justify-center items-center max-w-6xl">
+          <div className="flex flex-row w-full h-[70vh] my-auto justify-center items-center max-w-5xl">
             <div className="w-full h-full hidden sm:flex flex-col space-y-8 p-8 sm:p-16 justify-start items-start text-start">
               <h2 className="text-2xl lg:text-3xl font-semibold leading-9 tracking-tight text-gray-900">
                 Trusted by startups and enterprises
