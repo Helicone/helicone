@@ -1,8 +1,7 @@
-import { z } from "zod";
 import { Path, Str } from "@cloudflare/itty-router-openapi";
 import { IRequest } from "itty-router";
+import { z } from "zod";
 import { Env } from "../../../../";
-import { Json } from "../../../../../supabase/database.types";
 import { RequestWrapper } from "../../../../lib/RequestWrapper";
 import { AuthParams } from "../../../../lib/dbLogger/DBLoggable";
 import { APIClient } from "../../../lib/apiClient";
@@ -36,7 +35,9 @@ function recurAndReplaceString(
 
 const ReturnBody = z
   .object({
-    providerKey: z.string(),
+    heliconeTemplate: z.any(),
+    promptId: z.string(),
+    version: z.number(),
   })
   .array();
 
@@ -106,6 +107,7 @@ export class AutoPromptInputs extends BaseAPIRoute {
     if (promptId.length > 32) {
       throw new Error("Prompt id is too long");
     }
+
     await client.queue.waitForResponse(
       requestId,
       authParams.organizationId,
@@ -123,6 +125,20 @@ export class AutoPromptInputs extends BaseAPIRoute {
     const inputsToAdd = Object.entries(inputs).map(([key, value]) => {
       return { key: key, value: value };
     });
+
+    const upsertResult = await client.queue.upsertPrompt(
+      body.inputTemplate
+        ? body.inputTemplate
+        : recurAndReplaceString(heliconeRequest.body, inputsToAdd),
+      promptId,
+      authParams.organizationId
+    );
+
+    if (upsertResult.error || !upsertResult.data) {
+      console.error("Error upserting prompt", upsertResult.error);
+      throw new Error(JSON.stringify(upsertResult.error));
+    }
+
     const newProperties = inputsToAdd.map(({ key, value }) => {
       return { key: `Helicone-Prompt-Input-${key}`, value: value };
     });
@@ -131,38 +147,27 @@ export class AutoPromptInputs extends BaseAPIRoute {
       value: promptId,
     });
 
-    const allProperties = {
-      ...((heliconeRequest?.properties as Record<string, Json>) || {}),
-      ...newProperties.reduce((acc, { key, value }) => {
-        return { ...acc, [key]: value };
-      }, {}),
-    };
+    newProperties.push({
+      key: "Helicone-Prompt-Version",
+      value: upsertResult.data.version.toString(),
+    });
 
-    await client.queue.putRequestProperty(
+    const putRequestPropertyResult = await client.queue.putRequestProperty(
       requestId,
-      allProperties,
       newProperties,
-      authParams.organizationId,
-      heliconeRequest
-    );
-
-    const upsertResult = await client.queue.upsertPrompt(
-      body.inputTemplate
-        ? body.inputTemplate
-        : recurAndReplaceString(heliconeRequest.body, inputsToAdd),
-      promptId,
-      heliconeRequest,
       authParams.organizationId
     );
 
-    if (upsertResult.error) {
-      console.error("Error upserting prompt", upsertResult.error);
-      throw new Error(JSON.stringify(upsertResult.error));
+    if (putRequestPropertyResult.error || !putRequestPropertyResult.data) {
+      console.error("Error adding properties", putRequestPropertyResult.error);
+      throw new Error(JSON.stringify(putRequestPropertyResult.error));
     }
 
     return [
       {
-        providerKey: "hello",
+        heliconeTemplate: upsertResult.data.template,
+        promptId: promptId,
+        version: upsertResult.data.version,
       },
     ];
   }

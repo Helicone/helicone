@@ -1,5 +1,5 @@
 import { Env } from "../..";
-import { Database, Json } from "../../../supabase/database.types";
+import { Database } from "../../../supabase/database.types";
 import { RequestWrapper } from "../../lib/RequestWrapper";
 import { Job, isValidStatus, validateRun } from "../../lib/models/Runs";
 import { HeliconeNode, validateHeliconeNode } from "../../lib/models/Tasks";
@@ -10,10 +10,10 @@ import { Route } from "itty-router";
 import { logAsync } from "../../api/helpers/logAsync";
 import { createAPIClient } from "../../api/lib/apiClient";
 import { CustomerGet } from "../../api/routes/customer-portal/customer/get";
-import { CustomerUsageGet } from "../../api/routes/customer-portal/customer/usage/get";
 import { ProviderKeyGet } from "../../api/routes/customer-portal/customer/provderKey/get";
-import { AutoPromptInputs } from "../../api/routes/request/prompt/autoInputs";
+import { CustomerUsageGet } from "../../api/routes/customer-portal/customer/usage/get";
 import { PromptsGet } from "../../api/routes/prompts/get";
+import { AutoPromptInputs } from "../../api/routes/request/prompt/autoInputs";
 
 function getOpenAPIRouter(
   router: OpenAPIRouterType<
@@ -275,15 +275,6 @@ function getAPIRouterV1(
         value: string;
       }
 
-      const { data, error } = await client.db.getRequestById(id);
-      if (error) {
-        return client.response.newError(error, 500);
-      }
-
-      if (!data) {
-        return client.response.newError("Request not found.", 404);
-      }
-
       const newProperty = await requestWrapper.getJson<Body>();
       if (!newProperty) {
         return client.response.newError("Request body is missing.", 400);
@@ -303,18 +294,16 @@ function getAPIRouterV1(
         );
       }
 
-      const allProperties = {
-        ...((data?.properties as Record<string, Json>) || {}),
-        [newProperty.key]: newProperty.value,
-      };
-
-      await client.queue.putRequestProperty(
+      const res = await client.queue.putRequestProperty(
         id,
-        allProperties,
         [newProperty],
-        authParams.data.organizationId,
-        data
+        authParams.data.organizationId
       );
+
+      if (res.error) {
+        return client.response.newError(res.error, 500);
+      }
+
       return client.response.successJSON({ ok: "true" }, true);
     }
   );
