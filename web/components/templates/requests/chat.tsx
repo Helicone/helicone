@@ -1,4 +1,5 @@
 import {
+  ArrowsPointingOutIcon,
   BeakerIcon,
   ChatBubbleLeftRightIcon,
   ChevronDownIcon,
@@ -11,6 +12,7 @@ import React, { useLayoutEffect, useRef, useState } from "react";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { LlmSchema } from "../../../lib/api/models/requestResponseModel";
+import ThemedModal from "../../shared/themed/themedModal";
 
 export type Message = {
   id: string;
@@ -216,13 +218,13 @@ export const SingleChat = (props: {
       <div
         className={clsx(
           getBgColor(),
-          "items-start p-4 text-left grid grid-cols-12 space-x-4 text-black dark:text-white",
+          "items-start py-4 px-8 text-left flex flex-row space-x-4 text-black dark:text-white",
           isSystem && "font-semibold",
           isLast && "rounded-b-md"
         )}
         key={index}
       >
-        <div className="col-span-2 flex items-center justify-center">
+        <div className="flex items-center justify-center">
           <div
             className={clsx(
               "bg-white dark:bg-black border border-gray-300 dark:border-gray-700",
@@ -232,7 +234,7 @@ export const SingleChat = (props: {
             <p>{message.role}</p>
           </div>
         </div>
-        <div className="relative whitespace-pre-wrap col-span-10 leading-6 items-center h-full">
+        <div className="relative whitespace-pre-wrap items-center h-full">
           {isFunction ? (
             <div className="flex flex-col space-y-2">
               <code className="text-xs whitespace-pre-wrap font-semibold">
@@ -293,6 +295,8 @@ interface ChatProps {
 
 export const Chat = (props: ChatProps) => {
   const { requestBody, responseBody, requestId, llmSchema, model } = props;
+
+  const [open, setOpen] = useState(false);
 
   const requestMessages =
     llmSchema?.request.messages ?? requestBody?.messages ?? [];
@@ -433,97 +437,143 @@ export const Chat = (props: ChatProps) => {
   };
 
   return (
-    <div className="w-full flex flex-col text-left space-y-2 text-sm">
-      <div className="w-full border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
-        <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100">
-          <div className="flex flex-row items-center space-x-2">
-            <button
-              onClick={() => {
-                setExpandedChildren(
-                  Object.fromEntries(
-                    Object.keys(expandedChildren).map((key) => [
-                      key,
-                      !allExpanded,
-                    ])
-                  )
-                );
-              }}
-              className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
-            >
-              {allExpanded ? (
-                <EyeSlashIcon className="h-4 w-4" />
-              ) : (
-                <EyeIcon className="h-4 w-4" />
-              )}
-              <p className="text-xs font-semibold">
-                {allExpanded ? "Shrink All" : "Expand All"}
-              </p>
-            </button>
-            {!(
-              model === "gpt-4-vision-preview" ||
-              model === "gpt-4-1106-vision-preview" ||
-              /^claude/.test(model)
-            ) && (
+    <>
+      <div className="w-full flex flex-col text-left space-y-2 text-sm">
+        <div className="w-full border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
+          <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100">
+            <div className="flex flex-row items-center space-x-2">
               <button
                 onClick={() => {
-                  if (requestMessages) {
-                    router.push("/playground?request=" + requestId);
-                  }
+                  setExpandedChildren(
+                    Object.fromEntries(
+                      Object.keys(expandedChildren).map((key) => [
+                        key,
+                        !allExpanded,
+                      ])
+                    )
+                  );
                 }}
                 className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
               >
-                <BeakerIcon className="h-4 w-4" />
-                <p className="text-xs font-semibold">Playground</p>
+                {allExpanded ? (
+                  <EyeSlashIcon className="h-4 w-4" />
+                ) : (
+                  <EyeIcon className="h-4 w-4" />
+                )}
+                <p className="text-xs font-semibold">
+                  {allExpanded ? "Shrink All" : "Expand All"}
+                </p>
               </button>
-            )}
-          </div>
-
-          <button
-            onClick={() => {
-              setMode(mode === "pretty" ? "json" : "pretty");
-            }}
-            className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
-          >
-            <ChevronUpDownIcon className="h-4 w-4" />
-            <p className="text-xs font-semibold">
-              {mode === "pretty" ? "JSON" : "Pretty"}
-            </p>
-          </button>
-        </div>
-
-        {mode === "json" ? (
-          <div className="flex flex-col space-y-8 bg-gray-50 dark:bg-black relative text-black dark:text-white">
-            <div className="flex flex-col space-y-2 p-4">
-              <p className="font-semibold text-gray-900 dark:text-gray-100 text-md">
-                Request
-              </p>
-              <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
-                {JSON.stringify(requestBody, null, 2)}
-              </pre>
-            </div>
-            <div className="flex flex-col space-y-2 p-4">
-              <p className="font-semibold text-gray-900 dark:text-gray-100 text-md">
-                Response
-              </p>
-              <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
-                {JSON.stringify(responseBody, null, 2)}
-              </pre>
-            </div>
-          </div>
-        ) : messages.length > 0 ? (
-          <>{renderMessages(messages)}</>
-        ) : (
-          <div className="">
-            <div
-              className={clsx(
-                "bg-gray-100 dark:bg-gray-900 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2"
+              {!(
+                model === "gpt-4-vision-preview" ||
+                model === "gpt-4-1106-vision-preview" ||
+                /^claude/.test(model)
+              ) && (
+                <button
+                  onClick={() => {
+                    if (requestMessages) {
+                      router.push("/playground?request=" + requestId);
+                    }
+                  }}
+                  className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+                >
+                  <BeakerIcon className="h-4 w-4" />
+                  <p className="text-xs font-semibold">Playground</p>
+                </button>
               )}
-            >
-              n/a
+            </div>
+            <div className="flex flex-row items-center space-x-2">
+              <button
+                onClick={() => setOpen(true)}
+                className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+              >
+                <ArrowsPointingOutIcon className="h-4 w-4" />
+                <p className="text-xs font-semibold">Expand</p>
+              </button>
+              <button
+                onClick={() => {
+                  setMode(mode === "pretty" ? "json" : "pretty");
+                }}
+                className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+              >
+                <ChevronUpDownIcon className="h-4 w-4" />
+                <p className="text-xs font-semibold">
+                  {mode === "pretty" ? "JSON" : "Pretty"}
+                </p>
+              </button>
             </div>
           </div>
-        )}
+
+          {mode === "json" ? (
+            <div className="flex flex-col space-y-8 bg-gray-50 dark:bg-black relative text-black dark:text-white">
+              <div className="flex flex-col space-y-2 p-4">
+                <p className="font-semibold text-gray-900 dark:text-gray-100 text-md">
+                  Request
+                </p>
+                <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
+                  {JSON.stringify(requestBody, null, 2)}
+                </pre>
+              </div>
+              <div className="flex flex-col space-y-2 p-4">
+                <p className="font-semibold text-gray-900 dark:text-gray-100 text-md">
+                  Response
+                </p>
+                <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
+                  {JSON.stringify(responseBody, null, 2)}
+                </pre>
+              </div>
+            </div>
+          ) : messages.length > 0 ? (
+            <>{renderMessages(messages)}</>
+          ) : (
+            <div className="">
+              <div
+                className={clsx(
+                  "bg-gray-100 dark:bg-gray-900 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2"
+                )}
+              >
+                n/a
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+      <ThemedModal open={open} setOpen={setOpen}>
+        <div className="w-[80vw] border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
+          {mode === "json" ? (
+            <div className="flex flex-col space-y-8 bg-gray-50 dark:bg-black relative text-black dark:text-white">
+              <div className="flex flex-col space-y-2 p-4">
+                <p className="font-semibold text-gray-900 dark:text-gray-100 text-md">
+                  Request
+                </p>
+                <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
+                  {JSON.stringify(requestBody, null, 2)}
+                </pre>
+              </div>
+              <div className="flex flex-col space-y-2 p-4">
+                <p className="font-semibold text-gray-900 dark:text-gray-100 text-md">
+                  Response
+                </p>
+                <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
+                  {JSON.stringify(responseBody, null, 2)}
+                </pre>
+              </div>
+            </div>
+          ) : messages.length > 0 ? (
+            <>{renderMessages(messages)}</>
+          ) : (
+            <div className="">
+              <div
+                className={clsx(
+                  "bg-gray-100 dark:bg-gray-900 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2"
+                )}
+              >
+                n/a
+              </div>
+            </div>
+          )}
+        </div>
+      </ThemedModal>
+    </>
   );
 };
