@@ -18,7 +18,7 @@ function recurAndReplaceString(
 ): any {
   if (typeof obj === "string") {
     for (const { key, value } of inputs) {
-      obj = obj.replace(value, `<helicone-prompt-input key=${key}/>`);
+      obj = obj.replace(value, `<helicone-prompt-input key="${key}"/>`);
     }
     return obj;
   }
@@ -42,6 +42,13 @@ const ReturnBody = z
 
 type ReturnBodyType = z.infer<typeof ReturnBody>;
 
+const RequestBody = z.object({
+  inputs: z.record(z.string()),
+  inputTemplate: z.any(),
+});
+
+type RequestBodyType = z.infer<typeof RequestBody>;
+
 export class AutoPromptInputs extends BaseAPIRoute {
   static schema = {
     tags: ["Prompt", "Request"],
@@ -55,7 +62,7 @@ export class AutoPromptInputs extends BaseAPIRoute {
         description: "prompt id",
       }),
     },
-    requestBody: z.record(z.string()),
+    requestBody: RequestBody,
     responses: {
       "200": {
         description: "Task fetched successfully",
@@ -87,13 +94,15 @@ export class AutoPromptInputs extends BaseAPIRoute {
     data: OpenAPIdata;
   }): Promise<ReturnBodyType> {
     const {
-      params: { requestId, promptId },
-      body,
+      params: { requestId, promptId: uriEncodedPromptId },
+      body: body,
     } = data as {
       params: { requestId: string; promptId: string };
-      body: Record<string, string>;
+      body: RequestBodyType;
     };
+    const inputs = body.inputs;
 
+    const promptId = decodeURIComponent(uriEncodedPromptId);
     if (promptId.length > 32) {
       throw new Error("Prompt id is too long");
     }
@@ -111,7 +120,7 @@ export class AutoPromptInputs extends BaseAPIRoute {
     if (!heliconeRequest) {
       throw new Error("Request not found");
     }
-    const inputsToAdd = Object.entries(body).map(([key, value]) => {
+    const inputsToAdd = Object.entries(inputs).map(([key, value]) => {
       return { key: key, value: value };
     });
     const newProperties = inputsToAdd.map(({ key, value }) => {
@@ -137,13 +146,10 @@ export class AutoPromptInputs extends BaseAPIRoute {
       heliconeRequest
     );
 
-    const heliconeTemplate = recurAndReplaceString(
-      heliconeRequest.body,
-      inputsToAdd
-    );
-
     const upsertResult = await client.queue.upsertPrompt(
-      heliconeTemplate,
+      body.inputTemplate
+        ? body.inputTemplate
+        : recurAndReplaceString(heliconeRequest.body, inputsToAdd),
       promptId,
       heliconeRequest,
       authParams.organizationId

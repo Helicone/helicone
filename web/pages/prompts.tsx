@@ -5,24 +5,25 @@ import AuthLayout from "../components/layout/authLayout";
 import PlaygroundPage from "../components/templates/playground/playgroundPage";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { ReactElement } from "react";
+import PromptsPage from "../components/templates/prompts/promptsPage";
 
 interface PlaygroundProps {
   user: User;
 }
 
-const Playground = (props: PlaygroundProps) => {
+const Prompts = (props: PlaygroundProps) => {
   const { user } = props;
 
   const router = useRouter();
 
   const { request } = router.query;
 
-  return <PlaygroundPage request={request as string | undefined} />;
+  return <PromptsPage request={request as string | undefined} />;
 };
 
-export default Playground;
+export default Prompts;
 
-Playground.getLayout = function getLayout(page: ReactElement) {
+Prompts.getLayout = function getLayout(page: ReactElement) {
   return <AuthLayout>{page}</AuthLayout>;
 };
 

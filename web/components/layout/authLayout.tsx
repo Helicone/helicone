@@ -42,6 +42,7 @@ import { useTheme } from "../shared/theme/themeContext";
 import ReferralModal from "../common/referralModal";
 import MetaData from "./public/authMetaData";
 import { Badge } from "@tremor/react";
+import { useFeatureFlags } from "../../services/hooks/featureFlags";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
@@ -62,6 +63,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [referOpen, setReferOpen] = useState(false);
   const [open, setOpen] = useState(false);
+  const ffs = useFeatureFlags("prompts", org?.currentOrg?.id || "");
 
   const NAVIGATION: {
     name: string;
@@ -82,7 +84,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: TableCellsIcon,
       current: pathname.includes("/requests"),
     },
-    ...(tier === "enterprise"
+    ...(tier === "enterprise" || ffs.hasFlag
       ? [
           {
             name: "Prompts",
