@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database, Json } from "../../../supabase/database.types";
-import { Result, ok } from "../../results";
+import { Result, ok, err } from "../../results";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { ResponseCopyV3 } from "../db/clickhouse";
 import { formatTimeString } from "./clickhouseLog";
@@ -330,9 +330,16 @@ export class InsertQueue {
   async upsertPrompt(
     heliconeTemplate: Json,
     promptId: string,
-    request: Database["public"]["Tables"]["request"]["Row"],
     orgId: string
-  ): Promise<Result<null, string>> {
+  ): Promise<
+    Result<
+      {
+        version: number;
+        template: Json;
+      },
+      string
+    >
+  > {
     const promptAlreadyExists = await this.database
       .from("prompts")
       .select("*")
@@ -370,17 +377,16 @@ export class InsertQueue {
         },
       ]);
       if (insertResult.error) {
-        return { data: null, error: insertResult.error.message };
+        return err(insertResult.error.message);
       }
     }
-    return { data: null, error: null };
+    return ok({
+      version,
+      template: heliconeTemplate,
+    });
   }
 
-  public async waitForResponse(
-    requestId: string,
-    orgId: string,
-    timeout: number
-  ) {
+  async waitForResponse(requestId: string, orgId: string, timeout: number) {
     while (timeout > 0) {
       const query = `
       SELECT * 
@@ -403,16 +409,36 @@ export class InsertQueue {
       }
     }
   }
+
   async putRequestProperty(
     requestId: string,
-    allProperties: Record<string, any>,
     newProperties: {
       key: string;
       value: string;
     }[],
-    orgId: string,
-    values: Database["public"]["Tables"]["request"]["Row"]
-  ): Promise<void> {
+    orgId: string
+  ): Promise<
+    Result<
+      {
+        request: Database["public"]["Tables"]["request"]["Row"];
+      },
+      string
+    >
+  > {
+    const request = await this.database
+      .from("request")
+      .select("*")
+      .eq("id", requestId)
+      .eq("helicone_org_id", orgId)
+      .single();
+
+    if (request.error) {
+      return err(request.error.message);
+    }
+
+    const allProperties =
+      request.data.properties ?? ({} as Record<string, any>);
+
     await this.database
       .from("request")
       .update({ properties: allProperties })
@@ -426,7 +452,7 @@ export class InsertQueue {
         request_id: requestId,
         key: p.key,
         value: p.value,
-        auth_hash: values.auth_hash,
+        auth_hash: "",
       }))
     );
 
@@ -444,7 +470,7 @@ export class InsertQueue {
     ]);
 
     if (error || data === null || data?.length == 0) {
-      return Promise.reject("No response found.");
+      return err("No response found.");
     }
     const response: ResponseCopyV3 = data[0] as ResponseCopyV3;
 
@@ -453,7 +479,7 @@ export class InsertQueue {
       response.status === null ||
       response.model === null
     ) {
-      return Promise.reject("Missing response data.");
+      return err("Missing response data.");
     }
 
     const { error: e } = await this.clickhouseWrapper.dbInsertClickhouse(
@@ -469,9 +495,9 @@ export class InsertQueue {
           prompt_tokens: response.prompt_tokens,
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           model: response.model!,
-          request_id: values.id,
-          request_created_at: formatTimeString(values.created_at),
-          auth_hash: values.auth_hash,
+          request_id: requestId,
+          request_created_at: response.request_created_at,
+          auth_hash: "",
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           user_id: response.user_id!,
           organization_id: orgId,
@@ -497,5 +523,7 @@ export class InsertQueue {
         };
       })
     );
+
+    return ok({ request: request.data });
   }
 }
