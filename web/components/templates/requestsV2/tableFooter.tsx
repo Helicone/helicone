@@ -6,6 +6,9 @@ import {
 } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { clsx } from "../../shared/clsx";
+import { NumberInput } from "@tremor/react";
+import { useEffect, useState } from "react";
+import { useDebounce } from "../../../services/hooks/debounce";
 
 interface TableFooterProps {
   currentPage: number;
@@ -34,6 +37,15 @@ const TableFooter = (props: TableFooterProps) => {
 
   const totalPages = Math.ceil(count / pageSize);
 
+  const [page, setPage] = useState<number>(currentPage);
+
+  const debouncedPage = useDebounce(page, 1000);
+
+  // once the debouncedPage changes, update the page using onPageChange and update the router
+  useEffect(() => {
+    onPageChange(debouncedPage);
+  }, [debouncedPage]);
+
   return (
     <div className="flex flex-row justify-between text-sm items-center">
       <div className="flex flex-row gap-16 items-center justify-between w-full">
@@ -59,13 +71,42 @@ const TableFooter = (props: TableFooterProps) => {
           </select>
         </div>
         <div className="flex flex-row space-x-1 items-center">
-          <p className="text-gray-700 dark:text-gray-300 font-medium">{`Page ${currentPage} of ${
-            isCountLoading
-              ? "..."
-              : Math.ceil((count as number) / Number(pageSize || 10))
-          }`}</p>
-          {showCount && (
-            <p className="text-gray-500 font-medium text-xs">{`(${count} total)`}</p>
+          {count > 0 && (
+            <div className="flex items-center gap-1">
+              <p className="text-gray-700 dark:text-gray-300 font-medium">
+                Page
+              </p>
+
+              <input
+                type="number"
+                style={{ width: "4rem" }}
+                value={page}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value, 10);
+                  if (value < 1) {
+                    setPage(1);
+                    return;
+                  }
+                  if (value > totalPages) {
+                    setPage(totalPages);
+                    return;
+                  }
+                  setPage(value);
+                }}
+                min={1}
+                max={Math.ceil((count as number) / Number(pageSize || 10))}
+                className="text-gray-700 dark:text-gray-300 bg-white dark:bg-black block rounded-md border-gray-300 dark:border-gray-700 py-1.5 px-3 text-base focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
+              />
+              <p className="text-gray-700 dark:text-gray-300 font-medium">of</p>
+              <p className="text-gray-700 dark:text-gray-300 font-medium">{`${
+                isCountLoading
+                  ? "..."
+                  : Math.ceil((count as number) / Number(pageSize || 10))
+              }`}</p>
+              {showCount && (
+                <p className="text-gray-500 font-medium text-xs">{`(${count} total)`}</p>
+              )}
+            </div>
           )}
         </div>
 
