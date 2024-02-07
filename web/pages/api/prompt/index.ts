@@ -20,7 +20,7 @@ async function handler({
   Result<
     {
       id: string;
-      latestVersion: number;
+      latest_version: number;
     }[],
     string
   >
@@ -33,9 +33,9 @@ async function handler({
   }
   const promptIds = await dbExecute<{
     id: string;
-    latestVersion: number;
+    latest_version: number;
   }>(
-    `SELECT id, max(version) as latestVersion FROM 
+    `SELECT id, max(version) as latest_version FROM 
     prompts
     where prompts.organization_id = $1
     and prompts.soft_delete = false
@@ -44,6 +44,7 @@ async function handler({
     [orgId]
   );
 
+  console.log("promptIds", promptIds);
   res.status(promptIds.error === null ? 200 : 500).json(promptIds);
 }
 

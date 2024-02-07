@@ -9,7 +9,7 @@ const usePrompts = () => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["prompts"],
     queryFn: async (query) => {
-      const prompts = await fetch("/api/prompts", {
+      const prompts = await fetch("/api/prompt", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -20,7 +20,7 @@ const usePrompts = () => {
             Result<
               {
                 id: string;
-                latestVersion: number;
+                latest_version: number;
               }[],
               string
             >
