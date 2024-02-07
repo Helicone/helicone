@@ -85,13 +85,18 @@ const TableFooter = (props: TableFooterProps) => {
 
                   if (value < 1) {
                     setPage(1);
-                    return;
-                  }
-                  if (value > totalPages) {
+                    router.query.page_size = e.target.value;
+                    router.push(router);
+                  } else if (value > totalPages) {
                     setPage(totalPages);
-                    return;
+                    router.query.page_size = e.target.value;
+                    router.push(router);
+                  } else {
+                    setPage(value);
                   }
-                  setPage(value);
+
+                  router.query.page_size = e.target.value;
+                  router.push(router);
                 }}
                 min={1}
                 max={Math.ceil((count as number) / Number(pageSize || 10))}
