@@ -6,7 +6,6 @@ import {
 } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { clsx } from "../../shared/clsx";
-import { NumberInput } from "@tremor/react";
 import { useEffect, useState } from "react";
 import { useDebounce } from "../../../services/hooks/debounce";
 
@@ -83,6 +82,7 @@ const TableFooter = (props: TableFooterProps) => {
                 value={page}
                 onChange={(e) => {
                   const value = parseInt(e.target.value, 10);
+
                   if (value < 1) {
                     setPage(1);
                     return;
