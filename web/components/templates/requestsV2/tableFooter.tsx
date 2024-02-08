@@ -38,7 +38,7 @@ const TableFooter = (props: TableFooterProps) => {
 
   const [page, setPage] = useState<number>(currentPage);
 
-  const debouncedPage = useDebounce(page, 2000);
+  const debouncedPage = useDebounce(page, 1500);
 
   // once the debouncedPage changes, update the page using onPageChange and update the router
 
