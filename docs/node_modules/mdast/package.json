@@ -1,0 +1,12 @@
+{
+  "name": "mdast",
+  "version": "3.0.0",
+  "description": "Markdown Abstract Syntax Tree format",
+  "license": "MIT",
+  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wooorm/mdast.git"
+  },
+  "author": "Titus Wormer <tituswormer@gmail.com>"
+}

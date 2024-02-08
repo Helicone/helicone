@@ -1,0 +1,31 @@
+{
+  "name": "@socket.io/component-emitter",
+  "description": "Event emitter",
+  "version": "3.1.0",
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*"
+  },
+  "component": {
+    "scripts": {
+      "emitter/index.js": "index.js"
+    }
+  },
+  "main": "index.js",
+  "module": "index.mjs",
+  "types": "index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/socketio/emitter.git"
+  },
+  "scripts": {
+    "test": "make test"
+  },
+  "files": [
+    "index.js",
+    "index.mjs",
+    "index.d.ts",
+    "LICENSE"
+  ]
+}
