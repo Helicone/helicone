@@ -41,12 +41,20 @@ const TableFooter = (props: TableFooterProps) => {
   const debouncedPage = useDebounce(page, 2000);
 
   // once the debouncedPage changes, update the page using onPageChange and update the router
+
   useEffect(() => {
     onPageChange(debouncedPage);
     router.query.page = debouncedPage.toString();
     // update the url, but don't trigger a new fetch
     router.replace(router);
   }, [debouncedPage]);
+
+  // on initial load, set the page to 1
+  useEffect(() => {
+    if (currentPage !== page) {
+      setPage(1);
+    }
+  }, []);
 
   return (
     <div className="flex flex-row justify-between text-sm items-center">
