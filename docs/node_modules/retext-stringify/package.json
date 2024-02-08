@@ -1,0 +1,57 @@
+{
+  "name": "retext-stringify",
+  "version": "3.1.0",
+  "description": "retext plugin to serialize prose",
+  "license": "MIT",
+  "keywords": [
+    "unified",
+    "retext",
+    "retext-plugin",
+    "plugin",
+    "natural",
+    "language",
+    "text",
+    "concrete",
+    "syntax",
+    "tree",
+    "cst",
+    "stringify",
+    "serialize",
+    "compile"
+  ],
+  "homepage": "https://github.com/retextjs/retext",
+  "repository": "https://github.com/retextjs/retext/tree/main/packages/retext-stringify",
+  "bugs": "https://github.com/retextjs/retext/issues",
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/unified"
+  },
+  "author": "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
+  "contributors": [
+    "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)"
+  ],
+  "sideEffects": false,
+  "type": "module",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "lib/",
+    "index.d.ts",
+    "index.js"
+  ],
+  "dependencies": {
+    "@types/nlcst": "^1.0.0",
+    "nlcst-to-string": "^3.0.0",
+    "unified": "^10.0.0"
+  },
+  "scripts": {
+    "build": "rimraf \"lib/**/*.d.ts\" && tsc && type-coverage"
+  },
+  "xo": false,
+  "typeCoverage": {
+    "atLeast": 100,
+    "detail": true,
+    "strict": true,
+    "ignoreCatch": true
+  }
+}
