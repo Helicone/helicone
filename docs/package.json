@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "mintlify": "^4.0.122"
+  },
+  "dependencies": {
+    "sharp": "^0.33.2"
+  }
+}

@@ -6,9 +6,9 @@
   },
   "favicon": "/favicon.webp",
   "colors": {
-    "primary": "#4BA3E3",
-    "light": "#4BA3E3",
-    "dark": "#4BA3E3"
+    "primary": "#000000",
+    "light": "#FFFFFF",
+    "dark": "#000000"
   },
   "modeToggle": {
     "default": "light"
@@ -130,6 +130,7 @@
         "features/advanced-usage/user-metrics",
         "features/advanced-usage/feedback",
         "features/advanced-usage/vault",
+        "features/advanced-usage/fine-tuning",
         "features/advanced-usage/templated-prompts",
         "features/advanced-usage/caching",
         "features/advanced-usage/retries",
