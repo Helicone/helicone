@@ -150,8 +150,13 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   });
 
   const [inputOpen, setInputOpen] = useState(false);
-  const [selectedProperties, setSelectedProperties] =
-    useState<Record<string, string>>();
+
+  // the selected request to view in the tempalte
+  const [selectedInput, setSelectedInput] = useState<{
+    id: string;
+    createdAt: string;
+    properties: Record<string, string>;
+  }>();
 
   // set the selected version to the latest version on initial load
   useEffect(() => {
@@ -213,14 +218,30 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                         const randomProperty =
                           selectedPrompt.properties?.[randomInput];
 
-                        setSelectedProperties(randomProperty?.properties);
+                        setSelectedInput(randomProperty);
                       }}
-                      className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+                      className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center"
                     >
                       <SparklesIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block pl-2 pr-1">
                         Random Input
                       </p>
+                      {selectedInput && (
+                        <div className="flex items-center">
+                          <span className="text-sm font-medium border-l border-gray-300 pl-1 text-sky-500">
+                            {selectedInput.id}
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedInput(undefined);
+                            }}
+                            className="flex items-center hover:cursor-pointer text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
+                          >
+                            <XMarkIcon className="h-4 w-4 inline" />
+                          </button>
+                        </div>
+                      )}
                     </button>
                   </div>
                   <div className="flex items-center space-x-1">
@@ -271,7 +292,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                             <div key={i}>
                               <RenderWithPrettyInputKeys
                                 text={m.content}
-                                selectedProperties={selectedProperties}
+                                selectedProperties={selectedInput?.properties}
                               />
                             </div>
                           )
@@ -284,7 +305,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       <div>
                         <PrettyInput
                           keyName="output"
-                          selectedProperties={selectedProperties}
+                          selectedProperties={selectedInput?.properties}
                         />
                       </div>
                     </div>
