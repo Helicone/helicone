@@ -1,16 +1,12 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 
-import {
-  getProperties,
-  Property,
-} from "../../../lib/api/properties/properties";
-import { Result } from "../../../lib/result";
-import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
+import { dbExecute } from "../../../lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { dbExecute } from "../../../lib/api/db/dbExecute";
+import { Result } from "../../../lib/result";
+import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 
 async function handler({
   req,

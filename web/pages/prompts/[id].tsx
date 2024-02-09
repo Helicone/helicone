@@ -1,10 +1,9 @@
 import { User } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
-import { useRouter } from "next/router";
 
 import { ReactElement } from "react";
-import PromptIdPage from "../../components/templates/prompts/id/promptIdPage";
 import AuthLayout from "../../components/layout/authLayout";
+import PromptIdPage from "../../components/templates/prompts/id/promptIdPage";
 import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 
 interface PlaygroundProps {
