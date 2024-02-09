@@ -3,6 +3,7 @@ import { Response } from "@whatwg-node/fetch";
 
 type OnHeliconeLog = (response: Response) => Promise<void>;
 type OnHeliconeFeedback = (result: Response) => Promise<void>;
+type OnPromptLog = (response: Response) => Promise<void>;
 
 interface IHeliconeMeta {
   apiKey?: string;
@@ -14,6 +15,7 @@ interface IHeliconeMeta {
   baseUrl?: string;
   onLog?: OnHeliconeLog;
   onFeedback?: OnHeliconeFeedback;
+  onPromptLog?: OnPromptLog;
 }
 
 interface IHeliconeProxyClientOptions extends ClientOptions {
@@ -30,4 +32,5 @@ export {
   IHeliconeAsyncClientOptions,
   OnHeliconeLog,
   OnHeliconeFeedback,
+  OnPromptLog,
 };

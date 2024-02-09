@@ -1,3 +1,4 @@
+import { HeliconePrompt } from "./HeliconePrompt";
 import { IHeliconeMeta } from "./HeliconeClientOptions";
 import { HeliconeFeedback, HeliconeFeedbackRating } from "./HeliconeFeedback";
 
@@ -13,6 +14,21 @@ export class Helicone {
       this.heliconeMeta,
       heliconeId,
       ratingAsBool
+    );
+  }
+
+  public async logPrompt(
+    heliconeId: string,
+    promptId: string,
+    inputTemplate: string,
+    inputs: Record<string, any>
+  ) {
+    await HeliconePrompt.logPrompt(
+      this.heliconeMeta,
+      heliconeId,
+      promptId,
+      inputTemplate,
+      inputs
     );
   }
 }
