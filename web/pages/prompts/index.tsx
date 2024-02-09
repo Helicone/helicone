@@ -1,11 +1,9 @@
 import { User } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
-import { useRouter } from "next/router";
-import AuthLayout from "../components/layout/authLayout";
-import PlaygroundPage from "../components/templates/playground/playgroundPage";
-import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
+import PromptsPage from "../../components/templates/prompts/promptsPage";
+import AuthLayout from "../../components/layout/authLayout";
 import { ReactElement } from "react";
-import PromptsPage from "../components/templates/prompts/promptsPage";
+import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 
 interface PlaygroundProps {
   user: User;
@@ -14,11 +12,7 @@ interface PlaygroundProps {
 const Prompts = (props: PlaygroundProps) => {
   const { user } = props;
 
-  const router = useRouter();
-
-  const { request } = router.query;
-
-  return <PromptsPage request={request as string | undefined} />;
+  return <PromptsPage />;
 };
 
 export default Prompts;
