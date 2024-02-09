@@ -43,7 +43,7 @@ const RenderWithPrettyInputKeys = (props: { text: string }) => {
   // Function to replace matched patterns with JSX components
   const replaceInputKeysWithComponents = (inputText: string) => {
     // Regular expression to match the pattern
-    const regex = /<helicone-prompt-input key="([^"]+)".*\/>/g;
+    const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
     const parts = [];
     let lastIndex = 0;
 
@@ -68,7 +68,7 @@ const RenderWithPrettyInputKeys = (props: { text: string }) => {
     if (lastIndex < inputText.length) {
       parts.push(inputText.substring(lastIndex));
     }
-
+    console.log(parts);
     return parts;
   };
 
@@ -123,13 +123,16 @@ const PromptsPage = (props: PromptsPageProps) => {
             </div>
             <div className="bg-white p-5">
               <i className="text-gray-400">input</i>
+
               {selectedPrompt.heliconeTemplate?.messages.map(
                 (m: any, i: number) => (
                   <div key={i}>
                     <RenderWithPrettyInputKeys text={m.content} />
+                    {m.content}
                   </div>
                 )
               )}
+              {/* {JSON.stringify(selectedPrompt.heliconeTemplate)} */}
             </div>
             <div className="bg-white p-5">
               <i className="text-gray-400">output</i>
