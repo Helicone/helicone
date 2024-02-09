@@ -286,7 +286,7 @@ async function getRequest(
   return { error: "Request not found.", data: null };
 }
 
-async function getResponse(
+export async function getResponse(
   dbClient: SupabaseClient<Database>,
   heliconeId: string
 ): Promise<Result<Database["public"]["Tables"]["response"]["Row"], string>> {
