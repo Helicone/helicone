@@ -5,7 +5,7 @@ import { Result } from "../../../lib/result";
 import { FilterNode } from "../../lib/filters/filterDefs";
 import { SortLeafUsers } from "../../lib/sorts/users/sorts";
 
-const usePrompts = () => {
+const usePrompts = (id?: string) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["prompts"],
     queryFn: async (query) => {
