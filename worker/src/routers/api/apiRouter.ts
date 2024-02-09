@@ -1,5 +1,5 @@
 import { Env } from "../..";
-import { Database, Json } from "../../../supabase/database.types";
+import { Database } from "../../../supabase/database.types";
 import { RequestWrapper } from "../../lib/RequestWrapper";
 import { Job, isValidStatus, validateRun } from "../../lib/models/Runs";
 import { HeliconeNode, validateHeliconeNode } from "../../lib/models/Tasks";
@@ -10,8 +10,10 @@ import { Route } from "itty-router";
 import { logAsync } from "../../api/helpers/logAsync";
 import { createAPIClient } from "../../api/lib/apiClient";
 import { CustomerGet } from "../../api/routes/customer-portal/customer/get";
-import { CustomerUsageGet } from "../../api/routes/customer-portal/customer/usage/get";
 import { ProviderKeyGet } from "../../api/routes/customer-portal/customer/provderKey/get";
+import { CustomerUsageGet } from "../../api/routes/customer-portal/customer/usage/get";
+import { PromptsGet } from "../../api/routes/prompts/get";
+import { AutoPromptInputs } from "../../api/routes/request/prompt/autoInputs";
 
 function getOpenAPIRouter(
   router: OpenAPIRouterType<
@@ -25,6 +27,17 @@ function getOpenAPIRouter(
   router.get("/v1/customer/:customerId/provider-key", ProviderKeyGet as any);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   router.get("/v1/customers", CustomerGet as any);
+  router.post(
+    "/v1/request/:requestId/prompt/:promptId/inputs",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    AutoPromptInputs as any
+  );
+
+  router.get(
+    "/v1/prompts",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    PromptsGet as any
+  );
 }
 
 function getAPIRouterV1(
@@ -262,46 +275,35 @@ function getAPIRouterV1(
         value: string;
       }
 
-      const { data, error } = await client.db.getRequestById(id);
-      if (error) {
-        return client.response.newError(error, 500);
-      }
-
-      if (!data) {
-        return client.response.newError("Request not found.", 404);
-      }
-
-      const property = await requestWrapper.getJson<Body>();
-      if (!property) {
+      const newProperty = await requestWrapper.getJson<Body>();
+      if (!newProperty) {
         return client.response.newError("Request body is missing.", 400);
       }
 
-      if (!property.key) {
+      if (!newProperty.key) {
         return client.response.newError(
           "Invalid request body. 'key' is required.",
           400
         );
       }
 
-      if (!property.value) {
+      if (!newProperty.value) {
         return client.response.newError(
           "Invalid request body. 'value' is required.",
           400
         );
       }
 
-      const properties = {
-        ...((data?.properties as Record<string, Json>) || {}),
-        [property.key]: property.value,
-      };
-
-      await client.queue.putRequestProperty(
+      const res = await client.queue.putRequestProperty(
         id,
-        properties,
-        property,
-        authParams.data.organizationId,
-        data
+        [newProperty],
+        authParams.data.organizationId
       );
+
+      if (res.error) {
+        return client.response.newError(res.error, 500);
+      }
+
       return client.response.successJSON({ ok: "true" }, true);
     }
   );

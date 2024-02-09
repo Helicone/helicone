@@ -6,6 +6,11 @@ import { ClickhouseClientWrapper } from "../../lib/db/clickhouse";
 import { AuthParams } from "../../lib/dbLogger/DBLoggable";
 import { APIClient, createAPIClient } from "../lib/apiClient";
 
+export type OpenAPIdata = {
+  params: Record<string, string>;
+  body: Record<string, unknown>;
+};
+
 export abstract class BaseAPIRoute extends OpenAPIRoute<
   IRequest,
   [RequestWrapper, Env, ExecutionContext, Provider]
@@ -18,13 +23,15 @@ export abstract class BaseAPIRoute extends OpenAPIRoute<
     client: APIClient;
     authParams: AuthParams;
     clickhouse: ClickhouseClientWrapper;
+    data: OpenAPIdata;
   }): Promise<unknown>;
 
   async handle(
     request: IRequest,
     requestWrapper: RequestWrapper,
     env: Env,
-    ctx: ExecutionContext
+    ctx: ExecutionContext,
+    data: unknown
   ) {
     const client = await createAPIClient(env, requestWrapper);
     const authParams = await client.db.getAuthParams();
@@ -40,6 +47,7 @@ export abstract class BaseAPIRoute extends OpenAPIRoute<
       client,
       authParams: authParams.data,
       clickhouse: new ClickhouseClientWrapper(env),
+      data: data as OpenAPIdata,
     });
   }
 }
