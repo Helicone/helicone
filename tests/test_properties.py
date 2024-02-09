@@ -16,12 +16,8 @@ helicone_async_url = os.environ["HELICONE_ASYNC_URL"]
 openai_api_key = os.environ["OPENAI_API_KEY"]
 # openai_org_id = os.environ["OPENAI_ORG"]
 helicone_api_key = os.environ["HELICONE_API_KEY"]
-<<<<<<< HEAD
 # supabase_key = os.environ["SUPABASE_KEY"]
 # supabase_url = os.environ["SUPABASE_URL"]
-=======
-
->>>>>>> main
 # org_id = '83635a30-5ba6-41a8-8cc6-fb7df941b24a'
 # helicone_proxy_key = 'sk-helicone-proxy-7wpoayi-xm5e6cy-wfimwqy-avnannq-d144312e-5c65-4eaa-a1c1-f0c143080601'
 # hashed_proxy_key = '246172676f6e32696424763d3139246d3d3236323134342c743d332c703d3124415972396d5431736832356a474546546630614371672468767537654e7879674f474c6c7633584f4a597565643162414b6f326732732f7a575a30584c4b6c716134000000000000000000000000000000000000000000000000000000000000'
