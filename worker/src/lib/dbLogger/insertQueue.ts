@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database, Json } from "../../../supabase/database.types";
-import { Result, ok, err } from "../../results";
-import { ClickhouseClientWrapper } from "../db/clickhouse";
-import { ResponseCopyV3 } from "../db/clickhouse";
-import { formatTimeString } from "./clickhouseLog";
-import { Valhalla } from "../db/valhalla";
+import { getResponse } from "../../feedback";
 import { deepCompare } from "../../helpers";
+import { Result, err, ok } from "../../results";
+import { ClickhouseClientWrapper, ResponseCopyV3 } from "../db/clickhouse";
+import { Valhalla } from "../db/valhalla";
+import { formatTimeString } from "./clickhouseLog";
 
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];
@@ -340,7 +340,7 @@ export class InsertQueue {
       string
     >
   > {
-    const promptAlreadyExists = await this.database
+    const existingPrompt = await this.database
       .from("prompts")
       .select("*")
       .eq("organization_id", orgId)
@@ -348,24 +348,21 @@ export class InsertQueue {
       .order("version", { ascending: false })
       .limit(1);
 
-    if (promptAlreadyExists.error) {
-      return { data: null, error: promptAlreadyExists.error.message };
+    if (existingPrompt.error) {
+      return { data: null, error: existingPrompt.error.message };
     }
 
-    let version = promptAlreadyExists.data?.[0]?.version ?? 0;
-    if (promptAlreadyExists.data.length > 0) {
+    let version = existingPrompt.data?.[0]?.version ?? 0;
+    if (existingPrompt.data.length > 0) {
       if (
-        !deepCompare(
-          promptAlreadyExists.data[0].heliconeTemplate,
-          heliconeTemplate
-        )
+        !deepCompare(existingPrompt.data[0].heliconeTemplate, heliconeTemplate)
       ) {
-        version = promptAlreadyExists.data[0].version + 1;
+        version = existingPrompt.data[0].version + 1;
       }
     }
     if (
-      promptAlreadyExists.data.length === 0 ||
-      version !== promptAlreadyExists.data[0].version
+      existingPrompt.data.length === 0 ||
+      version !== existingPrompt.data[0].version
     ) {
       const insertResult = await this.database.from("prompts").insert([
         {
@@ -386,28 +383,8 @@ export class InsertQueue {
     });
   }
 
-  async waitForResponse(requestId: string, orgId: string, timeout: number) {
-    while (timeout > 0) {
-      const query = `
-      SELECT * 
-      FROM response_copy_v3
-      WHERE (
-        request_id={val_0: UUID} AND
-        organization_id={val_1: UUID}
-      )
-  `;
-      const { data, error } = await this.clickhouseWrapper.dbQuery(query, [
-        requestId,
-        orgId,
-      ]);
-      if (error || data === null || data?.length == 0) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        timeout -= 1000;
-        continue;
-      } else {
-        return;
-      }
-    }
+  async waitForResponse(requestId: string) {
+    await getResponse(this.database, requestId);
   }
 
   async putRequestProperty(
