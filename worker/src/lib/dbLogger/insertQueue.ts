@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database, Json } from "../../../supabase/database.types";
-import { Result, ok, err } from "../../results";
-import { ClickhouseClientWrapper } from "../db/clickhouse";
-import { ResponseCopyV3 } from "../db/clickhouse";
-import { formatTimeString } from "./clickhouseLog";
-import { Valhalla } from "../db/valhalla";
-import { deepCompare } from "../../helpers";
 import { getResponse } from "../../feedback";
+import { deepCompare } from "../../helpers";
+import { Result, err, ok } from "../../results";
+import { ClickhouseClientWrapper, ResponseCopyV3 } from "../db/clickhouse";
+import { Valhalla } from "../db/valhalla";
+import { formatTimeString } from "./clickhouseLog";
 
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];
