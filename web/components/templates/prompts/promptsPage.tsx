@@ -6,14 +6,25 @@ import AuthHeader from "../../shared/authHeader";
 import RequestDrawerV2 from "../requestsV2/requestDrawerV2";
 import useNotification from "../../shared/notification/useNotification";
 import {
+  BookOpenIcon,
   CodeBracketSquareIcon,
+  DocumentTextIcon,
   InformationCircleIcon,
+  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
-import { MultiSelect, MultiSelectItem } from "@tremor/react";
+import {
+  MultiSelect,
+  MultiSelectItem,
+  Select,
+  SelectItem,
+  TextInput,
+} from "@tremor/react";
 import ThemedModal from "../../shared/themed/themedModal";
 import Image from "next/image";
 import { usePrompts } from "../../../services/hooks/prompts/prompts";
 import { usePrompt } from "../../../services/hooks/prompts/singlePrompt";
+import Link from "next/link";
+import { Database } from "../../../supabase/database.types";
 
 interface PromptsPageProps {
   request?: string;
@@ -68,56 +79,131 @@ const RenderWithPrettyInputKeys = (props: { text: string }) => {
 const PromptsPage = (props: PromptsPageProps) => {
   const { prompts } = usePrompts();
 
-  const [selectedPromptId, setSelectedPromptId] = useState<string | undefined>(
-    undefined
+  const [currentPrompt, setCurrentPrompt] = useState<{
+    id: string;
+    latest_version: number;
+  }>();
+
+  const [selectedVersion, setSelectedVersion] = useState<string>(
+    currentPrompt?.latest_version.toString() ?? "1"
   );
 
-  const [selectedVersion, setSelectedVersion] = useState<number>(0);
-
   const selectedPrompt = usePrompt({
-    version: selectedVersion,
-    promptId: selectedPromptId,
+    version: Number(selectedVersion),
+    promptId: currentPrompt?.id,
   });
 
   return (
     <>
       <AuthHeader title={"Prompts"} />
       <div className="flex flex-col xl:flex-row xl:divide-x xl:divide-gray-200 dark:xl:divide-gray-800 gap-8 xl:gap-4 min-h-[80vh] h-full">
-        <div className="flex flex-col space-y-6 w-full min-w-[350px] max-w-[350px]">
-          <h3 className="font-semibold text-md text-black dark:text-white">
-            Your Prompts
-          </h3>
+        <div className="flex flex-col space-y-4 w-full min-w-[350px] max-w-[350px]">
+          <TextInput
+            icon={MagnifyingGlassIcon}
+            placeholder="Search Prompt Id..."
+            className="max-w-sm"
+            onChange={(e) => {
+              // // add this into query params as search
+              // const search = e.target.value as string;
+              // setCurrentSearch(search);
+              // if (search === "") {
+              //   // delete the query param from the url
+              //   delete router.query.q;
+              //   router.push({
+              //     pathname: router.pathname,
+              //     query: { ...router.query },
+              //   });
+              //   refetch();
+              //   return;
+              // }
+              // router.push({
+              //   pathname: router.pathname,
+              //   query: { ...router.query, q: search },
+              // });
+              // refetch();
+            }}
+          />
 
           <ul className="w-full bg-white h-fit border border-gray-300 dark:border-gray-700 rounded-lg">
-            {prompts?.data?.map((p) => (
-              <div key={p.id}>
+            {prompts?.data?.map((prompt, i) => (
+              <li key={i}>
                 <button
                   onClick={() => {
-                    setSelectedPromptId(p.id);
-                    setSelectedVersion(p.latest_version);
+                    setCurrentPrompt(prompt);
+                    setSelectedVersion(prompt.latest_version.toString());
                   }}
                   className={clsx(
-                    "bg-gray-200 rounded-md p-2 m-2",
-                    selectedPromptId === p.id ? "bg-blue-200" : ""
+                    currentPrompt?.id === prompt.id
+                      ? "bg-sky-200 dark:bg-sky-800"
+                      : "bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-950",
+                    i === 0 ? "rounded-t-md" : "",
+                    i === prompts.data?.length - 1 ? "rounded-b-md" : "",
+                    "w-full flex flex-col space-x-2 p-2 border-b border-gray-200 dark:border-gray-800"
                   )}
                 >
-                  {JSON.stringify(p)}
-                  {/* {p.id} - version count: {p.latest_version} */}
+                  {/* <TagIcon className="h-4 w-4 text-black dark:text-white" /> */}
+                  <p className="text-md font-semibold text-black dark:text-white p-2">
+                    {prompt.id}
+                  </p>
+                  <div className="flex flex-row justify-between w-full px-2">
+                    <div />
+                    <div className="flex flex-row items-center space-x-1 text-xs">
+                      <div className="text-gray-500">Versions:</div>
+                      <div className="text-gray-500">
+                        {prompt.latest_version}
+                      </div>
+                    </div>
+                  </div>
                 </button>
-              </div>
+              </li>
             ))}
           </ul>
         </div>
 
         <div className="w-full xl:pl-4 flex flex-col space-y-4">
-          {selectedPromptId ? (
+          <div id="toolbar" className="w-full flex"></div>
+          {currentPrompt ? (
             <div className="flex flex-col gap-2">
+              <div className="max-w-[10px] mx-auto space-y-6">
+                <Select
+                  value={selectedVersion}
+                  placeholder={selectedVersion}
+                  onValueChange={(e) => {
+                    setSelectedVersion(e);
+                  }}
+                  enableClear={false}
+                >
+                  {/* map the version numbers */}
+                  {Array.from(
+                    { length: currentPrompt.latest_version },
+                    (_, i) => i + 1
+                  )
+                    .reverse()
+                    .map((version: any, i: number) => (
+                      <SelectItem value={version} key={i}>
+                        {version}
+                      </SelectItem>
+                    ))}
+                  {/* <SelectItem value="1" icon={CalculatorIcon}>
+                    Kilometers
+                  </SelectItem>
+                  <SelectItem value="2" icon={CalculatorIcon}>
+                    Meters
+                  </SelectItem>
+                  <SelectItem value="3" icon={CalculatorIcon}>
+                    Miles
+                  </SelectItem>
+                  <SelectItem value="4" icon={CalculatorIcon}>
+                    Nautical Miles
+                  </SelectItem> */}
+                </Select>
+              </div>
               <div>
                 Version:
                 <input
                   type="number"
                   value={selectedVersion}
-                  onChange={(e) => setSelectedVersion(parseInt(e.target.value))}
+                  onChange={(e) => setSelectedVersion(e.target.value)}
                 />
               </div>
               {selectedPrompt.isLoading ? (
@@ -143,7 +229,27 @@ const PromptsPage = (props: PromptsPageProps) => {
               </div>
             </div>
           ) : (
-            <div>Select a prompt on the left side</div>
+            <div className="flex flex-col w-full h-96 justify-center items-center">
+              <div className="flex flex-col w-2/5">
+                <DocumentTextIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+                <p className="text-xl text-black dark:text-white font-semibold mt-8">
+                  Select a prompt to get started.
+                </p>
+                <p className="text-sm text-gray-500 max-w-sm mt-2">
+                  If you do not have any prompts, please view our documentation
+                  to get started.
+                </p>
+                <div className="mt-4">
+                  <Link
+                    href="#"
+                    className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  >
+                    <BookOpenIcon className="h-4 w-4" />
+                    View Docs
+                  </Link>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
