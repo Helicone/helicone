@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { usePlaygroundPage } from "../../../services/hooks/playground";
 import { clsx } from "../../shared/clsx";
-import ChatPlayground from "./chatPlayground";
 import { useDebounce } from "../../../services/hooks/debounce";
 import AuthHeader from "../../shared/authHeader";
 import RequestDrawerV2 from "../requestsV2/requestDrawerV2";
@@ -20,15 +19,6 @@ interface PromptsPageProps {
   request?: string;
 }
 
-///
-///
-///
-/// ex:
-/// The scene is <helicone-prompt-input key="scene"/>. Just respond with "Hello", do not include punctuation.
-///  Replaces all occurrences of the input keys with a pretty input key
-/// like <helicone-prompt-input key="scene"/> will be replaced
-/// with a JSX component that is just the word "scene" in a pretty
-/// input box.
 const PrettyInput = ({ keyName }: { keyName: string }) => {
   return (
     <span className="inline-block border border-orange-200 rounded py-1 px-3 text-sm text-gray-700 bg-cyan-200">
@@ -92,58 +82,70 @@ const PromptsPage = (props: PromptsPageProps) => {
   return (
     <>
       <AuthHeader title={"Prompts"} />
-      <div className="flex flex-row justify-between w-full">
-        <div className="">
-          {prompts?.data?.map((p) => (
-            <div key={p.id}>
-              <button
-                onClick={() => {
-                  setSelectedPromptId(p.id);
-                  setSelectedVersion(p.latest_version);
-                }}
-                className={clsx(
-                  "bg-gray-200 rounded-md p-2 m-2",
-                  selectedPromptId === p.id ? "bg-blue-200" : ""
-                )}
-              >
-                {p.id} - version count: {p.latest_version}
-              </button>
-            </div>
-          ))}
-        </div>
-        {selectedPromptId ? (
-          <div className="flex flex-col gap-2">
-            <div>
-              Version:
-              <input
-                type="number"
-                value={selectedVersion}
-                onChange={(e) => setSelectedVersion(parseInt(e.target.value))}
-              />
-            </div>
-            <div className="bg-white p-5">
-              <i className="text-gray-400">input</i>
+      <div className="flex flex-col xl:flex-row xl:divide-x xl:divide-gray-200 dark:xl:divide-gray-800 gap-8 xl:gap-4 min-h-[80vh] h-full">
+        <div className="flex flex-col space-y-6 w-full min-w-[350px] max-w-[350px]">
+          <h3 className="font-semibold text-md text-black dark:text-white">
+            Your Prompts
+          </h3>
 
-              {selectedPrompt.heliconeTemplate?.messages.map(
-                (m: any, i: number) => (
-                  <div key={i}>
-                    <RenderWithPrettyInputKeys text={m.content} />
-                    {m.content}
-                  </div>
-                )
-              )}
-              {/* {JSON.stringify(selectedPrompt.heliconeTemplate)} */}
-            </div>
-            <div className="bg-white p-5">
-              <i className="text-gray-400">output</i>
+          <ul className="w-full bg-white h-fit border border-gray-300 dark:border-gray-700 rounded-lg">
+            {prompts?.data?.map((p) => (
+              <div key={p.id}>
+                <button
+                  onClick={() => {
+                    setSelectedPromptId(p.id);
+                    setSelectedVersion(p.latest_version);
+                  }}
+                  className={clsx(
+                    "bg-gray-200 rounded-md p-2 m-2",
+                    selectedPromptId === p.id ? "bg-blue-200" : ""
+                  )}
+                >
+                  {JSON.stringify(p)}
+                  {/* {p.id} - version count: {p.latest_version} */}
+                </button>
+              </div>
+            ))}
+          </ul>
+        </div>
+
+        <div className="w-full xl:pl-4 flex flex-col space-y-4">
+          {selectedPromptId ? (
+            <div className="flex flex-col gap-2">
               <div>
-                <PrettyInput keyName="output" />
+                Version:
+                <input
+                  type="number"
+                  value={selectedVersion}
+                  onChange={(e) => setSelectedVersion(parseInt(e.target.value))}
+                />
+              </div>
+              {selectedPrompt.isLoading ? (
+                <h1>Loading...</h1>
+              ) : (
+                <div className="bg-white p-5">
+                  <i className="text-gray-400">input</i>
+                  {selectedPrompt.heliconeTemplate?.messages.map(
+                    (m: any, i: number) => (
+                      <div key={i}>
+                        <RenderWithPrettyInputKeys text={m.content} />
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
+
+              <div className="bg-white p-5">
+                <i className="text-gray-400">output</i>
+                <div>
+                  <PrettyInput keyName="output" />
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <div>Select a prompt on the left side</div>
-        )}
+          ) : (
+            <div>Select a prompt on the left side</div>
+          )}
+        </div>
       </div>
     </>
   );

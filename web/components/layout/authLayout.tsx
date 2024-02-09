@@ -23,6 +23,7 @@ import {
   SparklesIcon,
   CircleStackIcon,
   TvIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
@@ -89,7 +90,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
           {
             name: "Prompts",
             href: "/prompts",
-            icon: TvIcon,
+            icon: DocumentTextIcon,
             current: pathname.includes("/prompts"),
           },
         ]
