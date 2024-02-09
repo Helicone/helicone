@@ -43,7 +43,6 @@ async function handler({
     [orgId]
   );
 
-  console.log("promptIds", promptIds);
   res.status(promptIds.error === null ? 200 : 500).json(promptIds);
 }
 
