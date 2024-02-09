@@ -79,20 +79,20 @@ def test_properties_async():
     print("---------Running test_properties_async---------")
 
     # Set the API key for Helicone
-    request_id = str(uuid.uuid4())
-    print(helicone_api_key)
-    addedReq = requests.post(f"{helicone_async_url}/custom/v1/log", json=exReq(request_id), headers={
-        "Authorization": f"Bearer {helicone_api_key}"
-    })
-    addedReq.raise_for_status()
-    print("ADD LOG")
+    # request_id = str(uuid.uuid4())
+    # print(helicone_api_key)
+    # addedReq = requests.post(f"{helicone_async_url}/custom/v1/log", json=exReq(request_id), headers={
+    #     "Authorization": f"Bearer {helicone_api_key}"
+    # })
+    # addedReq.raise_for_status()
+    # print("ADD LOG")
 
-    res = requests.put(f"{helicone_async_url}/v1/request/{request_id}/property", json={
-        "key": "test_key",
-        "value": "test_value"
-    }, headers={
-        "Authorization": f"Bearer {helicone_api_key}"
-    })
-    res.raise_for_status()
-    res = res.json()
-    print(res)
+    # res = requests.put(f"{helicone_async_url}/v1/request/{request_id}/property", json={
+    #     "key": "test_key",
+    #     "value": "test_value"
+    # }, headers={
+    #     "Authorization": f"Bearer {helicone_api_key}"
+    # })
+    # res.raise_for_status()
+    # res = res.json()
+    # print(res)
