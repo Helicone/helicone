@@ -81,25 +81,26 @@ jobs:
             ${{ runner.os }}-node-
       - name: Install node dependencies
         run: |
+          mkdir -p ~/test-logs
           cd worker
           npm install -g wrangler
           npm install
       - name: Start proxy worker
         run: |
           cd worker
-          wrangler dev --port 8787 --var WORKER_TYPE:OPENAI_PROXY &
+          wrangler dev --port 8787 --var WORKER_TYPE:OPENAI_PROXY > ~/test-logs/proxy.log &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start async worker
         run: |
           cd worker
-          wrangler dev --port 8788 --var WORKER_TYPE:HELICONE_API &
+          wrangler dev --port 8788 --var WORKER_TYPE:HELICONE_API > ~/test-logs/async.log &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start gateway worker
         run: |
           cd worker
-          wrangler dev --port 8789 --var WORKER_TYPE:GATEWAY_API &
+          wrangler dev --port 8789 --var WORKER_TYPE:GATEWAY_API > ~/test-logs/gateway.log &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start Supabase DB & API
@@ -119,6 +120,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.CI_OPENAI_API_KEY }}
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
         run: |
+          pytest test_properties.py -s
           pytest python_integration_tests.py -s
       - name: Run helicone-python tests
         working-directory: helicone-python
@@ -135,3 +137,10 @@ jobs:
           curl -sSL https://install.python-poetry.org | python3 -
           poetry install
           poetry run pytest -s tests/test_async.py
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: job-logs
+          path: |
+            ~/test-logs/*.log
