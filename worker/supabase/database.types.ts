@@ -977,7 +977,9 @@ export interface Database {
           description: string | null
           heliconeTemplate: Json | null
           id: string
+          name: string | null
           organization_id: string
+          soft_delete: boolean
           status: string
           version: number
         }
@@ -986,7 +988,9 @@ export interface Database {
           description?: string | null
           heliconeTemplate?: Json | null
           id: string
+          name?: string | null
           organization_id: string
+          soft_delete?: boolean
           status?: string
           version?: number
         }
@@ -995,7 +999,9 @@ export interface Database {
           description?: string | null
           heliconeTemplate?: Json | null
           id?: string
+          name?: string | null
           organization_id?: string
+          soft_delete?: boolean
           status?: string
           version?: number
         }
