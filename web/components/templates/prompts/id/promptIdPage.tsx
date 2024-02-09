@@ -1,23 +1,11 @@
-import { useState } from "react";
-import { usePlaygroundPage } from "../../../../services/hooks/playground";
-import { clsx } from "../../../shared/clsx";
-import { useDebounce } from "../../../../services/hooks/debounce";
-import AuthHeader from "../../../shared/authHeader";
-import RequestDrawerV2 from "../../requestsV2/requestDrawerV2";
-import useNotification from "../../../shared/notification/useNotification";
 import {
   BookOpenIcon,
   CircleStackIcon,
-  CodeBracketSquareIcon,
   DocumentTextIcon,
-  InformationCircleIcon,
-  MagnifyingGlassIcon,
   PaintBrushIcon,
   StarIcon,
 } from "@heroicons/react/24/outline";
 import {
-  MultiSelect,
-  MultiSelectItem,
   Select,
   SelectItem,
   Table,
@@ -26,14 +14,12 @@ import {
   TableHead,
   TableHeaderCell,
   TableRow,
-  TextInput,
 } from "@tremor/react";
-import ThemedModal from "../../../shared/themed/themedModal";
-import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 import { usePrompts } from "../../../../services/hooks/prompts/prompts";
 import { usePrompt } from "../../../../services/hooks/prompts/singlePrompt";
-import Link from "next/link";
-import { Database } from "../../../../supabase/database.types";
+import AuthHeader from "../../../shared/authHeader";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import { getUSDateFromString } from "../../../shared/utils/utils";
 

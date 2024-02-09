@@ -1,8 +1,5 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import {
-  dbExecute,
-  dbQueryClickhouse,
-} from "../../../../../lib/api/db/dbExecute";
+import { dbExecute } from "../../../../../lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,
   withAuth,
