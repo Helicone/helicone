@@ -8,5 +8,7 @@ export * from "./core/HeliconeClientOptions";
 export * from "./core/HeliconeFeedback";
 export * from "./core/HeliconeHeaderBuilder";
 export * from "./core/HeliconeOpenAIApi";
+export * from "./core/HeliconePromptFormat";
 
 export * from "./proxy_logger/HeliconeProxyOpenAI";
+
