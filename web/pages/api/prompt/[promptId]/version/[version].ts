@@ -36,7 +36,7 @@ async function handler(options: HandlerWrapperOptions<SinglePrompt>) {
     created_at,
     request_id
    FROM properties_v3
-  WHERE "key" = "Helicone-Prompt-Id"
+  WHERE "key" = 'Helicone-Prompt-Id'
   AND "value" = {val_0 : String}
   AND organization_id = {val_1 : String}
   ORDER BY created_at DESC

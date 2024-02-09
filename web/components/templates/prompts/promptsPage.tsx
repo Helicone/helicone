@@ -68,7 +68,6 @@ const RenderWithPrettyInputKeys = (props: { text: string }) => {
     if (lastIndex < inputText.length) {
       parts.push(inputText.substring(lastIndex));
     }
-    console.log(parts);
     return parts;
   };
 
@@ -85,7 +84,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   const [selectedVersion, setSelectedVersion] = useState<number>(0);
 
   const selectedPrompt = usePrompt({
-    version: selectedVersion,
+    version: `${selectedVersion}`,
     promptId: selectedPromptId,
   });
 

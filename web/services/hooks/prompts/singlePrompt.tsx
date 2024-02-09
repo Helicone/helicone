@@ -5,7 +5,7 @@ const usePrompt = ({
   version,
   promptId,
 }: {
-  version: number;
+  version: string;
   promptId?: string;
 }) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
@@ -16,6 +16,7 @@ const usePrompt = ({
       if (!version || !promptId) {
         return;
       }
+
       const heliconeTemplate = await fetch(
         `/api/prompt/${promptId}/version/${version}`,
         {
