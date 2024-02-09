@@ -120,8 +120,8 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.CI_OPENAI_API_KEY }}
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
         run: |
-          pytest test_properties.py -s
-          pytest python_integration_tests.py -s
+          pytest test_properties.py -s > ~/test-logs/properties.log
+          pytest python_integration_tests.py -s > ~/test-logs/integration.log
       - name: Run helicone-python tests
         working-directory: helicone-python
         env:
