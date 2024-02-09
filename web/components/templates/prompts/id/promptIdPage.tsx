@@ -1,10 +1,3 @@
-import { useEffect, useState } from "react";
-import { usePlaygroundPage } from "../../../../services/hooks/playground";
-import { clsx } from "../../../shared/clsx";
-import { useDebounce } from "../../../../services/hooks/debounce";
-import AuthHeader from "../../../shared/authHeader";
-import RequestDrawerV2 from "../../requestsV2/requestDrawerV2";
-import useNotification from "../../../shared/notification/useNotification";
 import {
   BookOpenIcon,
   ChevronLeftIcon,
@@ -12,7 +5,6 @@ import {
   DocumentTextIcon,
   PaintBrushIcon,
   SparklesIcon,
-  StarIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import {
@@ -26,12 +18,12 @@ import {
   TableRow,
 } from "@tremor/react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePrompts } from "../../../../services/hooks/prompts/prompts";
 import { usePrompt } from "../../../../services/hooks/prompts/singlePrompt";
-import AuthHeader from "../../../shared/authHeader";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import { getUSDateFromString } from "../../../shared/utils/utils";
+import ThemedModal from "../../../shared/themed/themedModal";
 
 interface PromptIdPageProps {
   id: string;
