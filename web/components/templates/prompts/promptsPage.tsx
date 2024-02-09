@@ -7,10 +7,13 @@ import RequestDrawerV2 from "../requestsV2/requestDrawerV2";
 import useNotification from "../../shared/notification/useNotification";
 import {
   BookOpenIcon,
+  CircleStackIcon,
   CodeBracketSquareIcon,
   DocumentTextIcon,
   InformationCircleIcon,
   MagnifyingGlassIcon,
+  PaintBrushIcon,
+  StarIcon,
 } from "@heroicons/react/24/outline";
 import {
   MultiSelect,
@@ -161,73 +164,90 @@ const PromptsPage = (props: PromptsPageProps) => {
         </div>
 
         <div className="w-full xl:pl-4 flex flex-col space-y-4">
-          <div id="toolbar" className="w-full flex"></div>
           {currentPrompt ? (
-            <div className="flex flex-col gap-2">
-              <div className="max-w-[10px] mx-auto space-y-6">
-                <Select
-                  value={selectedVersion}
-                  placeholder={selectedVersion}
-                  onValueChange={(e) => {
-                    setSelectedVersion(e);
-                  }}
-                  enableClear={false}
-                >
-                  {/* map the version numbers */}
-                  {Array.from(
-                    { length: currentPrompt.latest_version },
-                    (_, i) => i + 1
-                  )
-                    .reverse()
-                    .map((version: any, i: number) => (
-                      <SelectItem value={version} key={i}>
-                        {version}
-                      </SelectItem>
-                    ))}
-                  {/* <SelectItem value="1" icon={CalculatorIcon}>
-                    Kilometers
-                  </SelectItem>
-                  <SelectItem value="2" icon={CalculatorIcon}>
-                    Meters
-                  </SelectItem>
-                  <SelectItem value="3" icon={CalculatorIcon}>
-                    Miles
-                  </SelectItem>
-                  <SelectItem value="4" icon={CalculatorIcon}>
-                    Nautical Miles
-                  </SelectItem> */}
-                </Select>
-              </div>
-              <div>
-                Version:
-                <input
-                  type="number"
-                  value={selectedVersion}
-                  onChange={(e) => setSelectedVersion(e.target.value)}
-                />
-              </div>
-              {selectedPrompt.isLoading ? (
-                <h1>Loading...</h1>
-              ) : (
-                <div className="bg-white p-5">
-                  <i className="text-gray-400">input</i>
-                  {selectedPrompt.heliconeTemplate?.messages.map(
-                    (m: any, i: number) => (
-                      <div key={i}>
-                        <RenderWithPrettyInputKeys text={m.content} />
-                      </div>
+            <>
+              <div
+                id="toolbar"
+                className="w-full flex items-center justify-between"
+              >
+                <div className="flex items-center space-x-1">
+                  <button
+                    // onClick={() => setOpen(true)}
+                    className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+                  >
+                    <CircleStackIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
+                      Run on Dataset
+                    </p>
+                  </button>
+                  <button
+                    // onClick={() => setOpen(true)}
+                    className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+                  >
+                    <PaintBrushIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
+                      View Inputs
+                    </p>
+                  </button>
+                  <button
+                    // onClick={() => setOpen(true)}
+                    className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+                  >
+                    <StarIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
+                      Random Input
+                    </p>
+                  </button>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <label>Version:</label>
+                  <Select
+                    value={selectedVersion}
+                    placeholder={selectedVersion}
+                    onValueChange={(e) => {
+                      setSelectedVersion(e);
+                    }}
+                    enableClear={false}
+                    style={{ width: "2rem" }}
+                  >
+                    {/* map the version numbers */}
+                    {Array.from(
+                      { length: currentPrompt.latest_version },
+                      (_, i) => i + 1
                     )
-                  )}
-                </div>
-              )}
-
-              <div className="bg-white p-5">
-                <i className="text-gray-400">output</i>
-                <div>
-                  <PrettyInput keyName="output" />
+                      .reverse()
+                      .map((version: any, i: number) => (
+                        <SelectItem value={version} key={i}>
+                          {version}
+                        </SelectItem>
+                      ))}
+                  </Select>
                 </div>
               </div>
-            </div>
+              <div className="flex flex-col gap-2">
+                {selectedPrompt.isLoading ? (
+                  <h1>Loading...</h1>
+                ) : (
+                  <div className="bg-white border-gray-300 p-4 border rounded-lg flex flex-col space-y-4">
+                    <i className="text-gray-500">input</i>
+                    {selectedPrompt.heliconeTemplate?.messages.map(
+                      (m: any, i: number) => (
+                        <div key={i}>
+                          <RenderWithPrettyInputKeys text={m.content} />
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
+
+                <div className="bg-white border-gray-300 p-4 border rounded-lg flex flex-col space-y-4">
+                  <i className="text-gray-500">output</i>
+                  <div>
+                    <PrettyInput keyName="output" />
+                  </div>
+                </div>
+              </div>
+            </>
           ) : (
             <div className="flex flex-col w-full h-96 justify-center items-center">
               <div className="flex flex-col w-2/5">

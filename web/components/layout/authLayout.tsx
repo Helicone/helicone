@@ -85,7 +85,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: TableCellsIcon,
       current: pathname.includes("/requests"),
     },
-    ...(tier === "enterprise" || ffs.hasFlag
+    ...(ffs.hasFlag
       ? [
           {
             name: "Prompts",
