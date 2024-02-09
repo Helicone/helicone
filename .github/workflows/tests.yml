@@ -81,26 +81,26 @@ jobs:
             ${{ runner.os }}-node-
       - name: Install node dependencies
         run: |
-          mkdir -p /test-logs
+          mkdir -p ~/test-logs
           cd worker
           npm install -g wrangler
           npm install
       - name: Start proxy worker
         run: |
           cd worker
-          wrangler dev --port 8787 --var WORKER_TYPE:OPENAI_PROXY > /test-logs/proxy.log &
+          wrangler dev --port 8787 --var WORKER_TYPE:OPENAI_PROXY > ~/test-logs/proxy.log &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start async worker
         run: |
           cd worker
-          wrangler dev --port 8788 --var WORKER_TYPE:HELICONE_API > /test-logs/async.log &
+          wrangler dev --port 8788 --var WORKER_TYPE:HELICONE_API > ~/test-logs/async.log &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start gateway worker
         run: |
           cd worker
-          wrangler dev --port 8789 --var WORKER_TYPE:GATEWAY_API > /test-logs/gateway.log &
+          wrangler dev --port 8789 --var WORKER_TYPE:GATEWAY_API > ~/test-logs/gateway.log &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start Supabase DB & API
@@ -143,4 +143,4 @@ jobs:
         with:
           name: job-logs
           path: |
-            /test-logs/*.log
+            ~/test-logs/*.log
