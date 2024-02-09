@@ -108,11 +108,7 @@ export class AutoPromptInputs extends BaseAPIRoute {
       throw new Error("Prompt id is too long");
     }
 
-    await client.queue.waitForResponse(
-      requestId,
-      authParams.organizationId,
-      1000 * 10 // 10 seconds
-    );
+    await client.queue.waitForResponse(requestId);
     const { data: heliconeRequest, error: heliconeRequestError } =
       await client.db.getRequestById(requestId);
     if (heliconeRequestError) {
