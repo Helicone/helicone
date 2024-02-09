@@ -21,6 +21,7 @@ async function handler({
     {
       id: string;
       latest_version: number;
+      created_at: string;
     }[],
     string
   >
@@ -34,12 +35,14 @@ async function handler({
   const promptIds = await dbExecute<{
     id: string;
     latest_version: number;
+    created_at: string;
   }>(
-    `SELECT id, max(version) as latest_version FROM 
+    `SELECT id, max(version) as latest_version, max(created_at) as created_at FROM 
     prompts
     where prompts.organization_id = $1
     and prompts.soft_delete = false
     group by prompts.id
+    order by max(created_at) desc
   `,
     [orgId]
   );

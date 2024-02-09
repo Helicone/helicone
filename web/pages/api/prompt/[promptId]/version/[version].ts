@@ -1,17 +1,24 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { dbQueryClickhouse } from "../../../../../lib/api/db/dbExecute";
+import {
+  dbExecute,
+  dbQueryClickhouse,
+} from "../../../../../lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../../../lib/api/handlerWrappers";
 import { supabaseServer } from "../../../../../lib/supabaseServer";
+import { FilterNode } from "../../../../../services/lib/filters/filterDefs";
+import { buildFilterWithAuth } from "../../../../../services/lib/filters/filters";
 
 export interface SinglePrompt {
   heliconeTemplate: any;
-  requests: {
+  propertyRow?: {
     id: string;
     createdAt: string;
-  };
+    properties: Record<string, string>;
+  }[];
+  columnNames: string[];
 }
 
 async function handler(options: HandlerWrapperOptions<SinglePrompt>) {
@@ -30,24 +37,56 @@ async function handler(options: HandlerWrapperOptions<SinglePrompt>) {
     .match({ id: promptId, version: version, organization_id: orgId })
     .single();
 
-  const requests = await dbQueryClickhouse(
-    `
-  SELECT 
-    created_at,
-    request_id
-   FROM properties_v3
-  WHERE "key" = 'Helicone-Prompt-Id'
-  AND "value" = {val_0 : String}
-  AND organization_id = {val_1 : String}
-  ORDER BY created_at DESC
-  limit 100
-  `,
-    [promptId, orgId]
+  const propertyFilter: FilterNode = {
+    left: {
+      properties: {
+        "Helicone-Prompt-Id": {
+          equals: promptId as string,
+        },
+      },
+    },
+    right: {
+      properties: {
+        "Helicone-Prompt-Version": {
+          equals: version as string,
+        },
+      },
+    },
+    operator: "and",
+  };
+
+  const { argsAcc, filter } = await buildFilterWithAuth({
+    filter: propertyFilter,
+    org_id: orgId,
+    argsAcc: [],
+  });
+  const requests = await dbExecute<{
+    created_at: string;
+    id: string;
+    properties: Record<string, string>;
+  }>(
+    `SELECT properties, created_at, id
+     FROM public.request
+      WHERE (${filter})`,
+    argsAcc
   );
 
   res.status(prompt.error === null ? 200 : 500).json({
     heliconeTemplate: prompt.data?.heliconeTemplate || {},
-    requests: [],
+    propertyRow: requests.data?.map((r) => ({
+      id: r.id,
+      createdAt: r.created_at,
+      properties: Object.entries(r.properties)
+        .filter(([key, value]) => key.includes("Helicone-Prompt-Input"))
+        .map(([key, value]) => ({
+          [key.replace("Helicone-Prompt-Input-", "")]: value,
+        }))
+
+        .reduce((acc, cur) => ({ ...acc, ...cur }), {}),
+    })),
+    columnNames: Object.entries(requests.data?.[0].properties ?? {})
+      .filter(([key, value]) => key.includes("Helicone-Prompt-Input"))
+      .map(([key, value]) => key.replace("Helicone-Prompt-Input-", "")),
   });
 }
 

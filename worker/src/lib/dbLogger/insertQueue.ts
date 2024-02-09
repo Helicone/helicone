@@ -436,8 +436,13 @@ export class InsertQueue {
       return err(request.error.message);
     }
 
-    const allProperties =
-      request.data.properties ?? ({} as Record<string, any>);
+    const allProperties: Record<string, any> =
+      (request.data.properties as Record<string, any>) ??
+      ({} as Record<string, any>);
+
+    newProperties.forEach((p) => {
+      allProperties[p.key] = p.value;
+    });
 
     await this.database
       .from("request")

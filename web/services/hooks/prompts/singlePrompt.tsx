@@ -39,6 +39,8 @@ const usePrompt = ({
     refetch,
     isRefetching,
     heliconeTemplate: data?.heliconeTemplate.heliconeTemplate,
+    properties: data?.heliconeTemplate.propertyRow,
+    columnNames: data?.heliconeTemplate.columnNames,
   };
 };
 

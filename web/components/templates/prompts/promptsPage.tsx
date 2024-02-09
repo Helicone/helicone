@@ -28,6 +28,7 @@ import { usePrompts } from "../../../services/hooks/prompts/prompts";
 import { usePrompt } from "../../../services/hooks/prompts/singlePrompt";
 import Link from "next/link";
 import { Database } from "../../../supabase/database.types";
+import ThemedDrawer from "../../shared/themed/themedDrawer";
 
 interface PromptsPageProps {
   request?: string;
@@ -95,6 +96,8 @@ const PromptsPage = (props: PromptsPageProps) => {
     promptId: currentPrompt?.id,
   });
 
+  const [inputOpen, setInputOpen] = useState(false);
+
   return (
     <>
       <AuthHeader title={"Prompts"} />
@@ -148,7 +151,11 @@ const PromptsPage = (props: PromptsPageProps) => {
                     {prompt.id}
                   </p>
                   <div className="flex flex-row justify-between w-full px-2">
+                    <div className="text-gray-500 text-xs">
+                      {new Date(prompt.created_at).toLocaleString()}
+                    </div>
                     <div />
+
                     <div className="flex flex-row items-center space-x-1 text-xs">
                       <div className="text-gray-500">Versions:</div>
                       <div className="text-gray-500">
@@ -161,6 +168,25 @@ const PromptsPage = (props: PromptsPageProps) => {
             ))}
           </ul>
         </div>
+        <ThemedDrawer open={inputOpen} setOpen={setInputOpen}>
+          <table>
+            <th>Request Id</th>
+            <th>Created At</th>
+
+            {selectedPrompt?.columnNames?.map((p, i) => (
+              <th key={i}>{p}</th>
+            ))}
+            {selectedPrompt?.properties?.map((row, i) => (
+              <tr key={i}>
+                <td className="text-gray-500">{row.id}</td>
+                <td className="text-gray-500">{row.createdAt}</td>
+                {selectedPrompt?.columnNames?.map((col, i) => (
+                  <td key={i}>{row.properties[col]}</td>
+                ))}
+              </tr>
+            ))}
+          </table>
+        </ThemedDrawer>
 
         <div className="w-full xl:pl-4 flex flex-col space-y-4">
           {currentPrompt ? (
@@ -180,7 +206,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                     </p>
                   </button>
                   <button
-                    // onClick={() => setOpen(true)}
+                    onClick={() => setInputOpen(!inputOpen)}
                     className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
                   >
                     <PaintBrushIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
