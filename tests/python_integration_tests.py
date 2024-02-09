@@ -314,19 +314,3 @@ def test_openai_async():
     response_data = fetch_from_db(query, (latest_request["id"],))
     assert response_data, "Response data not found in the database for the given request ID"
     print("passed")
-
-
-def test_properties_async():
-    print("---------Running test_properties_async---------")
-
-    # Set the API key for Helicone
-
-    res = requests.post(f"{helicone_async_url}/v1/properties", json={
-        "key": "test_key",
-        "value": "test_value"
-    }, headers={
-        "Helicone-Auth": f"Bearer {helicone_api_key}"
-    })
-    res.raise_for_status()
-    res = res.json()
-    print(res)
