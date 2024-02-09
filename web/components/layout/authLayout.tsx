@@ -5,23 +5,24 @@ import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
   Bars3BottomLeftIcon,
-  BellIcon,
   BeakerIcon,
+  BellIcon,
   BookOpenIcon,
+  CircleStackIcon,
   CloudArrowUpIcon,
+  CodeBracketIcon,
   Cog6ToothIcon,
+  DocumentTextIcon,
   HomeIcon,
+  MoonIcon,
   QuestionMarkCircleIcon,
+  SparklesIcon,
+  SunIcon,
   TableCellsIcon,
   TagIcon,
   UserCircleIcon,
   UsersIcon,
   XMarkIcon,
-  CodeBracketIcon,
-  SunIcon,
-  MoonIcon,
-  SparklesIcon,
-  CircleStackIcon,
 } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
@@ -36,11 +37,12 @@ import OrgContext, { useOrg } from "./organizationContext";
 import UpgradeProModal from "../shared/upgradeProModal";
 import OrgDropdown from "./orgDropdown";
 
-import { ThemedSwitch } from "../shared/themed/themedSwitch";
-import { useTheme } from "../shared/theme/themeContext";
-import ReferralModal from "../common/referralModal";
-import MetaData from "./public/authMetaData";
 import { Badge } from "@tremor/react";
+import { useFeatureFlags } from "../../services/hooks/featureFlags";
+import ReferralModal from "../common/referralModal";
+import { useTheme } from "../shared/theme/themeContext";
+import { ThemedSwitch } from "../shared/themed/themedSwitch";
+import MetaData from "./public/authMetaData";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
@@ -61,6 +63,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [referOpen, setReferOpen] = useState(false);
   const [open, setOpen] = useState(false);
+  const ffs = useFeatureFlags("prompts", org?.currentOrg?.id || "");
 
   const NAVIGATION: {
     name: string;
@@ -81,6 +84,16 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: TableCellsIcon,
       current: pathname.includes("/requests"),
     },
+    ...(ffs.hasFlag
+      ? [
+          {
+            name: "Prompts",
+            href: "/prompts",
+            icon: DocumentTextIcon,
+            current: pathname.includes("/prompts"),
+          },
+        ]
+      : []),
     {
       name: "Users",
       href: "/users",
