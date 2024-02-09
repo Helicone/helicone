@@ -211,8 +211,8 @@ const PromptsPage = (props: PromptsPageProps) => {
                   >
                     {/* map the version numbers */}
                     {Array.from(
-                      { length: currentPrompt.latest_version },
-                      (_, i) => i + 1
+                      { length: currentPrompt.latest_version + 1 },
+                      (_, i) => i
                     )
                       .reverse()
                       .map((version: any, i: number) => (
