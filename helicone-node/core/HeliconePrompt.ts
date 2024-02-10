@@ -1,4 +1,5 @@
 import { IHeliconeMeta } from "./HeliconeClientOptions";
+import { fetch, Response } from "@whatwg-node/fetch";
 
 export class HeliconePrompt {
   static async logPrompt(
@@ -43,7 +44,7 @@ export class HeliconePrompt {
   }
 }
 
-export function prompt(
+export function hpmt(
   strings: TemplateStringsArray,
   ...values: any[]
 ): {

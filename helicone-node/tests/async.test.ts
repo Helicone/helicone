@@ -23,12 +23,14 @@ import {
   createCustomModelRequestBody,
 } from "./testConsts";
 import { v4 as uuidv4 } from "uuid";
+import { hpmt } from "../core/HeliconePrompt";
 
 describe("Helicone Proxy OpenAI tests", () => {
   let openai: HeliconeAsyncOpenAI;
   let expectedHeaders: { [key: string]: string };
   const mockOnFeedback = jest.fn();
   const mockOnLog = jest.fn();
+  const mockOnPrompt = jest.fn();
 
   beforeAll(() => {
     const heliconeMeta: IHeliconeMeta = {
@@ -41,6 +43,7 @@ describe("Helicone Proxy OpenAI tests", () => {
       baseUrl: TEST_ASYNC_URL,
       onFeedback: mockOnFeedback,
       onLog: mockOnLog,
+      onPromptLog: mockOnPrompt,
     };
 
     // All headers are not used with async logging
@@ -190,6 +193,41 @@ describe("Helicone Proxy OpenAI tests", () => {
 
     await logger.submit(builder);
     expect(asyncNock.isDone()).toBe(true);
+  });
+
+  test("PROMPTS", async () => {
+    const heliconeId = uuidv4();
+    const promptId = uuidv4();
+    const scene = "a scene";
+
+    const { builtString, heliconeTemplate, inputs } = hpmt`
+     The scene is ${{ scene }}. test
+    Just respond with "Hello", do not include punctuation hello.
+
+    This is my new prompt. Make sure to not curse in your output.
+   `;
+
+    const path = `/v1/request/${heliconeId}/prompt/${promptId}/inputs`;
+
+    const promptNock = nock(TEST_ASYNC_URL)
+      .post(path, (body) => {
+        expect(body).toMatchObject({
+          inputs,
+          inputTemplate: heliconeTemplate,
+        });
+        return true;
+      })
+      .reply(200, {}, { "helicone-id": heliconeId });
+
+    await openai.helicone.logPrompt(
+      heliconeId,
+      promptId,
+      heliconeTemplate,
+      inputs
+    );
+
+    expect(promptNock.isDone()).toBe(true);
+    expect(mockOnPrompt).toHaveBeenCalledTimes(1);
   });
 });
 
