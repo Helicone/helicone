@@ -3,16 +3,25 @@ import { Response } from "openai/core";
 import { HeliconeFeedbackRating } from "../core/HeliconeFeedback";
 import { HeliconeProxyOpenAI } from "../proxy_logger/HeliconeProxyOpenAI";
 import * as dotenv from "dotenv";
+import { hpmt } from "../core/HeliconePrompt";
 
 dotenv.config();
 
 async function testAsync(): Promise<void> {
+  const scene = "a scene";
+  const { builtString, heliconeTemplate, inputs } = hpmt`
+  The scene is ${{ scene }}. test
+ Just respond with "Hello", do not include punctuation hello.
+
+ This is my new prompt. Make sure to not curse in your output.
+`;
+
   const openai = new HeliconeAsyncOpenAI({
     apiKey: process.env.OPENAI_API_KEY,
     organization: process.env.OPENAI_ORG_ID,
     heliconeMeta: {
       apiKey: process.env.HELICONE_API_KEY,
-      baseUrl: "https://api_staging.hconeai.com",
+      baseUrl: "https://api.hconeai.com",
       onLog: async (response: Response) => {
         console.log(`Log result: ${response.status}`);
         const heliconeId = response.headers.get("helicone-id");
@@ -20,6 +29,25 @@ async function testAsync(): Promise<void> {
           await openai.helicone.logFeedback(
             heliconeId,
             HeliconeFeedbackRating.Positive
+          );
+
+          await openai.helicone.logPrompt(
+            heliconeId,
+            "coleywoley",
+            {
+              model: "gpt-3.5-turbo",
+              messages: [
+                {
+                  role: "system",
+                  content: heliconeTemplate,
+                },
+                {
+                  role: "user",
+                  content: "Say 'TestAsync_ChatCompletion_NoStreaming'",
+                },
+              ],
+            },
+            inputs
           );
         }
       },
@@ -29,15 +57,26 @@ async function testAsync(): Promise<void> {
     },
   });
 
-  const data = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
-    messages: [
-      {
-        role: "user",
-        content: "Say 'TestAsync_ChatCompletion_NoStreaming'",
+  const data = await openai.chat.completions.create(
+    {
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: builtString,
+        },
+        {
+          role: "user",
+          content: "Say 'TestAsync_ChatCompletion_NoStreaming'",
+        },
+      ],
+    },
+    {
+      headers: {
+        "Helicone-Prompt-Id": "Prompt123",
       },
-    ],
-  });
+    }
+  );
 
   console.log(data.choices[0].message.content);
 
@@ -65,15 +104,6 @@ async function testAsync(): Promise<void> {
   }
 
   console.log(`Streaming result: ${chunks.join("")}`);
-
-  const { data: data2, response: response2 } = await openai.completions
-    .create({
-      model: "davinci",
-      prompt: "1+1=",
-    })
-    .withResponse();
-
-  console.log(data2.choices[0].text);
 
   const { data: data3, response: response3 } = await openai.embeddings
     .create({

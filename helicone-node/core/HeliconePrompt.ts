@@ -6,7 +6,7 @@ export class HeliconePrompt {
     heliconeMeta: IHeliconeMeta,
     heliconeId: string,
     promptId: string,
-    inputTemplate: string,
+    inputTemplate: any,
     inputs: Record<string, any>
   ): Promise<void> {
     const options = {

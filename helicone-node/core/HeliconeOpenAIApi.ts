@@ -20,7 +20,7 @@ export class Helicone {
   public async logPrompt(
     heliconeId: string,
     promptId: string,
-    inputTemplate: string,
+    inputTemplate: any,
     inputs: Record<string, any>
   ) {
     await HeliconePrompt.logPrompt(
