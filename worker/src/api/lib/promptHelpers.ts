@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Parses a string containing custom JSX-like tags and extracts information to produce two outputs:
  * 1. A version of the string with all JSX tags removed, leaving only the text content.
