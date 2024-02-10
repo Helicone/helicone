@@ -37,3 +37,24 @@ export function prompt(
   }, "");
   return { heliconeTemplate, inputs, builtString };
 }
+
+export function hprompt(
+  strings: TemplateStringsArray,
+  ...values: any[]
+): string {
+  // TODO handle the case where you just have `${input}` as a string and not `{{input}}`
+  return strings.reduce((acc, string, i) => {
+    const val = values[i];
+    if (val != null) {
+      const key = Object.keys(val)[0];
+      const value = Object.values(val)[0];
+      return (
+        acc +
+        string +
+        `<helicone-prompt-input key="${key}" >${value}</helicone-prompt-input>`
+      );
+    } else {
+      return acc + string;
+    }
+  }, "");
+}
