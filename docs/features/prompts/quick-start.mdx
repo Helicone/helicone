@@ -1,0 +1,187 @@
+---
+title: "Quick Start"
+description: ""
+---
+
+<Warning>This feature is in Beta, please use at your own risk.</Warning>
+<Accordion title="How does it work?">
+
+We are currently using an adapated version of JSX to manage prompts and their input variables.
+Essentially send over a prompt with the following syntax
+`tsx
+    <helicone-prompt-input key="my_input_key">Input to your LLM</helicone-prompt-input>
+    `
+
+Within the proxy we will extract the `children` text from the JSX element `helicone-prompt-input` and replace it before it is sent to you LLM.
+This will result in the following string sent over to your LLM
+
+```tsx
+    Input to your LLM
+```
+
+Then all of the variables are mapped within the UI as a dictionary like
+
+```json
+{
+  "my_input_key": "Input to your LLM"
+}
+```
+
+<Note>
+  it is crucial that each key has a unique identifier otherwise you will get the
+  same variable replacing in multiple places
+</Note>
+</Accordion>
+
+## Prerequisties
+
+You must have Helicone setup in proxy mode via
+[Gateway](/getting-started/integration-method/gateway) or [custom package](/getting-started/integration-method/openai-proxy).
+
+Read [Proxy vs Async](/getting-started/proxy-vs-async) to learn more about the difference between proxy and async integrations.
+
+You have to be using Helicone via Proxy,
+if you are not using Helicone via proxy,
+please see our [Quick Start Async](/features/prompts/quick-start-async).
+
+<Tabs>
+  <Tab title="Typescript / Javascript">
+
+    ## TS/JS Quick Start
+    ``` tsx
+    // 1. Add this line
+    import { hprompt } from "@helicone/helicone";
+
+    const chatCompletion = await openai.chat.completions.create(
+      {
+        messages: [
+          {
+            role: "user",
+            // 2: add hprompt to any string, and nest any variable in additional brackets `{}`
+            content: hprompt`Write a story about ${{ scene }}`,
+          },
+        ],
+        model: "gpt-3.5-turbo",
+      },
+      {
+        // 3. Add Prompt Id Header
+        headers: {
+          "Helicone-Prompt-Id": "prompt_story",
+        },
+      }
+    );
+    ```
+
+
+    ## Step by step
+    <Steps>
+      <Step title="add hprompt">
+
+      ```ts
+      import { hprompt } from "@helicone/helicone";
+      ```
+
+      </Step>
+      <Step title="Replace any text input">
+
+      Using the back ticket string formatter in javascript, just add `hprompt` infront of your backtick to automatically format your text so that Helicone can determine where your variables are.
+
+      Also nest your inputted variable so that is within another bracket `{}`, this is essentially
+      making it so that we can determine the `input key` for Helicone.
+
+      ```tsx
+      content: hprompt`Write a story about ${{ scene }}`,
+      ```
+
+      <Accordion title="Change Input Name">
+        If you want to rename your input or have custom input you can change the key value pair in the passed dictionary to the string formatter function. Like this:
+
+        ```tsx
+        content: hprompt`Write a story about ${{ "my_magical_input": scene  }}`,
+        ```
+      </Accordion>
+      </Step>
+
+      <Step title="Tag your prompt and assign an id">
+        Assign a `Helicone-Prompt-Id` header to your LLM request.
+
+        Assigning an id allows us to associate your prompt with future versions of your prompt, and automatically manage versions on your behalf.
+
+        Depending on the package you are using, you will neeed to add a header, for more information on adding headers to packages please see [Helicone Headers](/helicone-headers).
+
+        ```tsx
+        headers: {
+          "Helicone-Prompt-Id": "prompt_story",
+        },
+        ```
+
+      </Step>
+
+
+    </Steps>
+
+  </Tab>
+  <Tab title="Packageless (curl)">
+  Let's say we have an app that generates a short story with an inputed scene.
+  
+  For example: "Write a story about a secret agent"
+
+  <Steps>
+    <Step title="Determine your input variables">
+    ```ts
+    Write a story about a secret agent
+    ```
+
+    Given the above string, let's say `a secret agent` is our inputted variable.
+    </Step>
+    <Step title="Create a key name for your inputted variable">
+    Since we are a scene, let's call our key `scene`
+    </Step>
+    <Step title="Replace">
+    Now within your prompt replace your string with the following, don't worry Helicone will remove this for you before it sends it to your LLM.
+
+    Add `<helicone-input-prompt key="<INPUT_ID>" >` before your input and `</helicone-input-prompt>` after your input.
+
+    ```tsx
+    Write a story about <helicone-input-prompt key="scene" >a secret agent</helicone-input-prompt>
+    ```
+
+    </Step>
+    <Step title="Tag your prompt">
+
+      Inorder to securely ensure that we know when and how to parse and categorize your prompt, please append the following header to your LLM request.
+      `Helicone-Prompt-Id: you_prompt_id`.
+
+      <Note>
+      Must not include any spaces or special characters, underscores and dashes are okay.
+      </Note>
+
+    </Step>
+    <Step title="Make a request">
+
+      Now when you make your request to your LLM, the LLM will receive the prompt with all of the `helicone-input-prompt` tags removed, however Helicone will now keep track of all of your inputs for you.
+    </Step>
+
+  </Steps>
+  
+  </Tab>
+  <Tab title="Other">
+    Right now, we only support packages for Typescript and Javascript for an easy integration. For now we recommend manually implementing input variables like this.
+
+    ```python
+    openai.ChatCompletion.create(
+      model="[DEPLOYMENT]",
+      # Manually add starting and ending tags with before and after variables
+      messages=[{"role": "User", "content": f'Write a story about <helicone-prompt-input key="scene" >{scene} </helicone-prompt-input>'}],
+      headers={
+        # Add Prompt Id header
+        "Helicone-Prompt-Id": "Bearer [HELICONE_API_KEY]",
+      }
+    )
+    ```
+
+    If you want more package support, please reach out to [engineering@helicone.ai](mailto:engineering@helicone.ai)
+
+  </Tab>
+
+</Tabs>

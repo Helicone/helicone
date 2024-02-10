@@ -1,0 +1,105 @@
+---
+title: "Quick Start (Async)"
+description: ""
+---
+
+<Warning>This feature is in Beta, please use at your own risk.</Warning>
+<Note>
+  <b>
+    We highly recommend using our{" "}
+    <u>[proxy integration for prompts](/features/prompts/quick-start)</u> , it
+    is significantly easier to get up and running!
+  </b>
+</Note>
+
+This guide is written from the standpoint that you are using the
+[custom integration method](/getting-started/integration-method/custom) or async version of Helicone.
+To learn more please read [Proxy vs Async](/getting-started/proxy-vs-async).
+
+If you are using the async libraries, it is significantly harder to get everything setup.
+If you'd like us to add better support for this please email us at [engineering@helicone.ai](mailto:engineering@helicone.ai).
+
+## Async Get Started
+
+<Steps>
+  <Step title="Get the request id from your logged request">
+
+### Option 1: Predefine
+
+You will need to get the helicone request id for the request that you are logging.
+
+The easiest way to do this is to define before hand.
+
+```ts
+const requestId = uuidv4(); // must be a valid UUID
+```
+
+Then when you make your request, you can add the request id via the `providerRequest.meta` tag like this.
+
+```ts
+meta: {
+  `Helicone-Request-Id: ${requestId}`;
+}
+```
+
+### Option 2: Fetch it after the fact
+
+You can also fetch your requestId after the fact via call backs within the async SDKs like this...
+
+```ts
+onLog: async (response: Response) => {
+  const heliconeId = response.headers.get("helicone-id");
+},
+```
+
+  </Step>
+  <Step title="Auto detect your template inputs">
+
+```ts
+const promptId = "my_prompt_id";
+const res = await fetch(
+  `https://api.hconeai.com/v1/request/${requestId}/prompt/${promptId}/inputs`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Helicone-Auth": `Bearer ${heliconeApiKey}`,
+    },
+    body: JSON.stringify({
+      inputs: inputs,
+    }),
+  }
+);
+```
+
+  </Step>
+    <Step title="(Optional) Explicitly define your template">
+
+```ts
+const promptId = "my_prompt_id";
+const res = await fetch(
+  `https://api.hconeai.com/v1/request/${requestId}/prompt/${promptId}/inputs`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Helicone-Auth": `Bearer ${heliconeApiKey}`,
+    },
+    body: JSON.stringify({
+      inputs: inputs,
+      inputTemplate: {
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "user",
+            content: `What you were already sending to openai <helicone-input-prompt key="my_input"/>`,
+          },
+        ],
+      },
+    }),
+  }
+);
+```
+
+  </Step>
+</Steps>

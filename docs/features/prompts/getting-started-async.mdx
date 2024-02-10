@@ -1,0 +1,45 @@
+---
+title: "Billing by usage"
+description: "Comming soon"
+---
+
+const openai = new OpenAI({
+apiKey: "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",
+baseURL: "https://oai_staging.hconeai.com/v1",
+defaultHeaders: {
+"Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
+"Helicone-Request-Id": requestId,
+},
+});
+
+const scene = "A movie somethingsdafls;aldfk;ldfsk";
+const chatCompletion = await openai.chat.completions.create({
+messages: [
+{
+role: "user",
+content: `
+The scene is ${scene}.
+
+      Just respond with "Hello", do not include punctuation. Seriously do not!
+
+`,
+},
+],
+model: "gpt-3.5-turbo",
+});
+
+const promptId = "prompt_get_hello";
+
+const res = await fetch(
+`https://api.hconeai.com/v1/request/${requestId}/prompt/${promptId}/inputs`,
+{
+method: "POST",
+headers: {
+"Content-Type": "application/json",
+"Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
+},
+body: JSON.stringify({
+scene: scene, // <helicone-input key="scene" />
+}),
+}
+);
