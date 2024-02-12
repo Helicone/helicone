@@ -163,6 +163,7 @@ input TextOperators {
   like: String
   ilike: String
   contains: String
+  not_contains: String
   not_equals: String
 }
 
