@@ -16,6 +16,10 @@ import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
 import { dbQueryClickhouse, printRunnableQuery } from "../db/dbExecute";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 
+function convertDbIncrement(dbIncrement: TimeIncrement): string {
+  return dbIncrement === "min" ? "MINUTE" : dbIncrement;
+}
+
 function buildFill(
   startDate: Date,
   endDate: Date,
@@ -37,7 +41,10 @@ function buildFill(
     timeZoneDifference,
     clickhouseParam(i + 1, endDate)
   );
-  const fill = `WITH FILL FROM ${startDateVal} to ${endDateVal} + 1 STEP INTERVAL 1 ${dbIncrement}`;
+
+  const fill = `WITH FILL FROM ${startDateVal} to ${endDateVal} + 1 STEP INTERVAL 1 ${convertDbIncrement(
+    dbIncrement
+  )}`;
   return { fill, argsAcc: [...argsAcc, startDate, endDate] };
 }
 
@@ -46,7 +53,7 @@ function buildDateTrunc(
   timeZoneDifference: number,
   column: string
 ): string {
-  return `DATE_TRUNC('${dbIncrement}', ${column} ${
+  return `DATE_TRUNC('${convertDbIncrement(dbIncrement)}', ${column} ${
     timeZoneDifference > 0
       ? `- INTERVAL '${Math.abs(timeZoneDifference)} minute'`
       : `+ INTERVAL '${timeZoneDifference} minute'`
@@ -125,6 +132,7 @@ export async function getXOverTime<T>(
     "request_created_at"
   );
   const query = `
+  -- getXOverTime
 SELECT
   ${dateTrunc} as created_at_trunc,
   ${groupByColumns.concat([countColumn]).join(", ")}
