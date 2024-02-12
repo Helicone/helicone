@@ -342,12 +342,16 @@ export function buildFilterLeaf(
         ? "!="
         : operatorKey === "contains"
         ? "ILIKE"
+        : operatorKey === "not-contains"
+        ? "NOT ILIKE"
         : undefined;
 
     filters.push(
       `${column} ${sqlOperator} ${argPlaceHolder(argsAcc.length, value)}`
     );
     if (operatorKey === "contains") {
+      argsAcc.push(`%${value}%`);
+    } else if (operatorKey === "not-contains") {
       argsAcc.push(`%${value}%`);
     } else {
       argsAcc.push(value);
