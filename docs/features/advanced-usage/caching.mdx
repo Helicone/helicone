@@ -147,6 +147,12 @@ const openai = new OpenAIApi(configuration);
 
 You can add a seed to your cache, so that you can have a deterministic cache, this is useful for when you want to have a consistent cache across multiple requests.
 
+```python
+  defaultHeaders: {
+    "Helicone-Cache-Seed": "user-123"
+  },
+```
+
 Add a header called `Helicone-Cache-Seed` with a string value for the seed.
 
 ```
