@@ -3,7 +3,7 @@ import {
   ChartBarIcon,
   HomeIcon,
 } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import {
   getTimeInterval,
@@ -34,6 +34,7 @@ import { Result } from "../../../lib/result";
 import { ModelMetric } from "../../../lib/api/models/models";
 import { MultiSelect, MultiSelectItem } from "@tremor/react";
 import Link from "next/link";
+import { TimeIncrement } from "../../../lib/timeCalculations/fetchTimeData";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -137,13 +138,14 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
 
-  const { metrics, filterMap, overTimeData, isAnyLoading } = useDashboardPage({
-    timeFilter,
-    uiFilters: debouncedAdvancedFilters,
-    apiKeyFilter: null,
-    timeZoneDifference: new Date().getTimezoneOffset(),
-    dbIncrement: timeIncrement,
-  });
+  const { metrics, filterMap, overTimeData, isAnyLoading, refetch } =
+    useDashboardPage({
+      timeFilter,
+      uiFilters: debouncedAdvancedFilters,
+      apiKeyFilter: null,
+      timeZoneDifference: new Date().getTimezoneOffset(),
+      dbIncrement: timeIncrement,
+    });
 
   const { data: models, isLoading } = useQuery({
     queryKey: ["modelMetrics", timeFilter],
@@ -616,10 +618,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         headerActions={
           <button
             onClick={() => {
-              setTimeFilter({
-                start: getTimeIntervalAgo(interval),
-                end: new Date(),
-              });
+              refetch();
             }}
             className="font-semibold text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700"
           >

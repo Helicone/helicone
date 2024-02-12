@@ -75,6 +75,9 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
       }
 
       setStartDate(formatDateToInputString(new Date(startDate)));
+      setEndDate(
+        formatDateToInputString(new Date(new Date().getTime() + 1000))
+      );
     }
   }, [relative, relativeValue]);
 

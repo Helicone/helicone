@@ -31,8 +31,7 @@ async function handler(
       dbIncrement: dbIncrement ?? "hour",
       timeZoneDifference,
     },
-    ["response_copy_v3.status as status"],
-    true
+    ["response_copy_v3.status as status"]
   );
 
   res.status(200).json(totalRequests);
