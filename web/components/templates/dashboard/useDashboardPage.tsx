@@ -200,5 +200,9 @@ export const useDashboardPage = ({
     metrics,
     overTimeData,
     isAnyLoading,
+    refetch: () => {
+      Object.values(overTimeData).forEach((x) => x.refetch());
+      Object.values(metrics).forEach((x) => x.refetch());
+    },
   };
 };
