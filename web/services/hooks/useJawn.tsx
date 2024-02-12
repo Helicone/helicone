@@ -1,10 +1,13 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useOrg } from "../../components/layout/organizationContext";
 import { getHeliconeCookie } from "../../lib/cookies";
+import { usePostHog } from "posthog-js/react";
 
 export const useJawn = () => {
   const org = useOrg();
   const authFromCookie = getHeliconeCookie();
+
+  const posthog = usePostHog();
 
   const fetchJawn = useCallback(
     async ({
@@ -16,20 +19,33 @@ export const useJawn = () => {
       body?: string;
       method: string;
     }) => {
-      return fetch(`${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}${path}`, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          "helicone-authorization": JSON.stringify({
-            _type: "jwt",
-            token: authFromCookie.data?.jwtToken,
-            orgId: org?.currentOrg?.id,
-          }),
-        },
-        body: body,
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}${path}`,
+        {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+            "helicone-authorization": JSON.stringify({
+              _type: "jwt",
+              token: authFromCookie.data?.jwtToken,
+              orgId: org?.currentOrg?.id,
+            }),
+          },
+          body: body,
+        }
+      );
+
+      if (!res.ok) {
+        posthog.capture("jawn_request_failed", {
+          path,
+          method,
+          status: res.status,
+        });
+      }
+
+      return res;
     },
-    [authFromCookie.data?.jwtToken, org?.currentOrg?.id]
+    [authFromCookie.data?.jwtToken, org?.currentOrg?.id, posthog]
   );
   return {
     fetchJawn,
