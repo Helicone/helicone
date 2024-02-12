@@ -85,7 +85,8 @@ export async function proxyForwarder(
         const cachedResponse = await getCachedResponse(
           proxyRequest,
           cacheSettings.bucketSettings,
-          env.CACHE_KV
+          env.CACHE_KV,
+          cacheSettings.cacheSeed
         );
         if (cachedResponse) {
           ctx.waitUntil(
@@ -129,7 +130,8 @@ export async function proxyForwarder(
                 responseBody.body,
                 cacheSettings.cacheControl,
                 cacheSettings.bucketSettings,
-                env.CACHE_KV
+                env.CACHE_KV,
+                cacheSettings.cacheSeed ?? null
               )
             )
         );
