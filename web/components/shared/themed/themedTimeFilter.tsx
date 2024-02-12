@@ -115,7 +115,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
                 {({ close }) => (
                   <div className="px-4 py-2 flex flex-col space-y-4">
                     <TabGroup>
-                      <TabList className="font-semibold" variant="line">
+                      <TabList className="font-semibold" variant="solid">
                         <Tab>Absolute</Tab>
                         <Tab>Relative</Tab>
                       </TabList>
