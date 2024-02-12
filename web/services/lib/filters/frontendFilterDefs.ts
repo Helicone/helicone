@@ -159,6 +159,7 @@ export const REQUEST_TABLE_FILTERS: [
   SingleFilterDef<"request">,
   SingleFilterDef<"response">,
   SingleFilterDef<"response">,
+  SingleFilterDef<"request">,
   SingleFilterDef<"feedback">
 ] = [
   {
