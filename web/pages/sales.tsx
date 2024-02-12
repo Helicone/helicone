@@ -27,7 +27,7 @@ const Sales = () => {
       <div className="bg-white h-full min-h-screen">
         <GridBackground>
           <div className="flex flex-col sm:flex-row mx-auto w-full gap-8 max-w-6xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
-            <div className="flex flex-col w-full">
+            <div className="flex flex-col w-2/3">
               <h1 className="text-2xl sm:text-4xl font-semibold leading-tight sm:leading-snug max-w-4xl">
                 Contact Us
               </h1>
@@ -56,13 +56,7 @@ const Sales = () => {
                 Contact Us <ChevronRightIcon className="h-4 w-4" />
               </Link>
             </div>
-            <ContactForm
-              contactTag={"contact-us"}
-              buttonText={"Contact Us"}
-              defaultPlaceholder={
-                "I am interested in using Helicone for my business..."
-              }
-            />
+            <Calendar />
           </div>
         </GridBackground>
       </div>
@@ -72,3 +66,26 @@ const Sales = () => {
 };
 
 export default Sales;
+
+import Cal, { getCalApi } from "@calcom/embed-react";
+import { useEffect } from "react";
+function Calendar() {
+  useEffect(() => {
+    (async function () {
+      const cal = await getCalApi();
+      cal("ui", {
+        theme: "light",
+        styles: { branding: { brandColor: "#000000" } },
+        hideEventTypeDetails: false,
+        layout: "month_view",
+      });
+    })();
+  }, []);
+  return (
+    <Cal
+      calLink="team/helicone/helicone-discovery"
+      style={{ width: "100%", height: "100%", overflow: "scroll" }}
+      config={{ layout: "month_view" }}
+    />
+  );
+}
