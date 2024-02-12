@@ -12,6 +12,7 @@ export interface CacheSettings {
   bucketSettings: {
     maxSize: number;
   };
+  cacheSeed: string | null;
 }
 
 function buildCacheControl(cacheControl: string): string {
@@ -43,6 +44,7 @@ interface CacheHeaders {
   cacheSave: boolean;
   cacheRead: boolean;
   cacheBucketMaxSize: number;
+  cacheSeed: string | null;
 }
 
 function getCacheState(headers: Headers): CacheHeaders {
@@ -56,6 +58,7 @@ function getCacheState(headers: Headers): CacheHeaders {
     cacheBucketMaxSize: parseInt(
       headers.get("Helicone-Cache-Bucket-Max-Size") ?? "1"
     ),
+    cacheSeed: headers.get("Helicone-Cache-Seed"),
   };
 }
 
@@ -73,6 +76,7 @@ export function getCacheSettings(
         bucketSettings: {
           maxSize: 1,
         },
+        cacheSeed: null,
       },
       error: null,
     };
@@ -103,6 +107,7 @@ export function getCacheSettings(
         bucketSettings: {
           maxSize: cacheHeaders.cacheBucketMaxSize,
         },
+        cacheSeed: cacheHeaders.cacheSeed,
       },
     };
   } catch (e) {
