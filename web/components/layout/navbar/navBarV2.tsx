@@ -24,7 +24,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
     <header className="bg-white top-0 sticky z-30 border-b border-gray-200">
       {!mobileMenuOpen && (
         <nav
-          className="mx-auto flex max-w-5xl items-center md:gap-x-8 gap-x-16 py-2"
+          className="mx-auto flex max-w-5xl items-center md:gap-x-8 gap-x-16 py-3"
           aria-label="Global"
         >
           <div className="flex items-center">
@@ -122,7 +122,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
               <>
                 <Link
                   href="/signin"
-                  className="bg-white hover:bg-gray-100 border border-black whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                  className="bg-white hover:bg-gray-100 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 >
                   Sign In
                 </Link>
