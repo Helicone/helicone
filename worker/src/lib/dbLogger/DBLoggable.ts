@@ -43,6 +43,7 @@ export interface DBLoggableProps {
     provider: Provider;
     nodeId: string | null;
     modelOverride?: string;
+    heliconeTemplate?: Record<string, unknown>;
   };
   timing: {
     startTime: Date;
@@ -75,6 +76,7 @@ export function dbLoggableRequestFromProxyRequest(
     nodeId: proxyRequest.nodeId,
     modelOverride:
       proxyRequest.requestWrapper.heliconeHeaders.modelOverride ?? undefined,
+    heliconeTemplate: proxyRequest.heliconePromptTemplate ?? undefined,
   };
 }
 
@@ -546,6 +548,39 @@ export class DBLoggable {
         data: null,
         error: webhookError,
       };
+    }
+
+    if (this.request.heliconeTemplate && this.request.promptId) {
+      const upsertResult = await db.queue.upsertPrompt(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this.request.heliconeTemplate as any,
+        this.request.promptId ?? "",
+        authParams.organizationId
+      );
+
+      if (upsertResult.error || !upsertResult.data) {
+        console.error("Error upserting prompt", upsertResult.error);
+        return err(JSON.stringify(upsertResult.error));
+      }
+      const propResult = await db.queue.putRequestProperty(
+        requestResult.data.request.id,
+        [
+          {
+            key: "Helicone-Prompt-Id",
+            value: this.request.promptId,
+          },
+          {
+            key: "Helicone-Prompt-Version",
+            value: upsertResult.data.version.toString() ?? "",
+          },
+        ],
+        authParams.organizationId
+      );
+
+      if (propResult.error || !propResult.data) {
+        console.error("Error adding properties", propResult.error);
+        return err(JSON.stringify(propResult.error));
+      }
     }
 
     return ok(null);
