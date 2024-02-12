@@ -95,6 +95,7 @@ export const getTimeInterval = ({
   end: Date;
 }): TimeIncrement => {
   const diff = end.getTime() - start.getTime();
+
   if (diff < 1000 * 60 * 60 * 2) {
     return "min";
   } else if (diff < 1000 * 60 * 60 * 24 * 7) {
