@@ -58,16 +58,20 @@ def insert_into_db(query, params):
     return result
 
 
-def fetch(base_url, endpoint, method="GET", json=None, headers=None):
+def fetch(base_url, endpoint, method="GET", json=None, headers=None, stream=False):
     url = f"{base_url}/{endpoint}"
-    response = requests.request(method, url, json=json, headers=headers)
+    response = requests.request(
+        method, url, json=json, headers=headers, stream=stream)
     try:
         response.raise_for_status()
     except requests.exceptions.HTTPError as e:
         print(e)
         print(response.text)
         raise e
-    return response.json()
+    if stream:
+        return response
+    else:
+        return response.json()
 
 
 def test_gateway_api():
@@ -154,7 +158,53 @@ def test_openai_proxy():
 
     query = "SELECT * FROM response WHERE request = %s LIMIT 1"
     response_data = fetch_from_db(query, (latest_request["id"],))
-    assert response_data, "Response data not found in the database for the given request ID"
+    assert response_data[0]["body"]["choices"], "Response data not found in the database for the given request ID"
+    print("passed")
+
+
+def test_openai_proxy_stream():
+    print("\n---------Running test_proxy---------")
+    requestId = str(uuid.uuid4())
+    print("Request ID: " + requestId + "")
+    message_content = test_openai_proxy.__name__ + " - " + requestId
+    messages = [
+        {
+            "role": "user",
+            "content": message_content
+        }
+    ]
+    data = {
+        "model": "gpt-3.5-turbo",
+        "messages": messages,
+        "max_tokens": 1,
+        "stream": True
+    }
+    headers = {
+        "Authorization": f"Bearer {openai_api_key}",
+        "Helicone-Auth": f"Bearer {helicone_api_key}",
+        "Helicone-Property-RequestId": requestId,
+        "OpenAI-Organization": openai_org_id
+    }
+
+    response = fetch(helicone_proxy_url, "chat/completions",
+                     method="POST", json=data, headers=headers,
+                     stream=True)
+    assert response, "Response from OpenAI API is empty"
+
+    time.sleep(3)  # Helicone needs time to insert request into the database
+
+    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
+    request_data = fetch_from_db(query, (requestId,))
+    assert request_data, "Request data not found in the database for the given property request id"
+
+    latest_request = request_data[0]
+    assert message_content in latest_request["body"]["messages"][
+        0]["content"], "Request not found in the database"
+
+    query = "SELECT * FROM response WHERE request = %s LIMIT 1"
+    response_data = fetch_from_db(query, (latest_request["id"],))
+
+    assert response_data[0]["body"]["choices"], "Response data not found in the database for the given request ID"
     print("passed")
 
 

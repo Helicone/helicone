@@ -16,7 +16,7 @@ function getFilterSearchFilterNode(
   search: string
 ): FilterNode {
   const propertyFilter: FilterLeaf = {
-    properties_copy_v2: {
+    properties_v3: {
       key: {
         equals: property,
       },
@@ -26,7 +26,7 @@ function getFilterSearchFilterNode(
     return propertyFilter;
   }
   const searchFilter: FilterLeaf = {
-    properties_copy_v2: {
+    properties_v3: {
       value: {
         contains: search,
       },
@@ -52,7 +52,7 @@ export async function getPropertyParams(
 
   const query = `
   SELECT distinct key as property_key, value as property_param
-  from properties_copy_v2
+  from properties_v3
   where (
     ${builtFilter.filter}
   )

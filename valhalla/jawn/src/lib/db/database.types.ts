@@ -971,6 +971,50 @@ export interface Database {
         }
         Relationships: []
       }
+      prompts: {
+        Row: {
+          created_at: string
+          description: string | null
+          heliconeTemplate: Json | null
+          id: string
+          name: string | null
+          organization_id: string
+          soft_delete: boolean
+          status: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          heliconeTemplate?: Json | null
+          id: string
+          name?: string | null
+          organization_id: string
+          soft_delete?: boolean
+          status?: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          heliconeTemplate?: Json | null
+          id?: string
+          name?: string | null
+          organization_id?: string
+          soft_delete?: boolean
+          status?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prompts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       properties: {
         Row: {
           auth_hash: string | null

@@ -1,28 +1,28 @@
 import Footer from "../components/layout/footer";
 import NavBarV2 from "../components/layout/navbar/navBarV2";
-import MetaData from "../components/shared/metaData";
 import Link from "next/link";
 import ContactForm from "../components/shared/contactForm";
 import { useRouter } from "next/router";
-import GridBackground from "../components/layout/public-pages/gridBackground";
+import GridBackground from "../components/layout/public/gridBackground";
 import { CheckCircleIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
+import PublicMetaData from "../components/layout/public/publicMetaData";
 
 const bullets = [
-  "Billing/Usage APIs",
-  "White labeling",
-  "Embeddable dashboards",
-  "Alerts",
-  "Customer ratelimiting",
-  "Customer facing API tokens",
-  "Custom domains",
-  "Custom Proxy Endpoint",
+  "Request a demo",
+  "Learn more about our product",
+  "Learn about our pricing, features, and integrations",
+  "Request a SOC-2 report or our on-premise solution",
+  "Get onboarding support",
 ];
 
 const Sales = () => {
   const router = useRouter();
 
   return (
-    <MetaData title={"Contact Us"}>
+    <PublicMetaData
+      description={"The easiest way to build your LLM-application at scale."}
+      ogImageUrl={"https://www.helicone.ai/static/helicone-landing.png"}
+    >
       <NavBarV2 />
       <div className="bg-white h-full min-h-screen">
         <GridBackground>
@@ -48,9 +48,7 @@ const Sales = () => {
                 Want to chat with the founders?
               </p>
               <Link
-                href={
-                  "https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call"
-                }
+                href={"https://cal.com/team/helicone/helicone-discovery"}
                 className="text-gray-500 hover:text-black flex flex-row items-center gap-1 text-sm mt-2 w-fit"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -59,7 +57,7 @@ const Sales = () => {
               </Link>
             </div>
             <ContactForm
-              contactTag={""}
+              contactTag={"contact-us"}
               buttonText={"Contact Us"}
               defaultPlaceholder={
                 "I am interested in using Helicone for my business..."
@@ -69,7 +67,7 @@ const Sales = () => {
         </GridBackground>
       </div>
       <Footer />
-    </MetaData>
+    </PublicMetaData>
   );
 };
 

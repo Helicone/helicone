@@ -81,7 +81,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
   return (
     <Menu
       as="div"
-      className="relative inline-flex text-left z-10 shadow-sm isolate rounded-lg"
+      className="relative inline-flex text-left z-10 shadow-sm h-fit w-fit isolate rounded-lg"
     >
       {custom && (
         <>

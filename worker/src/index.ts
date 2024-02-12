@@ -71,34 +71,45 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
   const url = new URL(request.getUrl());
   const host = url.host;
   const hostParts = host.split(".");
-  if (hostParts.length >= 3 && hostParts[0].includes("2yfv")) {
+
+  if (host.includes("hconeai") && hostParts.length >= 3) {
+    // hconeai.com requests
+    if (hostParts[0].includes("gateway")) {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+      };
+    } else if (hostParts[0].includes("oai")) {
+      return {
+        ...env,
+        WORKER_TYPE: "OPENAI_PROXY",
+      };
+    } else if (hostParts[0].includes("anthropic")) {
+      return {
+        ...env,
+        WORKER_TYPE: "ANTHROPIC_PROXY",
+      };
+    } else if (hostParts[0].includes("api")) {
+      return {
+        ...env,
+        WORKER_TYPE: "HELICONE_API",
+      };
+    }
+  }
+
+  if (
+    hostParts.length >= 3 &&
+    hostParts[0].includes("gateway") &&
+    !host.includes("hconeai")
+  ) {
+    // if it is not a hconeai.com request, but it is a gateway request, then it is a customer gateway request
     return {
       ...env,
       WORKER_TYPE: "CUSTOMER_GATEWAY",
     };
-  } else if (hostParts.length >= 3 && hostParts[0].includes("gateway")) {
-    return {
-      ...env,
-      WORKER_TYPE: "GATEWAY_API",
-    };
-  } else if (hostParts.length >= 3 && hostParts[0].includes("oai")) {
-    return {
-      ...env,
-      WORKER_TYPE: "OPENAI_PROXY",
-    };
-  } else if (hostParts.length >= 3 && hostParts[0].includes("anthropic")) {
-    return {
-      ...env,
-      WORKER_TYPE: "ANTHROPIC_PROXY",
-    };
-  } else if (hostParts.length >= 3 && hostParts[0].includes("api")) {
-    return {
-      ...env,
-      WORKER_TYPE: "HELICONE_API",
-    };
-  } else {
-    throw new Error("Could not determine worker type");
   }
+
+  throw new Error("Could not determine worker type");
 }
 
 export default {

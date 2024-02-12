@@ -118,6 +118,7 @@ export type HeliconeRequestFilter = {
   createdAt?: InputMaybe<DateOperators>;
   feedback?: InputMaybe<FeedbackFilter>;
   id?: InputMaybe<NumberOperators>;
+  model?: InputMaybe<TextOperators>;
   prompt?: InputMaybe<TextOperators>;
   property?: InputMaybe<PropertyFilter>;
   requestId?: InputMaybe<TextOperators>;

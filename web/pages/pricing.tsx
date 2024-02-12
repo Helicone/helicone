@@ -1,11 +1,16 @@
-import MetaData from "../components/shared/metaData";
 import PricingPage from "../components/templates/pricing/pricingPage";
+import PublicMetaData from "../components/layout/public/publicMetaData";
 
 const Pricing = () => {
   return (
-    <MetaData title="Pricing">
-      <PricingPage />
-    </MetaData>
+    <>
+      <PublicMetaData
+        description={"Pricing as simple as our code integration."}
+        ogImageUrl={"https://www.helicone.ai/static/helicone-pricing.png"}
+      >
+        <PricingPage />
+      </PublicMetaData>
+    </>
   );
 };
 

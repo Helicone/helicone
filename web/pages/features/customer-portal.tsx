@@ -1,8 +1,8 @@
 import { CheckCircleIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
-import MetaData from "../../components/shared/metaData";
+import MetaData from "../../components/layout/public/authMetaData";
 import NavBarV2 from "../../components/layout/navbar/navBarV2";
-import GridBackground from "../../components/layout/public-pages/gridBackground";
+import GridBackground from "../../components/layout/public/gridBackground";
 import Link from "next/link";
 import ContactForm from "../../components/shared/contactForm";
 import Image from "next/image";
@@ -56,9 +56,7 @@ const CustomerPortal = () => {
                 Want to chat with the founders?
               </p>
               <Link
-                href={
-                  "https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call"
-                }
+                href={"https://cal.com/team/helicone/helicone-discovery"}
                 className="text-gray-500 hover:text-black flex flex-row items-center gap-1 text-sm mt-2 w-fit"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -67,7 +65,7 @@ const CustomerPortal = () => {
               </Link>
             </div>
             <ContactForm
-              contactTag={""}
+              contactTag={"customer-portal"}
               buttonText={"Contact Us"}
               defaultPlaceholder={
                 "I am interested in Helicone's Customer Portal feature!"

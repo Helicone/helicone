@@ -15,7 +15,7 @@ import { RosettaWrapper } from "../../wrappers/rosetta/rosettaWrapper";
 import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { LlmSchema } from "../models/requestResponseModel";
 
-export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
+export type Provider = "OPENAI" | "ANTHROPIC" | "TOGETHERAI" | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 3900000 / 10;
 
 export interface HeliconeRequest {
@@ -254,8 +254,14 @@ async function mapLLMCalls(
 }
 
 const getModelFromPath = (path: string) => {
-  let regex = /\/engines\/([^\/]+)/;
-  let match = path.match(regex);
+  const regex1 = /\/engines\/([^/]+)/;
+  const regex2 = /models\/([^/:]+)/;
+
+  let match = path.match(regex1);
+
+  if (!match) {
+    match = path.match(regex2);
+  }
 
   if (match && match[1]) {
     return match[1];

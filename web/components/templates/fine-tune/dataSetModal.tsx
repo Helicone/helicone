@@ -32,13 +32,15 @@ export const CreateDataSetModal = (props: CreateDataSetModalProps) => {
     <ThemedModal open={isOpen} setOpen={setOpen}>
       <div className="flex flex-col gap-8 w-[450px]">
         <div className="flex flex-row items-center gap-2">
-          <CircleStackIcon className="w-6 h-6" />
-          <p className="font-semibold text-xl">Create Dataset</p>
+          <CircleStackIcon className="w-6 h-6 dark:text-white" />
+          <p className="font-semibold text-xl dark:text-white">
+            Create Dataset
+          </p>
         </div>
         <div className="flex flex-col space-y-1">
           <label
             htmlFor="alert-metric"
-            className="text-gray-900 text-xs font-semibold"
+            className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
           >
             Dataset Name
           </label>
@@ -57,20 +59,20 @@ export const CreateDataSetModal = (props: CreateDataSetModalProps) => {
         <div className="flex flex-col space-y-4">
           <label
             htmlFor="alert-metric"
-            className="text-gray-900 text-xs font-semibold"
+            className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
           >
             Your Filters
           </label>
           <ul className="flex flex-col space-y-2">
             {uiFilter.length === 0 ? (
-              <p className="text-sm">None</p>
+              <p className="text-sm dark:text-white">None</p>
             ) : (
               uiFilter.map((_filter, i) => (
                 <li
                   className="flex flex-row text-sm space-x-1 items-center"
                   key={`filer_${i}`}
                 >
-                  <ArrowRightIcon className="w-3 h-3" />
+                  <ArrowRightIcon className="w-3 h-3 dark:text-white" />
                   <span className="font-semibold">
                     {filterMap[_filter.filterMapIdx]?.label}
                   </span>

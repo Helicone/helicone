@@ -2,7 +2,7 @@ import { User } from "@supabase/auth-helpers-nextjs";
 
 import { GetServerSidePropsContext } from "next";
 import AuthHeader from "../components/shared/authHeader";
-import MetaData from "../components/shared/metaData";
+import MetaData from "../components/layout/public/authMetaData";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import WebhooksPage from "../components/templates/webhooks/webhooksPage";
 

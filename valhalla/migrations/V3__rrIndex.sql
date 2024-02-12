@@ -1,2 +1,0 @@
-create index if not exists response_id_idx on public.response using btree (id) tablespace pg_default;
-create index if not exists request_id_idx on public.request using btree (id) tablespace pg_default;

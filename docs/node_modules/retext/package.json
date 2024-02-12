@@ -1,0 +1,54 @@
+{
+  "name": "retext",
+  "version": "8.1.0",
+  "description": "natural language processor powered by plugins part of the unified collective",
+  "license": "MIT",
+  "keywords": [
+    "unified",
+    "retext",
+    "natural",
+    "language",
+    "concrete",
+    "syntax",
+    "tree",
+    "cst",
+    "parse",
+    "stringify",
+    "process"
+  ],
+  "homepage": "https://github.com/retextjs/retext",
+  "repository": "https://github.com/retextjs/retext/tree/main/packages/retext",
+  "bugs": "https://github.com/retextjs/retext/issues",
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/unified"
+  },
+  "author": "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
+  "contributors": [
+    "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)"
+  ],
+  "sideEffects": false,
+  "type": "module",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index.d.ts",
+    "index.js"
+  ],
+  "dependencies": {
+    "@types/nlcst": "^1.0.0",
+    "retext-latin": "^3.0.0",
+    "retext-stringify": "^3.0.0",
+    "unified": "^10.0.0"
+  },
+  "scripts": {
+    "build": "rimraf \"*.d.ts\" && tsc && type-coverage"
+  },
+  "xo": false,
+  "typeCoverage": {
+    "atLeast": 100,
+    "detail": true,
+    "strict": true,
+    "ignoreCatch": true
+  }
+}

@@ -103,7 +103,7 @@ class ChatBuilder extends AbstractRequestBuilder {
     return {
       requestText: getRequestText(),
       responseText: getResponseText(),
-      render: getRenderContent(),
+      render: getRenderContent,
     };
   }
 }

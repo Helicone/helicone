@@ -132,6 +132,8 @@ const whereKeyMappings: KeyMappings = {
     org_id: "request.helicone_org_id",
     id: "request.id",
     node_id: "job_node_request.node_id",
+    model: "request.model",
+    modelOverride: "request.model_override",
   }),
   response: easyKeyMappings<"response">({
     body_completion:
@@ -139,6 +141,7 @@ const whereKeyMappings: KeyMappings = {
     body_model: "request.body ->> 'model'",
     body_tokens: "((response.body -> 'usage') ->> 'total_tokens')::bigint",
     status: "response.status",
+    model: "response.model",
   }),
   properties_table: easyKeyMappings<"properties_table">({
     auth_hash: "properties.auth_hash",
@@ -204,6 +207,11 @@ const whereKeyMappings: KeyMappings = {
     key: "properties_copy_v2.key",
     value: "properties_copy_v2.value",
     organization_id: "properties_copy_v2.organization_id",
+  }),
+  properties_v3: easyKeyMappings<"properties_v3">({
+    key: "properties_v3.key",
+    value: "properties_v3.value",
+    organization_id: "properties_v3.organization_id",
   }),
   property_with_response_v1: easyKeyMappings<"property_with_response_v1">({
     property_key: "property_with_response_v1.property_key",
@@ -289,6 +297,7 @@ const havingKeyMappings: KeyMappings = {
   response_copy_v2: NOT_IMPLEMENTED,
   response_copy_v3: NOT_IMPLEMENTED,
   properties_copy_v2: NOT_IMPLEMENTED,
+  properties_v3: NOT_IMPLEMENTED,
   property_with_response_v1: NOT_IMPLEMENTED,
   job: NOT_IMPLEMENTED,
   job_node: NOT_IMPLEMENTED,
@@ -516,7 +525,7 @@ export async function buildFilterWithAuthClickHouseProperties(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
-    properties_copy_v2: {
+    properties_v3: {
       organization_id: {
         equals: orgId,
       },

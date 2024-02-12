@@ -8,18 +8,20 @@ class UnknownBuilder extends AbstractRequestBuilder {
     return {
       requestText: "",
       responseText: "",
-      render: (
-        <Completion
-          request={""}
-          response={{
-            title: "Response",
-            text: "",
-          }}
-          rawRequest={this.response.request_body}
-          rawResponse={this.response.response_body}
-          defaultMode="json"
-        />
-      ),
+      render: () => {
+        return (
+          <Completion
+            request={""}
+            response={{
+              title: "Response",
+              text: "",
+            }}
+            rawRequest={this.response.request_body}
+            rawResponse={this.response.response_body}
+            defaultMode="json"
+          />
+        );
+      },
     };
   }
 }

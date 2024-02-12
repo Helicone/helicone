@@ -6,6 +6,7 @@ import useNotification from "../components/shared/notification/useNotification";
 import ThemedModal from "../components/shared/themed/themedModal";
 import AuthForm from "../components/templates/auth/authForm";
 import { DEMO_EMAIL } from "../lib/constants";
+import PublicMetaData from "../components/layout/public/publicMetaData";
 
 const SignUp = () => {
   const supabase = useSupabaseClient();
@@ -20,7 +21,10 @@ const SignUp = () => {
   }
 
   return (
-    <>
+    <PublicMetaData
+      description={"The easiest way to build your LLM-application at scale."}
+      ogImageUrl={"https://www.helicone.ai/static/helicone-landing.png"}
+    >
       <AuthForm
         handleEmailSubmit={async (email: string, password: string) => {
           const origin = window.location.origin;
@@ -87,7 +91,7 @@ const SignUp = () => {
           </div>
         </div>
       </ThemedModal>
-    </>
+    </PublicMetaData>
   );
 };
 

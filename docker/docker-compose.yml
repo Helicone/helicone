@@ -5,11 +5,11 @@
 #   Destroy:        docker compose -f docker-compose.yml -f ./dev/docker-compose.dev.yml down -v --remove-orphans
 
 version: "3.8"
-
 services:
+
   studio:
     container_name: supabase-studio
-    image: supabase/studio:20230330-99fed3d
+    image: supabase/studio:20240101-8e4a094
     restart: unless-stopped
     healthcheck:
       test:
@@ -23,7 +23,10 @@ services:
       interval: 5s
       retries: 3
     ports:
-      - ${STUDIO_PORT}:3000/tcp
+      - 54323:3000/tcp
+    # depends_on:
+    #   analytics:
+    #     condition: service_healthy
     environment:
       STUDIO_PG_META_URL: http://meta:8080
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -36,28 +39,42 @@ services:
       SUPABASE_ANON_KEY: ${ANON_KEY}
       SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
 
+      LOGFLARE_API_KEY: ${LOGFLARE_API_KEY}
+      # LOGFLARE_URL: http://analytics:4000
+      NEXT_PUBLIC_ENABLE_LOGS: true
+      # Comment to use Big Query backend for analytics
+      # NEXT_ANALYTICS_BACKEND_PROVIDER: postgres
+      # Uncomment to use Big Query backend for analytics
+      # NEXT_ANALYTICS_BACKEND_PROVIDER: bigquery
+
   kong:
     container_name: supabase-kong
     image: kong:2.8.1
     restart: unless-stopped
+    # https://unix.stackexchange.com/a/294837
+    entrypoint: bash -c 'eval "echo \"$$(cat ~/temp.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
     ports:
       - ${KONG_HTTP_PORT}:8000/tcp
       - ${KONG_HTTPS_PORT}:8443/tcp
     environment:
       KONG_DATABASE: "off"
-      KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml
+      KONG_DECLARATIVE_CONFIG: /home/kong/kong.yml
       # https://github.com/supabase/cli/issues/14
       KONG_DNS_ORDER: LAST,A,CNAME
-      KONG_PLUGINS: request-transformer,cors,key-auth,acl
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth
       KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
       KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
+      SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
+      DASHBOARD_USERNAME: ${DASHBOARD_USERNAME}
+      DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}
     volumes:
       # https://github.com/supabase/supabase/issues/12661
-      - ./volumes/api/kong.yml:/var/lib/kong/kong.yml:ro
+      - ./volumes/api/kong.yml:/home/kong/temp.yml:ro
 
   auth:
     container_name: supabase-auth
-    image: supabase/gotrue:v2.60.7
+    image: supabase/gotrue:v2.132.3
     depends_on:
       db:
         # Disable this if you are using an external Postgres database
@@ -114,11 +131,12 @@ services:
 
   rest:
     container_name: supabase-rest
-    image: postgrest/postgrest:v10.1.2
+    image: postgrest/postgrest:v12.0.1
     depends_on:
       db:
         # Disable this if you are using an external Postgres database
         condition: service_healthy
+
     restart: unless-stopped
     environment:
       PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
@@ -126,56 +144,21 @@ services:
       PGRST_DB_ANON_ROLE: anon
       PGRST_JWT_SECRET: ${JWT_SECRET}
       PGRST_DB_USE_LEGACY_GUCS: "false"
+      PGRST_APP_SETTINGS_JWT_SECRET: ${JWT_SECRET}
+      PGRST_APP_SETTINGS_JWT_EXP: ${JWT_EXPIRY}
+    command: "postgrest"
 
-  realtime:
-    container_name: realtime-dev.supabase-realtime
-    image: supabase/realtime:v2.5.1
-    depends_on:
-      db:
-        # Disable this if you are using an external Postgres database
-        condition: service_healthy
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "bash",
-          "-c",
-          "printf \\0 > /dev/tcp/localhost/4000"
-        ]
-      timeout: 5s
-      interval: 5s
-      retries: 3
-    restart: unless-stopped
-    environment:
-      PORT: 4000
-      DB_HOST: ${POSTGRES_HOST}
-      DB_PORT: ${POSTGRES_PORT}
-      DB_USER: supabase_admin
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_NAME: ${POSTGRES_DB}
-      DB_AFTER_CONNECT_QUERY: 'SET search_path TO _realtime'
-      DB_ENC_KEY: supabaserealtime
-      API_JWT_SECRET: ${JWT_SECRET}
-      FLY_ALLOC_ID: fly123
-      FLY_APP_NAME: realtime
-      SECRET_KEY_BASE: UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq
-      ERL_AFLAGS: -proto_dist inet_tcp
-      ENABLE_TAILSCALE: "false"
-      DNS_NODES: "''"
-    command: >
-      sh -c "/app/bin/migrate && /app/bin/realtime eval 'Realtime.Release.seeds(Realtime.Repo)' && /app/bin/server"
-
+  # To use S3 backed storage: docker compose -f docker-compose.yml -f docker-compose.s3.yml up
   storage:
     container_name: supabase-storage
-    image: supabase/storage-api:v0.28.2
+    image: supabase/storage-api:v0.43.11
     depends_on:
       db:
         # Disable this if you are using an external Postgres database
         condition: service_healthy
       rest:
         condition: service_started
-      imgproxy:
-        condition: service_started
+ 
     healthcheck:
       test:
         [
@@ -208,25 +191,10 @@ services:
     volumes:
       - ./volumes/storage:/var/lib/storage:z
 
-  imgproxy:
-    container_name: supabase-imgproxy
-    image: darthsim/imgproxy:v3.13
-    healthcheck:
-      test: [ "CMD", "imgproxy", "health" ]
-      timeout: 5s
-      interval: 5s
-      retries: 3
-    environment:
-      IMGPROXY_BIND: ":5001"
-      IMGPROXY_LOCAL_FILESYSTEM_ROOT: /
-      IMGPROXY_USE_ETAG: "true"
-      IMGPROXY_ENABLE_WEBP_DETECTION: ${IMGPROXY_ENABLE_WEBP_DETECTION}
-    volumes:
-      - ./volumes/storage:/var/lib/storage:z
 
   meta:
     container_name: supabase-meta
-    image: supabase/postgres-meta:v0.60.7
+    image: supabase/postgres-meta:v0.75.0
     depends_on:
       db:
         # Disable this if you are using an external Postgres database
@@ -240,30 +208,10 @@ services:
       PG_META_DB_USER: supabase_admin
       PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD}
 
-  functions:
-    container_name: supabase-edge-functions
-    image: supabase/edge-runtime:v1.2.12
-    restart: unless-stopped
-    environment:
-      JWT_SECRET: ${JWT_SECRET}
-      SUPABASE_URL: http://kong:8000"
-      SUPABASE_ANON_KEY: ${ANON_KEY}
-      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
-      SUPABASE_DB_URL: postgresql://postgres:${POSTGRES_PASSWORD}@{POSTGRES_DB}:${POSTGRES_PORT}/${POSTGRES_DB}"
-      VERIFY_JWT: "false"
-    ports:
-      - ${FUNCTIONS_HTTP_PORT}:9000/tcp
-    volumes:
-      - ./volumes/functions:/home/deno/functions:Z
-    command:
-      - start
-      - --main-service
-      - /home/deno/functions/main
-
-  # # Comment out everything below this point if you are using an external Postgres database
+  # Comment out everything below this point if you are using an external Postgres database
   db:
     container_name: supabase-db
-    image: supabase/postgres:15.1.0.54-rc0
+    image: supabase/postgres:15.1.0.147
     healthcheck:
       test: pg_isready -U postgres -h localhost
       interval: 5s
@@ -287,66 +235,53 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       PGDATABASE: ${POSTGRES_DB}
       POSTGRES_DB: ${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXP: ${JWT_EXPIRY}
     volumes:
       - ./volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
       # Must be superuser to create event trigger
       - ./volumes/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z
       # Must be superuser to alter reserved role
       - ./volumes/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
+      # Initialize the database settings with JWT_SECRET and JWT_EXP
+      - ./volumes/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z
       # PGDATA directory is persisted between restarts
       - ./volumes/db/data:/var/lib/postgresql/data:Z
+      # Changes required for Analytics support
+      - ./volumes/db/logs.sql:/docker-entrypoint-initdb.d/migrations/99-logs.sql:Z
+
 
   web:
-    container_name: helicone-web
-    image: helicone/web:latest
+    container_name: helicone-web-local
+    depends_on:
+      - clickhouse-migration-runner
+      - supabase-migration-runner
+    build:
+      context: ../web
+      dockerfile: ../docker/dockerfiles/dockerfile_web  
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_PUBLIC_URL}
+        NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+        NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL}
+
     restart: unless-stopped
     ports:
-      # Pass down internal port because it's set dynamically by other services
       - 3000:3000
     environment:
       NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_PUBLIC_URL}
-      SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
+      NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+      NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL}
+
+      SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
       SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
       DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       VERCEL_ENV: ${VERCEL_ENV}
-      NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH}
-
-  worker-openai-proxy:
-    container_name: helicone-worker-openai-proxy
-    image: helicone/worker-openai-proxy:latest
-    restart: unless-stopped
-    ports:
-      # Pass down internal port because it's set dynamically by other services
-      - 8787:8787
-    environment:
-      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
-      SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
-      CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
-      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
-      STORAGE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${PGBOUNCER_PORT}/${POSTGRES_DB}
-
-  worker-helicone-api:
-    container_name: helicone-worker-helicone-api
-    image: helicone/worker-helicone-api:latest
-    restart: unless-stopped
-    ports:
-      # Pass down internal port because it's set dynamically by other services
-      - 8788:8788
-    environment:
-      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
-      SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
-      CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
-      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
-      STORAGE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${PGBOUNCER_PORT}/${POSTGRES_DB}
-
+      
   clickhouse-db:
     container_name: clickhouse-db
     image: clickhouse/clickhouse-server:23.4.2.11
@@ -364,24 +299,142 @@ services:
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
 
+  clickhouse-migration-runner:
+    container_name: clickhouse-migration-runner
+    build:
+      context: ../clickhouse
+      dockerfile: ../docker/dockerfiles/dockerfile_clickhouse_migration_runner
+    depends_on:
+      clickhouse-db:
+        # Disable this if you are using an external Postgres database
+        condition: service_healthy
+
+    environment:
+      CLICKHOUSE_HOST: ${CLICKHOUSE_HOST}
+      CLICKHOUSE_PORT: ${CLICKHOUSE_PORT}
+
   supabase-migration-runner:
     container_name: supabase-migration-runner
-    image: helicone/supabase-migration-runner:latest
+    build:
+      context: ../supabase
+      dockerfile: ../docker/dockerfiles/dockerfile_supabase_migration_runner
+      # target: linux/amd64
     depends_on:
       db:
         condition: service_healthy
     environment:
       DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
 
-  clickhouse-migration-runner:
-    container_name: clickhouse-migration-runner
-    image: helicone/clickhouse-migration-runner:latest
-    depends_on:
-      clickhouse-db:
-        # Disable this if you are using an external Postgres database
-        condition: service_healthy
+
+  worker-openai-proxy:
+    container_name: helicone-worker-openai-proxy
+    build:
+      context: ../worker
+      dockerfile: ../docker/dockerfiles/dockerfile_worker
+    restart: unless-stopped
+    ports:
+      - ${OPENAI_PROXY_PORT}:${OPENAI_PROXY_PORT}
     environment:
-      CLICKHOUSE_HOST: ${CLICKHOUSE_HOST}
-      CLICKHOUSE_PORT: ${CLICKHOUSE_PORT}
+      WORKER_TYPE: OPENAI_PROXY
+      WORKER_PORT: ${OPENAI_PROXY_PORT}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
+      CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+
+  worker-api:
+    container_name: helicone-worker-api
+    build:
+      context: ../worker
+      dockerfile: ../docker/dockerfiles/dockerfile_worker
+    restart: unless-stopped
+    ports:
+      - ${HELICONE_API_PORT}:${HELICONE_API_PORT}
+    environment:
+      WORKER_TYPE: HELICONE_API
+      WORKER_PORT: ${HELICONE_API_PORT}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
+      CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+
+
+  worker-anthropic-proxy:
+    container_name: helicone-worker-anthropic-proxy
+    build:
+      context: ../worker
+      dockerfile: ../docker/dockerfiles/dockerfile_worker
+    restart: unless-stopped
+    ports:
+      - ${ANTHROPIC_PROXY_PORT}:${ANTHROPIC_PROXY_PORT}
+    environment:
+      WORKER_TYPE: ANTHROPIC_PROXY
+      WORKER_PORT: ${ANTHROPIC_PROXY_PORT}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
+      CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+
+  worker-gateway:
+    container_name: helicone-worker-gateway
+    build:
+      context: ../worker
+      dockerfile: ../docker/dockerfiles/dockerfile_worker
+    restart: unless-stopped
+    ports:
+      - ${GATEWAY_API_PORT}:${GATEWAY_API_PORT}
+    environment:
+      WORKER_TYPE: HELICONE_API
+      WORKER_PORT: ${GATEWAY_API_PORT}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
+      CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+
+  jawn:
+    container_name: helicone-jawn
+    build:
+      context: ../valhalla
+    restart: unless-stopped
+    ports:
+      - ${JAWN_PORT}:${JAWN_PORT}
+    environment:
+      PORT: ${JAWN_PORT}
+    
+      SUPABASE_CREDS: |
+        {
+          "url": "http://kong:${KONG_HTTP_PORT}",
+          "service_role_key": "${SERVICE_ROLE_KEY}"
+        }
+      SUPABASE_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+
+    
+
+
+
+  # worker-helicone-api:
+  #   container_name: helicone-worker-helicone-api
+  #   image: helicone/worker-helicone-api:latest
+  #   restart: unless-stopped
+  #   ports:
+  #     # Pass down internal port because it's set dynamically by other services
+  #     - 8788:8788
+  #   environment:
+  #     SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+  #     SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
+  #     CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
+  #     NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+  #     CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+  #     CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+  #     STORAGE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${PGBOUNCER_PORT}/${POSTGRES_DB}
+
 
     # If you want to use logging, please run with `docker compose -f docker-compose.yml -f docker-compose-logging.yml up`

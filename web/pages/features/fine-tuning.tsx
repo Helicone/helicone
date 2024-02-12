@@ -1,8 +1,8 @@
 import { CheckCircleIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
-import MetaData from "../../components/shared/metaData";
+import MetaData from "../../components/layout/public/authMetaData";
 import NavBarV2 from "../../components/layout/navbar/navBarV2";
-import GridBackground from "../../components/layout/public-pages/gridBackground";
+import GridBackground from "../../components/layout/public/gridBackground";
 import Link from "next/link";
 import ContactForm from "../../components/shared/contactForm";
 import Footer from "../../components/layout/footer";
@@ -55,9 +55,7 @@ const FineTuning = () => {
                 Want to chat with the founders?
               </p>
               <Link
-                href={
-                  "https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call"
-                }
+                href={"https://cal.com/team/helicone/helicone-discoveryl"}
                 className="text-gray-500 hover:text-black flex flex-row items-center gap-1 text-sm mt-2 w-fit"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -66,10 +64,10 @@ const FineTuning = () => {
               </Link>
             </div>
             <ContactForm
-              contactTag={""}
+              contactTag={"fine-tuning"}
               buttonText={"Contact Us"}
               defaultPlaceholder={
-                "I am interested in Helicone's Customer Portal feature!"
+                "I am interested in Helicone's fine-tuning feature!"
               }
             />
           </div>

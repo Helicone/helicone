@@ -44,7 +44,11 @@ export const getBuilderType = (
     return "CustomBuilder";
   }
 
-  if (model == "gpt-4-vision-preview" || model == "gpt-4-1106-vision-preview") {
+  if (
+    provider === "TOGETHERAI" ||
+    model == "gpt-4-vision-preview" ||
+    model == "gpt-4-1106-vision-preview"
+  ) {
     return "ChatGPTBuilder";
   }
 
@@ -114,8 +118,14 @@ const builders: {
 };
 
 const getModelFromPath = (path: string) => {
-  let regex = /\/engines\/([^\/]+)/;
-  let match = path.match(regex);
+  const regex1 = /\/engines\/([^/]+)/;
+  const regex2 = /models\/([^/:]+)/;
+
+  let match = path.match(regex1);
+
+  if (!match) {
+    match = path.match(regex2);
+  }
 
   if (match && match[1]) {
     return match[1];

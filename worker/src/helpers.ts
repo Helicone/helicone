@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { EventEmitter } from "events";
 
 export const once = (
@@ -24,4 +25,20 @@ export async function withTimeout<T>(
 
 export function enumerate<T>(arr: T[]): [number, T][] {
   return arr.map((item, index) => [index, item]);
+}
+
+export function deepCompare(a: any, b: any): boolean {
+  if (a === b) return true;
+
+  if (typeof a === "object" && typeof b === "object") {
+    if (Object.keys(a).length !== Object.keys(b).length) return false;
+
+    for (const key in a) {
+      if (!deepCompare(a[key], b[key])) return false;
+    }
+
+    return true;
+  }
+
+  return false;
 }

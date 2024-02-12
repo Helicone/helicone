@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import BasePageV2 from "../components/layout/basePageV2";
 import LoadingAnimation from "../components/shared/loadingAnimation";
-import MetaData from "../components/shared/metaData";
+import MetaData from "../components/layout/public/authMetaData";
 import { HeliconeIssuesResolvedType } from "./api/issues";
 
 const Home = () => {

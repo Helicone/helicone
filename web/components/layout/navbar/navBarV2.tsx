@@ -1,15 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 import { Dialog } from "@headlessui/react";
-import { Bars3Icon, StarIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { useState } from "react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { clsx } from "../../shared/clsx";
 import SolutionsButton from "./solutionsButton";
 import DeveloperButton from "./developerButton";
-import { BsGithub } from "react-icons/bs";
 
 interface NavBarV2Props {}
 
@@ -26,16 +24,16 @@ const NavBarV2 = (props: NavBarV2Props) => {
     <header className="bg-white top-0 sticky z-30 border-b border-gray-200">
       {!mobileMenuOpen && (
         <nav
-          className="mx-auto flex max-w-6xl items-center md:gap-x-8 gap-x-16 p-3 md:px-8"
+          className="mx-auto flex max-w-5xl items-center md:gap-x-8 gap-x-16 py-2"
           aria-label="Global"
         >
-          <div className="flex">
+          <div className="flex items-center">
             <Link href="/" className="-m-1.5 p-1.5">
               <span className="sr-only">Helicone</span>
               <div>
                 <svg
                   width="120"
-                  height="25"
+                  height="20"
                   viewBox="0 0 447 86"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -84,12 +82,12 @@ const NavBarV2 = (props: NavBarV2Props) => {
               </div>
             </Link>
           </div>
-          <div className="hidden md:flex gap-x-1 lg:gap-x-4 items-center text-sm">
+          <div className="hidden md:flex gap-x-1 lg:gap-x-2 items-center text-sm">
             <SolutionsButton />
             <DeveloperButton />
             <Link
               href="/pricing"
-              className="flex flex-row items-center font-semibold hover:bg-gray-200 rounded-lg px-4 py-2 focus:outline-none"
+              className="flex flex-row items-center font-semibold hover:bg-gray-100 rounded-md px-3 py-1.5 focus:outline-none"
             >
               Pricing
             </Link>
@@ -97,32 +95,18 @@ const NavBarV2 = (props: NavBarV2Props) => {
               href="https://blog.helicone.ai/"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-row items-center font-semibold hover:bg-gray-200 rounded-lg px-4 py-2 focus:outline-none"
+              className="flex flex-row items-center font-semibold hover:bg-gray-100 rounded-md px-3 py-1.5 focus:outline-none"
             >
               Blog
             </Link>
             <Link
               href="/sales"
-              className="flex flex-row items-center font-semibold hover:bg-gray-200 rounded-lg px-4 py-2 focus:outline-none"
+              className="flex flex-row items-center font-semibold hover:bg-gray-100 rounded-md px-3 py-1.5 focus:outline-none"
             >
               Contact
             </Link>
           </div>
           <div className="flex-1 hidden md:flex items-center justify-end gap-x-4">
-            <Link
-              href="https://github.com/Helicone/helicone"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={clsx(
-                "text-xs font-semibold text-gray-900 flex flex-row gap-x-2 items-center"
-              )}
-            >
-              <StarIcon className="h-3 w-3 text-gray-900 " />
-              <div className="hidden lg:block">Star us on Github</div>
-              <div className="lg:hidden">
-                <BsGithub className="h-4 w-4" />
-              </div>
-            </Link>
             {user ? (
               <button
                 onClick={() => {
@@ -130,17 +114,25 @@ const NavBarV2 = (props: NavBarV2Props) => {
                     router.push("/");
                   });
                 }}
-                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-lg px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
               >
                 Sign Out
               </button>
             ) : (
-              <Link
-                href="/signin"
-                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-              >
-                Sign In
-              </Link>
+              <>
+                <Link
+                  href="/signin"
+                  className="bg-white hover:bg-gray-100 border border-black whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                >
+                  Sign Up
+                </Link>
+              </>
             )}
           </div>
           <div className="flex flex-1 justify-end md:hidden">
@@ -181,7 +173,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                 <a href="#" className="-m-1.5 p-1.5">
                   <span className="sr-only">Helicone</span>
                   <Image
-                    className="block rounded-lg"
+                    className="block rounded-md"
                     src="/assets/landing/helicone.webp"
                     width={150}
                     height={150 / (1876 / 528)}
@@ -246,14 +238,14 @@ const NavBarV2 = (props: NavBarV2Props) => {
                             router.push("/");
                           });
                         }}
-                        className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap flex w-full justify-center rounded-lg px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                        className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap flex w-full justify-center rounded-md px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                       >
                         Sign Out
                       </button>
                     ) : (
                       <Link
                         href="/signin"
-                        className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap flex w-full justify-center rounded-lg px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                        className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap flex w-full justify-center rounded-md px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                       >
                         Sign In
                       </Link>

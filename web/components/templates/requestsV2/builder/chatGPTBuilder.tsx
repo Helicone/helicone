@@ -86,7 +86,22 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
               return false;
             };
 
-            if (hasFunctionCall()) {
+            const hasText = () => {
+              // check if message.text is an object
+              if (
+                message?.text &&
+                typeof message.text === "object" &&
+                message.text !== null
+              ) {
+                return true;
+              }
+
+              return false;
+            };
+
+            if (hasText()) {
+              return JSON.stringify(message.text);
+            } else if (hasFunctionCall()) {
               const tools = message.tool_calls;
               const functionTools = tools?.find(
                 (tool: { type: string }) => tool.type === "function"
@@ -125,9 +140,9 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
     return {
       requestText: getRequestText(),
       responseText: getResponseText(),
-      render:
-        this.response.response_status === 0 ||
-        this.response.response_status === null ? (
+      render: () => {
+        return this.response.response_status === 0 ||
+          this.response.response_status === null ? (
           <p>Pending...</p>
         ) : this.response.response_status === 200 ? (
           <Chat
@@ -159,7 +174,8 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
               </p>
             </div>
           </div>
-        ),
+        );
+      },
     };
   }
 }

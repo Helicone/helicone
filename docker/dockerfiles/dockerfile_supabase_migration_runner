@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM --platform=linux/amd64 node:18.18.0
 
 WORKDIR /app
 RUN apt update -y
@@ -6,17 +6,11 @@ RUN apt install curl git -y
 # Install gcc
 RUN apt install build-essential -y
 
-RUN bash -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
+COPY . /app/supabase
 
-USER root
-ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
+WORKDIR /app
 
-RUN brew install supabase/tap/supabase
 
-COPY . /app/helicone
+RUN npm i supabase
 
-WORKDIR /app/helicone
-
-# CMD [ "supabase", "db", "push", "--db-url", ${DATABASE_URL} ]
-CMD supabase db push --db-url ${DATABASE_URL}
-# CMD echo ${DATABASE_URL}
+CMD npx supabase db push --db-url ${DATABASE_URL}
