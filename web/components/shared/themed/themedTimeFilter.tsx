@@ -1,9 +1,10 @@
 import { Menu, Popover, Transition } from "@headlessui/react";
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { clsx } from "../clsx";
 import useNotification from "../notification/useNotification";
 import useSearchParams from "../utils/useSearchParams";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react";
 import { TimeFilter } from "../../templates/dashboard/dashboardPage";
 
 interface ThemedTimeFilterProps {
@@ -52,6 +53,34 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
     return active === key;
   };
 
+  const [relative, setRelative] = useState<
+    "minute" | "hour" | "day" | "week" | "month"
+  >("day");
+  const [relativeValue, setRelativeValue] = useState<number>(1);
+
+  useEffect(() => {
+    if (relative && relativeValue) {
+      let startDate = new Date().getTime();
+
+      if (relative === "minute") {
+        startDate -= relativeValue * 60 * 1000;
+      } else if (relative === "hour") {
+        startDate -= relativeValue * 60 * 60 * 1000;
+      } else if (relative === "day") {
+        startDate -= relativeValue * 24 * 60 * 60 * 1000;
+      } else if (relative === "week") {
+        startDate -= relativeValue * 7 * 24 * 60 * 60 * 1000;
+      } else if (relative === "month") {
+        startDate -= relativeValue * 30 * 24 * 60 * 60 * 1000;
+      }
+
+      setStartDate(formatDateToInputString(new Date(startDate)));
+      setEndDate(
+        formatDateToInputString(new Date(new Date().getTime() + 1000))
+      );
+    }
+  }, [relative, relativeValue]);
+
   return (
     <Menu
       as="div"
@@ -85,48 +114,92 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
               <Popover.Panel className="mt-3 absolute z-10 bg-white dark:bg-black rounded-lg shadow-2xl p-2 border border-gray-300 dark:border-gray-700">
                 {({ close }) => (
                   <div className="px-4 py-2 flex flex-col space-y-4">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <div>
-                        <label
-                          htmlFor="startDate"
-                          className="block text-xs font-medium text-gray-700 dark:text-gray-300"
-                        >
-                          Start Date
-                        </label>
-                        <div className="mt-1">
-                          <input
-                            type="datetime-local"
-                            name="startDate"
-                            id="startDate"
-                            onChange={(e) => {
-                              setStartDate(e.target.value);
-                            }}
-                            value={startDate}
-                            className="bg-gray-50 dark:bg-gray-900 text-black dark:text-white block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="endDate"
-                          className="block text-xs font-medium text-gray-700 dark:text-gray-300"
-                        >
-                          End Date
-                        </label>
-                        <div className="mt-1">
-                          <input
-                            type="datetime-local"
-                            name="endDate"
-                            id="endDate"
-                            onChange={(e) => {
-                              setEndDate(e.target.value);
-                            }}
-                            value={endDate}
-                            className="bg-gray-50 dark:bg-gray-900 text-black dark:text-white block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          />
-                        </div>
-                      </div>
-                    </div>
+                    <TabGroup>
+                      <TabList className="font-semibold" variant="solid">
+                        <Tab>Absolute</Tab>
+                        <Tab>Relative</Tab>
+                      </TabList>
+                      <TabPanels>
+                        <TabPanel>
+                          <div className="flex flex-col sm:flex-row gap-4">
+                            <div>
+                              <label
+                                htmlFor="startDate"
+                                className="block text-xs font-medium text-gray-700 dark:text-gray-300"
+                              >
+                                Start Date
+                              </label>
+                              <div className="mt-1">
+                                <input
+                                  type="datetime-local"
+                                  name="startDate"
+                                  id="startDate"
+                                  onChange={(e) => {
+                                    setStartDate(e.target.value);
+                                    console.log(e.target.value);
+                                  }}
+                                  value={startDate}
+                                  className="bg-gray-50 dark:bg-gray-900 text-black dark:text-white block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <label
+                                htmlFor="endDate"
+                                className="block text-xs font-medium text-gray-700 dark:text-gray-300"
+                              >
+                                End Date
+                              </label>
+                              <div className="mt-1">
+                                <input
+                                  type="datetime-local"
+                                  name="endDate"
+                                  id="endDate"
+                                  onChange={(e) => {
+                                    setEndDate(e.target.value);
+                                  }}
+                                  value={endDate}
+                                  className="bg-gray-50 dark:bg-gray-900 text-black dark:text-white block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </TabPanel>
+                        <TabPanel>
+                          <div className="flex flex-col sm:flex-row gap-4 items-center">
+                            <div className="mt-1">
+                              <input
+                                type="number"
+                                name="relativeValue"
+                                id="relativeValue"
+                                onChange={(e) => {
+                                  setRelativeValue(Number(e.target.value));
+                                }}
+                                value={relativeValue}
+                                className="h-10 w-16 bg-gray-50 dark:bg-gray-900 text-black dark:text-white block rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                              />
+                            </div>
+
+                            <select
+                              id="relative"
+                              name="relative"
+                              value={relative}
+                              onChange={(e) => {
+                                setRelative(e.target.value as any);
+                              }}
+                              className="h-10 bg-gray-50 dark:bg-gray-900 text-black dark:text-white  rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            >
+                              <option value="minute">Minutes</option>
+                              <option value="hour">Hours</option>
+                              <option value="day">Days</option>
+                              <option value="week">Weeks</option>
+                              <option value="month">Months</option>
+                            </select>
+                          </div>
+                        </TabPanel>
+                      </TabPanels>
+                    </TabGroup>
+
                     <div className="py-1 w-full flex flex-row gap-3 items-center justify-end">
                       <button
                         onClick={() => close()}

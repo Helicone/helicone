@@ -134,6 +134,7 @@ const whereKeyMappings: KeyMappings = {
     node_id: "job_node_request.node_id",
     model: "request.model",
     modelOverride: "request.model_override",
+    path: "request.path",
   }),
   response: easyKeyMappings<"response">({
     body_completion:
@@ -345,12 +346,16 @@ export function buildFilterLeaf(
         ? "!="
         : operatorKey === "contains"
         ? "ILIKE"
+        : operatorKey === "not-contains"
+        ? "NOT ILIKE"
         : undefined;
 
     filters.push(
       `${column} ${sqlOperator} ${argPlaceHolder(argsAcc.length, value)}`
     );
     if (operatorKey === "contains") {
+      argsAcc.push(`%${value}%`);
+    } else if (operatorKey === "not-contains") {
       argsAcc.push(`%${value}%`);
     } else {
       argsAcc.push(value);

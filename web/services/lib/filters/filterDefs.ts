@@ -10,9 +10,10 @@ export type AllOperators =
   | "lt"
   | "gt"
   | "not-equals"
-  | "contains";
+  | "contains"
+  | "not-contains";
 export type TextOperators = Record<
-  "not-equals" | "equals" | "like" | "ilike" | "contains",
+  "not-equals" | "equals" | "like" | "ilike" | "contains" | "not-contains",
   string
 >;
 
@@ -49,6 +50,7 @@ export type RequestTableToOperators = {
   node_id: SingleKey<TextOperators>;
   model: SingleKey<TextOperators>;
   modelOverride: SingleKey<TextOperators>;
+  path: SingleKey<TextOperators>;
 };
 
 export type FilterLeafRequest = SingleKey<RequestTableToOperators>;
