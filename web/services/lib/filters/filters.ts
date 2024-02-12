@@ -134,6 +134,7 @@ const whereKeyMappings: KeyMappings = {
     node_id: "job_node_request.node_id",
     model: "request.model",
     modelOverride: "request.model_override",
+    path: "request.path",
   }),
   response: easyKeyMappings<"response">({
     body_completion:

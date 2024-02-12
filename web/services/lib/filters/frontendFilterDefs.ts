@@ -168,6 +168,7 @@ export const REQUEST_TABLE_FILTERS: [
     column: "prompt",
     category: "request",
   },
+
   {
     label: "Response",
     operators: textOperators,
@@ -202,6 +203,13 @@ export const REQUEST_TABLE_FILTERS: [
     category: "response",
     table: "response",
     column: "status",
+  },
+  {
+    label: "Path",
+    operators: textOperators,
+    table: "request",
+    column: "path",
+    category: "request",
   },
   {
     label: "Feedback",

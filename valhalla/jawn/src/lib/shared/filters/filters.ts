@@ -132,6 +132,7 @@ const whereKeyMappings: KeyMappings = {
     org_id: "request.helicone_org_id",
     id: "request.id",
     node_id: "job_node_request.node_id",
+    path: "request.path",
   }),
   response: easyKeyMappings<"response">({
     body_completion:

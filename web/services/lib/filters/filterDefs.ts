@@ -50,6 +50,7 @@ export type RequestTableToOperators = {
   node_id: SingleKey<TextOperators>;
   model: SingleKey<TextOperators>;
   modelOverride: SingleKey<TextOperators>;
+  path: SingleKey<TextOperators>;
 };
 
 export type FilterLeafRequest = SingleKey<RequestTableToOperators>;

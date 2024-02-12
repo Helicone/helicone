@@ -53,6 +53,7 @@ export type RequestTableToOperators = {
   org_id: SingleKey<TextOperators>;
   id: SingleKey<TextOperators>;
   node_id: SingleKey<TextOperators>;
+  path: SingleKey<TextOperators>;
 };
 
 export type FilterLeafRequest = SingleKey<RequestTableToOperators>;
