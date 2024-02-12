@@ -10,9 +10,10 @@ export type AllOperators =
   | "lt"
   | "gt"
   | "not-equals"
-  | "contains";
+  | "contains"
+  | "not-contains";
 export type TextOperators = Record<
-  "not-equals" | "equals" | "like" | "ilike" | "contains",
+  "not-equals" | "equals" | "like" | "ilike" | "contains" | "not-contains",
   string
 >;
 

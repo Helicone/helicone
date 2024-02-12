@@ -40,6 +40,11 @@ const textOperators: Operator<keyof TextOperators>[] = [
     type: "text",
   },
   {
+    value: "not-contains",
+    label: "not contains",
+    type: "text",
+  },
+  {
     value: "ilike",
     label: "ilike",
     type: "text",
