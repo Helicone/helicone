@@ -253,7 +253,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                     </Select>
                   </div>
                 </div>
-                {!selectedVersion ? (
+                {selectedVersion === undefined ? (
                   <div className="flex flex-col w-full h-96 justify-center items-center">
                     <div className="flex flex-col w-2/5">
                       <DocumentTextIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
