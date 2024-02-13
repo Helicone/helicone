@@ -38,7 +38,6 @@ import UpgradeProModal from "../shared/upgradeProModal";
 import OrgDropdown from "./orgDropdown";
 
 import { Badge } from "@tremor/react";
-import { useFeatureFlags } from "../../services/hooks/featureFlags";
 import ReferralModal from "../common/referralModal";
 import { useTheme } from "../shared/theme/themeContext";
 import { ThemedSwitch } from "../shared/themed/themedSwitch";
@@ -63,7 +62,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [referOpen, setReferOpen] = useState(false);
   const [open, setOpen] = useState(false);
-  const ffs = useFeatureFlags("prompts", org?.currentOrg?.id || "");
 
   const NAVIGATION: {
     name: string;
@@ -84,16 +82,13 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: TableCellsIcon,
       current: pathname.includes("/requests"),
     },
-    ...(ffs.hasFlag
-      ? [
-          {
-            name: "Prompts",
-            href: "/prompts",
-            icon: DocumentTextIcon,
-            current: pathname.includes("/prompts"),
-          },
-        ]
-      : []),
+    {
+      name: "Prompts",
+      href: "/prompts",
+      icon: DocumentTextIcon,
+      current: pathname.includes("/prompts"),
+      featured: true,
+    },
     {
       name: "Users",
       href: "/users",
@@ -111,7 +106,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/fine-tune",
       icon: SparklesIcon,
       current: pathname.includes("/fine-tune"),
-      featured: true,
     },
     {
       name: "Properties",

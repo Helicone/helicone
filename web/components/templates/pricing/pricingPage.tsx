@@ -92,6 +92,22 @@ const sections: {
     name: "Features",
     features: [
       {
+        name: "Prompts",
+        tiers: {
+          Free: "1",
+          Pro: "3 + 20$/prompt (max 10)",
+          Custom: "prompt bulk pricing",
+        },
+      },
+      {
+        name: "Prompt Evaluation",
+        tiers: {
+          Free: false,
+          Pro: "limited access",
+          Custom: true,
+        },
+      },
+      {
         name: "Caching",
         tiers: {
           Free: false,
