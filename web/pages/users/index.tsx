@@ -1,10 +1,11 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
-import AuthLayout from "../components/layout/authLayout";
-import UsersPageV2 from "../components/templates/users/usersPageV2";
-import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
-import { SortDirection } from "../services/lib/sorts/users/sorts";
+
 import { ReactElement } from "react";
+import { SortDirection } from "../../services/lib/sorts/users/sorts";
+import UsersPageV2 from "../../components/templates/users/usersPageV2";
+import AuthLayout from "../../components/layout/authLayout";
+import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 
 interface UsersProps {
   user: User;

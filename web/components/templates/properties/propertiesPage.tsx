@@ -21,7 +21,7 @@ const PropertiesPage = (props: {}) => {
 
   return (
     <>
-      <AuthHeader title={"Properties"} subtitle="" />
+      <AuthHeader title={"Properties"} />
       <div className="flex flex-col gap-4">
         <>
           {isPropertiesLoading ? (
