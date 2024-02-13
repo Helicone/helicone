@@ -18,7 +18,7 @@ import { RequestViews } from "./themedTableV5";
 import { useOrg } from "../../../layout/organizationContext";
 
 interface ThemedTableHeaderProps<T> {
-  rows: T[];
+  rows?: T[];
 
   // define this if you want the advanced filters
   advancedFilters?: {
@@ -29,6 +29,7 @@ interface ThemedTableHeaderProps<T> {
       property: string,
       search: string
     ) => Promise<Result<void, string>>;
+    show?: boolean;
   };
 
   // define this if you want the columns filter
@@ -130,7 +131,8 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               visibleColumns={columnsFilter.visibleColumns}
             />
           )}
-          <ExportButton rows={rows} />
+          {rows && <ExportButton rows={rows} />}
+
           {viewToggle && (
             <ViewButton
               currentView={viewToggle.currentView}
@@ -169,6 +171,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
       )}
       {advancedFilters &&
         advancedFilters.filters.length > 0 &&
+        advancedFilters.show &&
         !showFilters && (
           <div className="flex-wrap w-full flex-row space-x-4 space-y-2 mt-4">
             {advancedFilters.filters.map((_filter, index) => {

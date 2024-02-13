@@ -15,6 +15,7 @@ import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 import Link from "next/link";
 import { ElementType } from "react";
 import { useRouter } from "next/router";
+import AuthHeader from "../../shared/authHeader";
 
 interface DeveloperPageProps {
   defaultIndex?: number;
@@ -66,12 +67,8 @@ const DeveloperPage = (props: DeveloperPageProps) => {
   const isPaidPlan = tier === "pro" || tier === "enterprise";
 
   return (
-    <div className="flex flex-col space-y-4">
-      <div className="flex flex-row items-center justify-between">
-        <h1 className="font-semibold text-3xl text-black dark:text-white">
-          Developer
-        </h1>
-      </div>
+    <>
+      <AuthHeader title={"Developer"} />
       <TabGroup defaultIndex={defaultIndex}>
         <TabList className="font-semibold" variant="line">
           {tabs.map((tab) => (
@@ -153,7 +150,7 @@ const DeveloperPage = (props: DeveloperPageProps) => {
           </TabPanel>
         </TabPanels>
       </TabGroup>
-    </div>
+    </>
   );
 };
 
