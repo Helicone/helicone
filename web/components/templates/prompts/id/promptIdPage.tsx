@@ -126,7 +126,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   const { id } = props;
   const { prompts, isLoading } = usePrompts();
 
-  const currentPrompt = prompts?.data?.find((p) => p.id === id);
+  const currentPrompt = prompts?.data?.prompts.find((p) => p.id === id);
   const [selectedVersion, setSelectedVersion] = useState<string>();
 
   const selectedPrompt = usePrompt({

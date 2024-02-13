@@ -38,7 +38,6 @@ import UpgradeProModal from "../shared/upgradeProModal";
 import OrgDropdown from "./orgDropdown";
 
 import { Badge } from "@tremor/react";
-import { useFeatureFlags } from "../../services/hooks/featureFlags";
 import ReferralModal from "../common/referralModal";
 import { useTheme } from "../shared/theme/themeContext";
 import { ThemedSwitch } from "../shared/themed/themedSwitch";
