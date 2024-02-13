@@ -30,8 +30,9 @@ const AuthForm = (props: AuthFormProps) => {
       const fullUrl = window.location.href;
       const startIndex = fullUrl.indexOf("url=");
       const urlParam = fullUrl.substring(startIndex + 4);
+      const decodedUrl = decodeURIComponent(urlParam);
 
-      window.location.href = urlParam as string;
+      window.location.href = decodedUrl as string;
     }
   }, [router.query, router.asPath]);
 
