@@ -7,7 +7,7 @@ import {
   TabPanels,
 } from "@tremor/react";
 import AuthHeader from "../../../shared/authHeader";
-import { useUserId, useUsers } from "../../../../services/hooks/users";
+import { useUserId } from "../../../../services/hooks/users";
 import LoadingAnimation from "../../../shared/loadingAnimation";
 import { getUSDate } from "../../../shared/utils/utils";
 import { formatNumber } from "../initialColumns";

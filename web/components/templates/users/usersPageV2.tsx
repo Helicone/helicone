@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { UserMetric } from "../../../lib/api/users/users";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useUsers } from "../../../services/hooks/users";
 import {
@@ -15,7 +14,6 @@ import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import TableFooter from "../requestsV2/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
-import UserModal from "./userModal";
 import { useRouter } from "next/router";
 
 function formatNumber(num: number) {
