@@ -39,6 +39,7 @@ interface ThemedTableV5Props<T> {
       property: string,
       search: string
     ) => Promise<Result<void, string>>;
+    show?: boolean;
   };
   timeFilter?: {
     currentTimeFilter: TimeFilter;
@@ -130,6 +131,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
                 filters: advancedFilters.filters,
                 searchPropertyFilters: advancedFilters.searchPropertyFilters,
                 setAdvancedFilters: advancedFilters.setAdvancedFilters,
+                show: advancedFilters.show,
               }
             : undefined
         }
@@ -159,7 +161,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
               }
             : undefined
         }
-        rows={exportData || []}
+        rows={exportData}
       />
 
       {dataLoading ? (

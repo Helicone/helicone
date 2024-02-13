@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { UserMetric } from "../../../lib/api/users/users";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useUsers } from "../../../services/hooks/users";
 import {
@@ -15,7 +14,7 @@ import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import TableFooter from "../requestsV2/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
-import UserModal from "./userModal";
+import { useRouter } from "next/router";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -46,11 +45,9 @@ interface UsersPageV2Props {
 const UsersPageV2 = (props: UsersPageV2Props) => {
   const { currentPage, pageSize, sort } = props;
 
-  const [open, setOpen] = useState(false);
-
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
   const debouncedAdvancedFilters = useDebounce(advancedFilters, 2_000); // 2 seconds
-  const [selectedUser, setSelectedUser] = useState<UserMetric>();
+  const router = useRouter();
 
   const sortLeaf: SortLeafRequest =
     sort.sortKey && sort.sortDirection
@@ -93,8 +90,9 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           }}
           exportData={users}
           onRowSelect={(row) => {
-            setSelectedUser(row);
-            setOpen(true);
+            router.push("/users/" + row.user_id);
+            // setSelectedUser(row);
+            // setOpen(true);
           }}
         />
         <TableFooter
@@ -113,7 +111,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
         />
       </div>
 
-      <UserModal open={open} setOpen={setOpen} user={selectedUser} />
+      {/* <UserModal open={open} setOpen={setOpen} user={selectedUser} /> */}
     </>
   );
 };
