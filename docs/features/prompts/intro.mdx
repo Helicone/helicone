@@ -1,33 +1,30 @@
 ---
-title: "Intro"
-description: ""
+title: "Introduction"
+description: "Understanding Helicone's Prompt Management"
 ---
 
-Helicone's prompt management is a really easy way for users to
-keep track of the prompt they use when calling their generative AI application.
-Helicone can automatically keep track of versions and inputs as they change.
+Helicone's prompt management provides a seamless way for users to track the prompts used when operating their generative AI applications. With Helicone, you can effortlessly monitor versions and inputs as they evolve.
 
-### How it works
+### How it Works
 
 ```tsx
 const location = "space";
 const scene = "two brothers";
 const promptInput = hprompt`
-Write a movie scene about ${{ scene }}, where they are on ${{ location }}
+Compose a movie scene involving ${{ scene }}, set in ${{ location }}
 `;
 ```
 
-As you change your prompt a new version will automatically be added and kept track of withint Helicone.
-Also a dataset of input/output keys will be kept for each version as well.
+As you modify your prompt, Helicone automatically adds a new version and maintains a record of it. Additionally, a dataset of input/output keys is preserved for each version.
 
-### Get started
+### Getting Started
 
 <CardGroup cols={2}>
-  <Card title="Quick Start" href="/features/prompts/quick-start">
+  <Card title="Quick Start Guide" href="/features/prompts/quick-start">
     Recommended
   </Card>
   <Card
-    title="Quick Start (Async)"
+    title="Quick Start Guide (Async)"
     href="/features/prompts/quick-start-async"
   ></Card>
 </CardGroup>

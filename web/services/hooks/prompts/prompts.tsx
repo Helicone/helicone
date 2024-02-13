@@ -4,6 +4,7 @@ import { UserMetric } from "../../../lib/api/users/users";
 import { Result } from "../../../lib/result";
 import { FilterNode } from "../../lib/filters/filterDefs";
 import { SortLeafUsers } from "../../lib/sorts/users/sorts";
+import { PromptsResult } from "../../../pages/api/prompt";
 
 const usePrompts = (id?: string) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
@@ -14,19 +15,7 @@ const usePrompts = (id?: string) => {
         headers: {
           "Content-Type": "application/json",
         },
-      }).then(
-        (res) =>
-          res.json() as Promise<
-            Result<
-              {
-                id: string;
-                latest_version: number;
-                created_at: string;
-              }[],
-              string
-            >
-          >
-      );
+      }).then((res) => res.json() as Promise<PromptsResult>);
 
       return {
         prompts,

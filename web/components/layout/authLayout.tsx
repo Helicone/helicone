@@ -63,7 +63,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [referOpen, setReferOpen] = useState(false);
   const [open, setOpen] = useState(false);
-  const ffs = useFeatureFlags("prompts", org?.currentOrg?.id || "");
 
   const NAVIGATION: {
     name: string;
@@ -84,16 +83,13 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: TableCellsIcon,
       current: pathname.includes("/requests"),
     },
-    ...(ffs.hasFlag
-      ? [
-          {
-            name: "Prompts",
-            href: "/prompts",
-            icon: DocumentTextIcon,
-            current: pathname.includes("/prompts"),
-          },
-        ]
-      : []),
+    {
+      name: "Prompts",
+      href: "/prompts",
+      icon: DocumentTextIcon,
+      current: pathname.includes("/prompts"),
+      featured: true,
+    },
     {
       name: "Users",
       href: "/users",
@@ -111,7 +107,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/fine-tune",
       icon: SparklesIcon,
       current: pathname.includes("/fine-tune"),
-      featured: true,
     },
     {
       name: "Properties",

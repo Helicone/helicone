@@ -3,23 +3,26 @@ title: "Quick Start"
 description: ""
 ---
 
-<Warning>This feature is in Beta, please use at your own risk.</Warning>
+<Warning>This feature is currently in Beta. Use it at your own risk.</Warning>
 <Accordion title="How does it work?">
 
-We are currently using an adapated version of JSX to manage prompts and their input variables.
-Essentially send over a prompt with the following syntax
-`tsx
-    <helicone-prompt-input key="my_input_key">Input to your LLM</helicone-prompt-input>
-    `
+We are currently utilizing an adapted version of JSX to manage prompts and their input variables.
+You can send over a prompt with the following syntax:
 
-Within the proxy we will extract the `children` text from the JSX element `helicone-prompt-input` and replace it before it is sent to you LLM.
-This will result in the following string sent over to your LLM
+```tsx
+<helicone-prompt-input key="my_input_key">
+  Input to your LLM
+</helicone-prompt-input>
+```
+
+Within the proxy, we extract the `children` text from the JSX element `helicone-prompt-input` and replace it before it is sent to your LLM.
+This results in the following string being sent over to your LLM:
 
 ```tsx
     Input to your LLM
 ```
 
-Then all of the variables are mapped within the UI as a dictionary like
+Then, all of the variables are mapped within the UI as a dictionary like:
 
 ```json
 {
@@ -28,21 +31,19 @@ Then all of the variables are mapped within the UI as a dictionary like
 ```
 
 <Note>
-  it is crucial that each key has a unique identifier otherwise you will get the
-  same variable replacing in multiple places
+  It is crucial that each key has a unique identifier; otherwise, you will get the
+  same variable replacing in multiple places.
 </Note>
 </Accordion>
 
-## Prerequisties
+## Prerequisites
 
-You must have Helicone setup in proxy mode via
+You must have Helicone set up in proxy mode via
 [Gateway](/getting-started/integration-method/gateway) or [custom package](/getting-started/integration-method/openai-proxy).
 
-Read [Proxy vs Async](/getting-started/proxy-vs-async) to learn more about the difference between proxy and async integrations.
+Read [Proxy vs Async](/getting-started/proxy-vs-async) to learn more about the differences between proxy and async integrations.
 
-You have to be using Helicone via Proxy,
-if you are not using Helicone via proxy,
-please see our [Quick Start Async](/features/prompts/quick-start-async).
+You must be using Helicone via Proxy. If you are not, please refer to our [Quick Start Async](/features/prompts/quick-start-async).
 
 <Tabs>
   <Tab title="Typescript / Javascript">
@@ -57,7 +58,7 @@ please see our [Quick Start Async](/features/prompts/quick-start-async).
         messages: [
           {
             role: "user",
-            // 2: add hprompt to any string, and nest any variable in additional brackets `{}`
+            // 2: Add hprompt to any string, and nest any variable in additional brackets `{}`
             content: hprompt`Write a story about ${{ scene }}`,
           },
         ],
@@ -73,9 +74,9 @@ please see our [Quick Start Async](/features/prompts/quick-start-async).
     ```
 
 
-    ## Step by step
+    ## Step by Step
     <Steps>
-      <Step title="add hprompt">
+      <Step title="Add hprompt">
 
       ```ts
       import { hprompt } from "@helicone/helicone";
@@ -84,9 +85,9 @@ please see our [Quick Start Async](/features/prompts/quick-start-async).
       </Step>
       <Step title="Replace any text input">
 
-      Using the back ticket string formatter in javascript, just add `hprompt` infront of your backtick to automatically format your text so that Helicone can determine where your variables are.
+      Using the backtick string formatter in JavaScript, add `hprompt` in front of your backtick to automatically format your text so that Helicone can determine where your variables are.
 
-      Also nest your inputted variable so that is within another bracket `{}`, this is essentially
+      Also, nest your inputted variable so that it is within another bracket `{}`, this is essentially
       making it so that we can determine the `input key` for Helicone.
 
       ```tsx
@@ -94,7 +95,7 @@ please see our [Quick Start Async](/features/prompts/quick-start-async).
       ```
 
       <Accordion title="Change Input Name">
-        If you want to rename your input or have custom input you can change the key value pair in the passed dictionary to the string formatter function. Like this:
+        If you want to rename your input or have a custom input, you can change the key-value pair in the passed dictionary to the string formatter function. Like this:
 
         ```tsx
         content: hprompt`Write a story about ${{ "my_magical_input": scene  }}`,
@@ -107,7 +108,7 @@ please see our [Quick Start Async](/features/prompts/quick-start-async).
 
         Assigning an id allows us to associate your prompt with future versions of your prompt, and automatically manage versions on your behalf.
 
-        Depending on the package you are using, you will neeed to add a header, for more information on adding headers to packages please see [Helicone Headers](/helicone-headers).
+        Depending on the package you are using, you will need to add a header. For more information on adding headers to packages, please see [Helicone Headers](/helicone-headers).
 
         ```tsx
         headers: {
@@ -122,7 +123,7 @@ please see our [Quick Start Async](/features/prompts/quick-start-async).
 
   </Tab>
   <Tab title="Packageless (curl)">
-  Let's say we have an app that generates a short story with an inputed scene.
+  Let's say we have an app that generates a short story with an inputted scene.
   
   For example: "Write a story about a secret agent"
 
@@ -135,10 +136,10 @@ please see our [Quick Start Async](/features/prompts/quick-start-async).
     Given the above string, let's say `a secret agent` is our inputted variable.
     </Step>
     <Step title="Create a key name for your inputted variable">
-    Since we are a scene, let's call our key `scene`
+    Since we have a scene, let's call our key `scene`.
     </Step>
     <Step title="Replace">
-    Now within your prompt replace your string with the following, don't worry Helicone will remove this for you before it sends it to your LLM.
+    Now within your prompt, replace your string with the following. Don't worry, Helicone will remove this for you before it sends it to your LLM.
 
     Add `<helicone-input-prompt key="<INPUT_ID>" >` before your input and `</helicone-input-prompt>` after your input.
 
@@ -149,24 +150,24 @@ please see our [Quick Start Async](/features/prompts/quick-start-async).
     </Step>
     <Step title="Tag your prompt">
 
-      Inorder to securely ensure that we know when and how to parse and categorize your prompt, please append the following header to your LLM request.
+      In order to securely ensure that we know when and how to parse and categorize your prompt, please append the following header to your LLM request.
       `Helicone-Prompt-Id: you_prompt_id`.
 
       <Note>
-      Must not include any spaces or special characters, underscores and dashes are okay.
+      The id must not include any spaces or special characters. Underscores and dashes are acceptable.
       </Note>
 
     </Step>
     <Step title="Make a request">
 
-      Now when you make your request to your LLM, the LLM will receive the prompt with all of the `helicone-input-prompt` tags removed, however Helicone will now keep track of all of your inputs for you.
+      Now when you make your request to your LLM, the LLM will receive the prompt with all of the `helicone-input-prompt` tags removed. However, Helicone will now keep track of all of your inputs for you.
     </Step>
 
   </Steps>
   
   </Tab>
   <Tab title="Other">
-    Right now, we only support packages for Typescript and Javascript for an easy integration. For now we recommend manually implementing input variables like this.
+    Currently, we only support packages for TypeScript and JavaScript for easy integration. For now, we recommend manually implementing input variables like this:
 
     ```python
     openai.ChatCompletion.create(

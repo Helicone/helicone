@@ -1,40 +1,39 @@
 ---
-title: "Quick Start (Async)"
-description: ""
+title: "Quick Start Guide: Asynchronous Integration"
+description: "A step-by-step guide to setting up asynchronous integration with Helicone."
 ---
 
-<Warning>This feature is in Beta, please use at your own risk.</Warning>
+<Warning>This feature is currently in Beta. Use it at your own discretion.</Warning>
 <Note>
   <b>
-    We highly recommend using our{" "}
-    <u>[proxy integration for prompts](/features/prompts/quick-start)</u> , it
-    is significantly easier to get up and running!
+    We strongly recommend using our{" "}
+    <u>[proxy integration for prompts](/features/prompts/quick-start)</u> , as
+    it is significantly simpler to set up!
   </b>
 </Note>
 
-This guide is written from the standpoint that you are using the
-[custom integration method](/getting-started/integration-method/custom) or async version of Helicone.
-To learn more please read [Proxy vs Async](/getting-started/proxy-vs-async).
+This guide assumes that you are using the
+[custom integration method](/getting-started/integration-method/custom) or the asynchronous version of Helicone.
+To learn more, please read [Proxy vs Async](/getting-started/proxy-vs-async).
 
-If you are using the async libraries, it is significantly harder to get everything setup.
-If you'd like us to add better support for this please email us at [engineering@helicone.ai](mailto:engineering@helicone.ai).
+Setting up the asynchronous libraries can be challenging. If you would like us to enhance support for this, please email us at [engineering@helicone.ai](mailto:engineering@helicone.ai).
 
-## Async Get Started
+## Getting Started with Asynchronous Integration
 
 <Steps>
-  <Step title="Get the request id from your logged request">
+  <Step title="Obtain the request ID from your logged request">
 
 ### Option 1: Predefine
 
-You will need to get the helicone request id for the request that you are logging.
+You need to obtain the Helicone request ID for the request that you are logging.
 
-The easiest way to do this is to define before hand.
+The simplest way to do this is to define it beforehand.
 
 ```ts
 const requestId = uuidv4(); // must be a valid UUID
 ```
 
-Then when you make your request, you can add the request id via the `providerRequest.meta` tag like this.
+When you make your request, you can add the request ID via the `providerRequest.meta` tag as follows.
 
 ```ts
 meta: {
@@ -42,9 +41,9 @@ meta: {
 }
 ```
 
-### Option 2: Fetch it after the fact
+### Option 2: Retrieve it post-request
 
-You can also fetch your requestId after the fact via call backs within the async SDKs like this...
+You can also retrieve your request ID post-request via callbacks within the asynchronous SDKs as follows.
 
 ```ts
 onLog: async (response: Response) => {
@@ -53,7 +52,7 @@ onLog: async (response: Response) => {
 ```
 
   </Step>
-  <Step title="Auto detect your template inputs">
+  <Step title="Automatically detect your template inputs">
 
 ```ts
 const promptId = "my_prompt_id";
@@ -92,7 +91,7 @@ const res = await fetch(
         messages: [
           {
             role: "user",
-            content: `What you were already sending to openai <helicone-input-prompt key="my_input"/>`,
+            content: `The content you were already sending to OpenAI <helicone-input-prompt key="my_input"/>`,
           },
         ],
       },

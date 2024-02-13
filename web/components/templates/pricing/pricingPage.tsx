@@ -96,7 +96,7 @@ const sections: {
         tiers: {
           Free: "1",
           Pro: "3 + 20$/prompt/month",
-          Custom: "20$/prompt",
+          Custom: "prompt bulk pricing",
         },
       },
       {
