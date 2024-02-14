@@ -59,7 +59,7 @@ You must be using Helicone via Proxy. If you are not, please refer to our [Quick
           {
             role: "user",
             // 2: Add hprompt to any string, and nest any variable in additional brackets `{}`
-            content: hprompt`Write a story about ${{ scene }}`,
+            content: hprompt()`Write a story about ${{ scene }}`,
           },
         ],
         model: "gpt-3.5-turbo",
@@ -85,20 +85,20 @@ You must be using Helicone via Proxy. If you are not, please refer to our [Quick
       </Step>
       <Step title="Replace any text input">
 
-      Using the backtick string formatter in JavaScript, add `hprompt` in front of your backtick to automatically format your text so that Helicone can determine where your variables are.
+      Using the backtick string formatter in JavaScript, add `hprompt()` in front of your backtick to automatically format your text so that Helicone can determine where your variables are.
 
       Also, nest your inputted variable so that it is within another bracket `{}`, this is essentially
       making it so that we can determine the `input key` for Helicone.
 
       ```tsx
-      content: hprompt`Write a story about ${{ scene }}`,
+      content: hprompt()`Write a story about ${{ scene }}`,
       ```
 
       <Accordion title="Change Input Name">
         If you want to rename your input or have a custom input, you can change the key-value pair in the passed dictionary to the string formatter function. Like this:
 
         ```tsx
-        content: hprompt`Write a story about ${{ "my_magical_input": scene  }}`,
+        content: hprompt()`Write a story about ${{ "my_magical_input": scene  }}`,
         ```
       </Accordion>
       </Step>
@@ -124,8 +124,8 @@ You must be using Helicone via Proxy. If you are not, please refer to our [Quick
   </Tab>
   <Tab title="Packageless (curl)">
   Let's say we have an app that generates a short story with an inputted scene.
-  
-  For example: "Write a story about a secret agent"
+
+For example: "Write a story about a secret agent"
 
   <Steps>
     <Step title="Determine your input variables">
@@ -164,7 +164,7 @@ You must be using Helicone via Proxy. If you are not, please refer to our [Quick
     </Step>
 
   </Steps>
-  
+
   </Tab>
   <Tab title="Other">
     Currently, we only support packages for TypeScript and JavaScript for easy integration. For now, we recommend manually implementing input variables like this:
