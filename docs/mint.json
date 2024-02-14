@@ -115,6 +115,15 @@
       "group": "Features",
       "pages": [
         {
+          "group": "Prompts",
+          "pages": [
+            "features/prompts/intro",
+            "features/prompts/quick-start",
+            "features/prompts/quick-start-async",
+            "features/prompts/getting-started-async"
+          ]
+        },
+        {
           "group": "Customer Portal",
           "pages": [
             "features/customer_portal/intro",
@@ -131,7 +140,6 @@
         "features/advanced-usage/feedback",
         "features/advanced-usage/vault",
         "features/advanced-usage/fine-tuning",
-        "features/advanced-usage/templated-prompts",
         "features/advanced-usage/caching",
         "features/advanced-usage/retries",
         "features/advanced-usage/custom-rate-limits",

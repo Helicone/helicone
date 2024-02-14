@@ -126,7 +126,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   const { id } = props;
   const { prompts, isLoading } = usePrompts();
 
-  const currentPrompt = prompts?.data?.find((p) => p.id === id);
+  const currentPrompt = prompts?.data?.prompts.find((p) => p.id === id);
   const [selectedVersion, setSelectedVersion] = useState<string>();
 
   const selectedPrompt = usePrompt({
@@ -141,6 +141,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     id: string;
     createdAt: string;
     properties: Record<string, string>;
+    response: string;
   }>();
 
   // set the selected version to the latest version on initial load
@@ -253,7 +254,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                     </Select>
                   </div>
                 </div>
-                {!selectedVersion ? (
+                {selectedVersion === undefined ? (
                   <div className="flex flex-col w-full h-96 justify-center items-center">
                     <div className="flex flex-col w-2/5">
                       <DocumentTextIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
@@ -290,7 +291,11 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       <div>
                         <PrettyInput
                           keyName="output"
-                          selectedProperties={selectedInput?.properties}
+                          selectedProperties={{
+                            output: selectedInput?.response
+                              ? selectedInput.response
+                              : "output",
+                          }}
                         />
                       </div>
                     </div>

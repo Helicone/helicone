@@ -14,7 +14,9 @@ export interface SinglePrompt {
     id: string;
     createdAt: string;
     properties: Record<string, string>;
+    response: string;
   }[];
+
   columnNames: string[];
 }
 
@@ -61,9 +63,11 @@ async function handler(options: HandlerWrapperOptions<SinglePrompt>) {
     created_at: string;
     id: string;
     properties: Record<string, string>;
+    response: any;
   }>(
-    `SELECT properties, created_at, id
+    `SELECT request.properties, request.created_at, request.id, response.body as response
      FROM public.request
+     left join response on request.id = response.request
       WHERE (${filter})`,
     argsAcc
   );
@@ -80,6 +84,7 @@ async function handler(options: HandlerWrapperOptions<SinglePrompt>) {
         }))
 
         .reduce((acc, cur) => ({ ...acc, ...cur }), {}),
+      response: r.response?.choices?.[0]?.message?.content,
     })),
     columnNames: Object.entries(requests.data?.[0].properties ?? {})
       .filter(([key, value]) => key.includes("Helicone-Prompt-Input"))

@@ -1,10 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 import { BsGoogle, BsGithub } from "react-icons/bs";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { CustomerPortalContent } from "../../../pages/signin";
 import GridBackground from "../../layout/public/gridBackground";
+import { useRouter } from "next/router";
 
 interface AuthFormProps {
   handleEmailSubmit: (email: string, password: string) => void;
@@ -22,6 +23,18 @@ const AuthForm = (props: AuthFormProps) => {
     authFormType,
     customerPortalContent,
   } = props;
+
+  const router = useRouter();
+  useEffect(() => {
+    if (router.query.url && router.asPath) {
+      const fullUrl = window.location.href;
+      const startIndex = fullUrl.indexOf("url=");
+      const urlParam = fullUrl.substring(startIndex + 4);
+      const decodedUrl = decodeURIComponent(urlParam);
+
+      window.location.href = decodedUrl as string;
+    }
+  }, [router.query, router.asPath]);
 
   const [isLoading, setIsLoading] = useState(false);
 

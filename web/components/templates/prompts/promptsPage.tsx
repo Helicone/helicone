@@ -8,6 +8,7 @@ import { usePrompts } from "../../../services/hooks/prompts/prompts";
 import { useState } from "react";
 import { clsx } from "../../shared/clsx";
 import Link from "next/link";
+import { useOrg } from "../../layout/organizationContext";
 
 interface PromptsPageProps {}
 
@@ -20,11 +21,30 @@ const PromptsPage = (props: PromptsPageProps) => {
     latest_version: number;
   }>();
 
+  const org = useOrg();
+
   return (
     <div className="flex flex-col space-y-4 w-full">
       <div className="flex flex-row items-center justify-between">
         <h1 className="font-semibold text-3xl text-black dark:text-white">
           Prompts
+          {prompts?.data?.isOverLimit && (
+            <p className="text-green-500 text-sm">
+              You have reached the limit of prompts{" "}
+              <a
+                href={
+                  org?.currentOrg?.tier === "free"
+                    ? "/settings?tab=1"
+                    : "https://cal.com/team/helicone/helicone-discovery"
+                }
+                className="text-blue-500 underline"
+              >
+                upgrade to{" "}
+                {org?.currentOrg?.tier === "free" ? "pro" : "enterprise"}
+              </a>{" "}
+              get more prompts
+            </p>
+          )}
         </h1>
 
         {/* <Link
@@ -62,7 +82,7 @@ const PromptsPage = (props: PromptsPageProps) => {
             // refetch();
           }}
         />
-        {prompts?.data?.length === 0 ? (
+        {prompts?.data?.prompts.length === 0 ? (
           <div className="flex flex-col w-full h-96 justify-center items-center">
             <div className="flex flex-col">
               <DocumentTextIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
@@ -74,7 +94,7 @@ const PromptsPage = (props: PromptsPageProps) => {
               </p>
               <div className="mt-4">
                 <Link
-                  href="https://docs.helicone.ai/introduction"
+                  href="https://docs.helicone.ai/features/prompts/intro"
                   className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
                   <BookOpenIcon className="h-4 w-4" />
@@ -85,7 +105,7 @@ const PromptsPage = (props: PromptsPageProps) => {
           </div>
         ) : (
           <ul className="w-full h-full grid grid-cols-4 gap-4">
-            {prompts?.data?.map((prompt, i) => (
+            {prompts?.data?.prompts.map((prompt, i) => (
               <li
                 key={i}
                 className="col-span-1 bg-white border border-gray-300 dark:border-gray-700 rounded-lg"
@@ -97,7 +117,9 @@ const PromptsPage = (props: PromptsPageProps) => {
                       ? "bg-sky-200 dark:bg-sky-800"
                       : "bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-950",
                     i === 0 ? "rounded-t-md" : "",
-                    i === prompts.data?.length - 1 ? "rounded-b-md" : "",
+                    i === prompts.data?.prompts.length - 1
+                      ? "rounded-b-md"
+                      : "",
                     "w-full flex flex-col space-x-2 p-2 border-b border-gray-200 dark:border-gray-800"
                   )}
                 >
