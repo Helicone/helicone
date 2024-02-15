@@ -39,7 +39,7 @@ export function prompt(
 }
 
 interface HPromptConfig {
-  dedent?: (strings: TemplateStringsArray, ...values: unknown[]) => string;
+  chain?: (strings: TemplateStringsArray, ...values: unknown[]) => string;
   format: "raw" | "template";
 }
 
@@ -47,31 +47,40 @@ const hpromptTag = "helicone-prompt-input";
 
 /**
  * Generates a prompt with annotated variables.
- * @param dedent - Dedent is the name of the most commonly used tagged template literal function for postprocessing, though any similar function may be provided.
+ * @param chain - Any other chian you want to use for template literal function for postprocessing, though any similar function may be provided. (ex. dedent, sql)
  * @param format - The format of the prompt. If 'raw', the prompt will be returned as a string with the variables replaced. If 'template', the prompt will be returned as a string with the variables replaced with helicone-prompt-input tags.
  */
-export const hprompt =
-  (config?: HPromptConfig) =>
+
+type StringFormatter = (
+  strings: TemplateStringsArray,
+  ...values: any[]
+) => string;
+
+export const hpromptc =
+  ({ format, chain }: HPromptConfig) =>
   (strings: TemplateStringsArray, ...values: any[]): string => {
-    const { dedent, format = "template" } = config ?? {};
-    const parts: string[] = strings.reduce(
-      (acc: string[], str: string, i: number) => {
-        acc.push(str);
-        if (values[i] != null) {
-          const isObject = typeof values[i] === "object";
-          const value = isObject ? Object.values(values[i])[0] : values[i];
-          acc.push(
-            format === "template" && isObject
-              ? `<${hpromptTag} key="${
-                  Object.keys(values[i])[0]
-                }">${value}</${hpromptTag}>`
-              : value
-          );
+    const newValues = values.map((v) => {
+      if (typeof v === "object") {
+        if (format === "raw") {
+          return Object.values(v)[0];
+        } else {
+          return `<${hpromptTag} key="${Object.keys(v)[0]}" >${
+            Object.values(v)[0] as string
+          }</${hpromptTag}>`;
         }
-        return acc;
-      },
-      []
-    );
-    const output = parts.join("");
-    return dedent != null ? dedent`${output}` : output;
+      } else {
+        return v;
+      }
+    });
+    if (chain) {
+      return chain(strings, ...newValues);
+    } else {
+      return strings.reduce((acc, string, i) => {
+        return acc + string + (newValues[i] || "");
+      }, "");
+    }
   };
+
+export const hprompt = hpromptc({ format: "template" });
+export const hpromptr = (chain: StringFormatter) =>
+  hpromptc({ format: "template", chain });
