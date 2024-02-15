@@ -88,7 +88,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
         </div>
         <div className="my-4 w-full rounded-lg bg-violet-500 h-96"></div>
       </section>
-      <section className="w-full flex flex-col max-w-6xl mx-auto py-32 px-4">
+      <section className="w-full flex flex-col max-w-6xl mx-auto space-y-20 py-32 px-4">
         <div className="flex flex-col w-full items-center">
           <h3 className="text-5xl font-bold text-black text-center tracking-tighter leading-tight">
             The GenAI platform for{" "}
@@ -98,157 +98,293 @@ const HomePageV3 = (props: HomePageV3Props) => {
           <p className="text-gray-700 font-medium text-xl leading-8 mt-2">
             Thousands of companies use Helicone today to build AI applications
           </p>
-          <button className="mt-6 w-fit flex items-center bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-lg px-4 py-2 text-md font-semibold text-white shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500">
-            Get a demo
-          </button>{" "}
         </div>
-        <div className="w-full flex justify-between -mt-12">
+        <div className="grid grid-cols-4 gap-16 w-full mx-auto justify-center">
+          <div className="flex flex-col">
+            <dd className="text-black text-4xl font-bold">125M</dd>
+            <dt className="text-gray-500 text-md">requests logged per month</dt>
+          </div>
+          <div className="flex flex-col">
+            <dd className="text-black text-4xl font-bold">1 BILLION</dd>
+            <dt className="text-gray-500 text-md">total requests</dt>
+          </div>
+          <div className="flex flex-col">
+            <dd className="text-black text-4xl font-bold">$30k+</dd>
+            <dt className="text-gray-500 text-md">total cache savings</dt>
+          </div>
+          <div className="flex flex-col">
+            <dd className="text-black text-4xl font-bold">5000+</dd>
+            <dt className="text-gray-500 text-md">total users</dt>
+          </div>
+        </div>
+        <div className="grid grid-cols-6 gap-8">
+          <div
+            className={clsx(
+              `h-20 w-20 sm:h-40 sm:w-40 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+            )}
+          >
+            <Image
+              src={"/assets/home/logos/logo.svg"}
+              alt={""}
+              width={120}
+              height={120}
+            />
+          </div>
+          <div
+            className={clsx(
+              `h-20 w-20 sm:h-40 sm:w-40 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+            )}
+          >
+            <Image
+              src={"/assets/home/logos/logo.svg"}
+              alt={""}
+              width={120}
+              height={120}
+            />
+          </div>{" "}
+          <div
+            className={clsx(
+              `h-20 w-20 sm:h-40 sm:w-40 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+            )}
+          >
+            <Image
+              src={"/assets/home/logos/logo.svg"}
+              alt={""}
+              width={120}
+              height={120}
+            />
+          </div>{" "}
+          <div
+            className={clsx(
+              `h-20 w-20 sm:h-40 sm:w-40 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+            )}
+          >
+            <Image
+              src={"/assets/home/logos/logo.svg"}
+              alt={""}
+              width={120}
+              height={120}
+            />
+          </div>{" "}
+          <div
+            className={clsx(
+              `h-20 w-20 sm:h-40 sm:w-40 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+            )}
+          >
+            <Image
+              src={"/assets/home/logos/logo.svg"}
+              alt={""}
+              width={120}
+              height={120}
+            />
+          </div>{" "}
+          <div
+            className={clsx(
+              `h-20 w-20 sm:h-40 sm:w-40 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+            )}
+          >
+            <Image
+              src={"/assets/home/logos/logo.svg"}
+              alt={""}
+              width={120}
+              height={120}
+            />
+          </div>{" "}
+          <div
+            className={clsx(
+              `h-20 w-20 sm:h-40 sm:w-40 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+            )}
+          >
+            <Image
+              src={"/assets/home/logos/logo.svg"}
+              alt={""}
+              width={120}
+              height={120}
+            />
+          </div>{" "}
+          <div
+            className={clsx(
+              `h-20 w-20 sm:h-40 sm:w-40 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+            )}
+          >
+            <Image
+              src={"/assets/home/logos/logo.svg"}
+              alt={""}
+              width={120}
+              height={120}
+            />
+          </div>{" "}
+          <div
+            className={clsx(
+              `h-20 w-20 sm:h-40 sm:w-40 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+            )}
+          >
+            <Image
+              src={"/assets/home/logos/logo.svg"}
+              alt={""}
+              width={120}
+              height={120}
+            />
+          </div>{" "}
+          <div
+            className={clsx(
+              `h-20 w-20 sm:h-40 sm:w-40 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+            )}
+          >
+            <Image
+              src={"/assets/home/logos/logo.svg"}
+              alt={""}
+              width={120}
+              height={120}
+            />
+          </div>{" "}
+          <div
+            className={clsx(
+              `h-20 w-20 sm:h-40 sm:w-40 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+            )}
+          >
+            <Image
+              src={"/assets/home/logos/logo.svg"}
+              alt={""}
+              width={120}
+              height={120}
+            />
+          </div>{" "}
+          <div
+            className={clsx(
+              `h-20 w-20 sm:h-40 sm:w-40 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+            )}
+          >
+            <Image
+              src={"/assets/home/logos/logo.svg"}
+              alt={""}
+              width={120}
+              height={120}
+            />
+          </div>
+        </div>
+        {/* <div className="w-full flex justify-between">
           <div className="flex flex-col gap-4">
             <div
               className={clsx(
-                `h-20 w-20 sm:h-28 sm:w-28 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+                `h-20 w-20 sm:h-20 sm:w-20 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
               )}
             >
               <Image
                 src={"/assets/home/logos/logo.svg"}
                 alt={""}
-                width={80}
-                height={80}
+                width={64}
+                height={64}
               />
             </div>
             <div className="flex items-center gap-4">
               <div
                 className={clsx(
-                  `h-20 w-20 sm:h-28 sm:w-28 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+                  `h-20 w-20 sm:h-20 sm:w-20 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
                 )}
               >
                 <Image
                   src={"/assets/home/logos/qawolf.png"}
                   alt={""}
-                  width={80}
-                  height={80}
+                  width={64}
+                  height={64}
                 />
               </div>{" "}
               <div
                 className={clsx(
-                  `h-20 w-20 sm:h-28 sm:w-28 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+                  `h-20 w-20 sm:h-20 sm:w-20 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
                 )}
               >
                 <Image
                   src={"/assets/home/logos/carta.png"}
                   alt={""}
-                  width={80}
-                  height={80}
+                  width={64}
+                  height={64}
                 />
               </div>
             </div>
             <div className="flex items-center gap-4">
               <div
                 className={clsx(
-                  `h-20 w-20 sm:h-28 sm:w-28 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+                  `h-20 w-20 sm:h-20 sm:w-20 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
                 )}
               >
                 <Image
                   src={"/assets/home/logos/lex.svg"}
                   alt={""}
-                  width={80}
-                  height={80}
+                  width={64}
+                  height={64}
                 />
               </div>{" "}
               <div
                 className={clsx(
-                  `h-20 w-20 sm:h-28 sm:w-28 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+                  `h-20 w-20 sm:h-20 sm:w-20 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
                 )}
               >
                 <Image
                   src={"/assets/home/logos/particl.png"}
                   alt={""}
-                  width={80}
-                  height={80}
+                  width={64}
+                  height={64}
                 />
               </div>
               <div
                 className={clsx(
-                  `h-20 w-20 sm:h-28 sm:w-28 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+                  `h-20 w-20 sm:h-20 sm:w-20 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
                 )}
               >
                 <Image
                   src={"/assets/home/logos/mintlify.svg"}
                   alt={""}
-                  width={80}
-                  height={80}
+                  width={64}
+                  height={64}
                 />
               </div>
             </div>
           </div>
+
           <div className="flex flex-col gap-4 items-end justify-end">
             <div className="flex items-center gap-4 w-full justify-center">
               <div
                 className={clsx(
-                  `h-20 w-20 sm:h-28 sm:w-28 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+                  `h-20 w-20 sm:h-20 sm:w-20 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
                 )}
               >
                 <Image
                   src={"/assets/home/logos/onboard.png"}
                   alt={""}
-                  width={80}
-                  height={80}
+                  width={64}
+                  height={64}
                 />
               </div>
             </div>
             <div className="flex items-center gap-4">
               <div
                 className={clsx(
-                  `h-20 w-20 sm:h-28 sm:w-28 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+                  `h-20 w-20 sm:h-20 sm:w-20 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
                 )}
               >
                 <Image
                   src={"/assets/home/logos/autogpt.png"}
                   alt={""}
-                  width={80}
-                  height={80}
+                  width={64}
+                  height={64}
                 />
               </div>{" "}
               <div
                 className={clsx(
-                  `h-20 w-20 sm:h-28 sm:w-28 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+                  `h-20 w-20 sm:h-20 sm:w-20 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
                 )}
               >
                 <Image
                   src={"/assets/home/logos/autogpt.png"}
                   alt={""}
-                  width={80}
-                  height={80}
+                  width={64}
+                  height={64}
                 />
               </div>
             </div>
           </div>
-        </div>
-
-        {/* <div className="w-fit h-fit mt-16 sm:mt-8 grid grid-cols-3 gap-8 relative col-span-8 sm:col-span-4">
-          {[
-            "/assets/home/logos/logo.svg",
-            "/assets/home/logos/qawolf.png",
-            "/assets/home/logos/upenn.png",
-            "/assets/home/logos/carta.png",
-            "/assets/home/logos/lex.svg",
-            "/assets/home/logos/particl.png",
-            "/assets/home/logos/mintlify.svg",
-            "/assets/home/logos/onboard.png",
-            "/assets/home/logos/autogpt.png",
-          ].map((item, i) => (
-            <div
-              key={i}
-              className={clsx(
-                i === 1 && "rotate-12 translate-x-8 -translate-y-8",
-                i === 2 && "translate-x-16 -translate-y-20",
-                i === 5 && "-rotate-12 translate-x-8 -translate-y-8",
-                `h-20 w-20 sm:h-28 sm:w-28 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
-              )}
-            >
-              <Image src={item} alt={""} width={80} height={80} />
-            </div>
-          ))}
         </div> */}
       </section>
       <section className="w-full bg-[#0e2337] relative isolate overflow-hidden">
@@ -260,30 +396,27 @@ const HomePageV3 = (props: HomePageV3Props) => {
           <p className="text-gray-300 font-medium text-2xl leading-8 text-center">
             This is the easiest integration you will ever do. We promise
           </p>
-          <div className="flex gap-4 flex-col space-y-4 pt-16 px-24">
+          <div className="flex gap-4 flex-col space-y-4 pt-16">
             <Steps />
           </div>
         </div>
-        <div className="-bottom-44 md:-bottom-64 items-center flex absolute md:-right-72 w-full justify-end">
+        {/* <div className="-bottom-44 md:-bottom-64 items-center flex absolute md:-right-72 w-full justify-end">
           <Globe />
-        </div>
+        </div> */}
       </section>
-      <section
-        id="integration"
-        className="bg-gradient-to-b from-gray-200 to-gray-50 py-36 antialiased"
-      >
+      <section id="integration" className="py-36">
         <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
           <div className="flex flex-col space-y-4">
-            <h2 className="text-4xl md:text-5xl font-semibold tracking-tighter leading-tight">
-              Any model, any scale
-            </h2>
+            <h3 className="text-5xl font-bold text-black text-center tracking-tighter leading-tight">
+              Any model, <span className="text-pink-500">any scale</span>
+            </h3>
             <p className="text-lg md:text-xl text-gray-600 max-w-2xl">
               We support any provider and model, as well as fine-tuned models.
               All with sub millisecond latency and query times.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 md:justify-center w-full">
-            <div className="relative isolate bg-white h-[32rem] w-full border border-gray-300 shadow-sm rounded-xl flex justify-center items-center">
+            <div className="relative isolate bg-white h-[32rem] w-full border-2 border-black shadow-sm rounded-xl flex justify-center items-center">
               <div className="w-full h-full rounded-xl p-8 flex flex-col space-y-4 text-left">
                 <h2 className="text-2xl font-semibold text-gray-900">
                   Support for all models
@@ -389,7 +522,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
                 </div>
               </div>
             </div>
-            <div className="overflow-hidden relative isolate bg-white h-[32rem] w-full border border-gray-300 shadow-sm rounded-xl flex justify-center items-center">
+            <div className="overflow-hidden relative isolate bg-white h-[32rem] w-full border-2 border-black  shadow-sm rounded-xl flex justify-center items-center">
               <div className="w-full h-full rounded-xl p-8 flex flex-col space-y-4 text-left">
                 <h2 className="text-2xl font-semibold text-gray-900">
                   Built for scale
