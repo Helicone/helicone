@@ -91,8 +91,6 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           exportData={users}
           onRowSelect={(row) => {
             router.push("/users/" + row.user_id);
-            // setSelectedUser(row);
-            // setOpen(true);
           }}
         />
         <TableFooter
@@ -110,8 +108,6 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           showCount={true}
         />
       </div>
-
-      {/* <UserModal open={open} setOpen={setOpen} user={selectedUser} /> */}
     </>
   );
 };
