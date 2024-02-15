@@ -411,7 +411,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   return (
     <div>
-      {(!isCached || userId) && (
+      {!isCached && userId === undefined && (
         <AuthHeader
           title={isCached ? "Cached Requests" : "Requests"}
           headerActions={
