@@ -46,18 +46,19 @@ type StringFormatter = (
 export const hpromptc =
   (type: "raw" | "template", otherFormatter?: StringFormatter) =>
   (strings: TemplateStringsArray, ...values: any[]): string => {
-    const newValues =
-      type === "raw"
-        ? values
-        : values.map((v) => {
-            if (typeof v === "object") {
-              return `<helicone-prompt-input key="${Object.keys(v)[0]}" >${
-                Object.values(v)[0] as string
-              }</helicone-prompt-input>`;
-            } else {
-              return v;
-            }
-          });
+    const newValues = values.map((v) => {
+      if (typeof v === "object") {
+        if (type === "raw") {
+          return Object.values(v)[0];
+        } else {
+          return `<helicone-prompt-input key="${Object.keys(v)[0]}" >${
+            Object.values(v)[0] as string
+          }</helicone-prompt-input>`;
+        }
+      } else {
+        return v;
+      }
+    });
     if (otherFormatter) {
       return otherFormatter(strings, ...newValues);
     } else {
