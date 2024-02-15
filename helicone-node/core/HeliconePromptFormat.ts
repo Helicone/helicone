@@ -38,23 +38,35 @@ export function prompt(
   return { heliconeTemplate, inputs, builtString };
 }
 
-export function hprompt(
+type StringFormatter = (
   strings: TemplateStringsArray,
   ...values: any[]
-): string {
-  // TODO handle the case where you just have `${input}` as a string and not `{{input}}`
-  return strings.reduce((acc, string, i) => {
-    const val = values[i];
-    if (val != null) {
-      const key = Object.keys(val)[0];
-      const value = Object.values(val)[0];
-      return (
-        acc +
-        string +
-        `<helicone-prompt-input key="${key}" >${value}</helicone-prompt-input>`
-      );
+) => string;
+
+export const hpromptc =
+  (type: "raw" | "template", otherFormatter?: StringFormatter) =>
+  (strings: TemplateStringsArray, ...values: any[]): string => {
+    const newValues =
+      type === "raw"
+        ? values
+        : values.map((v) => {
+            if (typeof v === "object") {
+              return `<helicone-prompt-input key="${Object.keys(v)[0]}" >${
+                Object.values(v)[0] as string
+              }</helicone-prompt-input>`;
+            } else {
+              return v;
+            }
+          });
+    if (otherFormatter) {
+      return otherFormatter(strings, ...newValues);
     } else {
-      return acc + string;
+      return strings.reduce((acc, string, i) => {
+        return acc + string + (newValues[i] || "");
+      }, "");
     }
-  }, "");
-}
+  };
+
+export const hprompt = hpromptc("template");
+export const hpromptr = (otherFormatter: StringFormatter) =>
+  hpromptc("template", otherFormatter);
