@@ -38,29 +38,42 @@ export function prompt(
   return { heliconeTemplate, inputs, builtString };
 }
 
+interface HPromptConfig {
+  chain?: (strings: TemplateStringsArray, ...values: unknown[]) => string;
+  format: "raw" | "template";
+}
+
+const hpromptTag = "helicone-prompt-input";
+
+/**
+ * Generates a prompt with annotated variables.
+ * @param chain - Any other chian you want to use for template literal function for postprocessing, though any similar function may be provided. (ex. dedent, sql)
+ * @param format - The format of the prompt. If 'raw', the prompt will be returned as a string with the variables replaced. If 'template', the prompt will be returned as a string with the variables replaced with helicone-prompt-input tags.
+ */
+
 type StringFormatter = (
   strings: TemplateStringsArray,
   ...values: any[]
 ) => string;
 
 export const hpromptc =
-  (type: "raw" | "template", otherFormatter?: StringFormatter) =>
+  ({ format, chain }: HPromptConfig) =>
   (strings: TemplateStringsArray, ...values: any[]): string => {
     const newValues = values.map((v) => {
       if (typeof v === "object") {
-        if (type === "raw") {
+        if (format === "raw") {
           return Object.values(v)[0];
         } else {
-          return `<helicone-prompt-input key="${Object.keys(v)[0]}" >${
+          return `<${hpromptTag} key="${Object.keys(v)[0]}" >${
             Object.values(v)[0] as string
-          }</helicone-prompt-input>`;
+          }</${hpromptTag}>`;
         }
       } else {
         return v;
       }
     });
-    if (otherFormatter) {
-      return otherFormatter(strings, ...newValues);
+    if (chain) {
+      return chain(strings, ...newValues);
     } else {
       return strings.reduce((acc, string, i) => {
         return acc + string + (newValues[i] || "");
@@ -68,6 +81,6 @@ export const hpromptc =
     }
   };
 
-export const hprompt = hpromptc("template");
-export const hpromptr = (otherFormatter: StringFormatter) =>
-  hpromptc("template", otherFormatter);
+export const hprompt = hpromptc({ format: "template" });
+export const hpromptr = (chain: StringFormatter) =>
+  hpromptc({ format: "template", chain });
