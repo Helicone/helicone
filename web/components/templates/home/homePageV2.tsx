@@ -317,7 +317,7 @@ export default function Example() {
               {[
                 "/assets/home/logos/logo.svg",
                 "/assets/home/logos/qawolf.png",
-                "/assets/home/logos/upenn.png",
+                "/assets/home/logos/reworkd.png",
                 "/assets/home/logos/carta.png",
                 "/assets/home/logos/lex.svg",
                 "/assets/home/logos/particl.png",
