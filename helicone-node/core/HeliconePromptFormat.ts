@@ -44,43 +44,29 @@ type StringFormatter = (
 ) => string;
 
 export const hpromptc =
-  (type: "raw" | "template", ...otherFormaters: StringFormatter[]) =>
+  (type: "raw" | "template", otherFormatter?: StringFormatter) =>
   (strings: TemplateStringsArray, ...values: any[]): string => {
-    const rawParts: string[] = [];
-    const templateParts: string[] = [];
-
-    for (let i = 0; i < strings.length; i++) {
-      rawParts.push(strings[i]);
-      templateParts.push(strings[i]);
-      if (values[i] != null) {
-        const value =
-          typeof values[i] === "object"
-            ? Object.values(values[i])[0]
-            : values[i];
-        rawParts.push(value as string);
-        if (typeof values[i] === "object") {
-          templateParts.push(
-            `<helicone-prompt-input key="${Object.keys(values[i])[0]}" >${
-              value as string
-            }</helicone-prompt-input>`
-          );
-        } else {
-          templateParts.push(value as string);
-        }
-      }
+    const newValues =
+      type === "raw"
+        ? values
+        : values.map((v) => {
+            if (typeof v === "object") {
+              return `<helicone-prompt-input key="${Object.keys(v)[0]}" >${
+                Object.values(v)[0] as string
+              }</helicone-prompt-input>`;
+            } else {
+              return v;
+            }
+          });
+    if (otherFormatter) {
+      return otherFormatter(strings, ...newValues);
+    } else {
+      return strings.reduce((acc, string, i) => {
+        return acc + string + (newValues[i] || "");
+      }, "");
     }
-
-    const returnedString =
-      type === "template" ? templateParts.join("") : rawParts.join("");
-
-    if (otherFormaters.length === 0) {
-      return returnedString;
-    }
-
-    return otherFormaters.reduce(
-      (acc, formatter) => formatter`${acc}`,
-      returnedString
-    );
   };
 
 export const hprompt = hpromptc("template");
+export const hpromptr = (otherFormatter: StringFormatter) =>
+  hpromptc("template", otherFormatter);
