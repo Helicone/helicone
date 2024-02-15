@@ -41,7 +41,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
         <header className="w-full flex flex-col space-y-6 mx-auto max-w-6xl h-full py-32 items-center text-center">
           <h1 className="text-7xl block font-bold w-full h-full tracking-tight text-center items-center leading-[1]">
             How developers{" "}
-            <span className="text-yellow-500">build AI applications</span>
+            <span className="text-green-500">build AI applications</span>
           </h1>
           <p className="text-gray-700 font-medium text-2xl leading-8">
             Meet the lightweight, yet powerful platform purpose-built for
@@ -90,7 +90,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
       </section>
       <section className="w-full grid grid-cols-8 max-w-6xl mx-auto py-32 justify-between gap-8 sm:gap-16 text-left">
         <div className="w-full flex flex-col col-span-8 sm:col-span-4">
-          <h3 className="mt-8 text-4xl md:text-5xl font-semibold flex flex-col tracking-tighter leading-tight">
+          <h3 className="mt-8 text-4xl md:text-5xl font-bold flex flex-col tracking-tighter leading-tight">
             Modern startups and enterprises use Helicone
           </h3>
           <p className="text-lg text-gray-600 md:leading-normal mt-4">
@@ -139,16 +139,16 @@ const HomePageV3 = (props: HomePageV3Props) => {
           ))}
         </div>
       </section>
-      <section className="w-full bg-[#002c59] relative isolate overflow-hidden">
+      <section className="w-full bg-[#0e2337] relative isolate overflow-hidden">
         <div className="max-w-6xl mx-auto flex flex-col space-y-4 py-24 h-full">
-          <h3 className="text-5xl font-semibold text-white text-center tracking-tighter leading-tight">
+          <h3 className="text-5xl font-bold text-white text-center tracking-tighter leading-tight">
             Made by developers,{" "}
             <span className="text-cyan-400">for developers</span>
           </h3>
           <p className="text-gray-300 font-medium text-2xl leading-8 text-center">
             This is the easiest integration you will ever do. We promise
           </p>
-          <div className="flex gap-4 flex-col space-y-4 pt-24 px-24">
+          <div className="flex gap-4 flex-col space-y-4 pt-16 px-24">
             <Steps />
           </div>
         </div>

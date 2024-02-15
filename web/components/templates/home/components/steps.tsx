@@ -17,10 +17,13 @@ from openai import OpenAI
 client = OpenAI(
   api_key={{OPENAI_API_KEY}},
   base_url="http://oai.hconeai.com/v1", 
+  default_headers= { 
+    "Helicone-Auth": f"Bearer {{HELICONE_API_KEY}}",
+  }
 )
         `}
           language={"python"}
-          newLines={[4]}
+          newLines={[4, 6]}
           oldLines={[]}
           minHeight={false}
           textSize="lg"
