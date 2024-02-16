@@ -361,11 +361,11 @@ const DashboardPage = (props: DashboardPageProps) => {
       x: 0,
       y: 8,
       w: 6,
-      h: 43,
+      h: 4,
       minW: 3,
       maxW: 12,
       minH: 4,
-      maxH: 8,
+      maxH: 4,
     },
   ];
 
@@ -483,11 +483,11 @@ const DashboardPage = (props: DashboardPageProps) => {
       x: 0,
       y: 24,
       w: 6,
-      h: 43,
+      h: 4,
       minW: 3,
       maxW: 12,
       minH: 4,
-      maxH: 8,
+      maxH: 4,
     },
   ];
 
@@ -903,6 +903,31 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </StyledAreaChart>
               </div>
+
+              <div key="latency">
+                <StyledAreaChart
+                  title={"Latency"}
+                  value={`${
+                    metrics.averageLatency.data?.data?.toFixed(0) ?? 0
+                  } ms / req`}
+                  isDataOverTimeLoading={overTimeData.latency.isLoading}
+                >
+                  <AreaChart
+                    className="h-[14rem]"
+                    data={
+                      overTimeData.latency.data?.data?.map((r) => ({
+                        date: getTimeMap(timeIncrement)(r.time),
+                        latency: r.duration,
+                      })) ?? []
+                    }
+                    index="date"
+                    categories={["latency"]}
+                    colors={["cyan"]}
+                    showYAxis={false}
+                    curveType="monotone"
+                  />
+                </StyledAreaChart>
+              </div>
               <div key="tokens-per-min-over-time">
                 <StyledAreaChart
                   title={"Tokens / Minute"}
@@ -921,15 +946,13 @@ const DashboardPage = (props: DashboardPageProps) => {
                       overTimeData.promptTokensOverTime.data?.data?.map(
                         (r) => ({
                           date: getTimeMap(timeIncrement)(r.time),
-                          "Prompt / min": (
+                          "Prompt / min":
                             (r.prompt_tokens + 0.0) /
-                            getIncrementAsMinutes(timeIncrement)
-                          ).toFixed(2),
+                            getIncrementAsMinutes(timeIncrement),
 
-                          "Completion / min": (
+                          "Completion / min":
                             (r.completion_tokens + 0.0) /
-                            getIncrementAsMinutes(timeIncrement)
-                          ).toFixed(2),
+                            getIncrementAsMinutes(timeIncrement),
                           "Total / min": (
                             (r.prompt_tokens + r.completion_tokens + 0.0) /
                             getIncrementAsMinutes(timeIncrement)
@@ -953,30 +976,11 @@ const DashboardPage = (props: DashboardPageProps) => {
                     ]}
                     showYAxis={false}
                     curveType="monotone"
-                  />
-                </StyledAreaChart>
-              </div>
-              <div key="latency">
-                <StyledAreaChart
-                  title={"Latency"}
-                  value={`${
-                    metrics.averageLatency.data?.data?.toFixed(0) ?? 0
-                  } ms / req`}
-                  isDataOverTimeLoading={overTimeData.latency.isLoading}
-                >
-                  <AreaChart
-                    className="h-[14rem]"
-                    data={
-                      overTimeData.latency.data?.data?.map((r) => ({
-                        date: getTimeMap(timeIncrement)(r.time),
-                        latency: r.duration,
-                      })) ?? []
+                    valueFormatter={(number: number | bigint) =>
+                      `${new Intl.NumberFormat("us")
+                        .format(number)
+                        .toString()} tokens`
                     }
-                    index="date"
-                    categories={["latency"]}
-                    colors={["cyan"]}
-                    showYAxis={false}
-                    curveType="monotone"
                   />
                 </StyledAreaChart>
               </div>
