@@ -24,6 +24,7 @@ import {
   CubeIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
+import Features from "./components/features";
 
 interface HomePageV3Props {}
 
@@ -65,35 +66,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
         </header>
       </GridBackground>
       <section className="w-full max-w-6xl mx-auto pb-16 px-4">
-        <div className="border-b border-gray-300 w-full flex justify-center gap-16 mx-auto">
-          <ul className="w-fit flex items-center gap-16">
-            <li className="flex items-center gap-2 pb-3 -mb-0.5 border-b-[3px] border-violet-700">
-              <ChartPieIcon className="w-6 h-6 text-violet-700" />
-              <p className="text-md font-bold">Monitoring</p>
-            </li>
-            <li className="flex items-center gap-2 py-1">
-              <ArrowPathIcon className="w-6 h-6 text-green-500" />
-              <p className="text-md font-medium">Gateway</p>
-            </li>
-            <li className="flex items-center gap-2 py-1">
-              <ArrowPathIcon className="w-6 h-6 text-orange-500" />
-              <p className="text-md font-medium">Data Collection</p>
-            </li>
-            <li className="flex items-center gap-2 py-1">
-              <ArrowPathIcon className="w-6 h-6 text-sky-500" />
-              <p className="text-md font-medium">Customer Portal</p>
-            </li>
-            <li className="flex items-center gap-2 py-1">
-              <ArrowPathIcon className="w-6 h-6 text-red-500" />
-              <p className="text-md font-medium">Fine-Tuning</p>
-            </li>
-            <li className="flex items-center gap-2 py-1">
-              <ArrowPathIcon className="w-6 h-6 text-black" />
-              <p className="text-md font-medium">Evaluations</p>
-            </li>
-          </ul>
-        </div>
-        <div className="my-4 w-full rounded-lg bg-violet-500 h-96"></div>
+        <Features />
       </section>
       <section className="w-full flex flex-col max-w-6xl mx-auto space-y-20 py-32 px-4">
         <div className="flex flex-col w-full items-center">
@@ -127,7 +100,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
         <div className="grid grid-cols-6 gap-8">
           <div
             className={clsx(
-              `h-20 w-20 sm:h-32 sm:w-32 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
+              `h-20 w-20 sm:h-32 sm:w-32 rounded-lg flex items-center justify-center font-semibold text-sm`
             )}
           >
             <Image
