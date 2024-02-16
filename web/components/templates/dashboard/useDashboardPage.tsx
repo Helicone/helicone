@@ -25,6 +25,7 @@ import {
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { LatencyOverTime } from "../../../pages/api/metrics/latencyOverTime";
 import { UsersOverTime } from "../../../pages/api/metrics/usersOverTime";
+import { TokensOverTime } from "../../../pages/api/metrics/tokensOverTime";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -94,6 +95,22 @@ export const useDashboardPage = ({
   };
 
   const overTimeData = {
+    promptTokensOverTime: useBackendMetricCall<
+      Result<TokensOverTime[], string>
+    >({
+      params,
+      endpoint: "/api/metrics/tokensOverTime",
+      key: "errorOverTime",
+      postProcess: (data) => {
+        return resultMap(data, (d) =>
+          d.map((d) => ({
+            prompt_tokens: +d.prompt_tokens,
+            completion_tokens: +d.completion_tokens,
+            time: new Date(d.time),
+          }))
+        );
+      },
+    }),
     errors: useBackendMetricCall<Result<ErrorOverTime[], string>>({
       params,
       endpoint: "/api/metrics/errorOverTime",
