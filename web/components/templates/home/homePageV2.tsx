@@ -143,7 +143,6 @@ export default function Example() {
   const user = useUser();
 
   const supabaseClient = useSupabaseClient<Database>();
-  const { stars, isLoading } = useHomePage();
 
   if (!demoLoading && user?.email === DEMO_EMAIL) {
     supabaseClient.auth.signOut();
