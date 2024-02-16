@@ -59,6 +59,10 @@ interface StatusCounts {
   [key: string]: number;
 }
 
+function max(arr: number[]) {
+  return arr.reduce((p, c) => (p > c ? p : c), 0);
+}
+
 export function formatNumberString(
   numString: string,
   minimumFractionDigits?: boolean
@@ -473,6 +477,17 @@ const DashboardPage = (props: DashboardPageProps) => {
       minH: 4,
       maxH: 4,
       static: true,
+    },
+    {
+      i: "tokens-per-min-over-time",
+      x: 0,
+      y: 24,
+      w: 6,
+      h: 43,
+      minW: 3,
+      maxW: 12,
+      minH: 4,
+      maxH: 8,
     },
   ];
 
@@ -891,7 +906,13 @@ const DashboardPage = (props: DashboardPageProps) => {
               <div key="tokens-per-min-over-time">
                 <StyledAreaChart
                   title={"Tokens / Minute"}
-                  value={metrics.activeUsers.data?.data?.toString() ?? "0"}
+                  value={`Max: ${(
+                    max(
+                      overTimeData.promptTokensOverTime.data?.data
+                        ?.map((d) => d.completion_tokens + d.prompt_tokens)
+                        .filter((d) => d !== 0) ?? []
+                    ) / getIncrementAsMinutes(timeIncrement)
+                  ).toFixed(2)}`}
                   isDataOverTimeLoading={overTimeData.users.isLoading}
                 >
                   <AreaChart
