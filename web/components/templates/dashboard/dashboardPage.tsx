@@ -365,7 +365,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       minW: 3,
       maxW: 12,
       minH: 4,
-      maxH: 8,
+      maxH: 4,
     },
   ];
 
@@ -483,11 +483,11 @@ const DashboardPage = (props: DashboardPageProps) => {
       x: 0,
       y: 24,
       w: 6,
-      h: 43,
+      h: 4,
       minW: 3,
       maxW: 12,
       minH: 4,
-      maxH: 8,
+      maxH: 4,
     },
   ];
 
@@ -946,15 +946,13 @@ const DashboardPage = (props: DashboardPageProps) => {
                       overTimeData.promptTokensOverTime.data?.data?.map(
                         (r) => ({
                           date: getTimeMap(timeIncrement)(r.time),
-                          "Prompt / min": (
+                          "Prompt / min":
                             (r.prompt_tokens + 0.0) /
-                            getIncrementAsMinutes(timeIncrement)
-                          ).toFixed(2),
+                            getIncrementAsMinutes(timeIncrement),
 
-                          "Completion / min": (
+                          "Completion / min":
                             (r.completion_tokens + 0.0) /
-                            getIncrementAsMinutes(timeIncrement)
-                          ).toFixed(2),
+                            getIncrementAsMinutes(timeIncrement),
                           "Total / min": (
                             (r.prompt_tokens + r.completion_tokens + 0.0) /
                             getIncrementAsMinutes(timeIncrement)
@@ -978,6 +976,11 @@ const DashboardPage = (props: DashboardPageProps) => {
                     ]}
                     showYAxis={false}
                     curveType="monotone"
+                    valueFormatter={(number: number | bigint) =>
+                      `${new Intl.NumberFormat("us")
+                        .format(number)
+                        .toString()} tokens`
+                    }
                   />
                 </StyledAreaChart>
               </div>
