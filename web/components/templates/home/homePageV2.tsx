@@ -143,7 +143,6 @@ export default function Example() {
   const user = useUser();
 
   const supabaseClient = useSupabaseClient<Database>();
-  const { stars, isLoading } = useHomePage();
 
   if (!demoLoading && user?.email === DEMO_EMAIL) {
     supabaseClient.auth.signOut();
@@ -742,11 +741,8 @@ export default function Example() {
               </svg>
               <span>Star</span>
             </div>
-            <div className="bg-gray-100 px-2 py-1">
-              {stars && stars > 999
-                ? `${Math.round(stars / 100) / 10}k`
-                : stars}
-            </div>
+
+            <div className="bg-gray-100 px-2 py-1">1.2k</div>
           </Link>
           <button
             onClick={() => {
