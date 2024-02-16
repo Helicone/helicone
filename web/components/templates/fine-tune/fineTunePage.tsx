@@ -223,9 +223,9 @@ const FineTuningPage = (props: FineTuningPageProps) => {
               <p className="text-gray-500 text-sm">Model</p>
               <button
                 onClick={() => {
-                  if (selectedJob?.dataFromOpenAI.job.fine_tuned_model) {
+                  if (selectedJob?.dataFromOpenAI.job?.fine_tuned_model) {
                     navigator.clipboard.writeText(
-                      selectedJob?.dataFromOpenAI.job.fine_tuned_model
+                      selectedJob?.dataFromOpenAI.job?.fine_tuned_model
                     );
                     setNotification("Copied to clipboard", "success");
                   }
@@ -233,7 +233,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 className="flex flex-row items-center"
               >
                 <h3 className="text-xl font-semibold">
-                  {selectedJob?.dataFromOpenAI.job.fine_tuned_model}
+                  {selectedJob?.dataFromOpenAI.job?.fine_tuned_model}
                 </h3>
                 <ClipboardDocumentListIcon className="w-5 h-5 ml-2 text-gray-500" />
               </button>
@@ -266,7 +266,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 <p className="text-gray-700 dark:text-gray-300 truncate">
                   {selectedJob?.finetune_job_id}
                 </p>
-                {selectedJob?.dataFromOpenAI.job.fine_tuned_model && (
+                {selectedJob?.dataFromOpenAI.job?.fine_tuned_model && (
                   <ArrowTopRightOnSquareIcon className="w-3 h-3 ml-1 inline" />
                 )}
               </Link>
@@ -341,7 +341,7 @@ client = OpenAI(
 
 # send the request
 chat_completion = client.chat.completions.create(
-  model="${selectedJob?.dataFromOpenAI.job.fine_tuned_model}",
+  model="${selectedJob?.dataFromOpenAI.job?.fine_tuned_model}",
   messages=[
     {"role": "user", "content": "Hello world!"}
   ],
