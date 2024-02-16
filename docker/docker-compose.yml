@@ -6,7 +6,6 @@
 
 version: "3.8"
 services:
-
   studio:
     container_name: supabase-studio
     image: supabase/studio:20240101-8e4a094
@@ -158,7 +157,7 @@ services:
         condition: service_healthy
       rest:
         condition: service_started
- 
+
     healthcheck:
       test:
         [
@@ -254,11 +253,11 @@ services:
   web:
     container_name: helicone-web-local
     depends_on:
-      - clickhouse-migration-runner
-      - supabase-migration-runner
+      - db
+      - kong
     build:
       context: ../web
-      dockerfile: ../docker/dockerfiles/dockerfile_web  
+      dockerfile: ../docker/dockerfiles/dockerfile_web
       args:
         NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_PUBLIC_URL}
         NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH}
@@ -273,15 +272,16 @@ services:
       NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
       NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL}
-
       SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
       SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
       DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
+      CLICKHOUSE_HOST_INTERNAL: ${CLICKHOUSE_HOST}
+      CLICKHOUSE_PORT: ${CLICKHOUSE_PORT}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       VERCEL_ENV: ${VERCEL_ENV}
-      
+
   clickhouse-db:
     container_name: clickhouse-db
     image: clickhouse/clickhouse-server:23.4.2.11
@@ -298,34 +298,6 @@ services:
     environment:
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
-
-  clickhouse-migration-runner:
-    container_name: clickhouse-migration-runner
-    build:
-      context: ../clickhouse
-      dockerfile: ../docker/dockerfiles/dockerfile_clickhouse_migration_runner
-    depends_on:
-      clickhouse-db:
-        # Disable this if you are using an external Postgres database
-        condition: service_healthy
-
-    environment:
-      CLICKHOUSE_HOST: ${CLICKHOUSE_HOST}
-      CLICKHOUSE_PORT: ${CLICKHOUSE_PORT}
-
-  supabase-migration-runner:
-    container_name: supabase-migration-runner
-    build:
-      context: ../supabase
-      dockerfile: ../docker/dockerfiles/dockerfile_supabase_migration_runner
-      # target: linux/amd64
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-
-
   worker-openai-proxy:
     container_name: helicone-worker-openai-proxy
     build:
@@ -361,7 +333,6 @@ services:
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
-
 
   worker-anthropic-proxy:
     container_name: helicone-worker-anthropic-proxy
@@ -408,17 +379,13 @@ services:
       - ${JAWN_PORT}:${JAWN_PORT}
     environment:
       PORT: ${JAWN_PORT}
-    
+
       SUPABASE_CREDS: |
         {
           "url": "http://kong:${KONG_HTTP_PORT}",
           "service_role_key": "${SERVICE_ROLE_KEY}"
         }
       SUPABASE_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-
-    
-
-
 
   # worker-helicone-api:
   #   container_name: helicone-worker-helicone-api
@@ -436,5 +403,4 @@ services:
   #     CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
   #     STORAGE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${PGBOUNCER_PORT}/${POSTGRES_DB}
 
-
-    # If you want to use logging, please run with `docker compose -f docker-compose.yml -f docker-compose-logging.yml up`
+  # If you want to use logging, please run with `docker compose -f docker-compose.yml -f docker-compose-logging.yml up`
