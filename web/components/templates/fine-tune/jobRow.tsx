@@ -90,7 +90,7 @@ const JobRow = (props: JobRowProps) => {
             </button>
           </TableCell>
           <TableCell>
-            <ModelPill model={job.dataFromOpenAI.job.model} />
+            <ModelPill model={job.dataFromOpenAI.job?.model} />
           </TableCell>
 
           <TableCell>
