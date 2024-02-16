@@ -18,7 +18,10 @@ import { useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { ModelMetric } from "../../../lib/api/models/models";
 import { Result } from "../../../lib/result";
-import { getTimeMap } from "../../../lib/timeCalculations/constants";
+import {
+  getIncrementAsMinutes,
+  getTimeMap,
+} from "../../../lib/timeCalculations/constants";
 import {
   TimeInterval,
   getTimeInterval,
@@ -54,6 +57,10 @@ export type TimeFilter = {
 
 interface StatusCounts {
   [key: string]: number;
+}
+
+function max(arr: number[]) {
+  return arr.reduce((p, c) => (p > c ? p : c), 0);
 }
 
 export function formatNumberString(
@@ -349,6 +356,17 @@ const DashboardPage = (props: DashboardPageProps) => {
       minH: 4,
       maxH: 4,
     },
+    {
+      i: "tokens-per-min-over-time",
+      x: 0,
+      y: 8,
+      w: 6,
+      h: 43,
+      minW: 3,
+      maxW: 12,
+      minH: 4,
+      maxH: 8,
+    },
   ];
 
   const smallLayout: ReactGridLayout.Layout[] = [
@@ -459,6 +477,17 @@ const DashboardPage = (props: DashboardPageProps) => {
       minH: 4,
       maxH: 4,
       static: true,
+    },
+    {
+      i: "tokens-per-min-over-time",
+      x: 0,
+      y: 24,
+      w: 6,
+      h: 43,
+      minW: 3,
+      maxW: 12,
+      minH: 4,
+      maxH: 8,
     },
   ];
 
@@ -871,6 +900,59 @@ const DashboardPage = (props: DashboardPageProps) => {
                     categories={["users"]}
                     colors={["orange"]}
                     showYAxis={false}
+                  />
+                </StyledAreaChart>
+              </div>
+              <div key="tokens-per-min-over-time">
+                <StyledAreaChart
+                  title={"Tokens / Minute"}
+                  value={`Max: ${(
+                    max(
+                      overTimeData.promptTokensOverTime.data?.data
+                        ?.map((d) => d.completion_tokens + d.prompt_tokens)
+                        .filter((d) => d !== 0) ?? []
+                    ) / getIncrementAsMinutes(timeIncrement)
+                  ).toFixed(2)}`}
+                  isDataOverTimeLoading={overTimeData.users.isLoading}
+                >
+                  <AreaChart
+                    className="h-[14rem]"
+                    data={
+                      overTimeData.promptTokensOverTime.data?.data?.map(
+                        (r) => ({
+                          date: getTimeMap(timeIncrement)(r.time),
+                          "Prompt / min": (
+                            (r.prompt_tokens + 0.0) /
+                            getIncrementAsMinutes(timeIncrement)
+                          ).toFixed(2),
+
+                          "Completion / min": (
+                            (r.completion_tokens + 0.0) /
+                            getIncrementAsMinutes(timeIncrement)
+                          ).toFixed(2),
+                          "Total / min": (
+                            (r.prompt_tokens + r.completion_tokens + 0.0) /
+                            getIncrementAsMinutes(timeIncrement)
+                          ).toFixed(2),
+                        })
+                      ) ?? []
+                    }
+                    index="date"
+                    categories={[
+                      "Prompt / min",
+                      "Completion / min",
+                      "Total / min",
+                    ]}
+                    colors={[
+                      "green",
+                      "blue",
+                      "orange",
+                      "indigo",
+                      "orange",
+                      "pink",
+                    ]}
+                    showYAxis={false}
+                    curveType="monotone"
                   />
                 </StyledAreaChart>
               </div>
