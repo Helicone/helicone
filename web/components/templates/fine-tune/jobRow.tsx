@@ -75,7 +75,7 @@ const JobRow = (props: JobRowProps) => {
             {/* </Link> */}
           </TableCell>
           <TableCell>
-            <JobStatus jobStatus={job.dataFromOpenAI.job.status} />
+            <JobStatus jobStatus={job.dataFromOpenAI.job?.status} />
           </TableCell>
           <TableCell>{getUSDate(new Date(job.created_at))}</TableCell>
           <TableCell>
