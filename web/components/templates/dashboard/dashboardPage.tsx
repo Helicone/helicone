@@ -953,10 +953,9 @@ const DashboardPage = (props: DashboardPageProps) => {
                           "Completion / min":
                             (r.completion_tokens + 0.0) /
                             getIncrementAsMinutes(timeIncrement),
-                          "Total / min": (
+                          "Total / min":
                             (r.prompt_tokens + r.completion_tokens + 0.0) /
-                            getIncrementAsMinutes(timeIncrement)
-                          ).toFixed(2),
+                            getIncrementAsMinutes(timeIncrement),
                         })
                       ) ?? []
                     }
@@ -977,9 +976,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     showYAxis={false}
                     curveType="monotone"
                     valueFormatter={(number: number | bigint) =>
-                      `${new Intl.NumberFormat("us")
-                        .format(number)
-                        .toString()} tokens`
+                      `${new Intl.NumberFormat("us").format(number)} tokens`
                     }
                   />
                 </StyledAreaChart>
