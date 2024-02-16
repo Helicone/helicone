@@ -59,16 +59,16 @@ const JobRow = (props: JobRowProps) => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (job.dataFromOpenAI.job.fine_tuned_model) {
+                  if (job.dataFromOpenAI.job?.fine_tuned_model) {
                     navigator.clipboard.writeText(
-                      job.dataFromOpenAI.job.fine_tuned_model
+                      job.dataFromOpenAI.job?.fine_tuned_model
                     );
                     setNotification("Copied to clipboard", "success");
                   }
                 }}
                 className="flex items-center font-semibold underline"
               >
-                {job.dataFromOpenAI.job.fine_tuned_model}
+                {job.dataFromOpenAI.job?.fine_tuned_model}
               </button>
             </Tooltip>
 
