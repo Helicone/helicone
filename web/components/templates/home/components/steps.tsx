@@ -26,7 +26,7 @@ client = OpenAI(
           newLines={[4, 6]}
           oldLines={[]}
           minHeight={false}
-          textSize="lg"
+          textSize="md"
         />
         <i className="text-gray-500 text-xs text-center pt-2">
           Example Python integration with OpenAI
