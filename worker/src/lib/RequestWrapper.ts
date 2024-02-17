@@ -10,7 +10,7 @@ import { Result, err, map, mapPostgrestErr, ok } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
 import { checkLimits, checkLimitsSingle } from "./limits/check";
 import { getAndStoreInCache } from "./secureCache";
-import { parseJSXString } from "../api/lib/promptHelpers";
+import { parseJSXObject } from "../api/lib/promptHelpers";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -159,6 +159,7 @@ export class RequestWrapper {
 
   async getText(): Promise<string> {
     let text = await this.getRawText();
+
     if (this.bodyKeyOverride) {
       try {
         const bodyJson = await JSON.parse(text);
@@ -171,8 +172,9 @@ export class RequestWrapper {
         throw new Error("Could not stringify bodyKeyOverride");
       }
     } else if (this.heliconeHeaders.promptId) {
-      const { stringWithoutJSXTags } = parseJSXString(text);
-      return stringWithoutJSXTags;
+      const { objectWithoutJSXTags } = parseJSXObject(JSON.parse(text));
+
+      return JSON.stringify(objectWithoutJSXTags);
     }
     return text;
   }
