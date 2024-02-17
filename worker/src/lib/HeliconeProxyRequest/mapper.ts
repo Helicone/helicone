@@ -73,7 +73,6 @@ export class HeliconeProxyRequestMapper {
 
     let heliconePromptTemplate: Record<string, unknown> | null = null;
     if (this.request.heliconeHeaders.promptId) {
-      console.log("this.request.getJson()", await this.request.getJson());
       const { templateWithInputs } = parseJSXObject(
         JSON.parse(await this.request.getRawText())
       );
@@ -82,10 +81,6 @@ export class HeliconeProxyRequestMapper {
         unknown
       >;
 
-      console.log(
-        "templateWithInputs",
-        JSON.stringify(templateWithInputs.template)
-      );
       this.injectPromptInputs(templateWithInputs.inputs);
     }
 
