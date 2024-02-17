@@ -41,12 +41,8 @@ export type RequestWrapper = {
   promptName: string;
   promptRegex: string;
   requestCreatedAt: string;
-  formattedPromptId: string;
   id: string;
   path: string;
-  promptValues: {
-    [key: string]: Json;
-  } | null;
   customProperties: {
     [key: string]: Json;
   } | null;
@@ -176,10 +172,8 @@ export const convertRequest = (request: HeliconeRequest, values: string[]) => {
     promptName: request.prompt_name || "",
     promptRegex: request.prompt_regex || "",
     requestCreatedAt: request.request_created_at,
-    formattedPromptId: request.request_formatted_prompt_id || "",
     id: request.request_id,
     path: request.request_path,
-    promptValues: request.request_prompt_values,
     customProperties: request.request_properties,
     feedback: request.request_feedback,
     userId: request.request_user_id || "",
@@ -207,16 +201,6 @@ export const convertRequest = (request: HeliconeRequest, values: string[]) => {
       if (request.request_properties.hasOwnProperty(property)) {
         const value = request.request_properties[property];
         obj[property] = value;
-      }
-    }
-  }
-
-  // add the values to the object
-  if (obj.promptValues) {
-    for (const key of values) {
-      if (obj.promptValues.hasOwnProperty(key)) {
-        const value = obj.promptValues[key];
-        obj[key] = value;
       }
     }
   }

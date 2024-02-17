@@ -33,10 +33,6 @@ export interface HeliconeRequest {
   request_properties: {
     [key: string]: Json;
   } | null;
-  request_formatted_prompt_id: string | null;
-  request_prompt_values: {
-    [key: string]: Json;
-  } | null;
   request_feedback: {
     [key: string]: Json;
   } | null;
@@ -44,8 +40,6 @@ export interface HeliconeRequest {
   prompt_name: string | null;
   prompt_regex: string | null;
   key_name: string;
-  request_prompt: string | null;
-  response_prompt: string | null;
   delay_ms: number | null;
   total_tokens: number | null;
   prompt_tokens: number | null;
@@ -94,8 +88,6 @@ export async function getRequests(
     request.path AS request_path,
     request.user_id AS request_user_id,
     request.properties AS request_properties,
-    request.formatted_prompt_id as request_formatted_prompt_id,
-    request.prompt_values as request_prompt_values,
     request.provider as provider,
     request.model as request_model,
     request.model_override as model_override,
@@ -109,9 +101,7 @@ export async function getRequests(
     job_node_request.node_id as node_id,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
-    feedback.rating AS feedback_rating,
-    (coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text as request_prompt,
-    (coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text as response_prompt
+    feedback.rating AS feedback_rating
   FROM request
     left join response on request.id = response.request
     left join feedback on response.id = feedback.response_id
@@ -176,8 +166,6 @@ export async function getRequestsCached(
     request.path AS request_path,
     request.user_id AS request_user_id,
     request.properties AS request_properties,
-    request.formatted_prompt_id as request_formatted_prompt_id,
-    request.prompt_values as request_prompt_values,
     request.provider as provider,
     request.model as request_model,
     request.model_override as model_override,
@@ -190,9 +178,7 @@ export async function getRequestsCached(
     response.prompt_tokens as prompt_tokens,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
-    feedback.rating AS feedback_rating,
-    (coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text as request_prompt,
-    (coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text as response_prompt
+    feedback.rating AS feedback_rating
   FROM cache_hits
     inner join request on cache_hits.request_id = request.id
     inner join response on request.id = response.request
@@ -328,8 +314,6 @@ function truncLargeData(
   const trunced = data.map((d) => {
     return {
       ...d,
-      response_prompt: d.response_prompt,
-      request_prompt: d.request_prompt,
       request_body: d.request_body,
       response_body: d.response_body,
       llmSchema: d.llmSchema,
