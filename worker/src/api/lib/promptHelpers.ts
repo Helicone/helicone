@@ -39,53 +39,27 @@ export interface TemplateWithInputs {
   template: string;
   inputs: { [key: string]: string };
 }
-export function parseJSXString(input: string) {
-  const stringWithoutJSXTags = input.replace(
-    /<helicone-prompt-input key="[^"]*" *>(.*?)<\/helicone-prompt-input>/g,
-    "$1"
-  );
 
-  const templateWithInputs = input.replace(
-    /<helicone-prompt-input key="([^"]*)" *>(.*?)<\/helicone-prompt-input>/g,
-    (_, key) => `<helicone-prompt-input key="${key}" />`
-  );
-
-  const inputs: { [key: string]: string } = {};
-  input.replace(
-    /<helicone-prompt-input key="([^"]*)" *>(.*?)<\/helicone-prompt-input>/g,
-    (_, key, value) => {
-      inputs[key] = value.trim();
-      return "";
-    }
-  );
-
-  return {
-    stringWithoutJSXTags,
-    templateWithInputs: {
-      template: templateWithInputs,
-      inputs,
-    },
+export function parseJSXObject(input: object): {
+  objectWithoutJSXTags: object;
+  templateWithInputs: {
+    template: object;
+    inputs: { [key: string]: string };
   };
-}
-
-type InputObject = {
-  [key: string]: any;
-};
-
-export function transformObject(input: InputObject) {
+} {
   const inputs: { [key: string]: string } = {};
 
   function traverseAndTransform(obj: any): any {
     if (typeof obj === "string") {
       // Remove JSX tags and keep content
       const stringWithoutJSXTags = obj.replace(
-        /<helicone-prompt-input key="[^"]*" *>(.*?)<\/helicone-prompt-input>/g,
+        /<helicone-prompt-input key="[^"]*" *>([\s\S]*?)<\/helicone-prompt-input>/g,
         "$1"
       );
 
       // Replace JSX tags with self-closing tags and extract inputs
       const templateWithSelfClosingTags = obj.replace(
-        /<helicone-prompt-input key="([^"]*)" *>(.*?)<\/helicone-prompt-input>/g,
+        /<helicone-prompt-input key="([^"]*)" *>([\s\S]*?)<\/helicone-prompt-input>/g,
         (_, key, value) => {
           inputs[key] = value.trim();
           return `<helicone-prompt-input key="${key}" />`;
@@ -96,7 +70,7 @@ export function transformObject(input: InputObject) {
     } else if (Array.isArray(obj)) {
       return obj.map(traverseAndTransform);
     } else if (typeof obj === "object" && obj !== null) {
-      const result: InputObject = {};
+      const result: { [key: string]: any } = {};
       for (const key of Object.keys(obj)) {
         result[key] = traverseAndTransform(obj[key]);
       }
