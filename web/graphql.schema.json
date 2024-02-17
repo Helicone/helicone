@@ -883,18 +883,6 @@
             "deprecationReason": null
           },
           {
-            "name": "prompt",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "properties",
             "description": null,
             "args": [],
@@ -1735,6 +1723,18 @@
           },
           {
             "name": "like",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "not_contains",
             "description": null,
             "type": {
               "kind": "SCALAR",
