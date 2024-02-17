@@ -165,7 +165,7 @@ export async function getRequestsCached(
     END AS response_body,
     response.status AS response_status,
     request.id AS request_id,
-    request.created_at as request_created_at,
+    cache_hits.created_at as request_created_at,
     CASE 
       WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE}
       THEN '{"helicone_message": "request body too large"}'::jsonb
