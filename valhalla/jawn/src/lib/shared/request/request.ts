@@ -79,15 +79,15 @@ export async function getRequests(
   SELECT response.id AS response_id,
     response.created_at as response_created_at,
     CASE 
-      WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} OR request.path LIKE '%embeddings%' THEN ''
-      ELSE response.body::text
+      WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} OR request.path LIKE '%embeddings%' THEN '{}'::jsonb
+      ELSE response.body::jsonb
     END AS response_body,
     response.status AS response_status,
     request.id AS request_id,
     request.created_at as request_created_at,
     CASE 
-      WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE} OR request.path LIKE '%embeddings%' THEN ''
-      ELSE request.body::text
+      WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE} OR request.path LIKE '%embeddings%' THEN '{}'::jsonb
+      ELSE request.body::jsonb
     END AS request_body,
     request.path AS request_path,
     request.user_id AS request_user_id,
@@ -159,15 +159,15 @@ export async function getRequestsCached(
   SELECT response.id AS response_id,
     cache_hits.created_at as response_created_at,
     CASE 
-      WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} OR request.path LIKE '%embeddings%' THEN ''
-      ELSE response.body::text
+      WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} OR request.path LIKE '%embeddings%' THEN '{}'::jsonb
+      ELSE response.body::jsonb
     END AS response_body,
     response.status AS response_status,
     request.id AS request_id,
     cache_hits.created_at as request_created_at,
     CASE 
-      WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE} OR request.path LIKE '%embeddings%' THEN ''
-      ELSE request.body::text
+      WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE} OR request.path LIKE '%embeddings%' THEN '{}'::jsonb
+      ELSE request.body::jsonb
     END AS request_body,
     request.path AS request_path,
     request.user_id AS request_user_id,
