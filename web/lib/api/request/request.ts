@@ -16,7 +16,7 @@ import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { LlmSchema } from "../models/requestResponseModel";
 
 export type Provider = "OPENAI" | "ANTHROPIC" | "TOGETHERAI" | "CUSTOM";
-const MAX_TOTAL_BODY_SIZE = 3900000 / 10;
+const MAX_TOTAL_BODY_SIZE = 3 * 1024 * 1024;
 
 export interface HeliconeRequest {
   response_id: string;
@@ -79,11 +79,17 @@ export async function getRequests(
   const query = `
   SELECT response.id AS response_id,
     response.created_at as response_created_at,
-    response.body AS response_body,
+    CASE 
+      WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} OR request.path LIKE '%embeddings%' THEN '{}'::jsonb
+      ELSE response.body::jsonb
+    END AS response_body,
     response.status AS response_status,
     request.id AS request_id,
     request.created_at as request_created_at,
-    request.body AS request_body,
+    CASE 
+      WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE} OR request.path LIKE '%embeddings%' THEN '{}'::jsonb
+      ELSE request.body::jsonb
+    END AS request_body,
     request.path AS request_path,
     request.user_id AS request_user_id,
     request.properties AS request_properties,
@@ -152,11 +158,17 @@ export async function getRequestsCached(
   const query = `
   SELECT response.id AS response_id,
     cache_hits.created_at as response_created_at,
-    response.body AS response_body,
+    CASE 
+      WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} OR request.path LIKE '%embeddings%' THEN '{}'::jsonb
+      ELSE response.body::jsonb
+    END AS response_body,
     response.status AS response_status,
     request.id AS request_id,
     cache_hits.created_at as request_created_at,
-    request.body AS request_body,
+    CASE 
+      WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE} OR request.path LIKE '%embeddings%' THEN '{}'::jsonb
+      ELSE request.body::jsonb
+    END AS request_body,
     request.path AS request_path,
     request.user_id AS request_user_id,
     request.properties AS request_properties,
