@@ -176,8 +176,6 @@ export async function heliconeRequest(
       sum_prompt_tokens: r.prompt_tokens ?? 0,
       sum_tokens: (r.total_tokens ?? 0) + (r.completion_tokens ?? 0),
     }),
-    prompt: r.request_prompt,
-    response: r.response_prompt,
     user: r.request_user_id
       ? {
           id: r.request_user_id,
@@ -185,12 +183,6 @@ export async function heliconeRequest(
       : null,
     properties: r.request_properties
       ? Object.entries(r.request_properties).map(([k, v]) => ({
-          name: k,
-          value: v as string,
-        }))
-      : [],
-    values: r.request_prompt_values
-      ? Object.entries(r.request_prompt_values).map(([k, v]) => ({
           name: k,
           value: v as string,
         }))
