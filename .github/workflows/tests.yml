@@ -55,11 +55,11 @@ jobs:
           yarn lint
 
   worker-test:
-    name: Lint
+    name: Worker Unit Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Lint worker
+      - name: Jest
         run: |
           cd worker
           yarn install
