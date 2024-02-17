@@ -38,7 +38,7 @@ def main(test_mode):
         
         # Adjust the Dockerfile path according to the special case for "jawn"
         if dockerfile_name == "jawn":
-            dockerfile_path = "Dockerfile"  # Assuming the Dockerfile is directly in the context directory for "jawn"
+            dockerfile_path = "../valhalla/dockerfile"  # Assuming the Dockerfile is directly in the context directory for "jawn"
         else:
             dockerfile_path = f"dockerfiles/dockerfile_{dockerfile_name}"
 
