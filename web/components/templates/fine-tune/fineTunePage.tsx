@@ -21,7 +21,7 @@ import { useOrg } from "../../layout/organizationContext";
 import { Database } from "../../../supabase/database.types";
 import { getUSDate, getUSDateFromString } from "../../shared/utils/utils";
 import { middleTruncString } from "../../../lib/stringHelpers";
-import { FineTuneJob } from "./jobRow";
+import JobRow, { FineTuneJob } from "./jobRow";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedModal from "../../shared/themed/themedModal";
 import FineTuneForm from "./fineTuneForm";
@@ -186,18 +186,17 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {jobs?.map((job, index) => JSON.stringify(job))}
-                    {/* // {jobs?.map((job, index) => (
-                    //   <JobRow
-                    //     job={job}
-                    //     key={index}
-                    //     onSelect={(job) => {
-                    //       setSelectedJob(job);
-                    //       setJobOpen(true);
-                    //     }}
-                    //     datasets={datasets}
-                    //   />
-                    // ))} */}
+                    {jobs?.map((job, index) => (
+                      <JobRow
+                        job={job}
+                        key={index}
+                        onSelect={(job) => {
+                          setSelectedJob(job);
+                          setJobOpen(true);
+                        }}
+                        datasets={datasets}
+                      />
+                    ))}
                   </TableBody>
                 </Table>
               </Card>
@@ -219,7 +218,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
       </ThemedModal>
       <ThemedDrawer open={jobOpen} setOpen={setJobOpen}>
         <div className="flex flex-col py-2">
-          {selectedJob?.dataFromOpenAI.job.status === "succeeded" && (
+          {selectedJob?.dataFromOpenAI.job?.status === "succeeded" && (
             <>
               <p className="text-gray-500 text-sm">Model</p>
               <button
@@ -234,7 +233,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 className="flex flex-row items-center"
               >
                 <h3 className="text-xl font-semibold">
-                  {selectedJob?.dataFromOpenAI.job?.fine_tuned_model}
+                  {selectedJob?.dataFromOpenAI.job?.fine_tuned_model || "n/a"}
                 </h3>
                 <ClipboardDocumentListIcon className="w-5 h-5 ml-2 text-gray-500" />
               </button>
@@ -251,7 +250,11 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 Status
               </p>
               <JobStatus
-                jobStatus={selectedJob?.dataFromOpenAI.job.status || "unknown"}
+                jobStatus={
+                  selectedJob?.dataFromOpenAI.job?.status ||
+                  selectedJob?.status ||
+                  "unknown"
+                }
               />
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -267,9 +270,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 <p className="text-gray-700 dark:text-gray-300 truncate">
                   {selectedJob?.finetune_job_id}
                 </p>
-                {selectedJob?.dataFromOpenAI.job?.fine_tuned_model && (
-                  <ArrowTopRightOnSquareIcon className="w-3 h-3 ml-1 inline" />
-                )}
+                <ArrowTopRightOnSquareIcon className="w-3 h-3 ml-1 inline" />
               </Link>
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -277,7 +278,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 Base Model
               </p>
               <ModelPill
-                model={selectedJob?.dataFromOpenAI.job.model || "unknown"}
+                model={selectedJob?.dataFromOpenAI.job?.model || "unknown"}
               />
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -307,7 +308,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 Trained Tokens
               </p>
               <p className="text-gray-700 dark:text-gray-300 truncate">
-                {selectedJob?.dataFromOpenAI.job.trained_tokens}
+                {selectedJob?.dataFromOpenAI.job?.trained_tokens}
               </p>
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -315,11 +316,11 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 Epochs
               </p>
               <p className="text-gray-700 dark:text-gray-300 truncate">
-                {selectedJob?.dataFromOpenAI.job.hyperparameters.n_epochs}
+                {selectedJob?.dataFromOpenAI.job?.hyperparameters.n_epochs}
               </p>
             </li>
           </ul>
-          {selectedJob?.dataFromOpenAI.job.status === "succeeded" && (
+          {selectedJob?.dataFromOpenAI.job?.status === "succeeded" && (
             <div className="mt-8">
               <p className="font-semibold text-xl">How to integrate</p>
               <p className="text-gray-500 text-sm mt-1 leading-5">
