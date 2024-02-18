@@ -21,7 +21,7 @@ import { useOrg } from "../../layout/organizationContext";
 import { Database } from "../../../supabase/database.types";
 import { getUSDate, getUSDateFromString } from "../../shared/utils/utils";
 import { middleTruncString } from "../../../lib/stringHelpers";
-import JobRow, { FineTuneJob } from "./jobRow";
+import { FineTuneJob } from "./jobRow";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedModal from "../../shared/themed/themedModal";
 import FineTuneForm from "./fineTuneForm";
