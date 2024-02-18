@@ -186,17 +186,18 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {jobs?.map((job, index) => (
-                      <JobRow
-                        job={job}
-                        key={index}
-                        onSelect={(job) => {
-                          setSelectedJob(job);
-                          setJobOpen(true);
-                        }}
-                        datasets={datasets}
-                      />
-                    ))}
+                    {jobs?.map((job, index) => JSON.stringify(job))}
+                    {/* // {jobs?.map((job, index) => (
+                    //   <JobRow
+                    //     job={job}
+                    //     key={index}
+                    //     onSelect={(job) => {
+                    //       setSelectedJob(job);
+                    //       setJobOpen(true);
+                    //     }}
+                    //     datasets={datasets}
+                    //   />
+                    // ))} */}
                   </TableBody>
                 </Table>
               </Card>
