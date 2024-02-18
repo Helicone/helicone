@@ -63,7 +63,31 @@ const tabOptions: {
     id: "gateway",
     title: "Gateway",
     icon: <ArrowPathIcon className="w-6 h-6 text-green-500" />,
-    content: "Data Collection",
+    content: (
+      <div className="my-8 w-full rounded-lg bg-green-300 h-[28rem] relative p-16 flex justify-end">
+        <div className="flex flex-col space-y-4 text-black w-full">
+          <h2 className="text-3xl font-bold tracking-tight">Gateway</h2>
+          <p className="text-lg font-bold">
+            Within our proxy, we offer caching, rate limiting, prompt detection,
+            prompt templating, and much more...
+          </p>
+        </div>
+        <Image
+          className="z-20 absolute bottom-4 -left-4 shadow-sm rounded-lg border border-gray-300 max-h-56 -rotate-2 w-fit object-contain lg:col-span-1"
+          src="/assets/home/bento/template.png"
+          alt="requests"
+          width={980}
+          height={604}
+        />
+        <Image
+          className="z-20 absolute bottom-8 -right-4 shadow-sm rounded-lg border border-gray-300 max-h-80 rotate-2 w-fit object-contain lg:col-span-1"
+          src="/assets/home/bento/cache.png"
+          alt="requests"
+          width={1200}
+          height={800}
+        />
+      </div>
+    ),
     highlightColor: "border-green-700",
   },
   {
@@ -74,14 +98,15 @@ const tabOptions: {
       <div className="my-8 w-full rounded-lg bg-orange-300 h-[28rem] relative p-16 flex justify-end">
         <div className="flex flex-col space-y-4 text-black w-2/5">
           <h2 className="text-3xl font-bold tracking-tight">Data Collection</h2>
-          <p className="text-xl font-bold">
-            Normalize and collect data from various providers and models
+          <p className="text-lg font-bold">
+            Collect, normalize, and transform data from various providers and
+            models
           </p>
           <ul className="list-disc text-xl pl-4 space-y-2 font-bold">
-            <li>OpenAI</li>
-            <li>Anthropic</li>
-            <li>Gemini</li>
-            <li>and many more...</li>
+            <li>Request Logs</li>
+            <li>Datasets</li>
+            <li>Standardized schema</li>
+            <li>GraphQL API</li>
           </ul>
         </div>
         <Image
@@ -99,7 +124,24 @@ const tabOptions: {
     id: "fine-tuning",
     title: "Fine-Tuning",
     icon: <CodeBracketSquareIcon className="w-6 h-6 text-red-500" />,
-    content: "Fine-Tuning",
+    content: (
+      <div className="my-8 w-full rounded-lg bg-red-600 h-[28rem] relative p-16 flex justify-start">
+        <div className="flex flex-col space-y-4 text-white w-2/5">
+          <h2 className="text-3xl font-bold tracking-tight">Fine-Tuning</h2>
+          <p className="text-lg font-bold">
+            Easily fine-tune on your datasets to improve quality while cutting
+            costs.
+          </p>
+        </div>
+        <Image
+          className="z-20 absolute bottom-4 right-8 shadow-sm rounded-lg border border-gray-300 max-h-[27rem] -rotate-2 w-fit object-contain lg:col-span-1"
+          src="/assets/home/bento/logs.png"
+          alt="requests"
+          width={980}
+          height={604}
+        />
+      </div>
+    ),
     highlightColor: "border-red-700",
   },
   {

@@ -75,8 +75,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
             <span className="text-violet-500">startups and enterprises</span>
           </h3>
           <p className="text-gray-700 font-medium text-xl leading-8 mt-2">
-            Our Generative AI platform is flexible when you want it, but
-            powerful when you need it.
+            Helicone is built to scale with your business, no matter the size.
           </p>
         </div>
         <div className="grid grid-cols-4 gap-16 w-full mx-auto justify-center font-mono tracking-tighter">
