@@ -402,7 +402,7 @@ chat_completion = client.chat.completions.create(
                         {
                           filterMap[_filter.filterMapIdx]?.operators[
                             _filter.operatorIdx
-                          ].label
+                          ]?.label
                         }
                       </span>
                       <span>`{_filter.value}`</span>
