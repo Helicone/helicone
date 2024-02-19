@@ -10,4 +10,5 @@ RUN rm .env.* || true
 
 EXPOSE 3000
 
-CMD sh -c "npx supabase db push --db-url ${DATABASE_URL} && python3 clickhouse/ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST_DOCKER} --port ${CLICKHOUSE_PORT} && yarn build-and-start"
+CMD ["yarn", "build-and-start"]
+# CMD sh -c "npx supabase db push --db-url ${DATABASE_URL} && python3 clickhouse/ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST_DOCKER} --port ${CLICKHOUSE_PORT} && yarn build-and-start"

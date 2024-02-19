@@ -299,31 +299,31 @@ services:
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
 
-  # clickhouse-migration-runner:
-  #   container_name: clickhouse-migration-runner
-  #   build:
-  #     context: ../clickhouse
-  #     dockerfile: ../docker/dockerfiles/dockerfile_clickhouse_migration_runner
-  #   depends_on:
-  #     clickhouse-db:
-  #       # Disable this if you are using an external Postgres database
-  #       condition: service_healthy
+  clickhouse-migration-runner:
+    container_name: clickhouse-migration-runner
+    build:
+      context: ../clickhouse
+      dockerfile: ../docker/dockerfiles/dockerfile_clickhouse_migration_runner
+    depends_on:
+      clickhouse-db:
+        # Disable this if you are using an external Postgres database
+        condition: service_healthy
 
-  #   environment:
-  #     CLICKHOUSE_HOST: ${CLICKHOUSE_HOST}
-  #     CLICKHOUSE_PORT: ${CLICKHOUSE_PORT}
+    environment:
+      CLICKHOUSE_HOST: ${CLICKHOUSE_HOST}
+      CLICKHOUSE_PORT: ${CLICKHOUSE_PORT}
 
-  # supabase-migration-runner:
-  #   container_name: supabase-migration-runner
-  #   build:
-  #     context: ../supabase
-  #     dockerfile: ../docker/dockerfiles/dockerfile_supabase_migration_runner
-  #     # target: linux/amd64
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #   environment:
-  #     DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+  supabase-migration-runner:
+    container_name: supabase-migration-runner
+    build:
+      context: ../supabase
+      dockerfile: ../docker/dockerfiles/dockerfile_supabase_migration_runner
+      # target: linux/amd64
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
 
   worker-openai-proxy:
     container_name: helicone-worker-openai-proxy
