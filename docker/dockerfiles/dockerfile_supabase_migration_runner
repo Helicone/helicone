@@ -6,11 +6,8 @@ RUN apt install curl git -y
 # Install gcc
 RUN apt install build-essential -y
 
-COPY . /app
+COPY . /app/supabase
 
 WORKDIR /app
 
-RUN npm i supabase
-
-# CMD sh -c "npx supabase db push --db-url ${DATABASE_URL} && python3 clickhouse/ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST_DOCKER} --port ${CLICKHOUSE_PORT} && yarn build-and-start"
-CMD sh -c "cd supabase && npx supabase db push --db-url ${DATABASE_URL}"
+CMD ["sh", "-c", "npx supabase db push --db-url ${DATABASE_URL}"]
