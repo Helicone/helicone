@@ -128,17 +128,14 @@ export interface Database {
       cache_hits: {
         Row: {
           created_at: string
-          organization_id: string | null
           request_id: string
         }
         Insert: {
           created_at?: string
-          organization_id?: string | null
           request_id: string
         }
         Update: {
           created_at?: string
-          organization_id?: string | null
           request_id?: string
         }
         Relationships: [
@@ -266,150 +263,6 @@ export interface Database {
             columns: ["response_id"]
             isOneToOne: true
             referencedRelation: "response_rbac"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      finetune_dataset: {
-        Row: {
-          created_at: string
-          filter_node: string | null
-          filters: string | null
-          id: string
-          name: string
-          organization_id: string
-        }
-        Insert: {
-          created_at?: string
-          filter_node?: string | null
-          filters?: string | null
-          id?: string
-          name: string
-          organization_id: string
-        }
-        Update: {
-          created_at?: string
-          filter_node?: string | null
-          filters?: string | null
-          id?: string
-          name?: string
-          organization_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "finetune_dataset_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      finetune_dataset_data: {
-        Row: {
-          created_at: string
-          id: string
-          organization_id: string
-          request_id: string
-        }
-        Insert: {
-          created_at?: string
-          id: string
-          organization_id: string
-          request_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          organization_id?: string
-          request_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "finetune_dataset_data_id_fkey"
-            columns: ["id"]
-            isOneToOne: false
-            referencedRelation: "finetune_dataset"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "finetune_dataset_data_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "finetune_dataset_data_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "finetune_dataset_data_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request_rbac"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      finetune_job: {
-        Row: {
-          created_at: string
-          dataset_id: string
-          finetune_job_id: string
-          id: string
-          organization_id: string
-          provider_key_id: string
-          status: string
-        }
-        Insert: {
-          created_at?: string
-          dataset_id: string
-          finetune_job_id: string
-          id?: string
-          organization_id: string
-          provider_key_id: string
-          status: string
-        }
-        Update: {
-          created_at?: string
-          dataset_id?: string
-          finetune_job_id?: string
-          id?: string
-          organization_id?: string
-          provider_key_id?: string
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "finetune_job_dataset_id_fkey"
-            columns: ["dataset_id"]
-            isOneToOne: false
-            referencedRelation: "finetune_dataset"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "finetune_job_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "finetune_job_provider_key_id_fkey"
-            columns: ["provider_key_id"]
-            isOneToOne: false
-            referencedRelation: "decrypted_provider_keys"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "finetune_job_provider_key_id_fkey"
-            columns: ["provider_key_id"]
-            isOneToOne: false
-            referencedRelation: "provider_keys"
             referencedColumns: ["id"]
           }
         ]
@@ -814,15 +667,12 @@ export interface Database {
         Row: {
           color: string
           created_at: string | null
-          domain: string | null
           has_onboarded: boolean
           icon: string
           id: string
           is_personal: boolean
-          limits: Json | null
           logo_path: string | null
           name: string
-          org_provider_key: string | null
           organization_type: string
           owner: string
           referral: string | null
@@ -837,15 +687,12 @@ export interface Database {
         Insert: {
           color?: string
           created_at?: string | null
-          domain?: string | null
           has_onboarded?: boolean
           icon?: string
           id?: string
           is_personal?: boolean
-          limits?: Json | null
           logo_path?: string | null
           name: string
-          org_provider_key?: string | null
           organization_type?: string
           owner: string
           referral?: string | null
@@ -860,15 +707,12 @@ export interface Database {
         Update: {
           color?: string
           created_at?: string | null
-          domain?: string | null
           has_onboarded?: boolean
           icon?: string
           id?: string
           is_personal?: boolean
-          limits?: Json | null
           logo_path?: string | null
           name?: string
-          org_provider_key?: string | null
           organization_type?: string
           owner?: string
           referral?: string | null
@@ -881,20 +725,6 @@ export interface Database {
           tier?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "organization_org_provider_key_fkey"
-            columns: ["org_provider_key"]
-            isOneToOne: false
-            referencedRelation: "decrypted_provider_keys"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "organization_org_provider_key_fkey"
-            columns: ["org_provider_key"]
-            isOneToOne: false
-            referencedRelation: "provider_keys"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "organization_owner_fkey"
             columns: ["owner"]
@@ -970,50 +800,6 @@ export interface Database {
           prompt?: string
         }
         Relationships: []
-      }
-      prompts: {
-        Row: {
-          created_at: string
-          description: string | null
-          heliconeTemplate: Json | null
-          id: string
-          name: string | null
-          organization_id: string
-          soft_delete: boolean
-          status: string
-          version: number
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          heliconeTemplate?: Json | null
-          id: string
-          name?: string | null
-          organization_id: string
-          soft_delete?: boolean
-          status?: string
-          version?: number
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          heliconeTemplate?: Json | null
-          id?: string
-          name?: string | null
-          organization_id?: string
-          soft_delete?: boolean
-          status?: string
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "prompts_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          }
-        ]
       }
       properties: {
         Row: {
@@ -1135,45 +921,6 @@ export interface Database {
           }
         ]
       }
-      referrals: {
-        Row: {
-          created_at: string | null
-          id: string
-          referred_user_id: string | null
-          referrer_user_id: string | null
-          status: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          referred_user_id?: string | null
-          referrer_user_id?: string | null
-          status?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          referred_user_id?: string | null
-          referrer_user_id?: string | null
-          status?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "referrals_referred_user_id_fkey"
-            columns: ["referred_user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "referrals_referrer_user_id_fkey"
-            columns: ["referrer_user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
       request: {
         Row: {
           auth_hash: string
@@ -1185,8 +932,6 @@ export interface Database {
           helicone_proxy_key_id: string | null
           helicone_user: string | null
           id: string
-          model: string | null
-          model_override: string | null
           path: string
           prompt_id: string | null
           prompt_values: Json | null
@@ -1204,8 +949,6 @@ export interface Database {
           helicone_proxy_key_id?: string | null
           helicone_user?: string | null
           id?: string
-          model?: string | null
-          model_override?: string | null
           path: string
           prompt_id?: string | null
           prompt_values?: Json | null
@@ -1223,8 +966,6 @@ export interface Database {
           helicone_proxy_key_id?: string | null
           helicone_user?: string | null
           id?: string
-          model?: string | null
-          model_override?: string | null
           path?: string
           prompt_id?: string | null
           prompt_values?: Json | null
@@ -1325,7 +1066,6 @@ export interface Database {
           delay_ms: number | null
           feedback: Json | null
           id: string
-          model: string | null
           prompt_tokens: number | null
           request: string
           status: number | null
@@ -1337,7 +1077,6 @@ export interface Database {
           delay_ms?: number | null
           feedback?: Json | null
           id?: string
-          model?: string | null
           prompt_tokens?: number | null
           request: string
           status?: number | null
@@ -1349,7 +1088,6 @@ export interface Database {
           delay_ms?: number | null
           feedback?: Json | null
           id?: string
-          model?: string | null
           prompt_tokens?: number | null
           request?: string
           status?: number | null
@@ -1436,21 +1174,18 @@ export interface Database {
       user_settings: {
         Row: {
           created_at: string | null
-          referral_code: string
           request_limit: number
           tier: string
           user: string
         }
         Insert: {
           created_at?: string | null
-          referral_code?: string
           request_limit?: number
           tier?: string
           user: string
         }
         Update: {
           created_at?: string | null
-          referral_code?: string
           request_limit?: number
           tier?: string
           user?: string
