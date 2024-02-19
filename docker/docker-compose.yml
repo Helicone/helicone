@@ -6,7 +6,6 @@
 
 version: "3.8"
 services:
-
   studio:
     container_name: supabase-studio
     image: supabase/studio:20240101-8e4a094
@@ -17,7 +16,7 @@ services:
           "CMD",
           "node",
           "-e",
-          "require('http').get('http://localhost:3000/api/profile', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+          "require('http').get('http://localhost:3000/api/profile', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})",
         ]
       timeout: 5s
       interval: 5s
@@ -87,7 +86,7 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://localhost:9999/health"
+          "http://localhost:9999/health",
         ]
       timeout: 5s
       interval: 5s
@@ -167,7 +166,7 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://localhost:5000/status"
+          "http://localhost:5000/status",
         ]
       timeout: 5s
       interval: 5s
@@ -190,7 +189,6 @@ services:
       IMGPROXY_URL: http://imgproxy:5001
     volumes:
       - ./volumes/storage:/var/lib/storage:z
-
 
   meta:
     container_name: supabase-meta
@@ -250,12 +248,12 @@ services:
       # Changes required for Analytics support
       - ./volumes/db/logs.sql:/docker-entrypoint-initdb.d/migrations/99-logs.sql:Z
 
-
   web:
     container_name: helicone-web-local
     depends_on:
       - db
       - jawn
+      - clickhouse-db
     build:
       context: ../web
       dockerfile: ../docker/dockerfiles/dockerfile_web
@@ -363,7 +361,6 @@ services:
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
 
-
   worker-anthropic-proxy:
     container_name: helicone-worker-anthropic-proxy
     build:
@@ -417,10 +414,6 @@ services:
         }
       SUPABASE_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
 
-
-
-
-
   # worker-helicone-api:
   #   container_name: helicone-worker-helicone-api
   #   image: helicone/worker-helicone-api:latest
@@ -436,6 +429,5 @@ services:
   #     CLICKHOUSE_USER: ${CLICKHOUSE_USER}
   #     CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
   #     STORAGE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${PGBOUNCER_PORT}/${POSTGRES_DB}
-
 
   # If you want to use logging, please run with `docker compose -f docker-compose.yml -f docker-compose-logging.yml up`
