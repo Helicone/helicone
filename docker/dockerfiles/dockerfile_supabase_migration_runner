@@ -6,7 +6,7 @@ RUN apt install curl git -y
 # Install gcc
 RUN apt install build-essential -y
 
-COPY . /app/supabase
+COPY . /app
 
 WORKDIR /app
 
