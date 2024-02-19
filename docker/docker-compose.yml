@@ -254,6 +254,7 @@ services:
       - db
       - jawn
       - clickhouse-db
+      - kong
     build:
       context: ../web
       dockerfile: ../docker/dockerfiles/dockerfile_web
