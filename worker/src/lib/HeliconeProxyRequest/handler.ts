@@ -121,3 +121,35 @@ export async function handleProxyRequest(
     error: null,
   };
 }
+
+export async function handleThreatProxyRequest(
+  proxyRequest: HeliconeProxyRequest
+): Promise<Result<ProxyResult, string>> {
+  const threatProxyResponse = {
+    data: {
+      loggable: new DBLoggable({
+        request: dbLoggableRequestFromProxyRequest(proxyRequest),
+        response: {
+          responseId: crypto.randomUUID(),
+          getResponseBody: async () => ({
+            body: "{}",
+            endTime: new Date(new Date().getTime()),
+          }),
+          responseHeaders: new Headers(),
+          status: async () => -4,
+          omitLog:
+            proxyRequest.requestWrapper.heliconeHeaders.omitHeaders
+              .omitResponse,
+        },
+        timing: {
+          startTime: proxyRequest.startTime,
+        },
+        tokenCalcUrl: proxyRequest.tokenCalcUrl,
+      }),
+      response: new Response("{}", {}),
+    },
+    error: null,
+  };
+
+  return threatProxyResponse;
+}

@@ -14,8 +14,10 @@ import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { InsertQueue } from "../dbLogger/insertQueue";
 
 import { Valhalla } from "../db/valhalla";
-import { handleProxyRequest } from "./handler";
+import { handleProxyRequest, handleThreatProxyRequest } from "./handler";
 import { HeliconeProxyRequestMapper } from "./mapper";
+import { checkPromptSecurity } from "../security/promptSecurity";
+import { DBLoggable } from "../dbLogger/DBLoggable";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -58,6 +60,34 @@ export async function proxyForwarder(
     );
     if (rateLimitCheckResult.status === "rate_limited") {
       return responseBuilder.buildRateLimitedResponse();
+    }
+  }
+
+  if (
+    request.headers.get("Helicone-Prompt-Security-Enabled") &&
+    provider === "OPENAI"
+  ) {
+    const threat = await checkPromptSecurity(proxyRequest, env);
+    proxyRequest.threat = threat;
+
+    const { data, error } = await handleThreatProxyRequest(proxyRequest);
+
+    if (error !== null) {
+      return responseBuilder.build({
+        body: error,
+        status: 500,
+      });
+    }
+    const { loggable } = data;
+
+    if (proxyRequest.threat === true) {
+      const responseContent = {
+        body: "Prompt threat detected.",
+        status: 500,
+      };
+      ctx.waitUntil(log(loggable));
+
+      return responseBuilder.build(responseContent);
     }
   }
 
@@ -147,7 +177,7 @@ export async function proxyForwarder(
     responseBuilder.setHeader("Helicone-Cache", "MISS");
   }
 
-  async function log() {
+  async function log(loggable: DBLoggable) {
     const { data: auth, error: authError } = await request.auth();
     if (authError !== null) {
       console.error("Error getting auth", authError);
@@ -165,13 +195,14 @@ export async function proxyForwarder(
         env.REQUEST_AND_RESPONSE_QUEUE_KV
       ),
     });
+
     if (res.error !== null) {
       console.error("Error logging", res.error);
     }
   }
 
   if (request?.heliconeHeaders?.heliconeAuth || request.heliconeProxyKeyId) {
-    ctx.waitUntil(log());
+    ctx.waitUntil(log(loggable));
   }
 
   if (proxyRequest.rateLimitOptions) {

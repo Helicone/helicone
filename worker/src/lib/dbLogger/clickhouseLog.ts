@@ -102,6 +102,7 @@ export async function logInClickhouse(
         job_id: node.job,
         node_id: node.id,
         proxy_key_id: request.helicone_proxy_key_id ?? null,
+        threat: request.threat ?? null,
       },
     ]),
     clickhouseDb.dbInsertClickhouse(
