@@ -151,10 +151,8 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
                                   "rounded-full border border-gray-300 dark:border-gray-700 h-4 w-4 mr-2 flex items-center"
                                 )}
                               >
-                                {checked ? (
+                                {checked && (
                                   <CheckCircleIcon className="h-5 w-5 text-sky-500" />
-                                ) : (
-                                  <></>
                                 )}
                               </div>
                               <RadioGroup.Label
