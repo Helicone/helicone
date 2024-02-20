@@ -10,11 +10,7 @@ import ThemedModal from "../../../../shared/themed/themedModal";
 import { DecryptedProviderKey } from "../../../../../services/lib/keys";
 import useNotification from "../../../../shared/notification/useNotification";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import {
-  CheckCircleIcon,
-  CheckIcon,
-  PlusCircleIcon,
-} from "@heroicons/react/20/solid";
+import { CheckCircleIcon, PlusCircleIcon } from "@heroicons/react/20/solid";
 
 interface ProviderKeyListProps {
   variant?: "portal" | "basic";
