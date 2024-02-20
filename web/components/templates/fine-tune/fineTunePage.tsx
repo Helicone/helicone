@@ -89,7 +89,11 @@ const FineTuningPage = (props: FineTuningPageProps) => {
     refetchInterval: 5_000,
   });
 
-  const { data: datasets, isLoading: isDatasetsLoading } = useQuery({
+  const {
+    data: datasets,
+    isLoading: isDatasetsLoading,
+    refetch: refetchDatasets,
+  } = useQuery({
     queryKey: ["fine-tune-datasets", orgContext?.currentOrg?.id],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
@@ -211,6 +215,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
             setFineTuneOpen(false);
           }}
           onSuccess={() => {
+            refetchDatasets();
             refetch();
             setFineTuneOpen(false);
           }}
