@@ -78,11 +78,16 @@ export async function proxyForwarder(
         status: 500,
       });
     }
-    const { loggable } = data;
+    const { loggable, response } = data;
 
     if (proxyRequest.threat === true) {
+      response.headers.forEach((value, key) => {
+        responseBuilder.setHeader(key, value);
+      });
+
       const responseContent = {
         body: "Prompt threat detected.",
+        inheritFrom: response,
         status: 500,
       };
       ctx.waitUntil(log(loggable));

@@ -78,7 +78,7 @@ export function dbLoggableRequestFromProxyRequest(
     modelOverride:
       proxyRequest.requestWrapper.heliconeHeaders.modelOverride ?? undefined,
     heliconeTemplate: proxyRequest.heliconePromptTemplate ?? undefined,
-    threat: proxyRequest.threat ?? undefined,
+    threat: proxyRequest.threat ?? null,
   };
 }
 
@@ -137,6 +137,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       provider,
       nodeId: requestWrapper.getNodeId(),
       modelOverride: requestWrapper.heliconeHeaders.modelOverride ?? undefined,
+      threat: null,
     },
     response: {
       responseId: crypto.randomUUID(),

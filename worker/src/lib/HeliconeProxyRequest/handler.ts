@@ -125,6 +125,9 @@ export async function handleProxyRequest(
 export async function handleThreatProxyRequest(
   proxyRequest: HeliconeProxyRequest
 ): Promise<Result<ProxyResult, string>> {
+  const responseHeaders = new Headers();
+  responseHeaders.set("Helicone-Status", "failed");
+  responseHeaders.set("Helicone-Id", proxyRequest.requestId);
   const threatProxyResponse = {
     data: {
       loggable: new DBLoggable({
@@ -135,7 +138,7 @@ export async function handleThreatProxyRequest(
             body: "{}",
             endTime: new Date(new Date().getTime()),
           }),
-          responseHeaders: new Headers(),
+          responseHeaders: responseHeaders,
           status: async () => -4,
           omitLog:
             proxyRequest.requestWrapper.heliconeHeaders.omitHeaders
@@ -146,7 +149,10 @@ export async function handleThreatProxyRequest(
         },
         tokenCalcUrl: proxyRequest.tokenCalcUrl,
       }),
-      response: new Response("{}", {}),
+      response: new Response("{}", {
+        status: 500,
+        headers: responseHeaders,
+      }),
     },
     error: null,
   };
