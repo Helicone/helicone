@@ -1,5 +1,5 @@
 import { RadioGroup } from "@headlessui/react";
-import { CheckIcon, KeyIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { KeyIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { SecretInput } from "../../../../shared/themed/themedTable";
 import { useVaultPage } from "../../../vault/useVaultPage";
 import { clsx } from "../../../../shared/clsx";
@@ -10,7 +10,7 @@ import ThemedModal from "../../../../shared/themed/themedModal";
 import { DecryptedProviderKey } from "../../../../../services/lib/keys";
 import useNotification from "../../../../shared/notification/useNotification";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { PlusCircleIcon } from "@heroicons/react/20/solid";
+import { CheckCircleIcon, PlusCircleIcon } from "@heroicons/react/20/solid";
 
 interface ProviderKeyListProps {
   variant?: "portal" | "basic";
@@ -146,6 +146,15 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
                         <div className="flex w-full items-center justify-between">
                           <div className="flex items-center">
                             <div className="text-sm flex space-x-2 items-center">
+                              <div
+                                className={clsx(
+                                  "rounded-full border border-gray-300 dark:border-gray-700 h-4 w-4 mr-2 flex items-center"
+                                )}
+                              >
+                                {checked && (
+                                  <CheckCircleIcon className="h-5 w-5 text-sky-500" />
+                                )}
+                              </div>
                               <RadioGroup.Label
                                 as="p"
                                 className={`font-medium text-black dark:text-white`}
@@ -163,24 +172,16 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
                               </RadioGroup.Description>
                             </div>
                           </div>
-
-                          {checked ? (
-                            <CheckIcon
-                              className="h-5 w-5 text-sky-500"
-                              aria-hidden="true"
-                            />
-                          ) : (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedProviderKey(key);
-                                setDeleteProviderOpen(true);
-                              }}
-                              type="button"
-                            >
-                              <TrashIcon className="h-6 w-6 text-red-500 hover:bg-red-100 p-1 rounded-md" />
-                            </button>
-                          )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedProviderKey(key);
+                              setDeleteProviderOpen(true);
+                            }}
+                            type="button"
+                          >
+                            <TrashIcon className="h-6 w-6 text-red-500 hover:bg-red-100 p-1 rounded-md" />
+                          </button>
                         </div>
                       </>
                     )}

@@ -41,7 +41,7 @@ const JobRow = (props: JobRowProps) => {
 
   const [open, setOpen] = useState(false);
 
-  const jobFilters = JSON.parse(jobDataSet?.filters || "") as UIFilterRow[];
+  const jobFilters = JSON.parse(jobDataSet?.filters || "[]") as UIFilterRow[];
 
   const filterMap = REQUEST_TABLE_FILTERS;
 
