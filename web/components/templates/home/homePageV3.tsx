@@ -49,7 +49,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
         <header className="w-full flex flex-col space-y-6 mx-auto max-w-6xl h-full py-32 items-center text-center">
           <h1 className="text-7xl block font-bold w-full h-full tracking-tight text-center items-center leading-[1]">
             How developers{" "}
-            <span className="text-green-500">build AI applications</span>
+            <span className="text-sky-500">build AI applications</span>
           </h1>
           <p className="text-gray-700 font-medium text-2xl leading-8">
             Meet the lightweight, yet powerful platform purpose-built for
@@ -78,7 +78,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
             Helicone is built to scale with your business, no matter the size.
           </p>
         </div>
-        <div className="grid grid-cols-4 gap-16 w-full mx-auto justify-center font-mono tracking-tighter">
+        <div className="grid grid-cols-4 gap-16 w-fit mx-auto justify-center font-mono tracking-tighter">
           <div className="flex flex-col">
             <dd className="text-black text-4xl font-bold">125M</dd>
             <dt className="text-gray-500 text-md">requests per month</dt>
@@ -96,55 +96,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
             <dt className="text-gray-500 text-md">total users</dt>
           </div>
         </div>
-        <div className="grid grid-cols-6 gap-8">
-          <div
-            className={clsx(
-              `h-20 w-20 sm:h-32 sm:w-32 rounded-lg flex items-center justify-center font-semibold text-sm`
-            )}
-          >
-            <Image
-              src={"/assets/home/logos/logo.svg"}
-              alt={""}
-              width={100}
-              height={100}
-            />
-          </div>
-          <div
-            className={clsx(
-              `h-20 w-20 sm:h-32 sm:w-32 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
-            )}
-          >
-            <Image
-              src={"/assets/home/logos/logo.svg"}
-              alt={""}
-              width={100}
-              height={100}
-            />
-          </div>{" "}
-          <div
-            className={clsx(
-              `h-20 w-20 sm:h-32 sm:w-32 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
-            )}
-          >
-            <Image
-              src={"/assets/home/logos/logo.svg"}
-              alt={""}
-              width={100}
-              height={100}
-            />
-          </div>{" "}
-          <div
-            className={clsx(
-              `h-20 w-20 sm:h-32 sm:w-32 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
-            )}
-          >
-            <Image
-              src={"/assets/home/logos/logo.svg"}
-              alt={""}
-              width={100}
-              height={100}
-            />
-          </div>{" "}
+        <div className="grid grid-cols-4 gap-16 w-fit mx-auto">
           <div
             className={clsx(
               `h-20 w-20 sm:h-32 sm:w-32 border-4 border-black rounded-lg shadow-lg flex items-center justify-center font-semibold text-sm bg-white`
