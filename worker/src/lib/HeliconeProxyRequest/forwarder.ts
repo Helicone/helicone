@@ -64,13 +64,13 @@ export async function proxyForwarder(
   }
 
   if (
-    request.headers.get("Helicone-Prompt-Security-Enabled") &&
+    proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled &&
     provider === "OPENAI"
   ) {
     let latestMessage;
 
     try {
-      latestMessage = JSON.parse(request["cachedText"] ?? "").messages.pop();
+      latestMessage = JSON.parse(proxyRequest.bodyText ?? "").messages.pop();
     } catch (error) {
       console.error("Error parsing latest message:", error);
       return responseBuilder.build({
@@ -87,6 +87,7 @@ export async function proxyForwarder(
       const threat = await checkPromptSecurity(
         latestMessage.content,
         provider.toLowerCase(),
+        proxyRequest.requestId,
         env
       );
       proxyRequest.threat = threat;
