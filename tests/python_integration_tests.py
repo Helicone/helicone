@@ -120,7 +120,7 @@ def test_gateway_api():
 
 
 def test_openai_proxy():
-    print("\n---------Running test_proxy---------")    
+    print("\n---------Running test_proxy---------")
     requestId = str(uuid.uuid4())
     print("Request ID: " + requestId + "")
     message_content = test_openai_proxy.__name__ + " - " + requestId
