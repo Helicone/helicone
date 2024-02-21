@@ -67,32 +67,54 @@ export async function proxyForwarder(
     request.headers.get("Helicone-Prompt-Security-Enabled") &&
     provider === "OPENAI"
   ) {
-    const threat = await checkPromptSecurity(proxyRequest, env);
-    proxyRequest.threat = threat;
+    let latestMessage;
 
-    const { data, error } = await handleThreatProxyRequest(proxyRequest);
-
-    if (error !== null) {
+    try {
+      latestMessage = JSON.parse(request["cachedText"] ?? "").messages.pop();
+    } catch (error) {
+      console.error("Error parsing latest message:", error);
       return responseBuilder.build({
-        body: error,
+        body: "Failed to parse the latest message.",
         status: 500,
       });
     }
-    const { loggable, response } = data;
 
-    if (proxyRequest.threat === true) {
-      response.headers.forEach((value, key) => {
-        responseBuilder.setHeader(key, value);
-      });
+    if (
+      request.url.pathname.includes("chat/completions") &&
+      latestMessage.role === "user" &&
+      latestMessage
+    ) {
+      const threat = await checkPromptSecurity(
+        latestMessage.content,
+        provider.toLowerCase(),
+        env
+      );
+      proxyRequest.threat = threat;
 
-      const responseContent = {
-        body: "Prompt threat detected.",
-        inheritFrom: response,
-        status: 500,
-      };
-      ctx.waitUntil(log(loggable));
+      const { data, error } = await handleThreatProxyRequest(proxyRequest);
 
-      return responseBuilder.build(responseContent);
+      if (error !== null) {
+        return responseBuilder.build({
+          body: error,
+          status: 500,
+        });
+      }
+      const { loggable, response } = data;
+
+      if (proxyRequest.threat === true) {
+        response.headers.forEach((value, key) => {
+          responseBuilder.setHeader(key, value);
+        });
+
+        const responseContent = {
+          body: "Prompt threat detected.",
+          inheritFrom: response,
+          status: 400,
+        };
+        ctx.waitUntil(log(loggable));
+
+        return responseBuilder.build(responseContent);
+      }
     }
   }
 

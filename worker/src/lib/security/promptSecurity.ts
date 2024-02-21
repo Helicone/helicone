@@ -6,12 +6,13 @@ type PromptArmorResponse = {
 };
 
 export async function checkPromptSecurity(
-  request: HeliconeProxyRequest,
+  message: string,
+  provider: string,
   env: Env
 ): Promise<boolean> {
   const promptArmorRequest = JSON.stringify({
-    content: request.bodyText,
-    source: request.provider.toLowerCase(),
+    content: message,
+    source: provider,
   });
 
   const response = await fetch(
