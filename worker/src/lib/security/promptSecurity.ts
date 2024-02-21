@@ -1,5 +1,4 @@
 import { Env } from "../..";
-import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
 
 type PromptArmorResponse = {
   detection: boolean;
