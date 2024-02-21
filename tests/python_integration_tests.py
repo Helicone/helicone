@@ -120,8 +120,7 @@ def test_gateway_api():
 
 
 def test_openai_proxy():
-    print("\n---------Running test_proxy---------")
-    print(supabase_key)
+    print("\n---------Running test_proxy---------")    
     requestId = str(uuid.uuid4())
     print("Request ID: " + requestId + "")
     message_content = test_openai_proxy.__name__ + " - " + requestId
@@ -226,10 +225,6 @@ def test_helicone_proxy_key():
 
     provider_key_data = insert_into_db(
         query, (org_id, "OpenAI", "Team1", openai_api_key))
-    print(1)
-    print(openai_api_key)
-    print(provider_key_data[0])
-    print(1)
     insert_into_db(query2, ('d144312e-5c65-4eaa-a1c1-f0c143080601',
                    org_id, "Cole", hashed_proxy_key, provider_key_data[0]))
     
@@ -412,7 +407,6 @@ def test_prompt_threat():
     except requests.exceptions.RequestException as e:
         print("Expected error")
     
-    print(response2)
     assert response2.status_code == 400, "Expected status code to be 400."
 
     assert response2.headers.get('Helicone-Status', None) == "failed", "Expected Helicone-Status to be failed."
