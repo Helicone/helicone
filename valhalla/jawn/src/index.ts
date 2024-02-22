@@ -110,7 +110,11 @@ const allowedOriginsEnv = {
     /^https?:\/\/(www\.)?helicone\.vercel\.app$/,
     /^https?:\/\/(www\.)?helicone-git-valhalla-use-jawn-to-read-helicone\.vercel\.app$/,
   ],
-  development: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
+  development: [
+    /^http:\/\/localhost:3000$/,
+    /^http:\/\/localhost:3001$/,
+    /^http:\/\/35\.203\.159\.150:3000$/,
+  ],
 };
 
 const corsForHelicone = (req: Request, res: Response, next: () => void) => {
