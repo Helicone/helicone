@@ -169,7 +169,7 @@ export async function heliconeRequest(
   return data.map((r) => ({
     id: r.request_id,
     createdAt: r.request_created_at,
-    model: r.response_body?.model ?? r.request_body?.model ?? null,
+    model: r.response_body?.model ?? r.request_body?.model ?? "",
     costUSD: modelCost({
       model: r.response_body?.model ?? r.request_body?.model ?? null,
       sum_completion_tokens: r.completion_tokens ?? 0,
