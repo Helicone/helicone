@@ -1,6 +1,6 @@
 {
   "name": "@helicone/helicone",
-  "version": "2.1.8",
+  "version": "2.1.11",
   "description": "A Node.js wrapper for the OpenAI API that logs all requests to Helicone.",
   "repository": {
     "type": "git",

@@ -15,7 +15,6 @@ export interface SortLeafRequest {
   user_id?: SortDirection;
   body_model?: SortDirection;
   is_cached?: SortDirection;
-  request_prompt?: SortDirection;
   response_text?: SortDirection;
   properties?: {
     [key: string]: SortDirection;
@@ -70,10 +69,6 @@ export function buildRequestSort(sort: SortLeafRequest) {
   if (sort.is_cached) {
     assertValidSortDirection(sort.is_cached);
     return `cache_count ${sort.is_cached}`;
-  }
-  if (sort.request_prompt) {
-    assertValidSortDirection(sort.request_prompt);
-    return `coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content') ${sort.request_prompt}`;
   }
   if (sort.response_text) {
     assertValidSortDirection(sort.response_text);

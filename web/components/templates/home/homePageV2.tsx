@@ -143,7 +143,6 @@ export default function Example() {
   const user = useUser();
 
   const supabaseClient = useSupabaseClient<Database>();
-  const { stars, isLoading } = useHomePage();
 
   if (!demoLoading && user?.email === DEMO_EMAIL) {
     supabaseClient.auth.signOut();
@@ -317,7 +316,7 @@ export default function Example() {
               {[
                 "/assets/home/logos/logo.svg",
                 "/assets/home/logos/qawolf.png",
-                "/assets/home/logos/upenn.png",
+                "/assets/home/logos/reworkd.png",
                 "/assets/home/logos/carta.png",
                 "/assets/home/logos/lex.svg",
                 "/assets/home/logos/particl.png",
@@ -742,11 +741,8 @@ export default function Example() {
               </svg>
               <span>Star</span>
             </div>
-            <div className="bg-gray-100 px-2 py-1">
-              {stars && stars > 999
-                ? `${Math.round(stars / 100) / 10}k`
-                : stars}
-            </div>
+
+            <div className="bg-gray-100 px-2 py-1">1.2k</div>
           </Link>
           <button
             onClick={() => {

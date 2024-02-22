@@ -105,7 +105,6 @@ export type HeliconeRequest = {
   id: Scalars['ID']['output'];
   latency?: Maybe<Scalars['Float']['output']>;
   model: Scalars['String']['output'];
-  prompt?: Maybe<Scalars['String']['output']>;
   properties?: Maybe<Array<Maybe<Property>>>;
   requestBody?: Maybe<Scalars['JSON']['output']>;
   response?: Maybe<Scalars['String']['output']>;
@@ -205,6 +204,7 @@ export type TextOperators = {
   equals?: InputMaybe<Scalars['String']['input']>;
   ilike?: InputMaybe<Scalars['String']['input']>;
   like?: InputMaybe<Scalars['String']['input']>;
+  not_contains?: InputMaybe<Scalars['String']['input']>;
   not_equals?: InputMaybe<Scalars['String']['input']>;
 };
 

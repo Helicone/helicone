@@ -47,7 +47,7 @@ response = openai.Completion.create(
 )
 ```
 
-👉 Then view your logs at [Helicone](www.helicone.ai).
+👉 Then view your logs at [Helicone](https://www.helicone.ai).
 
 ## More resources
 

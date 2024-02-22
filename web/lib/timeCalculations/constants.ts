@@ -41,3 +41,20 @@ const INC_TO_TIME: {
 export function getTimeMap(inc: TimeIncrement) {
   return INC_TO_TIME[inc];
 }
+
+export function getIncrementAsMinutes(inc: TimeIncrement) {
+  switch (inc) {
+    case "min":
+      return 1;
+    case "hour":
+      return 60;
+    case "day":
+      return 60 * 24;
+    case "week":
+      return 60 * 24 * 7;
+    case "month":
+      return 60 * 24 * 30;
+    case "year":
+      return 60 * 24 * 365;
+  }
+}
