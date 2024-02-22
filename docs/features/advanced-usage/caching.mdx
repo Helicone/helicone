@@ -1,5 +1,5 @@
 ---
-title: "Caching"
+title: "Cache"
 description: "Reduce latency and save costs by caching on the edge"
 ---
 
@@ -171,3 +171,45 @@ openai.completion("give me a random number") -> "42"
 # Cache Seed "user-456"
 openai.completion("give me a random number") -> "17"
 ```
+
+### Cache Response Headers
+
+When cache is enabled the following headers will be returned.
+```ts
+helicone-cache:	"HIT" | "MISS"
+helicone-cache-bucket-idx: number
+```
+
+Ex extracting headers from python with OpenAI:
+
+```python
+client = OpenAI(
+    api_key="<OPENAI_API_KEY>",
+    base_url="http://oai.hconeai.com/v1",
+    default_headers={ 
+        "Helicone-Auth": f"Bearer <API_KEY>",
+    }
+)
+
+# add `.with_raw_response` here
+chat_completion_raw = client.chat.completions.with_raw_response.create(
+    model="gpt-4-vision-preview",
+    messages=[
+        {"role": "user", "content": "Hello world!"}
+    ],
+    extra_headers={
+        "Helicone-Cache-Enabled": "true" # Cache enabled
+    },
+)
+
+# This is the original parsed response as expected...
+chat_completion = chat_completion_raw.parse()
+
+
+cache_hit = chat_completion_raw.http_response.headers.get(
+    'Helicone-Cache')
+
+print(cache_hit) # Will print "HIT" or "MISS"
+
+```
+
