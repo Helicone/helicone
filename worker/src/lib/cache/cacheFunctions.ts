@@ -23,12 +23,11 @@ export async function kvKeyFromRequest(
   }
 
   return await hash(
-    cacheSeed ??
-      "" +
-        request.url +
-        (await request.requestWrapper.getText()) +
-        JSON.stringify([...headers.entries()]) +
-        (freeIndex >= 1 ? freeIndex.toString() : "")
+    (cacheSeed ?? "") +
+      request.url +
+      (await request.requestWrapper.getText()) +
+      JSON.stringify([...headers.entries()]) +
+      (freeIndex >= 1 ? freeIndex.toString() : "")
   );
 }
 
