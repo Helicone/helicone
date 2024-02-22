@@ -81,28 +81,29 @@ export async function proxyForwarder(
 
     if (
       request.url.pathname.includes("chat/completions") &&
-      latestMessage.role === "user" &&
-      latestMessage
+      latestMessage &&
+      latestMessage.role === "user"
     ) {
       const threat = await checkPromptSecurity(
         latestMessage.content,
-        provider.toLowerCase(),
+        provider,
         proxyRequest.requestId,
         env
       );
-      proxyRequest.threat = threat;
 
-      const { data, error } = await handleThreatProxyRequest(proxyRequest);
+      if (threat === true) {
+        proxyRequest.threat = threat;
 
-      if (error !== null) {
-        return responseBuilder.build({
-          body: error,
-          status: 500,
-        });
-      }
-      const { loggable, response } = data;
+        const { data, error } = await handleThreatProxyRequest(proxyRequest);
 
-      if (proxyRequest.threat === true) {
+        if (error !== null) {
+          return responseBuilder.build({
+            body: error,
+            status: 500,
+          });
+        }
+        const { loggable, response } = data;
+
         response.headers.forEach((value, key) => {
           responseBuilder.setHeader(key, value);
         });

@@ -1,4 +1,4 @@
-import { Env } from "../..";
+import { Env, Provider } from "../..";
 
 type PromptArmorResponse = {
   detection: boolean;
@@ -6,7 +6,7 @@ type PromptArmorResponse = {
 
 export async function checkPromptSecurity(
   message: string,
-  provider: string,
+  provider: Provider,
   sessionId: string,
   env: Env
 ): Promise<boolean> {

@@ -227,7 +227,6 @@ def test_helicone_proxy_key():
         query, (org_id, "OpenAI", "Team1", openai_api_key))
     insert_into_db(query2, ('d144312e-5c65-4eaa-a1c1-f0c143080601',
                    org_id, "Cole", hashed_proxy_key, provider_key_data[0]))
-    
 
     requestId = str(uuid.uuid4())
     print("Request ID: " + requestId + "")
