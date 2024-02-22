@@ -7,7 +7,6 @@ type PromptArmorResponse = {
 export async function checkPromptSecurity(
   message: string,
   provider: Provider,
-  sessionId: string,
   env: Env
 ): Promise<boolean> {
   const promptArmorRequest = JSON.stringify({
@@ -22,7 +21,7 @@ export async function checkPromptSecurity(
       headers: {
         "Content-Type": "application/json",
         "PromptArmor-Auth": `Bearer ${env.PROMPTARMOR_API_KEY}`,
-        "PromptArmor-Session-ID": sessionId,
+        "PromptArmor-Session-ID": crypto.randomUUID(),
       },
       body: promptArmorRequest,
     }

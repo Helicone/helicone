@@ -87,7 +87,6 @@ export async function proxyForwarder(
       const threat = await checkPromptSecurity(
         latestMessage.content,
         provider,
-        proxyRequest.requestId,
         env
       );
 
