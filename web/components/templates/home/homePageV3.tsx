@@ -46,21 +46,26 @@ const HomePageV3 = (props: HomePageV3Props) => {
     <div className="w-full bg-gray-50 h-full antialiased">
       <NavBarV2 />
       <GridBackground>
-        <header className="w-full flex flex-col space-y-6 mx-auto max-w-6xl h-full py-32 items-center text-center">
-          <h1 className="text-7xl block font-bold w-full h-full tracking-tight text-center items-center leading-[1]">
+        <header className="w-full flex flex-col space-y-4 sm:space-y-6 mx-auto max-w-6xl h-full py-16 sm:py-32 items-center text-center px-4">
+          <h1 className="text-5xl sm:text-7xl block font-bold w-full h-full tracking-tight text-center items-center sm:leading-[1]">
             How developers{" "}
-            <span className="text-sky-500">build AI applications</span>
+            <span className="text-sky-500">
+              build AI <span className="inline sm:hidden">apps</span>
+              <span className="hidden sm:inline">applications</span>
+            </span>
           </h1>
-          <p className="text-gray-700 font-medium text-2xl leading-8">
+          <p className="text-gray-700 font-medium text-lg sm:text-2xl sm:leading-8">
             Meet the lightweight, yet powerful platform purpose-built for
             Generative AI
           </p>
           <div className="flex items-center gap-4">
-            <button className="flex items-center bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-lg px-4 py-2 text-md font-semibold text-white shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500">
-              Get Started for Free
+            <button className="bg-sky-300 text-black border-2 border-sky-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1">
+              Start Building
+              <ChevronRightIcon className="w-5 h-5 inline text-sky-700" />
             </button>
-            <button className="font-semibold text-sm flex items-center">
-              Contact Sales <ChevronRightIcon className="w-5 h-5 inline" />
+            <button className="bg-sky-50 text-black border-2 border-sky-300 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1">
+              Get a demo
+              <ChevronRightIcon className="w-5 h-5 inline text-sky-300" />
             </button>
           </div>
         </header>
@@ -68,7 +73,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
       <section className="w-full max-w-6xl mx-auto pb-16 px-4">
         <Features />
       </section>
-      <section className="w-full flex flex-col max-w-6xl mx-auto space-y-20 py-32 px-4">
+      {/* <section className="w-full flex flex-col max-w-6xl mx-auto space-y-20 py-32 px-4">
         <div className="flex flex-col w-full items-center">
           <h3 className="text-5xl font-bold text-black text-center tracking-tight leading-tight">
             Trusted by thousands of{" "}
@@ -333,7 +338,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
             <div className="h-96 rounded-lg w-full bg-sky-950"></div>
           </div>
         </div>
-      </section>
+      </section> */}
       {/* <section id="integration" className="py-36">
         <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
           <div className="flex flex-col space-y-4">
