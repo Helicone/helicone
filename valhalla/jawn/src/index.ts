@@ -164,6 +164,32 @@ app.use(
 );
 
 app.post(
+  "/v1/key/generateHash",
+  withAuth<
+    paths["/v1/key/generateHash"]["post"]["requestBody"]["content"]["application/json"]
+  >(async ({ request, res, supabaseClient, authParams }) => {
+    try {
+      const body = await request.getRawBody<any>();
+      const { apiKey } = body;
+      const hashedKey = await hashAuth(apiKey);
+
+      res.status(200).json({
+        data: {
+          keyHash: hashedKey,
+        },
+      });
+      return;
+    } catch (error: any) {
+      console.log(`Failed to generate key hash: ${error}`);
+      res.status(400).json({
+        error: "Failed to generate key hash",
+        message: error,
+      });
+    }
+  })
+);
+
+app.post(
   "/v1/request/query",
   withAuth<
     paths["/v1/request/query"]["post"]["requestBody"]["content"]["application/json"]

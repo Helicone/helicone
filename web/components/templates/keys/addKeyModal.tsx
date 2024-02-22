@@ -2,13 +2,14 @@ import { FormEvent, useEffect, useState } from "react";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import generateApiKey from "generate-api-key";
-import { hashAuth } from "../../../lib/hashClient";
 import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { OrgContextValue } from "../../layout/organizationContext";
 import {
   ArrowPathIcon,
   ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
+import { Result } from "../../../lib/result";
+import { getHeliconeCookie } from "../../../lib/cookies";
 
 interface AddKeyModalProps {
   open: boolean;
@@ -46,22 +47,48 @@ const AddKeyModal = (props: AddKeyModalProps) => {
       dashes: true,
     }).toString()}`.toLowerCase();
     setReturnedKey(apiKey);
-    hashAuth(apiKey).then((res) => {
-      supabaseClient
-        .from("helicone_api_keys")
-        .insert({
-          api_key_hash: res,
-          user_id: user?.id!,
-          api_key_name: keyName.value,
-          organization_id: org?.currentOrg?.id!,
-          created_at: new Date(),
-        })
-        .then(() => {
-          setNotification("Successfully created API key", "success");
-          setIsLoading(false);
-          onSuccess();
-        });
-    });
+
+    const authFromCookie = getHeliconeCookie();
+    const resp = await fetch(
+      `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/key/generateHash`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "helicone-authorization": JSON.stringify({
+            _type: "jwt",
+            token: authFromCookie.data?.jwtToken,
+            orgId: org?.currentOrg?.id,
+          }),
+        },
+        body: JSON.stringify({
+          apiKey,
+        }),
+      }
+    )
+      .then(
+        (res: Response) =>
+          res.json() as Promise<Result<{ keyHash: string }, string>>
+      )
+      .then((res: Result<{ keyHash: string }, string>) => {
+        const { data, error } = res;
+        if (!error && data) {
+          supabaseClient
+            .from("helicone_api_keys")
+            .insert({
+              api_key_hash: data.keyHash,
+              user_id: user?.id!,
+              api_key_name: keyName.value,
+              organization_id: org?.currentOrg?.id!,
+              created_at: new Date(),
+            })
+            .then(() => {
+              setNotification("Successfully created API key", "success");
+              setIsLoading(false);
+              onSuccess();
+            });
+        }
+      });
   };
 
   useEffect(() => {

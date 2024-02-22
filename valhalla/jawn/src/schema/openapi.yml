@@ -16,6 +16,41 @@ servers:
     description: Production server
 
 paths:
+  /v1/key/generateHash:
+    post:
+      tags:
+        - key
+      summary: Hashes an api key
+      description: Hashes and returns the hashed api key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                apiKey:
+                  type: string
+                  description: api key to hash
+      responses:
+        "200":
+          description: Successfully hashed api key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keyHash:
+                    type: string
+                    description: The hashed api key
+        "400":
+          description: Invalid input.
+        "500":
+          description: Internal server error.
+      security:
+        - helicone-authorization: []
+        - authorization: []
+
   /v1/fine-tune:
     post:
       tags:

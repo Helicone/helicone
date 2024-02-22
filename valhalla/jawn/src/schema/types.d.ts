@@ -5,6 +5,41 @@
 
 
 export interface paths {
+  "/v1/key/generateHash": {
+    /**
+     * Hashes an api key
+     * @description Hashes and returns the hashed api key
+     */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            /** @description api key to hash */
+            apiKey?: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Successfully hashed api key */
+        200: {
+          content: {
+            "application/json": {
+              /** @description The hashed api key */
+              keyHash?: string;
+            };
+          };
+        };
+        /** @description Invalid input. */
+        400: {
+          content: never;
+        };
+        /** @description Internal server error. */
+        500: {
+          content: never;
+        };
+      };
+    };
+  };
   "/v1/fine-tune": {
     /**
      * Insert a new request and its response
