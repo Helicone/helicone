@@ -29,7 +29,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, useState } from "react";
 import { DEMO_EMAIL } from "../../lib/constants";
-import { Database } from "../../supabase/database.types";
 import { clsx } from "../shared/clsx";
 import ThemedDropdown from "../shared/themed/themedDropdown";
 import OrgContext, { useOrg } from "./organizationContext";
@@ -42,6 +41,7 @@ import ReferralModal from "../common/referralModal";
 import { useTheme } from "../shared/theme/themeContext";
 import { ThemedSwitch } from "../shared/themed/themedSwitch";
 import MetaData from "./public/authMetaData";
+import { Database } from "../../supabase/database.types";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
