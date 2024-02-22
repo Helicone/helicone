@@ -38,23 +38,22 @@ const TableFooter = (props: TableFooterProps) => {
 
   const [page, setPage] = useState<number>(currentPage);
 
-  const debouncedPage = useDebounce(page, 1500);
+  const debouncedPage = useDebounce(page, 1200);
+
+  // the page should always match the currentPage
+  useEffect(() => {
+    if (currentPage !== page) {
+      setPage(currentPage);
+    }
+  }, [currentPage]);
 
   // once the debouncedPage changes, update the page using onPageChange and update the router
-
   useEffect(() => {
     onPageChange(debouncedPage);
     router.query.page = debouncedPage.toString();
     // update the url, but don't trigger a new fetch
     router.replace(router);
   }, [debouncedPage]);
-
-  // on initial load, set the page to 1
-  useEffect(() => {
-    if (currentPage !== page) {
-      setPage(1);
-    }
-  }, []);
 
   return (
     <div className="flex flex-row justify-between text-sm items-center">
