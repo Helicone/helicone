@@ -143,7 +143,9 @@ const corsForHelicone = (req: Request, res: Response, next: () => void) => {
   } else {
     res.header(
       "info",
-      `not allowed origin (${origin}) for ${ENVIRONMENT} environment :(`
+      `not allowed origin (${origin}) for ${ENVIRONMENT} environment. Allowed origins: ${JSON.stringify(
+        allowedOrigins
+      )}:(`
     );
   }
   next();
