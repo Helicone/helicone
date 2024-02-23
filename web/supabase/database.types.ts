@@ -1192,6 +1192,7 @@ export interface Database {
           prompt_values: Json | null
           properties: Json | null
           provider: string
+          threat: boolean | null
           user_id: string | null
         }
         Insert: {
@@ -1211,6 +1212,7 @@ export interface Database {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
+          threat?: boolean | null
           user_id?: string | null
         }
         Update: {
@@ -1230,6 +1232,7 @@ export interface Database {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
+          threat?: boolean | null
           user_id?: string | null
         }
         Relationships: [
