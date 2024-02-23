@@ -51,13 +51,13 @@ const HomePageV3 = (props: HomePageV3Props) => {
       if (subTextRef.current) {
         subTextRef.current.classList.remove("invisible", "opacity-0");
         gsap.from(subTextRef.current, {
-          duration: 3,
+          duration: 2,
           autoAlpha: 0,
-          y: 30,
+          y: -50,
           ease: "power3.out",
         });
       }
-    }, 800); // Delay in milliseconds (0.8 seconds)
+    }, 300); // Delay in milliseconds (0.8 seconds)
 
     // Clear the timeout if the component unmounts
     return () => clearTimeout(animationDelay);
@@ -66,11 +66,19 @@ const HomePageV3 = (props: HomePageV3Props) => {
   useEffect(() => {
     // Ensure that heroTextRef.current is not null before using it
     if (heroTextRef.current) {
-      gsap.from(heroTextRef.current.children, {
-        duration: 0.8,
-        y: 50,
-        opacity: 0,
-        stagger: 0.2, // Stagger the animation for each child
+      // stagger affect
+
+      // gsap.from(heroTextRef.current.children, {
+      //   duration: 0.8,
+      //   y: 50,
+      //   opacity: 0,
+      //   stagger: 0.2, // Stagger the animation for each child
+      //   ease: "power3.out",
+      // });
+      gsap.from(heroTextRef.current, {
+        duration: 1,
+        autoAlpha: 0,
+        y: -50,
         ease: "power3.out",
       });
     }
@@ -172,7 +180,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
           </h1>
           <p
             ref={subTextRef}
-            className="text-gray-700 font-medium text-lg sm:text-2xl sm:leading-8 invisible opacity-0"
+            className="text-gray-700 font-medium text-lg sm:text-2xl sm:leading-7 invisible opacity-0"
           >
             Meet the lightweight, yet powerful platform purpose-built for
             Generative AI
@@ -190,7 +198,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
         </header>
       </GridBackground>
 
-      <section className="w-full max-w-6xl mx-auto justify-center items-center pt-8 sm:pb-32 px-4 flex flex-col space-y-16">
+      <section className="w-full max-w-6xl mx-auto justify-center items-center pt-8 sm:pb-16 px-4 flex flex-col space-y-16">
         <Features />
       </section>
       <section className="w-full flex flex-col max-w-6xl mx-auto space-y-16 py-32 px-4">
