@@ -27,6 +27,8 @@ import {
 } from "@heroicons/react/24/outline";
 import Features from "./components/features";
 import gsap from "gsap";
+import AuthLayout from "../../layout/authLayout";
+import Platform from "./components/platform";
 
 interface HomePageV3Props {}
 
@@ -68,19 +70,19 @@ const HomePageV3 = (props: HomePageV3Props) => {
     if (heroTextRef.current) {
       // stagger affect
 
-      // gsap.from(heroTextRef.current.children, {
-      //   duration: 0.8,
-      //   y: 50,
-      //   opacity: 0,
-      //   stagger: 0.2, // Stagger the animation for each child
-      //   ease: "power3.out",
-      // });
-      gsap.from(heroTextRef.current, {
-        duration: 1,
-        autoAlpha: 0,
-        y: -50,
+      gsap.from(heroTextRef.current.children, {
+        duration: 0.8,
+        y: 50,
+        opacity: 0,
+        stagger: 0.2, // Stagger the animation for each child
         ease: "power3.out",
       });
+      // gsap.from(heroTextRef.current, {
+      //   duration: 1,
+      //   autoAlpha: 0,
+      //   y: -50,
+      //   ease: "power3.out",
+      // });
     }
   }, []);
 
@@ -92,8 +94,8 @@ const HomePageV3 = (props: HomePageV3Props) => {
     <div className="w-full bg-gray-50 h-full antialiased">
       <NavBarV2 />
       <GridBackground>
-        <header className="w-full flex flex-col space-y-4 sm:space-y-6 mx-auto max-w-6xl h-full py-16 sm:py-24 items-center text-center px-4 sm:px-4 lg:px-0">
-          <div className="text-xs mx-auto flex flex-col sm:flex-row sm:divide-x-2 gap-[14px] justify-center items-center divide-gray-300 opacity-75 w-fit px-4 py-1 rounded-xl">
+        <header className="w-full flex flex-col space-y-4 sm:space-y-6 mx-auto max-w-6xl h-full py-16 sm:py-24 items-center text-center px-2 sm:px-2 lg:px-0">
+          {/* <div className="text-xs mx-auto flex flex-col sm:flex-row sm:divide-x-2 gap-[14px] justify-center items-center divide-gray-300 opacity-75 w-fit px-4 py-1 rounded-xl">
             <Link
               href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
               target="_blank"
@@ -168,19 +170,19 @@ const HomePageV3 = (props: HomePageV3Props) => {
               Fully open-source{" "}
               <HeartIcon className="h-4 w-4 inline ml-2 text-pink-500" />
             </div>
-          </div>
+          </div> */}
           <h1
             ref={heroTextRef}
-            className="text-5xl sm:text-7xl block font-bold w-full h-full tracking-tight text-center items-center sm:leading-[1]"
+            className="text-4xl sm:text-7xl block font-bold w-full h-full tracking-tight text-center items-center sm:leading-[1]"
           >
             <span>How</span> <span>developers</span>{" "}
-            <span className="text-sky-500 block sm:inline">build</span>{" "}
-            <span className="text-sky-500 block sm:inline">AI</span>{" "}
-            <span className="text-sky-500 block sm:inline">applications</span>
+            <span className="text-sky-500 ">build</span>{" "}
+            <span className="text-sky-500">AI</span>{" "}
+            <span className="text-sky-500">applications</span>
           </h1>
           <p
             ref={subTextRef}
-            className="text-gray-700 font-medium text-lg sm:text-2xl sm:leading-7 invisible opacity-0"
+            className="text-gray-700 font-medium text-md sm:text-2xl sm:leading-7 invisible opacity-0"
           >
             Meet the lightweight, yet powerful platform purpose-built for
             Generative AI
@@ -201,141 +203,102 @@ const HomePageV3 = (props: HomePageV3Props) => {
       <section className="w-full max-w-6xl mx-auto justify-center items-center pt-8 sm:pb-16 px-4 flex flex-col space-y-16">
         <Features />
       </section>
-      <section className="w-full flex flex-col max-w-6xl mx-auto space-y-16 py-32 px-4">
+      <section className="w-full flex flex-col max-w-6xl mx-auto space-y-4 py-32 px-4">
         <div className="flex flex-col w-full items-center text-center">
-          <h3 className="text-3xl sm:text-5xl font-bold text-black text-center tracking-tight leading-tight">
+          <h3 className="text-xl sm:text-3xl font-bold text-black text-center tracking-tight leading-tight">
             Trusted by thousands of{" "}
-            <span className="text-violet-500">startups and enterprises</span>
+            <span className=" hidden sm:inline">startups and enterprises</span>
+            <span className=" inline sm:hidden">companies</span>
           </h3>
-          <p className="text-gray-700 font-medium text-xl leading-8 mt-2">
-            Helicone is built to scale with your business, no matter the size.
+          <p className="text-gray-700 font-medium text-md sm:text-lg sm:leading-9">
+            <span className="hidden sm:inline">Helicone is built</span>
+            <span className="inline sm:hidden">Built</span> to scale with your
+            business
+            <span className="hidden sm:inline">, no matter the size.</span>
           </p>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 items-center gap-16 w-full mx-auto justify-between font-mono tracking-tighter p-4">
-          <div className="flex flex-col w-full">
-            <dd className="text-black text-3xl font-bold">125M</dd>
-            <dt className="text-gray-500 text-md">requests per month</dt>
+        <div className="flex flex-row sm:flex-col mx-auto px-4 sm:px-0 gap-8 sm:gap-0 w-full">
+          <div className="flex flex-col sm:flex-row justify-between w-full mx-auto max-w-4xl">
+            <div className={clsx(`h-32 w-32 flex items-center justify-center`)}>
+              <Image
+                src={"/assets/home/logos/logo.svg"}
+                alt={""}
+                width={400}
+                height={400}
+              />
+            </div>{" "}
+            <div className={clsx(`h-32 w-32 flex items-center justify-center`)}>
+              <Image
+                src={"/assets/home/logos/qawolf.png"}
+                alt={""}
+                width={400}
+                height={400}
+              />
+            </div>{" "}
+            <div className={clsx(`h-32 w-32 flex items-center justify-center`)}>
+              <Image
+                src={"/assets/home/logos/carta.png"}
+                alt={""}
+                width={100}
+                height={100}
+              />
+            </div>{" "}
+            <div className={clsx(`h-32 w-32 flex items-center justify-center`)}>
+              <Image
+                src={"/assets/home/logos/reworkd.png"}
+                alt={""}
+                className="invert"
+                width={100}
+                height={100}
+              />
+            </div>{" "}
           </div>
-          <div className="flex flex-col w-full">
-            <dd className="text-black text-3xl font-bold">{`>1 BILLION`}</dd>
-            <dt className="text-gray-500 text-md">total requests</dt>
-          </div>
-          <div className="flex flex-col w-full">
-            <dd className="text-black text-3xl font-bold">{`>$30k+`}</dd>
-            <dt className="text-gray-500 text-md">total cache savings</dt>
-          </div>
-          <div className="flex flex-col w-full">
-            <dd className="text-black text-3xl font-bold">5000+</dd>
-            <dt className="text-gray-500 text-md">total users</dt>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-4 sm:gap-8 xl:gap-16 w-fit mx-auto">
-          <div
-            className={clsx(
-              `h-32 w-32 border-[3px] border-black rounded-lg shadow-lg flex items-center justify-center bg-white`
-            )}
-          >
-            <Image
-              src={"/assets/home/logos/logo.svg"}
-              alt={""}
-              width={100}
-              height={100}
-            />
-          </div>{" "}
-          <div
-            className={clsx(
-              `h-32 w-32 border-[3px] border-black rounded-lg shadow-lg flex items-center justify-center bg-white`
-            )}
-          >
-            <Image
-              src={"/assets/home/logos/qawolf.png"}
-              alt={""}
-              width={100}
-              height={100}
-            />
-          </div>{" "}
-          <div
-            className={clsx(
-              `h-32 w-32 border-[3px] border-black rounded-lg shadow-lg flex items-center justify-center bg-white`
-            )}
-          >
-            <Image
-              src={"/assets/home/logos/carta.png"}
-              alt={""}
-              width={100}
-              height={100}
-            />
-          </div>{" "}
-          <div
-            className={clsx(
-              `h-32 w-32 border-[3px] border-black rounded-lg shadow-lg flex items-center justify-center bg-white`
-            )}
-          >
-            <Image
-              src={"/assets/home/logos/reworkd.png"}
-              alt={""}
-              className="invert"
-              width={100}
-              height={100}
-            />
-          </div>{" "}
-          <div
-            className={clsx(
-              `h-32 w-32 border-[3px] border-black rounded-lg shadow-lg flex items-center justify-center bg-white`
-            )}
-          >
-            <Image
-              src={"/assets/home/logos/lex.svg"}
-              alt={""}
-              width={80}
-              height={80}
-            />
-          </div>{" "}
-          <div
-            className={clsx(
-              `h-32 w-32 border-[3px] border-black rounded-lg shadow-lg flex items-center justify-center bg-white`
-            )}
-          >
-            <Image
-              src={"/assets/home/logos/particl.png"}
-              alt={""}
-              width={100}
-              height={100}
-            />
-          </div>{" "}
-          <div
-            className={clsx(
-              `h-32 w-32 border-[3px] border-black rounded-lg shadow-lg flex items-center justify-center bg-white`
-            )}
-          >
-            <Image
-              src={"/assets/home/logos/mintlify.svg"}
-              alt={""}
-              width={100}
-              height={100}
-            />
-          </div>{" "}
-          <div
-            className={clsx(
-              `h-32 w-32 border-[3px] border-black rounded-lg shadow-lg flex items-center justify-center bg-white`
-            )}
-          >
-            <Image
-              src={"/assets/home/logos/onboard.png"}
-              alt={""}
-              width={300}
-              height={300}
-            />
+          <div className="flex flex-col sm:flex-row justify-between w-full mx-auto max-w-4xl">
+            <div className={clsx(`h-28 w-32 flex items-center justify-center`)}>
+              <Image
+                src={"/assets/home/logos/lex.svg"}
+                alt={""}
+                width={60}
+                height={60}
+              />
+            </div>{" "}
+            <div className={clsx(`h-28 w-32 flex items-center justify-center`)}>
+              <Image
+                src={"/assets/home/logos/particl.png"}
+                alt={""}
+                width={400}
+                height={400}
+              />
+            </div>{" "}
+            <div className={clsx(`h-28 w-32 flex items-center justify-center`)}>
+              <Image
+                src={"/assets/home/logos/mintlify.svg"}
+                alt={""}
+                width={400}
+                height={400}
+              />
+            </div>{" "}
+            <div className={clsx(`h-28 w-32 flex items-center justify-center`)}>
+              <Image
+                src={"/assets/home/logos/onboard.png"}
+                alt={""}
+                width={600}
+                height={600}
+              />
+            </div>
           </div>
         </div>
       </section>
+      <section className="w-full flex flex-col max-w-6xl mx-auto space-y-4 py-16 px-4">
+        <Platform />
+      </section>
       <section className="w-full bg-[#0b1c2d] relative isolate overflow-hidden mt-32">
-        <div className="max-w-6xl mx-auto flex flex-col space-y-2 py-28 h-full px-16">
-          <h3 className="text-5xl font-bold text-white text-center tracking-tight leading-tight">
+        <div className="max-w-6xl mx-auto flex flex-col space-y-2 py-28 h-full px-4">
+          <h3 className="text-3xl sm:text-5xl font-bold text-white text-center tracking-tight leading-tight">
             Made by developers,{" "}
             <span className="text-cyan-400">for developers</span>
           </h3>
-          <p className="text-gray-300 font-medium text-xl leading-8 text-center">
+          <p className="text-gray-300 font-medium text-lg sm:text-xl leading-8 text-center">
             This is the easiest integration you will ever do. We promise
           </p>
 
@@ -395,87 +358,14 @@ const HomePageV3 = (props: HomePageV3Props) => {
           <Globe />
         </div>
       </section>
-      {/* <section className="w-full relative isolate overflow-hidden">
-        <div className="max-w-6xl mx-auto flex flex-col space-y-4 py-36 h-full">
-          <h3 className="text-5xl font-bold text-white text-center tracking-tight leading-tight">
-            Code Examples
-            <span className="text-cyan-400"></span>
-          </h3>
-          <p className="text-gray-400 font-medium text-2xl leading-8 text-center">
-            Powerful features with minimal code
-          </p>
-          <div className="w-full flex justify-center gap-16 mx-auto py-8">
-            <ul className="w-fit flex items-center gap-16 text-white">
-              <li className="flex flex-col items-center gap-4">
-                <div className="p-4 border-2 border-cyan-700 rounded-lg">
-                  <ChartPieIcon className="w-8 h-8 text-cyan-400 " />
-                </div>
-                <p className="text-md font-bold">Labeling</p>
-              </li>
-              <li className="flex flex-col items-center gap-4">
-                <div className="p-4 border border-gray-700 rounded-lg">
-                  <ChartPieIcon className="w-8 h-8 text-gray-400 " />
-                </div>
-                <p className="text-md font-bold text-gray-400">Labeling</p>
-              </li>{" "}
-              <li className="flex flex-col items-center gap-4">
-                <div className="p-4 border border-gray-700 rounded-lg">
-                  <ChartPieIcon className="w-8 h-8 text-gray-400 " />
-                </div>
-                <p className="text-md font-bold text-gray-400">Labeling</p>
-              </li>{" "}
-              <li className="flex flex-col items-center gap-4">
-                <div className="p-4 border border-gray-700 rounded-lg">
-                  <ChartPieIcon className="w-8 h-8 text-gray-400 " />
-                </div>
-                <p className="text-md font-bold text-gray-400">Labeling</p>
-              </li>{" "}
-              <li className="flex flex-col items-center gap-4">
-                <div className="p-4 border border-gray-700 rounded-lg">
-                  <ChartPieIcon className="w-8 h-8 text-gray-400 " />
-                </div>
-                <p className="text-md font-bold text-gray-400">Labeling</p>
-              </li>{" "}
-              <li className="flex flex-col items-center gap-4">
-                <div className="p-4 border border-gray-700 rounded-lg">
-                  <ChartPieIcon className="w-8 h-8 text-gray-400 " />
-                </div>
-                <p className="text-md font-bold text-gray-400">Labeling</p>
-              </li>{" "}
-              <li className="flex flex-col items-center gap-4">
-                <div className="p-4 border border-gray-700 rounded-lg">
-                  <ChartPieIcon className="w-8 h-8 text-gray-400 " />
-                </div>
-                <p className="text-md font-bold text-gray-400">Labeling</p>
-              </li>{" "}
-              <li className="flex flex-col items-center gap-4">
-                <div className="p-4 border border-gray-700 rounded-lg">
-                  <ChartPieIcon className="w-8 h-8 text-gray-400 " />
-                </div>
-                <p className="text-md font-bold text-gray-400">Labeling</p>
-              </li>{" "}
-            </ul>
-          </div>
-          <div className="flex flex-row space-x-8 mx-16 p-8 rounded-xl">
-            <div className="flex flex-col space-y-4 max-w-[18rem]">
-              <h2 className="text-2xl font-semibold text-white">Labeling</h2>
-              <p className="text-lg text-gray-300">
-                Our custom-built mapper engine and gateway allows us to support
-                any model from any provider.
-              </p>
-            </div>
-            <div className="h-96 rounded-lg w-full bg-sky-950"></div>
-          </div>
-        </div>
-      </section> */}
       <section id="integration" className="py-36">
         <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
-          <div className="flex flex-col space-y-2 pb-2">
-            <h3 className="text-5xl font-bold text-black text-center tracking-tight leading-tight">
+          <div className="flex flex-col space-y-2 pb-2 w-full items-center">
+            <h3 className="text-3xl sm:text-5xl font-bold text-black text-center tracking-tight leading-tight">
               Join our <span className="text-pink-500">open source</span>{" "}
               community
             </h3>
-            <p className="text-lg md:text-xl text-gray-600 max-w-2xl">
+            <p className="text-lg md:text-xl text-gray-600 max-w-2xl text-center">
               Developers from around the world are helping us build the future
               of AI
             </p>
@@ -499,7 +389,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
                 </Link>
               </div>
               <div className="bottom-0 absolute w-full">
-                <div className="w-full flex flex-row space-x-4 justify-end p-8 relative h-full">
+                <div className="w-full flex flex-wrap-reverse gap-4 justify-end p-8 relative h-full">
                   <div className="h-28 w-28 rounded-lg bg-white shadow-lg flex items-center justify-center border-[3px] border-black p-4">
                     <Image
                       src={"/assets/landing/aws.svg.png"}
@@ -562,13 +452,13 @@ const HomePageV3 = (props: HomePageV3Props) => {
               </div>
               <div className="bottom-0 absolute w-full">
                 <div className="w-full flex flex-row justify-center items-center p-8 relative h-full">
-                  <div className="h-40 w-40 absolute bottom-12 left-12 -rotate-6 rounded-lg bg-white shadow-lg flex items-center justify-center border-[3px] border-black p-4">
+                  <div className="h-32 w-32 sm:h-40 sm:w-40 absolute bottom-16 sm:bottom-12 left-4 sm:left-12 -rotate-6 rounded-lg bg-white shadow-lg flex items-center justify-center border-[3px] border-black p-4">
                     <div className="flex flex-col w-full">
                       <dd className="text-violet-500 text-3xl font-bold">{`>50`}</dd>
                       <dt className="text-gray-500 text-md">contributors</dt>
                     </div>
                   </div>
-                  <div className="z-30 h-40 w-40 absolute rounded-lg bottom-4 mx-auto bg-white shadow-lg flex items-center justify-center border-[3px] border-black p-4">
+                  <div className="z-30 h-32 w-32 sm:h-40 sm:w-40 absolute rounded-lg bottom-4 mx-auto bg-white shadow-lg flex items-center justify-center border-[3px] border-black p-4">
                     <div className="flex flex-col w-full">
                       <dd className="text-3xl font-bold text-yellow-500">
                         1.2k
@@ -576,10 +466,12 @@ const HomePageV3 = (props: HomePageV3Props) => {
                       <dt className="text-gray-500 text-md">stars</dt>
                     </div>
                   </div>
-                  <div className="h-40 w-40 rotate-6 bottom-12 right-12 absolute rounded-lg bg-white shadow-lg flex items-center justify-center border-[3px] border-black p-4">
+                  <div className="h-32 w-32 sm:h-40 sm:w-40  rotate-6 bottom-16 sm:bottom-12 right-4 sm:right-12 absolute rounded-lg bg-white shadow-lg flex items-end sm:items-center justify-center border-[3px] border-black p-4">
                     <div className="flex flex-col w-full">
-                      <dd className="text-green-500 text-3xl font-bold">{`>1B`}</dd>
-                      <dt className="text-gray-500 text-md">requests logged</dt>
+                      <dd className="text-green-500 text-3xl font-bold text-right sm:text-center">{`>1B`}</dd>
+                      <dt className="text-gray-500 text-md text-right sm:text-center">
+                        requests logged
+                      </dt>
                     </div>
                   </div>
                 </div>

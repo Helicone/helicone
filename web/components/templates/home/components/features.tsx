@@ -36,7 +36,7 @@ const tabOptions: {
   id: string;
   title: string;
   icon: React.ReactNode;
-  highlightColor: string;
+  highlight: string;
   content: React.ReactNode;
 }[] = [
   {
@@ -97,7 +97,7 @@ const tabOptions: {
         </div>
       </div>
     ),
-    highlightColor: "border-violet-700",
+    highlight: "ring-violet-700 bg-violet-100",
   },
   {
     id: "gateway",
@@ -142,7 +142,7 @@ const tabOptions: {
         </div>
       </div>
     ),
-    highlightColor: "border-green-700",
+    highlight: "ring-green-700 bg-green-100",
   },
   {
     id: "data-collection",
@@ -188,7 +188,7 @@ const tabOptions: {
         </div>
       </div>
     ),
-    highlightColor: "border-orange-700",
+    highlight: "ring-orange-700 bg-orange-100",
   },
   {
     id: "fine-tuning",
@@ -227,7 +227,7 @@ const tabOptions: {
         </div>
       </div>
     ),
-    highlightColor: "border-red-700",
+    highlight: "ring-red-700 bg-red-100",
   },
   {
     id: "evaluations",
@@ -273,7 +273,7 @@ const tabOptions: {
         </div>
       </div>
     ),
-    highlightColor: "border-black",
+    highlight: "ring-black bg-gray-100",
   },
   {
     id: "customer-portal",
@@ -326,7 +326,7 @@ const tabOptions: {
         </div>
       </div>
     ),
-    highlightColor: "border-sky-700",
+    highlight: "ring-sky-700 bg-sky-100",
   },
 ];
 
@@ -353,20 +353,19 @@ const Features = (props: FeaturesProps) => {
         </AccordionList>
       </div>
       <div className="hidden md:flex flex-col w-full justify-center mx-auto">
-        <ul className="w-fit flex items-center gap-8 lg:gap-16 border-b border-gray-300">
+        <ul className="w-full flex flex-wrap items-center gap-8 lg:gap-8 mx-auto justify-center">
           {tabOptions.map((tab) => (
-            <li
-              key={tab.id}
-              className={clsx(
-                tab.id === activeTab && `border-b-[3px] ${tab.highlightColor}`,
-                "flex items-center pb-4 -mb-0.5"
-              )}
-            >
+            <li key={tab.id}>
               <button
                 onClick={() => setActiveTab(tab.id)}
-                className="w-full flex items-center gap-2"
+                className={clsx(
+                  tab.id === activeTab
+                    ? `ring-2 ${tab.highlight}`
+                    : "ring-1  ring-gray-300",
+                  "flex items-center p-3 rounded-lg gap-2 transition-all duration-300 ease-in-out"
+                )}
               >
-                {tab.icon}
+                <span className="">{tab.icon}</span>
                 <p className="text-md font-bold">{tab.title}</p>
               </button>
             </li>

@@ -58,13 +58,13 @@ const Steps = () => {
             <>
               {stepIdx !== steps.length - 1 ? (
                 <div
-                  className="absolute left-4 top-4 -ml-px mt-0.5 h-full w-0.5 bg-cyan-500"
+                  className="absolute left-2 sm:left-4 top-4 -ml-px mt-0.5 h-full w-0.5 bg-cyan-500"
                   aria-hidden="true"
                 />
               ) : null}
               <div className="group relative flex items-start">
                 <span className="flex h-8 items-center">
-                  <span className="relative z-10 flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500">
+                  <span className="relative z-10 flex h-4 w-4 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-cyan-500">
                     <CheckIcon
                       className="h-4 w-4 text-white"
                       aria-hidden="true"
