@@ -14,8 +14,10 @@ import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { InsertQueue } from "../dbLogger/insertQueue";
 
 import { Valhalla } from "../db/valhalla";
-import { handleProxyRequest } from "./handler";
+import { handleProxyRequest, handleThreatProxyRequest } from "./handler";
 import { HeliconeProxyRequestMapper } from "./mapper";
+import { checkPromptSecurity } from "../security/promptSecurity";
+import { DBLoggable } from "../dbLogger/DBLoggable";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -58,6 +60,73 @@ export async function proxyForwarder(
     );
     if (rateLimitCheckResult.status === "rate_limited") {
       return responseBuilder.buildRateLimitedResponse();
+    }
+  }
+
+  if (
+    proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled &&
+    provider === "OPENAI"
+  ) {
+    let latestMessage;
+
+    try {
+      latestMessage = JSON.parse(proxyRequest.bodyText ?? "").messages.pop();
+    } catch (error) {
+      console.error("Error parsing latest message:", error);
+      return responseBuilder.build({
+        body: "Failed to parse the latest message.",
+        status: 500,
+      });
+    }
+
+    if (
+      request.url.pathname.includes("chat/completions") &&
+      latestMessage &&
+      latestMessage.role === "user"
+    ) {
+      const threat = await checkPromptSecurity(
+        latestMessage.content,
+        provider,
+        env
+      );
+
+      if (threat === true) {
+        proxyRequest.threat = threat;
+
+        const { data, error } = await handleThreatProxyRequest(proxyRequest);
+
+        if (error !== null) {
+          return responseBuilder.build({
+            body: error,
+            status: 500,
+          });
+        }
+        const { loggable, response } = data;
+
+        response.headers.forEach((value, key) => {
+          responseBuilder.setHeader(key, value);
+        });
+
+        ctx.waitUntil(log(loggable));
+
+        const responseContent = {
+          body: JSON.stringify({
+            success: false,
+            error: {
+              code: "PROMPT_THREAT_DETECTED",
+              message:
+                "Prompt threat detected. Your request cannot be processed.",
+              details: "See your Helicone request page for more info.",
+            },
+          }),
+          inheritFrom: response,
+          status: 400,
+        };
+
+        return responseBuilder
+          .setHeader("content-type", "application/json")
+          .build(responseContent);
+      }
     }
   }
 
@@ -147,7 +216,7 @@ export async function proxyForwarder(
     responseBuilder.setHeader("Helicone-Cache", "MISS");
   }
 
-  async function log() {
+  async function log(loggable: DBLoggable) {
     const { data: auth, error: authError } = await request.auth();
     if (authError !== null) {
       console.error("Error getting auth", authError);
@@ -165,13 +234,14 @@ export async function proxyForwarder(
         env.REQUEST_AND_RESPONSE_QUEUE_KV
       ),
     });
+
     if (res.error !== null) {
       console.error("Error logging", res.error);
     }
   }
 
   if (request?.heliconeHeaders?.heliconeAuth || request.heliconeProxyKeyId) {
-    ctx.waitUntil(log());
+    ctx.waitUntil(log(loggable));
   }
 
   if (proxyRequest.rateLimitOptions) {

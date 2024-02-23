@@ -72,7 +72,7 @@
     },
     {
       "group": "Community",
-      "pages": ["community/openpipe", "community/promptarmor"]
+      "pages": ["community/openpipe"]
     },
     {
       "group": "Integrations",
@@ -145,7 +145,8 @@
         "features/advanced-usage/custom-rate-limits",
         "features/advanced-usage/omit-logs",
         "features/streaming",
-        "features/webhooks"
+        "features/webhooks",
+        "features/advanced-usage/prompt-security"
       ]
     },
     {
