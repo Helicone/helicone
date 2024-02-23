@@ -107,14 +107,25 @@ export async function proxyForwarder(
           responseBuilder.setHeader(key, value);
         });
 
+        ctx.waitUntil(log(loggable));
+
         const responseContent = {
-          body: "Prompt threat detected.",
+          body: JSON.stringify({
+            success: false,
+            error: {
+              code: "PROMPT_THREAT_DETECTED",
+              message:
+                "Prompt threat detected. Your request cannot be processed.",
+              details: "See your Helicone request page for more info.",
+            },
+          }),
           inheritFrom: response,
           status: 400,
         };
-        ctx.waitUntil(log(loggable));
 
-        return responseBuilder.build(responseContent);
+        return responseBuilder
+          .setHeader("content-type", "application/json")
+          .build(responseContent);
       }
     }
   }

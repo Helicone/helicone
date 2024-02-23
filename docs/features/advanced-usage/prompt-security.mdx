@@ -1,0 +1,29 @@
+---
+title: "Prompt Security"
+description: "Secure your AI interactions against injection threats with minimal latency impact."
+---
+
+## Enabling Prompt Security
+
+Activate Prompt Security by adding the `Helicone-Prompt-Security-Enabled: true` header to your requests. This enables our security checks against prompt injections.
+
+## How It Works
+
+- **Security Checks:** Requests are analyzed for injection threats using [Prompt Armor](https://promptarmor.com).
+- **Response on Threat Detection:** Requests with detected threats are rejected.
+  ```json
+  {
+    "success": false,
+    "error": {
+      "code": "PROMPT_THREAT_DETECTED",
+      "message": "Prompt threat detected. Your request cannot be processed.",
+      "details": "See your Helicone request page for more info."
+    }
+  }
+  ```
+- **Latency:** Security checks add minimal latency, typically under one second.
+- **Normal Requests:** Clean requests are forwarded without delay.
+
+## Monitoring
+
+Detected threats and details are accessible on your Helicone request page for review.
