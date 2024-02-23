@@ -135,7 +135,7 @@ export async function logRequest(
       model: getModelFromRequest(),
       model_override: request.modelOverride ?? null,
       created_at: createdAt.toISOString(),
-      threat: request.threat,
+      threat: request.threat ?? null,
     };
 
     const customPropertyRows = Object.entries(request.properties).map(
