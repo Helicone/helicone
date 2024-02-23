@@ -14,7 +14,7 @@ const bullets = [
   "Get onboarding support",
 ];
 
-const Sales = () => {
+const Contact = () => {
   const router = useRouter();
 
   return (
@@ -64,7 +64,7 @@ const Sales = () => {
   );
 };
 
-export default Sales;
+export default Contact;
 
 import Cal, { getCalApi } from "@calcom/embed-react";
 import { useEffect } from "react";

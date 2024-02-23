@@ -241,7 +241,7 @@ const tabOptions: {
             Evaluate your models, datasets, and more with our evaluation tools
           </p>
           <Link
-            href="/sales"
+            href="/contact"
             className="border border-white font-bold py-2 px-4 text-sm rounded-lg w-fit  hover:bg-gray-900"
           >
             Join Beta

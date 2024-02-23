@@ -491,7 +491,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
                   deployments for maximum security.
                 </p>
                 <Link
-                  href="/sales"
+                  href="/contact"
                   className="bg-white text-black border-2 border-gray-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1"
                 >
                   Deploy on Prem

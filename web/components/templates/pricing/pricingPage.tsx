@@ -31,7 +31,7 @@ const tiers = [
   {
     name: "Custom",
     id: "tier-Custom",
-    href: "/sales",
+    href: "/contact",
     priceMonthly: "Enterprise",
     text: "Contact us",
     description:

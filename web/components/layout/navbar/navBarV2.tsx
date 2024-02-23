@@ -100,7 +100,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
               Blog
             </Link>
             <Link
-              href="/sales"
+              href="/contact"
               className="flex flex-row items-center font-semibold hover:bg-gray-100 rounded-md px-3 py-1.5 focus:outline-none"
             >
               Contact
