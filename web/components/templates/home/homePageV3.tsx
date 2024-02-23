@@ -1,6 +1,6 @@
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Database } from "../../../supabase/database.types";
 import { DEMO_EMAIL } from "../../../lib/constants";
 import GridBackground from "../../layout/public/gridBackground";
@@ -26,6 +26,7 @@ import {
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 import Features from "./components/features";
+import gsap from "gsap";
 
 interface HomePageV3Props {}
 
@@ -38,6 +39,42 @@ const HomePageV3 = (props: HomePageV3Props) => {
   const user = useUser();
 
   const supabaseClient = useSupabaseClient<Database>();
+
+  // Create a ref for the hero text
+  const heroTextRef = useRef<HTMLDivElement>(null);
+  const subTextRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Set a timeout to delay the animation
+    const animationDelay = setTimeout(() => {
+      // Ensure the ref is not null
+      if (subTextRef.current) {
+        subTextRef.current.classList.remove("invisible", "opacity-0");
+        gsap.from(subTextRef.current, {
+          duration: 3,
+          autoAlpha: 0,
+          y: 30,
+          ease: "power3.out",
+        });
+      }
+    }, 800); // Delay in milliseconds (0.8 seconds)
+
+    // Clear the timeout if the component unmounts
+    return () => clearTimeout(animationDelay);
+  }, []);
+
+  useEffect(() => {
+    // Ensure that heroTextRef.current is not null before using it
+    if (heroTextRef.current) {
+      gsap.from(heroTextRef.current.children, {
+        duration: 0.8,
+        y: 50,
+        opacity: 0,
+        stagger: 0.2, // Stagger the animation for each child
+        ease: "power3.out",
+      });
+    }
+  }, []);
 
   if (!demoLoading && user?.email === DEMO_EMAIL) {
     supabaseClient.auth.signOut();
@@ -124,19 +161,24 @@ const HomePageV3 = (props: HomePageV3Props) => {
               <HeartIcon className="h-4 w-4 inline ml-2 text-pink-500" />
             </div>
           </div>
-          <h1 className="text-5xl sm:text-7xl block font-bold w-full h-full tracking-tight text-center items-center sm:leading-[1]">
-            How developers{" "}
-            <span className="text-sky-500 block sm:inline">
-              build AI <span className="inline sm:hidden">apps</span>
-              <span className="hidden sm:inline">applications</span>
-            </span>
+          <h1
+            ref={heroTextRef}
+            className="text-5xl sm:text-7xl block font-bold w-full h-full tracking-tight text-center items-center sm:leading-[1]"
+          >
+            <span>How</span> <span>developers</span>{" "}
+            <span className="text-sky-500 block sm:inline">build</span>{" "}
+            <span className="text-sky-500 block sm:inline">AI</span>{" "}
+            <span className="text-sky-500 block sm:inline">applications</span>
           </h1>
-          <p className="text-gray-700 font-medium text-lg sm:text-2xl sm:leading-8">
+          <p
+            ref={subTextRef}
+            className="text-gray-700 font-medium text-lg sm:text-2xl sm:leading-8 invisible opacity-0"
+          >
             Meet the lightweight, yet powerful platform purpose-built for
             Generative AI
           </p>
           <div className="flex items-center gap-4">
-            <button className="bg-sky-200 text-sky-950 border-2 border-sky-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1">
+            <button className="bg-sky-100 text-black border-2 border-sky-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1">
               Start Building
               <ChevronRightIcon className="w-5 h-5 inline text-sky-700" />
             </button>
