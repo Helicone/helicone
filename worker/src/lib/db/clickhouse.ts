@@ -155,6 +155,7 @@ export interface ResponseCopyV3 extends ResponseCopyV2 {
   node_id: Nullable<string>;
   job_id: Nullable<string>;
   proxy_key_id: Nullable<string>;
+  threat: Nullable<boolean>;
 }
 
 interface PropertiesCopyV1 {

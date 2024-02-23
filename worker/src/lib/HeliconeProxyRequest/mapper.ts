@@ -43,6 +43,7 @@ export interface HeliconeProxyRequest {
   requestId: string;
   nodeId: string | null;
   heliconePromptTemplate: Record<string, unknown> | null;
+  threat?: boolean;
 }
 
 const providerBaseUrlMappings: Record<Provider, string> = {

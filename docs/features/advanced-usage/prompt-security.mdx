@@ -1,0 +1,31 @@
+---
+title: "Prompt Security"
+description: "Secure OpenAI chat completions against prompt injections."
+---
+
+## Enabling Prompt Security
+
+Add `Helicone-Prompt-Security-Enabled: true` to your request headers.
+
+## How It Works
+
+- **OpenAI Chat Support:** Exclusively for OpenAI chat completions.
+- **Analysis:** Only the latest user message is checked for threats.
+- **Security Checks:** Requests are analyzed for injection threats using [Prompt Armor](https://promptarmor.com).
+- **Response on Threat Detection:** Requests with detected threats are rejected.
+  ```json
+  {
+    "success": false,
+    "error": {
+      "code": "PROMPT_THREAT_DETECTED",
+      "message": "Prompt threat detected. Your request cannot be processed.",
+      "details": "See your Helicone request page for more info."
+    }
+  }
+  ```
+- **Latency:** Security checks add minimal latency, typically under one second.
+- **Normal Requests:** Clean requests are forwarded without delay.
+
+## Monitoring
+
+Detected threats and details are accessible on your Helicone request page for review.
