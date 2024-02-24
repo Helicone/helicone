@@ -1433,6 +1433,38 @@ export interface Database {
           }
         ]
       }
+      user_feedback: {
+        Row: {
+          created_at: string
+          feedback: string
+          id: number
+          organization_id: string
+          tag: string
+        }
+        Insert: {
+          created_at?: string
+          feedback: string
+          id?: number
+          organization_id: string
+          tag: string
+        }
+        Update: {
+          created_at?: string
+          feedback?: string
+          id?: number
+          organization_id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_feedback_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       user_settings: {
         Row: {
           created_at: string | null
