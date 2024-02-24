@@ -1,14 +1,8 @@
 import {
-  ArrowPathIcon,
   BellIcon,
   CircleStackIcon,
-  CloudArrowUpIcon,
-  Cog6ToothIcon,
-  FingerPrintIcon,
   FolderArrowDownIcon,
   KeyIcon,
-  LockClosedIcon,
-  ServerIcon,
   TagIcon,
   UserMinusIcon,
 } from "@heroicons/react/20/solid";

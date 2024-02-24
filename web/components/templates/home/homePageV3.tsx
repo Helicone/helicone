@@ -6,13 +6,7 @@ import { DEMO_EMAIL } from "../../../lib/constants";
 import GridBackground from "../../layout/public/gridBackground";
 import NavBarV2 from "../../layout/navbar/navBarV2";
 import Footer from "../../layout/footer";
-import {
-  ArrowPathIcon,
-  ChartPieIcon,
-  ChevronRightIcon,
-  CodeBracketIcon,
-  HeartIcon,
-} from "@heroicons/react/20/solid";
+import { ChevronRightIcon, HeartIcon } from "@heroicons/react/20/solid";
 import Image from "next/image";
 import { clsx } from "../../shared/clsx";
 import Link from "next/link";
@@ -20,14 +14,12 @@ import Globe from "./globe";
 import Steps from "./components/steps";
 import {
   BuildingOffice2Icon,
-  CircleStackIcon,
   CodeBracketSquareIcon,
   CubeIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 import Features from "./components/features";
 import gsap from "gsap";
-import AuthLayout from "../../layout/authLayout";
 import Platform from "./components/platform";
 
 interface HomePageV3Props {}

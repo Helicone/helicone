@@ -2,7 +2,6 @@ import React from "react";
 import Prism, { defaultProps } from "prism-react-renderer";
 import theme from "prism-react-renderer/themes/nightOwl";
 import { clsx } from "../../shared/clsx";
-import { text } from "stream/consumers";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
 import useNotification from "../../shared/notification/useNotification";
 
