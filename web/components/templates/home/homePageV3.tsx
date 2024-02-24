@@ -94,8 +94,8 @@ const HomePageV3 = (props: HomePageV3Props) => {
     <div className="w-full bg-gray-50 h-full antialiased">
       <NavBarV2 />
       <GridBackground>
-        <header className="w-full flex flex-col space-y-4 sm:space-y-6 mx-auto max-w-6xl h-full py-16 sm:py-24 items-center text-center px-2 sm:px-2 lg:px-0">
-          {/* <div className="text-xs mx-auto flex flex-col sm:flex-row sm:divide-x-2 gap-[14px] justify-center items-center divide-gray-300 opacity-75 w-fit px-4 py-1 rounded-xl">
+        <header className="w-full flex flex-col space-y-6 mx-auto max-w-6xl h-full py-16 sm:py-24 items-center text-center px-2 sm:px-2 lg:px-0">
+          <div className="-mt-4 text-xs mx-auto flex flex-col sm:flex-row sm:divide-x-2 gap-[14px] justify-center items-center divide-gray-300 opacity-75 w-fit px-4 py-1 rounded-xl">
             <Link
               href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
               target="_blank"
@@ -170,7 +170,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
               Fully open-source{" "}
               <HeartIcon className="h-4 w-4 inline ml-2 text-pink-500" />
             </div>
-          </div> */}
+          </div>
           <h1
             ref={heroTextRef}
             className="text-4xl sm:text-7xl block font-bold w-full h-full tracking-tight text-center items-center sm:leading-[1]"
@@ -187,7 +187,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
             Meet the lightweight, yet powerful platform purpose-built for
             Generative AI
           </p>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 pt-4">
             <button className="bg-sky-100 text-black border-2 border-sky-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1">
               Start Building
               <ChevronRightIcon className="w-5 h-5 inline text-sky-700" />
@@ -247,9 +247,8 @@ const HomePageV3 = (props: HomePageV3Props) => {
               <Image
                 src={"/assets/home/logos/reworkd.png"}
                 alt={""}
-                className="invert"
-                width={100}
-                height={100}
+                width={60}
+                height={60}
               />
             </div>{" "}
           </div>
@@ -266,8 +265,8 @@ const HomePageV3 = (props: HomePageV3Props) => {
               <Image
                 src={"/assets/home/logos/particl.png"}
                 alt={""}
-                width={400}
-                height={400}
+                width={120}
+                height={120}
               />
             </div>{" "}
             <div className={clsx(`h-28 w-32 flex items-center justify-center`)}>
