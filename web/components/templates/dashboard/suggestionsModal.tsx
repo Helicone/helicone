@@ -2,7 +2,7 @@ import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Database } from "../../../supabase/database.types";
 import { useOrg } from "../../layout/organizationContext";
 
@@ -21,7 +21,9 @@ const SuggestionModal = (props: SuggestionModalProps) => {
   const [useCase, setUseCase] = useState("");
   const [whatElse, setWhatElse] = useState("");
   const client = useSupabaseClient<Database>();
-
+  useEffect(() => {
+    setEmail(user?.email ?? "");
+  }, [user?.email]);
   const { setNotification } = useNotification();
   return (
     <ThemedModal open={open} setOpen={setOpen}>
