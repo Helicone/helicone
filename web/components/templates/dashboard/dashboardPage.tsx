@@ -42,10 +42,8 @@ import UpgradeProModal from "../../shared/upgradeProModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { formatNumber } from "../users/initialColumns";
 import StyledAreaChart from "./styledAreaChart";
-import { useDashboardPage } from "./useDashboardPage";
-import { useOrg } from "../../layout/organizationContext";
-import ThemedModal from "../../shared/themed/themedModal";
 import SuggestionModal from "./suggestionsModal";
+import { useDashboardPage } from "./useDashboardPage";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 

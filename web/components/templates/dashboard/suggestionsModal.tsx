@@ -1,9 +1,7 @@
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { useRouter } from "next/router";
 import { useState } from "react";
 import { Database } from "../../../supabase/database.types";
 import { useOrg } from "../../layout/organizationContext";
