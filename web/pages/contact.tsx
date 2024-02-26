@@ -2,7 +2,6 @@ import Footer from "../components/layout/footer";
 import NavBarV2 from "../components/layout/navbar/navBarV2";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import GridBackground from "../components/layout/public/gridBackground";
 import { CheckCircleIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 
