@@ -487,7 +487,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
             {faqs.map((faq) => (
               <Disclosure as="div" key={faq.question} className="">
                 {({ open }) => (
-                  <div className="border border-gray-300 rounded-xl p-6">
+                  <div className="border-2 border-black rounded-xl p-6">
                     <dt>
                       <Disclosure.Button className="flex w-full items-start justify-between text-left text-gray-900">
                         <span className="text-lg font-bold leading-7">
