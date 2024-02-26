@@ -5,6 +5,7 @@ import {
   BookOpenIcon,
   ChatBubbleBottomCenterIcon,
   ChevronDownIcon,
+  ChevronRightIcon,
   CodeBracketIcon,
   GlobeAltIcon,
   MapIcon,
@@ -65,15 +66,11 @@ export default function DeveloperButton() {
       <Popover className="relative">
         {({ open }) => (
           <>
-            <Popover.Button
-              className={clsx(
-                "flex flex-row items-center font-semibold hover:bg-gray-100 rounded-lg px-3 py-1.5 focus:outline-none"
-              )}
-            >
+            <Popover.Button className="flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-gray-700">
               <span>Developer</span>
-              <ChevronDownIcon
-                className={`${open ? "" : "text-opacity-70"}
-                  ml-1 h-5 w-5 transition duration-150 ease-in-out group-hover:text-opacity-80`}
+              <ChevronRightIcon
+                className={`${open ? "rotate-90" : "text-opacity-70"}
+                  ml-1 h-4 w45 transition duration-150 ease-in-out group-hover:text-opacity-80`}
                 aria-hidden="true"
               />
             </Popover.Button>

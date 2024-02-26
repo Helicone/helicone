@@ -7,7 +7,7 @@ const GridBackground = (props: GridBackgroundProps) => {
   const { children } = props;
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-white">
       <div className="relative isolate">
         <svg
           className="absolute inset-0 -z-10 h-full w-full stroke-gray-200 [mask-image:radial-gradient(100%_100%_at_top_center,white,transparent)]"

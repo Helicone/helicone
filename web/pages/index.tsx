@@ -22,10 +22,11 @@ export const Home = () => {
   return (
     <>
       <PublicMetaData
-        description={"The easiest way to build your LLM-application at scale."}
+        description={
+          "The go-to platform for developers to create AI applications."
+        }
         ogImageUrl={"https://www.helicone.ai/static/helicone-landing.png"}
       >
-        {/* <HomePageV2 /> */}
         <HomePageV3 />
       </PublicMetaData>
     </>

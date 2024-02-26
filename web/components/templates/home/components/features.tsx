@@ -42,9 +42,9 @@ const tabOptions: {
   {
     id: "monitoring",
     title: "Monitoring",
-    icon: <ChartPieIcon className="w-6 h-6 text-violet-700" />,
+    icon: <ChartPieIcon className="w-6 h-6 text-violet-500" />,
     content: (
-      <div className="my-2 md:my-8 w-full md:rounded-lg bg-violet-600 h-full grid grid-cols-8 p-8 gap-8 md:p-16">
+      <div className="my-2 md:my-8 w-full md:rounded-lg bg-violet-500 h-full grid grid-cols-8 p-8 gap-8 md:p-16">
         <div className="flex flex-col space-y-4 text-white col-span-8 md:col-span-3">
           <h2 className="text-3xl font-bold tracking-tight">Monitoring</h2>
           <p className="text-md font-medium max-w-xs text-gray-300">
@@ -280,7 +280,7 @@ const tabOptions: {
     title: "Customer Portal",
     icon: <UserGroupIcon className="w-6 h-6 text-sky-500" />,
     content: (
-      <div className="my-2 md:my-8 w-full md:rounded-lg bg-sky-600 h-full grid grid-cols-8 p-8 gap-8 md:p-16 overflow-hidden">
+      <div className="my-2 md:my-8 w-full md:rounded-lg bg-sky-500 h-full grid grid-cols-8 p-8 gap-8 md:p-16 overflow-hidden">
         <div className="hidden md:flex relative col-span-8 md:col-span-5 w-full justify-center items-center">
           <Image
             className="z-20 absolute -bottom-24 -left-8 shadow-lg rounded-lg border border-gray-300 max-h-96 w-fit object-contain lg:col-span-1"
@@ -301,28 +301,20 @@ const tabOptions: {
           >
             Explore
           </Link>
-          <Image
-            className="hidden md:block z-10 absolute -bottom-20 right-0 shadow-lg rounded-lg border border-gray-300 max-h-48 w-fit object-contain lg:col-span-1"
-            src="/assets/home/bento/users.webp"
-            alt="requests"
-            width={980}
-            height={604}
-          />
-          <Image
-            className="hidden md:block z-20 absolute -bottom-28 right-0 shadow-lg rounded-lg border border-gray-300 max-h-48 w-fit object-contain lg:col-span-1"
-            src="/assets/home/bento/costs.webp"
-            alt="requests"
-            width={980}
-            height={604}
-          />
-
-          <Image
-            className="hidden md:block z-30 absolute -bottom-36 right-0 shadow-lg rounded-lg border border-gray-300 max-h-48 w-fit object-contain lg:col-span-1"
-            src="/assets/home/bento/requests.webp"
-            alt="requests"
-            width={980}
-            height={604}
-          />
+          <ul className="gap-4 font-bold text-md grid grid-cols-1 w-fit pt-6">
+            <li className="flex items-center gap-2">
+              <CodeBracketSquareIcon className="h-6 w-6" /> White Labeling
+            </li>
+            <li className="flex items-center gap-2">
+              <RectangleGroupIcon className="h-6 w-6" /> Create Datasets
+            </li>
+            <li className="flex items-center gap-2">
+              <InboxStackIcon className="h-6 w-6" /> Standardized schemas
+            </li>
+            <li className="flex items-center gap-2">
+              <CodeBracketIcon className="h-6 w-6" /> GraphQL API
+            </li>
+          </ul>
         </div>
       </div>
     ),

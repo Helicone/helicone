@@ -21,8 +21,29 @@ import {
 import Features from "./components/features";
 import gsap from "gsap";
 import Platform from "./components/platform";
+import { Disclosure } from "@headlessui/react";
+import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
 interface HomePageV3Props {}
+
+const faqs = [
+  {
+    question: "Is there a latency impact to my requests with Helicone's Proxy?",
+    answer:
+      "Helicone leverages Cloudflare’s global network of servers as proxies for efficient web traffic routing. Cloudflare workers maintain extremely low latency through their worldwide distribution. This results in a fast and reliable proxy for your LLM requests with less than a fraction of a millisecond of latency impact.",
+  },
+  {
+    question: "Do you offer a self-hosted or manage-hosted solution?",
+    answer:
+      "Our recommended solution is to use our cloud service, but we do offer a dedicated manage-hosted solution for enterprise customers. Please contact us at sales@helicone.ai for more information.",
+  },
+  {
+    question: "I do not want to use the proxy, can I still use Helicone?",
+    answer:
+      "Yes, you can use Helicone without the proxy. We have packages for Python and Node.js that you can use to send data to Helicone. Visit our documentation page to learn more.",
+  },
+  // More questions...
+];
 
 const HomePageV3 = (props: HomePageV3Props) => {
   const {} = props;
@@ -39,9 +60,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
   const subTextRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Set a timeout to delay the animation
     const animationDelay = setTimeout(() => {
-      // Ensure the ref is not null
       if (subTextRef.current) {
         subTextRef.current.classList.remove("invisible", "opacity-0");
         gsap.from(subTextRef.current, {
@@ -51,17 +70,13 @@ const HomePageV3 = (props: HomePageV3Props) => {
           ease: "power3.out",
         });
       }
-    }, 300); // Delay in milliseconds (0.8 seconds)
+    }, 300);
 
-    // Clear the timeout if the component unmounts
     return () => clearTimeout(animationDelay);
   }, []);
 
   useEffect(() => {
-    // Ensure that heroTextRef.current is not null before using it
     if (heroTextRef.current) {
-      // stagger affect
-
       gsap.from(heroTextRef.current.children, {
         duration: 0.8,
         y: 50,
@@ -69,12 +84,6 @@ const HomePageV3 = (props: HomePageV3Props) => {
         stagger: 0.2, // Stagger the animation for each child
         ease: "power3.out",
       });
-      // gsap.from(heroTextRef.current, {
-      //   duration: 1,
-      //   autoAlpha: 0,
-      //   y: -50,
-      //   ease: "power3.out",
-      // });
     }
   }, []);
 
@@ -83,114 +92,113 @@ const HomePageV3 = (props: HomePageV3Props) => {
   }
 
   return (
-    <div className="w-full bg-gray-50 h-full antialiased">
+    <div className="w-full bg-[#f8feff] h-full antialiased">
       <NavBarV2 />
-      <GridBackground>
-        <header className="w-full flex flex-col space-y-6 mx-auto max-w-6xl h-full py-16 sm:py-24 items-center text-center px-2 sm:px-2 lg:px-0">
-          <div className="-mt-4 text-xs mx-auto flex flex-col sm:flex-row sm:divide-x-2 gap-[14px] justify-center items-center divide-gray-300 opacity-75 w-fit px-4 py-1 rounded-xl">
-            <Link
-              href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex space-x-6 font-semibold text-gray-600 items-center"
+
+      <header className="w-full flex flex-col space-y-4 mx-auto max-w-6xl h-full py-16 sm:py-24 items-center text-center px-2 sm:px-2 lg:px-0">
+        <div className="-mt-4 text-xs mx-auto flex flex-col sm:flex-row sm:divide-x-2 gap-[14px] justify-center items-center divide-gray-300 opacity-75 w-fit px-4 pb-4 rounded-xl">
+          <Link
+            href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex space-x-6 font-semibold text-gray-600 items-center"
+          >
+            Backed by{" "}
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="mr-1 ml-2"
             >
-              Backed by{" "}
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="mr-1 ml-2"
-              >
-                <g clipPath="url(#clip0_24_57)">
-                  <rect width="24" height="24" rx="5.4" fill="#FF5100"></rect>
-                  <rect
-                    x="0.5"
-                    y="0.5"
-                    width="23"
-                    height="23"
-                    rx="4.9"
-                    stroke="#FF844B"
-                  ></rect>
-                  <path
-                    d="M7.54102 7.31818H9.28604L11.9458 11.9467H12.0552L14.715 7.31818H16.46L12.7662 13.5028V17.5H11.2349V13.5028L7.54102 7.31818Z"
-                    fill="white"
-                  ></path>
-                </g>
+              <g clipPath="url(#clip0_24_57)">
+                <rect width="24" height="24" rx="5.4" fill="#FF5100"></rect>
                 <rect
                   x="0.5"
                   y="0.5"
                   width="23"
                   height="23"
                   rx="4.9"
-                  stroke="#FF5100"
-                  strokeOpacity="0.1"
+                  stroke="#FF844B"
                 ></rect>
-                <rect
-                  x="0.5"
-                  y="0.5"
-                  width="23"
-                  height="23"
-                  rx="4.9"
-                  stroke="url(#paint0_radial_24_57)"
-                ></rect>
-                <defs>
-                  <radialGradient
-                    id="paint0_radial_24_57"
-                    cx="0"
-                    cy="0"
-                    r="1"
-                    gradientUnits="userSpaceOnUse"
-                    gradientTransform="translate(7.35) rotate(58.475) scale(34.1384)"
-                  >
-                    <stop stopColor="white" stopOpacity="0.56"></stop>
-                    <stop
-                      offset="0.28125"
-                      stopColor="white"
-                      stopOpacity="0"
-                    ></stop>
-                  </radialGradient>
-                  <clipPath id="clip0_24_57">
-                    <rect width="24" height="24" rx="5.4" fill="white"></rect>
-                  </clipPath>
-                </defs>
-              </svg>{" "}
-              Combinator
-            </Link>
-            <div className="font-semibold text-gray-600 pl-4 flex items-center">
-              Fully open-source{" "}
-              <HeartIcon className="h-4 w-4 inline ml-2 text-pink-500" />
-            </div>
+                <path
+                  d="M7.54102 7.31818H9.28604L11.9458 11.9467H12.0552L14.715 7.31818H16.46L12.7662 13.5028V17.5H11.2349V13.5028L7.54102 7.31818Z"
+                  fill="white"
+                ></path>
+              </g>
+              <rect
+                x="0.5"
+                y="0.5"
+                width="23"
+                height="23"
+                rx="4.9"
+                stroke="#FF5100"
+                strokeOpacity="0.1"
+              ></rect>
+              <rect
+                x="0.5"
+                y="0.5"
+                width="23"
+                height="23"
+                rx="4.9"
+                stroke="url(#paint0_radial_24_57)"
+              ></rect>
+              <defs>
+                <radialGradient
+                  id="paint0_radial_24_57"
+                  cx="0"
+                  cy="0"
+                  r="1"
+                  gradientUnits="userSpaceOnUse"
+                  gradientTransform="translate(7.35) rotate(58.475) scale(34.1384)"
+                >
+                  <stop stopColor="white" stopOpacity="0.56"></stop>
+                  <stop
+                    offset="0.28125"
+                    stopColor="white"
+                    stopOpacity="0"
+                  ></stop>
+                </radialGradient>
+                <clipPath id="clip0_24_57">
+                  <rect width="24" height="24" rx="5.4" fill="white"></rect>
+                </clipPath>
+              </defs>
+            </svg>{" "}
+            Combinator
+          </Link>
+          <div className="font-semibold text-gray-600 pl-4 flex items-center">
+            Fully open-source{" "}
+            <HeartIcon className="h-4 w-4 inline ml-2 text-pink-500" />
           </div>
-          <h1
-            ref={heroTextRef}
-            className="text-4xl sm:text-7xl block font-bold w-full h-full tracking-tight text-center items-center sm:leading-[1]"
-          >
-            <span>How</span> <span>developers</span>{" "}
-            <span className="text-sky-500 ">build</span>{" "}
-            <span className="text-sky-500">AI</span>{" "}
-            <span className="text-sky-500">applications</span>
-          </h1>
-          <p
-            ref={subTextRef}
-            className="text-gray-700 font-medium text-md sm:text-2xl sm:leading-7 invisible opacity-0"
-          >
-            Meet the lightweight, yet powerful platform purpose-built for
-            Generative AI
-          </p>
-          <div className="flex items-center gap-4 pt-4">
-            <button className="bg-sky-100 text-black border-2 border-sky-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1">
-              Start Building
-              <ChevronRightIcon className="w-5 h-5 inline text-sky-700" />
-            </button>
-            <button className="bg-white text-black border-2 border-gray-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1">
-              Get a demo
-              <ChevronRightIcon className="w-5 h-5 inline text-black" />
-            </button>
-          </div>
-        </header>
-      </GridBackground>
+        </div>
+        <h1
+          ref={heroTextRef}
+          className="font-mono text-4xl sm:text-7xl block font-bold w-full h-full tracking-tight text-center items-center sm:leading-[1]"
+        >
+          <span>How</span> <span>developers</span>{" "}
+          <span className="text-sky-500 ">build</span>{" "}
+          <span className="text-sky-500">AI</span>{" "}
+          <span className="text-sky-500">applications</span>
+        </h1>
+        <p
+          ref={subTextRef}
+          className="text-gray-700 font-medium text-md sm:text-2xl sm:leading-7 invisible opacity-0 font-[Roboto Mono]"
+        >
+          Meet the lightweight, yet powerful platform purpose-built for
+          Generative AI
+        </p>
+        <div className="flex items-center gap-4 pt-4">
+          <button className="bg-sky-100 text-black border-2 border-sky-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1">
+            Start Building
+            <ChevronRightIcon className="w-5 h-5 inline text-sky-700" />
+          </button>
+          <button className="bg-white text-black border-2 border-gray-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1">
+            Get a demo
+            <ChevronRightIcon className="w-5 h-5 inline text-black" />
+          </button>
+        </div>
+      </header>
 
       <section className="w-full max-w-6xl mx-auto justify-center items-center pt-8 sm:pb-16 px-4 flex flex-col space-y-16">
         <Features />
@@ -353,16 +361,15 @@ const HomePageV3 = (props: HomePageV3Props) => {
         <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
           <div className="flex flex-col space-y-2 pb-2 w-full items-center">
             <h3 className="text-3xl sm:text-5xl font-bold text-black text-center tracking-tight leading-tight">
-              Join our <span className="text-pink-500">open source</span>{" "}
-              community
+              Proudly <span className="text-amber-500">Open Source</span>
             </h3>
             <p className="text-lg md:text-xl text-gray-600 max-w-2xl text-center">
-              Developers from around the world are helping us build the future
-              of AI
+              We believe in the power of community and the importance of
+              transparency.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 md:justify-center w-full">
-            <div className="relative isolate bg-white h-[32rem] w-full border-[3px] border-black shadow-sm rounded-xl flex justify-center items-center">
+            <div className="relative isolate bg-inherit h-[32rem] w-full border-[3px] border-black shadow-sm rounded-xl flex justify-center items-center">
               <div className="w-full h-full rounded-xl p-8 flex flex-col space-y-4 text-left">
                 <h2 className="text-2xl font-semibold text-gray-900">
                   Deploy Anywhere
@@ -411,7 +418,7 @@ const HomePageV3 = (props: HomePageV3Props) => {
                 </div>
               </div>
             </div>
-            <div className="overflow-hidden relative isolate bg-white h-[32rem] w-full border-[3px] border-black shadow-sm rounded-xl flex justify-center items-center">
+            <div className="overflow-hidden relative isolate bg-inherit h-[32rem] w-full border-[3px] border-black shadow-sm rounded-xl flex justify-center items-center">
               <div className="w-full h-full rounded-xl p-8 flex flex-col space-y-4 text-left">
                 <h2 className="text-2xl font-semibold text-gray-900">
                   Join Our Community
@@ -469,6 +476,50 @@ const HomePageV3 = (props: HomePageV3Props) => {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+      <section id="faq" className="bg-inherit py-36">
+        <div className="mx-auto px-4 md:px-8 max-w-6xl">
+          <div className="flex flex-col space-y-4  text-left sm:text-center ">
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-tighter leading-tight">
+              Frequently asked questions
+            </h2>
+          </div>
+          <dl className="mt-10 flex flex-col space-y-4">
+            {faqs.map((faq) => (
+              <Disclosure as="div" key={faq.question} className="">
+                {({ open }) => (
+                  <div className="border border-gray-300 rounded-xl p-6">
+                    <dt>
+                      <Disclosure.Button className="flex w-full items-start justify-between text-left text-gray-900">
+                        <span className="text-lg font-bold leading-7">
+                          {faq.question}
+                        </span>
+                        <span className="ml-6 flex h-7 items-center">
+                          {open ? (
+                            <ChevronRightIcon
+                              className="h-6 w-6 rotate-90 transform transition-transform duration-300 ease-in-out"
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <ChevronRightIcon
+                              className="h-6 w-6 transform transition-transform duration-300 ease-in-out"
+                              aria-hidden="true"
+                            />
+                          )}
+                        </span>
+                      </Disclosure.Button>
+                    </dt>
+                    <Disclosure.Panel as="dd" className="mt-4 pr-12">
+                      <p className="text-base leading-7 text-gray-600">
+                        {faq.answer}
+                      </p>
+                    </Disclosure.Panel>
+                  </div>
+                )}
+              </Disclosure>
+            ))}
+          </dl>
         </div>
       </section>
 
