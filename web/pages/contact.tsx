@@ -19,12 +19,14 @@ const Contact = () => {
 
   return (
     <PublicMetaData
-      description={"The easiest way to build your LLM-application at scale."}
+      description={
+        "The go-to platform for developers to create AI applications."
+      }
       ogImageUrl={"https://www.helicone.ai/static/helicone-landing.png"}
     >
-      <NavBarV2 />
-      <div className="bg-white h-full min-h-screen">
-        <GridBackground>
+      <div className="w-full bg-[#f8feff] h-full antialiased">
+        <NavBarV2 />
+        <div className="h-full min-h-screen">
           <div className="flex flex-col sm:flex-row mx-auto w-full gap-8 max-w-6xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
             <div className="flex flex-col w-2/3">
               <h1 className="text-2xl sm:text-4xl font-semibold leading-tight sm:leading-snug max-w-4xl">
@@ -57,9 +59,9 @@ const Contact = () => {
             </div>
             <Calendar />
           </div>
-        </GridBackground>
+        </div>
+        <Footer />
       </div>
-      <Footer />
     </PublicMetaData>
   );
 };
