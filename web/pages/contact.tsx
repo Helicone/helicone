@@ -19,7 +19,7 @@ const Contact = () => {
   return (
     <PublicMetaData
       description={
-        "The go-to platform for developers to create AI applications."
+        "The Generative AI platform built for developers. Get observability, tooling, fine-tuning, and evaluations out of the box. "
       }
       ogImageUrl={"https://www.helicone.ai/static/helicone-landing.png"}
     >
