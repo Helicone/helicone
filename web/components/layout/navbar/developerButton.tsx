@@ -4,7 +4,6 @@ import {
   ArrowPathIcon,
   BookOpenIcon,
   ChatBubbleBottomCenterIcon,
-  ChevronDownIcon,
   ChevronRightIcon,
   CodeBracketIcon,
   GlobeAltIcon,
@@ -14,7 +13,6 @@ import {
 } from "@heroicons/react/20/solid";
 import { ChartPieIcon, CircleStackIcon } from "@heroicons/react/20/solid";
 import { Fragment } from "react";
-import { clsx } from "../../shared/clsx";
 import Link from "next/link";
 
 const solutions = [

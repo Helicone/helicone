@@ -1,7 +1,6 @@
 import { Popover, Transition } from "@headlessui/react";
 import {
   BugAntIcon,
-  ChevronDownIcon,
   ChevronRightIcon,
   CodeBracketSquareIcon,
   DocumentMagnifyingGlassIcon,
@@ -13,7 +12,6 @@ import {
   CommandLineIcon,
 } from "@heroicons/react/20/solid";
 import { Fragment } from "react";
-import { clsx } from "../../shared/clsx";
 import Link from "next/link";
 
 const solutions: {

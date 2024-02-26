@@ -1,7 +1,6 @@
 import { Fragment } from "react";
 import { CheckCircleIcon, MinusIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
-import GridBackground from "../../layout/public/gridBackground";
 import NavBarV2 from "../../layout/navbar/navBarV2";
 import Footer from "../../layout/footer";
 import Link from "next/link";

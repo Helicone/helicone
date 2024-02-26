@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import { Database } from "../../../supabase/database.types";
 import { DEMO_EMAIL } from "../../../lib/constants";
-import GridBackground from "../../layout/public/gridBackground";
 import NavBarV2 from "../../layout/navbar/navBarV2";
 import Footer from "../../layout/footer";
 import { ChevronRightIcon, HeartIcon } from "@heroicons/react/20/solid";
@@ -22,7 +21,6 @@ import Features from "./components/features";
 import gsap from "gsap";
 import Platform from "./components/platform";
 import { Disclosure } from "@headlessui/react";
-import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
 interface HomePageV3Props {}
 
