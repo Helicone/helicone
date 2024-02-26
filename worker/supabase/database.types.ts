@@ -1192,6 +1192,7 @@ export interface Database {
           prompt_values: Json | null
           properties: Json | null
           provider: string
+          threat: boolean | null
           user_id: string | null
         }
         Insert: {
@@ -1211,6 +1212,7 @@ export interface Database {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
+          threat?: boolean | null
           user_id?: string | null
         }
         Update: {
@@ -1230,6 +1232,7 @@ export interface Database {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
+          threat?: boolean | null
           user_id?: string | null
         }
         Relationships: [
@@ -1429,6 +1432,38 @@ export interface Database {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      user_feedback: {
+        Row: {
+          created_at: string
+          feedback: string
+          id: number
+          organization_id: string
+          tag: string
+        }
+        Insert: {
+          created_at?: string
+          feedback: string
+          id?: number
+          organization_id: string
+          tag: string
+        }
+        Update: {
+          created_at?: string
+          feedback?: string
+          id?: number
+          organization_id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_feedback_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
             referencedColumns: ["id"]
           }
         ]
