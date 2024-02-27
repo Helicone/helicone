@@ -153,7 +153,7 @@ const tabOptions: {
         <div className="hidden md:flex relative col-span-8 md:col-span-5 w-full justify-center items-center">
           <Image
             className="z-20 absolute -left-16 shadow-lg rounded-lg border border-gray-300 max-h-[40rem] -rotate-2 w-full object-contain lg:col-span-1"
-            src="/assets/home/bento/logs.png"
+            src="/assets/home/bento/logs.webp"
             alt="requests"
             width={980}
             height={900}
@@ -212,14 +212,14 @@ const tabOptions: {
         <div className="hidden md:flex relative col-span-8 md:col-span-5 w-full justify-center items-center">
           <Image
             className="z-20 absolute -top-8 shadow-lg rounded-lg border border-gray-300 max-h-[27rem] -rotate-2 w-fit object-contain lg:col-span-1"
-            src="/assets/home/bento/finetune.png"
+            src="/assets/home/bento/finetune.webp"
             alt="requests"
             width={980}
             height={604}
           />
           <Image
             className="z-20 absolute -bottom-16 right-0 shadow-lg rounded-lg border border-gray-300 max-h-72 rotate-3 w-fit object-contain lg:col-span-1"
-            src="/assets/home/bento/create-finetune.png"
+            src="/assets/home/bento/create-finetune.webp"
             alt="requests"
             width={980}
             height={604}
@@ -261,7 +261,7 @@ const tabOptions: {
         <div className="hidden md:flex relative col-span-8 md:col-span-5 w-full justify-center items-center">
           <Image
             className="z-20 absolute bottom-0 shadow-lg rounded-lg border border-gray-300 max-h-72 rotate-2 w-fit object-contain lg:col-span-1"
-            src="/assets/home/bento/template.png"
+            src="/assets/home/bento/template.webp"
             alt="requests"
             width={980}
             height={700}
@@ -284,7 +284,7 @@ const tabOptions: {
         <div className="hidden md:flex relative col-span-8 md:col-span-5 w-full justify-center items-center">
           <Image
             className="z-20 absolute -bottom-24 -left-8 shadow-lg rounded-lg border border-gray-300 max-h-96 w-fit object-contain lg:col-span-1"
-            src="/assets/home/bento/portal.png"
+            src="/assets/home/bento/portal.webp"
             alt="requests"
             width={980}
             height={604}
