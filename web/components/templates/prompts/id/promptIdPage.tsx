@@ -24,6 +24,9 @@ import { usePrompt } from "../../../../services/hooks/prompts/singlePrompt";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import { getUSDateFromString } from "../../../shared/utils/utils";
 import ThemedModal from "../../../shared/themed/themedModal";
+import getNormalizedRequest from "../../requestsV2/builder/requestBuilder";
+import { helper } from "../../requestsV2/builder/chatGPTBuilder";
+import { Chat } from "../../requests/chat";
 
 interface PromptIdPageProps {
   id: string;
@@ -80,6 +83,10 @@ const RenderWithPrettyInputKeys = (props: {
 
   // Function to replace matched patterns with JSX components
   const replaceInputKeysWithComponents = (inputText: string) => {
+    if (typeof inputText !== "string") {
+      throw new Error("Input text must be a string");
+    }
+
     // Regular expression to match the pattern
     const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
     const parts = [];
@@ -117,7 +124,7 @@ const RenderWithPrettyInputKeys = (props: {
 
   return (
     <div className="text-sm leading-8">
-      {replaceInputKeysWithComponents(text)}
+      {replaceInputKeysWithComponents(JSON.stringify(text))}
     </div>
   );
 };
@@ -151,6 +158,12 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     }
   }, [currentPrompt]);
 
+  const generateX = (template: any) => {
+    console.log("t", template);
+
+    const request = helper(template);
+    console.log("request", request);
+  };
   return (
     <>
       <div className="flex flex-row items-center justify-between">
@@ -273,15 +286,30 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                     ) : (
                       <div className="bg-white border-gray-300 p-4 border rounded-lg flex flex-col space-y-4">
                         <i className="text-gray-500">input</i>
+                        {/* use request builder ??? */}
+                        {generateX(selectedPrompt.heliconeTemplate)}
                         {selectedPrompt.heliconeTemplate?.messages.map(
-                          (m: any, i: number) => (
-                            <div key={i}>
-                              <RenderWithPrettyInputKeys
-                                text={m.content}
-                                selectedProperties={selectedInput?.properties}
+                          (m: any, i: number) => {
+                            return (
+                              <Chat
+                                requestBody={selectedPrompt.heliconeTemplate}
+                                responseBody={
+                                  selectedInput?.response
+                                    ? selectedInput.response
+                                    : "output"
+                                }
+                                status={200}
+                                requestId={""}
+                                model={selectedPrompt.heliconeTemplate.model}
                               />
-                            </div>
-                          )
+                              // <div key={i}>
+                              //   <RenderWithPrettyInputKeys
+                              //     text={m.content}
+                              //     selectedProperties={selectedInput?.properties}
+                              //   />
+                              // </div>
+                            );
+                          }
                         )}
                       </div>
                     )}
