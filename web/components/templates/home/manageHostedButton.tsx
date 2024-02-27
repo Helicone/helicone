@@ -26,7 +26,7 @@ const ManageHostedButton = () => {
           <div className="flex flex-row w-full items-center justify-center gap-8 pt-8 pb-4">
             <button
               onClick={() => {
-                router.push("/sales");
+                router.push("/contact");
               }}
               className="p-4 rounded-lg shadow-lg border border-gray-300"
             >
