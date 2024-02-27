@@ -1,7 +1,6 @@
 import { Fragment } from "react";
 import { CheckCircleIcon, MinusIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
-import GridBackground from "../../layout/public/gridBackground";
 import NavBarV2 from "../../layout/navbar/navBarV2";
 import Footer from "../../layout/footer";
 import Link from "next/link";
@@ -31,7 +30,7 @@ const tiers = [
   {
     name: "Custom",
     id: "tier-Custom",
-    href: "/sales",
+    href: "/contact",
     priceMonthly: "Enterprise",
     text: "Contact us",
     description:
@@ -191,27 +190,22 @@ const sections: {
 
 export default function Example() {
   return (
-    <div className="bg-white">
+    <div className="bg-[#f8feff]">
       <NavBarV2 />
-      <div className="bg-white mx-auto px-6 lg:px-8">
-        <GridBackground>
-          <div className="flex flex-col max-w-6xl mx-auto p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
-            <h1 className="text-4xl sm:text-6xl font-semibold leading-tight sm:leading-snug max-w-4xl">
-              Pricing that&apos;s{" "}
-              <span className="md:border-2 border-sky-600 border-dashed text-sky-600 md:py-2 md:px-4">
-                simple
-              </span>
-            </h1>
-            <p className="mt-6 w-full text-xl leading-8 text-gray-700 max-w-2xl">
-              Free to get started, and easy to scale when you need to - all with
-              a <span className="font-semibold">one-line</span> code
-              integration. Are you a startup?{" "}
-              <Link href="#startup" className="text-blue-500 underline">
-                Click here
-              </Link>
-            </p>
-          </div>
-        </GridBackground>
+      <div className="bg-[#f8feff] mx-auto px-6 lg:px-8">
+        <div className="flex flex-col max-w-6xl mx-auto p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
+          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight leading-tight sm:leading-snug max-w-4xl">
+            Pricing that&apos;s <span className=" text-sky-600">simple</span>
+          </h1>
+          <p className="mt-6 w-full text-xl leading-8 text-gray-700 max-w-2xl">
+            Free to get started, and easy to scale when you need to - all with a{" "}
+            <span className="font-semibold">one-line</span> code integration.
+            Are you a startup?{" "}
+            <Link href="#startup" className="text-blue-500 underline">
+              Click here
+            </Link>
+          </p>
+        </div>
 
         {/* xs to lg */}
         <div className="mx-auto mt-4 max-w-md space-y-8 sm:mt-8 lg:hidden">

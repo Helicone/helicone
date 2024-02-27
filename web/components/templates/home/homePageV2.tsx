@@ -305,7 +305,7 @@ export default function Example() {
                   Get Started <ChevronRightIcon className="w-5 h-5 inline" />
                 </Link>
                 <Link
-                  href="/sales"
+                  href="/contact"
                   className="font-semibold text-sm flex items-center"
                 >
                   Contact Sales <ChevronRightIcon className="w-5 h-5 inline" />
