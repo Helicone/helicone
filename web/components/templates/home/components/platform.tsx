@@ -61,7 +61,7 @@ export default function Platform() {
       <div className="relative overflow-hidden pt-8">
         <div className="mx-auto max-w-8xl px-6 lg:px-8">
           <img
-            src="/assets/home/bento/dashboard.png"
+            src="/assets/home/bento/dashboard.webp"
             alt="App screenshot"
             className="mb-[-12%] rounded-xl shadow-2xl ring-1 ring-gray-900/10"
             width={2432}
