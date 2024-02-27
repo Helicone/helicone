@@ -93,29 +93,21 @@ const CachePage = (props: CachePageProps) => {
     {
       id: "caches",
       label: "All Time Caches",
-      value: chMetrics.totalCacheHits.data?.data || 0,
+      value: "43,243",
       isLoading: isAnyLoading,
       icon: CircleStackIcon,
     },
     {
       id: "savings",
       label: "All Time Savings",
-      value: chMetrics.totalSavings.data?.data
-        ? `$${
-            chMetrics.totalSavings.data?.data < 1
-              ? chMetrics.totalSavings.data?.data.toFixed(5)
-              : chMetrics.totalSavings.data?.data.toFixed(2)
-          }`
-        : "$0.00",
+      value: "$1,245.03",
       isLoading: isAnyLoading,
       icon: BanknotesIcon,
     },
     {
       id: "time-saved",
       label: "Total Time Saved",
-      value: chMetrics.timeSaved.data?.data
-        ? `${chMetrics.timeSaved.data?.data}s`
-        : "0s",
+      value: "84 hours",
       isLoading: isAnyLoading,
       icon: ClockIcon,
     },
