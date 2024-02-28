@@ -2,22 +2,12 @@ import {
   ArrowsPointingOutIcon,
   BookOpenIcon,
   ChevronLeftIcon,
-  CircleStackIcon,
   DocumentTextIcon,
   PaintBrushIcon,
   SparklesIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import {
-  Select,
-  SelectItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeaderCell,
-  TableRow,
-} from "@tremor/react";
+import { Select, SelectItem } from "@tremor/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePrompts } from "../../../../services/hooks/prompts/prompts";
@@ -25,8 +15,6 @@ import { usePrompt } from "../../../../services/hooks/prompts/singlePrompt";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import { getUSDateFromString } from "../../../shared/utils/utils";
 import ThemedModal from "../../../shared/themed/themedModal";
-import getNormalizedRequest from "../../requestsV2/builder/requestBuilder";
-import { helper } from "../../requestsV2/builder/chatGPTBuilder";
 import { Chat } from "../../requests/chat";
 import { clsx } from "../../../shared/clsx";
 import { Tooltip } from "@mui/material";
