@@ -193,14 +193,20 @@ const HomePageV3 = (props: HomePageV3Props) => {
           Generative AI
         </p>
         <div className="flex items-center gap-4 pt-4">
-          <button className="bg-sky-100 text-black border-2 border-sky-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1">
+          <Link
+            href="/signup"
+            className="bg-sky-100 text-black border-2 border-sky-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1"
+          >
             Start Building
             <ChevronRightIcon className="w-5 h-5 inline text-sky-700" />
-          </button>
-          <button className="bg-white text-black border-2 border-gray-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1">
+          </Link>
+          <Link
+            href="/contact"
+            className="bg-white text-black border-2 border-gray-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1"
+          >
             Get a demo
             <ChevronRightIcon className="w-5 h-5 inline text-black" />
-          </button>
+          </Link>
         </div>
       </header>
 
