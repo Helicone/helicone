@@ -9,7 +9,9 @@ const UserId: NextPageWithLayout<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = (props) => {
   const { userId, defaultIndex } = props;
-  return <UserIdPage userId={userId} defaultIndex={defaultIndex} />;
+  // need to decode the userId
+  const decodedUserId = decodeURIComponent(userId);
+  return <UserIdPage userId={decodedUserId} defaultIndex={defaultIndex} />;
 };
 
 UserId.getLayout = function getLayout(page: ReactElement) {
