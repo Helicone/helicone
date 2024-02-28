@@ -158,6 +158,25 @@ export interface ResponseCopyV3 extends ResponseCopyV2 {
   // threat: Nullable<boolean>;
 }
 
+export interface RequestResponseLog {
+  response_id: Nullable<string>;
+  response_created_at: Nullable<string>;
+  latency: Nullable<number>;
+  status: Nullable<number>;
+  completion_tokens: Nullable<number>;
+  prompt_tokens: Nullable<number>;
+  model: Nullable<string>;
+  request_id: string;
+  request_created_at: string;
+  auth_hash: string;
+  user_id: Nullable<string>;
+  organization_id: string;
+  node_id: Nullable<string>;
+  job_id: Nullable<string>;
+  proxy_key_id: Nullable<string>;
+  threat: Nullable<boolean>;
+}
+
 interface PropertiesCopyV1 {
   id: number;
   created_at: Nullable<string>;
@@ -213,6 +232,7 @@ export interface ClickhouseDB {
     properties_copy_v2: PropertiesCopyV2;
     properties_v3: PropertiesV3;
     response_copy_v3: ResponseCopyV3;
+    request_response_log: RequestResponseLog;
     property_with_response_v1: PropertyWithResponseV1;
     cache_hits: CacheHits;
   };

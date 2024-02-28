@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       alert: {
@@ -62,7 +62,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       alert_history: {
@@ -122,7 +122,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       cache_hits: {
@@ -155,7 +155,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "request_rbac"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       contact_submissions: {
@@ -348,7 +348,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       feedback: {
@@ -398,7 +398,7 @@ export interface Database {
             isOneToOne: true
             referencedRelation: "response_rbac"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       finetune_dataset: {
@@ -433,7 +433,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       finetune_dataset_data: {
@@ -483,7 +483,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "request_rbac"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       finetune_job: {
@@ -542,7 +542,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "provider_keys"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       helicone_api_keys: {
@@ -587,7 +587,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       helicone_proxy_key_limits: {
@@ -625,7 +625,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "helicone_proxy_keys"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       helicone_proxy_keys: {
@@ -677,7 +677,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "provider_keys"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       job: {
@@ -721,7 +721,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       job_node: {
@@ -784,7 +784,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       job_node_relationships: {
@@ -824,7 +824,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "job_node"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       job_node_request: {
@@ -874,7 +874,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "request_rbac"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       layout: {
@@ -909,7 +909,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       org_rate_limit_tracker: {
@@ -938,7 +938,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       organization: {
@@ -1039,7 +1039,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       organization_member: {
@@ -1075,7 +1075,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       prompt: {
@@ -1149,7 +1149,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       properties: {
@@ -1201,7 +1201,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       provider_keys: {
@@ -1269,7 +1269,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       referrals: {
@@ -1308,7 +1308,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       request: {
@@ -1407,7 +1407,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       request_job_task: {
@@ -1454,7 +1454,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "job_node"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       response: {
@@ -1570,39 +1570,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
-        ]
-      }
-      user_feedback: {
-        Row: {
-          created_at: string
-          feedback: string
-          id: number
-          organization_id: string
-          tag: string
-        }
-        Insert: {
-          created_at?: string
-          feedback: string
-          id?: number
-          organization_id: string
-          tag: string
-        }
-        Update: {
-          created_at?: string
-          feedback?: string
-          id?: number
-          organization_id?: string
-          tag?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_feedback_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          }
+          },
         ]
       }
       user_settings: {
@@ -1634,7 +1602,7 @@ export interface Database {
             isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       webhook_subscriptions: {
@@ -1666,7 +1634,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "webhooks"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       webhooks: {
@@ -1701,7 +1669,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
     }
@@ -1774,7 +1742,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       materialized_response_and_request: {
@@ -1804,7 +1772,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       metrics_rbac: {
@@ -1878,7 +1846,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       response_rbac: {
@@ -2093,7 +2061,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "buckets"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
     }
@@ -2172,7 +2140,7 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
@@ -2181,14 +2149,14 @@ export type Tables<
     ? R
     : never
   : PublicTableNameOrOptions extends keyof (Database["public"]["Tables"] &
-      Database["public"]["Views"])
-  ? (Database["public"]["Tables"] &
-      Database["public"]["Views"])[PublicTableNameOrOptions] extends {
-      Row: infer R
-    }
-    ? R
+        Database["public"]["Views"])
+    ? (Database["public"]["Tables"] &
+        Database["public"]["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
     : never
-  : never
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
@@ -2196,7 +2164,7 @@ export type TablesInsert<
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
@@ -2204,12 +2172,12 @@ export type TablesInsert<
     ? I
     : never
   : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-  ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-      Insert: infer I
-    }
-    ? I
+    ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
     : never
-  : never
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
@@ -2217,7 +2185,7 @@ export type TablesUpdate<
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
@@ -2225,12 +2193,12 @@ export type TablesUpdate<
     ? U
     : never
   : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-  ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-      Update: infer U
-    }
-    ? U
+    ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
     : never
-  : never
 
 export type Enums<
   PublicEnumNameOrOptions extends
@@ -2238,10 +2206,10 @@ export type Enums<
     | { schema: keyof Database },
   EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never
+    : never = never,
 > = PublicEnumNameOrOptions extends { schema: keyof Database }
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
-  ? Database["public"]["Enums"][PublicEnumNameOrOptions]
-  : never
+    ? Database["public"]["Enums"][PublicEnumNameOrOptions]
+    : never
 
