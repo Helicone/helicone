@@ -198,11 +198,11 @@ const pricingBands: {
 }[] = [
   {
     lower: 0,
-    upper: 1_000_000,
+    upper: 500_000,
     rate: 0,
   },
   {
-    lower: 1_000_001,
+    lower: 500_001,
     upper: 2_000_000,
     rate: 0.000248 * MULTIPLIER,
   },
