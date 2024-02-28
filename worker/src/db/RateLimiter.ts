@@ -72,7 +72,7 @@ export class RateLimiter {
         }
       );
     } catch (error: any) {
-      return err(error.message);
+      return err(JSON.stringify(error));
     }
   }
 }
