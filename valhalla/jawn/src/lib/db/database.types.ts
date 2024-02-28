@@ -266,6 +266,7 @@ export interface Database {
           dataset: string
           id: string
           name: string
+          organization_id: string
           origin_prompt: string
           status: string
           test_prompt: string
@@ -275,6 +276,7 @@ export interface Database {
           dataset: string
           id?: string
           name: string
+          organization_id: string
           origin_prompt: string
           status?: string
           test_prompt: string
@@ -284,6 +286,7 @@ export interface Database {
           dataset?: string
           id?: string
           name?: string
+          organization_id?: string
           origin_prompt?: string
           status?: string
           test_prompt?: string
@@ -294,6 +297,13 @@ export interface Database {
             columns: ["dataset"]
             isOneToOne: false
             referencedRelation: "experiment_dataset"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
             referencedColumns: ["id"]
           },
           {
