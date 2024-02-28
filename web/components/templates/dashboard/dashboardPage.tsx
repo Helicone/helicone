@@ -2,6 +2,7 @@ import {
   ArrowPathIcon,
   ChartBarIcon,
   HomeIcon,
+  PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
 import { User } from "@supabase/auth-helpers-nextjs";
 import { useQuery } from "@tanstack/react-query";
@@ -954,16 +955,17 @@ const DashboardPage = (props: DashboardPageProps) => {
               </div>
 
               <div key="suggest-more-graphs">
-                <div className="bg-white w-full h-full p-2 border-2 shadow-sm rounded-lg flex flex-col items-center justify-center">
+                <button className="space-y-2 bg-white dark:bg-black border border-gray-900 dark:border-white border-dashed w-full h-full p-2 text-black dark:text-white shadow-sm rounded-lg flex flex-col items-center justify-center">
+                  <PresentationChartLineIcon className="h-12 w-12 text-black dark:text-white" />
                   <button
-                    className="p-5"
+                    className="p-4 text-semibold text-lg"
                     onClick={() => {
                       setOpenSuggestGraph(true);
                     }}
                   >
                     Request a new graph
                   </button>
-                </div>
+                </button>
               </div>
 
               <div key="tokens-per-min-over-time">
