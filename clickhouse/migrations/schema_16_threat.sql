@@ -1,3 +1,3 @@
 ALTER TABLE response_copy_v3
-ADD COLUMN threat Nullable(Bool)
+ADD COLUMN IF NOT EXISTS threat Nullable(Bool)
 AFTER organization_id
