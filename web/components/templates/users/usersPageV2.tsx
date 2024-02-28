@@ -90,7 +90,8 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           }}
           exportData={users}
           onRowSelect={(row) => {
-            router.push("/users/" + row.user_id);
+            // need to url encode the user_id
+            router.push(`/users/${encodeURIComponent(row.user_id)}`);
           }}
         />
         <TableFooter
