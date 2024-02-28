@@ -30,7 +30,9 @@ export type Message = {
 };
 
 export const SingleChat = (props: {
+  editable: boolean;
   message: Message;
+  setMessage: (message: Message) => void;
   index: number;
   isLast: boolean;
   expandedProps: {
@@ -44,6 +46,8 @@ export const SingleChat = (props: {
     index,
     isLast,
     expandedProps: { expanded, setExpanded },
+    editable,
+    setMessage,
   } = props;
 
   const [showButton, setShowButton] = useState(true);
@@ -149,6 +153,7 @@ export const SingleChat = (props: {
             // remove the leading " and trailing " from the text
             text={textMessage?.text}
             selectedProperties={props.selectedProperties}
+            editable={editable}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <div className="flex flex-wrap items-center pt-4">
@@ -224,7 +229,7 @@ export const SingleChat = (props: {
       <div
         className={clsx(
           getBgColor(),
-          "items-start p-4 text-left flex flex-row space-x-4 text-black dark:text-white",
+          "items-start p-4 text-left flex flex-row space-x-4 text-black dark:text-white ",
           isSystem && "font-semibold",
           isLast && "rounded-b-md"
         )}
@@ -240,7 +245,7 @@ export const SingleChat = (props: {
             <p>{message.role}</p>
           </div>
         </div>
-        <div className="relative whitespace-pre-wrap items-center h-full">
+        <div className="relative whitespace-pre-wrap items-center h-full w-full">
           {isFunction ? (
             <div className="flex flex-col space-y-2">
               <code className="text-xs whitespace-pre-wrap font-semibold">
@@ -268,6 +273,7 @@ export const SingleChat = (props: {
               >
                 {/* render the string or stringify the array/object */}
                 <RenderWithPrettyInputKeys
+                  editable={editable}
                   text={
                     isJSON(formattedMessageContent)
                       ? JSON.stringify(
@@ -307,6 +313,7 @@ interface ChatProps {
   status: number;
   model: string;
   selectedProperties?: Record<string, string>;
+  editable?: boolean;
 }
 
 export const Chat = (props: ChatProps) => {
@@ -317,6 +324,7 @@ export const Chat = (props: ChatProps) => {
     llmSchema,
     model,
     selectedProperties,
+    editable,
   } = props;
 
   const [open, setOpen] = useState(false);
@@ -347,7 +355,7 @@ export const Chat = (props: ChatProps) => {
         {
           length: [...requestMessages, responseMessage].filter(Boolean).length,
         },
-        (_, i) => [i, false]
+        (_, i) => [i, editable ? true : false]
       )
     )
   );
@@ -381,6 +389,7 @@ export const Chat = (props: ChatProps) => {
           {firstTwo.map((message, index) => {
             return (
               <SingleChat
+                editable={editable === true}
                 message={message}
                 index={index}
                 isLast={index === messages.length - 1}
@@ -417,6 +426,7 @@ export const Chat = (props: ChatProps) => {
           {lastTwo.map((message, index) => {
             return (
               <SingleChat
+                editable={editable === true}
                 message={message}
                 index={index}
                 isLast={index === messages.length - 1}
@@ -440,6 +450,7 @@ export const Chat = (props: ChatProps) => {
       return messages.map((message, index) => {
         return (
           <SingleChat
+            editable={editable === true}
             message={message}
             index={index}
             isLast={index === messages.length - 1}

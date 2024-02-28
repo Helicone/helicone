@@ -9,7 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Select, SelectItem } from "@tremor/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { LegacyRef, useEffect, useRef, useState } from "react";
 import { usePrompts } from "../../../../services/hooks/prompts/prompts";
 import { usePrompt } from "../../../../services/hooks/prompts/singlePrompt";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
@@ -92,11 +92,50 @@ const PrettyInput = ({
   );
 };
 
-export const RenderWithPrettyInputKeys = (props: {
+const AutoResizingTextarea = ({
+  text,
+  setText,
+}: {
   text: string;
+  setText: (text: string) => void;
+}) => {
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    const adjustHeight = () => {
+      if (textareaRef && textareaRef.current) {
+        const textarea = textareaRef.current as HTMLTextAreaElement;
+        textarea.style.height = "inherit"; // Reset height to recalculate
+        const computed = window.getComputedStyle(textareaRef.current);
+        // Calculate the height
+        const height =
+          textarea.scrollHeight +
+          parseInt(computed.borderTopWidth, 10) +
+          parseInt(computed.borderBottomWidth, 10);
+        textarea.style.height = `${height}px`;
+      }
+    };
+    adjustHeight();
+  }, [text]); // This effect runs when 'text' changes
+
+  return (
+    <textarea
+      ref={textareaRef}
+      className="text-sm leading-8 resize-none w-full border rounded-lg p-4"
+      value={text}
+      onChange={(e) => setText(e.target.value)}
+      style={{ overflow: "hidden" }}
+    />
+  );
+};
+
+export const RenderWithPrettyInputKeys = (props: {
+  editable: boolean;
+  text: string;
+  setText: (text: string) => void;
   selectedProperties: Record<string, string> | undefined;
 }) => {
-  const { text, selectedProperties } = props;
+  const { text, selectedProperties, editable, setText } = props;
 
   // Function to replace matched patterns with JSX components
   const replaceInputKeysWithComponents = (inputText: string) => {
@@ -139,7 +178,11 @@ export const RenderWithPrettyInputKeys = (props: {
     return parts;
   };
 
-  return (
+  return editable === true ? (
+    <div className="w-full bg-blue-400">
+      <AutoResizingTextarea text={text} setText={setText} />
+    </div>
+  ) : (
     <div className="text-sm leading-8">
       {replaceInputKeysWithComponents(text)}
     </div>
@@ -159,6 +202,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   });
 
   const [inputOpen, setInputOpen] = useState(false);
+  const [experimentOpen, setExperimentOpen] = useState(false);
 
   // the selected request to view in the tempalte
   const [selectedInput, setSelectedInput] = useState<{
@@ -203,7 +247,10 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   className="w-full flex items-center justify-between"
                 >
                   <div className="flex items-center space-x-1">
-                    <button className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2">
+                    <button
+                      className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+                      onClick={() => setExperimentOpen(!experimentOpen)}
+                    >
                       <BeakerIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
                         Run Experiment
@@ -343,6 +390,31 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           </div>
         </div>
       )}
+      <ThemedModal open={experimentOpen} setOpen={setExperimentOpen}>
+        <div className="max-w-3xl">
+          <Chat
+            editable={true}
+            requestBody={selectedPrompt.heliconeTemplate}
+            responseBody={{
+              role: "assistant",
+              choices: [
+                {
+                  message: {
+                    content:
+                      selectedInput?.response ||
+                      `<helicone-prompt-input key="output" />`,
+                    role: "assistant",
+                  },
+                },
+              ],
+            }}
+            status={200}
+            requestId={""}
+            model={selectedPrompt.heliconeTemplate?.model}
+            selectedProperties={selectedInput?.properties}
+          />
+        </div>
+      </ThemedModal>
       <ThemedDrawer open={inputOpen} setOpen={setInputOpen}>
         <div className="flex flex-col space-y-4">
           <div className="flex items-center space-x-2">
