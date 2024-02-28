@@ -92,4 +92,11 @@ alter table "public"."experiment_dataset" add constraint "experiment_dataset_org
 
 alter table "public"."experiment_dataset" validate constraint "experiment_dataset_organization_id_fkey";
 
+alter table "public"."experiments" add column "organization_id" uuid not null;
+
+alter table "public"."experiments" add constraint "experiments_organization_id_fkey" FOREIGN KEY (organization_id) REFERENCES organization(id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
+
+alter table "public"."experiments" validate constraint "experiments_organization_id_fkey";
+
+
 
