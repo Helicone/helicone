@@ -498,15 +498,19 @@ export class DBLoggable {
 
     const rateLimit = await rateLimiter.data.checkRateLimit(tier.data);
 
-    if (rateLimit.shouldLogInDB) {
+    if (rateLimit.error) {
+      console.error(`Error checking rate limit: ${rateLimit.error}`);
+    }
+
+    if (!rateLimit.error && rateLimit.data?.shouldLogInDB) {
       console.log("LOGGING RATE LIMIT IN DB");
       await db.dbWrapper.recordRateLimitHit(
         authParams.organizationId,
-        rateLimit.rlIncrementDB
+        rateLimit.data.rlIncrementDB
       );
     }
 
-    if (rateLimit.isRateLimited) {
+    if (!rateLimit.error && rateLimit.data?.isRateLimited) {
       console.log("RATE LIMITED");
       return err("Rate limited");
     }
