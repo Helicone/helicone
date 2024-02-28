@@ -20,6 +20,7 @@ import { clsx } from "../../../shared/clsx";
 import { Tooltip } from "@mui/material";
 import { BeakerIcon } from "@heroicons/react/24/solid";
 import { ThemedPill } from "../../../shared/themed/themedPill";
+import ExperimentForm from "./experimentForm";
 
 interface PromptIdPageProps {
   id: string;
@@ -390,31 +391,16 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           </div>
         </div>
       )}
-      <ThemedModal open={experimentOpen} setOpen={setExperimentOpen}>
-        <div className="max-w-3xl">
-          <Chat
-            editable={true}
-            requestBody={selectedPrompt.heliconeTemplate}
-            responseBody={{
-              role: "assistant",
-              choices: [
-                {
-                  message: {
-                    content:
-                      selectedInput?.response ||
-                      `<helicone-prompt-input key="output" />`,
-                    role: "assistant",
-                  },
-                },
-              ],
-            }}
-            status={200}
-            requestId={""}
-            model={selectedPrompt.heliconeTemplate?.model}
-            selectedProperties={selectedInput?.properties}
-          />
-        </div>
-      </ThemedModal>
+      <ThemedDrawer
+        open={experimentOpen}
+        setOpen={setExperimentOpen}
+        defaultExpanded={true}
+      >
+        <ExperimentForm
+          requestId={selectedPrompt.properties?.[0]?.id || ""}
+          currentPrompt={currentPrompt!}
+        />
+      </ThemedDrawer>
       <ThemedDrawer open={inputOpen} setOpen={setInputOpen}>
         <div className="flex flex-col space-y-4">
           <div className="flex items-center space-x-2">
