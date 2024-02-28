@@ -195,16 +195,27 @@ export interface Database {
         Row: {
           created_at: string
           id: string
+          organization_id: string
         }
         Insert: {
           created_at?: string
           id?: string
+          organization_id: string
         }
         Update: {
           created_at?: string
           id?: string
+          organization_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "experiment_dataset_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       experiment_dataset_values: {
         Row: {
