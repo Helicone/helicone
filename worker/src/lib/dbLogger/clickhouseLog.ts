@@ -1,5 +1,4 @@
 import { Database } from "../../../supabase/database.types";
-import { Result } from "../../results";
 import { ClickhouseClientWrapper, ClickhouseDB } from "../db/clickhouse";
 
 export function formatTimeString(timeString: string): string {
