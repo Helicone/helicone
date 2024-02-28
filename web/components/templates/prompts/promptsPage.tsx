@@ -1,14 +1,18 @@
 import {
   BookOpenIcon,
   DocumentTextIcon,
+  EyeIcon,
   MagnifyingGlassIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { TextInput } from "@tremor/react";
 import { usePrompts } from "../../../services/hooks/prompts/prompts";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { clsx } from "../../shared/clsx";
 import Link from "next/link";
 import { useOrg } from "../../layout/organizationContext";
+import { EllipsisVerticalIcon } from "@heroicons/react/24/solid";
+import { Menu, Transition } from "@headlessui/react";
 
 interface PromptsPageProps {}
 
@@ -115,18 +119,90 @@ const PromptsPage = (props: PromptsPageProps) => {
                   className={clsx(
                     currentPrompt?.id === prompt.id
                       ? "bg-sky-200 dark:bg-sky-800"
-                      : "bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-950 rounded-lg",
+                      : "bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-950 rounded-md p-2",
                     i === 0 ? "rounded-t-md" : "",
                     i === prompts.data?.prompts.length - 1
                       ? "rounded-b-md"
                       : "",
-                    "w-full flex flex-col space-x-2 p-2"
+                    "w-full flex flex-col space-x-2"
                   )}
                 >
                   {/* <TagIcon className="h-4 w-4 text-black dark:text-white" /> */}
-                  <p className="text-md font-semibold text-black dark:text-white p-2">
-                    {prompt.id}
-                  </p>
+                  <div className="flex items-start w-full justify-between relative">
+                    <p className="text-md font-semibold text-black dark:text-white p-2">
+                      {prompt.id}
+                    </p>
+                    <Menu as="div" className="relative text-left pl-1">
+                      <div className="flex items-center">
+                        <Menu.Button
+                          className="absolute top-1 right-0"
+                          onClick={(e: any) => {
+                            e.stopPropagation();
+                          }}
+                        >
+                          <EllipsisVerticalIcon className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+                        </Menu.Button>
+                      </div>
+                      <Transition
+                        as={Fragment}
+                        enter="transition ease-out duration-100"
+                        enterFrom="transform opacity-0 scale-95"
+                        enterTo="transform opacity-100 scale-100"
+                        leave="transition ease-in duration-75"
+                        leaveFrom="transform opacity-100 scale-100"
+                        leaveTo="transform opacity-0 scale-95"
+                      >
+                        <Menu.Items className="z-50 absolute right-0 mt-8 w-24 origin-top-right divide-y divide-gray-100 dark:divide-gray-900 rounded-md bg-white dark:bg-black shadow-lg ring-1 ring-black dark:ring-gray-500 ring-opacity-5 focus:outline-none">
+                          <div className="px-1 py-1">
+                            <Menu.Item>
+                              {({ active }) => (
+                                <button
+                                  className={`${
+                                    active
+                                      ? "bg-sky-500 text-white dark:text-black"
+                                      : "text-gray-900 dark:text-gray-100"
+                                  } group flex w-full items-center gap-2 rounded-md px-2 py-2 text-xs`}
+                                  onClick={() => {
+                                    setCurrentPrompt({
+                                      id: prompt.id,
+                                      latest_version: prompt.latest_version,
+                                    });
+                                  }}
+                                >
+                                  <EyeIcon
+                                    className="h-4 w-4"
+                                    aria-hidden="true"
+                                  />
+                                  View
+                                </button>
+                              )}
+                            </Menu.Item>
+                            <Menu.Item>
+                              {({ active }) => (
+                                <button
+                                  className={`${
+                                    active
+                                      ? "bg-sky-500 text-white dark:text-black"
+                                      : "text-gray-900 dark:text-gray-100"
+                                  } group flex w-full items-center gap-2 rounded-md px-2 py-2 text-xs`}
+                                  onClick={() => {
+                                    // TODO: implement
+                                  }}
+                                >
+                                  <TrashIcon
+                                    className="h-4 w-4"
+                                    aria-hidden="true"
+                                  />
+                                  Delete
+                                </button>
+                              )}
+                            </Menu.Item>
+                          </div>
+                        </Menu.Items>
+                      </Transition>
+                    </Menu>
+                  </div>
+
                   <div className="flex flex-row justify-between w-full pr-2">
                     <div className="text-gray-500 text-xs">
                       {new Date(prompt.created_at).toLocaleString()}
