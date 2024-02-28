@@ -1,4 +1,5 @@
 import {
+  ArrowsPointingOutIcon,
   BookOpenIcon,
   ChevronLeftIcon,
   CircleStackIcon,
@@ -27,6 +28,10 @@ import ThemedModal from "../../../shared/themed/themedModal";
 import getNormalizedRequest from "../../requestsV2/builder/requestBuilder";
 import { helper } from "../../requestsV2/builder/chatGPTBuilder";
 import { Chat } from "../../requests/chat";
+import { clsx } from "../../../shared/clsx";
+import { Tooltip } from "@mui/material";
+import { BeakerIcon } from "@heroicons/react/24/solid";
+import { ThemedPill } from "../../../shared/themed/themedPill";
 
 interface PromptIdPageProps {
   id: string;
@@ -39,24 +44,48 @@ const PrettyInput = ({
   keyName: string;
   selectedProperties: Record<string, string> | undefined;
 }) => {
-  const renderText = selectedProperties?.[keyName] || keyName;
+  const getRenderText = () => {
+    if (selectedProperties) {
+      return selectedProperties[keyName] || "{{undefined}}";
+    } else {
+      return keyName;
+    }
+  };
+  const renderText = getRenderText();
   const [open, setOpen] = useState(false);
   const TEXT_LIMIT = 120;
+
   return (
     <>
-      {renderText.length > TEXT_LIMIT ? (
-        <button
-          onClick={() => setOpen(!open)}
-          className="text-sm text-gray-900 bg-yellow-100 border border-yellow-300 rounded-lg py-1 px-3"
-          title={renderText}
-        >
-          {renderText.slice(0, TEXT_LIMIT)}...
-        </button>
-      ) : (
-        <span className="inline-block border border-yellow-300 rounded-lg py-1 px-3 text-sm text-gray-900 bg-yellow-100">
-          {renderText}
-        </span>
-      )}
+      <Tooltip title={keyName} placement="top">
+        {renderText.length > TEXT_LIMIT ? (
+          <button
+            onClick={() => setOpen(!open)}
+            className={clsx(
+              selectedProperties
+                ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
+                : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
+              "relative text-sm text-gray-900 dark:text-gray-100 border rounded-lg py-1 px-3 text-left"
+            )}
+            title={renderText}
+          >
+            <ArrowsPointingOutIcon className="h-4 w-4 text-sky-500 absolute right-2 top-1.5 transform" />
+            <p className="pr-8">{renderText.slice(0, TEXT_LIMIT)}...</p>
+          </button>
+        ) : (
+          <span
+            className={clsx(
+              selectedProperties
+                ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
+                : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
+              "inline-block border text-gray-900 dark:text-gray-100 rounded-lg py-1 px-3 text-sm"
+            )}
+          >
+            {renderText}
+          </span>
+        )}
+      </Tooltip>
+
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="w-[66vw] h-full flex flex-col space-y-4">
           <div className="flex items-center w-full justify-center">
@@ -66,7 +95,7 @@ const PrettyInput = ({
             </button>
           </div>
 
-          <div className="bg-white border-gray-300 p-4 border rounded-lg flex flex-col space-y-4">
+          <div className="bg-white border-gray-300 dark:bg-black dark:border-gray-700 p-4 border rounded-lg flex flex-col space-y-4">
             {selectedProperties?.[keyName]}
           </div>
         </div>
@@ -75,7 +104,7 @@ const PrettyInput = ({
   );
 };
 
-const RenderWithPrettyInputKeys = (props: {
+export const RenderWithPrettyInputKeys = (props: {
   text: string;
   selectedProperties: Record<string, string> | undefined;
 }) => {
@@ -124,7 +153,7 @@ const RenderWithPrettyInputKeys = (props: {
 
   return (
     <div className="text-sm leading-8">
-      {replaceInputKeysWithComponents(JSON.stringify(text))}
+      {replaceInputKeysWithComponents(text)}
     </div>
   );
 };
@@ -158,12 +187,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     }
   }, [currentPrompt]);
 
-  const generateX = (template: any) => {
-    console.log("t", template);
-
-    const request = helper(template);
-    console.log("request", request);
-  };
   return (
     <>
       <div className="flex flex-row items-center justify-between">
@@ -193,11 +216,12 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                 >
                   <div className="flex items-center space-x-1">
                     <button className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2">
-                      <CircleStackIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                      <BeakerIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-                        Run on Dataset
+                        Run Experiment
                       </p>
                     </button>
+
                     <button
                       onClick={() => setInputOpen(!inputOpen)}
                       className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
@@ -207,6 +231,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                         View Inputs
                       </p>
                     </button>
+
                     <button
                       onClick={() => {
                         const randomInput = Math.floor(
@@ -219,32 +244,24 @@ const PromptIdPage = (props: PromptIdPageProps) => {
 
                         setSelectedInput(randomProperty);
                       }}
-                      className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center"
+                      className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
                     >
                       <SparklesIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block pl-2 pr-1">
                         Random Input
                       </p>
-                      {selectedInput && (
-                        <div className="flex items-center">
-                          <span className="text-sm font-medium border-l border-gray-300 pl-1 text-sky-500">
-                            {selectedInput.id}
-                          </span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedInput(undefined);
-                            }}
-                            className="flex items-center hover:cursor-pointer text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
-                          >
-                            <XMarkIcon className="h-4 w-4 inline" />
-                          </button>
-                        </div>
-                      )}
                     </button>
+                    {selectedInput && (
+                      <ThemedPill
+                        label={selectedInput.id}
+                        onDelete={() => setSelectedInput(undefined)}
+                      />
+                    )}
                   </div>
                   <div className="flex items-center space-x-1">
-                    <label>Version:</label>
+                    <label className="text-black dark:text-white">
+                      Version:
+                    </label>
                     <Select
                       value={selectedVersion}
                       placeholder={selectedVersion}
@@ -280,52 +297,34 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-2">
-                    {selectedPrompt.isLoading ? (
-                      <h1>Loading...</h1>
-                    ) : (
-                      <div className="bg-white border-gray-300 p-4 border rounded-lg flex flex-col space-y-4">
-                        <i className="text-gray-500">input</i>
-                        {/* use request builder ??? */}
-                        {generateX(selectedPrompt.heliconeTemplate)}
-                        {selectedPrompt.heliconeTemplate?.messages.map(
-                          (m: any, i: number) => {
-                            return (
-                              <Chat
-                                requestBody={selectedPrompt.heliconeTemplate}
-                                responseBody={
-                                  selectedInput?.response
-                                    ? selectedInput.response
-                                    : "output"
-                                }
-                                status={200}
-                                requestId={""}
-                                model={selectedPrompt.heliconeTemplate.model}
-                              />
-                              // <div key={i}>
-                              //   <RenderWithPrettyInputKeys
-                              //     text={m.content}
-                              //     selectedProperties={selectedInput?.properties}
-                              //   />
-                              // </div>
-                            );
-                          }
-                        )}
-                      </div>
-                    )}
-
-                    <div className="bg-white border-gray-300 p-4 border rounded-lg flex flex-col space-y-4">
-                      <i className="text-gray-500">output</i>
-                      <div>
-                        <PrettyInput
-                          keyName="output"
-                          selectedProperties={{
-                            output: selectedInput?.response
-                              ? selectedInput.response
-                              : "output",
-                          }}
-                        />
-                      </div>
+                  <div className="flex space-x-4 w-full">
+                    <div className="flex flex-col space-y-8 w-full">
+                      {selectedPrompt.isLoading ? (
+                        <h1>Loading...</h1>
+                      ) : (
+                        <div className="w-full">
+                          <Chat
+                            requestBody={selectedPrompt.heliconeTemplate}
+                            responseBody={{
+                              role: "assistant",
+                              choices: [
+                                {
+                                  message: {
+                                    content:
+                                      selectedInput?.response ||
+                                      `<helicone-prompt-input key="output" />`,
+                                    role: "assistant",
+                                  },
+                                },
+                              ],
+                            }}
+                            status={200}
+                            requestId={""}
+                            model={selectedPrompt.heliconeTemplate.model}
+                            selectedProperties={selectedInput?.properties}
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -360,40 +359,66 @@ const PromptIdPage = (props: PromptIdPageProps) => {
         <div className="flex flex-col space-y-4">
           <div className="flex items-center space-x-2">
             <PaintBrushIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-            <h2 className="text-2xl font-semibold">Inputs</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+              Inputs
+            </h2>
           </div>
         </div>
-        <Table className="">
-          <TableHead className="border-b border-gray-300 dark:border-gray-700">
-            <TableRow>
-              <TableHeaderCell className="text-black dark:text-white w-[10px]">
-                Request Id
-              </TableHeaderCell>
-              <TableHeaderCell className="text-black dark:text-white">
-                Created At
-              </TableHeaderCell>
-              {selectedPrompt?.columnNames?.map((p, i) => (
-                <TableHeaderCell key={i} className="text-black dark:text-white">
-                  {p.charAt(0).toUpperCase() + p.slice(1)}
-                </TableHeaderCell>
-              ))}
-              <TableHeaderCell />
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {selectedPrompt?.properties?.map((row, i) => (
-              <TableRow key={i}>
-                <TableCell>
-                  <p className="w-[80px] truncate"> {row.id}</p>
-                </TableCell>
-                <TableCell>{getUSDateFromString(row.createdAt)}</TableCell>
-                {selectedPrompt?.columnNames?.map((col, i) => (
-                  <TableCell key={i}>{row.properties[col]}</TableCell>
+        <ul className="flex flex-col space-y-4 mt-8 w-full">
+          {selectedPrompt?.properties?.map((row, i) => (
+            <li
+              key={row.id}
+              className={clsx(
+                selectedInput?.id === row.id
+                  ? "bg-sky-100 border-sky-500 dark:bg-sky-950"
+                  : "bg-white border-gray-300 dark:bg-black dark:border-gray-700",
+                "w-full border p-4 rounded-lg"
+              )}
+            >
+              <button
+                className="flex flex-col w-full"
+                onClick={() => {
+                  if (selectedInput?.id === row.id) {
+                    setSelectedInput(undefined);
+                    return;
+                  }
+                  setSelectedInput(row);
+                }}
+              >
+                <div className="flex flex-col items-start w-full">
+                  <div className="flex items-center w-full justify-between">
+                    <p className="font-semibold text-black dark:text-white text-lg">
+                      {row.id}
+                    </p>
+                    <div className="border rounded-full border-gray-500 bg-white dark:bg-black h-6 w-6 flex items-center justify-center">
+                      {selectedInput?.id === row.id && (
+                        <div className="bg-sky-500 rounded-full h-4 w-4" />
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-gray-500 text-sm">
+                    {getUSDateFromString(row.createdAt)}
+                  </p>
+                </div>
+              </button>
+              <ul className="divide-y divide-gray-300 dark:divide-gray-700 flex flex-col mt-4 w-full">
+                {Object.entries(row.properties).map(([key, value]) => (
+                  <li
+                    key={key}
+                    className="flex items-center py-2 justify-between gap-8"
+                  >
+                    <p className="text-sm font-semibold text-black dark:text-white">
+                      {key}
+                    </p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 max-w-[22.5vw] truncate">
+                      {value}
+                    </p>
+                  </li>
                 ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+              </ul>
+            </li>
+          ))}
+        </ul>
       </ThemedDrawer>
     </>
   );
