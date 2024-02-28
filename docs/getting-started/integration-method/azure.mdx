@@ -4,6 +4,17 @@ title: "Azure OpenAI"
 
 You can use Helicone with your Azure-OpenAI deployment, and it requires no additional code changes beyond importing the OpenAI package with Helicone.
 
+<Note>
+<b>MODEL OVERRIDE</b>
+
+When using Azure, sometimes the model shows differently than what you expect. We have a series of logic to parse out the model, but the returned body of the model is inconsissent in most cases.
+
+<code>Helicone-Model-Override: [MODEL_NAME]</code>
+<br/>
+<br/>
+<a href="/helicone-headers/intro"> Click here to learn more about model override</a>
+</Note>
+
 <Tabs>
  <Tab title="Python">
  <Note>Ensure you include api-version in all of your requests</Note>
