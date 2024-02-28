@@ -105,6 +105,29 @@ export async function logInClickhouse(
         // threat: request.threat ?? null,
       },
     ]),
+    clickhouseDb.dbInsertClickhouse("request_response_log", [
+      {
+        auth_hash: request.auth_hash,
+        user_id: request.user_id,
+        request_id: request.id,
+        completion_tokens: response.completion_tokens ?? null,
+        latency: response.delay_ms ?? null,
+        model: model,
+        prompt_tokens: response.prompt_tokens ?? null,
+        request_created_at: formatTimeString(request.created_at),
+        response_created_at: response.created_at
+          ? formatTimeString(response.created_at)
+          : null,
+        response_id: response.id ?? null,
+        status: response.status ?? null,
+        organization_id:
+          request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
+        job_id: node.job,
+        node_id: node.id,
+        proxy_key_id: request.helicone_proxy_key_id ?? null,
+        threat: request.threat ?? null,
+      },
+    ]),
     clickhouseDb.dbInsertClickhouse(
       "properties_copy_v1",
       properties.map((p) => ({
@@ -150,38 +173,4 @@ export async function logInClickhouse(
       buildPropertyWithResponseInserts(request, response, properties)
     ),
   ]);
-}
-
-export async function addFeedbackToResponse(
-  clickhouseDb: ClickhouseClientWrapper,
-  feedback: Database["public"]["Tables"]["feedback"]["Insert"][]
-): Promise<Result<null, string>> {
-  const updateQueries: string[] = [];
-
-  for (const fb of feedback) {
-    const { response_id, created_at, id, rating } = fb;
-
-    const updateQuery = `
-      UPDATE feedback_created_at = '${formatTimeString(
-        created_at ?? new Date().toISOString()
-      )}',
-          feedback_id = '${id}',
-          rating = ${rating ? "1" : "0"}
-      WHERE response_id = '${response_id}'`;
-
-    updateQueries.push(updateQuery);
-  }
-
-  const batchUpdateQuery = `ALTER TABLE default.response_copy_v3 ${updateQueries.join(
-    ", "
-  )}`;
-
-  const updateResult = await clickhouseDb.dbUpdateClickhouse(batchUpdateQuery);
-
-  if (updateResult.error) {
-    console.error(`Error updating response_copy_v3: ${updateResult.error}`);
-    return { error: updateResult.error, data: null };
-  }
-
-  return { error: null, data: null };
 }
