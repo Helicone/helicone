@@ -59,7 +59,6 @@ is_migration_applied() {
         echo "There was a failure retrieving the migrations table rows."
         exit 1
     elif [[ ${result} -gt 0 ]]; then
-        echo "Migration $migration_name was applied previously."
         echo "1"
     else
         echo "0" # Migration not applied
@@ -108,6 +107,8 @@ run_migrations() {
                 echo "Failed to apply migration from $file"
                 exit 1
             fi
+        else
+            echo "Migration $file was applied previously."
         fi
     done
 
