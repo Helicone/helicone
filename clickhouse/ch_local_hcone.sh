@@ -38,9 +38,9 @@ create_migration_table() {
 
     clickhouse-client $ch_conn_str --query "$query"
     if [ $? -eq 0 ]; then
-        echo "Migration table created/verified successfully"
+        echo "Migration table created/verified successfully."
     else
-        echo "Failed to create/verify migration table"
+        echo "Failed to create/verify migration table."
         exit 1
     fi
 }
@@ -59,7 +59,8 @@ is_migration_applied() {
         echo "There was a failure retrieving the migrations table rows."
         exit 1
     elif [[ ${result} -gt 0 ]]; then
-        echo "1" # Migration was applied previously
+        echo "Migration $migration_name was applied previously."
+        echo "1"
     else
         echo "0" # Migration not applied
     fi
@@ -77,7 +78,7 @@ mark_migration_as_applied() {
     if [ $? -eq 0 ]; then
         echo "Migration $migration_name applied successfully."
     else
-        echo "Failed to mark $migration_name as applied"
+        echo "Failed to mark $migration_name as applied."
         exit 1
     fi
 }
