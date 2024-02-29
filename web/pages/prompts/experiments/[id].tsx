@@ -1,19 +1,21 @@
 import { User } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
 
-import AuthLayout from "../../components/layout/authLayout";
 import { ReactElement } from "react";
-import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
-import PromptsPage from "../../components/templates/prompts/promptsPage";
+import AuthLayout from "../../../components/layout/authLayout";
+import PromptIdPage from "../../../components/templates/prompts/id/promptIdPage";
+import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
+import ExperimentIdPage from "../../../components/templates/prompts/experiments/id/experimentIdPage";
 
 interface PlaygroundProps {
   user: User;
+  id: string;
 }
 
 const Prompts = (props: PlaygroundProps) => {
-  const { user } = props;
+  const { user, id } = props;
 
-  return <PromptsPage />;
+  return <ExperimentIdPage id={id} />;
 };
 
 export default Prompts;
@@ -38,10 +40,14 @@ export const getServerSideProps = async (
       },
     };
 
+  // get the id from the query params
+  const id = context.params?.id as string;
+
   return {
     props: {
       initialSession: session,
       user: session.user,
+      id,
     },
   };
 };
