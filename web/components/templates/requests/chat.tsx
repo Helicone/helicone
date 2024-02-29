@@ -30,9 +30,8 @@ export type Message = {
 };
 
 export const SingleChat = (props: {
-  editable: boolean;
   message: Message;
-  setMessage: (message: Message) => void;
+
   index: number;
   isLast: boolean;
   expandedProps: {
@@ -46,8 +45,6 @@ export const SingleChat = (props: {
     index,
     isLast,
     expandedProps: { expanded, setExpanded },
-    editable,
-    setMessage,
   } = props;
 
   const [showButton, setShowButton] = useState(true);
@@ -153,7 +150,6 @@ export const SingleChat = (props: {
             // remove the leading " and trailing " from the text
             text={textMessage?.text}
             selectedProperties={props.selectedProperties}
-            editable={editable}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <div className="flex flex-wrap items-center pt-4">
@@ -176,7 +172,7 @@ export const SingleChat = (props: {
                     />
                   ) : (
                     <div className="h-[150px] w-[200px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 text-center items-center flex justify-center text-xs italic text-gray-500">
-                      Unsupported Image Type
+                      hello
                     </div>
                   )}
                 </div>
@@ -273,7 +269,6 @@ export const SingleChat = (props: {
               >
                 {/* render the string or stringify the array/object */}
                 <RenderWithPrettyInputKeys
-                  editable={editable}
                   text={
                     isJSON(formattedMessageContent)
                       ? JSON.stringify(
@@ -389,7 +384,6 @@ export const Chat = (props: ChatProps) => {
           {firstTwo.map((message, index) => {
             return (
               <SingleChat
-                editable={editable === true}
                 message={message}
                 index={index}
                 isLast={index === messages.length - 1}
@@ -426,7 +420,6 @@ export const Chat = (props: ChatProps) => {
           {lastTwo.map((message, index) => {
             return (
               <SingleChat
-                editable={editable === true}
                 message={message}
                 index={index}
                 isLast={index === messages.length - 1}
@@ -450,7 +443,6 @@ export const Chat = (props: ChatProps) => {
       return messages.map((message, index) => {
         return (
           <SingleChat
-            editable={editable === true}
             message={message}
             index={index}
             isLast={index === messages.length - 1}

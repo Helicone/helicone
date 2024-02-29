@@ -37,8 +37,35 @@ const ChatRow = (props: ChatRowProps) => {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <div className="flex flex-wrap items-center pt-4">
             {content.map((item, index) =>
-              item.type === "image_url" ? (
+              item.type === "image_url" || item.type === "image" ? (
                 <div key={index}>
+                  {/* 
+                   {arr.map((item, index) =>
+              item.type === "image_url" || item.type === "image" ? (
+                <div key={index}>
+                  {item.image_url.url ? (
+                    <img
+                      src={item.image_url.url}
+                      alt={""}
+                      width={600}
+                      height={600}
+                    />
+                  ) : item.image_url ? (
+                    <img
+                      src={item.image_url}
+                      alt={""}
+                      width={600}
+                      height={600}
+                    />
+                  ) : (
+                    <div className="h-[150px] w-[200px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 text-center items-center flex justify-center text-xs italic text-gray-500">
+                      Unsupported Image Type
+                    </div>
+                  )}
+                </div>
+              ) : null
+                  
+                  */}
                   {item.image_url.url ? (
                     <img
                       src={item.image_url.url}
@@ -49,6 +76,7 @@ const ChatRow = (props: ChatRowProps) => {
                   ) : (
                     <div className="h-[150px] w-[200px] bg-white border border-gray-300 text-center items-center flex justify-center text-xs italic text-gray-500">
                       Unsupported Image Type
+                      {JSON.stringify(item)}
                     </div>
                   )}
                 </div>

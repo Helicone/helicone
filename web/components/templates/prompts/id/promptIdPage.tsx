@@ -21,6 +21,7 @@ import { Tooltip } from "@mui/material";
 import { BeakerIcon } from "@heroicons/react/24/solid";
 import { ThemedPill } from "../../../shared/themed/themedPill";
 import ExperimentForm from "./experimentForm";
+import PromptPropertyCard from "./promptPropertyCard";
 
 interface PromptIdPageProps {
   id: string;
@@ -131,12 +132,11 @@ const AutoResizingTextarea = ({
 };
 
 export const RenderWithPrettyInputKeys = (props: {
-  editable: boolean;
   text: string;
-  setText: (text: string) => void;
+
   selectedProperties: Record<string, string> | undefined;
 }) => {
-  const { text, selectedProperties, editable, setText } = props;
+  const { text, selectedProperties } = props;
 
   // Function to replace matched patterns with JSX components
   const replaceInputKeysWithComponents = (inputText: string) => {
@@ -179,11 +179,7 @@ export const RenderWithPrettyInputKeys = (props: {
     return parts;
   };
 
-  return editable === true ? (
-    <div className="w-full bg-blue-400">
-      <AutoResizingTextarea text={text} setText={setText} />
-    </div>
-  ) : (
+  return (
     <div className="text-sm leading-8">
       {replaceInputKeysWithComponents(text)}
     </div>
@@ -399,6 +395,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
         <ExperimentForm
           requestId={selectedPrompt.properties?.[0]?.id || ""}
           currentPrompt={currentPrompt!}
+          promptProperties={selectedPrompt.properties || []}
+          close={() => setExperimentOpen(false)}
         />
       </ThemedDrawer>
       <ThemedDrawer open={inputOpen} setOpen={setInputOpen}>
@@ -412,57 +410,19 @@ const PromptIdPage = (props: PromptIdPageProps) => {
         </div>
         <ul className="flex flex-col space-y-4 mt-8 w-full">
           {selectedPrompt?.properties?.map((row, i) => (
-            <li
-              key={row.id}
-              className={clsx(
-                selectedInput?.id === row.id
-                  ? "bg-sky-100 border-sky-500 dark:bg-sky-950"
-                  : "bg-white border-gray-300 dark:bg-black dark:border-gray-700",
-                "w-full border p-4 rounded-lg"
-              )}
-            >
-              <button
-                className="flex flex-col w-full"
-                onClick={() => {
-                  if (selectedInput?.id === row.id) {
-                    setSelectedInput(undefined);
-                    return;
-                  }
-                  setSelectedInput(row);
-                }}
-              >
-                <div className="flex flex-col items-start w-full">
-                  <div className="flex items-center w-full justify-between">
-                    <p className="font-semibold text-black dark:text-white text-lg">
-                      {row.id}
-                    </p>
-                    <div className="border rounded-full border-gray-500 bg-white dark:bg-black h-6 w-6 flex items-center justify-center">
-                      {selectedInput?.id === row.id && (
-                        <div className="bg-sky-500 rounded-full h-4 w-4" />
-                      )}
-                    </div>
-                  </div>
-                  <p className="text-gray-500 text-sm">
-                    {getUSDateFromString(row.createdAt)}
-                  </p>
-                </div>
-              </button>
-              <ul className="divide-y divide-gray-300 dark:divide-gray-700 flex flex-col mt-4 w-full">
-                {Object.entries(row.properties).map(([key, value]) => (
-                  <li
-                    key={key}
-                    className="flex items-center py-2 justify-between gap-8"
-                  >
-                    <p className="text-sm font-semibold text-black dark:text-white">
-                      {key}
-                    </p>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 max-w-[22.5vw] truncate">
-                      {value}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </li>
+            <PromptPropertyCard
+              isSelected={selectedInput?.id === row.id}
+              onSelect={() => {
+                if (selectedInput?.id === row.id) {
+                  setSelectedInput(undefined);
+                  return;
+                }
+                setSelectedInput(row);
+              }}
+              requestId={row.id}
+              createdAt={row.createdAt}
+              properties={row.properties}
+            />
           ))}
         </ul>
       </ThemedDrawer>
