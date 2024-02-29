@@ -26,6 +26,7 @@ import UpgradeProModal from "../../shared/upgradeProModal";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import AuthHeader from "../../shared/authHeader";
+import { formatNumber } from "../users/initialColumns";
 
 interface CachePageProps {
   currentPage: number;
@@ -100,7 +101,7 @@ const CachePage = (props: CachePageProps) => {
     {
       id: "savings",
       label: "All Time Savings",
-      value: `$${chMetrics.totalSavings.data?.data ?? 0.0}}`,
+      value: `$${formatNumber(chMetrics.totalSavings.data?.data ?? 0)}`,
       isLoading: isAnyLoading,
       icon: BanknotesIcon,
     },
