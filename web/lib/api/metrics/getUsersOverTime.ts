@@ -8,7 +8,7 @@ export async function getUsersOverTime(
 ): Promise<Result<UsersOverTime[], string>> {
   const res = await getXOverTime<{
     users: number;
-  }>(data, "count(DISTINCT response_copy_v3.user_id) AS users");
+  }>(data, "count(DISTINCT request_response_log.user_id) AS users");
   return resultMap(res, (resData) =>
     resData.map((d) => ({
       time: new Date(new Date(d.created_at_trunc).getTime()),
