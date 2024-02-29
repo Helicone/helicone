@@ -113,6 +113,7 @@ jobs:
           wrangler dev --port 8787 --var WORKER_TYPE:OPENAI_PROXY > ~/test-logs/proxy.log &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          PROMPTARMOR_API_KEY: ${{ secrets.PROMPTARMOR_API_KEY }}
       - name: Start async worker
         run: |
           cd worker
@@ -125,6 +126,7 @@ jobs:
           wrangler dev --port 8789 --var WORKER_TYPE:GATEWAY_API > ~/test-logs/gateway.log &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          PROMPTARMOR_API_KEY: ${{ secrets.PROMPTARMOR_API_KEY }}
       - name: Start Supabase DB & API
         run: supabase start db,api
       - name: Install python dependencies
