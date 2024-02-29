@@ -32,6 +32,17 @@ jobs:
               exit 1
           fi
 
+      - name: Generate types and check for changes
+        run: |
+          bash genDockerIgnore.sh
+
+          if git status | grep ".dockerignore"; then
+              git diff --ignore-space-at-eol ./**/.dockerignore
+              echo "MUST GENERATE TYPES FOR .dockerignore. See status below:"
+              git diff
+              exit 1
+          fi
+
   helicone-node-tests:
     name: Helicone Node Package tests
     runs-on: ubuntu-latest
