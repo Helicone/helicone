@@ -40,6 +40,11 @@ const textOperators: Operator<keyof TextOperators>[] = [
     type: "text",
   },
   {
+    value: "not-contains",
+    label: "not contains",
+    type: "text",
+  },
+  {
     value: "ilike",
     label: "ilike",
     type: "text",
@@ -154,6 +159,7 @@ export const REQUEST_TABLE_FILTERS: [
   SingleFilterDef<"request">,
   SingleFilterDef<"response">,
   SingleFilterDef<"response">,
+  SingleFilterDef<"request">,
   SingleFilterDef<"feedback">
 ] = [
   {
@@ -197,6 +203,13 @@ export const REQUEST_TABLE_FILTERS: [
     category: "response",
     table: "response",
     column: "status",
+  },
+  {
+    label: "Path",
+    operators: textOperators,
+    table: "request",
+    column: "path",
+    category: "request",
   },
   {
     label: "Feedback",

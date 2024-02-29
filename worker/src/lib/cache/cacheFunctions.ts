@@ -6,7 +6,8 @@ import { Database } from "../../../supabase/database.types";
 
 export async function kvKeyFromRequest(
   request: HeliconeProxyRequest,
-  freeIndex: number
+  freeIndex: number,
+  cacheSeed: string | null
 ): Promise<string> {
   const headers = new Headers();
   for (const [key, value] of request.requestWrapper.getHeaders().entries()) {
@@ -22,7 +23,8 @@ export async function kvKeyFromRequest(
   }
 
   return await hash(
-    request.url +
+    (cacheSeed ?? "") +
+      request.url +
       (await request.requestWrapper.getText()) +
       JSON.stringify([...headers.entries()]) +
       (freeIndex >= 1 ? freeIndex.toString() : "")
@@ -35,7 +37,8 @@ export async function saveToCache(
   responseBody: string,
   cacheControl: string,
   settings: { maxSize: number },
-  cacheKv: KVNamespace
+  cacheKv: KVNamespace,
+  cacheSeed: string | null
 ): Promise<void> {
   console.log("Saving to cache");
   const expirationTtl = cacheControl.includes("max-age=")
@@ -44,11 +47,12 @@ export async function saveToCache(
   const { freeIndexes } = await getMaxCachedResponses(
     request,
     settings,
-    cacheKv
+    cacheKv,
+    cacheSeed
   );
   if (freeIndexes.length > 0) {
     await cacheKv.put(
-      await kvKeyFromRequest(request, freeIndexes[0]),
+      await kvKeyFromRequest(request, freeIndexes[0], cacheSeed),
       JSON.stringify({
         headers: Object.fromEntries(response.headers.entries()),
         body: responseBody,
@@ -124,12 +128,14 @@ export async function recordCacheHit(
 export async function getCachedResponse(
   request: HeliconeProxyRequest,
   settings: { maxSize: number },
-  cacheKv: KVNamespace
+  cacheKv: KVNamespace,
+  cacheSeed: string | null
 ): Promise<Response | null> {
   const { requests: requestCaches, freeIndexes } = await getMaxCachedResponses(
     request,
     settings,
-    cacheKv
+    cacheKv,
+    cacheSeed
   );
   if (freeIndexes.length > 0) {
     console.log("Max cache size reached, not caching");
@@ -152,11 +158,12 @@ export async function getCachedResponse(
 async function getMaxCachedResponses(
   request: HeliconeProxyRequest,
   { maxSize }: { maxSize: number },
-  cacheKv: KVNamespace
+  cacheKv: KVNamespace,
+  cacheSeed: string | null
 ) {
   const requests = await Promise.all(
     Array.from(Array(maxSize).keys()).map(async (idx) => {
-      const requestCache = await kvKeyFromRequest(request, idx);
+      const requestCache = await kvKeyFromRequest(request, idx, cacheSeed);
       return cacheKv.get<{
         headers: Record<string, string>;
         body: string;

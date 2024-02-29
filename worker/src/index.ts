@@ -46,6 +46,7 @@ export interface Env {
   VALHALLA_URL: string;
   ALERTER: DurableObjectNamespace;
   RESEND_API_KEY: string;
+  PROMPTARMOR_API_KEY: string;
 }
 
 export async function hash(key: string): Promise<string> {

@@ -255,7 +255,7 @@ const FineTurnForm = (props: FineTurnFormProps) => {
           <>
             <ExclamationTriangleIcon className="h-6 w-6 text-yellow-500" />
             <div className="flex flex-col space-y-4 w-full">
-              <div className="text-sm">
+              <div className="text-sm text-black dark:text-white">
                 I understand that this fine-tuning job will be run using my
                 OpenAI API key. To learn more about fine-tuning and pricing,
                 please see{" "}

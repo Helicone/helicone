@@ -1,7 +1,7 @@
 import { Popover, Transition } from "@headlessui/react";
 import {
   BugAntIcon,
-  ChevronDownIcon,
+  ChevronRightIcon,
   CodeBracketSquareIcon,
   DocumentMagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
@@ -12,7 +12,6 @@ import {
   CommandLineIcon,
 } from "@heroicons/react/20/solid";
 import { Fragment } from "react";
-import { clsx } from "../../shared/clsx";
 import Link from "next/link";
 
 const solutions: {
@@ -90,15 +89,11 @@ export default function SolutionsButton() {
       <Popover className="relative">
         {({ open }) => (
           <>
-            <Popover.Button
-              className={clsx(
-                "flex flex-row items-center font-semibold hover:bg-gray-100 rounded-lg px-3 py-1.5 focus:outline-none"
-              )}
-            >
+            <Popover.Button className="flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-gray-700">
               <span>Solutions</span>
-              <ChevronDownIcon
-                className={`${open ? "" : "text-opacity-70"}
-                  ml-1 h-5 w-5 transition duration-150  ease-in-out group-hover:text-opacity-80`}
+              <ChevronRightIcon
+                className={`${open ? "rotate-90" : "text-opacity-70"}
+                  ml-1 h-4 w-4 transition duration-150  ease-in-out group-hover:text-opacity-80`}
                 aria-hidden="true"
               />
             </Popover.Button>

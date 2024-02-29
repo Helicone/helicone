@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       alert: {
@@ -62,7 +62,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       alert_history: {
@@ -122,7 +122,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       cache_hits: {
@@ -155,7 +155,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "request_rbac"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       contact_submissions: {
@@ -191,6 +191,154 @@ export interface Database {
         }
         Relationships: []
       }
+      experiment_dataset: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_dataset_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      experiment_dataset_values: {
+        Row: {
+          created_at: string
+          dataset_id: string
+          id: number
+          request_id: string
+        }
+        Insert: {
+          created_at?: string
+          dataset_id: string
+          id?: number
+          request_id: string
+        }
+        Update: {
+          created_at?: string
+          dataset_id?: string
+          id?: number
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_dataset_values_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_dataset"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_dataset_values_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_dataset_values_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request_rbac"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      experiments: {
+        Row: {
+          created_at: string
+          dataset: string
+          id: string
+          name: string
+          organization_id: string
+          origin_prompt: string
+          provider_key: string
+          status: string
+          test_prompt: string
+        }
+        Insert: {
+          created_at?: string
+          dataset: string
+          id?: string
+          name: string
+          organization_id: string
+          origin_prompt: string
+          provider_key: string
+          status?: string
+          test_prompt: string
+        }
+        Update: {
+          created_at?: string
+          dataset?: string
+          id?: string
+          name?: string
+          organization_id?: string
+          origin_prompt?: string
+          provider_key?: string
+          status?: string
+          test_prompt?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiments_dataset_fkey"
+            columns: ["dataset"]
+            isOneToOne: false
+            referencedRelation: "experiment_dataset"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_origin_prompt_fkey"
+            columns: ["origin_prompt"]
+            isOneToOne: false
+            referencedRelation: "prompts"
+            referencedColumns: ["uuid"]
+          },
+          {
+            foreignKeyName: "experiments_provider_key_fkey"
+            columns: ["provider_key"]
+            isOneToOne: false
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_provider_key_fkey"
+            columns: ["provider_key"]
+            isOneToOne: false
+            referencedRelation: "provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_test_prompt_fkey"
+            columns: ["test_prompt"]
+            isOneToOne: false
+            referencedRelation: "prompts"
+            referencedColumns: ["uuid"]
+          }
+        ]
+      }
       feature_flags: {
         Row: {
           created_at: string | null
@@ -217,7 +365,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       feedback: {
@@ -267,7 +415,7 @@ export interface Database {
             isOneToOne: true
             referencedRelation: "response_rbac"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       finetune_dataset: {
@@ -302,7 +450,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       finetune_dataset_data: {
@@ -352,7 +500,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "request_rbac"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       finetune_job: {
@@ -411,7 +559,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "provider_keys"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       helicone_api_keys: {
@@ -456,7 +604,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       helicone_proxy_key_limits: {
@@ -494,7 +642,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "helicone_proxy_keys"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       helicone_proxy_keys: {
@@ -546,7 +694,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "provider_keys"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       job: {
@@ -590,7 +738,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       job_node: {
@@ -653,7 +801,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       job_node_relationships: {
@@ -693,7 +841,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "job_node"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       job_node_request: {
@@ -743,7 +891,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "request_rbac"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       layout: {
@@ -778,7 +926,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       org_rate_limit_tracker: {
@@ -807,7 +955,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       organization: {
@@ -908,7 +1056,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       organization_member: {
@@ -944,7 +1092,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       prompt: {
@@ -977,8 +1125,12 @@ export interface Database {
           description: string | null
           heliconeTemplate: Json | null
           id: string
+          is_experiment: boolean
+          name: string | null
           organization_id: string
+          soft_delete: boolean
           status: string
+          uuid: string
           version: number
         }
         Insert: {
@@ -986,8 +1138,12 @@ export interface Database {
           description?: string | null
           heliconeTemplate?: Json | null
           id: string
+          is_experiment?: boolean
+          name?: string | null
           organization_id: string
+          soft_delete?: boolean
           status?: string
+          uuid?: string
           version?: number
         }
         Update: {
@@ -995,8 +1151,12 @@ export interface Database {
           description?: string | null
           heliconeTemplate?: Json | null
           id?: string
+          is_experiment?: boolean
+          name?: string | null
           organization_id?: string
+          soft_delete?: boolean
           status?: string
+          uuid?: string
           version?: number
         }
         Relationships: [
@@ -1006,7 +1166,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       properties: {
@@ -1058,7 +1218,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       provider_keys: {
@@ -1126,7 +1286,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       referrals: {
@@ -1165,7 +1325,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       request: {
@@ -1186,6 +1346,7 @@ export interface Database {
           prompt_values: Json | null
           properties: Json | null
           provider: string
+          threat: boolean | null
           user_id: string | null
         }
         Insert: {
@@ -1205,6 +1366,7 @@ export interface Database {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
+          threat?: boolean | null
           user_id?: string | null
         }
         Update: {
@@ -1224,6 +1386,7 @@ export interface Database {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
+          threat?: boolean | null
           user_id?: string | null
         }
         Relationships: [
@@ -1261,7 +1424,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       request_job_task: {
@@ -1308,7 +1471,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "job_node"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       response: {
@@ -1424,7 +1587,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       user_settings: {
@@ -1456,7 +1619,7 @@ export interface Database {
             isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       webhook_subscriptions: {
@@ -1488,7 +1651,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "webhooks"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       webhooks: {
@@ -1523,7 +1686,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
     }
@@ -1596,7 +1759,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       materialized_response_and_request: {
@@ -1626,7 +1789,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       metrics_rbac: {
@@ -1700,7 +1863,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       response_rbac: {
@@ -1915,7 +2078,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "buckets"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
     }
@@ -1994,7 +2157,7 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
@@ -2003,14 +2166,14 @@ export type Tables<
     ? R
     : never
   : PublicTableNameOrOptions extends keyof (Database["public"]["Tables"] &
-      Database["public"]["Views"])
-  ? (Database["public"]["Tables"] &
-      Database["public"]["Views"])[PublicTableNameOrOptions] extends {
-      Row: infer R
-    }
-    ? R
+        Database["public"]["Views"])
+    ? (Database["public"]["Tables"] &
+        Database["public"]["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
     : never
-  : never
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
@@ -2018,7 +2181,7 @@ export type TablesInsert<
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
@@ -2026,12 +2189,12 @@ export type TablesInsert<
     ? I
     : never
   : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-  ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-      Insert: infer I
-    }
-    ? I
+    ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
     : never
-  : never
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
@@ -2039,7 +2202,7 @@ export type TablesUpdate<
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
@@ -2047,12 +2210,12 @@ export type TablesUpdate<
     ? U
     : never
   : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-  ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-      Update: infer U
-    }
-    ? U
+    ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
     : never
-  : never
 
 export type Enums<
   PublicEnumNameOrOptions extends
@@ -2060,10 +2223,10 @@ export type Enums<
     | { schema: keyof Database },
   EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never
+    : never = never,
 > = PublicEnumNameOrOptions extends { schema: keyof Database }
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
-  ? Database["public"]["Enums"][PublicEnumNameOrOptions]
-  : never
+    ? Database["public"]["Enums"][PublicEnumNameOrOptions]
+    : never
 

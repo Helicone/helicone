@@ -54,6 +54,17 @@ jobs:
           yarn install
           yarn lint
 
+  worker-test:
+    name: Worker Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Jest
+        run: |
+          cd worker
+          yarn install
+          yarn test
+
   tests:
     name: Python E2E tests
     runs-on: ubuntu-latest
@@ -119,6 +130,7 @@ jobs:
           HELICONE_API_KEY: "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
           OPENAI_API_KEY: ${{ secrets.CI_OPENAI_API_KEY }}
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
+          PROMPTARMOR_API_KEY: ${{ secrets.PROMPTARMOR_API_KEY }}
         run: |
           pytest test_properties.py -s
           pytest python_integration_tests.py -s

@@ -43,6 +43,7 @@ interface RequestsPageV2Props {
   };
   isCached?: boolean;
   initialRequestId?: string;
+  userId?: string;
 }
 
 function getSortLeaf(
@@ -109,6 +110,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     sort,
     isCached = false,
     initialRequestId,
+    userId,
   } = props;
   const [isLive, setIsLive] = useLocalStorage("isLive", false);
   const org = useOrg();
@@ -225,10 +227,29 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           .map(decodeFilter)
           .filter((filter) => filter !== null) as UIFilterRow[];
 
+        if (userId) {
+          decodedFilters.push({
+            filterMapIdx: 3,
+            operatorIdx: 0,
+            value: userId,
+          });
+        }
+
+        console.log("decoded", decodedFilters);
+
         return decodedFilters;
       }
     } catch (error) {
       console.error("Error decoding advanced filters:", error);
+    }
+    if (userId) {
+      return [
+        {
+          filterMapIdx: 3,
+          operatorIdx: 0,
+          value: userId,
+        },
+      ];
     }
     return [];
   };
@@ -390,7 +411,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   return (
     <div>
-      {!isCached && (
+      {!isCached && userId === undefined && (
         <AuthHeader
           title={isCached ? "Cached Requests" : "Requests"}
           headerActions={
@@ -432,10 +453,15 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             filters: advancedFilters,
             setAdvancedFilters: onSetAdvancedFilters,
             searchPropertyFilters: searchPropertyFilters,
+            show: userId ? false : true,
           }}
-          onDataSet={() => {
-            setFineTuneModalOpen(true);
-          }}
+          onDataSet={
+            userId
+              ? undefined
+              : () => {
+                  setFineTuneModalOpen(true);
+                }
+          }
           exportData={requests.map((request) => {
             const flattenedRequest: any = {};
             Object.entries(request).forEach(([key, value]) => {
@@ -464,12 +490,20 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           onRowSelect={(row, index) => {
             onRowSelectHandler(row, index);
           }}
-          makeCard={(row) => {
-            return <RequestCard request={row} properties={properties} />;
-          }}
-          makeRow={{
-            properties: properties,
-          }}
+          makeCard={
+            userId
+              ? undefined
+              : (row) => {
+                  return <RequestCard request={row} properties={properties} />;
+                }
+          }
+          makeRow={
+            userId
+              ? undefined
+              : {
+                  properties: properties,
+                }
+          }
         />
         <TableFooter
           currentPage={currentPage}

@@ -1,5 +1,6 @@
 import { Env } from "..";
 import { AuthParams } from "../lib/dbLogger/DBLoggable";
+import { Result, err, ok } from "../results";
 
 export class RateLimiter {
   constructor(
@@ -33,34 +34,46 @@ export class RateLimiter {
     return rateLimitParams[tier];
   }
 
-  async checkRateLimit(tier: string): Promise<{
-    isRateLimited: boolean;
-    shouldLogInDB: boolean;
-    rlIncrementDB: number;
-  }> {
-    const rateLimiterId = this.rateLimiter.idFromName(
-      this.authParams.organizationId
-    );
-
-    const rateLimiter = this.rateLimiter.get(rateLimiterId);
-
-    const params = this.getRateLimitParams(tier);
-
-    const rateLimitRes = await rateLimiter.fetch(
-      "https://www.this_does_matter.helicone.ai",
+  async checkRateLimit(tier: string): Promise<
+    Result<
       {
-        method: "POST",
-        body: JSON.stringify(params),
-        headers: {
-          "content-type": "application/json",
-        },
-      }
-    );
+        isRateLimited: boolean;
+        shouldLogInDB: boolean;
+        rlIncrementDB: number;
+      },
+      string
+    >
+  > {
+    try {
+      const rateLimiterId = this.rateLimiter.idFromName(
+        this.authParams.organizationId
+      );
 
-    return rateLimitRes.json() as Promise<{
-      isRateLimited: boolean;
-      shouldLogInDB: boolean;
-      rlIncrementDB: number;
-    }>;
+      const rateLimiter = this.rateLimiter.get(rateLimiterId);
+
+      const params = this.getRateLimitParams(tier);
+
+      const rateLimitRes = await rateLimiter.fetch(
+        "https://www.this_does_matter.helicone.ai",
+        {
+          method: "POST",
+          body: JSON.stringify(params),
+          headers: {
+            "content-type": "application/json",
+          },
+        }
+      );
+
+      return ok(
+        (await rateLimitRes.json()) as {
+          isRateLimited: boolean;
+          shouldLogInDB: boolean;
+          rlIncrementDB: number;
+        }
+      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      return err(JSON.stringify(error));
+    }
   }
 }

@@ -43,6 +43,8 @@ export interface DBLoggableProps {
     provider: Provider;
     nodeId: string | null;
     modelOverride?: string;
+    heliconeTemplate?: Record<string, unknown>;
+    threat: boolean | null;
   };
   timing: {
     startTime: Date;
@@ -75,6 +77,8 @@ export function dbLoggableRequestFromProxyRequest(
     nodeId: proxyRequest.nodeId,
     modelOverride:
       proxyRequest.requestWrapper.heliconeHeaders.modelOverride ?? undefined,
+    heliconeTemplate: proxyRequest.heliconePromptTemplate ?? undefined,
+    threat: proxyRequest.threat ?? null,
   };
 }
 
@@ -133,6 +137,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       provider,
       nodeId: requestWrapper.getNodeId(),
       modelOverride: requestWrapper.heliconeHeaders.modelOverride ?? undefined,
+      threat: null,
     },
     response: {
       responseId: crypto.randomUUID(),
@@ -493,15 +498,19 @@ export class DBLoggable {
 
     const rateLimit = await rateLimiter.data.checkRateLimit(tier.data);
 
-    if (rateLimit.shouldLogInDB) {
+    if (rateLimit.error) {
+      console.error(`Error checking rate limit: ${rateLimit.error}`);
+    }
+
+    if (!rateLimit.error && rateLimit.data?.shouldLogInDB) {
       console.log("LOGGING RATE LIMIT IN DB");
       await db.dbWrapper.recordRateLimitHit(
         authParams.organizationId,
-        rateLimit.rlIncrementDB
+        rateLimit.data.rlIncrementDB
       );
     }
 
-    if (rateLimit.isRateLimited) {
+    if (!rateLimit.error && rateLimit.data?.isRateLimited) {
       console.log("RATE LIMITED");
       return err("Rate limited");
     }
@@ -546,6 +555,39 @@ export class DBLoggable {
         data: null,
         error: webhookError,
       };
+    }
+
+    if (this.request.heliconeTemplate && this.request.promptId) {
+      const upsertResult = await db.queue.upsertPrompt(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this.request.heliconeTemplate as any,
+        this.request.promptId ?? "",
+        authParams.organizationId
+      );
+
+      if (upsertResult.error || !upsertResult.data) {
+        console.error("Error upserting prompt", upsertResult.error);
+        return err(JSON.stringify(upsertResult.error));
+      }
+      const propResult = await db.queue.putRequestProperty(
+        requestResult.data.request.id,
+        [
+          {
+            key: "Helicone-Prompt-Id",
+            value: this.request.promptId,
+          },
+          {
+            key: "Helicone-Prompt-Version",
+            value: upsertResult.data.version.toString() ?? "",
+          },
+        ],
+        authParams.organizationId
+      );
+
+      if (propResult.error || !propResult.data) {
+        console.error("Error adding properties", propResult.error);
+        return err(JSON.stringify(propResult.error));
+      }
     }
 
     return ok(null);

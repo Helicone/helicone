@@ -1242,6 +1242,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@calcom/embed-core@npm:1.3.3":
+  version: 1.3.3
+  resolution: "@calcom/embed-core@npm:1.3.3"
+  checksum: be1d6f31902ba6c620f8549f80b043491aae8b30325a8129d814a78add45b29d47b2081f63a2634f3d13d6582feebf4136e01762ffc8a212a56e39969799c3c2
+  languageName: node
+  linkType: hard
+
+"@calcom/embed-react@npm:^1.3.2":
+  version: 1.3.2
+  resolution: "@calcom/embed-react@npm:1.3.2"
+  dependencies:
+    "@calcom/embed-core": "npm:1.3.3"
+    "@calcom/embed-snippet": "npm:1.1.3"
+  peerDependencies:
+    react: ^18.2.0
+    react-dom: ^18.2.0
+  checksum: 53ecab6c6dd69118e8a7b7c68a6de810fdb307c584d54f9beb764a2fc01b22eb4ca7c5be5ebf32a6fe5430f17963e0b4d1d5d6743aedea38dee0e3c011ababd8
+  languageName: node
+  linkType: hard
+
+"@calcom/embed-snippet@npm:1.1.3":
+  version: 1.1.3
+  resolution: "@calcom/embed-snippet@npm:1.1.3"
+  dependencies:
+    "@calcom/embed-core": "npm:1.3.3"
+  checksum: 8cfe2a3e212aef17820c8c4d88f500ed12dc90cde27720ffa60655ca9b4b50ba636061eb142ec1e399bb79c459a6a8eddad2b60eba655bbbc20d1b2cbbbd83fe
+  languageName: node
+  linkType: hard
+
 "@clickhouse/client@npm:^0.0.14":
   version: 0.0.14
   resolution: "@clickhouse/client@npm:0.0.14"
@@ -7995,6 +8024,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"gsap@npm:^3.12.5":
+  version: 3.12.5
+  resolution: "gsap@npm:3.12.5"
+  checksum: cb38e89bd577fc18c9cf77e4aeb83617603b1e0fa768fe8ca1acd836fd852936722e186a88c9cf6ece42e53407edd45324be2bfe35a41f424c5f2c2b33fd1a98
+  languageName: node
+  linkType: hard
+
 "har-schema@npm:^2.0.0":
   version: 2.0.0
   resolution: "har-schema@npm:2.0.0"
@@ -8120,6 +8156,7 @@ __metadata:
     "@apollo/client": "npm:^3.7.10"
     "@apollo/explorer": "npm:^3.4.0"
     "@apollo/sandbox": "npm:^2.4.0"
+    "@calcom/embed-react": "npm:^1.3.2"
     "@clickhouse/client": "npm:^0.0.14"
     "@emotion/react": "npm:^11.10.5"
     "@emotion/styled": "npm:^11.10.5"
@@ -8175,6 +8212,7 @@ __metadata:
     graphql: "npm:^16.6.0"
     graphql-tag: "npm:^2.12.6"
     graphql-type-json: "npm:^0.3.2"
+    gsap: "npm:^3.12.5"
     js-cookie: "npm:^3.0.5"
     micro: "npm:^10.0.1"
     moment: "npm:^2.29.4"

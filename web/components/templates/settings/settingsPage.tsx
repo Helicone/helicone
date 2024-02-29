@@ -10,6 +10,7 @@ import OrgPlanPage from "../organization/plan/orgPlanPage";
 import OrgMembersPage from "../organization/members/orgMembersPage";
 import { ElementType } from "react";
 import { useRouter } from "next/router";
+import AuthHeader from "../../shared/authHeader";
 
 interface SettingsPageProps {
   defaultIndex?: number;
@@ -44,12 +45,8 @@ const SettingsPage = (props: SettingsPageProps) => {
   const router = useRouter();
 
   return (
-    <div className="flex flex-col space-y-4">
-      <div className="flex flex-row items-center justify-between">
-        <h1 className="font-semibold text-3xl text-black dark:text-white">
-          Settings
-        </h1>
-      </div>
+    <>
+      <AuthHeader title="Settings" />
       <TabGroup>
         <TabList className="font-semibold" variant="line">
           {tabs.map((tab) => (
@@ -86,7 +83,7 @@ const SettingsPage = (props: SettingsPageProps) => {
           <></>
         )}
       </TabGroup>
-    </div>
+    </>
   );
 };
 

@@ -5,23 +5,24 @@ import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
   Bars3BottomLeftIcon,
-  BellIcon,
   BeakerIcon,
+  BellIcon,
   BookOpenIcon,
+  CircleStackIcon,
   CloudArrowUpIcon,
+  CodeBracketIcon,
   Cog6ToothIcon,
+  DocumentTextIcon,
   HomeIcon,
+  MoonIcon,
   QuestionMarkCircleIcon,
+  SparklesIcon,
+  SunIcon,
   TableCellsIcon,
   TagIcon,
   UserCircleIcon,
   UsersIcon,
   XMarkIcon,
-  CodeBracketIcon,
-  SunIcon,
-  MoonIcon,
-  SparklesIcon,
-  CircleStackIcon,
 } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
@@ -36,11 +37,11 @@ import OrgContext, { useOrg } from "./organizationContext";
 import UpgradeProModal from "../shared/upgradeProModal";
 import OrgDropdown from "./orgDropdown";
 
-import { ThemedSwitch } from "../shared/themed/themedSwitch";
-import { useTheme } from "../shared/theme/themeContext";
-import ReferralModal from "../common/referralModal";
-import MetaData from "./public/authMetaData";
 import { Badge } from "@tremor/react";
+import ReferralModal from "../common/referralModal";
+import { useTheme } from "../shared/theme/themeContext";
+import { ThemedSwitch } from "../shared/themed/themedSwitch";
+import MetaData from "./public/authMetaData";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
@@ -82,6 +83,13 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname.includes("/requests"),
     },
     {
+      name: "Prompts",
+      href: "/prompts",
+      icon: DocumentTextIcon,
+      current: pathname.includes("/prompts"),
+      featured: true,
+    },
+    {
       name: "Users",
       href: "/users",
       icon: UsersIcon,
@@ -98,7 +106,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/fine-tune",
       icon: SparklesIcon,
       current: pathname.includes("/fine-tune"),
-      featured: true,
     },
     {
       name: "Properties",
@@ -267,7 +274,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
         </Transition.Root>
 
         {/* Static sidebar for desktop */}
-        <div className="hidden md:fixed md:inset-y-0 md:flex md:w-56 md:flex-col z-30">
+        <div className="hidden fixed md:inset-y-0 md:flex md:w-56 md:flex-col z-30">
           {/* Sidebar component, swap this element with another sidebar if you like */}
           <div className="w-full flex flex-grow flex-col overflow-y-auto border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
             <div className="p-2 flex items-center gap-4 h-14 border-b border-gray-300 dark:border-gray-700 absolute w-full">

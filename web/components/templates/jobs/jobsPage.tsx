@@ -107,7 +107,6 @@ const JobsPage = (props: JobsPageProps) => {
             </button>
           </div>
         }
-        jobs={true}
         actions={
           <>
             <ThemedSwitch checked={isLive} onChange={setIsLive} label="Live" />
