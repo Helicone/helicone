@@ -108,7 +108,7 @@ const CachePage = (props: CachePageProps) => {
     {
       id: "time-saved",
       label: "Total Time Saved",
-      value: `${chMetrics.timeSaved.data?.data ?? 0} hours`,
+      value: `${chMetrics.timeSaved.data?.data ?? 0} s`,
       isLoading: isAnyLoading,
       icon: ClockIcon,
     },
