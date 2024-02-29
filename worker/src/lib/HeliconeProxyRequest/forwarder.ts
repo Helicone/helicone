@@ -63,6 +63,9 @@ export async function proxyForwarder(
     }
   }
 
+  if (!env.PROMPTARMOR_API_KEY) {
+    console.error("PROMPTARMOR_API_KEY not set", env.PROMPTARMOR_API_KEY);
+  }
   if (
     proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled &&
     provider === "OPENAI" &&
