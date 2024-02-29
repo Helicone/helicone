@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 export default function FormSteps(props: {
   currentStep: number;
   setCurrentStep: (id: number) => void;

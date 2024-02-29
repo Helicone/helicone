@@ -1,13 +1,11 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 
-import { dbExecute } from "../../../lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result, ok, resultMap } from "../../../lib/result";
+import { Result, ok } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
-import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 
 export type PromptsResult = Result<
   {

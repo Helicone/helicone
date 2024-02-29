@@ -1,27 +1,15 @@
 import {
   ArrowsPointingOutIcon,
-  BookOpenIcon,
   ChevronLeftIcon,
-  DocumentTextIcon,
-  PaintBrushIcon,
-  SparklesIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Select, SelectItem } from "@tremor/react";
 import Link from "next/link";
-import { LegacyRef, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePrompts } from "../../../../../services/hooks/prompts/prompts";
 import { usePrompt } from "../../../../../services/hooks/prompts/singlePrompt";
-import ThemedDrawer from "../../../../shared/themed/themedDrawer";
-import { getUSDateFromString } from "../../../../shared/utils/utils";
 import ThemedModal from "../../../../shared/themed/themedModal";
-import { Chat } from "../../../requests/chat";
 import { clsx } from "../../../../shared/clsx";
 import { Tooltip } from "@mui/material";
-import { BeakerIcon } from "@heroicons/react/24/solid";
-import { ThemedPill } from "../../../../shared/themed/themedPill";
-import ExperimentForm from "../../id/experimentForm";
-import PromptPropertyCard from "../../id/promptPropertyCard";
 
 interface PromptIdPageProps {
   id: string;
