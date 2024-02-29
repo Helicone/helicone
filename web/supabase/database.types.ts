@@ -268,6 +268,7 @@ export interface Database {
           name: string
           organization_id: string
           origin_prompt: string
+          provider_key: string
           status: string
           test_prompt: string
         }
@@ -278,6 +279,7 @@ export interface Database {
           name: string
           organization_id: string
           origin_prompt: string
+          provider_key: string
           status?: string
           test_prompt: string
         }
@@ -288,6 +290,7 @@ export interface Database {
           name?: string
           organization_id?: string
           origin_prompt?: string
+          provider_key?: string
           status?: string
           test_prompt?: string
         }
@@ -312,6 +315,20 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "prompts"
             referencedColumns: ["uuid"]
+          },
+          {
+            foreignKeyName: "experiments_provider_key_fkey"
+            columns: ["provider_key"]
+            isOneToOne: false
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_provider_key_fkey"
+            columns: ["provider_key"]
+            isOneToOne: false
+            referencedRelation: "provider_keys"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "experiments_test_prompt_fkey"
