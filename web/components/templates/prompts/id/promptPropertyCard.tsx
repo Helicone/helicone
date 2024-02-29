@@ -31,7 +31,7 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
         "w-full border p-4 rounded-lg"
       )}
     >
-      <button className="flex flex-col w-full" onClick={onSelect}>
+      <button className={clsx("flex flex-col w-full")} onClick={onSelect}>
         <div className="flex flex-col items-start w-full">
           <div className="flex items-center w-full justify-between">
             <p
