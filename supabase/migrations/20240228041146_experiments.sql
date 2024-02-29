@@ -99,4 +99,10 @@ alter table "public"."experiments" add constraint "experiments_organization_id_f
 alter table "public"."experiments" validate constraint "experiments_organization_id_fkey";
 
 
+alter table "public"."experiments" add column "provider_key" uuid not null;
+
+alter table "public"."experiments" add constraint "experiments_provider_key_fkey" FOREIGN KEY (provider_key) REFERENCES provider_keys(id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
+
+alter table "public"."experiments" validate constraint "experiments_provider_key_fkey";
+
 
