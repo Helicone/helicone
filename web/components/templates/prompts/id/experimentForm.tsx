@@ -8,7 +8,6 @@ import ProviderKeyList from "../../enterprise/portal/id/providerKeyList";
 import { useOrg } from "../../../layout/organizationContext";
 import PromptPropertyCard from "./promptPropertyCard";
 import useNotification from "../../../shared/notification/useNotification";
-import ExperimentConfig from "./formSteps/experimentConfig";
 
 interface ExperimentFormProps {
   requestId: string;
@@ -30,37 +29,159 @@ const ExperimentForm = (props: ExperimentFormProps) => {
   const { requestId, currentPrompt, promptProperties, close } = props;
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState<{
-    experimentName: string;
-    version: number;
-    model: string;
-    providerKey: string;
-    requestIds: string[];
-  }>();
+  const [selectedVersion, setSelectedVersion] = useState<string>();
+  const [providerKeyId, setProviderKeyId] = useState("");
+  const [experimentName, setExperimentName] = useState("");
+  const [requestIdList, setRequestIdList] = useState<string[]>([]);
+  const [experimentModel, setExperimentModel] =
+    useState<string>("gpt-3.5-turbo-1106");
+  const { setNotification } = useNotification();
 
   const { data, isLoading, chat, hasData, isChat } =
     usePlaygroundPage(requestId);
+  const orgContext = useOrg();
 
   const singleRequest = data.length > 0 ? data[0] : null;
 
   const renderStep = [
-    <ExperimentConfig
-      key={0}
-      currentPrompt={currentPrompt}
-      promptProperties={promptProperties}
-      initialValues={formData}
-      onFormSubmit={(data) => {
-        setFormData(data);
-        setCurrentStep(1);
-      }}
-    />,
+    <div className="flex flex-col space-y-8 w-full">
+      <div className="flex flex-col space-y-1 w-1/4">
+        <label
+          htmlFor="experiment-name"
+          className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
+        >
+          Name
+        </label>
+        <TextInput
+          value={experimentName}
+          onChange={(e) => setExperimentName(e.target.value)}
+        />
+      </div>
+      <div className="flex w-full gap-4">
+        <div className="flex flex-col space-y-1 w-1/4">
+          <label
+            htmlFor="alert-metric"
+            className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
+          >
+            Version
+          </label>
+          <Select
+            value={selectedVersion}
+            placeholder={selectedVersion}
+            onValueChange={(e) => {
+              setSelectedVersion(e);
+            }}
+            enableClear={false}
+            className="w-full"
+          >
+            {Array.from(
+              { length: currentPrompt.latest_version + 1 },
+              (_, i) => i
+            )
+              .reverse()
+              .map((version: any, i: number) => (
+                <SelectItem value={version} key={i}>
+                  {version}
+                </SelectItem>
+              ))}
+          </Select>
+        </div>
+        <div className="flex flex-col space-y-1 w-1/4">
+          <label
+            htmlFor="experiment-model"
+            className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
+          >
+            Experiment Model
+          </label>
+          <Select
+            value={experimentModel}
+            enableClear={false}
+            onValueChange={(e) => {
+              setExperimentModel(e);
+            }}
+          >
+            <SelectItem value="gpt-3.5-turbo-1106">
+              gpt-3.5-turbo-1106
+            </SelectItem>
+            <SelectItem value="gpt-4-vision-preview">
+              gpt-4-vision-preview
+            </SelectItem>
+          </Select>
+        </div>
+      </div>
+
+      <ProviderKeyList
+        orgId={orgContext?.currentOrg?.id}
+        setProviderKeyCallback={(x) => {
+          setProviderKeyId(x);
+        }}
+        variant="basic"
+      />
+      <div className="flex flex-col space-y-1 w-full pt-8">
+        <label
+          htmlFor="experiment-sample"
+          className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
+        >
+          Random Data Set Sample (up to 10)
+        </label>
+        <div className="flex w-full overflow-auto gap-4">
+          {/* get a random `n=10` sample of the properties and then render cards */}
+          {[...promptProperties].slice(0, 10).map((property, i) => (
+            <div className="w-full min-w-[25rem] max-w-[25rem]">
+              <PromptPropertyCard
+                key={i}
+                isSelected={false}
+                onSelect={() => {}}
+                requestId={property.id}
+                createdAt={property.createdAt}
+                properties={property.properties}
+                size="small"
+                index={i + 1}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="border-t border-gray-300 py-4 flex items-center justify-end space-x-2">
+        <button
+          onClick={close}
+          className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => {
+            if (experimentName === "") {
+              setNotification("Experiment name is required", "error");
+              return;
+            }
+            if (selectedVersion === "") {
+              setNotification("Version is required", "error");
+              return;
+            }
+            if (providerKeyId === "") {
+              setNotification("Provider key is required", "error");
+              return;
+            }
+            // set the request id list
+            setRequestIdList(
+              promptProperties.map((property) => property.id).slice(0, 10)
+            );
+            setCurrentStep(1);
+          }}
+          className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          Next
+        </button>
+      </div>
+    </div>,
     <div>
       {isLoading ? (
         <h1>loading...</h1>
       ) : hasData && isChat && singleRequest !== null ? (
         <>
           <ChatPlayground
-            requestId={""}
+            requestId={requestId}
             chat={chat}
             models={["gpt-3.5-turbo"]}
             temperature={1}
@@ -68,10 +189,12 @@ const ExperimentForm = (props: ExperimentFormProps) => {
           />
         </>
       ) : (
-        <h1>
-          {JSON.stringify(chat)}
-          {JSON.stringify(data)}no data
-        </h1>
+        <div className="flex flex-col">
+          {requestId}
+          {JSON.stringify(hasData)}
+          {JSON.stringify(isChat)}
+          {JSON.stringify(data)}
+        </div>
       )}
     </div>,
     <h1>Step 3</h1>,

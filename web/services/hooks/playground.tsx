@@ -49,7 +49,7 @@ export const getChat = (
 
   return {
     chat: sourcePrompt,
-    isChat: true,
+    isChat,
   };
 };
 
