@@ -236,6 +236,17 @@ const RequestRow = (props: {
               </p>
             </li>
           )}
+          {/* Insert the new conditional rendering block for the temperature here */}
+          {request.requestBody?.temperature && (
+            <li className="flex flex-row justify-between items-center py-2">
+              <p className="font-semibold text-gray-900 dark:text-gray-100">
+                Temperature
+              </p>
+              <p className="text-gray-700 dark:text-gray-300 truncate">
+                {request.requestBody.temperature.toFixed(1)}°C
+              </p>
+            </li>
+          )}
         </ul>
       </div>
 

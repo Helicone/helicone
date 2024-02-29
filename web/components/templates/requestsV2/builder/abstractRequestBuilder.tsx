@@ -28,6 +28,7 @@ type CommonFields = {
     rating: boolean | null;
   };
   provider: Provider;
+  temperature?: number;
 };
 
 export type NormalizedRequest = CommonFields & {
