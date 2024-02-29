@@ -71,6 +71,7 @@ export class RateLimiter {
           rlIncrementDB: number;
         }
       );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       return err(JSON.stringify(error));
     }

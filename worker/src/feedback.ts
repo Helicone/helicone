@@ -3,60 +3,8 @@ import { Env, hash } from ".";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { Database } from "../supabase/database.types";
 import { Result } from "./results";
-import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
-import { addFeedbackToResponse } from "./lib/dbLogger/clickhouseLog";
 import { IHeliconeHeaders } from "./lib/HeliconeHeaders";
 import { Valhalla } from "./lib/db/valhalla";
-
-const FEEDBACK_LATEST_CREATED_AT = "feedback-latest-created-at";
-
-export async function feedbackCronHandler(env: Env) {
-  const supabaseClient: SupabaseClient<Database> = createClient(
-    env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
-  );
-
-  const storedDate = await env.UTILITY_KV.get(FEEDBACK_LATEST_CREATED_AT);
-  const feedbackCreatedAt = (
-    storedDate ? new Date(storedDate) : new Date(Date.now() - 60 * 1000)
-  ).toISOString();
-
-  const { data: feedback, error } = await supabaseClient
-    .from("feedback")
-    .select("*")
-    .gt("created_at", feedbackCreatedAt);
-
-  if (error) {
-    console.error(`Error fetching feedback: ${error}`);
-    return;
-  }
-
-  if (!feedback || feedback.length === 0) {
-    console.log("No new feedback");
-    return;
-  }
-
-  const feedbackUpdateResult = await addFeedbackToResponse(
-    new ClickhouseClientWrapper({
-      CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
-      CLICKHOUSE_USER: env.CLICKHOUSE_USER,
-      CLICKHOUSE_PASSWORD: env.CLICKHOUSE_PASSWORD,
-    }),
-    feedback
-  );
-
-  if (feedbackUpdateResult.error) {
-    console.error(`Error updating feedback: ${feedbackUpdateResult.error}`);
-    return;
-  }
-
-  await env.UTILITY_KV.put(
-    FEEDBACK_LATEST_CREATED_AT,
-    new Date(Date.now() - 5 * 1000).toISOString()
-  );
-
-  console.log(`Updated ${feedback.length} feedback rows.`);
-}
 
 interface FeedbackRequestBodyV2 {
   "helicone-id": string;
