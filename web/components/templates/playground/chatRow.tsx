@@ -10,6 +10,7 @@ import ResizeTextArea from "./resizeTextArea";
 import { Message } from "../requests/chat";
 import { RenderWithPrettyInputKeys } from "../prompts/id/promptIdPage";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
+import { set } from "date-fns";
 
 interface ChatRowProps {
   index: number;
@@ -37,9 +38,9 @@ const ChatRow = (props: ChatRowProps) => {
       const textMessage = rawMessage.content.find(
         (element) => element.type === "text"
       );
-      return textMessage?.text;
+      return textMessage?.text as string;
     } else {
-      return rawMessage.content;
+      return rawMessage.content as string;
     }
   };
 
@@ -135,7 +136,7 @@ const ChatRow = (props: ChatRowProps) => {
                   />
                 </span>
               ) : (
-                <>{getContent(currentMessage.content)}</>
+                <>{getContent(currentMessage.content as string)}</>
               )}
             </div>
             <div className="relative h-full justify-end">
@@ -171,7 +172,7 @@ const ChatRow = (props: ChatRowProps) => {
                   </button>
                   <button
                     onClick={() => {
-                      callback(contentAsString || "", role);
+                      callback((contentAsString as string) || "", role);
                       setIsEditing(false);
                     }}
                     className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
@@ -219,7 +220,7 @@ const ChatRow = (props: ChatRowProps) => {
                   />
                 </span>
               ) : (
-                <>{getContent(currentMessage.content)}</>
+                <>{getContent(currentMessage.content as string)}</>
               )}
             </div>
 
@@ -256,7 +257,12 @@ const ChatRow = (props: ChatRowProps) => {
                   </button>
                   <button
                     onClick={() => {
-                      callback(contentAsString || "", role);
+                      setCurrentMessage({
+                        role: role,
+                        content: contentAsString as string,
+                        id: currentMessage.id,
+                      });
+                      callback((contentAsString as string) || "", role);
                       setIsEditing(false);
                     }}
                     className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
