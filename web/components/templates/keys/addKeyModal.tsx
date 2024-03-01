@@ -8,7 +8,6 @@ import {
   ArrowPathIcon,
   ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
-import { Result } from "../../../lib/result";
 import { getHeliconeCookie } from "../../../lib/cookies";
 
 interface AddKeyModalProps {
