@@ -16,6 +16,10 @@ export interface paths {
           "application/json": {
             /** @description api key to hash */
             apiKey?: string;
+            /** @description name of the key */
+            keyName?: string;
+            /** @description user id */
+            userId?: string;
           };
         };
       };

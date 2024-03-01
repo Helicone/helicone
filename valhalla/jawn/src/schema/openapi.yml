@@ -32,6 +32,12 @@ paths:
                 apiKey:
                   type: string
                   description: api key to hash
+                keyName:
+                  type: string
+                  description: name of the key
+                userId:
+                  type: string
+                  description: user id
       responses:
         "200":
           description: Successfully hashed api key

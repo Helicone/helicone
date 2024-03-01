@@ -63,32 +63,20 @@ const AddKeyModal = (props: AddKeyModalProps) => {
         },
         body: JSON.stringify({
           apiKey,
+          userId: user?.id!,
+          keyName: keyName.value,
         }),
       }
-    )
-      .then(
-        (res: Response) =>
-          res.json() as Promise<Result<{ keyHash: string }, string>>
-      )
-      .then((res: Result<{ keyHash: string }, string>) => {
-        const { data, error } = res;
-        if (!error && data) {
-          supabaseClient
-            .from("helicone_api_keys")
-            .insert({
-              api_key_hash: data.keyHash,
-              user_id: user?.id!,
-              api_key_name: keyName.value,
-              organization_id: org?.currentOrg?.id!,
-              created_at: new Date(),
-            })
-            .then(() => {
-              setNotification("Successfully created API key", "success");
-              setIsLoading(false);
-              onSuccess();
-            });
-        }
-      });
+    ).then((res: Response) => {
+      if (res.ok) {
+        setNotification("Successfully created API key", "success");
+        setIsLoading(false);
+        onSuccess();
+      } else {
+        setNotification("Failed to create API key", "error");
+        setIsLoading(false);
+      }
+    });
   };
 
   useEffect(() => {

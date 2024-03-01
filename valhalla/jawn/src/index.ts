@@ -164,13 +164,30 @@ app.post(
   >(async ({ request, res, supabaseClient, authParams }) => {
     try {
       const body = await request.getRawBody<any>();
-      const { apiKey } = body;
+      const { apiKey, userId, keyName } = body;
       const hashedKey = await hashAuth(apiKey);
 
+      const insertRes = await supabaseClient.client
+        .from("helicone_api_keys")
+        .insert({
+          api_key_hash: hashedKey,
+          user_id: userId,
+          api_key_name: keyName,
+          organization_id: authParams.organizationId,
+        });
+
+      if (insertRes.error) {
+        res.status(500).json({
+          error: {
+            message: "Failed to insert key",
+            details: insertRes.error,
+          },
+        });
+        return;
+      }
+
       res.status(200).json({
-        data: {
-          keyHash: hashedKey,
-        },
+        success: true,
       });
       return;
     } catch (error: any) {
@@ -179,6 +196,7 @@ app.post(
         error: "Failed to generate key hash",
         message: error,
       });
+      return;
     }
   })
 );
