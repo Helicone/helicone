@@ -90,58 +90,74 @@ function AdvancedFilterInput({
   onChange,
   inputParams,
   onSearchHandler,
+  operator,
 }: {
   type: ColumnType;
   value: string;
   onChange: (value: string | null) => void;
   inputParams?: string[];
   onSearchHandler?: (search: string) => Promise<Result<void, string>>;
+  operator?: string;
 }) {
   // if any of the inputs below are changed, we want to set the page number back to 1
   switch (type) {
     case "text":
       return (
-        <input
-          type="text"
-          onChange={(e) => {
-            onChange(e.target.value);
-          }}
-          placeholder={"text..."}
-          value={value}
-          className="block w-full sm:min-w-[25rem] rounded-md border-gray-300 dark:border-gray-700 text-black dark:text-white bg-white dark:bg-black shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
-        />
+        <>
+          {operator !== 'is-null' && operator !== 'is-not-null' && operator !== 'is-empty' && operator !== 'is-not-empty' && (
+            <input
+              type="text"
+              onChange={(e) => {
+                onChange(e.target.value);
+              }}
+              placeholder={"text..."}
+              value={value}
+              className="block w-full sm:min-w-[25rem] rounded-md border-gray-300 dark:border-gray-700 text-black dark:text-white bg-white dark:bg-black shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+            />
+          )}
+        </>
       );
     case "number":
       return (
-        <input
-          type="number"
-          name="search-field"
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={"number..."}
-          value={value}
-          className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white text-black dark:text-white dark:bg-black shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
-        />
+        <>
+          {operator !== 'is-null' && operator !== 'is-not-null' && (
+            <input
+              type="number"
+              name="search-field"
+              onChange={(e) => onChange(e.target.value)}
+              placeholder={"number..."}
+              value={value}
+              className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white text-black dark:text-white dark:bg-black shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+            />
+          )}
+        </>
       );
     case "timestamp":
       return (
-        <input
-          type="datetime-local"
-          name="search-field-start"
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={"date..."}
-          value={value}
-          className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white text-black dark:text-white dark:bg-black shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
-        />
+        <>
+          {operator !== 'is-null' && operator !== 'is-not-null' && (
+            <input
+              type="datetime-local"
+              name="search-field-start"
+              onChange={(e) => onChange(e.target.value)}
+              placeholder={"date..."}
+              value={value}
+              className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white text-black dark:text-white dark:bg-black shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+            />
+          )}
+        </>
       );
     case "text-with-suggestions":
       return (
         <>
-          <ThemedTextDropDown
-            options={inputParams ?? []}
-            onChange={(e) => onChange(e)}
-            value={value}
-            onSearchHandler={onSearchHandler}
-          />
+          {operator !== 'is-null' && operator !== 'is-not-null' && operator !== 'is-empty' && operator !== 'is-not-empty' && (
+            <ThemedTextDropDown
+              options={inputParams ?? []}
+              onChange={(e) => onChange(e)}
+              value={value}
+              onSearchHandler={onSearchHandler}
+            />
+          )}
         </>
       );
     case "bool":
@@ -180,6 +196,8 @@ function AdvancedFilterRow({
     search: string
   ) => Promise<Result<void, string>>;
 }) {
+  const operator = filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx].key;
+
   return (
     <div className="w-full flex flex-col lg:flex-row gap-3 items-left lg:items-center ml-4">
       <ThemedDropdown
@@ -244,6 +262,7 @@ function AdvancedFilterRow({
             filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx].type
           }
           value={filter.value}
+          operator={operator}
           inputParams={filterMap[filter.filterMapIdx]?.operators[
             filter.operatorIdx
           ].inputParams

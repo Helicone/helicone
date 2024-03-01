@@ -16,22 +16,36 @@ export type AllOperators =
   | "gt"
   | "not-equals"
   | "contains"
-  | "not-contains";
+  | "not-contains"
+  | "is-null"
+  | "is-not-null"
+  | "is-empty"
+  | "is-not-empty";
+
 export type TextOperators = Record<
-  "not-equals" | "equals" | "like" | "ilike" | "contains" | "not-contains",
-  string
+  "not-equals" | "equals" | "like" | "ilike" | "contains" | "not-contains" | "is-null" | "is-not-null" | "is-empty" | "is-not-empty",
+  string | null
 >;
 
 export type NumberOperators = Record<
-  "not-equals" | "equals" | "gte" | "lte" | "lt" | "gt",
-  number
+  "not-equals" | "equals" | "gte" | "lte" | "lt" | "gt" | "is-null" | "is-not-null",
+  number | null
 >;
 
-export type BooleanOperators = Record<"equals", boolean>;
+export type BooleanOperators = Record<
+  "equals" | "is-null" | "is-not-null",
+  boolean
+>;
 
-export type TimestampOperators = Record<"gte" | "lte" | "lt" | "gt", string>;
+export type TimestampOperators = Record<
+  "gte" | "lte" | "lt" | "gt" | "is-null" | "is-not-null",
+  string
+>;
 
-export type TimestampOperatorsTyped = Record<"gte" | "lte" | "lt" | "gt", Date>;
+export type TimestampOperatorsTyped = Record<
+  "gte" | "lte" | "lt" | "gt" | "is-null" | "is-not-null",
+  Date
+>;
 
 export type AnyOperator =
   | SingleKey<TextOperators>

@@ -59,6 +59,18 @@ const filterInputToFilterLeaf: {
     if (prompt === undefined || prompt === null) {
       return undefined;
     }
+    if (prompt.is_null) {
+      return { prompt: { "is-null": true } };
+    }
+    if (prompt.is_empty) {
+      return { prompt: { "is-empty": true } };
+    }
+    if (prompt.is_not_null) {
+      return { prompt: { "is-not-null": true } };
+    }
+    if (prompt.is_not_empty) {
+      return { prompt: { "is-not-empty": true } };
+    }
     return {
       request: {
         prompt: convertTextOperators(prompt),
@@ -68,6 +80,18 @@ const filterInputToFilterLeaf: {
   response: (response) => {
     if (response === undefined || response === null) {
       return undefined;
+    }
+    if (response.is_null) {
+      return { response: { "is-null": true } };
+    }
+    if (response.is_empty) {
+      return { response: { "is-empty": true } };
+    }
+    if (response.is_not_null) {
+      return { response: { "is-not-null": true } };
+    }
+    if (response.is_not_empty) {
+      return { response: { "is-not-empty": true } };
     }
     return {
       response: {
@@ -88,6 +112,9 @@ const filterInputToFilterLeaf: {
   createdAt: (createdAt) => {
     if (createdAt === undefined || createdAt === null) {
       return undefined;
+    }
+    if (createdAt.is_null) {
+      return { createdAt: { "is-null": true } };
     }
     return {
       request: {
