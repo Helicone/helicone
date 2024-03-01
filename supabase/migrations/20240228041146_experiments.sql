@@ -105,4 +105,13 @@ alter table "public"."experiments" add constraint "experiments_provider_key_fkey
 
 alter table "public"."experiments" validate constraint "experiments_provider_key_fkey";
 
+alter table "public"."experiments" add column "result_dataset" uuid;
+
+alter table "public"."helicone_proxy_keys" add column "experiment_use" boolean not null default false;
+
+alter table "public"."experiments" add constraint "experiments_result_dataset_fkey" FOREIGN KEY (result_dataset) REFERENCES experiment_dataset(id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
+
+alter table "public"."experiments" validate constraint "experiments_result_dataset_fkey";
+
+
 
