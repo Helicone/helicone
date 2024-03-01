@@ -255,6 +255,8 @@ services:
       - jawn
       - clickhouse-db
       - kong
+      - clickhouse-migration-runner
+      - supabase-migration-runner
     build:
       context: ../web
       dockerfile: ../docker/dockerfiles/dockerfile_web
@@ -277,8 +279,6 @@ services:
       SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
       DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
-      CLICKHOUSE_HOST_DOCKER: ${CLICKHOUSE_HOST}
-      CLICKHOUSE_PORT: ${CLICKHOUSE_PORT}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       VERCEL_ENV: ${VERCEL_ENV}

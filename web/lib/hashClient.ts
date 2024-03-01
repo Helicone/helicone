@@ -1,4 +1,3 @@
-import * as crypto from "crypto";
 export async function hashAuth(key: string): Promise<string> {
   key = `Bearer ${key}`;
   const encoder = new TextEncoder();

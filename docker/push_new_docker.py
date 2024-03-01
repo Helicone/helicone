@@ -11,16 +11,19 @@ def run_or_echo(test_mode, command):
         subprocess.run(command, check=True)
 
 def main(test_mode):
+    # Can comment out next line if you don't want to prune all images
     subprocess.run("echo y | docker system prune -a", shell=True, check=True)
     date = datetime.datetime.now().strftime("%Y.%m.%d")
     version_tag = f"v{date}"
 
+    # Can specify the image and context directories here
+    # Do not need to use all of the images
     docker_image_context = [
-        # {"image": "helicone/worker", "context": "../worker"},
+        {"image": "helicone/worker", "context": "../worker"},
         {"image": "helicone/web", "context": "../web"},
         {"image": "helicone/supabase-migration-runner", "context": "../supabase"},
-        {"image": "helicone/clickhouse-migration-runner", "context": "../clickhouse"}
-        # {"image": "helicone/jawn", "context": "../valhalla"}
+        {"image": "helicone/clickhouse-migration-runner", "context": "../clickhouse"},
+        {"image": "helicone/jawn", "context": "../valhalla"}
     ]
 
     for dic in docker_image_context:
