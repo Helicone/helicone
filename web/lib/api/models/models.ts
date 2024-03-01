@@ -38,7 +38,7 @@ export async function modelMetrics(
       operator: "and",
       right: {
         left: {
-          response_copy_v3: {
+          request_response_log: {
             request_created_at: {
               gte: new Date(timeFilter.start),
             },
@@ -46,7 +46,7 @@ export async function modelMetrics(
         },
         operator: "and",
         right: {
-          response_copy_v3: {
+          request_response_log: {
             request_created_at: {
               lte: new Date(timeFilter.end),
             },
@@ -63,15 +63,15 @@ export async function modelMetrics(
   });
   const query = `
 SELECT
-response_copy_v3.model as model,
+request_response_log.model as model,
   count(DISTINCT request_id) as total_requests,
-  sum(response_copy_v3.completion_tokens) as total_completion_tokens,
-  sum(response_copy_v3.prompt_tokens) as total_prompt_token,
-  sum(response_copy_v3.prompt_tokens) + sum(response_copy_v3.completion_tokens) as total_tokens,
-  (${CLICKHOUSE_PRICE_CALC("response_copy_v3")}) as cost
-from response_copy_v3
+  sum(request_response_log.completion_tokens) as total_completion_tokens,
+  sum(request_response_log.prompt_tokens) as total_prompt_token,
+  sum(request_response_log.prompt_tokens) + sum(request_response_log.completion_tokens) as total_tokens,
+  (${CLICKHOUSE_PRICE_CALC("request_response_log")}) as cost
+from request_response_log
 WHERE (${builtFilter.filter})
-GROUP BY response_copy_v3.model
+GROUP BY request_response_log.model
 HAVING (${havingFilter.filter})
 LIMIT ${limit}
 OFFSET ${offset}

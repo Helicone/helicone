@@ -269,6 +269,7 @@ export interface Database {
           organization_id: string
           origin_prompt: string
           provider_key: string
+          result_dataset: string | null
           status: string
           test_prompt: string
         }
@@ -280,6 +281,7 @@ export interface Database {
           organization_id: string
           origin_prompt: string
           provider_key: string
+          result_dataset?: string | null
           status?: string
           test_prompt: string
         }
@@ -291,6 +293,7 @@ export interface Database {
           organization_id?: string
           origin_prompt?: string
           provider_key?: string
+          result_dataset?: string | null
           status?: string
           test_prompt?: string
         }
@@ -328,6 +331,13 @@ export interface Database {
             columns: ["provider_key"]
             isOneToOne: false
             referencedRelation: "provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_result_dataset_fkey"
+            columns: ["result_dataset"]
+            isOneToOne: false
+            referencedRelation: "experiment_dataset"
             referencedColumns: ["id"]
           },
           {
@@ -648,6 +658,7 @@ export interface Database {
       helicone_proxy_keys: {
         Row: {
           created_at: string | null
+          experiment_use: boolean
           helicone_proxy_key: string
           helicone_proxy_key_name: string
           id: string
@@ -657,6 +668,7 @@ export interface Database {
         }
         Insert: {
           created_at?: string | null
+          experiment_use?: boolean
           helicone_proxy_key: string
           helicone_proxy_key_name: string
           id?: string
@@ -666,6 +678,7 @@ export interface Database {
         }
         Update: {
           created_at?: string | null
+          experiment_use?: boolean
           helicone_proxy_key?: string
           helicone_proxy_key_name?: string
           id?: string

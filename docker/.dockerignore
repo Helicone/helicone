@@ -1,0 +1,6 @@
+volumes/db/data
+volumes/clickhouse
+volumes/storage
+.env
+test.http
+docker-compose.override.yml

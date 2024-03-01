@@ -65,7 +65,8 @@ export async function proxyForwarder(
 
   if (
     proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled &&
-    provider === "OPENAI"
+    provider === "OPENAI" &&
+    env.PROMPTARMOR_API_KEY
   ) {
     let latestMessage;
 

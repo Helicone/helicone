@@ -113,7 +113,6 @@ export const DASHBOARD_PAGE_TABLE_FILTERS: [
   SingleFilterDef<"response_copy_v3">,
   SingleFilterDef<"response_copy_v3">,
   SingleFilterDef<"response_copy_v3">,
-  SingleFilterDef<"response_copy_v3">,
   SingleFilterDef<"response_copy_v3">
 ] = [
   {
@@ -143,13 +142,6 @@ export const DASHBOARD_PAGE_TABLE_FILTERS: [
     category: "request",
     table: "response_copy_v3",
     column: "user_id",
-  },
-  {
-    label: "Feedback",
-    operators: booleanOperators,
-    category: "feedback",
-    table: "response_copy_v3",
-    column: "rating",
   },
 ];
 export const REQUEST_TABLE_FILTERS: [
