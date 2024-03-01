@@ -224,13 +224,8 @@ export type TablesAndViews = {
   properties_table: FilterLeafPropertiesTable;
 
   // CLICKHOUSE TABLES
-  response_copy_v1: FilterLeafResponseCopyV1;
-  response_copy_v2: FilterLeafResponseCopyV2;
-  response_copy_v3: FilterLeafResponseCopyV3;
   request_response_log: FilterLeafRequestResponseLog;
   users_view: FilterLeafUserView;
-  properties_copy_v1: FilterLeafPropertiesTable;
-  properties_copy_v2: FilterLeafPropertiesCopyV2;
   properties_v3: FilterLeafPropertiesCopyV2;
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
   job: FilterLeafJob;
@@ -259,43 +254,7 @@ export function timeFilterToFilterNode(
   filter: TimeFilter,
   table: keyof TablesAndViews
 ): FilterNode {
-  if (table === "response_copy_v2") {
-    return {
-      left: {
-        response_copy_v2: {
-          request_created_at: {
-            gte: filter.start,
-          },
-        },
-      },
-      right: {
-        response_copy_v2: {
-          request_created_at: {
-            lte: filter.end,
-          },
-        },
-      },
-      operator: "and",
-    };
-  } else if (table === "response_copy_v3") {
-    return {
-      left: {
-        response_copy_v3: {
-          request_created_at: {
-            gte: filter.start,
-          },
-        },
-      },
-      right: {
-        response_copy_v3: {
-          request_created_at: {
-            lte: filter.end,
-          },
-        },
-      },
-      operator: "and",
-    };
-  } else if (table === "request_response_log") {
+  if (table === "request_response_log") {
     return {
       left: {
         request_response_log: {
