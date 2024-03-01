@@ -30,12 +30,12 @@ on "public"."helicone_api_keys"
 as permissive
 for all
 to public
-using ((((auth.uid() = user_id) AND ((auth.jwt() ->> 'email'::text) <> 'valyrdemo@gmail.com'::text)) OR (auth.uid() = ( SELECT organization.owner
+using ((((auth.uid() = user_id)) OR (auth.uid() = ( SELECT organization.owner
    FROM organization
   WHERE (organization.id = helicone_api_keys.organization_id))) OR (auth.uid() IN ( SELECT om.member
    FROM organization_member om
   WHERE (om.organization = helicone_api_keys.organization_id)))))
-with check ((((auth.uid() = user_id) AND ((auth.jwt() ->> 'email'::text) <> 'valyrdemo@gmail.com'::text)) OR (auth.uid() = ( SELECT organization.owner
+with check ((((auth.uid() = user_id)) OR (auth.uid() = ( SELECT organization.owner
    FROM organization
   WHERE (organization.id = helicone_api_keys.organization_id))) OR (auth.uid() IN ( SELECT om.member
    FROM organization_member om
