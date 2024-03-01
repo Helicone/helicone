@@ -21,7 +21,9 @@ import { FineTuningManager } from "./lib/managers/FineTuningManager";
 import { PostHog } from "posthog-node";
 import { hashAuth } from "./lib/db/hash";
 import { FilterNode } from "./lib/shared/filters/filterDefs";
-import { SupabaseConnector } from "./lib/db/supabase";
+import { SupabaseConnector, supabaseServer } from "./lib/db/supabase";
+import { dbExecute, dbQueryClickhouse } from "./lib/shared/db/dbExecute";
+import { runLoopsOnce, runMainLoops } from "./mainLoops";
 
 const ph_project_api_key = process.env.PUBLIC_POSTHOG_API_KEY;
 
@@ -44,9 +46,23 @@ const errorHandler: ErrorRequestHandler = (
 };
 
 export const ENVIRONMENT = process.env.VERCEL_ENV ?? "development";
+
+if (ENVIRONMENT === "production") {
+  runMainLoops();
+}
 const dirname = __dirname;
 
 const app = express();
+
+if (ENVIRONMENT !== "production") {
+  app.get("/run-loops/:index", async (req, res) => {
+    const index = parseInt(req.params.index);
+    await runLoopsOnce(index);
+    res.json({
+      status: "done",
+    });
+  });
+}
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
