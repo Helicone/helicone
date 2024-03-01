@@ -1,8 +1,15 @@
 import { clsx } from "../../shared/clsx";
-import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import {
+  CheckIcon,
+  PencilIcon,
+  TrashIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { useState } from "react";
 import ResizeTextArea from "./resizeTextArea";
 import { Message } from "../requests/chat";
+import { RenderWithPrettyInputKeys } from "../prompts/id/promptIdPage";
+import { removeLeadingWhitespace } from "../../shared/utils/utils";
 
 interface ChatRowProps {
   index: number;
@@ -25,58 +32,46 @@ const ChatRow = (props: ChatRowProps) => {
   const isAssistant = role === "assistant";
   const isSystem = role === "system";
 
-  const contentAsString = currentMessage.content as string;
+  const getContentAsString = (rawMessage: Message) => {
+    if (Array.isArray(rawMessage.content)) {
+      const textMessage = rawMessage.content.find(
+        (element) => element.type === "text"
+      );
+      return textMessage?.text;
+    } else {
+      return rawMessage.content;
+    }
+  };
+
+  const contentAsString = getContentAsString(currentMessage);
 
   const getContent = (content: string | any[] | null) => {
     if (Array.isArray(content)) {
       const textMessage = content.find((element) => element.type === "text");
 
       return (
-        <div className="flex flex-col space-y-4 divide-y divide-gray-100">
-          <p>{textMessage?.text}</p>
+        <div className="flex flex-col space-y-4 divide-y divide-gray-100 whitespace-pre-wrap">
+          <RenderWithPrettyInputKeys
+            text={removeLeadingWhitespace(textMessage?.text)}
+            selectedProperties={undefined}
+          />
+
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <div className="flex flex-wrap items-center pt-4">
             {content.map((item, index) =>
               item.type === "image_url" || item.type === "image" ? (
                 <div key={index}>
-                  {/* 
-                   {arr.map((item, index) =>
-              item.type === "image_url" || item.type === "image" ? (
-                <div key={index}>
                   {item.image_url.url ? (
                     <img
                       src={item.image_url.url}
                       alt={""}
-                      width={600}
-                      height={600}
-                    />
-                  ) : item.image_url ? (
-                    <img
-                      src={item.image_url}
-                      alt={""}
-                      width={600}
-                      height={600}
-                    />
-                  ) : (
-                    <div className="h-[150px] w-[200px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 text-center items-center flex justify-center text-xs italic text-gray-500">
-                      Unsupported Image Type
-                    </div>
-                  )}
-                </div>
-              ) : null
-                  
-                  */}
-                  {item.image_url.url ? (
-                    <img
-                      src={item.image_url.url}
-                      alt={""}
-                      width={200}
-                      height={200}
+                      width={800}
+                      height={800}
+                      className="bg-white border border-gray-300 rounded-lg p-2"
                     />
                   ) : (
                     <div className="h-[150px] w-[200px] bg-white border border-gray-300 text-center items-center flex justify-center text-xs italic text-gray-500">
                       Unsupported Image Type
-                      {JSON.stringify(item)}
                     </div>
                   )}
                 </div>
@@ -116,7 +111,7 @@ const ChatRow = (props: ChatRowProps) => {
               className={clsx(
                 isSystem ? "cursor-not-allowed" : "hover:bg-gray-50",
                 "bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-gray-900 border border-gray-300 dark:border-gray-700",
-                "w-20 h-6 text-xs rounded-lg font-semibold text-gray-900 dark:text-gray-100"
+                "sticky top-60 left-0 w-20 h-6 text-xs rounded-lg font-semibold text-gray-900 dark:text-gray-100"
               )}
               disabled={isSystem}
               onClick={() => {
@@ -126,7 +121,8 @@ const ChatRow = (props: ChatRowProps) => {
             >
               {isSystem ? "system" : "assistant"}
             </button>
-            <div className={clsx(isEditing ? "w-5/6" : "w-2/3")}>
+            {/* <div className={clsx(isEditing ? "w-5/6" : "w-2/3")}> */}
+            <div className="w-full pr-8">
               {isEditing ? (
                 <span className="w-full">
                   <ResizeTextArea
@@ -142,46 +138,50 @@ const ChatRow = (props: ChatRowProps) => {
                 <>{getContent(currentMessage.content)}</>
               )}
             </div>
-
-            {!isEditing && (
-              <div className="absolute right-0 flex flex-row space-x-4">
-                <button onClick={() => setIsEditing(true)}>
-                  <PencilIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
-                </button>
-                {!isSystem && (
+            <div className="relative h-full justify-end">
+              {!isEditing ? (
+                <div className="sticky top-60 right-0 flex flex-row space-x-4">
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
+                  >
+                    <PencilIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+                  </button>
+                  {!isSystem && (
+                    <button
+                      onClick={() => {
+                        deleteRow(currentMessage.id);
+                      }}
+                      className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
+                    >
+                      <TrashIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="sticky top-60 right-0 flex flex-row space-x-4">
                   <button
                     onClick={() => {
-                      deleteRow(currentMessage.id);
+                      setCurrentMessage(originalMessage);
+                      setIsEditing(false);
                     }}
+                    className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
                   >
-                    <TrashIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+                    <XMarkIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
                   </button>
-                )}
-              </div>
-            )}
-          </div>
-          {isEditing && (
-            <div className="flex flex-row space-x-4 w-full mx-auto items-center justify-end px-2">
-              <button
-                onClick={() => {
-                  setCurrentMessage(originalMessage);
-                  setIsEditing(false);
-                }}
-                className="px-2.5 py-1.5 text-xs font-medium bg-white dark:bg-black border border-gray-700 dark:border-gray-300 text-gray-900 dark:text-gray-100 rounded-lg"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  callback(contentAsString || "", role);
-                  setIsEditing(false);
-                }}
-                className="px-2.5 py-1.5 text-xs font-medium bg-gray-900 dark:bg-gray-100 text-white dark:text-black rounded-lg"
-              >
-                Save
-              </button>
+                  <button
+                    onClick={() => {
+                      callback(contentAsString || "", role);
+                      setIsEditing(false);
+                    }}
+                    className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
+                  >
+                    <CheckIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+                  </button>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       ) : (
         <div className="flex flex-col gap-4 w-full">
@@ -189,7 +189,7 @@ const ChatRow = (props: ChatRowProps) => {
             <button
               className={clsx(
                 "bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-gray-900 border border-gray-300 dark:border-gray-700",
-                "w-20 h-6 text-xs rounded-lg font-semibold text-gray-900 dark:text-gray-100"
+                "sticky top-60 left-0 w-20 h-6 text-xs rounded-lg font-semibold text-gray-900 dark:text-gray-100"
               )}
               disabled={isSystem}
               onClick={() => {
@@ -205,7 +205,7 @@ const ChatRow = (props: ChatRowProps) => {
             >
               user
             </button>
-            <div className={clsx(isEditing ? "w-5/6" : "w-2/3")}>
+            <div className="w-full">
               {isEditing ? (
                 <span className="w-full">
                   <ResizeTextArea
@@ -223,43 +223,50 @@ const ChatRow = (props: ChatRowProps) => {
               )}
             </div>
 
-            {!isEditing && (
-              <div className="absolute right-0 flex flex-row space-x-4">
-                <button onClick={() => setIsEditing(true)}>
-                  <PencilIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
-                </button>
-                <button
-                  onClick={() => {
-                    deleteRow(currentMessage.id);
-                  }}
-                >
-                  <TrashIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
-                </button>
-              </div>
-            )}
-          </div>
-          {isEditing && (
-            <div className="flex flex-row space-x-4 w-full mx-auto items-center justify-end px-2">
-              <button
-                onClick={() => {
-                  setCurrentMessage({ ...originalMessage });
-                  setIsEditing(false);
-                }}
-                className="px-2.5 py-1.5 text-xs font-medium bg-white dark:bg-black border border-gray-700 dark:border-gray-300 text-gray-900 dark:text-gray-100 rounded-lg"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  callback(contentAsString || "", role);
-                  setIsEditing(false);
-                }}
-                className="px-2.5 py-1.5 text-xs font-medium bg-gray-900 dark:bg-gray-100 text-white dark:text-black rounded-lg"
-              >
-                Save
-              </button>
+            <div className="relative h-full justify-end">
+              {!isEditing ? (
+                <div className="sticky top-60 right-0 flex flex-row space-x-4">
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
+                  >
+                    <PencilIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+                  </button>
+                  {!isSystem && (
+                    <button
+                      onClick={() => {
+                        deleteRow(currentMessage.id);
+                      }}
+                      className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
+                    >
+                      <TrashIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="sticky top-60 right-0 flex flex-row space-x-4">
+                  <button
+                    onClick={() => {
+                      setCurrentMessage(originalMessage);
+                      setIsEditing(false);
+                    }}
+                    className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
+                  >
+                    <XMarkIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      callback(contentAsString || "", role);
+                      setIsEditing(false);
+                    }}
+                    className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
+                  >
+                    <CheckIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+                  </button>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       )}
     </li>

@@ -147,7 +147,6 @@ export const SingleChat = (props: {
       return (
         <div className="flex flex-col space-y-4 divide-y divide-gray-100 dark:divide-gray-900">
           <RenderWithPrettyInputKeys
-            // remove the leading " and trailing " from the text
             text={textMessage?.text}
             selectedProperties={props.selectedProperties}
           />
@@ -172,7 +171,7 @@ export const SingleChat = (props: {
                     />
                   ) : (
                     <div className="h-[150px] w-[200px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 text-center items-center flex justify-center text-xs italic text-gray-500">
-                      hello
+                      Unsupported Image Type
                     </div>
                   )}
                 </div>

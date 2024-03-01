@@ -437,7 +437,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
         defaultExpanded={true}
       >
         <ExperimentForm
-          requestId={selectedPrompt.properties?.[0]?.id || ""}
+          heliconeTemplate={selectedPrompt.heliconeTemplate}
           currentPrompt={currentPrompt!}
           promptProperties={selectedPrompt.properties || []}
           close={() => setExperimentOpen(false)}

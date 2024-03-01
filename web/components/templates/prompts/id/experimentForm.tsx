@@ -8,14 +8,15 @@ import ProviderKeyList from "../../enterprise/portal/id/providerKeyList";
 import { useOrg } from "../../../layout/organizationContext";
 import PromptPropertyCard from "./promptPropertyCard";
 import useNotification from "../../../shared/notification/useNotification";
+import EditPrompt from "./formSteps/editPrompt";
 
 interface ExperimentFormProps {
-  requestId: string;
   currentPrompt: {
     id: string;
     latest_version: number;
     created_at: string;
   };
+  heliconeTemplate: any;
   promptProperties: {
     id: string;
     createdAt: string;
@@ -26,7 +27,7 @@ interface ExperimentFormProps {
 }
 
 const ExperimentForm = (props: ExperimentFormProps) => {
-  const { requestId, currentPrompt, promptProperties, close } = props;
+  const { currentPrompt, heliconeTemplate, promptProperties, close } = props;
 
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedVersion, setSelectedVersion] = useState<string>();
@@ -36,6 +37,8 @@ const ExperimentForm = (props: ExperimentFormProps) => {
   const [experimentModel, setExperimentModel] =
     useState<string>("gpt-3.5-turbo-1106");
   const { setNotification } = useNotification();
+
+  const requestId = promptProperties?.[0]?.id || "";
 
   const { data, isLoading, chat, hasData, isChat } =
     usePlaygroundPage(requestId);
@@ -179,15 +182,7 @@ const ExperimentForm = (props: ExperimentFormProps) => {
       {isLoading ? (
         <h1>loading...</h1>
       ) : hasData && isChat && singleRequest !== null ? (
-        <>
-          <ChatPlayground
-            requestId={requestId}
-            chat={chat}
-            models={["gpt-3.5-turbo"]}
-            temperature={1}
-            maxTokens={256}
-          />
-        </>
+        <EditPrompt heliconeTemplate={heliconeTemplate} chat={chat} />
       ) : (
         <div className="flex flex-col">
           {requestId}
