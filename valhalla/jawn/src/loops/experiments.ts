@@ -95,7 +95,7 @@ async function createProxyKey(
       helicone_proxy_key_name: heliconeProxyKeyName,
       helicone_proxy_key: hashedResult.data[0].hashed_password,
       provider_key_id: providerKey.id,
-      //TODO add a flag here that is was an experiment API key so we can have a cron job come and clean these up
+      experiment_use: true,
     })
     .select("*")
     .single();
@@ -251,7 +251,8 @@ export const experimentsLoop = async () => {
     .delete({
       count: "exact",
     })
-    .eq("id", proxyKey?.data.newProxyMapping?.id ?? "");
+    .eq("id", proxyKey?.data.newProxyMapping?.id ?? "")
+    .eq("experiment_use", true);
 
   const testDataset = await supabaseServer.client
     .from("experiment_dataset")
@@ -270,9 +271,13 @@ export const experimentsLoop = async () => {
       },
     ]);
 
+  const putResult = await supabaseServer.client
+    .from("experiments")
+    .update({
+      result_dataset: testDataset?.data?.id ?? "",
+    })
+    .eq("id", experiement?.data?.[0].id ?? "");
+
   console.log("deleteResult", deleteResult);
   console.log("res", await res.json());
-  //TODO create a result dataset and associate all of the new requests with the new result dataset :)
-  // console.log(testPrompt?.data?.[0]?.heliconeTemplate);
-  // console.log(traverseAndTransform(testPrompt?.data?.[0]?.heliconeTemplate));
 };
