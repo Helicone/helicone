@@ -18,7 +18,7 @@ export async function getTotalFeedback(
     {
       org_id,
       filter: {
-        left: timeFilterToFilterNode(timeFilter, "response_copy_v3"),
+        left: timeFilterToFilterNode(timeFilter, "request_response_log"),
         right: filter,
         operator: "and",
       },
@@ -29,7 +29,7 @@ export async function getTotalFeedback(
   const query = `
       WITH total_count AS (
         SELECT count(*) as count
-        FROM response_copy_v3
+        FROM request_response_log
         WHERE (
           (${filterString})
           AND rating IS NOT NULL

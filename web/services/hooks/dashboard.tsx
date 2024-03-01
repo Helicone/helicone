@@ -80,7 +80,7 @@ const useGetUnauthorized = (userId: string) => {
         body: JSON.stringify({
           filter: {
             left: {
-              response_copy_v3: {
+              request_response_log: {
                 request_created_at: {
                   gte: getBeginningOfMonth(),
                 },

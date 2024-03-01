@@ -134,6 +134,23 @@ interface ResponseCopyV3ToOperators extends ResponseCopyV2ToOperators {
 
 export type FilterLeafResponseCopyV3 = SingleKey<ResponseCopyV3ToOperators>;
 
+interface RequestResponseLogToOperators {
+  latency: SingleKey<NumberOperators>;
+  status: SingleKey<NumberOperators>;
+  request_created_at: SingleKey<TimestampOperatorsTyped>;
+  response_created_at: SingleKey<TimestampOperatorsTyped>;
+  auth_hash: SingleKey<TextOperators>;
+  model: SingleKey<TextOperators>;
+  user_id: SingleKey<TextOperators>;
+  organization_id: SingleKey<TextOperators>;
+  node_id: SingleKey<TextOperators>;
+  job_id: SingleKey<TextOperators>;
+  threat: SingleKey<BooleanOperators>;
+}
+
+export type FilterLeafRequestResponseLog =
+  SingleKey<RequestResponseLogToOperators>;
+
 type PropertiesCopyV2ToOperators = {
   key: SingleKey<TextOperators>;
   value: SingleKey<TextOperators>;
@@ -214,6 +231,7 @@ export type TablesAndViews = {
   response_copy_v1: FilterLeafResponseCopyV1;
   response_copy_v2: FilterLeafResponseCopyV2;
   response_copy_v3: FilterLeafResponseCopyV3;
+  request_response_log: FilterLeafRequestResponseLog;
   users_view: FilterLeafUserView;
   properties_copy_v1: FilterLeafPropertiesTable;
   properties_copy_v2: FilterLeafPropertiesCopyV2;
@@ -274,6 +292,24 @@ export function timeFilterToFilterNode(
       },
       right: {
         response_copy_v3: {
+          request_created_at: {
+            lte: filter.end,
+          },
+        },
+      },
+      operator: "and",
+    };
+  } else if (table === "request_response_log") {
+    return {
+      left: {
+        request_response_log: {
+          request_created_at: {
+            gte: filter.start,
+          },
+        },
+      },
+      right: {
+        request_response_log: {
           request_created_at: {
             lte: filter.end,
           },

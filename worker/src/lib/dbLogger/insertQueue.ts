@@ -440,7 +440,7 @@ export class InsertQueue {
 
     const query = `
         SELECT * 
-        FROM response_copy_v3
+        FROM request_response_log
         WHERE (
           request_id={val_0: UUID} AND
           organization_id={val_1: UUID}

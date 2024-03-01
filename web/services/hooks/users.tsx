@@ -23,7 +23,7 @@ const useUserId = (userId: string) => {
 
       const userFilters = filterUIToFilterLeafs(filterMap, []).concat([
         {
-          response_copy_v3: {
+          request_response_log: {
             user_id: {
               equals: userId,
             },

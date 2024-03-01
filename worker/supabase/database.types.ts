@@ -214,7 +214,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       experiment_dataset_values: {
@@ -257,7 +257,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "request_rbac"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       experiments: {
@@ -336,7 +336,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "prompts"
             referencedColumns: ["uuid"]
-          }
+          },
         ]
       }
       feature_flags: {
@@ -1586,6 +1586,38 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_feedback: {
+        Row: {
+          created_at: string
+          feedback: string
+          id: number
+          organization_id: string
+          tag: string
+        }
+        Insert: {
+          created_at?: string
+          feedback: string
+          id?: number
+          organization_id: string
+          tag: string
+        }
+        Update: {
+          created_at?: string
+          feedback?: string
+          id?: number
+          organization_id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_feedback_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
             referencedColumns: ["id"]
           },
         ]
