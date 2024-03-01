@@ -18,7 +18,7 @@ export async function getErrorCodes(
     {
       org_id,
       filter: {
-        left: timeFilterToFilterNode(timeFilter, "response_copy_v3"),
+        left: timeFilterToFilterNode(timeFilter, "request_response_log"),
         right: filter,
         operator: "and",
       },
@@ -27,13 +27,13 @@ export async function getErrorCodes(
   );
   const query = `
   SELECT
-    response_copy_v3.status as error_code,
+  request_response_log.status as error_code,
     count(*) AS count
-  FROM response_copy_v3
+  FROM request_response_log
   WHERE (
     ${filterString}
   )
-  GROUP BY response_copy_v3.status
+  GROUP BY request_response_log.status
 `;
 
   return resultMap(

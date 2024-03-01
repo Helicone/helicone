@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 1.145.4
       - run: supabase db start
       - run: supabase db lint
 
@@ -110,7 +110,7 @@ jobs:
       - name: Start proxy worker
         run: |
           cd worker
-          wrangler dev --port 8787 --var WORKER_TYPE:OPENAI_PROXY > ~/test-logs/proxy.log &
+          wrangler dev --port 8787 --var WORKER_TYPE:OPENAI_PROXY PROMPTARMOR_API_KEY:${{ secrets.PROMPTARMOR_API_KEY }} > ~/test-logs/proxy.log &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start async worker
@@ -122,7 +122,7 @@ jobs:
       - name: Start gateway worker
         run: |
           cd worker
-          wrangler dev --port 8789 --var WORKER_TYPE:GATEWAY_API > ~/test-logs/gateway.log &
+          wrangler dev --port 8789 --var WORKER_TYPE:GATEWAY_API PROMPTARMOR_API_KEY:${{ secrets.PROMPTARMOR_API_KEY }} > ~/test-logs/gateway.log &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start Supabase DB & API
@@ -141,7 +141,6 @@ jobs:
           HELICONE_API_KEY: "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
           OPENAI_API_KEY: ${{ secrets.CI_OPENAI_API_KEY }}
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
-          PROMPTARMOR_API_KEY: ${{ secrets.PROMPTARMOR_API_KEY }}
         run: |
           pytest test_properties.py -s
           pytest python_integration_tests.py -s

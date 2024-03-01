@@ -194,7 +194,20 @@ const whereKeyMappings: KeyMappings = {
       feedback_created_at: "response_copy_v3.feedback_created_at",
     })(filter);
   },
-  users_view: easyKeyMappings<"response_copy_v3">({
+  request_response_log: easyKeyMappings<"request_response_log">({
+    latency: "request_response_log.latency",
+    status: "request_response_log.status",
+    request_created_at: "request_response_log.request_created_at",
+    response_created_at: "request_response_log.response_created_at",
+    auth_hash: "request_response_log.auth_hash",
+    model: "request_response_log.model",
+    user_id: "request_response_log.user_id",
+    organization_id: "request_response_log.organization_id",
+    node_id: "request_response_log.node_id",
+    job_id: "request_response_log.job_id",
+    threat: "request_response_log.threat",
+  }),
+  users_view: easyKeyMappings<"request_response_log">({
     status: "r.status",
     user_id: "r.user_id",
   }),
@@ -297,6 +310,7 @@ const havingKeyMappings: KeyMappings = {
   properties_copy_v1: NOT_IMPLEMENTED,
   response_copy_v2: NOT_IMPLEMENTED,
   response_copy_v3: NOT_IMPLEMENTED,
+  request_response_log: NOT_IMPLEMENTED,
   properties_copy_v2: NOT_IMPLEMENTED,
   properties_v3: NOT_IMPLEMENTED,
   property_with_response_v1: NOT_IMPLEMENTED,
@@ -506,7 +520,7 @@ export async function buildFilterWithAuthClickHouse(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
-    response_copy_v3: {
+    request_response_log: {
       organization_id: {
         equals: orgId,
       },
