@@ -236,7 +236,6 @@ const RequestRow = (props: {
               </p>
             </li>
           )}
-          {/* Conditional rendering block for temperature */}
           {request.temperature && (
             <li className="flex flex-row justify-between items-center py-2">
               <p className="font-semibold text-gray-900 dark:text-gray-100">

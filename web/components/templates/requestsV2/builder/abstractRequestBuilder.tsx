@@ -57,7 +57,6 @@ abstract class AbstractRequestBuilder {
   }
 
   protected getCommonFields(): CommonFields {
-    // Add the following line to extract temperature from the response
     const temperature = this.response?.request_body?.temperature;
     return {
       model: this.model,
