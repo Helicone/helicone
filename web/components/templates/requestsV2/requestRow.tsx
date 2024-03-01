@@ -240,7 +240,7 @@ const RequestRow = (props: {
           {request.temperature && (
             <li className="flex flex-row justify-between items-center py-2">
               <p className="font-semibold text-gray-900 dark:text-gray-100">
-                LLM Temperature
+               Temperature
               </p>
               <p className="text-gray-700 dark:text-gray-300 truncate">
                 {request.temperature.toFixed(1)}
