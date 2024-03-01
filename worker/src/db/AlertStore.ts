@@ -97,9 +97,9 @@ export class AlertStore {
     timeWindowMs: number
   ): Promise<Result<AlertState, string>> {
     const query = `SELECT 
-    ${CLICKHOUSE_PRICE_CALC("response_copy_v3")} as totalCount,
+    ${CLICKHOUSE_PRICE_CALC("request_response_log")} as totalCount,
     COUNT() AS requestCount
-    FROM response_copy_v3
+    FROM request_response_log
     WHERE
     organization_id = {val_0: UUID} AND
     request_created_at >= toDateTime64(now(), 3) - INTERVAL {val_1: Int64} MILLISECOND`;
@@ -127,7 +127,7 @@ export class AlertStore {
     COUNT() AS totalCount,
     COUNTIf(status BETWEEN 400 AND 599) AS errorCount,
     COUNT() AS requestCount
-  FROM response_copy_v3
+  FROM request_response_log
   WHERE 
     organization_id = {val_0: UUID} AND
     request_created_at >= toDateTime64(now(), 3) - INTERVAL {val_1: Int64} MILLISECOND
