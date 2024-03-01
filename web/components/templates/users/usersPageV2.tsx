@@ -15,6 +15,7 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import TableFooter from "../requestsV2/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { useRouter } from "next/router";
+import UserDocsLink from './UserDocsLink';
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -73,6 +74,9 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     <>
       <AuthHeader title={"Users"} />
       <div className="flex flex-col space-y-4">
+        {/* Conditional rendering of the UserDocsLink */}
+        {count <= 1 && !isLoading && <UserDocsLink />}
+      
         <ThemedTableV5
           defaultData={users}
           defaultColumns={INITIAL_COLUMNS}
