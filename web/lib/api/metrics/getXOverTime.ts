@@ -83,14 +83,14 @@ export async function getXOverTime<T>(
   const endDate = new Date(timeFilter.end);
   const timeFilterNode: FilterNode = {
     left: {
-      response_copy_v3: {
+      request_response_log: {
         request_created_at: {
           gte: startDate,
         },
       },
     },
     right: {
-      response_copy_v3: {
+      request_response_log: {
         request_created_at: {
           lte: endDate,
         },
@@ -136,7 +136,7 @@ export async function getXOverTime<T>(
 SELECT
   ${dateTrunc} as created_at_trunc,
   ${groupByColumns.concat([countColumn]).join(", ")}
-FROM response_copy_v3
+FROM request_response_log
 WHERE (
   ${builtFilter}
 )

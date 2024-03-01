@@ -2,7 +2,6 @@ import Footer from "../components/layout/footer";
 import NavBarV2 from "../components/layout/navbar/navBarV2";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import GridBackground from "../components/layout/public/gridBackground";
 import { CheckCircleIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 
@@ -14,18 +13,20 @@ const bullets = [
   "Get onboarding support",
 ];
 
-const Sales = () => {
+const Contact = () => {
   const router = useRouter();
 
   return (
     <PublicMetaData
-      description={"The easiest way to build your LLM-application at scale."}
+      description={
+        "The Generative AI platform built for developers. Get observability, tooling, fine-tuning, and evaluations out of the box. "
+      }
       ogImageUrl={"https://www.helicone.ai/static/helicone-landing.png"}
     >
-      <NavBarV2 />
-      <div className="bg-white h-full min-h-screen">
-        <GridBackground>
-          <div className="flex flex-col sm:flex-row mx-auto w-full gap-8 max-w-6xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
+      <div className="w-full bg-gray-50 h-full antialiased">
+        <NavBarV2 />
+        <div className="h-full">
+          <div className="flex flex-col mx-auto w-full gap-8 max-w-5xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
             <div className="flex flex-col w-2/3">
               <h1 className="text-2xl sm:text-4xl font-semibold leading-tight sm:leading-snug max-w-4xl">
                 Contact Us
@@ -57,14 +58,14 @@ const Sales = () => {
             </div>
             <Calendar />
           </div>
-        </GridBackground>
+        </div>
+        <Footer />
       </div>
-      <Footer />
     </PublicMetaData>
   );
 };
 
-export default Sales;
+export default Contact;
 
 import Cal, { getCalApi } from "@calcom/embed-react";
 import { useEffect } from "react";

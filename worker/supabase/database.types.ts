@@ -191,6 +191,164 @@ export interface Database {
         }
         Relationships: []
       }
+      experiment_dataset: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_dataset_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      experiment_dataset_values: {
+        Row: {
+          created_at: string
+          dataset_id: string
+          id: number
+          request_id: string
+        }
+        Insert: {
+          created_at?: string
+          dataset_id: string
+          id?: number
+          request_id: string
+        }
+        Update: {
+          created_at?: string
+          dataset_id?: string
+          id?: number
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_dataset_values_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_dataset"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_dataset_values_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_dataset_values_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request_rbac"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      experiments: {
+        Row: {
+          created_at: string
+          dataset: string
+          id: string
+          name: string
+          organization_id: string
+          origin_prompt: string
+          provider_key: string
+          result_dataset: string | null
+          status: string
+          test_prompt: string
+        }
+        Insert: {
+          created_at?: string
+          dataset: string
+          id?: string
+          name: string
+          organization_id: string
+          origin_prompt: string
+          provider_key: string
+          result_dataset?: string | null
+          status?: string
+          test_prompt: string
+        }
+        Update: {
+          created_at?: string
+          dataset?: string
+          id?: string
+          name?: string
+          organization_id?: string
+          origin_prompt?: string
+          provider_key?: string
+          result_dataset?: string | null
+          status?: string
+          test_prompt?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiments_dataset_fkey"
+            columns: ["dataset"]
+            isOneToOne: false
+            referencedRelation: "experiment_dataset"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_origin_prompt_fkey"
+            columns: ["origin_prompt"]
+            isOneToOne: false
+            referencedRelation: "prompts"
+            referencedColumns: ["uuid"]
+          },
+          {
+            foreignKeyName: "experiments_provider_key_fkey"
+            columns: ["provider_key"]
+            isOneToOne: false
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_provider_key_fkey"
+            columns: ["provider_key"]
+            isOneToOne: false
+            referencedRelation: "provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_result_dataset_fkey"
+            columns: ["result_dataset"]
+            isOneToOne: false
+            referencedRelation: "experiment_dataset"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_test_prompt_fkey"
+            columns: ["test_prompt"]
+            isOneToOne: false
+            referencedRelation: "prompts"
+            referencedColumns: ["uuid"]
+          }
+        ]
+      }
       feature_flags: {
         Row: {
           created_at: string | null
@@ -500,6 +658,7 @@ export interface Database {
       helicone_proxy_keys: {
         Row: {
           created_at: string | null
+          experiment_use: boolean
           helicone_proxy_key: string
           helicone_proxy_key_name: string
           id: string
@@ -509,6 +668,7 @@ export interface Database {
         }
         Insert: {
           created_at?: string | null
+          experiment_use?: boolean
           helicone_proxy_key: string
           helicone_proxy_key_name: string
           id?: string
@@ -518,6 +678,7 @@ export interface Database {
         }
         Update: {
           created_at?: string | null
+          experiment_use?: boolean
           helicone_proxy_key?: string
           helicone_proxy_key_name?: string
           id?: string
@@ -977,10 +1138,12 @@ export interface Database {
           description: string | null
           heliconeTemplate: Json | null
           id: string
+          is_experiment: boolean
           name: string | null
           organization_id: string
           soft_delete: boolean
           status: string
+          uuid: string
           version: number
         }
         Insert: {
@@ -988,10 +1151,12 @@ export interface Database {
           description?: string | null
           heliconeTemplate?: Json | null
           id: string
+          is_experiment?: boolean
           name?: string | null
           organization_id: string
           soft_delete?: boolean
           status?: string
+          uuid?: string
           version?: number
         }
         Update: {
@@ -999,10 +1164,12 @@ export interface Database {
           description?: string | null
           heliconeTemplate?: Json | null
           id?: string
+          is_experiment?: boolean
           name?: string | null
           organization_id?: string
           soft_delete?: boolean
           status?: string
+          uuid?: string
           version?: number
         }
         Relationships: [
@@ -1192,6 +1359,7 @@ export interface Database {
           prompt_values: Json | null
           properties: Json | null
           provider: string
+          threat: boolean | null
           user_id: string | null
         }
         Insert: {
@@ -1211,6 +1379,7 @@ export interface Database {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
+          threat?: boolean | null
           user_id?: string | null
         }
         Update: {
@@ -1230,6 +1399,7 @@ export interface Database {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
+          threat?: boolean | null
           user_id?: string | null
         }
         Relationships: [
@@ -1429,6 +1599,38 @@ export interface Database {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      user_feedback: {
+        Row: {
+          created_at: string
+          feedback: string
+          id: number
+          organization_id: string
+          tag: string
+        }
+        Insert: {
+          created_at?: string
+          feedback: string
+          id?: number
+          organization_id: string
+          tag: string
+        }
+        Update: {
+          created_at?: string
+          feedback?: string
+          id?: number
+          organization_id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_feedback_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
             referencedColumns: ["id"]
           }
         ]

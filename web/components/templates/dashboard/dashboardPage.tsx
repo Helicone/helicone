@@ -2,6 +2,7 @@ import {
   ArrowPathIcon,
   ChartBarIcon,
   HomeIcon,
+  PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
 import { User } from "@supabase/auth-helpers-nextjs";
 import { useQuery } from "@tanstack/react-query";
@@ -42,6 +43,7 @@ import UpgradeProModal from "../../shared/upgradeProModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { formatNumber } from "../users/initialColumns";
 import StyledAreaChart from "./styledAreaChart";
+import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -367,6 +369,17 @@ const DashboardPage = (props: DashboardPageProps) => {
       minH: 4,
       maxH: 4,
     },
+    {
+      i: "suggest-more-graphs",
+      x: 6,
+      y: 8,
+      w: 6,
+      h: 4,
+      minW: 3,
+      maxW: 12,
+      minH: 4,
+      maxH: 4,
+    },
   ];
 
   const smallLayout: ReactGridLayout.Layout[] = [
@@ -489,6 +502,17 @@ const DashboardPage = (props: DashboardPageProps) => {
       minH: 4,
       maxH: 4,
     },
+    {
+      i: "suggest-more-graphs",
+      x: 0,
+      y: 28,
+      w: 6,
+      h: 4,
+      minW: 3,
+      maxW: 12,
+      minH: 4,
+      maxH: 4,
+    },
   ];
 
   const gridCols = { lg: 12, md: 12, sm: 12, xs: 4, xxs: 2 };
@@ -590,6 +614,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     }));
 
   const [currentStatus, setCurrentStatus] = useState<string[]>(["200"]);
+  const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
 
   const renderUnauthorized = () => {
     if (currentTier === "free") {
@@ -928,6 +953,21 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </StyledAreaChart>
               </div>
+
+              <div key="suggest-more-graphs">
+                <button className="space-y-2 bg-white dark:bg-black border border-gray-900 dark:border-white border-dashed w-full h-full p-2 text-black dark:text-white shadow-sm rounded-lg flex flex-col items-center justify-center">
+                  <PresentationChartLineIcon className="h-12 w-12 text-black dark:text-white" />
+                  <button
+                    className="p-4 text-semibold text-lg"
+                    onClick={() => {
+                      setOpenSuggestGraph(true);
+                    }}
+                  >
+                    Request a new graph
+                  </button>
+                </button>
+              </div>
+
               <div key="tokens-per-min-over-time">
                 <StyledAreaChart
                   title={"Tokens / Minute"}
@@ -985,6 +1025,8 @@ const DashboardPage = (props: DashboardPageProps) => {
           </section>
         </div>
       )}
+      <SuggestionModal open={openSuggestGraph} setOpen={setOpenSuggestGraph} />
+
       <UpgradeProModal open={open} setOpen={setOpen} />
     </>
   );

@@ -26,6 +26,7 @@ import UpgradeProModal from "../../shared/upgradeProModal";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import AuthHeader from "../../shared/authHeader";
+import { formatNumber } from "../users/initialColumns";
 
 interface CachePageProps {
   currentPage: number;
@@ -93,29 +94,21 @@ const CachePage = (props: CachePageProps) => {
     {
       id: "caches",
       label: "All Time Caches",
-      value: chMetrics.totalCacheHits.data?.data || 0,
+      value: `${chMetrics.totalCacheHits.data?.data ?? 0} hits`,
       isLoading: isAnyLoading,
       icon: CircleStackIcon,
     },
     {
       id: "savings",
       label: "All Time Savings",
-      value: chMetrics.totalSavings.data?.data
-        ? `$${
-            chMetrics.totalSavings.data?.data < 1
-              ? chMetrics.totalSavings.data?.data.toFixed(5)
-              : chMetrics.totalSavings.data?.data.toFixed(2)
-          }`
-        : "$0.00",
+      value: `$${formatNumber(chMetrics.totalSavings.data?.data ?? 0)}`,
       isLoading: isAnyLoading,
       icon: BanknotesIcon,
     },
     {
       id: "time-saved",
       label: "Total Time Saved",
-      value: chMetrics.timeSaved.data?.data
-        ? `${chMetrics.timeSaved.data?.data}s`
-        : "0s",
+      value: `${chMetrics.timeSaved.data?.data ?? 0} s`,
       isLoading: isAnyLoading,
       icon: ClockIcon,
     },

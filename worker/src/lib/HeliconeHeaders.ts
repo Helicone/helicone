@@ -43,6 +43,7 @@ export interface IHeliconeHeaders {
   nodeId: Nullable<string>;
   fallBacks: Nullable<HeliconeFallback[]>;
   modelOverride: Nullable<string>;
+  promptSecurityEnabled: Nullable<string>;
 }
 
 export class HeliconeHeaders implements IHeliconeHeaders {
@@ -73,6 +74,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   nodeId: Nullable<string>;
   fallBacks: Nullable<HeliconeFallback[]>;
   modelOverride: Nullable<string>;
+  promptSecurityEnabled: Nullable<string>;
 
   constructor(private headers: Headers) {
     const heliconeHeaders = this.getHeliconeHeaders();
@@ -93,6 +95,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.nodeId = heliconeHeaders.nodeId;
     this.fallBacks = this.getFallBacks();
     this.modelOverride = heliconeHeaders.modelOverride;
+    this.promptSecurityEnabled = heliconeHeaders.promptSecurityEnabled;
   }
 
   private getFallBacks(): Nullable<HeliconeFallback[]> {
@@ -199,6 +202,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       nodeId: this.headers.get("Helicone-Node-Id") ?? null,
       fallBacks: this.getFallBacks(),
       modelOverride: this.headers.get("Helicone-Model-Override") ?? null,
+      promptSecurityEnabled:
+        this.headers.get("Helicone-Prompt-Security-Enabled") ?? null,
     };
   }
 

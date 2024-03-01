@@ -56,7 +56,7 @@ const UserModal = (props: UserModalProps) => {
 
     const userFilters = filterUIToFilterLeafs(filterMap, []).concat([
       {
-        response_copy_v3: {
+        request_response_log: {
           user_id: {
             equals: user?.user_id,
           },

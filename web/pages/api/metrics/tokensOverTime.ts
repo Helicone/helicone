@@ -23,8 +23,8 @@ export async function getTokensOverTime(
     completion_tokens: number;
   }>(
     data,
-    `sum(response_copy_v3.prompt_tokens) AS prompt_tokens,
-     sum(response_copy_v3.completion_tokens) AS completion_tokens`
+    `sum(request_response_log.prompt_tokens) AS prompt_tokens,
+     sum(request_response_log.completion_tokens) AS completion_tokens`
   );
   return resultMap(res, (resData) =>
     resData.map((d) => ({

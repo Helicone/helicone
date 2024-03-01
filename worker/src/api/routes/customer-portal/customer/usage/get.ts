@@ -83,12 +83,12 @@ export class CustomerUsageGet extends BaseAPIRoute {
       `
       SELECT
         count(*) as count,
-        ${CLICKHOUSE_PRICE_CALC("response_copy_v3")} as cost,
-        count(response_copy_v3.prompt_tokens) as prompt_tokens,
-        count(response_copy_v3.completion_tokens) as completion_tokens
-      FROM response_copy_v3
+        ${CLICKHOUSE_PRICE_CALC("request_response_log")} as cost,
+        count(request_response_log.prompt_tokens) as prompt_tokens,
+        count(request_response_log.completion_tokens) as completion_tokens
+      FROM request_response_log
       WHERE (
-        response_copy_v3.organization_id = {val_0 : String}
+        request_response_log.organization_id = {val_0 : String}
       )
     `,
       [customerId]

@@ -115,12 +115,12 @@ const PromptsPage = (props: PromptsPageProps) => {
                   className={clsx(
                     currentPrompt?.id === prompt.id
                       ? "bg-sky-200 dark:bg-sky-800"
-                      : "bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-950",
+                      : "bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-950 rounded-lg",
                     i === 0 ? "rounded-t-md" : "",
                     i === prompts.data?.prompts.length - 1
                       ? "rounded-b-md"
                       : "",
-                    "w-full flex flex-col space-x-2 p-2 border-b border-gray-200 dark:border-gray-800"
+                    "w-full flex flex-col space-x-2 p-2"
                   )}
                 >
                   {/* <TagIcon className="h-4 w-4 text-black dark:text-white" /> */}

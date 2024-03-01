@@ -7,6 +7,7 @@ module.exports = {
     "./node_modules/@tremor/**/*.{js,ts,jsx,tsx}", // Tremor module
   ],
   theme: {
+    fontFamily: {},
     transparent: "transparent",
     current: "currentColor",
     extend: {
