@@ -10,7 +10,4 @@ COPY . /app/supabase
 
 WORKDIR /app
 
-
-RUN npm i supabase
-
-CMD npx supabase db push --db-url ${DATABASE_URL}
+CMD ["sh", "-c", "npx supabase db push --db-url ${DATABASE_URL}"]

@@ -2,7 +2,6 @@ import { Badge, TableCell, TableRow, Text, AreaChart } from "@tremor/react";
 import { getUSDateFromString } from "../../../shared/utils/utils";
 import { Fragment, useState } from "react";
 import { clsx } from "../../../shared/clsx";
-import { Database } from "../../../../supabase/database.types";
 import { useGetOrgMembers } from "../../../../services/hooks/organizations";
 import { formatISO } from "date-fns";
 import { useRequestsOverTime } from "../../organization/plan/renderOrgPlan";
@@ -17,6 +16,7 @@ import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import { Menu, Transition } from "@headlessui/react";
 import { DeleteOrgModal } from "../../organization/deleteOrgModal";
 import EditCustomerOrgModal from "./editCustomerOrgModal";
+import { Database } from "../../../../supabase/database.types";
 
 interface CustomerRowProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
