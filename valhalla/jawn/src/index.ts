@@ -158,6 +158,50 @@ app.use(
 );
 
 app.post(
+  "/v1/key/generateHash",
+  withAuth<
+    paths["/v1/key/generateHash"]["post"]["requestBody"]["content"]["application/json"]
+  >(async ({ request, res, supabaseClient, authParams }) => {
+    try {
+      const body = await request.getRawBody<any>();
+      const { apiKey, userId, keyName } = body;
+      const hashedKey = await hashAuth(apiKey);
+
+      const insertRes = await supabaseClient.client
+        .from("helicone_api_keys")
+        .insert({
+          api_key_hash: hashedKey,
+          user_id: userId,
+          api_key_name: keyName,
+          organization_id: authParams.organizationId,
+        });
+
+      if (insertRes.error) {
+        res.status(500).json({
+          error: {
+            message: "Failed to insert key",
+            details: insertRes.error,
+          },
+        });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+      });
+      return;
+    } catch (error: any) {
+      console.log(`Failed to generate key hash: ${error}`);
+      res.status(400).json({
+        error: "Failed to generate key hash",
+        message: error,
+      });
+      return;
+    }
+  })
+);
+
+app.post(
   "/v1/request/query",
   withAuth<
     paths["/v1/request/query"]["post"]["requestBody"]["content"]["application/json"]

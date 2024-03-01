@@ -6,7 +6,6 @@
 
 version: "3.8"
 services:
-
   studio:
     container_name: supabase-studio
     image: supabase/studio:20240101-8e4a094
@@ -17,7 +16,7 @@ services:
           "CMD",
           "node",
           "-e",
-          "require('http').get('http://localhost:3000/api/profile', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+          "require('http').get('http://localhost:3000/api/profile', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})",
         ]
       timeout: 5s
       interval: 5s
@@ -87,7 +86,7 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://localhost:9999/health"
+          "http://localhost:9999/health",
         ]
       timeout: 5s
       interval: 5s
@@ -158,7 +157,7 @@ services:
         condition: service_healthy
       rest:
         condition: service_started
- 
+
     healthcheck:
       test:
         [
@@ -167,7 +166,7 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://localhost:5000/status"
+          "http://localhost:5000/status",
         ]
       timeout: 5s
       interval: 5s
@@ -190,7 +189,6 @@ services:
       IMGPROXY_URL: http://imgproxy:5001
     volumes:
       - ./volumes/storage:/var/lib/storage:z
-
 
   meta:
     container_name: supabase-meta
@@ -250,15 +248,18 @@ services:
       # Changes required for Analytics support
       - ./volumes/db/logs.sql:/docker-entrypoint-initdb.d/migrations/99-logs.sql:Z
 
-
   web:
     container_name: helicone-web-local
     depends_on:
+      - db
+      - jawn
+      - clickhouse-db
+      - kong
       - clickhouse-migration-runner
       - supabase-migration-runner
     build:
       context: ../web
-      dockerfile: ../docker/dockerfiles/dockerfile_web  
+      dockerfile: ../docker/dockerfiles/dockerfile_web
       args:
         NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_PUBLIC_URL}
         NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH}
@@ -281,7 +282,7 @@ services:
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       VERCEL_ENV: ${VERCEL_ENV}
-      
+
   clickhouse-db:
     container_name: clickhouse-db
     image: clickhouse/clickhouse-server:23.4.2.11
@@ -325,7 +326,6 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
 
-
   worker-openai-proxy:
     container_name: helicone-worker-openai-proxy
     build:
@@ -361,7 +361,6 @@ services:
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
-
 
   worker-anthropic-proxy:
     container_name: helicone-worker-anthropic-proxy
@@ -408,17 +407,13 @@ services:
       - ${JAWN_PORT}:${JAWN_PORT}
     environment:
       PORT: ${JAWN_PORT}
-    
+
       SUPABASE_CREDS: |
         {
           "url": "http://kong:${KONG_HTTP_PORT}",
           "service_role_key": "${SERVICE_ROLE_KEY}"
         }
       SUPABASE_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-
-    
-
-
 
   # worker-helicone-api:
   #   container_name: helicone-worker-helicone-api
@@ -436,5 +431,4 @@ services:
   #     CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
   #     STORAGE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${PGBOUNCER_PORT}/${POSTGRES_DB}
 
-
-    # If you want to use logging, please run with `docker compose -f docker-compose.yml -f docker-compose-logging.yml up`
+  # If you want to use logging, please run with `docker compose -f docker-compose.yml -f docker-compose-logging.yml up`
