@@ -9,6 +9,7 @@ import { useOrg } from "../../../layout/organizationContext";
 import PromptPropertyCard from "./promptPropertyCard";
 import useNotification from "../../../shared/notification/useNotification";
 import EditPrompt from "./formSteps/editPrompt";
+import { Message } from "../../requests/chat";
 
 interface ExperimentFormProps {
   currentPrompt: {
@@ -34,8 +35,10 @@ const ExperimentForm = (props: ExperimentFormProps) => {
   const [providerKeyId, setProviderKeyId] = useState("");
   const [experimentName, setExperimentName] = useState("");
   const [requestIdList, setRequestIdList] = useState<string[]>([]);
+  const [newPromptChat, setNewPromptChat] = useState<Message[]>([]);
   const [experimentModel, setExperimentModel] =
     useState<string>("gpt-3.5-turbo-1106");
+
   const { setNotification } = useNotification();
 
   const requestId = promptProperties?.[0]?.id || "";
@@ -47,7 +50,7 @@ const ExperimentForm = (props: ExperimentFormProps) => {
   const singleRequest = data.length > 0 ? data[0] : null;
 
   const renderStep = [
-    <div className="flex flex-col space-y-8 w-full">
+    <div className="flex flex-col space-y-8 w-full" key={1}>
       <div className="flex flex-col space-y-1 w-1/4">
         <label
           htmlFor="experiment-name"
@@ -178,21 +181,66 @@ const ExperimentForm = (props: ExperimentFormProps) => {
         </button>
       </div>
     </div>,
-    <div>
+    <div key={2}>
       {isLoading ? (
         <h1>loading...</h1>
       ) : hasData && isChat && singleRequest !== null ? (
-        <EditPrompt heliconeTemplate={heliconeTemplate} chat={chat} />
+        <EditPrompt
+          heliconeTemplate={heliconeTemplate}
+          onSubmit={(newPrompt) => {
+            setNewPromptChat(newPrompt);
+            setCurrentStep(2);
+          }}
+        />
       ) : (
-        <div className="flex flex-col">
-          {requestId}
-          {JSON.stringify(hasData)}
-          {JSON.stringify(isChat)}
-          {JSON.stringify(data)}
-        </div>
+        <div className="flex flex-col">No data available.</div>
       )}
     </div>,
-    <h1>Step 3</h1>,
+    <div key={3} className="flex flex-col space-y-4">
+      <h3 className="font-semibold text-2xl">Confirm your experiment run</h3>
+      <ul className="flex flex-col space-y-2">
+        <li className="flex items-center text-sm gap-2">
+          <h4 className="font-semibold">Experiment Name</h4>-
+          <p>{experimentName}</p>
+        </li>
+        <li className="flex items-center text-sm gap-2">
+          <h4 className="font-semibold">Version</h4>-<p>{selectedVersion}</p>
+        </li>
+        <li className="flex items-center text-sm gap-2">
+          <h4 className="font-semibold">Provider Key</h4>-<p>{providerKeyId}</p>
+        </li>
+        <li className="flex items-center text-sm gap-2">
+          <h4 className="font-semibold">Request Ids</h4>-
+          <p>{requestIdList.join(", ")}</p>
+        </li>
+        <li className="flex items-center text-sm gap-2">
+          <h4 className="font-semibold">Experiment Model</h4>-
+          <p>{experimentModel}</p>
+        </li>
+      </ul>
+      <pre className="whitespace-pre-wrap">
+        {JSON.stringify(
+          {
+            name: "Experiment",
+            originPrompt: {
+              promptId: currentPrompt.id,
+              version: selectedVersion,
+            },
+            newPrompt: {
+              heliconeTemplate: {
+                model: experimentModel,
+                messages: newPromptChat,
+              },
+            },
+            dataset: {
+              requestIds: requestIdList,
+            },
+          },
+          null,
+          2
+        )}
+      </pre>
+    </div>,
   ];
 
   return (

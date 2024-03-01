@@ -1,13 +1,14 @@
+import { useState } from "react";
 import ChatPlayground from "../../../playground/chatPlayground";
 import { Message } from "../../../requests/chat";
 
 interface EditPromptProps {
   heliconeTemplate: any;
-  chat: Message[];
+  onSubmit: (newPrompt: Message[]) => void;
 }
 
 const EditPrompt = (props: EditPromptProps) => {
-  const { heliconeTemplate, chat } = props;
+  const { heliconeTemplate, onSubmit } = props;
 
   return (
     <>
@@ -17,6 +18,7 @@ const EditPrompt = (props: EditPromptProps) => {
         models={["gpt-3.5-turbo"]}
         temperature={1}
         maxTokens={256}
+        onSubmit={(history) => onSubmit(history)}
       />
     </>
   );

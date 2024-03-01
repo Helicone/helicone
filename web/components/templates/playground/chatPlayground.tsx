@@ -19,10 +19,11 @@ interface ChatPlaygroundProps {
   models: string[];
   temperature: number;
   maxTokens: number;
+  onSubmit?: (history: Message[]) => void;
 }
 
 const ChatPlayground = (props: ChatPlaygroundProps) => {
-  const { requestId, chat, models, temperature, maxTokens } = props;
+  const { requestId, chat, models, temperature, maxTokens, onSubmit } = props;
 
   const { setNotification } = useNotification();
 
@@ -307,7 +308,11 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           </button>
           <button
             onClick={() => {
-              handleSubmit(currentChat);
+              if (onSubmit) {
+                onSubmit(currentChat);
+              } else {
+                handleSubmit(currentChat);
+              }
             }}
             className={clsx(
               "bg-sky-500 hover:bg-sky-600",
