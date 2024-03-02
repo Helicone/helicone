@@ -61,6 +61,13 @@ export async function run(
         body: JSON.stringify(newRequestBody),
       });
 
+      const putResultInDataset = await supabaseServer.client
+        .from("experiment_dataset_values")
+        .update({
+          result_request_id: requestId,
+        })
+        .eq("id", experiment.dataset.id);
+
       console.log("data", await res.json());
     }
 
