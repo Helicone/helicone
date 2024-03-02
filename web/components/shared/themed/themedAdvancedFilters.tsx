@@ -115,7 +115,7 @@ function AdvancedFilterInput({
     case "text":
       return (
         <TextInput
-          className="mx-auto max-w-xs"
+          className=""
           onChange={(e) => {
             setCurrentValue(e.target.value);
             onChange(e.target.value);
@@ -127,7 +127,7 @@ function AdvancedFilterInput({
     case "number":
       return (
         <NumberInput
-          className="mx-auto max-w-xs"
+          className=""
           onChange={(e) => {
             setCurrentValue(e.target.value);
             onChange(e.target.value);
@@ -243,7 +243,7 @@ function AdvancedFilterRow({
         </SearchSelect>
       </div>
 
-      <div className="w-full max-w-[10rem]">
+      <div className="w-full max-w-[15rem]">
         <Select
           value={currentOperator}
           placeholder="equals"

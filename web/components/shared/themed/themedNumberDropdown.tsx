@@ -17,7 +17,7 @@ const ThemedNumberDropdown = (props: ThemedNumberDropdownProps) => {
   const [selected, setSelected] = useState(value);
 
   return (
-    <>
+    <div className="w-full max-w-[15rem]">
       <SearchSelect
         value={selected}
         placeholder="Select value..."
@@ -29,14 +29,12 @@ const ThemedNumberDropdown = (props: ThemedNumberDropdownProps) => {
         {options.map((option, i) => (
           <SearchSelectItem value={option.key} key={i}>
             <p>
-              {/* capitalize the first letter */}
               {option.param.charAt(0).toUpperCase() + option.param.slice(1)}
-              {/* {option.param} */}
             </p>
           </SearchSelectItem>
         ))}
       </SearchSelect>
-    </>
+    </div>
   );
 };
 
