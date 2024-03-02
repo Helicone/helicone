@@ -223,18 +223,21 @@ export type Database = {
           dataset_id: string
           id: number
           request_id: string
+          result_request_id: string | null
         }
         Insert: {
           created_at?: string
           dataset_id: string
           id?: number
           request_id: string
+          result_request_id?: string | null
         }
         Update: {
           created_at?: string
           dataset_id?: string
           id?: number
           request_id?: string
+          result_request_id?: string | null
         }
         Relationships: [
           {
@@ -254,6 +257,20 @@ export type Database = {
           {
             foreignKeyName: "experiment_dataset_values_request_id_fkey"
             columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request_rbac"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_dataset_values_result_request_id_fkey"
+            columns: ["result_request_id"]
+            isOneToOne: false
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_dataset_values_result_request_id_fkey"
+            columns: ["result_request_id"]
             isOneToOne: false
             referencedRelation: "request_rbac"
             referencedColumns: ["id"]
