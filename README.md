@@ -61,12 +61,13 @@ response = openai.Completion.create(
 
 Helicone's [cloud offering](https://www.helicone.ai) is deployed on Cloudflare and ensures the lowest latency add-on to your API requests.
 
-To get started locally, Helicone is comprised of four services:
+To get started locally, Helicone is comprised of five services:
 
-- Frontend (Node)
-- The proxy worker (Wrangler)
-- Application database (Supabase)
-- Analytics database (ClickHouse)
+- Web: Frontend Platform (NextJs)
+- Worker: Proxy & Async Logging (Cloudflare Workers)
+- Jawn: Dedicated Server for serving Web (Express)
+- Supabase: Application Database and Auth
+- ClickHouse: Analytics Database
 
 If you have any questions, contact help@helicone.ai or join [discord](https://discord.gg/zsSTcH2qhG).
 
@@ -104,11 +105,17 @@ supabase start
 yarn
 yarn dev
 
-# start worker (simulates oai.hconeai.com)
+# start workers (for proxying, async logging and some API requests)
 # in another terminal
 cd worker
 yarn
-wrangler dev --local
+chmod +x run_all_workers.sh
+./run_all_workers.sh
+
+# start jawn (for serving the FE and handling API requests)
+# in another terminal
+cd valhalla/jawn
+yarn && yarn dev
 
 # Make your request to local host
 curl --request POST \
@@ -153,6 +160,7 @@ SUPABASE_SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 # Community 🌍
 
 ## Learn this repo with Onboard AI
+
 [learnthisrepo.com/helicone](learnthisrepo.com/helicone)
 
 ## Supported Projects
@@ -162,7 +170,7 @@ SUPABASE_SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 | [nextjs-chat-app](https://github.com/enricoros/nextjs-chatgpt-app) | [Docs](https://github.com/enricoros/nextjs-chatgpt-app/issues/32)                         |
 | [langchain](https://github.com/hwchase17/langchain)                | [Docs](https://python.langchain.com/en/latest/ecosystem/helicone.html?highlight=helicone) |
 | [langchainjs](https://github.com/hwchase17/langchainjs)            | [Docs](https://js.langchain.com/docs/ecosystem/helicone)                                  |
-| [ModelFusion](https://modelfusion.dev)                             | [Docs](https://modelfusion.dev/integration/observability/helicone) |
+| [ModelFusion](https://modelfusion.dev)                             | [Docs](https://modelfusion.dev/integration/observability/helicone)                        |
 
 ## Contributing
 
