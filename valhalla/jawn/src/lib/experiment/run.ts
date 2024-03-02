@@ -70,32 +70,6 @@ export async function run(
 
       console.log("data", await res.json());
     }
-
-    const testDataset = await supabaseServer.client
-      .from("experiment_dataset")
-      .insert({
-        organization_id: experiment.organizationId,
-      })
-      .select("*")
-      .single();
-
-    const testValues = await supabaseServer.client
-      .from("experiment_dataset_values")
-      .insert(
-        testResults.map((requestId) => ({
-          dataset_id: testDataset.data!.id,
-          request_id: requestId,
-        }))
-      );
-
-    const putResult = await supabaseServer.client
-      .from("experiments")
-      .update({
-        result_dataset: testDataset.data!.id,
-        status: "completed",
-      })
-      .eq("id", experiment.id);
-    console.log("putResult", putResult);
   });
   return err("Not implemented");
 }
