@@ -83,6 +83,7 @@ export async function handleProxyRequest(
     }
   }
 
+  const completedChunk = await interceptor?.waitForChunk();
   return {
     data: {
       loggable: new DBLoggable({
@@ -90,18 +91,14 @@ export async function handleProxyRequest(
         response: {
           responseId: crypto.randomUUID(),
           getResponseBody: async () => ({
-            body: (await interceptor?.waitForChunk())?.body ?? "",
+            body: completedChunk?.body ?? "",
             endTime: new Date(
-              (await interceptor?.waitForChunk())?.endTimeUnix ??
-                new Date().getTime()
+              completedChunk?.endTimeUnix ?? new Date().getTime()
             ),
           }),
           responseHeaders: new Headers(response.headers),
           status: async () => {
-            return getStatus(
-              response.status,
-              (await interceptor?.waitForChunk())?.reason
-            );
+            return getStatus(response.status, completedChunk?.reason);
           },
           omitLog:
             proxyRequest.requestWrapper.heliconeHeaders.omitHeaders
@@ -109,6 +106,11 @@ export async function handleProxyRequest(
         },
         timing: {
           startTime: proxyRequest.startTime,
+          timeToFirstToken:
+            completedChunk?.endTimeUnix !== undefined &&
+            completedChunk?.startTimeUnix !== undefined
+              ? completedChunk.endTimeUnix - completedChunk.startTimeUnix
+              : undefined,
         },
         tokenCalcUrl: proxyRequest.tokenCalcUrl,
       }),

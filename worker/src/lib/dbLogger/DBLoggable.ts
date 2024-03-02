@@ -49,6 +49,7 @@ export interface DBLoggableProps {
   timing: {
     startTime: Date;
     endTime?: Date;
+    timeToFirstToken?: number;
   };
   tokenCalcUrl: string;
 }
@@ -273,6 +274,7 @@ export class DBLoggable {
       await this.response.getResponseBody();
     const endTime = this.timing.endTime ?? responseEndTime;
     const delay_ms = endTime.getTime() - this.timing.startTime.getTime();
+    const timeToFirstToken = this.timing.timeToFirstToken;
     const status = await this.response.status();
     const parsedResponse = await this.parseResponse(responseBody, status);
     const isStream = this.request.isStream;
@@ -298,6 +300,7 @@ export class DBLoggable {
         status: await this.response.status(),
         completion_tokens: parsedResponse.data.usage?.completion_tokens,
         prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
+        time_to_first_token: timeToFirstToken,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         model: model,
         delay_ms,
