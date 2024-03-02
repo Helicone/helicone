@@ -113,5 +113,8 @@ alter table "public"."experiments" add constraint "experiments_result_dataset_fk
 
 alter table "public"."experiments" validate constraint "experiments_result_dataset_fkey";
 
+alter table "public"."experiment_dataset_values" add column "result_request_id" uuid;
 
+alter table "public"."experiment_dataset_values" add constraint "experiment_dataset_values_result_request_id_fkey" FOREIGN KEY (result_request_id) REFERENCES request(id) ON UPDATE CASCADE ON DELETE SET NULL not valid;
 
+alter table "public"."experiment_dataset_values" validate constraint "experiment_dataset_values_result_request_id_fkey";
