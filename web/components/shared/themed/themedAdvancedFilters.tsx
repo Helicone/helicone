@@ -6,12 +6,15 @@ import {
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { ThemedTextDropDown } from "./themedTextDropDown";
 import {
+  NumberInput,
   SearchSelect,
   SearchSelectItem,
   Select,
   SelectItem,
+  TextInput,
 } from "@tremor/react";
 import { useState } from "react";
+import ThemedNumberDropdown from "./themedNumberDropdown";
 
 export function AdvancedFilters({
   filterMap,
@@ -100,7 +103,10 @@ function AdvancedFilterInput({
   type: ColumnType;
   value: string;
   onChange: (value: string | null) => void;
-  inputParams?: string[];
+  inputParams?: {
+    key: string;
+    param: string;
+  }[];
   onSearchHandler?: (search: string) => Promise<Result<void, string>>;
 }) {
   const [currentValue, setCurrentValue] = useState<string>(value);
@@ -108,25 +114,27 @@ function AdvancedFilterInput({
   switch (type) {
     case "text":
       return (
-        <input
-          type="text"
+        <TextInput
+          className="mx-auto max-w-xs"
           onChange={(e) => {
+            setCurrentValue(e.target.value);
             onChange(e.target.value);
           }}
           placeholder={"text..."}
-          value={value}
-          className="block w-full sm:min-w-[25rem] rounded-md border-gray-300 dark:border-gray-700 text-black dark:text-white bg-white dark:bg-black shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+          value={currentValue}
         />
       );
     case "number":
       return (
-        <input
-          type="number"
-          name="search-field"
-          onChange={(e) => onChange(e.target.value)}
+        <NumberInput
+          className="mx-auto max-w-xs"
+          onChange={(e) => {
+            setCurrentValue(e.target.value);
+            onChange(e.target.value);
+          }}
           placeholder={"number..."}
-          value={value}
-          className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white text-black dark:text-white dark:bg-black shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+          value={currentValue}
+          enableStepper={false}
         />
       );
     case "timestamp":
@@ -143,10 +151,18 @@ function AdvancedFilterInput({
     case "text-with-suggestions":
       return (
         <ThemedTextDropDown
-          options={inputParams ?? []}
+          options={inputParams?.map((param) => param.param) ?? []}
           onChange={(e) => onChange(e)}
           value={value}
           onSearchHandler={onSearchHandler}
+        />
+      );
+    case "number-with-suggestions":
+      return (
+        <ThemedNumberDropdown
+          options={inputParams ?? []}
+          onChange={(e) => onChange(e)}
+          value={value}
         />
       );
     case "bool":
@@ -258,13 +274,10 @@ function AdvancedFilterRow({
             filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx].type
           }
           value={filter.value}
-          inputParams={filterMap[filter.filterMapIdx]?.operators[
-            filter.operatorIdx
-          ].inputParams
-            ?.filter(
-              (param) => param.key === filterMap[filter.filterMapIdx]?.column
-            )
-            .map((param) => param.param)}
+          inputParams={
+            filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx]
+              .inputParams
+          }
           onChange={(value) => {
             setFilter([
               {
