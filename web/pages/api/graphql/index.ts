@@ -47,9 +47,10 @@ export default async function handler(
 ): Promise<void> {
   if (req.url === "/api/graphql") {
   }
-  if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-    const client = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-      host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+
+  if (process.env.NEXT_PUBLIC_POSTHOG_API_KEY) {
+    const client = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
+      host: "https://app.posthog.com",
     });
 
     client.capture({
