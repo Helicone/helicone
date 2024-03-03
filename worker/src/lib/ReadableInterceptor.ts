@@ -105,8 +105,6 @@ export class ReadableInterceptor {
     return new Promise((resolve, _reject) => {
       const timeoutId = setTimeout(() => {
         this.chunkEmitter.removeListener(eventName, listener);
-        console.log(`Starting time: ${this.startTimeUnix}`);
-        console.log(`First chunk time: ${this.firstChunkTimeUnix}`);
         resolve({
           body: this.responseBody,
           reason: "timeout",
