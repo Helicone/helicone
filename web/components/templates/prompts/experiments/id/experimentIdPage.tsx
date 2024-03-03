@@ -10,6 +10,7 @@ import { usePrompt } from "../../../../../services/hooks/prompts/singlePrompt";
 import ThemedModal from "../../../../shared/themed/themedModal";
 import { clsx } from "../../../../shared/clsx";
 import { Tooltip } from "@mui/material";
+import { useExperiment } from "../../../../../services/hooks/prompts/experiments";
 
 interface PromptIdPageProps {
   id: string;
@@ -176,33 +177,33 @@ export const RenderWithPrettyInputKeys = (props: {
 
 const ExperimentIdPage = (props: PromptIdPageProps) => {
   const { id } = props;
-  const { prompts, isLoading } = usePrompts();
+  const { experiment, isLoading } = useExperiment(id);
 
-  const currentPrompt = prompts?.data?.prompts.find((p) => p.id === id);
-  const [selectedVersion, setSelectedVersion] = useState<string>();
+  // const currentPrompt = prompts?.data?.prompts.find((p) => p.id === id);
+  // const [selectedVersion, setSelectedVersion] = useState<string>();
 
-  const selectedPrompt = usePrompt({
-    version: selectedVersion || "0",
-    promptId: id,
-  });
+  // const selectedPrompt = usePrompt({
+  //   version: selectedVersion || "0",
+  //   promptId: id,
+  // });
 
-  const [inputOpen, setInputOpen] = useState(false);
-  const [experimentOpen, setExperimentOpen] = useState(false);
+  // const [inputOpen, setInputOpen] = useState(false);
+  // const [experimentOpen, setExperimentOpen] = useState(false);
 
-  // the selected request to view in the tempalte
-  const [selectedInput, setSelectedInput] = useState<{
-    id: string;
-    createdAt: string;
-    properties: Record<string, string>;
-    response: string;
-  }>();
+  // // the selected request to view in the tempalte
+  // const [selectedInput, setSelectedInput] = useState<{
+  //   id: string;
+  //   createdAt: string;
+  //   properties: Record<string, string>;
+  //   response: string;
+  // }>();
 
   // set the selected version to the latest version on initial load
-  useEffect(() => {
-    if (currentPrompt) {
-      setSelectedVersion(currentPrompt.latest_version.toString());
-    }
-  }, [currentPrompt]);
+  // useEffect(() => {
+  //   if (currentPrompt) {
+  //     setSelectedVersion(currentPrompt.latest_version.toString());
+  //   }
+  // }, [currentPrompt]);
 
   return (
     <>
@@ -218,6 +219,34 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
           <h1 className="font-semibold text-3xl text-black dark:text-white">
             {id}
           </h1>
+          Name: {experiment?.name}
+          {experiment?.datasetRuns.length}
+          <div className="grid grid-cols-5 w-full gap-4 border ">
+            <div className="col-span-1"></div>
+            <pre className="text-sm overflow-auto col-span-2">
+              {experiment?.originPrompt.heliconeTemplate.messages?.[0]?.content}
+            </pre>
+            <pre className="text-sm overflow-auto col-span-2">
+              {experiment?.testPrompt.heliconeTemplate.messages?.[0]?.content}
+            </pre>
+
+            {experiment?.datasetRuns.map((run) => {
+              return (
+                <>
+                  <div className="col-span-1">
+                    <pre>{JSON.stringify(run.inputs, undefined, 2)}</pre>
+                  </div>
+                  <pre className="text-sm overflow-auto col-span-2">
+                    {run.originResult.responseBody.choices[0].message.content}
+                  </pre>
+
+                  <pre className="text-sm overflow-auto col-span-2">
+                    {run.testResult.responseBody.choices[0].message.content}
+                  </pre>
+                </>
+              );
+            })}
+          </div>
         </div>
       </div>
     </>

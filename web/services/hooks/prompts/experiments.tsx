@@ -6,6 +6,7 @@ import { FilterNode } from "../../lib/filters/filterDefs";
 import { SortLeafUsers } from "../../lib/sorts/users/sorts";
 import { PromptsResult } from "../../../pages/api/prompt";
 import { ExperimentResult } from "../../../pages/api/experiment";
+import { Experiment } from "../../../pages/api/experiment/[id]";
 
 const useExperiments = () => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
@@ -31,14 +32,15 @@ const useExperiments = () => {
 
 const useExperiment = (id: string) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["experiments"],
+    queryKey: ["experiment", id],
     queryFn: async (query) => {
-      return await fetch("/api/experiment", {
+      const id = query.queryKey[1];
+      return await fetch(`/api/experiment/${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-      }).then((res) => res.json() as Promise<ExperimentResult>);
+      }).then((res) => res.json() as Promise<Result<Experiment, string>>);
     },
     refetchOnWindowFocus: false,
   });
@@ -47,8 +49,8 @@ const useExperiment = (id: string) => {
     isLoading,
     refetch,
     isRefetching,
-    experiment: data?.data?.experiment,
+    experiment: data?.data,
   };
 };
 
-export { useExperiments };
+export { useExperiments, useExperiment };

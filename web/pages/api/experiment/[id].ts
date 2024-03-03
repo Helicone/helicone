@@ -1,4 +1,3 @@
-import { error } from "itty-router";
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 
 import {
@@ -14,12 +13,19 @@ type DatasetResult = {
   responseBody: any;
 };
 
-type Experiment = {
+type Prompt = {
+  heliconeTemplate: any;
+};
+export type Experiment = {
   name: string;
+
+  originPrompt: Prompt;
+  testPrompt: Prompt;
+
   datasetRuns: {
     inputs: Record<string, string>;
     originResult: DatasetResult;
-    newResult: DatasetResult;
+    testResult: DatasetResult;
   }[];
 };
 
@@ -39,67 +45,85 @@ async function handler({
     .from("experiments")
     .select("*")
     .eq("id", id)
+    .eq("organization_id", orgId)
     .single();
 
+  if (experimentErr) {
+    res.status(500).json({ error: "Server error", data: null });
+    return;
+  }
+
   const query = `
-    SELECT req.properties as properties, res.body as body from experiment_dataset_values e
-    INNER JOIN request req ON req.id = e.request_id
-    INNER JOIN response res ON res.request_id = req.id
+    SELECT 
+      origin_req.properties as properties, 
+      origin_res.body as origin_response_body,
+      origin_res.created_at as origin_response_created_at,
+      test_res.body as test_response_body,
+      test_res.created_at as test_response_created_at
+
+    
+    from experiment_dataset_values e
+    INNER JOIN request origin_req ON origin_req.id = e.request_id
+    INNER JOIN response origin_res ON origin_res.request = origin_req.id
+
+    INNER JOIN request test_req ON test_req.id = e.result_request_id
+    INNER JOIN response test_res ON test_res.request = test_req.id
     WHERE e.dataset_id = $1
     `;
-
   const { data: datasetRuns, error: datasetRunsErr } = await dbExecute<{
     properties: Record<string, string>;
-    body: any;
+    origin_response_body: any;
+    origin_response_created_at: string;
+    test_response_body: any;
+    test_response_created_at: string;
   }>(query, [experimentData?.dataset]);
 
-  const poo = datasetRuns?.map((run) => {
-    const inputs = Object.keys(run.properties).reduce((acc, propertyKey) => {
-      if (propertyKey.startsWith("Helicone-Prompt-Input-")) {
-        acc[propertyKey.replace("Helicone-Prompt-Input-", "")] =
-          run.properties[propertyKey];
-      }
-      return acc;
-    }, {} as Record<string, string>);
+  const originPrompt = await supabaseServer
+    .from("prompts")
+    .select("*")
+    .eq("organization_id", orgId)
+    .eq("uuid", experimentData?.origin_prompt)
+    .single();
 
-    return {
-      inputs,
-      originResult: {
-        createdAt: "",
-        responseBody: run.body,
+  const testPrompt = await supabaseServer
+    .from("prompts")
+    .select("*")
+    .eq("organization_id", orgId)
+    .eq("uuid", experimentData?.test_prompt)
+    .single();
+
+  res.status(200).json(
+    ok({
+      name: experimentData?.name ?? "",
+      originPrompt: {
+        heliconeTemplate: originPrompt?.data?.heliconeTemplate ?? null,
       },
-      newResult: {
-        createdAt: "",
-        responseBody: run.body,
+      testPrompt: {
+        heliconeTemplate: testPrompt?.data?.heliconeTemplate ?? null,
       },
-    };
-  });
-
-  const query2 = `
-  SELECT req.properties as properties, res.body as body from experiment_dataset_values e
-  INNER JOIN request req ON req.id = e.request_id
-  INNER JOIN response res ON res.request_id = req.id
-  WHERE e.dataset_id = $1
-  `;
-
-  const { data: datasetRuns2, error: datasetRunsErr2 } = await dbExecute<{
-    properties: Record<string, string>;
-    body: any;
-  }>(query, [experimentData?.result_dataset]);
-
-  const datasets2 = datasetRuns2?.map((run) => {
-    const originId = run.properties["Helicone-Property-Source-Request-Id"];
-
-    return {
-      ...run,
-      originId,
-    };
-  });
-  const originRequestId = datasetRuns2?.find((run) => {
-    return Object.keys(run.properties).includes(
-      "Helicone-Property-Source-Request-Id"
-    );
-  });
+      datasetRuns:
+        datasetRuns?.map((datasetRun) => ({
+          inputs: Object.keys(datasetRun.properties).reduce(
+            (acc, propertyKey) => {
+              if (propertyKey.startsWith("Helicone-Prompt-Input-")) {
+                acc[propertyKey.replace("Helicone-Prompt-Input-", "")] =
+                  datasetRun.properties[propertyKey];
+              }
+              return acc;
+            },
+            {} as Record<string, string>
+          ),
+          originResult: {
+            createdAt: datasetRun.origin_response_created_at,
+            responseBody: datasetRun.origin_response_body,
+          },
+          testResult: {
+            createdAt: datasetRun.test_response_created_at,
+            responseBody: datasetRun.test_response_body,
+          },
+        })) ?? [],
+    })
+  );
 }
 
 export default withAuth(handler);

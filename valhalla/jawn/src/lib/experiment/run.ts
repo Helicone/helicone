@@ -61,15 +61,27 @@ export async function run(
         body: JSON.stringify(newRequestBody),
       });
 
+      // wait 1 seconds for the request to be processed
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       const putResultInDataset = await supabaseServer.client
         .from("experiment_dataset_values")
         .update({
           result_request_id: requestId,
         })
-        .eq("id", experiment.dataset.id);
-
-      console.log("data", await res.json());
+        .eq("id", data.datasetValueId);
+      if (putResultInDataset.error) {
+        console.error(putResultInDataset.error);
+      }
     }
+
+    const newExperiment = await supabaseServer.client
+      .from("experiments")
+      .update({
+        status: "completed",
+        result: testResults,
+      })
+      .eq("id", experiment.id);
   });
   return err("Not implemented");
 }

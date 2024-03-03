@@ -31,6 +31,7 @@ export interface Dataset {
   id: string;
   datasetId: string;
   data: {
+    datasetValueId: number;
     requestId: string;
     createdAt: string;
     inputs: Record<string, string>;
@@ -107,7 +108,7 @@ async function fetchDataset(
   datasetId: string
 ): Promise<Result<Dataset, string>> {
   const dataSetValues = await dbExecute<{
-    id: string;
+    id: number;
     dataset_id: string;
     request_id: string;
     properties: Record<string, string>;
@@ -127,9 +128,10 @@ async function fetchDataset(
   }
 
   const dataset: Dataset = {
-    id: dataSetValues.data[0].id,
+    id: dataSetValues.data[0].dataset_id,
     datasetId: dataSetValues.data[0].dataset_id,
     data: dataSetValues.data.map((d) => ({
+      datasetValueId: d.id,
       requestId: d.request_id,
       createdAt: d.path,
       inputs: Object.entries(d.properties as Record<string, string>)
