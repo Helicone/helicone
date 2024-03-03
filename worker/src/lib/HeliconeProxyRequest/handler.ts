@@ -41,7 +41,7 @@ export async function handleProxyRequest(
     : callProvider(callProps));
 
   const interceptor = response.body
-    ? new ReadableInterceptor(response.body)
+    ? new ReadableInterceptor(response.body, proxyRequest.isStream)
     : null;
   let body = interceptor ? interceptor.stream : null;
 

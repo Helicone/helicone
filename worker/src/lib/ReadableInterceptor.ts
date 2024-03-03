@@ -19,6 +19,7 @@ export class ReadableInterceptor {
 
   constructor(
     stream: ReadableStream,
+    private isStream: boolean,
     private chunkEventName = "done",
     private chunkTimeoutMs = 30 * 60 * 1000 // Default to 30 minutes
   ) {
@@ -45,7 +46,7 @@ export class ReadableInterceptor {
     };
 
     const onChunk = (chunk: Uint8Array) => {
-      if (this.firstChunkTimeUnix === null) {
+      if (this.isStream && this.firstChunkTimeUnix === null) {
         this.firstChunkTimeUnix = Date.now();
       }
 
