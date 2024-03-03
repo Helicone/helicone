@@ -47,8 +47,9 @@ export default async function handler(
 ): Promise<void> {
   if (req.url === "/api/graphql") {
   }
-  if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-    const client = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
+  console.log("req.url", process.env.NEXT_PUBLIC_POSTHOG_API_KEY);
+  if (process.env.NEXT_PUBLIC_POSTHOG_API_KEY) {
+    const client = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
       host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     });
 
