@@ -83,7 +83,6 @@ export async function handleProxyRequest(
     }
   }
 
-  const completedChunk = await interceptor?.waitForChunk();
   return {
     data: {
       loggable: new DBLoggable({
@@ -91,14 +90,18 @@ export async function handleProxyRequest(
         response: {
           responseId: crypto.randomUUID(),
           getResponseBody: async () => ({
-            body: completedChunk?.body ?? "",
+            body: (await interceptor?.waitForChunk())?.body ?? "",
             endTime: new Date(
-              completedChunk?.endTimeUnix ?? new Date().getTime()
+              (await interceptor?.waitForChunk())?.endTimeUnix ??
+                new Date().getTime()
             ),
           }),
           responseHeaders: new Headers(response.headers),
           status: async () => {
-            return getStatus(response.status, completedChunk?.reason);
+            return getStatus(
+              response.status,
+              (await interceptor?.waitForChunk())?.reason
+            );
           },
           omitLog:
             proxyRequest.requestWrapper.heliconeHeaders.omitHeaders
@@ -106,11 +109,13 @@ export async function handleProxyRequest(
         },
         timing: {
           startTime: proxyRequest.startTime,
-          timeToFirstToken:
-            completedChunk?.endTimeUnix !== undefined &&
-            completedChunk?.startTimeUnix !== undefined
-              ? completedChunk.endTimeUnix - completedChunk.startTimeUnix
-              : undefined,
+          timeToFirstToken: async () => {
+            const chunk = await interceptor?.waitForChunk();
+            if (chunk?.firstChunkTimeUnix && chunk.startTimeUnix) {
+              return chunk.firstChunkTimeUnix - chunk.startTimeUnix;
+            }
+            return null;
+          },
         },
         tokenCalcUrl: proxyRequest.tokenCalcUrl,
       }),
@@ -148,6 +153,7 @@ export async function handleThreatProxyRequest(
         },
         timing: {
           startTime: proxyRequest.startTime,
+          timeToFirstToken: async () => null,
         },
         tokenCalcUrl: proxyRequest.tokenCalcUrl,
       }),

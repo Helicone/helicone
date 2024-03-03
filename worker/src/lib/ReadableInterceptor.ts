@@ -39,6 +39,8 @@ export class ReadableInterceptor {
         body: this.responseBody,
         reason,
         endTimeUnix: new Date().getTime(),
+        startTimeUnix: this.startTimeUnix,
+        firstChunkTimeUnix: this.firstChunkTimeUnix,
       } as CompletedChunk);
     };
 
@@ -102,6 +104,8 @@ export class ReadableInterceptor {
     return new Promise((resolve, _reject) => {
       const timeoutId = setTimeout(() => {
         this.chunkEmitter.removeListener(eventName, listener);
+        console.log(`Starting time: ${this.startTimeUnix}`);
+        console.log(`First chunk time: ${this.firstChunkTimeUnix}`);
         resolve({
           body: this.responseBody,
           reason: "timeout",
