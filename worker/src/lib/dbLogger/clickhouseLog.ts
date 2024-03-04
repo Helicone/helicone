@@ -27,6 +27,7 @@ function buildPropertyWithResponseInserts(
     user_id: request.user_id ?? "",
     organization_id:
       request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
+    threat: request.threat ?? null,
     property_key: p.key,
     property_value: p.value,
   }));

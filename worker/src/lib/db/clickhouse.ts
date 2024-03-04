@@ -122,42 +122,6 @@ export class ClickhouseClientWrapper {
 
 type Nullable<T> = T | null;
 
-interface ResponseCopyV1 {
-  response_id: Nullable<string>;
-  response_created_at: Nullable<string>;
-  latency: Nullable<number>;
-  status: Nullable<number>;
-  completion_tokens: Nullable<number>;
-  prompt_tokens: Nullable<number>;
-  model: Nullable<string>;
-  request_id: string;
-  request_created_at: string;
-  auth_hash: string;
-  user_id: Nullable<string>;
-}
-
-interface ResponseCopyV2 {
-  response_id: Nullable<string>;
-  response_created_at: Nullable<string>;
-  latency: Nullable<number>;
-  status: Nullable<number>;
-  completion_tokens: Nullable<number>;
-  prompt_tokens: Nullable<number>;
-  model: Nullable<string>;
-  request_id: string;
-  request_created_at: string;
-  auth_hash: string;
-  user_id: Nullable<string>;
-  organization_id: string;
-}
-
-export interface ResponseCopyV3 extends ResponseCopyV2 {
-  node_id: Nullable<string>;
-  job_id: Nullable<string>;
-  proxy_key_id: Nullable<string>;
-  // threat: Nullable<boolean>;
-}
-
 export interface RequestResponseLog {
   response_id: Nullable<string>;
   response_created_at: Nullable<string>;
@@ -177,17 +141,7 @@ export interface RequestResponseLog {
   threat: Nullable<boolean>;
 }
 
-interface PropertiesCopyV1 {
-  id: number;
-  created_at: Nullable<string>;
-  user_id: Nullable<string>;
-  request_id: string;
-  auth_hash: string;
-  key: Nullable<string>;
-  value: Nullable<string>;
-}
-
-interface PropertiesCopyV2 {
+interface PropertiesV3 {
   id: number;
   created_at: string;
   request_id: string;
@@ -195,7 +149,6 @@ interface PropertiesCopyV2 {
   value: string;
   organization_id: string;
 }
-type PropertiesV3 = PropertiesCopyV2;
 
 export interface PropertyWithResponseV1 {
   response_id: Nullable<string>;
@@ -212,6 +165,7 @@ export interface PropertyWithResponseV1 {
   organization_id: string;
   property_key: string;
   property_value: string;
+  threat: Nullable<boolean>;
 }
 
 export interface CacheHits {
@@ -226,12 +180,7 @@ export interface CacheHits {
 
 export interface ClickhouseDB {
   Tables: {
-    response_copy_v1: ResponseCopyV1;
-    properties_copy_v1: PropertiesCopyV1;
-    response_copy_v2: ResponseCopyV2;
-    properties_copy_v2: PropertiesCopyV2;
     properties_v3: PropertiesV3;
-    response_copy_v3: ResponseCopyV3;
     request_response_log: RequestResponseLog;
     property_with_response_v1: PropertyWithResponseV1;
     cache_hits: CacheHits;
