@@ -3,6 +3,7 @@ import subprocess
 import os
 import sys
 import time
+import re
 
 file_dir = os.path.dirname(os.path.realpath(__file__))
 schema_dir = f'{file_dir}/migrations'
@@ -11,7 +12,14 @@ all_schemas = [
     for file in
     os.listdir(schema_dir)
 ]
-all_schemas.sort()
+
+def schema_sort_key(filename):
+    match = re.search(r'schema_(\d+)', filename)
+    if match:
+        return int(match.group(1))
+    return -1
+
+all_schemas.sort(key=schema_sort_key)
 
 container_name = 'helicone-clickhouse-server'
 
@@ -25,9 +33,11 @@ def create_migration_table(host, port):
     '''
     res = subprocess.run(f'''
 echo "{query}" | curl 'http://{host}:{port}/' --data-binary @-
-    ''', shell=True)
+    ''', shell=True, capture_output=True, text=True)
     if res.returncode != 0:
         print('Failed to create helicone_migrations table')
+        print('STDOUT:', res.stdout)
+        print('STDERR:', res.stderr)
         exit(1)
     else:
         print('Created helicone_migrations table')
@@ -140,7 +150,7 @@ docker stop {container_name}
 docker rm {container_name}
 docker run -d -p {args.port}:8123 -p19000:9000 --name {container_name} --ulimit nofile=262144:262144 clickhouse/clickhouse-server
         ''', shell=True)
-        time.sleep(1)
+        time.sleep(5)
         create_migration_table(args.host, args.port)
         run_migrations(args.host, args.port)
         print(f'''
