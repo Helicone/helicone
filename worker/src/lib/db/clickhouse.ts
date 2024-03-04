@@ -211,6 +211,7 @@ export interface PropertyWithResponseV1 {
   auth_hash: string;
   user_id: string;
   organization_id: string;
+  time_to_first_token: Nullable<number>;
   property_key: string;
   property_value: string;
 }
