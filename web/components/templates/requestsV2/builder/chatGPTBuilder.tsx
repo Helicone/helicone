@@ -99,7 +99,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
         }
         //
         if (/^claude/.test(this.model)) {
-          return this.response.response_body?.content[0].text || "";
+          return this.response.response_body?.content?.[0].text || "";
         }
         // successful response, check for choices
         if (this.response.response_body?.choices) {
