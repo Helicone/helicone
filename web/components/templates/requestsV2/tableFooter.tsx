@@ -142,14 +142,14 @@ const TableFooter = (props: TableFooterProps) => {
             <ChevronDoubleLeftIcon className="h-5 w-5" />
           </button>
           <button
-            disabled={!isCountLoading || currentPage <= 1}
+            disabled={!isCountLoading && currentPage <= 1}
             onClick={() => {
               router.query.page = (currentPage - 1).toString();
               router.push(router);
               onPageChange(currentPage - 1);
             }}
             className={clsx(
-              !isCountLoading || currentPage <= 1
+              !isCountLoading && currentPage <= 1
                 ? "border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-700 hover:cursor-not-allowed text-gray-300 dark:text-gray-500"
                 : "border-gray-300 bg-white dark:border-gray-700 dark:bg-black hover:cursor-pointer text-gray-700 dark:text-gray-300",
               "block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
@@ -158,14 +158,14 @@ const TableFooter = (props: TableFooterProps) => {
             <ChevronLeftIcon className="h-5 w-5 " />
           </button>
           <button
-            disabled={!isCountLoading || currentPage >= totalPages}
+            disabled={!isCountLoading && currentPage >= totalPages}
             onClick={() => {
               router.query.page = (currentPage + 1).toString();
               router.push(router);
               onPageChange(currentPage + 1);
             }}
             className={clsx(
-              !isCountLoading || currentPage >= totalPages
+              !isCountLoading && currentPage >= totalPages
                 ? "border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-700 hover:cursor-not-allowed text-gray-300 dark:text-gray-500"
                 : "border-gray-300 bg-white dark:border-gray-700 dark:bg-black hover:cursor-pointer text-gray-700 dark:text-gray-300",
               "block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
@@ -174,7 +174,7 @@ const TableFooter = (props: TableFooterProps) => {
             <ChevronRightIcon className="h-5 w-5" />
           </button>
           <button
-            disabled={!isCountLoading || currentPage >= totalPages}
+            disabled={!isCountLoading && currentPage >= totalPages}
             onClick={() => {
               router.query.page = Math.ceil(
                 (count as number) / Number(pageSize || 10)
@@ -185,7 +185,7 @@ const TableFooter = (props: TableFooterProps) => {
               );
             }}
             className={clsx(
-              !isCountLoading || currentPage >= totalPages
+              !isCountLoading && currentPage >= totalPages
                 ? "border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-700 hover:cursor-not-allowed text-gray-300 dark:text-gray-500"
                 : "border-gray-300 bg-white dark:border-gray-700 dark:bg-black hover:cursor-pointer text-gray-700 dark:text-gray-300",
               "hidden sm:block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
