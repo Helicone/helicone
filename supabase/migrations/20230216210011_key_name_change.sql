@@ -8,4 +8,4 @@ CREATE POLICY "Enable read access for all users"
     AS PERMISSIVE
     FOR UPDATE
     TO public
-    USING (((auth.uid() = user_id) AND ((auth.jwt() ->> 'email'::text) <> 'valyrdemo@gmail.com'::text)));
+    USING (((auth.uid() = user_id)));

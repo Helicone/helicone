@@ -31,8 +31,9 @@ export interface AuthParams {
 type AuthResult = PromiseGenericResult<AuthParams>;
 
 const SUPABASE_CREDS = JSON.parse(process.env.SUPABASE_CREDS ?? "{}");
-const supabaseURL = SUPABASE_CREDS?.url;
-const supabaseServiceRoleKey = SUPABASE_CREDS?.service_role_key;
+const supabaseURL = SUPABASE_CREDS?.url ?? process.env.SUPABASE_URL;
+const supabaseServiceRoleKey =
+  SUPABASE_CREDS?.service_role_key ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!supabaseURL) {
   throw new Error("No Supabase URL");
 }

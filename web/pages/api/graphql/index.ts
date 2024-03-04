@@ -20,6 +20,7 @@ import { DEFAULT_EXAMPLE_QUERY } from "../../../components/templates/graphql/gra
 import { aggregatedHeliconeRequest } from "../../../lib/api/graphql/query/aggregatedHeliconeRequest";
 import { heliconeJob } from "../../../lib/api/graphql/query/heliconeJob";
 import { heliconeNode } from "../../../lib/api/graphql/query/heliconeNode";
+import { PostHog } from "posthog-node";
 
 const resolvers = {
   JSON: GraphQLJSON,
@@ -45,6 +46,22 @@ export default async function handler(
   res: NextApiResponse<{}>
 ): Promise<void> {
   if (req.url === "/api/graphql") {
+  }
+
+  if (process.env.NEXT_PUBLIC_POSTHOG_API_KEY) {
+    const client = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
+      host: "https://app.posthog.com",
+    });
+
+    client.capture({
+      distinctId: "server",
+      event: "graphql",
+      properties: {
+        url: req.url,
+        method: req.method,
+        body: req.body,
+      },
+    });
   }
   const apolloServer = new ApolloServer({
     typeDefs: makeExecutableSchema({

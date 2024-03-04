@@ -19,9 +19,10 @@ class MyDocument extends Document {
         <body>
           <Main />
           <NextScript />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
+          {(process.env.NEXT_PUBLIC_TRACKING_ENABLED || false) && (
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
               !(function (t) {
                 if (window.ko) return;
                 (window.ko = []),
@@ -49,8 +50,9 @@ class MyDocument extends Document {
                   (document.body || document.head).appendChild(n);
               })();
             `,
-            }}
-          />
+              }}
+            />
+          )}
         </body>
       </Html>
     );
