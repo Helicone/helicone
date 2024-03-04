@@ -54,6 +54,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const [supabaseClient] = useState(() => createBrowserSupabaseClient());
 
   const getLayout = Component.getLayout ?? ((page) => page);
+  const trackingEnabled = process.env.NEXT_PUBLIC_TRACKING_ENABLED || false;
 
   return (
     <>
@@ -76,11 +77,15 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
           </QueryClientProvider>
         </ApolloProvider>
       </SessionContextProvider>
-      <Analytics />
-      <Script
-        id="octolane-script"
-        src="https://cdn.octolane.com/tag.js?pk=2777c36a1af860ec5a67"
-      />
+      {trackingEnabled && (
+        <>
+          <Analytics />
+          <Script
+            id="octolane-script"
+            src="https://cdn.octolane.com/tag.js?pk=2777c36a1af860ec5a67"
+          />
+        </>
+      )}
     </>
   );
 }

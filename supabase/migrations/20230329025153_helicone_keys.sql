@@ -36,5 +36,5 @@ GRANT ALL ON TABLE public.helicone_api_keys TO service_role;
 CREATE POLICY "only users can view and edit their helicone keys" ON "public"."helicone_api_keys"
 AS PERMISSIVE FOR ALL
 TO public
-USING (((auth.uid() = user_id) AND ((auth.jwt() ->> 'email'::text) <> 'valyrdemo@gmail.com'::text)))
-WITH CHECK (((auth.uid() = user_id) AND ((auth.jwt() ->> 'email'::text) <> 'valyrdemo@gmail.com'::text)))
+USING (((auth.uid() = user_id)))
+WITH CHECK (((auth.uid() = user_id)))

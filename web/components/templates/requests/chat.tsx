@@ -190,7 +190,10 @@ export const SingleChat = (props: {
     // if it is an object, find the text inside of the content array
 
     if (Array.isArray(message.content)) {
-      if (typeof message.content[0] === "string") {
+      if (
+        message.content.length > 0 &&
+        typeof message.content[0] === "string"
+      ) {
         return message.content[0];
       }
       const textMessage = message.content.find(

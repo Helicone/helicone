@@ -61,19 +61,16 @@ yarn
 ```
 
 ```bash
-# Start OpenAI Proxy
-wrangler dev --local --var WORKER_TYPE:OPENAI_PROXY --port 8787
+# Start All Workers
+chmod +x run_all_workers.sh
+./run_all_workers
 ```
 
-```bash
-# Start API Service
-wrangler dev --local --var WORKER_TYPE:HELICONE_API --port 8788
-```
+### Start Jawn (Serves Web)
 
 ```bash
-# We have a cron job that runs every 1 minute that is required for feedback
-# to work. This cron job is not started by default. We will add a service
-# for this soon. Please contact us if you want to us Feedback on self deploy
+cd valhalla/jawn
+yarn && yarn dev
 ```
 
 ### Start Web
