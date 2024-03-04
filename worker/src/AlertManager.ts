@@ -21,7 +21,6 @@ export class AlertManager {
   }
 
   public async checkAlerts() {
-    console.log("Checking alerts");
     const { data: allAlerts, error: allAlertsErr } =
       await this.alertStore.getAlerts();
 

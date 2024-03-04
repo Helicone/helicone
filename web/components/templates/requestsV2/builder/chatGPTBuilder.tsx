@@ -3,6 +3,42 @@ import AbstractRequestBuilder, {
   SpecificFields,
 } from "./abstractRequestBuilder";
 
+export const helper = (x: any) => {
+  const messages = x.messages;
+  if (messages) {
+    if (messages.length > 0) {
+      const content = messages.at(-1).content;
+
+      if (Array.isArray(content)) {
+        // if the first element inside of content is a string, return the string
+        if (typeof content[0] === "string") {
+          return content[0];
+        }
+        // image handling
+        // find the last message that has the key text OR type:text is inside of `content`
+        const textMessage = messages
+          .slice()
+          .reverse()
+          .find(
+            (message: any) =>
+              message.text ||
+              (message.content &&
+                Array.isArray(message.content) &&
+                message.content.some((content: any) => content.type === "text"))
+          );
+
+        return textMessage?.text || textMessage?.content[0].text || "";
+      } else {
+        return content;
+      }
+    } else {
+      return JSON.stringify(messages);
+    }
+  } else {
+    return "";
+  }
+};
+
 class ChatGPTBuilder extends AbstractRequestBuilder {
   protected buildSpecific(): SpecificFields {
     const hasNoContent = this.response.response_body?.choices
@@ -63,7 +99,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
         }
         //
         if (/^claude/.test(this.model)) {
-          return this.response.response_body?.content[0].text || "";
+          return this.response.response_body?.content?.[0].text || "";
         }
         // successful response, check for choices
         if (this.response.response_body?.choices) {

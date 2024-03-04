@@ -2,14 +2,25 @@
 title: "Azure OpenAI"
 ---
 
-You can use Helicone with your Azure-OpenAI deployment, and it requires no additional code changes beyond importing the OpenAI package with Helicone.
+Helicone can be seamlessly integrated with your Azure-OpenAI deployment. This integration requires no additional code changes beyond importing the OpenAI package with Helicone.
+
+<Note>
+<b>MODEL OVERRIDE</b>
+
+When using Azure, the model may sometimes display differently than expected. We have implemented a series of logic to parse out the model, but the returned body of the model can be inconsistent in most cases.
+
+<code>Helicone-Model-Override: [MODEL_NAME]</code>
+<br/>
+<br/>
+<a href="/helicone-headers/intro"> Click here to learn more about model override</a>
+</Note>
 
 <Tabs>
  <Tab title="Python">
- <Note>Ensure you include api-version in all of your requests</Note>
+ <Note>Please ensure to include the 'api-version' in all of your requests.</Note>
 <AccordionGroup>
   <Accordion title="OpenAI v1+">
-  <Note>Must include api-key in both locations</Note>
+  <Note>It is mandatory to include the 'api-key' in both locations.</Note>
   ```python
     client = OpenAI(
       api_key="[AZURE_OPENAI_API_KEY]",
@@ -28,7 +39,7 @@ You can use Helicone with your Azure-OpenAI deployment, and it requires no addit
   </Accordion>
 
   <Accordion title="OpenAI <v1">
-  **Change the api base and add a Helicone-Auth header**
+  **Modify the API base and add a Helicone-Auth header**
 
 ```python
 import openai
@@ -51,11 +62,11 @@ openai.ChatCompletion.create(
 
   </Accordion>
 </AccordionGroup>
-    That's it! Your Azure OpenAI requests now log results to Helicone.
+    Congratulations! Your Azure OpenAI requests are now configured to log results to Helicone.
   </Tab>
 
 <Tab title="Node.js">
-<Note>Ensure you include api-version in all of your requests</Note>
+<Note>Please ensure to include the 'api-version' in all of your requests.</Note>
 <AccordionGroup>
 
   <Accordion title="OpenAI v4+">

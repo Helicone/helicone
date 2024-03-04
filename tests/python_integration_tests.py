@@ -354,7 +354,7 @@ def test_prompt_threat():
         print(response1.text)
         raise e
     
-    assert response1.status_code == 400,  "Expected status code to be 200."
+    assert response1.status_code == 200,  "Expected status code to be 200."
 
     assert response1.headers.get('Helicone-Status', None) == "success", "Expected Helicone-Status to be success."
     
@@ -375,7 +375,7 @@ def test_prompt_threat():
     query = "SELECT * FROM response WHERE request = %s LIMIT 1"
     response_data1 = fetch_from_db(query, (latest_request1["id"],))
     assert response_data1[0]["body"]
-    assert response_data1[0]["status"] == 400
+    assert response_data1[0]["status"] == 200
 
     # Threat detection test
    

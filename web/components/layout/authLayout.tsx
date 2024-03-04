@@ -29,7 +29,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, useState } from "react";
 import { DEMO_EMAIL } from "../../lib/constants";
-import { Database } from "../../supabase/database.types";
 import { clsx } from "../shared/clsx";
 import ThemedDropdown from "../shared/themed/themedDropdown";
 import OrgContext, { useOrg } from "./organizationContext";
@@ -42,6 +41,7 @@ import ReferralModal from "../common/referralModal";
 import { useTheme } from "../shared/theme/themeContext";
 import { ThemedSwitch } from "../shared/themed/themedSwitch";
 import MetaData from "./public/authMetaData";
+import { Database } from "../../supabase/database.types";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
@@ -274,7 +274,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
         </Transition.Root>
 
         {/* Static sidebar for desktop */}
-        <div className="hidden md:fixed md:inset-y-0 md:flex md:w-56 md:flex-col z-30">
+        <div className="hidden fixed md:inset-y-0 md:flex md:w-56 md:flex-col z-30">
           {/* Sidebar component, swap this element with another sidebar if you like */}
           <div className="w-full flex flex-grow flex-col overflow-y-auto border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
             <div className="p-2 flex items-center gap-4 h-14 border-b border-gray-300 dark:border-gray-700 absolute w-full">

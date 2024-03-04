@@ -6,9 +6,9 @@ import { ok } from "../../lib/result";
 export async function getModelUsageOverTime() {
   const LastMonthStatsQuery = `
 SELECT 
-  count(DISTINCT response_copy_v3.organization_id) AS count_step,
-  count(response_copy_v3.request_id) AS request_count_step
-FROM response_copy_v3
+  count(DISTINCT request_response_log.organization_id) AS count_step,
+  count(request_response_log.request_id) AS request_count_step
+FROM request_response_log
 WHERE created_at > now() - INTERVAL '1 month'
 `;
 
@@ -23,7 +23,7 @@ FROM
 SELECT
   COUNT(*) AS count
 FROM
-  response_copy_v3
+request_response_log
 `;
 
   const [

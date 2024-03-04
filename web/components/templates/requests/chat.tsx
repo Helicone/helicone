@@ -13,6 +13,7 @@ import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { LlmSchema } from "../../../lib/api/models/requestResponseModel";
 import ThemedModal from "../../shared/themed/themedModal";
+import { RenderWithPrettyInputKeys } from "../prompts/id/promptIdPage";
 
 export type Message = {
   id: string;
@@ -36,6 +37,7 @@ export const SingleChat = (props: {
     expanded: boolean;
     setExpanded: (expanded: boolean) => void;
   };
+  selectedProperties?: Record<string, string>;
 }) => {
   const {
     message,
@@ -143,7 +145,11 @@ export const SingleChat = (props: {
 
       return (
         <div className="flex flex-col space-y-4 divide-y divide-gray-100 dark:divide-gray-900">
-          <p>{textMessage?.text}</p>
+          <RenderWithPrettyInputKeys
+            // remove the leading " and trailing " from the text
+            text={textMessage?.text}
+            selectedProperties={props.selectedProperties}
+          />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <div className="flex flex-wrap items-center pt-4">
             {arr.map((item, index) =>
@@ -153,15 +159,15 @@ export const SingleChat = (props: {
                     <img
                       src={item.image_url.url}
                       alt={""}
-                      width={200}
-                      height={200}
+                      width={600}
+                      height={600}
                     />
                   ) : item.image_url ? (
                     <img
                       src={item.image_url}
                       alt={""}
-                      width={200}
-                      height={200}
+                      width={600}
+                      height={600}
                     />
                   ) : (
                     <div className="h-[150px] w-[200px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 text-center items-center flex justify-center text-xs italic text-gray-500">
@@ -184,7 +190,10 @@ export const SingleChat = (props: {
     // if it is an object, find the text inside of the content array
 
     if (Array.isArray(message.content)) {
-      if (typeof message.content[0] === "string") {
+      if (
+        message.content.length > 0 &&
+        typeof message.content[0] === "string"
+      ) {
         return message.content[0];
       }
       const textMessage = message.content.find(
@@ -261,9 +270,18 @@ export const SingleChat = (props: {
                 style={{ maxHeight: expanded ? "none" : "10.5rem" }}
               >
                 {/* render the string or stringify the array/object */}
-                {isJSON(formattedMessageContent)
-                  ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
-                  : formattedMessageContent}
+                <RenderWithPrettyInputKeys
+                  text={
+                    isJSON(formattedMessageContent)
+                      ? JSON.stringify(
+                          JSON.parse(formattedMessageContent),
+                          null,
+                          2
+                        )
+                      : formattedMessageContent
+                  }
+                  selectedProperties={props.selectedProperties}
+                />
               </div>
               {showButton && (
                 <div className="w-full flex justify-center items-center pt-2 pr-24">
@@ -291,10 +309,18 @@ interface ChatProps {
   requestId: string;
   status: number;
   model: string;
+  selectedProperties?: Record<string, string>;
 }
 
 export const Chat = (props: ChatProps) => {
-  const { requestBody, responseBody, requestId, llmSchema, model } = props;
+  const {
+    requestBody,
+    responseBody,
+    requestId,
+    llmSchema,
+    model,
+    selectedProperties,
+  } = props;
 
   const [open, setOpen] = useState(false);
 
@@ -371,6 +397,7 @@ export const Chat = (props: ChatProps) => {
                   },
                 }}
                 key={index}
+                selectedProperties={selectedProperties}
               />
             );
           })}
@@ -406,6 +433,7 @@ export const Chat = (props: ChatProps) => {
                   },
                 }}
                 key={index}
+                selectedProperties={selectedProperties}
               />
             );
           })}
@@ -428,6 +456,7 @@ export const Chat = (props: ChatProps) => {
               },
             }}
             key={index}
+            selectedProperties={selectedProperties}
           />
         );
       });
