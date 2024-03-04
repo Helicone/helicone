@@ -1,2 +1,2 @@
 ALTER TABLE default.cache_hits
-ADD COLUMN latency Nullable(Int64);
+ADD COLUMN IF NOT EXISTS latency Nullable(Int64);
