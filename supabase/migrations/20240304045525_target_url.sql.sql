@@ -1,2 +1,2 @@
 alter table "public"."request"
-add column "targetUrl" text default null;
+add column "target_url" text default null;
