@@ -37,6 +37,7 @@ export interface DBLoggableProps {
     startTime: Date;
     bodyText?: string;
     path: string;
+    targetUrl: string;
     properties: Record<string, string>;
     isStream: boolean;
     omitLog: boolean;
@@ -78,6 +79,7 @@ export function dbLoggableRequestFromProxyRequest(
     modelOverride:
       proxyRequest.requestWrapper.heliconeHeaders.modelOverride ?? undefined,
     heliconeTemplate: proxyRequest.heliconePromptTemplate ?? undefined,
+    targetUrl: proxyRequest.targetUrl.href,
     threat: proxyRequest.threat ?? null,
   };
 }
@@ -137,6 +139,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       provider,
       nodeId: requestWrapper.getNodeId(),
       modelOverride: requestWrapper.heliconeHeaders.modelOverride ?? undefined,
+      targetUrl: asyncLogModel.providerRequest.url,
       threat: null,
     },
     response: {

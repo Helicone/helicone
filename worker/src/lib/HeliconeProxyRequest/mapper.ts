@@ -43,6 +43,7 @@ export interface HeliconeProxyRequest {
   requestId: string;
   nodeId: string | null;
   heliconePromptTemplate: Record<string, unknown> | null;
+  targetUrl: URL;
   threat?: boolean;
 }
 
@@ -85,6 +86,11 @@ export class HeliconeProxyRequestMapper {
       this.injectPromptInputs(templateWithInputs.inputs);
     }
 
+    const targetUrl = this.buildTargetUrl(
+      this.request.url,
+      new URL(api_base.replace(/\/$/, ""))
+    );
+
     return {
       data: {
         rateLimitOptions: this.rateLimitOptions(),
@@ -108,9 +114,16 @@ export class HeliconeProxyRequestMapper {
         requestWrapper: this.request,
         nodeId: this.request.heliconeHeaders.nodeId ?? null,
         heliconePromptTemplate,
+        targetUrl,
       },
       error: null,
     };
+  }
+
+  private buildTargetUrl(originalUrl: URL, apiBaseUrl: URL): URL {
+    return new URL(
+      `${apiBaseUrl.origin}${originalUrl.pathname}${originalUrl.search}`
+    );
   }
 
   private injectPromptInputs(inputs: Record<string, string>) {
