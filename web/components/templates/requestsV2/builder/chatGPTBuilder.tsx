@@ -199,12 +199,12 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
                 model={this.model}
               />
             )}
-            {this.response.response_status !== -4 ?? (
+            {this.response.response_status !== -4 && (
               <div className="w-full flex flex-col text-left space-y-1 text-sm">
                 <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
                   Error
                 </p>
-                <p className="text-gray-900 dark:text-gray-100 p-2 border border-gray-300 bg-gray-100 dark:border-gray-700 dark:bg-gray-900 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+                <p className="text-gray-900 dark:text-gray-100 p-2 border border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-gray-900 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
                   {this.response.response_body?.error?.message ||
                     this.response.response_body?.helicone_error ||
                     ""}
