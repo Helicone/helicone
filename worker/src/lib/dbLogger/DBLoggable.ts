@@ -71,6 +71,7 @@ export function dbLoggableRequestFromProxyRequest(
     startTime: proxyRequest.startTime,
     bodyText: proxyRequest.bodyText ?? undefined,
     path: proxyRequest.requestWrapper.url.href,
+    targetUrl: proxyRequest.targetUrl.href,
     properties: proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
     isStream: proxyRequest.isStream,
     omitLog: proxyRequest.omitOptions.omitRequest,
@@ -79,7 +80,6 @@ export function dbLoggableRequestFromProxyRequest(
     modelOverride:
       proxyRequest.requestWrapper.heliconeHeaders.modelOverride ?? undefined,
     heliconeTemplate: proxyRequest.heliconePromptTemplate ?? undefined,
-    targetUrl: proxyRequest.targetUrl.href,
     threat: proxyRequest.threat ?? null,
   };
 }
@@ -133,13 +133,13 @@ export async function dbLoggableRequestFromAsyncLogModel(
       ),
       bodyText: JSON.stringify(asyncLogModel.providerRequest.json),
       path: asyncLogModel.providerRequest.url,
+      targetUrl: asyncLogModel.providerRequest.url,
       properties: providerRequestHeaders.heliconeProperties,
       isStream: asyncLogModel.providerRequest.json?.stream == true ?? false,
       omitLog: false,
       provider,
       nodeId: requestWrapper.getNodeId(),
       modelOverride: requestWrapper.heliconeHeaders.modelOverride ?? undefined,
-      targetUrl: asyncLogModel.providerRequest.url,
       threat: null,
     },
     response: {

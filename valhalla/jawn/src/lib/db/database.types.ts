@@ -1376,6 +1376,7 @@ export type Database = {
           prompt_values: Json | null
           properties: Json | null
           provider: string
+          targetUrl: string | null
           threat: boolean | null
           user_id: string | null
         }
@@ -1396,6 +1397,7 @@ export type Database = {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
+          targetUrl?: string | null
           threat?: boolean | null
           user_id?: string | null
         }
@@ -1416,6 +1418,7 @@ export type Database = {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
+          targetUrl?: string | null
           threat?: boolean | null
           user_id?: string | null
         }
