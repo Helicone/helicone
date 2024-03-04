@@ -21,8 +21,8 @@ import { aggregatedHeliconeRequest } from "../../../lib/api/graphql/query/aggreg
 import { heliconeJob } from "../../../lib/api/graphql/query/heliconeJob";
 import { heliconeNode } from "../../../lib/api/graphql/query/heliconeNode";
 import { Ratelimit } from "@upstash/ratelimit";
-
 import { kv } from "@vercel/kv";
+import { PostHog } from "posthog-node";
 
 const resolvers = {
   JSON: GraphQLJSON,
@@ -83,10 +83,29 @@ export default async function handler(
   }
 
   const orgId = await getOrgIdOrThrow(req, res);
-  const context = getContext(`graphql-${orgId}`);
+  const context = getContext(orgId);
 
-  const rateLimit = await checkRateLimit(orgId);
+  const rateLimit = await checkRateLimit(`graphql-${orgId}`);
+
+  if (process.env.NEXT_PUBLIC_POSTHOG_API_KEY) {
+    const client = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
+      host: "https://app.posthog.com",
+    });
+
+    client.capture({
+      distinctId: "server",
+      event: "graphql",
+      properties: {
+        orgId,
+        wasRateLimited: rateLimit.success,
+        url: req.url,
+        method: req.method,
+        body: req.body,
+      },
+    });
+  }
   if (!rateLimit.success) {
+    console.error("Rate limit exceeded", orgId);
     res.status(429).json({
       error:
         "Rate limit exceeded, contact support@helicone.ai to increase your rate limit",
