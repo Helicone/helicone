@@ -162,6 +162,7 @@ type PropertyWithResponseV1ToOperators = {
   property_value: SingleKey<TextOperators>;
   request_created_at: SingleKey<TimestampOperatorsTyped>;
   organization_id: SingleKey<TextOperators>;
+  threat: SingleKey<BooleanOperators>;
 };
 
 export type FilterLeafPropertyWithResponseV1 =

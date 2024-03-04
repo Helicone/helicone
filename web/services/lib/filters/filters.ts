@@ -190,6 +190,7 @@ const whereKeyMappings: KeyMappings = {
     property_value: "property_with_response_v1.property_value",
     request_created_at: "property_with_response_v1.request_created_at",
     organization_id: "property_with_response_v1.organization_id",
+    threat: "property_with_response_v1.threat",
   }),
   job: (filter) => {
     if ("custom_properties" in filter && filter.custom_properties) {
