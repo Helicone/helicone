@@ -1,3 +1,3 @@
-ALTER TABLE response_copy_v3
+ALTER TABLE property_with_response_v1
 ADD COLUMN IF NOT EXISTS threat Nullable(Bool)
 AFTER organization_id;
