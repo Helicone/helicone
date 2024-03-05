@@ -1,2 +1,2 @@
 ALTER TABLE default.cache_hits
-ADD COLUMN completion_tokens Nullable(Int64);
+ADD COLUMN IF NOT EXISTS completion_tokens Nullable(Int64);

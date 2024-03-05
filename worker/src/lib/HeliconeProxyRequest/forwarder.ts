@@ -91,9 +91,8 @@ export async function proxyForwarder(
         env
       );
 
+      proxyRequest.threat = threat;
       if (threat === true) {
-        proxyRequest.threat = threat;
-
         const { data, error } = await handleThreatProxyRequest(proxyRequest);
 
         if (error !== null) {
