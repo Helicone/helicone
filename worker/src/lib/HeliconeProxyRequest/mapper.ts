@@ -118,12 +118,6 @@ export class HeliconeProxyRequestMapper {
     };
   }
 
-  private buildTargetUrl(originalUrl: URL, apiBaseUrl: URL): URL {
-    return new URL(
-      `${apiBaseUrl.origin}${originalUrl.pathname}${originalUrl.search}`
-    );
-  }
-
   private injectPromptInputs(inputs: Record<string, string>) {
     Object.entries(inputs).forEach(([key, value]) => {
       this.request.heliconeHeaders.heliconeProperties[
