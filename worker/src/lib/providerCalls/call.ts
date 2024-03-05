@@ -6,7 +6,6 @@ export interface CallProps {
   body: string | null;
   increaseTimeout: boolean;
   originalUrl: URL;
-  targetUrl: URL;
 }
 
 export function callPropsFromProxyRequest(
@@ -20,7 +19,6 @@ export function callPropsFromProxyRequest(
     increaseTimeout:
       proxyRequest.requestWrapper.heliconeHeaders.featureFlags.increaseTimeout,
     originalUrl: proxyRequest.requestWrapper.url,
-    targetUrl: proxyRequest.targetUrl,
   };
 }
 
@@ -35,7 +33,11 @@ function removeHeliconeHeaders(request: Headers): Headers {
 }
 
 export async function callProvider(props: CallProps): Promise<Response> {
-  const { headers, method, body, increaseTimeout, targetUrl } = props;
+  const { headers, method, apiBase, body, increaseTimeout, originalUrl } =
+    props;
+
+  const targetUrl = buildTargetUrl(originalUrl, apiBase);
+
   const baseInit = { method, headers: removeHeliconeHeaders(headers) };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
 
@@ -52,4 +54,12 @@ export async function callProvider(props: CallProps): Promise<Response> {
     response = await fetch(targetUrl.href, init);
   }
   return response;
+}
+
+export function buildTargetUrl(originalUrl: URL, apiBase: string): URL {
+  const apiBaseUrl = new URL(apiBase.replace(/\/$/, ""));
+
+  return new URL(
+    `${apiBaseUrl.origin}${originalUrl.pathname}${originalUrl.search}`
+  );
 }
