@@ -41,7 +41,7 @@ export async function handleProxyRequest(
     : callProvider(callProps));
 
   const interceptor = response.body
-    ? new ReadableInterceptor(response.body)
+    ? new ReadableInterceptor(response.body, proxyRequest.isStream)
     : null;
   let body = interceptor ? interceptor.stream : null;
 
@@ -109,6 +109,16 @@ export async function handleProxyRequest(
         },
         timing: {
           startTime: proxyRequest.startTime,
+          timeToFirstToken: async () => {
+            if (proxyRequest.isStream) {
+              const chunk = await interceptor?.waitForChunk();
+              if (chunk?.firstChunkTimeUnix && chunk.startTimeUnix) {
+                return chunk.firstChunkTimeUnix - chunk.startTimeUnix;
+              }
+            }
+
+            return null;
+          },
         },
         tokenCalcUrl: proxyRequest.tokenCalcUrl,
       }),
@@ -146,6 +156,7 @@ export async function handleThreatProxyRequest(
         },
         timing: {
           startTime: proxyRequest.startTime,
+          timeToFirstToken: async () => null,
         },
         tokenCalcUrl: proxyRequest.tokenCalcUrl,
       }),
