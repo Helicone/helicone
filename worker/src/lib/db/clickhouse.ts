@@ -139,6 +139,7 @@ export interface RequestResponseLog {
   job_id: Nullable<string>;
   proxy_key_id: Nullable<string>;
   threat: Nullable<boolean>;
+  time_to_first_token: Nullable<number>;
 }
 
 interface PropertiesV3 {
@@ -163,6 +164,7 @@ export interface PropertyWithResponseV1 {
   auth_hash: string;
   user_id: string;
   organization_id: string;
+  time_to_first_token: Nullable<number>;
   property_key: string;
   property_value: string;
   threat: Nullable<boolean>;

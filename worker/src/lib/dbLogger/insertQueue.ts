@@ -483,6 +483,7 @@ export class InsertQueue {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           user_id: response.user_id!,
           organization_id: orgId,
+          time_to_first_token: response.time_to_first_token,
           property_key: p.key,
           property_value: p.value,
           threat: response.threat,
