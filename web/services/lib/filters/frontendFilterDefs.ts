@@ -196,7 +196,7 @@ export const REQUEST_TABLE_FILTERS: [
     operators: numberWithSuggestions([
       {
         key: "200",
-        param: "success",
+        param: "200 (success)",
       },
       {
         key: "-4",
@@ -327,7 +327,9 @@ export const userTableFilters: [
   },
 ];
 
-function textWithSuggestions(inputParams: InputParam[]): Operator<string>[] {
+export function textWithSuggestions(
+  inputParams: InputParam[]
+): Operator<string>[] {
   return textOperators.map((o) => ({
     ...o,
     type: "text-with-suggestions",
@@ -335,7 +337,9 @@ function textWithSuggestions(inputParams: InputParam[]): Operator<string>[] {
   }));
 }
 
-function numberWithSuggestions(inputParams: InputParam[]): Operator<string>[] {
+export function numberWithSuggestions(
+  inputParams: InputParam[]
+): Operator<string>[] {
   return numberOperators.map((o) => ({
     ...o,
     type: "number-with-suggestions",

@@ -13,7 +13,7 @@ import {
   SelectItem,
   TextInput,
 } from "@tremor/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ThemedNumberDropdown from "./themedNumberDropdown";
 
 export function AdvancedFilters({
@@ -110,7 +110,19 @@ function AdvancedFilterInput({
   onSearchHandler?: (search: string) => Promise<Result<void, string>>;
 }) {
   const [currentValue, setCurrentValue] = useState<string>(value);
-  // if any of the inputs below are changed, we want to set the page number back to 1
+  const [currentParams, setCurrentParams] = useState<
+    {
+      key: string;
+      param: string;
+    }[]
+  >(inputParams ?? []);
+
+  useEffect(() => {
+    if (inputParams !== currentParams) {
+      setCurrentParams(inputParams ?? []);
+    }
+  }, [type, inputParams]);
+
   switch (type) {
     case "text":
       return (
@@ -151,7 +163,7 @@ function AdvancedFilterInput({
     case "text-with-suggestions":
       return (
         <ThemedTextDropDown
-          options={inputParams?.map((param) => param.param) ?? []}
+          options={currentParams.map((param) => param.param) ?? []}
           onChange={(e) => onChange(e)}
           value={value}
           onSearchHandler={onSearchHandler}
@@ -160,7 +172,7 @@ function AdvancedFilterInput({
     case "number-with-suggestions":
       return (
         <ThemedNumberDropdown
-          options={inputParams ?? []}
+          options={currentParams ?? []}
           onChange={(e) => onChange(e)}
           value={value}
         />
@@ -209,7 +221,7 @@ function AdvancedFilterRow({
       <div className="w-full max-w-[15rem]">
         <SearchSelect
           value={currentColumn}
-          placeholder="Request"
+          placeholder="Search Fields..."
           onValueChange={(value) => {
             setCurrentColumn(value);
             const selected = Number(value);
