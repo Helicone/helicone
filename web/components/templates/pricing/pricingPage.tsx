@@ -178,7 +178,7 @@ const sections: {
       },
       {
         name: "GraphQL API",
-        tiers: { Free: false, Pro: "1,000 reqs / day", Custom: "Unlimited" },
+        tiers: { Free: false, Pro: "100 reqs / minute", Custom: "Unlimited" },
       },
       {
         name: "Custom ETL Integrations",
