@@ -4662,12 +4662,39 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@upstash/core-analytics@npm:^0.0.7":
+  version: 0.0.7
+  resolution: "@upstash/core-analytics@npm:0.0.7"
+  dependencies:
+    "@upstash/redis": "npm:^1.28.3"
+  checksum: 151e6a522b04ec94521ac8b93f7c495f8ac3cf9bff07db2385b0dc541630b77f1f1e9552f5478074e97b90da214d558ddaa24e94ec7b4b2e9c373fc32021fb53
+  languageName: node
+  linkType: hard
+
+"@upstash/ratelimit@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@upstash/ratelimit@npm:1.0.1"
+  dependencies:
+    "@upstash/core-analytics": "npm:^0.0.7"
+  checksum: e40a7e6802784b384798702d5b9aa10bc9a6dae845f21bf5db1cfce5bd7c8f953cc9fe2d6f3b4f3dca8c0c399607c19618f1a2e8401f9b7df1192165140e76ad
+  languageName: node
+  linkType: hard
+
 "@upstash/redis@npm:1.24.3":
   version: 1.24.3
   resolution: "@upstash/redis@npm:1.24.3"
   dependencies:
     crypto-js: "npm:^4.2.0"
   checksum: f689d1c2d143ea5f12a96a4c723670d73e8415f755e9bd3e7eba0157a91c31aac55de65a4ace74d0aabcf1f96b30bd8bb4c1c0ae7771ff3d0f08a9d4c4eaeb74
+  languageName: node
+  linkType: hard
+
+"@upstash/redis@npm:^1.28.3":
+  version: 1.28.4
+  resolution: "@upstash/redis@npm:1.28.4"
+  dependencies:
+    crypto-js: "npm:^4.2.0"
+  checksum: 9a448bac74b506358f232eba479d439ca4fd65f1d882499a260900b24e36f16a99f5b0584be36a814d76962bf46be8d3779b73ff946479189114547d448ac657
   languageName: node
   linkType: hard
 
@@ -8213,6 +8240,7 @@ __metadata:
     "@types/react-grid-layout": "npm:^1.3.3"
     "@types/react-lottie": "npm:^1.2.9"
     "@types/react-syntax-highlighter": "npm:^15.5.6"
+    "@upstash/ratelimit": "npm:^1.0.1"
     "@vercel/analytics": "npm:^0.1.5"
     "@vercel/kv": "npm:^0.2.4"
     apollo-server-core: "npm:^3.12.0"
