@@ -36,7 +36,6 @@ export async function handleProxyRequest(
   const { retryOptions } = proxyRequest;
 
   const callProps = callPropsFromProxyRequest(proxyRequest);
-  const startTimeUnix = new Date().getTime();
   const response = await (retryOptions
     ? callProviderWithRetry(callProps, retryOptions)
     : callProvider(callProps));
@@ -113,6 +112,7 @@ export async function handleProxyRequest(
           timeToFirstToken: async () => {
             if (proxyRequest.isStream) {
               const chunk = await interceptor?.waitForChunk();
+              const startTimeUnix = proxyRequest.startTime.getTime();
               if (chunk?.firstChunkTimeUnix && startTimeUnix) {
                 return chunk.firstChunkTimeUnix - startTimeUnix;
               }
