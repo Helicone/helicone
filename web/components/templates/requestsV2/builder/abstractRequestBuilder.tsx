@@ -59,7 +59,6 @@ abstract class AbstractRequestBuilder {
 
   protected getCommonFields(): CommonFields {
     const temperature = this.response?.request_body?.temperature;
-    console.log(`Time to first token: ${this.response.time_to_first_token}`);
     return {
       model: this.model,
       id: this.response.request_id,

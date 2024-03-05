@@ -110,10 +110,13 @@ export async function handleProxyRequest(
         timing: {
           startTime: proxyRequest.startTime,
           timeToFirstToken: async () => {
-            const chunk = await interceptor?.waitForChunk();
-            if (chunk?.firstChunkTimeUnix && chunk.startTimeUnix) {
-              return chunk.firstChunkTimeUnix - chunk.startTimeUnix;
+            if (proxyRequest.isStream) {
+              const chunk = await interceptor?.waitForChunk();
+              if (chunk?.firstChunkTimeUnix && chunk.startTimeUnix) {
+                return chunk.firstChunkTimeUnix - chunk.startTimeUnix;
+              }
             }
+
             return null;
           },
         },
