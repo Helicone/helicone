@@ -1,6 +1,5 @@
 import { SearchSelect, SearchSelectItem } from "@tremor/react";
 import { useState } from "react";
-import { clsx } from "../clsx";
 
 interface ThemedNumberDropdownProps {
   options: {

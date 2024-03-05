@@ -7,7 +7,6 @@ import {
   filterUIToFilterLeafs,
 } from "../../../services/lib/filters/filterDefs";
 import {
-  InputParam,
   REQUEST_TABLE_FILTERS,
   SingleFilterDef,
   textWithSuggestions,
