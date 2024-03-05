@@ -486,6 +486,7 @@ export class InsertQueue {
           time_to_first_token: response.time_to_first_token,
           property_key: p.key,
           property_value: p.value,
+          threat: response.threat,
         };
       })
     );

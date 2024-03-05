@@ -144,6 +144,8 @@ const useGetRequests = (
       },
       refetchOnWindowFocus: false,
       refetchInterval: isLive ? 2_000 : false,
+      // cache the count for 5 minutes
+      cacheTime: 5 * 60 * 1000,
     }),
   };
 };

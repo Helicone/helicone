@@ -1,2 +1,2 @@
 ALTER TABLE default.cache_hits
-ADD COLUMN model String;
+ADD COLUMN IF NOT EXISTS model String;
