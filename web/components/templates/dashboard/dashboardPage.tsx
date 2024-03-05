@@ -955,7 +955,7 @@ const DashboardPage = (props: DashboardPageProps) => {
               </div>
 
               <div key="suggest-more-graphs">
-                <button className="space-y-2 bg-white dark:bg-black border border-gray-900 dark:border-white border-dashed w-full h-full p-2 text-black dark:text-white shadow-sm rounded-lg flex flex-col items-center justify-center">
+                <div className="space-y-2 bg-white dark:bg-black border border-gray-900 dark:border-white border-dashed w-full h-full p-2 text-black dark:text-white shadow-sm rounded-lg flex flex-col items-center justify-center">
                   <PresentationChartLineIcon className="h-12 w-12 text-black dark:text-white" />
                   <button
                     className="p-4 text-semibold text-lg"
@@ -965,7 +965,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   >
                     Request a new graph
                   </button>
-                </button>
+                </div>
               </div>
 
               <div key="tokens-per-min-over-time">
