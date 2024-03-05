@@ -4,7 +4,6 @@ export interface CompletedChunk {
   body: string;
   reason: "cancel" | "done" | "timeout";
   endTimeUnix: number;
-  startTimeUnix: number;
   firstChunkTimeUnix: number | null;
 }
 
@@ -13,7 +12,6 @@ export class ReadableInterceptor {
   private cachedChunk: CompletedChunk | null = null;
   private responseBody = "";
   private decoder = new TextDecoder("utf-8");
-  private startTimeUnix: number;
   private firstChunkTimeUnix: number | null = null;
   stream: ReadableStream;
 
@@ -25,7 +23,6 @@ export class ReadableInterceptor {
   ) {
     this.stream = this.interceptStream(stream);
     this.setupChunkListener();
-    this.startTimeUnix = new Date().getTime();
   }
 
   private setupChunkListener() {
@@ -40,7 +37,6 @@ export class ReadableInterceptor {
         body: this.responseBody,
         reason,
         endTimeUnix: new Date().getTime(),
-        startTimeUnix: this.startTimeUnix,
         firstChunkTimeUnix: this.firstChunkTimeUnix,
       } as CompletedChunk);
     };
@@ -109,7 +105,6 @@ export class ReadableInterceptor {
           body: this.responseBody,
           reason: "timeout",
           endTimeUnix: new Date().getTime(),
-          startTimeUnix: this.startTimeUnix,
           firstChunkTimeUnix: this.firstChunkTimeUnix,
         });
       }, this.chunkTimeoutMs);
