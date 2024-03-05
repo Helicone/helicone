@@ -69,7 +69,7 @@ async function getContext(orgId: string): Promise<Context> {
 async function checkRateLimit(orgId: string) {
   const ratelimit = new Ratelimit({
     redis: kv,
-    limiter: Ratelimit.slidingWindow(1_000, "60 s"),
+    limiter: Ratelimit.slidingWindow(100, "60 s"),
   });
 
   return ratelimit.limit(orgId);
