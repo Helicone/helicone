@@ -12,7 +12,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 // import "ts-tiny-invariant";
 
 import NextCors from "nextjs-cors";
-import { getOrgIdOrThrow } from "../../../lib/api/graphql/helpers/auth";
+import { getOrgIdOrThrow as getOrgIdOrThrowFromApiKey } from "../../../lib/api/graphql/helpers/auth";
 import { heliconeRequest } from "../../../lib/api/graphql/query/heliconeRequest";
 import { queryUser } from "../../../lib/api/graphql/query/user";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
@@ -20,6 +20,8 @@ import { DEFAULT_EXAMPLE_QUERY } from "../../../components/templates/graphql/gra
 import { aggregatedHeliconeRequest } from "../../../lib/api/graphql/query/aggregatedHeliconeRequest";
 import { heliconeJob } from "../../../lib/api/graphql/query/heliconeJob";
 import { heliconeNode } from "../../../lib/api/graphql/query/heliconeNode";
+import { Ratelimit } from "@upstash/ratelimit";
+import { kv } from "@vercel/kv";
 import { PostHog } from "posthog-node";
 
 const resolvers = {
@@ -41,12 +43,49 @@ export interface Context {
   getOrgIdOrThrow: () => Promise<string>;
 }
 
+async function getOrgIdOrThrow(req: NextApiRequest, res: NextApiResponse) {
+  if (req.headers["use-cookies"] === "true") {
+    const supabaseClient = new SupabaseServerWrapper({
+      req,
+      res,
+    });
+    const { data, error } = await supabaseClient.getUserAndOrg();
+
+    if (error !== null || !data.orgId || !data.userId) {
+      throw new ApolloError("Unauthorized", "401");
+    }
+    return data.orgId;
+  } else {
+    return await getOrgIdOrThrowFromApiKey(req.headers.authorization ?? "");
+  }
+}
+
+async function getContext(orgId: string): Promise<Context> {
+  return {
+    getOrgIdOrThrow: async () => orgId,
+  };
+}
+
+async function checkRateLimit(orgId: string) {
+  const ratelimit = new Ratelimit({
+    redis: kv,
+    limiter: Ratelimit.slidingWindow(100, "60 s"),
+  });
+
+  return ratelimit.limit(orgId);
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<{}>
 ): Promise<void> {
   if (req.url === "/api/graphql") {
   }
+
+  const orgId = await getOrgIdOrThrow(req, res);
+  const context = getContext(orgId);
+
+  const rateLimit = await checkRateLimit(`graphql-${orgId}`);
 
   if (process.env.NEXT_PUBLIC_POSTHOG_API_KEY) {
     const client = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
@@ -57,12 +96,24 @@ export default async function handler(
       distinctId: "server",
       event: "graphql",
       properties: {
+        orgId,
+        wasRateLimited: rateLimit.success,
         url: req.url,
         method: req.method,
         body: req.body,
       },
     });
   }
+  if (!rateLimit.success) {
+    console.error("Rate limit exceeded", orgId);
+    res.status(429).json({
+      error:
+        "Rate limit exceeded, contact support@helicone.ai to increase your rate limit",
+      data: null,
+    });
+    return;
+  }
+
   const apolloServer = new ApolloServer({
     typeDefs: makeExecutableSchema({
       typeDefs: [mainTypeDefs],
@@ -89,30 +140,7 @@ export default async function handler(
         },
       }),
     ],
-    context: () => {
-      if (req.headers["use-cookies"] === "true") {
-        return {
-          getOrgIdOrThrow: async () => {
-            const supabaseClient = new SupabaseServerWrapper({
-              req,
-              res,
-            });
-            const { data, error } = await supabaseClient.getUserAndOrg();
-
-            if (error !== null || !data.orgId || !data.userId) {
-              throw new ApolloError("Unauthorized", "401");
-            }
-            return data.orgId;
-          },
-        };
-      } else {
-        return {
-          getOrgIdOrThrow: async () => {
-            return await getOrgIdOrThrow(req.headers.authorization ?? "");
-          },
-        };
-      }
-    },
+    context: () => context,
   });
   const startServer = apolloServer.start();
 
