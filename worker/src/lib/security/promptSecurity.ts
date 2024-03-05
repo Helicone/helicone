@@ -8,7 +8,7 @@ export async function checkPromptSecurity(
   message: string,
   provider: Provider,
   env: Env
-): Promise<boolean> {
+): Promise<boolean | undefined> {
   const promptArmorRequest = JSON.stringify({
     content: message,
     source: provider,
@@ -33,5 +33,6 @@ export async function checkPromptSecurity(
 
     return detection;
   }
-  return false;
+
+  return undefined;
 }
