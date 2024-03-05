@@ -17,6 +17,8 @@ const googleapis = /^https:\/\/(.*\.)?googleapis\.com/;
 const openRouter = /^https:\/\/api\.openrouter\.ai/;
 //api.wisdominanutshell.academy
 const wisdomInANutshell = /^https:\/\/api\.wisdominanutshell\.academy/;
+// api.groq.com
+const groq = /^https:\/\/api\.groq\.com/;
 
 export const approvedDomains = [
   openAiPattern,
@@ -35,4 +37,5 @@ export const approvedDomains = [
   googleapis,
   openRouter,
   wisdomInANutshell,
+  groq,
 ];
