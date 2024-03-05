@@ -35,11 +35,8 @@ function removeHeliconeHeaders(request: Headers): Headers {
 export async function callProvider(props: CallProps): Promise<Response> {
   const { headers, method, apiBase, body, increaseTimeout, originalUrl } =
     props;
-  const apiBaseUrl = new URL(apiBase.replace(/\/$/, "")); // remove trailing slash if any
 
-  const new_url = new URL(
-    `${apiBaseUrl.origin}${originalUrl.pathname}${originalUrl.search}`
-  );
+  const targetUrl = buildTargetUrl(originalUrl, apiBase);
 
   const baseInit = { method, headers: removeHeliconeHeaders(headers) };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
@@ -49,12 +46,20 @@ export async function callProvider(props: CallProps): Promise<Response> {
     const controller = new AbortController();
     const signal = controller.signal;
     setTimeout(() => controller.abort(), 1000 * 60 * 30);
-    response = await fetch(new_url.href, {
+    response = await fetch(targetUrl.href, {
       ...init,
       signal,
     });
   } else {
-    response = await fetch(new_url.href, init);
+    response = await fetch(targetUrl.href, init);
   }
   return response;
+}
+
+export function buildTargetUrl(originalUrl: URL, apiBase: string): URL {
+  const apiBaseUrl = new URL(apiBase.replace(/\/$/, ""));
+
+  return new URL(
+    `${apiBaseUrl.origin}${originalUrl.pathname}${originalUrl.search}`
+  );
 }
