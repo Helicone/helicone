@@ -111,37 +111,37 @@ export type SingleFilterDef<T extends keyof TablesAndViews> = {
 };
 
 export const DASHBOARD_PAGE_TABLE_FILTERS: [
-  SingleFilterDef<"response_copy_v3">,
-  SingleFilterDef<"response_copy_v3">,
-  SingleFilterDef<"response_copy_v3">,
-  SingleFilterDef<"response_copy_v3">
+  SingleFilterDef<"request_response_log">,
+  SingleFilterDef<"request_response_log">,
+  SingleFilterDef<"request_response_log">,
+  SingleFilterDef<"request_response_log">
 ] = [
   {
     label: "Model",
     operators: textOperators,
     category: "request",
-    table: "response_copy_v3",
+    table: "request_response_log",
     column: "model",
   },
   {
     label: "Status",
     operators: numberOperators,
     category: "request",
-    table: "response_copy_v3",
+    table: "request_response_log",
     column: "status",
   },
   {
     label: "Latency",
     operators: numberOperators,
     category: "request",
-    table: "response_copy_v3",
+    table: "request_response_log",
     column: "latency",
   },
   {
     label: "User",
     operators: textOperators,
     category: "request",
-    table: "response_copy_v3",
+    table: "request_response_log",
     column: "user_id",
   },
 ];
@@ -273,8 +273,8 @@ export const userTableFilters: [
   SingleFilterDef<"users_view">,
   SingleFilterDef<"users_view">,
   SingleFilterDef<"users_view">,
-  SingleFilterDef<"response_copy_v1">,
-  SingleFilterDef<"response_copy_v1">
+  SingleFilterDef<"request_response_log">,
+  SingleFilterDef<"request_response_log">
 ] = [
   {
     label: "ID",
@@ -314,14 +314,14 @@ export const userTableFilters: [
   {
     label: "Created At",
     operators: timestampOperators,
-    table: "response_copy_v1",
+    table: "request_response_log",
     column: "request_created_at",
     category: "request",
   },
   {
     label: "Status",
     operators: numberOperators,
-    table: "response_copy_v1",
+    table: "request_response_log",
     column: "status",
     category: "request",
   },

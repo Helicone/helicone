@@ -37,6 +37,7 @@ export interface DBLoggableProps {
     startTime: Date;
     bodyText?: string;
     path: string;
+    targetUrl: string;
     properties: Record<string, string>;
     isStream: boolean;
     omitLog: boolean;
@@ -49,6 +50,7 @@ export interface DBLoggableProps {
   timing: {
     startTime: Date;
     endTime?: Date;
+    timeToFirstToken: () => Promise<number | null>;
   };
   tokenCalcUrl: string;
 }
@@ -70,6 +72,7 @@ export function dbLoggableRequestFromProxyRequest(
     startTime: proxyRequest.startTime,
     bodyText: proxyRequest.bodyText ?? undefined,
     path: proxyRequest.requestWrapper.url.href,
+    targetUrl: proxyRequest.targetUrl.href,
     properties: proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
     isStream: proxyRequest.isStream,
     omitLog: proxyRequest.omitOptions.omitRequest,
@@ -131,6 +134,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       ),
       bodyText: JSON.stringify(asyncLogModel.providerRequest.json),
       path: asyncLogModel.providerRequest.url,
+      targetUrl: asyncLogModel.providerRequest.url,
       properties: providerRequestHeaders.heliconeProperties,
       isStream: asyncLogModel.providerRequest.json?.stream == true ?? false,
       omitLog: false,
@@ -156,6 +160,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
         asyncLogModel.timing.endTime.seconds * 1000 +
           asyncLogModel.timing.endTime.milliseconds
       ),
+      timeToFirstToken: async () => null,
     },
     tokenCalcUrl: env.VALHALLA_URL,
   });
@@ -273,6 +278,9 @@ export class DBLoggable {
       await this.response.getResponseBody();
     const endTime = this.timing.endTime ?? responseEndTime;
     const delay_ms = endTime.getTime() - this.timing.startTime.getTime();
+    const timeToFirstToken = this.request.isStream
+      ? await this.timing.timeToFirstToken()
+      : null;
     const status = await this.response.status();
     const parsedResponse = await this.parseResponse(responseBody, status);
     const isStream = this.request.isStream;
@@ -298,6 +306,7 @@ export class DBLoggable {
         status: await this.response.status(),
         completion_tokens: parsedResponse.data.usage?.completion_tokens,
         prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
+        time_to_first_token: timeToFirstToken,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         model: model,
         delay_ms,
@@ -321,6 +330,7 @@ export class DBLoggable {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           model: (parsedResponse.data as any)?.model ?? undefined,
           delay_ms,
+          time_to_first_token: timeToFirstToken,
         }
       : {
           id: this.response.responseId,

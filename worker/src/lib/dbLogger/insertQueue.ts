@@ -4,7 +4,7 @@ import { Database, Json } from "../../../supabase/database.types";
 import { getResponse } from "../../feedback";
 import { deepCompare } from "../../helpers";
 import { Result, err, ok } from "../../results";
-import { ClickhouseClientWrapper, ResponseCopyV3 } from "../db/clickhouse";
+import { ClickhouseClientWrapper, RequestResponseLog } from "../db/clickhouse";
 import { Valhalla } from "../db/valhalla";
 import { formatTimeString } from "./clickhouseLog";
 
@@ -454,7 +454,7 @@ export class InsertQueue {
     if (error || data === null || data?.length == 0) {
       return err("No response found.");
     }
-    const response: ResponseCopyV3 = data[0] as ResponseCopyV3;
+    const response: RequestResponseLog = data[0] as RequestResponseLog;
 
     if (
       response.user_id === null ||
@@ -483,8 +483,10 @@ export class InsertQueue {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           user_id: response.user_id!,
           organization_id: orgId,
+          time_to_first_token: response.time_to_first_token,
           property_key: p.key,
           property_value: p.value,
+          threat: response.threat,
         };
       })
     );

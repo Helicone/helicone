@@ -42,6 +42,7 @@ export interface HeliconeRequest {
   prompt_regex: string | null;
   key_name: string;
   delay_ms: number | null;
+  time_to_first_token: number | null;
   total_tokens: number | null;
   prompt_tokens: number | null;
   completion_tokens: number | null;
@@ -96,6 +97,7 @@ export async function getRequests(
     response.feedback as request_feedback,
     request.helicone_user as helicone_user,
     response.delay_ms as delay_ms,
+    response.time_to_first_token as time_to_first_token,
     (response.prompt_tokens + response.completion_tokens) as total_tokens,
     response.completion_tokens as completion_tokens,
     response.prompt_tokens as prompt_tokens,
@@ -173,6 +175,7 @@ export async function getRequestsCached(
     response.feedback as request_feedback,
     request.helicone_user as helicone_user,
     response.delay_ms as delay_ms,
+    response.time_to_first_token as time_to_first_token,
     (response.prompt_tokens + response.completion_tokens) as total_tokens,
     response.completion_tokens as completion_tokens,
     response.prompt_tokens as prompt_tokens,

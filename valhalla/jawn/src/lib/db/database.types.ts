@@ -1376,6 +1376,7 @@ export type Database = {
           prompt_values: Json | null
           properties: Json | null
           provider: string
+          target_url: string | null
           threat: boolean | null
           user_id: string | null
         }
@@ -1396,6 +1397,7 @@ export type Database = {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
+          target_url?: string | null
           threat?: boolean | null
           user_id?: string | null
         }
@@ -1416,6 +1418,7 @@ export type Database = {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
+          target_url?: string | null
           threat?: boolean | null
           user_id?: string | null
         }
@@ -1516,6 +1519,7 @@ export type Database = {
           prompt_tokens: number | null
           request: string
           status: number | null
+          time_to_first_token: number | null
         }
         Insert: {
           body: Json
@@ -1528,6 +1532,7 @@ export type Database = {
           prompt_tokens?: number | null
           request: string
           status?: number | null
+          time_to_first_token?: number | null
         }
         Update: {
           body?: Json
@@ -1540,6 +1545,7 @@ export type Database = {
           prompt_tokens?: number | null
           request?: string
           status?: number | null
+          time_to_first_token?: number | null
         }
         Relationships: []
       }

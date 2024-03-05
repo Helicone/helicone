@@ -6,6 +6,7 @@ import { Result, ok } from "../../results";
 import { IHeliconeHeaders } from "../HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
 import { approvedDomains } from "../gateway/approvedDomains";
+import { buildTargetUrl } from "../providerCalls/call";
 
 import { RateLimitOptions, RateLimitOptionsBuilder } from "./rateLimit";
 
@@ -43,6 +44,7 @@ export interface HeliconeProxyRequest {
   requestId: string;
   nodeId: string | null;
   heliconePromptTemplate: Record<string, unknown> | null;
+  targetUrl: URL;
   threat?: boolean;
 }
 
@@ -85,6 +87,8 @@ export class HeliconeProxyRequestMapper {
       this.injectPromptInputs(templateWithInputs.inputs);
     }
 
+    const targetUrl = buildTargetUrl(this.request.url, api_base);
+
     return {
       data: {
         rateLimitOptions: this.rateLimitOptions(),
@@ -108,6 +112,7 @@ export class HeliconeProxyRequestMapper {
         requestWrapper: this.request,
         nodeId: this.request.heliconeHeaders.nodeId ?? null,
         heliconePromptTemplate,
+        targetUrl,
       },
       error: null,
     };
