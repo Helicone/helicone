@@ -27,6 +27,7 @@ function buildPropertyWithResponseInserts(
     user_id: request.user_id ?? "",
     organization_id:
       request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
+    time_to_first_token: response.time_to_first_token ?? null,
     threat: request.threat ?? null,
     property_key: p.key,
     property_value: p.value,
@@ -67,6 +68,7 @@ export async function logInClickhouse(
         node_id: node.id,
         proxy_key_id: request.helicone_proxy_key_id ?? null,
         threat: request.threat ?? null,
+        time_to_first_token: response.time_to_first_token ?? null,
       },
     ]),
     clickhouseDb.dbInsertClickhouse(

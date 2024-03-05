@@ -1519,6 +1519,7 @@ export type Database = {
           prompt_tokens: number | null
           request: string
           status: number | null
+          time_to_first_token: number | null
         }
         Insert: {
           body: Json
@@ -1531,6 +1532,7 @@ export type Database = {
           prompt_tokens?: number | null
           request: string
           status?: number | null
+          time_to_first_token?: number | null
         }
         Update: {
           body?: Json
@@ -1543,6 +1545,7 @@ export type Database = {
           prompt_tokens?: number | null
           request?: string
           status?: number | null
+          time_to_first_token?: number | null
         }
         Relationships: []
       }
