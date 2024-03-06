@@ -273,16 +273,37 @@ export class DBLoggable {
     }
   }
 
-  getUsage(parsedResponse: any): {
+  getUsage(parsedResponse: unknown): {
     prompt_tokens: number | undefined;
     completion_tokens: number | undefined;
   } {
-    const usage = parsedResponse?.usage;
+    if (
+      typeof parsedResponse !== "object" ||
+      parsedResponse === null ||
+      !("usage" in parsedResponse)
+    ) {
+      return {
+        prompt_tokens: undefined,
+        completion_tokens: undefined,
+      };
+    }
+
+    const response = parsedResponse as {
+      usage: {
+        prompt_tokens?: number;
+        completion_tokens?: number;
+        input_tokens?: number;
+        output_tokens?: number;
+      };
+    };
+    const usage = response.usage;
+
     return {
       prompt_tokens: usage?.prompt_tokens ?? usage?.input_tokens,
       completion_tokens: usage?.completion_tokens ?? usage?.output_tokens,
     };
   }
+
   async getResponse() {
     const { body: responseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
