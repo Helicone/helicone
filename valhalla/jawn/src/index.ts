@@ -207,7 +207,7 @@ app.post(
     paths["/v1/request/query"]["post"]["requestBody"]["content"]["application/json"]
   >(async ({ request, res, supabaseClient, authParams }) => {
     const body = await request.getRawBody<any>();
-    console.log("body", body);
+
     const { filter, offset, limit, sort, isCached } = body;
 
     const metrics = isCached
@@ -519,7 +519,7 @@ app.post(
     }
 
     const body = await request.getRawBody<any>();
-    console.log("body", body);
+
     const { filter, providerKeyId, uiFilter } = body;
 
     const metrics = await getRequests(
