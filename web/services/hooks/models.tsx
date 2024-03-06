@@ -3,7 +3,7 @@ import { TimeFilter } from "../../components/templates/dashboard/dashboardPage";
 import { Result } from "../../lib/result";
 import { ModelMetric } from "../../lib/api/models/models";
 
-const useModels = (timeFilter: TimeFilter) => {
+const useModels = (timeFilter: TimeFilter, limit: number) => {
   const { data: models, isLoading } = useQuery({
     queryKey: ["modelMetrics", timeFilter],
     queryFn: async (query) => {
@@ -15,7 +15,7 @@ const useModels = (timeFilter: TimeFilter) => {
         body: JSON.stringify({
           filter: "all",
           offset: 0,
-          limit: 5,
+          limit,
           timeFilter,
         }),
       }).then((res) => res.json() as Promise<Result<ModelMetric[], string>>);
