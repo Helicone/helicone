@@ -235,6 +235,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           });
         }
 
+        console.log("decoded", decodedFilters);
+
         return decodedFilters;
       }
     } catch (error) {
