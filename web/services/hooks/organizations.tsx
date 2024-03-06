@@ -152,9 +152,11 @@ const useOrgsContextManager = () => {
     if ((!orgs || orgs.length === 0) && user?.id) {
       fetch(`/api/user/${user.id}/ensure-one-org`).then((res) => {
         if (res.status === 201) {
+          console.log("found orgs");
         } else if (res.status !== 200) {
           console.error("Failed to create org", res.json());
         } else {
+          console.log(res.json());
           refreshCurrentOrg();
         }
       });

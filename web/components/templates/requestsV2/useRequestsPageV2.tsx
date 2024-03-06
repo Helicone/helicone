@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useGetProperties } from "../../../services/hooks/properties";
 import { useGetRequests } from "../../../services/hooks/requests";
 import {
@@ -9,14 +9,10 @@ import {
 import {
   REQUEST_TABLE_FILTERS,
   SingleFilterDef,
-  textWithSuggestions,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import getNormalizedRequest from "./builder/requestBuilder";
-import { useModels } from "../../../services/hooks/models";
-import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
-import { TimeFilter } from "../dashboard/dashboardPage";
 
 const useRequestsPageV2 = (
   currentPage: number,
@@ -27,11 +23,6 @@ const useRequestsPageV2 = (
   isCached: boolean,
   isLive: boolean
 ) => {
-  const [timeFilter] = useState<TimeFilter>({
-    start: getTimeIntervalAgo("all"),
-    end: new Date(),
-  });
-
   const {
     properties,
     isLoading: isPropertiesLoading,
@@ -39,38 +30,9 @@ const useRequestsPageV2 = (
     searchPropertyFilters,
   } = useGetProperties();
 
-  const { models, isLoading: isModelsLoading } = useModels(timeFilter, 50);
-
   const filterMap = (REQUEST_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
     propertyFilters
   );
-
-  // replace the model filter inside of the filterMap with the text suggestion model
-  const modelFilterIdx = filterMap.findIndex(
-    (filter) => filter.label === "Model"
-  );
-  if (modelFilterIdx !== -1) {
-    filterMap[modelFilterIdx] = {
-      label: "Model",
-      operators: textWithSuggestions(
-        models?.data
-          ?.filter((model) => model.model)
-          .map((model) => ({
-            key: model.model,
-            param: model.model,
-          }))
-          .concat([
-            {
-              key: " null",
-              param: "null",
-            },
-          ]) || []
-      ),
-      table: "response",
-      column: "body_model",
-      category: "request",
-    };
-  }
 
   const filter: FilterNode = {
     left: filterListToTree(
