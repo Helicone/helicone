@@ -16,7 +16,7 @@ const ThemedNumberDropdown = (props: ThemedNumberDropdownProps) => {
   const [selected, setSelected] = useState(value);
 
   return (
-    <div className="w-full max-w-[15rem]">
+    <div className="w-full">
       <SearchSelect
         value={selected}
         placeholder="Select value..."

@@ -218,7 +218,7 @@ function AdvancedFilterRow({
 
   return (
     <div className="w-full flex flex-col lg:flex-row gap-3 items-left lg:items-center ml-4">
-      <div className="w-full max-w-[15rem]">
+      <div className="w-full max-w-[12.5rem]">
         <SearchSelect
           value={currentColumn}
           placeholder="Search Fields..."
@@ -255,7 +255,7 @@ function AdvancedFilterRow({
         </SearchSelect>
       </div>
 
-      <div className="w-full max-w-[15rem]">
+      <div className="w-full max-w-[12.5rem]">
         <Select
           value={currentOperator}
           placeholder="equals"
@@ -280,7 +280,7 @@ function AdvancedFilterRow({
         </Select>
       </div>
 
-      <div className="">
+      <div className="w-full max-w-[20rem]">
         <AdvancedFilterInput
           type={
             filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx].type
