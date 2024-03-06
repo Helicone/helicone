@@ -133,3 +133,4 @@ deleted_classes = ["AtomicAlerter"]
 [[migrations]]
 tag = "v6"
 new_classes = ["InMemoryRateLimiter"]
+deleted_classes = ["AtomicRateLimiter"]
