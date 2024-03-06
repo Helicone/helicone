@@ -39,7 +39,7 @@ const useRequestsPageV2 = (
     searchPropertyFilters,
   } = useGetProperties();
 
-  const { models, isLoading: isModelsLoading } = useModels(timeFilter);
+  const { models, isLoading: isModelsLoading } = useModels(timeFilter, 50);
 
   const filterMap = (REQUEST_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
     propertyFilters
@@ -65,6 +65,9 @@ const useRequestsPageV2 = (
       category: "request",
     };
   }
+
+  // sort the model by name
+  models?.data?.sort((a, b) => a.model.localeCompare(b.model));
 
   const filter: FilterNode = {
     left: filterListToTree(
