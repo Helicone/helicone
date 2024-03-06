@@ -58,7 +58,13 @@ const useRequestsPageV2 = (
           .map((model) => ({
             key: model.model,
             param: model.model,
-          })) || []
+          }))
+          .concat([
+            {
+              key: " null",
+              param: "null",
+            },
+          ]) || []
       ),
       table: "response",
       column: "body_model",
