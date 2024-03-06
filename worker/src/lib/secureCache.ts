@@ -122,7 +122,6 @@ export async function getFromCache(
   const hashedKey = await hash(key);
   const encryptedMemory = InMemoryCache.getInstance<string>().get(hashedKey);
   if (encryptedMemory !== undefined) {
-    console.log("Using in-memory cache");
     return decrypt(JSON.parse(encryptedMemory), env);
   }
 
