@@ -5,7 +5,6 @@ import {
   PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
 import { User } from "@supabase/auth-helpers-nextjs";
-import { useQuery } from "@tanstack/react-query";
 import {
   AreaChart,
   BarChart,
@@ -18,7 +17,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { ModelMetric } from "../../../lib/api/models/models";
-import { Result } from "../../../lib/result";
 import {
   getIncrementAsMinutes,
   getTimeMap,
@@ -45,6 +43,7 @@ import { formatNumber } from "../users/initialColumns";
 import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
+import { useModels } from "../../../services/hooks/models";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -161,24 +160,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       dbIncrement: timeIncrement,
     });
 
-  const { data: models, isLoading } = useQuery({
-    queryKey: ["modelMetrics", timeFilter],
-    queryFn: async (query) => {
-      return await fetch("/api/models", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          filter: "all",
-          offset: 0,
-          limit: 5,
-          timeFilter,
-        }),
-      }).then((res) => res.json() as Promise<Result<ModelMetric[], string>>);
-    },
-    refetchOnWindowFocus: false,
-  });
+  const { isLoading, models } = useModels(timeFilter);
 
   function encodeFilter(filter: UIFilterRow): string {
     return `${filter.filterMapIdx}:${filter.operatorIdx}:${encodeURIComponent(

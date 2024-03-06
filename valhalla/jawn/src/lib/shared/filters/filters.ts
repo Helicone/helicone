@@ -137,7 +137,8 @@ const whereKeyMappings: KeyMappings = {
   response: easyKeyMappings<"response">({
     body_completion:
       "(coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text",
-    body_model: "request.body ->> 'model'",
+    body_model:
+      "(coalesce(response.body ->> 'model', request.body ->> 'model'))::text",
     body_tokens: "((response.body -> 'usage') ->> 'total_tokens')::bigint",
     status: "response.status",
   }),
