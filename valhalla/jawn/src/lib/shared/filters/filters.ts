@@ -138,7 +138,7 @@ const whereKeyMappings: KeyMappings = {
     body_completion:
       "(coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text",
     body_model:
-      "(coalesce(response.body ->> 'model', request.body ->> 'model'))::text",
+      "(coalesce(request.model_override, response.model, request.model, response.body ->> 'model', request.body ->> 'model'))::text",
     body_tokens: "((response.body -> 'usage') ->> 'total_tokens')::bigint",
     status: "response.status",
   }),
@@ -316,15 +316,21 @@ export function buildFilterLeaf(
         ? "NOT ILIKE"
         : undefined;
 
-    filters.push(
-      `${column} ${sqlOperator} ${argPlaceHolder(argsAcc.length, value)}`
-    );
-    if (operatorKey === "contains") {
-      argsAcc.push(`%${value}%`);
-    } else if (operatorKey === "not-contains") {
-      argsAcc.push(`%${value}%`);
+    if (operatorKey === "not-equals" && value === "null") {
+      filters.push(`${column} is not null`);
+    } else if (operatorKey === "equals" && value === "null") {
+      filters.push(`${column} is null`);
     } else {
-      argsAcc.push(value);
+      filters.push(
+        `${column} ${sqlOperator} ${argPlaceHolder(argsAcc.length, value)}`
+      );
+      if (operatorKey === "contains") {
+        argsAcc.push(`%${value}%`);
+      } else if (operatorKey === "not-contains") {
+        argsAcc.push(`%${value}%`);
+      } else {
+        argsAcc.push(value);
+      }
     }
   }
 
@@ -333,7 +339,6 @@ export function buildFilterLeaf(
     argsAcc,
   };
 }
-
 export function buildFilterBranch(
   args: Omit<BuildFilterArgs, "filter"> & { filter: FilterBranch }
 ): {
