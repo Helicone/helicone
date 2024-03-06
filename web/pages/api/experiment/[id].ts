@@ -11,6 +11,7 @@ import { dbExecute } from "../../../lib/api/db/dbExecute";
 type DatasetResult = {
   createdAt: string;
   responseBody: any;
+  delay: number;
 };
 
 type Prompt = {
@@ -58,8 +59,10 @@ async function handler({
       origin_req.properties as properties, 
       origin_res.body as origin_response_body,
       origin_res.created_at as origin_response_created_at,
+      origin_res.delay_ms as origin_response_delay,
       test_res.body as test_response_body,
-      test_res.created_at as test_response_created_at
+      test_res.created_at as test_response_created_at,
+      test_res.delay_ms as test_response_delay
 
     
     from experiment_dataset_values e
@@ -74,8 +77,10 @@ async function handler({
     properties: Record<string, string>;
     origin_response_body: any;
     origin_response_created_at: string;
+    origin_response_delay: number;
     test_response_body: any;
     test_response_created_at: string;
+    test_response_delay: number;
   }>(query, [experimentData?.dataset]);
 
   const originPrompt = await supabaseServer
@@ -116,10 +121,12 @@ async function handler({
           originResult: {
             createdAt: datasetRun.origin_response_created_at,
             responseBody: datasetRun.origin_response_body,
+            delay: datasetRun.origin_response_delay,
           },
           testResult: {
             createdAt: datasetRun.test_response_created_at,
             responseBody: datasetRun.test_response_body,
+            delay: datasetRun.test_response_delay,
           },
         })) ?? [],
     })
