@@ -79,39 +79,45 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<{}>
 ): Promise<void> {
-  if (req.url === "/api/graphql") {
-  }
+  let context: Promise<Context> | null = null;
+  if (req.method === "POST") {
+    let orgId = "";
+    try {
+      orgId = await getOrgIdOrThrow(req, res);
+    } catch (e) {
+      res.status(401).json({ error: "Unauthorized", data: null });
+      return;
+    }
+    context = getContext(orgId);
 
-  const orgId = await getOrgIdOrThrow(req, res);
-  const context = getContext(orgId);
+    const rateLimit = await checkRateLimit(`graphql-${orgId}`);
 
-  const rateLimit = await checkRateLimit(`graphql-${orgId}`);
+    if (process.env.NEXT_PUBLIC_POSTHOG_API_KEY) {
+      const client = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
+        host: "https://app.posthog.com",
+      });
 
-  if (process.env.NEXT_PUBLIC_POSTHOG_API_KEY) {
-    const client = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
-      host: "https://app.posthog.com",
-    });
-
-    client.capture({
-      distinctId: "server",
-      event: "graphql",
-      properties: {
-        orgId,
-        wasRateLimited: rateLimit.success,
-        url: req.url,
-        method: req.method,
-        body: req.body,
-      },
-    });
-  }
-  if (!rateLimit.success) {
-    console.error("Rate limit exceeded", orgId);
-    res.status(429).json({
-      error:
-        "Rate limit exceeded, contact support@helicone.ai to increase your rate limit",
-      data: null,
-    });
-    return;
+      client.capture({
+        distinctId: "server",
+        event: "graphql",
+        properties: {
+          orgId,
+          wasRateLimited: rateLimit.success,
+          url: req.url,
+          method: req.method,
+          body: req.body,
+        },
+      });
+    }
+    if (!rateLimit.success) {
+      console.error("Rate limit exceeded", orgId);
+      res.status(429).json({
+        error:
+          "Rate limit exceeded, contact support@helicone.ai to increase your rate limit",
+        data: null,
+      });
+      return;
+    }
   }
 
   const apolloServer = new ApolloServer({
