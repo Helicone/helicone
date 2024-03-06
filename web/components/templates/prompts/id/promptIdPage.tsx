@@ -101,7 +101,8 @@ export const RenderWithPrettyInputKeys = (props: {
   // Function to replace matched patterns with JSX components
   const replaceInputKeysWithComponents = (inputText: string) => {
     if (typeof inputText !== "string") {
-      throw new Error("Input text must be a string");
+      // don't throw, stringify the input and return it
+      return JSON.stringify(inputText);
     }
 
     // Regular expression to match the pattern
