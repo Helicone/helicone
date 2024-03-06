@@ -45,7 +45,7 @@ export async function logInClickhouse(
   clickhouseDb: ClickhouseClientWrapper
 ) {
   const model =
-    request.model_override ?? response.model ?? request.model ?? "not-found";
+    request.model_override ?? response.model ?? request.model ?? null;
   return Promise.all([
     clickhouseDb.dbInsertClickhouse("request_response_log", [
       {
