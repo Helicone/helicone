@@ -44,6 +44,32 @@ export async function handleProxyRequest(
     ? new ReadableInterceptor(response.body, proxyRequest.isStream)
     : null;
   let body = interceptor ? interceptor.stream : null;
+  const model = await proxyRequest.requestWrapper.getJson<{ model?: string }>();
+  if (
+    model.model &&
+    model.model.includes("claude-3") &&
+    proxyRequest.isStream
+  ) {
+    let buffer: Uint8Array | null = null;
+    const transformer = new TransformStream({
+      transform(chunk, controller) {
+        if (chunk.toString().includes("data")) {
+          controller.enqueue(chunk);
+        } else if (buffer && buffer.toString().includes("data")) {
+          controller.enqueue(buffer);
+          buffer = null;
+        } else if (buffer) {
+          const mergedArray = new Uint8Array(buffer.length + chunk.length);
+          mergedArray.set(buffer);
+          mergedArray.set(chunk, buffer.length);
+          buffer = mergedArray;
+        } else {
+          buffer = chunk;
+        }
+      },
+    });
+    body = body?.pipeThrough(transformer) ?? null;
+  }
 
   if (
     proxyRequest.requestWrapper.heliconeHeaders.featureFlags.streamForceFormat
