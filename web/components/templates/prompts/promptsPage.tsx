@@ -1,4 +1,6 @@
 import {
+  ArrowTrendingUpIcon,
+  BeakerIcon,
   BookOpenIcon,
   DocumentTextIcon,
   EyeIcon,
@@ -14,18 +16,43 @@ import {
   TextInput,
 } from "@tremor/react";
 import { usePrompts } from "../../../services/hooks/prompts/prompts";
-import { Fragment, useState } from "react";
+import { ElementType, Fragment, useState } from "react";
 import { clsx } from "../../shared/clsx";
 import Link from "next/link";
 import { useOrg } from "../../layout/organizationContext";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/solid";
 import { Menu, Transition } from "@headlessui/react";
 import { useExperiments } from "../../../services/hooks/prompts/experiments";
+import { useRouter } from "next/router";
 
-interface PromptsPageProps {}
+interface PromptsPageProps {
+  defaultIndex: number;
+}
+
+const tabs: {
+  id: number;
+  title: string;
+  icon: ElementType<any>;
+}[] = [
+  {
+    id: 0,
+    title: "Prompts",
+    icon: DocumentTextIcon,
+  },
+  {
+    id: 1,
+    title: "Experiments",
+    icon: BeakerIcon,
+  },
+  {
+    id: 2,
+    title: "Evaluations",
+    icon: ArrowTrendingUpIcon,
+  },
+];
 
 const PromptsPage = (props: PromptsPageProps) => {
-  const {} = props;
+  const { defaultIndex } = props;
 
   const { prompts } = usePrompts();
   const { experiments } = useExperiments();
@@ -35,21 +62,36 @@ const PromptsPage = (props: PromptsPageProps) => {
   }>();
 
   const org = useOrg();
+  const router = useRouter();
 
   return (
     <div className="flex flex-col space-y-4 w-full">
       <h1 className="font-semibold text-3xl text-black dark:text-white">
         Prompts (Beta)
       </h1>
-      <TabGroup>
+      <TabGroup defaultIndex={defaultIndex}>
         <TabList className="font-semibold" variant="line">
-          <Tab>Prompts</Tab>
-          <Tab>Experiments</Tab>
-          <Tab>Evaluations</Tab>
+          {tabs.map((tab) => (
+            <Tab
+              key={tab.id}
+              icon={tab.icon}
+              onClick={() => {
+                router.push(
+                  {
+                    query: { tab: tab.id },
+                  },
+                  undefined,
+                  { shallow: true }
+                );
+              }}
+            >
+              {tab.title}
+            </Tab>
+          ))}
         </TabList>
         <TabPanels>
           <TabPanel>
-            <div className="flex flex-row items-center justify-between">
+            <div className="flex flex-row items-center justify-between py-2">
               <h1 className="font-semibold text-3xl text-black dark:text-white">
                 {prompts?.data?.isOverLimit && (
                   <p className="text-green-500 text-sm">
@@ -243,7 +285,7 @@ const PromptsPage = (props: PromptsPageProps) => {
             </div>
           </TabPanel>
           <TabPanel>
-            <div className="flex flex-row items-center gap-5">
+            <div className="w-full h-full grid grid-cols-4 gap-4 py-2">
               {experiments?.map((experiment, i) => (
                 <div
                   key={i}

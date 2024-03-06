@@ -11,6 +11,14 @@ import ThemedModal from "../../../../shared/themed/themedModal";
 import { clsx } from "../../../../shared/clsx";
 import { Tooltip } from "@mui/material";
 import { useExperiment } from "../../../../../services/hooks/prompts/experiments";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+} from "@tremor/react";
 
 interface PromptIdPageProps {
   id: string;
@@ -208,45 +216,79 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
   return (
     <>
       <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-col items-start space-y-2">
+        <div className="flex flex-col items-start space-y-4 w-full">
           <Link
             className="flex w-fit items-center text-gray-500 space-x-2 hover:text-gray-700"
-            href={"/prompts"}
+            href={"/prompts?tab=1"}
           >
             <ChevronLeftIcon className="h-4 w-4 inline" />
-            <span className="text-sm font-semibold">Prompts</span>
+            <span className="text-sm font-semibold">Experiments</span>
           </Link>
           <h1 className="font-semibold text-3xl text-black dark:text-white">
-            {id}
+            {experiment?.name}
           </h1>
-          Name: {experiment?.name}
-          {experiment?.datasetRuns.length}
-          <div className="grid grid-cols-5 w-full gap-4 border ">
-            <div className="col-span-1"></div>
-            <pre className="text-sm overflow-auto col-span-2">
-              {experiment?.originPrompt.heliconeTemplate.messages?.[0]?.content}
-            </pre>
-            <pre className="text-sm overflow-auto col-span-2">
-              {experiment?.testPrompt.heliconeTemplate.messages?.[0]?.content}
-            </pre>
 
-            {experiment?.datasetRuns.map((run) => {
-              return (
-                <>
-                  <div className="col-span-1">
-                    <pre>{JSON.stringify(run.inputs, undefined, 2)}</pre>
-                  </div>
-                  <pre className="text-sm overflow-auto col-span-2">
-                    {run.originResult.responseBody.choices[0].message.content}
-                  </pre>
+          <div className="w-full">
+            <Table className="bg-white border border-gray-300 rounded-lg p-4 w-full">
+              <TableHead className="border-b border-gray-300 w-full">
+                <TableRow>
+                  <TableHeaderCell className="w-1/3">
+                    <p>Prompt Variables</p>
+                  </TableHeaderCell>
 
-                  <pre className="text-sm overflow-auto col-span-2">
-                    {run.testResult.responseBody.choices[0].message.content}
-                  </pre>
-                </>
-              );
-            })}
+                  <TableHeaderCell className="w-1/3 border-l border-gray-300">
+                    <p>Origin</p>
+                    {/* <p className="whitespace-pre-wrap">
+                      {
+                        experiment?.originPrompt.heliconeTemplate.messages?.[0]
+                          ?.content
+                      }
+                    </p> */}
+                  </TableHeaderCell>
+                  <TableHeaderCell className="w-1/3 border-l border-gray-300">
+                    <p>Experiment</p>
+                    {/* <p className="whitespace-pre-wrap">
+                      {
+                        experiment?.testPrompt.heliconeTemplate.messages?.[0]
+                          ?.content
+                      }
+                    </p> */}
+                  </TableHeaderCell>
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {experiment?.datasetRuns.map((run, i) => {
+                  return (
+                    <TableRow key={i}>
+                      <TableCell className="h-full items-start border-r border-gray-300">
+                        <pre>{JSON.stringify(run.inputs, undefined, 2)}</pre>
+                      </TableCell>
+                      <TableCell className="inline-flex h-full">
+                        <pre className="text-sm overflow-auto h-full bg-red-500">
+                          {
+                            run.originResult.responseBody.choices[0].message
+                              .content
+                          }
+                        </pre>
+                      </TableCell>
+
+                      <TableCell className="h-full border-l border-gray-300">
+                        <pre className="text-sm overflow-auto h-full">
+                          {
+                            run.testResult.responseBody.choices[0].message
+                              .content
+                          }
+                        </pre>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
+
+          {/* {experiment?.datasetRuns.length} */}
         </div>
       </div>
     </>
