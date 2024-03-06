@@ -25,14 +25,12 @@ export class InMemoryRateLimiter {
     );
 
     let isRateLimited = false;
-    let shouldLogInDB = false;
     if (this.transactions.length <= this.maxCount) {
       // Not rate limited
       this.transactions.push(now);
     } else {
       // Rate limited
       isRateLimited = true;
-      shouldLogInDB = true;
     }
 
     return new Response(JSON.stringify({ isRateLimited }), {
