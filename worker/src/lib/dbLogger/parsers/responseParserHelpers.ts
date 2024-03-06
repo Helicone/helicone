@@ -1,25 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export function recursivelyConsolidateFunctionCall(
-  existingFunctionCall: any,
-  functionCallDelta: any
-): any {
-  Object.keys(functionCallDelta).forEach((key) => {
-    if (existingFunctionCall[key] === undefined) {
-      existingFunctionCall[key] = functionCallDelta[key];
-    } else if (typeof existingFunctionCall[key] === "object") {
-      recursivelyConsolidateFunctionCall(
-        existingFunctionCall[key],
-        functionCallDelta[key]
-      );
-    } else if (typeof existingFunctionCall[key] === "number") {
-      existingFunctionCall[key] += functionCallDelta[key];
-    } else if (typeof existingFunctionCall[key] === "string") {
-      existingFunctionCall[key] += functionCallDelta[key];
+export function recursivelyConsolidate(body: any, delta: any): any {
+  Object.keys(delta).forEach((key) => {
+    if (body[key] === undefined) {
+      body[key] = delta[key];
+    } else if (typeof body[key] === "object") {
+      recursivelyConsolidate(body[key], delta[key]);
+    } else if (typeof body[key] === "number") {
+      body[key] += delta[key];
+    } else if (typeof body[key] === "string") {
+      body[key] += delta[key];
     } else {
       throw new Error("Invalid function call type");
     }
   });
-  return existingFunctionCall;
+  return body;
 }
 
 export function consolidateTextFields(responseBody: any[]): any {
@@ -50,7 +44,7 @@ export function consolidateTextFields(responseBody: any[]): any {
                     ? c.delta.content + (cur.choices[i].delta.content ?? "")
                     : cur.choices[i].delta.content,
                   function_call: c.delta.function_call
-                    ? recursivelyConsolidateFunctionCall(
+                    ? recursivelyConsolidate(
                         c.delta.function_call,
                         cur.choices[i].delta.function_call ?? {}
                       )
