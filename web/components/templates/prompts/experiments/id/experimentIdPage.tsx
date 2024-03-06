@@ -265,7 +265,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                         <pre>{JSON.stringify(run.inputs, undefined, 2)}</pre>
                       </TableCell>
                       <TableCell className="inline-flex h-full">
-                        <pre className="text-sm overflow-auto h-full bg-red-500">
+                        <pre className="text-sm overflow-auto h-full">
                           {
                             run.originResult.responseBody.choices[0].message
                               .content
