@@ -207,17 +207,29 @@ export class DBWrapper {
     return authParams;
   }
 
-  async getTier(): Promise<Result<string, string>> {
-    if (this.tier !== undefined) {
-      return ok(this.tier);
-    }
+  async getOrganization(): Promise<
+    Result<
+      {
+        tier: string;
+        id: string;
+        percentLog: number;
+      },
+      string
+    >
+  > {
     const authParams = await this.getAuthParams();
     if (authParams.error !== null) {
       return err(authParams.error);
     }
-
-    const tier = await getAndStoreInCache<string, string>(
-      `tier-${authParams.data.organizationId}`,
+    return await getAndStoreInCache<
+      {
+        tier: string;
+        id: string;
+        percentLog: number;
+      },
+      string
+    >(
+      `org-${authParams.data.organizationId}`,
       this.secureCacheEnv,
       async () => {
         const { data, error } = await this.supabaseClient
@@ -229,15 +241,22 @@ export class DBWrapper {
         if (error !== null) {
           return err(error.message);
         }
-        return ok(data?.tier ?? "free");
+        return ok({
+          tier: data?.tier ?? "free",
+          id: data?.id ?? "",
+          percentLog: 100_000,
+        });
       }
     );
-    if (tier.error !== null) {
-      return err(tier.error);
-    }
-    this.tier = tier.data;
+  }
 
-    return ok(this.tier);
+  async getTier(): Promise<Result<string, string>> {
+    const org = await this.getOrganization();
+    if (org.error !== null) {
+      return err(org.error);
+    }
+
+    return ok(org.data.tier);
   }
 
   async recordRateLimitHit(orgId: string, totalCount: number): Promise<void> {

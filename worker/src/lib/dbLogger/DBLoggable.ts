@@ -532,13 +532,21 @@ export class DBLoggable {
       return rateLimiter;
     }
 
-    const tier = await db.dbWrapper.getTier();
+    const org = await db.dbWrapper.getOrganization();
 
-    if (tier.error !== null) {
-      return err(tier.error);
+    if (org.error !== null) {
+      return err(org.error);
+    }
+    const tier = org.data?.tier;
+
+    if (org.data.percentLog !== 100_000) {
+      const random = Math.random() * 100_000;
+      if (random > org.data.percentLog) {
+        return ok(null);
+      }
     }
 
-    const rateLimit = await rateLimiter.data.checkRateLimit(tier.data);
+    const rateLimit = await rateLimiter.data.checkRateLimit(tier);
 
     if (rateLimit.error) {
       console.error(`Error checking rate limit: ${rateLimit.error}`);
