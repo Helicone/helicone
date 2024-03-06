@@ -11,7 +11,6 @@ export type ColumnType =
   | "timestamp"
   | "number"
   | "text-with-suggestions"
-  | "number-with-suggestions"
   | "bool";
 
 export type InputParam = {
@@ -66,7 +65,7 @@ const numberOperators: Operator<keyof NumberOperators>[] = [
   {
     value: "not-equals",
     label: "not equals",
-    type: "number",
+    type: "text",
   },
   {
     value: "gte",
@@ -193,60 +192,7 @@ export const REQUEST_TABLE_FILTERS: [
   },
   {
     label: "Status",
-    operators: numberWithSuggestions([
-      {
-        key: "200",
-        param: "200 (success)",
-      },
-      {
-        key: "-4",
-        param: "threat",
-      },
-      {
-        key: "-3",
-        param: "cancelled",
-      },
-      {
-        key: "-2",
-        param: "pending",
-      },
-      {
-        key: "-1",
-        param: "timeout",
-      },
-      {
-        key: "400",
-        param: "400",
-      },
-      {
-        key: "401",
-        param: "401",
-      },
-      {
-        key: "404",
-        param: "404",
-      },
-      {
-        key: "429",
-        param: "429 (rate-limit)",
-      },
-      {
-        key: "500",
-        param: "500",
-      },
-      {
-        key: "502",
-        param: "502",
-      },
-      {
-        key: "503",
-        param: "503",
-      },
-      {
-        key: "524",
-        param: "524 (server timeout)",
-      },
-    ]),
+    operators: numberOperators,
     category: "response",
     table: "response",
     column: "status",
@@ -327,22 +273,10 @@ export const userTableFilters: [
   },
 ];
 
-export function textWithSuggestions(
-  inputParams: InputParam[]
-): Operator<string>[] {
+function textWithSuggestions(inputParams: InputParam[]): Operator<string>[] {
   return textOperators.map((o) => ({
     ...o,
     type: "text-with-suggestions",
-    inputParams,
-  }));
-}
-
-export function numberWithSuggestions(
-  inputParams: InputParam[]
-): Operator<string>[] {
-  return numberOperators.map((o) => ({
-    ...o,
-    type: "number-with-suggestions",
     inputParams,
   }));
 }

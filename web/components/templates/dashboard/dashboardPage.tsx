@@ -5,6 +5,7 @@ import {
   PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
 import { User } from "@supabase/auth-helpers-nextjs";
+import { useQuery } from "@tanstack/react-query";
 import {
   AreaChart,
   BarChart,
@@ -17,6 +18,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { ModelMetric } from "../../../lib/api/models/models";
+import { Result } from "../../../lib/result";
 import {
   getIncrementAsMinutes,
   getTimeMap,

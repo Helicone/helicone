@@ -4,17 +4,8 @@ import {
   ColumnType,
   SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
+import ThemedDropdown from "./themedDropdown";
 import { ThemedTextDropDown } from "./themedTextDropDown";
-import {
-  NumberInput,
-  SearchSelect,
-  SearchSelectItem,
-  Select,
-  SelectItem,
-  TextInput,
-} from "@tremor/react";
-import { useEffect, useState } from "react";
-import ThemedNumberDropdown from "./themedNumberDropdown";
 
 export function AdvancedFilters({
   filterMap,
@@ -103,50 +94,32 @@ function AdvancedFilterInput({
   type: ColumnType;
   value: string;
   onChange: (value: string | null) => void;
-  inputParams?: {
-    key: string;
-    param: string;
-  }[];
+  inputParams?: string[];
   onSearchHandler?: (search: string) => Promise<Result<void, string>>;
 }) {
-  const [currentValue, setCurrentValue] = useState<string>(value);
-  const [currentParams, setCurrentParams] = useState<
-    {
-      key: string;
-      param: string;
-    }[]
-  >(inputParams ?? []);
-
-  useEffect(() => {
-    if (inputParams !== currentParams) {
-      setCurrentParams(inputParams ?? []);
-    }
-  }, [type, inputParams]);
-
+  // if any of the inputs below are changed, we want to set the page number back to 1
   switch (type) {
     case "text":
       return (
-        <TextInput
-          className=""
+        <input
+          type="text"
           onChange={(e) => {
-            setCurrentValue(e.target.value);
             onChange(e.target.value);
           }}
           placeholder={"text..."}
-          value={currentValue}
+          value={value}
+          className="block w-full sm:min-w-[25rem] rounded-md border-gray-300 dark:border-gray-700 text-black dark:text-white bg-white dark:bg-black shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
         />
       );
     case "number":
       return (
-        <NumberInput
-          className=""
-          onChange={(e) => {
-            setCurrentValue(e.target.value);
-            onChange(e.target.value);
-          }}
+        <input
+          type="number"
+          name="search-field"
+          onChange={(e) => onChange(e.target.value)}
           placeholder={"number..."}
-          value={currentValue}
-          enableStepper={false}
+          value={value}
+          className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white text-black dark:text-white dark:bg-black shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
         />
       );
     case "timestamp":
@@ -162,20 +135,14 @@ function AdvancedFilterInput({
       );
     case "text-with-suggestions":
       return (
-        <ThemedTextDropDown
-          options={currentParams.map((param) => param.param) ?? []}
-          onChange={(e) => onChange(e)}
-          value={value}
-          onSearchHandler={onSearchHandler}
-        />
-      );
-    case "number-with-suggestions":
-      return (
-        <ThemedNumberDropdown
-          options={currentParams ?? []}
-          onChange={(e) => onChange(e)}
-          value={value}
-        />
+        <>
+          <ThemedTextDropDown
+            options={inputParams ?? []}
+            onChange={(e) => onChange(e)}
+            value={value}
+            onSearchHandler={onSearchHandler}
+          />
+        </>
       );
     case "bool":
       return (
@@ -213,83 +180,77 @@ function AdvancedFilterRow({
     search: string
   ) => Promise<Result<void, string>>;
 }) {
-  const [currentColumn, setCurrentColumn] = useState<string>();
-  const [currentOperator, setCurrentOperator] = useState<string>();
-
   return (
     <div className="w-full flex flex-col lg:flex-row gap-3 items-left lg:items-center ml-4">
-      <div className="w-full max-w-[12.5rem]">
-        <SearchSelect
-          value={currentColumn}
-          placeholder="Search Fields..."
-          onValueChange={(value) => {
-            setCurrentColumn(value);
-            const selected = Number(value);
-            const label = filterMap[selected].label;
-            if (label === "Feedback") {
-              // feedback idx
-              setFilter([
-                {
-                  filterMapIdx: selected,
-                  operatorIdx: 0,
-                  value: "1",
-                },
-              ]);
-            } else {
-              setFilter([
-                {
-                  filterMapIdx: selected,
-                  operatorIdx: 0,
-                  value: "",
-                },
-              ]);
-            }
-          }}
-          enableClear={false}
-        >
-          {filterMap.map((column, i) => (
-            <SearchSelectItem value={i.toString()} key={i}>
-              {column.label}
-            </SearchSelectItem>
-          ))}
-        </SearchSelect>
-      </div>
+      <ThemedDropdown
+        options={filterMap.map((column, i) => {
+          return {
+            value: i,
+            label: column.label,
+            category: column.category,
+          };
+        })}
+        selectedValue={filter.filterMapIdx}
+        onSelect={(selected) => {
+          const label = filterMap[selected].label;
+          if (label === "Feedback") {
+            // feedback idx
 
-      <div className="w-full max-w-[12.5rem]">
-        <Select
-          value={currentOperator}
-          placeholder="equals"
-          onValueChange={(value: string | number | undefined) => {
-            const selected = Number(value);
-            setCurrentOperator(value as string);
             setFilter([
               {
-                filterMapIdx: filter.filterMapIdx,
-                operatorIdx: selected,
+                filterMapIdx: selected,
+                operatorIdx: 0,
+                value: "1",
+              },
+            ]);
+          } else {
+            setFilter([
+              {
+                filterMapIdx: selected,
+                operatorIdx: 0,
                 value: "",
               },
             ]);
-          }}
-          enableClear={false}
-        >
-          {filterMap[filter.filterMapIdx]?.operators.map((operator, i) => (
-            <SelectItem value={i.toString()} key={i}>
-              {operator.label}
-            </SelectItem>
-          ))}
-        </Select>
-      </div>
+          }
+        }}
+        className="w-full lg:w-fit"
+      />
 
-      <div className="w-full max-w-[20rem]">
+      <ThemedDropdown
+        options={filterMap[filter.filterMapIdx]?.operators.map(
+          (operator, i) => {
+            return {
+              value: i,
+              label: operator.label,
+            };
+          }
+        )}
+        selectedValue={filter.operatorIdx}
+        onSelect={(selected) => {
+          setFilter([
+            {
+              filterMapIdx: filter.filterMapIdx,
+              operatorIdx: selected,
+              value: "",
+            },
+          ]);
+        }}
+        className="w-full lg:w-fit"
+      />
+
+      <div className="">
         <AdvancedFilterInput
           type={
             filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx].type
           }
           value={filter.value}
-          inputParams={
-            filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx]
-              .inputParams
-          }
+          inputParams={filterMap[filter.filterMapIdx]?.operators[
+            filter.operatorIdx
+          ].inputParams
+            ?.filter(
+              (param) => param.key === filterMap[filter.filterMapIdx]?.column
+            )
+            .map((param) => param.param)}
           onChange={(value) => {
             setFilter([
               {
