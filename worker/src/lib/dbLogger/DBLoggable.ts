@@ -273,6 +273,37 @@ export class DBLoggable {
     }
   }
 
+  getUsage(parsedResponse: unknown): {
+    prompt_tokens: number | undefined;
+    completion_tokens: number | undefined;
+  } {
+    if (
+      typeof parsedResponse !== "object" ||
+      parsedResponse === null ||
+      !("usage" in parsedResponse)
+    ) {
+      return {
+        prompt_tokens: undefined,
+        completion_tokens: undefined,
+      };
+    }
+
+    const response = parsedResponse as {
+      usage: {
+        prompt_tokens?: number;
+        completion_tokens?: number;
+        input_tokens?: number;
+        output_tokens?: number;
+      };
+    };
+    const usage = response.usage;
+
+    return {
+      prompt_tokens: usage?.prompt_tokens ?? usage?.input_tokens,
+      completion_tokens: usage?.completion_tokens ?? usage?.output_tokens,
+    };
+  }
+
   async getResponse() {
     const { body: responseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
@@ -285,6 +316,7 @@ export class DBLoggable {
     const parsedResponse = await this.parseResponse(responseBody, status);
     const isStream = this.request.isStream;
 
+    const usage = this.getUsage(parsedResponse.data);
     if (
       !isStream &&
       this.provider === "GOOGLE" &&
@@ -304,8 +336,8 @@ export class DBLoggable {
             }
           : body,
         status: await this.response.status(),
-        completion_tokens: parsedResponse.data.usage?.completion_tokens,
-        prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
+        completion_tokens: usage.completion_tokens,
+        prompt_tokens: usage.prompt_tokens,
         time_to_first_token: timeToFirstToken,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         model: model,
@@ -325,8 +357,8 @@ export class DBLoggable {
               }
             : parsedResponse.data,
           status: await this.response.status(),
-          completion_tokens: parsedResponse.data.usage?.completion_tokens,
-          prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
+          completion_tokens: usage.completion_tokens,
+          prompt_tokens: usage.prompt_tokens,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           model: (parsedResponse.data as any)?.model ?? undefined,
           delay_ms,
