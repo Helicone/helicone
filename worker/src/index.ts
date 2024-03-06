@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
-import { AtomicRateLimiter } from "./db/AtomicRateLimiter";
+import { InMemoryRateLimiter } from "./db/InMemoryRateLimiter";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { RosettaWrapper } from "./lib/rosetta/RosettaWrapper";
 import { updateLoopUsers } from "./lib/updateLoopsUsers";
@@ -187,4 +187,4 @@ function handleError(e: unknown): Response {
     }
   );
 }
-export { AtomicRateLimiter };
+export { InMemoryRateLimiter };

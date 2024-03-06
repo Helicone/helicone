@@ -9,7 +9,7 @@ logpush = true
 node_compat = true
 
 durable_objects.bindings = [
-	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" }
+	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" }
 ]
 
 kv_namespaces = [
@@ -47,7 +47,7 @@ routes = [
 ]
 
 durable_objects.bindings = [
-	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" }
+	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" }
 ]
 
 kv_namespaces = [
@@ -93,7 +93,7 @@ kv_namespaces = [
 ]
 
 durable_objects.bindings = [
-	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" }
+	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" }
 ]
 
 queues.producers = [
@@ -118,10 +118,9 @@ new_classes = ["AtomicRateLimiter"]
 tag = "v2"
 new_classes = ["AtomicAlerter"]
 
-
 [[migrations]]
 tag = "v3"
-delete_classes = ["AtomicAlerter"]
+deleted_classes = ["AtomicAlerter"]
 
 [[migrations]]
 tag = "v4"
@@ -130,3 +129,7 @@ new_classes = ["AtomicAlerter"]
 [[migrations]]
 tag = "v5"
 deleted_classes = ["AtomicAlerter"]
+
+[[migrations]]
+tag = "v6"
+new_classes = ["InMemoryRateLimiter"]
