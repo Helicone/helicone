@@ -1,3 +1,4 @@
+import { enforceString } from "../../../../lib/helpers/typeEnforcers";
 import { Completion } from "../../requests/completion";
 import AbstractRequestBuilder, {
   SpecificFields,
@@ -25,12 +26,15 @@ class ClaudeBuilder extends AbstractRequestBuilder {
         return this.response.response_body?.error?.message || "";
       }
     };
+
     return {
-      requestText: this.response.request_body.tooLarge
-        ? "Helicone Message: Input too large"
-        : this.response.request_body.prompt ||
-          this.response.request_body.messages.slice(-1)[0].content ||
-          "",
+      requestText: enforceString(
+        this.response.request_body.tooLarge
+          ? "Helicone Message: Input too large"
+          : this.response.request_body.prompt ||
+              this.response.request_body.messages.slice(-1)[0].content ||
+              ""
+      ),
       responseText: getResponseText(),
       render: () => {
         return this.response.response_status === 0 ||
