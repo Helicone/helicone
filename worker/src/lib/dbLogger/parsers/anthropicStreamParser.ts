@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ok } from "../../../results";
+import { Result, ok } from "../../../results";
 import { consolidateTextFields } from "./responseParserHelpers";
 
 export function recursivelyConsolidateAnthropic(body: any, delta: any): any {
@@ -94,7 +94,7 @@ export async function anthropicAIStream(
   result: string,
   tokenCounter: (text: string) => Promise<number>,
   requestBody?: string
-) {
+): Promise<Result<any, string>> {
   const lines = result
     .split("\n")
     .filter((line) => line !== "")
