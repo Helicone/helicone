@@ -277,6 +277,210 @@ export type Database = {
           },
         ]
       }
+      experiment_prompts: {
+        Row: {
+          created_at: string
+          experiment_id: string
+          id: string
+          prompt_id: string
+          soft_delete: boolean
+        }
+        Insert: {
+          created_at?: string
+          experiment_id: string
+          id?: string
+          prompt_id: string
+          soft_delete?: boolean
+        }
+        Update: {
+          created_at?: string
+          experiment_id?: string
+          id?: string
+          prompt_id?: string
+          soft_delete?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_prompts_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_prompts_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: false
+            referencedRelation: "prompts"
+            referencedColumns: ["uuid"]
+          },
+        ]
+      }
+      experiment_run_prompt_outputs: {
+        Row: {
+          created_at: string
+          experiment_id: string
+          experiment_prompt_id: string
+          experiment_run_id: string
+          id: string
+          output: string
+          soft_delete: boolean
+        }
+        Insert: {
+          created_at?: string
+          experiment_id: string
+          experiment_prompt_id: string
+          experiment_run_id: string
+          id?: string
+          output: string
+          soft_delete?: boolean
+        }
+        Update: {
+          created_at?: string
+          experiment_id?: string
+          experiment_prompt_id?: string
+          experiment_run_id?: string
+          id?: string
+          output?: string
+          soft_delete?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_run_prompt_outputs_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_run_prompt_outputs_experiment_prompt_id_fkey"
+            columns: ["experiment_prompt_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_prompts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_run_prompt_outputs_experiment_run_id_fkey"
+            columns: ["experiment_run_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_run_values: {
+        Row: {
+          created_at: string
+          experiment_id: string
+          experiment_run_id: string
+          experiment_variable_id: string
+          id: string
+          soft_delete: boolean
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          experiment_id: string
+          experiment_run_id: string
+          experiment_variable_id: string
+          id?: string
+          soft_delete?: boolean
+          value: string
+        }
+        Update: {
+          created_at?: string
+          experiment_id?: string
+          experiment_run_id?: string
+          experiment_variable_id?: string
+          id?: string
+          soft_delete?: boolean
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_run_values_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_run_values_experiment_run_id_fkey"
+            columns: ["experiment_run_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_run_values_experiment_variable_id_fkey"
+            columns: ["experiment_variable_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_variables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_runs: {
+        Row: {
+          created_at: string
+          experiment_id: string
+          id: string
+          soft_delete: boolean
+        }
+        Insert: {
+          created_at?: string
+          experiment_id: string
+          id?: string
+          soft_delete?: boolean
+        }
+        Update: {
+          created_at?: string
+          experiment_id?: string
+          id?: string
+          soft_delete?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_runs_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_variables: {
+        Row: {
+          created_at: string
+          experiment_id: string
+          id: string
+          name: string
+          soft_delete: boolean
+        }
+        Insert: {
+          created_at?: string
+          experiment_id: string
+          id?: string
+          name: string
+          soft_delete?: boolean
+        }
+        Update: {
+          created_at?: string
+          experiment_id?: string
+          id?: string
+          name?: string
+          soft_delete?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_variables_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiments: {
         Row: {
           created_at: string
@@ -1376,6 +1580,7 @@ export type Database = {
           prompt_values: Json | null
           properties: Json | null
           provider: string
+          target_url: string | null
           threat: boolean | null
           user_id: string | null
         }
@@ -1396,6 +1601,7 @@ export type Database = {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
+          target_url?: string | null
           threat?: boolean | null
           user_id?: string | null
         }
@@ -1416,6 +1622,7 @@ export type Database = {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
+          target_url?: string | null
           threat?: boolean | null
           user_id?: string | null
         }
@@ -1516,6 +1723,7 @@ export type Database = {
           prompt_tokens: number | null
           request: string
           status: number | null
+          time_to_first_token: number | null
         }
         Insert: {
           body: Json
@@ -1528,6 +1736,7 @@ export type Database = {
           prompt_tokens?: number | null
           request: string
           status?: number | null
+          time_to_first_token?: number | null
         }
         Update: {
           body?: Json
@@ -1540,6 +1749,7 @@ export type Database = {
           prompt_tokens?: number | null
           request?: string
           status?: number | null
+          time_to_first_token?: number | null
         }
         Relationships: []
       }
