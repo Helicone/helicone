@@ -180,11 +180,16 @@ export interface CacheHits {
   created_at: Nullable<string>;
 }
 
+export interface RateLimitLog {
+  organization_id: string;
+}
+
 export interface ClickhouseDB {
   Tables: {
     properties_v3: PropertiesV3;
     request_response_log: RequestResponseLog;
     property_with_response_v1: PropertyWithResponseV1;
     cache_hits: CacheHits;
+    rate_limit_log: RateLimitLog;
   };
 }

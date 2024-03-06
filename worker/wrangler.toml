@@ -103,7 +103,6 @@ queues.producers = [
 [env.production_staging.vars]
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
-CLICKHOUSE_USER = "default"
 VAULT_ENABLED = "true"
 
 [env.production_staging.triggers]
