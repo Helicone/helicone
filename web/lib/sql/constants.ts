@@ -13,6 +13,7 @@ sum(
     WHEN (${table}.model LIKE '%gpt-4-1106-preview-vision%') THEN 0.01 * ${table}.prompt_tokens + 0.03 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%gpt-3.5-turbo-0613%') THEN 0.0015 * ${table}.prompt_tokens + 0.002 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%gpt-3.5-turbo-16k-0613%') THEN 0.003 * ${table}.prompt_tokens + 0.004 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%gpt-3.5-turbo-0125%') THEN 0.0005 * ${table}.prompt_tokens + 0.0015 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%gpt-35-turbo-16k%') THEN 0.003 * ${table}.prompt_tokens + 0.004 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%text-embedding-ada-002%') THEN 0.0001 * ${table}.prompt_tokens + 0.0001 * coalesce(${table}.completion_tokens, 0)
     WHEN (${table}.model LIKE '%text-embedding-ada-002-v2%') THEN 0.0001 * ${table}.prompt_tokens + 0.0001 * coalesce(${table}.completion_tokens, 0)
