@@ -28,7 +28,7 @@ export function recursivelyConsolidateAnthropic(body: any, delta: any): any {
 
 export function recursivelyConsolidateAnthropicListForClaude3(
   delta: any[]
-): any[] {
+): any {
   return delta.reduce((acc, item) => {
     if (Array.isArray(item)) {
       return recursivelyConsolidateAnthropicListForClaude3(item);
