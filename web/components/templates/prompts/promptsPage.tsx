@@ -1,29 +1,21 @@
+import { Menu, Transition } from "@headlessui/react";
 import {
   ArrowTrendingUpIcon,
   BeakerIcon,
   BookOpenIcon,
   DocumentTextIcon,
   EyeIcon,
-  MagnifyingGlassIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import {
-  Tab,
-  TabGroup,
-  TabList,
-  TabPanel,
-  TabPanels,
-  TextInput,
-} from "@tremor/react";
-import { usePrompts } from "../../../services/hooks/prompts/prompts";
-import { ElementType, Fragment, useState } from "react";
-import { clsx } from "../../shared/clsx";
-import Link from "next/link";
-import { useOrg } from "../../layout/organizationContext";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/solid";
-import { Menu, Transition } from "@headlessui/react";
-import { useExperiments } from "../../../services/hooks/prompts/experiments";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react";
+import Link from "next/link";
 import { useRouter } from "next/router";
+import { ElementType, Fragment, useState } from "react";
+import { useExperiments } from "../../../services/hooks/prompts/experiments";
+import { usePrompts } from "../../../services/hooks/prompts/prompts";
+import { useOrg } from "../../layout/organizationContext";
+import { clsx } from "../../shared/clsx";
 
 interface PromptsPageProps {
   defaultIndex: number;

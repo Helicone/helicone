@@ -1,4 +1,3 @@
-import { clsx } from "../../shared/clsx";
 import {
   CheckIcon,
   PencilIcon,
@@ -6,11 +5,11 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import ResizeTextArea from "./resizeTextArea";
-import { Message } from "../requests/chat";
-import { RenderWithPrettyInputKeys } from "../prompts/id/promptIdPage";
+import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
-import { set } from "date-fns";
+import { RenderWithPrettyInputKeys } from "../prompts/id/promptIdPage";
+import { Message } from "../requests/chat";
+import ResizeTextArea from "./resizeTextArea";
 
 interface ChatRowProps {
   index: number;

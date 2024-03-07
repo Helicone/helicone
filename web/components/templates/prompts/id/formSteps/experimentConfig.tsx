@@ -139,7 +139,10 @@ const ExperimentConfig = (props: ExperimentConfigProps) => {
         <div className="flex w-full overflow-auto gap-4">
           {/* get a random `n=10` sample of the properties and then render cards */}
           {[...promptProperties].slice(0, 10).map((property, i) => (
-            <div className="w-full min-w-[25rem] max-w-[25rem]">
+            <div
+              className="w-full min-w-[25rem] max-w-[25rem]"
+              key={`prompt-${i}`}
+            >
               <PromptPropertyCard
                 key={i}
                 isSelected={false}

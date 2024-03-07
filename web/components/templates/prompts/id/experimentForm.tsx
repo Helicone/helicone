@@ -1,15 +1,14 @@
-import { useState } from "react";
-import { usePlaygroundPage } from "../../../../services/hooks/playground";
-import ChatPlayground from "../../playground/chatPlayground";
-import FormSteps from "./formSteps";
 import { BeakerIcon } from "@heroicons/react/24/solid";
 import { Select, SelectItem, TextInput } from "@tremor/react";
-import ProviderKeyList from "../../enterprise/portal/id/providerKeyList";
+import { useState } from "react";
+import { usePlaygroundPage } from "../../../../services/hooks/playground";
 import { useOrg } from "../../../layout/organizationContext";
-import PromptPropertyCard from "./promptPropertyCard";
 import useNotification from "../../../shared/notification/useNotification";
-import EditPrompt from "./formSteps/editPrompt";
+import ProviderKeyList from "../../enterprise/portal/id/providerKeyList";
 import { Message } from "../../requests/chat";
+import FormSteps from "./formSteps";
+import EditPrompt from "./formSteps/editPrompt";
+import PromptPropertyCard from "./promptPropertyCard";
 
 interface ExperimentFormProps {
   currentPrompt: {
@@ -133,7 +132,10 @@ const ExperimentForm = (props: ExperimentFormProps) => {
         <div className="flex w-full overflow-auto gap-4">
           {/* get a random `n=10` sample of the properties and then render cards */}
           {[...promptProperties].slice(0, 10).map((property, i) => (
-            <div className="w-full min-w-[25rem] max-w-[25rem]">
+            <div
+              className="w-full min-w-[25rem] max-w-[25rem]"
+              key={`property-${i}`}
+            >
               <PromptPropertyCard
                 key={i}
                 isSelected={false}

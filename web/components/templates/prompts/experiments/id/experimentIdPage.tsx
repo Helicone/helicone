@@ -3,14 +3,7 @@ import {
   ChevronLeftIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { usePrompts } from "../../../../../services/hooks/prompts/prompts";
-import { usePrompt } from "../../../../../services/hooks/prompts/singlePrompt";
-import ThemedModal from "../../../../shared/themed/themedModal";
-import { clsx } from "../../../../shared/clsx";
 import { Tooltip } from "@mui/material";
-import { useExperiment } from "../../../../../services/hooks/prompts/experiments";
 import {
   Table,
   TableBody,
@@ -19,8 +12,13 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@tremor/react";
-import LoadingAnimation from "../../../../shared/loadingAnimation";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import ReactDiffViewer from "react-diff-viewer";
+import { useExperiment } from "../../../../../services/hooks/prompts/experiments";
+import { clsx } from "../../../../shared/clsx";
+import LoadingAnimation from "../../../../shared/loadingAnimation";
+import ThemedModal from "../../../../shared/themed/themedModal";
 import ModelPill from "../../../requestsV2/modelPill";
 
 interface PromptIdPageProps {

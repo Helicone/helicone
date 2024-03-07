@@ -459,6 +459,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
         <ul className="flex flex-col space-y-4 mt-8 w-full">
           {selectedPrompt?.properties?.map((row, i) => (
             <PromptPropertyCard
+              key={`selectedPrompt-${i}`}
               isSelected={selectedInput?.id === row.id}
               onSelect={() => {
                 if (selectedInput?.id === row.id) {
