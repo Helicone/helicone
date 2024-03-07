@@ -1,4 +1,4 @@
-import { BeakerIcon } from "@heroicons/react/24/solid";
+import { ArrowPathIcon, BeakerIcon } from "@heroicons/react/24/solid";
 import { Select, SelectItem, TextInput } from "@tremor/react";
 import { useState } from "react";
 import { usePlaygroundPage } from "../../../../services/hooks/playground";
@@ -9,6 +9,8 @@ import { Message } from "../../requests/chat";
 import FormSteps from "./formSteps";
 import EditPrompt from "./formSteps/editPrompt";
 import PromptPropertyCard from "./promptPropertyCard";
+import ReactDiffViewer from "react-diff-viewer";
+import { request } from "http";
 
 interface ExperimentFormProps {
   currentPrompt: {
@@ -29,6 +31,10 @@ interface ExperimentFormProps {
 const ExperimentForm = (props: ExperimentFormProps) => {
   const { currentPrompt, heliconeTemplate, promptProperties, close } = props;
 
+  // make a deep copy of the heliconeTemplate
+  const originPromptCopy = JSON.parse(JSON.stringify(heliconeTemplate));
+
+  const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedVersion, setSelectedVersion] = useState<string>();
   const [providerKeyId, setProviderKeyId] = useState("");
@@ -42,8 +48,13 @@ const ExperimentForm = (props: ExperimentFormProps) => {
 
   const requestId = promptProperties?.[0]?.id || "";
 
-  const { data, isLoading, chat, hasData, isChat } =
-    usePlaygroundPage(requestId);
+  const {
+    data,
+    isLoading: isDataLoading,
+    chat,
+    hasData,
+    isChat,
+  } = usePlaygroundPage(requestId);
   const orgContext = useOrg();
 
   const singleRequest = data.length > 0 ? data[0] : null;
@@ -186,11 +197,11 @@ const ExperimentForm = (props: ExperimentFormProps) => {
       </div>
     </div>,
     <div key={2}>
-      {isLoading ? (
+      {isDataLoading ? (
         <h1>loading...</h1>
       ) : hasData && isChat && singleRequest !== null ? (
         <EditPrompt
-          heliconeTemplate={heliconeTemplate}
+          heliconeTemplate={originPromptCopy}
           onSubmit={(newPrompt) => {
             setNewPromptChat(newPrompt);
             setCurrentStep(2);
@@ -203,47 +214,85 @@ const ExperimentForm = (props: ExperimentFormProps) => {
     <div key={3} className="flex flex-col space-y-4">
       <h3 className="font-semibold text-2xl">Confirm your experiment run</h3>
       <ul className="flex flex-col space-y-2">
-        <li className="flex items-center text-sm gap-2">
+        <li className="flex items-center gap-1">
           <h4 className="font-semibold">Experiment Name</h4>-
           <p>{experimentName}</p>
         </li>
-        <li className="flex items-center text-sm gap-2">
+        <li className="flex items-center gap-1">
           <h4 className="font-semibold">Version</h4>-<p>{selectedVersion}</p>
         </li>
-        <li className="flex items-center text-sm gap-2">
-          <h4 className="font-semibold">Provider Key</h4>-<p>{providerKeyId}</p>
-        </li>
-        <li className="flex items-center text-sm gap-2">
-          <h4 className="font-semibold">Request Ids</h4>-
-          <p>{requestIdList.join(", ")}</p>
-        </li>
-        <li className="flex items-center text-sm gap-2">
+
+        <li className="flex items-center gap-1">
           <h4 className="font-semibold">Experiment Model</h4>-
           <p>{experimentModel}</p>
         </li>
       </ul>
-      <pre className="whitespace-pre-wrap">
-        {JSON.stringify(
-          {
-            name: "Experiment",
-            originPrompt: {
-              promptId: currentPrompt.id,
-              version: selectedVersion,
-            },
-            newPrompt: {
-              heliconeTemplate: {
-                model: experimentModel,
-                messages: newPromptChat,
+      <p>
+        This experiment will make{" "}
+        {requestId.length < 10 ? requestId.length : 10} request(s) to OpenAI.
+        Please confirm and the experiment will start.{" "}
+      </p>
+      <div className="border-t border-gray-300 py-4 flex items-center justify-end space-x-2">
+        <button
+          onClick={close}
+          className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => {
+            setIsLoading(true);
+            fetch(`/api/experiment/create`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
               },
-            },
-            dataset: {
-              requestIds: requestIdList,
-            },
-          },
-          null,
-          2
-        )}
-      </pre>
+              body: JSON.stringify({
+                name: experimentName,
+                providerKeyId: providerKeyId,
+                originPrompt: {
+                  promptId: currentPrompt.id,
+                  version: selectedVersion,
+                },
+                newPrompt: {
+                  heliconeTemplate: {
+                    model: experimentModel,
+                    messages: newPromptChat,
+                  },
+                },
+                dataset: {
+                  requestIds: requestIdList.slice(0, 10),
+                },
+              }),
+            })
+              .then((res) => res.json())
+              .then((res) => {
+                if (res.error) {
+                  setNotification(res.error, "error");
+                  close();
+                  return;
+                } else {
+                  setNotification("Experiment has been created", "success");
+                  close();
+                }
+              })
+              .finally(() => {
+                setIsLoading(false);
+              });
+          }}
+          className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          {isLoading && (
+            <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+          )}
+          Confirm and Run Experiment
+        </button>
+      </div>
+      {/* <ReactDiffViewer
+        oldValue={JSON.stringify(originPromptCopy.messages)}
+        newValue={JSON.stringify(newPromptChat)}
+        splitView={true}
+      /> */}
     </div>,
   ];
 
