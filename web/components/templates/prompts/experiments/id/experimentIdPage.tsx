@@ -212,7 +212,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
 
             return (
               <div key={i} className="flex space-x-2 pl-6">
-                <h3 className="text-sm font-semibold">{key}:</h3>
+                <h3 className="text-sm font-semibold text-black">{key}:</h3>
                 {value.length > TEXT_LIMIT ? (
                   // show a button with truncated text
                   <button
@@ -303,10 +303,8 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                     return (
                       <TableRow key={i} className="w-full">
                         <TableCell className="h-full items-start border-r border-gray-300">
-                          <pre className="text-black whitespace-pre-wrap">
-                            {renderPrettyInputs(run.inputs)}
-                            {/* {JSON.stringify(run.inputs, undefined, 2)} */}
-                          </pre>
+                          {renderPrettyInputs(run.inputs)}
+                          {/* {JSON.stringify(run.inputs, undefined, 2)} */}
                         </TableCell>
                         <TableCell className="inline-flex h-full">
                           <div className="flex flex-col h-full w-full space-y-4">
