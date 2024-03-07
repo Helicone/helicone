@@ -329,7 +329,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                   run.originResult.responseBody?.usage
                                     .total_tokens
                                 }{" "}
-                                tokens
+                                total tokens
                               </span>
                               <ModelPill
                                 model={run.originResult.responseBody?.model}
