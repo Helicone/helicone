@@ -28,7 +28,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const debouncedRequestId = useDebounce(requestId, 500);
 
   const { data, isLoading, chat, hasData, isChat } = usePlaygroundPage(
-    debouncedRequestId || ""
+    debouncedRequestId || "",
   );
 
   const singleRequest = data.length > 0 ? data[0] : null;
@@ -37,13 +37,13 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     singleRequest !== null ? (singleRequest.requestBody as any) : null;
 
   const [selectedModels, setSelectedModels] = useState<string[]>(
-    singleRequest !== null ? [singleRequest.model] : []
+    singleRequest !== null ? [singleRequest.model] : [],
   );
   const [temperature, setTemperature] = useState<number>(
-    reqBody !== null ? reqBody.temperature : 0.7
+    reqBody !== null ? reqBody.temperature : 0.7,
   );
   const [maxTokens, setMaxTokens] = useState<number>(
-    reqBody !== null ? reqBody.max_tokens : 256
+    reqBody !== null ? reqBody.max_tokens : 256,
   );
 
   const { setNotification } = useNotification();
@@ -60,7 +60,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               id="request-id"
               onChange={(e) => setRequestId(e.target.value)}
               className={clsx(
-                "block w-[22rem] rounded-lg px-4 py-2 text-sm text-gray-900 bg-white shadow-sm border border-gray-300 dark:bg-black dark:text-gray-100 dark:border-gray-700"
+                "block w-[22rem] rounded-lg px-4 py-2 text-sm text-gray-900 bg-white shadow-sm border border-gray-300 dark:bg-black dark:text-gray-100 dark:border-gray-700",
               )}
               placeholder="Enter in a Request ID"
               value={requestId}
@@ -76,7 +76,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               }}
               className={clsx(
                 singleRequest === null ? "opacity-50" : "",
-                "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+                "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2",
               )}
             >
               <CodeBracketSquareIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
@@ -173,18 +173,12 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                           value={temperature}
                           onChange={(e) => {
                             const value = parseFloat(e.target.value);
-                            if (value < 0.01) {
-                              setTemperature(0.01);
-                              return;
-                            }
-                            if (value > 1.99) {
-                              setTemperature(1.99);
-                              return;
-                            }
-                            setTemperature(parseFloat(e.target.value));
+                            if (value < 0) setTemperature(0);
+                            else if (value > 1.99) setTemperature(1.99);
+                            else setTemperature(value);
                           }}
                           min={0}
-                          max={1}
+                          max={1.99}
                           step={0.01}
                           className="w-16 text-sm px-2 py-1 rounded-lg border border-gray-500"
                         />
@@ -199,15 +193,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                         value={temperature}
                         onChange={(e) => {
                           const value = parseFloat(e.target.value);
-                          if (value < 0.01) {
-                            setTemperature(0.01);
-                            return;
-                          }
-                          if (value > 1.99) {
-                            setTemperature(1.99);
-                            return;
-                          }
-                          setTemperature(parseFloat(e.target.value));
+                          if (value < 0) setTemperature(0);
+                          else if (value > 1.99) setTemperature(1.99);
+                          else setTemperature(value);
                         }}
                         className="text-black"
                         style={{
