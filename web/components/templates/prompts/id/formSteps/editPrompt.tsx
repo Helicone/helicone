@@ -18,6 +18,7 @@ const EditPrompt = (props: EditPromptProps) => {
         temperature={1}
         maxTokens={256}
         onSubmit={(history) => onSubmit(history)}
+        submitText="Save and Run"
       />
     </>
   );

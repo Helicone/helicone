@@ -20,10 +20,19 @@ interface ChatPlaygroundProps {
   temperature: number;
   maxTokens: number;
   onSubmit?: (history: Message[]) => void;
+  submitText?: string;
 }
 
 const ChatPlayground = (props: ChatPlaygroundProps) => {
-  const { requestId, chat, models, temperature, maxTokens, onSubmit } = props;
+  const {
+    requestId,
+    chat,
+    models,
+    temperature,
+    maxTokens,
+    onSubmit,
+    submitText = "Submit",
+  } = props;
 
   const { setNotification } = useNotification();
 
@@ -320,7 +329,8 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             )}
           >
             <PaperAirplaneIcon className="h-4 w-4 inline text-white dark:text-black rounded-lg mr-2" />
-            Submit
+
+            {submitText}
           </button>
         </div>
       </li>

@@ -114,14 +114,16 @@ const ExperimentForm = (props: ExperimentFormProps) => {
           </Select>
         </div>
       </div>
+      <div className="w-1/2">
+        <ProviderKeyList
+          orgId={orgContext?.currentOrg?.id}
+          setProviderKeyCallback={(x) => {
+            setProviderKeyId(x);
+          }}
+          variant="basic"
+        />
+      </div>
 
-      <ProviderKeyList
-        orgId={orgContext?.currentOrg?.id}
-        setProviderKeyCallback={(x) => {
-          setProviderKeyId(x);
-        }}
-        variant="basic"
-      />
       <div className="flex flex-col space-y-1 w-full pt-8">
         <label
           htmlFor="experiment-sample"
@@ -246,7 +248,7 @@ const ExperimentForm = (props: ExperimentFormProps) => {
   ];
 
   return (
-    <div className="w-full flex flex-col space-y-4 pb-4 relative h-full justify-between">
+    <div className="w-full flex flex-col space-y-8 pb-4 relative h-full justify-between">
       <header className="sticky top-[4.25rem] z-40 bg-white border-b border-gray-300 flex flex-col space-y-8 pb-4">
         <div className="flex items-center space-x-2">
           <BeakerIcon className="h-8 w-8 text-sky-500" />
