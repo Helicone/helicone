@@ -140,6 +140,7 @@ export interface RequestResponseLog {
   proxy_key_id: Nullable<string>;
   threat: Nullable<boolean>;
   time_to_first_token: Nullable<number>;
+  target_url: Nullable<string>;
 }
 
 interface PropertiesV3 {
