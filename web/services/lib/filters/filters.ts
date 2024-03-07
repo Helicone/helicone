@@ -139,7 +139,8 @@ const whereKeyMappings: KeyMappings = {
   response: easyKeyMappings<"response">({
     body_completion:
       "(coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text",
-    body_model: "request.body ->> 'model'",
+    body_model:
+      "(coalesce(request.model_override, response.model, request.model, response.body ->> 'model', request.body ->> 'model'))::text",
     body_tokens: "((response.body -> 'usage') ->> 'total_tokens')::bigint",
     status: "response.status",
     model: "response.model",
@@ -163,37 +164,6 @@ const whereKeyMappings: KeyMappings = {
     prompt_tokens: "cache_hits.prompt_tokens",
     created_at: "cache_hits.created_at",
   }),
-  response_copy_v1: easyKeyMappings<"response_copy_v1">({
-    auth_hash: "response_copy_v1.auth_hash",
-    model: "response_copy_v1.model",
-    request_created_at: "response_copy_v1.request_created_at",
-    latency: "response_copy_v1.latency",
-    user_id: "response_copy_v1.user_id",
-    status: "response_copy_v1.status",
-  }),
-  response_copy_v2: easyKeyMappings<"response_copy_v2">({
-    auth_hash: "response_copy_v2.auth_hash",
-    model: "response_copy_v2.model",
-    request_created_at: "response_copy_v2.request_created_at",
-    latency: "response_copy_v2.latency",
-    user_id: "response_copy_v2.user_id",
-    status: "response_copy_v2.status",
-    organization_id: "response_copy_v2.organization_id",
-  }),
-  response_copy_v3: (filter) => {
-    return easyKeyMappings<"response_copy_v3">({
-      auth_hash: "response_copy_v3.auth_hash",
-      model: "response_copy_v3.model",
-      request_created_at: "response_copy_v3.request_created_at",
-      latency: "response_copy_v3.latency",
-      user_id: "response_copy_v3.user_id",
-      status: "response_copy_v3.status",
-      organization_id: "response_copy_v3.organization_id",
-      rating: "response_copy_v3.rating",
-      feedback_id: "response_copy_v3.feedback_id",
-      feedback_created_at: "response_copy_v3.feedback_created_at",
-    })(filter);
-  },
   request_response_log: easyKeyMappings<"request_response_log">({
     latency: "request_response_log.latency",
     status: "request_response_log.status",
@@ -211,17 +181,6 @@ const whereKeyMappings: KeyMappings = {
     status: "r.status",
     user_id: "r.user_id",
   }),
-  properties_copy_v1: easyKeyMappings<"properties_copy_v1">({
-    key: "properties_copy_v1.key",
-    value: "properties_copy_v1.value",
-    auth_hash: "properties_copy_v1.auth_hash",
-  }),
-
-  properties_copy_v2: easyKeyMappings<"properties_copy_v2">({
-    key: "properties_copy_v2.key",
-    value: "properties_copy_v2.value",
-    organization_id: "properties_copy_v2.organization_id",
-  }),
   properties_v3: easyKeyMappings<"properties_v3">({
     key: "properties_v3.key",
     value: "properties_v3.value",
@@ -232,6 +191,7 @@ const whereKeyMappings: KeyMappings = {
     property_value: "property_with_response_v1.property_value",
     request_created_at: "property_with_response_v1.request_created_at",
     organization_id: "property_with_response_v1.organization_id",
+    threat: "property_with_response_v1.threat",
   }),
   job: (filter) => {
     if ("custom_properties" in filter && filter.custom_properties) {
@@ -306,12 +266,7 @@ const havingKeyMappings: KeyMappings = {
   response: NOT_IMPLEMENTED,
   values: NOT_IMPLEMENTED,
   properties_table: NOT_IMPLEMENTED,
-  response_copy_v1: NOT_IMPLEMENTED,
-  properties_copy_v1: NOT_IMPLEMENTED,
-  response_copy_v2: NOT_IMPLEMENTED,
-  response_copy_v3: NOT_IMPLEMENTED,
   request_response_log: NOT_IMPLEMENTED,
-  properties_copy_v2: NOT_IMPLEMENTED,
   properties_v3: NOT_IMPLEMENTED,
   property_with_response_v1: NOT_IMPLEMENTED,
   job: NOT_IMPLEMENTED,
@@ -364,15 +319,21 @@ export function buildFilterLeaf(
         ? "NOT ILIKE"
         : undefined;
 
-    filters.push(
-      `${column} ${sqlOperator} ${argPlaceHolder(argsAcc.length, value)}`
-    );
-    if (operatorKey === "contains") {
-      argsAcc.push(`%${value}%`);
-    } else if (operatorKey === "not-contains") {
-      argsAcc.push(`%${value}%`);
+    if (operatorKey === "not-equals" && value === "null") {
+      filters.push(`${column} is not null`);
+    } else if (operatorKey === "equals" && value === "null") {
+      filters.push(`${column} is null`);
     } else {
-      argsAcc.push(value);
+      filters.push(
+        `${column} ${sqlOperator} ${argPlaceHolder(argsAcc.length, value)}`
+      );
+      if (operatorKey === "contains") {
+        argsAcc.push(`%${value}%`);
+      } else if (operatorKey === "not-contains") {
+        argsAcc.push(`%${value}%`);
+      } else {
+        argsAcc.push(value);
+      }
     }
   }
 

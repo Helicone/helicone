@@ -218,8 +218,8 @@ export const userTableFilters: [
   SingleFilterDef<"users_view">,
   SingleFilterDef<"users_view">,
   SingleFilterDef<"users_view">,
-  SingleFilterDef<"response_copy_v1">,
-  SingleFilterDef<"response_copy_v1">
+  SingleFilterDef<"request_response_log">,
+  SingleFilterDef<"request_response_log">
 ] = [
   {
     label: "ID",
@@ -259,14 +259,14 @@ export const userTableFilters: [
   {
     label: "Created At",
     operators: timestampOperators,
-    table: "response_copy_v1",
+    table: "request_response_log",
     column: "request_created_at",
     category: "request",
   },
   {
     label: "Status",
     operators: numberOperators,
-    table: "response_copy_v1",
+    table: "request_response_log",
     column: "status",
     category: "request",
   },

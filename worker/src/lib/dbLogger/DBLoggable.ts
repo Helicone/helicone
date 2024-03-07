@@ -37,6 +37,7 @@ export interface DBLoggableProps {
     startTime: Date;
     bodyText?: string;
     path: string;
+    targetUrl: string;
     properties: Record<string, string>;
     isStream: boolean;
     omitLog: boolean;
@@ -49,6 +50,7 @@ export interface DBLoggableProps {
   timing: {
     startTime: Date;
     endTime?: Date;
+    timeToFirstToken: () => Promise<number | null>;
   };
   tokenCalcUrl: string;
 }
@@ -70,6 +72,7 @@ export function dbLoggableRequestFromProxyRequest(
     startTime: proxyRequest.startTime,
     bodyText: proxyRequest.bodyText ?? undefined,
     path: proxyRequest.requestWrapper.url.href,
+    targetUrl: proxyRequest.targetUrl.href,
     properties: proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
     isStream: proxyRequest.isStream,
     omitLog: proxyRequest.omitOptions.omitRequest,
@@ -131,6 +134,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       ),
       bodyText: JSON.stringify(asyncLogModel.providerRequest.json),
       path: asyncLogModel.providerRequest.url,
+      targetUrl: asyncLogModel.providerRequest.url,
       properties: providerRequestHeaders.heliconeProperties,
       isStream: asyncLogModel.providerRequest.json?.stream == true ?? false,
       omitLog: false,
@@ -156,6 +160,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
         asyncLogModel.timing.endTime.seconds * 1000 +
           asyncLogModel.timing.endTime.milliseconds
       ),
+      timeToFirstToken: async () => null,
     },
     tokenCalcUrl: env.VALHALLA_URL,
   });
@@ -268,15 +273,50 @@ export class DBLoggable {
     }
   }
 
+  getUsage(parsedResponse: unknown): {
+    prompt_tokens: number | undefined;
+    completion_tokens: number | undefined;
+  } {
+    if (
+      typeof parsedResponse !== "object" ||
+      parsedResponse === null ||
+      !("usage" in parsedResponse)
+    ) {
+      return {
+        prompt_tokens: undefined,
+        completion_tokens: undefined,
+      };
+    }
+
+    const response = parsedResponse as {
+      usage: {
+        prompt_tokens?: number;
+        completion_tokens?: number;
+        input_tokens?: number;
+        output_tokens?: number;
+      };
+    };
+    const usage = response.usage;
+
+    return {
+      prompt_tokens: usage?.prompt_tokens ?? usage?.input_tokens,
+      completion_tokens: usage?.completion_tokens ?? usage?.output_tokens,
+    };
+  }
+
   async getResponse() {
     const { body: responseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
     const endTime = this.timing.endTime ?? responseEndTime;
     const delay_ms = endTime.getTime() - this.timing.startTime.getTime();
+    const timeToFirstToken = this.request.isStream
+      ? await this.timing.timeToFirstToken()
+      : null;
     const status = await this.response.status();
     const parsedResponse = await this.parseResponse(responseBody, status);
     const isStream = this.request.isStream;
 
+    const usage = this.getUsage(parsedResponse.data);
     if (
       !isStream &&
       this.provider === "GOOGLE" &&
@@ -296,8 +336,9 @@ export class DBLoggable {
             }
           : body,
         status: await this.response.status(),
-        completion_tokens: parsedResponse.data.usage?.completion_tokens,
-        prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
+        completion_tokens: usage.completion_tokens,
+        prompt_tokens: usage.prompt_tokens,
+        time_to_first_token: timeToFirstToken,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         model: model,
         delay_ms,
@@ -316,11 +357,12 @@ export class DBLoggable {
               }
             : parsedResponse.data,
           status: await this.response.status(),
-          completion_tokens: parsedResponse.data.usage?.completion_tokens,
-          prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
+          completion_tokens: usage.completion_tokens,
+          prompt_tokens: usage.prompt_tokens,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           model: (parsedResponse.data as any)?.model ?? undefined,
           delay_ms,
+          time_to_first_token: timeToFirstToken,
         }
       : {
           id: this.response.responseId,
@@ -502,16 +544,12 @@ export class DBLoggable {
       console.error(`Error checking rate limit: ${rateLimit.error}`);
     }
 
-    if (!rateLimit.error && rateLimit.data?.shouldLogInDB) {
-      console.log("LOGGING RATE LIMIT IN DB");
-      await db.dbWrapper.recordRateLimitHit(
-        authParams.organizationId,
-        rateLimit.data.rlIncrementDB
-      );
-    }
-
     if (!rateLimit.error && rateLimit.data?.isRateLimited) {
-      console.log("RATE LIMITED");
+      await db.clickhouse.dbInsertClickhouse("rate_limit_log", [
+        {
+          organization_id: authParams.organizationId,
+        },
+      ]);
       return err("Rate limited");
     }
 

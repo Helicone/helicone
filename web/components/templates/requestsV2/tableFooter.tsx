@@ -80,7 +80,11 @@ const TableFooter = (props: TableFooterProps) => {
           </select>
         </div>
         <div className="flex flex-row space-x-1 items-center">
-          {count > 0 && (
+          {isCountLoading ? (
+            <p className="text-gray-700 dark:text-gray-300 font-medium">
+              Loading...
+            </p>
+          ) : count > 0 ? (
             <div className="flex items-center gap-1">
               <p className="text-gray-700 dark:text-gray-300 font-medium">
                 Page
@@ -115,19 +119,21 @@ const TableFooter = (props: TableFooterProps) => {
                 <p className="text-gray-500 font-medium text-xs">{`(${count} total)`}</p>
               )}
             </div>
+          ) : (
+            <></>
           )}
         </div>
 
         <div className="flex flex-row gap-2 items-center">
           <button
-            disabled={currentPage <= 1}
+            disabled={!isCountLoading && currentPage <= 1}
             onClick={() => {
               router.query.page = "1";
               router.push(router);
               onPageChange(1);
             }}
             className={clsx(
-              currentPage <= 1
+              !isCountLoading && currentPage <= 1
                 ? "border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-700 hover:cursor-not-allowed text-gray-300 dark:text-gray-500"
                 : "border-gray-300 bg-white dark:border-gray-700 dark:bg-black hover:cursor-pointer text-gray-700 dark:text-gray-300",
               "hidden sm:block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
@@ -136,14 +142,14 @@ const TableFooter = (props: TableFooterProps) => {
             <ChevronDoubleLeftIcon className="h-5 w-5" />
           </button>
           <button
-            disabled={currentPage <= 1}
+            disabled={!isCountLoading && currentPage <= 1}
             onClick={() => {
               router.query.page = (currentPage - 1).toString();
               router.push(router);
               onPageChange(currentPage - 1);
             }}
             className={clsx(
-              currentPage <= 1
+              !isCountLoading && currentPage <= 1
                 ? "border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-700 hover:cursor-not-allowed text-gray-300 dark:text-gray-500"
                 : "border-gray-300 bg-white dark:border-gray-700 dark:bg-black hover:cursor-pointer text-gray-700 dark:text-gray-300",
               "block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
@@ -152,14 +158,14 @@ const TableFooter = (props: TableFooterProps) => {
             <ChevronLeftIcon className="h-5 w-5 " />
           </button>
           <button
-            disabled={currentPage >= totalPages}
+            disabled={!isCountLoading && currentPage >= totalPages}
             onClick={() => {
               router.query.page = (currentPage + 1).toString();
               router.push(router);
               onPageChange(currentPage + 1);
             }}
             className={clsx(
-              currentPage >= totalPages
+              !isCountLoading && currentPage >= totalPages
                 ? "border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-700 hover:cursor-not-allowed text-gray-300 dark:text-gray-500"
                 : "border-gray-300 bg-white dark:border-gray-700 dark:bg-black hover:cursor-pointer text-gray-700 dark:text-gray-300",
               "block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
@@ -168,7 +174,7 @@ const TableFooter = (props: TableFooterProps) => {
             <ChevronRightIcon className="h-5 w-5" />
           </button>
           <button
-            disabled={currentPage >= totalPages}
+            disabled={!isCountLoading && currentPage >= totalPages}
             onClick={() => {
               router.query.page = Math.ceil(
                 (count as number) / Number(pageSize || 10)
@@ -179,7 +185,7 @@ const TableFooter = (props: TableFooterProps) => {
               );
             }}
             className={clsx(
-              currentPage >= totalPages
+              !isCountLoading && currentPage >= totalPages
                 ? "border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-700 hover:cursor-not-allowed text-gray-300 dark:text-gray-500"
                 : "border-gray-300 bg-white dark:border-gray-700 dark:bg-black hover:cursor-pointer text-gray-700 dark:text-gray-300",
               "hidden sm:block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"

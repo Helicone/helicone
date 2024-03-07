@@ -4,6 +4,7 @@ export interface CompletedChunk {
   body: string;
   reason: "cancel" | "done" | "timeout";
   endTimeUnix: number;
+  firstChunkTimeUnix: number | null;
 }
 
 export class ReadableInterceptor {
@@ -11,10 +12,12 @@ export class ReadableInterceptor {
   private cachedChunk: CompletedChunk | null = null;
   private responseBody = "";
   private decoder = new TextDecoder("utf-8");
+  private firstChunkTimeUnix: number | null = null;
   stream: ReadableStream;
 
   constructor(
     stream: ReadableStream,
+    private isStream: boolean,
     private chunkEventName = "done",
     private chunkTimeoutMs = 30 * 60 * 1000 // Default to 30 minutes
   ) {
@@ -34,10 +37,15 @@ export class ReadableInterceptor {
         body: this.responseBody,
         reason,
         endTimeUnix: new Date().getTime(),
+        firstChunkTimeUnix: this.firstChunkTimeUnix,
       } as CompletedChunk);
     };
 
     const onChunk = (chunk: Uint8Array) => {
+      if (this.isStream && this.firstChunkTimeUnix === null) {
+        this.firstChunkTimeUnix = Date.now();
+      }
+
       this.responseBody += this.decoder.decode(chunk, { stream: true });
     };
 
@@ -97,6 +105,7 @@ export class ReadableInterceptor {
           body: this.responseBody,
           reason: "timeout",
           endTimeUnix: new Date().getTime(),
+          firstChunkTimeUnix: this.firstChunkTimeUnix,
         });
       }, this.chunkTimeoutMs);
 
