@@ -81,6 +81,13 @@ export type CacheHitsTableToOperators = {
 
 export type FilterLeafCacheHits = SingleKey<CacheHitsTableToOperators>;
 
+export type RateLimitTableToOperators = {
+  organization_id: SingleKey<TextOperators>;
+  created_at: SingleKey<TimestampOperatorsTyped>;
+};
+
+export type FilterLeafRateLimitLog = SingleKey<RateLimitTableToOperators>;
+
 export type FilterLeafPropertiesTable = SingleKey<PropertiesTableToOperators>;
 
 type UserApiKeysTableToOperators = {
@@ -232,6 +239,7 @@ export type TablesAndViews = {
   job: FilterLeafJob;
   job_node: FilterLeafNode;
   cache_hits: FilterLeafCacheHits;
+  rate_limit_log: FilterLeafRateLimitLog;
 
   properties: {
     [key: string]: SingleKey<TextOperators>;
