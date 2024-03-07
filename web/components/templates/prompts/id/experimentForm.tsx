@@ -9,8 +9,6 @@ import { Message } from "../../requests/chat";
 import FormSteps from "./formSteps";
 import EditPrompt from "./formSteps/editPrompt";
 import PromptPropertyCard from "./promptPropertyCard";
-import ReactDiffViewer from "react-diff-viewer";
-import { request } from "http";
 
 interface ExperimentFormProps {
   currentPrompt: {
