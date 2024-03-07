@@ -20,6 +20,7 @@ import { clsx } from "../../../../shared/clsx";
 import LoadingAnimation from "../../../../shared/loadingAnimation";
 import ThemedModal from "../../../../shared/themed/themedModal";
 import ModelPill from "../../../requestsV2/modelPill";
+import ThemedDrawer from "../../../../shared/themed/themedDrawer";
 
 interface PromptIdPageProps {
   id: string;
@@ -187,32 +188,59 @@ export const RenderWithPrettyInputKeys = (props: {
 const ExperimentIdPage = (props: PromptIdPageProps) => {
   const { id } = props;
   const { experiment, isLoading } = useExperiment(id);
+  const [selectedObj, setSelectedObj] = useState<{
+    key: string;
+    value: string;
+  }>();
+  const [open, setOpen] = useState(false);
 
-  // const currentPrompt = prompts?.data?.prompts.find((p) => p.id === id);
-  // const [selectedVersion, setSelectedVersion] = useState<string>();
+  const runs = experiment?.datasetRuns;
 
-  // const selectedPrompt = usePrompt({
-  //   version: selectedVersion || "0",
-  //   promptId: id,
-  // });
+  // get the keys from the first run
+  const keys = runs?.[0]?.inputs
+    ? Object.keys(runs?.[0]?.inputs).map((key) => key)
+    : [];
 
-  // const [inputOpen, setInputOpen] = useState(false);
-  // const [experimentOpen, setExperimentOpen] = useState(false);
+  const renderPrettyInputs = (inputs: Record<string, string>) => {
+    const TEXT_LIMIT = 80;
 
-  // // the selected request to view in the tempalte
-  // const [selectedInput, setSelectedInput] = useState<{
-  //   id: string;
-  //   createdAt: string;
-  //   properties: Record<string, string>;
-  //   response: string;
-  // }>();
+    return (
+      <>
+        <div className="flex flex-col space-y-1">
+          <p>{`{`}</p>
+          {keys.map((key, i) => {
+            const value = inputs[key];
 
-  // set the selected version to the latest version on initial load
-  // useEffect(() => {
-  //   if (currentPrompt) {
-  //     setSelectedVersion(currentPrompt.latest_version.toString());
-  //   }
-  // }, [currentPrompt]);
+            return (
+              <div key={i} className="flex space-x-2 pl-6">
+                <h3 className="text-sm font-semibold">{key}:</h3>
+                {value.length > TEXT_LIMIT ? (
+                  // show a button with truncated text
+                  <button
+                    onClick={() => {
+                      setSelectedObj({ key, value });
+                      setOpen(true);
+                    }}
+                    className="flex space-x-2 text-left border-sky-500 bg-sky-100 border rounded-md p-2 relative"
+                  >
+                    <ArrowsPointingOutIcon className="h-4 w-4 text-sky-500 absolute top-2 right-2" />
+                    <pre className="text-sm text-black">
+                      {value.slice(0, TEXT_LIMIT)}...
+                    </pre>
+                  </button>
+                ) : (
+                  <pre className="text-sm whitespace-pre-wrap text-black">
+                    {value},
+                  </pre>
+                )}
+              </div>
+            );
+          })}
+          <p>{`}`}</p>
+        </div>
+      </>
+    );
+  };
 
   return (
     <>
@@ -274,10 +302,11 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                 <TableBody>
                   {experiment?.datasetRuns.map((run, i) => {
                     return (
-                      <TableRow key={i}>
+                      <TableRow key={i} className="w-full">
                         <TableCell className="h-full items-start border-r border-gray-300">
-                          <pre className="text-black">
-                            {JSON.stringify(run.inputs, undefined, 2)}
+                          <pre className="text-black whitespace-pre-wrap">
+                            {renderPrettyInputs(run.inputs)}
+                            {/* {JSON.stringify(run.inputs, undefined, 2)} */}
                           </pre>
                         </TableCell>
                         <TableCell className="inline-flex h-full">
@@ -309,7 +338,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                 model={run.originResult.responseBody?.model}
                               />
                             </div>
-                            <pre className="text-sm overflow-auto h-full text-black">
+                            <pre className="whitespace-pre-wrap text-sm w-full h-full text-black">
                               {
                                 run.originResult.responseBody?.choices?.[0]
                                   .message.content
@@ -320,7 +349,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
 
                         <TableCell className="h-full border-l border-gray-300">
                           {run.testResult.responseBody?.error ? (
-                            <pre className="bg-red-50 text-red-700 ring-red-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset">
+                            <pre className="whitespace-pre-wrap bg-red-50 text-red-700 ring-red-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset">
                               {JSON.stringify(
                                 run.testResult.responseBody.error,
                                 undefined,
@@ -357,7 +386,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                   model={run.testResult.responseBody?.model}
                                 />
                               </div>
-                              <pre className="text-sm overflow-auto h-full text-black">
+                              <pre className="whitespace-pre-wrap text-sm overflow-auto h-full text-black">
                                 {
                                   run.testResult.responseBody?.choices?.[0]
                                     .message.content
@@ -375,6 +404,22 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
           </div>
         )}
       </div>
+      <ThemedModal open={open} setOpen={setOpen}>
+        <div className="w-[66vw] h-full flex flex-col space-y-4">
+          <div className="flex items-center w-full justify-center">
+            <h3 className="text-2xl font-semibold">{selectedObj?.key}</h3>
+            <button onClick={() => setOpen(false)} className="ml-auto">
+              <XMarkIcon className="h-6 w-6 text-gray-500" />
+            </button>
+          </div>
+
+          <div className="bg-white border-gray-300 dark:bg-black dark:border-gray-700 p-4 border rounded-lg flex flex-col space-y-4">
+            <pre className="whitespace-pre-wrap text-sm w-full h-full text-black">
+              {selectedObj?.value}
+            </pre>
+          </div>
+        </div>
+      </ThemedModal>
     </>
   );
 };
