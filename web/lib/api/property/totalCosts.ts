@@ -1,3 +1,4 @@
+import { clickhousePriceCalc } from "../../../packages/cost";
 import {
   FilterNode,
   filterListToTree,
@@ -5,7 +6,6 @@ import {
 } from "../../../services/lib/filters/filterDefs";
 import { buildFilterWithAuthClickHousePropResponse } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../result";
-import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
 import { dbQueryClickhouse } from "../db/dbExecute";
 import { convertTextOperators } from "../graphql/query/helper";
 import { PropertyFilter } from "../graphql/schema/types/graphql";
@@ -112,7 +112,7 @@ export async function getTotalCostProperties(
 
   const query = `
     SELECT 
-    ${CLICKHOUSE_PRICE_CALC("property_with_response_x")} as cost,
+    ${clickhousePriceCalc("property_with_response_x")} as cost,
     count(*) as count
      FROM (
       SELECT response_id,
@@ -161,7 +161,7 @@ export async function getTotalCostRaw(
     });
   const query = `
   WITH total_cost AS (
-    SELECT ${CLICKHOUSE_PRICE_CALC("property_with_response_v1")} as cost
+    SELECT ${clickhousePriceCalc("property_with_response_v1")} as cost
     FROM property_with_response_v1
     WHERE (
       (${filterString})

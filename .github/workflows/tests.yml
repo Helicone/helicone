@@ -54,6 +54,23 @@ jobs:
           npm install
           npm test
 
+  costs:
+    name: Helicone Node Package tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run node tests
+        working-directory: costs
+        run: |
+          npm install
+          npm run test
+          npm run copy
+          if git status | grep "cost"; then
+              echo "all costs must be copied to the packages. please run `yarn copy"
+              git diff
+              exit 1
+          fi
+
   lint:
     name: Lint
     runs-on: ubuntu-latest

@@ -9,7 +9,7 @@ import {
   buildUserSort,
   SortLeafUsers,
 } from "../../../services/lib/sorts/users/sorts";
-import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
+import { clickhousePriceCalc } from "../../../packages/cost";
 
 export interface UserMetric {
   user_id: string;
@@ -56,7 +56,7 @@ SELECT
   (sum(r.prompt_tokens) + sum(r.completion_tokens)) / count(r.request_id) as average_tokens_per_request,
   sum(r.completion_tokens) as total_completion_tokens,
   sum(r.prompt_tokens) as total_prompt_token,
-  (${CLICKHOUSE_PRICE_CALC("r")}) as cost
+  (${clickhousePriceCalc("r")}) as cost
 from request_response_log r
 WHERE (${builtFilter.filter})
 GROUP BY r.user_id
