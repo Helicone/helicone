@@ -14,12 +14,13 @@ interface ThemedDrawerProps {
   setOpen: (open: boolean) => void;
   children: React.ReactNode;
   actions?: React.ReactNode;
+  defaultExpanded?: boolean;
 }
 
 const ThemedDrawer = (props: ThemedDrawerProps) => {
-  const { open, setOpen, children, actions } = props;
+  const { open, setOpen, children, actions, defaultExpanded = false } = props;
 
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(defaultExpanded);
 
   const themeContext = useTheme();
 
@@ -60,14 +61,20 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
               >
                 <Dialog.Panel
                   className={clsx(
-                    expanded
-                      ? "md:min-w-[60rem] w-full md:w-[90vw]"
+                    defaultExpanded
+                      ? "md:min-w-[60rem] w-full md:w-[60vw]"
+                      : expanded
+                      ? "md:min-w-[60rem] w-full md:w-[60vw]"
                       : "md:min-w-[35rem] w-full md:w-[36vw]",
                     "pointer-events-auto ease-in-out duration-300"
                   )}
                 >
-                  <div className="flex h-full flex-col overflow-y-scroll bg-white dark:bg-black py-6 shadow-2xl">
-                    <div className="px-4 sm:px-6 flex flex-row justify-between">
+                  <div
+                    className={clsx(
+                      "flex h-full flex-col overflow-y-scroll bg-white dark:bg-black shadow-2xl relative"
+                    )}
+                  >
+                    <div className="px-4 sm:px-6 py-6 flex flex-row justify-between sticky top-0 bg-white z-50">
                       <div className="flex flex-row items-center space-x-2 text-gray-500 w-full">
                         <button
                           onClick={() => setOpen(false)}
@@ -75,24 +82,25 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
                         >
                           <ChevronDoubleRightIcon className="h-5 w-5" />
                         </button>
-
-                        <Tooltip title={clsx(expanded ? "Shrink" : "Expand")}>
-                          <button
-                            onClick={() => setExpanded(!expanded)}
-                            className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
-                          >
-                            {expanded ? (
-                              <ArrowsPointingInIcon className="h-5 w-5" />
-                            ) : (
-                              <ArrowsPointingOutIcon className="h-5 w-5" />
-                            )}
-                          </button>
-                        </Tooltip>
+                        {!defaultExpanded && (
+                          <Tooltip title={clsx(expanded ? "Shrink" : "Expand")}>
+                            <button
+                              onClick={() => setExpanded(!expanded)}
+                              className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
+                            >
+                              {expanded ? (
+                                <ArrowsPointingInIcon className="h-5 w-5" />
+                              ) : (
+                                <ArrowsPointingOutIcon className="h-5 w-5" />
+                              )}
+                            </button>
+                          </Tooltip>
+                        )}
 
                         <div className="w-full">{actions}</div>
                       </div>
                     </div>
-                    <div className="relative my-4 flex-1 px-4 sm:px-6">
+                    <div className="relative my-2 flex-1 px-4 sm:px-6">
                       {children}
                     </div>
                   </div>

@@ -87,7 +87,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/prompts",
       icon: DocumentTextIcon,
       current: pathname.includes("/prompts"),
-      featured: true,
     },
     {
       name: "Users",

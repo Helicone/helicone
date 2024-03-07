@@ -160,7 +160,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       dbIncrement: timeIncrement,
     });
 
-  const { isLoading, models } = useModels(timeFilter);
+  const { isLoading, models } = useModels(timeFilter, 5);
 
   function encodeFilter(filter: UIFilterRow): string {
     return `${filter.filterMapIdx}:${filter.operatorIdx}:${encodeURIComponent(

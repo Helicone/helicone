@@ -31,6 +31,7 @@ export type Message = {
 
 export const SingleChat = (props: {
   message: Message;
+
   index: number;
   isLast: boolean;
   expandedProps: {
@@ -146,7 +147,6 @@ export const SingleChat = (props: {
       return (
         <div className="flex flex-col space-y-4 divide-y divide-gray-100 dark:divide-gray-900">
           <RenderWithPrettyInputKeys
-            // remove the leading " and trailing " from the text
             text={textMessage?.text}
             selectedProperties={props.selectedProperties}
           />
@@ -227,7 +227,7 @@ export const SingleChat = (props: {
       <div
         className={clsx(
           getBgColor(),
-          "items-start p-4 text-left flex flex-row space-x-4 text-black dark:text-white",
+          "items-start p-4 text-left flex flex-row space-x-4 text-black dark:text-white ",
           isSystem && "font-semibold",
           isLast && "rounded-b-md"
         )}
@@ -243,7 +243,7 @@ export const SingleChat = (props: {
             <p>{message.role}</p>
           </div>
         </div>
-        <div className="relative whitespace-pre-wrap items-center h-full">
+        <div className="relative whitespace-pre-wrap items-center h-full w-full">
           {isFunction ? (
             <div className="flex flex-col space-y-2">
               <code className="text-xs whitespace-pre-wrap font-semibold">
@@ -310,6 +310,7 @@ interface ChatProps {
   status: number;
   model: string;
   selectedProperties?: Record<string, string>;
+  editable?: boolean;
 }
 
 export const Chat = (props: ChatProps) => {
@@ -320,6 +321,7 @@ export const Chat = (props: ChatProps) => {
     llmSchema,
     model,
     selectedProperties,
+    editable,
   } = props;
 
   const [open, setOpen] = useState(false);
@@ -350,7 +352,7 @@ export const Chat = (props: ChatProps) => {
         {
           length: [...requestMessages, responseMessage].filter(Boolean).length,
         },
-        (_, i) => [i, false]
+        (_, i) => [i, editable ? true : false]
       )
     )
   );
