@@ -13,7 +13,6 @@ import {
   SelectItem,
   TextInput,
 } from "@tremor/react";
-import { useEffect, useState } from "react";
 import ThemedNumberDropdown from "./themedNumberDropdown";
 
 export function AdvancedFilters({
@@ -109,27 +108,12 @@ function AdvancedFilterInput({
   }[];
   onSearchHandler?: (search: string) => Promise<Result<void, string>>;
 }) {
-  // const [currentValue, setCurrentValue] = useState<string>(value);
-  // const [currentParams, setCurrentParams] = useState<
-  //   {
-  //     key: string;
-  //     param: string;
-  //   }[]
-  // >(inputParams ?? []);
-
-  // useEffect(() => {
-  //   if (inputParams !== currentParams) {
-  //     setCurrentParams(inputParams ?? []);
-  //   }
-  // }, [type, inputParams]);
-
   switch (type) {
     case "text":
       return (
         <TextInput
           className=""
           onChange={(e) => {
-            // setCurrentValue(e.target.value);
             onChange(e.target.value);
           }}
           placeholder={"text..."}
@@ -141,7 +125,6 @@ function AdvancedFilterInput({
         <NumberInput
           className=""
           onChange={(e) => {
-            // setCurrentValue(e.target.value);
             onChange(e.target.value);
           }}
           placeholder={"number..."}
@@ -213,9 +196,6 @@ function AdvancedFilterRow({
     search: string
   ) => Promise<Result<void, string>>;
 }) {
-  // const [currentColumn, setCurrentColumn] = useState<string>();
-  // const [currentOperator, setCurrentOperator] = useState<string>();
-
   return (
     <div className="w-full flex flex-col lg:flex-row gap-3 items-left lg:items-center ml-4">
       <div className="w-full max-w-[12.5rem]">
