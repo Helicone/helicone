@@ -22,6 +22,7 @@
     "express": "^4.18.2",
     "express-openapi-validator": "^5.1.1",
     "fs": "^0.0.1-security",
+    "generate-api-key": "^1.0.2",
     "gpt-tokenizer": "^2.1.2",
     "js-tiktoken": "^1.0.8",
     "lodash": "^4.17.21",
