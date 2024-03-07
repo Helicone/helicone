@@ -44,6 +44,7 @@ export interface IHeliconeHeaders {
   fallBacks: Nullable<HeliconeFallback[]>;
   modelOverride: Nullable<string>;
   promptSecurityEnabled: Nullable<string>;
+  moderationsEnabled: Nullable<string>;
 }
 
 export class HeliconeHeaders implements IHeliconeHeaders {
@@ -75,6 +76,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   fallBacks: Nullable<HeliconeFallback[]>;
   modelOverride: Nullable<string>;
   promptSecurityEnabled: Nullable<string>;
+  moderationsEnabled: Nullable<string>;
 
   constructor(private headers: Headers) {
     const heliconeHeaders = this.getHeliconeHeaders();
@@ -96,6 +98,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.fallBacks = this.getFallBacks();
     this.modelOverride = heliconeHeaders.modelOverride;
     this.promptSecurityEnabled = heliconeHeaders.promptSecurityEnabled;
+    this.moderationsEnabled = heliconeHeaders.moderationsEnabled;
   }
 
   private getFallBacks(): Nullable<HeliconeFallback[]> {
@@ -204,6 +207,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       modelOverride: this.headers.get("Helicone-Model-Override") ?? null,
       promptSecurityEnabled:
         this.headers.get("Helicone-Prompt-Security-Enabled") ?? null,
+      moderationsEnabled:
+        this.headers.get("Helicone-Moderations-Enabled") ?? null,
     };
   }
 

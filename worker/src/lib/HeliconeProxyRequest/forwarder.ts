@@ -14,10 +14,11 @@ import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { InsertQueue } from "../dbLogger/insertQueue";
 
 import { Valhalla } from "../db/valhalla";
-import { handleProxyRequest, handleThreatProxyRequest } from "./handler";
+import { handleModerationProxyRequest, handleProxyRequest, handleThreatProxyRequest } from "./handler";
 import { HeliconeProxyRequestMapper } from "./mapper";
 import { checkPromptSecurity } from "../security/promptSecurity";
 import { DBLoggable } from "../dbLogger/DBLoggable";
+import { checkPromptModeration } from "../moderation/promptModeration";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -60,6 +61,49 @@ export async function proxyForwarder(
     );
     if (rateLimitCheckResult.status === "rate_limited") {
       return responseBuilder.buildRateLimitedResponse();
+    }
+  }
+
+  // Moved above prompt threat detection
+  // TODO move this to proxyRequest (old comment)
+  const { data: cacheSettings, error: cacheError } = getCacheSettings(
+    proxyRequest.requestWrapper.getHeaders(),
+    proxyRequest.isStream
+  );
+
+  if (cacheError !== null) {
+    return responseBuilder.build({
+      body: cacheError,
+      status: 500,
+    });
+  }
+
+  if (cacheSettings.shouldReadFromCache) {
+    const { data: auth, error: authError } = await request.auth();
+    if (authError == null) {
+      const db = new DBWrapper(env, auth);
+      const { data: orgData, error: orgError } = await db.getAuthParams();
+      if (orgError !== null || !orgData?.organizationId) {
+        console.error("Error getting org", orgError);
+      } else {
+        const cachedResponse = await getCachedResponse(
+          proxyRequest,
+          cacheSettings.bucketSettings,
+          env.CACHE_KV,
+          cacheSettings.cacheSeed
+        );
+        if (cachedResponse) {
+          ctx.waitUntil(
+            recordCacheHit(
+              cachedResponse.headers,
+              env,
+              new ClickhouseClientWrapper(env),
+              orgData.organizationId
+            )
+          );
+          return cachedResponse;
+        }
+      }
     }
   }
 
@@ -130,45 +174,65 @@ export async function proxyForwarder(
     }
   }
 
-  // TODO move this to proxyRequest
-  const { data: cacheSettings, error: cacheError } = getCacheSettings(
-    proxyRequest.requestWrapper.getHeaders(),
-    proxyRequest.isStream
-  );
+  /**
+   * Cache missed
+   * Prompt threat detection passed
+   * Going to check moderation then hit api
+   **/
 
-  if (cacheError !== null) {
-    return responseBuilder.build({
-      body: cacheError,
-      status: 500,
-    });
-  }
+  if (
+    proxyRequest.requestWrapper.heliconeHeaders.moderationsEnabled &&
+    provider == "OPENAI"
+  ) {
+    let latestMessage;
 
-  if (cacheSettings.shouldReadFromCache) {
-    const { data: auth, error: authError } = await request.auth();
-    if (authError == null) {
-      const db = new DBWrapper(env, auth);
-      const { data: orgData, error: orgError } = await db.getAuthParams();
-      if (orgError !== null || !orgData?.organizationId) {
-        console.error("Error getting org", orgError);
-      } else {
-        const cachedResponse = await getCachedResponse(
-          proxyRequest,
-          cacheSettings.bucketSettings,
-          env.CACHE_KV,
-          cacheSettings.cacheSeed
-        );
-        if (cachedResponse) {
-          ctx.waitUntil(
-            recordCacheHit(
-              cachedResponse.headers,
-              env,
-              new ClickhouseClientWrapper(env),
-              orgData.organizationId
-            )
-          );
-          return cachedResponse;
-        }
+    try {
+      latestMessage = JSON.parse(proxyRequest.bodyText ?? "").messages.pop();
+    } catch (error) {
+      console.error("Error parsing latest message:", error);
+      return responseBuilder.build({
+        body: "Failed to parse the latest message.",
+        status: 500,
+      });
+    }
+
+    const flagged = await checkPromptModeration(latestMessage.content, env);
+    proxyRequest.flaggedForModeration = flagged;
+
+    if (flagged == true) {
+      const { data, error } = await handleModerationProxyRequest(proxyRequest);
+
+      if (error !== null) {
+        return responseBuilder.build({
+          body: error,
+          status: 500,
+        });
       }
+      const { loggable, response } = data;
+
+      response.headers.forEach((value, key) => {
+        responseBuilder.setHeader(key, value);
+      });
+
+      ctx.waitUntil(log(loggable));
+
+      const responseContent = {
+        body: JSON.stringify({
+          success: false,
+          error: {
+            code: "PROMPT_FLAGGED_FOR_MODERATION",
+            message:
+            "The given prompt was flagged by the moderation endpoint.",
+            details: "See your Helicone request page for more info.", // TODO: filter to moderation request
+          },
+        }),
+        inheritFrom: response,
+        status: 400,
+      };
+
+      return responseBuilder
+        .setHeader("content-type", "application/json")
+        .build(responseContent);
     }
   }
 
