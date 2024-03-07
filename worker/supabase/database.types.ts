@@ -1003,7 +1003,6 @@ export interface Database {
           org_provider_key: string | null
           organization_type: string
           owner: string
-          percent_log: number | null
           referral: string | null
           reseller_id: string | null
           size: string | null
@@ -1027,7 +1026,6 @@ export interface Database {
           org_provider_key?: string | null
           organization_type?: string
           owner: string
-          percent_log?: number | null
           referral?: string | null
           reseller_id?: string | null
           size?: string | null
@@ -1051,7 +1049,6 @@ export interface Database {
           org_provider_key?: string | null
           organization_type?: string
           owner?: string
-          percent_log?: number | null
           referral?: string | null
           reseller_id?: string | null
           size?: string | null
