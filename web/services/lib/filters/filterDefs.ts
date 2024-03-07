@@ -299,6 +299,24 @@ export function timeFilterToFilterNode(
       },
       operator: "and",
     };
+  } else if (table === "rate_limit_log") {
+    return {
+      left: {
+        rate_limit_log: {
+          created_at: {
+            gte: filter.start,
+          },
+        },
+      },
+      right: {
+        rate_limit_log: {
+          created_at: {
+            lte: filter.end,
+          },
+        },
+      },
+      operator: "and",
+    };
   }
 
   throw new Error("Table not supported");

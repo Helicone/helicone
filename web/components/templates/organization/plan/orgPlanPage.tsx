@@ -23,6 +23,11 @@ import { clsx } from "../../../shared/clsx";
 import UpgradeProModal from "../../../shared/upgradeProModal";
 import { useRateLimitTracker } from "../../../../services/hooks/rateLimitTracker";
 import RenderOrgPlan from "./renderOrgPlan";
+import StyledAreaChart from "../../dashboard/styledAreaChart";
+import { AreaChart, BarChart } from "@tremor/react";
+import { TimeFilter } from "../../dashboard/dashboardPage";
+import { getTimeMap } from "../../../../lib/timeCalculations/constants";
+import { useOrgPlanPage } from "./useOrgPlanPage";
 
 interface OrgPlanPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -40,6 +45,9 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
   const endOfMonthFormatted = formatISO(endOfMonth(currentMonth), {
     representation: "date",
   });
+  const startOfMonthDate = currentMonth;
+  const endOfMonthDate = endOfMonth(currentMonth);
+
   const isNextMonthDisabled = isAfter(addMonths(currentMonth, 1), new Date());
 
   const [open, setOpen] = useState(false);
@@ -54,10 +62,39 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
     org.id
   );
 
+  const timeIncrement = "day";
+  // const [timeFilter, _] = useState<TimeFilter>({
+  //   start: currentMonth,
+  //   end: endOfMonth(currentMonth),
+  // });
+
+  const {
+    overTimeData,
+    metrics,
+    refetch: refetchData,
+  } = useOrgPlanPage({
+    timeFilter: {
+      start: currentMonth,
+      end: endOfMonth(currentMonth),
+    },
+    timeZoneDifference: 0,
+    dbIncrement: timeIncrement,
+  });
+
+  // refetch both the request count and the rate limit tracker
   useEffect(() => {
     refetch();
-  }, [currentMonth, refetch]);
-  const rateLimitTracker = useRateLimitTracker();
+    refetchData();
+  }, [currentMonth, refetch, refetchData]);
+
+  // useEffect(() => {
+  //   refetch();
+  //   console.log(`Refetching data`);
+  //   refetchData();
+  //   console.log(`RefetchedData data`);
+  // }, [currentMonth, refetch]);
+
+  const { isLoading, request: rateLimitTrackerRequest } = useRateLimitTracker();
 
   const capitalizeHelper = (str: string) => {
     const words = str.split("_");
@@ -163,7 +200,29 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
         ) : (
           renderInfo()
         )}
-
+        {!isLoading && metrics.totalRateLimits.data && (
+          <div key="rate-limit">
+            <StyledAreaChart
+              title={"Helicone Rate Limited"}
+              value={metrics.totalRateLimits.data.data?.toString() ?? ""}
+              isDataOverTimeLoading={false}
+            >
+              <BarChart
+                className="h-[14rem]"
+                data={
+                  overTimeData.rateLimits.data?.data?.map((r) => ({
+                    date: getTimeMap(timeIncrement)(r.time),
+                    rateLimits: r.count,
+                  })) ?? []
+                }
+                index="date"
+                categories={["rateLimits"]}
+                colors={["cyan"]}
+                showYAxis={false}
+              />
+            </StyledAreaChart>
+          </div>
+        )}
         <div className="flex flex-col sm:flex-row sm:space-x-4">
           <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
             <dt className="text-sm font-medium leading-6 text-gray-700 dark:text-gray-300">
@@ -185,7 +244,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
               </dd>
             </div>
           )}
-          {rateLimitTracker.request && (
+          {rateLimitTrackerRequest && (
             <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
               <dt className="text-sm font-medium leading-6 text-red-700 dark:text-red-300">
                 Rate Limited
@@ -195,7 +254,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
                 {isCountLoading
                   ? "Loading..."
                   : Number(
-                      Math.floor(rateLimitTracker.request.total_count / 10) * 10
+                      Math.floor(rateLimitTrackerRequest.total_count / 10) * 10
                     )}
                 +<span className="pl-1 text-sm font-light">times</span>
               </dd>
