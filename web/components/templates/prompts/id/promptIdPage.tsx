@@ -21,6 +21,7 @@ import { BeakerIcon } from "@heroicons/react/24/solid";
 import { ThemedPill } from "../../../shared/themed/themedPill";
 import ExperimentForm from "./experimentForm";
 import PromptPropertyCard from "./promptPropertyCard";
+import { useOrg } from "../../../layout/organizationContext";
 
 interface PromptIdPageProps {
   id: string;
@@ -189,6 +190,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   const { id } = props;
   const { prompts, isLoading } = usePrompts();
 
+  const org = useOrg();
   const currentPrompt = prompts?.data?.prompts.find((p) => p.id === id);
   const [selectedVersion, setSelectedVersion] = useState<string>();
 
@@ -288,15 +290,17 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       </p>
                     </button>
 
-                    <button
-                      className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
-                      onClick={() => setExperimentOpen(!experimentOpen)}
-                    >
-                      <BeakerIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-                        Run Experiment
-                      </p>
-                    </button>
+                    {org?.currentOrg?.tier === "enterprise" && (
+                      <button
+                        className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+                        onClick={() => setExperimentOpen(!experimentOpen)}
+                      >
+                        <BeakerIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
+                          Run Experiment
+                        </p>
+                      </button>
+                    )}
 
                     <button
                       onClick={() => setInputOpen(!inputOpen)}
