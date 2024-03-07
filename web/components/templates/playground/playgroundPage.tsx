@@ -172,19 +172,12 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                           name="temp"
                           value={temperature}
                           onChange={(e) => {
-                            const value = parseFloat(e.target.value);
-                            if (value < 0.01) {
-                              setTemperature(0.01);
-                              return;
-                            }
-                            if (value > 1.99) {
-                              setTemperature(1.99);
-                              return;
-                            }
-                            setTemperature(parseFloat(e.target.value));
+                            let value = parseFloat(e.target.value);
+                            value = Math.min(Math.max(value, 0), 1.99); // Enforces the range between 0 and 1.99
+                            setTemperature(value);
                           }}
                           min={0}
-                          max={1}
+                          max={1.99}
                           step={0.01}
                           className="w-16 text-sm px-2 py-1 rounded-lg border border-gray-500"
                         />
@@ -198,16 +191,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                         step={0.01}
                         value={temperature}
                         onChange={(e) => {
-                          const value = parseFloat(e.target.value);
-                          if (value < 0.01) {
-                            setTemperature(0.01);
-                            return;
-                          }
-                          if (value > 1.99) {
-                            setTemperature(1.99);
-                            return;
-                          }
-                          setTemperature(parseFloat(e.target.value));
+                            let value = parseFloat(e.target.value);
+                            value = Math.min(Math.max(value, 0), 1.99); // Enforces the range between 0 and 1.99
+                            setTemperature(value);
                         }}
                         className="text-black"
                         style={{
