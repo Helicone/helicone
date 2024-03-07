@@ -20,7 +20,6 @@ import { clsx } from "../../../../shared/clsx";
 import LoadingAnimation from "../../../../shared/loadingAnimation";
 import ThemedModal from "../../../../shared/themed/themedModal";
 import ModelPill from "../../../requestsV2/modelPill";
-import ThemedDrawer from "../../../../shared/themed/themedDrawer";
 
 interface PromptIdPageProps {
   id: string;
