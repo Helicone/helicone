@@ -99,8 +99,6 @@ async function createProxyKey(
     .select("*")
     .single();
 
-  console.log("newProxyMapping", newProxyMapping);
-
   return {
     data: {
       proxyKey,

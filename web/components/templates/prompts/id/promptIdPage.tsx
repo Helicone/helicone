@@ -245,6 +245,51 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   <div className="flex items-center space-x-1">
                     <button
                       className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+                      onClick={() =>
+                        fetch(`/api/experiment/create`, {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({
+                            name: "Experiment",
+                            providerKeyId:
+                              "5e7598f4-b86c-4c75-b77d-ca13bdad825b",
+                            originPrompt: {
+                              promptId: id,
+                              version: selectedVersion,
+                            },
+                            newPrompt: {
+                              heliconeTemplate: {
+                                model: "gpt-3.5-turbo",
+                                messages: [
+                                  {
+                                    role: "system",
+                                    content:
+                                      'This is a dance battle between <helicone-prompt-input key="person1" /> and <helicone-prompt-input key="person2" />.\n\nHere are the rules that apply to each rapper with the following multipliers:\n- Lines in a verse must rhyme\n- Creativity\n- Flaunting their success\n- Making fun of the opponent\n- Aggressiveness towards the opponent\n\nVerse format:\n```\n<helicone-prompt-input key="person1" /> - {gender}\n{line},\n{line}.\n{line},\n{line}.\n---\n<helicone-prompt-input key="person1" /> - {gender}\n{line},\n{line}.\n{line},\n{line}.\n```\n\nMultipliers:\n{\n  <helicone-prompt-input key="person1" />: {\n    "rhyme": 1,\n    "creativity": 4,\n    "flaunting": 5,\n    "make_fun": 5,\n    "aggressiveness": 10\n},\n<helicone-prompt-input key="person2" />: {\n    "rhyme": 1,\n    "creativity": 4,\n    "flaunting": 5,\n    "make_fun": 5,\n    "aggressiveness": 10\n}\n}\n\n\nPrevious verses:\n```<helicone-prompt-input key="prevVerses" />\n```\n\nNext verse:\n```',
+                                  },
+                                ],
+                              },
+                            },
+                            dataset: {
+                              requestIds: [
+                                "f01ecd13-2103-466a-be55-54590300afe6",
+                                "ca595360-95f8-4f6a-a136-f96644d7bb74",
+                                "8c501554-2487-4c50-a514-1d534956afe7",
+                              ],
+                            },
+                          }),
+                        })
+                      }
+                    >
+                      <BeakerIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
+                        TEST FOR SCOTT ON AI RAP BATTLE
+                      </p>
+                    </button>
+
+                    <button
+                      className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
                       onClick={() => setExperimentOpen(!experimentOpen)}
                     >
                       <BeakerIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />

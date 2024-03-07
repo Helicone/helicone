@@ -79,7 +79,6 @@ export async function run(
       .from("experiments")
       .update({
         status: "completed",
-        result: testResults,
       })
       .eq("id", experiment.id);
   });
