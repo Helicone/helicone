@@ -300,57 +300,71 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                 )}
                               >
                                 {
-                                  run.originResult.responseBody.usage
+                                  run.originResult.responseBody?.usage
                                     .total_tokens
                                 }{" "}
                                 tokens
                               </span>
                               <ModelPill
-                                model={run.originResult.responseBody.model}
+                                model={run.originResult.responseBody?.model}
                               />
                             </div>
                             <pre className="text-sm overflow-auto h-full text-black">
                               {
-                                run.originResult.responseBody.choices[0].message
-                                  .content
+                                run.originResult.responseBody?.choices?.[0]
+                                  .message.content
                               }
                             </pre>
                           </div>
                         </TableCell>
 
                         <TableCell className="h-full border-l border-gray-300">
-                          <div className="flex flex-col h-full w-full space-y-4">
-                            <div className="w-full flex items-center gap-2">
-                              <span
-                                className={clsx(
-                                  run.originResult.delay >= run.testResult.delay
-                                    ? "bg-green-50 text-green-700 ring-green-200"
-                                    : "bg-red-50 text-red-700 ring-red-200",
-                                  `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
-                                )}
-                              >
-                                {run.testResult.delay} ms
-                              </span>
-                              <span
-                                className={clsx(
-                                  "bg-gray-50 text-gray-700 ring-gray-200",
-                                  `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
-                                )}
-                              >
-                                {run.testResult.responseBody.usage.total_tokens}{" "}
-                                tokens
-                              </span>
-                              <ModelPill
-                                model={run.testResult.responseBody.model}
-                              />
-                            </div>
-                            <pre className="text-sm overflow-auto h-full text-black">
-                              {
-                                run.testResult.responseBody.choices[0].message
-                                  .content
-                              }
+                          {run.testResult.responseBody?.error ? (
+                            <pre className="bg-red-50 text-red-700 ring-red-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset">
+                              {JSON.stringify(
+                                run.testResult.responseBody.error,
+                                undefined,
+                                2
+                              )}
                             </pre>
-                          </div>
+                          ) : (
+                            <div className="flex flex-col h-full w-full space-y-4">
+                              <div className="w-full flex items-center gap-2">
+                                <span
+                                  className={clsx(
+                                    run.originResult.delay >=
+                                      run.testResult.delay
+                                      ? "bg-green-50 text-green-700 ring-green-200"
+                                      : "bg-red-50 text-red-700 ring-red-200",
+                                    `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+                                  )}
+                                >
+                                  {run.testResult.delay} ms
+                                </span>
+                                <span
+                                  className={clsx(
+                                    "bg-gray-50 text-gray-700 ring-gray-200",
+                                    `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+                                  )}
+                                >
+                                  {
+                                    run.testResult.responseBody?.usage
+                                      ?.total_tokens
+                                  }{" "}
+                                  tokens
+                                </span>
+                                <ModelPill
+                                  model={run.testResult.responseBody?.model}
+                                />
+                              </div>
+                              <pre className="text-sm overflow-auto h-full text-black">
+                                {
+                                  run.testResult.responseBody?.choices?.[0]
+                                    .message.content
+                                }
+                              </pre>
+                            </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     );
