@@ -32,7 +32,7 @@ export async function getAverageTimeToFirstToken(
       sum(request_response_log.time_to_first_token) as total_time_to_first_token
     FROM request_response_log
     WHERE (
-      (${filterString})
+      (${filterString} and request_response_log.time_to_first_token > 0)
     )
   )
   SELECT CASE
