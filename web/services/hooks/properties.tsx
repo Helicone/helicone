@@ -20,9 +20,12 @@ const useGetProperties = () => {
   });
 
   const allProperties: string[] =
-    data?.data?.map((property: Property) => {
-      return property.property;
-    }) ?? [];
+    data?.data
+      ?.map((property: Property) => {
+        return property.property;
+      })
+      // sort by property alphabetically
+      .sort() ?? [];
 
   const [propertyFilters, setPropertyFilters] = useState<
     SingleFilterDef<"properties">[]
