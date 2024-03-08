@@ -1,10 +1,10 @@
+import { clickhousePriceCalc } from "../../../packages/cost";
 import {
   FilterNode,
   timeFilterToFilterNode,
 } from "../../../services/lib/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../result";
-import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
 export interface TotalCost {
@@ -42,7 +42,7 @@ export async function getTotalCost(
   const query = `
 
   WITH total_cost AS (
-    SELECT ${CLICKHOUSE_PRICE_CALC("request_response_log")} as cost
+    SELECT ${clickhousePriceCalc("request_response_log")} as cost
     FROM request_response_log
     WHERE (
       (${filterString})
