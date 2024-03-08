@@ -11,12 +11,6 @@ import { costs as togetherAICosts } from "./providers/togetherai";
 import { costs as azureCosts } from "./providers/azure";
 import { costs as googleCosts } from "./providers/google";
 
-const totalLength =
-  openaiCosts.length +
-  togetherAICosts.length +
-  azureCosts.length +
-  googleCosts.length;
-
 export function costOf(model: string) {
   const costs = [
     ...openaiCosts,
