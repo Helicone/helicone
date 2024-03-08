@@ -344,7 +344,18 @@ const DashboardPage = (props: DashboardPageProps) => {
       i: "tokens-per-min-over-time",
       x: 0,
       y: 8,
-      w: 6,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 12,
+      minH: 4,
+      maxH: 4,
+    },
+    {
+      i: "time-to-first-token",
+      x: 4,
+      y: 8,
+      w: 4,
       h: 4,
       minW: 3,
       maxW: 12,
@@ -353,9 +364,9 @@ const DashboardPage = (props: DashboardPageProps) => {
     },
     {
       i: "suggest-more-graphs",
-      x: 6,
+      x: 8,
       y: 8,
-      w: 6,
+      w: 4,
       h: 4,
       minW: 3,
       maxW: 12,
@@ -936,6 +947,31 @@ const DashboardPage = (props: DashboardPageProps) => {
                 </StyledAreaChart>
               </div>
 
+              <div key="time-to-first-token">
+                <StyledAreaChart
+                  title={"Time to First Token"}
+                  value={`${
+                    metrics.averageTimeToFirstToken.data?.data?.toFixed(0) ?? 0
+                  } ms`}
+                  isDataOverTimeLoading={overTimeData.ttft.isLoading}
+                >
+                  <AreaChart
+                    className="h-[14rem]"
+                    data={
+                      overTimeData.ttft.data?.data?.map((r) => ({
+                        date: getTimeMap(timeIncrement)(r.time),
+                        time: r.ttft,
+                      })) ?? []
+                    }
+                    index="date"
+                    categories={["time"]}
+                    colors={["violet"]}
+                    showYAxis={false}
+                    curveType="monotone"
+                  />
+                </StyledAreaChart>
+              </div>
+
               <div key="suggest-more-graphs">
                 <div className="space-y-2 bg-white dark:bg-black border border-gray-900 dark:border-white border-dashed w-full h-full p-2 text-black dark:text-white shadow-sm rounded-lg flex flex-col items-center justify-center">
                   <PresentationChartLineIcon className="h-12 w-12 text-black dark:text-white" />
@@ -988,9 +1024,9 @@ const DashboardPage = (props: DashboardPageProps) => {
                       "Total / min",
                     ]}
                     colors={[
-                      "green",
+                      "cyan",
                       "blue",
-                      "orange",
+                      "green",
                       "indigo",
                       "orange",
                       "pink",
