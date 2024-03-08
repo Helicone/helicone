@@ -2,7 +2,7 @@ import { ClickhouseClientWrapper } from "./../lib/db/clickhouse";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Result, err, ok } from "../results";
 import { Database } from "../../supabase/database.types";
-import { CLICKHOUSE_PRICE_CALC } from "../lib/limits/check";
+import { clickhousePriceCalc } from "../packages/cost";
 
 type AlertStatus = "triggered" | "resolved";
 type Alert = Database["public"]["Tables"]["alert"]["Row"];
@@ -97,7 +97,7 @@ export class AlertStore {
     timeWindowMs: number
   ): Promise<Result<AlertState, string>> {
     const query = `SELECT 
-    ${CLICKHOUSE_PRICE_CALC("request_response_log")} as totalCount,
+    ${clickhousePriceCalc("request_response_log")} as totalCount,
     COUNT() AS requestCount
     FROM request_response_log
     WHERE

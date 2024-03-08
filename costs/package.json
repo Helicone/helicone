@@ -1,0 +1,25 @@
+{
+  "name": "GenAICost",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "repository": "git@github.com:Helicone/GenAICost.git",
+  "author": "Justin <justintorre75@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "build": "tsc",
+    "dev": "nodemon src/index.ts",
+    "test": "jest",
+    "copy": "cp -r src/* ../web/packages/cost && cp -r src/* ../worker/src/packages/cost "
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.25",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.0",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.2"
+  }
+}
