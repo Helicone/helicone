@@ -30,14 +30,16 @@ jobs:
           DIR2=./src
 
           # Generate hash lists
-          find $DIR1 -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/dir1_hashes.txt
-          find $DIR2 -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/dir2_hashes.txt
+          find $DIR1 -type f -print0 | sort -z | xargs -0 sha256sum | awk '{print $1}' > /tmp/dir1_hashes_only.txt
+          find $DIR2 -type f -print0 | sort -z | xargs -0 sha256sum | awk '{print $1}' > /tmp/dir2_hashes_only.txt
 
           # Compare the hash lists
-          if cmp -s /tmp/dir1_hashes.txt /tmp/dir2_hashes.txt; then
+          if cmp -s /tmp/dir1_hashes_only.txt /tmp/dir2_hashes_only.txt; then
               echo "Directories have the same contents."
           else
-              echo "Directories do not have the same contents."
+              echo "Directories have different contents."
+              echo "Please run the copy script to update the contents of the directories."
+              exit 1
           fi
 
   db-type-checks:
