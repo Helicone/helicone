@@ -21,11 +21,9 @@ import { useGetRequestCountClickhouse } from "../../../../services/hooks/request
 import Link from "next/link";
 import { clsx } from "../../../shared/clsx";
 import UpgradeProModal from "../../../shared/upgradeProModal";
-import { useRateLimitTracker } from "../../../../services/hooks/rateLimitTracker";
 import RenderOrgPlan from "./renderOrgPlan";
 import StyledAreaChart from "../../dashboard/styledAreaChart";
-import { AreaChart, BarChart } from "@tremor/react";
-import { TimeFilter } from "../../dashboard/dashboardPage";
+import { BarChart } from "@tremor/react";
 import { getTimeMap } from "../../../../lib/timeCalculations/constants";
 import { useOrgPlanPage } from "./useOrgPlanPage";
 
@@ -63,15 +61,12 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
   );
 
   const timeIncrement = "day";
-  // const [timeFilter, _] = useState<TimeFilter>({
-  //   start: currentMonth,
-  //   end: endOfMonth(currentMonth),
-  // });
 
   const {
     overTimeData,
     metrics,
     refetch: refetchData,
+    isLoading,
   } = useOrgPlanPage({
     timeFilter: {
       start: currentMonth,
@@ -81,20 +76,10 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
     dbIncrement: timeIncrement,
   });
 
-  // refetch both the request count and the rate limit tracker
   useEffect(() => {
     refetch();
     refetchData();
   }, [currentMonth, refetch, refetchData]);
-
-  // useEffect(() => {
-  //   refetch();
-  //   console.log(`Refetching data`);
-  //   refetchData();
-  //   console.log(`RefetchedData data`);
-  // }, [currentMonth, refetch]);
-
-  const { isLoading, request: rateLimitTrackerRequest } = useRateLimitTracker();
 
   const capitalizeHelper = (str: string) => {
     const words = str.split("_");
@@ -221,6 +206,9 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
                 showYAxis={false}
               />
             </StyledAreaChart>
+            <dd className="text-sm">
+              Please contact us to increase your rate limit
+            </dd>
           </div>
         )}
         <div className="flex flex-col sm:flex-row sm:space-x-4">
@@ -241,25 +229,6 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
                 {isCountLoading
                   ? "Loading..."
                   : Number(count?.data || 0).toLocaleString()}
-              </dd>
-            </div>
-          )}
-          {rateLimitTrackerRequest && (
-            <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
-              <dt className="text-sm font-medium leading-6 text-red-700 dark:text-red-300">
-                Rate Limited
-              </dt>
-
-              <dd className="w-full flex-row gap-2 text-3xl font-medium leading-10 tracking-tight text-red-900 dark:text-red-100">
-                {isCountLoading
-                  ? "Loading..."
-                  : Number(
-                      Math.floor(rateLimitTrackerRequest.total_count / 10) * 10
-                    )}
-                +<span className="pl-1 text-sm font-light">times</span>
-              </dd>
-              <dd className="text-sm">
-                Please contact us to increase your rate limit
               </dd>
             </div>
           )}

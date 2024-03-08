@@ -1,6 +1,6 @@
 import { RateLimitOverTime } from "../../../pages/api/metrics/rateLimitsOverTime";
 import { Result, resultMap } from "../../result";
-import { getXOverTime } from "./getXOverTime";
+import { getXOverTimeRateLimit } from "./getXOverTime";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 
 export async function getRateLimitOverTime(
@@ -8,7 +8,7 @@ export async function getRateLimitOverTime(
   groupByColumns: string[] = [],
   printQuery = false
 ): Promise<Result<RateLimitOverTime[], string>> {
-  const res = await getXOverTime<{
+  const res = await getXOverTimeRateLimit<{
     count: number;
     status: number;
   }>(data, "count(*) as count", groupByColumns, printQuery);

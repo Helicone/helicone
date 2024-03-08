@@ -4,6 +4,7 @@ import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuthClickHouse,
   buildFilterWithAuthClickHouseCacheHits,
+  buildFilterWithAuthClickHouseRateLimits,
   clickhouseParam,
 } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../result";
@@ -304,7 +305,7 @@ export async function getXOverTimeRateLimit<T>(
     return { data: null, error: "Invalid time zone difference" };
   }
   const { filter: builtFilter, argsAcc: builtFilterArgsAcc } =
-    await buildFilterWithAuthClickHouseCacheHits({
+    await buildFilterWithAuthClickHouseRateLimits({
       org_id: orgId,
       filter,
       argsAcc: [],
