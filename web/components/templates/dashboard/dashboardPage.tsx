@@ -1024,8 +1024,8 @@ const DashboardPage = (props: DashboardPageProps) => {
                       "Total / min",
                     ]}
                     colors={[
+                      "cyan",
                       "blue",
-                      "orange",
                       "green",
                       "indigo",
                       "orange",
