@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Result } from "../../../lib/result";
 import { SearchSelect, SearchSelectItem } from "@tremor/react";
 import React from "react";
@@ -30,6 +30,11 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
             .replace(/\s+/g, "")
             .includes(query.toLowerCase().replace(/\s+/g, ""))
         );
+
+  useEffect(() => {
+    onSearchHandler?.(query);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
 
   return (
     <SearchSelect
