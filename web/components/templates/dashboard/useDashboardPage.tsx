@@ -26,6 +26,7 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { LatencyOverTime } from "../../../pages/api/metrics/latencyOverTime";
 import { UsersOverTime } from "../../../pages/api/metrics/usersOverTime";
 import { TokensOverTime } from "../../../pages/api/metrics/tokensOverTime";
+import { TimeToFirstToken } from "../../../pages/api/metrics/timeToFirstToken";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -177,6 +178,16 @@ export const useDashboardPage = ({
         );
       },
     }),
+    ttft: useBackendMetricCall<Result<TimeToFirstToken[], string>>({
+      params,
+      endpoint: "/api/metrics/timeToFirstToken",
+      key: "timeToFirstToken",
+      postProcess: (data) => {
+        return resultMap(data, (d) =>
+          d.map((d) => ({ ttft: +d.ttft, time: new Date(d.time) }))
+        );
+      },
+    }),
   };
 
   const metrics = {
@@ -201,6 +212,10 @@ export const useDashboardPage = ({
     activeUsers: useBackendMetricCall<Result<number, string>>({
       params,
       endpoint: "/api/metrics/activeUsers",
+    }),
+    averageTimeToFirstToken: useBackendMetricCall<Result<number, string>>({
+      params,
+      endpoint: "/api/metrics/averageTimeToFirstToken",
     }),
   };
 
