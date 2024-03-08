@@ -26,10 +26,10 @@ jobs:
           bash genSupabaseTypes.sh
 
           echo "Running git diff"
-          git --no-pager diff HEAD~1
+          git --no-pager diff
 
           if git status | grep "database.types.ts"; then
-              git --no-pager diff HEAD~1 -- ./**/database.types.ts
+              git --no-pager diff -- ./**/database.types.ts
               echo "Detected uncommitted changes after build in web/supabase/database.types.ts. See status below:"
               git diff
               exit 1
