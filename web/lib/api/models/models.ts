@@ -1,10 +1,10 @@
+import { clickhousePriceCalc } from "../../../packages/cost";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterClickHouse,
   buildFilterWithAuthClickHouse,
 } from "../../../services/lib/filters/filters";
 import { Result } from "../../result";
-import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
 export interface ModelMetric {
@@ -68,7 +68,7 @@ request_response_log.model as model,
   sum(request_response_log.completion_tokens) as total_completion_tokens,
   sum(request_response_log.prompt_tokens) as total_prompt_token,
   sum(request_response_log.prompt_tokens) + sum(request_response_log.completion_tokens) as total_tokens,
-  (${CLICKHOUSE_PRICE_CALC("request_response_log")}) as cost
+  (${clickhousePriceCalc("request_response_log")}) as cost
 from request_response_log
 WHERE (${builtFilter.filter})
 GROUP BY request_response_log.model
