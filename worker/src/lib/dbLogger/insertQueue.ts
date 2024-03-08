@@ -7,6 +7,7 @@ import { Result, err, ok } from "../../results";
 import { ClickhouseClientWrapper, RequestResponseLog } from "../db/clickhouse";
 import { Valhalla } from "../db/valhalla";
 import { formatTimeString } from "./clickhouseLog";
+import { measureExecutionTime } from "./supabaseWrapper";
 
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];

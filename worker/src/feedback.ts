@@ -38,9 +38,30 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
     return new Response("Authentication required.", { status: 401 });
   }
 
+  const customFetch = async (url: any, options: any) => {
+    const start = performance.now();
+    try {
+      const response = await fetch(url, options);
+      const end = performance.now();
+
+      // Here you would send the log to Datadog
+      console.log(`Request to ${url} took ${end - start} ms`);
+
+      return response;
+    } catch (error) {
+      // Log or handle error
+      throw error;
+    }
+  };
+
   const dbClient: SupabaseClient<Database> = createClient(
     env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
+    env.SUPABASE_SERVICE_ROLE_KEY,
+    {
+      global: {
+        fetch: customFetch,
+      },
+    }
   );
 
   const requestPromise = getRequest(dbClient, heliconeId);
