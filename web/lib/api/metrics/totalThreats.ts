@@ -27,7 +27,7 @@ export async function getTotalThreats(
   );
   const query = `
     SELECT 
-        count(DISTINCT request_response_log.threat) AS threats
+        count(request_response_log.threat) AS threats
     FROM request_response_log
     WHERE (
         ${filterString}

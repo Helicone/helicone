@@ -2,7 +2,7 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { getUsersOverTime } from "../../../lib/api/metrics/getUsersOverTime";
+import { getThreatsOverTime } from "../../../lib/api/metrics/getThreatsOverTime";
 import { Result } from "../../../lib/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
@@ -27,7 +27,7 @@ async function handler(
   } = options.req.body as MetricsBackendBody;
 
   res.status(200).json(
-    await getUsersOverTime({
+    await getThreatsOverTime({
       timeFilter,
       userFilter: userFilters,
       orgId,

@@ -27,6 +27,7 @@ import { LatencyOverTime } from "../../../pages/api/metrics/latencyOverTime";
 import { UsersOverTime } from "../../../pages/api/metrics/usersOverTime";
 import { TokensOverTime } from "../../../pages/api/metrics/tokensOverTime";
 import { TimeToFirstToken } from "../../../pages/api/metrics/timeToFirstToken";
+import { ThreatsOverTime } from "../../../pages/api/metrics/threatsOverTime";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -188,6 +189,16 @@ export const useDashboardPage = ({
         );
       },
     }),
+    threats: useBackendMetricCall<Result<ThreatsOverTime[], string>>({
+      params,
+      endpoint: "/api/metrics/threatsOverTime",
+      key: "threatsOverTime",
+      postProcess: (data) => {
+        return resultMap(data, (d) =>
+          d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
+        );
+      },
+    }),
   };
 
   const metrics = {
@@ -216,6 +227,10 @@ export const useDashboardPage = ({
     averageTimeToFirstToken: useBackendMetricCall<Result<number, string>>({
       params,
       endpoint: "/api/metrics/averageTimeToFirstToken",
+    }),
+    totalThreats: useBackendMetricCall<Result<number, string>>({
+      params,
+      endpoint: "/api/metrics/totalThreats",
     }),
   };
 
