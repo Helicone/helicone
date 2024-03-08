@@ -9,17 +9,19 @@ import {
 } from "@heroicons/react/24/outline";
 import { Select, SelectItem } from "@tremor/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePrompts } from "../../../../services/hooks/prompts/prompts";
 import { usePrompt } from "../../../../services/hooks/prompts/singlePrompt";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
-import { getUSDateFromString } from "../../../shared/utils/utils";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { Chat } from "../../requests/chat";
 import { clsx } from "../../../shared/clsx";
 import { Tooltip } from "@mui/material";
 import { BeakerIcon } from "@heroicons/react/24/solid";
 import { ThemedPill } from "../../../shared/themed/themedPill";
+import ExperimentForm from "./experimentForm";
+import PromptPropertyCard from "./promptPropertyCard";
+import { useOrg } from "../../../layout/organizationContext";
 
 interface PromptIdPageProps {
   id: string;
@@ -92,8 +94,46 @@ const PrettyInput = ({
   );
 };
 
+const AutoResizingTextarea = ({
+  text,
+  setText,
+}: {
+  text: string;
+  setText: (text: string) => void;
+}) => {
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    const adjustHeight = () => {
+      if (textareaRef && textareaRef.current) {
+        const textarea = textareaRef.current as HTMLTextAreaElement;
+        textarea.style.height = "inherit"; // Reset height to recalculate
+        const computed = window.getComputedStyle(textareaRef.current);
+        // Calculate the height
+        const height =
+          textarea.scrollHeight +
+          parseInt(computed.borderTopWidth, 10) +
+          parseInt(computed.borderBottomWidth, 10);
+        textarea.style.height = `${height}px`;
+      }
+    };
+    adjustHeight();
+  }, [text]); // This effect runs when 'text' changes
+
+  return (
+    <textarea
+      ref={textareaRef}
+      className="text-sm leading-8 resize-none w-full border rounded-lg p-4"
+      value={text}
+      onChange={(e) => setText(e.target.value)}
+      style={{ overflow: "hidden" }}
+    />
+  );
+};
+
 export const RenderWithPrettyInputKeys = (props: {
   text: string;
+
   selectedProperties: Record<string, string> | undefined;
 }) => {
   const { text, selectedProperties } = props;
@@ -151,6 +191,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   const { id } = props;
   const { prompts, isLoading } = usePrompts();
 
+  const org = useOrg();
   const currentPrompt = prompts?.data?.prompts.find((p) => p.id === id);
   const [selectedVersion, setSelectedVersion] = useState<string>();
 
@@ -160,6 +201,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   });
 
   const [inputOpen, setInputOpen] = useState(false);
+  const [experimentOpen, setExperimentOpen] = useState(false);
 
   // the selected request to view in the tempalte
   const [selectedInput, setSelectedInput] = useState<{
@@ -204,12 +246,17 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   className="w-full flex items-center justify-between"
                 >
                   <div className="flex items-center space-x-1">
-                    <button className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2">
-                      <BeakerIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-                        Run Experiment
-                      </p>
-                    </button>
+                    {org?.currentOrg?.tier === "enterprise" && (
+                      <button
+                        className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+                        onClick={() => setExperimentOpen(!experimentOpen)}
+                      >
+                        <BeakerIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
+                          Run Experiment
+                        </p>
+                      </button>
+                    )}
 
                     <button
                       onClick={() => setInputOpen(!inputOpen)}
@@ -236,7 +283,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
                     >
                       <SparklesIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block pl-2 pr-1">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block pr-1">
                         Random Input
                       </p>
                     </button>
@@ -344,6 +391,18 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           </div>
         </div>
       )}
+      <ThemedDrawer
+        open={experimentOpen}
+        setOpen={setExperimentOpen}
+        defaultExpanded={true}
+      >
+        <ExperimentForm
+          heliconeTemplate={selectedPrompt.heliconeTemplate}
+          currentPrompt={currentPrompt!}
+          promptProperties={selectedPrompt.properties || []}
+          close={() => setExperimentOpen(false)}
+        />
+      </ThemedDrawer>
       <ThemedDrawer open={inputOpen} setOpen={setInputOpen}>
         <div className="flex flex-col space-y-4">
           <div className="flex items-center space-x-2">
@@ -355,57 +414,20 @@ const PromptIdPage = (props: PromptIdPageProps) => {
         </div>
         <ul className="flex flex-col space-y-4 mt-8 w-full">
           {selectedPrompt?.properties?.map((row, i) => (
-            <li
-              key={row.id}
-              className={clsx(
-                selectedInput?.id === row.id
-                  ? "bg-sky-100 border-sky-500 dark:bg-sky-950"
-                  : "bg-white border-gray-300 dark:bg-black dark:border-gray-700",
-                "w-full border p-4 rounded-lg"
-              )}
-            >
-              <button
-                className="flex flex-col w-full"
-                onClick={() => {
-                  if (selectedInput?.id === row.id) {
-                    setSelectedInput(undefined);
-                    return;
-                  }
-                  setSelectedInput(row);
-                }}
-              >
-                <div className="flex flex-col items-start w-full">
-                  <div className="flex items-center w-full justify-between">
-                    <p className="font-semibold text-black dark:text-white text-lg">
-                      {row.id}
-                    </p>
-                    <div className="border rounded-full border-gray-500 bg-white dark:bg-black h-6 w-6 flex items-center justify-center">
-                      {selectedInput?.id === row.id && (
-                        <div className="bg-sky-500 rounded-full h-4 w-4" />
-                      )}
-                    </div>
-                  </div>
-                  <p className="text-gray-500 text-sm">
-                    {getUSDateFromString(row.createdAt)}
-                  </p>
-                </div>
-              </button>
-              <ul className="divide-y divide-gray-300 dark:divide-gray-700 flex flex-col mt-4 w-full">
-                {Object.entries(row.properties).map(([key, value]) => (
-                  <li
-                    key={key}
-                    className="flex items-center py-2 justify-between gap-8"
-                  >
-                    <p className="text-sm font-semibold text-black dark:text-white">
-                      {key}
-                    </p>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 max-w-[22.5vw] truncate">
-                      {value}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </li>
+            <PromptPropertyCard
+              key={`selectedPrompt-${i}`}
+              isSelected={selectedInput?.id === row.id}
+              onSelect={() => {
+                if (selectedInput?.id === row.id) {
+                  setSelectedInput(undefined);
+                  return;
+                }
+                setSelectedInput(row);
+              }}
+              requestId={row.id}
+              createdAt={row.createdAt}
+              properties={row.properties}
+            />
           ))}
         </ul>
       </ThemedDrawer>
