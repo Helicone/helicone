@@ -65,7 +65,7 @@ jobs:
               exit 1
           fi
 
-      - name: Generate types and check for changes
+      - name: Generate .dockerignore and check for changes
         run: |
           bash genDockerIgnore.sh
 
