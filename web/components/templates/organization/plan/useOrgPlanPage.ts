@@ -1,4 +1,4 @@
-import { UseQueryResult, useQuery } from "@tanstack/react-query";
+import { UseQueryResult } from "@tanstack/react-query";
 import { Result, resultMap } from "../../../../lib/result";
 import { TimeIncrement } from "../../../../lib/timeCalculations/fetchTimeData";
 import { RateLimitOverTime } from "../../../../pages/api/metrics/rateLimitsOverTime";
