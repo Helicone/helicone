@@ -137,7 +137,7 @@ export const useDashboardPage = ({
     >({
       params,
       endpoint: "/api/metrics/requestStatusOverTime",
-      key: "requestOverTime",
+      key: "requestStatusOverTime",
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({
