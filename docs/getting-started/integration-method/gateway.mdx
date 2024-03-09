@@ -11,6 +11,14 @@ The Gateway serves as a unified entry point for all traffic, regardless of your 
 
 This is achieved by allowing you to determine the destination of your request by specifying the provider in the URL path. For instance, if you wish to send a request to LemonFox, you would send a request to `https://gateway.hconeai.com` instead of `https://api.lemonfox.ai`, but you would specify the provider and the endpoint in the URL path within the headers of your request.
 
+## Ex 1
+
+`api.groq.com/openai/v1"` -> `gateway.hconeai.com/openai/v1`
+
+- Header: `Helicone-Target-Url: https://api.groq.com`
+
+## Ex 2
+
 `api.lemonfox.ai/v1` -> `gateway.hconeai.com/v1`
 
 - Header: `Helicone-Target-Url: https://api.lemonfox.ai`
@@ -166,7 +174,7 @@ Current gateway request
 
 ```bash
 curl --request POST \
-  --url https://gateway.ai.cloudflare.com/v1/[id]/open-ai/openai/chat/completions \
+  --url https://gateway.ai.cloudflare.com/v1/[ACCOUNT-ID]/[GATEWAY-ID]/openai/chat/completions \
   --header 'Authorization: Bearer <API_KEY>' \
   --header 'Content-Type: application/json' \
   -d ' {
@@ -185,7 +193,7 @@ Simply change `gateway.ai.cloudflare.com` to `gateway.hconeai.com` and add the f
 
 ```bash
 curl --request POST \
-  --url https://gateway.hconeai.com/v1/[id]/open-ai/openai/chat/completions \
+  --url https://gateway.hconeai.com/v1/[ACCOUNT-ID]/[GATEWAY-ID]/openai/chat/completions \
   --header 'Helicone-Auth: Bearer <Helicone_Auth>' \
   --header 'Helicone-Target-Url: https://gateway.ai.cloudflare.com' \
   --header 'Authorization: Bearer <API_KEY>' \
@@ -283,6 +291,7 @@ curl --request POST \
 | Fireworks   | `api.fireworks.ai`           | ❌           | ❌                      |
 | Perplexity  | `api.perplexity.ai`          | ❌           | ❌                      |
 | OpenRouter  | `openrouter.ai`              | ❌           | ❌                      |
+| Groq        | `api.groq.com`               | ❌           | ❌                      |
 
 ## Unapproved Domains
 

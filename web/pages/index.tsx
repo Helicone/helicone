@@ -4,10 +4,10 @@ import { useRouter } from "next/router";
 
 import { DEMO_EMAIL } from "../lib/constants";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
-import HomePageV2 from "../components/templates/home/homePageV2";
 import RedirectingScreen from "../components/templates/home/redirectingScreen";
 import { isCustomerDomain } from "../lib/customerPortalHelpers";
 import PublicMetaData from "../components/layout/public/publicMetaData";
+import HomePageV3 from "../components/templates/home/homePageV3";
 
 export const Home = () => {
   const router = useRouter();
@@ -23,11 +23,11 @@ export const Home = () => {
     <>
       <PublicMetaData
         description={
-          "The easiest way to monitor your LLM-application at scale."
+          "The Generative AI platform built for developers. Get observability, tooling, fine-tuning, and evaluations out of the box. "
         }
         ogImageUrl={"https://www.helicone.ai/static/helicone-landing.png"}
       >
-        <HomePageV2 />
+        <HomePageV3 />
       </PublicMetaData>
     </>
   );

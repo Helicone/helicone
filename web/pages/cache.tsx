@@ -2,7 +2,6 @@ import AuthLayout from "../components/layout/authLayout";
 
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { User } from "@supabase/auth-helpers-react";
-import AuthHeader from "../components/shared/authHeader";
 import CachePage from "../components/templates/cache/cachePage";
 import { SortDirection } from "../services/lib/sorts/requests/sorts";
 import { ReactElement } from "react";
@@ -16,13 +15,19 @@ interface CacheProps {
     sortDirection: SortDirection | null;
     isCustomProperty: boolean;
   };
+  defaultIndex: number;
 }
+
 const Cache = (props: CacheProps) => {
-  const { currentPage, pageSize, sort } = props;
+  const { currentPage, pageSize, sort, defaultIndex } = props;
   return (
     <>
-      <AuthHeader title={"Cache"} />
-      <CachePage currentPage={currentPage} pageSize={pageSize} sort={sort} />
+      <CachePage
+        currentPage={currentPage}
+        pageSize={pageSize}
+        sort={sort}
+        defaultIndex={defaultIndex}
+      />
     </>
   );
 };
@@ -34,7 +39,7 @@ Cache.getLayout = function getLayout(page: ReactElement) {
 export default Cache;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
-  const { page, page_size, sortKey, sortDirection, isCustomProperty } =
+  const { page, page_size, sortKey, sortDirection, isCustomProperty, tab } =
     options.context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
@@ -50,6 +55,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
         sortDirection: sortDirection ? (sortDirection as SortDirection) : null,
         isCustomProperty: isCustomProperty === "true",
       },
+      defaultIndex: tab ? parseInt(tab as string) : 0,
     },
   };
 });

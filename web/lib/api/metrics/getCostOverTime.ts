@@ -1,5 +1,5 @@
+import { clickhousePriceCalc } from "../../../packages/cost";
 import { Result, resultMap } from "../../result";
-import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
 import { getXOverTime } from "./getXOverTime";
 
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
@@ -14,7 +14,7 @@ export async function getCostOverTime(
 ): Promise<Result<DateCountDBModel[], string>> {
   const res = await getXOverTime<{
     cost: number;
-  }>(data, `${CLICKHOUSE_PRICE_CALC("response_copy_v3")} AS cost`);
+  }>(data, `${clickhousePriceCalc("request_response_log")} AS cost`);
   return resultMap(res, (resData) =>
     resData.map((d) => ({
       time: new Date(new Date(d.created_at_trunc).getTime()),

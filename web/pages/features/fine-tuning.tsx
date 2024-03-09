@@ -55,9 +55,7 @@ const FineTuning = () => {
                 Want to chat with the founders?
               </p>
               <Link
-                href={
-                  "https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call"
-                }
+                href={"https://cal.com/team/helicone/helicone-discoveryl"}
                 className="text-gray-500 hover:text-black flex flex-row items-center gap-1 text-sm mt-2 w-fit"
                 target="_blank"
                 rel="noopener noreferrer"

@@ -1,0 +1,35 @@
+---
+title: "Fine-Tuning"
+description: "Easily fine-tune a model using your request logs inside of Helicone."
+---
+
+Fine-tuning allows you to reduce your costs and improve your applications performance - all using the data already inside of Helicone. Read more about
+it here: [OpenAI's fine-tuning guide](https://platform.openai.com/docs/guides/fine-tuning)
+
+<Steps>
+  <Step title="Create a dataset">
+    Navigate to the request page and use filters to get your desired dataset
+    <Frame>
+      <img src="/images/features/fine-tuning/filters.png" />
+    </Frame>
+
+    Press `Create Dataset` and name it
+    <Frame>
+        <img src="/images/features/fine-tuning/create-dataset.png" width={400} />
+    </Frame>
+    <Tip>You need at least 10 requests within a dataset to fine-tune.</Tip>
+
+  </Step>
+  <Step title="Start a fine-tuning job">
+    Navigate to the fine-tune page and creete a new fine-tuning job.
+    <Frame>
+        <img src="/images/features/fine-tuning/fine-tune-job.png" width={400} />
+    </Frame>
+  </Step>
+  <Step title="Replace your model name">
+    Once your fine-tuning job is completed, all you have to do is replace the model name and you can start using the new fine-tuned model!
+    <Frame caption="Example Python integration">
+        <img src="/images/features/fine-tuning/model.png" width={600} />
+    </Frame>
+  </Step>
+</Steps>

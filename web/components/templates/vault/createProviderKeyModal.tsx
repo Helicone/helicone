@@ -4,8 +4,15 @@ import useNotification from "../../shared/notification/useNotification";
 import { Result } from "../../../lib/result";
 import { DecryptedProviderKey } from "../../../services/lib/keys";
 import { clsx } from "../../shared/clsx";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowPathIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/outline";
 import { useOrg } from "../../layout/organizationContext";
+import { Select, SelectItem, TextInput } from "@tremor/react";
+import { Tooltip } from "@mui/material";
+import { useGetOrgMembers } from "../../../services/hooks/organizations";
+import { useUser } from "@supabase/auth-helpers-react";
 
 interface CreateProviderKeyModalProps {
   open: boolean;
@@ -20,6 +27,17 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
   const { setNotification } = useNotification();
   const [isLoading, setIsLoading] = useState(false);
   const org = useOrg();
+  const user = useUser();
+
+  const {
+    data,
+    isLoading: isMembersLoading,
+    refetch,
+  } = useGetOrgMembers(org?.currentOrg?.id || "");
+
+  const currentUserRole = data?.data?.find(
+    (d) => d.email === user?.email
+  )?.org_role;
 
   const handleSubmitHandler = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -34,10 +52,21 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
 
     if ((!keyName || keyName.value === "") && variant !== "portal") {
       setNotification("Please enter in a key name", "error");
+      setIsLoading(false);
       return;
     }
     if (!providerKey || providerKey.value === "") {
       setNotification("Please enter in a provider key", "error");
+      setIsLoading(false);
+      return;
+    }
+
+    if (currentUserRole === "member") {
+      setNotification(
+        "Members are not allowed to create provider keys",
+        "error"
+      );
+      setIsLoading(false);
       return;
     }
 
@@ -67,7 +96,9 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
           );
         }
       })
-      .catch(console.error)
+      .catch((err) => {
+        setNotification(`Error: ${err}`, "error");
+      })
       .finally(() => setIsLoading(false));
   };
 
@@ -84,39 +115,44 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
         </h1>
         <div className="w-full space-y-1.5 text-sm">
           <label htmlFor="api-key">Provider</label>
-          <select
+          <Select
+            defaultValue="openai"
+            placeholder="openai"
             disabled
-            className="block w-full rounded-md border border-gray-500 bg-gray-100 dark:bg-gray-900 shadow-sm p-2 text-sm"
+            enableClear={false}
           >
-            <option value="openai">
-              {variant === "portal" ? org?.currentOrg?.name : "OpenAI"}
-            </option>
-          </select>
+            <SelectItem value="openai">OpenAI</SelectItem>
+          </Select>
         </div>
 
         <div className="w-full space-y-1.5 text-sm">
-          <label htmlFor="key-name">Key Name</label>
-          <input
-            name="key-name"
-            id="key-name"
-            className={clsx(
-              "block w-full rounded-md border border-gray-500 bg-gray-100 dark:bg-gray-900 shadow-sm p-2 text-sm"
-            )}
-            required
-            placeholder="Provider Key Name"
-          />
-        </div>
-        <div className="w-full space-y-1.5 text-sm">
-          <label htmlFor="provider-key">Provider Key</label>
-          <input
+          <label htmlFor="provider-key" className="flex items-center gap-1">
+            Provider Key
+            <Tooltip
+              title={
+                "This is the secret key that you get from the provider. It is used to authenticate and make requests to the provider's API."
+              }
+            >
+              <InformationCircleIcon
+                className={clsx("w-4 h-4 text-gray-500")}
+              />
+            </Tooltip>
+          </label>
+          <TextInput
             type="password"
             name="provider-key"
             id="provider-key"
-            className={clsx(
-              "block w-full rounded-md border border-gray-500 bg-gray-100 dark:bg-gray-900 shadow-sm p-2 text-sm"
-            )}
             required
             placeholder="sk-"
+          />
+        </div>
+        <div className="w-full space-y-1.5 text-sm">
+          <label htmlFor="key-name">Key Name</label>
+          <TextInput
+            name="key-name"
+            id="key-name"
+            required
+            placeholder="Provider Key Name"
           />
         </div>
         <div className="flex justify-end gap-2">

@@ -1,7 +1,7 @@
 import { Popover, Transition } from "@headlessui/react";
 import {
   BugAntIcon,
-  ChevronDownIcon,
+  ChevronRightIcon,
   CodeBracketSquareIcon,
   DocumentMagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
@@ -12,7 +12,6 @@ import {
   CommandLineIcon,
 } from "@heroicons/react/20/solid";
 import { Fragment } from "react";
-import { clsx } from "../../shared/clsx";
 import Link from "next/link";
 
 const solutions: {
@@ -90,15 +89,11 @@ export default function SolutionsButton() {
       <Popover className="relative">
         {({ open }) => (
           <>
-            <Popover.Button
-              className={clsx(
-                "flex flex-row items-center font-semibold hover:bg-gray-200 rounded-lg px-4 py-2 focus:outline-none"
-              )}
-            >
+            <Popover.Button className="flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-gray-700">
               <span>Solutions</span>
-              <ChevronDownIcon
-                className={`${open ? "" : "text-opacity-70"}
-                  ml-1 h-5 w-5 transition duration-150  ease-in-out group-hover:text-opacity-80`}
+              <ChevronRightIcon
+                className={`${open ? "rotate-90" : "text-opacity-70"}
+                  ml-1 h-4 w-4 transition duration-150  ease-in-out group-hover:text-opacity-80`}
                 aria-hidden="true"
               />
             </Popover.Button>
@@ -111,7 +106,7 @@ export default function SolutionsButton() {
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-1"
             >
-              <Popover.Panel className="absolute z-10 mt-3 w-[600px] transform px-4 sm:px-0">
+              <Popover.Panel className="absolute z-10 mt-2 w-[600px] transform px-4 sm:px-0">
                 <div className="overflow-hidden rounded-lg shadow-2xl ring-1 ring-black ring-opacity-10">
                   <div className="relative grid gap-8 bg-white p-7 grid-cols-1 lg:grid-cols-2">
                     <p className="-mb-2 text-sm font-medium text-gray-700 col-span-2">

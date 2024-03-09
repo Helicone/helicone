@@ -6,6 +6,8 @@ import {
 } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { clsx } from "../../shared/clsx";
+import { useEffect, useState } from "react";
+import { useDebounce } from "../../../services/hooks/debounce";
 
 interface TableFooterProps {
   currentPage: number;
@@ -34,6 +36,25 @@ const TableFooter = (props: TableFooterProps) => {
 
   const totalPages = Math.ceil(count / pageSize);
 
+  const [page, setPage] = useState<number>(currentPage);
+
+  const debouncedPage = useDebounce(page, 1200);
+
+  // the page should always match the currentPage
+  useEffect(() => {
+    if (currentPage !== page) {
+      setPage(currentPage);
+    }
+  }, [currentPage]);
+
+  // once the debouncedPage changes, update the page using onPageChange and update the router
+  useEffect(() => {
+    onPageChange(debouncedPage);
+    router.query.page = debouncedPage.toString();
+    // update the url, but don't trigger a new fetch
+    router.replace(router);
+  }, [debouncedPage]);
+
   return (
     <div className="flex flex-row justify-between text-sm items-center">
       <div className="flex flex-row gap-16 items-center justify-between w-full">
@@ -59,26 +80,60 @@ const TableFooter = (props: TableFooterProps) => {
           </select>
         </div>
         <div className="flex flex-row space-x-1 items-center">
-          <p className="text-gray-700 dark:text-gray-300 font-medium">{`Page ${currentPage} of ${
-            isCountLoading
-              ? "..."
-              : Math.ceil((count as number) / Number(pageSize || 10))
-          }`}</p>
-          {showCount && (
-            <p className="text-gray-500 font-medium text-xs">{`(${count} total)`}</p>
+          {isCountLoading ? (
+            <p className="text-gray-700 dark:text-gray-300 font-medium">
+              Loading...
+            </p>
+          ) : count > 0 ? (
+            <div className="flex items-center gap-1">
+              <p className="text-gray-700 dark:text-gray-300 font-medium">
+                Page
+              </p>
+
+              <input
+                type="number"
+                style={{ width: "4rem" }}
+                value={page}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value, 10);
+
+                  if (value < 1) {
+                    setPage(1);
+                  } else if (value > totalPages) {
+                    setPage(totalPages);
+                  } else {
+                    setPage(value);
+                  }
+                }}
+                min={1}
+                max={Math.ceil((count as number) / Number(pageSize || 10))}
+                className="text-gray-700 dark:text-gray-300 bg-white dark:bg-black block rounded-md border-gray-300 dark:border-gray-700 py-1.5 px-3 text-base focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
+              />
+              <p className="text-gray-700 dark:text-gray-300 font-medium">of</p>
+              <p className="text-gray-700 dark:text-gray-300 font-medium">{`${
+                isCountLoading
+                  ? "..."
+                  : Math.ceil((count as number) / Number(pageSize || 10))
+              }`}</p>
+              {showCount && (
+                <p className="text-gray-500 font-medium text-xs">{`(${count} total)`}</p>
+              )}
+            </div>
+          ) : (
+            <></>
           )}
         </div>
 
         <div className="flex flex-row gap-2 items-center">
           <button
-            disabled={currentPage <= 1}
+            disabled={!isCountLoading && currentPage <= 1}
             onClick={() => {
               router.query.page = "1";
               router.push(router);
               onPageChange(1);
             }}
             className={clsx(
-              currentPage <= 1
+              !isCountLoading && currentPage <= 1
                 ? "border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-700 hover:cursor-not-allowed text-gray-300 dark:text-gray-500"
                 : "border-gray-300 bg-white dark:border-gray-700 dark:bg-black hover:cursor-pointer text-gray-700 dark:text-gray-300",
               "hidden sm:block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
@@ -87,14 +142,14 @@ const TableFooter = (props: TableFooterProps) => {
             <ChevronDoubleLeftIcon className="h-5 w-5" />
           </button>
           <button
-            disabled={currentPage <= 1}
+            disabled={!isCountLoading && currentPage <= 1}
             onClick={() => {
               router.query.page = (currentPage - 1).toString();
               router.push(router);
               onPageChange(currentPage - 1);
             }}
             className={clsx(
-              currentPage <= 1
+              !isCountLoading && currentPage <= 1
                 ? "border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-700 hover:cursor-not-allowed text-gray-300 dark:text-gray-500"
                 : "border-gray-300 bg-white dark:border-gray-700 dark:bg-black hover:cursor-pointer text-gray-700 dark:text-gray-300",
               "block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
@@ -103,14 +158,14 @@ const TableFooter = (props: TableFooterProps) => {
             <ChevronLeftIcon className="h-5 w-5 " />
           </button>
           <button
-            disabled={currentPage >= totalPages}
+            disabled={!isCountLoading && currentPage >= totalPages}
             onClick={() => {
               router.query.page = (currentPage + 1).toString();
               router.push(router);
               onPageChange(currentPage + 1);
             }}
             className={clsx(
-              currentPage >= totalPages
+              !isCountLoading && currentPage >= totalPages
                 ? "border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-700 hover:cursor-not-allowed text-gray-300 dark:text-gray-500"
                 : "border-gray-300 bg-white dark:border-gray-700 dark:bg-black hover:cursor-pointer text-gray-700 dark:text-gray-300",
               "block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
@@ -119,7 +174,7 @@ const TableFooter = (props: TableFooterProps) => {
             <ChevronRightIcon className="h-5 w-5" />
           </button>
           <button
-            disabled={currentPage >= totalPages}
+            disabled={!isCountLoading && currentPage >= totalPages}
             onClick={() => {
               router.query.page = Math.ceil(
                 (count as number) / Number(pageSize || 10)
@@ -130,7 +185,7 @@ const TableFooter = (props: TableFooterProps) => {
               );
             }}
             className={clsx(
-              currentPage >= totalPages
+              !isCountLoading && currentPage >= totalPages
                 ? "border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-700 hover:cursor-not-allowed text-gray-300 dark:text-gray-500"
                 : "border-gray-300 bg-white dark:border-gray-700 dark:bg-black hover:cursor-pointer text-gray-700 dark:text-gray-300",
               "hidden sm:block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"

@@ -169,15 +169,13 @@ export async function heliconeRequest(
   return data.map((r) => ({
     id: r.request_id,
     createdAt: r.request_created_at,
-    model: r.response_body?.model ?? r.request_body?.model ?? null,
+    model: r.response_body?.model ?? r.request_body?.model ?? "",
     costUSD: modelCost({
       model: r.response_body?.model ?? r.request_body?.model ?? null,
       sum_completion_tokens: r.completion_tokens ?? 0,
       sum_prompt_tokens: r.prompt_tokens ?? 0,
       sum_tokens: (r.total_tokens ?? 0) + (r.completion_tokens ?? 0),
     }),
-    prompt: r.request_prompt,
-    response: r.response_prompt,
     user: r.request_user_id
       ? {
           id: r.request_user_id,
@@ -185,12 +183,6 @@ export async function heliconeRequest(
       : null,
     properties: r.request_properties
       ? Object.entries(r.request_properties).map(([k, v]) => ({
-          name: k,
-          value: v as string,
-        }))
-      : [],
-    values: r.request_prompt_values
-      ? Object.entries(r.request_prompt_values).map(([k, v]) => ({
           name: k,
           value: v as string,
         }))

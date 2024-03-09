@@ -4,7 +4,7 @@ import {
   withAuth,
 } from "../../../../lib/api/handlerWrappers";
 import { Result } from "../../../../lib/result";
-import { CLICKHOUSE_PRICE_CALC } from "../../../../lib/sql/constants";
+import { clickhousePriceCalc } from "../../../../packages/cost";
 import { DecryptedProviderKeyMapping } from "../../../../services/lib/keys";
 import { Permission } from "../../../../services/lib/user";
 const generateSubquery = (
@@ -18,14 +18,14 @@ const generateSubquery = (
   return `
     (
       SELECT count(*) as count,
-      ${CLICKHOUSE_PRICE_CALC("response_copy_v3")} as cost
-      FROM response_copy_v3
+      ${clickhousePriceCalc("request_response_log")} as cost
+      FROM request_response_log
       WHERE (
-        response_copy_v3.request_created_at >= now() - INTERVAL {${secondsVal} : Int32} SECOND
+        request_response_log.request_created_at >= now() - INTERVAL {${secondsVal} : Int32} SECOND
       ) AND (
-        response_copy_v3.organization_id = {${orgIdVal} : String}
+        request_response_log.organization_id = {${orgIdVal} : String}
       ) AND (
-        response_copy_v3.proxy_key_id = {${proxyKeyIdVal} : String}
+        request_response_log.proxy_key_id = {${proxyKeyIdVal} : String}
       )
     ) as x_${index}
   `;

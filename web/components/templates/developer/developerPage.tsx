@@ -13,15 +13,49 @@ import { useUser } from "@supabase/auth-helpers-react";
 import VaultPage from "../vault/vaultPage";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 import Link from "next/link";
+import { ElementType } from "react";
+import { useRouter } from "next/router";
+import AuthHeader from "../../shared/authHeader";
 
-interface DeveloperPageProps {}
+interface DeveloperPageProps {
+  defaultIndex?: number;
+}
+
+const tabs: {
+  id: number;
+  title: string;
+  icon: ElementType<any>;
+}[] = [
+  {
+    id: 0,
+    title: "Keys",
+    icon: KeyIcon,
+  },
+  {
+    id: 1,
+    title: "GraphQL",
+    icon: CodeBracketSquareIcon,
+  },
+  {
+    id: 2,
+    title: "Webhooks",
+    icon: GlobeAltIcon,
+  },
+  {
+    id: 3,
+    title: "Vault",
+    icon: LockClosedIcon,
+  },
+];
 
 const DeveloperPage = (props: DeveloperPageProps) => {
-  const {} = props;
+  const { defaultIndex = 0 } = props;
 
   const orgContext = useOrg();
 
   const user = useUser();
+
+  const router = useRouter();
 
   const { hasFlag } = useFeatureFlags(
     "webhook_beta",
@@ -33,18 +67,27 @@ const DeveloperPage = (props: DeveloperPageProps) => {
   const isPaidPlan = tier === "pro" || tier === "enterprise";
 
   return (
-    <div className="flex flex-col space-y-4">
-      <div className="flex flex-row items-center justify-between">
-        <h1 className="font-semibold text-3xl text-black dark:text-white">
-          Developer
-        </h1>
-      </div>
-      <TabGroup>
+    <>
+      <AuthHeader title={"Developer"} />
+      <TabGroup defaultIndex={defaultIndex}>
         <TabList className="font-semibold" variant="line">
-          <Tab icon={KeyIcon}>Keys</Tab>
-          <Tab icon={CodeBracketSquareIcon}>GraphQL</Tab>
-          <Tab icon={GlobeAltIcon}>Webhooks</Tab>
-          <Tab icon={LockClosedIcon}>Vault</Tab>
+          {tabs.map((tab) => (
+            <Tab
+              key={tab.id}
+              icon={tab.icon}
+              onClick={() => {
+                router.push(
+                  {
+                    query: { tab: tab.id },
+                  },
+                  undefined,
+                  { shallow: true }
+                );
+              }}
+            >
+              {tab.title}
+            </Tab>
+          ))}
         </TabList>
         <TabPanels>
           <TabPanel>
@@ -107,7 +150,7 @@ const DeveloperPage = (props: DeveloperPageProps) => {
           </TabPanel>
         </TabPanels>
       </TabGroup>
-    </div>
+    </>
   );
 };
 

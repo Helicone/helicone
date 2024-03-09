@@ -15,7 +15,7 @@ import { Database, Json } from "../../db/database.types";
 import { mapGeminiPro } from "./mappers";
 
 export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
-const MAX_TOTAL_BODY_SIZE = 3900000 / 10;
+const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
 export interface HeliconeRequest {
   response_id: string;
@@ -33,10 +33,6 @@ export interface HeliconeRequest {
   request_properties: {
     [key: string]: Json;
   } | null;
-  request_formatted_prompt_id: string | null;
-  request_prompt_values: {
-    [key: string]: Json;
-  } | null;
   request_feedback: {
     [key: string]: Json;
   } | null;
@@ -44,9 +40,8 @@ export interface HeliconeRequest {
   prompt_name: string | null;
   prompt_regex: string | null;
   key_name: string;
-  request_prompt: string | null;
-  response_prompt: string | null;
   delay_ms: number | null;
+  time_to_first_token: number | null;
   total_tokens: number | null;
   prompt_tokens: number | null;
   completion_tokens: number | null;
@@ -78,16 +73,22 @@ export async function getRequests(
   const query = `
   SELECT response.id AS response_id,
     response.created_at as response_created_at,
-    response.body AS response_body,
+    CASE 
+      WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} THEN '{"helicone_message": "request body too large"}'::jsonb
+      WHEN request.path LIKE '%embeddings%' THEN '{"helicone_message": "embeddings response omitted"}'::jsonb
+      ELSE response.body::jsonb
+    END AS response_body,
     response.status AS response_status,
     request.id AS request_id,
     request.created_at as request_created_at,
-    request.body AS request_body,
+    CASE 
+      WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE}
+      THEN '{"helicone_message": "request body too large"}'::jsonb
+      ELSE request.body::jsonb
+    END AS request_body,
     request.path AS request_path,
     request.user_id AS request_user_id,
     request.properties AS request_properties,
-    request.formatted_prompt_id as request_formatted_prompt_id,
-    request.prompt_values as request_prompt_values,
     request.provider as provider,
     request.model as request_model,
     request.model_override as model_override,
@@ -95,15 +96,14 @@ export async function getRequests(
     response.feedback as request_feedback,
     request.helicone_user as helicone_user,
     response.delay_ms as delay_ms,
+    response.time_to_first_token as time_to_first_token,
     (response.prompt_tokens + response.completion_tokens) as total_tokens,
     response.completion_tokens as completion_tokens,
     response.prompt_tokens as prompt_tokens,
     job_node_request.node_id as node_id,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
-    feedback.rating AS feedback_rating,
-    (coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text as request_prompt,
-    (coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text as response_prompt
+    feedback.rating AS feedback_rating
   FROM request
     left join response on request.id = response.request
     left join feedback on response.id = feedback.response_id
@@ -115,7 +115,6 @@ export async function getRequests(
   LIMIT ${limit}
   OFFSET ${offset}
 `;
-
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
 
   if (!supabaseServer) {
@@ -152,16 +151,22 @@ export async function getRequestsCached(
   const query = `
   SELECT response.id AS response_id,
     cache_hits.created_at as response_created_at,
-    response.body AS response_body,
+    CASE 
+      WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} THEN '{"helicone_message": "request body too large"}'::jsonb
+      WHEN request.path LIKE '%embeddings%' THEN '{"helicone_message": "embeddings response omitted"}'::jsonb
+      ELSE response.body::jsonb
+    END AS response_body,
     response.status AS response_status,
     request.id AS request_id,
     cache_hits.created_at as request_created_at,
-    request.body AS request_body,
+    CASE 
+      WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE}
+      THEN '{"helicone_message": "request body too large"}'::jsonb
+      ELSE request.body::jsonb
+    END AS request_body,
     request.path AS request_path,
     request.user_id AS request_user_id,
     request.properties AS request_properties,
-    request.formatted_prompt_id as request_formatted_prompt_id,
-    request.prompt_values as request_prompt_values,
     request.provider as provider,
     request.model as request_model,
     request.model_override as model_override,
@@ -169,14 +174,13 @@ export async function getRequestsCached(
     response.feedback as request_feedback,
     request.helicone_user as helicone_user,
     response.delay_ms as delay_ms,
+    response.time_to_first_token as time_to_first_token,
     (response.prompt_tokens + response.completion_tokens) as total_tokens,
     response.completion_tokens as completion_tokens,
     response.prompt_tokens as prompt_tokens,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
-    feedback.rating AS feedback_rating,
-    (coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text as request_prompt,
-    (coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text as response_prompt
+    feedback.rating AS feedback_rating
   FROM cache_hits
     inner join request on cache_hits.request_id = request.id
     inner join response on request.id = response.request
@@ -312,8 +316,6 @@ function truncLargeData(
   const trunced = data.map((d) => {
     return {
       ...d,
-      response_prompt: d.response_prompt,
-      request_prompt: d.request_prompt,
       request_body: d.request_body,
       response_body: d.response_body,
       llmSchema: d.llmSchema,
@@ -397,7 +399,7 @@ export async function getRequestCountClickhouse(
   const query = `
 SELECT
   count(DISTINCT r.request_id) as count
-from response_copy_v3 r
+from request_response_log r
 WHERE (${builtFilter.filter})
   `;
   const { data, error } = await dbQueryClickhouse<{ count: number }>(

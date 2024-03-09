@@ -28,6 +28,8 @@ type CommonFields = {
     rating: boolean | null;
   };
   provider: Provider;
+  temperature?: number;
+  timeToFirstToken?: number | null;
 };
 
 export type NormalizedRequest = CommonFields & {
@@ -56,6 +58,7 @@ abstract class AbstractRequestBuilder {
   }
 
   protected getCommonFields(): CommonFields {
+    const temperature = this.response?.request_body?.temperature;
     return {
       model: this.model,
       id: this.response.request_id,
@@ -85,6 +88,8 @@ abstract class AbstractRequestBuilder {
         rating: this.response.feedback_rating ?? null,
       },
       provider: this.response.provider,
+      temperature,
+      timeToFirstToken: this.response.time_to_first_token,
     };
   }
 

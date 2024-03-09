@@ -120,20 +120,20 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
             </div>
           </div>
           <h1 className="text-sm text-gray-700 dark:text-gray-300">
-            This organization is on the free plan. Upgrade to remove request
-            limits and unlock the features below:
+            This organization is on the free plan. Upgrade to Helicone Pro to
+            remove request limits and unlock the features below:
           </h1>
         </div>
         <div className="grid grid-cols-2 gap-4">
           {[
-            "Unlimited Requests",
-            "Bucket Caching",
-            "User Rate Limiting",
+            "10x more request logs",
+            "8 seats",
+            "Caching",
+            "More fine-tuning jobs",
+            "Model Load Balancing",
             "GraphQL API",
-            "Request Retries",
             "Key Vault",
-            "10 Seats",
-            "Up to 2GB of storage",
+            "Evaluations (coming soon!)",
           ].map((item, i) => (
             <div key={i} className="text-sm flex flex-row items-center">
               <SparklesIcon className="h-4 w-4 mr-2 text-yellow-500" />

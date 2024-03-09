@@ -1,4 +1,5 @@
 import {
+  ArrowsPointingOutIcon,
   BeakerIcon,
   ChatBubbleLeftRightIcon,
   ChevronDownIcon,
@@ -11,6 +12,8 @@ import React, { useLayoutEffect, useRef, useState } from "react";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { LlmSchema } from "../../../lib/api/models/requestResponseModel";
+import ThemedModal from "../../shared/themed/themedModal";
+import { RenderWithPrettyInputKeys } from "../prompts/id/promptIdPage";
 
 export type Message = {
   id: string;
@@ -28,12 +31,14 @@ export type Message = {
 
 export const SingleChat = (props: {
   message: Message;
+
   index: number;
   isLast: boolean;
   expandedProps: {
     expanded: boolean;
     setExpanded: (expanded: boolean) => void;
   };
+  selectedProperties?: Record<string, string>;
 }) => {
   const {
     message,
@@ -141,7 +146,10 @@ export const SingleChat = (props: {
 
       return (
         <div className="flex flex-col space-y-4 divide-y divide-gray-100 dark:divide-gray-900">
-          <p>{textMessage?.text}</p>
+          <RenderWithPrettyInputKeys
+            text={textMessage?.text}
+            selectedProperties={props.selectedProperties}
+          />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <div className="flex flex-wrap items-center pt-4">
             {arr.map((item, index) =>
@@ -151,15 +159,15 @@ export const SingleChat = (props: {
                     <img
                       src={item.image_url.url}
                       alt={""}
-                      width={200}
-                      height={200}
+                      width={600}
+                      height={600}
                     />
                   ) : item.image_url ? (
                     <img
                       src={item.image_url}
                       alt={""}
-                      width={200}
-                      height={200}
+                      width={600}
+                      height={600}
                     />
                   ) : (
                     <div className="h-[150px] w-[200px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 text-center items-center flex justify-center text-xs italic text-gray-500">
@@ -182,7 +190,10 @@ export const SingleChat = (props: {
     // if it is an object, find the text inside of the content array
 
     if (Array.isArray(message.content)) {
-      if (typeof message.content[0] === "string") {
+      if (
+        message.content.length > 0 &&
+        typeof message.content[0] === "string"
+      ) {
         return message.content[0];
       }
       const textMessage = message.content.find(
@@ -216,13 +227,13 @@ export const SingleChat = (props: {
       <div
         className={clsx(
           getBgColor(),
-          "items-start p-4 text-left grid grid-cols-12 space-x-4 text-black dark:text-white",
+          "items-start p-4 text-left flex flex-row space-x-4 text-black dark:text-white ",
           isSystem && "font-semibold",
           isLast && "rounded-b-md"
         )}
         key={index}
       >
-        <div className="col-span-2 flex items-center justify-center">
+        <div className="flex items-center justify-center">
           <div
             className={clsx(
               "bg-white dark:bg-black border border-gray-300 dark:border-gray-700",
@@ -232,7 +243,7 @@ export const SingleChat = (props: {
             <p>{message.role}</p>
           </div>
         </div>
-        <div className="relative whitespace-pre-wrap col-span-10 leading-6 items-center h-full">
+        <div className="relative whitespace-pre-wrap items-center h-full w-full">
           {isFunction ? (
             <div className="flex flex-col space-y-2">
               <code className="text-xs whitespace-pre-wrap font-semibold">
@@ -259,9 +270,18 @@ export const SingleChat = (props: {
                 style={{ maxHeight: expanded ? "none" : "10.5rem" }}
               >
                 {/* render the string or stringify the array/object */}
-                {isJSON(formattedMessageContent)
-                  ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
-                  : formattedMessageContent}
+                <RenderWithPrettyInputKeys
+                  text={
+                    isJSON(formattedMessageContent)
+                      ? JSON.stringify(
+                          JSON.parse(formattedMessageContent),
+                          null,
+                          2
+                        )
+                      : formattedMessageContent
+                  }
+                  selectedProperties={props.selectedProperties}
+                />
               </div>
               {showButton && (
                 <div className="w-full flex justify-center items-center pt-2 pr-24">
@@ -289,10 +309,22 @@ interface ChatProps {
   requestId: string;
   status: number;
   model: string;
+  selectedProperties?: Record<string, string>;
+  editable?: boolean;
 }
 
 export const Chat = (props: ChatProps) => {
-  const { requestBody, responseBody, requestId, llmSchema, model } = props;
+  const {
+    requestBody,
+    responseBody,
+    requestId,
+    llmSchema,
+    model,
+    selectedProperties,
+    editable,
+  } = props;
+
+  const [open, setOpen] = useState(false);
 
   const requestMessages =
     llmSchema?.request.messages ?? requestBody?.messages ?? [];
@@ -320,7 +352,7 @@ export const Chat = (props: ChatProps) => {
         {
           length: [...requestMessages, responseMessage].filter(Boolean).length,
         },
-        (_, i) => [i, false]
+        (_, i) => [i, editable ? true : false]
       )
     )
   );
@@ -367,6 +399,7 @@ export const Chat = (props: ChatProps) => {
                   },
                 }}
                 key={index}
+                selectedProperties={selectedProperties}
               />
             );
           })}
@@ -402,6 +435,7 @@ export const Chat = (props: ChatProps) => {
                   },
                 }}
                 key={index}
+                selectedProperties={selectedProperties}
               />
             );
           })}
@@ -424,6 +458,7 @@ export const Chat = (props: ChatProps) => {
               },
             }}
             key={index}
+            selectedProperties={selectedProperties}
           />
         );
       });
@@ -433,97 +468,199 @@ export const Chat = (props: ChatProps) => {
   };
 
   return (
-    <div className="w-full flex flex-col text-left space-y-2 text-sm">
-      <div className="w-full border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
-        <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100">
-          <div className="flex flex-row items-center space-x-2">
-            <button
-              onClick={() => {
-                setExpandedChildren(
-                  Object.fromEntries(
-                    Object.keys(expandedChildren).map((key) => [
-                      key,
-                      !allExpanded,
-                    ])
-                  )
-                );
-              }}
-              className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
-            >
-              {allExpanded ? (
-                <EyeSlashIcon className="h-4 w-4" />
-              ) : (
-                <EyeIcon className="h-4 w-4" />
-              )}
-              <p className="text-xs font-semibold">
-                {allExpanded ? "Shrink All" : "Expand All"}
-              </p>
-            </button>
-            {!(
-              model === "gpt-4-vision-preview" ||
-              model === "gpt-4-1106-vision-preview" ||
-              /^claude/.test(model)
-            ) && (
+    <>
+      <div className="w-full flex flex-col text-left space-y-2 text-sm">
+        <div className="w-full border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
+          <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100">
+            <div className="flex flex-row items-center space-x-2">
               <button
                 onClick={() => {
-                  if (requestMessages) {
-                    router.push("/playground?request=" + requestId);
-                  }
+                  setExpandedChildren(
+                    Object.fromEntries(
+                      Object.keys(expandedChildren).map((key) => [
+                        key,
+                        !allExpanded,
+                      ])
+                    )
+                  );
                 }}
                 className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
               >
-                <BeakerIcon className="h-4 w-4" />
-                <p className="text-xs font-semibold">Playground</p>
+                {allExpanded ? (
+                  <EyeSlashIcon className="h-4 w-4" />
+                ) : (
+                  <EyeIcon className="h-4 w-4" />
+                )}
+                <p className="text-xs font-semibold">
+                  {allExpanded ? "Shrink All" : "Expand All"}
+                </p>
               </button>
-            )}
-          </div>
-
-          <button
-            onClick={() => {
-              setMode(mode === "pretty" ? "json" : "pretty");
-            }}
-            className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
-          >
-            <ChevronUpDownIcon className="h-4 w-4" />
-            <p className="text-xs font-semibold">
-              {mode === "pretty" ? "JSON" : "Pretty"}
-            </p>
-          </button>
-        </div>
-
-        {mode === "json" ? (
-          <div className="flex flex-col space-y-8 bg-gray-50 dark:bg-black relative text-black dark:text-white">
-            <div className="flex flex-col space-y-2 p-4">
-              <p className="font-semibold text-gray-900 dark:text-gray-100 text-md">
-                Request
-              </p>
-              <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
-                {JSON.stringify(requestBody, null, 2)}
-              </pre>
-            </div>
-            <div className="flex flex-col space-y-2 p-4">
-              <p className="font-semibold text-gray-900 dark:text-gray-100 text-md">
-                Response
-              </p>
-              <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
-                {JSON.stringify(responseBody, null, 2)}
-              </pre>
-            </div>
-          </div>
-        ) : messages.length > 0 ? (
-          <>{renderMessages(messages)}</>
-        ) : (
-          <div className="">
-            <div
-              className={clsx(
-                "bg-gray-100 dark:bg-gray-900 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2"
+              {!(
+                model === "gpt-4-vision-preview" ||
+                model === "gpt-4-1106-vision-preview" ||
+                /^claude/.test(model)
+              ) && (
+                <button
+                  onClick={() => {
+                    if (requestMessages) {
+                      router.push("/playground?request=" + requestId);
+                    }
+                  }}
+                  className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+                >
+                  <BeakerIcon className="h-4 w-4" />
+                  <p className="text-xs font-semibold">Playground</p>
+                </button>
               )}
-            >
-              n/a
+            </div>
+            <div className="flex flex-row items-center space-x-2">
+              <button
+                onClick={() => setOpen(true)}
+                className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+              >
+                <ArrowsPointingOutIcon className="h-4 w-4" />
+                <p className="text-xs font-semibold">Expand</p>
+              </button>
+              <button
+                onClick={() => {
+                  setMode(mode === "pretty" ? "json" : "pretty");
+                }}
+                className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+              >
+                <ChevronUpDownIcon className="h-4 w-4" />
+                <p className="text-xs font-semibold">
+                  {mode === "pretty" ? "JSON" : "Pretty"}
+                </p>
+              </button>
             </div>
           </div>
-        )}
+
+          {mode === "json" ? (
+            <div className="flex flex-col space-y-8 bg-gray-50 dark:bg-black relative text-black dark:text-white">
+              <div className="flex flex-col space-y-2 p-4">
+                <p className="font-semibold text-gray-900 dark:text-gray-100 text-md">
+                  Request
+                </p>
+                <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
+                  {JSON.stringify(requestBody, null, 2)}
+                </pre>
+              </div>
+              <div className="flex flex-col space-y-2 p-4">
+                <p className="font-semibold text-gray-900 dark:text-gray-100 text-md">
+                  Response
+                </p>
+                <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
+                  {JSON.stringify(responseBody, null, 2)}
+                </pre>
+              </div>
+            </div>
+          ) : messages.length > 0 ? (
+            <>{renderMessages(messages)}</>
+          ) : (
+            <div className="">
+              <div
+                className={clsx(
+                  "bg-gray-100 dark:bg-gray-900 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2"
+                )}
+              >
+                n/a
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+      <ThemedModal open={open} setOpen={setOpen}>
+        <div className="w-[80vw] border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
+          <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100">
+            <div className="flex flex-row items-center space-x-2">
+              <button
+                onClick={() => {
+                  setExpandedChildren(
+                    Object.fromEntries(
+                      Object.keys(expandedChildren).map((key) => [
+                        key,
+                        !allExpanded,
+                      ])
+                    )
+                  );
+                }}
+                className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+              >
+                {allExpanded ? (
+                  <EyeSlashIcon className="h-4 w-4" />
+                ) : (
+                  <EyeIcon className="h-4 w-4" />
+                )}
+                <p className="text-xs font-semibold">
+                  {allExpanded ? "Shrink All" : "Expand All"}
+                </p>
+              </button>
+              {!(
+                model === "gpt-4-vision-preview" ||
+                model === "gpt-4-1106-vision-preview" ||
+                /^claude/.test(model)
+              ) && (
+                <button
+                  onClick={() => {
+                    if (requestMessages) {
+                      router.push("/playground?request=" + requestId);
+                    }
+                  }}
+                  className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+                >
+                  <BeakerIcon className="h-4 w-4" />
+                  <p className="text-xs font-semibold">Playground</p>
+                </button>
+              )}
+            </div>
+            <div className="flex flex-row items-center space-x-2">
+              <button
+                onClick={() => {
+                  setMode(mode === "pretty" ? "json" : "pretty");
+                }}
+                className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+              >
+                <ChevronUpDownIcon className="h-4 w-4" />
+                <p className="text-xs font-semibold">
+                  {mode === "pretty" ? "JSON" : "Pretty"}
+                </p>
+              </button>
+            </div>
+          </div>
+          {mode === "json" ? (
+            <div className="flex flex-col space-y-8 bg-gray-50 dark:bg-black relative text-black dark:text-white">
+              <div className="flex flex-col space-y-2 p-4">
+                <p className="font-semibold text-gray-900 dark:text-gray-100 text-md">
+                  Request
+                </p>
+                <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
+                  {JSON.stringify(requestBody, null, 2)}
+                </pre>
+              </div>
+              <div className="flex flex-col space-y-2 p-4">
+                <p className="font-semibold text-gray-900 dark:text-gray-100 text-md">
+                  Response
+                </p>
+                <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
+                  {JSON.stringify(responseBody, null, 2)}
+                </pre>
+              </div>
+            </div>
+          ) : messages.length > 0 ? (
+            <>{renderMessages(messages)}</>
+          ) : (
+            <div className="">
+              <div
+                className={clsx(
+                  "bg-gray-100 dark:bg-gray-900 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2"
+                )}
+              >
+                n/a
+              </div>
+            </div>
+          )}
+        </div>
+      </ThemedModal>
+    </>
   );
 };

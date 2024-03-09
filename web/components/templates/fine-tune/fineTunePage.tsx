@@ -36,6 +36,7 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { REQUEST_TABLE_FILTERS } from "../../../services/lib/filters/frontendFilterDefs";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import { useRouter } from "next/router";
+import AuthHeader from "../../shared/authHeader";
 
 interface FineTuningPageProps {}
 
@@ -88,7 +89,11 @@ const FineTuningPage = (props: FineTuningPageProps) => {
     refetchInterval: 5_000,
   });
 
-  const { data: datasets, isLoading: isDatasetsLoading } = useQuery({
+  const {
+    data: datasets,
+    isLoading: isDatasetsLoading,
+    refetch: refetchDatasets,
+  } = useQuery({
     queryKey: ["fine-tune-datasets", orgContext?.currentOrg?.id],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
@@ -117,40 +122,11 @@ const FineTuningPage = (props: FineTuningPageProps) => {
   return (
     <>
       <div className="flex flex-col space-y-4">
-        <div className="flex flex-row items-center justify-between">
-          <h1 className="font-semibold text-3xl text-black dark:text-white">
-            Fine-Tune
-          </h1>
-        </div>
+        <AuthHeader title={"Fine-Tune"} />
 
-        <div className="flex flex-col mt-8">
+        <div className="flex flex-col">
           <div className="flex flex-row justify-between items-center mb-4">
             <div />
-            {/* <TextInput
-              icon={MagnifyingGlassIcon}
-              placeholder="Search Job Id..."
-              className="max-w-sm"
-              onChange={(e) => {
-                // add this into query params as search
-                const search = e.target.value as string;
-                setCurrentSearch(search);
-                if (search === "") {
-                  // delete the query param from the url
-                  delete router.query.q;
-                  router.push({
-                    pathname: router.pathname,
-                    query: { ...router.query },
-                  });
-                  refetch();
-                  return;
-                }
-                router.push({
-                  pathname: router.pathname,
-                  query: { ...router.query, q: search },
-                });
-                refetch();
-              }}
-            /> */}
             <div className="flex flex-row space-x-2 items-center">
               <button
                 onClick={() => {
@@ -166,7 +142,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
           <div className="flex flex-col w-full space-y-4">
             {isJobsLoading || isDatasetsLoading ? (
               <LoadingAnimation title="Loading Data..." />
-            ) : jobs?.length === 0 ? (
+            ) : jobs === undefined || jobs?.length === 0 ? (
               <div className="flex flex-col w-full h-96 justify-center items-center">
                 <div className="flex flex-col w-2/5">
                   <SparklesIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
@@ -239,6 +215,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
             setFineTuneOpen(false);
           }}
           onSuccess={() => {
+            refetchDatasets();
             refetch();
             setFineTuneOpen(false);
           }}
@@ -246,14 +223,14 @@ const FineTuningPage = (props: FineTuningPageProps) => {
       </ThemedModal>
       <ThemedDrawer open={jobOpen} setOpen={setJobOpen}>
         <div className="flex flex-col py-2">
-          {selectedJob?.dataFromOpenAI.job.status === "succeeded" && (
+          {selectedJob?.dataFromOpenAI.job?.status === "succeeded" && (
             <>
               <p className="text-gray-500 text-sm">Model</p>
               <button
                 onClick={() => {
-                  if (selectedJob?.dataFromOpenAI.job.fine_tuned_model) {
+                  if (selectedJob?.dataFromOpenAI.job?.fine_tuned_model) {
                     navigator.clipboard.writeText(
-                      selectedJob?.dataFromOpenAI.job.fine_tuned_model
+                      selectedJob?.dataFromOpenAI.job?.fine_tuned_model
                     );
                     setNotification("Copied to clipboard", "success");
                   }
@@ -261,7 +238,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 className="flex flex-row items-center"
               >
                 <h3 className="text-xl font-semibold">
-                  {selectedJob?.dataFromOpenAI.job.fine_tuned_model}
+                  {selectedJob?.dataFromOpenAI.job?.fine_tuned_model || "n/a"}
                 </h3>
                 <ClipboardDocumentListIcon className="w-5 h-5 ml-2 text-gray-500" />
               </button>
@@ -278,7 +255,11 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 Status
               </p>
               <JobStatus
-                jobStatus={selectedJob?.dataFromOpenAI.job.status || "unknown"}
+                jobStatus={
+                  selectedJob?.dataFromOpenAI.job?.status ||
+                  selectedJob?.status ||
+                  "unknown"
+                }
               />
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -294,9 +275,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 <p className="text-gray-700 dark:text-gray-300 truncate">
                   {selectedJob?.finetune_job_id}
                 </p>
-                {selectedJob?.dataFromOpenAI.job.fine_tuned_model && (
-                  <ArrowTopRightOnSquareIcon className="w-3 h-3 ml-1 inline" />
-                )}
+                <ArrowTopRightOnSquareIcon className="w-3 h-3 ml-1 inline" />
               </Link>
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -304,7 +283,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 Base Model
               </p>
               <ModelPill
-                model={selectedJob?.dataFromOpenAI.job.model || "unknown"}
+                model={selectedJob?.dataFromOpenAI.job?.model || "unknown"}
               />
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -334,7 +313,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 Trained Tokens
               </p>
               <p className="text-gray-700 dark:text-gray-300 truncate">
-                {selectedJob?.dataFromOpenAI.job.trained_tokens}
+                {selectedJob?.dataFromOpenAI.job?.trained_tokens}
               </p>
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -342,11 +321,11 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 Epochs
               </p>
               <p className="text-gray-700 dark:text-gray-300 truncate">
-                {selectedJob?.dataFromOpenAI.job.hyperparameters.n_epochs}
+                {selectedJob?.dataFromOpenAI.job?.hyperparameters.n_epochs}
               </p>
             </li>
           </ul>
-          {selectedJob?.dataFromOpenAI.job.status === "succeeded" && (
+          {selectedJob?.dataFromOpenAI.job?.status === "succeeded" && (
             <div className="mt-8">
               <p className="font-semibold text-xl">How to integrate</p>
               <p className="text-gray-500 text-sm mt-1 leading-5">
@@ -369,7 +348,7 @@ client = OpenAI(
 
 # send the request
 chat_completion = client.chat.completions.create(
-  model="${selectedJob?.dataFromOpenAI.job.fine_tuned_model}",
+  model="${selectedJob?.dataFromOpenAI.job?.fine_tuned_model}",
   messages=[
     {"role": "user", "content": "Hello world!"}
   ],
@@ -428,7 +407,7 @@ chat_completion = client.chat.completions.create(
                         {
                           filterMap[_filter.filterMapIdx]?.operators[
                             _filter.operatorIdx
-                          ].label
+                          ]?.label
                         }
                       </span>
                       <span>`{_filter.value}`</span>

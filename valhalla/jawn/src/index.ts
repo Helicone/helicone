@@ -21,7 +21,9 @@ import { FineTuningManager } from "./lib/managers/FineTuningManager";
 import { PostHog } from "posthog-node";
 import { hashAuth } from "./lib/db/hash";
 import { FilterNode } from "./lib/shared/filters/filterDefs";
-import { SupabaseConnector } from "./lib/db/supabase";
+import { SupabaseConnector, supabaseServer } from "./lib/db/supabase";
+import { dbExecute, dbQueryClickhouse } from "./lib/shared/db/dbExecute";
+import { runLoopsOnce, runMainLoops } from "./mainLoops";
 
 const ph_project_api_key = process.env.PUBLIC_POSTHOG_API_KEY;
 
@@ -44,9 +46,23 @@ const errorHandler: ErrorRequestHandler = (
 };
 
 export const ENVIRONMENT = process.env.VERCEL_ENV ?? "development";
+
+if (ENVIRONMENT === "production") {
+  runMainLoops();
+}
 const dirname = __dirname;
 
 const app = express();
+
+if (ENVIRONMENT !== "production") {
+  app.get("/run-loops/:index", async (req, res) => {
+    const index = parseInt(req.params.index);
+    await runLoopsOnce(index);
+    res.json({
+      status: "done",
+    });
+  });
+}
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
@@ -158,12 +174,56 @@ app.use(
 );
 
 app.post(
+  "/v1/key/generateHash",
+  withAuth<
+    paths["/v1/key/generateHash"]["post"]["requestBody"]["content"]["application/json"]
+  >(async ({ request, res, supabaseClient, authParams }) => {
+    try {
+      const body = await request.getRawBody<any>();
+      const { apiKey, userId, keyName } = body;
+      const hashedKey = await hashAuth(apiKey);
+
+      const insertRes = await supabaseClient.client
+        .from("helicone_api_keys")
+        .insert({
+          api_key_hash: hashedKey,
+          user_id: userId,
+          api_key_name: keyName,
+          organization_id: authParams.organizationId,
+        });
+
+      if (insertRes.error) {
+        res.status(500).json({
+          error: {
+            message: "Failed to insert key",
+            details: insertRes.error,
+          },
+        });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+      });
+      return;
+    } catch (error: any) {
+      console.log(`Failed to generate key hash: ${error}`);
+      res.status(400).json({
+        error: "Failed to generate key hash",
+        message: error,
+      });
+      return;
+    }
+  })
+);
+
+app.post(
   "/v1/request/query",
   withAuth<
     paths["/v1/request/query"]["post"]["requestBody"]["content"]["application/json"]
   >(async ({ request, res, supabaseClient, authParams }) => {
     const body = await request.getRawBody<any>();
-    console.log("body", body);
+
     const { filter, offset, limit, sort, isCached } = body;
 
     const metrics = isCached
@@ -475,7 +535,7 @@ app.post(
     }
 
     const body = await request.getRawBody<any>();
-    console.log("body", body);
+
     const { filter, providerKeyId, uiFilter } = body;
 
     const metrics = await getRequests(

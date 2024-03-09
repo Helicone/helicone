@@ -1,10 +1,12 @@
 // This will store all of the information coming from the client.
 
 import { Env, Provider } from "../..";
+import { parseJSXObject } from "../../api/lib/promptHelpers";
 import { Result, ok } from "../../results";
 import { IHeliconeHeaders } from "../HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
 import { approvedDomains } from "../gateway/approvedDomains";
+import { buildTargetUrl } from "../providerCalls/call";
 
 import { RateLimitOptions, RateLimitOptionsBuilder } from "./rateLimit";
 
@@ -41,6 +43,9 @@ export interface HeliconeProxyRequest {
   requestWrapper: RequestWrapper;
   requestId: string;
   nodeId: string | null;
+  heliconePromptTemplate: Record<string, unknown> | null;
+  targetUrl: URL;
+  threat?: boolean;
 }
 
 const providerBaseUrlMappings: Record<Provider, string> = {
@@ -69,6 +74,21 @@ export class HeliconeProxyRequestMapper {
       return { data: null, error: api_base_error };
     }
 
+    let heliconePromptTemplate: Record<string, unknown> | null = null;
+    if (this.request.heliconeHeaders.promptId) {
+      const { templateWithInputs } = parseJSXObject(
+        JSON.parse(await this.request.getRawText())
+      );
+      heliconePromptTemplate = templateWithInputs.template as Record<
+        string,
+        unknown
+      >;
+
+      this.injectPromptInputs(templateWithInputs.inputs);
+    }
+
+    const targetUrl = buildTargetUrl(this.request.url, api_base);
+
     return {
       data: {
         rateLimitOptions: this.rateLimitOptions(),
@@ -91,9 +111,19 @@ export class HeliconeProxyRequestMapper {
           this.request.heliconeHeaders.requestId ?? crypto.randomUUID(),
         requestWrapper: this.request,
         nodeId: this.request.heliconeHeaders.nodeId ?? null,
+        heliconePromptTemplate,
+        targetUrl,
       },
       error: null,
     };
+  }
+
+  private injectPromptInputs(inputs: Record<string, string>) {
+    Object.entries(inputs).forEach(([key, value]) => {
+      this.request.heliconeHeaders.heliconeProperties[
+        `Helicone-Prompt-Input-${key}`
+      ] = value;
+    });
   }
 
   private async getBody(): Promise<string | null> {
@@ -102,13 +132,6 @@ export class HeliconeProxyRequestMapper {
     }
 
     return await this.request.getText();
-  }
-
-  private isPromptFormatterEnabled(): boolean {
-    return (
-      this.request.heliconeHeaders.promptFormat !== undefined &&
-      this.request.heliconeHeaders.promptFormat !== null
-    );
   }
 
   private validateApiConfiguration(api_base: string | undefined): boolean {

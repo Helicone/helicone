@@ -1,0 +1,90 @@
+{
+  "name": "@apidevtools/swagger-parser",
+  "version": "10.1.0",
+  "description": "Swagger 2.0 and OpenAPI 3.0 parser and validator for Node and browsers",
+  "keywords": [
+    "swagger",
+    "openapi",
+    "open-api",
+    "json",
+    "yaml",
+    "parse",
+    "parser",
+    "validate",
+    "validator",
+    "validation",
+    "spec",
+    "specification",
+    "schema",
+    "reference",
+    "dereference"
+  ],
+  "author": {
+    "name": "James Messinger",
+    "url": "https://jamesmessinger.com"
+  },
+  "homepage": "https://apitools.dev/swagger-parser/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/APIDevTools/swagger-parser.git"
+  },
+  "license": "MIT",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "clean": "shx rm -rf .nyc_output coverage",
+    "lint": "eslint lib test online/src/js",
+    "build": "npm run build:website && npm run build:sass",
+    "build:website": "simplifyify online/src/js/index.js --outfile online/js/bundle.js --bundle --debug --minify",
+    "build:sass": "node-sass --source-map true --output-style compressed online/src/scss/style.scss online/css/style.min.css",
+    "test": "npm run test:node && npm run test:typescript && npm run test:browser && npm run lint",
+    "test:node": "mocha",
+    "test:browser": "karma start --single-run",
+    "test:typescript": "tsc --noEmit --strict --lib esnext,dom test/specs/typescript-definition.spec.ts",
+    "coverage": "npm run coverage:node && npm run coverage:browser",
+    "coverage:node": "nyc node_modules/mocha/bin/mocha",
+    "coverage:browser": "npm run test:browser -- --coverage",
+    "upgrade": "npm-check -u && npm audit fix",
+    "bump": "bump --tag --push --all",
+    "--release--cannot upgrade or everything breaks": "npm run upgrade && npm run clean && npm run build && npm test && npm run bump",
+    "release": "npm run clean && npm run build && npm test && npm run bump"
+  },
+  "devDependencies": {
+    "@babel/polyfill": "^7.12",
+    "@jsdevtools/eslint-config": "^1.1.4",
+    "@jsdevtools/host-environment": "^2.1.2",
+    "@jsdevtools/karma-config": "^3.2.0",
+    "@jsdevtools/version-bump-prompt": "^6.1.0",
+    "@types/node": "^14.6.4",
+    "chai": "^4.2.0",
+    "eslint": "^7.8.1",
+    "js-yaml": "^3.14.0",
+    "karma": "^6.3.19",
+    "karma-cli": "^2.0.0",
+    "mocha": "^8.1.3",
+    "node-fetch": "^2.6.7",
+    "node-sass": "^7.0",
+    "npm-check": "^4.1.4",
+    "nyc": "^15.1.0",
+    "openapi-types": "^9.3.0",
+    "shx": "^0.3.2",
+    "simplifyify": "^7.0.7",
+    "sinon": "^11.1.2",
+    "typescript": "^4.0.2"
+  },
+  "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "9.0.6",
+    "@apidevtools/openapi-schemas": "^2.1.0",
+    "@apidevtools/swagger-methods": "^3.0.2",
+    "@jsdevtools/ono": "^7.1.3",
+    "ajv": "^8.6.3",
+    "ajv-draft-04": "^1.0.0",
+    "call-me-maybe": "^1.0.1"
+  },
+  "peerDependencies": {
+    "openapi-types": ">=7"
+  }
+}

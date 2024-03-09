@@ -25,7 +25,7 @@ export const useUserRequests = (
 
   const userFilters = filterUIToFilterLeafs(filterMap, uiFilters).concat([
     {
-      response_copy_v3: {
+      request_response_log: {
         user_id: {
           equals: userId,
         },

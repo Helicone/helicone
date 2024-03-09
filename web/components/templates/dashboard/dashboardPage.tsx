@@ -2,38 +2,48 @@ import {
   ArrowPathIcon,
   ChartBarIcon,
   HomeIcon,
+  PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
-import { useState } from "react";
-import { getTimeMap } from "../../../lib/timeCalculations/constants";
+import { User } from "@supabase/auth-helpers-nextjs";
 import {
+  AreaChart,
+  BarChart,
+  BarList,
+  Card,
+  MultiSelect,
+  MultiSelectItem,
+} from "@tremor/react";
+import Link from "next/link";
+import { useState } from "react";
+import { Responsive, WidthProvider } from "react-grid-layout";
+import { ModelMetric } from "../../../lib/api/models/models";
+import {
+  getIncrementAsMinutes,
+  getTimeMap,
+} from "../../../lib/timeCalculations/constants";
+import {
+  TimeInterval,
   getTimeInterval,
   getTimeIntervalAgo,
-  TimeInterval,
 } from "../../../lib/timeCalculations/time";
+import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import ThemedTableHeader from "../../shared/themed/themedTableHeader";
+import LoadingAnimation from "../../shared/loadingAnimation";
 import {
   MetricsPanel,
   MetricsPanelProps,
 } from "../../shared/metrics/metricsPanel";
-import { useDashboardPage } from "./useDashboardPage";
-import { useGetUnauthorized } from "../../../services/hooks/dashboard";
-import { User } from "@supabase/auth-helpers-nextjs";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
-import { Responsive, WidthProvider } from "react-grid-layout";
-import StyledAreaChart from "./styledAreaChart";
-import { AreaChart, BarChart, BarList, Card } from "@tremor/react";
-import LoadingAnimation from "../../shared/loadingAnimation";
 import { formatNumber } from "../users/initialColumns";
-import { useQuery } from "@tanstack/react-query";
-import { Result } from "../../../lib/result";
-import { ModelMetric } from "../../../lib/api/models/models";
-import { MultiSelect, MultiSelectItem } from "@tremor/react";
-import Link from "next/link";
+import StyledAreaChart from "./styledAreaChart";
+import SuggestionModal from "./suggestionsModal";
+import { useDashboardPage } from "./useDashboardPage";
+import { useModels } from "../../../services/hooks/models";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -48,6 +58,10 @@ export type TimeFilter = {
 
 interface StatusCounts {
   [key: string]: number;
+}
+
+function max(arr: number[]) {
+  return arr.reduce((p, c) => (p > c ? p : c), 0);
 }
 
 export function formatNumberString(
@@ -137,32 +151,16 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
 
-  const { metrics, filterMap, overTimeData, isAnyLoading } = useDashboardPage({
-    timeFilter,
-    uiFilters: debouncedAdvancedFilters,
-    apiKeyFilter: null,
-    timeZoneDifference: new Date().getTimezoneOffset(),
-    dbIncrement: timeIncrement,
-  });
+  const { metrics, filterMap, overTimeData, isAnyLoading, refetch } =
+    useDashboardPage({
+      timeFilter,
+      uiFilters: debouncedAdvancedFilters,
+      apiKeyFilter: null,
+      timeZoneDifference: new Date().getTimezoneOffset(),
+      dbIncrement: timeIncrement,
+    });
 
-  const { data: models, isLoading } = useQuery({
-    queryKey: ["modelMetrics", timeFilter],
-    queryFn: async (query) => {
-      return await fetch("/api/models", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          filter: "all",
-          offset: 0,
-          limit: 5,
-          timeFilter,
-        }),
-      }).then((res) => res.json() as Promise<Result<ModelMetric[], string>>);
-    },
-    refetchOnWindowFocus: false,
-  });
+  const { isLoading, models } = useModels(timeFilter, 5);
 
   function encodeFilter(filter: UIFilterRow): string {
     return `${filter.filterMapIdx}:${filter.operatorIdx}:${encodeURIComponent(
@@ -342,6 +340,39 @@ const DashboardPage = (props: DashboardPageProps) => {
       minH: 4,
       maxH: 4,
     },
+    {
+      i: "tokens-per-min-over-time",
+      x: 0,
+      y: 8,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 12,
+      minH: 4,
+      maxH: 4,
+    },
+    {
+      i: "time-to-first-token",
+      x: 4,
+      y: 8,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 12,
+      minH: 4,
+      maxH: 4,
+    },
+    {
+      i: "suggest-more-graphs",
+      x: 8,
+      y: 8,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 12,
+      minH: 4,
+      maxH: 4,
+    },
   ];
 
   const smallLayout: ReactGridLayout.Layout[] = [
@@ -453,6 +484,28 @@ const DashboardPage = (props: DashboardPageProps) => {
       maxH: 4,
       static: true,
     },
+    {
+      i: "tokens-per-min-over-time",
+      x: 0,
+      y: 24,
+      w: 6,
+      h: 4,
+      minW: 3,
+      maxW: 12,
+      minH: 4,
+      maxH: 4,
+    },
+    {
+      i: "suggest-more-graphs",
+      x: 0,
+      y: 28,
+      w: 6,
+      h: 4,
+      minW: 3,
+      maxW: 12,
+      minH: 4,
+      maxH: 4,
+    },
   ];
 
   const gridCols = { lg: 12, md: 12, sm: 12, xs: 4, xxs: 2 };
@@ -554,6 +607,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     }));
 
   const [currentStatus, setCurrentStatus] = useState<string[]>(["200"]);
+  const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
 
   const renderUnauthorized = () => {
     if (currentTier === "free") {
@@ -616,10 +670,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         headerActions={
           <button
             onClick={() => {
-              setTimeFilter({
-                start: getTimeIntervalAgo(interval),
-                end: new Date(),
-              });
+              refetch();
             }}
             className="font-semibold text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700"
           >
@@ -852,9 +903,8 @@ const DashboardPage = (props: DashboardPageProps) => {
               <div key="users">
                 <StyledAreaChart
                   title={"Users"}
-                  value={metrics.activeUsers.data?.data ?? 0}
+                  value={metrics.activeUsers.data?.data?.toString() ?? "0"}
                   isDataOverTimeLoading={overTimeData.users.isLoading}
-                  // height={"212px"}
                 >
                   <BarChart
                     className="h-[14rem]"
@@ -871,6 +921,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </StyledAreaChart>
               </div>
+
               <div key="latency">
                 <StyledAreaChart
                   title={"Latency"}
@@ -895,10 +946,105 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </StyledAreaChart>
               </div>
+
+              <div key="time-to-first-token">
+                <StyledAreaChart
+                  title={"Time to First Token"}
+                  value={`${
+                    metrics.averageTimeToFirstToken.data?.data?.toFixed(0) ?? 0
+                  } ms`}
+                  isDataOverTimeLoading={overTimeData.ttft.isLoading}
+                >
+                  <AreaChart
+                    className="h-[14rem]"
+                    data={
+                      overTimeData.ttft.data?.data?.map((r) => ({
+                        date: getTimeMap(timeIncrement)(r.time),
+                        time: r.ttft,
+                      })) ?? []
+                    }
+                    index="date"
+                    categories={["time"]}
+                    colors={["violet"]}
+                    showYAxis={false}
+                    curveType="monotone"
+                  />
+                </StyledAreaChart>
+              </div>
+
+              <div key="suggest-more-graphs">
+                <div className="space-y-2 bg-white dark:bg-black border border-gray-900 dark:border-white border-dashed w-full h-full p-2 text-black dark:text-white shadow-sm rounded-lg flex flex-col items-center justify-center">
+                  <PresentationChartLineIcon className="h-12 w-12 text-black dark:text-white" />
+                  <button
+                    className="p-4 text-semibold text-lg"
+                    onClick={() => {
+                      setOpenSuggestGraph(true);
+                    }}
+                  >
+                    Request a new graph
+                  </button>
+                </div>
+              </div>
+
+              <div key="tokens-per-min-over-time">
+                <StyledAreaChart
+                  title={"Tokens / Minute"}
+                  value={`Max: ${(
+                    max(
+                      overTimeData.promptTokensOverTime.data?.data
+                        ?.map((d) => d.completion_tokens + d.prompt_tokens)
+                        .filter((d) => d !== 0) ?? []
+                    ) / getIncrementAsMinutes(timeIncrement)
+                  ).toFixed(2)}`}
+                  isDataOverTimeLoading={overTimeData.users.isLoading}
+                >
+                  <AreaChart
+                    className="h-[14rem]"
+                    data={
+                      overTimeData.promptTokensOverTime.data?.data?.map(
+                        (r) => ({
+                          date: getTimeMap(timeIncrement)(r.time),
+                          "Prompt / min":
+                            (r.prompt_tokens + 0.0) /
+                            getIncrementAsMinutes(timeIncrement),
+
+                          "Completion / min":
+                            (r.completion_tokens + 0.0) /
+                            getIncrementAsMinutes(timeIncrement),
+                          "Total / min":
+                            (r.prompt_tokens + r.completion_tokens + 0.0) /
+                            getIncrementAsMinutes(timeIncrement),
+                        })
+                      ) ?? []
+                    }
+                    index="date"
+                    categories={[
+                      "Prompt / min",
+                      "Completion / min",
+                      "Total / min",
+                    ]}
+                    colors={[
+                      "cyan",
+                      "blue",
+                      "green",
+                      "indigo",
+                      "orange",
+                      "pink",
+                    ]}
+                    showYAxis={false}
+                    curveType="monotone"
+                    valueFormatter={(number: number | bigint) =>
+                      `${new Intl.NumberFormat("us").format(number)} tokens`
+                    }
+                  />
+                </StyledAreaChart>
+              </div>
             </ResponsiveGridLayout>
           </section>
         </div>
       )}
+      <SuggestionModal open={openSuggestGraph} setOpen={setOpenSuggestGraph} />
+
       <UpgradeProModal open={open} setOpen={setOpen} />
     </>
   );

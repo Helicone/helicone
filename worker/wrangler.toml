@@ -9,7 +9,7 @@ logpush = true
 node_compat = true
 
 durable_objects.bindings = [
-	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" }
+	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" }
 ]
 
 kv_namespaces = [
@@ -47,7 +47,7 @@ routes = [
 ]
 
 durable_objects.bindings = [
-	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" }
+	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" }
 ]
 
 kv_namespaces = [
@@ -69,7 +69,6 @@ queues.producers = [
 [env.production.vars]
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
-CLICKHOUSE_USER = "default"
 VAULT_ENABLED = "true"
 
 
@@ -94,7 +93,7 @@ kv_namespaces = [
 ]
 
 durable_objects.bindings = [
-	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" }
+	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" }
 ]
 
 queues.producers = [
@@ -104,7 +103,6 @@ queues.producers = [
 [env.production_staging.vars]
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
-CLICKHOUSE_USER = "default"
 VAULT_ENABLED = "true"
 
 [env.production_staging.triggers]
@@ -119,10 +117,9 @@ new_classes = ["AtomicRateLimiter"]
 tag = "v2"
 new_classes = ["AtomicAlerter"]
 
-
 [[migrations]]
 tag = "v3"
-delete_classes = ["AtomicAlerter"]
+deleted_classes = ["AtomicAlerter"]
 
 [[migrations]]
 tag = "v4"
@@ -131,3 +128,8 @@ new_classes = ["AtomicAlerter"]
 [[migrations]]
 tag = "v5"
 deleted_classes = ["AtomicAlerter"]
+
+[[migrations]]
+tag = "v6"
+new_classes = ["InMemoryRateLimiter"]
+deleted_classes = ["AtomicRateLimiter"]

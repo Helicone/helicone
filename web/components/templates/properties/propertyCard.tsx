@@ -83,7 +83,7 @@ const PropertyCard = (props: PropertyCardPageProps) => {
 
   return (
     <>
-      <div className="bg-white dark:bg-black p-8 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm flex flex-col space-y-8">
+      <div className="w-full bg-white dark:bg-black p-8 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm flex flex-col space-y-8">
         <div className="flex flex-row justify-between items-center">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
             {property}

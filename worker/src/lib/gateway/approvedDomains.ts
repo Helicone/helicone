@@ -15,6 +15,10 @@ const perplexity = /^https:\/\/api\.perplexity\.ai/;
 const googleapis = /^https:\/\/(.*\.)?googleapis\.com/;
 // openrouter.ai
 const openRouter = /^https:\/\/api\.openrouter\.ai/;
+//api.wisdominanutshell.academy
+const wisdomInANutshell = /^https:\/\/api\.wisdominanutshell\.academy/;
+// api.groq.com
+const groq = /^https:\/\/api\.groq\.com/;
 
 export const approvedDomains = [
   openAiPattern,
@@ -32,4 +36,6 @@ export const approvedDomains = [
   perplexity,
   googleapis,
   openRouter,
+  wisdomInANutshell,
+  groq,
 ];

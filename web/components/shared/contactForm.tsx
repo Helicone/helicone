@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import useNotification from "./notification/useNotification";
 import { useState } from "react";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 
 export type ContactFormData = {
   firstName: string;
@@ -185,7 +186,7 @@ const ContactForm = (props: ContactFormProps) => {
           />
         </div>
       </div>
-      <div className="border-t border-gray-300 flex items-center justify-between gap-2 pt-4">
+      <div className="border-t border-gray-300 flex items-center justify-end gap-2 pt-4">
         {showCoupon ? (
           <p>
             Use coupon code: <span className="font-semibold">MSFTHELI</span>
@@ -193,6 +194,14 @@ const ContactForm = (props: ContactFormProps) => {
         ) : (
           <div />
         )}
+        <Link
+          href="https://cal.com/team/helicone/helicone-discovery"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="items-center border border-black rounded-md bg-white px-4 py-2 text-sm flex font-semibold text-black shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          Schedule a call
+        </Link>
         <button
           type="submit"
           className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"

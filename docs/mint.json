@@ -6,9 +6,9 @@
   },
   "favicon": "/favicon.webp",
   "colors": {
-    "primary": "#4BA3E3",
-    "light": "#4BA3E3",
-    "dark": "#4BA3E3"
+    "primary": "#000000",
+    "light": "#FFFFFF",
+    "dark": "#000000"
   },
   "modeToggle": {
     "default": "light"
@@ -72,7 +72,7 @@
     },
     {
       "group": "Community",
-      "pages": ["community/openpipe", "community/promptarmor"]
+      "pages": ["community/openpipe"]
     },
     {
       "group": "Integrations",
@@ -115,6 +115,15 @@
       "group": "Features",
       "pages": [
         {
+          "group": "Prompts",
+          "pages": [
+            "features/prompts/intro",
+            "features/prompts/quick-start",
+            "features/prompts/quick-start-async",
+            "features/prompts/getting-started-async"
+          ]
+        },
+        {
           "group": "Customer Portal",
           "pages": [
             "features/customer_portal/intro",
@@ -130,13 +139,14 @@
         "features/advanced-usage/user-metrics",
         "features/advanced-usage/feedback",
         "features/advanced-usage/vault",
-        "features/advanced-usage/templated-prompts",
+        "features/advanced-usage/fine-tuning",
         "features/advanced-usage/caching",
         "features/advanced-usage/retries",
         "features/advanced-usage/custom-rate-limits",
         "features/advanced-usage/omit-logs",
         "features/streaming",
-        "features/webhooks"
+        "features/webhooks",
+        "features/advanced-usage/llm-security"
       ]
     },
     {

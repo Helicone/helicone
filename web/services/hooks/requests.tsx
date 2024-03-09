@@ -144,6 +144,8 @@ const useGetRequests = (
       },
       refetchOnWindowFocus: false,
       refetchInterval: isLive ? 2_000 : false,
+      // cache the count for 5 minutes
+      cacheTime: 5 * 60 * 1000,
     }),
   };
 };
@@ -161,7 +163,7 @@ const useGetRequestCountClickhouse = (
         body: JSON.stringify({
           filter: {
             left: {
-              response_copy_v3: {
+              request_response_log: {
                 request_created_at: {
                   gte: startDateISO,
                 },
@@ -169,7 +171,7 @@ const useGetRequestCountClickhouse = (
             },
             operator: "and",
             right: {
-              response_copy_v3: {
+              request_response_log: {
                 request_created_at: {
                   lte: endDateISO,
                 },

@@ -1,163 +1,93 @@
 import { useState } from "react";
 
-import {
-  getTimeIntervalAgo,
-  TimeInterval,
-} from "../../../lib/timeCalculations/time";
-import { MultiSelect, MultiSelectItem } from "@tremor/react";
-
 import AuthHeader from "../../shared/authHeader";
 import { useGetProperties } from "../../../services/hooks/properties";
-import { useLocalStorage } from "../../../services/hooks/localStorage";
-import PropertyCard from "./propertyCard";
-import { ArrowPathIcon, TagIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, TagIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
-import ThemedTableHeader from "../../shared/themed/themedTableHeader";
-import useSearchParams from "../../shared/utils/useSearchParams";
 import React from "react";
+import Link from "next/link";
+import PropertyPanel from "./propertyPanel";
+import LoadingAnimation from "../../shared/loadingAnimation";
 
 const PropertiesPage = (props: {}) => {
-  const searchParams = useSearchParams();
-
-  const getInterval = () => {
-    const currentTimeFilter = searchParams.get("t");
-    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
-      return "custom";
-    } else {
-      return currentTimeFilter || "24h";
-    }
-  };
-
-  const [interval, setInterval] = useState<TimeInterval>(
-    getInterval() as TimeInterval
-  );
-  const [timeFilter, setTimeFilter] = useState<{
-    start: Date;
-    end: Date;
-  }>({
-    start: getTimeIntervalAgo(interval),
-    end: new Date(),
-  });
-
   const {
     properties,
     isLoading: isPropertiesLoading,
     refetch,
+    searchPropertyFilters,
   } = useGetProperties();
 
-  const [selectedProperties, setSelectedProperties] = useLocalStorage<string[]>(
-    "selectedProperties_PropertyPage",
-    [],
-    () => {
-      return () => [];
-    }
-  );
+  const [selectedProperty, setSelectedProperty] = useState<string>("");
 
   return (
     <>
-      <AuthHeader
-        title={"Properties"}
-        subtitle=""
-        headerActions={
-          <button
-            onClick={() => {
-              setTimeFilter({
-                start: getTimeIntervalAgo(interval),
-                end: new Date(),
-              });
-              refetch();
-            }}
-            className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
-          >
-            <ArrowPathIcon
-              className={clsx(false ? "animate-spin" : "", "h-5 w-5 inline")}
-            />
-          </button>
-        }
-      />
-
+      <AuthHeader title={"Properties"} />
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-8">
-          <ThemedTableHeader
-            isFetching={false}
-            timeFilter={{
-              currentTimeFilter: timeFilter,
-              customTimeFilter: true,
-              timeFilterOptions: [
-                { key: "24h", value: "Today" },
-                { key: "7d", value: "7D" },
-                { key: "1m", value: "1M" },
-                { key: "3m", value: "3M" },
-                { key: "all", value: "All" },
-              ],
-              defaultTimeFilter: interval,
-              onTimeSelectHandler: (key: TimeInterval, value: string) => {
-                if ((key as string) === "custom") {
-                  value = value.replace("custom:", "");
-                  const start = new Date(value.split("_")[0]);
-                  const end = new Date(value.split("_")[1]);
-                  setInterval(key);
-                  setTimeFilter({
-                    start,
-                    end,
-                  });
-                } else {
-                  setInterval(key);
-                  setTimeFilter({
-                    start: getTimeIntervalAgo(key),
-                    end: new Date(),
-                  });
-                }
-              },
-            }}
-          />
-          <div className="w-full space-y-2 max-w-sm">
-            <MultiSelect
-              placeholder="Select a Custom Property..."
-              value={selectedProperties}
-              onValueChange={(values: string[]) => {
-                setSelectedProperties(values);
-              }}
-            >
-              {properties.map((property, idx) => (
-                <MultiSelectItem
-                  value={property}
-                  key={idx}
-                  className="font-medium text-black"
-                >
-                  {property}
-                </MultiSelectItem>
-              ))}
-            </MultiSelect>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-8">
-          {selectedProperties.length < 1 ? (
-            <div className="h-96 p-8 flex flex-col space-y-4 w-full border border-dashed border-gray-300 rounded-xl justify-center items-center text-center">
-              <TagIcon className="h-12 w-12 text-gray-700 dark:text-gray-300" />
-              <p className="text-2xl font-semibold text-gray-700 dark:text-gray-300">
-                No Properties Selected
-              </p>
-              <p className="text-gray-500 ">
-                Please select a custom property to view data
-              </p>
+        <>
+          {isPropertiesLoading ? (
+            <LoadingAnimation title="Loading Properties" />
+          ) : properties.length < 1 ? (
+            <div className="flex flex-col w-full h-96 justify-center items-center">
+              <div className="flex flex-col w-2/5">
+                <TagIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+                <p className="text-xl text-black dark:text-white font-semibold mt-8">
+                  You do not have any properties.
+                </p>
+                <p className="text-sm text-gray-500 max-w-sm mt-2">
+                  View our docs to get started segmenting your LLM-requests
+                </p>
+                <div className="mt-4">
+                  <Link
+                    href="https://docs.helicone.ai/features/advanced-usage/custom-properties#what-are-custom-properties"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  >
+                    <PlusIcon className="h-4 w-4" />
+                    Get Started
+                  </Link>
+                </div>
+              </div>
             </div>
           ) : (
-            selectedProperties.map((property, i) => (
-              <PropertyCard
-                property={property}
-                key={i}
-                timeFilter={timeFilter}
-                onDelete={() => {
-                  setSelectedProperties(
-                    selectedProperties.filter((p) => p !== property)
-                  );
-                }}
-              />
-            ))
+            <div className="flex flex-col xl:flex-row xl:divide-x xl:divide-gray-200 dark:xl:divide-gray-800 gap-8 xl:gap-4 min-h-[80vh] h-full">
+              <div className="flex flex-col space-y-6 w-full min-w-[350px] max-w-[350px]">
+                <h3 className="font-semibold text-md text-black dark:text-white">
+                  Your Properties
+                </h3>
+
+                <ul className="w-full bg-white h-fit border border-gray-300 dark:border-gray-700 rounded-lg">
+                  {properties.map((property, i) => (
+                    <li key={i}>
+                      <button
+                        onClick={() => {
+                          setSelectedProperty(property);
+                        }}
+                        className={clsx(
+                          selectedProperty === property
+                            ? "bg-sky-200 dark:bg-sky-800"
+                            : "bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-950",
+                          i === 0 ? "rounded-t-md" : "",
+                          i === properties.length - 1 ? "rounded-b-md" : "",
+                          "w-full flex flex-row items-center space-x-2 p-4 border-b border-gray-200 dark:border-gray-800"
+                        )}
+                      >
+                        <TagIcon className="h-4 w-4 text-black dark:text-white" />
+                        <p className="text-md font-semibold text-black dark:text-white">
+                          {property}
+                        </p>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="w-full xl:pl-4 flex flex-col space-y-4">
+                <PropertyPanel property={selectedProperty} />
+              </div>
+            </div>
           )}
-        </div>
+        </>
       </div>
     </>
   );

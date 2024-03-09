@@ -132,11 +132,13 @@ const whereKeyMappings: KeyMappings = {
     org_id: "request.helicone_org_id",
     id: "request.id",
     node_id: "job_node_request.node_id",
+    path: "request.path",
   }),
   response: easyKeyMappings<"response">({
     body_completion:
       "(coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text",
-    body_model: "request.body ->> 'model'",
+    body_model:
+      "(coalesce(request.model_override, response.model, request.model, response.body ->> 'model', request.body ->> 'model'))::text",
     body_tokens: "((response.body -> 'usage') ->> 'total_tokens')::bigint",
     status: "response.status",
   }),
@@ -159,57 +161,34 @@ const whereKeyMappings: KeyMappings = {
     prompt_tokens: "cache_hits.prompt_tokens",
     created_at: "cache_hits.created_at",
   }),
-  response_copy_v1: easyKeyMappings<"response_copy_v1">({
-    auth_hash: "response_copy_v1.auth_hash",
-    model: "response_copy_v1.model",
-    request_created_at: "response_copy_v1.request_created_at",
-    latency: "response_copy_v1.latency",
-    user_id: "response_copy_v1.user_id",
-    status: "response_copy_v1.status",
+  request_response_log: easyKeyMappings<"request_response_log">({
+    latency: "request_response_log.latency",
+    status: "request_response_log.status",
+    request_created_at: "request_response_log.request_created_at",
+    response_created_at: "request_response_log.response_created_at",
+    auth_hash: "request_response_log.auth_hash",
+    model: "request_response_log.model",
+    user_id: "request_response_log.user_id",
+    organization_id: "request_response_log.organization_id",
+    node_id: "request_response_log.node_id",
+    job_id: "request_response_log.job_id",
+    threat: "request_response_log.threat",
   }),
-  response_copy_v2: easyKeyMappings<"response_copy_v2">({
-    auth_hash: "response_copy_v2.auth_hash",
-    model: "response_copy_v2.model",
-    request_created_at: "response_copy_v2.request_created_at",
-    latency: "response_copy_v2.latency",
-    user_id: "response_copy_v2.user_id",
-    status: "response_copy_v2.status",
-    organization_id: "response_copy_v2.organization_id",
-  }),
-  response_copy_v3: (filter) => {
-    return easyKeyMappings<"response_copy_v3">({
-      auth_hash: "response_copy_v3.auth_hash",
-      model: "response_copy_v3.model",
-      request_created_at: "response_copy_v3.request_created_at",
-      latency: "response_copy_v3.latency",
-      user_id: "response_copy_v3.user_id",
-      status: "response_copy_v3.status",
-      organization_id: "response_copy_v3.organization_id",
-      rating: "response_copy_v3.rating",
-      feedback_id: "response_copy_v3.feedback_id",
-      feedback_created_at: "response_copy_v3.feedback_created_at",
-    })(filter);
-  },
-  users_view: easyKeyMappings<"response_copy_v3">({
+  users_view: easyKeyMappings<"request_response_log">({
     status: "r.status",
     user_id: "r.user_id",
   }),
-  properties_copy_v1: easyKeyMappings<"properties_copy_v1">({
-    key: "properties_copy_v1.key",
-    value: "properties_copy_v1.value",
-    auth_hash: "properties_copy_v1.auth_hash",
-  }),
-
-  properties_copy_v2: easyKeyMappings<"properties_copy_v2">({
-    key: "properties_copy_v2.key",
-    value: "properties_copy_v2.value",
-    organization_id: "properties_copy_v2.organization_id",
+  properties_v3: easyKeyMappings<"properties_v3">({
+    key: "properties_v3.key",
+    value: "properties_v3.value",
+    organization_id: "properties_v3.organization_id",
   }),
   property_with_response_v1: easyKeyMappings<"property_with_response_v1">({
     property_key: "property_with_response_v1.property_key",
     property_value: "property_with_response_v1.property_value",
     request_created_at: "property_with_response_v1.request_created_at",
     organization_id: "property_with_response_v1.organization_id",
+    threat: "property_with_response_v1.threat",
   }),
   job: (filter) => {
     if ("custom_properties" in filter && filter.custom_properties) {
@@ -284,11 +263,8 @@ const havingKeyMappings: KeyMappings = {
   response: NOT_IMPLEMENTED,
   values: NOT_IMPLEMENTED,
   properties_table: NOT_IMPLEMENTED,
-  response_copy_v1: NOT_IMPLEMENTED,
-  properties_copy_v1: NOT_IMPLEMENTED,
-  response_copy_v2: NOT_IMPLEMENTED,
-  response_copy_v3: NOT_IMPLEMENTED,
-  properties_copy_v2: NOT_IMPLEMENTED,
+  request_response_log: NOT_IMPLEMENTED,
+  properties_v3: NOT_IMPLEMENTED,
   property_with_response_v1: NOT_IMPLEMENTED,
   job: NOT_IMPLEMENTED,
   job_node: NOT_IMPLEMENTED,
@@ -336,15 +312,25 @@ export function buildFilterLeaf(
         ? "!="
         : operatorKey === "contains"
         ? "ILIKE"
+        : operatorKey === "not-contains"
+        ? "NOT ILIKE"
         : undefined;
 
-    filters.push(
-      `${column} ${sqlOperator} ${argPlaceHolder(argsAcc.length, value)}`
-    );
-    if (operatorKey === "contains") {
-      argsAcc.push(`%${value}%`);
+    if (operatorKey === "not-equals" && value === "null") {
+      filters.push(`${column} is not null`);
+    } else if (operatorKey === "equals" && value === "null") {
+      filters.push(`${column} is null`);
     } else {
-      argsAcc.push(value);
+      filters.push(
+        `${column} ${sqlOperator} ${argPlaceHolder(argsAcc.length, value)}`
+      );
+      if (operatorKey === "contains") {
+        argsAcc.push(`%${value}%`);
+      } else if (operatorKey === "not-contains") {
+        argsAcc.push(`%${value}%`);
+      } else {
+        argsAcc.push(value);
+      }
     }
   }
 
@@ -353,7 +339,6 @@ export function buildFilterLeaf(
     argsAcc,
   };
 }
-
 export function buildFilterBranch(
   args: Omit<BuildFilterArgs, "filter"> & { filter: FilterBranch }
 ): {
@@ -492,7 +477,7 @@ export async function buildFilterWithAuthClickHouse(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
-    response_copy_v3: {
+    request_response_log: {
       organization_id: {
         equals: orgId,
       },
@@ -516,7 +501,7 @@ export async function buildFilterWithAuthClickHouseProperties(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
-    properties_copy_v2: {
+    properties_v3: {
       organization_id: {
         equals: orgId,
       },
