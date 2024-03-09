@@ -17,16 +17,13 @@ jobs:
       - uses: actions/checkout@v3
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 1.145.4
       - run: supabase db start
       - run: supabase db lint
 
       - name: Generate types and check for changes
         run: |
           bash genSupabaseTypes.sh
-
-          echo "Running git diff"
-          git --no-pager diff
 
           if git status | grep "database.types.ts"; then
               git --no-pager diff -- ./**/database.types.ts
