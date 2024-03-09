@@ -229,44 +229,6 @@ export class InsertQueue {
     }
   }
 
-  private async addRequestToValhalla(
-    requestData: Database["public"]["Tables"]["request"]["Insert"],
-    responseId: string
-  ): Promise<Result<null, string>> {
-    if (!requestData.id) {
-      return { data: null, error: "Missing request.id" };
-    }
-
-    const val = await this.valhalla.post("/v1/request", {
-      provider: requestData.provider ?? "unknown",
-      url_href: requestData.path,
-      user_id: requestData.user_id,
-      body: requestData.body as any,
-      requestReceivedAt: requestData.created_at ?? new Date().toISOString(),
-      model: this.getModelFromRequest(requestData),
-      request_id: requestData.id,
-    });
-
-    if (val.error) {
-      console.error("Error inserting into valhalla:", val.error);
-      // return err(val.error);
-    }
-
-    const response = await this.valhalla.post("/v1/response", {
-      heliconeRequestId: requestData.id,
-      response_id: responseId,
-      delay_ms: -1,
-      body: {},
-      http_status: -2,
-      responseReceivedAt: new Date(0).toISOString(),
-    });
-    if (response.error) {
-      console.error("Error inserting response into valhalla:", response.error);
-      // return err(response.error);
-    }
-    return ok(null);
-  }
-
   async addRequest(
     requestData: Database["public"]["Tables"]["request"]["Insert"],
     propertiesData: Database["public"]["Tables"]["properties"]["Insert"][],
@@ -278,12 +240,8 @@ export class InsertQueue {
       responseId,
     };
 
-    const val = await this.addRequestToValhalla(requestData, responseId);
     const res = await insertIntoRequest(this.database, payload);
-    if (val.error) {
-      console.error("Error inserting into valhalla:", val.error);
-      // return val;
-    }
+
     if (res.error) {
       console.error("Error inserting into request:", res.error);
       return res;
