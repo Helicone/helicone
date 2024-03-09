@@ -46,6 +46,7 @@ export interface DBLoggableProps {
     modelOverride?: string;
     heliconeTemplate?: Record<string, unknown>;
     threat: boolean | null;
+    flaggedForModeration: boolean | null;
   };
   timing: {
     startTime: Date;
@@ -82,6 +83,7 @@ export function dbLoggableRequestFromProxyRequest(
       proxyRequest.requestWrapper.heliconeHeaders.modelOverride ?? undefined,
     heliconeTemplate: proxyRequest.heliconePromptTemplate ?? undefined,
     threat: proxyRequest.threat ?? null,
+    flaggedForModeration: proxyRequest.flaggedForModeration ?? null,
   };
 }
 
@@ -142,6 +144,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       nodeId: requestWrapper.getNodeId(),
       modelOverride: requestWrapper.heliconeHeaders.modelOverride ?? undefined,
       threat: null,
+      flaggedForModeration: null,
     },
     response: {
       responseId: crypto.randomUUID(),

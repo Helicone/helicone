@@ -14,11 +14,10 @@ import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { InsertQueue } from "../dbLogger/insertQueue";
 
 import { Valhalla } from "../db/valhalla";
-import { handleModerationProxyRequest, handleProxyRequest, handleThreatProxyRequest } from "./handler";
+import { handleProxyRequest, handleThreatProxyRequest } from "./handler";
 import { HeliconeProxyRequestMapper } from "./mapper";
 import { checkPromptSecurity } from "../security/promptSecurity";
 import { DBLoggable } from "../dbLogger/DBLoggable";
-import { checkPromptModeration } from "../moderation/promptModeration";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -174,12 +173,6 @@ export async function proxyForwarder(
     }
   }
 
-  /**
-   * Cache missed
-   * Prompt threat detection passed
-   * Going to check moderation then hit api
-   **/
-
   if (
     proxyRequest.requestWrapper.heliconeHeaders.moderationsEnabled &&
     provider == "OPENAI"
@@ -196,43 +189,71 @@ export async function proxyForwarder(
       });
     }
 
-    const flagged = await checkPromptModeration(latestMessage.content, env);
-    proxyRequest.flaggedForModeration = flagged;
+    if (latestMessage.role == "user") {
+      const moderationRequest = new Request("https://api.openai.com/v1/moderations", {
+        method: "POST",
+        headers: proxyRequest.requestWrapper.headers,
+        body: JSON.stringify({
+          input: latestMessage.content
+        }),
+      });
 
-    if (flagged == true) {
-      const { data, error } = await handleModerationProxyRequest(proxyRequest);
-
-      if (error !== null) {
+      const moderationRequestWrapper = await RequestWrapper.create(moderationRequest, env);
+      if (moderationRequestWrapper.error || !moderationRequestWrapper.data) {
         return responseBuilder.build({
-          body: error,
+          body: (moderationRequestWrapper.error),
+          status: 500
+        });
+      }
+
+      const { data: moderationProxyRequest, error: moderationProxyRequestError } =
+        await new HeliconeProxyRequestMapper(
+          moderationRequestWrapper.data,
+          provider,
+          env
+        ).tryToProxyRequest();
+
+      if (moderationProxyRequestError !== null) {
+        return responseBuilder.build({
+          body: moderationProxyRequestError,
+          status: 500
+        });
+      }
+
+      const { data: moderationResponse, error: moderationResponseError } = await handleProxyRequest(moderationProxyRequest);
+      if (moderationResponseError != null) {
+        return responseBuilder.build({
+          body: moderationResponseError,
           status: 500,
         });
       }
-      const { loggable, response } = data;
 
-      response.headers.forEach((value, key) => {
-        responseBuilder.setHeader(key, value);
-      });
+      const flaggedForModeration = (await moderationResponse.response.json() as OpenAIModerationResponse).results[0].flagged;
+      proxyRequest.flaggedForModeration = flaggedForModeration;
+      ctx.waitUntil(log(moderationResponse.loggable));
 
-      ctx.waitUntil(log(loggable));
+      if (flaggedForModeration == true) {
+        moderationResponse.response.headers.forEach((value, key) => {
+          responseBuilder.setHeader(key, value);
+        });
 
-      const responseContent = {
-        body: JSON.stringify({
-          success: false,
-          error: {
-            code: "PROMPT_FLAGGED_FOR_MODERATION",
-            message:
-            "The given prompt was flagged by the moderation endpoint.",
-            details: "See your Helicone request page for more info.", // TODO: filter to moderation request
-          },
-        }),
-        inheritFrom: response,
-        status: 400,
-      };
+        const responseContent = {
+          body: JSON.stringify({
+            success: false,
+            error: {
+              code: "PROMPT_FLAGGED_FOR_MODERATION",
+              message: "The given prompt was flagged by the OpenAI Moderation endpoint.",
+              details: `See your Helicone request page for more info: https://www.helicone.ai/requests?${moderationProxyRequest.requestId}`,
+            },
+          }),
+          inheritFrom: moderationResponse.response,
+          status: 400,
+        };
 
-      return responseBuilder
-        .setHeader("content-type", "application/json")
-        .build(responseContent);
+        return responseBuilder
+          .setHeader("content-type", "application/json")
+          .build(responseContent);
+      }
     }
   }
 
@@ -329,4 +350,15 @@ export async function proxyForwarder(
     inheritFrom: response,
     status: response.status,
   });
+}
+
+
+type OpenAIModerationResponse = {
+  id: string;
+  model: string;
+  results: Array<{
+    flagged: boolean;
+    categories: [Object];
+    category_scores: [Object]
+  }>;
 }
