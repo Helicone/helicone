@@ -547,16 +547,12 @@ export class DBLoggable {
       console.error(`Error checking rate limit: ${rateLimit.error}`);
     }
 
-    if (!rateLimit.error && rateLimit.data?.shouldLogInDB) {
-      console.log("LOGGING RATE LIMIT IN DB");
-      await db.dbWrapper.recordRateLimitHit(
-        authParams.organizationId,
-        rateLimit.data.rlIncrementDB
-      );
-    }
-
     if (!rateLimit.error && rateLimit.data?.isRateLimited) {
-      console.log("RATE LIMITED");
+      await db.clickhouse.dbInsertClickhouse("rate_limit_log", [
+        {
+          organization_id: authParams.organizationId,
+        },
+      ]);
       return err("Rate limited");
     }
 

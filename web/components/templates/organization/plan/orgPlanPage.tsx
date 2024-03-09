@@ -21,7 +21,6 @@ import { useGetRequestCountClickhouse } from "../../../../services/hooks/request
 import Link from "next/link";
 import { clsx } from "../../../shared/clsx";
 import UpgradeProModal from "../../../shared/upgradeProModal";
-import { useRateLimitTracker } from "../../../../services/hooks/rateLimitTracker";
 import RenderOrgPlan from "./renderOrgPlan";
 
 interface OrgPlanPageProps {
@@ -40,6 +39,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
   const endOfMonthFormatted = formatISO(endOfMonth(currentMonth), {
     representation: "date",
   });
+
   const isNextMonthDisabled = isAfter(addMonths(currentMonth, 1), new Date());
 
   const [open, setOpen] = useState(false);
@@ -57,7 +57,6 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
   useEffect(() => {
     refetch();
   }, [currentMonth, refetch]);
-  const rateLimitTracker = useRateLimitTracker();
 
   const capitalizeHelper = (str: string) => {
     const words = str.split("_");
@@ -163,7 +162,6 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
         ) : (
           renderInfo()
         )}
-
         <div className="flex flex-col sm:flex-row sm:space-x-4">
           <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
             <dt className="text-sm font-medium leading-6 text-gray-700 dark:text-gray-300">
@@ -182,25 +180,6 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
                 {isCountLoading
                   ? "Loading..."
                   : Number(count?.data || 0).toLocaleString()}
-              </dd>
-            </div>
-          )}
-          {rateLimitTracker.request && (
-            <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
-              <dt className="text-sm font-medium leading-6 text-red-700 dark:text-red-300">
-                Rate Limited
-              </dt>
-
-              <dd className="w-full flex-row gap-2 text-3xl font-medium leading-10 tracking-tight text-red-900 dark:text-red-100">
-                {isCountLoading
-                  ? "Loading..."
-                  : Number(
-                      Math.floor(rateLimitTracker.request.total_count / 10) * 10
-                    )}
-                +<span className="pl-1 text-sm font-light">times</span>
-              </dd>
-              <dd className="text-sm">
-                Please contact us to increase your rate limit
               </dd>
             </div>
           )}

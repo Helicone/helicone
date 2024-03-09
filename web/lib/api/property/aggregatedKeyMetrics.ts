@@ -1,10 +1,10 @@
+import { clickhousePriceCalc } from "../../../packages/cost";
 import {
   FilterNode,
   timeFilterToFilterNode,
 } from "../../../services/lib/filters/filterDefs";
 import { buildFilterWithAuthClickHousePropResponse } from "../../../services/lib/filters/filters";
 import { resultMap } from "../../result";
-import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
 export async function getAggregatedKeyMetrics(
@@ -33,7 +33,7 @@ export async function getAggregatedKeyMetrics(
   min(property_with_response_v1.request_created_at) as active_since,
   sum(property_with_response_v1.completion_tokens) / count(*) as avg_completion_tokens_per_request,
   sum(property_with_response_v1.latency) / count(*) as avg_latency_per_request,
-  ${CLICKHOUSE_PRICE_CALC("property_with_response_v1")} as total_cost
+  ${clickhousePriceCalc("property_with_response_v1")} as total_cost
 from property_with_response_v1
 where (
 ${filterString}

@@ -206,7 +206,9 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       fallBacks: this.getFallBacks(),
       modelOverride: this.headers.get("Helicone-Model-Override") ?? null,
       promptSecurityEnabled:
-        this.headers.get("Helicone-Prompt-Security-Enabled") ?? null,
+        this.headers.get("Helicone-LLM-Security-Enabled") ??
+        this.headers.get("Helicone-Prompt-Security-Enabled") ??
+        null,
       moderationsEnabled:
         this.headers.get("Helicone-Moderations-Enabled") == "true"
           ? true

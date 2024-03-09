@@ -6,9 +6,9 @@ import { Env } from "../../../../..";
 import { RequestWrapper } from "../../../../../lib/RequestWrapper";
 import { ClickhouseClientWrapper } from "../../../../../lib/db/clickhouse";
 import { AuthParams } from "../../../../../lib/dbLogger/DBLoggable";
-import { CLICKHOUSE_PRICE_CALC } from "../../../../../lib/limits/check";
 import { APIClient } from "../../../../lib/apiClient";
 import { BaseAPIRoute } from "../../../baseAPIRoute";
+import { clickhousePriceCalc } from "../../../../../packages/cost";
 
 const ReturnBody = z
   .object({
@@ -83,7 +83,7 @@ export class CustomerUsageGet extends BaseAPIRoute {
       `
       SELECT
         count(*) as count,
-        ${CLICKHOUSE_PRICE_CALC("request_response_log")} as cost,
+        ${clickhousePriceCalc("request_response_log")} as cost,
         count(request_response_log.prompt_tokens) as prompt_tokens,
         count(request_response_log.completion_tokens) as completion_tokens
       FROM request_response_log

@@ -1,11 +1,11 @@
 ---
-title: "Prompt Security"
+title: "LLM Security"
 description: "Secure OpenAI chat completions against prompt injections."
 ---
 
-## Enabling Prompt Security
+## Enabling LLM Security
 
-Add `Helicone-Prompt-Security-Enabled: true` to your request headers.
+Add `Helicone-LLM-Security-Enabled: true` to your request headers.
 
 ## Detectors
 
@@ -33,7 +33,7 @@ For a full list and updates, visit [Detectors Overview](https://promptarmor.read
 
 ## How It Works
 
-Prompt Security enhances OpenAI chat completions with automated security checks:
+LLM Security enhances OpenAI chat completions with automated security checks:
 
 - Only the last user message is checked for threats.
 - Utilizing [Prompt Armor](https://promptarmor.com), we quickly identify and block injection threats.
