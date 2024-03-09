@@ -2,6 +2,7 @@ import {
   UserGroupIcon,
   BuildingOfficeIcon,
   CreditCardIcon,
+  NoSymbolIcon,
 } from "@heroicons/react/24/outline";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react";
 import { useOrg } from "../../layout/organizationContext";
@@ -11,6 +12,7 @@ import OrgMembersPage from "../organization/members/orgMembersPage";
 import { ElementType } from "react";
 import { useRouter } from "next/router";
 import AuthHeader from "../../shared/authHeader";
+import RateLimitPage from "./rateLimitPage";
 
 interface SettingsPageProps {
   defaultIndex?: number;
@@ -35,6 +37,11 @@ const tabs: {
     id: 2,
     title: "Members",
     icon: UserGroupIcon,
+  },
+  {
+    id: 3,
+    title: "Rate-Limits",
+    icon: NoSymbolIcon,
   },
 ];
 
@@ -77,6 +84,9 @@ const SettingsPage = (props: SettingsPageProps) => {
             </TabPanel>
             <TabPanel>
               <OrgMembersPage org={orgContext?.currentOrg} />
+            </TabPanel>
+            <TabPanel>
+              <RateLimitPage />
             </TabPanel>
           </TabPanels>
         ) : (

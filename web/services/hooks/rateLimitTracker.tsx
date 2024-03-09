@@ -2,6 +2,16 @@ import { useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../components/layout/organizationContext";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { Database } from "../../supabase/database.types";
+import { TimeIncrement } from "../../lib/timeCalculations/fetchTimeData";
+
+export interface RateLimitPageData {
+  timeFilter: {
+    start: Date;
+    end: Date;
+  };
+  timeZoneDifference: number;
+  dbIncrement: TimeIncrement | undefined;
+}
 
 const useRateLimitTracker = () => {
   const org = useOrg();
@@ -25,7 +35,7 @@ const useRateLimitTracker = () => {
   });
   return {
     request: data?.data,
-    isLoading,
+    isLoading: isLoading,
   };
 };
 
