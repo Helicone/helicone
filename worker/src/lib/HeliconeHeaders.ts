@@ -208,7 +208,9 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       promptSecurityEnabled:
         this.headers.get("Helicone-Prompt-Security-Enabled") ?? null,
       moderationsEnabled:
-        this.headers.get("Helicone-Moderations-Enabled") == "true" ? true : false,
+        this.headers.get("Helicone-Moderations-Enabled") == "true"
+          ? true
+          : false,
     };
   }
 
