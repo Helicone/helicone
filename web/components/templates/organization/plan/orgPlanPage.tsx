@@ -22,10 +22,6 @@ import Link from "next/link";
 import { clsx } from "../../../shared/clsx";
 import UpgradeProModal from "../../../shared/upgradeProModal";
 import RenderOrgPlan from "./renderOrgPlan";
-import StyledAreaChart from "../../dashboard/styledAreaChart";
-import { BarChart } from "@tremor/react";
-import { getTimeMap } from "../../../../lib/timeCalculations/constants";
-import { useOrgPlanPage } from "./useOrgPlanPage";
 
 interface OrgPlanPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];

@@ -12,7 +12,6 @@ import StyledAreaChart from "../dashboard/styledAreaChart";
 import { BarChart } from "@tremor/react";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import useNotification from "../../shared/notification/useNotification";
 
 interface RateLimitPageProps {}
