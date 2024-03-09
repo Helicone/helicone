@@ -369,7 +369,7 @@ type OpenAIModerationResponse = {
   model: string;
   results: Array<{
     flagged: boolean;
-    categories: [Object];
-    category_scores: [Object];
+    categories: object;
+    category_scores: object;
   }>;
 };
