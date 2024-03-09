@@ -43,8 +43,6 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
   const endOfMonthFormatted = formatISO(endOfMonth(currentMonth), {
     representation: "date",
   });
-  const startOfMonthDate = currentMonth;
-  const endOfMonthDate = endOfMonth(currentMonth);
 
   const isNextMonthDisabled = isAfter(addMonths(currentMonth, 1), new Date());
 
@@ -60,26 +58,9 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
     org.id
   );
 
-  const timeIncrement = "day";
-
-  const {
-    overTimeData,
-    metrics,
-    refetch: refetchData,
-    isLoading,
-  } = useOrgPlanPage({
-    timeFilter: {
-      start: currentMonth,
-      end: endOfMonth(currentMonth),
-    },
-    timeZoneDifference: 0,
-    dbIncrement: timeIncrement,
-  });
-
   useEffect(() => {
     refetch();
-    refetchData();
-  }, [currentMonth, refetch, refetchData]);
+  }, [currentMonth, refetch]);
 
   const capitalizeHelper = (str: string) => {
     const words = str.split("_");
@@ -184,32 +165,6 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
           <div className="h-24 w-full bg-gray-300 dark:bg-gray-700 animate-pulse rounded-md"></div>
         ) : (
           renderInfo()
-        )}
-        {!isLoading && metrics.totalRateLimits.data && (
-          <div key="rate-limit">
-            <StyledAreaChart
-              title={"Helicone Rate Limited"}
-              value={metrics.totalRateLimits.data.data?.toString() ?? ""}
-              isDataOverTimeLoading={false}
-            >
-              <BarChart
-                className="h-[14rem]"
-                data={
-                  overTimeData.rateLimits.data?.data?.map((r) => ({
-                    date: getTimeMap(timeIncrement)(r.time),
-                    rateLimits: r.count,
-                  })) ?? []
-                }
-                index="date"
-                categories={["rateLimits"]}
-                colors={["cyan"]}
-                showYAxis={false}
-              />
-            </StyledAreaChart>
-            <dd className="text-sm">
-              Please contact us to increase your rate limit
-            </dd>
-          </div>
         )}
         <div className="flex flex-col sm:flex-row sm:space-x-4">
           <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
