@@ -53,6 +53,8 @@ export type RequestTableToOperators = {
   org_id: SingleKey<TextOperators>;
   id: SingleKey<TextOperators>;
   node_id: SingleKey<TextOperators>;
+  model: SingleKey<TextOperators>;
+  modelOverride: SingleKey<TextOperators>;
   path: SingleKey<TextOperators>;
 };
 
@@ -84,6 +86,13 @@ export type CacheHitsTableToOperators = {
 
 export type FilterLeafCacheHits = SingleKey<CacheHitsTableToOperators>;
 
+export type RateLimitTableToOperators = {
+  organization_id: SingleKey<TextOperators>;
+  created_at: SingleKey<TimestampOperatorsTyped>;
+};
+
+export type FilterLeafRateLimitLog = SingleKey<RateLimitTableToOperators>;
+
 export type FilterLeafPropertiesTable = SingleKey<PropertiesTableToOperators>;
 
 type UserApiKeysTableToOperators = {
@@ -98,6 +107,7 @@ type ResponseTableToOperators = {
   body_model: SingleKey<TextOperators>;
   body_completion: SingleKey<TextOperators>;
   status: SingleKey<NumberOperators>;
+  model: SingleKey<TextOperators>;
 };
 
 export type FilterLeafResponse = SingleKey<ResponseTableToOperators>;
@@ -236,6 +246,7 @@ export type TablesAndViews = {
   job: FilterLeafJob;
   job_node: FilterLeafNode;
   cache_hits: FilterLeafCacheHits;
+  rate_limit_log: FilterLeafRateLimitLog;
 
   properties: {
     [key: string]: SingleKey<TextOperators>;
