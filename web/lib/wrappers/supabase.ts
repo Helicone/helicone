@@ -9,7 +9,7 @@ import {
   NextApiRequest,
   NextApiResponse,
 } from "next";
-import { supabaseUrl as serverSupabaseUrl } from "../supabaseServer";
+import { getSupabaseUrl } from "../supabaseServer";
 import { ORG_ID_COOKIE_KEY } from "../constants";
 import { Result, ok } from "../result";
 
@@ -24,7 +24,7 @@ export class SupabaseServerWrapper<T> {
   client: SupabaseClient<Database>;
   ctx: SSRContext<T>;
   constructor(ctx: SSRContext<T>, options?: SupabaseServerWrapperOptions) {
-    const supabaseUrl = options?.supabaseUrl ?? serverSupabaseUrl ?? "";
+    const supabaseUrl = options?.supabaseUrl ?? getSupabaseUrl() ?? "";
     this.ctx = ctx;
     this.client = createServerSupabaseClient<Database>(ctx, {
       supabaseUrl,

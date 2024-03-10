@@ -1,32 +1,37 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
 
-class SupabaseSingleton {
-  private static instance: SupabaseClient<Database>;
-  private static supabaseUrl: string =
+export const getSupabaseUrl = (): string => {
+  const url =
     process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  private static supabaseServiceKey: string =
-    process.env.SUPABASE_SERVICE_KEY ?? "n/a";
+  if (url === "") {
+    throw new Error(`SUPABASE_URL is not set`);
+  }
+  return url;
+};
+
+export const getSupabaseServiceKey = (): string => {
+  const serviceKey = process.env.SUPABASE_SERVICE_KEY ?? "";
+  if (serviceKey === "") {
+    throw new Error(`SUPABASE_SERVICE_KEY is not set`);
+  }
+  return serviceKey;
+};
+
+export class SupabaseServerSingleton {
+  private static instance: SupabaseClient<Database>;
 
   private constructor() {}
 
   public static getInstance(): SupabaseClient<Database> {
-    if (!SupabaseSingleton.instance) {
-      if (
-        SupabaseSingleton.supabaseUrl === "" ||
-        SupabaseSingleton.supabaseServiceKey === "n/a"
-      ) {
-        throw new Error(
-          `URL or Service Key ENV not set for Server - ${SupabaseSingleton.supabaseServiceKey}`
-        );
-      }
-      SupabaseSingleton.instance = createClient<Database>(
-        SupabaseSingleton.supabaseUrl,
-        SupabaseSingleton.supabaseServiceKey
-      );
+    if (!this.instance) {
+      const supabaseUrl = getSupabaseUrl();
+      const supabaseServiceKey = getSupabaseServiceKey();
+
+      this.instance = createClient<Database>(supabaseUrl, supabaseServiceKey);
     }
-    return SupabaseSingleton.instance;
+    return this.instance;
   }
 }
 
-export const supabaseServer = SupabaseSingleton.getInstance();
+export const supabaseServer = SupabaseServerSingleton.getInstance();
