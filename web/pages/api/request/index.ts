@@ -33,9 +33,9 @@ async function handler({
         offset,
         limit,
         sort,
-        supabaseServer
+        supabaseServer()
       )
-    : await getRequests(orgId, filter, offset, limit, sort, supabaseServer);
+    : await getRequests(orgId, filter, offset, limit, sort, supabaseServer());
   res.status(metrics.error === null ? 200 : 500).json(metrics);
 }
 

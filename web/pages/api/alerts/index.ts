@@ -10,13 +10,13 @@ async function handler({
   res,
   userData: { orgId },
 }: HandlerWrapperOptions<Result<any, string>>) {
-  let { data: alert, error: alertError } = await supabaseServer
+  let { data: alert, error: alertError } = await supabaseServer()
     .from("alert")
     .select("*")
     .eq("org_id", orgId)
     .not("soft_delete", "eq", true);
 
-  let { data: alertHistory, error: alertHistoryError } = await supabaseServer
+  let { data: alertHistory, error: alertHistoryError } = await supabaseServer()
     .from("alert_history")
     .select("*")
     .eq("org_id", orgId)

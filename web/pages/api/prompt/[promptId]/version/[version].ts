@@ -30,7 +30,7 @@ async function handler(options: HandlerWrapperOptions<SinglePrompt>) {
     query: { promptId, version },
   } = req;
 
-  const prompt = await supabaseServer
+  const prompt = await supabaseServer()
     .from("prompts")
     .select("*")
     .match({ id: promptId, version: version, organization_id: orgId })

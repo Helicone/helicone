@@ -6,7 +6,7 @@ export const useAlert = (orgId: string) => {
   const { data, isLoading, refetch, isRefetching, error } = useQuery({
     queryKey: ["alert", orgId],
     queryFn: async () => {
-      return await supabase
+      return await supabase()
         .from("alert")
         .select("*")
         .eq("soft_delete", false)
@@ -28,7 +28,7 @@ export const useAlertHistory = (orgId: string) => {
   const { data, isLoading, refetch, isRefetching, error } = useQuery({
     queryKey: ["alert_history", orgId],
     queryFn: async () => {
-      return await supabase
+      return await supabase()
         .from("alert_history")
         .select("*")
         .eq("soft_delete", false)

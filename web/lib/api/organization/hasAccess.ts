@@ -23,7 +23,7 @@ export async function checkAccessToMutateOrg(
   orgId: string,
   userId: string
 ): Promise<boolean> {
-  const orgToCheck = await supabaseServer
+  const orgToCheck = await supabaseServer()
     .from("organization")
     .select("*")
     .eq("id", orgId)

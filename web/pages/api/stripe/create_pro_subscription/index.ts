@@ -53,7 +53,7 @@ export default async function handler(
       customerId = customer.id;
 
       // Save the Stripe customer ID in Supabase
-      await supabaseServer
+      await supabaseServer()
         .from("organization")
         .update({ stripe_customer_id: customerId })
         .eq("id", orgId);

@@ -40,7 +40,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         // Assuming you passed the organization's ID in the `metadata` when creating the checkout session:
         const orgId = session.metadata?.orgId;
 
-        const { data, error } = await supabaseServer
+        const { data, error } = await supabaseServer()
           .from("organization")
           .update({
             subscription_status: "active",
@@ -64,7 +64,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         }
 
         // Update the organization's status based on Stripe's subscription status.
-        await supabaseServer
+        await supabaseServer()
           .from("organization")
           .update({ subscription_status: status ? "active" : "pending-cancel" })
           .eq("stripe_subscription_id", subscriptionUpdated.id);
@@ -74,13 +74,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         // Subscription has been deleted, either due to non-payment or being manually canceled.
         const subscriptionDeleted = event.data.object as Stripe.Subscription;
 
-        await supabaseServer
+        await supabaseServer()
           .from("organization")
           .update({ tier: "free" })
           .eq("stripe_subscription_id", subscriptionDeleted.id);
 
         // Set the organization's status to 'inactive' or a similar status to indicate the subscription has ended.
-        await supabaseServer
+        await supabaseServer()
           .from("organization")
           .update({ subscription_status: "inactive" })
           .eq("stripe_subscription_id", subscriptionDeleted.id);

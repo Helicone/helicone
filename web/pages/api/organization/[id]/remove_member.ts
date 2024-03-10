@@ -45,7 +45,7 @@ export default async function handler(
     res.status(500).json({ error: orgAccess.error.message, data: null });
     return;
   }
-  const { error: deleteError } = await supabaseServer
+  const { error: deleteError } = await supabaseServer()
     .from("organization_member")
     .delete()
     .eq("member", memberId as string)

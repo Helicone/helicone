@@ -28,7 +28,7 @@ async function handler(option: HandlerWrapperOptions<Result<boolean, string>>) {
     supabaseClient: client,
   } = option;
 
-  const { error: ffError, data: ffData } = await supabaseServer
+  const { error: ffError, data: ffData } = await supabaseServer()
     .from("feature_flags")
     .select("*")
     .eq("org_id", orgId)
@@ -54,7 +54,7 @@ async function handler(option: HandlerWrapperOptions<Result<boolean, string>>) {
     return;
   }
 
-  const { error: webhookError, data: webhook } = await supabaseServer
+  const { error: webhookError, data: webhook } = await supabaseServer()
     .from("webhooks")
     .insert([
       {
@@ -74,7 +74,7 @@ async function handler(option: HandlerWrapperOptions<Result<boolean, string>>) {
     return;
   }
   const { error: webHookSubscriptionError, data: webHookSubscriptionData } =
-    await supabaseServer
+    await supabaseServer()
       .from("webhook_subscriptions")
       .insert([
         {

@@ -18,7 +18,7 @@ async function handler({
     referralCode: string;
   };
 
-  const { data: user, error: userError } = await supabaseServer
+  const { data: user, error: userError } = await supabaseServer()
     .from("user_settings")
     .select("*")
     .eq("referral_code", referralCode)
@@ -29,7 +29,7 @@ async function handler({
     return;
   }
 
-  const { error } = await supabaseServer.from("referrals").insert({
+  const { error } = await supabaseServer().from("referrals").insert({
     referred_user_id: userData?.userId,
     referrer_user_id: user?.user,
   });

@@ -17,7 +17,7 @@ async function handler({
   const hasAccess = await checkAccessToMutateOrg(id as string, userId);
 
   if (hasAccess) {
-    const deleteRes = await supabaseServer
+    const deleteRes = await supabaseServer()
       .from("organization")
       .update({
         soft_delete: true,

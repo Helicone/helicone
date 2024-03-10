@@ -12,7 +12,7 @@ export async function getUserOrThrow(auth: string): Promise<string> {
   }
   const removedBearer = auth.replace("Bearer ", "").trim();
   const hashedApiKey = await hashAuth(removedBearer);
-  const { data, error } = await supabaseServer
+  const { data, error } = await supabaseServer()
     .from("helicone_api_keys")
     .select("*")
     .eq("api_key_hash", hashedApiKey)
@@ -36,7 +36,7 @@ export async function getOrgIdOrThrow(auth: string): Promise<string> {
   }
   const removedBearer = auth.replace("Bearer ", "").trim();
   const hashedApiKey = await hashAuth(removedBearer);
-  const { data, error } = await supabaseServer
+  const { data, error } = await supabaseServer()
     .from("helicone_api_keys")
     .select("organization_id")
     .eq("soft_delete", false)

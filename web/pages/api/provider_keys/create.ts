@@ -39,7 +39,7 @@ async function handler({
   }
 
   const keyId = crypto.randomUUID();
-  const { error } = await supabaseServer.from("provider_keys").insert({
+  const { error } = await supabaseServer().from("provider_keys").insert({
     id: keyId,
     org_id: userData.orgId,
     provider_name: providerName,

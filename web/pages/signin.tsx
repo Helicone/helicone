@@ -88,7 +88,7 @@ export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
   if (isCustomerDomain(context.req.headers.host ?? "")) {
-    const org = await supabaseServer
+    const org = await supabaseServer()
       .from("organization")
       .select("*")
       .eq("domain", context.req.headers.host)

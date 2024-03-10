@@ -12,7 +12,7 @@ export default async function handler(
   const { firstName, lastName, email, companyName, companyDescription, tag } =
     req.body;
 
-  const { error } = await supabaseServer.from("contact_submissions").insert({
+  const { error } = await supabaseServer().from("contact_submissions").insert({
     first_name: firstName,
     last_name: lastName,
     email_address: email,

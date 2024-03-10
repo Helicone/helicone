@@ -449,7 +449,7 @@ function buildFilterPostgres(
 }
 
 async function getUserIdHashes(user_id: string): Promise<string[]> {
-  const { data: user_api_keys, error } = await supabaseServer
+  const { data: user_api_keys, error } = await supabaseServer()
     .from("user_api_keys")
     .select("api_key_hash")
     .eq("user_id", user_id);

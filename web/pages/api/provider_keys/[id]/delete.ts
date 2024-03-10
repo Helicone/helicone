@@ -22,7 +22,7 @@ async function handler({
     return;
   }
 
-  const { error } = await supabaseServer
+  const { error } = await supabaseServer()
     .from("provider_keys")
     .update({ soft_delete: true })
     .eq("org_id", userData.orgId)

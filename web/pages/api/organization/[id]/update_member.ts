@@ -37,7 +37,7 @@ export default async function handler(
     return;
   }
 
-  const { data: orgMember } = await supabaseServer
+  const { data: orgMember } = await supabaseServer()
     .from("organization_member")
     .select("*")
     .eq("member", user.data.user.id)
@@ -53,7 +53,7 @@ export default async function handler(
     return;
   }
 
-  const { error } = await supabaseServer
+  const { error } = await supabaseServer()
     .from("organization_member")
     .update({
       org_role: orgRole,

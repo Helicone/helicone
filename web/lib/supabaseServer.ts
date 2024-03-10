@@ -34,4 +34,4 @@ export class SupabaseServerSingleton {
   }
 }
 
-export const supabaseServer = SupabaseServerSingleton.getInstance();
+export const supabaseServer = () => SupabaseServerSingleton.getInstance();

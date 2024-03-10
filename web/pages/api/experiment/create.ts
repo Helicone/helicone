@@ -54,7 +54,7 @@ async function handler({
     return;
   }
 
-  const originPromptRow = await supabaseServer
+  const originPromptRow = await supabaseServer()
     .from("prompts")
     .select("*")
     .eq("organization_id", org.id)
@@ -69,7 +69,7 @@ async function handler({
   const randomString = Math.random().toString(36);
   const newPromptId = `${originPrompt.promptId}-${originPrompt.version}-EXP-${randomString}`;
 
-  const newPromptRow = await supabaseServer
+  const newPromptRow = await supabaseServer()
     .from("prompts")
     .insert([
       {
@@ -90,7 +90,7 @@ async function handler({
     return;
   }
 
-  const newDataset = await supabaseServer
+  const newDataset = await supabaseServer()
     .from("experiment_dataset")
     .insert({
       organization_id: org.id,
@@ -103,7 +103,7 @@ async function handler({
     return;
   }
 
-  const newDatasetContents = await supabaseServer
+  const newDatasetContents = await supabaseServer()
     .from("experiment_dataset_values")
     .insert(
       requestIds.map((requestId) => ({
@@ -120,7 +120,7 @@ async function handler({
     return;
   }
 
-  const providerKey = await supabaseServer
+  const providerKey = await supabaseServer()
     .from("provider_keys")
     .select("*")
     .eq("id", providerKeyId)
@@ -132,7 +132,7 @@ async function handler({
     return;
   }
 
-  const newExperiment = await supabaseServer
+  const newExperiment = await supabaseServer()
     .from("experiments")
     .insert({
       dataset: newDataset.data[0].id,

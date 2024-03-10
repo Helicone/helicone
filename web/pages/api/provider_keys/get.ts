@@ -18,7 +18,7 @@ async function handler({
   }
 
   const { data: keys, error } = await getDecryptedProviderKeysByOrgId(
-    supabaseServer,
+    supabaseServer(),
     userData.orgId
   );
 

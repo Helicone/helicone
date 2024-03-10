@@ -41,7 +41,7 @@ async function handler({
     return;
   }
 
-  const insert = await supabaseServer
+  const insert = await supabaseServer()
     .from("organization")
     .insert([insertRequest])
     .select("*")

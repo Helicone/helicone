@@ -19,7 +19,7 @@ async function handler(option: HandlerWrapperOptions<Result<string, string>>) {
     return;
   }
 
-  const { data, error } = await supabaseServer
+  const { data, error } = await supabaseServer()
     .from("organization")
     .select("stripe_customer_id, subscription_status")
     .eq("id", orgId)

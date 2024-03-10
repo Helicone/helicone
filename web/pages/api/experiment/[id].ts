@@ -42,7 +42,7 @@ async function handler({
 
   const { id } = req.query;
 
-  const { data: experimentData, error: experimentErr } = await supabaseServer
+  const { data: experimentData, error: experimentErr } = await supabaseServer()
     .from("experiments")
     .select("*")
     .eq("id", id)
@@ -83,14 +83,14 @@ async function handler({
     test_response_delay: number;
   }>(query, [experimentData?.dataset]);
 
-  const originPrompt = await supabaseServer
+  const originPrompt = await supabaseServer()
     .from("prompts")
     .select("*")
     .eq("organization_id", orgId)
     .eq("uuid", experimentData?.origin_prompt)
     .single();
 
-  const testPrompt = await supabaseServer
+  const testPrompt = await supabaseServer()
     .from("prompts")
     .select("*")
     .eq("organization_id", orgId)

@@ -43,7 +43,7 @@ export default async function handler(
     return;
   }
   if (userId?.length === 0) {
-    await supabaseServer.auth.signInWithOtp({
+    await supabaseServer().auth.signInWithOtp({
       email: email as string,
     });
     const res = await getUserId(email as string);
@@ -56,7 +56,7 @@ export default async function handler(
     return;
   }
 
-  const { error: insertError } = await supabaseServer
+  const { error: insertError } = await supabaseServer()
     .from("organization_member")
     .insert([{ organization: id as string, member: userId![0].id }]);
 

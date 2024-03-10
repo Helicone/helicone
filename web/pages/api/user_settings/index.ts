@@ -19,16 +19,17 @@ export type UserSettingsResponse = {
 export async function getOrCreateUserSettings(
   user: User
 ): Promise<Result<UserSettings, string>> {
-  const { data: userSettings, error: userSettingsError } = await supabaseServer
-    .from("user_settings")
-    .select("*")
-    .eq("user", user.id)
-    .single();
+  const { data: userSettings, error: userSettingsError } =
+    await supabaseServer()
+      .from("user_settings")
+      .select("*")
+      .eq("user", user.id)
+      .single();
 
   if (userSettings === null) {
     // add the user into the userSettings page
     const { data: newUserSettings, error: newUserSettingsError } =
-      await supabaseServer
+      await supabaseServer()
         .from("user_settings")
         .insert({
           user: user.id,

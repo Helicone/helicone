@@ -13,14 +13,14 @@ async function handler({
   res,
   userData: { orgId },
 }: HandlerWrapperOptions<Result<Tier, string>>) {
-  const { data: org, error: orgError } = await supabaseServer
+  const { data: org, error: orgError } = await supabaseServer()
     .from("organization")
     .select("*")
     .eq("id", orgId)
     .single();
 
   const { data: orgOwnerSettings, error: userSettingsError } =
-    await supabaseServer
+    await supabaseServer()
       .from("user_settings")
       .select("*")
       .eq("user", org?.owner)
