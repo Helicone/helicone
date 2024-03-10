@@ -1,3 +1,4 @@
+import { PostgrestBuilder } from "@supabase/postgrest-js";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database, Json } from "../../../supabase/database.types";
@@ -7,7 +8,30 @@ import { Result, err, ok } from "../../results";
 import { ClickhouseClientWrapper, RequestResponseLog } from "../db/clickhouse";
 import { Valhalla } from "../db/valhalla";
 import { formatTimeString } from "./clickhouseLog";
-import { measureExecutionTime } from "./supabaseWrapper";
+import { withTiming } from "../../db/SupabaseWrapper";
+
+export async function withTiming2<T>(
+  promise: PostgrestBuilder<T>,
+  { queryName }: { queryName: string }
+) {
+  //   if (!SupabaseWrapper.ctx) {
+  //     throw new Error("ExecutionContext is not set.");
+  //   }
+
+  const start = performance.now();
+  const result = await promise;
+  const end = performance.now();
+
+  //   SupabaseWrapper.ctx.waitUntil(
+  //     new Promise((resolve) => {
+  //       console.log(`Query ${queryName} took ${end - start} ms`);
+  //       // Replace console.log with your logging logic
+  //       setTimeout(resolve, 1000);
+  //     })
+  //   );
+
+  return result;
+}
 
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];
@@ -23,7 +47,12 @@ export async function insertIntoRequest(
     return { data: null, error: "Missing request.id" };
   }
 
-  const requestInsertResult = await database.from("request").insert([request]);
+  const requestInsertResult = await withTiming(
+    database.from("request").insert([request]),
+    {
+      queryName: "request_insert",
+    }
+  );
   const createdAt = request.created_at
     ? request.created_at
     : new Date().toISOString();
@@ -403,12 +432,17 @@ export class InsertQueue {
       string
     >
   > {
-    const request = await this.database
-      .from("request")
-      .select("*")
-      .eq("id", requestId)
-      .eq("helicone_org_id", orgId)
-      .single();
+    const request = await withTiming(
+      this.database
+        .from("request")
+        .select("*")
+        .eq("id", requestId)
+        .eq("helicone_org_id", orgId)
+        .single(),
+      {
+        queryName: "request_select",
+      }
+    );
 
     if (request.error) {
       return err(request.error.message);

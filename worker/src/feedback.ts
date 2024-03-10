@@ -5,6 +5,7 @@ import { Database } from "../supabase/database.types";
 import { Result } from "./results";
 import { IHeliconeHeaders } from "./lib/HeliconeHeaders";
 import { Valhalla } from "./lib/db/valhalla";
+import { withTiming } from "./db/SupabaseWrapper";
 
 interface FeedbackRequestBodyV2 {
   "helicone-id": string;
@@ -38,30 +39,10 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
     return new Response("Authentication required.", { status: 401 });
   }
 
-  const customFetch = async (url: any, options: any) => {
-    const start = performance.now();
-    try {
-      const response = await fetch(url, options);
-      const end = performance.now();
-
-      // Here you would send the log to Datadog
-      console.log(`Request to ${url} took ${end - start} ms`);
-
-      return response;
-    } catch (error) {
-      // Log or handle error
-      throw error;
-    }
-  };
-
+  //declare function fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
   const dbClient: SupabaseClient<Database> = createClient(
     env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY,
-    {
-      global: {
-        fetch: customFetch,
-      },
-    }
+    env.SUPABASE_SERVICE_ROLE_KEY
   );
 
   const requestPromise = getRequest(dbClient, heliconeId);
@@ -168,11 +149,17 @@ export async function isApiKeyAuthenticated(
       console.error("Error fetching user:", user.error.message);
       return { error: user.error.message, data: null };
     }
-    const isOwner = await dbClient
-      .from("organization")
-      .select("*")
-      .eq("id", orgId)
-      .eq("owner", user.data.user.id);
+
+    const isOwner = await withTiming(
+      dbClient
+        .from("organization")
+        .select("*")
+        .eq("id", orgId)
+        .eq("owner", user.data.user.id),
+      {
+        queryName: "isOwner",
+      }
+    );
     if (isOwner.error) {
       console.error("Error fetching user:", isOwner.error.message);
       return { error: isOwner.error.message, data: null };
