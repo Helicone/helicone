@@ -21,17 +21,21 @@ interface SupabaseServerWrapperOptions {
   supabaseUrl?: string;
 }
 export class SupabaseServerWrapper<T> {
-  client: SupabaseClient<Database>;
-  ctx: SSRContext<T>;
+  private client: SupabaseClient<Database> | null = null;
+  private ctx: SSRContext<T>;
+  private options: SupabaseServerWrapperOptions;
   constructor(ctx: SSRContext<T>, options?: SupabaseServerWrapperOptions) {
-    const supabaseUrl = options?.supabaseUrl ?? getSupabaseUrl() ?? "";
     this.ctx = ctx;
-    this.client = createServerSupabaseClient<Database>(ctx, {
-      supabaseUrl,
-    });
+    this.options = options || {};
   }
 
   getClient() {
+    if (!this.client) {
+      const supabaseUrl = this.options.supabaseUrl ?? getSupabaseUrl();
+      this.client = createServerSupabaseClient<Database>(this.ctx, {
+        supabaseUrl,
+      });
+    }
     return this.client;
   }
 
@@ -48,12 +52,12 @@ export class SupabaseServerWrapper<T> {
       string
     >
   > {
-    const user = await this.client.auth.getUser();
+    const user = await this.getClient().auth.getUser();
     if (!user.data || !user.data.user) {
       return { error: "Unauthorized User", data: null };
     }
 
-    const orgAccessCheck = await this.client
+    const orgAccessCheck = await this.getClient()
       .from("organization")
       .select("*")
       .eq("id", this.ctx.req.cookies[ORG_ID_COOKIE_KEY]);
@@ -91,7 +95,7 @@ export class SupabaseServerWrapper<T> {
     }
 
     const checkMembership = async (orgId: string) => {
-      const memberCheck = await this.client
+      const memberCheck = await this.getClient()
         .from("organization_member")
         .select("*")
         .eq("member", user.data.user?.id)

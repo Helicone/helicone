@@ -9,7 +9,7 @@ import { supabaseServer } from "../../../../lib/supabaseServer";
 async function handler({
   res,
   userData: { orgId, user, userId },
-  supabaseClient: { client },
+  supabaseClient: _,
   req,
 }: HandlerWrapperOptions<Result<string, string>>) {
   const { id } = req.query;

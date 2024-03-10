@@ -41,10 +41,12 @@ async function checkAccessToOrg(
 async function handler({
   res,
   userData: { orgId, user, userId },
-  supabaseClient: { client },
+  supabaseClient: { getClient },
   req,
 }: HandlerWrapperOptions<Members>) {
   const { id } = req.query;
+  const client = getClient();
+
   const orgToCheck = await client
     .from("organization")
     .select("*")
