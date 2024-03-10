@@ -59,6 +59,23 @@ const WORKER_MAP: Omit<
 };
 
 function addBaseRoutes(router: BaseRouter | BaseOpenAPIRouter): void {
+  router.get(
+    "/healthcheck",
+    async (
+      _,
+      _requestWrapper: RequestWrapper,
+      _env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      return new Response(null, {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    }
+  );
+
   router.post(
     "/v1/feedback",
     async (
