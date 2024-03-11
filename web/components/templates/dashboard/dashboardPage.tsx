@@ -987,12 +987,14 @@ const DashboardPage = (props: DashboardPageProps) => {
                   value={`${
                     metrics.averageTimeToFirstToken.data?.data?.toFixed(0) ?? 0
                   } ms`}
-                  isDataOverTimeLoading={overTimeData.ttft.isLoading}
+                  isDataOverTimeLoading={
+                    overTimeData.timeToFirstToken.isLoading
+                  }
                 >
                   <AreaChart
                     className="h-[14rem]"
                     data={
-                      overTimeData.ttft.data?.data?.map((r) => ({
+                      overTimeData.timeToFirstToken.data?.data?.map((r) => ({
                         date: getTimeMap(timeIncrement)(r.time),
                         time: r.ttft,
                       })) ?? []

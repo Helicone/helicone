@@ -179,7 +179,7 @@ export const useDashboardPage = ({
         );
       },
     }),
-    ttft: useBackendMetricCall<Result<TimeToFirstToken[], string>>({
+    timeToFirstToken: useBackendMetricCall<Result<TimeToFirstToken[], string>>({
       params,
       endpoint: "/api/metrics/timeToFirstToken",
       key: "timeToFirstToken",
