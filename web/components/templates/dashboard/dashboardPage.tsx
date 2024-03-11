@@ -151,7 +151,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
 
-  const { metrics, filterMap, overTimeData, isAnyLoading, refetch } =
+  const { metrics, filterMap, overTimeData, isAnyLoading, refetch, remove } =
     useDashboardPage({
       timeFilter,
       uiFilters: debouncedAdvancedFilters,
@@ -681,6 +681,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         headerActions={
           <button
             onClick={() => {
+              remove();
               refetch();
             }}
             className="font-semibold text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700"
