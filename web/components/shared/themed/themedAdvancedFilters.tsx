@@ -197,7 +197,7 @@ function AdvancedFilterRow({
   ) => Promise<Result<void, string>>;
 }) {
   return (
-    <div className="w-full flex flex-col lg:flex-row gap-3 items-left lg:items-center ml-4">
+    <div className="w-full flex flex-col lg:flex-row gap-3 items-left lg:items-end ml-4">
       <div className="w-full max-w-[12.5rem]">
         <SearchSelect
           value={filter.filterMapIdx.toString()}
