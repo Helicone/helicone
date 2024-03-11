@@ -46,38 +46,43 @@ export class SupabaseWrapper {
     const result = await promise;
     const end = performance.now();
 
-    SupabaseWrapper.ctx.waitUntil(
-      new Promise(async () => {
-        const distribution = {
-          series: [
-            {
-              metric: "postgres.query.execution_time",
-              points: [[timestamp, [end - start]]],
-              host: "cloudflare_worker",
-              // Query name should be `<operation>_<entity>_<action>`, e.g. `select_user_by_id`
-              tags: ["query_name:" + queryName],
+    const randomNumber = Math.floor(Math.random() * 100);
+
+    // Only send 1% of the requests to DataDog
+    if (randomNumber < 1) {
+      SupabaseWrapper.ctx.waitUntil(
+        new Promise(async () => {
+          const distribution = {
+            series: [
+              {
+                metric: "postgres.query.execution_time",
+                points: [[timestamp, [end - start]]],
+                host: "cloudflare_worker",
+                // Query name should be `<operation>_<entity>_<action>`, e.g. `select_user_by_id`
+                tags: ["query_name:" + queryName],
+              },
+            ],
+          };
+
+          const requestInit = {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Content-Encoding": "string",
+              "DD-API-KEY": SupabaseWrapper.dataDogConfig.apiKey,
             },
-          ],
-        };
+            body: JSON.stringify(distribution),
+          };
 
-        const requestInit = {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Content-Encoding": "string",
-            "DD-API-KEY": SupabaseWrapper.dataDogConfig.apiKey,
-          },
-          body: JSON.stringify(distribution),
-        };
+          const response = await fetch(
+            `${SupabaseWrapper.dataDogConfig.endpoint}/v1/distribution_points`,
+            requestInit
+          );
 
-        const response = await fetch(
-          `${SupabaseWrapper.dataDogConfig.endpoint}/v1/distribution_points`,
-          requestInit
-        );
-
-        return response;
-      })
-    );
+          return response;
+        })
+      );
+    }
 
     return result;
   }
