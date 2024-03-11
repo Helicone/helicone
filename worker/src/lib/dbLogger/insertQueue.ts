@@ -10,29 +10,6 @@ import { Valhalla } from "../db/valhalla";
 import { formatTimeString } from "./clickhouseLog";
 import { withTiming } from "../../db/SupabaseWrapper";
 
-export async function withTiming2<T>(
-  promise: PostgrestBuilder<T>,
-  { queryName }: { queryName: string }
-) {
-  //   if (!SupabaseWrapper.ctx) {
-  //     throw new Error("ExecutionContext is not set.");
-  //   }
-
-  const start = performance.now();
-  const result = await promise;
-  const end = performance.now();
-
-  //   SupabaseWrapper.ctx.waitUntil(
-  //     new Promise((resolve) => {
-  //       console.log(`Query ${queryName} took ${end - start} ms`);
-  //       // Replace console.log with your logging logic
-  //       setTimeout(resolve, 1000);
-  //     })
-  //   );
-
-  return result;
-}
-
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];
   properties: Database["public"]["Tables"]["properties"]["Insert"][];
