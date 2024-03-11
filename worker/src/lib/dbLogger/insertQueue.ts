@@ -27,25 +27,30 @@ export async function insertIntoRequest(
   const requestInsertResult = await withTiming(
     database.from("request").insert([request]),
     {
-      queryName: "request_insert",
+      queryName: "insert_request",
     }
   );
+
   const createdAt = request.created_at
     ? request.created_at
     : new Date().toISOString();
-  const responseInsertResult = await database.from("response").insert([
+  const responseInsertResult = await withTiming(
+    database.from("response").insert([
+      {
+        request: request.id,
+        id: responseId,
+        delay_ms: -1,
+        body: {},
+        status: -2,
+        created_at: createdAt,
+      },
+    ]),
     {
-      request: request.id,
-      id: responseId,
-      delay_ms: -1,
-      body: {},
-      status: -2,
-      created_at: createdAt,
-    },
-  ]);
-  const propertiesInsertResult = await database
-    .from("properties")
-    .insert(properties);
+      queryName: "insert_response",
+    }
+  );
+  const propertiesInsertResult = await insertProperties(database, properties);
+
   if (
     requestInsertResult.error ||
     responseInsertResult.error ||
@@ -63,6 +68,22 @@ export async function insertIntoRequest(
   return { data: null, error: null };
 }
 
+async function insertProperties(
+  database: SupabaseClient<Database>,
+  properties: Database["public"]["Tables"]["properties"]["Insert"][]
+): Promise<Result<null, string>> {
+  const insertResult = await withTiming(
+    database.from("properties").insert(properties),
+    {
+      queryName: "insert_properties",
+    }
+  );
+  if (insertResult.error) {
+    return { data: null, error: JSON.stringify(insertResult) };
+  }
+  return { data: null, error: null };
+}
+
 export async function updateResponse(
   database: SupabaseClient<Database>,
   responsePayload: ResponsePayload
@@ -71,16 +92,20 @@ export async function updateResponse(
   if (!responseId) {
     return { data: null, error: "Missing responseId" };
   }
-  return database
-    .from("response")
-    .update(response)
-    .match({ id: responseId, request: requestId })
-    .then((res) => {
-      if (res.error) {
-        return { data: null, error: res.error.message };
-      }
-      return { data: null, error: null };
-    });
+  return await withTiming(
+    database
+      .from("response")
+      .update(response)
+      .match({ id: responseId, request: requestId }),
+    {
+      queryName: "update_response",
+    }
+  ).then((res) => {
+    if (res.error) {
+      return { data: null, error: res.error.message };
+    }
+    return { data: null, error: null };
+  });
 }
 
 export interface ResponsePayload {
@@ -126,10 +151,15 @@ export class InsertQueue {
     jobId: string,
     status: Database["public"]["Tables"]["job"]["Insert"]["status"]
   ): Promise<Result<null, string>> {
-    const updateResult = await this.database
-      .from("job")
-      .update({ status, updated_at: new Date().toISOString() })
-      .eq("id", jobId);
+    const updateResult = await withTiming(
+      this.database
+        .from("job")
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq("id", jobId),
+      {
+        queryName: "update_job_status",
+      }
+    );
 
     if (updateResult.error) {
       return { data: null, error: JSON.stringify(updateResult.error) };
@@ -140,10 +170,15 @@ export class InsertQueue {
     nodeId: string,
     status: Database["public"]["Tables"]["job_node"]["Insert"]["status"]
   ): Promise<Result<null, string>> {
-    const updateResult = await this.database
-      .from("job_node")
-      .update({ status, updated_at: new Date().toISOString() })
-      .eq("id", nodeId);
+    const updateResult = await withTiming(
+      this.database
+        .from("job_node")
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq("id", nodeId),
+      {
+        queryName: "update_node_status",
+      }
+    );
     if (updateResult.error) {
       return { data: null, error: JSON.stringify(updateResult.error) };
     }
@@ -154,20 +189,28 @@ export class InsertQueue {
     node: Database["public"]["Tables"]["job_node"]["Insert"],
     options: { parent_job_id?: string }
   ): Promise<Result<null, string>> {
-    const insertResult = await this.database.from("job_node").insert([node]);
+    const insertResult = await withTiming(
+      this.database.from("job_node").insert([node]),
+      {
+        queryName: "insert_node",
+      }
+    );
     if (insertResult.error) {
       return { data: null, error: JSON.stringify(insertResult) };
     }
     if (options.parent_job_id) {
-      const insertResult = await this.database
-        .from("job_node_relationships")
-        .insert([
+      const insertResult = await withTiming(
+        this.database.from("job_node_relationships").insert([
           {
             node_id: node.id,
             parent_node_id: options.parent_job_id,
             job_id: node.job,
           },
-        ]);
+        ]),
+        {
+          queryName: "insert_node_relationship",
+        }
+      );
       if (insertResult.error) {
         return { data: null, error: JSON.stringify(insertResult) };
       }
@@ -347,13 +390,18 @@ export class InsertQueue {
       string
     >
   > {
-    const existingPrompt = await this.database
-      .from("prompts")
-      .select("*")
-      .eq("organization_id", orgId)
-      .eq("id", promptId)
-      .order("version", { ascending: false })
-      .limit(1);
+    const existingPrompt = await withTiming(
+      this.database
+        .from("prompts")
+        .select("*")
+        .eq("organization_id", orgId)
+        .eq("id", promptId)
+        .order("version", { ascending: false })
+        .limit(1),
+      {
+        queryName: "select_prompt_by_id",
+      }
+    );
 
     if (existingPrompt.error) {
       return { data: null, error: existingPrompt.error.message };
@@ -371,15 +419,20 @@ export class InsertQueue {
       existingPrompt.data.length === 0 ||
       version !== existingPrompt.data[0].version
     ) {
-      const insertResult = await this.database.from("prompts").insert([
+      const insertResult = await withTiming(
+        this.database.from("prompts").insert([
+          {
+            id: promptId,
+            organization_id: orgId,
+            heliconeTemplate,
+            status: "active",
+            version,
+          },
+        ]),
         {
-          id: promptId,
-          organization_id: orgId,
-          heliconeTemplate,
-          status: "active",
-          version,
-        },
-      ]);
+          queryName: "insert_prompt",
+        }
+      );
       if (insertResult.error) {
         return err(insertResult.error.message);
       }
@@ -417,7 +470,7 @@ export class InsertQueue {
         .eq("helicone_org_id", orgId)
         .single(),
       {
-        queryName: "request_select",
+        queryName: "select_request_by_id",
       }
     );
 
@@ -433,22 +486,28 @@ export class InsertQueue {
       allProperties[p.key] = p.value;
     });
 
-    await this.database
-      .from("request")
-      .update({ properties: allProperties })
-      .match({
-        id: requestId,
-      })
-      .eq("helicone_org_id", orgId);
+    await withTiming(
+      this.database
+        .from("request")
+        .update({ properties: allProperties })
+        .match({
+          id: requestId,
+        })
+        .eq("helicone_org_id", orgId),
+      {
+        queryName: "update_request_properties",
+      }
+    );
 
-    await this.database.from("properties").insert(
+    const properties: Database["public"]["Tables"]["properties"]["Insert"][] =
       newProperties.map((p) => ({
         request_id: requestId,
         key: p.key,
         value: p.value,
         auth_hash: "",
-      }))
-    );
+      }));
+
+    await insertProperties(this.database, properties);
 
     const query = `
         SELECT * 

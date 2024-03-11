@@ -45,78 +45,35 @@ export class SupabaseWrapper {
     const start = performance.now();
     const result = await promise;
     const end = performance.now();
-    console.log(`Query ${queryName} took ${end - start} ms`);
 
     SupabaseWrapper.ctx.waitUntil(
       new Promise(async () => {
-        const logEntry = {
+        const distribution = {
           series: [
             {
               metric: "postgres.query.execution_time",
-              type: 3, // guage
-              points: [
-                {
-                  timestamp: timestamp,
-                  value: end - start,
-                },
-              ],
-              resources: [
-                {
-                  name: "cloudflare_worker",
-                  type: "worker",
-                },
-              ],
+              points: [[timestamp, [end - start]]],
+              host: "cloudflare_worker",
+              // Query name should be `<operation>_<entity>_<action>`, e.g. `select_user_by_id`
               tags: ["query_name:" + queryName],
             },
           ],
         };
 
-        // {
-        //   "series": [
-        //     {
-        //       "metric": "example.metric.name",
-        //       "type": 3,
-        //       "points": [
-        //         {
-        //           "timestamp": 1636629071,
-        //           "value": 0.7
-        //         }
-        //       ],
-        //       "tags": ["environment:production", "version:1"],
-        //       "resources": [
-        //         {
-        //           "name": "examplehost",
-        //           "type": "host"
-        //         }
-        //       ],
-        //       "metadata": {
-        //         "unit": "milliseconds",
-        //         "type": "gauge"
-        //       },
-        //       "origin": {
-        //         "source_type_name": "my_source_type"
-        //       },
-        //       "metric_type": 3,
-        //       "product": 123,
-        //       "service": 456
-        //     }
-        //   ]
-        // }
+        const requestInit = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Content-Encoding": "string",
+            "DD-API-KEY": SupabaseWrapper.dataDogConfig.apiKey,
+          },
+          body: JSON.stringify(distribution),
+        };
 
         const response = await fetch(
-          `${SupabaseWrapper.dataDogConfig.endpoint}/v2/series`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "DD-API-KEY": SupabaseWrapper.dataDogConfig.apiKey,
-            },
-            body: JSON.stringify(logEntry),
-          }
+          `${SupabaseWrapper.dataDogConfig.endpoint}/v1/distribution_points`,
+          requestInit
         );
-
-        console.log(`DataDog response: ${response.status}`);
-        console.log(`DataDog response: ${await response.text()}`);
 
         return response;
       })

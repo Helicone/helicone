@@ -126,11 +126,16 @@ export async function isApiKeyAuthenticated(
     const heliconeApiKeyHash = await hash(
       `Bearer ${heliconeAuth.token.replace("Bearer ", "")}`
     );
-    const { data: apiKey, error: apiKeyError } = await dbClient
-      .from("helicone_api_keys")
-      .select("*")
-      .eq("organization_id", orgId)
-      .eq("api_key_hash", heliconeApiKeyHash);
+    const { data: apiKey, error: apiKeyError } = await withTiming(
+      dbClient
+        .from("helicone_api_keys")
+        .select("*")
+        .eq("organization_id", orgId)
+        .eq("api_key_hash", heliconeApiKeyHash),
+      {
+        queryName: "select_helicone_api_keys_by_org_id",
+      }
+    );
 
     if (apiKeyError || !apiKey) {
       console.error("Error fetching api key:", apiKeyError.message);
@@ -157,7 +162,7 @@ export async function isApiKeyAuthenticated(
         .eq("id", orgId)
         .eq("owner", user.data.user.id),
       {
-        queryName: "isOwner",
+        queryName: "select_organization_by_id",
       }
     );
     if (isOwner.error) {
@@ -167,11 +172,16 @@ export async function isApiKeyAuthenticated(
     if (isOwner.data.length > 0) {
       return { error: null, data: true };
     }
-    const isMemeber = await dbClient
-      .from("organization_member")
-      .select("*")
-      .eq("member", user.data.user.id)
-      .eq("organization", orgId);
+    const isMemeber = await withTiming(
+      dbClient
+        .from("organization_member")
+        .select("*")
+        .eq("member", user.data.user.id)
+        .eq("organization", orgId),
+      {
+        queryName: "select_organization_member_by_member_and_organization",
+      }
+    );
     if (isMemeber.error) {
       console.error("Error fetching user:", isMemeber.error.message);
       return { error: isMemeber.error.message, data: null };
@@ -189,18 +199,23 @@ export async function upsertFeedbackPostgres(
   rating: boolean,
   dbClient: SupabaseClient<Database>
 ): Promise<Result<Database["public"]["Tables"]["feedback"]["Row"], string>> {
-  const feedback = await dbClient
-    .from("feedback")
-    .upsert(
-      {
-        response_id: responseId,
-        rating: rating,
-        created_at: new Date().toISOString(),
-      },
-      { onConflict: "response_id" }
-    )
-    .select("*")
-    .single();
+  const feedback = await withTiming(
+    dbClient
+      .from("feedback")
+      .upsert(
+        {
+          response_id: responseId,
+          rating: rating,
+          created_at: new Date().toISOString(),
+        },
+        { onConflict: "response_id" }
+      )
+      .select("*")
+      .single(),
+    {
+      queryName: "upsert_feedback_by_response_id",
+    }
+  );
 
   if (feedback.error) {
     console.error("Error upserting feedback:", feedback.error);
@@ -221,10 +236,12 @@ async function getRequest(
   const maxRetries = 3;
 
   for (let i = 0; i < maxRetries; i++) {
-    const { data: request, error: requestError } = await dbClient
-      .from("request")
-      .select("*")
-      .eq("id", heliconeId);
+    const { data: request, error: requestError } = await withTiming(
+      dbClient.from("request").select("*").eq("id", heliconeId),
+      {
+        queryName: "select_request_by_id",
+      }
+    );
 
     if (requestError) {
       console.error("Error fetching request:", requestError.message);
@@ -249,10 +266,12 @@ export async function getResponse(
   const maxRetries = 3;
 
   for (let i = 0; i < maxRetries; i++) {
-    const { data: response, error: responseError } = await dbClient
-      .from("response")
-      .select("*")
-      .eq("request", heliconeId);
+    const { data: response, error: responseError } = await withTiming(
+      dbClient.from("response").select("*").eq("request", heliconeId),
+      {
+        queryName: "select_response_by_request",
+      }
+    );
 
     if (responseError) {
       console.error("Error fetching response:", responseError.message);
