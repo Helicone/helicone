@@ -1,5 +1,6 @@
 import {
   ArrowPathIcon,
+  ArrowTopRightOnSquareIcon,
   ArrowsPointingOutIcon,
   ClockIcon,
   CurrencyDollarIcon,
@@ -242,40 +243,43 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                   {cleanedValueData.map((propertyValue, i) => (
                     <TableRow
                       key={i}
-                      onClick={() => {
-                        const value = propertyValue.property_value;
-
-                        const filterMapIndex = filterMap.findIndex(
-                          (f) => f.label === property
-                        );
-
-                        const currentAdvancedFilters = encodeURIComponent(
-                          JSON.stringify(
-                            [
-                              {
-                                filterMapIdx: filterMapIndex,
-                                operatorIdx: 0,
-                                value,
-                              },
-                            ]
-                              .map(encodeFilter)
-                              .join("|")
-                          )
-                        );
-
-                        router.push({
-                          pathname: "/requests",
-                          query: {
-                            t: "3m",
-                            filters: JSON.stringify(currentAdvancedFilters),
-                          },
-                        });
-                      }}
-                      className="text-black dark:text-white border-b border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-900 hover:cursor-pointer"
+                      className="text-black dark:text-white border-b border-gray-300 dark:border-gray-700"
                     >
                       <>
-                        <TableCell className="font-semibold max-w-[200px] 2xl:max-w-[400px] truncate">
+                        <TableCell
+                          className="flex flex-row items-start font-semibold max-w-[200px] 2xl:max-w-[400px] truncate underline hover:cursor-pointer"
+                          onClick={() => {
+                            const value = propertyValue.property_value;
+
+                            const filterMapIndex = filterMap.findIndex(
+                              (f) => f.label === property
+                            );
+
+                            const currentAdvancedFilters = encodeURIComponent(
+                              JSON.stringify(
+                                [
+                                  {
+                                    filterMapIdx: filterMapIndex,
+                                    operatorIdx: 0,
+                                    value,
+                                  },
+                                ]
+                                  .map(encodeFilter)
+                                  .join("|")
+                              )
+                            );
+
+                            router.push({
+                              pathname: "/requests",
+                              query: {
+                                t: "3m",
+                                filters: JSON.stringify(currentAdvancedFilters),
+                              },
+                            });
+                          }}
+                        >
                           {propertyValue.property_value}
+                          <ArrowTopRightOnSquareIcon className="h-4 w-4 inline ml-1 text-gray-700 dark:text-gray-300" />
                         </TableCell>
                         <TableCell>{propertyValue.total_requests}</TableCell>
                         <TableCell>
