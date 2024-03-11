@@ -251,5 +251,9 @@ export const useDashboardPage = ({
       Object.values(overTimeData).forEach((x) => x.refetch());
       Object.values(metrics).forEach((x) => x.refetch());
     },
+    remove: () => {
+      Object.values(overTimeData).forEach((x) => x.remove());
+      Object.values(metrics).forEach((x) => x.remove());
+    },
   };
 };
