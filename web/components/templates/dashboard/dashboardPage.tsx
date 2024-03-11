@@ -962,7 +962,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 <StyledAreaChart
                   title={"Threats"}
                   value={`${metrics.totalThreats.data?.data?.toFixed(0) ?? 0}`}
-                  isDataOverTimeLoading={overTimeData.ttft.isLoading}
+                  isDataOverTimeLoading={overTimeData.threats.isLoading}
                 >
                   <AreaChart
                     className="h-[14rem]"
