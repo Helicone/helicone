@@ -47,15 +47,10 @@ export async function insertIntoRequest(
   const propertiesInsertResult = await database
     .from("properties")
     .insert(properties);
-  if (
-    requestInsertResult.error ||
-    responseInsertResult.error ||
-    propertiesInsertResult.error
-  ) {
+  if (responseInsertResult.error || propertiesInsertResult.error) {
     return {
       data: null,
       error: JSON.stringify({
-        requestError: requestInsertResult.error,
         responseError: responseInsertResult.error,
         propertiesError: propertiesInsertResult.error,
       }),
