@@ -10,6 +10,7 @@ import { Valhalla } from "../db/valhalla";
 import { formatTimeString } from "./clickhouseLog";
 import { withTiming } from "../../db/SupabaseWrapper";
 
+const percentLogging = 0.01;
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];
   properties: Database["public"]["Tables"]["properties"]["Insert"][];
@@ -28,6 +29,7 @@ export async function insertIntoRequest(
     database.from("request").insert([request]),
     {
       queryName: "insert_request",
+      percentLogging,
     }
   );
 
@@ -55,6 +57,7 @@ export async function insertIntoRequest(
     ]),
     {
       queryName: "insert_response",
+      percentLogging,
     }
   );
   const propertiesInsertResult = await insertProperties(database, properties);
@@ -79,6 +82,7 @@ async function insertProperties(
     database.from("properties").insert(properties),
     {
       queryName: "insert_properties",
+      percentLogging,
     }
   );
   if (insertResult.error) {
@@ -102,6 +106,7 @@ export async function updateResponse(
       .match({ id: responseId, request: requestId }),
     {
       queryName: "update_response",
+      percentLogging,
     }
   ).then((res) => {
     if (res.error) {
@@ -432,6 +437,7 @@ export class InsertQueue {
         .single(),
       {
         queryName: "select_request_by_id",
+        percentLogging,
       }
     );
 
@@ -457,6 +463,7 @@ export class InsertQueue {
         .eq("helicone_org_id", orgId),
       {
         queryName: "update_request_properties",
+        percentLogging,
       }
     );
 

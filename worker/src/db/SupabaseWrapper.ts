@@ -2,6 +2,7 @@ import { PostgrestBuilder } from "@supabase/postgrest-js";
 
 interface WithTimingParams {
   queryName: string;
+  percentLogging?: number;
 }
 
 interface DataDogConfig {
@@ -35,7 +36,7 @@ export class SupabaseWrapper {
 
   async withTiming<T>(
     promise: PostgrestBuilder<T>,
-    { queryName }: WithTimingParams
+    { queryName, percentLogging = 1 }: WithTimingParams
   ) {
     if (!SupabaseWrapper.ctx) {
       throw new Error("ExecutionContext is not set.");
@@ -46,10 +47,10 @@ export class SupabaseWrapper {
     const result = await promise;
     const end = performance.now();
 
-    const randomNumber = Math.floor(Math.random() * 100);
+    const randomNumber = Math.random();
 
-    // Only send 1% of the requests to DataDog
-    if (randomNumber < 1) {
+    // Log based on the percentage
+    if (randomNumber < percentLogging) {
       SupabaseWrapper.ctx.waitUntil(
         new Promise(async () => {
           const distribution = {
