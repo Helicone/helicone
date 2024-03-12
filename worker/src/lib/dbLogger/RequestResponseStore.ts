@@ -249,28 +249,6 @@ export class RequestResponseStore {
     }
   }
 
-  private getModelFromRequest(
-    requestData: Database["public"]["Tables"]["request"]["Insert"]
-  ) {
-    try {
-      if (typeof requestData.body !== "object" || !requestData.body) {
-        return "unknown";
-      }
-      if (Array.isArray(requestData.body)) {
-        return "unknown";
-      }
-
-      return (
-        (requestData.body["model"] ||
-          (requestData.body.body as any)["model"] ||
-          this.getModelFromPath(requestData.path)) ??
-        "unknown"
-      );
-    } catch (e) {
-      return this.getModelFromPath(requestData.path) ?? "unknown";
-    }
-  }
-
   private getModelFromResponse(
     responseData: Database["public"]["Tables"]["response"]["Update"]
   ) {
@@ -415,7 +393,7 @@ export class RequestResponseStore {
   }
 
   async waitForResponse(requestId: string) {
-    await getResponse(this.database, requestId);
+    await getResponse(this.database, this.queryTimer, requestId);
   }
 
   async putRequestProperty(
