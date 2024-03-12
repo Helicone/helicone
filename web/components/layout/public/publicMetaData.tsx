@@ -9,11 +9,21 @@ interface PublicMetaDataProps {
 const PublicMetaData = (props: PublicMetaDataProps) => {
   const { description, ogImageUrl, children } = props;
 
+  // Detect if running on localhost
+  const isLocalhost =
+    typeof window !== "undefined" && window.location.hostname === "localhost";
+
+  // Conditionally set favicon path
+  const faviconPath = isLocalhost
+    ? "/assets/landing/helicone-dev.png"
+    : "/static/helicone-logo.png";
+
   return (
     <>
       <Head>
         <title>{`Helicone - Open-Source Generative AI Platform for Developers`}</title>
-        <link rel="icon" href="/static/helicone-logo.png" />
+        {/* Update the favicon path based on the environment */}
+        <link rel="icon" href={faviconPath} />
         <meta property="og:title" content={"Helicone"} />
         <meta content="https://helicone.ai" property="og:url" />
         <meta name="description" content={description} />
