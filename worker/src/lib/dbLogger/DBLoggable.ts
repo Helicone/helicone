@@ -541,6 +541,9 @@ export class DBLoggable {
 
     if (org.data.percentLog !== 100_000) {
       const random = Math.random() * 100_000;
+      console.log(
+        `NOT LOGGING FOR ORG ID: ${authParams.organizationId} ${random} ${org.data.percentLog}`
+      );
       if (random > org.data.percentLog) {
         return ok(null);
       }
