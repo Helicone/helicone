@@ -13,7 +13,6 @@ import {
   SelectItem,
   TextInput,
 } from "@tremor/react";
-import { useEffect, useState } from "react";
 import ThemedNumberDropdown from "./themedNumberDropdown";
 
 export function AdvancedFilters({
@@ -109,31 +108,16 @@ function AdvancedFilterInput({
   }[];
   onSearchHandler?: (search: string) => Promise<Result<void, string>>;
 }) {
-  const [currentValue, setCurrentValue] = useState<string>(value);
-  const [currentParams, setCurrentParams] = useState<
-    {
-      key: string;
-      param: string;
-    }[]
-  >(inputParams ?? []);
-
-  useEffect(() => {
-    if (inputParams !== currentParams) {
-      setCurrentParams(inputParams ?? []);
-    }
-  }, [type, inputParams]);
-
   switch (type) {
     case "text":
       return (
         <TextInput
           className=""
           onChange={(e) => {
-            setCurrentValue(e.target.value);
             onChange(e.target.value);
           }}
           placeholder={"text..."}
-          value={currentValue}
+          value={value}
         />
       );
     case "number":
@@ -141,11 +125,10 @@ function AdvancedFilterInput({
         <NumberInput
           className=""
           onChange={(e) => {
-            setCurrentValue(e.target.value);
             onChange(e.target.value);
           }}
           placeholder={"number..."}
-          value={currentValue}
+          value={value}
           enableStepper={false}
         />
       );
@@ -163,7 +146,7 @@ function AdvancedFilterInput({
     case "text-with-suggestions":
       return (
         <ThemedTextDropDown
-          options={currentParams.map((param) => param.param) ?? []}
+          options={inputParams?.map((param) => param.param) ?? []}
           onChange={(e) => onChange(e)}
           value={value}
           onSearchHandler={onSearchHandler}
@@ -172,7 +155,7 @@ function AdvancedFilterInput({
     case "number-with-suggestions":
       return (
         <ThemedNumberDropdown
-          options={currentParams ?? []}
+          options={inputParams ?? []}
           onChange={(e) => onChange(e)}
           value={value}
         />
@@ -213,17 +196,12 @@ function AdvancedFilterRow({
     search: string
   ) => Promise<Result<void, string>>;
 }) {
-  const [currentColumn, setCurrentColumn] = useState<string>();
-  const [currentOperator, setCurrentOperator] = useState<string>();
-
   return (
-    <div className="w-full flex flex-col lg:flex-row gap-3 items-left lg:items-center ml-4">
+    <div className="w-full flex flex-col lg:flex-row gap-3 items-left lg:items-end ml-4">
       <div className="w-full max-w-[12.5rem]">
         <SearchSelect
-          value={currentColumn}
-          placeholder="Search Fields..."
+          value={filter.filterMapIdx.toString()}
           onValueChange={(value) => {
-            setCurrentColumn(value);
             const selected = Number(value);
             const label = filterMap[selected].label;
             if (label === "Feedback") {
@@ -257,11 +235,9 @@ function AdvancedFilterRow({
 
       <div className="w-full max-w-[12.5rem]">
         <Select
-          value={currentOperator}
-          placeholder="equals"
-          onValueChange={(value: string | number | undefined) => {
+          value={filter.operatorIdx.toString()}
+          onValueChange={(value: string) => {
             const selected = Number(value);
-            setCurrentOperator(value as string);
             setFilter([
               {
                 filterMapIdx: filter.filterMapIdx,

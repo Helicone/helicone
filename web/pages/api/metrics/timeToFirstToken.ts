@@ -1,35 +1,36 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { getTotalRequestsOverTime } from "../../../lib/api/metrics/getRequestOverTime";
+import { getTimeToFirstToken } from "../../../lib/api/metrics/getTimeToFirstToken";
 import { Result } from "../../../lib/result";
-import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
+export interface TimeToFirstToken {
+  ttft: number;
+  time: Date;
+}
+
 async function handler(
-  options: HandlerWrapperOptions<Result<RequestsOverTime[], string>>
+  options: HandlerWrapperOptions<Result<TimeToFirstToken[], string>>
 ) {
   const {
-    req,
     res,
     userData: { orgId },
   } = options;
+
   const {
     timeFilter,
     filter: userFilters,
     dbIncrement,
     timeZoneDifference,
-    organizationId,
   } = options.req.body as MetricsBackendBody;
 
   res.status(200).json(
-    await getTotalRequestsOverTime({
+    await getTimeToFirstToken({
       timeFilter,
       userFilter: userFilters,
-      orgId: organizationId ?? orgId,
+      orgId,
       dbIncrement: dbIncrement ?? "hour",
       timeZoneDifference,
     })

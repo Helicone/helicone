@@ -139,7 +139,8 @@ const whereKeyMappings: KeyMappings = {
   response: easyKeyMappings<"response">({
     body_completion:
       "(coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text",
-    body_model: "request.body ->> 'model'",
+    body_model:
+      "(coalesce(request.model_override, response.model, request.model, response.body ->> 'model', request.body ->> 'model'))::text",
     body_tokens: "((response.body -> 'usage') ->> 'total_tokens')::bigint",
     status: "response.status",
     model: "response.model",
@@ -191,6 +192,10 @@ const whereKeyMappings: KeyMappings = {
     request_created_at: "property_with_response_v1.request_created_at",
     organization_id: "property_with_response_v1.organization_id",
     threat: "property_with_response_v1.threat",
+  }),
+  rate_limit_log: easyKeyMappings<"rate_limit_log">({
+    organization_id: "rate_limit_log.organization_id",
+    created_at: "rate_limit_log.created_at",
   }),
   job: (filter) => {
     if ("custom_properties" in filter && filter.custom_properties) {
@@ -272,6 +277,7 @@ const havingKeyMappings: KeyMappings = {
   job_node: NOT_IMPLEMENTED,
   feedback: NOT_IMPLEMENTED,
   cache_hits: NOT_IMPLEMENTED,
+  rate_limit_log: NOT_IMPLEMENTED,
 };
 
 export function buildFilterLeaf(
@@ -318,15 +324,21 @@ export function buildFilterLeaf(
         ? "NOT ILIKE"
         : undefined;
 
-    filters.push(
-      `${column} ${sqlOperator} ${argPlaceHolder(argsAcc.length, value)}`
-    );
-    if (operatorKey === "contains") {
-      argsAcc.push(`%${value}%`);
-    } else if (operatorKey === "not-contains") {
-      argsAcc.push(`%${value}%`);
+    if (operatorKey === "not-equals" && value === "null") {
+      filters.push(`${column} is not null`);
+    } else if (operatorKey === "equals" && value === "null") {
+      filters.push(`${column} is null`);
     } else {
-      argsAcc.push(value);
+      filters.push(
+        `${column} ${sqlOperator} ${argPlaceHolder(argsAcc.length, value)}`
+      );
+      if (operatorKey === "contains") {
+        argsAcc.push(`%${value}%`);
+      } else if (operatorKey === "not-contains") {
+        argsAcc.push(`%${value}%`);
+      } else {
+        argsAcc.push(value);
+      }
     }
   }
 
@@ -511,6 +523,18 @@ export async function buildFilterWithAuthClickHouseCacheHits(
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
     cache_hits: {
+      organization_id: {
+        equals: orgId,
+      },
+    },
+  }));
+}
+
+export async function buildFilterWithAuthClickHouseRateLimits(
+  args: ExternalBuildFilterArgs & { org_id: string }
+): Promise<{ filter: string; argsAcc: any[] }> {
+  return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
+    rate_limit_log: {
       organization_id: {
         equals: orgId,
       },

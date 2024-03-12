@@ -151,7 +151,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
 
-  const { metrics, filterMap, overTimeData, isAnyLoading, refetch } =
+  const { metrics, filterMap, overTimeData, isAnyLoading, refetch, remove } =
     useDashboardPage({
       timeFilter,
       uiFilters: debouncedAdvancedFilters,
@@ -160,7 +160,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       dbIncrement: timeIncrement,
     });
 
-  const { isLoading, models } = useModels(timeFilter);
+  const { isLoading, models } = useModels(timeFilter, 5);
 
   function encodeFilter(filter: UIFilterRow): string {
     return `${filter.filterMapIdx}:${filter.operatorIdx}:${encodeURIComponent(
@@ -352,9 +352,31 @@ const DashboardPage = (props: DashboardPageProps) => {
       maxH: 4,
     },
     {
-      i: "suggest-more-graphs",
+      i: "threats",
       x: 6,
       y: 8,
+      w: 6,
+      h: 4,
+      minW: 3,
+      maxW: 12,
+      minH: 4,
+      maxH: 4,
+    },
+    {
+      i: "time-to-first-token",
+      x: 0,
+      y: 12,
+      w: 6,
+      h: 4,
+      minW: 3,
+      maxW: 12,
+      minH: 4,
+      maxH: 4,
+    },
+    {
+      i: "suggest-more-graphs",
+      x: 6,
+      y: 12,
       w: 6,
       h: 4,
       minW: 3,
@@ -659,6 +681,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         headerActions={
           <button
             onClick={() => {
+              remove();
               refetch();
             }}
             className="font-semibold text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700"
@@ -936,6 +959,56 @@ const DashboardPage = (props: DashboardPageProps) => {
                 </StyledAreaChart>
               </div>
 
+              <div key="threats">
+                <StyledAreaChart
+                  title={"Threats"}
+                  value={`${metrics.totalThreats.data?.data?.toFixed(0) ?? 0}`}
+                  isDataOverTimeLoading={overTimeData.threats.isLoading}
+                >
+                  <AreaChart
+                    className="h-[14rem]"
+                    data={
+                      overTimeData.threats.data?.data?.map((r) => ({
+                        date: getTimeMap(timeIncrement)(r.time),
+                        threats: r.count,
+                      })) ?? []
+                    }
+                    index="date"
+                    categories={["threats"]}
+                    colors={["amber"]}
+                    showYAxis={false}
+                    curveType="monotone"
+                  />
+                </StyledAreaChart>
+              </div>
+
+              <div key="time-to-first-token">
+                <StyledAreaChart
+                  title={"Time to First Token"}
+                  value={`${
+                    metrics.averageTimeToFirstToken.data?.data?.toFixed(0) ?? 0
+                  } ms`}
+                  isDataOverTimeLoading={
+                    overTimeData.timeToFirstToken.isLoading
+                  }
+                >
+                  <AreaChart
+                    className="h-[14rem]"
+                    data={
+                      overTimeData.timeToFirstToken.data?.data?.map((r) => ({
+                        date: getTimeMap(timeIncrement)(r.time),
+                        time: r.ttft,
+                      })) ?? []
+                    }
+                    index="date"
+                    categories={["time"]}
+                    colors={["violet"]}
+                    showYAxis={false}
+                    curveType="monotone"
+                  />
+                </StyledAreaChart>
+              </div>
+
               <div key="suggest-more-graphs">
                 <div className="space-y-2 bg-white dark:bg-black border border-gray-900 dark:border-white border-dashed w-full h-full p-2 text-black dark:text-white shadow-sm rounded-lg flex flex-col items-center justify-center">
                   <PresentationChartLineIcon className="h-12 w-12 text-black dark:text-white" />
@@ -988,9 +1061,9 @@ const DashboardPage = (props: DashboardPageProps) => {
                       "Total / min",
                     ]}
                     colors={[
-                      "green",
+                      "cyan",
                       "blue",
-                      "orange",
+                      "green",
                       "indigo",
                       "orange",
                       "pink",

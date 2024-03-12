@@ -259,13 +259,6 @@ export class DBWrapper {
     return ok(org.data.tier);
   }
 
-  async recordRateLimitHit(orgId: string, totalCount: number): Promise<void> {
-    await this.supabaseClient.from("org_rate_limit_tracker").insert({
-      org_id: orgId,
-      total_count: totalCount,
-    });
-  }
-
   async isAuthorized(): Promise<boolean> {
     try {
       const params = await this.getAuthParams();

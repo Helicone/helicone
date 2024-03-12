@@ -25,8 +25,8 @@ export class RateLimiter {
         maxCount: 100_000,
       },
       free: {
-        windowSizeSeconds: 60,
-        maxCount: 1_000,
+        windowSizeSeconds: 5,
+        maxCount: 1,
       },
     };
     tier = tier?.toLowerCase() in rateLimitParams ? tier.toLowerCase() : "free";
