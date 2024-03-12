@@ -8,7 +8,6 @@ import { buildRouter } from "./routers/routerFactory";
 import { AlertManager } from "./AlertManager";
 import { AlertStore } from "./db/AlertStore";
 import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
-import { SupabaseWrapper } from "./db/SupabaseWrapper";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -123,10 +122,6 @@ export default {
     ctx: ExecutionContext
   ): Promise<Response> {
     try {
-      SupabaseWrapper.initialize(ctx, {
-        apiKey: env.DATADOG_API_KEY,
-        endpoint: env.DATADOG_ENDPOINT,
-      });
       const requestWrapper = await RequestWrapper.create(request, env);
       if (requestWrapper.error || !requestWrapper.data) {
         return handleError(requestWrapper.error);

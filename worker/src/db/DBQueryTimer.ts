@@ -11,36 +11,20 @@ interface DataDogConfig {
   endpoint: string;
 }
 
-export class SupabaseWrapper {
-  private static instance: SupabaseWrapper;
-  private static ctx: ExecutionContext | null = null;
-  private static dataDogConfig: DataDogConfig;
+export class DBQueryTimer {
+  private ctx: ExecutionContext;
+  private dataDogConfig: DataDogConfig;
 
-  private constructor() {}
-
-  static initialize(ctx: ExecutionContext, dataDogConfig: DataDogConfig) {
+  constructor(ctx: ExecutionContext, dataDogConfig: DataDogConfig) {
     this.ctx = ctx;
     this.dataDogConfig = dataDogConfig;
   }
 
-  static getInstance(): SupabaseWrapper {
-    if (!this.instance) {
-      if (!this.ctx) {
-        throw new Error(
-          "ExecutionContext is not set. Call initialize with ExecutionContext before getInstance."
-        );
-      }
-      this.instance = new SupabaseWrapper();
-    }
-    return this.instance;
-  }
-
-  // seperate out the ctx.waitUntil to make it easier to test
   async withTiming<T>(
     promise: PostgrestBuilder<T>,
     { queryName, percentLogging = 1 }: WithTimingParams
   ) {
-    if (!SupabaseWrapper.ctx) {
+    if (!this.ctx) {
       throw new Error("ExecutionContext is not set.");
     }
 
@@ -53,7 +37,7 @@ export class SupabaseWrapper {
 
     // Log based on the percentage
     if (randomNumber < percentLogging) {
-      SupabaseWrapper.ctx.waitUntil(
+      this.ctx.waitUntil(
         this.logDistributionMetric(timestamp, end - start, queryName)
       );
     }
@@ -83,23 +67,16 @@ export class SupabaseWrapper {
       headers: {
         "Content-Type": "application/json",
         "Content-Encoding": "string",
-        "DD-API-KEY": SupabaseWrapper.dataDogConfig.apiKey,
+        "DD-API-KEY": this.dataDogConfig.apiKey,
       },
       body: JSON.stringify(distribution),
     };
 
     const response = await fetch(
-      `${SupabaseWrapper.dataDogConfig.endpoint}/v1/distribution_points`,
+      `${this.dataDogConfig.endpoint}/v1/distribution_points`,
       requestInit
     );
 
     return response;
   }
-}
-
-export function withTiming<T>(
-  promise: PostgrestBuilder<T>,
-  params: WithTimingParams
-) {
-  return SupabaseWrapper.getInstance().withTiming<T>(promise, params);
 }

@@ -7,111 +7,12 @@ import { Result, err, ok } from "../../results";
 import { ClickhouseClientWrapper, RequestResponseLog } from "../db/clickhouse";
 import { Valhalla } from "../db/valhalla";
 import { formatTimeString } from "./clickhouseLog";
-import { FrequentPercentLogging, withTiming } from "../../db/SupabaseWrapper";
+import { DBQueryTimer, FrequentPercentLogging } from "../../db/DBQueryTimer";
 
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];
   properties: Database["public"]["Tables"]["properties"]["Insert"][];
   responseId: string;
-}
-export async function insertIntoRequest(
-  database: SupabaseClient<Database>,
-  requestPayload: RequestPayload
-): Promise<Result<null, string>> {
-  const { request, properties, responseId } = requestPayload;
-  if (!request.id) {
-    return { data: null, error: "Missing request.id" };
-  }
-
-  const requestInsertResult = await withTiming(
-    database.from("request").insert([request]),
-    {
-      queryName: "insert_request",
-      percentLogging: FrequentPercentLogging,
-    }
-  );
-
-  if (requestInsertResult.error) {
-    return {
-      data: null,
-      error: JSON.stringify({
-        requestError: requestInsertResult.error,
-      }),
-    };
-  }
-  const createdAt = request.created_at
-    ? request.created_at
-    : new Date().toISOString();
-  const responseInsertResult = await withTiming(
-    database.from("response").insert([
-      {
-        request: request.id,
-        id: responseId,
-        delay_ms: -1,
-        body: {},
-        status: -2,
-        created_at: createdAt,
-      },
-    ]),
-    {
-      queryName: "insert_response",
-      percentLogging: FrequentPercentLogging,
-    }
-  );
-  const propertiesInsertResult = await insertProperties(database, properties);
-
-  if (responseInsertResult.error || propertiesInsertResult.error) {
-    return {
-      data: null,
-      error: JSON.stringify({
-        responseError: responseInsertResult.error,
-        propertiesError: propertiesInsertResult.error,
-      }),
-    };
-  }
-  return { data: null, error: null };
-}
-
-async function insertProperties(
-  database: SupabaseClient<Database>,
-  properties: Database["public"]["Tables"]["properties"]["Insert"][]
-): Promise<Result<null, string>> {
-  const insertResult = await withTiming(
-    database.from("properties").insert(properties),
-    {
-      queryName: "insert_properties",
-      percentLogging: FrequentPercentLogging,
-    }
-  );
-  if (insertResult.error) {
-    return { data: null, error: JSON.stringify(insertResult) };
-  }
-  return { data: null, error: null };
-}
-
-export async function updateResponse(
-  database: SupabaseClient<Database>,
-  responsePayload: ResponsePayload
-): Promise<Result<null, string>> {
-  const { responseId, requestId, response } = responsePayload;
-  if (!responseId) {
-    return { data: null, error: "Missing responseId" };
-  }
-  return await withTiming(
-    database
-      .from("response")
-      .update(response)
-      .match({ id: responseId, request: requestId }),
-    {
-      queryName: "update_response",
-      percentLogging: FrequentPercentLogging,
-    }
-  ).then((res) => {
-    if (res.error) {
-      return { data: null, error: res.error.message };
-    }
-    return { data: null, error: null };
-  });
 }
 
 export interface ResponsePayload {
@@ -120,14 +21,120 @@ export interface ResponsePayload {
   response: Database["public"]["Tables"]["response"]["Update"];
 }
 
-export class InsertQueue {
+export class RequestResponseStore {
   constructor(
     private database: SupabaseClient<Database>,
+    private queryTimer: DBQueryTimer,
     private valhalla: Valhalla,
     private clickhouseWrapper: ClickhouseClientWrapper,
     public fallBackQueue: Queue,
     public responseAndResponseQueueKV: KVNamespace
   ) {}
+
+  async insertIntoRequest(
+    database: SupabaseClient<Database>,
+    requestPayload: RequestPayload
+  ): Promise<Result<null, string>> {
+    const { request, properties, responseId } = requestPayload;
+    if (!request.id) {
+      return { data: null, error: "Missing request.id" };
+    }
+
+    const requestInsertResult = await this.queryTimer.withTiming(
+      database.from("request").insert([request]),
+      {
+        queryName: "insert_request",
+        percentLogging: FrequentPercentLogging,
+      }
+    );
+
+    if (requestInsertResult.error) {
+      return {
+        data: null,
+        error: JSON.stringify({
+          requestError: requestInsertResult.error,
+        }),
+      };
+    }
+    const createdAt = request.created_at
+      ? request.created_at
+      : new Date().toISOString();
+    const responseInsertResult = await this.queryTimer.withTiming(
+      database.from("response").insert([
+        {
+          request: request.id,
+          id: responseId,
+          delay_ms: -1,
+          body: {},
+          status: -2,
+          created_at: createdAt,
+        },
+      ]),
+      {
+        queryName: "insert_response",
+        percentLogging: FrequentPercentLogging,
+      }
+    );
+    const propertiesInsertResult = await this.insertProperties(
+      database,
+      properties
+    );
+
+    if (responseInsertResult.error || propertiesInsertResult.error) {
+      return {
+        data: null,
+        error: JSON.stringify({
+          responseError: responseInsertResult.error,
+          propertiesError: propertiesInsertResult.error,
+        }),
+      };
+    }
+    return { data: null, error: null };
+  }
+
+  async insertProperties(
+    database: SupabaseClient<Database>,
+    properties: Database["public"]["Tables"]["properties"]["Insert"][]
+  ): Promise<Result<null, string>> {
+    const insertResult = await this.queryTimer.withTiming(
+      database.from("properties").insert(properties),
+      {
+        queryName: "insert_properties",
+        percentLogging: FrequentPercentLogging,
+      }
+    );
+    if (insertResult.error) {
+      return { data: null, error: JSON.stringify(insertResult) };
+    }
+    return { data: null, error: null };
+  }
+
+  async updateResponsePostgres(
+    database: SupabaseClient<Database>,
+    responsePayload: ResponsePayload
+  ): Promise<Result<null, string>> {
+    const { responseId, requestId, response } = responsePayload;
+    if (!responseId) {
+      return { data: null, error: "Missing responseId" };
+    }
+    return await this.queryTimer
+      .withTiming(
+        database
+          .from("response")
+          .update(response)
+          .match({ id: responseId, request: requestId }),
+        {
+          queryName: "update_response",
+          percentLogging: FrequentPercentLogging,
+        }
+      )
+      .then((res) => {
+        if (res.error) {
+          return { data: null, error: res.error.message };
+        }
+        return { data: null, error: null };
+      });
+  }
 
   async addRequestNodeRelationship(
     job_id: string,
@@ -157,7 +164,7 @@ export class InsertQueue {
     jobId: string,
     status: Database["public"]["Tables"]["job"]["Insert"]["status"]
   ): Promise<Result<null, string>> {
-    const updateResult = await withTiming(
+    const updateResult = await this.queryTimer.withTiming(
       this.database
         .from("job")
         .update({ status, updated_at: new Date().toISOString() })
@@ -176,7 +183,7 @@ export class InsertQueue {
     nodeId: string,
     status: Database["public"]["Tables"]["job_node"]["Insert"]["status"]
   ): Promise<Result<null, string>> {
-    const updateResult = await withTiming(
+    const updateResult = await this.queryTimer.withTiming(
       this.database
         .from("job_node")
         .update({ status, updated_at: new Date().toISOString() })
@@ -195,7 +202,7 @@ export class InsertQueue {
     node: Database["public"]["Tables"]["job_node"]["Insert"],
     options: { parent_job_id?: string }
   ): Promise<Result<null, string>> {
-    const insertResult = await withTiming(
+    const insertResult = await this.queryTimer.withTiming(
       this.database.from("job_node").insert([node]),
       {
         queryName: "insert_node",
@@ -205,7 +212,7 @@ export class InsertQueue {
       return { data: null, error: JSON.stringify(insertResult) };
     }
     if (options.parent_job_id) {
-      const insertResult = await withTiming(
+      const insertResult = await this.queryTimer.withTiming(
         this.database.from("job_node_relationships").insert([
           {
             node_id: node.id,
@@ -296,7 +303,7 @@ export class InsertQueue {
       responseId,
     };
 
-    const res = await insertIntoRequest(this.database, payload);
+    const res = await this.insertIntoRequest(this.database, payload);
 
     if (res.error) {
       console.error("Error inserting into request:", res.error);
@@ -315,7 +322,7 @@ export class InsertQueue {
       requestId,
       response,
     };
-    const res = await updateResponse(this.database, payload);
+    const res = await this.updateResponsePostgres(this.database, payload);
 
     const responseUpdate = await this.valhalla.patch("/v1/response", {
       model: this.getModelFromResponse(response),
@@ -354,7 +361,7 @@ export class InsertQueue {
       string
     >
   > {
-    const existingPrompt = await withTiming(
+    const existingPrompt = await this.queryTimer.withTiming(
       this.database
         .from("prompts")
         .select("*")
@@ -383,7 +390,7 @@ export class InsertQueue {
       existingPrompt.data.length === 0 ||
       version !== existingPrompt.data[0].version
     ) {
-      const insertResult = await withTiming(
+      const insertResult = await this.queryTimer.withTiming(
         this.database.from("prompts").insert([
           {
             id: promptId,
@@ -426,7 +433,7 @@ export class InsertQueue {
       string
     >
   > {
-    const request = await withTiming(
+    const request = await this.queryTimer.withTiming(
       this.database
         .from("request")
         .select("*")
@@ -451,7 +458,7 @@ export class InsertQueue {
       allProperties[p.key] = p.value;
     });
 
-    await withTiming(
+    await this.queryTimer.withTiming(
       this.database
         .from("request")
         .update({ properties: allProperties })
@@ -473,7 +480,7 @@ export class InsertQueue {
         auth_hash: "",
       }));
 
-    await insertProperties(this.database, properties);
+    await this.insertProperties(this.database, properties);
 
     const query = `
         SELECT * 
