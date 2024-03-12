@@ -39,7 +39,6 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
     return new Response("Authentication required.", { status: 401 });
   }
 
-  //declare function fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
   const dbClient: SupabaseClient<Database> = createClient(
     env.SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY
