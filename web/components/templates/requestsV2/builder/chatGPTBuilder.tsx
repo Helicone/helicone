@@ -88,7 +88,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
           typeof lastMessageContent === "object" &&
           lastMessageContent !== null
         ) {
-          return lastMessageContent.transcript || "hello"; // Return 'transcript' or default to "hello"
+          return lastMessageContent.transcript || ""; // Return 'transcript' or default to "hello"
         }
 
         // Return the last message content if it's neither an array nor an object, or its string representation
