@@ -1,4 +1,3 @@
-import { PostgrestBuilder } from "@supabase/postgrest-js";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database, Json } from "../../../supabase/database.types";
@@ -8,9 +7,8 @@ import { Result, err, ok } from "../../results";
 import { ClickhouseClientWrapper, RequestResponseLog } from "../db/clickhouse";
 import { Valhalla } from "../db/valhalla";
 import { formatTimeString } from "./clickhouseLog";
-import { withTiming } from "../../db/SupabaseWrapper";
+import { FrequentPercentLogging, withTiming } from "../../db/SupabaseWrapper";
 
-const percentLogging = 0.01;
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];
   properties: Database["public"]["Tables"]["properties"]["Insert"][];
@@ -29,7 +27,7 @@ export async function insertIntoRequest(
     database.from("request").insert([request]),
     {
       queryName: "insert_request",
-      percentLogging,
+      percentLogging: FrequentPercentLogging,
     }
   );
 
@@ -57,7 +55,7 @@ export async function insertIntoRequest(
     ]),
     {
       queryName: "insert_response",
-      percentLogging,
+      percentLogging: FrequentPercentLogging,
     }
   );
   const propertiesInsertResult = await insertProperties(database, properties);
@@ -82,7 +80,7 @@ async function insertProperties(
     database.from("properties").insert(properties),
     {
       queryName: "insert_properties",
-      percentLogging,
+      percentLogging: FrequentPercentLogging,
     }
   );
   if (insertResult.error) {
@@ -106,7 +104,7 @@ export async function updateResponse(
       .match({ id: responseId, request: requestId }),
     {
       queryName: "update_response",
-      percentLogging,
+      percentLogging: FrequentPercentLogging,
     }
   ).then((res) => {
     if (res.error) {
@@ -437,7 +435,7 @@ export class InsertQueue {
         .single(),
       {
         queryName: "select_request_by_id",
-        percentLogging,
+        percentLogging: FrequentPercentLogging,
       }
     );
 
@@ -463,7 +461,7 @@ export class InsertQueue {
         .eq("helicone_org_id", orgId),
       {
         queryName: "update_request_properties",
-        percentLogging,
+        percentLogging: FrequentPercentLogging,
       }
     );
 
