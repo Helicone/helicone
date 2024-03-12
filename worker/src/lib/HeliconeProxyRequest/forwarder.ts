@@ -117,8 +117,7 @@ export async function proxyForwarder(
               code: "PROMPT_THREAT_DETECTED",
               message:
                 "Prompt threat detected. Your request cannot be processed.",
-              details:
-                "See your Helicone request page for more info. https://helicone.ai/request/proxyRequest.requestId",
+              details: `See your Helicone request page for more info. https://helicone.ai/request/${proxyRequest.requestId}`,
             },
           }),
           inheritFrom: response,
