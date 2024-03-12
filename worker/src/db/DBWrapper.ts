@@ -244,7 +244,7 @@ export class DBWrapper {
         return ok({
           tier: data?.tier ?? "free",
           id: data?.id ?? "",
-          percentLog: data?.percent_log ?? 100_000,
+          percentLog: data?.percent_to_log ?? 100_000,
         });
       }
     );
