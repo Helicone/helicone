@@ -97,7 +97,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
           : JSON.stringify(lastMessageContent || "");
       } catch (error) {
         console.error("Error parsing request text:", error);
-        return "";
+        return "error_parsing_request";
       }
     };
 
@@ -172,7 +172,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
         return "";
       } catch (error) {
         console.error("Error parsing response text:", error);
-        return "";
+        return "error_parsing_response";
       }
     };
 
