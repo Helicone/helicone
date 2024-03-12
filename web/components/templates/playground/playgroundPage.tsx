@@ -139,6 +139,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                       >
                         {[
                           "gpt-3.5-turbo",
+                          "gpt-3.5-turbo-0125",
                           "gpt-3.5-turbo-0613",
                           "gpt-3.5-turbo-16k",
                           "gpt-3.5-turbo-1106",

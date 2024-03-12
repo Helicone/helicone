@@ -235,8 +235,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           });
         }
 
-        console.log("decoded", decodedFilters);
-
         return decodedFilters;
       }
     } catch (error) {
@@ -304,6 +302,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     refetch,
     filterMap,
     searchPropertyFilters,
+    remove,
     filter: builtFilter,
   } = useRequestsPageV2(
     page,
@@ -417,7 +416,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           headerActions={
             <div className="flex flex-row gap-2">
               <button
-                onClick={() => refetch()}
+                onClick={() => {
+                  remove();
+                  refetch();
+                }}
                 className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
               >
                 <ArrowPathIcon

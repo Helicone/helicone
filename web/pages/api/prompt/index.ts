@@ -52,6 +52,7 @@ async function handler({
     prompts
     where prompts.organization_id = $1
     and prompts.soft_delete = false
+    and prompts.is_experiment = false
     group by prompts.id
     order by max(created_at) desc
     limit 100

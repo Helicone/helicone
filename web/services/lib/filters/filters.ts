@@ -193,6 +193,10 @@ const whereKeyMappings: KeyMappings = {
     organization_id: "property_with_response_v1.organization_id",
     threat: "property_with_response_v1.threat",
   }),
+  rate_limit_log: easyKeyMappings<"rate_limit_log">({
+    organization_id: "rate_limit_log.organization_id",
+    created_at: "rate_limit_log.created_at",
+  }),
   job: (filter) => {
     if ("custom_properties" in filter && filter.custom_properties) {
       const key = Object.keys(filter.custom_properties)[0];
@@ -273,6 +277,7 @@ const havingKeyMappings: KeyMappings = {
   job_node: NOT_IMPLEMENTED,
   feedback: NOT_IMPLEMENTED,
   cache_hits: NOT_IMPLEMENTED,
+  rate_limit_log: NOT_IMPLEMENTED,
 };
 
 export function buildFilterLeaf(
@@ -518,6 +523,18 @@ export async function buildFilterWithAuthClickHouseCacheHits(
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
     cache_hits: {
+      organization_id: {
+        equals: orgId,
+      },
+    },
+  }));
+}
+
+export async function buildFilterWithAuthClickHouseRateLimits(
+  args: ExternalBuildFilterArgs & { org_id: string }
+): Promise<{ filter: string; argsAcc: any[] }> {
+  return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
+    rate_limit_log: {
       organization_id: {
         equals: orgId,
       },

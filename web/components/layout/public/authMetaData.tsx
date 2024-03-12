@@ -9,11 +9,21 @@ interface AuthMetaDataProps {
 const AuthMetaData = (props: AuthMetaDataProps) => {
   const { children, title, image } = props;
 
+  // Detect if running on localhost
+  const isLocalhost =
+    typeof window !== "undefined" && window.location.hostname === "localhost";
+
+  // Conditionally set favicon path
+  const faviconPath = isLocalhost
+    ? "/assets/landing/helicone-dev.png"
+    : "/assets/landing/helicone-mobile.webp";
+
   return (
     <>
       <Head>
         <title>{`${title} - Helicone`}</title>
-        <link rel="icon" href="/assets/landing/helicone-mobile.webp" />
+        {/* Update the favicon path based on the environment */}
+        <link rel="icon" href={faviconPath} />
         <meta property="og:title" content={title} />
         <meta
           property="og:description"

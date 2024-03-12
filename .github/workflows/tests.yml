@@ -9,6 +9,39 @@ on:
       - main
 
 jobs:
+  costs:
+    name: Cost Calculation Package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run node tests
+        working-directory: costs
+        run: |
+          npm install
+          npm run test
+
+      - name: Ensure copy was ran
+        working-directory: costs
+        run: |
+          # Make sure the content of /src is copied to ../worker/src/packages/cost and ../web/packages/cost before pushing
+          # we can do this by calculating size of the content of /src and then copying it to the respective folders
+          # Compute the size of the content of /src
+          DIR1=../worker/src/packages/cost
+          DIR2=./src
+
+          # Generate hash lists
+          find $DIR1 -type f -print0 | sort -z | xargs -0 sha256sum | awk '{print $1}' > /tmp/dir1_hashes_only.txt
+          find $DIR2 -type f -print0 | sort -z | xargs -0 sha256sum | awk '{print $1}' > /tmp/dir2_hashes_only.txt
+
+          # Compare the hash lists
+          if cmp -s /tmp/dir1_hashes_only.txt /tmp/dir2_hashes_only.txt; then
+              echo "Directories have the same contents."
+          else
+              echo "Directories have different contents."
+              echo "Please run the copy script to update the contents of the directories."
+              exit 1
+          fi
+
   db-type-checks:
     name: DB type checks
     runs-on: ubuntu-latest
@@ -26,13 +59,13 @@ jobs:
           bash genSupabaseTypes.sh
 
           if git status | grep "database.types.ts"; then
-              git diff --ignore-space-at-eol web/supabase/database.types.ts
+              git --no-pager diff -- ./**/database.types.ts
               echo "Detected uncommitted changes after build in web/supabase/database.types.ts. See status below:"
               git diff
               exit 1
           fi
 
-      - name: Generate types and check for changes
+      - name: Generate .dockerignore and check for changes
         run: |
           bash genDockerIgnore.sh
 
@@ -142,8 +175,8 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.CI_OPENAI_API_KEY }}
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
         run: |
-          pytest test_properties.py -s
-          pytest python_integration_tests.py -s
+          pytest test_properties.py -s > ~/test-logs/properties.log
+          pytest python_integration_tests.py -s > ~/test-logs/integration.log
       - name: Run helicone-python tests
         working-directory: helicone-python
         env:

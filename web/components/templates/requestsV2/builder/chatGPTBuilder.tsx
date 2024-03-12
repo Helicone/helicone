@@ -78,8 +78,16 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
               );
 
             return textMessage?.text || textMessage?.content[0].text || "";
+          }
+          // check to see if content is an object
+          else if (content && typeof content === "object" && content !== null) {
+            // look for the key `transcript` and return the value if it exists
+            if (content.transcript) {
+              return content.transcript || "";
+            }
+            return "hello";
           } else {
-            return content;
+            return content || JSON.stringify(content);
           }
         } else {
           return JSON.stringify(messages);

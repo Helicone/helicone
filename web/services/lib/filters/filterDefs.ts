@@ -81,6 +81,13 @@ export type CacheHitsTableToOperators = {
 
 export type FilterLeafCacheHits = SingleKey<CacheHitsTableToOperators>;
 
+export type RateLimitTableToOperators = {
+  organization_id: SingleKey<TextOperators>;
+  created_at: SingleKey<TimestampOperatorsTyped>;
+};
+
+export type FilterLeafRateLimitLog = SingleKey<RateLimitTableToOperators>;
+
 export type FilterLeafPropertiesTable = SingleKey<PropertiesTableToOperators>;
 
 type UserApiKeysTableToOperators = {
@@ -232,6 +239,7 @@ export type TablesAndViews = {
   job: FilterLeafJob;
   job_node: FilterLeafNode;
   cache_hits: FilterLeafCacheHits;
+  rate_limit_log: FilterLeafRateLimitLog;
 
   properties: {
     [key: string]: SingleKey<TextOperators>;
@@ -285,6 +293,24 @@ export function timeFilterToFilterNode(
       right: {
         property_with_response_v1: {
           request_created_at: {
+            lte: filter.end,
+          },
+        },
+      },
+      operator: "and",
+    };
+  } else if (table === "rate_limit_log") {
+    return {
+      left: {
+        rate_limit_log: {
+          created_at: {
+            gte: filter.start,
+          },
+        },
+      },
+      right: {
+        rate_limit_log: {
+          created_at: {
             lte: filter.end,
           },
         },
