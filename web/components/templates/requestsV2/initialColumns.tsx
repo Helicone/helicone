@@ -88,7 +88,10 @@ export const getInitialColumns: (
     id: "totalTokens",
     accessorKey: "totalTokens",
     header: "Total Tokens",
-    cell: (info) => info.getValue(),
+    cell: (info) => {
+      const tokens = Number(info.getValue());
+      return <span>{tokens >= 0 ? tokens : "not found"}</span>;
+    },
     meta: {
       sortKey: "total_tokens",
     },
@@ -97,7 +100,10 @@ export const getInitialColumns: (
     id: "promptTokens",
     accessorKey: "promptTokens",
     header: "Prompt Tokens",
-    cell: (info) => info.getValue(),
+    cell: (info) => {
+      const tokens = Number(info.getValue());
+      return <span>{tokens >= 0 ? tokens : "not found"}</span>;
+    },
     meta: {
       sortKey: "prompt_tokens",
     },
@@ -106,7 +112,10 @@ export const getInitialColumns: (
     id: "completionTokens",
     accessorKey: "completionTokens",
     header: "Completion Tokens",
-    cell: (info) => info.getValue(),
+    cell: (info) => {
+      const tokens = Number(info.getValue());
+      return <span>{tokens >= 0 ? tokens : "not found"}</span>;
+    },
     meta: {
       sortKey: "completion_tokens",
     },
