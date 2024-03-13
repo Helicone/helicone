@@ -1,53 +1,25 @@
-import {
-  FilterNode,
-  timeFilterToFilterNode,
-} from "../../../services/lib/filters/filterDefs";
-import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../result";
-import { dbQueryClickhouse } from "../db/dbExecute";
+import { getXOverTime } from "./getXOverTime";
+import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 
 export interface Quantiles {
-  percentile: number;
+  time: Date;
   value: number;
 }
 
 export default async function quantilesCalc(
-  filter: FilterNode,
-  timeFilter: {
-    start: Date;
-    end: Date;
-  },
-  column: string,
-  org_id: string
+  data: DataOverTimeRequest,
+  property: string
 ): Promise<Result<Quantiles[], string>> {
-  const { filter: filterString, argsAcc } = await buildFilterWithAuthClickHouse(
-    {
-      org_id,
-      filter: {
-        left: timeFilterToFilterNode(timeFilter, "request_response_log"),
-        right: filter,
-        operator: "and",
-      },
-      argsAcc: [],
-    }
+  const query = `quantile(0.25)(${property}) as P25`;
+
+  const res = await getXOverTime<{
+    P25: number;
+  }>(data, query);
+  return resultMap(res, (resData) =>
+    resData.map((d) => ({
+      time: new Date(new Date(d.created_at_trunc).getTime()),
+      value: Number(d.P25),
+    }))
   );
-
-  const percentiles = [0.25, 0.5, 0.75, 0.9, 0.95, 0.99, 0.999];
-
-  const query = `SELECT quantilesExactExclusive
-  (${percentiles.join(",")})(${column})  
-  FROM (SELECT latency from request_response_log WHERE (
-      (${filterString})
-    ) 
-  `;
-
-  const res = await dbQueryClickhouse<{ quantiles: number[] }>(query, argsAcc);
-
-  return resultMap(res, (d) => {
-    const data = d[0];
-    return data.quantiles.map((value, idx) => ({
-      percentile: percentiles[idx],
-      value,
-    }));
-  });
 }

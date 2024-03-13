@@ -12,6 +12,8 @@ import {
   Card,
   MultiSelect,
   MultiSelectItem,
+  Select,
+  SelectItem,
 } from "@tremor/react";
 import Link from "next/link";
 import { useState } from "react";
@@ -44,6 +46,7 @@ import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
 import { useModels } from "../../../services/hooks/models";
+import { useQuantiles } from "../../../services/hooks/quantiles";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -374,10 +377,21 @@ const DashboardPage = (props: DashboardPageProps) => {
       maxH: 4,
     },
     {
-      i: "suggest-more-graphs",
+      i: "quantiles",
       x: 6,
       y: 12,
       w: 6,
+      h: 4,
+      minW: 3,
+      maxW: 12,
+      minH: 4,
+      maxH: 4,
+    },
+    {
+      i: "suggest-more-graphs",
+      x: 8,
+      y: 16,
+      w: 12,
       h: 4,
       minW: 3,
       maxW: 12,
@@ -523,6 +537,13 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const modelColors = ["purple", "blue", "green", "yellow", "orange"];
 
+  const quantilesProperties = new Map<string, string>([
+    ["Latency", "latency"],
+    ["Prompt tokens", "prompt_tokens"],
+    ["Completion tokens", "completion_tokens"],
+    ["Total tokens", "total_tokens"],
+  ]);
+
   const modelMapper = (model: ModelMetric, index: number) => {
     const currentAdvancedFilters = encodeURIComponent(
       JSON.stringify(
@@ -619,6 +640,18 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [currentStatus, setCurrentStatus] = useState<string[]>(["200"]);
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
+  const [currentProperty, setCurrentProperty] = useState<string>("Latency");
+
+  const {
+    quantiles,
+    isLoading: quantilesIsLoading,
+    refetch: quantilesRefetch,
+  } = useQuantiles({
+    timeFilter,
+    dbIncrement: timeIncrement,
+    timeZoneDifference: new Date().getTimezoneOffset(),
+    property: "latency",
+  });
 
   const renderUnauthorized = () => {
     if (currentTier === "free") {
@@ -1007,6 +1040,63 @@ const DashboardPage = (props: DashboardPageProps) => {
                     curveType="monotone"
                   />
                 </StyledAreaChart>
+              </div>
+
+              <div key="quantiles">
+                <Card>
+                  <div className="flex flex-row items-center justify-between">
+                    <div className="flex flex-col space-y-0.5">
+                      <p className="text-gray-500 text-sm">Quantiles</p>
+                    </div>
+                    {!quantilesIsLoading && (
+                      <Select
+                        placeholder="Select property"
+                        value={currentProperty}
+                        onValueChange={setCurrentProperty}
+                        className="border border-gray-400 rounded-lg w-fit min-w-[250px] max-w-xl"
+                      >
+                        {Array.from(quantilesProperties.entries()).map(
+                          ([key, value]) => (
+                            <SelectItem key={value} value={value}>
+                              {key}
+                            </SelectItem>
+                          )
+                        )}
+                      </Select>
+                    )}
+                  </div>
+
+                  <div
+                    className={clsx("p-2", "w-full")}
+                    style={{
+                      height: "224px",
+                    }}
+                  >
+                    {quantilesIsLoading ? (
+                      <div className="h-full w-full bg-gray-200 dark:bg-gray-800 rounded-md pt-4">
+                        <LoadingAnimation height={175} width={175} />
+                      </div>
+                    ) : (
+                      <AreaChart
+                        className="h-[14rem]"
+                        data={
+                          quantiles?.data?.map((r) => {
+                            const time = new Date(r.time);
+                            return {
+                              date: getTimeMap(timeIncrement)(time),
+                              P25: r.value,
+                            };
+                          }) ?? []
+                        }
+                        index="date"
+                        categories={["P25"]}
+                        colors={["amber"]}
+                        showYAxis={false}
+                        curveType="monotone"
+                      />
+                    )}
+                  </div>
+                </Card>
               </div>
 
               <div key="suggest-more-graphs">
