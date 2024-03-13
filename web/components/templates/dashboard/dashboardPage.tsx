@@ -643,9 +643,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [currentProperty, setCurrentProperty] = useState<string>("Latency");
 
   const onChangeCurrentProperty = (value: string) => {
-    alert(1);
     setCurrentProperty(value);
-    quantilesRefetch();
   };
 
   const {
@@ -1063,7 +1061,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       >
                         {Array.from(quantilesProperties.entries()).map(
                           ([key, value]) => (
-                            <SelectItem key={value} value={value}>
+                            <SelectItem key={key} value={key}>
                               {key}
                             </SelectItem>
                           )

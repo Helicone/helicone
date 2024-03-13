@@ -11,7 +11,15 @@ export default async function quantilesCalc(
   data: DataOverTimeRequest,
   property: string
 ): Promise<Result<Quantiles[], string>> {
-  const query = `quantile(0.25)(${property}) as P25`;
+  let query;
+
+  switch (property) {
+    case "total_tokens":
+      query = `quantile(0.25)(completion_tokens + prompt_tokens) as P25`;
+      break;
+    default:
+      query = `quantile(0.25)(${property}) as P25`;
+  }
 
   const res = await getXOverTime<{
     P25: number;
