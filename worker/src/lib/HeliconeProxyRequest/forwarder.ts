@@ -11,13 +11,14 @@ import {
 } from "../cache/cacheFunctions";
 import { getCacheSettings } from "../cache/cacheSettings";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
-import { InsertQueue } from "../dbLogger/insertQueue";
+import { RequestResponseStore } from "../dbLogger/RequestResponseStore";
 
 import { Valhalla } from "../db/valhalla";
 import { handleProxyRequest, handleThreatProxyRequest } from "./handler";
 import { HeliconeProxyRequestMapper } from "./mapper";
 import { checkPromptSecurity } from "../security/promptSecurity";
 import { DBLoggable } from "../dbLogger/DBLoggable";
+import { DBQueryTimer } from "../../db/DBQueryTimer";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -159,7 +160,7 @@ export async function proxyForwarder(
               code: "PROMPT_THREAT_DETECTED",
               message:
                 "Prompt threat detected. Your request cannot be processed.",
-              details: "See your Helicone request page for more info.",
+              details: `See your Helicone request page for more info. https://helicone.ai/request/${proxyRequest.requestId}`,
             },
           }),
           inheritFrom: response,
@@ -323,8 +324,12 @@ export async function proxyForwarder(
       clickhouse: new ClickhouseClientWrapper(env),
       supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
       dbWrapper: new DBWrapper(env, auth),
-      queue: new InsertQueue(
+      queue: new RequestResponseStore(
         createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+        new DBQueryTimer(ctx, {
+          apiKey: env.DATADOG_API_KEY,
+          endpoint: env.DATADOG_ENDPOINT,
+        }),
         new Valhalla(env.VALHALLA_URL, auth),
         new ClickhouseClientWrapper(env),
         env.FALLBACK_QUEUE,

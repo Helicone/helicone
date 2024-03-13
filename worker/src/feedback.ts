@@ -5,13 +5,18 @@ import { Database } from "../supabase/database.types";
 import { Result } from "./results";
 import { IHeliconeHeaders } from "./lib/HeliconeHeaders";
 import { Valhalla } from "./lib/db/valhalla";
+import { DBQueryTimer, FREQUENT_PRECENT_LOGGING } from "./db/DBQueryTimer";
 
 interface FeedbackRequestBodyV2 {
   "helicone-id": string;
   rating: boolean;
 }
 
-export async function handleFeedback(request: RequestWrapper, env: Env) {
+export async function handleFeedback(
+  request: RequestWrapper,
+  env: Env,
+  _ctx: ExecutionContext
+) {
   const auth = await request.auth();
   if (auth.error || !auth.data) {
     return new Response(auth.error, { status: 401 });
@@ -43,8 +48,13 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
     env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  const requestPromise = getRequest(dbClient, heliconeId);
-  const responsePromise = getResponse(dbClient, heliconeId);
+  const dbQueryTimer = new DBQueryTimer(_ctx, {
+    apiKey: env.DATADOG_API_KEY,
+    endpoint: env.DATADOG_ENDPOINT,
+  });
+
+  const requestPromise = getRequest(dbClient, dbQueryTimer, heliconeId);
+  const responsePromise = getResponse(dbClient, dbQueryTimer, heliconeId);
 
   const [
     { data: requestData, error: requestError },
@@ -69,6 +79,7 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
   const { data: isAuthenticated, error: authenticationError } =
     await isApiKeyAuthenticated(
       dbClient,
+      dbQueryTimer,
       requestData.helicone_org_id ?? "",
       heliconeAuth
     );
@@ -91,7 +102,12 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
   }
 
   const { data: feedbackData, error: feedbackDataError } =
-    await upsertFeedbackPostgres(responseData?.id, rating, dbClient);
+    await upsertFeedbackPostgres(
+      responseData?.id,
+      rating,
+      dbClient,
+      dbQueryTimer
+    );
 
   if (feedbackDataError || !feedbackData) {
     return new Response(`Error upserting feedback: ${feedbackDataError}`, {
@@ -117,6 +133,7 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
 
 export async function isApiKeyAuthenticated(
   dbClient: SupabaseClient<Database>,
+  dbQueryTimer: DBQueryTimer,
   orgId: string,
   heliconeAuth: IHeliconeHeaders["heliconeAuthV2"]
 ): Promise<Result<boolean, string>> {
@@ -124,11 +141,17 @@ export async function isApiKeyAuthenticated(
     const heliconeApiKeyHash = await hash(
       `Bearer ${heliconeAuth.token.replace("Bearer ", "")}`
     );
-    const { data: apiKey, error: apiKeyError } = await dbClient
-      .from("helicone_api_keys")
-      .select("*")
-      .eq("organization_id", orgId)
-      .eq("api_key_hash", heliconeApiKeyHash);
+    const { data: apiKey, error: apiKeyError } = await dbQueryTimer.withTiming(
+      dbClient
+        .from("helicone_api_keys")
+        .select("*")
+        .eq("organization_id", orgId)
+        .eq("api_key_hash", heliconeApiKeyHash),
+      {
+        queryName: "select_helicone_api_keys_by_org_id",
+        percentLogging: FREQUENT_PRECENT_LOGGING,
+      }
+    );
 
     if (apiKeyError || !apiKey) {
       console.error("Error fetching api key:", apiKeyError.message);
@@ -147,11 +170,18 @@ export async function isApiKeyAuthenticated(
       console.error("Error fetching user:", user.error.message);
       return { error: user.error.message, data: null };
     }
-    const isOwner = await dbClient
-      .from("organization")
-      .select("*")
-      .eq("id", orgId)
-      .eq("owner", user.data.user.id);
+
+    const isOwner = await dbQueryTimer.withTiming(
+      dbClient
+        .from("organization")
+        .select("*")
+        .eq("id", orgId)
+        .eq("owner", user.data.user.id),
+      {
+        queryName: "select_organization_by_id",
+        percentLogging: FREQUENT_PRECENT_LOGGING,
+      }
+    );
     if (isOwner.error) {
       console.error("Error fetching user:", isOwner.error.message);
       return { error: isOwner.error.message, data: null };
@@ -159,11 +189,17 @@ export async function isApiKeyAuthenticated(
     if (isOwner.data.length > 0) {
       return { error: null, data: true };
     }
-    const isMemeber = await dbClient
-      .from("organization_member")
-      .select("*")
-      .eq("member", user.data.user.id)
-      .eq("organization", orgId);
+    const isMemeber = await dbQueryTimer.withTiming(
+      dbClient
+        .from("organization_member")
+        .select("*")
+        .eq("member", user.data.user.id)
+        .eq("organization", orgId),
+      {
+        queryName: "select_organization_member_by_member_and_organization",
+        percentLogging: FREQUENT_PRECENT_LOGGING,
+      }
+    );
     if (isMemeber.error) {
       console.error("Error fetching user:", isMemeber.error.message);
       return { error: isMemeber.error.message, data: null };
@@ -179,20 +215,27 @@ export async function isApiKeyAuthenticated(
 export async function upsertFeedbackPostgres(
   responseId: string,
   rating: boolean,
-  dbClient: SupabaseClient<Database>
+  dbClient: SupabaseClient<Database>,
+  dbQueryTimer: DBQueryTimer
 ): Promise<Result<Database["public"]["Tables"]["feedback"]["Row"], string>> {
-  const feedback = await dbClient
-    .from("feedback")
-    .upsert(
-      {
-        response_id: responseId,
-        rating: rating,
-        created_at: new Date().toISOString(),
-      },
-      { onConflict: "response_id" }
-    )
-    .select("*")
-    .single();
+  const feedback = await dbQueryTimer.withTiming(
+    dbClient
+      .from("feedback")
+      .upsert(
+        {
+          response_id: responseId,
+          rating: rating,
+          created_at: new Date().toISOString(),
+        },
+        { onConflict: "response_id" }
+      )
+      .select("*")
+      .single(),
+    {
+      queryName: "upsert_feedback_by_response_id",
+      percentLogging: FREQUENT_PRECENT_LOGGING,
+    }
+  );
 
   if (feedback.error) {
     console.error("Error upserting feedback:", feedback.error);
@@ -208,15 +251,20 @@ export async function upsertFeedbackPostgres(
 
 async function getRequest(
   dbClient: SupabaseClient<Database>,
+  dbQueryTimer: DBQueryTimer,
   heliconeId: string
 ): Promise<Result<Database["public"]["Tables"]["request"]["Row"], string>> {
   const maxRetries = 3;
 
   for (let i = 0; i < maxRetries; i++) {
-    const { data: request, error: requestError } = await dbClient
-      .from("request")
-      .select("*")
-      .eq("id", heliconeId);
+    const { data: request, error: requestError } =
+      await dbQueryTimer.withTiming(
+        dbClient.from("request").select("*").eq("id", heliconeId),
+        {
+          queryName: "select_request_by_id",
+          percentLogging: FREQUENT_PRECENT_LOGGING,
+        }
+      );
 
     if (requestError) {
       console.error("Error fetching request:", requestError.message);
@@ -236,15 +284,20 @@ async function getRequest(
 
 export async function getResponse(
   dbClient: SupabaseClient<Database>,
+  dbQueryTimer: DBQueryTimer,
   heliconeId: string
 ): Promise<Result<Database["public"]["Tables"]["response"]["Row"], string>> {
   const maxRetries = 3;
 
   for (let i = 0; i < maxRetries; i++) {
-    const { data: response, error: responseError } = await dbClient
-      .from("response")
-      .select("*")
-      .eq("request", heliconeId);
+    const { data: response, error: responseError } =
+      await dbQueryTimer.withTiming(
+        dbClient.from("response").select("*").eq("request", heliconeId),
+        {
+          queryName: "select_response_by_request",
+          percentLogging: FREQUENT_PRECENT_LOGGING,
+        }
+      );
 
     if (responseError) {
       console.error("Error fetching response:", responseError.message);

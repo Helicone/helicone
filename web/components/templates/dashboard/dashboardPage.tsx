@@ -151,7 +151,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
 
-  const { metrics, filterMap, overTimeData, isAnyLoading, refetch } =
+  const { metrics, filterMap, overTimeData, isAnyLoading, refetch, remove } =
     useDashboardPage({
       timeFilter,
       uiFilters: debouncedAdvancedFilters,
@@ -344,7 +344,18 @@ const DashboardPage = (props: DashboardPageProps) => {
       i: "tokens-per-min-over-time",
       x: 0,
       y: 8,
-      w: 4,
+      w: 6,
+      h: 4,
+      minW: 3,
+      maxW: 12,
+      minH: 4,
+      maxH: 4,
+    },
+    {
+      i: "threats",
+      x: 6,
+      y: 8,
+      w: 6,
       h: 4,
       minW: 3,
       maxW: 12,
@@ -353,9 +364,9 @@ const DashboardPage = (props: DashboardPageProps) => {
     },
     {
       i: "time-to-first-token",
-      x: 4,
-      y: 8,
-      w: 4,
+      x: 0,
+      y: 12,
+      w: 6,
       h: 4,
       minW: 3,
       maxW: 12,
@@ -364,9 +375,9 @@ const DashboardPage = (props: DashboardPageProps) => {
     },
     {
       i: "suggest-more-graphs",
-      x: 8,
-      y: 8,
-      w: 4,
+      x: 6,
+      y: 12,
+      w: 6,
       h: 4,
       minW: 3,
       maxW: 12,
@@ -670,6 +681,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         headerActions={
           <button
             onClick={() => {
+              remove();
               refetch();
             }}
             className="font-semibold text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700"
@@ -947,18 +959,43 @@ const DashboardPage = (props: DashboardPageProps) => {
                 </StyledAreaChart>
               </div>
 
+              <div key="threats">
+                <StyledAreaChart
+                  title={"Threats"}
+                  value={`${metrics.totalThreats.data?.data?.toFixed(0) ?? 0}`}
+                  isDataOverTimeLoading={overTimeData.threats.isLoading}
+                >
+                  <AreaChart
+                    className="h-[14rem]"
+                    data={
+                      overTimeData.threats.data?.data?.map((r) => ({
+                        date: getTimeMap(timeIncrement)(r.time),
+                        threats: r.count,
+                      })) ?? []
+                    }
+                    index="date"
+                    categories={["threats"]}
+                    colors={["amber"]}
+                    showYAxis={false}
+                    curveType="monotone"
+                  />
+                </StyledAreaChart>
+              </div>
+
               <div key="time-to-first-token">
                 <StyledAreaChart
                   title={"Time to First Token"}
                   value={`${
                     metrics.averageTimeToFirstToken.data?.data?.toFixed(0) ?? 0
                   } ms`}
-                  isDataOverTimeLoading={overTimeData.ttft.isLoading}
+                  isDataOverTimeLoading={
+                    overTimeData.timeToFirstToken.isLoading
+                  }
                 >
                   <AreaChart
                     className="h-[14rem]"
                     data={
-                      overTimeData.ttft.data?.data?.map((r) => ({
+                      overTimeData.timeToFirstToken.data?.data?.map((r) => ({
                         date: getTimeMap(timeIncrement)(r.time),
                         time: r.ttft,
                       })) ?? []

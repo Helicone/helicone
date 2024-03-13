@@ -5,7 +5,8 @@ import { DBWrapper, HeliconeAuth } from "../../db/DBWrapper";
 import { RequestWrapper } from "../../lib/RequestWrapper";
 import { ClickhouseClientWrapper } from "../../lib/db/clickhouse";
 import { Valhalla } from "../../lib/db/valhalla";
-import { InsertQueue } from "../../lib/dbLogger/insertQueue";
+import { RequestResponseStore } from "../../lib/dbLogger/RequestResponseStore";
+import { DBQueryTimer } from "../../db/DBQueryTimer";
 
 class InternalResponse {
   constructor(private client: APIClient) {}
@@ -42,20 +43,25 @@ class InternalResponse {
 }
 
 export class APIClient {
-  public queue: InsertQueue;
+  public queue: RequestResponseStore;
   public response: InternalResponse;
   db: DBWrapper;
   private heliconeApiKeyRow?: Database["public"]["Tables"]["helicone_api_keys"]["Row"];
 
   constructor(
     private env: Env,
+    private ctx: ExecutionContext,
     private requestWrapper: RequestWrapper,
     auth: HeliconeAuth
   ) {
     this.response = new InternalResponse(this);
     this.db = new DBWrapper(env, auth);
-    this.queue = new InsertQueue(
+    this.queue = new RequestResponseStore(
       createClient<Database>(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+      new DBQueryTimer(ctx, {
+        apiKey: env.DATADOG_API_KEY,
+        endpoint: env.DATADOG_ENDPOINT,
+      }),
       new Valhalla(env.VALHALLA_URL, auth),
       new ClickhouseClientWrapper(env),
       env.FALLBACK_QUEUE,
@@ -66,11 +72,12 @@ export class APIClient {
 
 export async function createAPIClient(
   env: Env,
+  ctx: ExecutionContext,
   requestWrapper: RequestWrapper
 ) {
   const auth = await requestWrapper.auth();
   if (auth.error !== null) {
     throw new Error(auth.error);
   }
-  return new APIClient(env, requestWrapper, auth.data);
+  return new APIClient(env, ctx, requestWrapper, auth.data);
 }
