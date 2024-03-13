@@ -573,7 +573,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const modelColors = ["purple", "blue", "green", "yellow", "orange"];
 
-  const quantilesProperties = new Map<string, string>([
+  const quantilesMetrics = new Map<string, string>([
     ["Latency", "latency"],
     ["Prompt tokens", "prompt_tokens"],
     ["Completion tokens", "completion_tokens"],
@@ -686,7 +686,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     timeFilter,
     dbIncrement: timeIncrement,
     timeZoneDifference: new Date().getTimezoneOffset(),
-    metric: quantilesProperties.get(currentMetric) ?? "latency",
+    metric: quantilesMetrics.get(currentMetric) ?? "latency",
   });
 
   const renderUnauthorized = () => {
@@ -1050,7 +1050,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                         onValueChange={setCurrentMetric}
                         className="border border-gray-400 rounded-lg w-fit min-w-[250px] max-w-xl"
                       >
-                        {Array.from(quantilesProperties.entries()).map(
+                        {Array.from(quantilesMetrics.entries()).map(
                           ([key, value]) => (
                             <SelectItem key={key} value={key}>
                               {key}
