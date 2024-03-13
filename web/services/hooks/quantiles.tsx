@@ -32,8 +32,6 @@ const useQuantiles = (data: {
     refetchOnWindowFocus: false,
   });
 
-  console.log(quantiles);
-
   return { quantiles, isLoading, refetch };
 };
 
