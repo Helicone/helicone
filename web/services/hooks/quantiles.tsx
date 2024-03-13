@@ -10,14 +10,14 @@ const useQuantiles = (data: {
   };
   dbIncrement: TimeIncrement;
   timeZoneDifference: number;
-  property: string;
+  metric: string;
 }) => {
   const {
     data: quantiles,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["quantiles", data.timeFilter, data.property],
+    queryKey: ["quantiles", data.timeFilter, data.metric],
     queryFn: async (query) => {
       return await fetch("/api/metrics/quantiles", {
         method: "POST",

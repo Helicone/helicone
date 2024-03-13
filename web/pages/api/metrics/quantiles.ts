@@ -18,7 +18,7 @@ async function handler(
     res,
     userData: { orgId },
   } = options;
-  const { timeFilter, dbIncrement, timeZoneDifference, property } = req.body
+  const { timeFilter, dbIncrement, timeZoneDifference, metric } = req.body
     .data as {
     timeFilter: {
       start: string;
@@ -26,7 +26,7 @@ async function handler(
     };
     dbIncrement: TimeIncrement;
     timeZoneDifference: number;
-    property: string;
+    metric: string;
   };
   const { error: quantilesError, data: quantiles } = await quantilesCalc(
     {
@@ -36,7 +36,7 @@ async function handler(
       dbIncrement: dbIncrement ?? "hour",
       timeZoneDifference,
     },
-    property
+    metric
   );
 
   if (quantilesError !== null) {

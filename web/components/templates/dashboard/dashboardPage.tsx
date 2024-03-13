@@ -654,7 +654,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     timeFilter,
     dbIncrement: timeIncrement,
     timeZoneDifference: new Date().getTimezoneOffset(),
-    property: quantilesProperties.get(currentProperty) ?? "latency",
+    metric: quantilesProperties.get(currentProperty) ?? "latency",
   });
 
   const renderUnauthorized = () => {
@@ -1048,9 +1048,10 @@ const DashboardPage = (props: DashboardPageProps) => {
 
               <div key="quantiles">
                 <Card>
-                  <div className="flex flex-row items-center justify-between">
+                  <div className="flex flex-row items-center justify-between h-max">
                     <div className="flex flex-col space-y-0.5">
                       <p className="text-gray-500 text-sm">Quantiles</p>
+                      <div className="grow"></div>
                     </div>
                     {!quantilesIsLoading && (
                       <Select
@@ -1088,13 +1089,25 @@ const DashboardPage = (props: DashboardPageProps) => {
                             const time = new Date(r.time);
                             return {
                               date: getTimeMap(timeIncrement)(time),
-                              P25: r.value,
+                              P75: r.p75,
+                              P90: r.p90,
+                              P95: r.p95,
+                              P99: r.p99,
                             };
                           }) ?? []
                         }
                         index="date"
-                        categories={["P25"]}
-                        colors={["amber"]}
+                        categories={["P75", "P90", "P95", "P99"]}
+                        colors={[
+                          "yellow",
+                          "red",
+                          "green",
+                          "blue",
+                          "orange",
+                          "indigo",
+                          "orange",
+                          "pink",
+                        ]}
                         showYAxis={false}
                         curveType="monotone"
                       />
