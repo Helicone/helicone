@@ -355,7 +355,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       maxH: 4,
     },
     {
-      i: "threats",
+      i: "quantiles",
       x: 6,
       y: 8,
       w: 6,
@@ -377,7 +377,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       maxH: 4,
     },
     {
-      i: "quantiles",
+      i: "threats",
       x: 6,
       y: 12,
       w: 6,
@@ -510,9 +510,45 @@ const DashboardPage = (props: DashboardPageProps) => {
       static: true,
     },
     {
-      i: "tokens-per-min-over-time",
+      i: "quantiles",
       x: 0,
       y: 24,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "time-to-first-token",
+      x: 0,
+      y: 28,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "threats",
+      x: 0,
+      y: 32,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "tokens-per-min-over-time",
+      x: 0,
+      y: 36,
       w: 6,
       h: 4,
       minW: 3,
@@ -523,7 +559,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     {
       i: "suggest-more-graphs",
       x: 0,
-      y: 28,
+      y: 40,
       w: 6,
       h: 4,
       minW: 3,
@@ -996,60 +1032,10 @@ const DashboardPage = (props: DashboardPageProps) => {
                 </StyledAreaChart>
               </div>
 
-              <div key="threats">
-                <StyledAreaChart
-                  title={"Threats"}
-                  value={`${metrics.totalThreats.data?.data?.toFixed(0) ?? 0}`}
-                  isDataOverTimeLoading={overTimeData.threats.isLoading}
-                >
-                  <AreaChart
-                    className="h-[14rem]"
-                    data={
-                      overTimeData.threats.data?.data?.map((r) => ({
-                        date: getTimeMap(timeIncrement)(r.time),
-                        threats: r.count,
-                      })) ?? []
-                    }
-                    index="date"
-                    categories={["threats"]}
-                    colors={["amber"]}
-                    showYAxis={false}
-                    curveType="monotone"
-                  />
-                </StyledAreaChart>
-              </div>
-
-              <div key="time-to-first-token">
-                <StyledAreaChart
-                  title={"Time to First Token"}
-                  value={`${
-                    metrics.averageTimeToFirstToken.data?.data?.toFixed(0) ?? 0
-                  } ms`}
-                  isDataOverTimeLoading={
-                    overTimeData.timeToFirstToken.isLoading
-                  }
-                >
-                  <AreaChart
-                    className="h-[14rem]"
-                    data={
-                      overTimeData.timeToFirstToken.data?.data?.map((r) => ({
-                        date: getTimeMap(timeIncrement)(r.time),
-                        time: r.ttft,
-                      })) ?? []
-                    }
-                    index="date"
-                    categories={["time"]}
-                    colors={["violet"]}
-                    showYAxis={false}
-                    curveType="monotone"
-                  />
-                </StyledAreaChart>
-              </div>
-
               <div key="quantiles">
                 <Card>
-                  <div className="flex flex-row items-center justify-between min-h-fit">
-                    <div className="flex flex-col space-y-0.5 h-fit">
+                  <div className="flex flex-row items-center justify-between">
+                    <div className="flex flex-col space-y-0.5">
                       <p className="text-gray-500 text-sm">Quantiles</p>
                     </div>
                     {!quantilesIsLoading && (
@@ -1071,9 +1057,9 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </div>
 
                   <div
-                    className={clsx("p-2", "w-full")}
+                    className={clsx("p-2", "w-full", "h-full")}
                     style={{
-                      height: "224px",
+                      height: "234px",
                     }}
                   >
                     {quantilesIsLoading ? (
@@ -1109,10 +1095,65 @@ const DashboardPage = (props: DashboardPageProps) => {
                         ]}
                         showYAxis={false}
                         curveType="monotone"
+                        valueFormatter={(number: number | bigint) =>
+                          `${new Intl.NumberFormat("us").format(number)} ${
+                            currentProperty === "Latency" ? "ms" : "tokens"
+                          }`
+                        }
                       />
                     )}
                   </div>
                 </Card>
+              </div>
+
+              <div key="time-to-first-token">
+                <StyledAreaChart
+                  title={"Time to First Token"}
+                  value={`${
+                    metrics.averageTimeToFirstToken.data?.data?.toFixed(0) ?? 0
+                  } ms`}
+                  isDataOverTimeLoading={
+                    overTimeData.timeToFirstToken.isLoading
+                  }
+                >
+                  <AreaChart
+                    className="h-[14rem]"
+                    data={
+                      overTimeData.timeToFirstToken.data?.data?.map((r) => ({
+                        date: getTimeMap(timeIncrement)(r.time),
+                        time: r.ttft,
+                      })) ?? []
+                    }
+                    index="date"
+                    categories={["time"]}
+                    colors={["violet"]}
+                    showYAxis={false}
+                    curveType="monotone"
+                  />
+                </StyledAreaChart>
+              </div>
+
+              <div key="threats">
+                <StyledAreaChart
+                  title={"Threats"}
+                  value={`${metrics.totalThreats.data?.data?.toFixed(0) ?? 0}`}
+                  isDataOverTimeLoading={overTimeData.threats.isLoading}
+                >
+                  <AreaChart
+                    className="h-[14rem]"
+                    data={
+                      overTimeData.threats.data?.data?.map((r) => ({
+                        date: getTimeMap(timeIncrement)(r.time),
+                        threats: r.count,
+                      })) ?? []
+                    }
+                    index="date"
+                    categories={["threats"]}
+                    colors={["amber"]}
+                    showYAxis={false}
+                    curveType="monotone"
+                  />
+                </StyledAreaChart>
               </div>
 
               <div key="suggest-more-graphs">
