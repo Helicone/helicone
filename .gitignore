@@ -8,4 +8,5 @@ __pycache__/
 .DS_Store
 resend-cli/
 volumes
+**/package.json
 **/package-lock.json
