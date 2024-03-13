@@ -54,7 +54,7 @@ function getAPIRouterV1(
       env: Env,
       _ctx: ExecutionContext
     ) => {
-      const client = await createAPIClient(env, requestWrapper);
+      const client = await createAPIClient(env, _ctx, requestWrapper);
       const authParams = await client.db.getAuthParams();
       if (authParams.error !== null) {
         return client.response.unauthorized();
@@ -96,7 +96,7 @@ function getAPIRouterV1(
       env: Env,
       _ctx: ExecutionContext
     ) => {
-      const client = await createAPIClient(env, requestWrapper);
+      const client = await createAPIClient(env, _ctx, requestWrapper);
       const authParams = await client.db.getAuthParams();
       if (authParams.error !== null) {
         return client.response.unauthorized();
@@ -140,7 +140,7 @@ function getAPIRouterV1(
       env: Env,
       _ctx: ExecutionContext
     ) => {
-      const client = await createAPIClient(env, requestWrapper);
+      const client = await createAPIClient(env, _ctx, requestWrapper);
       const authParams = await client.db.getAuthParams();
       if (authParams.error !== null) {
         return client.response.unauthorized();
@@ -185,7 +185,7 @@ function getAPIRouterV1(
       env: Env,
       _ctx: ExecutionContext
     ) => {
-      const client = await createAPIClient(env, requestWrapper);
+      const client = await createAPIClient(env, _ctx, requestWrapper);
       const authParams = await client.db.getAuthParams();
       if (authParams.error !== null) {
         return client.response.unauthorized();
@@ -262,9 +262,9 @@ function getAPIRouterV1(
       { params: { id } },
       requestWrapper: RequestWrapper,
       env: Env,
-      _: ExecutionContext
+      _ctx: ExecutionContext
     ) => {
-      const client = await createAPIClient(env, requestWrapper);
+      const client = await createAPIClient(env, _ctx, requestWrapper);
       const authParams = await client.db.getAuthParams();
       if (authParams.error !== null) {
         return client.response.unauthorized();
@@ -316,7 +316,7 @@ function getAPIRouterV1(
       env: Env,
       _ctx: ExecutionContext
     ) => {
-      const client = await createAPIClient(env, requestWrapper);
+      const client = await createAPIClient(env, _ctx, requestWrapper);
       const { data: authParams, error: authError } =
         await client.db.getAuthParams();
 
@@ -353,8 +353,13 @@ function getAPIRouterV1(
 
   router.delete(
     "/alert/:id",
-    async ({ params: { id } }, requestWrapper: RequestWrapper, env: Env) => {
-      const client = await createAPIClient(env, requestWrapper);
+    async (
+      { params: { id } },
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      const client = await createAPIClient(env, _ctx, requestWrapper);
       const { data: authParams, error } = await client.db.getAuthParams();
 
       if (error !== null) {
@@ -376,7 +381,12 @@ function getAPIRouterV1(
 
   router.post(
     "/v1/organizations/:id/logo",
-    async (_, requestWrapper: RequestWrapper, env: Env) => {
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _ctx: ExecutionContext
+    ) => {
       const { error: formDataErr, data: formData } =
         await requestWrapper.getFormData();
 
@@ -394,7 +404,7 @@ function getAPIRouterV1(
         });
       }
 
-      const client = await createAPIClient(env, requestWrapper);
+      const client = await createAPIClient(env, _ctx, requestWrapper);
       const { data: authParams, error: authParamsErr } =
         await client.db.getAuthParams();
 
@@ -423,8 +433,13 @@ function getAPIRouterV1(
 
   router.get(
     "/v1/organizations/:id/logo",
-    async (_, requestWrapper: RequestWrapper, env: Env) => {
-      const client = await createAPIClient(env, requestWrapper);
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      const client = await createAPIClient(env, _ctx, requestWrapper);
       const { data: authParams, error: authParamsErr } =
         await client.db.getAuthParams();
 
