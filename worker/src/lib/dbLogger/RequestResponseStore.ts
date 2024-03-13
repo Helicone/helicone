@@ -32,7 +32,6 @@ export class RequestResponseStore {
   ) {}
 
   async insertIntoRequest(
-    database: SupabaseClient<Database>,
     requestPayload: RequestPayload
   ): Promise<Result<null, string>> {
     const { request, properties, responseId } = requestPayload;
@@ -41,7 +40,7 @@ export class RequestResponseStore {
     }
 
     const requestInsertResult = await this.queryTimer.withTiming(
-      database.from("request").insert([request]),
+      this.database.from("request").insert([request]),
       {
         queryName: "insert_request",
         percentLogging: FrequentPercentLogging,
@@ -60,7 +59,7 @@ export class RequestResponseStore {
       ? request.created_at
       : new Date().toISOString();
     const responseInsertResult = await this.queryTimer.withTiming(
-      database.from("response").insert([
+      this.database.from("response").insert([
         {
           request: request.id,
           id: responseId,
@@ -75,10 +74,7 @@ export class RequestResponseStore {
         percentLogging: FrequentPercentLogging,
       }
     );
-    const propertiesInsertResult = await this.insertProperties(
-      database,
-      properties
-    );
+    const propertiesInsertResult = await this.insertProperties(properties);
 
     if (responseInsertResult.error || propertiesInsertResult.error) {
       return {
@@ -93,11 +89,10 @@ export class RequestResponseStore {
   }
 
   async insertProperties(
-    database: SupabaseClient<Database>,
     properties: Database["public"]["Tables"]["properties"]["Insert"][]
   ): Promise<Result<null, string>> {
     const insertResult = await this.queryTimer.withTiming(
-      database.from("properties").insert(properties),
+      this.database.from("properties").insert(properties),
       {
         queryName: "insert_properties",
         percentLogging: FrequentPercentLogging,
@@ -110,7 +105,6 @@ export class RequestResponseStore {
   }
 
   async updateResponsePostgres(
-    database: SupabaseClient<Database>,
     responsePayload: ResponsePayload
   ): Promise<Result<null, string>> {
     const { responseId, requestId, response } = responsePayload;
@@ -119,7 +113,7 @@ export class RequestResponseStore {
     }
     return await this.queryTimer
       .withTiming(
-        database
+        this.database
           .from("response")
           .update(response)
           .match({ id: responseId, request: requestId }),
@@ -232,23 +226,6 @@ export class RequestResponseStore {
     return { data: null, error: null };
   }
 
-  private getModelFromPath(path: string) {
-    const regex1 = /\/engines\/([^/]+)/;
-    const regex2 = /models\/([^/:]+)/;
-
-    let match = path.match(regex1);
-
-    if (!match) {
-      match = path.match(regex2);
-    }
-
-    if (match && match[1]) {
-      return match[1];
-    } else {
-      return undefined;
-    }
-  }
-
   private getModelFromResponse(
     responseData: Database["public"]["Tables"]["response"]["Update"]
   ) {
@@ -281,7 +258,7 @@ export class RequestResponseStore {
       responseId,
     };
 
-    const res = await this.insertIntoRequest(this.database, payload);
+    const res = await this.insertIntoRequest(payload);
 
     if (res.error) {
       console.error("Error inserting into request:", res.error);
@@ -300,7 +277,7 @@ export class RequestResponseStore {
       requestId,
       response,
     };
-    const res = await this.updateResponsePostgres(this.database, payload);
+    const res = await this.updateResponsePostgres(payload);
 
     const responseUpdate = await this.valhalla.patch("/v1/response", {
       model: this.getModelFromResponse(response),
@@ -458,7 +435,7 @@ export class RequestResponseStore {
         auth_hash: "",
       }));
 
-    await this.insertProperties(this.database, properties);
+    await this.insertProperties(properties);
 
     const query = `
         SELECT * 
