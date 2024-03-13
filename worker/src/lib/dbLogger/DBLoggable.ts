@@ -12,7 +12,7 @@ import { INTERNAL_ERRORS } from "../constants";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { AsyncLogModel } from "../models/AsyncLog";
 import { logInClickhouse } from "./clickhouseLog";
-import { InsertQueue } from "./insertQueue";
+import { RequestResponseStore } from "./RequestResponseStore";
 import { logRequest } from "./logResponse";
 import { anthropicAIStream } from "./parsers/anthropicStreamParser";
 import { parseOpenAIStream } from "./parsers/openAIStreamParser";
@@ -380,7 +380,7 @@ export class DBLoggable {
   }
 
   async readAndLogResponse(
-    queue: InsertQueue
+    queue: RequestResponseStore
   ): Promise<
     Result<Database["public"]["Tables"]["response"]["Insert"], string>
   > {
@@ -520,7 +520,7 @@ export class DBLoggable {
     supabase: SupabaseClient<Database>; // TODO : Deprecate
     dbWrapper: DBWrapper;
     clickhouse: ClickhouseClientWrapper;
-    queue: InsertQueue;
+    queue: RequestResponseStore;
   }): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {

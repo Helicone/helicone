@@ -6,11 +6,12 @@ import { RequestWrapper } from "../../lib/RequestWrapper";
 import { ClickhouseClientWrapper } from "../../lib/db/clickhouse";
 import { Valhalla } from "../../lib/db/valhalla";
 import { dbLoggableRequestFromAsyncLogModel } from "../../lib/dbLogger/DBLoggable";
-import { InsertQueue } from "../../lib/dbLogger/insertQueue";
+import { RequestResponseStore } from "../../lib/dbLogger/RequestResponseStore";
 import {
   AsyncLogModel,
   validateAsyncLogModel,
 } from "../../lib/models/AsyncLog";
+import { DBQueryTimer } from "../../db/DBQueryTimer";
 
 export async function logAsync(
   requestWrapper: RequestWrapper,
@@ -57,8 +58,12 @@ export async function logAsync(
     clickhouse: new ClickhouseClientWrapper(env),
     supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
     dbWrapper: new DBWrapper(env, auth),
-    queue: new InsertQueue(
+    queue: new RequestResponseStore(
       createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+      new DBQueryTimer(ctx, {
+        apiKey: env.DATADOG_API_KEY,
+        endpoint: env.DATADOG_ENDPOINT,
+      }),
       new Valhalla(env.VALHALLA_URL, auth),
       new ClickhouseClientWrapper(env),
       env.FALLBACK_QUEUE,
