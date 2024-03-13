@@ -1,6 +1,6 @@
 import { PostgrestBuilder } from "@supabase/postgrest-js";
 
-export const FrequentPercentLogging = 0.01;
+export const FREQUENT_PRECENT_LOGGING = 0.01;
 interface WithTimingParams {
   queryName: string;
   percentLogging?: number;

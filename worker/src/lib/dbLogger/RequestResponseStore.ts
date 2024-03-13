@@ -7,7 +7,7 @@ import { Result, err, ok } from "../../results";
 import { ClickhouseClientWrapper, RequestResponseLog } from "../db/clickhouse";
 import { Valhalla } from "../db/valhalla";
 import { formatTimeString } from "./clickhouseLog";
-import { DBQueryTimer, FrequentPercentLogging } from "../../db/DBQueryTimer";
+import { DBQueryTimer, FREQUENT_PRECENT_LOGGING } from "../../db/DBQueryTimer";
 
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];
@@ -43,7 +43,7 @@ export class RequestResponseStore {
       this.database.from("request").insert([request]),
       {
         queryName: "insert_request",
-        percentLogging: FrequentPercentLogging,
+        percentLogging: FREQUENT_PRECENT_LOGGING,
       }
     );
 
@@ -71,7 +71,7 @@ export class RequestResponseStore {
       ]),
       {
         queryName: "insert_response",
-        percentLogging: FrequentPercentLogging,
+        percentLogging: FREQUENT_PRECENT_LOGGING,
       }
     );
     const propertiesInsertResult = await this.insertProperties(properties);
@@ -95,7 +95,7 @@ export class RequestResponseStore {
       this.database.from("properties").insert(properties),
       {
         queryName: "insert_properties",
-        percentLogging: FrequentPercentLogging,
+        percentLogging: FREQUENT_PRECENT_LOGGING,
       }
     );
     if (insertResult.error) {
@@ -119,7 +119,7 @@ export class RequestResponseStore {
           .match({ id: responseId, request: requestId }),
         {
           queryName: "update_response",
-          percentLogging: FrequentPercentLogging,
+          percentLogging: FREQUENT_PRECENT_LOGGING,
         }
       )
       .then((res) => {
@@ -397,7 +397,7 @@ export class RequestResponseStore {
         .single(),
       {
         queryName: "select_request_by_id",
-        percentLogging: FrequentPercentLogging,
+        percentLogging: FREQUENT_PRECENT_LOGGING,
       }
     );
 
@@ -423,7 +423,7 @@ export class RequestResponseStore {
         .eq("helicone_org_id", orgId),
       {
         queryName: "update_request_properties",
-        percentLogging: FrequentPercentLogging,
+        percentLogging: FREQUENT_PRECENT_LOGGING,
       }
     );
 

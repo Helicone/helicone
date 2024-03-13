@@ -5,7 +5,7 @@ import { Database } from "../supabase/database.types";
 import { Result } from "./results";
 import { IHeliconeHeaders } from "./lib/HeliconeHeaders";
 import { Valhalla } from "./lib/db/valhalla";
-import { DBQueryTimer, FrequentPercentLogging } from "./db/DBQueryTimer";
+import { DBQueryTimer, FREQUENT_PRECENT_LOGGING } from "./db/DBQueryTimer";
 
 interface FeedbackRequestBodyV2 {
   "helicone-id": string;
@@ -149,7 +149,7 @@ export async function isApiKeyAuthenticated(
         .eq("api_key_hash", heliconeApiKeyHash),
       {
         queryName: "select_helicone_api_keys_by_org_id",
-        percentLogging: FrequentPercentLogging,
+        percentLogging: FREQUENT_PRECENT_LOGGING,
       }
     );
 
@@ -179,7 +179,7 @@ export async function isApiKeyAuthenticated(
         .eq("owner", user.data.user.id),
       {
         queryName: "select_organization_by_id",
-        percentLogging: FrequentPercentLogging,
+        percentLogging: FREQUENT_PRECENT_LOGGING,
       }
     );
     if (isOwner.error) {
@@ -197,7 +197,7 @@ export async function isApiKeyAuthenticated(
         .eq("organization", orgId),
       {
         queryName: "select_organization_member_by_member_and_organization",
-        percentLogging: FrequentPercentLogging,
+        percentLogging: FREQUENT_PRECENT_LOGGING,
       }
     );
     if (isMemeber.error) {
@@ -233,7 +233,7 @@ export async function upsertFeedbackPostgres(
       .single(),
     {
       queryName: "upsert_feedback_by_response_id",
-      percentLogging: FrequentPercentLogging,
+      percentLogging: FREQUENT_PRECENT_LOGGING,
     }
   );
 
@@ -262,7 +262,7 @@ async function getRequest(
         dbClient.from("request").select("*").eq("id", heliconeId),
         {
           queryName: "select_request_by_id",
-          percentLogging: FrequentPercentLogging,
+          percentLogging: FREQUENT_PRECENT_LOGGING,
         }
       );
 
@@ -295,7 +295,7 @@ export async function getResponse(
         dbClient.from("response").select("*").eq("request", heliconeId),
         {
           queryName: "select_response_by_request",
-          percentLogging: FrequentPercentLogging,
+          percentLogging: FREQUENT_PRECENT_LOGGING,
         }
       );
 
