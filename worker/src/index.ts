@@ -47,6 +47,8 @@ export interface Env {
   ALERTER: DurableObjectNamespace;
   RESEND_API_KEY: string;
   PROMPTARMOR_API_KEY: string;
+  DATADOG_API_KEY: string;
+  DATADOG_ENDPOINT: string;
 }
 
 export async function hash(key: string): Promise<string> {

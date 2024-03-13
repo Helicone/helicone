@@ -67,7 +67,7 @@ function addBaseRoutes(router: BaseRouter | BaseOpenAPIRouter): void {
       env: Env,
       _ctx: ExecutionContext
     ) => {
-      return await handleFeedback(requestWrapper, env);
+      return await handleFeedback(requestWrapper, env, _ctx);
     }
   );
 
