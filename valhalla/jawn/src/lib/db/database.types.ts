@@ -1003,6 +1003,7 @@ export type Database = {
           org_provider_key: string | null
           organization_type: string
           owner: string
+          percent_to_log: number | null
           referral: string | null
           reseller_id: string | null
           size: string | null
@@ -1026,6 +1027,7 @@ export type Database = {
           org_provider_key?: string | null
           organization_type?: string
           owner: string
+          percent_to_log?: number | null
           referral?: string | null
           reseller_id?: string | null
           size?: string | null
@@ -1049,6 +1051,7 @@ export type Database = {
           org_provider_key?: string | null
           organization_type?: string
           owner?: string
+          percent_to_log?: number | null
           referral?: string | null
           reseller_id?: string | null
           size?: string | null

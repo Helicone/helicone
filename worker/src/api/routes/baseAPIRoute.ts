@@ -33,7 +33,7 @@ export abstract class BaseAPIRoute extends OpenAPIRoute<
     ctx: ExecutionContext,
     data: unknown
   ) {
-    const client = await createAPIClient(env, requestWrapper);
+    const client = await createAPIClient(env, ctx, requestWrapper);
     const authParams = await client.db.getAuthParams();
     if (authParams.error !== null) {
       return client.response.unauthorized();

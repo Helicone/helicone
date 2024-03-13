@@ -12,7 +12,7 @@ import { INTERNAL_ERRORS } from "../constants";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { AsyncLogModel } from "../models/AsyncLog";
 import { logInClickhouse } from "./clickhouseLog";
-import { InsertQueue } from "./insertQueue";
+import { RequestResponseStore } from "./RequestResponseStore";
 import { logRequest } from "./logResponse";
 import { anthropicAIStream } from "./parsers/anthropicStreamParser";
 import { parseOpenAIStream } from "./parsers/openAIStreamParser";
@@ -380,7 +380,7 @@ export class DBLoggable {
   }
 
   async readAndLogResponse(
-    queue: InsertQueue
+    queue: RequestResponseStore
   ): Promise<
     Result<Database["public"]["Tables"]["response"]["Insert"], string>
   > {
@@ -520,7 +520,7 @@ export class DBLoggable {
     supabase: SupabaseClient<Database>; // TODO : Deprecate
     dbWrapper: DBWrapper;
     clickhouse: ClickhouseClientWrapper;
-    queue: InsertQueue;
+    queue: RequestResponseStore;
   }): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
@@ -532,13 +532,24 @@ export class DBLoggable {
       return rateLimiter;
     }
 
-    const tier = await db.dbWrapper.getTier();
+    const org = await db.dbWrapper.getOrganization();
 
-    if (tier.error !== null) {
-      return err(tier.error);
+    if (org.error !== null) {
+      return err(org.error);
+    }
+    const tier = org.data?.tier;
+
+    if (org.data.percentLog !== 100_000) {
+      const random = Math.random() * 100_000;
+      console.log(
+        `NOT LOGGING FOR ORG ID: ${authParams.organizationId} ${random} ${org.data.percentLog}`
+      );
+      if (random > org.data.percentLog) {
+        return ok(null);
+      }
     }
 
-    const rateLimit = await rateLimiter.data.checkRateLimit(tier.data);
+    const rateLimit = await rateLimiter.data.checkRateLimit(tier);
 
     if (rateLimit.error) {
       console.error(`Error checking rate limit: ${rateLimit.error}`);

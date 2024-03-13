@@ -3,7 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";
 import { Result } from "../../results";
 import { AuthParams, DBLoggableProps } from "./DBLoggable";
-import { InsertQueue } from "./insertQueue";
+import { RequestResponseStore } from "./RequestResponseStore";
 
 const MAX_USER_ID_LENGTH = 7000;
 
@@ -46,7 +46,7 @@ export async function logRequest(
   request: DBLoggableProps["request"],
   responseId: string,
   dbClient: SupabaseClient<Database>,
-  insertQueue: InsertQueue,
+  insertQueue: RequestResponseStore,
   authParams: AuthParams
 ): Promise<
   Result<
