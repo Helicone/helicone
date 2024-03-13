@@ -676,11 +676,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [currentStatus, setCurrentStatus] = useState<string[]>(["200"]);
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
-  const [currentProperty, setCurrentProperty] = useState<string>("Latency");
-
-  const onChangeCurrentProperty = (value: string) => {
-    setCurrentProperty(value);
-  };
+  const [currentMetric, setCurrentMetric] = useState<string>("Latency");
 
   const {
     quantiles,
@@ -690,7 +686,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     timeFilter,
     dbIncrement: timeIncrement,
     timeZoneDifference: new Date().getTimezoneOffset(),
-    metric: quantilesProperties.get(currentProperty) ?? "latency",
+    metric: quantilesProperties.get(currentMetric) ?? "latency",
   });
 
   const renderUnauthorized = () => {
@@ -1044,14 +1040,14 @@ const DashboardPage = (props: DashboardPageProps) => {
                               ?.map((d) => d.p99)
                               .filter((d) => d !== 0) ?? []
                           )
-                        )} ${currentProperty === "Latency" ? "ms" : ""}`}
+                        )} ${currentMetric === "Latency" ? "ms" : ""}`}
                       </p>
                     </div>
                     {!quantilesIsLoading && (
                       <Select
                         placeholder="Select property"
-                        value={currentProperty}
-                        onValueChange={onChangeCurrentProperty}
+                        value={currentMetric}
+                        onValueChange={setCurrentMetric}
                         className="border border-gray-400 rounded-lg w-fit min-w-[250px] max-w-xl"
                       >
                         {Array.from(quantilesProperties.entries()).map(
@@ -1106,7 +1102,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                         curveType="monotone"
                         valueFormatter={(number: number | bigint) =>
                           `${new Intl.NumberFormat("us").format(number)} ${
-                            currentProperty === "Latency" ? "ms" : "tokens"
+                            currentMetric === "Latency" ? "ms" : "tokens"
                           }`
                         }
                       />
