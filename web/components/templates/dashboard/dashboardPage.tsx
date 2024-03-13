@@ -1048,10 +1048,9 @@ const DashboardPage = (props: DashboardPageProps) => {
 
               <div key="quantiles">
                 <Card>
-                  <div className="flex flex-row items-center justify-between h-max">
-                    <div className="flex flex-col space-y-0.5">
+                  <div className="flex flex-row items-center justify-between min-h-fit">
+                    <div className="flex flex-col space-y-0.5 h-fit">
                       <p className="text-gray-500 text-sm">Quantiles</p>
-                      <div className="grow"></div>
                     </div>
                     {!quantilesIsLoading && (
                       <Select
