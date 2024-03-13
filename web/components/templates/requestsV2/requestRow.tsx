@@ -183,13 +183,17 @@ const RequestRow = (props: {
               </p>
               <div className="flex flex-row items-center space-x-1">
                 <p className="text-gray-700 truncate dark:text-gray-300">
-                  {request.totalTokens}
+                  {request.totalTokens && request.totalTokens >= 0
+                    ? request.totalTokens
+                    : "not found"}
                 </p>
-                <Tooltip
-                  title={`Completion Tokens: ${request.completionTokens} - Prompt Tokens: ${request.promptTokens}`}
-                >
-                  <InformationCircleIcon className="h-4 w-4 inline text-gray-500" />
-                </Tooltip>
+                {request.totalTokens && request.totalTokens >= 0 && (
+                  <Tooltip
+                    title={`Completion Tokens: ${request.completionTokens} - Prompt Tokens: ${request.promptTokens}`}
+                  >
+                    <InformationCircleIcon className="h-4 w-4 inline text-gray-500" />
+                  </Tooltip>
+                )}
               </div>
             </li>
           )}

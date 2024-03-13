@@ -105,6 +105,7 @@ const useRequestsPageV2 = (
     isCountLoading: count.isLoading,
     properties,
     refetch: requests.refetch,
+    remove: requests.remove,
     searchPropertyFilters,
     filterMap,
     filter,

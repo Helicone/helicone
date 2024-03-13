@@ -15,6 +15,8 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import TableFooter from "../requestsV2/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { useRouter } from "next/router";
+import { UserGroupIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -94,6 +96,29 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
             router.push(`/users/${encodeURIComponent(row.user_id)}`);
           }}
         />
+        {users.length <= 1 && (
+          <div className="flex flex-col w-full h-96 justify-center items-center bg-white rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-black">
+            <div className="flex flex-col w-2/5">
+              <UserGroupIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+              <p className="text-xl text-black dark:text-white font-semibold mt-8">
+                No unique users found.
+              </p>
+              <p className="text-sm text-gray-500 max-w-sm mt-2">
+                Please explore our docs{" "}
+                <Link
+                  href="https://docs.helicone.ai/features/advanced-usage/user-metrics"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="underline text-blue-500"
+                >
+                  here
+                </Link>{" "}
+                to learn more about user tracking and metrics.
+              </p>
+            </div>
+          </div>
+        )}
+
         <TableFooter
           currentPage={currentPage}
           pageSize={pageSize}
