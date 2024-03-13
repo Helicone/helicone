@@ -642,6 +642,12 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
   const [currentProperty, setCurrentProperty] = useState<string>("Latency");
 
+  const onChangeCurrentProperty = (value: string) => {
+    alert(1);
+    setCurrentProperty(value);
+    quantilesRefetch();
+  };
+
   const {
     quantiles,
     isLoading: quantilesIsLoading,
@@ -650,7 +656,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     timeFilter,
     dbIncrement: timeIncrement,
     timeZoneDifference: new Date().getTimezoneOffset(),
-    property: "latency",
+    property: quantilesProperties.get(currentProperty) ?? "latency",
   });
 
   const renderUnauthorized = () => {
@@ -1052,7 +1058,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       <Select
                         placeholder="Select property"
                         value={currentProperty}
-                        onValueChange={setCurrentProperty}
+                        onValueChange={onChangeCurrentProperty}
                         className="border border-gray-400 rounded-lg w-fit min-w-[250px] max-w-xl"
                       >
                         {Array.from(quantilesProperties.entries()).map(

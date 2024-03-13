@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Result } from "../../lib/result";
 import { TimeIncrement } from "../../lib/timeCalculations/fetchTimeData";
-import { Quantiles } from "../../pages/api/metrics/quantiles";
+import { Quantiles } from "../../lib/api/metrics/quantilesCalc";
 
 const useQuantiles = (data: {
   timeFilter: {
@@ -17,7 +17,7 @@ const useQuantiles = (data: {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["quantiles", data.timeFilter],
+    queryKey: ["quantiles", data.timeFilter, data.property],
     queryFn: async (query) => {
       return await fetch("/api/metrics/quantiles", {
         method: "POST",
