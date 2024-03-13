@@ -1037,6 +1037,15 @@ const DashboardPage = (props: DashboardPageProps) => {
                   <div className="flex flex-row items-center justify-between">
                     <div className="flex flex-col space-y-0.5">
                       <p className="text-gray-500 text-sm">Quantiles</p>
+                      <p className="text-black dark:text-white text-xl font-semibold">
+                        {`Max: ${new Intl.NumberFormat("us").format(
+                          max(
+                            quantiles?.data
+                              ?.map((d) => d.p99)
+                              .filter((d) => d !== 0) ?? []
+                          )
+                        )} ${currentProperty === "Latency" ? "ms" : ""}`}
+                      </p>
                     </div>
                     {!quantilesIsLoading && (
                       <Select
@@ -1057,9 +1066,9 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </div>
 
                   <div
-                    className={clsx("p-2", "w-full", "h-full")}
+                    className={clsx("p-2", "w-full")}
                     style={{
-                      height: "234px",
+                      height: "224px",
                     }}
                   >
                     {quantilesIsLoading ? (
