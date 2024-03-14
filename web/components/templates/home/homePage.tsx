@@ -1,795 +1,577 @@
-/* eslint-disable @next/next/no-img-element */
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-    ],
-  }
-  ```
-*/
-import { useRouter } from "next/router";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { DEMO_EMAIL } from "../../../lib/constants";
-
+import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
+import { Database } from "../../../supabase/database.types";
+import { DEMO_EMAIL } from "../../../lib/constants";
+import NavBarV2 from "../../layout/navbar/navBarV2";
+import Footer from "../../layout/footer";
 import {
-  ArrowPathIcon,
-  BanknotesIcon,
-  CloudArrowDownIcon,
-  CloudArrowUpIcon,
-  CurrencyDollarIcon,
-} from "@heroicons/react/24/outline";
+  ChevronRightIcon,
+  HeartIcon,
+  XMarkIcon,
+} from "@heroicons/react/20/solid";
+import Image from "next/image";
 import { clsx } from "../../shared/clsx";
 import Link from "next/link";
+import Globe from "./globe";
+import Steps from "./components/steps";
 import {
-  ChartPieIcon,
-  CloudIcon,
-  CodeBracketIcon,
-  UserGroupIcon,
-} from "@heroicons/react/24/solid";
-import CodeSnippet from "./codeSnippet";
-import Footer from "../../layout/footer";
-import NavBarV2 from "../../layout/navbar/navBarV2";
-import ManageHostedButton from "./manageHostedButton";
-import ContactForm from "../../shared/contactForm";
-import Image from "next/image";
-import { CheckCircleIcon } from "@heroicons/react/20/solid";
+  BuildingOffice2Icon,
+  CodeBracketSquareIcon,
+  CubeIcon,
+  ShieldCheckIcon,
+} from "@heroicons/react/24/outline";
+import Features from "./components/features";
+import gsap from "gsap";
+import Platform from "./components/platform";
+import { Disclosure } from "@headlessui/react";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
+
+interface HomePageProps {}
 
 const faqs = [
   {
-    question: "How does Helicone work under the hood?",
+    question: "Is there a latency impact to my requests with Helicone's Proxy?",
     answer:
-      "Our recommended integration is via a proxy, but we also support an async logging integration. We log the request and response payloads, and use that to build a user-level view of your LLM usage.",
+      "Helicone leverages Cloudflare’s global network of servers as proxies for efficient web traffic routing. Cloudflare workers maintain extremely low latency through their worldwide distribution. This results in a fast and reliable proxy for your LLM requests with less than a fraction of a millisecond of latency impact.",
   },
   {
-    question: "What is the latency impact?",
+    question: "Do you offer a self-hosted or manage-hosted solution?",
     answer:
-      "We know latency is a huge concern for your LLM-powered application, so we use Cloudflare Workers to ensure the latency impact is negligible. You can read more about our architecture here.",
+      "Our recommended solution is to use our cloud service, but we do offer a dedicated manage-hosted solution for enterprise customers. Please contact us at sales@helicone.ai for more information.",
   },
   {
-    question: "I do not want to use a proxy. What are my options?",
+    question: "I do not want to use the proxy, can I still use Helicone?",
     answer:
-      "We have an async logging integration for users that do not want to use a proxy. We also provide a self-hosted version of our proxy for users that want to host it themselves.",
+      "Yes, you can use Helicone without the proxy. We have packages for Python and Node.js that you can use to send data to Helicone. Visit our documentation page to learn more.",
   },
   // More questions...
 ];
 
-interface HomePageProps {
-  microsoftForStartups?: boolean;
-}
+const HomePage = (props: HomePageProps) => {
+  const {} = props;
 
-export default function HomePage(props: HomePageProps) {
-  const { microsoftForStartups = false } = props;
-  const router = useRouter();
-  const supabaseClient = useSupabaseClient();
-  const user = useUser();
   const [demoLoading, setDemoLoading] = useState(false);
+
+  const router = useRouter();
+  const user = useUser();
+  const [showStars, setShowStars] = useLocalStorage("showStars", true);
+
+  const supabaseClient = useSupabaseClient<Database>();
+
+  // Create a ref for the hero text
+  const heroTextRef = useRef<HTMLDivElement>(null);
+  const subTextRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const animationDelay = setTimeout(() => {
+      if (subTextRef.current) {
+        subTextRef.current.classList.remove("invisible", "opacity-0");
+        gsap.from(subTextRef.current, {
+          duration: 2,
+          autoAlpha: 0,
+          y: -50,
+          ease: "power3.out",
+        });
+      }
+    }, 300);
+
+    return () => clearTimeout(animationDelay);
+  }, []);
+
+  useEffect(() => {
+    if (heroTextRef.current) {
+      gsap.from(heroTextRef.current.children, {
+        duration: 0.8,
+        y: 50,
+        opacity: 0,
+        stagger: 0.2, // Stagger the animation for each child
+        ease: "power3.out",
+      });
+    }
+  }, []);
+
   if (!demoLoading && user?.email === DEMO_EMAIL) {
     supabaseClient.auth.signOut();
   }
 
-  const observabilityDiv = useRef(null);
-  const rateDiv = useRef(null);
-  const bucketDiv = useRef(null);
-
-  const [currentPanel, setCurrentPanel] = useState("observability");
-
-  useEffect(() => {
-    const observability = observabilityDiv.current;
-    const rate = rateDiv.current;
-    const bucket = bucketDiv.current;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setCurrentPanel(entry.target.id);
-            return;
-          }
-        });
-      },
-      {
-        threshold: 0,
-      }
-    );
-
-    if (observability) {
-      observer.observe(observability);
-    }
-
-    if (rate) {
-      observer.observe(rate);
-    }
-
-    if (bucket) {
-      observer.observe(bucket);
-    }
-
-    return () => {
-      if (observability) {
-        observer.unobserve(observability);
-      }
-
-      if (rate) {
-        observer.unobserve(rate);
-      }
-
-      if (bucket) {
-        observer.unobserve(bucket);
-      }
-    };
-  }, []);
-
   return (
-    <div className="flex-col w-full antialiased">
+    <div className="w-full bg-[#f8feff] h-full antialiased relative">
       <NavBarV2 />
-      <div className="relative isolate overflow-hidden bg-white">
-        <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-32  border-gray-300">
-          <div className="mx-auto lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-0">
-            <div className="">
-              <a
-                href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex space-x-6"
-              >
-                <span className="rounded-full bg-orange-600/10 px-3 py-1 text-sm font-semibold leading-6 text-orange-600 ring-1 ring-inset ring-orange-600/10">
-                  Backed by Y Combinator
-                </span>
-              </a>
-            </div>
-            <h1 className="mt-8 sm:mt-16 lg:mt-8 leading-tight lg:leading-tight font-bold tracking-tight text-gray-800  text-5xl lg:text-6xl antialiased">
-              Open-Source{" "}
-              <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_4px] sm:bg-[length:100%_6px] pb-1 sm:pb-1.5 bg-no-repeat bg-bottom">
-                Monitoring
-              </span>{" "}
-              <p>for Generative AI</p>
-            </h1>
 
-            <p className="mt-6 text-lg leading-8 max-w-md text-gray-700 antialiased">
-              Thousands of users and organizations leverage Helicone to monitor
-              their LLM applications. Instantly get insights into your latency,
-              costs, and much more.
-            </p>
-
-            {microsoftForStartups ? (
-              <div className="flex flex-row items-center mt-16 -ml-5">
-                <div>
-                  <Image
-                    priority
-                    src={"/assets/mfs.png"}
-                    alt={"Helicone-mobile"}
-                    width={300}
-                    height={300}
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-row gap-8 mt-10">
-                <Link
-                  href="/signup"
-                  className="px-4 py-2 bg-gray-800 font-semibold text-white text-sm rounded-lg"
+      <header className="w-full flex flex-col space-y-4 mx-auto max-w-6xl h-full py-16 sm:py-24 items-center text-center px-2 sm:px-2 lg:px-0">
+        <div className="-mt-4 text-xs mx-auto flex flex-col sm:flex-row sm:divide-x-2 gap-[14px] justify-center items-center divide-gray-300 opacity-75 w-fit px-4 pb-4 rounded-xl">
+          <Link
+            href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex space-x-6 font-semibold text-gray-600 items-center"
+          >
+            Backed by{" "}
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="mr-1 ml-2"
+            >
+              <g clipPath="url(#clip0_24_57)">
+                <rect width="24" height="24" rx="5.4" fill="#FF5100"></rect>
+                <rect
+                  x="0.5"
+                  y="0.5"
+                  width="23"
+                  height="23"
+                  rx="4.9"
+                  stroke="#FF844B"
+                ></rect>
+                <path
+                  d="M7.54102 7.31818H9.28604L11.9458 11.9467H12.0552L14.715 7.31818H16.46L12.7662 13.5028V17.5H11.2349V13.5028L7.54102 7.31818Z"
+                  fill="white"
+                ></path>
+              </g>
+              <rect
+                x="0.5"
+                y="0.5"
+                width="23"
+                height="23"
+                rx="4.9"
+                stroke="#FF5100"
+                strokeOpacity="0.1"
+              ></rect>
+              <rect
+                x="0.5"
+                y="0.5"
+                width="23"
+                height="23"
+                rx="4.9"
+                stroke="url(#paint0_radial_24_57)"
+              ></rect>
+              <defs>
+                <radialGradient
+                  id="paint0_radial_24_57"
+                  cx="0"
+                  cy="0"
+                  r="1"
+                  gradientUnits="userSpaceOnUse"
+                  gradientTransform="translate(7.35) rotate(58.475) scale(34.1384)"
                 >
-                  Get Started
-                </Link>
-                {demoLoading ? (
-                  <button className="flex flex-row underline underline-offset-4 font-semibold text-gray-900 items-center text-sm">
-                    <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
-                    Logging In...
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setDemoLoading(true);
-                      supabaseClient.auth.signOut().then(() => {
-                        supabaseClient.auth
-                          .signInWithPassword({
-                            email: DEMO_EMAIL,
-                            password: "valyrdemo",
-                          })
-                          .then((res) => {
-                            router.push("/demo").then(() => {
-                              setDemoLoading(false);
-                            });
-                          });
-                      });
-                    }}
-                    className="underline underline-offset-4 font-semibold text-gray-900 text-sm"
-                  >
-                    View Demo
-                  </button>
-                )}
-              </div>
-            )}
+                  <stop stopColor="white" stopOpacity="0.56"></stop>
+                  <stop
+                    offset="0.28125"
+                    stopColor="white"
+                    stopOpacity="0"
+                  ></stop>
+                </radialGradient>
+                <clipPath id="clip0_24_57">
+                  <rect width="24" height="24" rx="5.4" fill="white"></rect>
+                </clipPath>
+              </defs>
+            </svg>{" "}
+            Combinator
+          </Link>
+          <div className="font-semibold text-gray-600 pl-4 flex items-center">
+            Fully open-source{" "}
+            <HeartIcon className="h-4 w-4 inline ml-2 text-pink-500" />
           </div>
-          {microsoftForStartups ? (
-            <ContactForm contactTag={"mfs"} buttonText={"Get 9 months free"} />
-          ) : (
-            <div className="relative mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-5 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-16">
-              <div className="flex-none sm:max-w-5xl lg:max-w-none pl-24 pb-24">
-                <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2 lg:rounded-2xl lg:p-2">
-                  <Image
-                    src="/assets/landing/preview.webp"
-                    alt="App screenshot"
-                    width={2720}
-                    height={1844}
-                    className="w-[55rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
-                  />
-                </div>
-              </div>
-              <div className="flex-none sm:max-w-5xl lg:max-w-none absolute bottom-0">
-                <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2 lg:rounded-2xl lg:p-2">
-                  <Image
-                    src="/assets/landing/request-preview.png"
-                    alt="App screenshot"
-                    width={556}
-                    height={916}
-                    className="w-[22.5rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
         </div>
-        {microsoftForStartups && (
-          <div className="mx-auto max-w-7xl px-6 lg:px-8 antialiased pb-24 sm:pb-32">
-            <div className="bg-white mx-auto max-w-2xl rounded-3xl border border-gray-200 shadow-sm sm:mt-20 lg:mx-0 lg:flex lg:items-center lg:max-w-none">
-              <div className="p-8 sm:p-10 lg:flex-auto">
-                <h3 className="text-2xl font-bold tracking-tight text-gray-900">
-                  What you get
-                </h3>
-                <p className="mt-6 text-base leading-7 text-gray-600">
-                  We&apos;re excited for you to join our community. Enjoy a
-                  dedicated Discord or Slack channel, an easy-to-use Helm chart,
-                  priority on feature requests, and expert support. We{"'"}ve
-                  got you covered for self-deployed instances and offer custom
-                  ETL integrations.
-                </p>
-                <div className="mt-10 flex items-center gap-x-4">
-                  <h4 className="flex-none text-sm font-semibold leading-6 text-indigo-600">
-                    What&apos;s included
-                  </h4>
-                  <div className="h-px flex-auto bg-gray-100" />
-                </div>
-                <ul
-                  role="list"
-                  className="mt-6 grid grid-cols-1 gap-4 text-sm leading-6 text-gray-600 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-6"
-                >
-                  {[
-                    "Monitoring and Dashboards",
-                    "Custom Properties",
-                    "Unlimited Requests",
-                    "Bucket Caching",
-                    "User Management and Rate Limiting",
-                    "GraphQL API",
-                    "Request Retries",
-                    "Unlimited Organizations",
-                    "Up to 2GB of storage",
-                  ].map((feature) => (
-                    <li key={feature} className="flex gap-x-3">
-                      <CheckCircleIcon
-                        className="h-6 w-5 flex-none text-indigo-600"
-                        aria-hidden="true"
-                      />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+        <h1
+          ref={heroTextRef}
+          className="font-mono text-4xl sm:text-7xl block font-bold w-full h-full tracking-tight text-center items-center sm:leading-[1]"
+        >
+          <span>How</span> <span>developers</span>{" "}
+          <span className="text-sky-500 ">build</span>{" "}
+          <span className="text-sky-500">AI</span>{" "}
+          <span className="text-sky-500">applications</span>
+        </h1>
+        <p
+          ref={subTextRef}
+          className="text-gray-700 font-medium text-md sm:text-2xl sm:leading-7 invisible opacity-0 font-[Roboto Mono]"
+        >
+          Meet the lightweight, yet powerful platform purpose-built for
+          Generative AI
+        </p>
+        <div className="flex items-center gap-4 pt-4">
+          <Link
+            href="/contact"
+            className="bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 rounded-lg px-6 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
+          >
+            Get a demo
+          </Link>
+          <Link
+            href="/signup"
+            className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 text-white border-[3px] border-sky-700 rounded-lg pl-6 pr-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
+          >
+            Start Building
+            <ChevronRightIcon className="w-5 h-5 inline text-white" />
+          </Link>
+        </div>
+      </header>
+
+      <section className="w-full max-w-6xl mx-auto justify-center items-center pt-8 sm:pb-16 px-4 flex flex-col space-y-16">
+        <Features />
+      </section>
+      <section className="w-full flex flex-col max-w-6xl mx-auto space-y-4 py-32 px-4">
+        <div className="flex flex-col w-full items-center text-center">
+          <h3 className="text-xl sm:text-3xl font-bold text-black text-center tracking-tight leading-tight">
+            Trusted by thousands of{" "}
+            <span className=" hidden sm:inline">startups and enterprises</span>
+            <span className=" inline sm:hidden">companies</span>
+          </h3>
+          <p className="text-gray-700 font-medium text-md sm:text-lg sm:leading-9">
+            <span className="hidden sm:inline">Helicone is built</span>
+            <span className="inline sm:hidden">Built</span> to scale with your
+            business
+            <span className="hidden sm:inline">, no matter the size.</span>
+          </p>
+        </div>
+        <div className="flex flex-row sm:flex-col mx-auto px-4 sm:px-0 gap-8 sm:gap-0 w-full">
+          <div className="flex flex-col sm:flex-row justify-between w-full mx-auto max-w-4xl">
+            <div className={clsx(`h-32 w-32 flex items-center justify-center`)}>
+              <Image
+                src={"/assets/home/logos/logo.svg"}
+                alt={""}
+                width={400}
+                height={400}
+              />
+            </div>{" "}
+            <div className={clsx(`h-32 w-32 flex items-center justify-center`)}>
+              <Image
+                src={"/assets/home/logos/qawolf.png"}
+                alt={""}
+                width={400}
+                height={400}
+              />
+            </div>{" "}
+            <div className={clsx(`h-32 w-32 flex items-center justify-center`)}>
+              <Image
+                src={"/assets/home/logos/carta.png"}
+                alt={""}
+                width={100}
+                height={100}
+              />
+            </div>{" "}
+            <div className={clsx(`h-32 w-32 flex items-center justify-center`)}>
+              <Image
+                src={"/assets/home/logos/reworkd.png"}
+                alt={""}
+                width={60}
+                height={60}
+              />
+            </div>{" "}
+          </div>
+          <div className="flex flex-col sm:flex-row justify-between w-full mx-auto max-w-4xl">
+            <div className={clsx(`h-28 w-32 flex items-center justify-center`)}>
+              <Image
+                src={"/assets/home/logos/lex.svg"}
+                alt={""}
+                width={60}
+                height={60}
+              />
+            </div>{" "}
+            <div className={clsx(`h-28 w-32 flex items-center justify-center`)}>
+              <Image
+                src={"/assets/home/logos/particl.png"}
+                alt={""}
+                width={120}
+                height={120}
+              />
+            </div>{" "}
+            <div className={clsx(`h-28 w-32 flex items-center justify-center`)}>
+              <Image
+                src={"/assets/home/logos/mintlify.svg"}
+                alt={""}
+                width={400}
+                height={400}
+              />
+            </div>{" "}
+            <div className={clsx(`h-28 w-32 flex items-center justify-center`)}>
+              <Image
+                src={"/assets/home/logos/onboard.png"}
+                alt={""}
+                width={600}
+                height={600}
+              />
             </div>
           </div>
-        )}
-      </div>
-      <div className="bg-gray-50">
-        <div className="px-8 grid grid-cols-4 gap-16 h-full max-w-7xl mx-auto  border-gray-300  w-full items-center justify-center">
-          <div className="col-span-4 md:col-span-2 flex flex-col space-y-8 py-32">
-            <p className="text-5xl text-sky-500 tracking-wide font-semibold">
-              Open Source
-            </p>
-            <p className="text-xl text-gray-700 font-medium leading-8">
-              Open-Source is more than a choice—it&apos;s a commitment to
-              user-centric development, community collaboration, and absolute
+        </div>
+      </section>
+      <section className="w-full flex flex-col max-w-6xl mx-auto space-y-4 py-16 px-4">
+        <Platform />
+      </section>
+      <section className="w-full bg-[#0b1c2d] relative isolate overflow-hidden mt-32">
+        <div className="max-w-6xl mx-auto flex flex-col space-y-2 py-28 h-full px-4">
+          <h3 className="text-3xl sm:text-5xl font-bold text-white text-center tracking-tight leading-tight">
+            Made by developers,{" "}
+            <span className="text-cyan-400">for developers</span>
+          </h3>
+          <p className="text-gray-300 font-medium text-lg sm:text-xl leading-8 text-center">
+            This is the easiest integration you will ever do. We promise
+          </p>
+
+          <div className="flex gap-4 flex-col space-y-4 pt-16">
+            <Steps />
+          </div>
+          <ul className="grid grid-cols-1 sm:grid-cols-4 pt-16 gap-8">
+            <li className="col-span-1 flex items-start space-x-2">
+              <div>
+                <CodeBracketSquareIcon className="w-6 h-6 text-cyan-400" />
+              </div>
+              <div className="flex flex-col space-y-1">
+                <h2 className="text-md font-bold text-white">Any Model</h2>
+                <p className="text-sm text-gray-300 font-medium">
+                  Bring any model from any provider to Helicone.
+                </p>
+              </div>
+            </li>
+            <li className="col-span-1 flex items-start space-x-2">
+              <div>
+                <BuildingOffice2Icon className="w-6 h-6 text-cyan-400" />
+              </div>
+              <div className="flex flex-col space-y-1">
+                <h2 className="text-md font-bold text-white">Any Scale</h2>
+                <p className="text-sm text-gray-300 font-medium">
+                  Log millions of requests per second with no latency impact.
+                </p>
+              </div>
+            </li>
+            <li className="col-span-1 flex items-start space-x-2">
+              <div>
+                <CubeIcon className="w-6 h-6 text-cyan-400" />
+              </div>
+              <div className="flex flex-col space-y-1">
+                <h2 className="text-md font-bold text-white">Async Packages</h2>
+                <p className="text-sm text-gray-300 font-medium">
+                  We offer async packages for all major languages.
+                </p>
+              </div>
+            </li>
+            <li className="col-span-1 flex items-start space-x-2">
+              <div>
+                <ShieldCheckIcon className="w-6 h-6 text-cyan-400" />
+              </div>
+              <div className="flex flex-col space-y-1">
+                <h2 className="text-md font-bold text-white">
+                  On-prem deployments
+                </h2>
+                <p className="text-sm text-gray-300 font-medium">
+                  Deploy Helicone on-prem for maximum security.
+                </p>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div className="-bottom-44 md:-bottom-56 items-center flex absolute md:-right-1/3 w-full justify-end opacity-10 -z-10">
+          <Globe />
+        </div>
+      </section>
+      <section id="integration" className="py-36">
+        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
+          <div className="flex flex-col space-y-2 pb-2 w-full items-center">
+            <h3 className="text-3xl sm:text-5xl font-bold text-black text-center tracking-tight leading-tight">
+              Proudly <span className="text-amber-500">Open Source</span>
+            </h3>
+            <p className="text-lg md:text-xl text-gray-600 max-w-2xl text-center">
+              We believe in the power of community and the importance of
               transparency.
             </p>
-            <div className="flex flex-row gap-8 items-center">
-              <Link
-                href="https://github.com/Helicone/helicone"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-lg"
-              >
-                Star us on GitHub
-              </Link>
-              <Link
-                href="/roadmap"
-                className="underline underline-offset-2 font-semibold text-gray-900"
-              >
-                View Roadmap
-              </Link>
-            </div>
           </div>
-          <div className="flex flex-col col-span-2 md:col-span-1 h-full py-32 space-y-4">
-            <div className="flex flex-col space-y-2">
-              <CloudIcon className="h-8 w-8 inline text-sky-500" />
-              <p className="text-gray-900 font-semibold text-xl">
-                Cloud Solution
-              </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 md:justify-center w-full">
+            <div className="relative isolate bg-inherit h-[32rem] w-full border-[3px] border-black shadow-sm rounded-xl flex justify-center items-center">
+              <div className="w-full h-full rounded-xl p-8 flex flex-col space-y-4 text-left">
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  Deploy Anywhere
+                </h2>
+                <p className="text-lg text-gray-600 max-w-[18rem]">
+                  We have a cloud-hosted solution, but also offer on-prem
+                  deployments for maximum security.
+                </p>
+                <Link
+                  href="/contact"
+                  className="bg-white text-black border-2 border-gray-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1"
+                >
+                  Deploy on Prem
+                  <ChevronRightIcon className="w-5 h-5 inline text-black" />
+                </Link>
+              </div>
+              <div className="bottom-0 absolute w-full">
+                <div className="w-full flex flex-wrap-reverse gap-4 justify-end p-8 relative h-full">
+                  <div className="h-28 w-28 rounded-lg bg-white shadow-lg flex items-center justify-center border-[3px] border-black p-4">
+                    <Image
+                      src={"/assets/landing/aws.svg.png"}
+                      alt={"aws"}
+                      width={80}
+                      height={80}
+                      className=""
+                    />
+                  </div>
+                  <div className="h-28 w-28 rounded-lg bg-white shadow-lg flex items-center justify-center border-[3px] border-black p-4">
+                    <Image
+                      src={"/assets/landing/gcp.svg.png"}
+                      alt={"aws"}
+                      width={80}
+                      height={80}
+                      className=""
+                    />
+                  </div>
+                  <div className="h-28 w-28 rounded-lg bg-white shadow-lg flex items-center justify-center border-[3px] border-black p-4">
+                    <Image
+                      src={"/assets/landing/azure.svg.png"}
+                      alt={"aws"}
+                      width={80}
+                      height={80}
+                      className=""
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
-            <p className="text-gray-500">
-              We offer a hosted cloud solution for users that want to get up and
-              running quickly.
-            </p>
-            <div>
-              <Link
-                href="/pricing"
-                className="underline underline-offset-2 font-semibold text-gray-900"
-              >
-                View Pricing
-              </Link>
-            </div>
-          </div>
-          <div className="flex flex-col col-span-2 md:col-span-1 h-full py-32 space-y-4">
-            <div className="flex flex-col space-y-2">
-              <CloudArrowUpIcon className="h-8 w-8 inline text-sky-500" />
-              <p className="text-gray-900 font-semibold text-xl">
-                Manage Hosted
-              </p>
-            </div>
-            <p className="text-gray-500">
-              Deploy Helicone on your own infrastructure to maintain full
-              control over your data.
-            </p>
-            <div>
-              <ManageHostedButton />
+            <div className="overflow-hidden relative isolate bg-inherit h-[32rem] w-full border-[3px] border-black shadow-sm rounded-xl flex justify-center items-center">
+              <div className="w-full h-full rounded-xl p-8 flex flex-col space-y-4 text-left">
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  Join Our Community
+                </h2>
+                <p className="text-lg text-gray-600 max-w-[18rem]">
+                  Have a question? Want to contribute? Join our Discord server
+                  or check out our GitHub.
+                </p>
+                <div className="flex items-center gap-4">
+                  <Link
+                    href="https://discord.gg/2TkeWdXNPQ"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-white text-black border-2 border-gray-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1"
+                  >
+                    Join Discord
+                    <ChevronRightIcon className="w-5 h-5 inline text-black" />
+                  </Link>
+                  <Link
+                    href="https://github.com/Helicone/helicone"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-white text-black border-2 border-gray-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1"
+                  >
+                    View Github
+                    <ChevronRightIcon className="w-5 h-5 inline text-black" />
+                  </Link>
+                </div>
+              </div>
+              <div className="bottom-0 absolute w-full">
+                <div className="w-full flex flex-row justify-center items-center p-8 relative h-full">
+                  <div className="h-32 w-32 sm:h-40 sm:w-40 absolute bottom-16 sm:bottom-12 left-4 sm:left-12 -rotate-6 rounded-lg bg-white shadow-lg flex items-center justify-center border-[3px] border-black p-4">
+                    <div className="flex flex-col w-full">
+                      <dd className="text-violet-500 text-3xl font-bold">{`>50`}</dd>
+                      <dt className="text-gray-500 text-md">contributors</dt>
+                    </div>
+                  </div>
+                  <div className="z-30 h-32 w-32 sm:h-40 sm:w-40 absolute rounded-lg bottom-4 mx-auto bg-white shadow-lg flex items-center justify-center border-[3px] border-black p-4">
+                    <div className="flex flex-col w-full">
+                      <dd className="text-3xl font-bold text-yellow-500">
+                        1.2k
+                      </dd>
+                      <dt className="text-gray-500 text-md">stars</dt>
+                    </div>
+                  </div>
+                  <div className="h-32 w-32 sm:h-40 sm:w-40  rotate-6 bottom-16 sm:bottom-12 right-4 sm:right-12 absolute rounded-lg bg-white shadow-lg flex items-end sm:items-center justify-center border-[3px] border-black p-4">
+                    <div className="flex flex-col w-full">
+                      <dd className="text-green-500 text-3xl font-bold text-right sm:text-center">{`>1B`}</dd>
+                      <dt className="text-gray-500 text-md text-right sm:text-center">
+                        requests logged
+                      </dt>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div className="bg-gray-100">
-        <div className="px-8 pb-24 relative grid grid-cols-4 h-full max-w-7xl mx-auto  border-gray-300  w-full items-center justify-center">
-          <div className="flex flex-col col-span-4 md:col-span-2 space-y-8 py-32 md:pr-32">
-            <p className="text-lg text-sky-500 tracking-wide font-semibold">
-              Real Time Metrics
-            </p>
-            <p className="text-5xl text-gray-900 font-semibold">
-              Insights into your Usage and Performance
-            </p>
-            <div
-              ref={observabilityDiv}
-              id="observability"
-              className="sr-only"
-            />
-            <p className="text-xl text-gray-700 font-normal leading-8">
-              Building a Large-Language Model monitoring tool is time consuming
-              and hard to scale. So we did it for you:
-            </p>
-            <ul className="flex flex-col space-y-4 list-disc ml-4 font-normal text-gray-700">
-              <li>
-                <p className="leading-7">
-                  <span className="font-semibold text-gray-900 underline">
-                    Monitor Spending:
-                  </span>{" "}
-                  Keep a close eye on your AI expenditure to control costs
-                </p>
-              </li>
-              <li>
-                <p className="leading-7">
-                  <span className="font-semibold text-gray-900 underline">
-                    Analyze Traffic Peaks:
-                  </span>{" "}
-                  Identify high-traffic periods to allocate resources more
-                  efficiently
-                </p>
-              </li>
-              <li>
-                <p className="leading-7">
-                  <span className="font-semibold text-gray-900 underline">
-                    Track Latency Patterns:
-                  </span>{" "}
-                  Detect patterns in application speed and rectify slowdowns
-                  proactively
-                </p>
-              </li>
-            </ul>
+      </section>
+      <section id="faq" className="bg-inherit py-36">
+        <div className="mx-auto px-4 md:px-8 max-w-6xl">
+          <div className="flex flex-col space-y-4  text-left sm:text-center ">
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-tighter leading-tight">
+              Frequently asked questions
+            </h2>
           </div>
-          <div className="flex-col hidden md:flex col-span-2 h-[85%] w-full flex-1 sticky top-[10%] pt-16 pb-8">
-            <div className="h-full w-full relative">
-              <div
-                className={clsx(
-                  currentPanel === "observability"
-                    ? "bg-sky-50 border-sky-500 text-sky-500"
-                    : "bg-gray-50 border-gray-300 text-gray-500",
-                  "p-4 z-10 shadow-lg border-[1.5px] rounded-xl absolute top-0 flex items-center justify-center"
+          <dl className="mt-10 flex flex-col space-y-4">
+            {faqs.map((faq) => (
+              <Disclosure as="div" key={faq.question} className="">
+                {({ open }) => (
+                  <div className="border-2 border-black rounded-xl p-6">
+                    <dt>
+                      <Disclosure.Button className="flex w-full items-start justify-between text-left text-gray-900">
+                        <span className="text-lg font-bold leading-7">
+                          {faq.question}
+                        </span>
+                        <span className="ml-6 flex h-7 items-center">
+                          {open ? (
+                            <ChevronRightIcon
+                              className="h-6 w-6 rotate-90 transform transition-transform duration-300 ease-in-out"
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <ChevronRightIcon
+                              className="h-6 w-6 transform transition-transform duration-300 ease-in-out"
+                              aria-hidden="true"
+                            />
+                          )}
+                        </span>
+                      </Disclosure.Button>
+                    </dt>
+                    <Disclosure.Panel as="dd" className="mt-4 pr-12">
+                      <p className="text-base leading-7 text-gray-600">
+                        {faq.answer}
+                      </p>
+                    </Disclosure.Panel>
+                  </div>
                 )}
+              </Disclosure>
+            ))}
+          </dl>
+        </div>
+      </section>
+      {showStars && (
+        <div className="bg-emerald-500 text-xs rounded-3xl w-fit px-4 py-2 bottom-8 mx-auto flex sticky z-50 justify-between items-center gap-4">
+          <p className="text-white font-mono font-bold tracking-tighter">
+            Star us on Github
+          </p>
+          <Link
+            className="flex flex-row items-center text-xs font-semibold ring-1 ring-gray-300"
+            href={"https://github.com/Helicone/helicone"}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <div className="bg-gray-300 px-2 py-1 flex items-center ">
+              <svg
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
               >
-                <ChartPieIcon className="h-8 w-8" />
-              </div>
-              <div
-                className={clsx(
-                  currentPanel === "rate"
-                    ? "bg-pink-50 border-pink-500 text-pink-500"
-                    : "bg-gray-50 border-gray-300 text-gray-500",
-                  "p-4 z-10 shadow-lg border-[1.5px] rounded-xl absolute top-1/3 right-0 flex items-center justify-center"
-                )}
-              >
-                <UserGroupIcon className="h-8 w-8" />
-              </div>
-              <div
-                className={clsx(
-                  currentPanel === "bucket"
-                    ? "bg-purple-50 border-purple-500 text-purple-500"
-                    : "bg-gray-50 border-gray-300 text-gray-500",
-                  "p-4 z-10 shadow-lg border-[1.5px] rounded-xl absolute left-[10%] bottom-0 flex items-center justify-center"
-                )}
-              >
-                <CodeBracketIcon className="h-8 w-8" />
-              </div>
-              <svg className="h-full w-full">
-                {currentPanel === "observability" && (
-                  <>
-                    <line
-                      x1="10%"
-                      y1="5.5%"
-                      x2="50%"
-                      y2="5.5%"
-                      stroke={"#0ea4e9"}
-                      strokeWidth={1.25}
-                    />
-                    <line
-                      x1="50%"
-                      y1="5.5%"
-                      x2="50%"
-                      y2="20%"
-                      stroke={"#0ea4e9"}
-                      strokeWidth={1.25}
-                    />
-                  </>
-                )}
-                {currentPanel === "rate" && (
-                  <>
-                    <line
-                      x1="95%"
-                      y1="40%"
-                      x2="95%"
-                      y2="50%"
-                      stroke="#ec489a"
-                      strokeWidth={1.25}
-                    />
-                    <line
-                      x1="95%"
-                      y1="50%"
-                      x2="85%"
-                      y2="50%"
-                      stroke="#ec489a"
-                      strokeWidth={1.25}
-                    />
-                  </>
-                )}
-                {currentPanel === "bucket" && (
-                  <>
-                    <line
-                      x1="15%"
-                      y1="95%"
-                      x2="50%"
-                      y2="95%"
-                      stroke="#a955f7"
-                      strokeWidth={1.25}
-                    />
-                    <line
-                      x1="50%"
-                      y1="95%"
-                      x2="50%"
-                      y2="80%"
-                      stroke="#a955f7"
-                      strokeWidth={1.25}
-                    />
-                  </>
-                )}
+                <path
+                  fillRule="evenodd"
+                  d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                  clipRule="evenodd"
+                />
               </svg>
-              <div
-                className={clsx(
-                  currentPanel === "observability" && "border-sky-500",
-                  currentPanel === "rate" && "border-pink-500",
-                  currentPanel === "bucket" && "border-purple-500",
-                  "h-[70%] w-[70%] shadow-lg border-[1.5px] rounded-xl bg-white absolute top-0 bottom-0 left-0 right-0 m-auto p-4"
-                )}
-              >
-                {currentPanel === "observability" && (
-                  <div className="relative h-full">
-                    <div className="p-6 w-56 bg-white border border-gray-300 rounded-lg space-y-2 absolute">
-                      <div className="w-full flex flex-row items-center justify-between">
-                        <div className="text-sm  text-gray-700">
-                          Total Costs
-                        </div>
-                        {
-                          <CurrencyDollarIcon
-                            className="h-5 w-5"
-                            aria-hidden="true"
-                          />
-                        }
-                      </div>
-                      <div className="text-2xl font-semibold">$432.24</div>
-                    </div>
-                    <div className="p-6 w-56 bg-white border border-gray-300 rounded-lg space-y-2 absolute top-[20%] right-0 z-10">
-                      <div className="w-full flex flex-row items-center justify-between">
-                        <div className="text-sm  text-gray-700">
-                          Avg Latency / Req
-                        </div>
-                        {
-                          <CloudArrowDownIcon
-                            className="h-5 w-5"
-                            aria-hidden="true"
-                          />
-                        }
-                      </div>
-                      <div className="text-2xl font-semibold">437.27 ms</div>
-                    </div>
-                    <div className="p-2 bottom-2 absolute rounded-lg border border-gray-300 mr-8">
-                      <Image
-                        src="/assets/landing/requests.png"
-                        alt="requests-graph"
-                      />
-                    </div>
-                  </div>
-                )}
-                {currentPanel === "rate" && (
-                  <div className="h-full flex flex-col space-y-4">
-                    <div className="w-full font-semibold text-gray-900 grid grid-cols-8 divide-x divide-gray-300 px-2 border-b border-gray-300 pb-1">
-                      <p className="col-span-2">User</p>
-                      <p className="col-span-3 pl-4">Total Cost</p>
-                      <p className="col-span-3 pl-4">Avg Req / Day</p>
-                    </div>
-                    <ul className="space-y-4">
-                      {Array.from({ length: 8 }).map((_, i) => (
-                        <li key={i}>
-                          <ul className="w-full grid grid-cols-8 px-1">
-                            <li className="bg-gray-400 rounded-lg h-6 w-12 col-span-2" />
-                            <li className="bg-gray-400 rounded-lg h-6 w-16 col-span-3 ml-2" />
-                            <li className="bg-gray-400 rounded-lg h-6 w-16 col-span-3 ml-2" />
-                          </ul>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {currentPanel === "bucket" && (
-                  <div className="relative h-full">
-                    <div className="p-6 w-56 z-10 bg-white border border-gray-300 rounded-lg right-0 space-y-2 absolute">
-                      <div className="w-full flex flex-row items-center justify-between">
-                        <div className="text-sm  text-gray-700">
-                          Total Saved
-                        </div>
-                        {
-                          <BanknotesIcon
-                            className="h-5 w-5"
-                            aria-hidden="true"
-                          />
-                        }
-                      </div>
-                      <div className="text-2xl font-semibold">$146.21</div>
-                    </div>
-                    <div className="p-2 left-0 top-[15%] absolute rounded-lg border border-gray-300">
-                      <Image
-                        src="/assets/landing/piechart.png"
-                        alt="pie-chart"
-                        className="h-56 w-56"
-                      />
-                    </div>
-                    <div className="p-4 h-40 w-56 bg-white border border-gray-300 rounded-lg flex flex-col space-y-4 absolute bottom-0 right-0">
-                      <div className="flex flex-row space-x-2">
-                        <div className="bg-gray-400 rounded-md h-4 w-12" />
-                        <div className="bg-gray-400 rounded-md h-4 w-12" />
-                        <div className="bg-gray-400 rounded-md h-4 w-8" />
-                      </div>
-                      <div className="flex flex-row space-x-2">
-                        <div className="bg-gray-400 rounded-md h-4 w-8" />
-                        <div className="bg-gray-400 rounded-md h-4 w-20" />
-                      </div>
-                      <div className="flex flex-row space-x-2">
-                        <div className="bg-gray-400 rounded-md h-4 w-12" />
-                        <div className="bg-gray-400 rounded-md h-4 w-20" />
-                        <div className="bg-gray-400 rounded-md h-4 w-8" />
-                      </div>
-                      <div className="flex flex-row space-x-2">
-                        <div className="bg-gray-400 rounded-md h-4 w-16" />
-                        <div className="bg-gray-400 rounded-md h-4 w-24" />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <span>Star</span>
             </div>
-          </div>
-          <div className="flex flex-col col-span-4 md:col-span-2 space-y-8 py-32 md:pr-32">
-            <p className="text-lg text-pink-500 tracking-wide font-semibold">
-              User Management Tools
-            </p>
-            <p className="text-5xl text-gray-900 font-semibold">
-              Easily manage your application&apos;s users
-            </p>
 
-            <p className="text-xl text-gray-700 font-normal leading-8">
-              Our intuitive user management tools offer a hassle-free way to
-              control access to your system.
-            </p>
-            <div ref={rateDiv} id="rate" className="sr-only" />
-            <ul className="flex flex-col space-y-4 list-disc ml-4 font-normal text-gray-700">
-              <li>
-                <p className="leading-7">
-                  <span className="font-semibold text-gray-900 underline">
-                    User Rate Limiting:
-                  </span>{" "}
-                  Limit the number of requests per user to prevent abuse
-                </p>
-              </li>
-              <li>
-                <p className="leading-7">
-                  <span className="font-semibold text-gray-900 underline">
-                    User Metrics:
-                  </span>{" "}
-                  Identify power users and optimize your application for them
-                </p>
-              </li>
-              <li>
-                <p className="leading-7">
-                  <span className="font-semibold text-gray-900 underline">
-                    Request Retries:
-                  </span>{" "}
-                  Automatically retry failed requests to ensure users
-                  aren&apos;t left in the dark
-                </p>
-              </li>
-            </ul>
-          </div>
-          <div className="grid grid-cols-4 col-span-4 py-32 md:pr-32">
-            <div className="col-span-4 md:col-span-2 space-y-8">
-              <p className="text-lg text-purple-500 tracking-wide font-semibold">
-                Tooling for LLMs
-              </p>
-              <p className="text-5xl text-gray-900 font-semibold">
-                Tools to scale your LLM-powered application
-              </p>
-
-              <p className="text-xl text-gray-700 font-normal leading-8">
-                Our toolkit provides an array of features to manage and control
-                your AI applications.
-              </p>
-              <div ref={bucketDiv} id="bucket" className="sr-only" />
-              <ul className="flex flex-col space-y-4 list-disc ml-4 font-normal text-gray-700">
-                <li>
-                  <p className="leading-7">
-                    <span className="font-semibold text-gray-900 underline">
-                      Bucket Cache:
-                    </span>{" "}
-                    Save money by caching and configuring responses
-                  </p>
-                </li>
-                <li>
-                  <p className="leading-7">
-                    <span className="font-semibold text-gray-900 underline">
-                      Custom Properties:
-                    </span>{" "}
-                    Tag requests to easily segment and analyze your traffic
-                  </p>
-                </li>
-                <li>
-                  <p className="leading-7">
-                    <span className="font-semibold text-gray-900 underline">
-                      Streaming Support:
-                    </span>{" "}
-                    Get analytics into streamed responses out of the box
-                  </p>
-                </li>
-              </ul>
-            </div>
-          </div>
+            <div className="bg-gray-100 px-2 py-1">1.2k</div>
+          </Link>
+          <button
+            onClick={() => {
+              setShowStars(false);
+            }}
+          >
+            <XMarkIcon className="h-4 w-4 text-white" />
+          </button>
         </div>
-      </div>
-      <div className="bg-[#0a2540] h-full">
-        <div className="px-8 pb-16 relative grid grid-cols-4 h-full max-w-7xl mx-auto  border-gray-400  w-full items-center justify-center">
-          <div className="col-span-4 md:col-span-2 flex flex-col space-y-12 py-32 md:pr-32">
-            <p className="text-lg text-sky-400 tracking-wide font-semibold">
-              Made By Developers, For Developers
-            </p>
-            <p className="text-5xl text-white font-semibold">
-              Simple and Flexible Integration
-            </p>
-            <p className="text-xl text-gray-300 font-normal leading-8">
-              Our solution is designed to seamlessly integrate with your
-              existing setup:
-            </p>
-            <ul className="flex flex-col space-y-4 list-disc ml-4 font-normal text-gray-300">
-              <li>
-                <p className="leading-7">
-                  <span className="font-semibold text-gray-100 underline">
-                    Effortless Setup:
-                  </span>{" "}
-                  Get started with only 2 lines of code
-                </p>
-              </li>
-              <li>
-                <p className="leading-7">
-                  <span className="font-semibold text-gray-100 underline">
-                    Versatile Support:
-                  </span>{" "}
-                  Our platform smoothly integrates with your preferred tool
-                </p>
-              </li>
-              <li>
-                <p className="leading-7">
-                  <span className="font-semibold text-gray-100 underline">
-                    Package Variety:
-                  </span>{" "}
-                  Choose from a wide range of packages to import
-                </p>
-              </li>
-            </ul>
-            <div>
-              <Link
-                href="https://docs.helicone.ai/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-sky-400 font-semibold text-gray-900 rounded-lg"
-              >
-                Read Our Docs
-              </Link>
-            </div>
-          </div>
-          <div className="hidden md:flex flex-col col-span-4 md:col-span-2 h-full py-32 space-y-4">
-            <CodeSnippet variant={"themed"} />
-            <p className="text-center italic text-gray-500">
-              Example Integration with OpenAI
-            </p>
-          </div>
-        </div>
-      </div>
-      <div className="bg-violet-50">
-        <div className="px-8 grid grid-cols-4 gap-24 h-full max-w-7xl mx-auto border-gray-300 w-full justify-center">
-          <div className="col-span-4 md:col-span-2 flex flex-col space-y-8 py-32">
-            <p className="text-5xl text-violet-500 tracking-wide font-semibold">
-              Frequently Asked Questions
-            </p>
-            <p className="text-xl text-gray-700 font-medium leading-8">
-              Can’t find the answer you’re looking for? Join our Discord server
-              or contact us directly.
-            </p>
-            <div className="flex flex-row gap-8 items-center">
-              <Link
-                href="https://discord.gg/zsSTcH2qhG"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-lg"
-              >
-                Join Discord
-              </Link>
-              <Link
-                href="mailto:sales@helicone.ai"
-                className="underline underline-offset-2 font-semibold text-gray-900"
-              >
-                Contact Us
-              </Link>
-            </div>
-          </div>
-          <div className="col-span-4 md:col-span-2 flex flex-col space-y-8 py-32">
-            <ul className="space-y-16">
-              {faqs.map((faq, idx) => (
-                <li key={idx}>
-                  <p className="text-xl text-gray-900 font-bold leading-8">
-                    {faq.question}
-                  </p>
-                  <p className="text-gray-700 mt-2 leading-7">{faq.answer}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
+      )}
       <Footer />
     </div>
   );
-}
+};
+
+export default HomePage;

@@ -19,9 +19,9 @@ const Contact = () => {
   return (
     <PublicMetaData
       description={
-        "The Generative AI platform built for developers. Get observability, tooling, fine-tuning, and evaluations out of the box. "
+        "How developers build AI applications. Get observability, tooling, fine-tuning, and evaluations out of the box. "
       }
-      ogImageUrl={"https://www.helicone.ai/static/helicone-landing.png"}
+      ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
     >
       <div className="w-full bg-gray-50 h-full antialiased">
         <NavBarV2 />
