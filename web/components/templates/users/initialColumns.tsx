@@ -67,7 +67,7 @@ export const INITIAL_COLUMNS: ColumnDef<UserMetric>[] = [
   {
     accessorKey: "total_requests",
     header: "Requests",
-    cell: (info) => info.getValue(),
+    cell: (info) => Number(info.getValue()).toLocaleString(),
     meta: {
       sortKey: "total_requests",
     },
@@ -87,6 +87,24 @@ export const INITIAL_COLUMNS: ColumnDef<UserMetric>[] = [
     cell: (info) => <span>{Number(info.getValue()).toFixed(2)}</span>,
     meta: {
       sortKey: "average_tokens_per_request",
+    },
+    minSize: 200,
+  },
+  {
+    accessorKey: "total_completion_tokens",
+    header: "Completion Tokens",
+    cell: (info) => Number(info.getValue()).toLocaleString(),
+    meta: {
+      sortKey: "total_completion_tokens",
+    },
+    minSize: 200,
+  },
+  {
+    accessorKey: "total_prompt_token",
+    header: "Prompt Tokens",
+    cell: (info) => Number(info.getValue()).toLocaleString(),
+    meta: {
+      sortKey: "total_prompt_token",
     },
     minSize: 200,
   },
