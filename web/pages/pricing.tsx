@@ -5,8 +5,10 @@ const Pricing = () => {
   return (
     <>
       <PublicMetaData
-        description={"Pricing as simple as our code integration."}
-        ogImageUrl={"https://www.helicone.ai/static/helicone-pricing.png"}
+        description={
+          "How developers build AI applications. Get observability, tooling, fine-tuning, and evaluations out of the box. "
+        }
+        ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
       >
         <PricingPage />
       </PublicMetaData>
