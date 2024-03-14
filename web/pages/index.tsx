@@ -7,7 +7,7 @@ import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import RedirectingScreen from "../components/templates/home/redirectingScreen";
 import { isCustomerDomain } from "../lib/customerPortalHelpers";
 import PublicMetaData from "../components/layout/public/publicMetaData";
-import HomePageV3 from "../components/templates/home/homePageV3";
+import HomePage from "../components/templates/home/homePage";
 
 export const Home = () => {
   const router = useRouter();
@@ -23,11 +23,11 @@ export const Home = () => {
     <>
       <PublicMetaData
         description={
-          "The Generative AI platform built for developers. Get observability, tooling, fine-tuning, and evaluations out of the box. "
+          "How developers build AI applications. Get observability, tooling, fine-tuning, and evaluations out of the box. "
         }
         ogImageUrl={"https://www.helicone.ai/static/helicone-landing.png"}
       >
-        <HomePageV3 />
+        <HomePage />
       </PublicMetaData>
     </>
   );

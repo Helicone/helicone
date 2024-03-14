@@ -108,27 +108,23 @@ const NavBarV2 = (props: NavBarV2Props) => {
           </div>
           <div className="flex-1 hidden md:flex items-center justify-end gap-x-4">
             {user ? (
-              <button
-                onClick={() => {
-                  supabaseClient.auth.signOut().then(() => {
-                    router.push("/");
-                  });
-                }}
-                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+              <Link
+                href="/dashboard"
+                className="bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
               >
-                Sign Out
-              </button>
+                Dashboard
+              </Link>
             ) : (
               <>
                 <Link
                   href="/signin"
-                  className="bg-[#f8feff] hover:bg-gray-100 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                  className="bg-[#f8feff] hover:bg-gray-100 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/signup"
-                  className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                  className="bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 >
                   Sign Up
                 </Link>
