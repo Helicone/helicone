@@ -25,7 +25,7 @@ export const Home = () => {
         description={
           "How developers build AI applications. Get observability, tooling, fine-tuning, and evaluations out of the box. "
         }
-        ogImageUrl={"https://www.helicone.ai/static/helicone-landing.png"}
+        ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
       >
         <HomePage />
       </PublicMetaData>
