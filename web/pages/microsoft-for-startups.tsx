@@ -4,7 +4,7 @@ import HomePage from "../components/templates/home/homePage";
 const MicrosoftForStartups = () => {
   return (
     <MetaData title="Microsoft for Startups">
-      <HomePage microsoftForStartups={true} />
+      <HomePage />
     </MetaData>
   );
 };

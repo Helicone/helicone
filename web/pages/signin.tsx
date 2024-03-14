@@ -37,8 +37,10 @@ const SignIn = ({
 
   return (
     <PublicMetaData
-      description={"The easiest way to build your LLM-application at scale."}
-      ogImageUrl={"https://www.helicone.ai/static/helicone-landing.png"}
+      description={
+        "How developers build AI applications. Get observability, tooling, fine-tuning, and evaluations out of the box. "
+      }
+      ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
     >
       <AuthForm
         handleEmailSubmit={async (email: string, password: string) => {
