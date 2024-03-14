@@ -19,6 +19,7 @@ import { HeliconeProxyRequestMapper } from "./mapper";
 import { checkPromptSecurity } from "../security/promptSecurity";
 import { DBLoggable } from "../dbLogger/DBLoggable";
 import { DBQueryTimer } from "../../db/DBQueryTimer";
+import { Moderator } from "../moderation/Moderator";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -203,82 +204,27 @@ export async function proxyForwarder(
         latestMessage?.content != undefined &&
         latestMessage?.content != ""
     ) {
-      const moderationRequest = new Request(
-        "https://api.openai.com/v1/moderations",
-        {
-          method: "POST",
-          headers: proxyRequest.requestWrapper.headers,
-          body: JSON.stringify({
-            input: latestMessage.content,
-          }),
-        }
+      const moderator = new Moderator(
+        latestMessage.content,
+        proxyRequest.requestWrapper.headers,
+        env,
+        provider
       );
 
-      const moderationRequestWrapper = await RequestWrapper.create(
-        moderationRequest,
-        env
-      );
-      if (moderationRequestWrapper.error || !moderationRequestWrapper.data) {
-        return responseBuilder.build({
-          body: moderationRequestWrapper.error,
-          status: 500,
-        });
+      const moderationResult = await moderator.moderate();
+
+      // Something in the moderation call itself failed.
+      if (moderationResult.error) {
+        return moderationResult.response;
       }
 
-      const {
-        data: moderationProxyRequest,
-        error: moderationProxyRequestError,
-      } = await new HeliconeProxyRequestMapper(
-        moderationRequestWrapper.data,
-        provider,
-        env
-      ).tryToProxyRequest();
+      // No Internal Server Error, loggable has been created.
+      ctx.waitUntil(log(moderationResult.loggable));
 
-      if (moderationProxyRequestError !== null) {
-        return responseBuilder.build({
-          body: moderationProxyRequestError,
-          status: 500,
-        });
+      if (moderationResult.isModerated) {
+        return moderationResult.response;
       }
-
-      const { data: moderationResponse, error: moderationResponseError } =
-        await handleProxyRequest(moderationProxyRequest);
-      if (moderationResponseError != null) {
-        return responseBuilder.build({
-          body: moderationResponseError,
-          status: 500,
-        });
-      }
-
-      const flaggedForModeration = (
-        (await moderationResponse.response.json()) as OpenAIModerationResponse
-      ).results[0].flagged;
-      proxyRequest.flaggedForModeration = flaggedForModeration;
-      ctx.waitUntil(log(moderationResponse.loggable));
-
-      if (flaggedForModeration == true) {
-        moderationResponse.response.headers.forEach((value, key) => {
-          responseBuilder.setHeader(key, value);
-        });
-
-        const responseContent = {
-          body: JSON.stringify({
-            success: false,
-            error: {
-              code: "PROMPT_FLAGGED_FOR_MODERATION",
-              message:
-                "The given prompt was flagged by the OpenAI Moderation endpoint.",
-              details: `See your Helicone request page for more info: https://www.helicone.ai/requests?${moderationProxyRequest.requestId}`,
-            },
-          }),
-          inheritFrom: moderationResponse.response,
-          status: 400,
-        };
-
-        return responseBuilder
-          .setHeader("content-type", "application/json")
-          .build(responseContent);
-      }
+      // Passed moderation...
     }
   }
 
@@ -380,13 +326,3 @@ export async function proxyForwarder(
     status: response.status,
   });
 }
-
-type OpenAIModerationResponse = {
-  id: string;
-  model: string;
-  results: Array<{
-    flagged: boolean;
-    categories: object;
-    category_scores: object;
-  }>;
-};

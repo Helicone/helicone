@@ -11,18 +11,15 @@ export class Moderator {
   message: string;
   headers: Headers;
   provider: Provider;
-  ctx: ExecutionContext;
   responseBuilder: ResponseBuilder;
 
   constructor(
     msg: string,
     headers: Headers,
     env: Env,
-    ctx: ExecutionContext,
     provider: Provider
   ) {
     this.env = env;
-    this.ctx = ctx;
     this.message = msg;
     this.headers = headers;
     this.provider = provider;
@@ -53,8 +50,7 @@ export class Moderator {
       });
 
       return {
-        isModerated: true,
-        loggable: null,
+        error: true,
         response: res
       }
     }
@@ -75,8 +71,7 @@ export class Moderator {
       });
 
       return {
-        isModerated: true,
-        loggable: null,
+        error: true,
         response: res,
       }
     }
@@ -90,8 +85,7 @@ export class Moderator {
       });
 
       return {
-        isModerated: true,
-        loggable: null,
+        error: true,
         response: res,
       }
     }
@@ -148,14 +142,21 @@ type OpenAIModerationResponse = {
 };
 
 type UnFlaggedResponse = {
+  error: false,
   isModerated: false;
   loggable: DBLoggable;
 }
 
 type FlaggedResponse = {
+  error: false,
   isModerated: true;
-  loggable: DBLoggable | null;
+  loggable: DBLoggable;
   response: Response
 }
 
-type ModerationResponse = UnFlaggedResponse | FlaggedResponse;
+type FailedResponse = {
+  error: true;
+  response: Response
+}
+
+type ModerationResponse = UnFlaggedResponse | FlaggedResponse | FailedResponse;
