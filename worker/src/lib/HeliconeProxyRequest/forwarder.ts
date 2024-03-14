@@ -64,6 +64,18 @@ export async function proxyForwarder(
     }
   }
 
+  console.log(
+    `True-Client-IP ${proxyRequest.requestWrapper.headers.get(
+      "True-Client-IP"
+    )}`
+  );
+
+  console.log(
+    `CF-Connecting-IP ${proxyRequest.requestWrapper.headers.get(
+      "CF-Connecting-IP"
+    )}`
+  );
+
   if (
     proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled &&
     provider === "OPENAI" &&
