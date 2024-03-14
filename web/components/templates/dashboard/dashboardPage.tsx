@@ -44,6 +44,7 @@ import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
 import { useModels } from "../../../services/hooks/models";
+import { QuantilesGraph } from "./quantilesGraph";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -352,7 +353,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       maxH: 4,
     },
     {
-      i: "threats",
+      i: "quantiles",
       x: 6,
       y: 8,
       w: 6,
@@ -374,10 +375,21 @@ const DashboardPage = (props: DashboardPageProps) => {
       maxH: 4,
     },
     {
-      i: "suggest-more-graphs",
+      i: "threats",
       x: 6,
       y: 12,
       w: 6,
+      h: 4,
+      minW: 3,
+      maxW: 12,
+      minH: 4,
+      maxH: 4,
+    },
+    {
+      i: "suggest-more-graphs",
+      x: 8,
+      y: 16,
+      w: 12,
       h: 4,
       minW: 3,
       maxW: 12,
@@ -496,9 +508,45 @@ const DashboardPage = (props: DashboardPageProps) => {
       static: true,
     },
     {
-      i: "tokens-per-min-over-time",
+      i: "quantiles",
       x: 0,
       y: 24,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "time-to-first-token",
+      x: 0,
+      y: 28,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "threats",
+      x: 0,
+      y: 32,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "tokens-per-min-over-time",
+      x: 0,
+      y: 36,
       w: 6,
       h: 4,
       minW: 3,
@@ -509,7 +557,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     {
       i: "suggest-more-graphs",
       x: 0,
-      y: 28,
+      y: 40,
       w: 6,
       h: 4,
       minW: 3,
@@ -959,27 +1007,11 @@ const DashboardPage = (props: DashboardPageProps) => {
                 </StyledAreaChart>
               </div>
 
-              <div key="threats">
-                <StyledAreaChart
-                  title={"Threats"}
-                  value={`${metrics.totalThreats.data?.data?.toFixed(0) ?? 0}`}
-                  isDataOverTimeLoading={overTimeData.threats.isLoading}
-                >
-                  <AreaChart
-                    className="h-[14rem]"
-                    data={
-                      overTimeData.threats.data?.data?.map((r) => ({
-                        date: getTimeMap(timeIncrement)(r.time),
-                        threats: r.count,
-                      })) ?? []
-                    }
-                    index="date"
-                    categories={["threats"]}
-                    colors={["amber"]}
-                    showYAxis={false}
-                    curveType="monotone"
-                  />
-                </StyledAreaChart>
+              <div key="quantiles">
+                <QuantilesGraph
+                  timeFilter={timeFilter}
+                  timeIncrement={timeIncrement}
+                />
               </div>
 
               <div key="time-to-first-token">
@@ -1003,6 +1035,29 @@ const DashboardPage = (props: DashboardPageProps) => {
                     index="date"
                     categories={["time"]}
                     colors={["violet"]}
+                    showYAxis={false}
+                    curveType="monotone"
+                  />
+                </StyledAreaChart>
+              </div>
+
+              <div key="threats">
+                <StyledAreaChart
+                  title={"Threats"}
+                  value={`${metrics.totalThreats.data?.data?.toFixed(0) ?? 0}`}
+                  isDataOverTimeLoading={overTimeData.threats.isLoading}
+                >
+                  <AreaChart
+                    className="h-[14rem]"
+                    data={
+                      overTimeData.threats.data?.data?.map((r) => ({
+                        date: getTimeMap(timeIncrement)(r.time),
+                        threats: r.count,
+                      })) ?? []
+                    }
+                    index="date"
+                    categories={["threats"]}
+                    colors={["amber"]}
                     showYAxis={false}
                     curveType="monotone"
                   />
