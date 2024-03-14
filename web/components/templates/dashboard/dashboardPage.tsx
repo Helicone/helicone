@@ -12,8 +12,6 @@ import {
   Card,
   MultiSelect,
   MultiSelectItem,
-  Select,
-  SelectItem,
 } from "@tremor/react";
 import Link from "next/link";
 import { useState } from "react";
@@ -46,7 +44,7 @@ import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
 import { useModels } from "../../../services/hooks/models";
-import { useQuantiles } from "../../../services/hooks/quantiles";
+import { QuantilesGraph } from "./quantilesGraph";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -573,13 +571,6 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const modelColors = ["purple", "blue", "green", "yellow", "orange"];
 
-  const quantilesMetrics = new Map<string, string>([
-    ["Latency", "latency"],
-    ["Prompt tokens", "prompt_tokens"],
-    ["Completion tokens", "completion_tokens"],
-    ["Total tokens", "total_tokens"],
-  ]);
-
   const modelMapper = (model: ModelMetric, index: number) => {
     const currentAdvancedFilters = encodeURIComponent(
       JSON.stringify(
@@ -676,18 +667,6 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [currentStatus, setCurrentStatus] = useState<string[]>(["200"]);
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
-  const [currentMetric, setCurrentMetric] = useState<string>("Latency");
-
-  const {
-    quantiles,
-    isLoading: quantilesIsLoading,
-    refetch: quantilesRefetch,
-  } = useQuantiles({
-    timeFilter,
-    dbIncrement: timeIncrement,
-    timeZoneDifference: new Date().getTimezoneOffset(),
-    metric: quantilesMetrics.get(currentMetric) ?? "latency",
-  });
 
   const renderUnauthorized = () => {
     if (currentTier === "free") {
@@ -1029,86 +1008,10 @@ const DashboardPage = (props: DashboardPageProps) => {
               </div>
 
               <div key="quantiles">
-                <Card>
-                  <div className="flex flex-row items-center justify-between">
-                    <div className="flex flex-col space-y-0.5">
-                      <p className="text-gray-500 text-sm">Quantiles</p>
-                      <p className="text-black dark:text-white text-xl font-semibold">
-                        {`Max: ${new Intl.NumberFormat("us").format(
-                          max(
-                            quantiles?.data
-                              ?.map((d) => d.p99)
-                              .filter((d) => d !== 0) ?? []
-                          )
-                        )} ${currentMetric === "Latency" ? "ms" : ""}`}
-                      </p>
-                    </div>
-                    {!quantilesIsLoading && (
-                      <Select
-                        placeholder="Select property"
-                        value={currentMetric}
-                        onValueChange={setCurrentMetric}
-                        className="border border-gray-400 rounded-lg w-fit min-w-[250px] max-w-xl"
-                      >
-                        {Array.from(quantilesMetrics.entries()).map(
-                          ([key, value]) => (
-                            <SelectItem key={key} value={key}>
-                              {key}
-                            </SelectItem>
-                          )
-                        )}
-                      </Select>
-                    )}
-                  </div>
-
-                  <div
-                    className={clsx("p-2", "w-full")}
-                    style={{
-                      height: "224px",
-                    }}
-                  >
-                    {quantilesIsLoading ? (
-                      <div className="h-full w-full bg-gray-200 dark:bg-gray-800 rounded-md pt-4">
-                        <LoadingAnimation height={175} width={175} />
-                      </div>
-                    ) : (
-                      <AreaChart
-                        className="h-[14rem]"
-                        data={
-                          quantiles?.data?.map((r) => {
-                            const time = new Date(r.time);
-                            return {
-                              date: getTimeMap(timeIncrement)(time),
-                              P75: r.p75,
-                              P90: r.p90,
-                              P95: r.p95,
-                              P99: r.p99,
-                            };
-                          }) ?? []
-                        }
-                        index="date"
-                        categories={["P75", "P90", "P95", "P99"]}
-                        colors={[
-                          "yellow",
-                          "red",
-                          "green",
-                          "blue",
-                          "orange",
-                          "indigo",
-                          "orange",
-                          "pink",
-                        ]}
-                        showYAxis={false}
-                        curveType="monotone"
-                        valueFormatter={(number: number | bigint) =>
-                          `${new Intl.NumberFormat("us").format(number)} ${
-                            currentMetric === "Latency" ? "ms" : "tokens"
-                          }`
-                        }
-                      />
-                    )}
-                  </div>
-                </Card>
+                <QuantilesGraph
+                  timeFilter={timeFilter}
+                  timeIncrement={timeIncrement}
+                />
               </div>
 
               <div key="time-to-first-token">
