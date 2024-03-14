@@ -112,7 +112,10 @@ export async function proxyForwarder(
     provider === "OPENAI" &&
     env.PROMPTARMOR_API_KEY
   ) {
-    let latestMessage;
+    let latestMessage: {
+      role?: string,
+      content?: string
+    } | null = null;
 
     try {
       latestMessage = JSON.parse(proxyRequest.bodyText ?? "").messages.pop();
@@ -127,7 +130,9 @@ export async function proxyForwarder(
     if (
       request.url.pathname.includes("chat/completions") &&
       latestMessage &&
-      latestMessage.role === "user"
+      latestMessage.role === "user" &&
+      latestMessage?.content != undefined &&
+      latestMessage?.content != ""
     ) {
       const threat = await checkPromptSecurity(
         latestMessage.content,
@@ -193,15 +198,11 @@ export async function proxyForwarder(
       });
     }
 
-    if (latestMessage == null || latestMessage?.content == undefined || latestMessage?.content == "") {
-      console.error("Empty message body.");
-      return responseBuilder.build({
-        body: "Empty message body.",
-        status: 400,
-      });
-    }
-
-    if (latestMessage?.role == "user") {
+    if (latestMessage != null &&
+        latestMessage?.role == "user" &&
+        latestMessage?.content != undefined &&
+        latestMessage?.content != ""
+    ) {
       const moderationRequest = new Request(
         "https://api.openai.com/v1/moderations",
         {
