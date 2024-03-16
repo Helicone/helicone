@@ -34,7 +34,7 @@ export class RateLimiter {
       // Which is 166 requests per second
       pro: {
         windowSizeSeconds: 5,
-        maxCount: 833,
+        maxCount: 834,
       },
       // Previously, the enterprise was 100,000 requests per minute = 1666.6666666666667 requests per second
       // There are 12 5-second intervals in a minute
@@ -42,7 +42,7 @@ export class RateLimiter {
       // Which is 1666.6666666666667 requests per second
       enterprise: {
         windowSizeSeconds: 5,
-        maxCount: 8333,
+        maxCount: 8334,
       },
       // Previously, the free was 1,000 requests per minute = 16.666666666666668 requests per second
       // There are 12 5-second intervals in a minute
@@ -50,7 +50,7 @@ export class RateLimiter {
       // Which is 16.666666666666668 requests per second
       free: {
         windowSizeSeconds: 5,
-        maxCount: 83,
+        maxCount: 84,
       },
     };
     tier = tier?.toLowerCase() in rateLimitParams ? tier.toLowerCase() : "free";
