@@ -28,13 +28,14 @@ const NavBarV2 = (props: NavBarV2Props) => {
           aria-label="Global"
         >
           <div className="flex items-center">
-            <Link href="/" className="-m-1.5">
+            <Link href="/" className="-m-1.5 max-h-12">
               <span className="sr-only">Helicone</span>
               <Image
-                src={"/static/helicone-new-logo.png"}
+                src={"/static/logo.svg"}
                 alt={""}
                 height={150}
                 width={150}
+                priority={true}
               />
             </Link>
           </div>
