@@ -28,7 +28,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
           aria-label="Global"
         >
           <div className="flex items-center">
-            <Link href="/" className="-m-1.5 max-h-12">
+            <Link href="/" className="-m-1.5">
               <span className="sr-only">Helicone</span>
               <Image
                 src={"/static/logo.svg"}
@@ -63,7 +63,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
               Contact
             </Link>
           </div>
-          <div className="flex-1 hidden md:flex items-center justify-end gap-x-4">
+          <div className="flex-1 hidden md:flex items-center justify-end gap-x-2">
             {user ? (
               <Link
                 href="/dashboard"
@@ -83,7 +83,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                   href="/signup"
                   className="bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 >
-                  Sign Up
+                  Sign up for free
                 </Link>
               </>
             )}
