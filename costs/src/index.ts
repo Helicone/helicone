@@ -7,19 +7,25 @@
 
 import { costs as openaiCosts } from "./providers/openai";
 import { costs as fineTunedOpenAICosts } from "./providers/openai/fine-tuned-models";
-import { costs as togetherAICosts } from "./providers/togetherai";
+import { costs as togetherAIChatCosts } from "./providers/togetherai/chat";
+import { costs as togetherAIChatLlamaCosts } from "./providers/togetherai/chat/llama";
+import { costs as togetherAICompletionCosts } from "./providers/togetherai/completion";
+import { costs as togetherAICompletionLlamaCosts } from "./providers/togetherai/completion";
+
 import { costs as azureCosts } from "./providers/azure";
 import { costs as googleCosts } from "./providers/google";
+const costs = [
+  ...openaiCosts,
+  ...togetherAIChatCosts,
+  ...togetherAIChatLlamaCosts,
+  ...togetherAICompletionCosts,
+  ...togetherAICompletionLlamaCosts,
+  ...azureCosts,
+  ...googleCosts,
+  ...fineTunedOpenAICosts,
+];
 
 export function costOf(model: string) {
-  const costs = [
-    ...openaiCosts,
-    ...togetherAICosts,
-    ...azureCosts,
-    ...googleCosts,
-    ...fineTunedOpenAICosts,
-  ];
-
   const cost = costs.find((cost) => {
     if (cost.model.operator === "equals") {
       return cost.model.value === model;
@@ -50,13 +56,6 @@ export function costOfPrompt({
 }
 
 export function clickhousePriceCalc(table: string) {
-  const costs = [
-    ...openaiCosts,
-    ...togetherAICosts,
-    ...azureCosts,
-    ...googleCosts,
-    ...fineTunedOpenAICosts,
-  ];
   // This is so that we don't need to do any floating point math in the database
   // and we can just divide by 1_000_000 to get the cost in dollars
   const multiple = 1_000_000_000;
