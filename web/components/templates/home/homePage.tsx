@@ -209,7 +209,7 @@ const HomePage = (props: HomePageProps) => {
         </div>
       </header>
 
-      <section className="w-full max-w-6xl mx-auto justify-center items-center pt-8 sm:pb-16 px-4 flex flex-col space-y-16">
+      <section className="w-full max-w-6xl mx-auto justify-center items-center pt-8 sm:pb-16 flex flex-col space-y-16">
         <Features />
       </section>
       <section className="w-full flex flex-col max-w-6xl mx-auto space-y-4 py-32 px-4">
