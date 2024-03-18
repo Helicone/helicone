@@ -226,6 +226,10 @@ export const getGatewayAPIRouter = (router: BaseRouter) => {
           ctx
         );
       }
+
+      if (env.GATEWAY_TARGET) {
+        return await forwarder(env.GATEWAY_TARGET);
+      }
       const fallbacks = requestWrapper.heliconeHeaders.fallBacks;
 
       if (fallbacks && fallbacks.length > 0) {
