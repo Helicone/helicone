@@ -65,8 +65,20 @@ const AuthForm = (props: AuthFormProps) => {
 
   return (
     <div className="bg-white">
-      <div className="h-screen flex flex-1 flex-row justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24 relative">
-        <div className="flex flex-row w-full h-[70vh] my-auto justify-center items-center max-w-6xl">
+      <div className="h-screen flex flex-1 flex-col sm:flex-row justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24 relative">
+        <div className="flex flex-col sm:flex-row w-full h-[70vh] my-auto justify-center items-center max-w-6xl">
+          <div className="flex sm:hidden w-full h-full">
+            <Link href="/" className="-ml-12 -mt-24 px-4">
+              <span className="sr-only">Helicone</span>
+              <Image
+                src={"/static/logo.svg"}
+                alt={""}
+                height={300}
+                width={300}
+                priority={true}
+              />
+            </Link>
+          </div>
           <div className="w-full h-full hidden sm:flex flex-col space-y-8 p-8 sm:p-16 justify-start items-start text-start">
             <Link href="/" className="-ml-12 -my-8">
               <span className="sr-only">Helicone</span>
