@@ -77,6 +77,17 @@ WHEN (request_response_log.model = 'text-embedding-ada-002-v2') THEN 100 * reque
 WHEN (request_response_log.model = 'text-embedding-3-small') THEN 20 * request_response_log.prompt_tokens + 0 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-4-vision-preview') THEN 10000 * request_response_log.prompt_tokens + 30000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-35-turbo-16k-0613') THEN 3000 * request_response_log.prompt_tokens + 4000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt-4-turbo-preview') THEN 10000 * request_response_log.prompt_tokens + 300000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt-45-turbo') THEN 10000 * request_response_log.prompt_tokens + 300000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt4-turbo-preview') THEN 10000 * request_response_log.prompt_tokens + 300000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt-4-preview-1106') THEN 10000 * request_response_log.prompt_tokens + 300000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt-35-turbo-1106') THEN 1500 * request_response_log.prompt_tokens + 2000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt35') THEN 1500 * request_response_log.prompt_tokens + 2000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt-35-turbo-0613') THEN 1500 * request_response_log.prompt_tokens + 2000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt-35-16k') THEN 3000 * request_response_log.prompt_tokens + 4000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt-4-vision') THEN 10000 * request_response_log.prompt_tokens + 300000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'google/gemini-pro') THEN 125 * request_response_log.prompt_tokens + 375 * request_response_log.completion_tokens
+WHEN (request_response_log.model LIKE 'ft:gpt-3.5-turbo-%') THEN 3000 * request_response_log.prompt_tokens + 6000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'allenai/OLMo-7B-Instruct') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'allenai/OLMo-7B-Twin-2T') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'allenai/OLMo-7B') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
@@ -163,17 +174,6 @@ WHEN (request_response_log.model = 'togethercomputer/RedPajama-INCITE-7B-Instruc
 WHEN (request_response_log.model = 'togethercomputer/StripedHyena-Hessian-7B') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'mistralai/Mistral-7B-v0.1') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'mistralai/Mixtral-8x7B-v0.1') THEN 900 * request_response_log.prompt_tokens + 900 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'gpt-4-turbo-preview') THEN 10000 * request_response_log.prompt_tokens + 300000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'gpt-45-turbo') THEN 10000 * request_response_log.prompt_tokens + 300000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'gpt4-turbo-preview') THEN 10000 * request_response_log.prompt_tokens + 300000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'gpt-4-preview-1106') THEN 10000 * request_response_log.prompt_tokens + 300000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'gpt-35-turbo-1106') THEN 1500 * request_response_log.prompt_tokens + 2000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'gpt35') THEN 1500 * request_response_log.prompt_tokens + 2000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'gpt-35-turbo-0613') THEN 1500 * request_response_log.prompt_tokens + 2000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'gpt-35-16k') THEN 3000 * request_response_log.prompt_tokens + 4000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'gpt-4-vision') THEN 10000 * request_response_log.prompt_tokens + 300000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'google/gemini-pro') THEN 125 * request_response_log.prompt_tokens + 375 * request_response_log.completion_tokens
-WHEN (request_response_log.model LIKE 'ft:gpt-3.5-turbo-%') THEN 3000 * request_response_log.prompt_tokens + 6000 * request_response_log.completion_tokens
     ELSE 0
   END
   ) / 1000000000

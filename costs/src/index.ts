@@ -14,15 +14,16 @@ import { costs as togetherAICompletionLlamaCosts } from "./providers/togetherai/
 
 import { costs as azureCosts } from "./providers/azure";
 import { costs as googleCosts } from "./providers/google";
+
 const costs = [
   ...openaiCosts,
+  ...azureCosts,
+  ...googleCosts,
+  ...fineTunedOpenAICosts,
   ...togetherAIChatCosts,
   ...togetherAIChatLlamaCosts,
   ...togetherAICompletionCosts,
   ...togetherAICompletionLlamaCosts,
-  ...azureCosts,
-  ...googleCosts,
-  ...fineTunedOpenAICosts,
 ];
 
 export function costOf(model: string) {
