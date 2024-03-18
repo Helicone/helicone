@@ -1,0 +1,63 @@
+name: Tusk Sanity Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      taskId:
+        description: "Tusk Task ID"
+        required: true
+      runType:
+        description: "Tusk Run Type"
+        required: true
+      runId:
+        description: "Tusk Run ID"
+        required: true
+
+jobs:
+  sanity_check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Log inputs/branch
+        run: |
+          echo "Tusk Task ID: ${{ github.event.inputs.taskId }}"
+          echo "Tusk Run Type: ${{ github.event.inputs.runType }}"
+          echo "Tusk Run ID: ${{ github.event.inputs.runId }}"
+          echo "Branch: ${{ github.ref }}"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Set Node.js v18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install web dependencies
+        run: yarn install
+        working-directory: ./web
+
+      - name: Web lint fix
+        run: yarn lint:fix
+        working-directory: ./web
+
+      - name: Install worker dependencies
+        run: yarn install
+        working-directory: ./worker
+
+      - name: Worker lint fix
+        run: yarn lint-fix
+        working-directory: ./worker
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "fix(${{ github.run_id }}): auto linting"
+          skip_fetch: true
+          skip_checkout: true
+
+      - name: Web build
+        run: |
+          cp ../.env.example .env
+          yarn build
+        working-directory: ./web
