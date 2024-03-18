@@ -133,13 +133,36 @@ function AdvancedFilterInput({
         />
       );
     case "timestamp":
+      const isoToLocal = (isoValue: string) => {
+        if (!isoValue) return "";
+
+        const date = new Date(isoValue);
+
+        const year = date.getFullYear();
+        const month = ("0" + (date.getMonth() + 1)).slice(-2);
+        const day = ("0" + date.getDate()).slice(-2);
+        const hours = ("0" + date.getHours()).slice(-2);
+        const minutes = ("0" + date.getMinutes()).slice(-2);
+
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+      };
+
+      const handleChange = (e: any) => {
+        const localDateTime = e.target.value;
+
+        if (localDateTime) {
+          onChange(localDateTime + ":00");
+        } else {
+          onChange("");
+        }
+      };
       return (
         <input
           type="datetime-local"
           name="search-field-start"
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={"date..."}
-          value={value}
+          onChange={handleChange}
+          placeholder="date..."
+          value={isoToLocal(value)}
           className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white text-black dark:text-white dark:bg-black shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
         />
       );
