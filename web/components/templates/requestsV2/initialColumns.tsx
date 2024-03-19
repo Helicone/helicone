@@ -5,6 +5,7 @@ import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
 import { HandThumbDownIcon, HandThumbUpIcon } from "@heroicons/react/24/solid";
 import { clsx } from "../../shared/clsx";
+import CostPill from "./costPill";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -145,9 +146,16 @@ export const getInitialColumns: (
     id: "cost",
     accessorKey: "cost",
     header: "Cost",
-    cell: (info) => (
-      <span>${isCached ? 0 : formatNumber(Number(info.getValue()))}</span>
-    ),
+    cell: (info) => {
+      const num = Number(info.getValue());
+      if (isCached) {
+        return <span>$0</span>;
+      } else if (num === 0) {
+        return <CostPill />;
+      } else {
+        return <span>${formatNumber(num)}</span>;
+      }
+    },
   },
   {
     id: "feedback",
