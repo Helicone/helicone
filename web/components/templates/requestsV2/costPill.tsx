@@ -10,8 +10,9 @@ const CostPill = () => {
   const handleOpenModal = (
     event: React.MouseEvent<HTMLSpanElement, MouseEvent>
   ) => {
-    setIsOpen(true);
+    event.preventDefault();
     event.stopPropagation();
+    setIsOpen(true);
   };
 
   return (
