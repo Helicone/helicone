@@ -1022,9 +1022,9 @@ const DashboardPage = (props: DashboardPageProps) => {
               <div key="time-to-first-token">
                 <StyledAreaChart
                   title={"Time to First Token"}
-                  value={`${
-                    metrics.averageTimeToFirstToken.data?.data?.toFixed(0) ?? 0
-                  } ms`}
+                  value={`${new Intl.NumberFormat("us").format(
+                    metrics.averageTimeToFirstToken.data?.data ?? 0
+                  )} ms`}
                   isDataOverTimeLoading={
                     overTimeData.timeToFirstToken.isLoading
                   }
@@ -1042,6 +1042,9 @@ const DashboardPage = (props: DashboardPageProps) => {
                     colors={["violet"]}
                     showYAxis={false}
                     curveType="monotone"
+                    valueFormatter={(number: number | bigint) => {
+                      return `${new Intl.NumberFormat("us").format(number)} ms`;
+                    }}
                   />
                 </StyledAreaChart>
               </div>
