@@ -43,13 +43,25 @@ export const QuantilesGraph = ({
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-col space-y-0.5">
           <p className="text-gray-500 text-sm">Quantiles</p>
-          <p className="text-black dark:text-white text-xl font-semibold">
-            {`Max: ${new Intl.NumberFormat("us").format(
-              max(
-                quantiles?.data?.map((d) => d.p99).filter((d) => d !== 0) ?? []
-              )
-            )} ${currentMetric === "Latency" ? "ms" : ""}`}
-          </p>
+          {currentMetric === "Latency" ? (
+            <p className="text-black dark:text-white text-xl font-semibold">
+              {`Max: ${new Intl.NumberFormat("us").format(
+                max(
+                  quantiles?.data?.map((d) => d.p99).filter((d) => d !== 0) ??
+                    []
+                ) / 1000
+              )} s`}
+            </p>
+          ) : (
+            <p className="text-black dark:text-white text-xl font-semibold">
+              {`Max: ${new Intl.NumberFormat("us").format(
+                max(
+                  quantiles?.data?.map((d) => d.p99).filter((d) => d !== 0) ??
+                    []
+                )
+              )} tokens`}
+            </p>
+          )}
         </div>
         {!quantilesIsLoading && (
           <Select
@@ -106,11 +118,15 @@ export const QuantilesGraph = ({
             ]}
             showYAxis={false}
             curveType="monotone"
-            valueFormatter={(number: number | bigint) =>
-              `${new Intl.NumberFormat("us").format(number)} ${
-                currentMetric === "Latency" ? "ms" : "tokens"
-              }`
-            }
+            valueFormatter={(number: number | bigint) => {
+              if (currentMetric === "Latency") {
+                return `${new Intl.NumberFormat("us").format(
+                  Number(number) / 1000
+                )} s`;
+              } else {
+                return `${new Intl.NumberFormat("us").format(number)} tokens`;
+              }
+            }}
           />
         )}
       </div>

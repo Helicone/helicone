@@ -8,7 +8,15 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/solid";
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react";
+import {
+  Badge,
+  Divider,
+  Tab,
+  TabGroup,
+  TabList,
+  TabPanel,
+  TabPanels,
+} from "@tremor/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ElementType, Fragment, useState } from "react";
@@ -16,6 +24,7 @@ import { useExperiments } from "../../../services/hooks/prompts/experiments";
 import { usePrompts } from "../../../services/hooks/prompts/prompts";
 import { useOrg } from "../../layout/organizationContext";
 import { clsx } from "../../shared/clsx";
+import { DiffHighlight } from "../welcome/diffHighlight";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -58,9 +67,9 @@ const PromptsPage = (props: PromptsPageProps) => {
 
   return (
     <div className="flex flex-col space-y-4 w-full">
-      <h1 className="font-semibold text-3xl text-black dark:text-white">
-        Prompts (Beta)
-      </h1>
+      <div className="font-semibold text-3xl text-black dark:text-white items-center flex gap-2">
+        Prompts <Badge size="sm">Beta</Badge>
+      </div>
       <TabGroup defaultIndex={defaultIndex}>
         <TabList className="font-semibold" variant="line">
           {tabs.map((tab) => (
@@ -105,33 +114,8 @@ const PromptsPage = (props: PromptsPageProps) => {
               </div>
             )}
             <div className="flex flex-col space-y-4 w-full py-2">
-              {/* <TextInput
-                icon={MagnifyingGlassIcon}
-                placeholder="Search Prompt Id..."
-                className="max-w-sm"
-                onChange={(e) => {
-                  // // add this into query params as search
-                  // const search = e.target.value as string;
-                  // setCurrentSearch(search);
-                  // if (search === "") {
-                  //   // delete the query param from the url
-                  //   delete router.query.q;
-                  //   router.push({
-                  //     pathname: router.pathname,
-                  //     query: { ...router.query },
-                  //   });
-                  //   refetch();
-                  //   return;
-                  // }
-                  // router.push({
-                  //   pathname: router.pathname,
-                  //   query: { ...router.query, q: search },
-                  // });
-                  // refetch();
-                }}
-              /> */}
               {prompts?.data?.prompts.length === 0 ? (
-                <div className="flex flex-col w-full h-96 justify-center items-center">
+                <div className="flex flex-col w-full mt-16 justify-center items-center">
                   <div className="flex flex-col">
                     <DocumentTextIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
                     <p className="text-xl text-black dark:text-white font-semibold mt-8">
@@ -148,6 +132,41 @@ const PromptsPage = (props: PromptsPageProps) => {
                         <BookOpenIcon className="h-4 w-4" />
                         View Docs
                       </Link>
+                    </div>
+                    <Divider>Or</Divider>
+
+                    <div className="mt-4">
+                      <h3 className="text-xl text-black dark:text-white font-semibold">
+                        TS/JS Quick Start
+                      </h3>
+                      <DiffHighlight
+                        code={`
+// 1. Add this line
+import { hprompt } from "@helicone/helicone";
+ 
+const chatCompletion = await openai.chat.completions.create(
+  {
+    messages: [
+      {
+        role: "user",
+        // 2: Add hprompt to any string, and nest any variable in additional brackets \`{}\`
+        content: hprompt\`Write a story about \${{ scene }}\`,
+      },
+    ],
+    model: "gpt-3.5-turbo",
+  },
+  {
+    // 3. Add Prompt Id Header
+    headers: {
+      "Helicone-Prompt-Id": "prompt_story",
+    },
+  }
+);
+ `}
+                        language="typescript"
+                        newLines={[]}
+                        oldLines={[]}
+                      />
                     </div>
                   </div>
                 </div>
