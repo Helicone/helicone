@@ -39,7 +39,7 @@ const CostPill = () => {
 
             <p className="text-sm text-gray-900 dark:text-gray-100">
               Currently, we do not support the cost of this model. Please create
-              an issue in Github.{" "}
+              an issue in Github{" "}
               <Link
                 target="_blank"
                 href="https://github.com/Helicone/helicone"
