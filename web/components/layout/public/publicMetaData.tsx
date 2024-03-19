@@ -14,7 +14,7 @@ const PublicMetaData = (props: PublicMetaDataProps) => {
     typeof window !== "undefined" && window.location.hostname === "localhost";
 
   // Conditionally set favicon path
-  const faviconPath = isLocalhost ? "/static/logo.png" : "/static/logo.png";
+  const faviconPath = isLocalhost ? "/static/logo-dev.png" : "/static/logo.png";
 
   return (
     <>

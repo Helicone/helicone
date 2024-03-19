@@ -1022,7 +1022,7 @@ const DashboardPage = (props: DashboardPageProps) => {
               <div key="time-to-first-token">
                 <StyledAreaChart
                   title={"Time to First Token"}
-                  value={`${new Intl.NumberFormat("us").format(
+                  value={`Average: ${new Intl.NumberFormat("us").format(
                     metrics.averageTimeToFirstToken.data?.data ?? 0
                   )} ms`}
                   isDataOverTimeLoading={
@@ -1095,7 +1095,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                         ?.map((d) => d.completion_tokens + d.prompt_tokens)
                         .filter((d) => d !== 0) ?? []
                     ) / getIncrementAsMinutes(timeIncrement)
-                  ).toFixed(2)}`}
+                  ).toFixed(2)} tokens`}
                   isDataOverTimeLoading={overTimeData.users.isLoading}
                 >
                   <AreaChart
