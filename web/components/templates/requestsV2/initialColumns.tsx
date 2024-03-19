@@ -156,6 +156,7 @@ export const getInitialColumns: (
         return <span>${formatNumber(num)}</span>;
       }
     },
+    size: 175,
   },
   {
     id: "feedback",
