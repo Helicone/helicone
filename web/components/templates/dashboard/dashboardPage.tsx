@@ -985,9 +985,9 @@ const DashboardPage = (props: DashboardPageProps) => {
               <div key="latency">
                 <StyledAreaChart
                   title={"Latency"}
-                  value={`${
-                    metrics.averageLatency.data?.data?.toFixed(0) ?? 0
-                  } ms / req`}
+                  value={`${new Intl.NumberFormat("us").format(
+                    (metrics.averageLatency.data?.data ?? 0) / 1000
+                  )} s / req`}
                   isDataOverTimeLoading={overTimeData.latency.isLoading}
                 >
                   <AreaChart
@@ -1003,6 +1003,11 @@ const DashboardPage = (props: DashboardPageProps) => {
                     colors={["cyan"]}
                     showYAxis={false}
                     curveType="monotone"
+                    valueFormatter={(number: number | bigint) => {
+                      return `${new Intl.NumberFormat("us").format(
+                        Number(number) / 1000
+                      )} s`;
+                    }}
                   />
                 </StyledAreaChart>
               </div>
@@ -1017,9 +1022,9 @@ const DashboardPage = (props: DashboardPageProps) => {
               <div key="time-to-first-token">
                 <StyledAreaChart
                   title={"Time to First Token"}
-                  value={`${
-                    metrics.averageTimeToFirstToken.data?.data?.toFixed(0) ?? 0
-                  } ms`}
+                  value={`Average: ${new Intl.NumberFormat("us").format(
+                    metrics.averageTimeToFirstToken.data?.data ?? 0
+                  )} ms`}
                   isDataOverTimeLoading={
                     overTimeData.timeToFirstToken.isLoading
                   }
@@ -1037,6 +1042,9 @@ const DashboardPage = (props: DashboardPageProps) => {
                     colors={["violet"]}
                     showYAxis={false}
                     curveType="monotone"
+                    valueFormatter={(number: number | bigint) => {
+                      return `${new Intl.NumberFormat("us").format(number)} ms`;
+                    }}
                   />
                 </StyledAreaChart>
               </div>
@@ -1087,7 +1095,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                         ?.map((d) => d.completion_tokens + d.prompt_tokens)
                         .filter((d) => d !== 0) ?? []
                     ) / getIncrementAsMinutes(timeIncrement)
-                  ).toFixed(2)}`}
+                  ).toFixed(2)} tokens`}
                   isDataOverTimeLoading={overTimeData.users.isLoading}
                 >
                   <AreaChart
