@@ -41,12 +41,11 @@ const ThemedModal = (props: ThemedModalProps) => {
           <div className="fixed inset-0 bg-gray-300 dark:bg-gray-700 bg-opacity-50 dark:bg-opacity-50 transition-opacity" />
         </Transition.Child>
 
-        <div className="fixed inset-0 z-10 overflow-y-auto flex items-center justify-center">
-          <button
-            role="button"
-            className="flex min-h-full items-center justify-center p-4 text-center sm:p-0"
-            onClick={handleCloseModal}
-          >
+        <button
+          className="fixed inset-0 z-10 overflow-y-auto flex items-center justify-center"
+          onClick={handleCloseModal}
+        >
+          <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -60,8 +59,8 @@ const ThemedModal = (props: ThemedModalProps) => {
                 {children}
               </Dialog.Panel>
             </Transition.Child>
-          </button>
-        </div>
+          </div>
+        </button>
       </Dialog>
     </Transition.Root>
   );
