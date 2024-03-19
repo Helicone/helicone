@@ -5,6 +5,7 @@ import StatusBadge from "../../../templates/requestsV2/statusBadge";
 import { formatNumber } from "../../../templates/users/initialColumns";
 import { clsx } from "../../clsx";
 import { useState } from "react";
+import CostPill from "../../../templates/requestsV2/costPill";
 
 interface RequestRowProps {
   index: number;
@@ -52,9 +53,13 @@ const RequestRow = (props: RequestRowProps) => {
         <div className="flex flex-wrap gap-4 items-center">
           <ModelPill model={row.model} />
           <p className="text-xs font-semibold">{Number(row.latency) / 1000}s</p>
-          <p className="text-xs font-semibold">{`$${formatNumber(
-            row.cost || 0
-          )}`}</p>
+          {row.cost ? (
+            <p className="text-xs font-semibold">{`$${formatNumber(
+              row.cost
+            )}`}</p>
+          ) : (
+            <CostPill />
+          )}
         </div>
 
         <ChevronRightIcon
