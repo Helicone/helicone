@@ -14,6 +14,14 @@ const ThemedModal = (props: ThemedModalProps) => {
 
   const themeContext = useTheme();
 
+  const handleCloseModal = (
+    event: React.MouseEvent<HTMLSpanElement, MouseEvent>
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setOpen(true);
+  };
+
   return (
     <Transition.Root show={open} as={Fragment}>
       <Dialog
@@ -33,7 +41,10 @@ const ThemedModal = (props: ThemedModalProps) => {
           <div className="fixed inset-0 bg-gray-300 dark:bg-gray-700 bg-opacity-50 dark:bg-opacity-50 transition-opacity" />
         </Transition.Child>
 
-        <div className="fixed inset-0 z-10 overflow-y-auto">
+        <button
+          className="fixed inset-0 z-10 overflow-y-auto flex items-center justify-center"
+          onClick={handleCloseModal}
+        >
           <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             <Transition.Child
               as={Fragment}
@@ -49,7 +60,7 @@ const ThemedModal = (props: ThemedModalProps) => {
               </Dialog.Panel>
             </Transition.Child>
           </div>
-        </div>
+        </button>
       </Dialog>
     </Transition.Root>
   );
