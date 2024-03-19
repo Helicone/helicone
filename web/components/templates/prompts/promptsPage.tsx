@@ -24,7 +24,6 @@ import { useExperiments } from "../../../services/hooks/prompts/experiments";
 import { usePrompts } from "../../../services/hooks/prompts/prompts";
 import { useOrg } from "../../layout/organizationContext";
 import { clsx } from "../../shared/clsx";
-import CodeSnippet from "../home/codeSnippet";
 import { DiffHighlight } from "../welcome/diffHighlight";
 
 interface PromptsPageProps {
