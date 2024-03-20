@@ -93,6 +93,15 @@ brew install supabase/tap/supabase
 python3 clickhouse/ch_hcone.py --start
 ```
 
+## Install and setup MinIO
+
+```bash
+brew install minio/stable/minio
+
+# Start minio
+minio server ~/data --console-address :9001
+```
+
 ## Run all services
 
 ```bash

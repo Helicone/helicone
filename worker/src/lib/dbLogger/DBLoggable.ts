@@ -622,14 +622,16 @@ export class DBLoggable {
         ).body,
       };
 
-      // log to s3
-
       const s3Result = await db.s3Client.storeRequestResponse(
         authParams.organizationId,
         this.request.requestId,
         JSON.stringify(requestResult.data.body),
         JSON.stringify(body)
       );
+
+      if (s3Result.error) {
+        return err(s3Result.error);
+      }
 
       return responseResult;
     }
@@ -640,6 +642,11 @@ export class DBLoggable {
       requestResult.data.body,
       responseResult.data.body
     );
+
+    if (s3Result.error) {
+      console.log("Error storing request response", s3Result.error);
+      return err(s3Result.error);
+    }
 
     await logInClickhouse(
       requestResult.data.request,

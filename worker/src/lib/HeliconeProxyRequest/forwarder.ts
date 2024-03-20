@@ -240,8 +240,9 @@ export async function proxyForwarder(
         env.REQUEST_AND_RESPONSE_QUEUE_KV
       ),
       s3Client: new S3Client(
-        env.S3_BUCKET_ACCESS_KEY,
-        env.S3_BUCKET_SECRET_KEY,
+        env.S3_ACCESS_KEY,
+        env.S3_SECRET_KEY,
+        env.S3_ENDPOINT,
         env.S3_BUCKET_NAME
       ),
     });

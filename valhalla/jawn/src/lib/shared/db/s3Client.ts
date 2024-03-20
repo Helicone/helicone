@@ -8,21 +8,23 @@ export type RequestResponseBody = {
 
 export class S3Client {
   private region = "us-west-2";
-  private bucketName = "request-response-storage";
   awsClient: AwsS3Client;
 
-  constructor(accessKey: string, secretKey: string, bucketName: string) {
+  constructor(
+    accessKey: string = "minioadmin",
+    secretKey: string = "minioadmin",
+    endpoint: string = "http://localhost:9000",
+    private bucketName: string = "request_response_storage"
+  ) {
     this.awsClient = new AwsS3Client({
       credentials: {
         accessKeyId: accessKey,
         secretAccessKey: secretKey,
       },
       region: this.region,
+      endpoint: endpoint ? endpoint : undefined,
+      forcePathStyle: true,
     });
-
-    if (bucketName) {
-      this.bucketName = bucketName;
-    }
   }
 
   getRequestResponseKey = (requestId: string, orgId: string) => {

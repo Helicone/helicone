@@ -3,25 +3,31 @@ import { Result } from "../results";
 
 export class S3Client {
   private region = "us-west-2";
-  private bucketName = "request-response-storage";
   awsClient: AwsClient;
 
-  constructor(accessKey: string, secretKey: string, bucketName: string) {
+  constructor(
+    accessKey: string = "minioadmin",
+    secretKey: string = "minioadmin",
+    private endpoint: string = "http://localhost:9000",
+    private bucketName: string = "request_response_storage"
+  ) {
     this.awsClient = new AwsClient({
       accessKeyId: accessKey,
       secretAccessKey: secretKey,
       service: "s3",
       region: this.region,
     });
-
-    if (bucketName) {
-      this.bucketName = bucketName;
-    }
   }
 
   getRequestResponseUrl = (requestId: string, orgId: string) => {
     const key = `organizations/${orgId}/requests/${requestId}`;
-    return `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${key}`;
+    if (this.endpoint) {
+      // For MinIO or another S3-compatible service
+      return `${this.endpoint}/${this.bucketName}/${key}`;
+    } else {
+      // For AWS S3
+      return `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${key}`;
+    }
   };
 
   async storeRequestResponse(
