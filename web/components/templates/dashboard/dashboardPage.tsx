@@ -10,11 +10,11 @@ import {
   BarChart,
   BarList,
   Card,
-  MultiSelect,
-  MultiSelectItem,
+  DonutChart,
+  Legend,
 } from "@tremor/react";
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { ModelMetric } from "../../../lib/api/models/models";
 import {
@@ -30,7 +30,6 @@ import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
-import LoadingAnimation from "../../shared/loadingAnimation";
 import {
   MetricsPanel,
   MetricsPanelProps,
@@ -45,6 +44,7 @@ import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
 import { useModels } from "../../../services/hooks/models";
 import { QuantilesGraph } from "./quantilesGraph";
+import LoadingAnimation from "../../shared/loadingAnimation";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -262,139 +262,109 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const initialLayout: ReactGridLayout.Layout[] = [
     {
-      i: "requests",
+      i: "cost-req",
       x: 0,
       y: 0,
-      w: 8,
-      h: 4,
-      minW: 4,
-      maxW: 12,
-      minH: 4,
-      maxH: 8,
-    },
-    {
-      i: "cost-req",
-      x: 8,
-      y: 0,
-      w: 2,
-      h: 2,
-      minW: 2,
-      maxW: 4,
-      minH: 1,
-      maxH: 4,
+      w: 3,
+      h: 1,
     },
     {
       i: "prompt-tokens",
-      x: 10,
+      x: 3,
       y: 0,
-      w: 2,
-      h: 2,
-      minW: 2,
-      maxW: 4,
-      minH: 1,
-      maxH: 4,
+      w: 3,
+      h: 1,
     },
     {
       i: "completion-tokens",
-      x: 8,
-      y: 3,
-      w: 2,
-      h: 2,
-      minW: 2,
-      maxW: 4,
-      minH: 1,
-      maxH: 4,
+      x: 6,
+      y: 0,
+      w: 3,
+      h: 1,
     },
     {
       i: "total-tokens",
-      x: 10,
-      y: 3,
-      w: 2,
-      h: 2,
-      minW: 2,
-      maxW: 4,
-      minH: 1,
-      maxH: 4,
+      x: 9,
+      y: 0,
+      w: 3,
+      h: 1,
+    },
+    {
+      i: "requests",
+      x: 0,
+      y: 1,
+      w: 6,
+      h: 3,
+    },
+    {
+      i: "errors",
+      x: 6,
+      y: 1,
+      w: 3,
+      h: 3,
     },
     {
       i: "models",
+      x: 9,
+      y: 1,
+      w: 3,
+      h: 3,
+    },
+    {
+      i: "costs",
       x: 0,
       y: 4,
-      w: 3,
-      h: 4,
-      minW: 3,
-      maxW: 8,
-      minH: 4,
-      maxH: 4,
+      w: 4,
+      h: 3,
     },
-    { i: "costs", x: 3, y: 4, w: 3, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
-    { i: "users", x: 6, y: 4, w: 3, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
-
+    {
+      i: "users",
+      x: 4,
+      y: 4,
+      w: 4,
+      h: 3,
+    },
     {
       i: "latency",
-      x: 9,
+      x: 8,
       y: 4,
-      w: 3,
-      h: 4,
-      minW: 3,
-      maxW: 8,
-      minH: 4,
-      maxH: 4,
+      w: 4,
+      h: 3,
     },
     {
       i: "tokens-per-min-over-time",
       x: 0,
-      y: 8,
+      y: 7,
       w: 6,
-      h: 4,
-      minW: 3,
-      maxW: 12,
-      minH: 4,
-      maxH: 4,
+      h: 3,
     },
     {
       i: "quantiles",
       x: 6,
-      y: 8,
+      y: 7,
       w: 6,
-      h: 4,
-      minW: 3,
-      maxW: 12,
-      minH: 4,
-      maxH: 4,
+      h: 3,
     },
     {
       i: "time-to-first-token",
       x: 0,
-      y: 12,
-      w: 6,
-      h: 4,
-      minW: 3,
-      maxW: 12,
-      minH: 4,
-      maxH: 4,
+      y: 10,
+      w: 4,
+      h: 3,
     },
     {
       i: "threats",
-      x: 6,
-      y: 12,
-      w: 6,
-      h: 4,
-      minW: 3,
-      maxW: 12,
-      minH: 4,
-      maxH: 4,
+      x: 4,
+      y: 10,
+      w: 4,
+      h: 3,
     },
     {
       i: "suggest-more-graphs",
       x: 8,
-      y: 16,
-      w: 12,
-      h: 4,
-      minW: 3,
-      maxW: 12,
-      minH: 4,
-      maxH: 4,
+      y: 10,
+      w: 4,
+      h: 3,
     },
   ];
 
@@ -605,67 +575,66 @@ const DashboardPage = (props: DashboardPageProps) => {
     };
   };
 
-  const statusSet = overTimeData.requestsWithStatus.data?.data?.reduce<
-    Set<number>
-  >((acc, { status }) => {
-    acc.add(status);
-    return acc;
-  }, new Set<number>());
+  // put this forEach inside of a useCallback to prevent unnecessary re-renders
+  const getStatusCountsOverTime = useCallback(() => {
+    const statusCounts: {
+      // overtime should be an array of objects with a time and a count
+      overTime: { [key: string]: { success: number; error: number } };
+      accStatusCounts: { [key: string]: number };
+    } = {
+      overTime: {},
+      accStatusCounts: {},
+    };
 
-  const uniqueStatusCodes = Array.from(statusSet || []).sort();
+    overTimeData.requestsWithStatus.data?.data?.forEach((d) => {
+      const time = getTimeMap(timeIncrement)(d.time);
+      if (statusCounts.overTime[time] === undefined) {
+        statusCounts.overTime[time] = {
+          success: 0,
+          error: 0,
+        };
+      }
+      if (d.status === 200) {
+        statusCounts.overTime[time]["success"] += d.count;
+      } else {
+        statusCounts.overTime[time]["error"] += d.count;
+      }
 
-  const statusStrings = uniqueStatusCodes.map((status) => {
-    if (status === -3) {
-      return "cancelled";
-    } else {
-      return status.toString();
-    }
+      // do not count 200s
+      if (d.status === 200) {
+        return;
+      }
+      if (statusCounts.accStatusCounts[d.status] === undefined) {
+        statusCounts.accStatusCounts[d.status] = 0;
+      }
+      statusCounts.accStatusCounts[d.status] += d.count;
+    });
+
+    return statusCounts;
+  }, [overTimeData.requestsWithStatus.data?.data, timeIncrement]);
+
+  // flatten the status counts over time
+  const flattenedOverTime = Object.entries(
+    getStatusCountsOverTime().overTime
+  ).map(([time, counts]) => {
+    return {
+      time,
+      ...counts,
+    };
   });
 
-  const flattenedObject = overTimeData.requestsWithStatus.data?.data?.reduce(
-    (acc, { count, status, time }) => {
-      const formattedTime = new Date(time).toUTCString();
-      if (!acc[formattedTime]) {
-        acc[formattedTime] = statusStrings.reduce(
-          (statusAcc: StatusCounts, status) => {
-            statusAcc[status] = 0;
-            return statusAcc;
-          },
-          {}
-        );
-      }
+  // flatten the accumulated status counts into an array of object {name, value}
+  const accumulatedStatusCounts = Object.entries(
+    getStatusCountsOverTime().accStatusCounts
+  ).map(([name, value]) => {
+    return {
+      name,
+      value,
+    };
+  });
 
-      const statusStr = String(status);
-      acc[formattedTime][statusStr] =
-        (acc[formattedTime][statusStr] || 0) + count;
+  console.log(flattenedOverTime, accumulatedStatusCounts);
 
-      return acc;
-    },
-    {} as { [key: string]: StatusCounts }
-  );
-
-  const flattenedArray = Object.entries(flattenedObject || {})
-    .map(([time, status]) => {
-      // create copy
-      let modifiedStatus = { ...status };
-
-      // if the status object has a `-3` key, rename the key to `cancelled`
-      if (modifiedStatus["-3"] !== undefined) {
-        modifiedStatus["cancelled"] = modifiedStatus["-3"];
-        delete modifiedStatus["-3"];
-      }
-
-      return {
-        date: time,
-        ...modifiedStatus,
-      };
-    })
-    .map((obj) => ({
-      ...obj,
-      date: getTimeMap(timeIncrement)(new Date(obj.date)),
-    }));
-
-  const [currentStatus, setCurrentStatus] = useState<string[]>(["200"]);
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
 
   const renderUnauthorized = () => {
@@ -802,9 +771,14 @@ const DashboardPage = (props: DashboardPageProps) => {
               isDraggable={false}
               breakpoints={{ lg: 1200, md: 996, sm: 600, xs: 360, xxs: 0 }}
               cols={gridCols}
-              rowHeight={72}
+              rowHeight={96}
               onLayoutChange={(currentLayout, allLayouts) => {}}
             >
+              {metricsData.map((m, i) => (
+                <div key={m.id}>
+                  <MetricsPanel metric={m} />
+                </div>
+              ))}
               <div key="requests">
                 <Card>
                   <div className="flex flex-row items-center justify-between">
@@ -818,53 +792,12 @@ const DashboardPage = (props: DashboardPageProps) => {
                           : "0"}
                       </p>
                     </div>
-                    {!overTimeData.requests.isLoading && (
-                      <MultiSelect
-                        placeholder="Select status codes"
-                        value={currentStatus}
-                        onValueChange={(values: string[]) => {
-                          setCurrentStatus(
-                            values.sort((a, b) => {
-                              if (a === "200") {
-                                return -1;
-                              } else if (b === "200") {
-                                return 1;
-                              } else {
-                                return Number(a) - Number(b);
-                              }
-                            })
-                          );
-                        }}
-                        className="border border-gray-400 rounded-lg w-fit min-w-[250px] max-w-xl"
-                      >
-                        {statusStrings
-                          .sort((a, b) => {
-                            if (a === "200") {
-                              return -1;
-                            } else if (b === "200") {
-                              return 1;
-                            } else {
-                              return Number(a) - Number(b);
-                            }
-                          })
-                          .filter((status) => status !== "0")
-                          .map((status, idx) => (
-                            <MultiSelectItem
-                              value={status}
-                              key={idx}
-                              className="font-medium text-black"
-                            >
-                              {status}
-                            </MultiSelectItem>
-                          ))}
-                      </MultiSelect>
-                    )}
                   </div>
 
                   <div
                     className={clsx("p-2", "w-full")}
                     style={{
-                      height: "224px",
+                      height: "212px",
                     }}
                   >
                     {overTimeData.requests.isLoading ? (
@@ -874,19 +807,10 @@ const DashboardPage = (props: DashboardPageProps) => {
                     ) : (
                       <AreaChart
                         className="h-[14rem]"
-                        data={flattenedArray}
-                        index="date"
-                        categories={currentStatus}
-                        colors={[
-                          "green",
-                          "red",
-                          "blue",
-                          "yellow",
-                          "orange",
-                          "indigo",
-                          "orange",
-                          "pink",
-                        ]}
+                        data={flattenedOverTime}
+                        index="time"
+                        categories={["success", "error"]}
+                        colors={["green", "red"]}
                         showYAxis={false}
                         curveType="monotone"
                       />
@@ -894,18 +818,40 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </div>
                 </Card>
               </div>
-              {metricsData.map((m, i) => (
-                <div key={m.id}>
-                  <MetricsPanel metric={m} hFull={true} />
-                </div>
-              ))}
+              <div key="errors">
+                <Card className="h-full w-full flex flex-col">
+                  <div className="flex flex-col space-y-2">
+                    <h2 className="text-gray-500 text-sm">Errors</h2>
+                    <Legend
+                      categories={
+                        accumulatedStatusCounts.map((d) => d.name) ?? []
+                      }
+                      className="max-w-xs"
+                    />
+                  </div>
+                  <div className="h-full flex-1 pt-4">
+                    <DonutChart
+                      data={accumulatedStatusCounts}
+                      onValueChange={(v) => console.log(v)}
+                      colors={[
+                        "cyan",
+                        "blue",
+                        "green",
+                        "indigo",
+                        "orange",
+                        "pink",
+                      ]}
+                    />
+                  </div>
+                </Card>
+              </div>
               <div key="models">
                 <StyledAreaChart
                   title={`Top Models`}
                   value={undefined}
                   isDataOverTimeLoading={isLoading}
                 >
-                  <div className="flex flex-row justify-between items-center pb-2">
+                  <div className="flex flex-row justify-between items-center">
                     <p className="text-xs font-semibold text-gray-700">Name</p>
                     <p className="text-xs font-semibold text-gray-700">
                       Requests
