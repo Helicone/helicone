@@ -1,5 +1,4 @@
 import { Card } from "@tremor/react";
-import { clsx } from "../clsx";
 
 export interface MetricsPanelProps {
   metric: {
@@ -8,7 +7,7 @@ export interface MetricsPanelProps {
     value: number | string;
     label: string;
     labelUnits?: string;
-    icon: React.ForwardRefExoticComponent<
+    icon?: React.ForwardRefExoticComponent<
       React.SVGProps<SVGSVGElement> & {
         title?: string | undefined;
         titleId?: string | undefined;
@@ -16,29 +15,26 @@ export interface MetricsPanelProps {
     >;
     onInformationHref?: string;
   };
-  wFull?: boolean;
-  hFull?: boolean;
 }
 
 export function MetricsPanel(props: MetricsPanelProps) {
-  const { metric, hFull = false, wFull = true } = props;
+  const { metric } = props;
 
   return (
-    <Card
-      className={clsx(
-        hFull ? "h-full" : "h-full max-h-24",
-        wFull ? "w-full" : "w-fit",
-        "flex flex-col p-4 justify-end dark:border dark:border-gray-700"
-      )}
-    >
-      <p className="text-gray-500 text-xs text-left">{metric.label}</p>
-      {metric.isLoading ? (
-        <div className="bg-gray-200 dark:bg-gray-800 animate-pulse h-6 w-16 rounded-md mt-1" />
-      ) : (
-        <p className="text-black dark:text-white font-semibold text-lg">
-          {metric.value} {metric.labelUnits}
-        </p>
-      )}
+    <Card>
+      <dd className="text-black dark:text-white flex flex-col">
+        <div className="flex w-full items-center justify-between">
+          <div className="text-gray-500 text-xs">{metric.label}</div>
+          {metric.icon && <metric.icon className="w-6 h-6" />}
+        </div>
+        {metric.isLoading ? (
+          <div className="bg-gray-200 dark:bg-gray-800 animate-pulse h-6 w-16 rounded-md mt-1" />
+        ) : (
+          <div className="text-xl font-semibold text-black dark:text-white">
+            {metric.value} {metric.labelUnits}
+          </div>
+        )}
+      </dd>
     </Card>
   );
 }

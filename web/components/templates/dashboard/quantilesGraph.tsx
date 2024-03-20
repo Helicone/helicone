@@ -38,6 +38,10 @@ export const QuantilesGraph = ({
     return arr.reduce((p, c) => (p > c ? p : c), 0);
   }
 
+  const maxQuantile = max(
+    quantiles?.data?.map((d) => d.p99).filter((d) => d !== 0) ?? []
+  );
+
   return (
     <Card>
       <div className="flex flex-row items-center justify-between">
@@ -46,20 +50,12 @@ export const QuantilesGraph = ({
           {currentMetric === "Latency" ? (
             <p className="text-black dark:text-white text-xl font-semibold">
               {`Max: ${new Intl.NumberFormat("us").format(
-                max(
-                  quantiles?.data?.map((d) => d.p99).filter((d) => d !== 0) ??
-                    []
-                ) / 1000
+                maxQuantile / 1000
               )} s`}
             </p>
           ) : (
             <p className="text-black dark:text-white text-xl font-semibold">
-              {`Max: ${new Intl.NumberFormat("us").format(
-                max(
-                  quantiles?.data?.map((d) => d.p99).filter((d) => d !== 0) ??
-                    []
-                )
-              )} tokens`}
+              {`Max: ${new Intl.NumberFormat("us").format(maxQuantile)} tokens`}
             </p>
           )}
         </div>
@@ -82,7 +78,7 @@ export const QuantilesGraph = ({
       <div
         className={clsx("p-2", "w-full")}
         style={{
-          height: "224px",
+          height: "212px",
         }}
       >
         {quantilesIsLoading ? (
@@ -95,6 +91,7 @@ export const QuantilesGraph = ({
             data={
               quantiles?.data?.map((r) => {
                 const time = new Date(r.time);
+                // return all of the values on a 0-100 scale where 0 is the min value and 100 is the max value of
                 return {
                   date: getTimeMap(timeIncrement)(time),
                   P75: r.p75,
