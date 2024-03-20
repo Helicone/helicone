@@ -221,7 +221,7 @@ app.post(
   "/v1/request/query",
   withAuth<
     paths["/v1/request/query"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, authParams }) => {
+  >(async ({ request, res, supabaseClient, authParams, s3Client }) => {
     const body = await request.getRawBody<any>();
 
     const { filter, offset, limit, sort, isCached } = body;
@@ -233,6 +233,7 @@ app.post(
           offset,
           limit,
           sort,
+          s3Client,
           supabaseClient.client
         )
       : await getRequests(
@@ -241,6 +242,7 @@ app.post(
           offset,
           limit,
           sort,
+          s3Client,
           supabaseClient.client
         );
     postHogClient?.capture({

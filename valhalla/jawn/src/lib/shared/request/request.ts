@@ -13,6 +13,7 @@ import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { LlmSchema } from "../requestResponseModel";
 import { Database, Json } from "../../db/database.types";
 import { mapGeminiPro } from "./mappers";
+import { S3Client } from "../db/s3Client";
 
 export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
@@ -59,6 +60,7 @@ export async function getRequests(
   offset: number,
   limit: number,
   sort: SortLeafRequest,
+  s3Client: S3Client,
   supabaseServer?: SupabaseClient<Database>
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
@@ -123,8 +125,7 @@ export async function getRequests(
     });
   }
 
-  const rosettaWrapper = new RosettaWrapper(supabaseServer);
-  const results = await mapLLMCalls(requests.data, rosettaWrapper);
+  const results = await mapLLMCalls(requests.data);
 
   return resultMap(results, (data) => {
     return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
@@ -137,6 +138,7 @@ export async function getRequestsCached(
   offset: number,
   limit: number,
   sort: SortLeafRequest,
+  s3Client: S3Client,
   supabaseServer?: SupabaseClient<Database>
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
@@ -201,8 +203,7 @@ export async function getRequestsCached(
     });
   }
 
-  const rosettaWrapper = new RosettaWrapper(supabaseServer);
-  const results = await mapLLMCalls(requests.data, rosettaWrapper);
+  const results = await mapLLMCalls(requests.data);
 
   return resultMap(results, (data) => {
     return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
@@ -210,8 +211,7 @@ export async function getRequestsCached(
 }
 
 async function mapLLMCalls(
-  heliconeRequests: HeliconeRequest[] | null,
-  rosettaWrapper: RosettaWrapper
+  heliconeRequests: HeliconeRequest[] | null
 ): Promise<Result<HeliconeRequest[], string>> {
   const promises =
     heliconeRequests?.map(async (heliconeRequest) => {
@@ -226,35 +226,15 @@ async function mapLLMCalls(
         getModelFromPath(heliconeRequest.request_path) ||
         "";
 
-      let mappedSchema: LlmSchema | null = null;
       try {
         if (model === "gemini-pro" || model === "gemini-pro-vision") {
           const mappedSchema = mapGeminiPro(heliconeRequest, model);
           heliconeRequest.llmSchema = mappedSchema;
           return heliconeRequest;
         }
-
-        const requestPath = new URL(heliconeRequest.request_path).pathname;
-        const schemaJson = await rosettaWrapper.mapLLMCall(
-          {
-            request: {
-              ...heliconeRequest.request_body,
-              request_path: requestPath,
-              model_best_guess: model,
-            },
-            response: heliconeRequest.response_body,
-          },
-          requestPath,
-          heliconeRequest.provider,
-          model
-        );
-
-        mappedSchema = JSON.parse(JSON.stringify(schemaJson)) as LlmSchema;
       } catch (error: any) {
         // Do nothing, FE will fall back to existing mappers
       }
-
-      heliconeRequest.llmSchema = mappedSchema || null;
 
       return heliconeRequest;
     }) ?? [];
