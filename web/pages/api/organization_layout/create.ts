@@ -2,45 +2,40 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../lib/result";
+import { mapPostgrestErr, Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
+import { Database } from "../../../supabase/database.types";
 
-export type OrganizationFilter = {
-  id: string;
-  name: string;
-  filter: string;
-  createdAt: Date;
-};
+//todo: do we need to create layout when create a org or separately? create org or create filter?
 
-export type OrganizationLayout = {
-  id: string;
-  organization_id: string;
-  type: string;
-  filters: OrganizationFilter[];
-};
+export type Org;
 
 async function handler({
   res,
-  userData: { orgId, user, userId },
-  req,
-}: HandlerWrapperOptions<Result<OrganizationLayout, string>>) {
+  userData: { orgId, user, userId, org },
+  body,
+}: HandlerWrapperOptions<
+  Result<Database["public"]["Tables"]["organization_layout"]["Row"], string>
+>) {
   if (!user) {
     res.status(401).json({ error: "Unauthorized", data: null });
     return;
   }
-  const orgToCheck = await supabaseServer
-    .from("organization")
-    .select("*")
-    .eq("id", orgId)
-    .single();
-  if (!orgToCheck.data || orgToCheck.error !== null) {
-    res
-      .status(404)
-      .json({ error: "Not found or don't have access to org", data: null });
+  if (!org) {
+    res.status(500).json({ error: "Organization not found", data: null });
     return;
   }
 
-  const { type } = req.query;
+  const insertRequest =
+    body.get<Database["public"]["Tables"]["organization_layout"]["Insert"]>();
+
+  const insert = await supabaseServer
+    .from("organization_layout")
+    .insert([insertRequest])
+    .select("*")
+    .single();
+
+  return res.status(insert.error ? 500 : 200).json(mapPostgrestErr(insert));
 
   const { data: layout, error: organizationLayoutError } = await supabaseServer
     .from("organization_layout")
