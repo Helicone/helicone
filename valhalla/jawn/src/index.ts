@@ -21,8 +21,7 @@ import { FineTuningManager } from "./lib/managers/FineTuningManager";
 import { PostHog } from "posthog-node";
 import { hashAuth } from "./lib/db/hash";
 import { FilterNode } from "./lib/shared/filters/filterDefs";
-import { SupabaseConnector, supabaseServer } from "./lib/db/supabase";
-import { dbExecute, dbQueryClickhouse } from "./lib/shared/db/dbExecute";
+import { SupabaseConnector } from "./lib/db/supabase";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 
 const ph_project_api_key = process.env.PUBLIC_POSTHOG_API_KEY;
@@ -387,7 +386,7 @@ app.post(
   "/v1/dataset/:datasetId/fine-tune",
   withAuth<
     paths["/v1/dataset/{datasetId}/fine-tune"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, authParams }) => {
+  >(async ({ request, res, supabaseClient, authParams, s3Client }) => {
     if (!(await hasAccessToFineTune(supabaseClient))) {
       res.status(405).json({
         error: "Must be on pro or higher plan to use fine-tuning",
@@ -431,6 +430,7 @@ app.post(
       0,
       1000,
       {},
+      s3Client,
       supabaseClient.client
     );
 
@@ -528,7 +528,7 @@ app.post(
   "/v1/fine-tune",
   withAuth<
     paths["/v1/fine-tune"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, authParams }) => {
+  >(async ({ request, res, supabaseClient, authParams, s3Client }) => {
     if (!(await hasAccessToFineTune(supabaseClient))) {
       res.status(405).json({
         error: "Must be on pro or higher plan to use fine-tuning",
@@ -546,6 +546,7 @@ app.post(
       0,
       1000,
       {},
+      s3Client,
       supabaseClient.client
     );
 
