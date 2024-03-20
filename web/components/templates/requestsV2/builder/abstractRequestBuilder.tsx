@@ -28,6 +28,7 @@ type CommonFields = {
     rating: boolean | null;
   };
   provider: Provider;
+  ip_address: string | null;
   temperature?: number;
   timeToFirstToken?: number | null;
 };
@@ -90,6 +91,7 @@ abstract class AbstractRequestBuilder {
       provider: this.response.provider,
       temperature,
       timeToFirstToken: this.response.time_to_first_token,
+      ip_address: this.response.ip_address,
     };
   }
 

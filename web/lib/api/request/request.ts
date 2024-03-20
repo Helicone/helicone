@@ -52,6 +52,7 @@ export interface HeliconeRequest {
   feedback_id?: string | null;
   feedback_rating?: boolean | null;
   llmSchema: LlmSchema | null;
+  ip_address: string | null;
 }
 
 export async function getRequests(

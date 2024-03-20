@@ -443,7 +443,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         />
       )}
 
-      <div className="flex flex-col space-y-4">
+      <div className="flex flex-col space-y-4 divide-y-8 ">
         <ThemedTableV5
           defaultData={requests || []}
           defaultColumns={columnsWithProperties}

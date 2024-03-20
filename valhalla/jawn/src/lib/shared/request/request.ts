@@ -50,6 +50,7 @@ export interface HeliconeRequest {
   feedback_created_at?: string | null;
   feedback_id?: string | null;
   feedback_rating?: boolean | null;
+  ip_address: string | null;
   llmSchema: LlmSchema | null;
 }
 
@@ -103,7 +104,8 @@ export async function getRequests(
     job_node_request.node_id as node_id,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
-    feedback.rating AS feedback_rating
+    feedback.rating AS feedback_rating,
+    request.request_ip as ip_address
   FROM request
     left join response on request.id = response.request
     left join feedback on response.id = feedback.response_id

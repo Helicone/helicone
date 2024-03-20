@@ -181,4 +181,19 @@ export const getInitialColumns: (
       );
     },
   },
+  {
+    id: "temperature",
+    accessorKey: "temperature",
+    header: "Temperature",
+    cell: (info) => {
+      const temp = Number(info.getValue());
+      return <span>{temp >= 0 ? temp : ""}</span>;
+    },
+  },
+  {
+    id: "ip_address",
+    accessorKey: "ip_address",
+    header: "IP Address",
+    cell: (info) => info.getValue(),
+  },
 ];
