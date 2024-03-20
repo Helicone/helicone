@@ -4,6 +4,7 @@ import { Database } from "../../../supabase/database.types";
 import { Result } from "../../results";
 import { AuthParams, DBLoggableProps } from "./DBLoggable";
 import { RequestResponseStore } from "./RequestResponseStore";
+import { S3Client } from "../../db/S3Client";
 
 const MAX_USER_ID_LENGTH = 7000;
 
@@ -57,6 +58,7 @@ export async function logRequest(
         id: string | null;
         job: string | null;
       };
+      body: string; // For S3 storage
     },
     string
   >
@@ -109,18 +111,28 @@ export async function logRequest(
       return null;
     };
 
+    const body_url = !request.omitLog
+      ? S3Client.getRequestResponseUrl(
+          request.requestId,
+          authParams.organizationId
+        )
+      : null;
+
+    const body = request.omitLog
+      ? {
+          model:
+            (requestBody as any).model !== "undefined"
+              ? (requestBody as any).model
+              : null,
+        }
+      : unsupportedImage(requestBody);
+
     const createdAt = request.startTime ?? new Date();
     const requestData = {
       id: request.requestId,
       path: request.path,
-      body: request.omitLog
-        ? {
-            model:
-              (requestBody as any).model !== "undefined"
-                ? (requestBody as any).model
-                : null,
-          }
-        : unsupportedImage(requestBody),
+      body: "", // Not used due to S3 storage
+      body_url: body_url,
       auth_hash: "",
       user_id: request.userId ?? null,
       prompt_id: request.promptId ?? null,
@@ -182,6 +194,7 @@ export async function logRequest(
           id: jobNode?.data.id ?? null,
           job: jobNode?.data.job ?? null,
         },
+        body: body,
       },
       error: null,
     };

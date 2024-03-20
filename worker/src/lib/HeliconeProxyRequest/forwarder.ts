@@ -19,6 +19,7 @@ import { HeliconeProxyRequestMapper } from "./mapper";
 import { checkPromptSecurity } from "../security/promptSecurity";
 import { DBLoggable } from "../dbLogger/DBLoggable";
 import { DBQueryTimer } from "../../db/DBQueryTimer";
+import { S3Client } from "../../db/S3Client";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -237,6 +238,11 @@ export async function proxyForwarder(
         new ClickhouseClientWrapper(env),
         env.FALLBACK_QUEUE,
         env.REQUEST_AND_RESPONSE_QUEUE_KV
+      ),
+      s3Client: new S3Client(
+        env.S3_BUCKET_ACCESS_KEY,
+        env.S3_BUCKET_SECRET_KEY,
+        env.S3_BUCKET_NAME
       ),
     });
 
