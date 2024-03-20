@@ -581,12 +581,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     };
   });
 
-  // flatten the accumulated status counts into an array of object {name, value}
-  // filter out status if it is 0
-  //      // if the status is -1, map it to timeout
-  // if the status is -2, map it to pending
-  // if the status is -3, map it to cancelled
-  // if the status is -4, map it to threat
   const accumulatedStatusCounts = Object.entries(
     getStatusCountsOverTime().accStatusCounts
   )
@@ -606,8 +600,6 @@ const DashboardPage = (props: DashboardPageProps) => {
       };
     })
     .filter((d) => d.value !== 0);
-
-  console.log(flattenedOverTime, accumulatedStatusCounts);
 
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
 
@@ -807,14 +799,6 @@ const DashboardPage = (props: DashboardPageProps) => {
                     <DonutChart
                       data={accumulatedStatusCounts}
                       onValueChange={(v) => console.log(v)}
-                      colors={[
-                        "cyan",
-                        "blue",
-                        "green",
-                        "indigo",
-                        "orange",
-                        "pink",
-                      ]}
                     />
                   </div>
                 </Card>
