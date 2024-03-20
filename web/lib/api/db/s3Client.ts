@@ -1,5 +1,5 @@
 import { S3Client as AwsS3Client, GetObjectCommand } from "@aws-sdk/client-s3";
-import { Result } from "../result";
+import { Result } from "../../result";
 
 export type RequestResponseBody = {
   request?: any;
@@ -33,6 +33,7 @@ export class S3Client {
   ): Promise<Result<RequestResponseBody, string>> {
     const key = S3Client.getRequestResponseKey(requestId, orgId);
 
+    console.log(`Key: ${key}`);
     return this.retrieve(key);
   }
 

@@ -220,7 +220,7 @@ app.post(
   "/v1/request/query",
   withAuth<
     paths["/v1/request/query"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, authParams, s3Client }) => {
+  >(async ({ request, res, authParams, s3Client }) => {
     const body = await request.getRawBody<any>();
 
     const { filter, offset, limit, sort, isCached } = body;
@@ -232,8 +232,7 @@ app.post(
           offset,
           limit,
           sort,
-          s3Client,
-          supabaseClient.client
+          s3Client
         )
       : await getRequests(
           authParams.organizationId,
@@ -241,8 +240,7 @@ app.post(
           offset,
           limit,
           sort,
-          s3Client,
-          supabaseClient.client
+          s3Client
         );
     postHogClient?.capture({
       distinctId: `${await hashAuth(body)}-${authParams.organizationId}`,
@@ -430,8 +428,7 @@ app.post(
       0,
       1000,
       {},
-      s3Client,
-      supabaseClient.client
+      s3Client
     );
 
     if (metrics.error || !metrics.data || metrics.data.length === 0) {
@@ -546,8 +543,7 @@ app.post(
       0,
       1000,
       {},
-      s3Client,
-      supabaseClient.client
+      s3Client
     );
 
     if (metrics.error || !metrics.data || metrics.data.length === 0) {

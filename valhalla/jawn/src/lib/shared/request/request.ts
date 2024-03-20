@@ -1,4 +1,3 @@
-import { SupabaseClient } from "@supabase/supabase-js";
 import { FilterNode } from "../filters/filterDefs";
 import {
   buildFilterWithAuth,
@@ -6,12 +5,10 @@ import {
   buildFilterWithAuthClickHouse,
 } from "../filters/filters";
 import { SortLeafRequest, buildRequestSort } from "../sorts/requests/sorts";
-// import { Database, Json } from "../../../supabase/database.types";
 import { Result, resultMap, ok } from "../result";
-import { RosettaWrapper } from "../rosetta/rosettaWrapper";
 import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { LlmSchema } from "../requestResponseModel";
-import { Database, Json } from "../../db/database.types";
+import { Json } from "../../db/database.types";
 import { mapGeminiPro } from "./mappers";
 import { S3Client } from "../db/s3Client";
 
@@ -22,6 +19,7 @@ export interface HeliconeRequest {
   response_id: string;
   response_created_at: string;
   response_body?: any;
+  response_body_url?: string | null;
   response_status: number;
   response_model: string | null;
   request_id: string;
@@ -29,6 +27,7 @@ export interface HeliconeRequest {
   model_override: string | null;
   request_created_at: string;
   request_body: any;
+  request_body_url: string | null;
   request_path: string;
   request_user_id: string | null;
   request_properties: {
@@ -60,8 +59,7 @@ export async function getRequests(
   offset: number,
   limit: number,
   sort: SortLeafRequest,
-  s3Client: S3Client,
-  supabaseServer?: SupabaseClient<Database>
+  s3Client: S3Client
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -80,6 +78,7 @@ export async function getRequests(
       WHEN request.path LIKE '%embeddings%' THEN '{"helicone_message": "embeddings response omitted"}'::jsonb
       ELSE response.body::jsonb
     END AS response_body,
+    response.body_url as response_body_url,
     response.status AS response_status,
     request.id AS request_id,
     request.created_at as request_created_at,
@@ -88,6 +87,7 @@ export async function getRequests(
       THEN '{"helicone_message": "request body too large"}'::jsonb
       ELSE request.body::jsonb
     END AS request_body,
+    request.body_url as request_body_url,
     request.path AS request_path,
     request.user_id AS request_user_id,
     request.properties AS request_properties,
@@ -118,17 +118,9 @@ export async function getRequests(
   OFFSET ${offset}
 `;
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
-
-  if (!supabaseServer) {
-    return resultMap(requests, (data) => {
-      return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
-    });
-  }
-
-  const results = await mapLLMCalls(requests.data);
-
+  const results = await mapLLMCalls(requests.data, s3Client, orgId);
   return resultMap(results, (data) => {
-    return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
+    return data;
   });
 }
 
@@ -138,8 +130,7 @@ export async function getRequestsCached(
   offset: number,
   limit: number,
   sort: SortLeafRequest,
-  s3Client: S3Client,
-  supabaseServer?: SupabaseClient<Database>
+  s3Client: S3Client
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -197,24 +188,44 @@ export async function getRequestsCached(
 
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
 
-  if (!supabaseServer) {
-    return resultMap(requests, (data) => {
-      return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
-    });
-  }
-
-  const results = await mapLLMCalls(requests.data);
+  const results = await mapLLMCalls(requests.data, s3Client, orgId);
 
   return resultMap(results, (data) => {
-    return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
+    return data;
   });
 }
 
 async function mapLLMCalls(
-  heliconeRequests: HeliconeRequest[] | null
+  heliconeRequests: HeliconeRequest[] | null,
+  s3Client: S3Client,
+  orgId: string
 ): Promise<Result<HeliconeRequest[], string>> {
   const promises =
     heliconeRequests?.map(async (heliconeRequest) => {
+      // First retrieve bodies from s3
+      if (
+        heliconeRequest.request_body_url ||
+        heliconeRequest.response_body_url
+      ) {
+        const { data: requestResponseBody, error: requestResponseBodyErr } =
+          await s3Client.getRequestResponseBody(
+            orgId,
+            heliconeRequest.request_id
+          );
+
+        if (requestResponseBodyErr || !requestResponseBody) {
+          // If error, return the request without the response_body
+          return heliconeRequest;
+        }
+
+        heliconeRequest.request_body = requestResponseBody.request;
+
+        if (heliconeRequest.response_body_url) {
+          heliconeRequest.response_body = requestResponseBody.response;
+        }
+      }
+
+      // Next map to standardized schema
       // Extract the model from various possible locations.
       const model =
         heliconeRequest.model_override ||
@@ -287,22 +298,6 @@ export async function getRequestsDateRange(
       max: new Date(data[0].max),
     };
   });
-}
-
-function truncLargeData(
-  data: HeliconeRequest[],
-  maxBodySize: number
-): HeliconeRequest[] {
-  const trunced = data.map((d) => {
-    return {
-      ...d,
-      request_body: d.request_body,
-      response_body: d.response_body,
-      llmSchema: d.llmSchema,
-    };
-  });
-
-  return trunced;
 }
 
 export async function getRequestCountCached(

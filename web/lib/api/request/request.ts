@@ -1,4 +1,3 @@
-import { SupabaseClient } from "@supabase/supabase-js";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuth,
@@ -9,11 +8,12 @@ import {
   SortLeafRequest,
   buildRequestSort,
 } from "../../../services/lib/sorts/requests/sorts";
-import { Database, Json } from "../../../supabase/database.types";
+import { Json } from "../../../supabase/database.types";
 import { Result, resultMap, ok } from "../../result";
-import { RosettaWrapper } from "../../wrappers/rosetta/rosettaWrapper";
 import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { LlmSchema } from "../models/requestResponseModel";
+import { S3Client } from "../db/s3Client";
+import { mapGeminiPro } from "../graphql/helpers/mappers";
 
 export type Provider = "OPENAI" | "ANTHROPIC" | "TOGETHERAI" | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 3 * 1024 * 1024;
@@ -22,6 +22,7 @@ export interface HeliconeRequest {
   response_id: string;
   response_created_at: string;
   response_body?: any;
+  response_body_url?: string | null;
   response_status: number;
   response_model: string | null;
   request_id: string;
@@ -29,6 +30,7 @@ export interface HeliconeRequest {
   model_override: string | null;
   request_created_at: string;
   request_body: any;
+  request_body_url: string | null;
   request_path: string;
   request_user_id: string | null;
   request_properties: {
@@ -60,7 +62,7 @@ export async function getRequests(
   offset: number,
   limit: number,
   sort: SortLeafRequest,
-  supabaseServer?: SupabaseClient<Database>
+  s3Client: S3Client
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -79,6 +81,7 @@ export async function getRequests(
       WHEN request.path LIKE '%embeddings%' THEN '{"helicone_message": "embeddings response omitted"}'::jsonb
       ELSE response.body::jsonb
     END AS response_body,
+    response.body_url as response_body_url,
     response.status AS response_status,
     request.id AS request_id,
     request.created_at as request_created_at,
@@ -87,6 +90,7 @@ export async function getRequests(
       THEN '{"helicone_message": "request body too large"}'::jsonb
       ELSE request.body::jsonb
     END AS request_body,
+    request.body_url as request_body_url,
     request.path AS request_path,
     request.user_id AS request_user_id,
     request.properties AS request_properties,
@@ -118,17 +122,9 @@ export async function getRequests(
 `;
 
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
-  if (!supabaseServer) {
-    return resultMap(requests, (data) => {
-      return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
-    });
-  }
-
-  const rosettaWrapper = new RosettaWrapper(supabaseServer);
-  const results = await mapLLMCalls(requests.data, rosettaWrapper);
-
+  const results = await mapLLMCalls(requests.data, s3Client, orgId);
   return resultMap(results, (data) => {
-    return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
+    return data;
   });
 }
 
@@ -138,7 +134,7 @@ export async function getRequestsCached(
   offset: number,
   limit: number,
   sort: SortLeafRequest,
-  supabaseServer?: SupabaseClient<Database>
+  s3Client: S3Client
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -157,6 +153,7 @@ export async function getRequestsCached(
       WHEN request.path LIKE '%embeddings%' THEN '{"helicone_message": "embeddings response omitted"}'::jsonb
       ELSE response.body::jsonb
     END AS response_body,
+    response.body_url as response_body_url,
     response.status AS response_status,
     request.id AS request_id,
     cache_hits.created_at as request_created_at,
@@ -165,6 +162,7 @@ export async function getRequestsCached(
       THEN '{"helicone_message": "request body too large"}'::jsonb
       ELSE request.body::jsonb
     END AS request_body,
+    request.body_url as request_body_url,
     request.path AS request_path,
     request.user_id AS request_user_id,
     request.properties AS request_properties,
@@ -196,27 +194,44 @@ export async function getRequestsCached(
 `;
 
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
-
-  if (!supabaseServer) {
-    return resultMap(requests, (data) => {
-      return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
-    });
-  }
-
-  const rosettaWrapper = new RosettaWrapper(supabaseServer);
-  const results = await mapLLMCalls(requests.data, rosettaWrapper);
-
+  const results = await mapLLMCalls(requests.data, s3Client, orgId);
   return resultMap(results, (data) => {
-    return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
+    return data;
   });
 }
 
 async function mapLLMCalls(
   heliconeRequests: HeliconeRequest[] | null,
-  rosettaWrapper: RosettaWrapper
+  s3Client: S3Client,
+  orgId: string
 ): Promise<Result<HeliconeRequest[], string>> {
   const promises =
     heliconeRequests?.map(async (heliconeRequest) => {
+      // First retrieve bodies from s3
+      if (
+        heliconeRequest.request_body_url ||
+        heliconeRequest.response_body_url
+      ) {
+        const { data: requestResponseBody, error: requestResponseBodyErr } =
+          await s3Client.getRequestResponseBody(
+            orgId,
+            heliconeRequest.request_id
+          );
+
+        if (requestResponseBodyErr || !requestResponseBody) {
+          // If error, return the request without the response_body
+          console.log(`Error fetching request body: ${requestResponseBodyErr}`);
+          return heliconeRequest;
+        }
+
+        heliconeRequest.request_body = requestResponseBody.request;
+
+        if (heliconeRequest.response_body_url) {
+          heliconeRequest.response_body = requestResponseBody.response;
+        }
+      }
+
+      // Next map to standardized schema
       // Extract the model from various possible locations.
       const model =
         heliconeRequest.model_override ||
@@ -228,29 +243,15 @@ async function mapLLMCalls(
         getModelFromPath(heliconeRequest.request_path) ||
         "";
 
-      let mappedSchema: LlmSchema | null = null;
       try {
-        const requestPath = new URL(heliconeRequest.request_path).pathname;
-        const schemaJson = await rosettaWrapper.mapLLMCall(
-          {
-            request: {
-              ...heliconeRequest.request_body,
-              request_path: requestPath,
-              model_best_guess: model,
-            },
-            response: heliconeRequest.response_body,
-          },
-          requestPath,
-          heliconeRequest.provider,
-          model
-        );
-
-        mappedSchema = JSON.parse(JSON.stringify(schemaJson)) as LlmSchema;
+        if (model === "gemini-pro" || model === "gemini-pro-vision") {
+          const mappedSchema = mapGeminiPro(heliconeRequest, model);
+          heliconeRequest.llmSchema = mappedSchema;
+          return heliconeRequest;
+        }
       } catch (error: any) {
         // Do nothing, FE will fall back to existing mappers
       }
-
-      heliconeRequest.llmSchema = mappedSchema || null;
 
       return heliconeRequest;
     }) ?? [];
