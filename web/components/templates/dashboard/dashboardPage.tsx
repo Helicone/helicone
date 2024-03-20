@@ -561,6 +561,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       if (d.status === 200) {
         return;
       }
+
       if (statusCounts.accStatusCounts[d.status] === undefined) {
         statusCounts.accStatusCounts[d.status] = 0;
       }
@@ -581,14 +582,30 @@ const DashboardPage = (props: DashboardPageProps) => {
   });
 
   // flatten the accumulated status counts into an array of object {name, value}
+  // filter out status if it is 0
+  //      // if the status is -1, map it to timeout
+  // if the status is -2, map it to pending
+  // if the status is -3, map it to cancelled
+  // if the status is -4, map it to threat
   const accumulatedStatusCounts = Object.entries(
     getStatusCountsOverTime().accStatusCounts
-  ).map(([name, value]) => {
-    return {
-      name,
-      value,
-    };
-  });
+  )
+    .map(([name, value]) => {
+      if (name === "-1") {
+        name = "timeout";
+      } else if (name === "-2") {
+        name = "pending";
+      } else if (name === "-3") {
+        name = "cancelled";
+      } else if (name === "-4") {
+        name = "threat";
+      }
+      return {
+        name,
+        value,
+      };
+    })
+    .filter((d) => d.value !== 0);
 
   console.log(flattenedOverTime, accumulatedStatusCounts);
 
