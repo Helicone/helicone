@@ -2,24 +2,24 @@ import { AwsClient } from "aws4fetch";
 import { Result } from "../results";
 
 export class S3Client {
-  private static region = "us-west-2";
-  private static bucketName = "request-response-storage";
+  private region = "us-west-2";
+  private bucketName = "request-response-storage";
   awsClient: AwsClient;
 
-  constructor(
-    private accessKey: string,
-    private secretKey: string,
-    private bucketName: string
-  ) {
+  constructor(accessKey: string, secretKey: string, bucketName: string) {
     this.awsClient = new AwsClient({
       accessKeyId: accessKey,
       secretAccessKey: secretKey,
       service: "s3",
-      region: S3Client.region,
+      region: this.region,
     });
+
+    if (bucketName) {
+      this.bucketName = bucketName;
+    }
   }
 
-  static getRequestResponseUrl = (requestId: string, orgId: string) => {
+  getRequestResponseUrl = (requestId: string, orgId: string) => {
     const key = `organizations/${orgId}/requests/${requestId}`;
     return `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${key}`;
   };
@@ -30,7 +30,7 @@ export class S3Client {
     request: string,
     response: string
   ): Promise<Result<string, string>> {
-    const url = S3Client.getRequestResponseUrl(requestId, orgId);
+    const url = this.getRequestResponseUrl(requestId, orgId);
 
     return this.store(url, JSON.stringify({ request, response }));
   }

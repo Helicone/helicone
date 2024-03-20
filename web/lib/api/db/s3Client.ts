@@ -7,8 +7,8 @@ export type RequestResponseBody = {
 };
 
 export class S3Client {
-  private static region = "us-west-2";
-  private static bucketName = "request-response-storage";
+  private region = "us-west-2";
+  private bucketName = "request-response-storage";
   awsClient: AwsS3Client;
 
   constructor(accessKey: string, secretKey: string, bucketName: string) {
@@ -17,21 +17,23 @@ export class S3Client {
         accessKeyId: accessKey,
         secretAccessKey: secretKey,
       },
-      region: S3Client.region,
+      region: this.region,
     });
+
+    if (bucketName) {
+      this.bucketName = bucketName;
+    }
   }
 
-  static getRequestResponseKey = (requestId: string, orgId: string) => {
-    const key = `organizations/${orgId}/requests/${requestId}`;
-
-    return key;
+  getRequestResponseKey = (requestId: string, orgId: string) => {
+    return `organizations/${orgId}/requests/${requestId}`;
   };
 
   async getRequestResponseBody(
     orgId: string,
     requestId: string
   ): Promise<Result<RequestResponseBody, string>> {
-    const key = S3Client.getRequestResponseKey(requestId, orgId);
+    const key = this.getRequestResponseKey(requestId, orgId);
 
     console.log(`Key: ${key}`);
     return this.retrieve(key);
@@ -39,7 +41,7 @@ export class S3Client {
 
   async retrieve<T>(key: string): Promise<Result<T, string>> {
     const command = new GetObjectCommand({
-      Bucket: S3Client.bucketName,
+      Bucket: this.bucketName,
       Key: key,
     });
 

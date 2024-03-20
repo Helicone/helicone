@@ -309,7 +309,7 @@ export class DBLoggable {
     };
   }
 
-  async getResponse(orgId: string) {
+  async getResponse(orgId: string, s3Client: S3Client) {
     const { body: responseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
     const endTime = this.timing.endTime ?? responseEndTime;
@@ -323,7 +323,7 @@ export class DBLoggable {
 
     const usage = this.getUsage(parsedResponse.data);
 
-    const body_url = S3Client.getRequestResponseUrl(
+    const body_url = s3Client.getRequestResponseUrl(
       this.request.requestId,
       orgId
     );
@@ -403,6 +403,7 @@ export class DBLoggable {
 
   async readAndLogResponse(
     queue: RequestResponseStore,
+    s3Client: S3Client,
     orgId: string
   ): Promise<
     Result<
@@ -415,7 +416,7 @@ export class DBLoggable {
   > {
     try {
       const { response, body } = await withTimeout(
-        this.getResponse(orgId),
+        this.getResponse(orgId, s3Client),
         1000 * 60 * 30
       ); // 30 minutes
       const { error } = await queue.updateResponse(
@@ -597,7 +598,8 @@ export class DBLoggable {
       this.response.responseId,
       db.supabase,
       db.queue,
-      authParams
+      authParams,
+      db.s3Client
     );
 
     // If no data or error, return
@@ -607,6 +609,7 @@ export class DBLoggable {
 
     const responseResult = await this.readAndLogResponse(
       db.queue,
+      db.s3Client,
       authParams.organizationId
     );
 

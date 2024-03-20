@@ -7,7 +7,6 @@ import * as Sentry from "@sentry/node";
 import { ProfilingIntegration } from "@sentry/profiling-node";
 import * as OpenApiValidator from "express-openapi-validator";
 import morgan from "morgan";
-import { v4 as uuid } from "uuid";
 import { paths } from "./schema/types";
 import {
   getTokenCountAnthropic,
@@ -16,7 +15,6 @@ import {
 import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
 import { withAuth } from "./lib/routers/withAuth";
 import { getRequests, getRequestsCached } from "./lib/shared/request/request";
-
 import { FineTuningManager } from "./lib/managers/FineTuningManager";
 import { PostHog } from "posthog-node";
 import { hashAuth } from "./lib/db/hash";

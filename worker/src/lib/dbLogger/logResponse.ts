@@ -48,7 +48,8 @@ export async function logRequest(
   responseId: string,
   dbClient: SupabaseClient<Database>,
   insertQueue: RequestResponseStore,
-  authParams: AuthParams
+  authParams: AuthParams,
+  s3Client: S3Client
 ): Promise<
   Result<
     {
@@ -112,7 +113,7 @@ export async function logRequest(
     };
 
     const body_url = !request.omitLog
-      ? S3Client.getRequestResponseUrl(
+      ? s3Client.getRequestResponseUrl(
           request.requestId,
           authParams.organizationId
         )
