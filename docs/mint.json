@@ -85,7 +85,8 @@
             "getting-started/integration-method/openai-proxy",
             "getting-started/integration-method/anthropic",
             "getting-started/integration-method/azure",
-            "getting-started/integration-method/anyscale"
+            "getting-started/integration-method/anyscale",
+            "getting-started/integration-method/together"
           ]
         },
         {
