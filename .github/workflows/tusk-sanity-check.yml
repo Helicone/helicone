@@ -39,7 +39,7 @@ jobs:
         working-directory: ./web
 
       - name: Web lint fix
-        run: yarn lint:fix
+        run: yarn lint --fix
         working-directory: ./web
 
       - name: Install worker dependencies
