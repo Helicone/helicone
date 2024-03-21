@@ -34,6 +34,8 @@ import { Result } from "../../../lib/result";
 import { ThemedPill } from "./themedPill";
 import { ThemedMultiSelect } from "./themedMultiSelect";
 import { TimeFilter } from "../../templates/dashboard/dashboardPage";
+import FiltersButton, { LayoutFilter } from "./table/filtersButton";
+import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -71,6 +73,11 @@ interface ThemedHeaderProps {
       search: string
     ) => Promise<Result<void, string>>;
   };
+  filterLayouts?: {
+    filters?: OrganizationFilter[];
+    currentFilter?: OrganizationFilter;
+    onFilterChange?: (value: OrganizationFilter) => void;
+  };
 }
 
 const notificationMethods = [
@@ -79,8 +86,14 @@ const notificationMethods = [
 ];
 
 export default function ThemedHeader(props: ThemedHeaderProps) {
-  const { isFetching, editColumns, timeFilter, advancedFilter, csvExport } =
-    props;
+  const {
+    isFetching,
+    editColumns,
+    timeFilter,
+    advancedFilter,
+    csvExport,
+    filterLayouts,
+  } = props;
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [exportFiltered, setExportFiltered] = useState(false);
@@ -110,22 +123,35 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
           {(advancedFilter || editColumns || csvExport) && (
             <div className="flex flex-wrap space-x-2 items-center">
               {advancedFilter && (
-                <div className="mx-auto flex text-sm">
-                  <button
-                    onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                    className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 dark:bg-black dark:hover:bg-sky-900 flex flex-row items-center gap-2"
-                  >
-                    <FunnelIcon
-                      className="h-5 w-5 text-gray-900 dark:text-gray-100"
-                      aria-hidden="true"
-                    />
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-                      {showAdvancedFilters ? "Hide Filters" : "Show Filters"}{" "}
-                      {advancedFilter.filters.length > 0 &&
-                        `(${advancedFilter.filters.length})`}
-                    </p>
-                  </button>
-                </div>
+                <>
+                  <div className="mx-auto flex text-sm">
+                    <button
+                      onClick={() =>
+                        setShowAdvancedFilters(!showAdvancedFilters)
+                      }
+                      className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 dark:bg-black dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+                    >
+                      <FunnelIcon
+                        className="h-5 w-5 text-gray-900 dark:text-gray-100"
+                        aria-hidden="true"
+                      />
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
+                        {showAdvancedFilters ? "Hide Filters" : "Show Filters"}{" "}
+                        {advancedFilter.filters.length > 0 &&
+                          `(${advancedFilter.filters.length})`}
+                      </p>
+                    </button>
+                  </div>
+                  {filterLayouts && (
+                    <div className="mx-auto flex text-sm">
+                      <FiltersButton
+                        filters={filterLayouts.filters}
+                        currentFilter={filterLayouts.currentFilter}
+                        onFilterChange={filterLayouts.onFilterChange}
+                      />
+                    </div>
+                  )}
+                </>
               )}
               {editColumns && (
                 <ThemedMultiSelect

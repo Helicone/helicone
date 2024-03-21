@@ -12,6 +12,8 @@ import {
   Card,
   DonutChart,
   Legend,
+  Select,
+  SelectItem,
 } from "@tremor/react";
 import Link from "next/link";
 import { useCallback, useState } from "react";
@@ -45,6 +47,7 @@ import { useDashboardPage } from "./useDashboardPage";
 import { useModels } from "../../../services/hooks/models";
 import { QuantilesGraph } from "./quantilesGraph";
 import LoadingAnimation from "../../shared/loadingAnimation";
+import { OrganizationFilter } from '../../../services/lib/organization_layout/organization_layout';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -603,6 +606,12 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
 
+  const [layoutFilters, setLayoutFilters] = useState<OrganizationFilter[]>();
+  const [currentLayoutFilter, setCurrentLayoutFilter] =
+    useState<OrganizationFilter>();
+
+  const saveFilter = () => {};
+
   const renderUnauthorized = () => {
     if (currentTier === "free") {
       return (
@@ -682,6 +691,18 @@ const DashboardPage = (props: DashboardPageProps) => {
         <>{renderUnauthorized()}</>
       ) : (
         <div className="space-y-4">
+          {/* <Select
+            placeholder="Select filter"
+            value={currentLayoutFilter}
+            onValueChange={setCurrentLayoutFilter}
+            className="border border-gray-400 rounded-lg w-fit min-w-[250px] max-w-xl"
+          >
+            {layoutFilters?.map((filter) => (
+              <SelectItem key={filter.name} value={filter.name}>
+                {filter.name}
+              </SelectItem>
+            ))}
+          </Select> */}
           <ThemedTableHeader
             isFetching={isAnyLoading}
             timeFilter={{
@@ -720,6 +741,11 @@ const DashboardPage = (props: DashboardPageProps) => {
               searchPropertyFilters: () => {
                 throw new Error("not implemented");
               },
+            }}
+            filterLayouts={{
+              currentFilter: currentLayoutFilter,
+              filters: layoutFilters,
+              onFilterChange: setCurrentLayoutFilter,
             }}
           />
           <section id="panels" className="-m-2">
