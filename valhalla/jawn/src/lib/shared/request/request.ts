@@ -199,19 +199,22 @@ async function mapLLMCalls(
 ): Promise<Result<HeliconeRequest[], string>> {
   const promises =
     heliconeRequests?.map(async (heliconeRequest) => {
-      // First retrieve s3 signed urls
+      // First retrieve s3 signed urls if past the implementation date
+      const now = new Date();
+      const s3ImplementationDate = new Date("2024-03-22");
+      if (now > s3ImplementationDate) {
+        const { data: signedBodyUrl, error: signedBodyUrlErr } =
+          await s3Client.getRequestResponseBodySignedUrl(
+            orgId,
+            heliconeRequest.request_id
+          );
 
-      const { data: signedBodyUrl, error: signedBodyUrlErr } =
-        await s3Client.getRequestResponseBodySignedUrl(
-          orgId,
-          heliconeRequest.request_id
-        );
+        if (signedBodyUrlErr || !signedBodyUrl) {
+          return heliconeRequest;
+        }
 
-      if (signedBodyUrlErr || !signedBodyUrl) {
-        return heliconeRequest;
+        heliconeRequest.signed_body_url = signedBodyUrl;
       }
-
-      heliconeRequest.signed_body_url = signedBodyUrl;
 
       // Next map to standardized schema
       // Extract the model from various possible locations.
