@@ -19,7 +19,6 @@ export interface HeliconeRequest {
   response_id: string;
   response_created_at: string;
   response_body?: any;
-  response_body_url?: string | null;
   response_status: number;
   response_model: string | null;
   request_id: string;
@@ -27,7 +26,6 @@ export interface HeliconeRequest {
   model_override: string | null;
   request_created_at: string;
   request_body: any;
-  request_body_url: string | null;
   request_path: string;
   request_user_id: string | null;
   request_properties: {
@@ -79,7 +77,6 @@ export async function getRequests(
       WHEN request.path LIKE '%embeddings%' THEN '{"helicone_message": "embeddings response omitted"}'::jsonb
       ELSE response.body::jsonb
     END AS response_body,
-    response.body_url as response_body_url,
     response.status AS response_status,
     request.id AS request_id,
     request.created_at as request_created_at,
@@ -88,7 +85,6 @@ export async function getRequests(
       THEN '{"helicone_message": "request body too large"}'::jsonb
       ELSE request.body::jsonb
     END AS request_body,
-    request.body_url as request_body_url,
     request.path AS request_path,
     request.user_id AS request_user_id,
     request.properties AS request_properties,
@@ -204,22 +200,18 @@ async function mapLLMCalls(
   const promises =
     heliconeRequests?.map(async (heliconeRequest) => {
       // First retrieve s3 signed urls
-      if (
-        heliconeRequest.request_body_url ||
-        heliconeRequest.response_body_url
-      ) {
-        const { data: signedBodyUrl, error: signedBodyUrlErr } =
-          await s3Client.getRequestResponseBodySignedUrl(
-            orgId,
-            heliconeRequest.request_id
-          );
 
-        if (signedBodyUrlErr || !signedBodyUrl) {
-          return heliconeRequest;
-        }
+      const { data: signedBodyUrl, error: signedBodyUrlErr } =
+        await s3Client.getRequestResponseBodySignedUrl(
+          orgId,
+          heliconeRequest.request_id
+        );
 
-        heliconeRequest.signed_body_url = signedBodyUrl;
+      if (signedBodyUrlErr || !signedBodyUrl) {
+        return heliconeRequest;
       }
+
+      heliconeRequest.signed_body_url = signedBodyUrl;
 
       // Next map to standardized schema
       // Extract the model from various possible locations.

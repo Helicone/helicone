@@ -1365,7 +1365,6 @@ export type Database = {
         Row: {
           auth_hash: string
           body: Json
-          body_url: string | null
           created_at: string
           formatted_prompt_id: string | null
           helicone_api_key_id: number | null
@@ -1388,7 +1387,6 @@ export type Database = {
         Insert: {
           auth_hash: string
           body: Json
-          body_url?: string | null
           created_at?: string
           formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null
@@ -1411,7 +1409,6 @@ export type Database = {
         Update: {
           auth_hash?: string
           body?: Json
-          body_url?: string | null
           created_at?: string
           formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null
@@ -1519,7 +1516,6 @@ export type Database = {
       response: {
         Row: {
           body: Json
-          body_url: string | null
           completion_tokens: number | null
           created_at: string
           delay_ms: number | null
@@ -1533,7 +1529,6 @@ export type Database = {
         }
         Insert: {
           body: Json
-          body_url?: string | null
           completion_tokens?: number | null
           created_at?: string
           delay_ms?: number | null
@@ -1547,7 +1542,6 @@ export type Database = {
         }
         Update: {
           body?: Json
-          body_url?: string | null
           completion_tokens?: number | null
           created_at?: string
           delay_ms?: number | null

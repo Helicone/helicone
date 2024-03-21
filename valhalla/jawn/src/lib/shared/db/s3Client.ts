@@ -15,7 +15,7 @@ export class S3Client {
     accessKey: string = "minioadmin",
     secretKey: string = "minioadmin",
     endpoint: string = "http://localhost:9000",
-    private bucketName: string = "request_response_storage"
+    private bucketName: string = "request-response-storage"
   ) {
     this.awsClient = new AwsS3Client({
       credentials: {

@@ -309,7 +309,7 @@ export class DBLoggable {
     };
   }
 
-  async getResponse(orgId: string, s3Client: S3Client) {
+  async getResponse() {
     const { body: responseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
     const endTime = this.timing.endTime ?? responseEndTime;
@@ -322,11 +322,6 @@ export class DBLoggable {
     const isStream = this.request.isStream;
 
     const usage = this.getUsage(parsedResponse.data);
-
-    const body_url = s3Client.getRequestResponseUrl(
-      this.request.requestId,
-      orgId
-    );
 
     if (
       !isStream &&
@@ -341,7 +336,12 @@ export class DBLoggable {
           id: this.response.responseId,
           created_at: endTime.toISOString(),
           request: this.request.requestId,
-          body: "",
+          body: this.response.omitLog // TODO: Remove in favor of S3 storage
+            ? {
+                usage: parsedResponse.data?.usage,
+                model,
+              }
+            : body,
           status: await this.response.status(),
           completion_tokens: usage.completion_tokens,
           prompt_tokens: usage.prompt_tokens,
@@ -365,8 +365,12 @@ export class DBLoggable {
             id: this.response.responseId,
             created_at: endTime.toISOString(),
             request: this.request.requestId,
-            body: "",
-            body_url: body_url,
+            body: this.response.omitLog // TODO: Remove in favor of S3 storage
+              ? {
+                  usage: parsedResponse.data?.usage,
+                  model: parsedResponse.data?.model,
+                }
+              : parsedResponse.data,
             status: await this.response.status(),
             completion_tokens: usage.completion_tokens,
             prompt_tokens: usage.prompt_tokens,
@@ -387,8 +391,12 @@ export class DBLoggable {
             id: this.response.responseId,
             request: this.request.requestId,
             created_at: endTime.toISOString(),
-            body: "",
-            body_url: body_url,
+            body: {
+              // TODO: Remove in favor of S3 storage
+              helicone_error: "error parsing response",
+              parse_response_error: parsedResponse.error,
+              body: parsedResponse.data,
+            },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             model: (parsedResponse.data as any)?.model ?? undefined,
             status: await this.response.status(),
@@ -401,11 +409,7 @@ export class DBLoggable {
         };
   }
 
-  async readAndLogResponse(
-    queue: RequestResponseStore,
-    s3Client: S3Client,
-    orgId: string
-  ): Promise<
+  async readAndLogResponse(queue: RequestResponseStore): Promise<
     Result<
       {
         response: Database["public"]["Tables"]["response"]["Insert"];
@@ -416,7 +420,7 @@ export class DBLoggable {
   > {
     try {
       const { response, body } = await withTimeout(
-        this.getResponse(orgId, s3Client),
+        this.getResponse(),
         1000 * 60 * 30
       ); // 30 minutes
       const { error } = await queue.updateResponse(
@@ -598,8 +602,7 @@ export class DBLoggable {
       this.response.responseId,
       db.supabase,
       db.queue,
-      authParams,
-      db.s3Client
+      authParams
     );
 
     // If no data or error, return
@@ -607,11 +610,7 @@ export class DBLoggable {
       return requestResult;
     }
 
-    const responseResult = await this.readAndLogResponse(
-      db.queue,
-      db.s3Client,
-      authParams.organizationId
-    );
+    const responseResult = await this.readAndLogResponse(db.queue);
 
     // If no data or error, return
     if (!responseResult.data || responseResult.error) {

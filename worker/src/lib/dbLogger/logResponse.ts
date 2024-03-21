@@ -4,13 +4,11 @@ import { Database } from "../../../supabase/database.types";
 import { Result } from "../../results";
 import { AuthParams, DBLoggableProps } from "./DBLoggable";
 import { RequestResponseStore } from "./RequestResponseStore";
-import { S3Client } from "../../db/S3Client";
 
 const MAX_USER_ID_LENGTH = 7000;
 
 // Replaces all the image_url that is not a url or not { url: url }  with
 // { unsupported_image: true }
-//
 function unsupportedImage(body: any): any {
   if (typeof body !== "object" || body === null) {
     return body;
@@ -48,8 +46,7 @@ export async function logRequest(
   responseId: string,
   dbClient: SupabaseClient<Database>,
   insertQueue: RequestResponseStore,
-  authParams: AuthParams,
-  s3Client: S3Client
+  authParams: AuthParams
 ): Promise<
   Result<
     {
@@ -112,13 +109,6 @@ export async function logRequest(
       return null;
     };
 
-    const body_url = !request.omitLog
-      ? s3Client.getRequestResponseUrl(
-          request.requestId,
-          authParams.organizationId
-        )
-      : null;
-
     const body = request.omitLog
       ? {
           model:
@@ -132,8 +122,7 @@ export async function logRequest(
     const requestData = {
       id: request.requestId,
       path: request.path,
-      body: "", // Not used due to S3 storage
-      body_url: body_url,
+      body: body, // TODO: Remove in favor of S3 storage
       auth_hash: "",
       user_id: request.userId ?? null,
       prompt_id: request.promptId ?? null,
