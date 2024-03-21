@@ -4,26 +4,15 @@ import {
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
-
-export type OrganizationFilter = {
-  id: string;
-  name: string;
-  filter: string;
-  createdAt: Date;
-};
-
-export type OrganizationLayout = {
-  id: string;
-  organization_id: string;
-  type: string;
-  filters: OrganizationFilter[];
-};
+import { Database } from "../../../supabase/database.types";
 
 async function handler({
   res,
   userData: { orgId, user, userId },
   req,
-}: HandlerWrapperOptions<Result<OrganizationLayout, string>>) {
+}: HandlerWrapperOptions<
+  Result<Database["public"]["Tables"]["organization_layout"]["Row"], string>
+>) {
   if (!user) {
     res.status(401).json({ error: "Unauthorized", data: null });
     return;
@@ -55,17 +44,8 @@ async function handler({
       data: null,
     });
   } else {
-    const filtersArr = layout.filters as unknown as OrganizationFilter[];
-
-    const orgLayout: OrganizationLayout = {
-      id: layout.id,
-      organization_id: layout.organization_id,
-      type: layout.type,
-      filters: filtersArr,
-    };
-
     res.status(200).json({
-      data: orgLayout,
+      data: layout,
       error: null,
     });
   }

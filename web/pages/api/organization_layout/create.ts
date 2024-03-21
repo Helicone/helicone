@@ -5,18 +5,23 @@ import {
 import { mapPostgrestErr, Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { Database } from "../../../supabase/database.types";
+import { OrganizationFilter } from "./types/orgLayout";
 
 //todo: do we need to create layout when create a org or separately? create org or create filter?
 
-export type Org;
-
 async function handler({
+  req,
   res,
   userData: { orgId, user, userId, org },
   body,
 }: HandlerWrapperOptions<
-  Result<Database["public"]["Tables"]["organization_layout"]["Row"], string>
+  Result<Database["public"]["Tables"]["organization_layout"]["Insert"], string>
 >) {
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method not allowed", data: null });
+    return;
+  }
+
   if (!user) {
     res.status(401).json({ error: "Unauthorized", data: null });
     return;
