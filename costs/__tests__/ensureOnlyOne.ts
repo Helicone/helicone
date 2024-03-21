@@ -174,6 +174,14 @@ WHEN (request_response_log.model = 'togethercomputer/RedPajama-INCITE-7B-Instruc
 WHEN (request_response_log.model = 'togethercomputer/StripedHyena-Hessian-7B') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'mistralai/Mistral-7B-v0.1') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'mistralai/Mixtral-8x7B-v0.1') THEN 900 * request_response_log.prompt_tokens + 900 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'claude-instant-1') THEN 1630 * request_response_log.prompt_tokens + 55100 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'claude-v1') THEN 8000 * request_response_log.prompt_tokens + 24000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'claude-2') THEN 8000 * request_response_log.prompt_tokens + 24000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'claude-instant-1.2') THEN 1630 * request_response_log.prompt_tokens + 5510 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'claude-2.0') THEN 11020 * request_response_log.prompt_tokens + 32680 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'claude-3-opus-20240229') THEN 15000 * request_response_log.prompt_tokens + 75000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'claude-3-sonnet-20240229') THEN 3000 * request_response_log.prompt_tokens + 15000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'claude-3-haiku-20240307') THEN 250 * request_response_log.prompt_tokens + 1250 * request_response_log.completion_tokens
     ELSE 0
   END
   ) / 1000000000

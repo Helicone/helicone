@@ -11,9 +11,9 @@ import { costs as togetherAIChatCosts } from "./providers/togetherai/chat";
 import { costs as togetherAIChatLlamaCosts } from "./providers/togetherai/chat/llama";
 import { costs as togetherAICompletionCosts } from "./providers/togetherai/completion";
 import { costs as togetherAICompletionLlamaCosts } from "./providers/togetherai/completion";
-
 import { costs as azureCosts } from "./providers/azure";
 import { costs as googleCosts } from "./providers/google";
+import { costs as anthropicCosts } from "./providers/anthropic";
 
 const costs = [
   ...openaiCosts,
@@ -24,6 +24,7 @@ const costs = [
   ...togetherAIChatLlamaCosts,
   ...togetherAICompletionCosts,
   ...togetherAICompletionLlamaCosts,
+  ...anthropicCosts,
 ];
 
 export function costOf(model: string) {
