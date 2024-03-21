@@ -9,6 +9,18 @@ import quantilesCalc, {
 } from "../../../lib/api/metrics/quantilesCalc";
 import { Result } from "../../../lib/result";
 import { TimeIncrement } from "../../../lib/timeCalculations/fetchTimeData";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+
+type QuantilesBackendBody = {
+  userFilter: FilterNode;
+  timeFilter: {
+    start: string;
+    end: string;
+  };
+  dbIncrement: TimeIncrement;
+  timeZoneDifference: number;
+  metric: string;
+};
 
 async function handler(
   options: HandlerWrapperOptions<Result<Quantiles[], string>>
@@ -18,20 +30,13 @@ async function handler(
     res,
     userData: { orgId },
   } = options;
-  const { timeFilter, dbIncrement, timeZoneDifference, metric } = req.body
-    .data as {
-    timeFilter: {
-      start: string;
-      end: string;
-    };
-    dbIncrement: TimeIncrement;
-    timeZoneDifference: number;
-    metric: string;
-  };
+  const { userFilter, timeFilter, dbIncrement, timeZoneDifference, metric } =
+    req.body.data as QuantilesBackendBody;
+
   const { error: quantilesError, data: quantiles } = await quantilesCalc(
     {
       timeFilter,
-      userFilter: "all",
+      userFilter,
       orgId: orgId,
       dbIncrement: dbIncrement ?? "hour",
       timeZoneDifference,

@@ -918,6 +918,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
               <div key="quantiles">
                 <QuantilesGraph
+                  uiFilters={debouncedAdvancedFilters}
                   timeFilter={timeFilter}
                   timeIncrement={timeIncrement}
                 />
