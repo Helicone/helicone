@@ -1,24 +1,24 @@
 # Helicone Observability
 
-Helicone is a lightweight tool that connects directly into any of your existing code base, no matter the language. We do this by simpily providing a new base URL endpoint that proxies the traffic to TogetherAI.
+Helicone is a streamlined tool that seamlessly integrates into any existing codebase, regardless of the programming language. This is achieved by providing a new base URL endpoint that proxies the traffic to TogetherAI.
 
-Helicone enables a suite of features, but are mainly used for
+Helicone offers a range of features, primarily used for:
 
-- Data Ingest and data normalization with other LLM providers
-- Prompt and application analytics and insights
-- Caching to save money on requests
+- Data Ingestion and normalization with other LLM providers
+- Prompt application analytics and insights
+- Caching to economize on requests
 
-Learn more by visiting Helicone's [documentation](https://docs.helicone.ai) or [contact us](https://helicone.ai/contact) for more information.
+For more information, visit Helicone's [documentation](https://docs.helicone.ai) or [contact us](https://helicone.ai/contact).
 
-# Get started
+# Getting Started
 
-### 1. Create a Helicone account
+### 1. Create a Helicone Account
 
-Create a Helicone account and get your API key from the [Helicone Dashboard](https://www.helicone.ai/signin).
+Start by creating a Helicone account and obtaining your API key from the [Helicone Dashboard](https://www.helicone.ai/signin).
 
-### 2. Add Helicone
+### 2. Implement Helicone
 
-Anywhere you use the TogetherAI API, simply replace the base URL with `https://together.hconeai.com` and add the `Helicone-Auth` header with your Helicone API key.
+Wherever you use the TogetherAI API, simply substitute the base URL with `https://together.hconeai.com` and include the `Helicone-Auth` header with your Helicone API key.
 
 ```python
 TOGETHER_API_KEY = os.environ.get("TOGETHER_API_KEY")
@@ -34,6 +34,6 @@ client = OpenAI(
 )
 ```
 
-### 3. Start using Helicone
+### 3. Start Utilizing Helicone
 
-That's it! You're now using Helicone to proxy your requests to TogetherAI. You can now start using Helicone's features such as data ingestion, caching, and analytics.
+Congratulations! You are now using Helicone to proxy your requests to TogetherAI. You can now leverage Helicone's features such as data ingestion, caching, and analytics.

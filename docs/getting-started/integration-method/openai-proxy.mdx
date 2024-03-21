@@ -3,26 +3,26 @@ title: "OpenAI Compatible Endpoints"
 ---
 
 <Note>
-  If you are using an openAI compatbile endpoint, you can easily log your
-  requests to Helicone by changing the base url from
+  If you are utilizing an OpenAI compatible endpoint, you can conveniently log your
+  requests to Helicone by modifying the base URL from
   `https://oai.hconeai.com/v1` to any of the following supported dedicated
   endpoints:
   <br></br>- `https://together.hconeai.com/v1`
 </Note>
 
 <Note>
-<b>Using another target that is OpenAI compatible?</b>
+<b>Are you using another target that is OpenAI compatible?</b>
 
-If the target is a domain that is approved with a <a href="/getting-started/integration-method/gateway#approved-domains"> dedicated domain</a> (ex: TogetherAI), then you can replace the base url with the dedicated domain.
-If the target is not approved, you can <a href="/getting-started/integration-method/gateway">use the Helicone Gateway</a> to log your requests to Helicone.
+If the target is a domain that has been approved with a <a href="/getting-started/integration-method/gateway#approved-domains"> dedicated domain</a> (e.g., TogetherAI), then you can replace the base URL with the dedicated domain.
+If the target has not been approved, you can <a href="/getting-started/integration-method/gateway">utilize the Helicone Gateway</a> to log your requests to Helicone.
 
 <b>Example:</b>
 
-Instead of using the base url
+Instead of using the base URL
 
 <code>base_url="https://oai.hconeai.com/v1", </code>
 
-You can use the base url
+You can use the base URL
 
 <code>base_url="http://together.hconeai.com/v1", </code>
 
@@ -38,7 +38,7 @@ You can use the base url
   export HELICONE_API_KEY=<your API key>
   ```
 
-Initialize OpenAI client. Can also be done via global client.
+Initialize the OpenAI client. This can also be done via a global client.
 
 ```python
 client = OpenAI(
@@ -50,7 +50,7 @@ client = OpenAI(
 )
 ```
 
-Send request and attach extra headers
+Send a request and attach extra headers
 
 ```python
 chat_completion = client.chat.completions.create(
@@ -64,7 +64,7 @@ chat_completion = client.chat.completions.create(
 )
 ```
 
-    That's it! Your OpenAI requests now log results to Helicone.
+    Congratulations! Your OpenAI requests are now logging results to Helicone.
 
   </Accordion>
 
@@ -74,7 +74,7 @@ chat_completion = client.chat.completions.create(
   export HELICONE_API_KEY=<your API key>
   ```
 
-Change the api base and add a Helicone-Auth header
+Modify the API base and add a Helicone-Auth header
 
 ```python
 import openai
@@ -88,7 +88,7 @@ openai.Completion.create(
 )
 ```
 
-    That's it! Your OpenAI requests now log results to Helicone.
+    Congratulations! Your OpenAI requests are now logging results to Helicone.
 
   </Accordion>
 </AccordionGroup>
@@ -105,12 +105,12 @@ openai.Completion.create(
     pip install helicone
     ```
 
-    **Change OpenAI import to use Helicone**
+    **Modify OpenAI import to use Helicone**
     ```python
     from helicone.openai_proxy import openai # replace `import openai` with this line
     ```
 
-    That's it! Your OpenAI requests now log results to Helicone. You can use advanced Helicone features as parameters:
+    Congratulations! Your OpenAI requests are now logging results to Helicone. You can use advanced Helicone features as parameters:
     ```python
     response = openai.Completion.create(
         model="text-davinci-003",
@@ -130,7 +130,7 @@ openai.Completion.create(
     export HELICONE_API_KEY=<your API key>
     ```
     
-  **Change the base path and add a Helicone-Auth header**
+  **Modify the base path and add a Helicone-Auth header**
   
   **OpenAI < V4**
     ```javascript
@@ -243,7 +243,7 @@ const openai = new OpenAI({
 
   </Tab>
   <Tab title="cURL">
-   **Replace the OpenAI Base url with Helicone's**
+   **Replace the OpenAI Base URL with Helicone's**
    ```
    - POST https://api.openai.com/v1
    + POST https://oai.hconeai.com/v1
@@ -258,7 +258,7 @@ const openai = new OpenAI({
 Here is an example cURL command:
 
    <Note>
-   Please make sure to replace API keys with your own
+   Please ensure to replace API keys with your own
    </Note>
    ```
     curl --request POST \
@@ -283,7 +283,7 @@ Here is an example cURL command:
   <Tab title="Langchain">
     **Python**
     
-    Change the api base and add a Helicone-Auth header
+    Modify the API base and add a Helicone-Auth header
     ```python
     #  Option 1
     openai.api_base = "https://oai.hconeai.com/v1"
