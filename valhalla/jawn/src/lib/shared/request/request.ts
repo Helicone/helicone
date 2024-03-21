@@ -50,6 +50,7 @@ export interface HeliconeRequest {
   feedback_created_at?: string | null;
   feedback_id?: string | null;
   feedback_rating?: boolean | null;
+  signed_body_url?: string | null;
   llmSchema: LlmSchema | null;
 }
 
@@ -202,27 +203,22 @@ async function mapLLMCalls(
 ): Promise<Result<HeliconeRequest[], string>> {
   const promises =
     heliconeRequests?.map(async (heliconeRequest) => {
-      // First retrieve bodies from s3
+      // First retrieve s3 signed urls
       if (
         heliconeRequest.request_body_url ||
         heliconeRequest.response_body_url
       ) {
-        const { data: requestResponseBody, error: requestResponseBodyErr } =
-          await s3Client.getRequestResponseBody(
+        const { data: signedBodyUrl, error: signedBodyUrlErr } =
+          await s3Client.getRequestResponseBodySignedUrl(
             orgId,
             heliconeRequest.request_id
           );
 
-        if (requestResponseBodyErr || !requestResponseBody) {
-          // If error, return the request without the response_body
+        if (signedBodyUrlErr || !signedBodyUrl) {
           return heliconeRequest;
         }
 
-        heliconeRequest.request_body = requestResponseBody.request;
-
-        if (heliconeRequest.response_body_url) {
-          heliconeRequest.response_body = requestResponseBody.response;
-        }
+        heliconeRequest.signed_body_url = signedBodyUrl;
       }
 
       // Next map to standardized schema

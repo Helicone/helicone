@@ -1,4 +1,5 @@
 import { S3Client as AwsS3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Result } from "../result";
 
 export type RequestResponseBody = {
@@ -27,42 +28,29 @@ export class S3Client {
     });
   }
 
-  getRequestResponseKey = (requestId: string, orgId: string) => {
-    return `organizations/${orgId}/requests/${requestId}`;
-  };
-
-  async getRequestResponseBody(
+  async getRequestResponseBodySignedUrl(
     orgId: string,
     requestId: string
-  ): Promise<Result<RequestResponseBody, string>> {
+  ): Promise<Result<string, string>> {
     const key = this.getRequestResponseKey(requestId, orgId);
-
-    return this.retrieve(key);
+    return this.getSignedUrl(key);
   }
 
-  async retrieve<T>(key: string): Promise<Result<T, string>> {
+  async getSignedUrl(key: string): Promise<Result<string, string>> {
+    this.awsClient;
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
       Key: key,
     });
 
-    try {
-      const data = await this.awsClient.send(command);
-      const bodyContents = await this.streamToString(data.Body);
-      const parsedBody = JSON.parse(bodyContents) as T;
-
-      return { data: parsedBody, error: null };
-    } catch (error: any) {
-      return { data: null, error: error.message };
-    }
-  }
-
-  streamToString(stream: any): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const chunks: any[] = [];
-      stream.on("data", (chunk: any) => chunks.push(chunk));
-      stream.on("error", reject);
-      stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+    const signedUrl = await getSignedUrl(this.awsClient, command, {
+      expiresIn: 3600, // 1 hour
     });
+
+    return { data: signedUrl, error: null };
   }
+
+  getRequestResponseKey = (requestId: string, orgId: string) => {
+    return `organizations/${orgId}/requests/${requestId}`;
+  };
 }
