@@ -54,11 +54,11 @@ const RequestRow = (props: RequestRowProps) => {
           <ModelPill model={row.model} />
           <p className="text-xs font-semibold">{Number(row.latency) / 1000}s</p>
           {row.cost ? (
-            <p className="text-xs font-semibold">{`$${formatNumber(
-              row.cost
-            )}`}</p>
-          ) : (
+            <p className="text-xs font-semibold">${formatNumber(row.cost)}</p>
+          ) : row.status && row.status.code === 200 ? (
             <CostPill />
+          ) : (
+            <p className="text-xs font-semibold"></p>
           )}
         </div>
 
