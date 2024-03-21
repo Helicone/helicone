@@ -14,7 +14,12 @@ import { LlmSchema } from "../requestResponseModel";
 import { Database, Json } from "../../db/database.types";
 import { mapGeminiPro } from "./mappers";
 
-export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
+export type Provider =
+  | "OPENAI"
+  | "ANTHROPIC"
+  | "TOGETHERAI"
+  | "GROQ"
+  | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
 export interface HeliconeRequest {
