@@ -220,13 +220,30 @@ export class DBLoggable {
         return ok(JSON.parse(result));
       } else if (!isStream && this.provider === "ANTHROPIC" && requestBody) {
         const responseJson = JSON.parse(result);
-        const prompt = JSON.parse(requestBody)?.prompt ?? "";
-        const completion = responseJson?.completion ?? "";
-        const completionTokens = await tokenCounter(completion);
-        const promptTokens = await tokenCounter(prompt);
         if (getModel(requestBody ?? "{}").includes("claude-3")) {
-          return ok(responseJson);
+          if (
+            !responseJson?.usage?.output_tokens ||
+            !responseJson?.usage?.input_tokens
+          ) {
+            return ok(responseJson);
+          } else {
+            return ok({
+              ...responseJson,
+              usage: {
+                total_tokens:
+                  responseJson?.usage?.output_tokens +
+                  responseJson?.usage?.input_tokens,
+                prompt_tokens: responseJson?.usage?.input_tokens,
+                completion_tokens: responseJson?.usage?.output_tokens,
+                helicone_calculated: true,
+              },
+            });
+          }
         } else {
+          const prompt = JSON.parse(requestBody)?.prompt ?? "";
+          const completion = responseJson?.completion ?? "";
+          const completionTokens = await tokenCounter(completion);
+          const promptTokens = await tokenCounter(prompt);
           return ok({
             ...responseJson,
             usage: {
