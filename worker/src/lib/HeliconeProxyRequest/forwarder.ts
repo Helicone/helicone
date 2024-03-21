@@ -15,11 +15,12 @@ import { RequestResponseStore } from "../dbLogger/RequestResponseStore";
 
 import { Valhalla } from "../db/valhalla";
 import { handleProxyRequest, handleThreatProxyRequest } from "./handler";
-import { HeliconeProxyRequestMapper } from "./mapper";
+import { HeliconeProxyRequest, HeliconeProxyRequestMapper } from "./mapper";
 import { checkPromptSecurity } from "../security/promptSecurity";
 import { DBLoggable } from "../dbLogger/DBLoggable";
 import { DBQueryTimer } from "../../db/DBQueryTimer";
 import { Moderator } from "../moderation/Moderator";
+import { Result } from "../../results";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -113,20 +114,15 @@ export async function proxyForwarder(
     provider === "OPENAI" &&
     env.PROMPTARMOR_API_KEY
   ) {
-    let latestMessage: {
-      role?: string,
-      content?: string
-    } | null = null;
 
-    try {
-      latestMessage = JSON.parse(proxyRequest.bodyText ?? "").messages.pop();
-    } catch (error) {
-      console.error("Error parsing latest message:", error);
+    let parseResult = parseLatestMessage(proxyRequest);
+    if (parseResult.error) {
       return responseBuilder.build({
         body: "Failed to parse the latest message.",
         status: 500,
       });
     }
+    let latestMessage = parseResult.data;
 
     if (
       request.url.pathname.includes("chat/completions") &&
@@ -183,20 +179,14 @@ export async function proxyForwarder(
     proxyRequest.requestWrapper.heliconeHeaders.moderationsEnabled &&
     provider == "OPENAI"
   ) {
-    let latestMessage: {
-      role?: string,
-      content?: string
-    } | null = null;
-
-    try {
-      latestMessage = JSON.parse(proxyRequest.bodyText ?? "").messages.pop();
-    } catch (error) {
-      console.error("Error parsing latest message:", error);
+    let parseResult = parseLatestMessage(proxyRequest);
+    if (parseResult.error) {
       return responseBuilder.build({
         body: "Failed to parse the latest message.",
         status: 500,
       });
     }
+    let latestMessage = parseResult.data;
 
     if (latestMessage != null &&
         latestMessage?.role == "user" &&
@@ -325,4 +315,24 @@ export async function proxyForwarder(
     inheritFrom: response,
     status: response.status,
   });
+
+  function parseLatestMessage(proxyRequest: HeliconeProxyRequest): Result<LatestMessage, Error> {
+    try {
+      return {
+        error: null,
+        data: JSON.parse(proxyRequest.bodyText ?? "").messages.pop() as LatestMessage
+      }
+    } catch (error) {
+      console.error("Error parsing latest message:", error);
+      return {
+        error: new Error("Failed to parse latest message."),
+        data: null
+      };
+    }
+  }
+}
+
+type LatestMessage = {
+  role?: string;
+  content?: string
 }
