@@ -14,6 +14,7 @@ import {
 import { clsx } from "../../shared/clsx";
 import { updateRequestFeedback } from "../../../services/lib/requests";
 import useNotification from "../../shared/notification/useNotification";
+import CostPill from "./costPill";
 
 interface RequestCardProps {
   request: NormalizedRequest;
@@ -107,9 +108,13 @@ const RequestCard = (props: RequestCardProps) => {
           <p className="text-sm font-semibold">
             {Number(request.latency) / 1000}s
           </p>
-          <p className="text-sm font-semibold">{`$${formatNumber(
-            request.cost || 0
-          )}`}</p>
+          {request.cost ? (
+            <p className="text-sm font-semibold">{`$${formatNumber(
+              request.cost
+            )}`}</p>
+          ) : (
+            <CostPill />
+          )}
         </div>
         <div className="flex flex-col space-y-4">
           <p className="text-sm">
