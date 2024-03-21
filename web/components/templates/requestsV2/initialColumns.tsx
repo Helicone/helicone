@@ -150,9 +150,9 @@ export const getInitialColumns: (
       const statusCode = info.row.original.status.code;
       const num = Number(info.getValue());
 
-      if (num === 0 && !isCached && statusCode === 200) {
+      if (Number(num) === 0 && !isCached && statusCode === 200) {
         return <CostPill />;
-      } else if (num > 0) {
+      } else if (Number(num) > 0) {
         return <span>${formatNumber(num)}</span>;
       }
       return <span></span>;

@@ -22,17 +22,31 @@ const useQuantiles = (data: {
   timeZoneDifference: number;
   metric: string;
 }) => {
-  const filterMap = DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[];
-
-  const userFilters = filterUIToFilterLeafs(filterMap, data.uiFilters);
-
   const {
     data: quantiles,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["quantiles", data.timeFilter, data.metric, data.uiFilters],
+    queryKey: [
+      "quantiles",
+      data.timeFilter,
+      data.metric,
+      data.uiFilters,
+      data.dbIncrement,
+      data.timeZoneDifference,
+    ],
     queryFn: async (query) => {
+      console.log(query);
+      const timeFilter = query.queryKey[1];
+      const metric = query.queryKey[2];
+      const uiFilters = query.queryKey[3] as UIFilterRow[];
+      const dbIncrement = query.queryKey[4];
+      const timeZoneDifference = query.queryKey[5];
+
+      const filterMap = DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[];
+
+      const userFilters = filterUIToFilterLeafs(filterMap, uiFilters);
+
       return await fetch("/api/metrics/quantiles", {
         method: "POST",
         headers: {
@@ -40,11 +54,11 @@ const useQuantiles = (data: {
         },
         body: JSON.stringify({
           data: {
-            timeFilter: data.timeFilter,
+            timeFilter: timeFilter,
             userFilter: filterListToTree(userFilters, "and"),
-            dbIncrement: data.dbIncrement,
-            timeZoneDifference: data.timeZoneDifference,
-            metric: data.metric,
+            dbIncrement: dbIncrement,
+            timeZoneDifference: timeZoneDifference,
+            metric: metric,
           },
         }),
       }).then((res) => res.json() as Promise<Result<Quantiles[], string>>);
