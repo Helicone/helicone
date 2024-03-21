@@ -147,14 +147,15 @@ export const getInitialColumns: (
     accessorKey: "cost",
     header: "Cost",
     cell: (info) => {
+      const statusCode = info.row.original.status.code;
       const num = Number(info.getValue());
-      if (isCached) {
-        return <span>$0</span>;
-      } else if (num === 0) {
+
+      if (Number(num) === 0 && !isCached && statusCode === 200) {
         return <CostPill />;
-      } else {
+      } else if (Number(num) > 0) {
         return <span>${formatNumber(num)}</span>;
       }
+      return <span></span>;
     },
     size: 175,
   },
