@@ -1,6 +1,32 @@
 ---
-title: "OpenAI"
+title: "OpenAI Compatible Endpoints"
 ---
+
+<Note>
+  If you are using an openAI compatbile endpoint, you can easily log your
+  requests to Helicone by changing the base url from
+  `https://oai.hconeai.com/v1` to any of the following supported dedicated
+  endpoints:
+  <br></br>- `https://together.hconeai.com/v1`
+</Note>
+
+<Note>
+<b>Using another target that is OpenAI compatible?</b>
+
+If the target is a domain that is approved with a <a href="/getting-started/integration-method/gateway#approved-domains"> dedicated domain</a> (ex: TogetherAI), then you can replace the base url with the dedicated domain.
+If the target is not approved, you can <a href="/getting-started/integration-method/gateway">use the Helicone Gateway</a> to log your requests to Helicone.
+
+<b>Example:</b>
+
+Instead of using the base url
+
+<code>base_url="https://oai.hconeai.com/v1", </code>
+
+You can use the base url
+
+<code>base_url="http://together.hconeai.com/v1", </code>
+
+</Note>
 
 <Tabs>
   <Tab title="Python">
