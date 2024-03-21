@@ -82,9 +82,17 @@ const RateLimitPage = (props: RateLimitPageProps) => {
             </button>
           )}
         </div>
+        <b>
+          Your requests are never dropped and will always be returned to the
+          client. Helicone will always do it{"'"}s best effort to make sure the
+          user gets their request.
+        </b>
         <p className="text-md text-gray-900 dark:text-gray-100">
-          Below is a summary of how many times your organization has been
-          rate-limited in the last month. Please contact us at{" "}
+          Below is a summary of the rate-limiting <b>logged</b> occurrences for
+          your organization last month. This simply indicates that some of your
+          requests were processed but not logged in your dashboard due to
+          reaching a rate limit - If you’d like to increase your rate limit,
+          please feel free to reach out to us at{" "}
           <button
             onClick={() => {
               // copy the email to the clipboard
@@ -94,8 +102,8 @@ const RateLimitPage = (props: RateLimitPageProps) => {
             className="text-blue-500 underline"
           >
             sales@helicone.ai
-          </button>{" "}
-          to increase your rate-limit.
+          </button>
+          .
         </p>
       </div>
       {!isLoading && metrics.totalRateLimits.data && (
@@ -121,6 +129,37 @@ const RateLimitPage = (props: RateLimitPageProps) => {
           </StyledAreaChart>
         </div>
       )}
+
+      <table
+        className="w-full border-collapse border border-gray-200 dark:border-gray-800"
+        style={{ tableLayout: "fixed" }}
+      >
+        <thead>
+          <tr>
+            <th>Tier</th>
+            <th>Rate limits</th>
+          </tr>
+        </thead>
+        <tbody className="text-sm">
+          <tr className="border-t border-gray-200 dark:border-gray-800">
+            <td>Free</td>
+            <td>834 logs / 5 seconds</td>
+          </tr>
+          <tr className="border-t border-gray-200 dark:border-gray-800">
+            <td>Pro</td>
+            <td>8334 logs / 5 second</td>
+          </tr>
+          <tr className="border-t border-gray-200 dark:border-gray-800">
+            <td
+              className="border-b border-gray-200 dark:border-gray-800"
+              rowSpan={2}
+            >
+              Enterprise
+            </td>
+            <td>Custom</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 };

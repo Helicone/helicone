@@ -74,7 +74,7 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
                       "flex h-full flex-col overflow-y-scroll bg-white dark:bg-black shadow-2xl relative"
                     )}
                   >
-                    <div className="px-4 sm:px-6 py-6 flex flex-row justify-between sticky top-0 bg-white z-50">
+                    <div className="px-4 sm:px-6 py-6 flex flex-row justify-between sticky top-0 bg-white dark:bg-black z-50 ">
                       <div className="flex flex-row items-center space-x-2 text-gray-500 w-full">
                         <button
                           onClick={() => setOpen(false)}

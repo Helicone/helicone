@@ -18,6 +18,8 @@ import {
   CodeBracketIcon,
   DocumentTextIcon,
   HandThumbUpIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { useState } from "react";
@@ -97,7 +99,7 @@ const tabOptions: {
         </div>
       </div>
     ),
-    highlight: "ring-violet-700 bg-violet-100",
+    highlight: "bg-violet-700",
   },
   {
     id: "gateway",
@@ -142,7 +144,7 @@ const tabOptions: {
         </div>
       </div>
     ),
-    highlight: "ring-green-700 bg-green-100",
+    highlight: "bg-green-700",
   },
   {
     id: "data-collection",
@@ -188,7 +190,7 @@ const tabOptions: {
         </div>
       </div>
     ),
-    highlight: "ring-orange-700 bg-orange-100",
+    highlight: "bg-orange-700",
   },
   {
     id: "fine-tuning",
@@ -227,7 +229,7 @@ const tabOptions: {
         </div>
       </div>
     ),
-    highlight: "ring-red-700 bg-red-100",
+    highlight: "bg-red-700",
   },
   {
     id: "evaluations",
@@ -273,7 +275,7 @@ const tabOptions: {
         </div>
       </div>
     ),
-    highlight: "ring-black bg-gray-100",
+    highlight: "bg-black",
   },
   {
     id: "customer-portal",
@@ -318,7 +320,7 @@ const tabOptions: {
         </div>
       </div>
     ),
-    highlight: "ring-sky-700 bg-sky-100",
+    highlight: "bg-sky-700",
   },
 ];
 
@@ -345,29 +347,67 @@ const Features = (props: FeaturesProps) => {
         </AccordionList>
       </div>
       <div className="hidden md:flex flex-col w-full justify-center mx-auto">
-        <ul className="w-full flex flex-wrap items-center gap-8 lg:gap-8 mx-auto justify-center">
-          {tabOptions.map((tab) => (
-            <li key={tab.id}>
-              <button
-                onClick={() => setActiveTab(tab.id)}
-                className={clsx(
-                  tab.id === activeTab
-                    ? `ring-2 ${tab.highlight}`
-                    : "ring-1  ring-gray-300",
-                  "flex items-center p-3 rounded-lg gap-2 transition-all duration-300 ease-in-out"
+        <div className="flex flex-col w-full justify-center mx-auto px-10">
+          <ul className="w-full flex flex-wrap items-center gap-4 lg:gap-6 mx-auto justify-center border-b border-gray-300">
+            {tabOptions.map((tab) => (
+              <li key={tab.id} className="relative">
+                <button
+                  onClick={() => setActiveTab(tab.id)}
+                  className={clsx(
+                    // tab.id === activeTab ? `border-b-4 ${tab.highlight}` : "",
+                    "flex items-center p-3 gap-2 transition-all duration-300 ease-in-out"
+                  )}
+                >
+                  <span
+                    className={clsx(tab.id !== activeTab ? `opacity-40` : "")}
+                  >
+                    {tab.icon}
+                  </span>
+                  <p className="text-md font-bold">{tab.title}</p>
+                </button>
+                {tab.id === activeTab && (
+                  <div
+                    className={`absolute w-full h-1 -m-0.5 ${tab.highlight}`}
+                  >
+                    {" "}
+                  </div>
                 )}
-              >
-                <span className="">{tab.icon}</span>
-                <p className="text-md font-bold">{tab.title}</p>
-              </button>
-            </li>
-          ))}
-        </ul>
-        {
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="w-full flex h-full items-center gap-2">
+          <button
+            onClick={() => {
+              const idx = tabOptions.findIndex((tab) => tab.id === activeTab);
+              if (idx === 0) {
+                setActiveTab(tabOptions[tabOptions.length - 1].id);
+              } else {
+                setActiveTab(tabOptions[idx - 1].id);
+              }
+            }}
+            className="border rounded-full border-gray-300 p-2"
+          >
+            <ChevronLeftIcon className="w-4 h-4" />
+          </button>
           <div className="w-full h-full sm:h-[28rem]">
             {tabOptions.find((tab) => tab.id === activeTab)?.content}
           </div>
-        }
+          <button
+            onClick={() => {
+              const idx = tabOptions.findIndex((tab) => tab.id === activeTab);
+              if (idx === tabOptions.length - 1) {
+                setActiveTab(tabOptions[0].id);
+              } else {
+                setActiveTab(tabOptions[idx + 1].id);
+              }
+            }}
+            className="border rounded-full border-gray-300 p-2"
+          >
+            <ChevronRightIcon className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

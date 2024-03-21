@@ -48,7 +48,8 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
   const { currentPage, pageSize, sort } = props;
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
-  const debouncedAdvancedFilters = useDebounce(advancedFilters, 2_000); // 2 seconds
+  const debouncedAdvancedFilters = useDebounce(advancedFilters, 500); // 0.5 seconds
+
   const router = useRouter();
 
   const sortLeaf: SortLeafRequest =
@@ -65,11 +66,25 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     pageSize,
     sortLeaf,
     filterListToTree(
-      filterUIToFilterLeafs(userTableFilters, debouncedAdvancedFilters),
+      filterUIToFilterLeafs(
+        userTableFilters.sort((a, b) => a.label.localeCompare(b.label)),
+        debouncedAdvancedFilters
+      ),
       "and"
     )
   );
   const { setNotification } = useNotification();
+
+  const checkIsNotUniqueUser = () => {
+    if (users.length === 0 || users.length > 1) {
+      return false;
+    }
+    if (users.length === 1) {
+      // check the user id and see if it is an empty string
+      const user = users[0];
+      return user.user_id === "";
+    }
+  };
 
   return (
     <>
@@ -92,11 +107,10 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           }}
           exportData={users}
           onRowSelect={(row) => {
-            // need to url encode the user_id
             router.push(`/users/${encodeURIComponent(row.user_id)}`);
           }}
         />
-        {users.length <= 1 && (
+        {!isLoading && checkIsNotUniqueUser() && (
           <div className="flex flex-col w-full h-96 justify-center items-center bg-white rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-black">
             <div className="flex flex-col w-2/5">
               <UserGroupIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
