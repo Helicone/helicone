@@ -6,34 +6,33 @@ import { HeliconeProxyRequestMapper } from "../HeliconeProxyRequest/mapper";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
 
+import type { Result } from "../../results";
+
 export class Moderator {
   env: Env;
-  message: string;
   headers: Headers;
   provider: Provider;
   responseBuilder: ResponseBuilder;
 
   constructor(
-    msg: string,
     headers: Headers,
     env: Env,
     provider: Provider
   ) {
     this.env = env;
-    this.message = msg;
     this.headers = headers;
     this.provider = provider;
     this.responseBuilder = new ResponseBuilder();
   }
 
-  async moderate(): Promise<ModerationResponse> {
+  async moderate(message: string): Promise<Result<ModerationResponse, Error>> {
     const moderationRequest = new Request(
       "https://api.openai.com/v1/moderations",
       {
         method: "POST",
         headers: this.headers,
         body: JSON.stringify({
-          input: this.message,
+          input: message,
         }),
       }
     );
@@ -44,14 +43,15 @@ export class Moderator {
     );
 
     if (moderationRequestWrapper.error || !moderationRequestWrapper.data) {
-      const res = this.responseBuilder.build({
-        body: moderationRequestWrapper.error,
-        status: 500,
-      });
-
       return {
-        error: true,
-        response: res
+        error: new Error(JSON.stringify({
+          success: false,
+          error: {
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Request to OpenAI moderation endpoint failed."
+          }
+        })),
+        data: null
       }
     }
 
@@ -65,28 +65,24 @@ export class Moderator {
       ).tryToProxyRequest();
 
     if (moderationProxyRequestError !== null) {
-      const res = this.responseBuilder.build({
-        body: moderationProxyRequestError,
-        status: 500,
-      });
-
       return {
-        error: true,
-        response: res,
+        error: new Error(JSON.stringify({
+          success: false,
+          error: {
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Proxy request to OpenAI moderation endpoint failed."
+          }
+        })),
+        data: null
       }
     }
 
     const { data: moderationResponse, error: moderationResponseError } =
       await handleProxyRequest(moderationProxyRequest);
     if (moderationResponseError != null) {
-      const res = this.responseBuilder.build({
-        body: moderationResponseError,
-        status: 500,
-      });
-
       return {
-        error: true,
-        response: res,
+        error: new Error(moderationResponseError),
+        data: null,
       }
     }
 
@@ -118,15 +114,21 @@ export class Moderator {
         .build(responseContent);
 
       return {
-        isModerated: true,
-        loggable: moderationResponse.loggable,
-        response: res,
+        error: null,
+        data: {
+          isModerated: true,
+          loggable: moderationResponse.loggable,
+          response: res,
+        }
       }
     }
 
     return {
-      isModerated: false,
-      loggable: moderationResponse.loggable
+      error: null,
+      data: {
+        isModerated: false,
+        loggable: moderationResponse.loggable
+      }
     }
   }
 }
@@ -142,21 +144,14 @@ type OpenAIModerationResponse = {
 };
 
 type UnFlaggedResponse = {
-  error: false,
   isModerated: false;
   loggable: DBLoggable;
 }
 
 type FlaggedResponse = {
-  error: false,
   isModerated: true;
   loggable: DBLoggable;
   response: Response
 }
 
-type FailedResponse = {
-  error: true;
-  response: Response
-}
-
-type ModerationResponse = UnFlaggedResponse | FlaggedResponse | FailedResponse;
+type ModerationResponse = UnFlaggedResponse | FlaggedResponse;

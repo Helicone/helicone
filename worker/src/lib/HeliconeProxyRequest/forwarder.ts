@@ -132,8 +132,7 @@ export async function proxyForwarder(
       request.url.pathname.includes("chat/completions") &&
       latestMessage &&
       latestMessage.role === "user" &&
-      latestMessage?.content != undefined &&
-      latestMessage?.content != ""
+      latestMessage?.content
     ) {
       const threat = await checkPromptSecurity(
         latestMessage.content,
@@ -201,28 +200,29 @@ export async function proxyForwarder(
 
     if (latestMessage != null &&
         latestMessage?.role == "user" &&
-        latestMessage?.content != undefined &&
-        latestMessage?.content != ""
+        latestMessage?.content
     ) {
       const moderator = new Moderator(
-        latestMessage.content,
         proxyRequest.requestWrapper.headers,
         env,
         provider
       );
 
-      const moderationResult = await moderator.moderate();
+      const moderationResult = await moderator.moderate(latestMessage.content);
 
       // Something in the moderation call itself failed.
       if (moderationResult.error) {
-        return moderationResult.response;
+        return responseBuilder.build({
+          body: moderationResult.error.message,
+          status: 500,
+        });
       }
 
       // No Internal Server Error, loggable has been created.
-      ctx.waitUntil(log(moderationResult.loggable));
+      ctx.waitUntil(log(moderationResult.data.loggable));
 
-      if (moderationResult.isModerated) {
-        return moderationResult.response;
+      if (moderationResult.data.isModerated) {
+        return moderationResult.data.response;
       }
       // Passed moderation...
     }
