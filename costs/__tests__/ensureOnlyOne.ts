@@ -174,6 +174,9 @@ WHEN (request_response_log.model = 'togethercomputer/RedPajama-INCITE-7B-Instruc
 WHEN (request_response_log.model = 'togethercomputer/StripedHyena-Hessian-7B') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'mistralai/Mistral-7B-v0.1') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'mistralai/Mixtral-8x7B-v0.1') THEN 900 * request_response_log.prompt_tokens + 900 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'llama2-70b-4096') THEN 700 * request_response_log.prompt_tokens + 800 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'mixtral-8x7b-32768') THEN 270 * request_response_log.prompt_tokens + 270 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gemma-7b-8192') THEN 100 * request_response_log.prompt_tokens + 100 * request_response_log.completion_tokens
     ELSE 0
   END
   ) / 1000000000
