@@ -265,6 +265,6 @@ class StaticValhallaPool {
   }
 }
 
-export function createValhallaClient(): IValhallaDB {
-  return StaticValhallaPool.getClient();
-}
+// export function createValhallaClient(): IValhallaDB {
+//   return StaticValhallaPool.getClient();
+// }
