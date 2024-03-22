@@ -96,10 +96,11 @@ python3 clickhouse/ch_hcone.py --start
 ## Install and setup MinIO
 
 ```bash
-brew install minio/stable/minio
+# Install minio
+pip install minio
 
 # Start minio
-minio server ~/data --console-address :9001
+python3 minio_start.py --restart
 ```
 
 ## Run all services

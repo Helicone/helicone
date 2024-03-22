@@ -201,7 +201,7 @@ async function mapLLMCalls(
     heliconeRequests?.map(async (heliconeRequest) => {
       // First retrieve s3 signed urls if past the implementation date
       const now = new Date();
-      const s3ImplementationDate = new Date("2024-03-22");
+      const s3ImplementationDate = new Date("2024-03-21");
       if (now > s3ImplementationDate) {
         const { data: signedBodyUrl, error: signedBodyUrlErr } =
           await s3Client.getRequestResponseBodySignedUrl(
