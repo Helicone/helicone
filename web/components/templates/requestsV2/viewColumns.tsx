@@ -17,7 +17,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
     (acc, column) => {
       const id = column.columnDef.id as string;
       // if the id starts with `Custom -` then it is a custom property
-      const isCustomProperty = id.startsWith("Custom -");
+      const isCustomProperty = id?.startsWith("Custom -") ?? false;
       if (isCustomProperty) {
         acc.customColumns.push(column);
       } else {
