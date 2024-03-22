@@ -100,7 +100,7 @@ python3 clickhouse/ch_hcone.py --start
 pip install minio
 
 # Start minio
-python3 minio_start.py --restart
+python3 minio_hcone.py --restart
 ```
 
 ## Run all services
