@@ -574,14 +574,14 @@ const DashboardPage = (props: DashboardPageProps) => {
   }, [overTimeData.requestsWithStatus.data?.data, timeIncrement]);
 
   // flatten the status counts over time
-  const flattenedOverTime = Object.entries(getStatusCountsOverTime().overTime)
-    .map(([time, counts]) => {
-      return {
-        time,
-        ...counts,
-      };
-    })
-    .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+  const flattenedOverTime = Object.entries(
+    getStatusCountsOverTime().overTime
+  ).map(([time, counts]) => {
+    return {
+      date: getTimeMap(timeIncrement)(new Date(time)),
+      ...counts,
+    };
+  });
 
   console.log("flattened", flattenedOverTime);
 
@@ -778,7 +778,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       <AreaChart
                         className="h-[14rem]"
                         data={flattenedOverTime}
-                        index="time"
+                        index="date"
                         categories={["success", "error"]}
                         colors={["green", "red"]}
                         showYAxis={false}
