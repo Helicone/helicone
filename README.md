@@ -101,6 +101,11 @@ pip install minio
 
 # Start minio
 python3 minio_hcone.py --restart
+
+# Dashboard will be available at http://localhost:9001
+# Default credentials:
+# Username: minioadmin
+# Password: minioadmin
 ```
 
 ## Run all services
