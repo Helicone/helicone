@@ -27,13 +27,13 @@ const GetStarted = (props: GetStartedProps) => {
       )}
     >
       <Image
-        src="/assets/landing/helicone-mobile.webp"
-        width={70}
-        height={70}
+        src="/static/logo-clear.png"
+        width={120}
+        height={120}
         alt="Helicone Logo"
         className="rounded-xl"
       />
-      <p className="text-2xl md:text-5xl font-semibold mt-8">
+      <p className="text-2xl md:text-5xl font-semibold mt-4">
         Welcome to Helicone
       </p>
       <p className="text-md md:text-lg text-gray-500 font-light mt-5">
