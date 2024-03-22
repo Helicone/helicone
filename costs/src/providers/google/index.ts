@@ -8,7 +8,7 @@ import { ModelRow } from "../../interfaces/Cost";
 export const costs: ModelRow[] = [
   {
     model: {
-      operator: "equals",
+      operator: "includes",
       value: "gemini-pro",
     },
     cost: {

@@ -30,11 +30,16 @@ const costs = [
 ];
 
 export function costOf(model: string) {
+  const modelLower = model.toLowerCase(); // Convert input model to lowercase
   const cost = costs.find((cost) => {
+    const valueLower = cost.model.value.toLowerCase(); // Convert each cost model value to lowercase
+
     if (cost.model.operator === "equals") {
-      return cost.model.value === model;
+      return valueLower === modelLower;
     } else if (cost.model.operator === "startsWith") {
-      return model.startsWith(cost.model.value);
+      return modelLower.startsWith(valueLower);
+    } else if (cost.model.operator === "includes") {
+      return modelLower.includes(valueLower);
     }
   });
 
@@ -69,13 +74,19 @@ sum(
     ${costs
       .map((cost) => {
         if (cost.model.operator === "equals") {
-          return `WHEN (${table}.model = '${cost.model.value}') THEN ${
+          return `WHEN (${table}.model ILIKE '${cost.model.value}') THEN ${
             cost.cost.prompt_token * multiple
           } * ${table}.prompt_tokens + ${
             cost.cost.completion_token * multiple
           } * ${table}.completion_tokens`;
         } else if (cost.model.operator === "startsWith") {
-          return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${
+          return `WHEN (${table}.model ILIKE '${cost.model.value}%') THEN ${
+            cost.cost.prompt_token * multiple
+          } * ${table}.prompt_tokens + ${
+            cost.cost.completion_token * multiple
+          } * ${table}.completion_tokens`;
+        } else if (cost.model.operator === "includes") {
+          return `WHEN (${table}.model ILIKE '%${cost.model.value}%') THEN ${
             cost.cost.prompt_token * multiple
           } * ${table}.prompt_tokens + ${
             cost.cost.completion_token * multiple
