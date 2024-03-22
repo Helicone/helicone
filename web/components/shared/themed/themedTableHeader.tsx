@@ -34,7 +34,7 @@ import { Result } from "../../../lib/result";
 import { ThemedPill } from "./themedPill";
 import { ThemedMultiSelect } from "./themedMultiSelect";
 import { TimeFilter } from "../../templates/dashboard/dashboardPage";
-import FiltersButton, { LayoutFilter } from "./table/filtersButton";
+import FiltersButton from "./table/filtersButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
@@ -77,6 +77,7 @@ interface ThemedHeaderProps {
     filters?: OrganizationFilter[];
     currentFilter?: OrganizationFilter;
     onFilterChange?: (value: OrganizationFilter) => void;
+    onSaveFilter?: () => void;
   };
 }
 
@@ -97,6 +98,15 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [exportFiltered, setExportFiltered] = useState(false);
+
+  const [isSaveFiltersModalOpen, setIsSaveFiltersModalOpen] =
+    useState<boolean>(false);
+
+  const onSaveFilter = () => {};
+
+  const handleOpenModal = (value: boolean) => {
+    setIsSaveFiltersModalOpen(value);
+  };
 
   return (
     <>
@@ -143,13 +153,56 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                     </button>
                   </div>
                   {filterLayouts && (
-                    <div className="mx-auto flex text-sm">
-                      <FiltersButton
-                        filters={filterLayouts.filters}
-                        currentFilter={filterLayouts.currentFilter}
-                        onFilterChange={filterLayouts.onFilterChange}
-                      />
-                    </div>
+                    <>
+                      <div className="mx-auto flex text-sm">
+                        <FiltersButton
+                          filters={filterLayouts.filters}
+                          currentFilter={filterLayouts.currentFilter}
+                          onFilterChange={filterLayouts.onFilterChange}
+                        />
+                      </div>
+                      <ThemedModal
+                        open={isSaveFiltersModalOpen}
+                        setOpen={() => setIsSaveFiltersModalOpen(false)}
+                      >
+                        <div className="flex flex-col gap-8 inset-0 bg-opacity-50 w-full sm:w-[450px] max-w-[450px] h-full rounded-3xl">
+                          <h1 className="col-span-4 font-semibold text-xl text-gray-900 dark:text-gray-100">
+                            Cost Unsupported
+                          </h1>
+
+                          <p className="text-sm text-gray-900 dark:text-gray-100">
+                            Currently, we do not support the cost of this model.
+                            Please create an issue in Github{" "}
+                            <Link
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              href="https://github.com/Helicone/helicone"
+                              className="underline text-blue-500"
+                            >
+                              https://github.com/Helicone/helicone
+                            </Link>{" "}
+                            or reach out to us at Discord{" "}
+                            <Link
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              href="https://discord.gg/zsSTcH2qhG"
+                              className="underline text-blue-500"
+                            >
+                              https://discord.gg/zsSTcH2qhG
+                            </Link>{" "}
+                          </p>
+                          <div className="col-span-4 flex justify-end gap-2 pt-4">
+                            <button
+                              type="button"
+                              onClick={() => false}
+                              className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                            >
+                              Close
+                            </button>
+                          </div>
+                        </div>
+                      </ThemedModal>
+                    </>
                   )}
                 </>
               )}
@@ -220,6 +273,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                     filters={advancedFilter.filters}
                     setAdvancedFilters={advancedFilter.onAdvancedFilter}
                     searchPropertyFilters={advancedFilter.searchPropertyFilters}
+                    onSaveFilters={handleOpenModal}
                   />
                 )}
                 {advancedFilter.filters.length > 0 && !showAdvancedFilters && (

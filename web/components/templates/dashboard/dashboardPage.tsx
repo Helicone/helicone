@@ -47,7 +47,7 @@ import { useDashboardPage } from "./useDashboardPage";
 import { useModels } from "../../../services/hooks/models";
 import { QuantilesGraph } from "./quantilesGraph";
 import LoadingAnimation from "../../shared/loadingAnimation";
-import { OrganizationFilter } from '../../../services/lib/organization_layout/organization_layout';
+import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -155,14 +155,21 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
 
-  const { metrics, filterMap, overTimeData, isAnyLoading, refetch, remove } =
-    useDashboardPage({
-      timeFilter,
-      uiFilters: debouncedAdvancedFilters,
-      apiKeyFilter: null,
-      timeZoneDifference: new Date().getTimezoneOffset(),
-      dbIncrement: timeIncrement,
-    });
+  const {
+    metrics,
+    filterMap,
+    overTimeData,
+    organizationLayout,
+    isAnyLoading,
+    refetch,
+    remove,
+  } = useDashboardPage({
+    timeFilter,
+    uiFilters: debouncedAdvancedFilters,
+    apiKeyFilter: null,
+    timeZoneDifference: new Date().getTimezoneOffset(),
+    dbIncrement: timeIncrement,
+  });
 
   const { isLoading, models } = useModels(timeFilter, 5);
 
