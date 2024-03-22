@@ -1,8 +1,8 @@
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import { CheckIcon } from "@heroicons/react/20/solid";
 import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
 import { Column } from "@tanstack/react-table";
+import { clsx } from "../../shared/clsx";
 
 interface ViewColumnsProps<T> {
   columns: Column<T, unknown>[];
@@ -13,14 +13,33 @@ interface ViewColumnsProps<T> {
 export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
   const { columns, onSelectAll, visibleColumns } = props;
 
+  const { defaultColumns, customColumns } = columns.reduce(
+    (acc, column) => {
+      const id = column.columnDef.id as string;
+      // if the id starts with `Custom -` then it is a custom property
+      const isCustomProperty = id?.startsWith("Custom -") ?? false;
+      if (isCustomProperty) {
+        acc.customColumns.push(column);
+      } else {
+        acc.defaultColumns.push(column);
+      }
+      return acc;
+    },
+    {
+      defaultColumns: [] as Column<T, unknown>[],
+      customColumns: [] as Column<T, unknown>[],
+    }
+  );
+
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
         <Menu.Button className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2">
           <AdjustmentsHorizontalIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-            Columns {`( ${visibleColumns} / ${columns.length} )`}
-          </p>
+          <div className="text-sm font-medium items-center text-gray-900 dark:text-gray-100 hidden sm:flex gap-1">
+            Columns{" "}
+            <span className="text-gray-500 text-xs">{`( ${visibleColumns} / ${columns.length} )`}</span>
+          </div>
         </Menu.Button>
       </div>
       <Transition
@@ -32,51 +51,78 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute z-10 right-0 mt-2 w-[200px] origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="grid grid-cols-2 divide-x divide-gray-300 dark:divide-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-lg border-b border-gray-300 dark:border-gray-700">
-            <button
-              onClick={() => onSelectAll(false)}
-              className="text-xs flex items-center justify-center gap-x-2.5 p-2.5 font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-t-lg"
-            >
-              Deselect All
-            </button>
-            <button
-              onClick={() => onSelectAll(true)}
-              className="text-xs flex items-center justify-center gap-x-2.5 p-2.5 font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900"
-            >
-              Select All
-            </button>
-          </div>
-          <div className="flex flex-col overflow-auto max-h-[40vh] py-0.5">
-            {columns.map((column, idx) => {
-              const header = column.columnDef.header as string;
+        <Menu.Items className="border border-gray-300 dark:border-gray-700 absolute z-10 right-0 mt-2 w-[400px] origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <div className="p-4 flex flex-col space-y-2 divide-y divide-gray-200">
+            <h3 className="text-xs text-black dark:text-white font-medium">
+              Column Options
+            </h3>
+            <div className="flex flex-col space-y-2 pt-2">
+              <p className="text-xs text-gray-500 font-medium">
+                Display Properties
+              </p>
+              <ul className="flex flex-wrap gap-2">
+                {defaultColumns.map((column) => {
+                  const header = column.columnDef.header as string;
+                  return (
+                    <li key={column.id}>
+                      <button
+                        onClick={column.getToggleVisibilityHandler()}
+                        className={clsx(
+                          column.getIsVisible()
+                            ? "bg-sky-100 dark:bg-sky-900 text-sky-700 font-medium hover:text-sky-900 dark:hover:text-sky-100 dark:text-sky-300"
+                            : "bg-white dark:bg-black text-gray-500 hover:bg-sky-50 dark:hover:bg-sky-900 hover:text-sky-900 dark:hover:text-sky-100",
+                          "text-xs border border-gray-300 dark:border-gray-700 w-fit px-2 py-1 rounded-md whitespace-pre-wrap text-left"
+                        )}
+                      >
+                        {header}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+            {customColumns.length > 0 && (
+              <div className="flex flex-col space-y-2 pt-2">
+                <p className="text-xs text-gray-500 font-medium">
+                  Custom Properties
+                </p>
+                <ul className="flex flex-col gap-2">
+                  {customColumns.map((column) => {
+                    const header = column.columnDef.header as string;
+                    return (
+                      <li key={column.id}>
+                        <button
+                          onClick={column.getToggleVisibilityHandler()}
+                          className={clsx(
+                            column.getIsVisible()
+                              ? "bg-sky-100 dark:bg-sky-900 text-sky-700 font-medium hover:text-sky-900 dark:hover:text-sky-100 dark:text-sky-300"
+                              : "bg-white dark:bg-black text-gray-500 hover:bg-sky-50 dark:hover:bg-sky-900 hover:text-sky-900 dark:hover:text-sky-100",
+                            "w-fit text-xs border border-gray-300 dark:border-gray-700 px-2 py-1 rounded-md whitespace-pre-wrap text-left"
+                          )}
+                        >
+                          {header}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
 
-              return (
-                <div key={idx} className="flex flex-row py-0.5">
-                  <label
-                    key={idx}
-                    className="relative mx-1 px-3 py-2 rounded-md select-none font-medium text-gray-900 w-full items-center flex hover:bg-sky-100 dark:hover:bg-sky-900 hover:cursor-pointer"
-                  >
-                    {column.getIsVisible() ? (
-                      <CheckIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
-                    ) : (
-                      <div className="h-4 w-4" />
-                    )}
-                    <span className="text-sm text-gray-700 hover:text-sky-900 dark:text-gray-300 dark:hover:text-sky-100 pl-2">
-                      {header}
-                    </span>
-                    <input
-                      {...{
-                        type: "checkbox",
-                        checked: column.getIsVisible(),
-                        onChange: column.getToggleVisibilityHandler(),
-                      }}
-                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-700 text-sky-500 focus:ring-sky-500 sr-only"
-                    />
-                  </label>
-                </div>
-              );
-            })}
+            <div className="flex justify-end items-center pt-2 gap-2">
+              <button
+                onClick={() => onSelectAll(false)}
+                className="text-xs flex items-center justify-center gap-x-2.5 px-2 py-1 font-medium text-gray-500 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg"
+              >
+                Deselect All
+              </button>
+              <button
+                onClick={() => onSelectAll(true)}
+                className="text-xs flex items-center justify-center gap-x-2.5 px-2 py-1 font-medium text-gray-500 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg"
+              >
+                Select All
+              </button>
+            </div>
           </div>
         </Menu.Items>
       </Transition>

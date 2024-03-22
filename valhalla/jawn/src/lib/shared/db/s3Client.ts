@@ -12,10 +12,10 @@ export class S3Client {
   private awsClient: AwsS3Client;
 
   constructor(
-    accessKey: string = "minioadmin",
-    secretKey: string = "minioadmin",
-    endpoint: string = "http://localhost:9000",
-    private bucketName: string = "request-response-storage"
+    accessKey: string,
+    secretKey: string,
+    endpoint: string,
+    private bucketName: string
   ) {
     this.awsClient = new AwsS3Client({
       credentials: {
@@ -37,17 +37,21 @@ export class S3Client {
   }
 
   async getSignedUrl(key: string): Promise<Result<string, string>> {
-    this.awsClient;
-    const command = new GetObjectCommand({
-      Bucket: this.bucketName,
-      Key: key,
-    });
+    try {
+      this.awsClient;
+      const command = new GetObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+      });
 
-    const signedUrl = await getSignedUrl(this.awsClient, command, {
-      expiresIn: 1800, // 30 minutes
-    });
+      const signedUrl = await getSignedUrl(this.awsClient, command, {
+        expiresIn: 1800, // 30 minutes
+      });
 
-    return { data: signedUrl, error: null };
+      return { data: signedUrl, error: null };
+    } catch (error: any) {
+      return { data: null, error: error.message };
+    }
   }
 
   getRequestResponseKey = (requestId: string, orgId: string) => {
