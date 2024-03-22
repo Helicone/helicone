@@ -9,7 +9,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "google/gemini-pro",
+      value: "gemini-pro",
     },
     cost: {
       prompt_token: 0.000000125,
