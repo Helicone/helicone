@@ -38,7 +38,7 @@ export class S3Client {
   ): Promise<Result<string, string>> {
     const url = this.getRequestResponseUrl(requestId, orgId);
 
-    return this.store(url, JSON.stringify({ request, response }));
+    return await this.store(url, JSON.stringify({ request, response }));
   }
 
   async store(url: string, value: string): Promise<Result<string, string>> {

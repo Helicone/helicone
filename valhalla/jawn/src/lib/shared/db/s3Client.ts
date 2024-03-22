@@ -33,7 +33,7 @@ export class S3Client {
     requestId: string
   ): Promise<Result<string, string>> {
     const key = this.getRequestResponseKey(requestId, orgId);
-    return this.getSignedUrl(key);
+    return await this.getSignedUrl(key);
   }
 
   async getSignedUrl(key: string): Promise<Result<string, string>> {
