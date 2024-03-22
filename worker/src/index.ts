@@ -49,6 +49,10 @@ export interface Env {
   PROMPTARMOR_API_KEY: string;
   DATADOG_API_KEY: string;
   DATADOG_ENDPOINT: string;
+  S3_ACCESS_KEY: string;
+  S3_SECRET_KEY: string;
+  S3_ENDPOINT: string;
+  S3_BUCKET_NAME: string;
 }
 
 export async function hash(key: string): Promise<string> {
