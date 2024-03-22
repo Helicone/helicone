@@ -31,8 +31,6 @@ async function handler({
   res,
   userData: { orgId, org },
 }: HandlerWrapperOptions<ExperimentResult>) {
-  console.log("orgId", orgId);
-
   const promptIds = await dbExecute<{
     id: string;
     status: "queued" | "running" | "completed" | "failed";
@@ -58,7 +56,6 @@ async function handler({
   `,
     [orgId]
   );
-  console.log("promptIds", promptIds);
 
   res.status(promptIds.error === null ? 200 : 500).json(
     resultMap(promptIds, (data) => ({

@@ -152,18 +152,35 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
               sort: {},
             }),
           }
-        )
-          .then(
-            (res) => res.json() as Promise<Result<HeliconeRequest[], string>>
-          )
-          .then((res) => {
-            const { data, error } = res;
-            if (data !== null && data.length > 0) {
-              const normalizedRequest = getNormalizedRequest(data[0]);
-              setSelectedData(normalizedRequest);
-              setOpen(true);
+        );
+
+        const result = (await resp.json()) as Result<HeliconeRequest, string>;
+
+        // update below logic to work for single request
+        if (result.data && !result.error) {
+          const request = result.data;
+          if (request?.signed_body_url) {
+            try {
+              const contentResponse = await fetch(request.signed_body_url);
+              if (contentResponse.ok) {
+                const text = await contentResponse.text();
+
+                const content = JSON.parse(text) as {
+                  request: string;
+                  response: string;
+                };
+                request.request_body = content.request;
+                request.response_body = content.response;
+              }
+            } catch (error) {
+              console.log(`Error fetching content: ${error}`);
             }
-          });
+          }
+
+          const normalizedRequest = getNormalizedRequest(result.data);
+          setSelectedData(normalizedRequest);
+          setOpen(true);
+        }
       };
       fetchRequest();
     }
