@@ -1,14 +1,14 @@
 {
   "name": "Helicone",
   "logo": {
-    "light": "/logo/light.svg",
+    "light": "/logo/light.png",
     "dark": "/logo/dark.svg"
   },
-  "favicon": "/favicon.webp",
+  "favicon": "/favicon.png",
   "colors": {
-    "primary": "#000000",
-    "light": "#FFFFFF",
-    "dark": "#000000"
+    "primary": "#0CA5E9",
+    "light": "#0CA5E9",
+    "dark": "#0CA5E9"
   },
   "modeToggle": {
     "default": "light"
@@ -17,18 +17,7 @@
     "name": "Sign In",
     "url": "https://www.helicone.ai/#:~:text=Discord-,Sign,-In"
   },
-  "anchors": [
-    {
-      "name": "Community",
-      "icon": "discord",
-      "url": "https://discord.com/invite/zsSTcH2qhG"
-    },
-    {
-      "name": "GitHub",
-      "icon": "github",
-      "url": "https://github.com/helicone/helicone"
-    }
-  ],
+
   "tabs": [
     {
       "name": "Use Cases",
@@ -42,7 +31,7 @@
   "navigation": [
     {
       "group": "Welcome",
-      "pages": ["introduction", "overview"]
+      "pages": ["introduction"]
     },
     {
       "group": "CI/CD",
@@ -69,10 +58,6 @@
         "getting-started/self-deploy-cloud",
         "getting-started/self-deploy-docker"
       ]
-    },
-    {
-      "group": "Community",
-      "pages": ["community/openpipe"]
     },
     {
       "group": "Integrations",
@@ -104,13 +89,7 @@
         }
       ]
     },
-    {
-      "group": "Helicone Headers",
-      "pages": [
-        "helicone-headers/intro",
-        "helicone-headers/predefining-request-id"
-      ]
-    },
+
     {
       "group": "Features",
       "pages": [
@@ -119,8 +98,7 @@
           "pages": [
             "features/prompts/intro",
             "features/prompts/quick-start",
-            "features/prompts/quick-start-async",
-            "features/prompts/getting-started-async"
+            "features/prompts/quick-start-async"
           ]
         },
         {
@@ -147,6 +125,13 @@
         "features/streaming",
         "features/webhooks",
         "features/advanced-usage/llm-security"
+      ]
+    },
+    {
+      "group": "Helicone Headers",
+      "pages": [
+        "helicone-headers/intro",
+        "helicone-headers/predefining-request-id"
       ]
     },
     {
