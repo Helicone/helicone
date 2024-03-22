@@ -97,7 +97,7 @@ python3 clickhouse/ch_hcone.py --start
 
 ```bash
 # Install minio
-pip install minio
+python3 -m pip install minio
 
 # Start minio
 python3 minio_hcone.py --restart
