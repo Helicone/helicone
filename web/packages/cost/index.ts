@@ -30,9 +30,9 @@ const costs = [
 ];
 
 export function costOf(model: string) {
-  const modelLower = model.toLowerCase(); // Convert input model to lowercase
+  const modelLower = model.toLowerCase();
   const cost = costs.find((cost) => {
-    const valueLower = cost.model.value.toLowerCase(); // Convert each cost model value to lowercase
+    const valueLower = cost.model.value.toLowerCase();
 
     if (cost.model.operator === "equals") {
       return valueLower === modelLower;
