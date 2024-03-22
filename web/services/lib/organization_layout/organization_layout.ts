@@ -1,8 +1,8 @@
 export type OrganizationFilter = {
-  id: string;
+  id?: string;
   name: string;
   filter: string;
-  createdAt: Date;
+  createdAt?: Date;
   softDelete: boolean;
 };
 

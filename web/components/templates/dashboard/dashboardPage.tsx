@@ -12,8 +12,6 @@ import {
   Card,
   DonutChart,
   Legend,
-  Select,
-  SelectItem,
 } from "@tremor/react";
 import Link from "next/link";
 import { useCallback, useState } from "react";
@@ -48,6 +46,9 @@ import { useModels } from "../../../services/hooks/models";
 import { QuantilesGraph } from "./quantilesGraph";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
+import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
+import { useOrg } from "../../layout/organizationContext";
+import { v4 as uuidv4 } from "uuid";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -155,21 +156,14 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
 
-  const {
-    metrics,
-    filterMap,
-    overTimeData,
-    organizationLayout,
-    isAnyLoading,
-    refetch,
-    remove,
-  } = useDashboardPage({
-    timeFilter,
-    uiFilters: debouncedAdvancedFilters,
-    apiKeyFilter: null,
-    timeZoneDifference: new Date().getTimezoneOffset(),
-    dbIncrement: timeIncrement,
-  });
+  const { metrics, filterMap, overTimeData, isAnyLoading, refetch, remove } =
+    useDashboardPage({
+      timeFilter,
+      uiFilters: debouncedAdvancedFilters,
+      apiKeyFilter: null,
+      timeZoneDifference: new Date().getTimezoneOffset(),
+      dbIncrement: timeIncrement,
+    });
 
   const { isLoading, models } = useModels(timeFilter, 5);
 
@@ -613,11 +607,71 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
 
-  const [layoutFilters, setLayoutFilters] = useState<OrganizationFilter[]>();
+  const orgContext = useOrg();
+
+  const {
+    organizationLayout: orgLayout,
+    isLoading: isOrgLayoutLoading,
+    refetch: orgLayoutRefetch,
+    isRefetching: isOrgLayoutRefetching,
+  } = useOrganizationLayout(orgContext?.currentOrg?.id!, "dashboard");
+
+  const [layoutFilters, setLayoutFilters] = useState<OrganizationFilter[]>(
+    orgLayout?.filters ?? []
+  );
   const [currentLayoutFilter, setCurrentLayoutFilter] =
     useState<OrganizationFilter>();
 
-  const saveFilter = () => {};
+  const onSaveFilter = async (name: string) => {
+    const currentAdvancedFilters = encodeURIComponent(
+      JSON.stringify(advancedFilters.map(encodeFilter).join("|"))
+    );
+    const encodedFilters = JSON.stringify(currentAdvancedFilters);
+    const saveFilter: OrganizationFilter = {
+      id: uuidv4(),
+      name: name,
+      filter: JSON.stringify(encodedFilters),
+      softDelete: false,
+    };
+    console.log(3);
+    console.log(saveFilter);
+    console.log(3);
+    if (advancedFilters.length > 0) {
+      if (orgLayout && orgLayout?.filters?.length > 0) {
+        console.log("update");
+        console.log(`flts : ${JSON.stringify(orgLayout.filters)}`);
+        const updatedFilters = [...orgLayout.filters, saveFilter];
+        console.log(`arr: ${JSON.stringify(updatedFilters)}`);
+        await fetch(
+          `/api/organization/${orgContext?.currentOrg?.id!}/update_filter`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: "dashboard",
+              filters: updatedFilters,
+            }),
+          }
+        );
+      } else {
+        alert("create");
+        await fetch(`/api/organization/${orgContext?.currentOrg?.id!}/create`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: "dashboard",
+            filters: [saveFilter],
+          }),
+        });
+      }
+      await orgLayoutRefetch();
+      setCurrentLayoutFilter(saveFilter);
+    }
+  };
 
   const renderUnauthorized = () => {
     if (currentTier === "free") {
@@ -698,20 +752,8 @@ const DashboardPage = (props: DashboardPageProps) => {
         <>{renderUnauthorized()}</>
       ) : (
         <div className="space-y-4">
-          {/* <Select
-            placeholder="Select filter"
-            value={currentLayoutFilter}
-            onValueChange={setCurrentLayoutFilter}
-            className="border border-gray-400 rounded-lg w-fit min-w-[250px] max-w-xl"
-          >
-            {layoutFilters?.map((filter) => (
-              <SelectItem key={filter.name} value={filter.name}>
-                {filter.name}
-              </SelectItem>
-            ))}
-          </Select> */}
           <ThemedTableHeader
-            isFetching={isAnyLoading}
+            isFetching={isAnyLoading || isOrgLayoutLoading}
             timeFilter={{
               currentTimeFilter: timeFilter,
               customTimeFilter: true,
@@ -751,8 +793,9 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
             filterLayouts={{
               currentFilter: currentLayoutFilter,
-              filters: layoutFilters,
+              filters: orgLayout?.filters,
               onFilterChange: setCurrentLayoutFilter,
+              onSaveFilter: onSaveFilter,
             }}
           />
           <section id="panels" className="-m-2">

@@ -36,6 +36,9 @@ import { ThemedMultiSelect } from "./themedMultiSelect";
 import { TimeFilter } from "../../templates/dashboard/dashboardPage";
 import FiltersButton from "./table/filtersButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
+import { TextInput } from "@tremor/react";
+import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
+import { useOrg } from "../../layout/organizationContext";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -77,7 +80,7 @@ interface ThemedHeaderProps {
     filters?: OrganizationFilter[];
     currentFilter?: OrganizationFilter;
     onFilterChange?: (value: OrganizationFilter) => void;
-    onSaveFilter?: () => void;
+    onSaveFilter?: (name: string) => void;
   };
 }
 
@@ -102,11 +105,25 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
   const [isSaveFiltersModalOpen, setIsSaveFiltersModalOpen] =
     useState<boolean>(false);
 
-  const onSaveFilter = () => {};
+  const [filterName, setFilterName] = useState<string>("");
+
+  const onSaveFilter = () => {
+    filterLayouts?.onSaveFilter?.(filterName) ?? (() => {})();
+    setIsSaveFiltersModalOpen(false);
+  };
 
   const handleOpenModal = (value: boolean) => {
     setIsSaveFiltersModalOpen(value);
   };
+
+  const orgContext = useOrg();
+
+  const {
+    organizationLayout: orgLayout,
+    isLoading: isOrgLayoutLoading,
+    refetch: orgLayoutRefetch,
+    isRefetching: isOrgLayoutRefetching,
+  } = useOrganizationLayout(orgContext?.currentOrg?.id!, "dashboard");
 
   return (
     <>
@@ -152,7 +169,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                       </p>
                     </button>
                   </div>
-                  {filterLayouts && (
+                  {filterLayouts && !isOrgLayoutLoading && (
                     <>
                       <div className="mx-auto flex text-sm">
                         <FiltersButton
@@ -167,37 +184,38 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                       >
                         <div className="flex flex-col gap-8 inset-0 bg-opacity-50 w-full sm:w-[450px] max-w-[450px] h-full rounded-3xl">
                           <h1 className="col-span-4 font-semibold text-xl text-gray-900 dark:text-gray-100">
-                            Cost Unsupported
+                            Save Filter
                           </h1>
 
-                          <p className="text-sm text-gray-900 dark:text-gray-100">
-                            Currently, we do not support the cost of this model.
-                            Please create an issue in Github{" "}
-                            <Link
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              href="https://github.com/Helicone/helicone"
-                              className="underline text-blue-500"
+                          <div className="flex flex-col space-y-1">
+                            <label
+                              htmlFor="alert-metric"
+                              className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
                             >
-                              https://github.com/Helicone/helicone
-                            </Link>{" "}
-                            or reach out to us at Discord{" "}
-                            <Link
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              href="https://discord.gg/zsSTcH2qhG"
-                              className="underline text-blue-500"
-                            >
-                              https://discord.gg/zsSTcH2qhG
-                            </Link>{" "}
-                          </p>
+                              Filter Name
+                            </label>
+                            <TextInput
+                              placeholder="My new filter"
+                              value={filterName}
+                              onChange={(e) => {
+                                setFilterName(e.target.value);
+                              }}
+                            />
+                          </div>
                           <div className="col-span-4 flex justify-end gap-2 pt-4">
                             <button
                               type="button"
-                              onClick={() => false}
-                              className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                              onClick={() => setIsSaveFiltersModalOpen(false)}
+                              className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
                             >
                               Close
+                            </button>
+                            <button
+                              type="button"
+                              onClick={onSaveFilter}
+                              className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                            >
+                              Save Filter
                             </button>
                           </div>
                         </div>

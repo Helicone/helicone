@@ -1,16 +1,21 @@
 import {
   HandlerWrapperOptions,
   withAuth,
-} from "../../../lib/api/handlerWrappers";
-import { checkAccessToMutateOrg } from "../../../lib/api/organization/hasAccess";
-import { Result } from "../../../lib/result";
-import { supabaseServer } from "../../../lib/supabaseServer";
-import { Database } from "../../../supabase/database.types";
+} from "../../../../lib/api/handlerWrappers";
+import { checkAccessToMutateOrg } from "../../../../lib/api/organization/hasAccess";
+import { Result } from "../../../../lib/result";
+import { supabaseServer } from "../../../../lib/supabaseServer";
+import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
+
+type UpdateOrgLayoutBody = {
+  filters: OrganizationFilter[];
+  type: "dashboard" | "requests";
+};
 
 async function handler({
+  req,
   res,
   userData: { orgId, user, userId, org },
-  body,
 }: HandlerWrapperOptions<Result<string, string>>) {
   if (!user) {
     res.status(401).json({ error: "Unauthorized", data: null });
@@ -24,16 +29,19 @@ async function handler({
   const hasAccess = await checkAccessToMutateOrg(orgId as string, userId);
 
   if (hasAccess) {
-    const updateRequest =
-      body.get<Database["public"]["Tables"]["organization_layout"]["Update"]>();
+    const { filters, type } = req.body as UpdateOrgLayoutBody;
+
+    console.log(1);
+    console.log(JSON.stringify(filters));
+    console.log(1);
 
     const updateRes = await supabaseServer
       .from("organization_layout")
       .update({
-        filters: updateRequest.filters,
+        filters: JSON.stringify(filters),
       })
-      .eq("id", orgId)
-      .eq("type", updateRequest.type);
+      .eq("organization_id", orgId)
+      .eq("type", type);
 
     if (updateRes.error) {
       res

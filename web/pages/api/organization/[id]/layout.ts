@@ -1,18 +1,17 @@
 import {
   HandlerWrapperOptions,
   withAuth,
-} from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../lib/result";
-import { supabaseServer } from "../../../lib/supabaseServer";
-import { Database } from "../../../supabase/database.types";
+} from "../../../../lib/api/handlerWrappers";
+import { Result } from "../../../../lib/result";
+import { supabaseServer } from "../../../../lib/supabaseServer";
+import { OrganizationLayout } from "../../../../services/lib/organization_layout/organization_layout";
 
 async function handler({
   res,
   userData: { orgId, user, userId },
   req,
-}: HandlerWrapperOptions<
-  Result<Database["public"]["Tables"]["organization_layout"]["Row"], string>
->) {
+}: HandlerWrapperOptions<Result<OrganizationLayout, string>>) {
+  console.log(`1 ${req}`);
   if (!user) {
     res.status(401).json({ error: "Unauthorized", data: null });
     return;
@@ -44,8 +43,15 @@ async function handler({
       data: null,
     });
   } else {
+    const filters = JSON.parse(layout.filters as string);
+    const orgLayout: OrganizationLayout = {
+      id: layout.id,
+      type: layout.type,
+      filters: filters,
+      organization_id: layout.organization_id,
+    };
     res.status(200).json({
-      data: layout,
+      data: orgLayout,
       error: null,
     });
   }

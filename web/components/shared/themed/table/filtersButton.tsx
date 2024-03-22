@@ -36,8 +36,8 @@ export default function FiltersButton({
           <Menu.Items className="absolute right-0 mt-2 w-56 z-10 origin-top-right divide-y divide-gray-100 dark:divide-gray-900 rounded-md bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="px-1 py-1">
               {filters && filters.length > 0 ? (
-                filters.map((filter) => (
-                  <Menu.Item key={filter.name}>
+                filters.map((filter, idx) => (
+                  <Menu.Item key={idx}>
                     {({ active }) => (
                       <button
                         className={`${
@@ -55,7 +55,7 @@ export default function FiltersButton({
                   </Menu.Item>
                 ))
               ) : (
-                <Menu.Item>
+                <Menu.Item key={"no-filters"}>
                   {({ active }) => (
                     <div
                       className={`${

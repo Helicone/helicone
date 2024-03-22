@@ -235,13 +235,6 @@ export const useDashboardPage = ({
     }),
   };
 
-  const organizationLayout = {
-    layout: useBackendMetricCall<Result<OrganizationLayout, string>>({
-      params,
-      endpoint: "/api/organization_layout",
-    }),
-  };
-
   function isLoading(x: UseQueryResult<any>) {
     return x.isLoading || x.isFetching;
   }
@@ -253,18 +246,15 @@ export const useDashboardPage = ({
   return {
     filterMap,
     metrics,
-    organizationLayout,
     overTimeData,
     isAnyLoading,
     refetch: () => {
       Object.values(overTimeData).forEach((x) => x.refetch());
       Object.values(metrics).forEach((x) => x.refetch());
-      Object.values(organizationLayout).forEach((x) => x.refetch());
     },
     remove: () => {
       Object.values(overTimeData).forEach((x) => x.remove());
       Object.values(metrics).forEach((x) => x.remove());
-      Object.values(organizationLayout).forEach((x) => x.remove());
     },
   };
 };
