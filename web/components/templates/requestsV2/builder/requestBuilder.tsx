@@ -44,6 +44,10 @@ export const getBuilderType = (
     return "CustomBuilder";
   }
 
+  if (provider === "GROQ") {
+    return "ChatGPTBuilder";
+  }
+
   if (
     provider === "TOGETHERAI" ||
     model == "gpt-4-vision-preview" ||

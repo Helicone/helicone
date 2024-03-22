@@ -12,8 +12,10 @@ import { costs as togetherAIChatLlamaCosts } from "./providers/togetherai/chat/l
 import { costs as togetherAICompletionCosts } from "./providers/togetherai/completion";
 import { costs as togetherAICompletionLlamaCosts } from "./providers/togetherai/completion";
 import { costs as cohereCosts } from "./providers/cohere";
+import { costs as groqCosts } from "./providers/groq";
 import { costs as azureCosts } from "./providers/azure";
 import { costs as googleCosts } from "./providers/google";
+import { costs as anthropicCosts } from "./providers/anthropic";
 
 const costs = [
   ...openaiCosts,
@@ -25,14 +27,21 @@ const costs = [
   ...togetherAICompletionCosts,
   ...togetherAICompletionLlamaCosts,
   ...cohereCosts,
+  ...groqCosts,
+  ...anthropicCosts,
 ];
 
 export function costOf(model: string) {
+  const modelLower = model.toLowerCase();
   const cost = costs.find((cost) => {
+    const valueLower = cost.model.value.toLowerCase();
+
     if (cost.model.operator === "equals") {
-      return cost.model.value === model;
+      return valueLower === modelLower;
     } else if (cost.model.operator === "startsWith") {
-      return model.startsWith(cost.model.value);
+      return modelLower.startsWith(valueLower);
+    } else if (cost.model.operator === "includes") {
+      return modelLower.includes(valueLower);
     }
   });
 
@@ -67,13 +76,19 @@ sum(
     ${costs
       .map((cost) => {
         if (cost.model.operator === "equals") {
-          return `WHEN (${table}.model = '${cost.model.value}') THEN ${
+          return `WHEN (${table}.model ILIKE '${cost.model.value}') THEN ${
             cost.cost.prompt_token * multiple
           } * ${table}.prompt_tokens + ${
             cost.cost.completion_token * multiple
           } * ${table}.completion_tokens`;
         } else if (cost.model.operator === "startsWith") {
-          return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${
+          return `WHEN (${table}.model ILIKE '${cost.model.value}%') THEN ${
+            cost.cost.prompt_token * multiple
+          } * ${table}.prompt_tokens + ${
+            cost.cost.completion_token * multiple
+          } * ${table}.completion_tokens`;
+        } else if (cost.model.operator === "includes") {
+          return `WHEN (${table}.model ILIKE '%${cost.model.value}%') THEN ${
             cost.cost.prompt_token * multiple
           } * ${table}.prompt_tokens + ${
             cost.cost.completion_token * multiple

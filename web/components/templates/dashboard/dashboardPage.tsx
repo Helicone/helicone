@@ -544,17 +544,18 @@ const DashboardPage = (props: DashboardPageProps) => {
     };
 
     overTimeData.requestsWithStatus.data?.data?.forEach((d) => {
-      const time = getTimeMap(timeIncrement)(d.time);
-      if (statusCounts.overTime[time] === undefined) {
-        statusCounts.overTime[time] = {
+      // data parsing for requests and errors over time graph
+      const formattedTime = new Date(d.time).toUTCString();
+      if (statusCounts.overTime[formattedTime] === undefined) {
+        statusCounts.overTime[formattedTime] = {
           success: 0,
           error: 0,
         };
       }
       if (d.status === 200) {
-        statusCounts.overTime[time]["success"] += d.count;
+        statusCounts.overTime[formattedTime]["success"] += d.count;
       } else {
-        statusCounts.overTime[time]["error"] += d.count;
+        statusCounts.overTime[formattedTime]["error"] += d.count;
       }
 
       // do not count 200s
@@ -562,6 +563,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         return;
       }
 
+      // data parsing for error graph
       if (statusCounts.accStatusCounts[d.status] === undefined) {
         statusCounts.accStatusCounts[d.status] = 0;
       }
@@ -576,17 +578,13 @@ const DashboardPage = (props: DashboardPageProps) => {
     getStatusCountsOverTime().overTime
   ).map(([time, counts]) => {
     return {
-      time,
-      ...counts,
+      date: getTimeMap(timeIncrement)(new Date(time)),
+      // success: counts.success,
+      // error: counts.error > 0 ? counts.error : null,
+      error: counts.error,
     };
   });
 
-  // flatten the accumulated status counts into an array of object {name, value}
-  // filter out status if it is 0
-  //      // if the status is -1, map it to timeout
-  // if the status is -2, map it to pending
-  // if the status is -3, map it to cancelled
-  // if the status is -4, map it to threat
   const accumulatedStatusCounts = Object.entries(
     getStatusCountsOverTime().accStatusCounts
   )
@@ -606,8 +604,6 @@ const DashboardPage = (props: DashboardPageProps) => {
       };
     })
     .filter((d) => d.value !== 0);
-
-  console.log(flattenedOverTime, accumulatedStatusCounts);
 
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
 
@@ -782,7 +778,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       <AreaChart
                         className="h-[14rem]"
                         data={flattenedOverTime}
-                        index="time"
+                        index="date"
                         categories={["success", "error"]}
                         colors={["green", "red"]}
                         showYAxis={false}
@@ -807,14 +803,6 @@ const DashboardPage = (props: DashboardPageProps) => {
                     <DonutChart
                       data={accumulatedStatusCounts}
                       onValueChange={(v) => console.log(v)}
-                      colors={[
-                        "cyan",
-                        "blue",
-                        "green",
-                        "indigo",
-                        "orange",
-                        "pink",
-                      ]}
                     />
                   </div>
                 </Card>
@@ -934,6 +922,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
               <div key="quantiles">
                 <QuantilesGraph
+                  uiFilters={debouncedAdvancedFilters}
                   timeFilter={timeFilter}
                   timeIncrement={timeIncrement}
                 />
