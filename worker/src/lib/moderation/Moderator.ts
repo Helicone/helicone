@@ -25,7 +25,7 @@ export class Moderator {
     this.responseBuilder = new ResponseBuilder();
   }
 
-  async moderate(message: string): Promise<Result<ModerationResponse, Error>> {
+  async moderate(message: string): Promise<Result<ModerationResponse, string>> {
     const moderationRequest = new Request(
       "https://api.openai.com/v1/moderations",
       {
@@ -44,13 +44,13 @@ export class Moderator {
 
     if (moderationRequestWrapper.error || !moderationRequestWrapper.data) {
       return {
-        error: new Error(JSON.stringify({
+        error: JSON.stringify({
           success: false,
           error: {
             code: "INTERNAL_SERVER_ERROR",
             message: "Request to OpenAI moderation endpoint failed."
           }
-        })),
+        }),
         data: null
       }
     }
@@ -66,13 +66,13 @@ export class Moderator {
 
     if (moderationProxyRequestError !== null) {
       return {
-        error: new Error(JSON.stringify({
+        error: JSON.stringify({
           success: false,
           error: {
             code: "INTERNAL_SERVER_ERROR",
             message: "Proxy request to OpenAI moderation endpoint failed."
           }
-        })),
+        }),
         data: null
       }
     }
@@ -81,7 +81,7 @@ export class Moderator {
       await handleProxyRequest(moderationProxyRequest);
     if (moderationResponseError != null) {
       return {
-        error: new Error(moderationResponseError),
+        error: moderationResponseError,
         data: null,
       }
     }
@@ -127,7 +127,8 @@ export class Moderator {
       error: null,
       data: {
         isModerated: false,
-        loggable: moderationResponse.loggable
+        loggable: moderationResponse.loggable,
+        response: null
       }
     }
   }
@@ -146,6 +147,7 @@ type OpenAIModerationResponse = {
 type UnFlaggedResponse = {
   isModerated: false;
   loggable: DBLoggable;
+  response: null;
 }
 
 type FlaggedResponse = {

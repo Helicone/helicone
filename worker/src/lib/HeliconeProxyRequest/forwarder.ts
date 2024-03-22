@@ -203,7 +203,7 @@ export async function proxyForwarder(
       // Something in the moderation call itself failed.
       if (moderationResult.error) {
         return responseBuilder.build({
-          body: moderationResult.error.message,
+          body: moderationResult.error,
           status: 500,
         });
       }
