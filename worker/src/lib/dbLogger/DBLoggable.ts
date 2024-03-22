@@ -631,25 +631,23 @@ export class DBLoggable {
     }
 
     const responseResult = await this.readAndLogResponse(db.queue);
-
     // If no data or error, return
     if (!responseResult.data || responseResult.error) {
-      const body = {
-        helicone_error: "error getting response, " + responseResult.error,
-        helicone_repsonse_body_as_string: (
-          await this.response.getResponseBody()
-        ).body,
-      };
-
+      // Log the error in S3
       const s3Result = await db.s3Client.storeRequestResponse(
         authParams.organizationId,
         this.request.requestId,
-        JSON.stringify(requestResult.data.body),
-        JSON.stringify(body)
+        requestResult.data.body,
+        JSON.stringify({
+          helicone_error: "error getting response, " + responseResult.error,
+          helicone_repsonse_body_as_string: (
+            await this.response.getResponseBody()
+          ).body,
+        })
       );
 
       if (s3Result.error) {
-        return err(s3Result.error);
+        console.error("Error storing request response", s3Result.error);
       }
 
       return responseResult;
@@ -663,8 +661,8 @@ export class DBLoggable {
     );
 
     if (s3Result.error) {
-      console.log("Error storing request response", s3Result.error);
-      return err(s3Result.error);
+      console.error("Error storing request response", s3Result.error);
+      // Continue logging to clickhouse
     }
 
     await logInClickhouse(

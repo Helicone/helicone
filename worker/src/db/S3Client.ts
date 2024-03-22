@@ -42,23 +42,27 @@ export class S3Client {
   }
 
   async store(url: string, value: string): Promise<Result<string, string>> {
-    const signedRequest = await this.awsClient.sign(url, {
-      method: "PUT",
-      body: value,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    try {
+      const signedRequest = await this.awsClient.sign(url, {
+        method: "PUT",
+        body: value,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-    const response = await fetch(signedRequest.url, signedRequest);
+      const response = await fetch(signedRequest.url, signedRequest);
 
-    if (!response.ok) {
-      return {
-        data: null,
-        error: `Failed to store data: ${response.statusText}`,
-      };
+      if (!response.ok) {
+        return {
+          data: null,
+          error: `Failed to store data: ${response.statusText}`,
+        };
+      }
+
+      return { data: url, error: null };
+    } catch (error: any) {
+      return { data: null, error: error.message };
     }
-
-    return { data: url, error: null };
   }
 }
