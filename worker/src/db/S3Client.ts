@@ -65,8 +65,9 @@ export class S3Client {
       }
 
       return { data: url, error: null };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      return { data: null, error: error.message };
+      return { data: null, error: error?.message };
     }
   }
 }
