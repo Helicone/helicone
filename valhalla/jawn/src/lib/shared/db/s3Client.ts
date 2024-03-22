@@ -12,10 +12,10 @@ export class S3Client {
   private awsClient: AwsS3Client;
 
   constructor(
-    accessKey: string = "minioadmin",
-    secretKey: string = "minioadmin",
-    endpoint: string = "http://localhost:9000",
-    private bucketName: string = "request-response-storage"
+    accessKey: string,
+    secretKey: string,
+    endpoint: string,
+    private bucketName: string
   ) {
     this.awsClient = new AwsS3Client({
       credentials: {
