@@ -9,7 +9,7 @@ export type RequestResponseBody = {
 
 export class S3Client {
   private region = "us-west-2";
-  awsClient: AwsS3Client;
+  private awsClient: AwsS3Client;
 
   constructor(
     accessKey: string = "minioadmin",
@@ -44,7 +44,7 @@ export class S3Client {
     });
 
     const signedUrl = await getSignedUrl(this.awsClient, command, {
-      expiresIn: 3600, // 1 hour
+      expiresIn: 1800, // 30 minutes
     });
 
     return { data: signedUrl, error: null };

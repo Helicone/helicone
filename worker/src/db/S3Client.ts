@@ -3,7 +3,7 @@ import { Result } from "../results";
 
 export class S3Client {
   private region = "us-west-2";
-  awsClient: AwsClient;
+  private awsClient: AwsClient;
 
   constructor(
     accessKey = "minioadmin",
