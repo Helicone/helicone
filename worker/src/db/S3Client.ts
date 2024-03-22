@@ -1,5 +1,6 @@
 import { AwsClient } from "aws4fetch";
 import { Result } from "../results";
+import { gzip } from "node-gzip";
 
 export class S3Client {
   private region = "us-west-2";
@@ -43,11 +44,14 @@ export class S3Client {
 
   async store(url: string, value: string): Promise<Result<string, string>> {
     try {
+      const compressedValue = await gzip(value);
+
       const signedRequest = await this.awsClient.sign(url, {
         method: "PUT",
-        body: value,
+        body: compressedValue,
         headers: {
           "Content-Type": "application/json",
+          "Content-Encoding": "gzip",
         },
       });
 
