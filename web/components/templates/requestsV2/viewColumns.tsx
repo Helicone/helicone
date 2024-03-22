@@ -81,31 +81,34 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                 })}
               </ul>
             </div>
-            <div className="flex flex-col space-y-2 pt-2">
-              <p className="text-xs text-gray-500 font-medium">
-                Custom Properties
-              </p>
-              <ul className="flex flex-col gap-2">
-                {customColumns.map((column) => {
-                  const header = column.columnDef.header as string;
-                  return (
-                    <li key={column.id}>
-                      <button
-                        onClick={column.getToggleVisibilityHandler()}
-                        className={clsx(
-                          column.getIsVisible()
-                            ? "bg-sky-100 dark:bg-sky-900 text-sky-700 font-medium hover:text-sky-900 dark:hover:text-sky-100 dark:text-sky-300"
-                            : "bg-white dark:bg-black text-gray-500 hover:bg-sky-50 dark:hover:bg-sky-900 hover:text-sky-900 dark:hover:text-sky-100",
-                          "w-fit text-xs border border-gray-300 dark:border-gray-700 px-2 py-1 rounded-md whitespace-pre-wrap text-left"
-                        )}
-                      >
-                        {header}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+            {customColumns.length > 0 && (
+              <div className="flex flex-col space-y-2 pt-2">
+                <p className="text-xs text-gray-500 font-medium">
+                  Custom Properties
+                </p>
+                <ul className="flex flex-col gap-2">
+                  {customColumns.map((column) => {
+                    const header = column.columnDef.header as string;
+                    return (
+                      <li key={column.id}>
+                        <button
+                          onClick={column.getToggleVisibilityHandler()}
+                          className={clsx(
+                            column.getIsVisible()
+                              ? "bg-sky-100 dark:bg-sky-900 text-sky-700 font-medium hover:text-sky-900 dark:hover:text-sky-100 dark:text-sky-300"
+                              : "bg-white dark:bg-black text-gray-500 hover:bg-sky-50 dark:hover:bg-sky-900 hover:text-sky-900 dark:hover:text-sky-100",
+                            "w-fit text-xs border border-gray-300 dark:border-gray-700 px-2 py-1 rounded-md whitespace-pre-wrap text-left"
+                          )}
+                        >
+                          {header}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+
             <div className="flex justify-end items-center pt-2 gap-2">
               <button
                 onClick={() => onSelectAll(false)}
