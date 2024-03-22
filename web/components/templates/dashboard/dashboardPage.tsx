@@ -545,17 +545,17 @@ const DashboardPage = (props: DashboardPageProps) => {
 
     overTimeData.requestsWithStatus.data?.data?.forEach((d) => {
       // data parsing for requests and errors over time graph
-      const time = getTimeMap(timeIncrement)(d.time);
-      if (statusCounts.overTime[time] === undefined) {
-        statusCounts.overTime[time] = {
+      const formattedTime = new Date(d.time).toUTCString();
+      if (statusCounts.overTime[formattedTime] === undefined) {
+        statusCounts.overTime[formattedTime] = {
           success: 0,
           error: 0,
         };
       }
       if (d.status === 200) {
-        statusCounts.overTime[time]["success"] += d.count;
+        statusCounts.overTime[formattedTime]["success"] += d.count;
       } else {
-        statusCounts.overTime[time]["error"] += d.count;
+        statusCounts.overTime[formattedTime]["error"] += d.count;
       }
 
       // do not count 200s
@@ -582,8 +582,6 @@ const DashboardPage = (props: DashboardPageProps) => {
       ...counts,
     };
   });
-
-  console.log("flattened", flattenedOverTime);
 
   const accumulatedStatusCounts = Object.entries(
     getStatusCountsOverTime().accStatusCounts
