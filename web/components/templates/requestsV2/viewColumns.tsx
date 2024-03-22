@@ -85,7 +85,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
               <p className="text-xs text-gray-500 font-medium">
                 Custom Properties
               </p>
-              <ul className="flex flex-col gap-1">
+              <ul className="flex flex-col gap-2">
                 {customColumns.map((column) => {
                   const header = column.columnDef.header as string;
                   return (
