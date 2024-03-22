@@ -93,6 +93,21 @@ brew install supabase/tap/supabase
 python3 clickhouse/ch_hcone.py --start
 ```
 
+## Install and setup MinIO
+
+```bash
+# Install minio
+python3 -m pip install minio
+
+# Start minio
+python3 minio_hcone.py --restart
+
+# Dashboard will be available at http://localhost:9001
+# Default credentials:
+# Username: minioadmin
+# Password: minioadmin
+```
+
 ## Run all services
 
 ```bash
