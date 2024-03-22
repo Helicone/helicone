@@ -82,7 +82,7 @@ export function recursivelyConsolidateAnthropicListForClaude3(
   }, {});
 }
 
-function getModel(requestBody: string): string {
+export function getModel(requestBody: string): string {
   try {
     return JSON.parse(requestBody)?.model;
   } catch (e) {
