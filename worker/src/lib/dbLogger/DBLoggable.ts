@@ -14,7 +14,7 @@ import { AsyncLogModel } from "../models/AsyncLog";
 import { logInClickhouse } from "./clickhouseLog";
 import { RequestResponseStore } from "./RequestResponseStore";
 import { logRequest } from "./logResponse";
-import { anthropicAIStream } from "./parsers/anthropicStreamParser";
+import { anthropicAIStream, getModel } from "./parsers/anthropicStreamParser";
 import { parseOpenAIStream } from "./parsers/openAIStreamParser";
 import { getTokenCount } from "./tokenCounter";
 
@@ -223,20 +223,40 @@ export class DBLoggable {
         return ok(JSON.parse(result));
       } else if (!isStream && this.provider === "ANTHROPIC" && requestBody) {
         const responseJson = JSON.parse(result);
-        const prompt = JSON.parse(requestBody)?.prompt ?? "";
-        const completion = responseJson?.completion ?? "";
-        const completionTokens = await tokenCounter(completion);
-        const promptTokens = await tokenCounter(prompt);
-
-        return ok({
-          ...responseJson,
-          usage: {
-            total_tokens: promptTokens + completionTokens,
-            prompt_tokens: promptTokens,
-            completion_tokens: completionTokens,
-            helicone_calculated: true,
-          },
-        });
+        if (getModel(requestBody ?? "{}").includes("claude-3")) {
+          if (
+            !responseJson?.usage?.output_tokens ||
+            !responseJson?.usage?.input_tokens
+          ) {
+            return ok(responseJson);
+          } else {
+            return ok({
+              ...responseJson,
+              usage: {
+                total_tokens:
+                  responseJson?.usage?.output_tokens +
+                  responseJson?.usage?.input_tokens,
+                prompt_tokens: responseJson?.usage?.input_tokens,
+                completion_tokens: responseJson?.usage?.output_tokens,
+                helicone_calculated: true,
+              },
+            });
+          }
+        } else {
+          const prompt = JSON.parse(requestBody)?.prompt ?? "";
+          const completion = responseJson?.completion ?? "";
+          const completionTokens = await tokenCounter(completion);
+          const promptTokens = await tokenCounter(prompt);
+          return ok({
+            ...responseJson,
+            usage: {
+              total_tokens: promptTokens + completionTokens,
+              prompt_tokens: promptTokens,
+              completion_tokens: completionTokens,
+              helicone_calculated: true,
+            },
+          });
+        }
       } else if (!isStream && this.provider === "GOOGLE") {
         const responseJson = JSON.parse(result);
         const usageMetadataItem = responseJson.find(
