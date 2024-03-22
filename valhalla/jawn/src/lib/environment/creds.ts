@@ -8,7 +8,8 @@ if (!process.env.S3_SECRET_KEY) {
 }
 
 if (!process.env.S3_ENDPOINT) {
-  throw new Error("No S3 endpoint");
+  // This is acceptable as it is optional.
+  // If no endpoint is provided, the SDK will use the default endpoint.
 }
 
 if (!process.env.S3_BUCKET_NAME) {
