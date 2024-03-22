@@ -8,8 +8,8 @@ import { ModelRow } from "../../interfaces/Cost";
 export const costs: ModelRow[] = [
   {
     model: {
-      operator: "equals",
-      value: "google/gemini-pro",
+      operator: "includes",
+      value: "gemini-pro",
     },
     cost: {
       prompt_token: 0.000000125,
