@@ -544,6 +544,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     };
 
     overTimeData.requestsWithStatus.data?.data?.forEach((d) => {
+      // data parsing for requests and errors over time graph
       const time = getTimeMap(timeIncrement)(d.time);
       if (statusCounts.overTime[time] === undefined) {
         statusCounts.overTime[time] = {
@@ -562,6 +563,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         return;
       }
 
+      // data parsing for error graph
       if (statusCounts.accStatusCounts[d.status] === undefined) {
         statusCounts.accStatusCounts[d.status] = 0;
       }
@@ -572,14 +574,16 @@ const DashboardPage = (props: DashboardPageProps) => {
   }, [overTimeData.requestsWithStatus.data?.data, timeIncrement]);
 
   // flatten the status counts over time
-  const flattenedOverTime = Object.entries(
-    getStatusCountsOverTime().overTime
-  ).map(([time, counts]) => {
-    return {
-      time,
-      ...counts,
-    };
-  });
+  const flattenedOverTime = Object.entries(getStatusCountsOverTime().overTime)
+    .map(([time, counts]) => {
+      return {
+        time,
+        ...counts,
+      };
+    })
+    .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+
+  console.log("flattened", flattenedOverTime);
 
   const accumulatedStatusCounts = Object.entries(
     getStatusCountsOverTime().accStatusCounts
