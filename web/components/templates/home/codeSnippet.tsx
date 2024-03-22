@@ -106,18 +106,23 @@ export default function CodeSnippet(props: CodeSnippetProps) {
 
   return (
     <div className="w-full flex flex-col">
-      <TabGroup defaultIndex={1}>
+      <TabGroup
+        defaultIndex={1}
+        className="w-full flex items-center justify-center"
+      >
         <TabList className="font-semibold" variant="solid">
           {Object.entries(NAMES).map(([key, name], i) => (
             <Tab
               onClick={() => setLang(key as SupportedLanguages)}
               key={`code_snip_tab_${i}`}
+              className="px-8 py-2"
             >
               {name}
             </Tab>
           ))}
         </TabList>
       </TabGroup>
+
       <DiffHighlight
         code={CODE_CONVERTS[lang](apiKey)}
         language="bash"
