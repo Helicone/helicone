@@ -106,7 +106,7 @@ export default function CodeSnippet(props: CodeSnippetProps) {
 
   return (
     <div className="w-full flex flex-col">
-      <TabGroup>
+      <TabGroup defaultIndex={1}>
         <TabList className="font-semibold" variant="solid">
           {Object.entries(NAMES).map(([key, name], i) => (
             <Tab
