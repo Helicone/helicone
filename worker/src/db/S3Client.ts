@@ -1,5 +1,6 @@
 import { AwsClient } from "aws4fetch";
 import { Result } from "../results";
+import { gzip } from "node-gzip";
 
 export class S3Client {
   private region = "us-west-2";
@@ -42,23 +43,31 @@ export class S3Client {
   }
 
   async store(url: string, value: string): Promise<Result<string, string>> {
-    const signedRequest = await this.awsClient.sign(url, {
-      method: "PUT",
-      body: value,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    try {
+      const compressedValue = await gzip(value);
 
-    const response = await fetch(signedRequest.url, signedRequest);
+      const signedRequest = await this.awsClient.sign(url, {
+        method: "PUT",
+        body: compressedValue,
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Encoding": "gzip",
+        },
+      });
 
-    if (!response.ok) {
-      return {
-        data: null,
-        error: `Failed to store data: ${response.statusText}`,
-      };
+      const response = await fetch(signedRequest.url, signedRequest);
+
+      if (!response.ok) {
+        return {
+          data: null,
+          error: `Failed to store data: ${response.statusText}`,
+        };
+      }
+
+      return { data: url, error: null };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      return { data: null, error: error?.message };
     }
-
-    return { data: url, error: null };
   }
 }
