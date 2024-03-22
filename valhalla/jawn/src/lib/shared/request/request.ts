@@ -215,6 +215,7 @@ async function mapLLMCalls(
           );
 
         if (signedBodyUrlErr || !signedBodyUrl) {
+          // If there was an error, just return the request as is
           return heliconeRequest;
         }
 

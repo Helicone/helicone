@@ -37,17 +37,21 @@ export class S3Client {
   }
 
   async getSignedUrl(key: string): Promise<Result<string, string>> {
-    this.awsClient;
-    const command = new GetObjectCommand({
-      Bucket: this.bucketName,
-      Key: key,
-    });
+    try {
+      this.awsClient;
+      const command = new GetObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+      });
 
-    const signedUrl = await getSignedUrl(this.awsClient, command, {
-      expiresIn: 1800, // 30 minutes
-    });
+      const signedUrl = await getSignedUrl(this.awsClient, command, {
+        expiresIn: 1800, // 30 minutes
+      });
 
-    return { data: signedUrl, error: null };
+      return { data: signedUrl, error: null };
+    } catch (error: any) {
+      return { data: null, error: error.message };
+    }
   }
 
   getRequestResponseKey = (requestId: string, orgId: string) => {
