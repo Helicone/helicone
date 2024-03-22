@@ -142,6 +142,7 @@ export interface RequestResponseLog {
   time_to_first_token: Nullable<number>;
   target_url: Nullable<string>;
   request_ip: Nullable<string>;
+  provider: Nullable<string>;
 }
 
 interface PropertiesV3 {
@@ -170,6 +171,7 @@ export interface PropertyWithResponseV1 {
   property_key: string;
   property_value: string;
   threat: Nullable<boolean>;
+  provider: Nullable<string>;
 }
 
 export interface CacheHits {
