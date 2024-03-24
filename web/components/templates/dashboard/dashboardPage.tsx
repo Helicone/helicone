@@ -579,8 +579,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   ).map(([time, counts]) => {
     return {
       date: getTimeMap(timeIncrement)(new Date(time)),
-      // success: counts.success,
-      // error: counts.error > 0 ? counts.error : null,
+      success: counts.success,
       error: counts.error,
     };
   });
