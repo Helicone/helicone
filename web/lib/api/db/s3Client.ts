@@ -2,6 +2,15 @@ import { S3Client as AwsS3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Result } from "../../result";
 
+const S3_ACCESS_KEY = process.env.S3_ACCESS_KEY ?? "";
+const S3_SECRET_KEY = process.env.S3_SECRET_KEY ?? "";
+const S3_ENDPOINT = process.env.S3_ENDPOINT ?? "";
+const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME ?? "";
+
+if (!S3_ACCESS_KEY || !S3_SECRET_KEY || !S3_ENDPOINT || !S3_BUCKET_NAME) {
+  throw new Error("S3 env variables not set");
+}
+
 export type RequestResponseBody = {
   request?: any;
   response?: any;
@@ -12,10 +21,10 @@ export class S3Client {
   private awsClient: AwsS3Client;
 
   constructor(
-    accessKey: string = "minioadmin",
-    secretKey: string = "minioadmin",
-    endpoint: string = "http://localhost:9000",
-    private bucketName: string = "request-response-storage"
+    accessKey: string,
+    secretKey: string,
+    endpoint: string,
+    private bucketName: string
   ) {
     this.awsClient = new AwsS3Client({
       credentials: {
@@ -37,17 +46,21 @@ export class S3Client {
   }
 
   async getSignedUrl(key: string): Promise<Result<string, string>> {
-    this.awsClient;
-    const command = new GetObjectCommand({
-      Bucket: this.bucketName,
-      Key: key,
-    });
+    try {
+      this.awsClient;
+      const command = new GetObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+      });
 
-    const signedUrl = await getSignedUrl(this.awsClient, command, {
-      expiresIn: 1800, // 30 minutes
-    });
+      const signedUrl = await getSignedUrl(this.awsClient, command, {
+        expiresIn: 1800, // 30 minutes
+      });
 
-    return { data: signedUrl, error: null };
+      return { data: signedUrl, error: null };
+    } catch (error: any) {
+      return { data: null, error: error.message };
+    }
   }
 
   getRequestResponseKey = (requestId: string, orgId: string) => {
