@@ -31,8 +31,6 @@ export function withAuth<T>(
 
     if (authParams.error) {
       console.error("authParams.error", authParams.error);
-
-      console.error("Authorization header", authorization);
       const SUPABASE_CREDS = JSON.parse(process.env.SUPABASE_CREDS ?? "{}");
       const supabaseURL = SUPABASE_CREDS?.url ?? process.env.SUPABASE_URL;
       const pingUrl = `${supabaseURL}`;

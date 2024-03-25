@@ -13,18 +13,22 @@ export function costOf({
   model: string;
   provider: string;
 }) {
+  const modelLower = model.toLowerCase();
   const providerCost = providers.find((p) => {
     return p.provider === provider;
   });
   if (!providerCost || !providerCost.costs) {
     return null;
   }
-
-  const cost = providerCost.costs.find((cost) => {
+  const costs = providerCost.costs;
+  const cost = costs.find((cost) => {
+    const valueLower = cost.model.value.toLowerCase();
     if (cost.model.operator === "equals") {
-      return cost.model.value === model;
+      return valueLower === modelLower;
     } else if (cost.model.operator === "startsWith") {
-      return model.startsWith(cost.model.value);
+      return modelLower.startsWith(valueLower);
+    } else if (cost.model.operator === "includes") {
+      return modelLower.includes(valueLower);
     }
   });
 
@@ -68,6 +72,14 @@ function caseForCost(costs: ModelRow[], table: string, multiple: number) {
         } * ${table}.prompt_tokens + ${
           cost.cost.completion_token * multiple
         } * ${table}.completion_tokens`;
+      } else if (cost.model.operator === "includes") {
+        return `WHEN (${table}.model ILIKE '%${cost.model.value}%') THEN ${
+          cost.cost.prompt_token * multiple
+        } * ${table}.prompt_tokens + ${
+          cost.cost.completion_token * multiple
+        } * ${table}.completion_tokens`;
+      } else {
+        throw new Error("Unknown operator");
       }
     })
     .join("\n")}
