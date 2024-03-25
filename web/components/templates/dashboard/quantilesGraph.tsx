@@ -5,8 +5,10 @@ import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { TimeIncrement } from "../../../lib/timeCalculations/fetchTimeData";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 
 type QuantilesGraphProps = {
+  uiFilters: UIFilterRow[];
   timeFilter: {
     start: Date;
     end: Date;
@@ -15,6 +17,7 @@ type QuantilesGraphProps = {
 };
 
 export const QuantilesGraph = ({
+  uiFilters,
   timeFilter,
   timeIncrement,
 }: QuantilesGraphProps) => {
@@ -28,6 +31,7 @@ export const QuantilesGraph = ({
   const [currentMetric, setCurrentMetric] = useState("Latency");
 
   const { quantiles, isLoading: quantilesIsLoading } = useQuantiles({
+    uiFilters,
     timeFilter,
     dbIncrement: timeIncrement,
     timeZoneDifference: new Date().getTimezoneOffset(),
@@ -38,18 +42,26 @@ export const QuantilesGraph = ({
     return arr.reduce((p, c) => (p > c ? p : c), 0);
   }
 
+  const maxQuantile = max(
+    quantiles?.data?.map((d) => d.p99).filter((d) => d !== 0) ?? []
+  );
+
   return (
     <Card>
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-col space-y-0.5">
           <p className="text-gray-500 text-sm">Quantiles</p>
-          <p className="text-black dark:text-white text-xl font-semibold">
-            {`Max: ${new Intl.NumberFormat("us").format(
-              max(
-                quantiles?.data?.map((d) => d.p99).filter((d) => d !== 0) ?? []
-              )
-            )} ${currentMetric === "Latency" ? "ms" : ""}`}
-          </p>
+          {currentMetric === "Latency" ? (
+            <p className="text-black dark:text-white text-xl font-semibold">
+              {`Max: ${new Intl.NumberFormat("us").format(
+                maxQuantile / 1000
+              )} s`}
+            </p>
+          ) : (
+            <p className="text-black dark:text-white text-xl font-semibold">
+              {`Max: ${new Intl.NumberFormat("us").format(maxQuantile)} tokens`}
+            </p>
+          )}
         </div>
         {!quantilesIsLoading && (
           <Select
@@ -70,7 +82,7 @@ export const QuantilesGraph = ({
       <div
         className={clsx("p-2", "w-full")}
         style={{
-          height: "224px",
+          height: "212px",
         }}
       >
         {quantilesIsLoading ? (
@@ -83,6 +95,7 @@ export const QuantilesGraph = ({
             data={
               quantiles?.data?.map((r) => {
                 const time = new Date(r.time);
+                // return all of the values on a 0-100 scale where 0 is the min value and 100 is the max value of
                 return {
                   date: getTimeMap(timeIncrement)(time),
                   P75: r.p75,
@@ -106,11 +119,15 @@ export const QuantilesGraph = ({
             ]}
             showYAxis={false}
             curveType="monotone"
-            valueFormatter={(number: number | bigint) =>
-              `${new Intl.NumberFormat("us").format(number)} ${
-                currentMetric === "Latency" ? "ms" : "tokens"
-              }`
-            }
+            valueFormatter={(number: number | bigint) => {
+              if (currentMetric === "Latency") {
+                return `${new Intl.NumberFormat("us").format(
+                  Number(number) / 1000
+                )} s`;
+              } else {
+                return `${new Intl.NumberFormat("us").format(number)} tokens`;
+              }
+            }}
           />
         )}
       </div>

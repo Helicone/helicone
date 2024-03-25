@@ -11,7 +11,7 @@ interface StyledAreaChartProps {
   children: React.ReactNode;
 }
 
-const DEFAULT_HEIGHT = "224px";
+const DEFAULT_HEIGHT = "212px";
 
 const StyledAreaChart = (props: StyledAreaChartProps) => {
   const {
@@ -24,7 +24,7 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
   } = props;
 
   const calculateHeight = () => {
-    // if value is undefined, add 28 to `224px`
+    // if value is undefined, add 28 to `212x`
 
     if (!value) {
       return parseInt(height.split("px")[0]) + 30 + "px";

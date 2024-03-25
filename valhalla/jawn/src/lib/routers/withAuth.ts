@@ -5,6 +5,7 @@ import {
 import { SupabaseConnector } from "../db/supabase";
 import { RequestWrapper } from "../requestWrapper";
 import { IRouterWrapperAuth } from "./iRouterWrapper";
+import { S3Client } from "../shared/db/s3Client";
 const supabaseClient = new SupabaseConnector();
 
 class AuthError extends Error {
@@ -31,8 +32,6 @@ export function withAuth<T>(
 
     if (authParams.error) {
       console.error("authParams.error", authParams.error);
-
-      console.error("Authorization header", authorization);
       const SUPABASE_CREDS = JSON.parse(process.env.SUPABASE_CREDS ?? "{}");
       const supabaseURL = SUPABASE_CREDS?.url ?? process.env.SUPABASE_URL;
       const pingUrl = `${supabaseURL}`;
@@ -53,6 +52,12 @@ export function withAuth<T>(
       res,
       authParams: authParams.data!,
       supabaseClient: supabaseClient,
+      s3Client: new S3Client(
+        process.env.S3_ACCESS_KEY ?? "",
+        process.env.S3_SECRET_KEY ?? "",
+        process.env.S3_ENDPOINT ?? "",
+        process.env.S3_BUCKET_NAME ?? ""
+      ),
     });
   };
 }

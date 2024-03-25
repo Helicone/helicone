@@ -4,7 +4,7 @@
  */
 
 interface TextOperator {
-  operator: "equals" | "startsWith";
+  operator: "equals" | "startsWith" | "includes";
   value: string;
 }
 

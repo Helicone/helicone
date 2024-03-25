@@ -125,6 +125,8 @@ async function getProvider(
     provider = "GOOGLE";
   } else if (targetBaseUrlLowerCase.includes("together.xyz")) {
     provider = "TOGETHERAI";
+  } else if (targetBaseUrlLowerCase.includes("api.groq.com")) {
+    provider = "GROQ";
   } else {
     provider = targetBaseUrlHost ?? "CUSTOM";
   }

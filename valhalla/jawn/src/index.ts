@@ -7,7 +7,6 @@ import * as Sentry from "@sentry/node";
 import { ProfilingIntegration } from "@sentry/profiling-node";
 import * as OpenApiValidator from "express-openapi-validator";
 import morgan from "morgan";
-import { v4 as uuid } from "uuid";
 import { paths } from "./schema/types";
 import {
   getTokenCountAnthropic,
@@ -16,13 +15,11 @@ import {
 import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
 import { withAuth } from "./lib/routers/withAuth";
 import { getRequests, getRequestsCached } from "./lib/shared/request/request";
-
 import { FineTuningManager } from "./lib/managers/FineTuningManager";
 import { PostHog } from "posthog-node";
 import { hashAuth } from "./lib/db/hash";
 import { FilterNode } from "./lib/shared/filters/filterDefs";
-import { SupabaseConnector, supabaseServer } from "./lib/db/supabase";
-import { dbExecute, dbQueryClickhouse } from "./lib/shared/db/dbExecute";
+import { SupabaseConnector } from "./lib/db/supabase";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 
 const ph_project_api_key = process.env.PUBLIC_POSTHOG_API_KEY;
@@ -221,7 +218,7 @@ app.post(
   "/v1/request/query",
   withAuth<
     paths["/v1/request/query"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, authParams }) => {
+  >(async ({ request, res, authParams, s3Client }) => {
     const body = await request.getRawBody<any>();
 
     const { filter, offset, limit, sort, isCached } = body;
@@ -233,7 +230,7 @@ app.post(
           offset,
           limit,
           sort,
-          supabaseClient.client
+          s3Client
         )
       : await getRequests(
           authParams.organizationId,
@@ -241,7 +238,7 @@ app.post(
           offset,
           limit,
           sort,
-          supabaseClient.client
+          s3Client
         );
     postHogClient?.capture({
       distinctId: `${await hashAuth(body)}-${authParams.organizationId}`,
@@ -385,7 +382,7 @@ app.post(
   "/v1/dataset/:datasetId/fine-tune",
   withAuth<
     paths["/v1/dataset/{datasetId}/fine-tune"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, authParams }) => {
+  >(async ({ request, res, supabaseClient, authParams, s3Client }) => {
     if (!(await hasAccessToFineTune(supabaseClient))) {
       res.status(405).json({
         error: "Must be on pro or higher plan to use fine-tuning",
@@ -429,7 +426,7 @@ app.post(
       0,
       1000,
       {},
-      supabaseClient.client
+      s3Client
     );
 
     if (metrics.error || !metrics.data || metrics.data.length === 0) {
@@ -526,7 +523,7 @@ app.post(
   "/v1/fine-tune",
   withAuth<
     paths["/v1/fine-tune"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, authParams }) => {
+  >(async ({ request, res, supabaseClient, authParams, s3Client }) => {
     if (!(await hasAccessToFineTune(supabaseClient))) {
       res.status(405).json({
         error: "Must be on pro or higher plan to use fine-tuning",
@@ -544,7 +541,7 @@ app.post(
       0,
       1000,
       {},
-      supabaseClient.client
+      s3Client
     );
 
     if (metrics.error || !metrics.data || metrics.data.length === 0) {

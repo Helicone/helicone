@@ -36,7 +36,6 @@ import OrgContext, { useOrg } from "./organizationContext";
 import UpgradeProModal from "../shared/upgradeProModal";
 import OrgDropdown from "./orgDropdown";
 
-import { Badge } from "@tremor/react";
 import ReferralModal from "../common/referralModal";
 import { useTheme } from "../shared/theme/themeContext";
 import { ThemedSwitch } from "../shared/themed/themedSwitch";
@@ -87,6 +86,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/prompts",
       icon: DocumentTextIcon,
       current: pathname.includes("/prompts"),
+      featured: true,
     },
     {
       name: "Users",
@@ -416,9 +416,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     <nav.icon className="h-4 w-4" />
                     {nav.name}
                     {nav.featured && (
-                      <Badge size="xs">
-                        <span className="text-xs">New</span>
-                      </Badge>
+                      <span className="-mt-1.5 -ml-0.5 h-2 w-2 rounded-full bg-sky-500 animate-pulse"></span>
                     )}
                   </Link>
                 ))}
