@@ -13,7 +13,6 @@ import {
 } from "../schema/types/graphql";
 import { modelCost } from "../../metrics/costCalc";
 import { convertTextOperators, convertTimeOperators } from "./helper";
-import { S3Client } from "../../db/s3Client";
 
 const filterInputToFilterLeaf: {
   [key in keyof HeliconeRequestFilter]: (
@@ -159,21 +158,9 @@ export async function heliconeRequest(
   );
   const filter = filterListToTree(convertedFilters, "and");
 
-  const { data, error } = await getRequests(
-    orgId,
-    filter,
-    offset,
-    limit,
-    {
-      created_at: "desc",
-    },
-    new S3Client(
-      process.env.S3_ACCESS_KEY ?? "",
-      process.env.S3_SECRET_KEY ?? "",
-      process.env.S3_ENDPOINT ?? "",
-      process.env.S3_BUCKET_NAME ?? ""
-    )
-  );
+  const { data, error } = await getRequests(orgId, filter, offset, limit, {
+    created_at: "desc",
+  });
 
   if (error !== null) {
     throw new ApolloError(error, "UNAUTHENTICATED");
