@@ -31,6 +31,7 @@ function buildPropertyWithResponseInserts(
     threat: request.threat ?? null,
     property_key: p.key,
     property_value: p.value,
+    provider: request.provider ?? null,
   }));
 }
 
@@ -71,6 +72,7 @@ export async function logInClickhouse(
         time_to_first_token: response.time_to_first_token ?? null,
         target_url: request.target_url ?? null,
         request_ip: request.request_ip ?? null,
+        provider: request.provider ?? null,
       },
     ]),
     clickhouseDb.dbInsertClickhouse(

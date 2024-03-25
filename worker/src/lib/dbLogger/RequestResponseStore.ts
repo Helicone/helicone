@@ -486,6 +486,7 @@ export class RequestResponseStore {
           property_key: p.key,
           property_value: p.value,
           threat: response.threat,
+          provider: response.provider,
         };
       })
     );
