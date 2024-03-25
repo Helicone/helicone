@@ -12,7 +12,12 @@ import { Json } from "../../db/database.types";
 import { mapGeminiPro } from "./mappers";
 import { S3Client } from "../db/s3Client";
 
-export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
+export type Provider =
+  | "OPENAI"
+  | "ANTHROPIC"
+  | "TOGETHERAI"
+  | "GROQ"
+  | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
 export interface HeliconeRequest {
