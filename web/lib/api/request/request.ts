@@ -15,7 +15,12 @@ import { LlmSchema } from "../models/requestResponseModel";
 import { S3Client } from "../db/s3Client";
 import { mapGeminiPro } from "../graphql/helpers/mappers";
 
-export type Provider = "OPENAI" | "ANTHROPIC" | "TOGETHERAI" | "CUSTOM";
+export type Provider =
+  | "OPENAI"
+  | "ANTHROPIC"
+  | "TOGETHERAI"
+  | "GROQ"
+  | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 3 * 1024 * 1024;
 
 export interface HeliconeRequest {
@@ -202,19 +207,23 @@ async function mapLLMCalls(
 ): Promise<Result<HeliconeRequest[], string>> {
   const promises =
     heliconeRequests?.map(async (heliconeRequest) => {
-      // First retrieve bodies from s3
+      // First retrieve s3 signed urls if past the implementation date
+      const s3ImplementationDate = new Date("2024-03-22T23:00:00Z");
+      const requestCreatedAt = new Date(heliconeRequest.request_created_at);
+      if (requestCreatedAt > s3ImplementationDate) {
+        const { data: signedBodyUrl, error: signedBodyUrlErr } =
+          await s3Client.getRequestResponseBodySignedUrl(
+            orgId,
+            heliconeRequest.request_id
+          );
 
-      const { data: signedBodyUrl, error: signedBodyUrlErr } =
-        await s3Client.getRequestResponseBodySignedUrl(
-          orgId,
-          heliconeRequest.request_id
-        );
+        if (signedBodyUrlErr || !signedBodyUrl) {
+          // If there was an error, just return the request as is
+          return heliconeRequest;
+        }
 
-      if (signedBodyUrlErr || !signedBodyUrl) {
-        return heliconeRequest;
+        heliconeRequest.signed_body_url = signedBodyUrl;
       }
-
-      heliconeRequest.signed_body_url = signedBodyUrl;
 
       // Next map to standardized schema
       // Extract the model from various possible locations.
