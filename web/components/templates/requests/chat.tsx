@@ -157,7 +157,7 @@ export const SingleChat = (props: {
                 <div key={index}>
                   {item.image_url.url ? (
                     <img
-                      src={item.image_url.url}
+                      src={item.image_url?.url}
                       alt={""}
                       width={600}
                       height={600}
