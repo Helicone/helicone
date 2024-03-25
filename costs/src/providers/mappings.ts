@@ -1,4 +1,4 @@
-const openAiPattern = /^https:\/\/api\.openai\.com\/v\d+\/?$/;
+const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
 const azurePattern =
   /^(https?:\/\/)?([^.]*\.)?(openai\.azure\.com|azure-api\.net)(\/.*)?$/;
