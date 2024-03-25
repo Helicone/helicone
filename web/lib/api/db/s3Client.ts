@@ -7,7 +7,14 @@ const S3_SECRET_KEY = process.env.S3_SECRET_KEY ?? "";
 const S3_ENDPOINT = process.env.S3_ENDPOINT ?? "";
 const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME ?? "";
 
-if (!S3_ACCESS_KEY || !S3_SECRET_KEY || !S3_ENDPOINT || !S3_BUCKET_NAME) {
+// S3 endpoint can be empty string
+if (
+  !S3_ACCESS_KEY ||
+  !S3_SECRET_KEY ||
+  S3_ENDPOINT === null ||
+  S3_ENDPOINT === undefined ||
+  !S3_BUCKET_NAME
+) {
   throw new Error("S3 env variables not set");
 }
 
