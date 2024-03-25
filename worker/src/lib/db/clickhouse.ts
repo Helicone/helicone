@@ -182,6 +182,7 @@ export interface CacheHits {
   latency: Nullable<number>;
   model: string;
   created_at: Nullable<string>;
+  provider: Nullable<string>;
 }
 
 export interface RateLimitLog {

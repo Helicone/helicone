@@ -9,7 +9,6 @@ const MAX_USER_ID_LENGTH = 7000;
 
 // Replaces all the image_url that is not a url or not { url: url }  with
 // { unsupported_image: true }
-//
 function unsupportedImage(body: any): any {
   if (typeof body !== "object" || body === null) {
     return body;
@@ -57,6 +56,7 @@ export async function logRequest(
         id: string | null;
         job: string | null;
       };
+      body: string; // For S3 storage
     },
     string
   >
@@ -109,18 +109,20 @@ export async function logRequest(
       return null;
     };
 
+    const body = request.omitLog
+      ? {
+          model:
+            (requestBody as any).model !== "undefined"
+              ? (requestBody as any).model
+              : null,
+        }
+      : unsupportedImage(requestBody);
+
     const createdAt = request.startTime ?? new Date();
     const requestData = {
       id: request.requestId,
       path: request.path,
-      body: request.omitLog
-        ? {
-            model:
-              (requestBody as any).model !== "undefined"
-                ? (requestBody as any).model
-                : null,
-          }
-        : unsupportedImage(requestBody),
+      body: body, // TODO: Remove in favor of S3 storage
       auth_hash: "",
       user_id: request.userId ?? null,
       prompt_id: request.promptId ?? null,
@@ -182,6 +184,7 @@ export async function logRequest(
           id: jobNode?.data.id ?? null,
           job: jobNode?.data.job ?? null,
         },
+        body: body,
       },
       error: null,
     };
