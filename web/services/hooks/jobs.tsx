@@ -42,7 +42,7 @@ export const useGetJobs = (props: {
         offset: (currentPage - 1) * currentPageSize,
         filters: advancedFilter,
       },
-      pollInterval: isLive ? 2_000 : undefined,
+      pollInterval: isLive ? 10_000 : undefined,
     }),
   };
 };
