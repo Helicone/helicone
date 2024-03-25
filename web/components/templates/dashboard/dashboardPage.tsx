@@ -234,11 +234,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   }
 
   const onSetAdvancedFilters = (filters: UIFilterRow[]) => {
-    if (filters.length > 0) {
-      const currentAdvancedFilters = encodeURIComponent(
-        JSON.stringify(filters.map(encodeFilter).join("|"))
-      );
-    } else {
+    if (!filters.length) {
       setCurrentFilter(undefined);
     }
 
