@@ -218,7 +218,7 @@ app.post(
   "/v1/request/query",
   withAuth<
     paths["/v1/request/query"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, authParams, s3Client }) => {
+  >(async ({ request, res, authParams }) => {
     const body = await request.getRawBody<any>();
 
     const { filter, offset, limit, sort, isCached } = body;
@@ -229,16 +229,14 @@ app.post(
           filter,
           offset,
           limit,
-          sort,
-          s3Client
+          sort
         )
       : await getRequests(
           authParams.organizationId,
           filter,
           offset,
           limit,
-          sort,
-          s3Client
+          sort
         );
     postHogClient?.capture({
       distinctId: `${await hashAuth(body)}-${authParams.organizationId}`,
@@ -382,7 +380,7 @@ app.post(
   "/v1/dataset/:datasetId/fine-tune",
   withAuth<
     paths["/v1/dataset/{datasetId}/fine-tune"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, authParams, s3Client }) => {
+  >(async ({ request, res, supabaseClient, authParams }) => {
     if (!(await hasAccessToFineTune(supabaseClient))) {
       res.status(405).json({
         error: "Must be on pro or higher plan to use fine-tuning",
@@ -425,8 +423,7 @@ app.post(
       filterNode,
       0,
       1000,
-      {},
-      s3Client
+      {}
     );
 
     if (metrics.error || !metrics.data || metrics.data.length === 0) {
@@ -523,7 +520,7 @@ app.post(
   "/v1/fine-tune",
   withAuth<
     paths["/v1/fine-tune"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, authParams, s3Client }) => {
+  >(async ({ request, res, supabaseClient, authParams }) => {
     if (!(await hasAccessToFineTune(supabaseClient))) {
       res.status(405).json({
         error: "Must be on pro or higher plan to use fine-tuning",
@@ -540,8 +537,7 @@ app.post(
       filter,
       0,
       1000,
-      {},
-      s3Client
+      {}
     );
 
     if (metrics.error || !metrics.data || metrics.data.length === 0) {
