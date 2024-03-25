@@ -154,11 +154,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           }
         );
 
-        const result = (await resp.json()) as Result<HeliconeRequest, string>;
+        const result = (await resp.json()) as Result<HeliconeRequest[], string>;
 
         // update below logic to work for single request
-        if (result.data && !result.error) {
-          const request = result.data;
+        if (result.data?.[0] && !result.error) {
+          const request = result.data[0];
           if (request?.signed_body_url) {
             try {
               const contentResponse = await fetch(request.signed_body_url);
@@ -177,7 +177,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             }
           }
 
-          const normalizedRequest = getNormalizedRequest(result.data);
+          const normalizedRequest = getNormalizedRequest(result.data[0]);
           setSelectedData(normalizedRequest);
           setOpen(true);
         }
