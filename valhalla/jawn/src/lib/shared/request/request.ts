@@ -62,8 +62,7 @@ export async function getRequests(
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRequest,
-  s3Client: S3Client
+  sort: SortLeafRequest
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -120,6 +119,12 @@ export async function getRequests(
   OFFSET ${offset}
 `;
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
+  const s3Client = new S3Client(
+    process.env.S3_ACCESS_KEY ?? "",
+    process.env.S3_SECRET_KEY ?? "",
+    process.env.S3_ENDPOINT ?? "",
+    process.env.S3_BUCKET_NAME ?? ""
+  );
   const results = await mapLLMCalls(requests.data, s3Client, orgId);
   return resultMap(results, (data) => {
     return data;
@@ -131,8 +136,7 @@ export async function getRequestsCached(
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRequest,
-  s3Client: S3Client
+  sort: SortLeafRequest
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -189,7 +193,12 @@ export async function getRequestsCached(
 `;
 
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
-
+  const s3Client = new S3Client(
+    process.env.S3_ACCESS_KEY ?? "",
+    process.env.S3_SECRET_KEY ?? "",
+    process.env.S3_ENDPOINT ?? "",
+    process.env.S3_BUCKET_NAME ?? ""
+  );
   const results = await mapLLMCalls(requests.data, s3Client, orgId);
 
   return resultMap(results, (data) => {
@@ -205,7 +214,7 @@ async function mapLLMCalls(
   const promises =
     heliconeRequests?.map(async (heliconeRequest) => {
       // First retrieve s3 signed urls if past the implementation date
-      const s3ImplementationDate = new Date("2024-03-22T23:00:00Z");
+      const s3ImplementationDate = new Date("2024-03-25T21:00:00Z");
       const requestCreatedAt = new Date(heliconeRequest.request_created_at);
       if (requestCreatedAt > s3ImplementationDate) {
         const { data: signedBodyUrl, error: signedBodyUrlErr } =
