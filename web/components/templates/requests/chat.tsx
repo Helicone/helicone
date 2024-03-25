@@ -155,9 +155,9 @@ export const SingleChat = (props: {
             {arr.map((item, index) =>
               item.type === "image_url" || item.type === "image" ? (
                 <div key={index}>
-                  {item.image_url.url ? (
+                  {item.image_url?.url ? (
                     <img
-                      src={item.image_url?.url}
+                      src={item.image_url.url}
                       alt={""}
                       width={600}
                       height={600}
