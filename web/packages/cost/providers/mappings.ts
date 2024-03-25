@@ -116,6 +116,8 @@ export const providers: {
   },
 ];
 
+export const allCosts = providers.flatMap((provider) => provider.costs ?? []);
+
 export const defaultProvider = providers.find(
   (provider) => provider.provider === "OPENAI"
 )!;
