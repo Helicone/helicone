@@ -33,7 +33,7 @@ export default function FiltersButton({
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute right-0 mt-2 w-56 z-10 origin-top-right divide-y divide-gray-100 dark:divide-gray-900 rounded-md bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <Menu.Items className="absolute right-0 mt-2 w-56 z-10 origin-top-right divide-y divide-gray-100 dark:divide-gray-900 rounded-md bg-white border border-gray-300 dark:border-gray-700 dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="px-1 py-1">
               {filters && filters.length > 0 ? (
                 filters.map((filter, idx) => (
@@ -46,10 +46,9 @@ export default function FiltersButton({
                         onClick={() => onFilterChange && onFilterChange(filter)}
                       >
                         {filter.name}
-                        {currentFilter &&
-                          currentFilter.filter === filter.filter && (
-                            <CheckIcon className="ml-auto h-5 w-5" />
-                          )}
+                        {currentFilter && currentFilter.id === filter.id && (
+                          <CheckIcon className="ml-auto h-5 w-5" />
+                        )}
                       </button>
                     )}
                   </Menu.Item>

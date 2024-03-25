@@ -14,7 +14,7 @@ import {
   Legend,
 } from "@tremor/react";
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { ModelMetric } from "../../../lib/api/models/models";
 import {
@@ -49,6 +49,7 @@ import { OrganizationFilter } from "../../../services/lib/organization_layout/or
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
 import { v4 as uuidv4 } from "uuid";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -88,6 +89,9 @@ export type DashboardMode = "requests" | "costs" | "errors";
 const DashboardPage = (props: DashboardPageProps) => {
   const { user } = props;
   const searchParams = useSearchParams();
+  const [currentFilter, setCurrentFilter] = useLocalStorage<
+    OrganizationFilter | undefined
+  >("dashboard-filter", undefined);
 
   const getInterval = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -120,24 +124,67 @@ const DashboardPage = (props: DashboardPageProps) => {
     return range;
   };
 
-  const getAdvancedFilters = (): UIFilterRow[] => {
-    try {
-      const currentAdvancedFilters = searchParams.get("filters");
+  // const getAdvancedFilters = useCallback(() => {
+  //   try {
+  //     console.log("hello");
+  //     let currentAdvancedFilters;
+  //     if (currentFilter) {
+  //       currentAdvancedFilters = JSON.parse(currentFilter?.filter);
+  //     }
+  //     if (currentAdvancedFilters) {
+  //       const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
+  //       const decodedFilters = filters
+  //         .split("|")
+  //         .map(decodeFilter)
+  //         .filter((filter) => filter !== null) as UIFilterRow[];
+  //       console.log(2);
+  //       console.log(decodedFilters);
+  //       console.log(2);
+  //       return decodedFilters;
+  //     }
+  //   } catch (error) {
+  //     console.error("Error decoding advanced filters:", error);
+  //   }
+  //   console.log("bye");
+  //   return [];
+  // }, [currentFilter]);
 
-      if (currentAdvancedFilters) {
-        const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
-        const decodedFilters = filters
-          .split("|")
-          .map(decodeFilter)
-          .filter((filter) => filter !== null) as UIFilterRow[];
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
-        return decodedFilters;
+  useEffect(() => {
+    if (!currentFilter) return;
+    const getAdvancedFilters = (): UIFilterRow[] => {
+      try {
+        let currentAdvancedFilters;
+        if (currentFilter) {
+          currentAdvancedFilters = JSON.parse(currentFilter?.filter);
+        }
+
+        if (currentAdvancedFilters) {
+          const filters = decodeURIComponent(currentAdvancedFilters).slice(
+            2,
+            -2
+          );
+          const decodedFilters = filters
+            .split("|")
+            .map(decodeFilter)
+            .filter((filter) => filter !== null) as UIFilterRow[];
+
+          console.log(2);
+          console.log(decodedFilters);
+          console.log(2);
+
+          return decodedFilters;
+        }
+      } catch (error) {
+        console.error("Error decoding advanced filters:", error);
       }
-    } catch (error) {
-      console.error("Error decoding advanced filters:", error);
-    }
-    return [];
-  };
+      return [];
+    };
+
+    const filters = getAdvancedFilters();
+    setAdvancedFilters(filters);
+  }, [currentFilter]);
 
   const [interval, setInterval] = useState<TimeInterval>(
     getInterval() as TimeInterval
@@ -145,10 +192,6 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>(getTimeFilter());
 
   const [open, setOpen] = useState(false);
-
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>(
-    getAdvancedFilters()
-  );
 
   const debouncedAdvancedFilters = useDebounce(advancedFilters, 500);
 
@@ -195,9 +238,8 @@ const DashboardPage = (props: DashboardPageProps) => {
       const currentAdvancedFilters = encodeURIComponent(
         JSON.stringify(filters.map(encodeFilter).join("|"))
       );
-      searchParams.set("filters", JSON.stringify(currentAdvancedFilters));
     } else {
-      searchParams.delete("filters");
+      setCurrentFilter(undefined);
     }
 
     setAdvancedFilters(filters);
@@ -616,12 +658,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     isRefetching: isOrgLayoutRefetching,
   } = useOrganizationLayout(orgContext?.currentOrg?.id!, "dashboard");
 
-  const [layoutFilters, setLayoutFilters] = useState<OrganizationFilter[]>(
-    orgLayout?.filters ?? []
-  );
-  const [currentLayoutFilter, setCurrentLayoutFilter] =
-    useState<OrganizationFilter>();
-
   const onSaveFilter = async (name: string) => {
     const currentAdvancedFilters = encodeURIComponent(
       JSON.stringify(advancedFilters.map(encodeFilter).join("|"))
@@ -633,15 +669,9 @@ const DashboardPage = (props: DashboardPageProps) => {
       filter: JSON.stringify(encodedFilters),
       softDelete: false,
     };
-    console.log(3);
-    console.log(saveFilter);
-    console.log(3);
     if (advancedFilters.length > 0) {
       if (orgLayout && orgLayout?.filters?.length > 0) {
-        console.log("update");
-        console.log(`flts : ${JSON.stringify(orgLayout.filters)}`);
         const updatedFilters = [...orgLayout.filters, saveFilter];
-        console.log(`arr: ${JSON.stringify(updatedFilters)}`);
         await fetch(
           `/api/organization/${orgContext?.currentOrg?.id!}/update_filter`,
           {
@@ -656,7 +686,6 @@ const DashboardPage = (props: DashboardPageProps) => {
           }
         );
       } else {
-        alert("create");
         await fetch(`/api/organization/${orgContext?.currentOrg?.id!}/create`, {
           method: "POST",
           headers: {
@@ -669,8 +698,13 @@ const DashboardPage = (props: DashboardPageProps) => {
         });
       }
       await orgLayoutRefetch();
-      setCurrentLayoutFilter(saveFilter);
+      setCurrentFilter(saveFilter);
     }
+  };
+
+  const onLayoutFilterChange = (value: OrganizationFilter) => {
+    setCurrentFilter(value);
+    onSetAdvancedFilters(advancedFilters);
   };
 
   const renderUnauthorized = () => {
@@ -792,9 +826,9 @@ const DashboardPage = (props: DashboardPageProps) => {
               },
             }}
             filterLayouts={{
-              currentFilter: currentLayoutFilter,
+              currentFilter: currentFilter,
               filters: orgLayout?.filters,
-              onFilterChange: setCurrentLayoutFilter,
+              onFilterChange: onLayoutFilterChange,
               onSaveFilter: onSaveFilter,
             }}
           />

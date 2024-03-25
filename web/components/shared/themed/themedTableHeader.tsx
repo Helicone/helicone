@@ -110,6 +110,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
   const onSaveFilter = () => {
     filterLayouts?.onSaveFilter?.(filterName) ?? (() => {})();
     setIsSaveFiltersModalOpen(false);
+    setShowAdvancedFilters(false);
   };
 
   const handleOpenModal = (value: boolean) => {
@@ -294,7 +295,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                     onSaveFilters={handleOpenModal}
                   />
                 )}
-                {advancedFilter.filters.length > 0 && !showAdvancedFilters && (
+                {/* {advancedFilter.filters.length > 0 && !showAdvancedFilters && (
                   <div className="flex-wrap w-full flex-row space-x-4 space-y-2 mt-4">
                     {advancedFilter.filters.map((_filter, index) => {
                       return (
@@ -316,7 +317,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                       );
                     })}
                   </div>
-                )}
+                )} */}
               </>
             )}
           </div>
