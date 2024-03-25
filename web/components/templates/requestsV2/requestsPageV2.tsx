@@ -161,7 +161,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           const request = result.data[0];
           if (request?.signed_body_url) {
             try {
-              const contentResponse = await fetch(request.signed_body_url);
+              const contentResponse = await fetch(request.signed_body_url, {
+                next: { tags: [`s3-${request.request_id}`] },
+              });
               if (contentResponse.ok) {
                 const text = await contentResponse.text();
 
