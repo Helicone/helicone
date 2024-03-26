@@ -137,7 +137,15 @@ The default sources are as follow (groupped by platform):
     "apple-touch-startup-image-2732x2048.png",
     "apple-touch-startup-image-640x1136.png",
     "apple-touch-startup-image-750x1334.png",
-    "apple-touch-startup-image-828x1792.png"
+    "apple-touch-startup-image-828x1792.png",
+    "apple-touch-startup-image-1179x2556.png",
+    "apple-touch-startup-image-2556x1179.png",
+    "apple-touch-startup-image-1290x2796.png",
+    "apple-touch-startup-image-2796x1290.png",
+    "apple-touch-startup-image-1488x2266.png",
+    "apple-touch-startup-image-2266x1488.png",
+    "apple-touch-startup-image-1640x2360.png",
+    "apple-touch-startup-image-2360x1640.png"
   ],
   "favicons": [
     "favicon-16x16.png",

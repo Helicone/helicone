@@ -55,13 +55,13 @@ export default function timedOut(request, delays, options) {
             throw error;
         }
     });
-    if (typeof delays.request !== 'undefined') {
+    if (delays.request !== undefined) {
         const cancelTimeout = addTimeout(delays.request, timeoutHandler, 'request');
         once(request, 'response', (response) => {
             once(response, 'end', cancelTimeout);
         });
     }
-    if (typeof delays.socket !== 'undefined') {
+    if (delays.socket !== undefined) {
         const { socket } = delays;
         const socketTimeoutHandler = () => {
             timeoutHandler(socket, 'socket');
@@ -74,17 +74,17 @@ export default function timedOut(request, delays, options) {
             request.removeListener('timeout', socketTimeoutHandler);
         });
     }
-    const hasLookup = typeof delays.lookup !== 'undefined';
-    const hasConnect = typeof delays.connect !== 'undefined';
-    const hasSecureConnect = typeof delays.secureConnect !== 'undefined';
-    const hasSend = typeof delays.send !== 'undefined';
+    const hasLookup = delays.lookup !== undefined;
+    const hasConnect = delays.connect !== undefined;
+    const hasSecureConnect = delays.secureConnect !== undefined;
+    const hasSend = delays.send !== undefined;
     if (hasLookup || hasConnect || hasSecureConnect || hasSend) {
         once(request, 'socket', (socket) => {
             const { socketPath } = request;
             /* istanbul ignore next: hard to test */
             if (socket.connecting) {
                 const hasPath = Boolean(socketPath ?? net.isIP(hostname ?? host ?? '') !== 0);
-                if (hasLookup && !hasPath && typeof socket.address().address === 'undefined') {
+                if (hasLookup && !hasPath && socket.address().address === undefined) {
                     const cancelTimeout = addTimeout(delays.lookup, timeoutHandler, 'lookup');
                     once(socket, 'lookup', cancelTimeout);
                 }
@@ -122,13 +122,13 @@ export default function timedOut(request, delays, options) {
             }
         });
     }
-    if (typeof delays.response !== 'undefined') {
+    if (delays.response !== undefined) {
         once(request, 'upload-complete', () => {
             const cancelTimeout = addTimeout(delays.response, timeoutHandler, 'response');
             once(request, 'response', cancelTimeout);
         });
     }
-    if (typeof delays.read !== 'undefined') {
+    if (delays.read !== undefined) {
         once(request, 'response', (response) => {
             const cancelTimeout = addTimeout(delays.read, timeoutHandler, 'read');
             once(response, 'end', cancelTimeout);

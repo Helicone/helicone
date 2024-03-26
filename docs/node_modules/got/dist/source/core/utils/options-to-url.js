@@ -1,5 +1,3 @@
-/* istanbul ignore file: deprecated */
-import { URL } from 'node:url';
 const keys = [
     'protocol',
     'host',

@@ -1,3 +1,3 @@
-declare const _exports: (o: {}, p: PropertyKey) => p is never;
-export = _exports;
-//# sourceMappingURL=index.d.ts.map
+declare function hasOwn<O, K extends PropertyKey, V = unknown>(o: O, p: K): o is O & Record<K, V>;
+
+export = hasOwn;

@@ -1,6 +1,6 @@
 {
 	"name": "has-property-descriptors",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Does the environment have full property descriptor support? Handles IE 8's broken defineProperty/gOPD.",
 	"main": "index.js",
 	"exports": {
@@ -45,18 +45,18 @@
 	"homepage": "https://github.com/inspect-js/has-property-descriptors#readme",
 	"devDependencies": {
 		"@ljharb/eslint-config": "^21.1.0",
-		"aud": "^2.0.3",
+		"aud": "^2.0.4",
 		"auto-changelog": "^2.4.0",
 		"eslint": "=8.8.0",
 		"evalmd": "^0.0.19",
 		"in-publish": "^2.0.1",
-		"npmignore": "^0.3.0",
+		"npmignore": "^0.3.1",
 		"nyc": "^10.3.2",
 		"safe-publish-latest": "^2.0.0",
-		"tape": "^5.7.2"
+		"tape": "^5.7.4"
 	},
 	"dependencies": {
-		"get-intrinsic": "^1.2.2"
+		"es-define-property": "^1.0.0"
 	},
 	"testling": {
 		"files": "test/index.js"

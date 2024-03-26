@@ -132,7 +132,7 @@
   border-color: currentColor;
 }
 .katex .katex-version::after {
-  content: "0.16.9";
+  content: "0.16.10";
 }
 .katex .katex-mathml {
   /* Accessibility hack to only show to screen readers

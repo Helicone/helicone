@@ -2,18 +2,16 @@
 
 > Regular expression for matching [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code)
 
-
 ## Install
 
 ```
 $ npm install ansi-regex
 ```
 
-
 ## Usage
 
 ```js
-const ansiRegex = require('ansi-regex');
+import ansiRegex from 'ansi-regex';
 
 ansiRegex().test('\u001B[4mcake\u001B[0m');
 //=> true
@@ -31,7 +29,6 @@ ansiRegex().test('cake');
 //=> ['\u001B]8;;https://github.com\u0007', '\u001B]8;;\u0007']
 ```
 
-
 ## API
 
 ### ansiRegex(options?)
@@ -44,11 +41,10 @@ Type: `object`
 
 ##### onlyFirst
 
-Type: `boolean`<br>
+Type: `boolean`\
 Default: `false` *(Matches any ANSI escape codes in a string)*
 
 Match only the first ANSI escape.
-
 
 ## FAQ
 
@@ -58,12 +54,10 @@ Some of the codes we run as a test are codes that we acquired finding various li
 
 On the historical side, those ECMA standards were established in the early 90's whereas the VT100, for example, was designed in the mid/late 70's. At that point in time, control codes were still pretty ungoverned and engineers used them for a multitude of things, namely to activate hardware ports that may have been proprietary. Somewhere else you see a similar 'anarchy' of codes is in the x86 architecture for processors; there are a ton of "interrupts" that can mean different things on certain brands of processors, most of which have been phased out.
 
-
 ## Maintainers
 
 - [Sindre Sorhus](https://github.com/sindresorhus)
 - [Josh Junon](https://github.com/qix-)
-
 
 ---
 

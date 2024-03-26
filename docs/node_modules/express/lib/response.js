@@ -55,6 +55,7 @@ module.exports = res
  */
 
 var charsetRegExp = /;\s*charset\s*=/;
+var schemaAndHostRegExp = /^(?:[a-zA-Z][a-zA-Z0-9+.-]*:)?\/\/[^\\\/\?]+/;
 
 /**
  * Set status `code`.
@@ -904,15 +905,23 @@ res.cookie = function (name, value, options) {
  */
 
 res.location = function location(url) {
-  var loc = url;
+  var loc;
 
   // "back" is an alias for the referrer
   if (url === 'back') {
     loc = this.req.get('Referrer') || '/';
+  } else {
+    loc = String(url);
   }
 
-  // set location
-  return this.set('Location', encodeUrl(loc));
+  var m = schemaAndHostRegExp.exec(loc);
+  var pos = m ? m[0].length + 1 : 0;
+
+  // Only encode after host to avoid invalid encoding which can introduce
+  // vulnerabilities (e.g. `\\` to `%5C`).
+  loc = loc.slice(0, pos) + encodeUrl(loc.slice(pos));
+
+  return this.set('Location', loc);
 };
 
 /**

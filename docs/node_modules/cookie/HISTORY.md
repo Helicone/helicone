@@ -1,16 +1,21 @@
+0.6.0 / 2023-11-06
+==================
+
+  * Add `partitioned` option
+
 0.5.0 / 2022-04-11
 ==================
 
   * Add `priority` option
   * Fix `expires` option to reject invalid dates
-  * pref: improve default decode speed
-  * pref: remove slow string split in parse
+  * perf: improve default decode speed
+  * perf: remove slow string split in parse
 
 0.4.2 / 2022-02-02
 ==================
 
-  * pref: read value only when assigning in parse
-  * pref: remove unnecessary regexp in parse
+  * perf: read value only when assigning in parse
+  * perf: remove unnecessary regexp in parse
 
 0.4.1 / 2020-04-21
 ==================
@@ -41,7 +46,7 @@
 
   * perf: enable strict mode
   * perf: use for loop in parse
-  * perf: use string concatination for serialization
+  * perf: use string concatenation for serialization
 
 0.2.3 / 2015-10-25
 ==================

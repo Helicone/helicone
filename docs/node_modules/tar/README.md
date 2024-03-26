@@ -115,6 +115,8 @@ Handlers receive 3 arguments:
   encountered an error which prevented it from being unpacked.  This occurs
   when:
   - an unrecoverable fs error happens during unpacking,
+  - an entry is trying to extract into an excessively deep
+    location (by default, limited to 1024 subfolders),
   - an entry has `..` in the path and `preservePaths` is not set, or
   - an entry is extracting through a symbolic link, when `preservePaths` is
     not set.
@@ -427,6 +429,10 @@ The following options are supported:
   `process.umask()` to determine the default umask value, since tar will
   extract with whatever mode is provided, and let the process `umask` apply
   normally.
+- `maxDepth` The maximum depth of subfolders to extract into. This
+  defaults to 1024. Anything deeper than the limit will raise a
+  warning and skip the entry. Set to `Infinity` to remove the
+  limitation.
 
 The following options are mostly internal, but can be modified in some
 advanced use cases, such as re-using caches between runs.
@@ -749,6 +755,10 @@ Most unpack errors will cause a `warn` event to be emitted.  If the
   `process.umask()` to determine the default umask value, since tar will
   extract with whatever mode is provided, and let the process `umask` apply
   normally.
+- `maxDepth` The maximum depth of subfolders to extract into. This
+  defaults to 1024. Anything deeper than the limit will raise a
+  warning and skip the entry. Set to `Infinity` to remove the
+  limitation.
 
 ### class tar.Unpack.Sync
 

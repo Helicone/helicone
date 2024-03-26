@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.2.2](https://github.com/ljharb/set-function-length/compare/v1.2.1...v1.2.2) - 2024-03-09
+
+### Commits
+
+- [types] use shared config [`027032f`](https://github.com/ljharb/set-function-length/commit/027032fe9cc439644a07248ea6a8d813fcc767cb)
+- [actions] remove redundant finisher; use reusable workflow [`1fd4fb1`](https://github.com/ljharb/set-function-length/commit/1fd4fb1c58bd5170f0dcff7e320077c0aa2ffdeb)
+- [types] use a handwritten d.ts file instead of emit [`01b9761`](https://github.com/ljharb/set-function-length/commit/01b9761742c95e1118e8c2d153ce2ae43d9731aa)
+- [Deps] update `define-data-property`, `get-intrinsic`, `has-property-descriptors` [`bee8eaf`](https://github.com/ljharb/set-function-length/commit/bee8eaf7749f325357ade85cffeaeef679e513d4)
+- [Dev Deps] update `call-bind`, `tape` [`5dae579`](https://github.com/ljharb/set-function-length/commit/5dae579fdc3aab91b14ebb58f9c19ee3f509d434)
+- [Tests] use `@arethetypeswrong/cli` [`7e22425`](https://github.com/ljharb/set-function-length/commit/7e22425d15957fd3d6da0b6bca4afc0c8d255d2d)
+
 ## [v1.2.1](https://github.com/ljharb/set-function-length/compare/v1.2.0...v1.2.1) - 2024-02-06
 
 ### Commits

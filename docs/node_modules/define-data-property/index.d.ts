@@ -1,3 +1,12 @@
-declare const _exports: (obj: Record<PropertyKey, unknown>, property: PropertyKey, value: unknown, nonEnumerable?: boolean | null, nonWritable?: boolean | null, nonConfigurable?: boolean | null, loose?: boolean) => void;
-export = _exports;
-//# sourceMappingURL=index.d.ts.map
+
+declare function defineDataProperty(
+    obj: Record<PropertyKey, unknown>,
+    property: keyof typeof obj,
+    value: typeof obj[typeof property],
+    nonEnumerable?: boolean | null,
+    nonWritable?: boolean | null,
+    nonConfigurable?: boolean | null,
+    loose?: boolean
+): void;
+
+export = defineDataProperty;

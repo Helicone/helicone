@@ -1,5 +1,3 @@
-'use strict';
-
 // We define these manually to ensure they're always copied
 // even if they would move up the prototype chain
 // https://nodejs.org/api/http.html#http_class_http_incomingmessage
@@ -18,15 +16,15 @@ const knownProperties = [
 	'statusCode',
 	'statusMessage',
 	'trailers',
-	'url'
+	'url',
 ];
 
-module.exports = (fromStream, toStream) => {
+export default function mimicResponse(fromStream, toStream) {
 	if (toStream._readableState.autoDestroy) {
 		throw new Error('The second stream must have the `autoDestroy` option set to `false`');
 	}
 
-	const fromProperties = new Set(Object.keys(fromStream).concat(knownProperties));
+	const fromProperties = new Set([...Object.keys(fromStream), ...knownProperties]);
 
 	const properties = {};
 
@@ -47,7 +45,7 @@ module.exports = (fromStream, toStream) => {
 				fromStream[property] = value;
 			},
 			enumerable: true,
-			configurable: false
+			configurable: false,
 		};
 	}
 
@@ -74,4 +72,4 @@ module.exports = (fromStream, toStream) => {
 	});
 
 	return toStream;
-};
+}

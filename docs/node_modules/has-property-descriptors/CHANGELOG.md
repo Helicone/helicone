@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.0.2](https://github.com/inspect-js/has-property-descriptors/compare/v1.0.1...v1.0.2) - 2024-02-12
+
+### Commits
+
+- [Refactor] use `es-define-property` [`f93a8c8`](https://github.com/inspect-js/has-property-descriptors/commit/f93a8c85eba70cbceab500f2619fb5cce73a1805)
+- [Dev Deps] update `aud`, `npmignore`, `tape` [`42b0c9d`](https://github.com/inspect-js/has-property-descriptors/commit/42b0c9d1c23e747755f0f2924923c418ea34a9ee)
+- [Deps] update `get-intrinsic` [`35e9b46`](https://github.com/inspect-js/has-property-descriptors/commit/35e9b46a7f14331bf0de98b644dd803676746037)
+
 ## [v1.0.1](https://github.com/inspect-js/has-property-descriptors/compare/v1.0.0...v1.0.1) - 2023-10-20
 
 ### Commits

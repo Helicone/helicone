@@ -151,7 +151,7 @@ katex__WEBPACK_IMPORTED_MODULE_0___default().__defineMacro("\\tripledash", "{\\v
 //  It takes the argument to \ce or \pu and returns the corresponding TeX string.
 //
 
-var chemParse = function chemParse(tokens, stateMachine) {
+var chemParse = function (tokens, stateMachine) {
   // Recreate the argument string from KaTeX's array of tokens.
   var str = "";
   var expectedLoc = tokens.length && tokens[tokens.length - 1].loc.start;
@@ -183,7 +183,7 @@ var mhchemParser = {
   // Call like
   //   go("H2O");
   //
-  go: function go(input, stateMachine) {
+  go: function (input, stateMachine) {
     if (!input) {
       return [];
     }
@@ -315,7 +315,7 @@ var mhchemParser = {
       }
     }
   },
-  concatArray: function concatArray(a, b) {
+  concatArray: function (a, b) {
     if (b) {
       if (Array.isArray(b)) {
         for (var iB = 0; iB < b.length; iB++) {
@@ -351,7 +351,7 @@ var mhchemParser = {
       'digits': /^[0-9]+/,
       '-9.,9': /^[+\-]?(?:[0-9]+(?:[,.][0-9]+)?|[0-9]*(?:\.[0-9]+))/,
       '-9.,9 no missing 0': /^[+\-]?[0-9]+(?:[.,][0-9]+)?/,
-      '(-)(9.,9)(e)(99)': function e99(input) {
+      '(-)(9.,9)(e)(99)': function (input) {
         var m = input.match(/^(\+\-|\+\/\-|\+|\-|\\pm\s?)?([0-9]+(?:[,.][0-9]+)?|[0-9]*(?:\.[0-9]+))?(\((?:[0-9]+(?:[,.][0-9]+)?|[0-9]*(?:\.[0-9]+))\))?(?:([eE]|\s*(\*|x|\\times|\u00D7)\s*10\^)([+\-]?[0-9]+|\{[+\-]?[0-9]+\}))?/);
 
         if (m && m[0]) {
@@ -363,7 +363,7 @@ var mhchemParser = {
 
         return null;
       },
-      '(-)(9)^(-9)': function _(input) {
+      '(-)(9)^(-9)': function (input) {
         var m = input.match(/^(\+\-|\+\/\-|\+|\-|\\pm\s?)?([0-9]+(?:[,.][0-9]+)?|[0-9]*(?:\.[0-9]+)?)\^([+\-]?[0-9]+|\{[+\-]?[0-9]+\})/);
 
         if (m && m[0]) {
@@ -375,7 +375,7 @@ var mhchemParser = {
 
         return null;
       },
-      'state of aggregation $': function stateOfAggregation$(input) {
+      'state of aggregation $': function (input) {
         // ... or crystal system
         var a = mhchemParser.patterns.findObserveGroups(input, "", /^\([a-z]{1,3}(?=[\),])/, ")", ""); // (aq), (aq,$\infty$), (aq, sat)
 
@@ -404,51 +404,51 @@ var mhchemParser = {
       '. ': /^([.\u22C5\u00B7\u2022])\s*/,
       '...': /^\.\.\.(?=$|[^.])/,
       '* ': /^([*])\s*/,
-      '^{(...)}': function _(input) {
+      '^{(...)}': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "^{", "", "", "}");
       },
-      '^($...$)': function $$(input) {
+      '^($...$)': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "^", "$", "$", "");
       },
       '^a': /^\^([0-9]+|[^\\_])/,
-      '^\\x{}{}': function x(input) {
+      '^\\x{}{}': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "^", /^\\[a-zA-Z]+\{/, "}", "", "", "{", "}", "", true);
       },
-      '^\\x{}': function x(input) {
+      '^\\x{}': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "^", /^\\[a-zA-Z]+\{/, "}", "");
       },
       '^\\x': /^\^(\\[a-zA-Z]+)\s*/,
       '^(-1)': /^\^(-?\d+)/,
       '\'': /^'/,
-      '_{(...)}': function _(input) {
+      '_{(...)}': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "_{", "", "", "}");
       },
-      '_($...$)': function _$$(input) {
+      '_($...$)': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "_", "$", "$", "");
       },
       '_9': /^_([+\-]?[0-9]+|[^\\])/,
-      '_\\x{}{}': function _X(input) {
+      '_\\x{}{}': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "_", /^\\[a-zA-Z]+\{/, "}", "", "", "{", "}", "", true);
       },
-      '_\\x{}': function _X(input) {
+      '_\\x{}': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "_", /^\\[a-zA-Z]+\{/, "}", "");
       },
       '_\\x': /^_(\\[a-zA-Z]+)\s*/,
       '^_': /^(?:\^(?=_)|\_(?=\^)|[\^_]$)/,
       '{}': /^\{\}/,
-      '{...}': function _(input) {
+      '{...}': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "", "{", "}", "");
       },
-      '{(...)}': function _(input) {
+      '{(...)}': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "{", "", "", "}");
       },
-      '$...$': function $$(input) {
+      '$...$': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "", "$", "$", "");
       },
-      '${(...)}$': function $$(input) {
+      '${(...)}$': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "${", "", "", "}$");
       },
-      '$(...)$': function $$(input) {
+      '$(...)$': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "$", "", "", "$");
       },
       '=<>': /^[=<>]/,
@@ -462,21 +462,21 @@ var mhchemParser = {
       'pm-operator': /^(?:\\pm|\$\\pm\$|\+-|\+\/-)/,
       'operator': /^(?:\+|(?:[\-=<>]|<<|>>|\\approx|\$\\approx\$)(?=\s|$|-?[0-9]))/,
       'arrowUpDown': /^(?:v|\(v\)|\^|\(\^\))(?=$|[\s,;\)\]\}])/,
-      '\\bond{(...)}': function bond(input) {
+      '\\bond{(...)}': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "\\bond{", "", "", "}");
       },
       '->': /^(?:<->|<-->|->|<-|<=>>|<<=>|<=>|[\u2192\u27F6\u21CC])/,
       'CMT': /^[CMT](?=\[)/,
-      '[(...)]': function _(input) {
+      '[(...)]': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "[", "", "", "]");
       },
       '1st-level escape': /^(&|\\\\|\\hline)\s*/,
       '\\,': /^(?:\\[,\ ;:])/,
       // \\x - but output no space before
-      '\\x{}{}': function x(input) {
+      '\\x{}{}': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "", /^\\[a-zA-Z]+\{/, "}", "", "", "{", "}", "", true);
       },
-      '\\x{}': function x(input) {
+      '\\x{}': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "", /^\\[a-zA-Z]+\{/, "}", "");
       },
       '\\ca': /^\\ca(?:\s+|(?![a-zA-Z]))/,
@@ -484,28 +484,28 @@ var mhchemParser = {
       'orbital': /^(?:[0-9]{1,2}[spdfgh]|[0-9]{0,2}sp)(?=$|[^a-zA-Z])/,
       // only those with numbers in front, because the others will be formatted correctly anyway
       'others': /^[\/~|]/,
-      '\\frac{(...)}': function frac(input) {
+      '\\frac{(...)}': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "\\frac{", "", "", "}", "{", "", "", "}");
       },
-      '\\overset{(...)}': function overset(input) {
+      '\\overset{(...)}': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "\\overset{", "", "", "}", "{", "", "", "}");
       },
-      "\\underset{(...)}": function underset(input) {
+      '\\underset{(...)}': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "\\underset{", "", "", "}", "{", "", "", "}");
       },
-      "\\underbrace{(...)}": function underbrace(input) {
+      '\\underbrace{(...)}': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "\\underbrace{", "", "", "}_", "{", "", "", "}");
       },
-      '\\color{(...)}0': function color0(input) {
+      '\\color{(...)}0': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "\\color{", "", "", "}");
       },
-      '\\color{(...)}{(...)}1': function color1(input) {
+      '\\color{(...)}{(...)}1': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "\\color{", "", "", "}", "{", "", "", "}");
       },
-      '\\color(...){(...)}2': function color2(input) {
+      '\\color(...){(...)}2': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "\\color", "\\", "", /^(?=\{)/, "{", "", "", "}");
       },
-      '\\ce{(...)}': function ce(input) {
+      '\\ce{(...)}': function (input) {
         return mhchemParser.patterns.findObserveGroups(input, "\\ce{", "", "", "}");
       },
       'oxidation$': /^(?:[+-][IVX]+|\\pm\s*0|\$\\pm\$\s*0)$/,
@@ -513,7 +513,7 @@ var mhchemParser = {
       // 0 could be oxidation or charge
       'roman numeral': /^[IVX]+/,
       '1/2$': /^[+\-]?(?:[0-9]+|\$[a-z]\$|[a-z])\/[0-9]+(?:\$[a-z]\$|[a-z])?$/,
-      'amount': function amount(input) {
+      'amount': function (input) {
         var match; // e.g. 2, 0.5, 1/2, -2, n/2, +;  $a$ could be added later in parsing
 
         match = input.match(/^(?:(?:(?:\([+\-]?[0-9]+\/[0-9]+\)|[+\-]?(?:[0-9]+|\$[a-z]\$|[a-z])\/[0-9]+|[+\-]?[0-9]+[.,][0-9]+|[+\-]?\.[0-9]+|[+\-]?[0-9]+)(?:[a-z](?=\s*[A-Z]))?)|[+\-]?[a-z](?=\s*[A-Z])|\+(?!\s))/);
@@ -541,11 +541,11 @@ var mhchemParser = {
 
         return null;
       },
-      'amount2': function amount2(input) {
+      'amount2': function (input) {
         return this['amount'](input);
       },
       '(KV letters),': /^(?:[A-Z][a-z]{0,2}|i)(?=,)/,
-      'formula$': function formula$(input) {
+      'formula$': function (input) {
         if (input.match(/^\([a-z]+\)$/)) {
           return null;
         } // state of aggregation = no formula
@@ -567,9 +567,9 @@ var mhchemParser = {
       '//': /^\s*(\/\/)\s*/,
       '*': /^\s*[*.]\s*/
     },
-    findObserveGroups: function findObserveGroups(input, begExcl, begIncl, endIncl, endExcl, beg2Excl, beg2Incl, end2Incl, end2Excl, combine) {
+    findObserveGroups: function (input, begExcl, begIncl, endIncl, endExcl, beg2Excl, beg2Incl, end2Incl, end2Excl, combine) {
       /** @type {{(input: string, pattern: string | RegExp): string | string[] | null;}} */
-      var _match = function _match(input, pattern) {
+      var _match = function (input, pattern) {
         if (typeof pattern === "string") {
           if (input.indexOf(pattern) !== 0) {
             return null;
@@ -589,7 +589,7 @@ var mhchemParser = {
       /** @type {{(input: string, i: number, endChars: string | RegExp): {endMatchBegin: number, endMatchEnd: number} | null;}} */
 
 
-      var _findObserveGroups = function _findObserveGroups(input, i, endChars) {
+      var _findObserveGroups = function (input, i, endChars) {
         var braces = 0;
 
         while (i < input.length) {
@@ -669,7 +669,7 @@ var mhchemParser = {
     // e.g. match("a", input) will look for the regexp called "a" and see if it matches
     // returns null or {match_:"a", remainder:"bc"}
     //
-    match_: function match_(m, input) {
+    match_: function (m, input) {
       var pattern = mhchemParser.patterns.patterns[m];
 
       if (pattern === undefined) {
@@ -705,88 +705,88 @@ var mhchemParser = {
   // Generic state machine actions
   //
   actions: {
-    'a=': function a(buffer, m) {
+    'a=': function (buffer, m) {
       buffer.a = (buffer.a || "") + m;
     },
-    'b=': function b(buffer, m) {
+    'b=': function (buffer, m) {
       buffer.b = (buffer.b || "") + m;
     },
-    'p=': function p(buffer, m) {
+    'p=': function (buffer, m) {
       buffer.p = (buffer.p || "") + m;
     },
-    'o=': function o(buffer, m) {
+    'o=': function (buffer, m) {
       buffer.o = (buffer.o || "") + m;
     },
-    'q=': function q(buffer, m) {
+    'q=': function (buffer, m) {
       buffer.q = (buffer.q || "") + m;
     },
-    'd=': function d(buffer, m) {
+    'd=': function (buffer, m) {
       buffer.d = (buffer.d || "") + m;
     },
-    'rm=': function rm(buffer, m) {
+    'rm=': function (buffer, m) {
       buffer.rm = (buffer.rm || "") + m;
     },
-    'text=': function text(buffer, m) {
+    'text=': function (buffer, m) {
       buffer.text_ = (buffer.text_ || "") + m;
     },
-    'insert': function insert(buffer, m, a) {
+    'insert': function (buffer, m, a) {
       return {
         type_: a
       };
     },
-    'insert+p1': function insertP1(buffer, m, a) {
+    'insert+p1': function (buffer, m, a) {
       return {
         type_: a,
         p1: m
       };
     },
-    'insert+p1+p2': function insertP1P2(buffer, m, a) {
+    'insert+p1+p2': function (buffer, m, a) {
       return {
         type_: a,
         p1: m[0],
         p2: m[1]
       };
     },
-    'copy': function copy(buffer, m) {
+    'copy': function (buffer, m) {
       return m;
     },
-    'rm': function rm(buffer, m) {
+    'rm': function (buffer, m) {
       return {
         type_: 'rm',
         p1: m || ""
       };
     },
-    'text': function text(buffer, m) {
+    'text': function (buffer, m) {
       return mhchemParser.go(m, 'text');
     },
-    '{text}': function text(buffer, m) {
+    '{text}': function (buffer, m) {
       var ret = ["{"];
       mhchemParser.concatArray(ret, mhchemParser.go(m, 'text'));
       ret.push("}");
       return ret;
     },
-    'tex-math': function texMath(buffer, m) {
+    'tex-math': function (buffer, m) {
       return mhchemParser.go(m, 'tex-math');
     },
-    'tex-math tight': function texMathTight(buffer, m) {
+    'tex-math tight': function (buffer, m) {
       return mhchemParser.go(m, 'tex-math tight');
     },
-    'bond': function bond(buffer, m, k) {
+    'bond': function (buffer, m, k) {
       return {
         type_: 'bond',
         kind_: k || m
       };
     },
-    'color0-output': function color0Output(buffer, m) {
+    'color0-output': function (buffer, m) {
       return {
         type_: 'color0',
         color: m[0]
       };
     },
-    'ce': function ce(buffer, m) {
+    'ce': function (buffer, m) {
       return mhchemParser.go(m);
     },
-    '1/2': function _(buffer, m) {
+    '1/2': function (buffer, m) {
       /** @type {ParserOutput[]} */
       var ret = [];
 
@@ -813,7 +813,7 @@ var mhchemParser = {
 
       return ret;
     },
-    '9,9': function _(buffer, m) {
+    '9,9': function (buffer, m) {
       return mhchemParser.go(m, '9,9');
     }
   },
@@ -822,7 +822,7 @@ var mhchemParser = {
   // convert  { 'letter': { 'state': { action_: 'output' } } }  to  { 'state' => [ { pattern: 'letter', task: { action_: [{type_: 'output'}] } } ] }
   // with expansion of 'a|b' to 'a' and 'b' (at 2 places)
   //
-  createTransitions: function createTransitions(o) {
+  createTransitions: function (o) {
     var pattern, state;
     /** @type {string[]} */
 
@@ -1458,7 +1458,7 @@ mhchemParser.stateMachines = {
           nextState: '3'
         }
       },
-      "\\underset{(...)}": {
+      '\\underset{(...)}': {
         '*': {
           action_: [{
             type_: 'output',
@@ -1467,7 +1467,7 @@ mhchemParser.stateMachines = {
           nextState: '3'
         }
       },
-      "\\underbrace{(...)}": {
+      '\\underbrace{(...)}': {
         '*': {
           action_: [{
             type_: 'output',
@@ -1553,7 +1553,7 @@ mhchemParser.stateMachines = {
       }
     }),
     actions: {
-      'o after d': function oAfterD(buffer, m) {
+      'o after d': function (buffer, m) {
         var ret;
 
         if ((buffer.d || "").match(/^[0-9]+$/)) {
@@ -1568,11 +1568,11 @@ mhchemParser.stateMachines = {
         mhchemParser.actions['o='](buffer, m);
         return ret;
       },
-      'd= kv': function dKv(buffer, m) {
+      'd= kv': function (buffer, m) {
         buffer.d = m;
         buffer.dType = 'kv';
       },
-      'charge or bond': function chargeOrBond(buffer, m) {
+      'charge or bond': function (buffer, m) {
         if (buffer['beginsWithBond']) {
           /** @type {ParserOutput[]} */
           var ret = [];
@@ -1583,7 +1583,7 @@ mhchemParser.stateMachines = {
           buffer.d = m;
         }
       },
-      '- after o/d': function afterOD(buffer, m, isAfterD) {
+      '- after o/d': function (buffer, m, isAfterD) {
         var c1 = mhchemParser.patterns.match_('orbital', buffer.o || "");
         var c2 = mhchemParser.patterns.match_('one lowercase greek letter $', buffer.o || "");
         var c3 = mhchemParser.patterns.match_('one lowercase latin letter $', buffer.o || "");
@@ -1617,35 +1617,35 @@ mhchemParser.stateMachines = {
 
         return ret;
       },
-      'a to o': function aToO(buffer) {
+      'a to o': function (buffer) {
         buffer.o = buffer.a;
         buffer.a = undefined;
       },
-      'sb=true': function sbTrue(buffer) {
+      'sb=true': function (buffer) {
         buffer.sb = true;
       },
-      'sb=false': function sbFalse(buffer) {
+      'sb=false': function (buffer) {
         buffer.sb = false;
       },
-      'beginsWithBond=true': function beginsWithBondTrue(buffer) {
+      'beginsWithBond=true': function (buffer) {
         buffer['beginsWithBond'] = true;
       },
-      'beginsWithBond=false': function beginsWithBondFalse(buffer) {
+      'beginsWithBond=false': function (buffer) {
         buffer['beginsWithBond'] = false;
       },
-      'parenthesisLevel++': function parenthesisLevel(buffer) {
+      'parenthesisLevel++': function (buffer) {
         buffer['parenthesisLevel']++;
       },
-      'parenthesisLevel--': function parenthesisLevel(buffer) {
+      'parenthesisLevel--': function (buffer) {
         buffer['parenthesisLevel']--;
       },
-      'state of aggregation': function stateOfAggregation(buffer, m) {
+      'state of aggregation': function (buffer, m) {
         return {
           type_: 'state of aggregation',
           p1: mhchemParser.go(m, 'o')
         };
       },
-      'comma': function comma(buffer, m) {
+      'comma': function (buffer, m) {
         var a = m.replace(/\s*$/, '');
         var withSpace = a !== m;
 
@@ -1661,7 +1661,7 @@ mhchemParser.stateMachines = {
           };
         }
       },
-      'output': function output(buffer, m, entityFollows) {
+      'output': function (buffer, m, entityFollows) {
         // entityFollows:
         //   undefined = if we have nothing else to output, also ignore the just read space (buffer.sb)
         //   1 = an entity follows, never omit the space if there was one just read before (can only apply to state 1)
@@ -1756,63 +1756,63 @@ mhchemParser.stateMachines = {
 
         return ret;
       },
-      'oxidation-output': function oxidationOutput(buffer, m) {
+      'oxidation-output': function (buffer, m) {
         var ret = ["{"];
         mhchemParser.concatArray(ret, mhchemParser.go(m, 'oxidation'));
         ret.push("}");
         return ret;
       },
-      'frac-output': function fracOutput(buffer, m) {
+      'frac-output': function (buffer, m) {
         return {
           type_: 'frac-ce',
           p1: mhchemParser.go(m[0]),
           p2: mhchemParser.go(m[1])
         };
       },
-      'overset-output': function oversetOutput(buffer, m) {
+      'overset-output': function (buffer, m) {
         return {
           type_: 'overset',
           p1: mhchemParser.go(m[0]),
           p2: mhchemParser.go(m[1])
         };
       },
-      'underset-output': function undersetOutput(buffer, m) {
+      'underset-output': function (buffer, m) {
         return {
           type_: 'underset',
           p1: mhchemParser.go(m[0]),
           p2: mhchemParser.go(m[1])
         };
       },
-      'underbrace-output': function underbraceOutput(buffer, m) {
+      'underbrace-output': function (buffer, m) {
         return {
           type_: 'underbrace',
           p1: mhchemParser.go(m[0]),
           p2: mhchemParser.go(m[1])
         };
       },
-      'color-output': function colorOutput(buffer, m) {
+      'color-output': function (buffer, m) {
         return {
           type_: 'color',
           color1: m[0],
           color2: mhchemParser.go(m[1])
         };
       },
-      'r=': function r(buffer, m) {
+      'r=': function (buffer, m) {
         buffer.r = m;
       },
-      'rdt=': function rdt(buffer, m) {
+      'rdt=': function (buffer, m) {
         buffer.rdt = m;
       },
-      'rd=': function rd(buffer, m) {
+      'rd=': function (buffer, m) {
         buffer.rd = m;
       },
-      'rqt=': function rqt(buffer, m) {
+      'rqt=': function (buffer, m) {
         buffer.rqt = m;
       },
-      'rq=': function rq(buffer, m) {
+      'rq=': function (buffer, m) {
         buffer.rq = m;
       },
-      'operator': function operator(buffer, m, p1) {
+      'operator': function (buffer, m, p1) {
         return {
           type_: 'operator',
           kind_: p1 || m
@@ -1944,7 +1944,7 @@ mhchemParser.stateMachines = {
       }
     }),
     actions: {
-      'output': function output(buffer) {
+      'output': function (buffer) {
         if (buffer.text_) {
           /** @type {ParserOutput} */
           var ret = {
@@ -2060,13 +2060,13 @@ mhchemParser.stateMachines = {
       }
     }),
     actions: {
-      'state of aggregation': function stateOfAggregation(buffer, m) {
+      'state of aggregation': function (buffer, m) {
         return {
           type_: 'state of aggregation subscript',
           p1: mhchemParser.go(m, 'o')
         };
       },
-      'color-output': function colorOutput(buffer, m) {
+      'color-output': function (buffer, m) {
         return {
           type_: 'color',
           color1: m[0],
@@ -2174,7 +2174,7 @@ mhchemParser.stateMachines = {
       }
     }),
     actions: {
-      'color-output': function colorOutput(buffer, m) {
+      'color-output': function (buffer, m) {
         return {
           type_: 'color',
           color1: m[0],
@@ -2205,7 +2205,7 @@ mhchemParser.stateMachines = {
       }
     }),
     actions: {
-      'roman-numeral': function romanNumeral(buffer, m) {
+      'roman-numeral': function (buffer, m) {
         return {
           type_: 'roman numeral',
           p1: m || ""
@@ -2237,7 +2237,7 @@ mhchemParser.stateMachines = {
       }
     }),
     actions: {
-      'output': function output(buffer) {
+      'output': function (buffer) {
         if (buffer.o) {
           /** @type {ParserOutput} */
           var ret = {
@@ -2283,10 +2283,10 @@ mhchemParser.stateMachines = {
       }
     }),
     actions: {
-      'tight operator': function tightOperator(buffer, m) {
+      'tight operator': function (buffer, m) {
         buffer.o = (buffer.o || "") + "{" + m + "}";
       },
-      'output': function output(buffer) {
+      'output': function (buffer) {
         if (buffer.o) {
           /** @type {ParserOutput} */
           var ret = {
@@ -2320,7 +2320,7 @@ mhchemParser.stateMachines = {
       }
     }),
     actions: {
-      'comma': function comma() {
+      'comma': function () {
         return {
           type_: 'commaDecimal'
         };
@@ -2407,7 +2407,7 @@ mhchemParser.stateMachines = {
       }
     }),
     actions: {
-      'enumber': function enumber(buffer, m) {
+      'enumber': function (buffer, m) {
         /** @type {ParserOutput[]} */
         var ret = [];
 
@@ -2451,7 +2451,7 @@ mhchemParser.stateMachines = {
 
         return ret;
       },
-      'number^': function number(buffer, m) {
+      'number^': function (buffer, m) {
         /** @type {ParserOutput[]} */
         var ret = [];
 
@@ -2465,18 +2465,18 @@ mhchemParser.stateMachines = {
         ret.push("^{" + m[2] + "}");
         return ret;
       },
-      'operator': function operator(buffer, m, p1) {
+      'operator': function (buffer, m, p1) {
         return {
           type_: 'operator',
           kind_: p1 || m
         };
       },
-      'space': function space() {
+      'space': function () {
         return {
           type_: 'pu-space-1'
         };
       },
-      'output': function output(buffer) {
+      'output': function (buffer) {
         /** @type {ParserOutput | ParserOutput[]} */
         var ret;
         var md = mhchemParser.patterns.match_('{(...)}', buffer.d || "");
@@ -2586,20 +2586,20 @@ mhchemParser.stateMachines = {
       }
     }),
     actions: {
-      'cdot': function cdot() {
+      'cdot': function () {
         return {
           type_: 'tight cdot'
         };
       },
-      '^(-1)': function _(buffer, m) {
+      '^(-1)': function (buffer, m) {
         buffer.rm += "^{" + m + "}";
       },
-      'space': function space() {
+      'space': function () {
         return {
           type_: 'pu-space-2'
         };
       },
-      'output': function output(buffer) {
+      'output': function (buffer) {
         /** @type {ParserOutput | ParserOutput[]} */
         var ret = [];
 
@@ -2653,12 +2653,12 @@ mhchemParser.stateMachines = {
       }
     }),
     actions: {
-      'comma': function comma() {
+      'comma': function () {
         return {
           type_: 'commaDecimal'
         };
       },
-      'output-0': function output0(buffer) {
+      'output-0': function (buffer) {
         /** @type {ParserOutput[]} */
         var ret = [];
         buffer.text_ = buffer.text_ || "";
@@ -2689,7 +2689,7 @@ mhchemParser.stateMachines = {
 
         return ret;
       },
-      'output-o': function outputO(buffer) {
+      'output-o': function (buffer) {
         /** @type {ParserOutput[]} */
         var ret = [];
         buffer.text_ = buffer.text_ || "";
@@ -2725,7 +2725,7 @@ mhchemParser.stateMachines = {
 /** @type {Texify} */
 
 var texify = {
-  go: function go(input, isInner) {
+  go: function (input, isInner) {
     // (recursive, max 4 levels)
     if (!input) {
       return "";
@@ -2754,14 +2754,14 @@ var texify = {
 
     return res;
   },
-  _goInner: function _goInner(input) {
+  _goInner: function (input) {
     if (!input) {
       return input;
     }
 
     return texify.go(input, true);
   },
-  _go2: function _go2(buf) {
+  _go2: function (buf) {
     /** @type {undefined | string} */
     var res;
 
@@ -3052,7 +3052,7 @@ var texify = {
     assertString(res);
     return res;
   },
-  _getArrow: function _getArrow(a) {
+  _getArrow: function (a) {
     switch (a) {
       case "->":
         return "rightarrow";
@@ -3089,7 +3089,7 @@ var texify = {
         throw ["MhchemBugT", "mhchem bug T. Please report."];
     }
   },
-  _getBond: function _getBond(a) {
+  _getBond: function (a) {
     switch (a) {
       case "-":
         return "{-}";
@@ -3147,7 +3147,7 @@ var texify = {
         throw ["MhchemBugT", "mhchem bug T. Please report."];
     }
   },
-  _getOperator: function _getOperator(a) {
+  _getOperator: function (a) {
     switch (a) {
       case "+":
         return " {}+{} ";

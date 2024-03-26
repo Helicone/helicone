@@ -9,9 +9,14 @@ let report = null;
 const getReport = () => {
   if (!report) {
     /* istanbul ignore next */
-    report = isLinux() && process.report
-      ? process.report.getReport()
-      : {};
+    if (isLinux() && process.report) {
+      const orig = process.report.excludeNetwork;
+      process.report.excludeNetwork = true;
+      report = process.report.getReport();
+      process.report.excludeNetwork = orig;
+    } else {
+      report = {};
+    }
   }
   return report;
 };

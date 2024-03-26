@@ -32,7 +32,7 @@ test('assert', function (t) {
 
 test('has', function (t) {
 	var channel = getSideChannel();
-	var o = [];
+	/** @type {unknown[]} */ var o = [];
 
 	t.equal(channel.has(o), false, 'nonexistent value yields false');
 

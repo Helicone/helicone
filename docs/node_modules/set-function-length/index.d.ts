@@ -1,7 +1,7 @@
-declare namespace _exports {
-    export { Func };
+declare namespace setFunctionLength {
+    type Func = (...args: unknown[]) => unknown;
 }
-declare const _exports: <T extends Func = Func>(fn: T, length: number, loose?: boolean) => T;
-export = _exports;
-type Func = (...args: unknown[]) => unknown;
-//# sourceMappingURL=index.d.ts.map
+
+declare function setFunctionLength<T extends setFunctionLength.Func = setFunctionLength.Func>(fn: T, length: number, loose?: boolean): T;
+
+export = setFunctionLength;

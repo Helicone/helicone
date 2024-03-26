@@ -1,6 +1,6 @@
 {
   "name": "follow-redirects",
-  "version": "1.15.5",
+  "version": "1.15.6",
   "description": "HTTP and HTTPS modules that follow redirects.",
   "license": "MIT",
   "main": "index.js",

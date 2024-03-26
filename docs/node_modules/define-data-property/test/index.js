@@ -34,21 +34,21 @@ test('defineDataProperty', function (t) {
 		forEach(v.nonBooleans, function (nonBoolean) {
 			if (nonBoolean !== null) {
 				st['throws'](
-				// @ts-expect-error
+					// @ts-expect-error
 					function () { defineDataProperty({}, 'key', 'value', nonBoolean); },
 					TypeError,
 					'throws on non-boolean nonEnumerable: ' + inspect(nonBoolean)
 				);
 
 				st['throws'](
-				// @ts-expect-error
+					// @ts-expect-error
 					function () { defineDataProperty({}, 'key', 'value', false, nonBoolean); },
 					TypeError,
 					'throws on non-boolean nonWritable: ' + inspect(nonBoolean)
 				);
 
 				st['throws'](
-				// @ts-expect-error
+					// @ts-expect-error
 					function () { defineDataProperty({}, 'key', 'value', false, false, nonBoolean); },
 					TypeError,
 					'throws on non-boolean nonConfigurable: ' + inspect(nonBoolean)

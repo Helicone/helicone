@@ -219,5 +219,5 @@ server.listen(3000);
 [coveralls-url]: https://coveralls.io/r/stream-utils/raw-body?branch=master
 [downloads-image]: https://img.shields.io/npm/dm/raw-body.svg
 [downloads-url]: https://npmjs.org/package/raw-body
-[github-actions-ci-image]: https://img.shields.io/github/workflow/status/stream-utils/raw-body/ci/master?label=ci
+[github-actions-ci-image]: https://img.shields.io/github/actions/workflow/status/stream-utils/raw-body/ci.yml?branch=master&label=ci
 [github-actions-ci-url]: https://github.com/jshttp/stream-utils/raw-body?query=workflow%3Aci

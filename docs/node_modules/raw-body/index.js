@@ -69,6 +69,13 @@ function getRawBody (stream, options, callback) {
   var done = callback
   var opts = options || {}
 
+  // light validation
+  if (stream === undefined) {
+    throw new TypeError('argument stream is required')
+  } else if (typeof stream !== 'object' || stream === null || typeof stream.on !== 'function') {
+    throw new TypeError('argument stream must be a stream')
+  }
+
   if (options === true || typeof options === 'string') {
     // short cut for encoding
     opts = {

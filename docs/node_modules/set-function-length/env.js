@@ -15,6 +15,7 @@ var boundFnsHaveConfigurableLengths = !!(bound && bound.configurable);
 
 var boundFnsHaveWritableLengths = !!(bound && bound.writable);
 
+/** @type {import('./env')} */
 module.exports = {
 	__proto__: null,
 	boundFnsHaveConfigurableLengths: boundFnsHaveConfigurableLengths,

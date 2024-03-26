@@ -1,1 +1,1 @@
-export {parseSelector} from './lib/index.js'
+export { parseSelector } from "./lib/index.js";

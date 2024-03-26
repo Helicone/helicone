@@ -1,8 +1,8 @@
 # body-parser
 
-[![NPM Version][npm-image]][npm-url]
-[![NPM Downloads][downloads-image]][downloads-url]
-[![Build Status][github-actions-ci-image]][github-actions-ci-url]
+[![NPM Version][npm-version-image]][npm-url]
+[![NPM Downloads][npm-downloads-image]][npm-url]
+[![Build Status][ci-image]][ci-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
 
 Node.js body parsing middleware.
@@ -454,11 +454,12 @@ app.use(bodyParser.text({ type: 'text/html' }))
 
 [MIT](LICENSE)
 
-[npm-image]: https://img.shields.io/npm/v/body-parser.svg
-[npm-url]: https://npmjs.org/package/body-parser
-[coveralls-image]: https://img.shields.io/coveralls/expressjs/body-parser/master.svg
+[ci-image]: https://badgen.net/github/checks/expressjs/body-parser/master?label=ci
+[ci-url]: https://github.com/expressjs/body-parser/actions/workflows/ci.yml
+[coveralls-image]: https://badgen.net/coveralls/c/github/expressjs/body-parser/master
 [coveralls-url]: https://coveralls.io/r/expressjs/body-parser?branch=master
-[downloads-image]: https://img.shields.io/npm/dm/body-parser.svg
-[downloads-url]: https://npmjs.org/package/body-parser
-[github-actions-ci-image]: https://img.shields.io/github/workflow/status/expressjs/body-parser/ci/master?label=ci
-[github-actions-ci-url]: https://github.com/expressjs/body-parser/actions/workflows/ci.yml
+[node-version-image]: https://badgen.net/npm/node/body-parser
+[node-version-url]: https://nodejs.org/en/download
+[npm-downloads-image]: https://badgen.net/npm/dm/body-parser
+[npm-url]: https://npmjs.org/package/body-parser
+[npm-version-image]: https://badgen.net/npm/v/body-parser
