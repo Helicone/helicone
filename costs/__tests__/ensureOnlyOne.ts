@@ -165,6 +165,12 @@ WHEN (request_response_log.provider = 'GOOGLE') THEN (
   ELSE 0
 END
 )
+WHEN (request_response_log.provider = 'COHERE') THEN (
+  CASE
+  WHEN (request_response_log.model = 'cohere/command-r') THEN 500 * request_response_log.prompt_tokens + 1500 * request_response_log.completion_tokens
+  ELSE 0
+END
+)
 WHEN (request_response_log.provider = 'MISTRAL') THEN (
   CASE
   WHEN (request_response_log.model = 'open-mistral-7b') THEN 250 * request_response_log.prompt_tokens + 250 * request_response_log.completion_tokens
