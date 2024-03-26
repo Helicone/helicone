@@ -1,11 +1,11 @@
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import { CheckIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, Square2StackIcon } from "@heroicons/react/24/outline";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 
 interface FilterButtonProps {
   filters?: OrganizationFilter[];
-  currentFilter?: OrganizationFilter;
+  currentFilter?: string;
   onFilterChange?: (value: OrganizationFilter) => void;
 }
 
@@ -19,9 +19,13 @@ export default function FiltersButton({
       <Menu as="div" className="relative inline-block text-left">
         <div>
           <Menu.Button className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2">
-            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
+            <Square2StackIcon
+              className="h-5 w-5 text-gray-900 dark:text-gray-100"
+              aria-hidden="true"
+            />
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
               Saved Filters
-            </span>
+            </p>
           </Menu.Button>
         </div>
         <Transition
@@ -46,7 +50,7 @@ export default function FiltersButton({
                         onClick={() => onFilterChange && onFilterChange(filter)}
                       >
                         {filter.name}
-                        {currentFilter && currentFilter.id === filter.id && (
+                        {currentFilter && currentFilter === filter.id && (
                           <CheckIcon className="ml-auto h-5 w-5" />
                         )}
                       </button>

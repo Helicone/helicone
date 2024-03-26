@@ -23,8 +23,6 @@ const Dashboard = (props: DashboardProps) => {
   const [orgFilters, setOrgFilters] = useState(orgLayout?.filters ?? null);
   const theme = useTheme();
 
-  useEffect(() => {}, [orgFilter, orgFilters]);
-
   // useEffect(() => {
   //   if (!process.env.NEXT_PUBLIC_COMMAND_BAR_HELPHUB_0) return;
   //   if (typeof window !== "undefined") {
@@ -44,9 +42,7 @@ const Dashboard = (props: DashboardProps) => {
     <DashboardPage
       user={user}
       currentFilter={orgFilter}
-      onChangeCurrentFilter={setOrgFilter}
-      orgFilters={orgFilters}
-      onChangeOrgFilters={setOrgFilters}
+      organizationLayout={orgLayout}
     />
   );
 };

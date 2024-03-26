@@ -45,18 +45,20 @@ import { useDashboardPage } from "./useDashboardPage";
 import { useModels } from "../../../services/hooks/models";
 import { QuantilesGraph } from "./quantilesGraph";
 import LoadingAnimation from "../../shared/loadingAnimation";
-import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
+import {
+  OrganizationFilter,
+  OrganizationLayout,
+} from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
 import { v4 as uuidv4 } from "uuid";
+import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface DashboardPageProps {
   user: User;
   currentFilter: OrganizationFilter | null;
-  onChangeCurrentFilter: (value: OrganizationFilter) => void;
-  orgFilters: OrganizationFilter[] | null;
-  onChangeOrgFilters: (value: OrganizationFilter[]) => void;
+  organizationLayout: OrganizationLayout | null;
 }
 
 export type TimeFilter = {
@@ -89,15 +91,31 @@ export type Loading<T> = T | "loading";
 export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
-  const {
-    user,
-    currentFilter,
-    onChangeCurrentFilter,
-    orgFilters,
-    onChangeOrgFilters,
-  } = props;
+  const { user, currentFilter, organizationLayout } = props;
 
   const searchParams = useSearchParams();
+
+  const orgContext = useOrg();
+
+  const {
+    organizationLayout: orgLayout,
+    isLoading: isOrgLayoutLoading,
+    refetch: orgLayoutRefetch,
+    isRefetching: isOrgLayoutRefetching,
+  } = useOrganizationLayout(
+    orgContext?.currentOrg?.id!,
+    "dashboard",
+    organizationLayout
+      ? {
+          data: organizationLayout,
+          error: null,
+        }
+      : undefined
+  );
+
+  const [currFilter, setCurrFilter] = useState(
+    searchParams.get("filter") ?? null
+  );
 
   const getInterval = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -622,9 +640,10 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
 
-  const orgContext = useOrg();
-
   const onSaveFilter = async (name: string) => {
+    // handle adding the new filter or updating the current filter
+
+    // once thats done, then call `refetch`
     if (advancedFilters.length > 0) {
       const currentAdvancedFilters = encodeURIComponent(
         JSON.stringify(advancedFilters.map(encodeFilter).join("|"))
@@ -636,8 +655,8 @@ const DashboardPage = (props: DashboardPageProps) => {
         filter: JSON.stringify(encodedFilters),
         softDelete: false,
       };
-      if (orgFilters && orgFilters.length > 0) {
-        const updatedFilters = [...orgFilters, saveFilter];
+      if (orgLayout && orgLayout.filters.length > 0) {
+        const updatedFilters = [...orgLayout.filters, saveFilter];
         await fetch(
           `/api/organization/${orgContext?.currentOrg?.id!}/update_filter`,
           {
@@ -651,7 +670,6 @@ const DashboardPage = (props: DashboardPageProps) => {
             }),
           }
         );
-        onChangeOrgFilters(updatedFilters);
       } else {
         await fetch(
           `/api/organization/${orgContext?.currentOrg?.id!}/create_filter`,
@@ -666,16 +684,15 @@ const DashboardPage = (props: DashboardPageProps) => {
             }),
           }
         );
-        onChangeOrgFilters([saveFilter]);
       }
       onLayoutFilterChange(saveFilter);
+      await orgLayoutRefetch();
     }
   };
 
   const onLayoutFilterChange = (layoutFilter: OrganizationFilter) => {
     let currentAdvancedFilters;
     if (layoutFilter) {
-      onChangeCurrentFilter(layoutFilter);
       currentAdvancedFilters = JSON.parse(layoutFilter?.filter);
     }
 
@@ -686,6 +703,8 @@ const DashboardPage = (props: DashboardPageProps) => {
         .map(decodeFilter)
         .filter((filter) => filter !== null) as UIFilterRow[];
       onSetAdvancedFilters(decodedFilters, layoutFilter.id);
+      setCurrFilter(layoutFilter?.id);
+      console.log(currFilter);
     }
   };
 
@@ -769,7 +788,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       ) : (
         <div className="space-y-4">
           <ThemedTableHeader
-            isFetching={isAnyLoading}
+            isFetching={isAnyLoading || isLoading}
             timeFilter={{
               currentTimeFilter: timeFilter,
               customTimeFilter: true,
@@ -808,8 +827,8 @@ const DashboardPage = (props: DashboardPageProps) => {
               },
             }}
             filterLayouts={{
-              currentFilter: currentFilter ?? undefined,
-              filters: orgFilters ?? undefined,
+              currentFilter: currFilter ?? undefined,
+              filters: orgLayout?.filters ?? undefined,
               onFilterChange: onLayoutFilterChange,
               onSaveFilter: onSaveFilter,
             }}

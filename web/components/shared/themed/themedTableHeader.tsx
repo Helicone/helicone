@@ -75,7 +75,7 @@ interface ThemedHeaderProps {
   };
   filterLayouts?: {
     filters?: OrganizationFilter[];
-    currentFilter?: OrganizationFilter;
+    currentFilter?: string;
     onFilterChange?: (value: OrganizationFilter) => void;
     onSaveFilter?: (name: string) => void;
   };
