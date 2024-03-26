@@ -89,11 +89,6 @@
     "use-deep-compare-effect": "^1.8.1"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "5.0.0",
-    "@graphql-codegen/client-preset": "4.1.0",
-    "@graphql-codegen/introspection": "4.0.0",
-    "@graphql-codegen/typescript-operations": "^3.0.2",
-    "@graphql-codegen/typescript-react-apollo": "^3.3.7",
     "@graphql-eslint/eslint-plugin": "^3.17.0",
     "@parcel/watcher": "^2.3.0",
     "@types/babel__core": "^7",
