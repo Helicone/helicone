@@ -171,6 +171,17 @@ WHEN (request_response_log.provider = 'COHERE') THEN (
   ELSE 0
 END
 )
+WHEN (request_response_log.provider = 'MISTRAL') THEN (
+  CASE
+  WHEN (request_response_log.model = 'open-mistral-7b') THEN 250 * request_response_log.prompt_tokens + 250 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'open-mixtral-8x7b') THEN 700 * request_response_log.prompt_tokens + 700 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'mistral-small-latest') THEN 2000 * request_response_log.prompt_tokens + 6000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'mistral-medium-latest') THEN 2700 * request_response_log.prompt_tokens + 8100 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'mistral-large-latest') THEN 8000 * request_response_log.prompt_tokens + 24000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'mistral-embed') THEN 100 * request_response_log.prompt_tokens + 100 * request_response_log.completion_tokens
+  ELSE 0
+END
+)
     ELSE 
   CASE
   WHEN (request_response_log.model = 'ada') THEN 400 * request_response_log.prompt_tokens + 400 * request_response_log.completion_tokens

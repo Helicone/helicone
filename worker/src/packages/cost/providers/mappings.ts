@@ -7,11 +7,8 @@ import { costs as togetherAICompletionLlamaCosts } from "./togetherai/completion
 import { costs as azureCosts } from "./azure";
 import { costs as googleCosts } from "./google";
 import { costs as anthropicCosts } from "./anthropic";
-<<<<<<< HEAD
 import { costs as cohereCosts } from "./cohere";
-=======
 import { costs as mistralCosts } from "./mistral";
->>>>>>> main
 import { ModelRow } from "../interfaces/Cost";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
@@ -35,13 +32,10 @@ const openRouter = /^https:\/\/api\.openrouter\.ai/;
 const wisdomInANutshell = /^https:\/\/api\.wisdominanutshell\.academy/;
 // api.groq.com
 const groq = /^https:\/\/api\.groq\.com/;
-<<<<<<< HEAD
 // cohere.ai
 const cohere = /^https:\/\/api\.cohere\.ai/;
-=======
 // api.mistral.ai
 const mistral = /^https:\/\/api\.mistral\.ai/;
->>>>>>> main
 
 export const providers: {
   pattern: RegExp;
@@ -127,15 +121,14 @@ export const providers: {
     provider: "GROQ",
   },
   {
-<<<<<<< HEAD
     pattern: cohere,
     provider: "COHERE",
     costs: cohereCosts,
-=======
+  },
+  {
     pattern: mistral,
     provider: "MISTRAL",
     costs: mistralCosts,
->>>>>>> main
   },
 ];
 
