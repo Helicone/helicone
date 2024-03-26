@@ -28,7 +28,6 @@ import { UsersOverTime } from "../../../pages/api/metrics/usersOverTime";
 import { TokensOverTime } from "../../../pages/api/metrics/tokensOverTime";
 import { TimeToFirstToken } from "../../../pages/api/metrics/timeToFirstToken";
 import { ThreatsOverTime } from "../../../pages/api/metrics/threatsOverTime";
-import { OrganizationLayout } from "../../../services/lib/organization_layout/organization_layout";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
