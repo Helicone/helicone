@@ -3703,7 +3703,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-table@npm:^8.7.9":
+"@tanstack/react-table@npm:^8.15.0":
   version: 8.15.0
   resolution: "@tanstack/react-table@npm:8.15.0"
   dependencies:
@@ -4205,12 +4205,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:18.0.9":
-  version: 18.0.9
-  resolution: "@types/react-dom@npm:18.0.9"
+"@types/react-dom@npm:^18.2.22":
+  version: 18.2.22
+  resolution: "@types/react-dom@npm:18.2.22"
   dependencies:
     "@types/react": "npm:*"
-  checksum: 1c85b0889f15631132816fba93bf3aaa7b11cd0ce6f4a825d3c863a46b1b8d0b7fcdf03d7fcdf761f4a2e38312e5f26fc9b9ba34b486ee9f160477b9103625af
+  checksum: cd85b5f402126e44b8c7b573e74737389816abcc931b2b14d8f946ba81cce8637ea490419488fcae842efb1e2f69853bc30522e43fd8359e1007d4d14b8d8146
   languageName: node
   linkType: hard
 
@@ -4250,14 +4250,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:17.0.30":
-  version: 17.0.30
-  resolution: "@types/react@npm:17.0.30"
+"@types/react@npm:*":
+  version: 18.2.48
+  resolution: "@types/react@npm:18.2.48"
   dependencies:
     "@types/prop-types": "npm:*"
     "@types/scheduler": "npm:*"
     csstype: "npm:^3.0.2"
-  checksum: f98d15b265720abb281e3dbcb6baab5c1d57b55ec4a3f5eeeda2f50882ec62ba051cb5cd7f7c9da7bed9cf02067cbdacffff1a96b4c6e3643498cf8cc7cc58e8
+  checksum: 7e89f18ea2928b1638f564b156d692894dcb9352a7e0a807873c97e858abe1f23dbd165a25dd088a991344e973fdeef88ba5724bfb64504b74072cbc9c220c3a
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^18.2.72":
+  version: 18.2.72
+  resolution: "@types/react@npm:18.2.72"
+  dependencies:
+    "@types/prop-types": "npm:*"
+    csstype: "npm:^3.0.2"
+  checksum: fe8a17a4067ab9d432ab1034967a8b2a773125e47ae84ee00e428a8b6c48912ab22d244ae6128663b119a38716a642bc5be019fcd2b3b2f4ab3c9b0200a6cc2d
   languageName: node
   linkType: hard
 
@@ -7421,7 +7431,7 @@ __metadata:
     "@supabase/supabase-js": "npm:^2.1.1"
     "@tailwindcss/forms": "npm:^0.5.3"
     "@tanstack/react-query": "npm:^4.24.10"
-    "@tanstack/react-table": "npm:^8.7.9"
+    "@tanstack/react-table": "npm:^8.15.0"
     "@tremor/react": "npm:^3.9.1"
     "@types/dagre": "npm:^0.7.49"
     "@types/dateformat": "npm:^5.0.0"
@@ -7429,8 +7439,8 @@ __metadata:
     "@types/node": "npm:18.11.9"
     "@types/papaparse": "npm:^5.3.7"
     "@types/pg": "npm:^8.6.6"
-    "@types/react": "npm:18.0.25"
-    "@types/react-dom": "npm:18.0.9"
+    "@types/react": "npm:^18.2.72"
+    "@types/react-dom": "npm:^18.2.22"
     "@types/react-grid-layout": "npm:^1.3.3"
     "@types/react-lottie": "npm:^1.2.9"
     "@types/react-syntax-highlighter": "npm:^15.5.6"
