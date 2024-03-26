@@ -66,8 +66,6 @@ export async function proxyForwarder(
     }
   }
 
-  // Moved above prompt threat detection
-  // TODO move this to proxyRequest (old comment)
   const { data: cacheSettings, error: cacheError } = getCacheSettings(
     proxyRequest.requestWrapper.getHeaders(),
     proxyRequest.isStream
@@ -206,7 +204,6 @@ export async function proxyForwarder(
       const { data: moderationRes, error: moderationErr } =
         await moderator.moderate(latestMsg.content);
 
-      // Something in the moderation call itself failed.
       if (moderationErr || !moderationRes) {
         return responseBuilder.build({
           body: moderationErr,
@@ -214,7 +211,6 @@ export async function proxyForwarder(
         });
       }
 
-      // No Internal Server Error, loggable has been created.
       ctx.waitUntil(log(moderationRes.loggable));
 
       if (moderationRes.isModerated) {
