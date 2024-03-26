@@ -37,7 +37,7 @@
     "@tanstack/react-table": "^8.7.9",
     "@tremor/react": "^3.9.1",
     "@types/node": "18.11.9",
-    "@types/react": "18.0.25",
+    "@types/react": "^18.2.71",
     "@types/react-dom": "18.0.9",
     "@upstash/ratelimit": "^1.0.1",
     "@vercel/analytics": "^0.1.5",
