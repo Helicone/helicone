@@ -115,23 +115,23 @@ export async function proxyForwarder(
     provider === "OPENAI" &&
     env.PROMPTARMOR_API_KEY
   ) {
-    let parseResult = parseLatestMessage(proxyRequest);
-    if (parseResult.error || !parseResult.data) {
+    const { data: latestMsg, error: latestMsgErr } =
+      parseLatestMessage(proxyRequest);
+    if (latestMsgErr || !latestMsg) {
       return responseBuilder.build({
-        body: parseResult.error,
+        body: latestMsgErr,
         status: 500,
       });
     }
 
-    let latestMessage = parseResult.data;
     if (
       request.url.pathname.includes("chat/completions") &&
-      latestMessage?.content &&
-      latestMessage?.role === "user"
+      latestMsg?.content &&
+      latestMsg?.role === "user"
     ) {
       const requestStartTime = new Date();
       const threat = await checkPromptSecurity(
-        latestMessage.content,
+        latestMsg.content,
         provider,
         env
       );
@@ -182,20 +182,20 @@ export async function proxyForwarder(
     proxyRequest.requestWrapper.heliconeHeaders.moderationsEnabled &&
     provider == "OPENAI"
   ) {
-    let parseResult = parseLatestMessage(proxyRequest);
+    const { data: latestMsg, error: latestMsgErr } =
+      parseLatestMessage(proxyRequest);
 
-    if (parseResult.error || !parseResult.data) {
+    if (latestMsgErr || !latestMsg) {
       return responseBuilder.build({
-        body: "Failed to parse the latest message.",
+        body: latestMsgErr,
         status: 500,
       });
     }
 
-    let latestMessage = parseResult.data;
     if (
       request.url.pathname.includes("chat/completions") &&
-      latestMessage?.content &&
-      latestMessage?.role === "user"
+      latestMsg?.content &&
+      latestMsg?.role === "user"
     ) {
       const moderator = new Moderator(
         proxyRequest.requestWrapper.headers,
@@ -204,7 +204,7 @@ export async function proxyForwarder(
       );
 
       const { data: moderationRes, error: moderationErr } =
-        await moderator.moderate(latestMessage.content);
+        await moderator.moderate(latestMsg.content);
 
       // Something in the moderation call itself failed.
       if (moderationErr || !moderationRes) {
