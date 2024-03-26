@@ -6,20 +6,23 @@ import DashboardPage from "../components/templates/dashboard/dashboardPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { useTheme } from "../components/shared/theme/themeContext";
 import { useLocalStorage } from "../services/hooks/localStorage";
-import { OrganizationFilter } from "../services/lib/organization_layout/organization_layout";
+import {
+  OrganizationFilter,
+  OrganizationLayout,
+} from "../services/lib/organization_layout/organization_layout";
 import LoadingAnimation from "../components/shared/loadingAnimation";
+import { Result } from "../lib/result";
+import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
+import { supabaseServer } from "../lib/supabaseServer";
 
 interface DashboardProps {
   user: User;
+  currentFilter: OrganizationFilter;
 }
 
 const Dashboard = (props: DashboardProps) => {
-  const { user } = props;
+  const { user, currentFilter } = props;
   const theme = useTheme();
-  const [currentFilter, setCurrentFilter] = useLocalStorage<
-    OrganizationFilter | undefined
-  >("dashboard-filter", undefined);
-  const [isLoading, setIsLoading] = useState(true);
 
   // useEffect(() => {
   //   if (!process.env.NEXT_PUBLIC_COMMAND_BAR_HELPHUB_0) return;
@@ -36,31 +39,14 @@ const Dashboard = (props: DashboardProps) => {
   //   };
   // }, [theme?.theme, user]);
 
-  useEffect(() => {
-    setIsLoading(false);
-  }, [currentFilter]);
-
-  return isLoading ? (
-    <LoadingAnimation />
-  ) : (
-    <DashboardPage
-      user={user}
-      currentFilter={currentFilter}
-      onChangeCurrentFilter={setCurrentFilter}
-    />
-  );
+  return <DashboardPage user={user} currentFilter={currentFilter} />;
 };
-
-Dashboard.getLayout = function getLayout(page: ReactElement) {
-  return <AuthLayout>{page}</AuthLayout>;
-};
-
-export default Dashboard;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
   const {
-    userData: { user, orgHasOnboarded },
+    userData: { user, orgHasOnboarded, orgId },
   } = options;
+  const { context } = options;
 
   if (!orgHasOnboarded) {
     return {
@@ -71,9 +57,33 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     };
   }
 
+  const { data: orgLayout, error: organizationLayoutError } =
+    await supabaseServer
+      .from("organization_layout")
+      .select("*")
+      .eq("organization_id", orgId)
+      .eq("type", "dashboard")
+      .single();
+
+  if (!orgLayout || organizationLayoutError) {
+    return {
+      props: {
+        user,
+        currentFilter: null,
+      },
+    };
+  }
+
+  const filterId = context.query.filter as string;
+
+  const filters: OrganizationFilter[] = JSON.parse(orgLayout.filters as string);
+
+  const currentFilter = filters.find((x) => x.id === filterId);
+
   return {
     props: {
       user,
+      currentFilter: currentFilter ?? null,
     },
   };
 });

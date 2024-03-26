@@ -55,7 +55,6 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 interface DashboardPageProps {
   user: User;
   currentFilter: OrganizationFilter | undefined;
-  onChangeCurrentFilter: (value: OrganizationFilter | undefined) => void;
 }
 
 export type TimeFilter = {
@@ -88,7 +87,8 @@ export type Loading<T> = T | "loading";
 export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
-  const { user, currentFilter, onChangeCurrentFilter } = props;
+  const { user, currentFilter } = props;
+  console.log(currentFilter);
   const searchParams = useSearchParams();
 
   const getInterval = () => {
@@ -198,9 +198,14 @@ const DashboardPage = (props: DashboardPageProps) => {
     }
   }
 
-  const onSetAdvancedFilters = (filters: UIFilterRow[]) => {
-    if (!filters.length) {
-      onChangeCurrentFilter(undefined);
+  const onSetAdvancedFilters = (
+    filters: UIFilterRow[],
+    layoutFilterId?: string
+  ) => {
+    if (filters.length && layoutFilterId) {
+      searchParams.set("filter", layoutFilterId);
+    } else {
+      searchParams.delete("filter");
     }
 
     setAdvancedFilters(filters);
@@ -659,11 +664,10 @@ const DashboardPage = (props: DashboardPageProps) => {
         });
       }
       await orgLayoutRefetch();
-      onChangeCurrentFilter(saveFilter);
     }
   };
 
-
+  //fix to search poarams
   const onLayoutFilterChange = async (layoutFilter: OrganizationFilter) => {
     let currentAdvancedFilters;
     if (layoutFilter) {
@@ -676,9 +680,11 @@ const DashboardPage = (props: DashboardPageProps) => {
         .split("|")
         .map(decodeFilter)
         .filter((filter) => filter !== null) as UIFilterRow[];
-      onChangeCurrentFilter(layoutFilter);
-      onSetAdvancedFilters(decodedFilters);
-      await refetch();
+      console.log(2);
+      console.log(decodedFilters);
+      console.log(layoutFilter);
+      console.log(2);
+      onSetAdvancedFilters(decodedFilters, layoutFilter.id);
     }
   };
 
