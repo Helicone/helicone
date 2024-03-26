@@ -1,5 +1,5 @@
 import { User } from "@supabase/auth-helpers-react";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useState } from "react";
 
 import AuthLayout from "../components/layout/authLayout";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
