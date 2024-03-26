@@ -138,7 +138,7 @@ const getModelFromPath = (path: string) => {
   }
 };
 
-const getRequestBuilder = (request: HeliconeRequest, useRosetta: boolean) => {
+const getRequestBuilder = (request: HeliconeRequest) => {
   let model =
     request.model_override ||
     request.response_model ||
@@ -152,7 +152,7 @@ const getRequestBuilder = (request: HeliconeRequest, useRosetta: boolean) => {
     model,
     request.provider,
     request.request_path,
-    useRosetta ? request.llmSchema?.request?.llm_type ?? null : null
+    request.llmSchema?.request?.llm_type ?? null
   );
   let builder = builders[builderType];
   return new builder(request, model);
@@ -160,9 +160,9 @@ const getRequestBuilder = (request: HeliconeRequest, useRosetta: boolean) => {
 
 const getNormalizedRequest = (request: HeliconeRequest): NormalizedRequest => {
   try {
-    return getRequestBuilder(request, true).build();
+    return getRequestBuilder(request).build();
   } catch (error) {
-    return getRequestBuilder(request, false).build();
+    return getRequestBuilder(request).build();
   }
 };
 
