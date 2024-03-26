@@ -7292,7 +7292,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql@npm:^16.6.0":
+"graphql@npm:^16.8.1":
   version: 16.8.1
   resolution: "graphql@npm:16.8.1"
   checksum: 129c318156b466f440914de80dbf7bc67d17f776f2a088a40cb0da611d19a97c224b1c6d2b13cbcbc6e5776e45ed7468b8432f9c3536724e079b44f1a3d57a8a
@@ -7463,7 +7463,7 @@ __metadata:
     eslint-plugin-prettier: "npm:^4.2.1"
     eslint-plugin-unused-imports: "npm:^3.0.0"
     generate-api-key: "npm:^1.0.2"
-    graphql: "npm:^16.6.0"
+    graphql: "npm:^16.8.1"
     graphql-tag: "npm:^2.12.6"
     graphql-type-json: "npm:^0.3.2"
     gsap: "npm:^3.12.5"

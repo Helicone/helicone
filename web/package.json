@@ -52,7 +52,7 @@
     "eslint": "8.47.0",
     "eslint-config-next": "13.0.5",
     "generate-api-key": "^1.0.2",
-    "graphql": "^16.6.0",
+    "graphql": "^16.8.1",
     "graphql-tag": "^2.12.6",
     "graphql-type-json": "^0.3.2",
     "gsap": "^3.12.5",
