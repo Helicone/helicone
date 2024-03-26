@@ -1,3 +1,16 @@
+import { costs as openaiCosts } from "./openai";
+import { costs as fineTunedOpenAICosts } from "./openai/fine-tuned-models";
+import { costs as togetherAIChatCosts } from "./togetherai/chat";
+import { costs as togetherAIChatLlamaCosts } from "./togetherai/chat/llama";
+import { costs as togetherAICompletionCosts } from "./togetherai/completion";
+import { costs as togetherAICompletionLlamaCosts } from "./togetherai/completion";
+import { costs as azureCosts } from "./azure";
+import { costs as googleCosts } from "./google";
+import { costs as anthropicCosts } from "./anthropic";
+import { costs as cohereCosts } from "./cohere";
+import { costs as mistralCosts } from "./mistral";
+import { ModelRow } from "../interfaces/Cost";
+
 const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
 const azurePattern =
@@ -19,19 +32,30 @@ const openRouter = /^https:\/\/api\.openrouter\.ai/;
 const wisdomInANutshell = /^https:\/\/api\.wisdominanutshell\.academy/;
 // api.groq.com
 const groq = /^https:\/\/api\.groq\.com/;
+// cohere.ai
+const cohere = /^https:\/\/api\.cohere\.ai/;
+// api.mistral.ai
+const mistral = /^https:\/\/api\.mistral\.ai/;
 
-export const providers = [
+export const providers: {
+  pattern: RegExp;
+  provider: string;
+  costs?: ModelRow[];
+}[] = [
   {
     pattern: openAiPattern,
     provider: "OPENAI",
+    costs: [...openaiCosts, ...fineTunedOpenAICosts],
   },
   {
     pattern: anthropicPattern,
     provider: "ANTHROPIC",
+    costs: anthropicCosts,
   },
   {
     pattern: azurePattern,
     provider: "AZURE",
+    costs: azureCosts,
   },
   {
     pattern: localProxyPattern,
@@ -60,6 +84,12 @@ export const providers = [
   {
     pattern: togetherPattern,
     provider: "TOGETHER",
+    costs: [
+      ...togetherAIChatCosts,
+      ...togetherAIChatLlamaCosts,
+      ...togetherAICompletionCosts,
+      ...togetherAICompletionLlamaCosts,
+    ],
   },
   {
     pattern: lemonFox,
@@ -76,6 +106,7 @@ export const providers = [
   {
     pattern: googleapis,
     provider: "GOOGLE",
+    costs: googleCosts,
   },
   {
     pattern: openRouter,
@@ -89,6 +120,23 @@ export const providers = [
     pattern: groq,
     provider: "GROQ",
   },
+  {
+    pattern: cohere,
+    provider: "COHERE",
+    costs: cohereCosts,
+  },
+  {
+    pattern: mistral,
+    provider: "MISTRAL",
+    costs: mistralCosts,
+  },
 ];
+
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+export const defaultProvider = providers.find(
+  (provider) => provider.provider === "OPENAI"
+)!;
+
+export const allCosts = providers.flatMap((provider) => provider.costs ?? []);
 
 export const approvedDomains = providers.map((provider) => provider.pattern);
