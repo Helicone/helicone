@@ -116,19 +116,18 @@ export async function proxyForwarder(
     env.PROMPTARMOR_API_KEY
   ) {
     let parseResult = parseLatestMessage(proxyRequest);
-    if (parseResult.error) {
+    if (parseResult.error || !parseResult.data) {
       return responseBuilder.build({
-        body: "Failed to parse the latest message.",
+        body: parseResult.error,
         status: 500,
       });
     }
-    let latestMessage = parseResult.data;
 
+    let latestMessage = parseResult.data;
     if (
       request.url.pathname.includes("chat/completions") &&
-      latestMessage &&
-      latestMessage.role === "user" &&
-      latestMessage?.content
+      latestMessage?.content &&
+      latestMessage?.role === "user"
     ) {
       const threat = await checkPromptSecurity(
         latestMessage.content,
@@ -180,18 +179,19 @@ export async function proxyForwarder(
     provider == "OPENAI"
   ) {
     let parseResult = parseLatestMessage(proxyRequest);
-    if (parseResult.error) {
+
+    if (parseResult.error || !parseResult.data) {
       return responseBuilder.build({
         body: "Failed to parse the latest message.",
         status: 500,
       });
     }
-    let latestMessage = parseResult.data;
 
+    let latestMessage = parseResult.data;
     if (
-      latestMessage != null &&
-      latestMessage?.role == "user" &&
-      latestMessage?.content
+      request.url.pathname.includes("chat/completions") &&
+      latestMessage?.content &&
+      latestMessage?.role === "user"
     ) {
       const moderator = new Moderator(
         proxyRequest.requestWrapper.headers,
@@ -326,7 +326,7 @@ export async function proxyForwarder(
 
   function parseLatestMessage(
     proxyRequest: HeliconeProxyRequest
-  ): Result<LatestMessage, Error> {
+  ): Result<LatestMessage, string> {
     try {
       return {
         error: null,
@@ -337,7 +337,7 @@ export async function proxyForwarder(
     } catch (error) {
       console.error("Error parsing latest message:", error);
       return {
-        error: new Error("Failed to parse latest message."),
+        error: "Failed to parse the latest message.",
         data: null,
       };
     }
