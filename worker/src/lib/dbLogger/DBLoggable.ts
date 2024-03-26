@@ -65,14 +65,15 @@ export interface AuthParams {
 }
 
 export function dbLoggableRequestFromProxyRequest(
-  proxyRequest: HeliconeProxyRequest
+  proxyRequest: HeliconeProxyRequest,
+  requestStartTime: Date
 ): DBLoggableProps["request"] {
   return {
     requestId: proxyRequest.requestId,
     heliconeProxyKeyId: proxyRequest.heliconeProxyKeyId,
     promptId: proxyRequest.requestWrapper.heliconeHeaders.promptId ?? undefined,
     userId: proxyRequest.userId,
-    startTime: proxyRequest.startTime,
+    startTime: requestStartTime,
     bodyText: proxyRequest.bodyText ?? undefined,
     path: proxyRequest.requestWrapper.url.href,
     targetUrl: proxyRequest.targetUrl.href,

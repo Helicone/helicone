@@ -35,6 +35,7 @@ export async function handleProxyRequest(
 ): Promise<Result<ProxyResult, string>> {
   const { retryOptions } = proxyRequest;
 
+  const requestStartTime = new Date();
   const callProps = callPropsFromProxyRequest(proxyRequest);
   const response = await (retryOptions
     ? callProviderWithRetry(callProps, retryOptions)
@@ -86,7 +87,10 @@ export async function handleProxyRequest(
   return {
     data: {
       loggable: new DBLoggable({
-        request: dbLoggableRequestFromProxyRequest(proxyRequest),
+        request: dbLoggableRequestFromProxyRequest(
+          proxyRequest,
+          requestStartTime
+        ),
         response: {
           responseId: crypto.randomUUID(),
           getResponseBody: async () => ({
@@ -134,7 +138,8 @@ export async function handleProxyRequest(
 }
 
 export async function handleThreatProxyRequest(
-  proxyRequest: HeliconeProxyRequest
+  proxyRequest: HeliconeProxyRequest,
+  requestStartTime: Date
 ): Promise<Result<ProxyResult, string>> {
   const responseHeaders = new Headers();
   responseHeaders.set("Helicone-Status", "failed");
@@ -142,7 +147,10 @@ export async function handleThreatProxyRequest(
   const threatProxyResponse = {
     data: {
       loggable: new DBLoggable({
-        request: dbLoggableRequestFromProxyRequest(proxyRequest),
+        request: dbLoggableRequestFromProxyRequest(
+          proxyRequest,
+          requestStartTime
+        ),
         response: {
           responseId: crypto.randomUUID(),
           getResponseBody: async () => ({
