@@ -100,7 +100,8 @@ export async function proxyForwarder(
               cachedResponse.headers,
               env,
               new ClickhouseClientWrapper(env),
-              orgData.organizationId
+              orgData.organizationId,
+              provider
             )
           );
           return cachedResponse;
@@ -198,21 +199,22 @@ export async function proxyForwarder(
         provider
       );
 
-      const moderationResult = await moderator.moderate(latestMessage.content);
+      const { data: moderationRes, error: moderationErr } =
+        await moderator.moderate(latestMessage.content);
 
       // Something in the moderation call itself failed.
-      if (moderationResult.error) {
+      if (moderationErr || !moderationRes) {
         return responseBuilder.build({
-          body: moderationResult.error,
+          body: moderationErr,
           status: 500,
         });
       }
 
       // No Internal Server Error, loggable has been created.
-      ctx.waitUntil(log(moderationResult.data.loggable));
+      ctx.waitUntil(log(moderationRes.loggable));
 
-      if (moderationResult.data.isModerated) {
-        return moderationResult.data.response;
+      if (moderationRes.isModerated) {
+        return moderationRes.response;
       }
       // Passed moderation...
     }

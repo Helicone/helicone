@@ -1,5 +1,4 @@
-import { Provider } from "@supabase/supabase-js";
-import { Env } from "../..";
+import { Env, Provider } from "../..";
 import { DBLoggable } from "../dbLogger/DBLoggable";
 import { handleProxyRequest } from "../HeliconeProxyRequest/handler";
 import { HeliconeProxyRequestMapper } from "../HeliconeProxyRequest/mapper";
@@ -14,11 +13,7 @@ export class Moderator {
   provider: Provider;
   responseBuilder: ResponseBuilder;
 
-  constructor(
-    headers: Headers,
-    env: Env,
-    provider: Provider
-  ) {
+  constructor(headers: Headers, env: Env, provider: Provider) {
     this.env = env;
     this.headers = headers;
     this.provider = provider;
@@ -48,42 +43,41 @@ export class Moderator {
           success: false,
           error: {
             code: "INTERNAL_SERVER_ERROR",
-            message: "Request to OpenAI moderation endpoint failed."
-          }
+            message: "Request to OpenAI moderation endpoint failed.",
+          },
         }),
-        data: null
-      }
+        data: null,
+      };
     }
 
-    const {
-      data: moderationProxyRequest,
-      error: moderationProxyRequestError,
-    } = await new HeliconeProxyRequestMapper(
+    const { data: moderationProxyRequest, error: moderationProxyRequestError } =
+      await new HeliconeProxyRequestMapper(
         moderationRequestWrapper.data,
         this.provider,
         this.env
       ).tryToProxyRequest();
 
-    if (moderationProxyRequestError !== null) {
+    if (moderationProxyRequestError || !moderationProxyRequest) {
       return {
         error: JSON.stringify({
           success: false,
           error: {
             code: "INTERNAL_SERVER_ERROR",
-            message: "Proxy request to OpenAI moderation endpoint failed."
-          }
+            message: "Proxy request to OpenAI moderation endpoint failed.",
+          },
         }),
-        data: null
-      }
+        data: null,
+      };
     }
 
     const { data: moderationResponse, error: moderationResponseError } =
       await handleProxyRequest(moderationProxyRequest);
-    if (moderationResponseError != null) {
+
+    if (moderationResponseError || !moderationResponse) {
       return {
         error: moderationResponseError,
         data: null,
-      }
+      };
     }
 
     const flaggedForModeration = (
@@ -101,7 +95,7 @@ export class Moderator {
           error: {
             code: "PROMPT_FLAGGED_FOR_MODERATION",
             message:
-            "The given prompt was flagged by the OpenAI Moderation endpoint.",
+              "The given prompt was flagged by the OpenAI Moderation endpoint.",
             details: `See your Helicone request page for more info: https://www.helicone.ai/requests?${moderationProxyRequest.requestId}`,
           },
         }),
@@ -119,8 +113,8 @@ export class Moderator {
           isModerated: true,
           loggable: moderationResponse.loggable,
           response: res,
-        }
-      }
+        },
+      };
     }
 
     return {
@@ -128,9 +122,9 @@ export class Moderator {
       data: {
         isModerated: false,
         loggable: moderationResponse.loggable,
-        response: null
-      }
-    }
+        response: null,
+      },
+    };
   }
 }
 
@@ -148,12 +142,12 @@ type UnFlaggedResponse = {
   isModerated: false;
   loggable: DBLoggable;
   response: null;
-}
+};
 
 type FlaggedResponse = {
   isModerated: true;
   loggable: DBLoggable;
-  response: Response
-}
+  response: Response;
+};
 
 type ModerationResponse = UnFlaggedResponse | FlaggedResponse;
