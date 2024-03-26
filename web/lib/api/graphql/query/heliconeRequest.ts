@@ -175,6 +175,7 @@ export async function heliconeRequest(
       sum_completion_tokens: r.completion_tokens ?? 0,
       sum_prompt_tokens: r.prompt_tokens ?? 0,
       sum_tokens: (r.total_tokens ?? 0) + (r.completion_tokens ?? 0),
+      provider: r.provider ?? "",
     }),
     user: r.request_user_id
       ? {

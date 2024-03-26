@@ -66,12 +66,13 @@ export async function getModelMetricsClickhouse(
   });
   const query = `
   select model, 
+    provider,
     sum(completion_tokens) as sum_completion_tokens, 
     sum(prompt_tokens) as sum_prompt_tokens, 
     sum(completion_tokens + prompt_tokens) as sum_tokens 
   from cache_hits 
   where (${builtFilter.filter})
-  group by model`;
+  group by model, provider`;
 
   const res = await dbQueryClickhouse<ModelMetrics>(query, builtFilter.argsAcc);
 
@@ -86,6 +87,7 @@ export async function getModelMetrics(org_id: string, filter: FilterNode) {
   });
   const query = `
 SELECT response.body ->> 'model'::text as model,
+  request.provider as provider,
   sum(response.completion_tokens + response.prompt_tokens) AS sum_tokens,
   sum(response.prompt_tokens) AS sum_prompt_tokens,
   sum(response.completion_tokens) AS sum_completion_tokens
@@ -95,7 +97,7 @@ FROM cache_hits
 WHERE (
   (${builtFilter.filter})
 )
-GROUP BY response.body ->> 'model'::text;
+GROUP BY response.body ->> 'model'::text, request.provider;
     `;
   return dbExecute<ModelMetrics>(query, builtFilter.argsAcc);
 }
