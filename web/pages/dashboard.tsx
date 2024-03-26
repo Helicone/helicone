@@ -1,5 +1,5 @@
 import { User } from "@supabase/auth-helpers-react";
-import { ReactElement } from "react";
+import { ReactElement, useEffect, useState } from "react";
 
 import AuthLayout from "../components/layout/authLayout";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
@@ -19,7 +19,12 @@ interface DashboardProps {
 
 const Dashboard = (props: DashboardProps) => {
   const { user, currentFilter, orgLayout } = props;
+  const [orgFilter, setOrgFilter] = useState(currentFilter);
+  const [orgFilters, setOrgFilters] = useState(orgLayout?.filters);
   const theme = useTheme();
+
+  useEffect(() => {
+  }, [orgFilter, orgFilters]);
 
   // useEffect(() => {
   //   if (!process.env.NEXT_PUBLIC_COMMAND_BAR_HELPHUB_0) return;
@@ -39,8 +44,10 @@ const Dashboard = (props: DashboardProps) => {
   return (
     <DashboardPage
       user={user}
-      currentFilter={currentFilter}
-      orgLayout={orgLayout}
+      currentFilter={orgFilter}
+      onChangeCurrentFilter={setOrgFilter}
+      orgFilters={orgFilters}
+      onChangeOrgFilters={setOrgFilters}
     />
   );
 };

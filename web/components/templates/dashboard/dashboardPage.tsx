@@ -45,10 +45,7 @@ import { useDashboardPage } from "./useDashboardPage";
 import { useModels } from "../../../services/hooks/models";
 import { QuantilesGraph } from "./quantilesGraph";
 import LoadingAnimation from "../../shared/loadingAnimation";
-import {
-  OrganizationFilter,
-  OrganizationLayout,
-} from "../../../services/lib/organization_layout/organization_layout";
+import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
 import { v4 as uuidv4 } from "uuid";
 
@@ -57,7 +54,9 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 interface DashboardPageProps {
   user: User;
   currentFilter: OrganizationFilter | null;
-  orgLayout: OrganizationLayout | null;
+  onChangeCurrentFilter: (value: OrganizationFilter) => void;
+  orgFilters: OrganizationFilter[] | null;
+  onChangeOrgFilters: (value: OrganizationFilter[]) => void;
 }
 
 export type TimeFilter = {
@@ -90,10 +89,14 @@ export type Loading<T> = T | "loading";
 export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
-  const { user, currentFilter, orgLayout } = props;
+  const {
+    user,
+    currentFilter,
+    onChangeCurrentFilter,
+    orgFilters,
+    onChangeOrgFilters,
+  } = props;
 
-  const [currentAdvFilter, setCurrentAdvFilter] =
-    useState<OrganizationFilter | null>(currentFilter);
   const searchParams = useSearchParams();
 
   const getInterval = () => {
@@ -630,8 +633,8 @@ const DashboardPage = (props: DashboardPageProps) => {
         filter: JSON.stringify(encodedFilters),
         softDelete: false,
       };
-      if (orgLayout && orgLayout?.filters?.length > 0) {
-        const updatedFilters = [...orgLayout.filters, saveFilter];
+      if (orgFilters && orgFilters.length > 0) {
+        const updatedFilters = [...orgFilters, saveFilter];
         await fetch(
           `/api/organization/${orgContext?.currentOrg?.id!}/update_filter`,
           {
@@ -645,7 +648,7 @@ const DashboardPage = (props: DashboardPageProps) => {
             }),
           }
         );
-        orgLayout.filters = updatedFilters;
+        onChangeOrgFilters(updatedFilters);
       } else {
         await fetch(
           `/api/organization/${orgContext?.currentOrg?.id!}/create_filter`,
@@ -660,6 +663,7 @@ const DashboardPage = (props: DashboardPageProps) => {
             }),
           }
         );
+        onChangeOrgFilters([saveFilter]);
       }
       onLayoutFilterChange(saveFilter);
     }
@@ -668,7 +672,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   const onLayoutFilterChange = (layoutFilter: OrganizationFilter) => {
     let currentAdvancedFilters;
     if (layoutFilter) {
-      setCurrentAdvFilter(layoutFilter);
+      onChangeCurrentFilter(layoutFilter);
       currentAdvancedFilters = JSON.parse(layoutFilter?.filter);
     }
 
@@ -801,8 +805,8 @@ const DashboardPage = (props: DashboardPageProps) => {
               },
             }}
             filterLayouts={{
-              currentFilter: currentAdvFilter ?? undefined,
-              filters: orgLayout?.filters,
+              currentFilter: currentFilter ?? undefined,
+              filters: orgFilters ?? undefined,
               onFilterChange: onLayoutFilterChange,
               onSaveFilter: onSaveFilter,
             }}
