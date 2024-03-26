@@ -2,7 +2,6 @@ import { createClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
 import { InMemoryRateLimiter } from "./db/InMemoryRateLimiter";
 import { RequestWrapper } from "./lib/RequestWrapper";
-import { RosettaWrapper } from "./lib/rosetta/RosettaWrapper";
 import { updateLoopUsers } from "./lib/updateLoopsUsers";
 import { buildRouter } from "./routers/routerFactory";
 import { AlertManager } from "./AlertManager";
@@ -41,7 +40,6 @@ export interface Env {
   RATE_LIMITER: DurableObjectNamespace;
   OPENAI_API_KEY: string;
   OPENAI_ORG_ID: string;
-  ROSETTA_HELICONE_API_KEY: string;
   CUSTOMER_GATEWAY_URL?: string;
   VALHALLA_URL: string;
   ALERTER: DurableObjectNamespace;
@@ -164,8 +162,8 @@ export default {
     );
     await updateLoopUsers(env);
     if (controller.cron === "0 * * * *") {
-      const rosetta = new RosettaWrapper(supabaseClient, env);
-      await rosetta.generateMappers();
+      // Do nothing
+      return;
     } else {
       const alertManager = new AlertManager(
         new AlertStore(supabaseClient, new ClickhouseClientWrapper(env)),
