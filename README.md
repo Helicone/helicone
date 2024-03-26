@@ -227,32 +227,36 @@ We are extremely open to contributors on documentation, integrations, and featur
 
    cost object is the cost per token for prompt and completion
 
-2. Import the new cost data into `src/index.ts` and add it to the `costs` array
+2. Import the new cost data into `src/providers/mappings.ts` and add it to the `providers` array
 
    Example:
 
-   File name: `costs/src/index.ts`
+   File name: `src/providers/mappings.ts`
 
    ```typescript
    import { costs as anthropicCosts } from "./providers/anthropic";
 
-   const costs = [
-     ...openaiCosts,
-     ...azureCosts,
-     ...googleCosts,
-     ...fineTunedOpenAICosts,
-     ...togetherAIChatCosts,
-     ...togetherAIChatLlamaCosts,
-     ...togetherAICompletionCosts,
-     ...togetherAICompletionLlamaCosts,
-     ...cohereCosts,
-     ...groqCosts,
-     ...anthropicCosts, // Add the new cost data here
+   // 1. Add the pattern for the API so it is a valid gateway.
+   const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
+
+   // 2. Add Anthropic pattern, provider tag, and costs array from the generated list
+   export const providers: {
+     pattern: RegExp;
+     provider: string;
+     costs?: ModelRow[];
+   }[] = [
+     // ...
+     {
+       pattern: anthropicPattern,
+       provider: "ANTHROPIC",
+       costs: anthropicCosts,
+     },
+     // ...
    ];
    ```
 
-3. Run `yarn copy` in the `cost/` directory to copy the cost data into other directories
-4. Run `yarn test -- -u` in the `cost/` directory to update the snapshot tests
+3. Run `yarn test -- -u` in the `cost/` directory to update the snapshot tests
+4. Run `yarn copy` in the `cost/` directory to copy the cost data into other directories
 
 ## License
 
