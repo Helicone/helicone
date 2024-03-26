@@ -42,6 +42,7 @@ const ThemedModal = (props: ThemedModalProps) => {
         </Transition.Child>
 
         <button
+          type="button"
           className="fixed inset-0 z-10 overflow-y-auto flex items-center justify-center"
           onClick={handleCloseModal}
         >
