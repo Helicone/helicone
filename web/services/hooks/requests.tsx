@@ -170,6 +170,7 @@ const useGetRequests = (
       },
       refetchOnWindowFocus: false,
       retry: false,
+      refetchIntervalInBackground: false,
       refetchInterval: isLive ? 2_000 : false,
     }),
     count: useQuery({
