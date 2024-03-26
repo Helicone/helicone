@@ -102,7 +102,9 @@ export function clickhousePriceCalc(table: string) {
   const providersWithCosts = providers.filter(
     (p) => p.costs && defaultProvider.provider !== p.provider
   );
-
+  if (!defaultProvider.costs) {
+    throw new Error("Default provider does not have costs");
+  }
   return `
 sum(
   CASE
@@ -112,9 +114,6 @@ sum(
         throw new Error("Provider does not have costs");
       }
 
-      if (!defaultProvider.costs) {
-        throw new Error("Default provider does not have costs");
-      }
       return `WHEN (${table}.provider = '${
         provider.provider
       }') THEN (${caseForCost(provider.costs, table, multiple)})`;
