@@ -23,7 +23,10 @@ export function costOf({
 
   // We need to concat allCosts because we need to check the provider costs first and if it is not founder thn fall back to make the best guess.
   // This is because we did not backfill the provider on supabase yet, and we do not plan to
+  // This is really for legacy
+  // TODO after 07/2024 we can probably remove this
   const costs = providerCost.costs.concat(allCosts);
+
   const cost = costs.find((cost) => {
     const valueLower = cost.model.value.toLowerCase();
     if (cost.model.operator === "equals") {
