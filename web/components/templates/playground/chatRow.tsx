@@ -61,7 +61,7 @@ const ChatRow = (props: ChatRowProps) => {
             {content.map((item, index) =>
               item.type === "image_url" || item.type === "image" ? (
                 <div key={index}>
-                  {item.image_url.url ? (
+                  {item.image_url?.url ? (
                     <img
                       src={item.image_url.url}
                       alt={""}

@@ -19,7 +19,7 @@ const ThemedModal = (props: ThemedModalProps) => {
   ) => {
     event.preventDefault();
     event.stopPropagation();
-    setOpen(true);
+    setOpen(false);
   };
 
   return (
@@ -27,7 +27,7 @@ const ThemedModal = (props: ThemedModalProps) => {
       <Dialog
         as="div"
         className={clsx(themeContext?.theme ?? "light", "relative z-40")}
-        onClose={setOpen}
+        onClose={() => setOpen(false)}
       >
         <Transition.Child
           as={Fragment}

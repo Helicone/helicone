@@ -14,9 +14,10 @@ import { AsyncLogModel } from "../models/AsyncLog";
 import { logInClickhouse } from "./clickhouseLog";
 import { RequestResponseStore } from "./RequestResponseStore";
 import { logRequest } from "./logResponse";
-import { anthropicAIStream } from "./parsers/anthropicStreamParser";
+import { anthropicAIStream, getModel } from "./parsers/anthropicStreamParser";
 import { parseOpenAIStream } from "./parsers/openAIStreamParser";
 import { getTokenCount } from "./tokenCounter";
+import { S3Client } from "../../db/S3Client";
 
 export interface DBLoggableProps {
   response: {
@@ -220,20 +221,40 @@ export class DBLoggable {
         return ok(JSON.parse(result));
       } else if (!isStream && this.provider === "ANTHROPIC" && requestBody) {
         const responseJson = JSON.parse(result);
-        const prompt = JSON.parse(requestBody)?.prompt ?? "";
-        const completion = responseJson?.completion ?? "";
-        const completionTokens = await tokenCounter(completion);
-        const promptTokens = await tokenCounter(prompt);
-
-        return ok({
-          ...responseJson,
-          usage: {
-            total_tokens: promptTokens + completionTokens,
-            prompt_tokens: promptTokens,
-            completion_tokens: completionTokens,
-            helicone_calculated: true,
-          },
-        });
+        if (getModel(requestBody ?? "{}").includes("claude-3")) {
+          if (
+            !responseJson?.usage?.output_tokens ||
+            !responseJson?.usage?.input_tokens
+          ) {
+            return ok(responseJson);
+          } else {
+            return ok({
+              ...responseJson,
+              usage: {
+                total_tokens:
+                  responseJson?.usage?.output_tokens +
+                  responseJson?.usage?.input_tokens,
+                prompt_tokens: responseJson?.usage?.input_tokens,
+                completion_tokens: responseJson?.usage?.output_tokens,
+                helicone_calculated: true,
+              },
+            });
+          }
+        } else {
+          const prompt = JSON.parse(requestBody)?.prompt ?? "";
+          const completion = responseJson?.completion ?? "";
+          const completionTokens = await tokenCounter(completion);
+          const promptTokens = await tokenCounter(prompt);
+          return ok({
+            ...responseJson,
+            usage: {
+              total_tokens: promptTokens + completionTokens,
+              prompt_tokens: promptTokens,
+              completion_tokens: completionTokens,
+              helicone_calculated: true,
+            },
+          });
+        }
       } else if (!isStream && this.provider === "GOOGLE") {
         const responseJson = JSON.parse(result);
         const usageMetadataItem = responseJson.find(
@@ -321,6 +342,7 @@ export class DBLoggable {
     const isStream = this.request.isStream;
 
     const usage = this.getUsage(parsedResponse.data);
+
     if (
       !isStream &&
       this.provider === "GOOGLE" &&
@@ -330,66 +352,97 @@ export class DBLoggable {
       const model = body?.model ?? body?.body?.model ?? undefined;
 
       return {
-        id: this.response.responseId,
-        created_at: endTime.toISOString(),
-        request: this.request.requestId,
+        response: {
+          id: this.response.responseId,
+          created_at: endTime.toISOString(),
+          request: this.request.requestId,
+          body: this.response.omitLog // TODO: Remove in favor of S3 storage
+            ? {
+                usage: parsedResponse.data?.usage,
+                model,
+              }
+            : body,
+          status: await this.response.status(),
+          completion_tokens: usage.completion_tokens,
+          prompt_tokens: usage.prompt_tokens,
+          time_to_first_token: timeToFirstToken,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          model: model,
+          delay_ms,
+        },
         body: this.response.omitLog
           ? {
               usage: parsedResponse.data?.usage,
               model,
             }
           : body,
-        status: await this.response.status(),
-        completion_tokens: usage.completion_tokens,
-        prompt_tokens: usage.prompt_tokens,
-        time_to_first_token: timeToFirstToken,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        model: model,
-        delay_ms,
       };
     }
 
     return parsedResponse.error === null
       ? {
-          id: this.response.responseId,
-          created_at: endTime.toISOString(),
-          request: this.request.requestId,
+          response: {
+            id: this.response.responseId,
+            created_at: endTime.toISOString(),
+            request: this.request.requestId,
+            body: this.response.omitLog // TODO: Remove in favor of S3 storage
+              ? {
+                  usage: parsedResponse.data?.usage,
+                  model: parsedResponse.data?.model,
+                }
+              : parsedResponse.data,
+            status: await this.response.status(),
+            completion_tokens: usage.completion_tokens,
+            prompt_tokens: usage.prompt_tokens,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            model: (parsedResponse.data as any)?.model ?? undefined,
+            delay_ms,
+            time_to_first_token: timeToFirstToken,
+          },
           body: this.response.omitLog
             ? {
                 usage: parsedResponse.data?.usage,
                 model: parsedResponse.data?.model,
               }
             : parsedResponse.data,
-          status: await this.response.status(),
-          completion_tokens: usage.completion_tokens,
-          prompt_tokens: usage.prompt_tokens,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          model: (parsedResponse.data as any)?.model ?? undefined,
-          delay_ms,
-          time_to_first_token: timeToFirstToken,
         }
       : {
-          id: this.response.responseId,
-          request: this.request.requestId,
-          created_at: endTime.toISOString(),
+          response: {
+            id: this.response.responseId,
+            request: this.request.requestId,
+            created_at: endTime.toISOString(),
+            body: {
+              // TODO: Remove in favor of S3 storage
+              helicone_error: "error parsing response",
+              parse_response_error: parsedResponse.error,
+              body: parsedResponse.data,
+            },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            model: (parsedResponse.data as any)?.model ?? undefined,
+            status: await this.response.status(),
+          },
           body: {
             helicone_error: "error parsing response",
             parse_response_error: parsedResponse.error,
             body: parsedResponse.data,
           },
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          model: (parsedResponse.data as any)?.model ?? undefined,
-          status: await this.response.status(),
         };
   }
 
-  async readAndLogResponse(
-    queue: RequestResponseStore
-  ): Promise<
-    Result<Database["public"]["Tables"]["response"]["Insert"], string>
+  async readAndLogResponse(queue: RequestResponseStore): Promise<
+    Result<
+      {
+        response: Database["public"]["Tables"]["response"]["Insert"];
+        body: string;
+      },
+      string
+    >
   > {
     try {
-      const response = await withTimeout(this.getResponse(), 1000 * 60 * 30); // 30 minutes
+      const { response, body } = await withTimeout(
+        this.getResponse(),
+        1000 * 60 * 30
+      ); // 30 minutes
       const { error } = await queue.updateResponse(
         this.response.responseId,
         this.request.requestId,
@@ -399,19 +452,14 @@ export class DBLoggable {
         console.error("Error updating response", error);
         // return err(error);
       }
-      return ok(response);
+      return ok({ response, body });
     } catch (e) {
       const { error } = await queue.updateResponse(
         this.response.responseId,
         this.request.requestId,
         {
           status: -1,
-          body: {
-            helicone_error: "error getting response, " + e,
-            helicone_repsonse_body_as_string: (
-              await this.response.getResponseBody()
-            ).body,
-          },
+          body: "",
         }
       );
       if (error !== null) {
@@ -525,6 +573,7 @@ export class DBLoggable {
     dbWrapper: DBWrapper;
     clickhouse: ClickhouseClientWrapper;
     queue: RequestResponseStore;
+    s3Client: S3Client;
   }): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
@@ -582,15 +631,43 @@ export class DBLoggable {
     }
 
     const responseResult = await this.readAndLogResponse(db.queue);
-
     // If no data or error, return
     if (!responseResult.data || responseResult.error) {
+      // Log the error in S3
+      const s3Result = await db.s3Client.storeRequestResponse(
+        authParams.organizationId,
+        this.request.requestId,
+        requestResult.data.body,
+        JSON.stringify({
+          helicone_error: "error getting response, " + responseResult.error,
+          helicone_repsonse_body_as_string: (
+            await this.response.getResponseBody()
+          ).body,
+        })
+      );
+
+      if (s3Result.error) {
+        console.error("Error storing request response", s3Result.error);
+      }
+
       return responseResult;
+    }
+
+    const s3Result = await db.s3Client.storeRequestResponse(
+      authParams.organizationId,
+      this.request.requestId,
+      requestResult.data.body,
+      responseResult.data.body
+    );
+
+    if (s3Result.error) {
+      console.error("Error storing request response", s3Result.error);
+      // Continue logging to clickhouse
     }
 
     await logInClickhouse(
       requestResult.data.request,
-      responseResult.data,
+      responseResult.data.response,
       requestResult.data.properties,
       requestResult.data.node,
       db.clickhouse
@@ -599,7 +676,7 @@ export class DBLoggable {
     // TODO We should probably move the webhook stuff out of dbLogger
     const { error: webhookError } = await this.sendToWebhooks(db.supabase, {
       request: requestResult.data,
-      response: responseResult.data,
+      response: responseResult.data.response,
     });
 
     if (webhookError !== null) {

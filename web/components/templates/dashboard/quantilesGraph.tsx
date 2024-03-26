@@ -5,8 +5,10 @@ import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { TimeIncrement } from "../../../lib/timeCalculations/fetchTimeData";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 
 type QuantilesGraphProps = {
+  uiFilters: UIFilterRow[];
   timeFilter: {
     start: Date;
     end: Date;
@@ -15,6 +17,7 @@ type QuantilesGraphProps = {
 };
 
 export const QuantilesGraph = ({
+  uiFilters,
   timeFilter,
   timeIncrement,
 }: QuantilesGraphProps) => {
@@ -28,6 +31,7 @@ export const QuantilesGraph = ({
   const [currentMetric, setCurrentMetric] = useState("Latency");
 
   const { quantiles, isLoading: quantilesIsLoading } = useQuantiles({
+    uiFilters,
     timeFilter,
     dbIncrement: timeIncrement,
     timeZoneDifference: new Date().getTimezoneOffset(),

@@ -3,6 +3,7 @@ import { enumerate } from "../helpers";
 import { proxyForwarder } from "../lib/HeliconeProxyRequest/forwarder";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { approvedDomains } from "../lib/gateway/approvedDomains";
+import { providers } from "../packages/cost/providers/mappings";
 import { Result, err, ok } from "../results";
 import { BaseRouter } from "./routerFactory";
 
@@ -113,24 +114,25 @@ async function getProvider(
 
   setBaseURLOverride(targetBaseUrl);
 
-  const targetBaseUrlLowerCase = targetBaseUrl.toLowerCase();
-
-  let provider;
-  if (
-    targetBaseUrlLowerCase.includes("azure") ||
-    targetBaseUrlLowerCase.includes("openai")
-  ) {
-    provider = "OPENAI";
-  } else if (targetBaseUrlLowerCase.includes("googleapis")) {
-    provider = "GOOGLE";
-  } else if (targetBaseUrlLowerCase.includes("together.xyz")) {
-    provider = "TOGETHERAI";
-  } else {
-    provider = targetBaseUrlHost ?? "CUSTOM";
-  }
   return ok({
-    provider,
+    provider: getProviderFromTargetUrl(targetBaseUrl),
   });
+}
+
+function getProviderFromTargetUrl(targetBaseUrl: string | null): string {
+  if (!targetBaseUrl) {
+    return "CUSTOM";
+  }
+  const targetBaseUrlLowerCase = targetBaseUrl.toLowerCase();
+  const provider = providers.find((provider) =>
+    provider.pattern.test(targetBaseUrlLowerCase)
+  );
+
+  if (provider) {
+    return provider.provider;
+  }
+
+  return targetBaseUrlLowerCase;
 }
 
 const gatewayForwarder = async (
@@ -225,6 +227,10 @@ export const getGatewayAPIRouter = (router: BaseRouter) => {
           env,
           ctx
         );
+      }
+
+      if (env.GATEWAY_TARGET) {
+        return await forwarder(env.GATEWAY_TARGET);
       }
       const fallbacks = requestWrapper.heliconeHeaders.fallBacks;
 

@@ -108,12 +108,14 @@ const RequestCard = (props: RequestCardProps) => {
           <p className="text-sm font-semibold">
             {Number(request.latency) / 1000}s
           </p>
-          {request.cost ? (
-            <p className="text-sm font-semibold">{`$${formatNumber(
-              request.cost
-            )}`}</p>
-          ) : (
+          {!request.cost && request.status.code === 200 ? (
             <CostPill />
+          ) : request.cost ? (
+            <p className="text-sm font-semibold">
+              ${formatNumber(request.cost)}
+            </p>
+          ) : (
+            <p className="text-sm font-semibold"></p>
           )}
         </div>
         <div className="flex flex-col space-y-4">

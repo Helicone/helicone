@@ -12,6 +12,7 @@ import {
   validateAsyncLogModel,
 } from "../../lib/models/AsyncLog";
 import { DBQueryTimer } from "../../db/DBQueryTimer";
+import { S3Client } from "../../db/S3Client";
 
 export async function logAsync(
   requestWrapper: RequestWrapper,
@@ -68,6 +69,12 @@ export async function logAsync(
       new ClickhouseClientWrapper(env),
       env.FALLBACK_QUEUE,
       env.REQUEST_AND_RESPONSE_QUEUE_KV
+    ),
+    s3Client: new S3Client(
+      env.S3_ACCESS_KEY ?? "",
+      env.S3_SECRET_KEY ?? "",
+      env.S3_ENDPOINT ?? "",
+      env.S3_BUCKET_NAME ?? ""
     ),
   });
 
