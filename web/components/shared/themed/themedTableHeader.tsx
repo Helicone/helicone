@@ -31,14 +31,11 @@ import { AdvancedFilters, UIFilterRow } from "./themedAdvancedFilters";
 import ThemedModal from "./themedModal";
 import Link from "next/link";
 import { Result } from "../../../lib/result";
-import { ThemedPill } from "./themedPill";
 import { ThemedMultiSelect } from "./themedMultiSelect";
 import { TimeFilter } from "../../templates/dashboard/dashboardPage";
 import FiltersButton from "./table/filtersButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 import { TextInput } from "@tremor/react";
-import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
-import { useOrg } from "../../layout/organizationContext";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -117,15 +114,6 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
     setIsSaveFiltersModalOpen(value);
   };
 
-  const orgContext = useOrg();
-
-  const {
-    organizationLayout: orgLayout,
-    isLoading: isOrgLayoutLoading,
-    refetch: orgLayoutRefetch,
-    isRefetching: isOrgLayoutRefetching,
-  } = useOrganizationLayout(orgContext?.currentOrg?.id!, "dashboard");
-
   return (
     <>
       {/* Filters */}
@@ -170,7 +158,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                       </p>
                     </button>
                   </div>
-                  {filterLayouts && !isOrgLayoutLoading && (
+                  {filterLayouts && (
                     <>
                       <div className="mx-auto flex text-sm">
                         <FiltersButton

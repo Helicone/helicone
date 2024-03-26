@@ -1,27 +1,24 @@
 import { User } from "@supabase/auth-helpers-react";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement } from "react";
 
 import AuthLayout from "../components/layout/authLayout";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { useTheme } from "../components/shared/theme/themeContext";
-import { useLocalStorage } from "../services/hooks/localStorage";
 import {
   OrganizationFilter,
   OrganizationLayout,
 } from "../services/lib/organization_layout/organization_layout";
-import LoadingAnimation from "../components/shared/loadingAnimation";
-import { Result } from "../lib/result";
-import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { supabaseServer } from "../lib/supabaseServer";
 
 interface DashboardProps {
   user: User;
-  currentFilter: OrganizationFilter;
+  currentFilter: OrganizationFilter | null;
+  orgLayout: OrganizationLayout | null;
 }
 
 const Dashboard = (props: DashboardProps) => {
-  const { user, currentFilter } = props;
+  const { user, currentFilter, orgLayout } = props;
   const theme = useTheme();
 
   // useEffect(() => {
@@ -39,8 +36,20 @@ const Dashboard = (props: DashboardProps) => {
   //   };
   // }, [theme?.theme, user]);
 
-  return <DashboardPage user={user} currentFilter={currentFilter} />;
+  return (
+    <DashboardPage
+      user={user}
+      currentFilter={currentFilter}
+      orgLayout={orgLayout}
+    />
+  );
 };
+
+Dashboard.getLayout = function getLayout(page: ReactElement) {
+  return <AuthLayout>{page}</AuthLayout>;
+};
+
+export default Dashboard;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
   const {
@@ -70,6 +79,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       props: {
         user,
         currentFilter: null,
+        orgLayout: orgLayout ?? null,
       },
     };
   }
@@ -78,12 +88,20 @@ export const getServerSideProps = withAuthSSR(async (options) => {
 
   const filters: OrganizationFilter[] = JSON.parse(orgLayout.filters as string);
 
+  const layout: OrganizationLayout = {
+    id: orgLayout.id,
+    type: orgLayout.type,
+    filters: filters,
+    organization_id: orgLayout.organization_id,
+  };
+
   const currentFilter = filters.find((x) => x.id === filterId);
 
   return {
     props: {
       user,
       currentFilter: currentFilter ?? null,
+      orgLayout: layout ?? null,
     },
   };
 });

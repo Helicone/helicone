@@ -14,7 +14,7 @@ import {
   Legend,
 } from "@tremor/react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { ModelMetric } from "../../../lib/api/models/models";
 import {
@@ -45,8 +45,10 @@ import { useDashboardPage } from "./useDashboardPage";
 import { useModels } from "../../../services/hooks/models";
 import { QuantilesGraph } from "./quantilesGraph";
 import LoadingAnimation from "../../shared/loadingAnimation";
-import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
-import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
+import {
+  OrganizationFilter,
+  OrganizationLayout,
+} from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
 import { v4 as uuidv4 } from "uuid";
 
@@ -54,7 +56,8 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface DashboardPageProps {
   user: User;
-  currentFilter: OrganizationFilter | undefined;
+  currentFilter: OrganizationFilter | null;
+  orgLayout: OrganizationLayout | null;
 }
 
 export type TimeFilter = {
@@ -87,8 +90,10 @@ export type Loading<T> = T | "loading";
 export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
-  const { user, currentFilter } = props;
-  console.log(currentFilter);
+  const { user, currentFilter, orgLayout } = props;
+
+  const [currentAdvFilter, setCurrentAdvFilter] =
+    useState<OrganizationFilter | null>(currentFilter);
   const searchParams = useSearchParams();
 
   const getInterval = () => {
@@ -135,10 +140,6 @@ const DashboardPage = (props: DashboardPageProps) => {
           .split("|")
           .map(decodeFilter)
           .filter((filter) => filter !== null) as UIFilterRow[];
-
-        console.log(2);
-        console.log(decodedFilters);
-        console.log(2);
 
         return decodedFilters;
       }
@@ -617,25 +618,18 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const orgContext = useOrg();
 
-  const {
-    organizationLayout: orgLayout,
-    isLoading: isOrgLayoutLoading,
-    refetch: orgLayoutRefetch,
-    isRefetching: isOrgLayoutRefetching,
-  } = useOrganizationLayout(orgContext?.currentOrg?.id!, "dashboard");
-
   const onSaveFilter = async (name: string) => {
-    const currentAdvancedFilters = encodeURIComponent(
-      JSON.stringify(advancedFilters.map(encodeFilter).join("|"))
-    );
-    const encodedFilters = JSON.stringify(currentAdvancedFilters);
-    const saveFilter: OrganizationFilter = {
-      id: uuidv4(),
-      name: name,
-      filter: JSON.stringify(encodedFilters),
-      softDelete: false,
-    };
     if (advancedFilters.length > 0) {
+      const currentAdvancedFilters = encodeURIComponent(
+        JSON.stringify(advancedFilters.map(encodeFilter).join("|"))
+      );
+      const encodedFilters = JSON.stringify(currentAdvancedFilters);
+      const saveFilter: OrganizationFilter = {
+        id: uuidv4(),
+        name: name,
+        filter: JSON.stringify(encodedFilters),
+        softDelete: false,
+      };
       if (orgLayout && orgLayout?.filters?.length > 0) {
         const updatedFilters = [...orgLayout.filters, saveFilter];
         await fetch(
@@ -651,26 +645,30 @@ const DashboardPage = (props: DashboardPageProps) => {
             }),
           }
         );
+        orgLayout.filters = updatedFilters;
       } else {
-        await fetch(`/api/organization/${orgContext?.currentOrg?.id!}/create`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            type: "dashboard",
-            filters: [saveFilter],
-          }),
-        });
+        await fetch(
+          `/api/organization/${orgContext?.currentOrg?.id!}/create_filter`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: "dashboard",
+              filters: [saveFilter],
+            }),
+          }
+        );
       }
-      await orgLayoutRefetch();
+      onLayoutFilterChange(saveFilter);
     }
   };
 
-  //fix to search poarams
-  const onLayoutFilterChange = async (layoutFilter: OrganizationFilter) => {
+  const onLayoutFilterChange = (layoutFilter: OrganizationFilter) => {
     let currentAdvancedFilters;
     if (layoutFilter) {
+      setCurrentAdvFilter(layoutFilter);
       currentAdvancedFilters = JSON.parse(layoutFilter?.filter);
     }
 
@@ -680,10 +678,6 @@ const DashboardPage = (props: DashboardPageProps) => {
         .split("|")
         .map(decodeFilter)
         .filter((filter) => filter !== null) as UIFilterRow[];
-      console.log(2);
-      console.log(decodedFilters);
-      console.log(layoutFilter);
-      console.log(2);
       onSetAdvancedFilters(decodedFilters, layoutFilter.id);
     }
   };
@@ -768,7 +762,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       ) : (
         <div className="space-y-4">
           <ThemedTableHeader
-            isFetching={isAnyLoading || isOrgLayoutLoading}
+            isFetching={isAnyLoading}
             timeFilter={{
               currentTimeFilter: timeFilter,
               customTimeFilter: true,
@@ -807,7 +801,7 @@ const DashboardPage = (props: DashboardPageProps) => {
               },
             }}
             filterLayouts={{
-              currentFilter: currentFilter,
+              currentFilter: currentAdvFilter ?? undefined,
               filters: orgLayout?.filters,
               onFilterChange: onLayoutFilterChange,
               onSaveFilter: onSaveFilter,
