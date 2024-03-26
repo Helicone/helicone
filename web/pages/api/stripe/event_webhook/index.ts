@@ -47,7 +47,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             stripe_subscription_id: checkoutCompleted.subscription?.toString(), // this is the ID of the subscription created by the checkout
             tier: "pro",
           })
-          .eq("id", orgId);
+          .eq("id", orgId || "");
 
         break;
 

@@ -13,7 +13,7 @@ export const useHeliconeKeys = () => {
         .from("helicone_api_keys")
         .select("*")
         .eq("soft_delete", false)
-        .eq("organization_id", org?.currentOrg?.id);
+        .eq("organization_id", org?.currentOrg?.id ?? "");
     },
     refetchOnWindowFocus: false,
   });

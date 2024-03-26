@@ -48,7 +48,7 @@ async function handler({
   const orgToCheck = await client
     .from("organization")
     .select("*")
-    .eq("id", id)
+    .eq("id", id || "")
     .single();
   if (!orgToCheck.data || orgToCheck.error !== null) {
     res
