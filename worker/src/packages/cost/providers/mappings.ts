@@ -116,6 +116,7 @@ export const providers: {
   },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 export const defaultProvider = providers.find(
   (provider) => provider.provider === "OPENAI"
 )!;

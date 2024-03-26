@@ -108,12 +108,19 @@ sum(
   CASE
   ${providersWithCosts
     .map((provider) => {
+      if (!provider.costs) {
+        throw new Error("Provider does not have costs");
+      }
+
+      if (!defaultProvider.costs) {
+        throw new Error("Default provider does not have costs");
+      }
       return `WHEN (${table}.provider = '${
         provider.provider
-      }') THEN (${caseForCost(provider.costs!, table, multiple)})`;
+      }') THEN (${caseForCost(provider.costs, table, multiple)})`;
     })
     .join("\n")}
-    ELSE ${caseForCost(defaultProvider.costs!, table, multiple)}
+    ELSE ${caseForCost(defaultProvider.costs, table, multiple)}
   END
   ) / ${multiple}
 `;
