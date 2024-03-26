@@ -8,6 +8,7 @@ import { costs as azureCosts } from "./azure";
 import { costs as googleCosts } from "./google";
 import { costs as anthropicCosts } from "./anthropic";
 import { costs as cohereCosts } from "./cohere";
+import { costs as mistralCosts } from "./mistral";
 import { ModelRow } from "../interfaces/Cost";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
@@ -33,6 +34,8 @@ const wisdomInANutshell = /^https:\/\/api\.wisdominanutshell\.academy/;
 const groq = /^https:\/\/api\.groq\.com/;
 // cohere.ai
 const cohere = /^https:\/\/api\.cohere\.ai/;
+// api.mistral.ai
+const mistral = /^https:\/\/api\.mistral\.ai/;
 
 export const providers: {
   pattern: RegExp;
@@ -121,6 +124,11 @@ export const providers: {
     pattern: cohere,
     provider: "COHERE",
     costs: cohereCosts,
+  },
+  {
+    pattern: mistral,
+    provider: "MISTRAL",
+    costs: mistralCosts,
   },
 ];
 
