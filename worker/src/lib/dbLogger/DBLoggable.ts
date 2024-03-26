@@ -47,6 +47,7 @@ export interface DBLoggableProps {
     modelOverride?: string;
     heliconeTemplate?: Record<string, unknown>;
     threat: boolean | null;
+    flaggedForModeration: boolean | null;
     request_ip: string | null;
   };
   timing: {
@@ -64,14 +65,15 @@ export interface AuthParams {
 }
 
 export function dbLoggableRequestFromProxyRequest(
-  proxyRequest: HeliconeProxyRequest
+  proxyRequest: HeliconeProxyRequest,
+  requestStartTime: Date
 ): DBLoggableProps["request"] {
   return {
     requestId: proxyRequest.requestId,
     heliconeProxyKeyId: proxyRequest.heliconeProxyKeyId,
     promptId: proxyRequest.requestWrapper.heliconeHeaders.promptId ?? undefined,
     userId: proxyRequest.userId,
-    startTime: proxyRequest.startTime,
+    startTime: requestStartTime,
     bodyText: proxyRequest.bodyText ?? undefined,
     path: proxyRequest.requestWrapper.url.href,
     targetUrl: proxyRequest.targetUrl.href,
@@ -84,6 +86,7 @@ export function dbLoggableRequestFromProxyRequest(
       proxyRequest.requestWrapper.heliconeHeaders.modelOverride ?? undefined,
     heliconeTemplate: proxyRequest.heliconePromptTemplate ?? undefined,
     threat: proxyRequest.threat ?? null,
+    flaggedForModeration: proxyRequest.flaggedForModeration ?? null,
     request_ip:
       proxyRequest.requestWrapper.headers.get("CF-Connecting-IP") ?? null,
   };
@@ -146,6 +149,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       nodeId: requestWrapper.getNodeId(),
       modelOverride: requestWrapper.heliconeHeaders.modelOverride ?? undefined,
       threat: null,
+      flaggedForModeration: null,
       request_ip: null,
     },
     response: {

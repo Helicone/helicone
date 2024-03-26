@@ -14,10 +14,12 @@ import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { RequestResponseStore } from "../dbLogger/RequestResponseStore";
 import { Valhalla } from "../db/valhalla";
 import { handleProxyRequest, handleThreatProxyRequest } from "./handler";
-import { HeliconeProxyRequestMapper } from "./mapper";
+import { HeliconeProxyRequest, HeliconeProxyRequestMapper } from "./mapper";
 import { checkPromptSecurity } from "../security/promptSecurity";
 import { DBLoggable } from "../dbLogger/DBLoggable";
 import { DBQueryTimer } from "../../db/DBQueryTimer";
+import { Moderator } from "../moderation/Moderator";
+import { Result } from "../../results";
 import { S3Client } from "../../db/S3Client";
 
 export async function proxyForwarder(
@@ -64,37 +66,80 @@ export async function proxyForwarder(
     }
   }
 
+  const { data: cacheSettings, error: cacheError } = getCacheSettings(
+    proxyRequest.requestWrapper.getHeaders(),
+    proxyRequest.isStream
+  );
+
+  if (cacheError !== null) {
+    return responseBuilder.build({
+      body: cacheError,
+      status: 500,
+    });
+  }
+
+  if (cacheSettings.shouldReadFromCache) {
+    const { data: auth, error: authError } = await request.auth();
+    if (authError == null) {
+      const db = new DBWrapper(env, auth);
+      const { data: orgData, error: orgError } = await db.getAuthParams();
+      if (orgError !== null || !orgData?.organizationId) {
+        console.error("Error getting org", orgError);
+      } else {
+        const cachedResponse = await getCachedResponse(
+          proxyRequest,
+          cacheSettings.bucketSettings,
+          env.CACHE_KV,
+          cacheSettings.cacheSeed
+        );
+        if (cachedResponse) {
+          ctx.waitUntil(
+            recordCacheHit(
+              cachedResponse.headers,
+              env,
+              new ClickhouseClientWrapper(env),
+              orgData.organizationId,
+              provider
+            )
+          );
+          return cachedResponse;
+        }
+      }
+    }
+  }
+
   if (
     proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled &&
     provider === "OPENAI" &&
     env.PROMPTARMOR_API_KEY
   ) {
-    let latestMessage;
-
-    try {
-      latestMessage = JSON.parse(proxyRequest.bodyText ?? "").messages.pop();
-    } catch (error) {
-      console.error("Error parsing latest message:", error);
+    const { data: latestMsg, error: latestMsgErr } =
+      parseLatestMessage(proxyRequest);
+    if (latestMsgErr || !latestMsg) {
       return responseBuilder.build({
-        body: "Failed to parse the latest message.",
+        body: latestMsgErr,
         status: 500,
       });
     }
 
     if (
       request.url.pathname.includes("chat/completions") &&
-      latestMessage &&
-      latestMessage.role === "user"
+      latestMsg?.content &&
+      latestMsg?.role === "user"
     ) {
+      const requestStartTime = new Date();
       const threat = await checkPromptSecurity(
-        latestMessage.content,
+        latestMsg.content,
         provider,
         env
       );
 
       proxyRequest.threat = threat;
       if (threat === true) {
-        const { data, error } = await handleThreatProxyRequest(proxyRequest);
+        const { data, error } = await handleThreatProxyRequest(
+          proxyRequest,
+          requestStartTime
+        );
 
         if (error !== null) {
           return responseBuilder.build({
@@ -131,46 +176,47 @@ export async function proxyForwarder(
     }
   }
 
-  // TODO move this to proxyRequest
-  const { data: cacheSettings, error: cacheError } = getCacheSettings(
-    proxyRequest.requestWrapper.getHeaders(),
-    proxyRequest.isStream
-  );
+  if (
+    proxyRequest.requestWrapper.heliconeHeaders.moderationsEnabled &&
+    provider == "OPENAI"
+  ) {
+    const { data: latestMsg, error: latestMsgErr } =
+      parseLatestMessage(proxyRequest);
 
-  if (cacheError !== null) {
-    return responseBuilder.build({
-      body: cacheError,
-      status: 500,
-    });
-  }
+    if (latestMsgErr || !latestMsg) {
+      return responseBuilder.build({
+        body: latestMsgErr,
+        status: 500,
+      });
+    }
 
-  if (cacheSettings.shouldReadFromCache) {
-    const { data: auth, error: authError } = await request.auth();
-    if (authError == null) {
-      const db = new DBWrapper(env, auth);
-      const { data: orgData, error: orgError } = await db.getAuthParams();
-      if (orgError !== null || !orgData?.organizationId) {
-        console.error("Error getting org", orgError);
-      } else {
-        const cachedResponse = await getCachedResponse(
-          proxyRequest,
-          cacheSettings.bucketSettings,
-          env.CACHE_KV,
-          cacheSettings.cacheSeed
-        );
-        if (cachedResponse) {
-          ctx.waitUntil(
-            recordCacheHit(
-              cachedResponse.headers,
-              env,
-              new ClickhouseClientWrapper(env),
-              orgData.organizationId,
-              proxyRequest.provider
-            )
-          );
-          return cachedResponse;
-        }
+    if (
+      request.url.pathname.includes("chat/completions") &&
+      latestMsg?.content &&
+      latestMsg?.role === "user"
+    ) {
+      const moderator = new Moderator(
+        proxyRequest.requestWrapper.headers,
+        env,
+        provider
+      );
+
+      const { data: moderationRes, error: moderationErr } =
+        await moderator.moderate(latestMsg.content);
+
+      if (moderationErr || !moderationRes) {
+        return responseBuilder.build({
+          body: moderationErr,
+          status: 500,
+        });
       }
+
+      ctx.waitUntil(log(moderationRes.loggable));
+
+      if (moderationRes.isModerated) {
+        return moderationRes.response;
+      }
+      // Passed moderation...
     }
   }
 
@@ -277,4 +323,28 @@ export async function proxyForwarder(
     inheritFrom: response,
     status: response.status,
   });
+
+  function parseLatestMessage(
+    proxyRequest: HeliconeProxyRequest
+  ): Result<LatestMessage, string> {
+    try {
+      return {
+        error: null,
+        data: JSON.parse(
+          proxyRequest.bodyText ?? ""
+        ).messages.pop() as LatestMessage,
+      };
+    } catch (error) {
+      console.error("Error parsing latest message:", error);
+      return {
+        error: "Failed to parse the latest message.",
+        data: null,
+      };
+    }
+  }
 }
+
+type LatestMessage = {
+  role?: string;
+  content?: string;
+};
