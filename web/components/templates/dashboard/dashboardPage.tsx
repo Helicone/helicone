@@ -49,12 +49,13 @@ import { OrganizationFilter } from "../../../services/lib/organization_layout/or
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
 import { v4 as uuidv4 } from "uuid";
-import { useLocalStorage } from "../../../services/hooks/localStorage";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface DashboardPageProps {
   user: User;
+  currentFilter: OrganizationFilter | undefined;
+  onChangeCurrentFilter: (value: OrganizationFilter | undefined) => void;
 }
 
 export type TimeFilter = {
@@ -87,11 +88,8 @@ export type Loading<T> = T | "loading";
 export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
-  const { user } = props;
+  const { user, currentFilter, onChangeCurrentFilter } = props;
   const searchParams = useSearchParams();
-  const [currentFilter, setCurrentFilter] = useLocalStorage<
-    OrganizationFilter | undefined
-  >("dashboard-filter", undefined);
 
   const getInterval = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -124,67 +122,34 @@ const DashboardPage = (props: DashboardPageProps) => {
     return range;
   };
 
-  // const getAdvancedFilters = useCallback(() => {
-  //   try {
-  //     console.log("hello");
-  //     let currentAdvancedFilters;
-  //     if (currentFilter) {
-  //       currentAdvancedFilters = JSON.parse(currentFilter?.filter);
-  //     }
-  //     if (currentAdvancedFilters) {
-  //       const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
-  //       const decodedFilters = filters
-  //         .split("|")
-  //         .map(decodeFilter)
-  //         .filter((filter) => filter !== null) as UIFilterRow[];
-  //       console.log(2);
-  //       console.log(decodedFilters);
-  //       console.log(2);
-  //       return decodedFilters;
-  //     }
-  //   } catch (error) {
-  //     console.error("Error decoding advanced filters:", error);
-  //   }
-  //   console.log("bye");
-  //   return [];
-  // }, [currentFilter]);
-
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
-
-  useEffect(() => {
-    if (!currentFilter) return;
-    const getAdvancedFilters = (): UIFilterRow[] => {
-      try {
-        let currentAdvancedFilters;
-        if (currentFilter) {
-          currentAdvancedFilters = JSON.parse(currentFilter?.filter);
-        }
-
-        if (currentAdvancedFilters) {
-          const filters = decodeURIComponent(currentAdvancedFilters).slice(
-            2,
-            -2
-          );
-          const decodedFilters = filters
-            .split("|")
-            .map(decodeFilter)
-            .filter((filter) => filter !== null) as UIFilterRow[];
-
-          console.log(2);
-          console.log(decodedFilters);
-          console.log(2);
-
-          return decodedFilters;
-        }
-      } catch (error) {
-        console.error("Error decoding advanced filters:", error);
+  const getAdvancedFilters = (): UIFilterRow[] => {
+    try {
+      let currentAdvancedFilters;
+      if (currentFilter) {
+        currentAdvancedFilters = JSON.parse(currentFilter?.filter);
       }
-      return [];
-    };
 
-    const filters = getAdvancedFilters();
-    setAdvancedFilters(filters);
-  }, [currentFilter]);
+      if (currentAdvancedFilters) {
+        const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
+        const decodedFilters = filters
+          .split("|")
+          .map(decodeFilter)
+          .filter((filter) => filter !== null) as UIFilterRow[];
+
+        console.log(2);
+        console.log(decodedFilters);
+        console.log(2);
+
+        return decodedFilters;
+      }
+    } catch (error) {
+      console.error("Error decoding advanced filters:", error);
+    }
+    return [];
+  };
+
+  const [advancedFilters, setAdvancedFilters] =
+    useState<UIFilterRow[]>(getAdvancedFilters);
 
   const [interval, setInterval] = useState<TimeInterval>(
     getInterval() as TimeInterval
@@ -235,7 +200,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const onSetAdvancedFilters = (filters: UIFilterRow[]) => {
     if (!filters.length) {
-      setCurrentFilter(undefined);
+      onChangeCurrentFilter(undefined);
     }
 
     setAdvancedFilters(filters);
@@ -694,13 +659,27 @@ const DashboardPage = (props: DashboardPageProps) => {
         });
       }
       await orgLayoutRefetch();
-      setCurrentFilter(saveFilter);
+      onChangeCurrentFilter(saveFilter);
     }
   };
 
-  const onLayoutFilterChange = (value: OrganizationFilter) => {
-    setCurrentFilter(value);
-    onSetAdvancedFilters(advancedFilters);
+
+  const onLayoutFilterChange = async (layoutFilter: OrganizationFilter) => {
+    let currentAdvancedFilters;
+    if (layoutFilter) {
+      currentAdvancedFilters = JSON.parse(layoutFilter?.filter);
+    }
+
+    if (currentAdvancedFilters) {
+      const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
+      const decodedFilters = filters
+        .split("|")
+        .map(decodeFilter)
+        .filter((filter) => filter !== null) as UIFilterRow[];
+      onChangeCurrentFilter(layoutFilter);
+      onSetAdvancedFilters(decodedFilters);
+      await refetch();
+    }
   };
 
   const renderUnauthorized = () => {

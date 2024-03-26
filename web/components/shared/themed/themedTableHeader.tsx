@@ -292,7 +292,13 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                     filters={advancedFilter.filters}
                     setAdvancedFilters={advancedFilter.onAdvancedFilter}
                     searchPropertyFilters={advancedFilter.searchPropertyFilters}
-                    onSaveFilters={handleOpenModal}
+                    filterLayouts={
+                      filterLayouts
+                        ? {
+                            onSaveFilters: handleOpenModal,
+                          }
+                        : undefined
+                    }
                   />
                 )}
                 {/* {advancedFilter.filters.length > 0 && !showAdvancedFilters && (

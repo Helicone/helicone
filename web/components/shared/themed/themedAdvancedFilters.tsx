@@ -21,7 +21,7 @@ export function AdvancedFilters({
   filters,
   setAdvancedFilters,
   searchPropertyFilters,
-  onSaveFilters,
+  filterLayouts,
 }: {
   filterMap: SingleFilterDef<any>[];
   filters: UIFilterRow[];
@@ -30,7 +30,9 @@ export function AdvancedFilters({
     property: string,
     search: string
   ) => Promise<Result<void, string>>;
-  onSaveFilters?: (value: boolean) => void;
+  filterLayouts?: {
+    onSaveFilters?: (value: boolean) => void;
+  };
 }) {
   return (
     <div className="flex flex-col bg-white dark:bg-black p-4 rounded-lg border border-gray-300 dark:border-gray-700 mt-8">
@@ -92,11 +94,11 @@ export function AdvancedFilters({
         </button>
       </div>
       <div className="flex flex-row w-full items-end justify-end">
-        {filters.length > 0 && (
+        {filterLayouts && filters.length > 0 && (
           <button
             onClick={() => {
-              if (onSaveFilters) {
-                onSaveFilters(true);
+              if (filterLayouts?.onSaveFilters) {
+                filterLayouts?.onSaveFilters(true);
               }
             }}
             className={clsx(
@@ -104,7 +106,7 @@ export function AdvancedFilters({
             )}
           >
             <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-              {"Save"}
+              {"Create new Filter"}
             </p>
           </button>
         )}
