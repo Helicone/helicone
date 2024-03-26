@@ -20,7 +20,7 @@ const useGetRequest = (requestId: string) => {
         };
       }
       const authFromCookie = getHeliconeCookie();
-      return await fetch(
+      const response = await fetch(
         `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/request/query`,
         {
           method: "POST",
@@ -46,7 +46,32 @@ const useGetRequest = (requestId: string) => {
             } as FilterNode,
           }),
         }
-      ).then((res) => res.json() as Promise<Result<HeliconeRequest, string>>);
+      );
+
+      const result = (await response.json()) as Result<HeliconeRequest, string>;
+
+      // update below logic to work for single request
+      const request = result.data;
+
+      if (request?.signed_body_url) {
+        try {
+          const contentResponse = await fetch(request.signed_body_url);
+          if (contentResponse.ok) {
+            const text = await contentResponse.text();
+
+            const content = JSON.parse(text) as {
+              request: string;
+              response: string;
+            };
+            request.request_body = content.request;
+            request.response_body = content.response;
+          }
+        } catch (error) {
+          console.log(`Error fetching content: ${error}`);
+        }
+      }
+
+      return { data: request, error: null };
     },
     refetchOnWindowFocus: false,
   });
@@ -90,7 +115,7 @@ const useGetRequests = (
           };
         }
         const authFromCookie = getHeliconeCookie();
-        return await fetch(
+        const response = await fetch(
           `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/request/query`,
           {
             method: "POST",
@@ -110,12 +135,42 @@ const useGetRequests = (
               isCached,
             }),
           }
-        ).then(
-          (res) => res.json() as Promise<Result<HeliconeRequest[], string>>
         );
+
+        const result = (await response.json()) as Result<
+          HeliconeRequest[],
+          string
+        >;
+
+        const requests = await Promise.all(
+          result.data?.map(async (request: HeliconeRequest) => {
+            if (request.signed_body_url) {
+              try {
+                const contentResponse = await fetch(request.signed_body_url);
+                if (contentResponse.ok) {
+                  const text = await contentResponse.text();
+
+                  const content = JSON.parse(text) as {
+                    request: string;
+                    response: string;
+                  };
+                  request.request_body = content.request;
+                  request.response_body = content.response;
+                }
+              } catch (error) {
+                console.log(`Error fetching content: ${error}`);
+                return request;
+              }
+            }
+            return request; // Return request if no signed_body_url
+          }) ?? []
+        );
+
+        return { data: requests, error: null };
       },
       refetchOnWindowFocus: false,
       retry: false,
+      refetchIntervalInBackground: false,
       refetchInterval: isLive ? 2_000 : false,
     }),
     count: useQuery({

@@ -12,7 +12,6 @@ import {
 import { getCacheSettings } from "../cache/cacheSettings";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { RequestResponseStore } from "../dbLogger/RequestResponseStore";
-
 import { Valhalla } from "../db/valhalla";
 import { handleProxyRequest, handleThreatProxyRequest } from "./handler";
 import { HeliconeProxyRequest, HeliconeProxyRequestMapper } from "./mapper";
@@ -21,6 +20,7 @@ import { DBLoggable } from "../dbLogger/DBLoggable";
 import { DBQueryTimer } from "../../db/DBQueryTimer";
 import { Moderator } from "../moderation/Moderator";
 import { Result } from "../../results";
+import { S3Client } from "../../db/S3Client";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -114,7 +114,6 @@ export async function proxyForwarder(
     provider === "OPENAI" &&
     env.PROMPTARMOR_API_KEY
   ) {
-
     let parseResult = parseLatestMessage(proxyRequest);
     if (parseResult.error) {
       return responseBuilder.build({
@@ -188,9 +187,10 @@ export async function proxyForwarder(
     }
     let latestMessage = parseResult.data;
 
-    if (latestMessage != null &&
-        latestMessage?.role == "user" &&
-        latestMessage?.content
+    if (
+      latestMessage != null &&
+      latestMessage?.role == "user" &&
+      latestMessage?.content
     ) {
       const moderator = new Moderator(
         proxyRequest.requestWrapper.headers,
@@ -283,6 +283,12 @@ export async function proxyForwarder(
         env.FALLBACK_QUEUE,
         env.REQUEST_AND_RESPONSE_QUEUE_KV
       ),
+      s3Client: new S3Client(
+        env.S3_ACCESS_KEY ?? "",
+        env.S3_SECRET_KEY ?? "",
+        env.S3_ENDPOINT ?? "",
+        env.S3_BUCKET_NAME ?? ""
+      ),
     });
 
     if (res.error !== null) {
@@ -316,17 +322,21 @@ export async function proxyForwarder(
     status: response.status,
   });
 
-  function parseLatestMessage(proxyRequest: HeliconeProxyRequest): Result<LatestMessage, Error> {
+  function parseLatestMessage(
+    proxyRequest: HeliconeProxyRequest
+  ): Result<LatestMessage, Error> {
     try {
       return {
         error: null,
-        data: JSON.parse(proxyRequest.bodyText ?? "").messages.pop() as LatestMessage
-      }
+        data: JSON.parse(
+          proxyRequest.bodyText ?? ""
+        ).messages.pop() as LatestMessage,
+      };
     } catch (error) {
       console.error("Error parsing latest message:", error);
       return {
         error: new Error("Failed to parse latest message."),
-        data: null
+        data: null,
       };
     }
   }
@@ -334,5 +344,5 @@ export async function proxyForwarder(
 
 type LatestMessage = {
   role?: string;
-  content?: string
-}
+  content?: string;
+};

@@ -49,6 +49,11 @@ export interface Env {
   PROMPTARMOR_API_KEY: string;
   DATADOG_API_KEY: string;
   DATADOG_ENDPOINT: string;
+  GATEWAY_TARGET?: string;
+  S3_ACCESS_KEY: string;
+  S3_SECRET_KEY: string;
+  S3_ENDPOINT: string;
+  S3_BUCKET_NAME: string;
 }
 
 export async function hash(key: string): Promise<string> {
@@ -96,6 +101,12 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
       return {
         ...env,
         WORKER_TYPE: "HELICONE_API",
+      };
+    } else if (hostParts[0].includes("together")) {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://api.together.xyz",
       };
     }
   }

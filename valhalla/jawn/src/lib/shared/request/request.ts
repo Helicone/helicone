@@ -1,4 +1,3 @@
-import { SupabaseClient } from "@supabase/supabase-js";
 import { FilterNode } from "../filters/filterDefs";
 import {
   buildFilterWithAuth,
@@ -6,13 +5,12 @@ import {
   buildFilterWithAuthClickHouse,
 } from "../filters/filters";
 import { SortLeafRequest, buildRequestSort } from "../sorts/requests/sorts";
-// import { Database, Json } from "../../../supabase/database.types";
 import { Result, resultMap, ok } from "../result";
-import { RosettaWrapper } from "../rosetta/rosettaWrapper";
 import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { LlmSchema } from "../requestResponseModel";
-import { Database, Json } from "../../db/database.types";
+import { Json } from "../../db/database.types";
 import { mapGeminiPro } from "./mappers";
+import { S3Client } from "../db/s3Client";
 
 export type Provider =
   | "OPENAI"
@@ -55,6 +53,7 @@ export interface HeliconeRequest {
   feedback_created_at?: string | null;
   feedback_id?: string | null;
   feedback_rating?: boolean | null;
+  signed_body_url?: string | null;
   llmSchema: LlmSchema | null;
 }
 
@@ -63,8 +62,7 @@ export async function getRequests(
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRequest,
-  supabaseServer?: SupabaseClient<Database>
+  sort: SortLeafRequest
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -121,18 +119,15 @@ export async function getRequests(
   OFFSET ${offset}
 `;
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
-
-  if (!supabaseServer) {
-    return resultMap(requests, (data) => {
-      return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
-    });
-  }
-
-  const rosettaWrapper = new RosettaWrapper(supabaseServer);
-  const results = await mapLLMCalls(requests.data, rosettaWrapper);
-
+  const s3Client = new S3Client(
+    process.env.S3_ACCESS_KEY ?? "",
+    process.env.S3_SECRET_KEY ?? "",
+    process.env.S3_ENDPOINT ?? "",
+    process.env.S3_BUCKET_NAME ?? ""
+  );
+  const results = await mapLLMCalls(requests.data, s3Client, orgId);
   return resultMap(results, (data) => {
-    return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
+    return data;
   });
 }
 
@@ -141,8 +136,7 @@ export async function getRequestsCached(
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRequest,
-  supabaseServer?: SupabaseClient<Database>
+  sort: SortLeafRequest
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -199,27 +193,45 @@ export async function getRequestsCached(
 `;
 
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
-
-  if (!supabaseServer) {
-    return resultMap(requests, (data) => {
-      return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
-    });
-  }
-
-  const rosettaWrapper = new RosettaWrapper(supabaseServer);
-  const results = await mapLLMCalls(requests.data, rosettaWrapper);
+  const s3Client = new S3Client(
+    process.env.S3_ACCESS_KEY ?? "",
+    process.env.S3_SECRET_KEY ?? "",
+    process.env.S3_ENDPOINT ?? "",
+    process.env.S3_BUCKET_NAME ?? ""
+  );
+  const results = await mapLLMCalls(requests.data, s3Client, orgId);
 
   return resultMap(results, (data) => {
-    return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
+    return data;
   });
 }
 
 async function mapLLMCalls(
   heliconeRequests: HeliconeRequest[] | null,
-  rosettaWrapper: RosettaWrapper
+  s3Client: S3Client,
+  orgId: string
 ): Promise<Result<HeliconeRequest[], string>> {
   const promises =
     heliconeRequests?.map(async (heliconeRequest) => {
+      // First retrieve s3 signed urls if past the implementation date
+      const s3ImplementationDate = new Date("2024-03-25T21:00:00Z");
+      const requestCreatedAt = new Date(heliconeRequest.request_created_at);
+      if (requestCreatedAt > s3ImplementationDate) {
+        const { data: signedBodyUrl, error: signedBodyUrlErr } =
+          await s3Client.getRequestResponseBodySignedUrl(
+            orgId,
+            heliconeRequest.request_id
+          );
+
+        if (signedBodyUrlErr || !signedBodyUrl) {
+          // If there was an error, just return the request as is
+          return heliconeRequest;
+        }
+
+        heliconeRequest.signed_body_url = signedBodyUrl;
+      }
+
+      // Next map to standardized schema
       // Extract the model from various possible locations.
       const model =
         heliconeRequest.model_override ||
@@ -231,35 +243,15 @@ async function mapLLMCalls(
         getModelFromPath(heliconeRequest.request_path) ||
         "";
 
-      let mappedSchema: LlmSchema | null = null;
       try {
         if (model === "gemini-pro" || model === "gemini-pro-vision") {
           const mappedSchema = mapGeminiPro(heliconeRequest, model);
           heliconeRequest.llmSchema = mappedSchema;
           return heliconeRequest;
         }
-
-        const requestPath = new URL(heliconeRequest.request_path).pathname;
-        const schemaJson = await rosettaWrapper.mapLLMCall(
-          {
-            request: {
-              ...heliconeRequest.request_body,
-              request_path: requestPath,
-              model_best_guess: model,
-            },
-            response: heliconeRequest.response_body,
-          },
-          requestPath,
-          heliconeRequest.provider,
-          model
-        );
-
-        mappedSchema = JSON.parse(JSON.stringify(schemaJson)) as LlmSchema;
       } catch (error: any) {
         // Do nothing, FE will fall back to existing mappers
       }
-
-      heliconeRequest.llmSchema = mappedSchema || null;
 
       return heliconeRequest;
     }) ?? [];
@@ -312,22 +304,6 @@ export async function getRequestsDateRange(
       max: new Date(data[0].max),
     };
   });
-}
-
-function truncLargeData(
-  data: HeliconeRequest[],
-  maxBodySize: number
-): HeliconeRequest[] {
-  const trunced = data.map((d) => {
-    return {
-      ...d,
-      request_body: d.request_body,
-      response_body: d.response_body,
-      llmSchema: d.llmSchema,
-    };
-  });
-
-  return trunced;
 }
 
 export async function getRequestCountCached(
