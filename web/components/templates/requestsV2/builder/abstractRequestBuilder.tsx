@@ -67,6 +67,7 @@ abstract class AbstractRequestBuilder {
         sum_completion_tokens: this.response.completion_tokens || 0,
         sum_prompt_tokens: this.response.prompt_tokens || 0,
         sum_tokens: this.response.total_tokens || 0,
+        provider: this.response.provider,
       }),
       createdAt: this.response.request_created_at,
       path: this.response.request_path,

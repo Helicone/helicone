@@ -16,7 +16,6 @@ export const DEFAULT_EXAMPLE_QUERY = `query ExampleQuery($limit: Int, $offset: I
       limit: $limit
       offset: $offset
   ) {
-      prompt
       properties{
         name
       }
