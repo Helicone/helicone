@@ -20,7 +20,7 @@ interface DashboardProps {
 const Dashboard = (props: DashboardProps) => {
   const { user, currentFilter, orgLayout } = props;
   const [orgFilter, setOrgFilter] = useState(currentFilter);
-  const [orgFilters, setOrgFilters] = useState(orgLayout?.filters);
+  const [orgFilters, setOrgFilters] = useState(orgLayout?.filters ?? null);
   const theme = useTheme();
 
   useEffect(() => {}, [orgFilter, orgFilters]);
