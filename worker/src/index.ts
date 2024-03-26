@@ -2,7 +2,6 @@ import { createClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
 import { InMemoryRateLimiter } from "./db/InMemoryRateLimiter";
 import { RequestWrapper } from "./lib/RequestWrapper";
-import { RosettaWrapper } from "./lib/rosetta/RosettaWrapper";
 import { updateLoopUsers } from "./lib/updateLoopsUsers";
 import { buildRouter } from "./routers/routerFactory";
 import { AlertManager } from "./AlertManager";
@@ -164,8 +163,8 @@ export default {
     );
     await updateLoopUsers(env);
     if (controller.cron === "0 * * * *") {
-      const rosetta = new RosettaWrapper(supabaseClient, env);
-      await rosetta.generateMappers();
+      // Do nothing
+      return;
     } else {
       const alertManager = new AlertManager(
         new AlertStore(supabaseClient, new ClickhouseClientWrapper(env)),
