@@ -577,7 +577,7 @@ export class DBLoggable {
     dbWrapper: DBWrapper;
     clickhouse: ClickhouseClientWrapper;
     queue: RequestResponseStore;
-    s3Client: S3Client;
+    s3Client?: S3Client;
   }): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
@@ -638,35 +638,39 @@ export class DBLoggable {
     // If no data or error, return
     if (!responseResult.data || responseResult.error) {
       // Log the error in S3
-      const s3Result = await db.s3Client.storeRequestResponse(
-        authParams.organizationId,
-        this.request.requestId,
-        requestResult.data.body,
-        JSON.stringify({
-          helicone_error: "error getting response, " + responseResult.error,
-          helicone_repsonse_body_as_string: (
-            await this.response.getResponseBody()
-          ).body,
-        })
-      );
+      if (db.s3Client) {
+        const s3Result = await db.s3Client.storeRequestResponse(
+          authParams.organizationId,
+          this.request.requestId,
+          requestResult.data.body,
+          JSON.stringify({
+            helicone_error: "error getting response, " + responseResult.error,
+            helicone_repsonse_body_as_string: (
+              await this.response.getResponseBody()
+            ).body,
+          })
+        );
 
-      if (s3Result.error) {
-        console.error("Error storing request response", s3Result.error);
+        if (s3Result.error) {
+          console.error("Error storing request response", s3Result.error);
+        }
       }
 
       return responseResult;
     }
 
-    const s3Result = await db.s3Client.storeRequestResponse(
-      authParams.organizationId,
-      this.request.requestId,
-      requestResult.data.body,
-      responseResult.data.body
-    );
+    if (db.s3Client) {
+      const s3Result = await db.s3Client.storeRequestResponse(
+        authParams.organizationId,
+        this.request.requestId,
+        requestResult.data.body,
+        responseResult.data.body
+      );
 
-    if (s3Result.error) {
-      console.error("Error storing request response", s3Result.error);
-      // Continue logging to clickhouse
+      if (s3Result.error) {
+        console.error("Error storing request response", s3Result.error);
+        // Continue logging to clickhouse
+      }
     }
 
     await logInClickhouse(
