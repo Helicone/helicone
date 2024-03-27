@@ -1092,6 +1092,38 @@ export type Database = {
           },
         ]
       }
+      organization_layout: {
+        Row: {
+          created_at: string
+          filters: Json
+          id: string
+          organization_id: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          filters: Json
+          id?: string
+          organization_id: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          organization_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_layout_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_member: {
         Row: {
           created_at: string | null
