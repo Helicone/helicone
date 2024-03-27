@@ -6,6 +6,7 @@ import Footer from "../../layout/footer";
 import Link from "next/link";
 import { Tooltip } from "@mui/material";
 import ContactForm from "../../shared/contactForm";
+import Image from "next/image";
 
 const tiers = [
   {
@@ -192,19 +193,31 @@ export default function Example() {
   return (
     <div className="bg-[#f8feff]">
       <NavBarV2 />
-      <div className="bg-[#f8feff] mx-auto px-6 lg:px-8">
-        <div className="flex flex-col max-w-6xl mx-auto p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
-          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight leading-tight sm:leading-snug max-w-4xl">
-            Pricing that&apos;s <span className=" text-sky-600">simple</span>
+      <div className="bg-[#f8feff] mx-auto px-6 lg:px-8 antialiased">
+        <div className="flex flex-col max-w-6xl mx-auto p-4 pb-24 pt-8 sm:pb-32 lg:flex">
+          <Image
+            src={"/assets/pricing/bouncing-cube.png"}
+            alt={""}
+            width={200}
+            height={100}
+          />
+          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight max-w-4xl pt-8">
+            Pricing that&apos;s <span className=" text-sky-500">simple</span>
           </h1>
-          <p className="mt-6 w-full text-xl leading-8 text-gray-700 max-w-2xl">
-            Free to get started, and easy to scale when you need to - all with a{" "}
-            <span className="font-semibold">one-line</span> code integration.
-            Are you a startup?{" "}
-            <Link href="#startup" className="text-blue-500 underline">
-              Click here
-            </Link>
+          <p className="mt-4 w-full text-md sm:text-lg leading-7 text-gray-700 max-w-xl">
+            We offer a generous free tier and straightforward{" "}
+            <button className="underline underline-offset-4 decoration-sky-300">
+              usage-based pricing
+            </button>{" "}
+            for when you need more. No hidden fees, no surprises.
           </p>
+        </div>
+
+        <div className="flex flex-col max-w-6xl mx-auto p-4 pb-24 pt-8 sm:pb-32 space-y-8">
+          <h2 className="text-2xl font-bold text-center">
+            Your first 500k requests per month are free
+          </h2>
+          <div className="border border-gray-300 rounded-lg h-96 w-full p-8"></div>
         </div>
 
         {/* xs to lg */}
