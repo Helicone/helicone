@@ -7,6 +7,20 @@ import Link from "next/link";
 import { Tooltip } from "@mui/material";
 import ContactForm from "../../shared/contactForm";
 import Image from "next/image";
+import {
+  Accordion,
+  AccordionBody,
+  AccordionHeader,
+  AccordionList,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+} from "@tremor/react";
+import { ChevronRightIcon, TableCellsIcon } from "@heroicons/react/24/outline";
+import { Disclosure } from "@headlessui/react";
 
 const tiers = [
   {
@@ -213,11 +227,100 @@ export default function Example() {
           </p>
         </div>
 
-        <div className="flex flex-col max-w-6xl mx-auto p-4 pb-24 pt-8 sm:pb-32 space-y-8">
-          <h2 className="text-2xl font-bold text-center">
-            Your first 500k requests per month are free
-          </h2>
-          <div className="border border-gray-300 rounded-lg h-96 w-full p-8"></div>
+        <div className="flex flex-col max-w-6xl mx-auto p-4 gap-2">
+          <div className="grid grid-cols-8 border-b-2 border-gray-300 pb-2 gap-8">
+            <div className="col-span-2"></div>
+            <div className="col-span-4 text-sky-500 font-bold">Calculator</div>
+            <div className="col-span-2 text-sky-500 font-bold">
+              Estimated Cost
+            </div>
+          </div>
+          <div className="grid grid-cols-8 py-2 gap-8 border-b-2 border-gray-300">
+            <div className="col-span-2 flex items-start">
+              <TableCellsIcon className="h-6 w-6 text-sky-600" />
+              <span className="ml-2 font-semibold text-black">
+                Request Logs
+              </span>
+            </div>
+            <div className="col-span-4">
+              <div className="w-full flex flex-col space-y-4">
+                {/* show an input slider */}
+                <div className="flex flex-col space-y-4">
+                  <div className="flex flex-col space-y-1">
+                    <p className="font-semibold text-2xl">Logs: 342,432</p>
+                    <div className="italic text-xs">
+                      First 500k requests are free every month!
+                    </div>
+                  </div>
+
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    className="text-sky-500"
+                  />
+                  <Disclosure as="div">
+                    <Disclosure.Button className="py-2 w-full">
+                      <div className="flex w-full justify-end">
+                        <div className="flex text-xs">
+                          How do we calculate this?
+                          <ChevronRightIcon className="h-3 w-3 ml-2" />
+                        </div>
+                      </div>
+                    </Disclosure.Button>
+                    <Disclosure.Panel className="text-gray-500" as="dd">
+                      Yes! You can purchase a license that you can share with
+                      your entire team.
+                    </Disclosure.Panel>
+                  </Disclosure>
+                </div>
+              </div>
+            </div>
+            <div className="col-span-2">Estimated Cost</div>
+          </div>
+          <div className="grid grid-cols-8 py-2 gap-8">
+            <div className="col-span-2 flex items-start">
+              <TableCellsIcon className="h-6 w-6 text-green-500" />
+              <span className="ml-2 font-semibold text-black">
+                Prompt Templates
+              </span>
+            </div>
+            <div className="col-span-4">
+              <div className="w-full flex flex-col space-y-4">
+                {/* show an input slider */}
+                <div className="flex flex-col space-y-4">
+                  <div className="flex flex-col space-y-1">
+                    <p className="font-semibold text-2xl">Prompts: 8</p>
+                    <div className="italic text-xs">
+                      Your first 3 prompts are free!
+                    </div>
+                  </div>
+
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    className="text-sky-500"
+                  />
+                  <Disclosure as="div">
+                    <Disclosure.Button className="py-2 w-full">
+                      <div className="flex w-full justify-end">
+                        <div className="flex text-xs">
+                          How do we calculate this?
+                          <ChevronRightIcon className="h-3 w-3 ml-2" />
+                        </div>
+                      </div>
+                    </Disclosure.Button>
+                    <Disclosure.Panel className="text-gray-500" as="dd">
+                      Yes! You can purchase a license that you can share with
+                      your entire team.
+                    </Disclosure.Panel>
+                  </Disclosure>
+                </div>
+              </div>
+            </div>
+            <div className="col-span-2">Estimated Cost</div>
+          </div>
         </div>
 
         {/* xs to lg */}
