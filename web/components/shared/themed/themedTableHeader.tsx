@@ -73,7 +73,7 @@ interface ThemedHeaderProps {
       search: string
     ) => Promise<Result<void, string>>;
   };
-  filterLayouts?: {
+  savedFilters?: {
     filters?: OrganizationFilter[];
     currentFilter?: string;
     onFilterChange?: (value: OrganizationFilter) => void;
@@ -93,7 +93,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
     timeFilter,
     advancedFilter,
     csvExport,
-    filterLayouts,
+    savedFilters,
   } = props;
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -105,7 +105,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
   const [filterName, setFilterName] = useState<string>("");
 
   const onSaveFilter = () => {
-    filterLayouts?.onSaveFilter?.(filterName) ?? (() => {})();
+    savedFilters?.onSaveFilter?.(filterName);
     setIsSaveFiltersModalOpen(false);
     setShowAdvancedFilters(false);
   };
@@ -158,13 +158,13 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                       </p>
                     </button>
                   </div>
-                  {filterLayouts && (
+                  {savedFilters && (
                     <>
                       <div className="mx-auto flex text-sm">
                         <FiltersButton
-                          filters={filterLayouts.filters}
-                          currentFilter={filterLayouts.currentFilter}
-                          onFilterChange={filterLayouts.onFilterChange}
+                          filters={savedFilters.filters}
+                          currentFilter={savedFilters.currentFilter}
+                          onFilterChange={savedFilters.onFilterChange}
                         />
                       </div>
                       <ThemedModal
@@ -280,8 +280,8 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                     filters={advancedFilter.filters}
                     setAdvancedFilters={advancedFilter.onAdvancedFilter}
                     searchPropertyFilters={advancedFilter.searchPropertyFilters}
-                    filterLayouts={
-                      filterLayouts
+                    savedFilters={
+                      savedFilters
                         ? {
                             onSaveFilters: handleOpenModal,
                           }

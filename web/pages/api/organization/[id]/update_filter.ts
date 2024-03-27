@@ -31,10 +31,6 @@ async function handler({
   if (hasAccess) {
     const { filters, type } = req.body as UpdateOrgLayoutBody;
 
-    console.log(1);
-    console.log(JSON.stringify(filters));
-    console.log(1);
-
     const updateRes = await supabaseServer
       .from("organization_layout")
       .update({

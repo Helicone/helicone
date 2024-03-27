@@ -19,29 +19,12 @@ interface DashboardProps {
 
 const Dashboard = (props: DashboardProps) => {
   const { user, currentFilter, orgLayout } = props;
-  const [orgFilter, setOrgFilter] = useState(currentFilter);
-  const [orgFilters, setOrgFilters] = useState(orgLayout?.filters ?? null);
   const theme = useTheme();
-
-  // useEffect(() => {
-  //   if (!process.env.NEXT_PUBLIC_COMMAND_BAR_HELPHUB_0) return;
-  //   if (typeof window !== "undefined") {
-  //     init(process.env.NEXT_PUBLIC_COMMAND_BAR_HELPHUB_0 ?? "");
-  //     window.CommandBar.boot(user.id);
-  //     theme?.theme === "dark"
-  //       ? window.CommandBar.setTheme("dark")
-  //       : window.CommandBar.setTheme("light");
-  //   }
-
-  //   return () => {
-  //     window.CommandBar.shutdown();
-  //   };
-  // }, [theme?.theme, user]);
 
   return (
     <DashboardPage
       user={user}
-      currentFilter={orgFilter}
+      currentFilter={currentFilter}
       organizationLayout={orgLayout}
     />
   );

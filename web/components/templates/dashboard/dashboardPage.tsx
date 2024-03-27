@@ -826,7 +826,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 throw new Error("not implemented");
               },
             }}
-            filterLayouts={{
+            savedFilters={{
               currentFilter: currFilter ?? undefined,
               filters: orgLayout?.filters ?? undefined,
               onFilterChange: onLayoutFilterChange,

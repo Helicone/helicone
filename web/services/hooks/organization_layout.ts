@@ -4,11 +4,11 @@ import { Result } from "../../lib/result";
 
 const useOrganizationLayout = (
   orgId: string,
-  type: string,
+  layoutPage: string,
   initialData?: Result<OrganizationLayout, string>
 ) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["organizationLayout", orgId, type],
+    queryKey: ["organizationLayout", orgId, layoutPage],
     initialData: initialData ? () => initialData : undefined,
     queryFn: async (query) => {
       const orgId = query.queryKey[1];
