@@ -55,30 +55,31 @@ export async function logAsync(
       status: 401,
     });
   }
-  const { error: logError } = await loggable.log({
-    clickhouse: new ClickhouseClientWrapper(env),
-    supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-    dbWrapper: new DBWrapper(env, auth),
-    queue: new RequestResponseStore(
-      createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-      new DBQueryTimer(ctx, {
-        apiKey: env.DATADOG_API_KEY,
-        endpoint: env.DATADOG_ENDPOINT,
-      }),
-      new Valhalla(env.VALHALLA_URL, auth),
-      new ClickhouseClientWrapper(env),
-      env.FALLBACK_QUEUE,
-      env.REQUEST_AND_RESPONSE_QUEUE_KV
-    ),
-    s3Client: env.S3_ENABLED
-      ? new S3Client(
-          env.S3_ACCESS_KEY ?? "",
-          env.S3_SECRET_KEY ?? "",
-          env.S3_ENDPOINT ?? "",
-          env.S3_BUCKET_NAME ?? ""
-        )
-      : undefined,
-  });
+  const { error: logError } = await loggable.log(
+    {
+      clickhouse: new ClickhouseClientWrapper(env),
+      supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+      dbWrapper: new DBWrapper(env, auth),
+      queue: new RequestResponseStore(
+        createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+        new DBQueryTimer(ctx, {
+          apiKey: env.DATADOG_API_KEY,
+          endpoint: env.DATADOG_ENDPOINT,
+        }),
+        new Valhalla(env.VALHALLA_URL, auth),
+        new ClickhouseClientWrapper(env),
+        env.FALLBACK_QUEUE,
+        env.REQUEST_AND_RESPONSE_QUEUE_KV
+      ),
+      s3Client: new S3Client(
+        env.S3_ACCESS_KEY ?? "",
+        env.S3_SECRET_KEY ?? "",
+        env.S3_ENDPOINT ?? "",
+        env.S3_BUCKET_NAME ?? ""
+      ),
+    },
+    env.S3_ENABLED ?? "true"
+  );
 
   if (logError !== null) {
     return new Response(JSON.stringify({ error: logError }), {
