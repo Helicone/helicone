@@ -46,6 +46,7 @@ export interface HeliconeProxyRequest {
   heliconePromptTemplate: Record<string, unknown> | null;
   targetUrl: URL;
   threat?: boolean;
+  flaggedForModeration?: boolean;
 }
 
 const providerBaseUrlMappings: Record<Provider, string> = {

@@ -24,7 +24,6 @@
     "@emotion/styled": "^11.10.5",
     "@graphql-tools/schema": "^9.0.17",
     "@headlessui/react": "^1.7.18",
-    "@helicone/project-rosetta": "^1.1.51",
     "@heroicons/react": "^2.0.13",
     "@mui/material": "^5.11.8",
     "@stripe/stripe-js": "^1.46.0",

@@ -1914,6 +1914,7 @@ __metadata:
   languageName: node
   linkType: hard
 
+<<<<<<< HEAD
 "@helicone/project-rosetta@npm:^1.1.51":
   version: 1.1.55
   resolution: "@helicone/project-rosetta@npm:1.1.55"
@@ -1925,6 +1926,8 @@ __metadata:
   languageName: node
   linkType: hard
 
+=======
+>>>>>>> origin/main
 "@heroicons/react@npm:^2.0.13":
   version: 2.1.3
   resolution: "@heroicons/react@npm:2.1.3"
@@ -4099,6 +4102,7 @@ __metadata:
   languageName: node
   linkType: hard
 
+<<<<<<< HEAD
 "@types/lodash.merge@npm:^4.6.8":
   version: 4.6.9
   resolution: "@types/lodash.merge@npm:4.6.9"
@@ -4115,6 +4119,8 @@ __metadata:
   languageName: node
   linkType: hard
 
+=======
+>>>>>>> origin/main
 "@types/long@npm:^4.0.0":
   version: 4.0.2
   resolution: "@types/long@npm:4.0.2"
@@ -7401,8 +7407,12 @@ __metadata:
     "@emotion/styled": "npm:^11.10.5"
     "@graphql-eslint/eslint-plugin": "npm:^3.17.0"
     "@graphql-tools/schema": "npm:^9.0.17"
+<<<<<<< HEAD
     "@headlessui/react": "npm:^1.7.18"
     "@helicone/project-rosetta": "npm:^1.1.51"
+=======
+    "@headlessui/react": "npm:^1.7.7"
+>>>>>>> origin/main
     "@heroicons/react": "npm:^2.0.13"
     "@mui/material": "npm:^5.11.8"
     "@parcel/watcher": "npm:^2.3.0"
@@ -9048,9 +9058,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+<<<<<<< HEAD
 "openai@npm:^4.24.1, openai@npm:^4.24.7":
   version: 4.29.2
   resolution: "openai@npm:4.29.2"
+=======
+"onetime@npm:^5.1.0":
+  version: 5.1.2
+  resolution: "onetime@npm:5.1.2"
+  dependencies:
+    mimic-fn: "npm:^2.1.0"
+  checksum: ffcef6fbb2692c3c40749f31ea2e22677a876daea92959b8a80b521d95cca7a668c884d8b2045d1d8ee7d56796aa405c405462af112a1477594cc63531baeb8f
+  languageName: node
+  linkType: hard
+
+"open@npm:^8.4.0":
+  version: 8.4.0
+  resolution: "open@npm:8.4.0"
+  dependencies:
+    define-lazy-prop: "npm:^2.0.0"
+    is-docker: "npm:^2.1.1"
+    is-wsl: "npm:^2.2.0"
+  checksum: 585596580226cbeb7262f36b5acc7eed05211dc26980020a2527f829336b8b07fd79cdc4240f4d995b5615f635e0a59ebb0261c4419fef91edd5d4604c463f18
+  languageName: node
+  linkType: hard
+
+"openai@npm:^4.24.7":
+  version: 4.24.7
+  resolution: "openai@npm:4.24.7"
+>>>>>>> origin/main
   dependencies:
     "@types/node": "npm:^18.11.18"
     "@types/node-fetch": "npm:^2.6.4"
@@ -9063,6 +9099,7 @@ __metadata:
     web-streams-polyfill: "npm:^3.2.1"
   bin:
     openai: bin/cli
+<<<<<<< HEAD
   checksum: 4bf00d9a6ee5cde24bb473d548670e8951058122b14e2cbd72199e47178b4e3b1e0350a51fdae871b6f5dec5b569ff7f6af5fc91a77d6c26b5e7437e8f62ec6a
   languageName: node
   linkType: hard
@@ -9070,6 +9107,15 @@ __metadata:
 "optimism@npm:^0.18.0":
   version: 0.18.0
   resolution: "optimism@npm:0.18.0"
+=======
+  checksum: 702bf1830901680f6da092d82b18d10c4d79928d3e7375af4fb5c0eb1d3146a7bfde461a8e800f0af1df247a92af26b7aeb8631a87294a9e3f5c1a41eff48c8a
+  languageName: node
+  linkType: hard
+
+"optimism@npm:^0.16.1":
+  version: 0.16.2
+  resolution: "optimism@npm:0.16.2"
+>>>>>>> origin/main
   dependencies:
     "@wry/caches": "npm:^1.0.0"
     "@wry/context": "npm:^0.7.0"

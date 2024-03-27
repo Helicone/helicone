@@ -125,7 +125,8 @@
         "features/advanced-usage/omit-logs",
         "features/streaming",
         "features/webhooks",
-        "features/advanced-usage/llm-security"
+        "features/advanced-usage/llm-security",
+        "features/advanced-usage/moderations"
       ]
     },
     {
