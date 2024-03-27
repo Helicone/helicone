@@ -580,7 +580,7 @@ export class DBLoggable {
       queue: RequestResponseStore;
       s3Client: S3Client;
     },
-    isS3Enabled: Env["S3_ENABLED"]
+    S3_ENABLED: Env["S3_ENABLED"]
   ): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
@@ -641,7 +641,7 @@ export class DBLoggable {
     // If no data or error, return
     if (!responseResult.data || responseResult.error) {
       // Log the error in S3
-      if (isS3Enabled === "true") {
+      if (S3_ENABLED === "true") {
         const s3Result = await db.s3Client.storeRequestResponse(
           authParams.organizationId,
           this.request.requestId,
@@ -662,7 +662,7 @@ export class DBLoggable {
       return responseResult;
     }
 
-    if (isS3Enabled === "true") {
+    if (S3_ENABLED === "true") {
       const s3Result = await db.s3Client.storeRequestResponse(
         authParams.organizationId,
         this.request.requestId,
