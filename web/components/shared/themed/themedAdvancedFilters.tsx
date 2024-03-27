@@ -96,24 +96,26 @@ export function AdvancedFilters({
         </button>
       </div>
       <div className="flex flex-row w-full items-end justify-end">
-        <button
-          onClick={() => {
-            if (savedFilters && filters.length == 0) {
-              setNotification("Saved Filters can not be empty", "error");
-              return;
-            }
-            if (savedFilters?.onSaveFilters) {
-              savedFilters?.onSaveFilters(true);
-            }
-          }}
-          className={clsx(
-            "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
-          )}
-        >
-          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-            {"Create new Filter"}
-          </p>
-        </button>
+        {savedFilters && (
+          <button
+            onClick={() => {
+              if (savedFilters && filters.length == 0) {
+                setNotification("Saved Filters can not be empty", "error");
+                return;
+              }
+              if (savedFilters?.onSaveFilters) {
+                savedFilters?.onSaveFilters(true);
+              }
+            }}
+            className={clsx(
+              "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+            )}
+          >
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
+              {"Create new Filter"}
+            </p>
+          </button>
+        )}
       </div>
     </div>
   );
