@@ -11,6 +11,7 @@ import { HeliconeHeaders } from "./HeliconeHeaders";
 import { checkLimits, checkLimitsSingle } from "./limits/check";
 import { getAndStoreInCache } from "./secureCache";
 import { parseJSXObject } from "../api/lib/promptHelpers";
+import { CfProperties } from "@cloudflare/workers-types";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -26,6 +27,7 @@ export class RequestWrapper {
   headers: Headers;
   heliconeProxyKeyId: string | undefined;
   baseURLOverride: string | null;
+  cf: CfProperties | undefined;
 
   private cachedText: string | null = null;
   private bodyKeyOverride: object | null = null;
@@ -79,6 +81,7 @@ export class RequestWrapper {
     this.headers = this.mutatedAuthorizationHeaders(request);
     this.heliconeHeaders = new HeliconeHeaders(request.headers);
     this.baseURLOverride = null;
+    this.cf = request.cf;
   }
 
   static async create(
@@ -86,6 +89,7 @@ export class RequestWrapper {
     env: Env
   ): Promise<Result<RequestWrapper, string>> {
     const requestWrapper = new RequestWrapper(request, env);
+    console.log(`country code = ${requestWrapper.cf?.country}`);
     const authorization = await requestWrapper.setAuthorization(env);
 
     if (authorization.error) {
