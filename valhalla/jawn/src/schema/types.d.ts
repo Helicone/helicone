@@ -553,7 +553,7 @@ export interface components {
       /** @description The user ID associated with the request. */
       user_id?: string | null;
       /** @description JSON object containing additional properties. */
-      properties?: unknown;
+      properties?: Record<string, unknown> | null;
       /**
        * Format: int64
        * @description The API key ID for Helicone.
@@ -595,7 +595,7 @@ export interface components {
       /** @description Number of tokens used in the prompt. */
       prompt_tokens?: number | null;
       /** @description JSON object containing the response body. */
-      body: unknown;
+      body: Record<string, unknown> | null;
       /**
        * Format: uuid
        * @description JSON object containing the response body.
