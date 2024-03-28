@@ -32,6 +32,7 @@ function buildPropertyWithResponseInserts(
     property_key: p.key,
     property_value: p.value,
     provider: request.provider ?? null,
+    country_code: request.country_code,
   }));
 }
 

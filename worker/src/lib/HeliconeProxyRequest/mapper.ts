@@ -9,6 +9,7 @@ import { approvedDomains } from "../gateway/approvedDomains";
 import { buildTargetUrl } from "../providerCalls/call";
 
 import { RateLimitOptions, RateLimitOptionsBuilder } from "./rateLimit";
+import { CfProperties } from "@cloudflare/workers-types";
 
 export type RetryOptions = {
   retries: number; // number of times to retry the request
@@ -47,6 +48,7 @@ export interface HeliconeProxyRequest {
   targetUrl: URL;
   threat?: boolean;
   flaggedForModeration?: boolean;
+  cf?: CfProperties;
 }
 
 const providerBaseUrlMappings: Record<Provider, string> = {
@@ -114,6 +116,7 @@ export class HeliconeProxyRequestMapper {
         nodeId: this.request.heliconeHeaders.nodeId ?? null,
         heliconePromptTemplate,
         targetUrl,
+        cf: this.request.cf ?? undefined,
       },
       error: null,
     };

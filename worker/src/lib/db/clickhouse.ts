@@ -173,6 +173,7 @@ export interface PropertyWithResponseV1 {
   property_value: string;
   threat: Nullable<boolean>;
   provider: Nullable<string>;
+  country_code: Nullable<string>;
 }
 
 export interface CacheHits {
@@ -184,6 +185,7 @@ export interface CacheHits {
   model: string;
   created_at: Nullable<string>;
   provider: Nullable<string>;
+  country_code: Nullable<string>;
 }
 
 export interface RateLimitLog {

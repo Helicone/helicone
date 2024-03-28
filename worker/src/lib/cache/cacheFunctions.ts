@@ -71,7 +71,8 @@ export async function recordCacheHit(
   env: Env,
   clickhouseDb: ClickhouseClientWrapper,
   organizationId: string,
-  provider: string
+  provider: string,
+  request: HeliconeProxyRequest
 ): Promise<void> {
   const requestId = headers.get("helicone-id");
   if (!requestId) {
@@ -106,6 +107,7 @@ export async function recordCacheHit(
   const promptTokens = response?.prompt_tokens ?? 0;
   const completionTokens = response?.completion_tokens ?? 0;
   const latency = response?.delay_ms ?? 0;
+  const countryCode = (request.cf?.country as string) ?? null;
 
   const { error: clickhouseError } = await clickhouseDb.dbInsertClickhouse(
     "cache_hits",
@@ -119,6 +121,7 @@ export async function recordCacheHit(
         latency: latency,
         created_at: null,
         provider,
+        country_code: countryCode,
       },
     ]
   );
