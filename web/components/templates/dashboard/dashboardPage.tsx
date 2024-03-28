@@ -45,11 +45,20 @@ import { useDashboardPage } from "./useDashboardPage";
 import { useModels } from "../../../services/hooks/models";
 import { QuantilesGraph } from "./quantilesGraph";
 import LoadingAnimation from "../../shared/loadingAnimation";
+import {
+  OrganizationFilter,
+  OrganizationLayout,
+} from "../../../services/lib/organization_layout/organization_layout";
+import { useOrg } from "../../layout/organizationContext";
+import { v4 as uuidv4 } from "uuid";
+import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface DashboardPageProps {
   user: User;
+  currentFilter: OrganizationFilter | null;
+  organizationLayout: OrganizationLayout | null;
 }
 
 export type TimeFilter = {
@@ -82,8 +91,31 @@ export type Loading<T> = T | "loading";
 export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
-  const { user } = props;
+  const { user, currentFilter, organizationLayout } = props;
+
   const searchParams = useSearchParams();
+
+  const orgContext = useOrg();
+
+  const {
+    organizationLayout: orgLayout,
+    isLoading: isOrgLayoutLoading,
+    refetch: orgLayoutRefetch,
+    isRefetching: isOrgLayoutRefetching,
+  } = useOrganizationLayout(
+    orgContext?.currentOrg?.id!,
+    "dashboard",
+    organizationLayout
+      ? {
+          data: organizationLayout,
+          error: null,
+        }
+      : undefined
+  );
+
+  const [currFilter, setCurrFilter] = useState(
+    searchParams.get("filter") ?? null
+  );
 
   const getInterval = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -117,23 +149,14 @@ const DashboardPage = (props: DashboardPageProps) => {
   };
 
   const getAdvancedFilters = (): UIFilterRow[] => {
-    try {
-      const currentAdvancedFilters = searchParams.get("filters");
-
-      if (currentAdvancedFilters) {
-        const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
-        const decodedFilters = filters
-          .split("|")
-          .map(decodeFilter)
-          .filter((filter) => filter !== null) as UIFilterRow[];
-
-        return decodedFilters;
-      }
-    } catch (error) {
-      console.error("Error decoding advanced filters:", error);
+    if (currentFilter) {
+      return currentFilter?.filter as UIFilterRow[];
     }
     return [];
   };
+
+  const [advancedFilters, setAdvancedFilters] =
+    useState<UIFilterRow[]>(getAdvancedFilters);
 
   const [interval, setInterval] = useState<TimeInterval>(
     getInterval() as TimeInterval
@@ -141,10 +164,6 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>(getTimeFilter());
 
   const [open, setOpen] = useState(false);
-
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>(
-    getAdvancedFilters()
-  );
 
   const debouncedAdvancedFilters = useDebounce(advancedFilters, 500);
 
@@ -186,14 +205,14 @@ const DashboardPage = (props: DashboardPageProps) => {
     }
   }
 
-  const onSetAdvancedFilters = (filters: UIFilterRow[]) => {
-    if (filters.length > 0) {
-      const currentAdvancedFilters = encodeURIComponent(
-        JSON.stringify(filters.map(encodeFilter).join("|"))
-      );
-      searchParams.set("filters", JSON.stringify(currentAdvancedFilters));
+  const onSetAdvancedFilters = (
+    filters: UIFilterRow[],
+    layoutFilterId?: string
+  ) => {
+    if (filters.length && layoutFilterId) {
+      searchParams.set("filter", layoutFilterId);
     } else {
-      searchParams.delete("filters");
+      searchParams.delete("filter");
     }
 
     setAdvancedFilters(filters);
@@ -606,6 +625,60 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
 
+  const onSaveFilter = async (name: string) => {
+    // handle adding the new filter or updating the current filter
+
+    // once thats done, then call `refetch`
+    if (advancedFilters.length > 0) {
+      const saveFilter: OrganizationFilter = {
+        id: uuidv4(),
+        name: name,
+        filter: advancedFilters,
+        createdAt: new Date().toISOString(),
+        softDelete: false,
+      };
+      if (orgLayout && orgLayout.filters.length > 0) {
+        const updatedFilters = [...orgLayout.filters, saveFilter];
+        await fetch(
+          `/api/organization/${orgContext?.currentOrg?.id!}/update_filter`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: "dashboard",
+              filters: updatedFilters,
+            }),
+          }
+        );
+      } else {
+        await fetch(
+          `/api/organization/${orgContext?.currentOrg?.id!}/create_filter`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: "dashboard",
+              filters: [saveFilter],
+            }),
+          }
+        );
+      }
+      onLayoutFilterChange(saveFilter);
+      await orgLayoutRefetch();
+    }
+  };
+
+  const onLayoutFilterChange = (layoutFilter: OrganizationFilter) => {
+    if (layoutFilter) {
+      onSetAdvancedFilters(layoutFilter?.filter, layoutFilter.id);
+      setCurrFilter(layoutFilter?.id);
+    }
+  };
+
   const renderUnauthorized = () => {
     if (currentTier === "free") {
       return (
@@ -686,7 +759,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       ) : (
         <div className="space-y-4">
           <ThemedTableHeader
-            isFetching={isAnyLoading}
+            isFetching={isAnyLoading || isLoading}
             timeFilter={{
               currentTimeFilter: timeFilter,
               customTimeFilter: true,
@@ -723,6 +796,12 @@ const DashboardPage = (props: DashboardPageProps) => {
               searchPropertyFilters: () => {
                 throw new Error("not implemented");
               },
+            }}
+            savedFilters={{
+              currentFilter: currFilter ?? undefined,
+              filters: orgLayout?.filters ?? undefined,
+              onFilterChange: onLayoutFilterChange,
+              onSaveFilter: onSaveFilter,
             }}
           />
           <section id="panels" className="-m-2">

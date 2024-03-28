@@ -14,12 +14,15 @@ import {
   TextInput,
 } from "@tremor/react";
 import ThemedNumberDropdown from "./themedNumberDropdown";
+import { clsx } from "../clsx";
+import useNotification from "../notification/useNotification";
 
 export function AdvancedFilters({
   filterMap,
   filters,
   setAdvancedFilters,
   searchPropertyFilters,
+  savedFilters,
 }: {
   filterMap: SingleFilterDef<any>[];
   filters: UIFilterRow[];
@@ -28,7 +31,11 @@ export function AdvancedFilters({
     property: string,
     search: string
   ) => Promise<Result<void, string>>;
+  savedFilters?: {
+    onSaveFilters?: (value: boolean) => void;
+  };
 }) {
+  const { setNotification } = useNotification();
   return (
     <div className="flex flex-col bg-white dark:bg-black p-4 rounded-lg border border-gray-300 dark:border-gray-700 mt-8">
       <div className="w-full flex flex-col sm:flex-row justify-between items-center">
@@ -87,6 +94,28 @@ export function AdvancedFilters({
           />
           Add Filter
         </button>
+      </div>
+      <div className="flex flex-row w-full items-end justify-end">
+        {savedFilters && (
+          <button
+            onClick={() => {
+              if (savedFilters && filters.length == 0) {
+                setNotification("Saved Filters can not be empty", "error");
+                return;
+              }
+              if (savedFilters?.onSaveFilters) {
+                savedFilters?.onSaveFilters(true);
+              }
+            }}
+            className={clsx(
+              "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+            )}
+          >
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
+              {"Create New Filter"}
+            </p>
+          </button>
+        )}
       </div>
     </div>
   );

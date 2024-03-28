@@ -220,7 +220,10 @@ async function mapLLMCalls(
       // First retrieve s3 signed urls if past the implementation date
       const s3ImplementationDate = new Date("2024-03-25T21:00:00Z");
       const requestCreatedAt = new Date(heliconeRequest.request_created_at);
-      if (requestCreatedAt > s3ImplementationDate) {
+      if (
+        (process.env.S3_ENABLED ?? "true") === "true" &&
+        requestCreatedAt > s3ImplementationDate
+      ) {
         const { data: signedBodyUrl, error: signedBodyUrlErr } =
           await s3Client.getRequestResponseBodySignedUrl(
             orgId,
