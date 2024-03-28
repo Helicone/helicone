@@ -45,8 +45,7 @@ async function handler({
   const { data: experimentData, error: experimentErr } = await supabaseServer
     .from("experiments")
     .select("*")
-    .eq("id", id)
-    .eq("organization_id", orgId)
+    .eq("id", id || "")
     .single();
 
   if (experimentErr) {
