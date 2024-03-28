@@ -44,7 +44,7 @@ const errorHandler: ErrorRequestHandler = (
 
 export const ENVIRONMENT = process.env.VERCEL_ENV ?? "development";
 
-if (ENVIRONMENT === "production") {
+if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
 }
 const dirname = __dirname;
