@@ -35,7 +35,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
       return client
         .from("webhooks")
         .select("*")
-        .eq("org_id", org?.currentOrg?.id);
+        .eq("org_id", org?.currentOrg?.id ?? "");
     },
     refetchOnWindowFocus: false,
   });

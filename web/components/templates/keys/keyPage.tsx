@@ -176,7 +176,7 @@ const KeyPage = (props: KeyPageProps) => {
                   .update({
                     api_key_name: editName,
                   })
-                  .eq("api_key_hash", selectedHeliconeKey?.api_key_hash)
+                  .eq("api_key_hash", selectedHeliconeKey?.api_key_hash ?? "")
                   .then((res) => {
                     setEditOpen(false);
                     setNotification("Key successfully updated", "success");
@@ -221,7 +221,7 @@ const KeyPage = (props: KeyPageProps) => {
                   .update({
                     soft_delete: true,
                   })
-                  .eq("api_key_hash", selectedHeliconeKey?.api_key_hash)
+                  .eq("api_key_hash", selectedHeliconeKey?.api_key_hash ?? "")
                   .then((res) => {
                     setDeleteHeliconeOpen(false);
                     setNotification("Key successfully deleted", "success");

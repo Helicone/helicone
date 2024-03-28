@@ -36,7 +36,7 @@ async function handler({
     .from("organization_layout")
     .select("*")
     .eq("organization_id", orgId)
-    .eq("type", type)
+    .eq("type", type ?? "")
     .single();
 
   if (organizationLayoutError !== null) {
