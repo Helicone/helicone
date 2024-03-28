@@ -1,5 +1,5 @@
 // Pull all creds in at global state, if does not exist, throw error:
-if (process.env.S3_ENABLED ?? "true" === "true") {
+if ((process.env.S3_ENABLED ?? "true") === "true") {
   if (!process.env.S3_ACCESS_KEY) {
     throw new Error("No S3 access key");
   }
