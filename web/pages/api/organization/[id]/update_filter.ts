@@ -34,7 +34,7 @@ async function handler({
     const updateRes = await supabaseServer
       .from("organization_layout")
       .update({
-        filters: JSON.stringify(filters),
+        filters: filters,
       })
       .eq("organization_id", orgId)
       .eq("type", type);

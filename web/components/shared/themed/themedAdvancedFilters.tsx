@@ -112,7 +112,7 @@ export function AdvancedFilters({
             )}
           >
             <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-              {"Create new Filter"}
+              {"Create New Filter"}
             </p>
           </button>
         )}

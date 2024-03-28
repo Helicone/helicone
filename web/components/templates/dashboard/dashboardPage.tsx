@@ -149,23 +149,8 @@ const DashboardPage = (props: DashboardPageProps) => {
   };
 
   const getAdvancedFilters = (): UIFilterRow[] => {
-    try {
-      let currentAdvancedFilters;
-      if (currentFilter) {
-        currentAdvancedFilters = JSON.parse(currentFilter?.filter);
-      }
-
-      if (currentAdvancedFilters) {
-        const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
-        const decodedFilters = filters
-          .split("|")
-          .map(decodeFilter)
-          .filter((filter) => filter !== null) as UIFilterRow[];
-
-        return decodedFilters;
-      }
-    } catch (error) {
-      console.error("Error decoding advanced filters:", error);
+    if (currentFilter) {
+      return currentFilter?.filter as UIFilterRow[];
     }
     return [];
   };
@@ -645,14 +630,11 @@ const DashboardPage = (props: DashboardPageProps) => {
 
     // once thats done, then call `refetch`
     if (advancedFilters.length > 0) {
-      const currentAdvancedFilters = encodeURIComponent(
-        JSON.stringify(advancedFilters.map(encodeFilter).join("|"))
-      );
-      const encodedFilters = JSON.stringify(currentAdvancedFilters);
       const saveFilter: OrganizationFilter = {
         id: uuidv4(),
         name: name,
-        filter: JSON.stringify(encodedFilters),
+        filter: advancedFilters,
+        createdAt: new Date().toISOString(),
         softDelete: false,
       };
       if (orgLayout && orgLayout.filters.length > 0) {
@@ -691,20 +673,9 @@ const DashboardPage = (props: DashboardPageProps) => {
   };
 
   const onLayoutFilterChange = (layoutFilter: OrganizationFilter) => {
-    let currentAdvancedFilters;
     if (layoutFilter) {
-      currentAdvancedFilters = JSON.parse(layoutFilter?.filter);
-    }
-
-    if (currentAdvancedFilters) {
-      const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
-      const decodedFilters = filters
-        .split("|")
-        .map(decodeFilter)
-        .filter((filter) => filter !== null) as UIFilterRow[];
-      onSetAdvancedFilters(decodedFilters, layoutFilter.id);
+      onSetAdvancedFilters(layoutFilter?.filter, layoutFilter.id);
       setCurrFilter(layoutFilter?.id);
-      console.log(currFilter);
     }
   };
 
