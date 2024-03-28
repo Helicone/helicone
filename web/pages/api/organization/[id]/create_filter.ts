@@ -39,7 +39,7 @@ async function handler({
     {
       organization_id: orgId,
       type: type,
-      filters: JSON.stringify(filters),
+      filters: filters,
     };
 
   const insert = await supabaseServer
