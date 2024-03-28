@@ -149,12 +149,8 @@ const DashboardPage = (props: DashboardPageProps) => {
   };
 
   const getAdvancedFilters = (): UIFilterRow[] => {
-    try {
-      if (currentFilter) {
-        return currentFilter?.filter as UIFilterRow[];
-      }
-    } catch (error) {
-      console.error("Error decoding advanced filters:", error);
+    if (currentFilter) {
+      return currentFilter?.filter as UIFilterRow[];
     }
     return [];
   };
