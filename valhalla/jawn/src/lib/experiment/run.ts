@@ -67,7 +67,7 @@ export async function run(
         headers["api-key"] = process.env.AZURE_API_KEY;
       }
 
-      const response = await fetch(fetchUrl.toString(), {
+      const response = await fetch(fetchUrl, {
         method: "POST",
         headers: headers,
         body: JSON.stringify(newRequestBody),
