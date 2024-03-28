@@ -71,7 +71,7 @@ export async function logInClickhouse(
         threat: request.threat ?? null,
         time_to_first_token: response.time_to_first_token ?? null,
         target_url: request.target_url ?? null,
-        request_ip: request.request_ip ?? null,
+        country_code: request.country_code ?? null,
         provider: request.provider ?? null,
       },
     ]),

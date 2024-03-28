@@ -48,7 +48,7 @@ export interface DBLoggableProps {
     heliconeTemplate?: Record<string, unknown>;
     threat: boolean | null;
     flaggedForModeration: boolean | null;
-    request_ip: string | null;
+    country_code: string | null;
   };
   timing: {
     startTime: Date;
@@ -87,8 +87,7 @@ export function dbLoggableRequestFromProxyRequest(
     heliconeTemplate: proxyRequest.heliconePromptTemplate ?? undefined,
     threat: proxyRequest.threat ?? null,
     flaggedForModeration: proxyRequest.flaggedForModeration ?? null,
-    request_ip:
-      proxyRequest.requestWrapper.headers.get("CF-Connecting-IP") ?? null,
+    country_code: (proxyRequest.requestWrapper.cf?.country as string) ?? null,
   };
 }
 
@@ -150,7 +149,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       modelOverride: requestWrapper.heliconeHeaders.modelOverride ?? undefined,
       threat: null,
       flaggedForModeration: null,
-      request_ip: null,
+      country_code: null,
     },
     response: {
       responseId: crypto.randomUUID(),

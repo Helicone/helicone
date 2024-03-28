@@ -1397,6 +1397,7 @@ export type Database = {
         Row: {
           auth_hash: string
           body: Json
+          country_code: string | null
           created_at: string
           formatted_prompt_id: string | null
           helicone_api_key_id: number | null
@@ -1411,7 +1412,6 @@ export type Database = {
           prompt_values: Json | null
           properties: Json | null
           provider: string
-          request_ip: string | null
           target_url: string | null
           threat: boolean | null
           user_id: string | null
@@ -1419,6 +1419,7 @@ export type Database = {
         Insert: {
           auth_hash: string
           body: Json
+          country_code?: string | null
           created_at?: string
           formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null
@@ -1433,7 +1434,6 @@ export type Database = {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
-          request_ip?: string | null
           target_url?: string | null
           threat?: boolean | null
           user_id?: string | null
@@ -1441,6 +1441,7 @@ export type Database = {
         Update: {
           auth_hash?: string
           body?: Json
+          country_code?: string | null
           created_at?: string
           formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null
@@ -1455,7 +1456,6 @@ export type Database = {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
-          request_ip?: string | null
           target_url?: string | null
           threat?: boolean | null
           user_id?: string | null
