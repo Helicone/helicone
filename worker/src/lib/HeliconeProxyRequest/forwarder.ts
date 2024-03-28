@@ -99,7 +99,8 @@ export async function proxyForwarder(
               env,
               new ClickhouseClientWrapper(env),
               orgData.organizationId,
-              provider
+              provider,
+              proxyRequest
             )
           );
           return cachedResponse;

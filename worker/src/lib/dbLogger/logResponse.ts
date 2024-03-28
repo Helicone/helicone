@@ -140,6 +140,7 @@ export async function logRequest(
       threat: request.threat ?? null,
       target_url: request.targetUrl,
       request_ip: null,
+      country_code: request.country_code,
     };
 
     const customPropertyRows = Object.entries(request.properties).map(
