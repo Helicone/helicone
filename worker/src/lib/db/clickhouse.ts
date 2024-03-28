@@ -141,7 +141,6 @@ export interface RequestResponseLog {
   threat: Nullable<boolean>;
   time_to_first_token: Nullable<number>;
   target_url: Nullable<string>;
-  request_ip: Nullable<string>;
   provider: Nullable<string>;
 }
 
