@@ -221,7 +221,7 @@ async function mapLLMCalls(
       const s3ImplementationDate = new Date("2024-03-25T21:00:00Z");
       const requestCreatedAt = new Date(heliconeRequest.request_created_at);
       if (
-        (process.env.S3_ENABLED ?? true) &&
+        (process.env.S3_ENABLED ?? "true") === "true" &&
         requestCreatedAt > s3ImplementationDate
       ) {
         const { data: signedBodyUrl, error: signedBodyUrlErr } =
