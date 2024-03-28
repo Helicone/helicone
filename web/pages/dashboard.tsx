@@ -71,8 +71,8 @@ export const getServerSideProps = withAuthSSR(async (options) => {
 
   const filterId = context.query.filter as string;
 
-  const filters: OrganizationFilter[] = JSON.parse(orgLayout.filters as string);
-
+  const filters: OrganizationFilter[] =
+    orgLayout.filters as OrganizationFilter[];
   const layout: OrganizationLayout = {
     id: orgLayout.id,
     type: orgLayout.type,

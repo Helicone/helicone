@@ -4,7 +4,10 @@ import {
 } from "../../../../lib/api/handlerWrappers";
 import { Result } from "../../../../lib/result";
 import { supabaseServer } from "../../../../lib/supabaseServer";
-import { OrganizationLayout } from "../../../../services/lib/organization_layout/organization_layout";
+import {
+  OrganizationFilter,
+  OrganizationLayout,
+} from "../../../../services/lib/organization_layout/organization_layout";
 
 async function handler({
   res,
@@ -38,15 +41,14 @@ async function handler({
 
   if (organizationLayoutError !== null) {
     res.status(400).json({
-      error: `{orgError: ${organizationLayoutError} }`,
+      error: `{orgError: ${JSON.stringify(organizationLayoutError)} }`,
       data: null,
     });
   } else {
-    const filters = JSON.parse(layout.filters as string);
     const orgLayout: OrganizationLayout = {
       id: layout.id,
       type: layout.type,
-      filters: filters,
+      filters: layout.filters as OrganizationFilter[],
       organization_id: layout.organization_id,
     };
     res.status(200).json({

@@ -634,6 +634,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         id: uuidv4(),
         name: name,
         filter: advancedFilters,
+        createdAt: new Date().toISOString(),
         softDelete: false,
       };
       if (orgLayout && orgLayout.filters.length > 0) {
