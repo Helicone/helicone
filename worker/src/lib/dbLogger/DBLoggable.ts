@@ -87,8 +87,7 @@ export function dbLoggableRequestFromProxyRequest(
     heliconeTemplate: proxyRequest.heliconePromptTemplate ?? undefined,
     threat: proxyRequest.threat ?? null,
     flaggedForModeration: proxyRequest.flaggedForModeration ?? null,
-    request_ip:
-      proxyRequest.requestWrapper.headers.get("CF-Connecting-IP") ?? null,
+    request_ip: null,
   };
 }
 
