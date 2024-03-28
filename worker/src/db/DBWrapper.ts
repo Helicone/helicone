@@ -67,18 +67,17 @@ async function getHeliconeJwtAuthParams(
     .from("organization")
     .select("*")
     .eq("id", orgId)
-    .eq("owner", user.data.user.id)
-    .single();
+    .eq("owner", user.data.user.id);
 
   if (orgOwner.error) {
-    console.error("Error fetching user:", orgOwner.error.message);
-    return { error: orgOwner.error.message, data: null };
+    console.error("Error fetching user:", orgOwner.error?.message);
+    return { error: orgOwner.error?.message, data: null };
   }
 
-  if (orgOwner.data) {
+  if (orgOwner.data.length > 0) {
     return {
       data: {
-        organizationId: orgOwner.data.id,
+        organizationId: orgOwner.data[0].id,
         userId: user.data.user.id,
         heliconeApiKeyId: undefined,
       },
