@@ -143,6 +143,7 @@ export interface RequestResponseLog {
   target_url: Nullable<string>;
   request_ip: Nullable<string>;
   provider: Nullable<string>;
+  country_code: Nullable<string>;
 }
 
 interface PropertiesV3 {

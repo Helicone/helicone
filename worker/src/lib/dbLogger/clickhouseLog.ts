@@ -73,6 +73,7 @@ export async function logInClickhouse(
         target_url: request.target_url ?? null,
         request_ip: null,
         provider: request.provider ?? null,
+        country_code: request.country_code ?? null,
       },
     ]),
     clickhouseDb.dbInsertClickhouse(

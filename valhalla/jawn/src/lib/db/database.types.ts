@@ -1397,6 +1397,7 @@ export type Database = {
         Row: {
           auth_hash: string
           body: Json
+          country_code: string | null
           created_at: string
           formatted_prompt_id: string | null
           helicone_api_key_id: number | null
@@ -1419,6 +1420,7 @@ export type Database = {
         Insert: {
           auth_hash: string
           body: Json
+          country_code?: string | null
           created_at?: string
           formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null
@@ -1441,6 +1443,7 @@ export type Database = {
         Update: {
           auth_hash?: string
           body?: Json
+          country_code?: string | null
           created_at?: string
           formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null

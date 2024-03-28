@@ -89,7 +89,6 @@ export class RequestWrapper {
     env: Env
   ): Promise<Result<RequestWrapper, string>> {
     const requestWrapper = new RequestWrapper(request, env);
-    console.log(`country code = ${requestWrapper.cf?.country}`);
     const authorization = await requestWrapper.setAuthorization(env);
 
     if (authorization.error) {
