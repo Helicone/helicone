@@ -292,7 +292,7 @@ export default function Example() {
                   <div className="flex flex-col space-y-1">
                     <p className="font-semibold text-2xl">Prompts: 8</p>
                     <div className="italic text-xs">
-                      Your first 3 prompts are free!
+                      First 3 prompts / month are free!
                     </div>
                   </div>
 
