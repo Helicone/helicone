@@ -51,13 +51,25 @@ export async function run(
         experiment.test_prompt.heliconeTemplate
       );
 
-      const res = await fetch(data.urlPath, {
+      const fetchUrl = process.env.EXPERIMENTS_HCONE_URL_OVERRIDE
+        ? new URL(process.env.EXPERIMENTS_HCONE_URL_OVERRIDE)
+        : new URL(data.urlPath);
+
+      let headers: { [key: string]: string } = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${proxyKey}`,
+        "Helicone-Request-Id": requestId,
+      };
+
+      // Determine if the call is for Azure and append additional headers if true
+      if (process.env.AZURE_API_KEY) {
+        headers["Helicone-OpenAI-API-Base"] = fetchUrl.origin;
+        headers["api-key"] = process.env.AZURE_API_KEY;
+      }
+
+      const response = await fetch(fetchUrl.toString(), {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${proxyKey}`,
-          "Helicone-Request-Id": requestId,
-        },
+        headers: headers,
         body: JSON.stringify(newRequestBody),
       });
 
