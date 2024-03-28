@@ -1,7 +1,13 @@
+export type FilterRow = {
+  filterMapIdx: number;
+  operatorIdx: number;
+  value: string;
+};
+
 export type OrganizationFilter = {
   id: string;
   name: string;
-  filter: string;
+  filter: FilterRow[];
   createdAt?: Date;
   softDelete: boolean;
 };
