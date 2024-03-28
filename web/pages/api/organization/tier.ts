@@ -23,7 +23,7 @@ async function handler({
     await supabaseServer
       .from("user_settings")
       .select("*")
-      .eq("user", org?.owner)
+      .eq("user", org?.owner || "")
       .single();
 
   if (orgError !== null || userSettingsError !== null) {

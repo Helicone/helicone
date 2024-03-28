@@ -191,9 +191,6 @@ const CreateOrg = (props: CreateOrgProps) => {
             <select
               id="org-size"
               name="org-size"
-              placeholder={
-                orgContext?.currentOrg?.size || "Select company size"
-              }
               className={clsx(
                 "bg-white dark:bg-black block w-full rounded-md border-0 px-4 py-2 text-sm shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
@@ -216,9 +213,6 @@ const CreateOrg = (props: CreateOrgProps) => {
             <select
               id="org-referral"
               name="org-referral"
-              placeholder={
-                orgContext?.currentOrg?.referral || "Select referral source"
-              }
               className={clsx(
                 "bg-white dark:bg-black block w-full rounded-md border-0 px-4 py-2 text-sm shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}

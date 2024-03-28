@@ -93,7 +93,7 @@ export const getServerSideProps = async (
     const org = await supabaseServer
       .from("organization")
       .select("*")
-      .eq("domain", context.req.headers.host)
+      .eq("domain", context.req.headers.host ?? "")
       .single();
     if (org.data) {
       return {

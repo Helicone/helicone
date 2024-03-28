@@ -12,7 +12,7 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { useRouter } from "next/router";
-import { Fragment } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { clsx } from "../../clsx";
 import { Menu, Transition } from "@headlessui/react";
@@ -70,6 +70,19 @@ export default function DraggableColumnHeader<T>(props: {
   const meta = header.column.columnDef?.meta as any;
   const hasSortKey = meta?.sortKey !== undefined;
 
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const thRef = useRef<HTMLTableCellElement>(null);
+
+  // Apply the React DnD ref to the button element
+  useEffect(() => {
+    if (buttonRef.current) {
+      dragRef(buttonRef);
+    }
+    if (thRef.current) {
+      dropRef(thRef);
+    }
+  }, [dragRef]);
+
   return (
     <th
       {...{
@@ -79,12 +92,12 @@ export default function DraggableColumnHeader<T>(props: {
           opacity: isDragging ? 0.5 : 1,
         },
       }}
-      ref={dropRef}
+      ref={thRef}
       className="text-left py-2 font-semibold text-gray-900 dark:text-gray-100 relative"
     >
       <div className="flex flex-row items-center gap-0.5">
         <button
-          ref={dragRef}
+          ref={buttonRef}
           className="flex flex-row items-center py-1 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg"
         >
           <EllipsisVerticalIcon className="h-3 w-3 -ml-1" />
