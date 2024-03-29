@@ -487,6 +487,7 @@ export class RequestResponseStore {
           property_value: p.value,
           threat: response.threat,
           provider: response.provider,
+          country_code: response.country_code,
         };
       })
     );
