@@ -54,6 +54,9 @@ export class FineTuningManager {
   ): Promise<Result<FineTuningJob, string>> {
     const formattedRows = requests
       .map((request) => {
+        if (request.response_status !== 200) {
+          return;
+        }
         const requestMessages = request.request_body.messages;
         const responseOutput = request.response_body.choices[0].message;
         const outputMessage = chatCompletionMessage.parse(responseOutput);
