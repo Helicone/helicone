@@ -1,7 +1,6 @@
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Analytics } from "@vercel/analytics/react";
 import { AppProps } from "next/app";
 import { ReactElement, ReactNode, useState } from "react";
 import Notification from "../components/shared/notification/Notification";
@@ -10,7 +9,6 @@ import "../styles/globals.css";
 import "../styles/index.css";
 import "../node_modules/react-grid-layout/css/styles.css";
 import "../node_modules/react-resizable/css/styles.css";
-
 import posthog from "posthog-js";
 import { OrgContextProvider } from "../components/layout/organizationContext";
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
@@ -18,7 +16,6 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { ThemeContextProvider } from "../components/shared/theme/themeContext";
 import { NextPage } from "next";
-import Script from "next/script";
 
 if (
   typeof window !== "undefined" &&
@@ -77,15 +74,6 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
           </QueryClientProvider>
         </ApolloProvider>
       </SessionContextProvider>
-      {trackingEnabled && (
-        <>
-          <Analytics />
-          <Script
-            id="octolane-script"
-            src="https://cdn.octolane.com/tag.js?pk=2777c36a1af860ec5a67"
-          />
-        </>
-      )}
     </>
   );
 }
