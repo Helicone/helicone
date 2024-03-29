@@ -7,7 +7,7 @@ import { validateAlertCreate } from "../../lib/util/validators/alertValidators";
 
 import { OpenAPIRouterType } from "@cloudflare/itty-router-openapi";
 import { Route } from "itty-router";
-import { logAsync } from "../../api/helpers/logAsync";
+import { logAsync } from "../../lib/managers/AsyncLogManager";
 import { createAPIClient } from "../../api/lib/apiClient";
 import { CustomerGet } from "../../api/routes/customer-portal/customer/get";
 import { ProviderKeyGet } from "../../api/routes/customer-portal/customer/provderKey/get";

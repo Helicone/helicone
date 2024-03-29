@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
-import { Env } from ".";
-import { RequestWrapper } from "./lib/RequestWrapper";
+import { Env } from "../..";
+import { RequestWrapper } from "../RequestWrapper";
 
 interface LoggingRequestBody {
   "helicone-id": string;

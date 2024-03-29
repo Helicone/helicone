@@ -3,10 +3,10 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
 import { Database, Json } from "../../../supabase/database.types";
 import { DBWrapper } from "../db/DBWrapper";
-import { withTimeout } from "../../helpers";
-import { Result, err, ok } from "../../results";
-import { HeliconeHeaders } from "../HeliconeHeaders";
-import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
+import { withTimeout } from "../util/helpers";
+import { Result, err, ok } from "../util/results";
+import { HeliconeHeaders } from "../models/HeliconeHeaders";
+import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 import { RequestWrapper } from "../RequestWrapper";
 import { INTERNAL_ERRORS } from "../util/constants";
 import { AsyncLogModel } from "../models/AsyncLog";
@@ -17,7 +17,7 @@ import {
   getModel,
 } from "./streamParsers/anthropicStreamParser";
 import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
-import { getTokenCount } from "./tokenCounter";
+import { getTokenCount } from "../clients/TokenCounterClient";
 import { S3Client } from "../clients/S3Client";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 

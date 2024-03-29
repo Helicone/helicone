@@ -6,13 +6,13 @@ import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from "..";
 import { Database } from "../../supabase/database.types";
 import { HeliconeAuth } from "./db/DBWrapper";
-import { Result, err, map, mapPostgrestErr, ok } from "../results";
-import { HeliconeHeaders } from "./HeliconeHeaders";
+import { Result, err, map, mapPostgrestErr, ok } from "./util/results";
+import { HeliconeHeaders } from "./models/HeliconeHeaders";
 import {
   checkLimits,
   checkLimitsSingle,
 } from "./managers/UsageLimitManager.ts";
-import { getAndStoreInCache } from "./secureCache";
+import { getAndStoreInCache } from "./util/cache/secureCache";
 import { parseJSXObject } from "../api/lib/promptHelpers";
 import { CfProperties } from "@cloudflare/workers-types";
 

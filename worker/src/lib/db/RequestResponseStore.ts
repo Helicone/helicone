@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database, Json } from "../../../supabase/database.types";
-import { getResponse } from "../../feedback";
-import { deepCompare } from "../../helpers";
-import { Result, err, ok } from "../../results";
+import { getResponse } from "../managers/FeedbackManager";
+import { deepCompare } from "../util/helpers";
+import { Result, err, ok } from "../util/results";
 import {
   ClickhouseClientWrapper,
   RequestResponseLog,

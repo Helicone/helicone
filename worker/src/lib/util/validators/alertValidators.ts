@@ -1,5 +1,5 @@
 import { Database } from "../../../../supabase/database.types";
-import { Result } from "../../../results";
+import { Result } from "../results";
 
 const thirtySecondsInMs = 30 * 1000; // 30 seconds in milliseconds
 const oneMonthInMs = 30 * 24 * 60 * 60 * 1000; // Roughly one month in milliseconds

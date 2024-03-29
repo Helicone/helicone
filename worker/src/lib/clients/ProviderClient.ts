@@ -1,7 +1,7 @@
 import {
   HeliconeProxyRequest,
   RetryOptions,
-} from "../HeliconeProxyRequest/mapper";
+} from "../models/HeliconeProxyRequest";
 import retry from "async-retry";
 
 export interface CallProps {

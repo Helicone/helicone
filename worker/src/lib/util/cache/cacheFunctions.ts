@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, hash } from "../../..";
-import { HeliconeProxyRequest } from "../../HeliconeProxyRequest/mapper";
+import { HeliconeProxyRequest } from "../../models/HeliconeProxyRequest";
 import { ClickhouseClientWrapper } from "../../db/ClickhouseWrapper";
 import { Database } from "../../../../supabase/database.types";
 

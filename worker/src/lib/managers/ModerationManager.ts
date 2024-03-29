@@ -1,11 +1,11 @@
 import { Env, Provider } from "../..";
 import { DBLoggable } from "../dbLogger/DBLoggable";
-import { handleProxyRequest } from "../HeliconeProxyRequest/handler";
-import { HeliconeProxyRequestMapper } from "../HeliconeProxyRequest/mapper";
+import { handleProxyRequest } from "../HeliconeProxyRequest/ProxyRequestHandler";
+import { HeliconeProxyRequestMapper } from "../models/HeliconeProxyRequest";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
 
-import type { Result } from "../../results";
+import type { Result } from "../util/results";
 
 export class Moderator {
   env: Env;

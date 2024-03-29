@@ -1,6 +1,6 @@
 import { Env } from "../..";
 import { Database } from "../../../supabase/database.types";
-import { Result, err, ok } from "../../results";
+import { Result, err, ok } from "../util/results";
 import { AlertState, AlertStore } from "../db/AlertStore";
 
 type AlertStateUpdate = {

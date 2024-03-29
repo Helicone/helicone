@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
 import { InMemoryRateLimiter } from "./lib/clients/InMemoryRateLimiter";
 import { RequestWrapper } from "./lib/RequestWrapper";
-import { updateLoopUsers } from "./lib/updateLoopsUsers";
+import { updateLoopUsers } from "./lib/managers/LoopsManager";
 import { buildRouter } from "./routers/routerFactory";
 import { AlertManager } from "./lib/managers/AlertManager";
 import { AlertStore } from "./lib/db/AlertStore";

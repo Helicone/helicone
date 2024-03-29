@@ -1,4 +1,4 @@
-import { Result } from "../../results";
+import { Result } from "./results";
 
 export interface RateLimitOptions {
   time_window: number;

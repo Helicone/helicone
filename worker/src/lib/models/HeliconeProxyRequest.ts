@@ -3,12 +3,12 @@
 import { Env, Provider } from "../..";
 import { parseJSXObject } from "../../api/lib/promptHelpers";
 import { approvedDomains } from "../../packages/cost/providers/mappings";
-import { Result, ok } from "../../results";
-import { IHeliconeHeaders } from "../HeliconeHeaders";
+import { Result, ok } from "../util/results";
+import { IHeliconeHeaders } from "./HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
 import { buildTargetUrl } from "../clients/ProviderClient";
 
-import { RateLimitOptions, RateLimitOptionsBuilder } from "./rateLimit";
+import { RateLimitOptions, RateLimitOptionsBuilder } from "../util/rateLimit";
 import { CfProperties } from "@cloudflare/workers-types";
 
 export type RetryOptions = {

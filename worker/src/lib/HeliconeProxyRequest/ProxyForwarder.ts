@@ -1,7 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
 import { DBWrapper } from "../db/DBWrapper";
-import { checkRateLimit, updateRateLimitCounter } from "../../rateLimit";
+import {
+  checkRateLimit,
+  updateRateLimitCounter,
+} from "../clients/KVRateLimiterClient";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
 import {
@@ -13,14 +16,20 @@ import { getCacheSettings } from "../util/cache/cacheSettings";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { RequestResponseStore } from "../db/RequestResponseStore";
 import { Valhalla } from "../db/valhalla";
-import { handleProxyRequest, handleThreatProxyRequest } from "./handler";
-import { HeliconeProxyRequest, HeliconeProxyRequestMapper } from "./mapper";
+import {
+  handleProxyRequest,
+  handleThreatProxyRequest,
+} from "./ProxyRequestHandler";
 import { checkPromptSecurity } from "../clients/PromptSecurityClient";
 import { DBLoggable } from "../dbLogger/DBLoggable";
 import { DBQueryTimer } from "../db/DBQueryTimer";
 import { Moderator } from "../managers/ModerationManager";
-import { Result } from "../../results";
+import { Result } from "../util/results";
 import { S3Client } from "../clients/S3Client";
+import {
+  HeliconeProxyRequestMapper,
+  HeliconeProxyRequest,
+} from "../models/HeliconeProxyRequest";
 
 export async function proxyForwarder(
   request: RequestWrapper,

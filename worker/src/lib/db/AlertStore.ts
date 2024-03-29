@@ -1,6 +1,6 @@
 import { ClickhouseClientWrapper } from "./ClickhouseWrapper";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Result, err, ok } from "../../results";
+import { Result, err, ok } from "../util/results";
 import { Database } from "../../../supabase/database.types";
 import { clickhousePriceCalc } from "../../packages/cost";
 

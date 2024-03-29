@@ -1,4 +1,4 @@
-import { Env, hash } from "..";
+import { Env, hash } from "../../..";
 import { Result, ok } from "../results";
 
 export interface SecureCacheEnv {

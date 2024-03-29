@@ -1,4 +1,4 @@
-import { Result } from "../../results";
+import { Result } from "../util/results";
 import { createClient } from "@clickhouse/client-web";
 import { WebClickHouseClient } from "@clickhouse/client-web/dist/client";
 import dateFormat from "dateformat";

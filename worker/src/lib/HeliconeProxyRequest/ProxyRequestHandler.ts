@@ -1,5 +1,8 @@
-import { Result } from "../../results";
-import { CompletedChunk, ReadableInterceptor } from "../ReadableInterceptor";
+import { Result } from "../util/results";
+import {
+  CompletedChunk,
+  ReadableInterceptor,
+} from "../util/ReadableInterceptor";
 import {
   DBLoggable,
   dbLoggableRequestFromProxyRequest,
@@ -9,7 +12,7 @@ import {
   callProvider,
   callProviderWithRetry,
 } from "../clients/ProviderClient";
-import { HeliconeProxyRequest } from "./mapper";
+import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 
 export type ProxyResult = {
   loggable: DBLoggable;

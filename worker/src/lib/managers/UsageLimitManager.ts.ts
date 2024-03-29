@@ -1,7 +1,7 @@
 import { Env, hash } from "../..";
 import { Database } from "../../../supabase/database.types";
 import { clickhousePriceCalc } from "../../packages/cost";
-import { Result, err, ok } from "../../results";
+import { Result, err, ok } from "../util/results";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 
 // uses Dat trunc
