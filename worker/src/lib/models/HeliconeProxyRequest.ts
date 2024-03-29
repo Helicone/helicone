@@ -8,7 +8,10 @@ import { IHeliconeHeaders } from "./HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
 import { buildTargetUrl } from "../clients/ProviderClient";
 
-import { RateLimitOptions, RateLimitOptionsBuilder } from "../util/rateLimit";
+import {
+  RateLimitOptions,
+  RateLimitOptionsBuilder,
+} from "../util/rateLimitOptions";
 import { CfProperties } from "@cloudflare/workers-types";
 
 export type RetryOptions = {
