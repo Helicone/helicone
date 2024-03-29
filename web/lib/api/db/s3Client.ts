@@ -73,6 +73,6 @@ export class S3Client {
   }
 
   getRequestResponseKey = (requestId: string, orgId: string) => {
-    return `organizations/${orgId}/requests/${requestId}`;
+    return `organizations/${orgId}/requests/${requestId}/request_response_data`;
   };
 }
