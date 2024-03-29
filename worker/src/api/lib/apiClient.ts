@@ -6,7 +6,7 @@ import { RequestWrapper } from "../../lib/RequestWrapper";
 import { ClickhouseClientWrapper } from "../../lib/db/ClickhouseWrapper";
 import { Valhalla } from "../../lib/db/valhalla";
 import { RequestResponseStore } from "../../lib/db/RequestResponseStore";
-import { DBQueryTimer } from "../../lib/db/DBQueryTimer";
+import { DBQueryTimer } from "../../lib/util/loggers/DBQueryTimer";
 
 class InternalResponse {
   constructor(private client: APIClient) {}

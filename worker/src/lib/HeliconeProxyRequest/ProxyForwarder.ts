@@ -22,7 +22,7 @@ import {
 } from "./ProxyRequestHandler";
 import { checkPromptSecurity } from "../clients/PromptSecurityClient";
 import { DBLoggable } from "../dbLogger/DBLoggable";
-import { DBQueryTimer } from "../db/DBQueryTimer";
+import { DBQueryTimer } from "../util/loggers/DBQueryTimer";
 import { Moderator } from "../managers/ModerationManager";
 import { Result } from "../util/results";
 import { S3Client } from "../clients/S3Client";

@@ -8,7 +8,7 @@ import { Valhalla } from "../db/valhalla";
 import { dbLoggableRequestFromAsyncLogModel } from "../dbLogger/DBLoggable";
 import { RequestResponseStore } from "../db/RequestResponseStore";
 import { AsyncLogModel, validateAsyncLogModel } from "../models/AsyncLog";
-import { DBQueryTimer } from "../db/DBQueryTimer";
+import { DBQueryTimer } from "../util/loggers/DBQueryTimer";
 import { S3Client } from "../clients/S3Client";
 
 export async function logAsync(

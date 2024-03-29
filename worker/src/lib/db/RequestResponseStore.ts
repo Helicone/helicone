@@ -10,7 +10,10 @@ import {
 } from "./ClickhouseWrapper";
 import { Valhalla } from "./valhalla";
 import { formatTimeString } from "./ClickhouseStore";
-import { DBQueryTimer, FREQUENT_PRECENT_LOGGING } from "./DBQueryTimer";
+import {
+  DBQueryTimer,
+  FREQUENT_PRECENT_LOGGING,
+} from "../util/loggers/DBQueryTimer";
 
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];
