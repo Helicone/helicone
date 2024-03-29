@@ -32,6 +32,7 @@ function buildPropertyWithResponseInserts(
     property_key: p.key,
     property_value: p.value,
     provider: request.provider ?? null,
+    country_code: request.country_code,
   }));
 }
 
@@ -73,6 +74,7 @@ export async function logInClickhouse(
         target_url: request.target_url ?? null,
         request_ip: null,
         provider: request.provider ?? null,
+        country_code: request.country_code ?? null,
       },
     ]),
     clickhouseDb.dbInsertClickhouse(

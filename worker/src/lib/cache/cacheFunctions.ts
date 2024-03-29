@@ -71,7 +71,8 @@ export async function recordCacheHit(
   env: Env,
   clickhouseDb: ClickhouseClientWrapper,
   organizationId: string,
-  provider: string
+  provider: string,
+  countryCode: string | null
 ): Promise<void> {
   const requestId = headers.get("helicone-id");
   if (!requestId) {
@@ -119,6 +120,7 @@ export async function recordCacheHit(
         latency: latency,
         created_at: null,
         provider,
+        country_code: countryCode,
       },
     ]
   );
