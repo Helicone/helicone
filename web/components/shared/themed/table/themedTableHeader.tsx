@@ -55,9 +55,6 @@ interface ThemedTableHeaderProps<T> {
 }
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
-  const { setNotification } = useNotification();
-  const org = useOrg();
-
   const { rows, columnsFilter, timeFilter, advancedFilters, viewToggle } =
     props;
 
