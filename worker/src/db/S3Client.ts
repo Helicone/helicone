@@ -21,7 +21,7 @@ export class S3Client {
   }
 
   getRequestResponseUrl = (requestId: string, orgId: string) => {
-    const key = `organizations/${orgId}/requests/${requestId}/request_response_data`;
+    const key = `organizations/${orgId}/requests/${requestId}/request_response_body`;
     if (this.endpoint) {
       // For MinIO or another S3-compatible service
       return `${this.endpoint}/${this.bucketName}/${key}`;
