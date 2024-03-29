@@ -97,7 +97,7 @@ const ContactForm = (props: ContactFormProps) => {
       action="#"
       method="POST"
       onSubmit={formSubmitHandler}
-      className="border border-gray-300 bg-gray-50 rounded-xl p-8 h-full space-y-4 w-full mt-16 lg:mt-0"
+      className="border-2 border-gray-300 bg-sky-100 rounded-xl p-8 h-full space-y-4 w-full mt-16 lg:mt-0"
     >
       <div>
         <label
@@ -112,7 +112,7 @@ const ContactForm = (props: ContactFormProps) => {
             name="first-name"
             type="text"
             required
-            className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+            className="bg-sky-50 block w-full rounded-md border border-gray-300 py-1.5 shadow-sm  text-sm lg:text-md lg:leading-6"
           />
         </div>
       </div>
@@ -129,7 +129,7 @@ const ContactForm = (props: ContactFormProps) => {
             name="last-name"
             type="text"
             required
-            className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+            className="bg-sky-50 block w-full rounded-md border border-gray-300 py-1.5 shadow-sm  text-sm lg:text-md lg:leading-6"
           />
         </div>
       </div>
@@ -147,7 +147,7 @@ const ContactForm = (props: ContactFormProps) => {
             type="email"
             autoComplete="email"
             required
-            className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+            className="bg-sky-50 block w-full rounded-md border border-gray-300 py-1.5 shadow-sm  text-sm lg:text-md lg:leading-6"
           />
         </div>
       </div>
@@ -164,7 +164,7 @@ const ContactForm = (props: ContactFormProps) => {
             name="company-name"
             type="text"
             required
-            className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+            className="bg-sky-50 block w-full rounded-md border border-gray-300 py-1.5 shadow-sm  text-sm lg:text-md lg:leading-6"
           />
         </div>
       </div>
@@ -182,7 +182,7 @@ const ContactForm = (props: ContactFormProps) => {
             required
             rows={4}
             placeholder={defaultPlaceholder}
-            className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+            className="bg-sky-50 block w-full rounded-md border border-gray-300 py-1.5 shadow-sm  text-sm lg:text-md lg:leading-6"
           />
         </div>
       </div>
@@ -198,13 +198,13 @@ const ContactForm = (props: ContactFormProps) => {
           href="https://cal.com/team/helicone/helicone-discovery"
           target="_blank"
           rel="noopener noreferrer"
-          className="items-center border border-black rounded-md bg-white px-4 py-2 text-sm flex font-semibold text-black shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          className="bg-sky-100 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
         >
           Schedule a call
         </Link>
         <button
           type="submit"
-          className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          className="bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
         >
           {isLoading && (
             <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
