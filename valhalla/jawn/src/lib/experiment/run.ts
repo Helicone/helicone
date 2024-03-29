@@ -62,11 +62,14 @@ export async function run(
       };
 
       // Determine if the call is for Azure and append additional headers if true
-      if (process.env.AZURE_API_KEY) {
-        headers["Helicone-OpenAI-API-Base"] = fetchUrl.origin;
+      if (process.env.AZURE_API_KEY && process.env.AZURE_BASE_URL) {
+        headers["Helicone-OpenAI-API-Base"] = process.env.AZURE_BASE_URL;
         headers["api-key"] = process.env.AZURE_API_KEY;
       }
 
+      console.log(`fetchUrl: ${fetchUrl}`);
+      console.log(`headers: ${JSON.stringify(headers)}`);
+      console.log(`newRequestBody: ${JSON.stringify(newRequestBody)}`);
       const response = await fetch(fetchUrl, {
         method: "POST",
         headers: headers,
