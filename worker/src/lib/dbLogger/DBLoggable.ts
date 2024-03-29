@@ -49,6 +49,7 @@ export interface DBLoggableProps {
     threat: boolean | null;
     flaggedForModeration: boolean | null;
     request_ip: string | null;
+    country_code: string | null;
   };
   timing: {
     startTime: Date;
@@ -88,6 +89,7 @@ export function dbLoggableRequestFromProxyRequest(
     threat: proxyRequest.threat ?? null,
     flaggedForModeration: proxyRequest.flaggedForModeration ?? null,
     request_ip: null,
+    country_code: (proxyRequest.requestWrapper.cf?.country as string) ?? null,
   };
 }
 
@@ -150,6 +152,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       threat: null,
       flaggedForModeration: null,
       request_ip: null,
+      country_code: (requestWrapper.cf?.country as string) ?? null,
     },
     response: {
       responseId: crypto.randomUUID(),
