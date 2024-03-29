@@ -4,9 +4,11 @@ import { InMemoryRateLimiter } from "./db/InMemoryRateLimiter";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { updateLoopUsers } from "./lib/updateLoopsUsers";
 import { buildRouter } from "./routers/routerFactory";
-import { AlertManager } from "./AlertManager";
-import { AlertStore } from "./db/AlertStore";
+import { AlertManager } from "./lib/managers/AlertManager";
+import { AlertStore } from "./lib/db/AlertStore";
 import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
+import { UsagePricingManager } from "./lib/managers/UsagePricingManager";
+import { OrganizationStore } from "./lib/db/OrganizationStore";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -161,13 +163,17 @@ export default {
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY
     );
+    const clickhouseClientWrapper = new ClickhouseClientWrapper(env);
     await updateLoopUsers(env);
-    if (controller.cron === "0 * * * *") {
-      // Do nothing
+    if (controller.cron === "10 0 * * *") {
+      const usageManager = new UsagePricingManager(
+        new OrganizationStore(supabaseClient, clickhouseClientWrapper)
+      );
+
       return;
     } else {
       const alertManager = new AlertManager(
-        new AlertStore(supabaseClient, new ClickhouseClientWrapper(env)),
+        new AlertStore(supabaseClient, clickhouseClientWrapper),
         env
       );
 

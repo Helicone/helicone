@@ -61,7 +61,7 @@ kv_namespaces = [
 ]
 
 [env.production.triggers]
-crons = ["* * * * *", "0 * * * *"]
+crons = ["* * * * *", "10 0 * * *"]
 
 queues.producers = [
 	{ binding = "FALLBACK_QUEUE", queue = "fallback-queue-prod" },
@@ -108,7 +108,7 @@ CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 VAULT_ENABLED = "true"
 
 [env.production_staging.triggers]
-crons = []
+crons = ["10 0 * * *"]
 
 
 [[migrations]]

@@ -1,7 +1,7 @@
-import { Env } from ".";
-import { Database } from "../supabase/database.types";
-import { Result, err, ok } from "./results";
-import { AlertState, AlertStore } from "./db/AlertStore";
+import { Env } from "../..";
+import { Database } from "../../../supabase/database.types";
+import { Result, err, ok } from "../../results";
+import { AlertState, AlertStore } from "../db/AlertStore";
 
 type AlertStateUpdate = {
   alert: Database["public"]["Tables"]["alert"]["Row"];
