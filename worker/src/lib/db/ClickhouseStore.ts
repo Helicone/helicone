@@ -1,5 +1,5 @@
 import { Database } from "../../../supabase/database.types";
-import { ClickhouseClientWrapper, ClickhouseDB } from "../db/clickhouse";
+import { ClickhouseClientWrapper, ClickhouseDB } from "./ClickhouseWrapper";
 
 export function formatTimeString(timeString: string): string {
   return new Date(timeString).toISOString().replace("Z", "");

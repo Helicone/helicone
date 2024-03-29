@@ -1,8 +1,8 @@
-import { ClickhouseClientWrapper } from "./../lib/db/clickhouse";
+import { ClickhouseClientWrapper } from "./ClickhouseWrapper";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Result, err, ok } from "../results";
-import { Database } from "../../supabase/database.types";
-import { clickhousePriceCalc } from "../packages/cost";
+import { Result, err, ok } from "../../results";
+import { Database } from "../../../supabase/database.types";
+import { clickhousePriceCalc } from "../../packages/cost";
 
 type AlertStatus = "triggered" | "resolved";
 type Alert = Database["public"]["Tables"]["alert"]["Row"];

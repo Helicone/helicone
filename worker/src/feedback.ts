@@ -5,7 +5,7 @@ import { Database } from "../supabase/database.types";
 import { Result } from "./results";
 import { IHeliconeHeaders } from "./lib/HeliconeHeaders";
 import { Valhalla } from "./lib/db/valhalla";
-import { DBQueryTimer, FREQUENT_PRECENT_LOGGING } from "./db/DBQueryTimer";
+import { DBQueryTimer, FREQUENT_PRECENT_LOGGING } from "./lib/db/DBQueryTimer";
 
 interface FeedbackRequestBodyV2 {
   "helicone-id": string;

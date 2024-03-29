@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
-import { DBWrapper } from "../../db/DBWrapper";
+import { DBWrapper } from "../db/DBWrapper";
 import { checkRateLimit, updateRateLimitCounter } from "../../rateLimit";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
@@ -8,19 +8,19 @@ import {
   getCachedResponse,
   recordCacheHit,
   saveToCache,
-} from "../cache/cacheFunctions";
-import { getCacheSettings } from "../cache/cacheSettings";
-import { ClickhouseClientWrapper } from "../db/clickhouse";
-import { RequestResponseStore } from "../dbLogger/RequestResponseStore";
+} from "../util/cache/cacheFunctions";
+import { getCacheSettings } from "../util/cache/cacheSettings";
+import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
+import { RequestResponseStore } from "../db/RequestResponseStore";
 import { Valhalla } from "../db/valhalla";
 import { handleProxyRequest, handleThreatProxyRequest } from "./handler";
 import { HeliconeProxyRequest, HeliconeProxyRequestMapper } from "./mapper";
-import { checkPromptSecurity } from "../security/promptSecurity";
+import { checkPromptSecurity } from "../clients/PromptSecurityClient";
 import { DBLoggable } from "../dbLogger/DBLoggable";
-import { DBQueryTimer } from "../../db/DBQueryTimer";
-import { Moderator } from "../moderation/Moderator";
+import { DBQueryTimer } from "../db/DBQueryTimer";
+import { Moderator } from "../managers/ModerationManager";
 import { Result } from "../../results";
-import { S3Client } from "../../db/S3Client";
+import { S3Client } from "../clients/S3Client";
 
 export async function proxyForwarder(
   request: RequestWrapper,

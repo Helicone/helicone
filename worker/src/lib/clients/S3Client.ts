@@ -1,5 +1,5 @@
 import { AwsClient } from "aws4fetch";
-import { Result } from "../results";
+import { Result } from "../../results";
 import { gzip } from "node-gzip";
 
 export class S3Client {

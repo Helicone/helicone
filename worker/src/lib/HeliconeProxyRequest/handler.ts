@@ -4,8 +4,11 @@ import {
   DBLoggable,
   dbLoggableRequestFromProxyRequest,
 } from "../dbLogger/DBLoggable";
-import { callPropsFromProxyRequest, callProvider } from "../providerCalls/call";
-import { callProviderWithRetry } from "../providerCalls/retry";
+import {
+  callPropsFromProxyRequest,
+  callProvider,
+  callProviderWithRetry,
+} from "../clients/ProviderClient";
 import { HeliconeProxyRequest } from "./mapper";
 
 export type ProxyResult = {

@@ -1,18 +1,18 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
-import { DBWrapper } from "../../db/DBWrapper";
+import { DBWrapper } from "../../lib/db/DBWrapper";
 import { HeliconeHeaders } from "../../lib/HeliconeHeaders";
 import { RequestWrapper } from "../../lib/RequestWrapper";
-import { ClickhouseClientWrapper } from "../../lib/db/clickhouse";
+import { ClickhouseClientWrapper } from "../../lib/db/ClickhouseWrapper";
 import { Valhalla } from "../../lib/db/valhalla";
 import { dbLoggableRequestFromAsyncLogModel } from "../../lib/dbLogger/DBLoggable";
-import { RequestResponseStore } from "../../lib/dbLogger/RequestResponseStore";
+import { RequestResponseStore } from "../../lib/db/RequestResponseStore";
 import {
   AsyncLogModel,
   validateAsyncLogModel,
 } from "../../lib/models/AsyncLog";
-import { DBQueryTimer } from "../../db/DBQueryTimer";
-import { S3Client } from "../../db/S3Client";
+import { DBQueryTimer } from "../../lib/db/DBQueryTimer";
+import { S3Client } from "../../lib/clients/S3Client";
 
 export async function logAsync(
   requestWrapper: RequestWrapper,

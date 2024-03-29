@@ -2,8 +2,10 @@ import { Env } from "..";
 import { enumerate } from "../helpers";
 import { proxyForwarder } from "../lib/HeliconeProxyRequest/forwarder";
 import { RequestWrapper } from "../lib/RequestWrapper";
-import { approvedDomains } from "../lib/gateway/approvedDomains";
-import { providers } from "../packages/cost/providers/mappings";
+import {
+  approvedDomains,
+  providers,
+} from "../packages/cost/providers/mappings";
 import { Result, err, ok } from "../results";
 import { BaseRouter } from "./routerFactory";
 

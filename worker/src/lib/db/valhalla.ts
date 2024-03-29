@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { HeliconeAuth } from "../../db/DBWrapper";
+import { HeliconeAuth } from "./DBWrapper";
 import { Result } from "../../results";
 import { paths } from "./valhalla.types";
 

@@ -1,6 +1,6 @@
-import { Env } from "..";
-import { AuthParams } from "../lib/dbLogger/DBLoggable";
-import { Result, err, ok } from "../results";
+import { Env } from "../..";
+import { AuthParams } from "../dbLogger/DBLoggable";
+import { Result, err, ok } from "../../results";
 
 export class RateLimiter {
   constructor(

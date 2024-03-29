@@ -4,10 +4,13 @@ import { Database, Json } from "../../../supabase/database.types";
 import { getResponse } from "../../feedback";
 import { deepCompare } from "../../helpers";
 import { Result, err, ok } from "../../results";
-import { ClickhouseClientWrapper, RequestResponseLog } from "../db/clickhouse";
-import { Valhalla } from "../db/valhalla";
-import { formatTimeString } from "./clickhouseLog";
-import { DBQueryTimer, FREQUENT_PRECENT_LOGGING } from "../../db/DBQueryTimer";
+import {
+  ClickhouseClientWrapper,
+  RequestResponseLog,
+} from "./ClickhouseWrapper";
+import { Valhalla } from "./valhalla";
+import { formatTimeString } from "./ClickhouseStore";
+import { DBQueryTimer, FREQUENT_PRECENT_LOGGING } from "./DBQueryTimer";
 
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];

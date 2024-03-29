@@ -2,11 +2,11 @@
 
 import { Env, Provider } from "../..";
 import { parseJSXObject } from "../../api/lib/promptHelpers";
+import { approvedDomains } from "../../packages/cost/providers/mappings";
 import { Result, ok } from "../../results";
 import { IHeliconeHeaders } from "../HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
-import { approvedDomains } from "../gateway/approvedDomains";
-import { buildTargetUrl } from "../providerCalls/call";
+import { buildTargetUrl } from "../clients/ProviderClient";
 
 import { RateLimitOptions, RateLimitOptionsBuilder } from "./rateLimit";
 import { CfProperties } from "@cloudflare/workers-types";

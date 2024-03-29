@@ -9,24 +9,6 @@ export interface ClickhouseEnv {
   CLICKHOUSE_PASSWORD: string;
 }
 
-function paramsToValues(params: (number | string | boolean | Date)[]) {
-  return params
-    .map((p) => {
-      if (p instanceof Date) {
-        //ex: 2023-05-27T08:21:26
-        return dateFormat(p, "yyyy-mm-dd HH:MM:ss", true);
-      } else {
-        return p;
-      }
-    })
-    .reduce((acc, parameter, index) => {
-      return {
-        ...acc,
-        [`val_${index}`]: parameter,
-      };
-    }, {});
-}
-
 export class ClickhouseClientWrapper {
   private clickHouseClient: WebClickHouseClient;
 
@@ -118,6 +100,24 @@ export class ClickhouseClientWrapper {
       };
     }
   }
+}
+
+function paramsToValues(params: (number | string | boolean | Date)[]) {
+  return params
+    .map((p) => {
+      if (p instanceof Date) {
+        //ex: 2023-05-27T08:21:26
+        return dateFormat(p, "yyyy-mm-dd HH:MM:ss", true);
+      } else {
+        return p;
+      }
+    })
+    .reduce((acc, parameter, index) => {
+      return {
+        ...acc,
+        [`val_${index}`]: parameter,
+      };
+    }, {});
 }
 
 type Nullable<T> = T | null;

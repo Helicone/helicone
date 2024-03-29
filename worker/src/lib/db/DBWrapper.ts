@@ -1,11 +1,11 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import { Env, hash } from "..";
-import { Database } from "../../supabase/database.types";
-import { getProviderKeyFromProxyCache } from "../lib/RequestWrapper";
-import { AuthParams } from "../lib/dbLogger/DBLoggable";
-import { SecureCacheEnv, getAndStoreInCache } from "../lib/secureCache";
-import { Result, err, ok } from "../results";
-import { RateLimiter } from "./RateLimiter";
+import { Env, hash } from "../..";
+import { Database } from "../../../supabase/database.types";
+import { getProviderKeyFromProxyCache } from "../RequestWrapper";
+import { AuthParams } from "../dbLogger/DBLoggable";
+import { SecureCacheEnv, getAndStoreInCache } from "../secureCache";
+import { Result, err, ok } from "../../results";
+import { RateLimiter } from "../clients/RateLimiter";
 
 async function getHeliconeApiKeyRow(
   dbClient: SupabaseClient<Database>,

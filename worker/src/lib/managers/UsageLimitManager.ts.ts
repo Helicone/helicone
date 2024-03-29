@@ -2,7 +2,7 @@ import { Env, hash } from "../..";
 import { Database } from "../../../supabase/database.types";
 import { clickhousePriceCalc } from "../../packages/cost";
 import { Result, err, ok } from "../../results";
-import { ClickhouseClientWrapper } from "../db/clickhouse";
+import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 
 // uses Dat trunc
 export async function checkLimitsSingle(
@@ -110,8 +110,6 @@ export async function checkLimits(
     return { count: +count, cost: +cost, limitId };
   }, {});
 
-  console.log("Remapped results:", remappedResults);
-  console.log("Limits:", limits);
   const result = limits.every((limit) => {
     const limitResult = remappedResults.find(
       (result) => result.limitId === limit.id
