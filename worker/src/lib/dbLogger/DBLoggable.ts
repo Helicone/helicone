@@ -644,7 +644,7 @@ export class DBLoggable {
     if (!responseResult.data || responseResult.error) {
       // Log the error in S3
       if (S3_ENABLED === "true") {
-        const s3Result = await db.s3Client.storeRequestResponse(
+        const s3Result = await db.s3Client.storeRequestResponseImage(
           authParams.organizationId,
           this.request.requestId,
           requestResult.data.body,
@@ -664,8 +664,10 @@ export class DBLoggable {
       return responseResult;
     }
 
+    //TODO: map by model that support images and next call save image
+
     if (S3_ENABLED === "true") {
-      const s3Result = await db.s3Client.storeRequestResponse(
+      const s3Result = await db.s3Client.storeRequestResponseImage(
         authParams.organizationId,
         this.request.requestId,
         requestResult.data.body,
