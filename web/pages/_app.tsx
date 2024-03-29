@@ -77,15 +77,6 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
           </QueryClientProvider>
         </ApolloProvider>
       </SessionContextProvider>
-      {trackingEnabled && (
-        <>
-          <Analytics />
-          <Script
-            id="octolane-script"
-            src="https://cdn.octolane.com/tag.js?pk=2777c36a1af860ec5a67"
-          />
-        </>
-      )}
     </>
   );
 }
