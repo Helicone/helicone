@@ -34,35 +34,48 @@ export class S3Client {
   async storeRequestResponseImage(
     orgId: string,
     requestId: string,
-    request: string,
+    requestString: string,
     response: string
   ) {
-    const requestJson = JSON.stringify(request);
-    const parsedRequest = JSON.parse(requestJson);
+    const parsedRequest = JSON.parse(requestString);
+    const uploadPromises = [];
 
-    // Create a deep copy of the parsedRequest to avoid modifying the original object
-    const modifiedRequest = JSON.parse(JSON.stringify(parsedRequest));
+    for (const message of parsedRequest.messages) {
+      for (const item of message.content) {
+        if (item.type === "image_url") {
+          const imageUrl = item.image_url.url;
 
-    const imageRequest = modifiedRequest.messages[0]?.content.find(
-      (content: any) => content.type === "image_url"
-    );
+          const uploadPromise = (async () => {
+            try {
+              let assetUrl = "";
+              if (imageUrl.startsWith("data:image/")) {
+                const [mimeType, base64Data] = this.extractBase64Data(imageUrl);
+                assetUrl = await this.uploadBase64ToS3(
+                  base64Data,
+                  mimeType,
+                  requestId
+                );
+              } else {
+                assetUrl = await this.uploadImageToS3(imageUrl, requestId);
+              }
 
-    const imageUrl = imageRequest?.image_url?.url || "";
+              if (assetUrl) {
+                item.image_url.url = assetUrl;
+              }
+            } catch (error) {
+              console.error("Error processing image:", error);
+              return null;
+            }
+          })();
 
-    if (imageUrl) {
-      // If imageUrl exists, replace the image URL with its base64 representation
-      const base64Image = await this.downloadImageAndEncodeToBase64(imageUrl);
-      if (imageRequest && imageRequest.image_url) {
-        imageRequest.image_url.url = base64Image;
+          uploadPromises.push(uploadPromise);
+        }
       }
     }
 
-    // Use modifiedRequest if imageUrl exists, otherwise use parsedRequest
-    const finalRequest = imageUrl ? modifiedRequest : parsedRequest;
-
+    await Promise.all(uploadPromises);
+    const finalRequest = JSON.stringify(parsedRequest);
     const url = this.getRequestResponseUrl(requestId, orgId);
-
-    // Store the final request and response
     return await this.store(
       url,
       JSON.stringify({ request: finalRequest, response })
@@ -76,8 +89,6 @@ export class S3Client {
     response: string
   ): Promise<Result<string, string>> {
     const url = this.getRequestResponseUrl(requestId, orgId);
-
-    console.log(request);
 
     return await this.store(url, JSON.stringify({ request, response }));
   }
@@ -111,24 +122,81 @@ export class S3Client {
     }
   }
 
-  async downloadImageAndEncodeToBase64(
-    imageUrl: string
-  ): Promise<string | null> {
-    try {
-      const response = await fetch(imageUrl);
-      if (!response.ok) {
-        console.log(
-          `Failed to download image: ${response.statusText}, image: ${imageUrl}`
-        );
-      }
+  async uploadBase64ToS3(
+    base64Data: string,
+    mimeType: string,
+    requestId: string
+  ): Promise<string> {
+    const buffer = Buffer.from(base64Data, "base64");
+    const fileExtension = this.getFileExtension(mimeType);
+    // Adjusted assetKey format for consistency
+    const assetKey = `organizations/${requestId}/assets/${requestId}-${fileExtension}-${Date.now()}`;
+    const uploadUrl = this.getUploadUrl(assetKey);
 
-      const arrayBuffer = await response.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      const base64 = buffer.toString("base64");
-      return base64;
-    } catch (error) {
-      console.error("Error downloading or encoding image:", error);
+    await this.uploadToS3(uploadUrl, buffer, mimeType);
+    return uploadUrl;
+  }
+
+  async uploadImageToS3(imageUrl: string, requestId: string): Promise<string> {
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      console.error(`Failed to download image: ${response.statusText}`);
+      return "";
     }
-    return null;
+    const blob = await response.blob();
+    const fileExtension =
+      this.getFileExtensionFromBlob(blob) ||
+      this.getFileExtensionFromUrl(imageUrl);
+    const assetKey = `organizations/${requestId}/assets/${requestId}-${fileExtension}-${Date.now()}`;
+    const uploadUrl = this.getUploadUrl(assetKey);
+
+    await this.uploadToS3(uploadUrl, await blob.arrayBuffer(), blob.type);
+    return uploadUrl;
+  }
+
+  private getFileExtensionFromBlob(blob: Blob) {
+    const mimeType = blob.type;
+    return mimeType.split("/").pop();
+  }
+
+  private getFileExtensionFromUrl(url: string) {
+    const pathname = new URL(url).pathname;
+    const lastSegment = pathname.split("/").pop();
+    return lastSegment?.split(".").pop();
+  }
+
+  private getUploadUrl(assetKey: string): string {
+    return this.endpoint
+      ? `${this.endpoint}/${this.bucketName}/${assetKey}`
+      : `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${assetKey}`;
+  }
+
+  private extractBase64Data(dataUri: string): [string, string] {
+    const matches = dataUri.match(
+      /^data:(image\/(?:png|jpeg|jpg|gif|webp));base64,(.*)$/
+    );
+    if (!matches || matches.length !== 3) {
+      console.log("Invalid base64 image data");
+      return ["", ""];
+    }
+    return [matches[1], matches[2]];
+  }
+
+  private async uploadToS3(
+    url: string,
+    body: ArrayBuffer | Buffer,
+    contentType: string
+  ): Promise<void> {
+    const signedRequest = await this.awsClient.sign(url, {
+      method: "PUT",
+      body: body,
+      headers: {
+        "Content-Type": contentType,
+      },
+    });
+
+    const response = await fetch(signedRequest.url, signedRequest);
+    if (!response.ok)
+      throw new Error(`Failed to upload to S3: ${response.statusText}`);
   }
 }

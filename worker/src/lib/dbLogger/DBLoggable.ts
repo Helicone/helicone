@@ -644,17 +644,23 @@ export class DBLoggable {
     if (!responseResult.data || responseResult.error) {
       // Log the error in S3
       if (S3_ENABLED === "true") {
-        const s3Result = await db.s3Client.storeRequestResponseImage(
-          authParams.organizationId,
-          this.request.requestId,
-          requestResult.data.body,
-          JSON.stringify({
-            helicone_error: "error getting response, " + responseResult.error,
-            helicone_repsonse_body_as_string: (
-              await this.response.getResponseBody()
-            ).body,
-          })
-        );
+        let s3Result: Result<string, string>;
+
+        //TODO: check if it's vision/dalle model and save image
+        if (requestResult.data.body) {
+        } else {
+          s3Result = await db.s3Client.storeRequestResponseImage(
+            authParams.organizationId,
+            this.request.requestId,
+            requestResult.data.body,
+            JSON.stringify({
+              helicone_error: "error getting response, " + responseResult.error,
+              helicone_repsonse_body_as_string: (
+                await this.response.getResponseBody()
+              ).body,
+            })
+          );
+        }
 
         if (s3Result.error) {
           console.error("Error storing request response", s3Result.error);
