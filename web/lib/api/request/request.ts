@@ -58,6 +58,7 @@ export interface HeliconeRequest {
   feedback_rating?: boolean | null;
   signed_body_url?: string | null;
   llmSchema: LlmSchema | null;
+  country_code: string | null;
 }
 
 export async function getRequests(

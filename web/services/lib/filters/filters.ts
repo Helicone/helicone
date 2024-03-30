@@ -135,6 +135,7 @@ const whereKeyMappings: KeyMappings = {
     model: "request.model",
     modelOverride: "request.model_override",
     path: "request.path",
+    country_code: "request.country_code",
   }),
   response: easyKeyMappings<"response">({
     body_completion:

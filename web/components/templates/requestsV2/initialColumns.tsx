@@ -6,6 +6,7 @@ import StatusBadge from "./statusBadge";
 import { HandThumbDownIcon, HandThumbUpIcon } from "@heroicons/react/24/solid";
 import { clsx } from "../../shared/clsx";
 import CostPill from "./costPill";
+import { COUTNRY_CODE_DIRECTORY } from "./countryCodeDirectory";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -178,6 +179,27 @@ export const getInitialColumns: (
           ) : (
             <HandThumbDownIcon className="h-5 w-5 inline" />
           )}
+        </span>
+      );
+    },
+  },
+  {
+    id: "country",
+    accessorKey: "countryCode",
+    header: "Country",
+    cell: (info) => {
+      const countryCode = info.getValue();
+      const country = COUTNRY_CODE_DIRECTORY.find(
+        (c) => c.isoCode === countryCode
+      );
+
+      if (country === undefined) {
+        return <span></span>;
+      }
+
+      return (
+        <span className="text-gray-900 dark:text-gray-100 font-medium">
+          {country.emojiFlag} {country.country} ({country.isoCode})
         </span>
       );
     },
