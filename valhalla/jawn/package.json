@@ -2,7 +2,7 @@
   "name": "jawn",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "build": "tsc --experimentalDecorators",
+    "build": "tsc",
     "serve": "node dist/index.js",
     "dev": "nodemon --config nodemon.jawn.json",
     "test:jawn": "npx jest --config packages/jawn/jest.config.js --detectOpenHandles"
