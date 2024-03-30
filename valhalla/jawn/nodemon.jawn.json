@@ -2,7 +2,7 @@
   "watch": ["src/**/*", "src/**/*", "src/schema/openapi.yml"],
 
   "ext": "ts,tsx,js,json",
-  "exec": "openapi-typescript src/schema/openapi.yml --output ../../../worker/src/lib/db/valhalla.types.ts && openapi-typescript src/schema/openapi.yml --output src/schema/types.d.ts && ts-node src/index.ts",
+  "exec": "openapi-typescript src/schema/openapi.yml --output ../../../worker/src/lib/db/valhalla.types.ts && openapi-typescript src/schema/openapi.yml --output src/schema/types.d.ts && ts-node src/index.ts --experimentalDecorators",
   "ignore": ["node_modules/*", "src/schema/types.d.ts"],
   "delay": "1000"
 }
