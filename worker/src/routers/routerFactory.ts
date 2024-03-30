@@ -9,9 +9,9 @@ import { RequestWrapper } from "../lib/RequestWrapper";
 import { getAnthropicProxyRouter } from "./anthropicProxyRouter";
 import { getAPIRouter } from "./api/apiRouter";
 import { getOpenAIProxyRouter } from "./openaiProxyRouter";
-import { handleFeedback } from "../feedback";
+import { handleFeedback } from "../lib/managers/FeedbackManager";
 import { getGatewayAPIRouter } from "./gatewayRouter";
-import { handleLoggingEndpoint } from "../properties";
+import { handleLoggingEndpoint } from "../lib/managers/PropertiesManager";
 
 export type BaseRouter = RouterType<
   Route,
