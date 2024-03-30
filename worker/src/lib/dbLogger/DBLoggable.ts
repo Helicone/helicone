@@ -743,6 +743,7 @@ const MAX_USER_ID_LENGTH = 7000;
 
 // Replaces all the image_url that is not a url or not { url: url }  with
 // { unsupported_image: true }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function unsupportedImage(body: any): any {
   if (typeof body !== "object" || body === null) {
     return body;
@@ -768,6 +769,7 @@ function unsupportedImage(body: any): any {
       body.image_url = notSupportMessage;
     }
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result: any = {};
   for (const key in body) {
     result[key] = unsupportedImage(body[key]);
@@ -831,7 +833,9 @@ export async function logRequest(
     }
 
     const getModelFromRequest = () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (requestBody && (requestBody as any).model) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return (requestBody as any).model;
       }
 
@@ -846,8 +850,10 @@ export async function logRequest(
     const body = request.omitLog
       ? {
           model:
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (requestBody as any).model !== "undefined"
-              ? (requestBody as any).model
+              ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (requestBody as any).model
               : null,
         }
       : unsupportedImage(requestBody);
