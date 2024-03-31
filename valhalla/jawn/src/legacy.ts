@@ -160,13 +160,6 @@ legacyRouter.options("*", (req, res) => {
   res.sendStatus(200);
 });
 
-// app.use(
-//   OpenApiValidator.middleware({
-//     apiSpec: process.env.OPENAPI_SCHEMA_FILE ?? `${dirname}/schema/openapi.yml`,
-//     validateRequests: true,
-//   })
-// );
-
 legacyRouter.post(
   "/v1/key/generateHash",
   withAuth<

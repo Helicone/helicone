@@ -9,8 +9,6 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-ENV OPENAPI_SCHEMA_FILE=/usr/src/app/jawn/src/schema/openapi.yml
-
 #yarn workspace jawn serve
 ENV PORT=8585
 
