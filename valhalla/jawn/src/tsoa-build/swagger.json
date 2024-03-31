@@ -26,6 +26,13 @@
 							"Sad"
 						]
 					},
+					"status2": {
+						"type": "string",
+						"enum": [
+							"Happy",
+							"Sad"
+						]
+					},
 					"phoneNumbers": {
 						"items": {
 							"type": "string"
@@ -80,7 +87,7 @@
 		"contact": {}
 	},
 	"paths": {
-		"/v1/users/{userId}": {
+		"/users/{userId}": {
 			"get": {
 				"operationId": "GetUser",
 				"responses": {
@@ -120,7 +127,7 @@
 				]
 			}
 		},
-		"/v1/users": {
+		"/users": {
 			"post": {
 				"operationId": "CreateUser",
 				"responses": {

@@ -7,20 +7,25 @@ import {
   Post,
   Query,
   Route,
+  Security,
+  Request,
   SuccessResponse,
   Tags,
 } from "tsoa";
-import { User } from "./user";
-import { UsersService, UserCreationParams } from "./usersService";
+import { User } from "../models/user";
+import express from "express";
+import { UsersService, UserCreationParams } from "../services/usersService";
 
-@Route("v1/users")
+@Route("users")
 @Tags("User")
 export class UsersController extends Controller {
   @Get("{userId}")
   public async getUser(
     @Path() userId: number,
+    @Request() request: express.Request & { user: { id: number } },
     @Query() name?: string
   ): Promise<User> {
+    console.log("request", request.user);
     return new UsersService().get(userId, name);
   }
 

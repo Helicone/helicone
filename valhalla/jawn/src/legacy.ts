@@ -10,8 +10,7 @@ import express, {
 import morgan from "morgan";
 import { PostHog } from "posthog-node";
 import swaggerUi from "swagger-ui-express";
-import { RegisterRoutes } from "./build/routes";
-import * as swaggerDocument from "./build/swagger.json";
+
 import { hashAuth } from "./lib/db/hash";
 import { SupabaseConnector } from "./lib/db/supabase";
 import { FineTuningManager } from "./lib/managers/FineTuningManager";
@@ -23,7 +22,7 @@ import { paths } from "./schema/types";
 import {
   getTokenCountAnthropic,
   getTokenCountGPT3,
-} from "./tokens/tokenCounter";
+} from "./lib/tokens/tokenCounter";
 
 const ph_project_api_key = process.env.PUBLIC_POSTHOG_API_KEY;
 

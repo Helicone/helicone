@@ -14,8 +14,8 @@ import express, {
 import morgan from "morgan";
 import { PostHog } from "posthog-node";
 import swaggerUi from "swagger-ui-express";
-import { RegisterRoutes } from "./build/routes";
-import * as swaggerDocument from "./build/swagger.json";
+import { RegisterRoutes as registerTSOARoutes } from "./tsoa-build/routes";
+import * as swaggerDocument from "./tsoa-build/swagger.json";
 import { hashAuth } from "./lib/db/hash";
 import { SupabaseConnector } from "./lib/db/supabase";
 import { FineTuningManager } from "./lib/managers/FineTuningManager";
@@ -27,8 +27,9 @@ import { paths } from "./schema/types";
 import {
   getTokenCountAnthropic,
   getTokenCountGPT3,
-} from "./tokens/tokenCounter";
+} from "./lib/tokens/tokenCounter";
 import { legacyRouter } from "./legacy";
+import { authMiddleware } from "./middleware/auth";
 
 const app = express();
 
@@ -46,9 +47,13 @@ unAuthenticatedRouter.use(
   swaggerUi.setup(swaggerDocument)
 );
 
-app.use("/v1", v1APIRouter);
-app.use("/v1", unAuthenticatedRouter);
+v1APIRouter.use(authMiddleware);
+
+registerTSOARoutes(v1APIRouter);
+
+app.use(unAuthenticatedRouter);
 app.use(legacyRouter);
+app.use(v1APIRouter);
 
 const server = app.listen(
   parseInt(process.env.PORT ?? "8585"),
