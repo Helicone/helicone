@@ -1,15 +1,11 @@
 import * as Sentry from "@sentry/node";
-import { ProfilingIntegration } from "@sentry/profiling-node";
 import express, {
   ErrorRequestHandler,
   NextFunction,
   Request,
   Response,
-  urlencoded,
 } from "express";
-import morgan from "morgan";
 import { PostHog } from "posthog-node";
-import swaggerUi from "swagger-ui-express";
 
 import { hashAuth } from "./lib/db/hash";
 import { SupabaseConnector } from "./lib/db/supabase";
@@ -17,12 +13,7 @@ import { FineTuningManager } from "./lib/managers/FineTuningManager";
 import { withAuth } from "./lib/routers/withAuth";
 import { FilterNode } from "./lib/shared/filters/filterDefs";
 import { getRequests, getRequestsCached } from "./lib/shared/request/request";
-import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { paths } from "./schema/types";
-import {
-  getTokenCountAnthropic,
-  getTokenCountGPT3,
-} from "./lib/tokens/tokenCounter";
 
 const ph_project_api_key = process.env.PUBLIC_POSTHOG_API_KEY;
 
