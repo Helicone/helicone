@@ -4,7 +4,7 @@
     "start": "ts-node src/index.ts",
     "build": "tsc",
     "serve": "node dist/index.js",
-    "dev": "nodemon --config nodemon.jawn.json",
+    "dev": "nodemon",
     "test:jawn": "npx jest --config packages/jawn/jest.config.js --detectOpenHandles"
   },
   "version": "1.0.0",
