@@ -48,39 +48,6 @@ export const ENVIRONMENT = process.env.VERCEL_ENV ?? "development";
 
 export const legacyRouter = express.Router();
 
-if (ENVIRONMENT !== "production") {
-  legacyRouter.get("/run-loops/:index", async (req, res) => {
-    const index = parseInt(req.params.index);
-    await runLoopsOnce(index);
-    res.json({
-      status: "done",
-    });
-  });
-}
-
-Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  integrations: [
-    // enable HTTP calls tracing
-    new Sentry.Integrations.Http({ tracing: true }),
-    // enable Express.js middleware tracing
-    new Sentry.Integrations.Express({ app: legacyRouter }),
-    new ProfilingIntegration(),
-  ],
-  // Performance Monitoring
-  tracesSampleRate: 1.0, //  Capture 100% of the transactions
-  // Set sampling rate for profiling - this is relative to tracesSampleRate
-  profilesSampleRate: 1.0,
-});
-
-legacyRouter.use(Sentry.Handlers.requestHandler());
-legacyRouter.use(Sentry.Handlers.tracingHandler());
-legacyRouter.use(Sentry.Handlers.errorHandler());
-
-legacyRouter.get("/debug-sentry", function mainHandler(req, res) {
-  throw new Error("My first Sentry error!");
-});
-
 legacyRouter.use(express.json({ limit: "50mb" }));
 legacyRouter.use(express.urlencoded({ limit: "50mb" }));
 
@@ -110,7 +77,6 @@ legacyRouter.use(
     ].join(" ");
   })
 );
-legacyRouter.use(express.json()); // for parsing application/json
 
 legacyRouter.use(errorHandler);
 const allowedOriginsEnv = {

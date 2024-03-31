@@ -30,6 +30,8 @@ import {
 } from "./lib/tokens/tokenCounter";
 import { legacyRouter } from "./legacy";
 import { authMiddleware } from "./middleware/auth";
+import { initSentry } from "./utils/injectSentry";
+import { initLogs } from "./utils/injectLogs";
 
 export const ENVIRONMENT = process.env.VERCEL_ENV ?? "development";
 
@@ -38,6 +40,19 @@ if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
 }
 
 const app = express();
+
+if (ENVIRONMENT !== "production") {
+  app.get("/run-loops/:index", async (req, res) => {
+    const index = parseInt(req.params.index);
+    await runLoopsOnce(index);
+    res.json({
+      status: "done",
+    });
+  });
+}
+
+initSentry(app);
+initLogs(app);
 app.use(legacyRouter);
 
 const v1APIRouter = express.Router();
@@ -49,7 +64,8 @@ unAuthenticatedRouter.use(
 );
 
 v1APIRouter.use(authMiddleware);
-
+v1APIRouter.use(express.json({ limit: "50mb" }));
+v1APIRouter.use(express.urlencoded({ limit: "50mb" }));
 registerTSOARoutes(v1APIRouter);
 
 app.use(unAuthenticatedRouter);
