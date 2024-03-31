@@ -31,13 +31,14 @@ import {
 import { legacyRouter } from "./legacy";
 import { authMiddleware } from "./middleware/auth";
 
-const app = express();
-
 export const ENVIRONMENT = process.env.VERCEL_ENV ?? "development";
 
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
 }
+
+const app = express();
+app.use(legacyRouter);
 
 const v1APIRouter = express.Router();
 const unAuthenticatedRouter = express.Router();
@@ -52,7 +53,7 @@ v1APIRouter.use(authMiddleware);
 registerTSOARoutes(v1APIRouter);
 
 app.use(unAuthenticatedRouter);
-app.use(legacyRouter);
+
 app.use(v1APIRouter);
 
 const server = app.listen(

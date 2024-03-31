@@ -33,7 +33,7 @@ export const authMiddleware = async (
       return;
     }
 
-    (req as any).authParamts = authParams.data;
+    (req as any).authParams = authParams.data;
     next();
   } catch (error) {
     res.status(400).send("Invalid token.");
