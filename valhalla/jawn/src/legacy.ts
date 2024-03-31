@@ -14,6 +14,10 @@ import { withAuth } from "./lib/routers/withAuth";
 import { FilterNode } from "./lib/shared/filters/filterDefs";
 import { getRequests, getRequestsCached } from "./lib/shared/request/request";
 import { paths } from "./schema/types";
+import {
+  getTokenCountAnthropic,
+  getTokenCountGPT3,
+} from "./lib/tokens/tokenCounter";
 
 const ph_project_api_key = process.env.PUBLIC_POSTHOG_API_KEY;
 
@@ -567,4 +571,19 @@ legacyRouter.post(
     }
   })
 );
+
+legacyRouter.post("/v1/tokens/anthropic", async (req, res) => {
+  const body = req.body;
+  const content = body?.content;
+  const tokens = await getTokenCountAnthropic(content ?? "");
+  res.json({ tokens });
+});
+
+legacyRouter.post("/v1/tokens/gpt3", async (req, res) => {
+  const body = req.body;
+  const content = body?.content;
+  const tokens = await getTokenCountGPT3(content ?? "");
+  res.json({ tokens });
+});
+
 postHogClient?.shutdown(); // new
