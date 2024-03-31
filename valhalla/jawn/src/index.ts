@@ -20,6 +20,12 @@ if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
 
 const app = express();
 
+app.get("/healthcheck", (req, res) => {
+  res.json({
+    status: "healthy :)",
+  });
+});
+
 if (ENVIRONMENT !== "production") {
   app.get("/run-loops/:index", async (req, res) => {
     const index = parseInt(req.params.index);
