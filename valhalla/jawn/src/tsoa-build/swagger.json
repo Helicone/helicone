@@ -26,6 +26,13 @@
 							"Sad"
 						]
 					},
+					"status2": {
+						"type": "string",
+						"enum": [
+							"Happy",
+							"Sad"
+						]
+					},
 					"phoneNumbers": {
 						"items": {
 							"type": "string"
@@ -41,35 +48,15 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"Pick_User.email-or-name-or-phoneNumbers_": {
-				"properties": {
-					"email": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"phoneNumbers": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"email",
-					"name",
-					"phoneNumbers"
-				],
-				"type": "object",
-				"description": "From T, pick a set of properties whose keys are in the union K"
-			},
-			"UserCreationParams": {
-				"$ref": "#/components/schemas/Pick_User.email-or-name-or-phoneNumbers_"
 			}
 		},
-		"securitySchemes": {}
+		"securitySchemes": {
+			"api_key": {
+				"type": "apiKey",
+				"name": "authorization",
+				"in": "header"
+			}
+		}
 	},
 	"info": {
 		"title": "jawn",
@@ -98,7 +85,11 @@
 				"tags": [
 					"User"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -131,15 +122,17 @@
 				"tags": [
 					"User"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
 					"content": {
 						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/UserCreationParams"
-							}
+							"schema": {}
 						}
 					}
 				}
