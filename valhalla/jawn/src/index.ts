@@ -2,25 +2,32 @@ require("dotenv").config({
   path: "./.env",
 });
 
-import express from "express";
 import * as Sentry from "@sentry/node";
 import { ProfilingIntegration } from "@sentry/profiling-node";
-import * as OpenApiValidator from "express-openapi-validator";
+import express, {
+  ErrorRequestHandler,
+  NextFunction,
+  Request,
+  Response,
+  urlencoded,
+} from "express";
 import morgan from "morgan";
+import { PostHog } from "posthog-node";
+import swaggerUi from "swagger-ui-express";
+import { RegisterRoutes } from "./build/routes";
+import * as swaggerDocument from "./build/swagger.json";
+import { hashAuth } from "./lib/db/hash";
+import { SupabaseConnector } from "./lib/db/supabase";
+import { FineTuningManager } from "./lib/managers/FineTuningManager";
+import { withAuth } from "./lib/routers/withAuth";
+import { FilterNode } from "./lib/shared/filters/filterDefs";
+import { getRequests, getRequestsCached } from "./lib/shared/request/request";
+import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { paths } from "./schema/types";
 import {
   getTokenCountAnthropic,
   getTokenCountGPT3,
 } from "./tokens/tokenCounter";
-import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
-import { withAuth } from "./lib/routers/withAuth";
-import { getRequests, getRequestsCached } from "./lib/shared/request/request";
-import { FineTuningManager } from "./lib/managers/FineTuningManager";
-import { PostHog } from "posthog-node";
-import { hashAuth } from "./lib/db/hash";
-import { FilterNode } from "./lib/shared/filters/filterDefs";
-import { SupabaseConnector } from "./lib/db/supabase";
-import { runLoopsOnce, runMainLoops } from "./mainLoops";
 
 const ph_project_api_key = process.env.PUBLIC_POSTHOG_API_KEY;
 
@@ -163,12 +170,12 @@ app.options("*", (req, res) => {
   res.sendStatus(200);
 });
 
-app.use(
-  OpenApiValidator.middleware({
-    apiSpec: process.env.OPENAPI_SCHEMA_FILE ?? `${dirname}/schema/openapi.yml`,
-    validateRequests: true,
-  })
-);
+// app.use(
+//   OpenApiValidator.middleware({
+//     apiSpec: process.env.OPENAPI_SCHEMA_FILE ?? `${dirname}/schema/openapi.yml`,
+//     validateRequests: true,
+//   })
+// );
 
 app.post(
   "/v1/key/generateHash",
@@ -665,6 +672,16 @@ app.get("/healthcheck", (req, res) => {
     status: "healthy :)",
   });
 });
+
+app.use(
+  urlencoded({
+    extended: true,
+  })
+);
+// app.use(json());
+
+RegisterRoutes(app);
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const server = app.listen(
   parseInt(process.env.PORT ?? "8585"),
