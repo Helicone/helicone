@@ -21,20 +21,20 @@ export class AsyncHeartBeat implements IHeartBeat {
 
 const providerRequest = {
   providerRequest: {
-    url: "ligma.com",
+    url: "test.com",
     json: {
       model: "gpt-3",
-      prompt: "ligma",
+      prompt: "test3",
     },
     meta: {
-      "Helicone-User-Id": "ligma",
-      "Helicone-Property-daf": "ligma",
+      "Helicone-User-Id": "test1",
+      "Helicone-Property-daf": "test2",
     },
   },
   providerResponse: {
     json: {
       id: "cmpl-7VUOT5k59aStnqxxXJwtyGnZibv1e",
-      model: "llama-2",
+      model: "gpt-4",
       usage: {
         total_tokens: 16,
         prompt_tokens: 14,
@@ -53,7 +53,7 @@ const providerRequest = {
     },
     status: 200,
     headers: {
-      "openai-version": "ligmaligma",
+      "openai-version": "someversion",
     },
   },
   timing: {
