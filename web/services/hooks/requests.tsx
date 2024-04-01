@@ -5,9 +5,11 @@ import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
 import { getHeliconeCookie } from "../../lib/cookies";
 import { useOrg } from "../../components/layout/organizationContext";
+import { useJawnClient } from "../../lib/clients/jawnHook";
 
 const useGetRequest = (requestId: string) => {
   const org = useOrg();
+  const jawn = useJawnClient();
   const { data, isLoading } = useQuery({
     queryKey: ["requestData", requestId, org?.currentOrg?.id],
     queryFn: async (query) => {
@@ -20,6 +22,29 @@ const useGetRequest = (requestId: string) => {
         };
       }
       const authFromCookie = getHeliconeCookie();
+      const response_2 = await jawn.POST("/v1/request/v2/query", {
+        body: {
+          filter: {
+            left: {
+              request: {
+                id: {
+                  equals: requestId,
+                },
+              },
+            },
+            operator: "and",
+            right: "all",
+          },
+          isCached: false,
+          limit: 1,
+          offset: 0,
+          sort: {
+            created_at: "desc",
+          },
+        },
+      });
+      const x = response_2.data?.data;
+      console.log(x);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/request/query`,
         {
@@ -90,6 +115,7 @@ const useGetRequests = (
   isLive: boolean = false
 ) => {
   const org = useOrg();
+  const jawn = useJawnClient();
   return {
     requests: useQuery({
       queryKey: [
@@ -115,6 +141,17 @@ const useGetRequests = (
           };
         }
         const authFromCookie = getHeliconeCookie();
+        const response_2 = await jawn.POST("/v1/request/v2/query", {
+          body: {
+            filter: advancedFilter as any,
+            offset: (currentPage - 1) * currentPageSize,
+            limit: currentPageSize,
+            sort: sortLeaf as any,
+            isCached: isCached as any,
+          },
+        });
+        const x = response_2.data?.data;
+        console.log(x);
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/request/query`,
           {

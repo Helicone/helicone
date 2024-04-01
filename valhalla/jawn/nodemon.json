@@ -1,5 +1,5 @@
 {
-  "exec": "tsoa spec-and-routes && ts-node src/index.ts",
+  "exec": "tsoa spec-and-routes && npx openapi-typescript  src/tsoa-build/swagger.json -o ../../web/lib/clients/jawnTypes.ts && ts-node src/index.ts ",
   "watch": ["src"],
   "ignore": ["src/tsoa-build"],
   "ext": "ts"

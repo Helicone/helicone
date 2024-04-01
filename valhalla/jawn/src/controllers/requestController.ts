@@ -9,10 +9,10 @@ import { JawnAuthenticatedRequest } from "../types/request";
 
 export interface RequestQueryParams {
   filter: FilterNode;
-  offset: number;
-  limit: number;
-  sort: SortLeafRequest;
-  isCached: boolean;
+  offset?: number;
+  limit?: number;
+  sort?: SortLeafRequest;
+  isCached?: boolean;
 }
 
 @Route("v1/request/v2")

@@ -1140,11 +1140,7 @@
 					}
 				},
 				"required": [
-					"filter",
-					"offset",
-					"limit",
-					"sort",
-					"isCached"
+					"filter"
 				],
 				"type": "object",
 				"additionalProperties": false
