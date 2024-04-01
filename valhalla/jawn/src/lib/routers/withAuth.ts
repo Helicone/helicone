@@ -5,7 +5,7 @@ import {
 import { SupabaseConnector } from "../db/supabase";
 import { RequestWrapper } from "../requestWrapper";
 import { IRouterWrapperAuth } from "./iRouterWrapper";
-const supabaseClient = new SupabaseConnector();
+export const supabaseClient = new SupabaseConnector();
 
 class AuthError extends Error {
   constructor(message: string, trace: string) {
