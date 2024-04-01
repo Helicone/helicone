@@ -3,11 +3,11 @@ import { Database } from "../../../supabase/database.types";
 import { RequestWrapper } from "../../lib/RequestWrapper";
 import { Job, isValidStatus, validateRun } from "../../lib/models/Runs";
 import { HeliconeNode, validateHeliconeNode } from "../../lib/models/Tasks";
-import { validateAlertCreate } from "../../lib/validators/alertValidators";
+import { validateAlertCreate } from "../../lib/util/validators/alertValidators";
 
 import { OpenAPIRouterType } from "@cloudflare/itty-router-openapi";
 import { Route } from "itty-router";
-import { logAsync } from "../../api/helpers/logAsync";
+import { logAsync } from "../../lib/managers/AsyncLogManager";
 import { createAPIClient } from "../../api/lib/apiClient";
 import { CustomerGet } from "../../api/routes/customer-portal/customer/get";
 import { ProviderKeyGet } from "../../api/routes/customer-portal/customer/provderKey/get";

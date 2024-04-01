@@ -1,12 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env } from "../..";
 import { Database } from "../../../supabase/database.types";
-import { DBWrapper, HeliconeAuth } from "../../db/DBWrapper";
+import { DBWrapper, HeliconeAuth } from "../../lib/db/DBWrapper";
 import { RequestWrapper } from "../../lib/RequestWrapper";
-import { ClickhouseClientWrapper } from "../../lib/db/clickhouse";
+import { ClickhouseClientWrapper } from "../../lib/db/ClickhouseWrapper";
 import { Valhalla } from "../../lib/db/valhalla";
-import { RequestResponseStore } from "../../lib/dbLogger/RequestResponseStore";
-import { DBQueryTimer } from "../../db/DBQueryTimer";
+import { RequestResponseStore } from "../../lib/db/RequestResponseStore";
+import { DBQueryTimer } from "../../lib/util/loggers/DBQueryTimer";
 
 class InternalResponse {
   constructor(private client: APIClient) {}

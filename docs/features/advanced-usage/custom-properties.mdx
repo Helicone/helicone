@@ -55,18 +55,18 @@ openai.Completion.create(
 ```
 
 ```js Node.js
-import { Configuration, OpenAIApi } from "openai";
-const configuration = new Configuration({
+import { OpenAI } from "openai";
+const configuration = {
   apiKey: process.env.OPENAI_API_KEY,
   basePath: "https://oai.hconeai.com/v1",
   defaultHeaders: {
-    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+    "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
     "Helicone-Property-Session": "24",
     "Helicone-Property-Conversation": "support_issue_2",
     "Helicone-Property-App": "mobile",
   },
-});
-const openai = new OpenAIApi(configuration);
+};
+const openai = new OpenAI(configuration);
 ```
 
 ```python Langchain (Python)

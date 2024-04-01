@@ -2,22 +2,24 @@ import { Headers } from "@cloudflare/workers-types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
 import { Database, Json } from "../../../supabase/database.types";
-import { DBWrapper } from "../../db/DBWrapper";
-import { withTimeout } from "../../helpers";
-import { Result, err, ok } from "../../results";
-import { HeliconeHeaders } from "../HeliconeHeaders";
-import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
+import { DBWrapper } from "../db/DBWrapper";
+import { withTimeout } from "../util/helpers";
+import { Result, err, ok } from "../util/results";
+import { HeliconeHeaders } from "../models/HeliconeHeaders";
+import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 import { RequestWrapper } from "../RequestWrapper";
-import { INTERNAL_ERRORS } from "../constants";
-import { ClickhouseClientWrapper } from "../db/clickhouse";
+import { INTERNAL_ERRORS } from "../util/constants";
 import { AsyncLogModel } from "../models/AsyncLog";
-import { logInClickhouse } from "./clickhouseLog";
-import { RequestResponseStore } from "./RequestResponseStore";
-import { logRequest } from "./logResponse";
-import { anthropicAIStream, getModel } from "./parsers/anthropicStreamParser";
-import { parseOpenAIStream } from "./parsers/openAIStreamParser";
-import { getTokenCount } from "./tokenCounter";
-import { S3Client } from "../../db/S3Client";
+import { logInClickhouse } from "../db/ClickhouseStore";
+import { RequestResponseStore } from "../db/RequestResponseStore";
+import {
+  anthropicAIStream,
+  getModel,
+} from "./streamParsers/anthropicStreamParser";
+import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
+import { getTokenCount } from "../clients/TokenCounterClient";
+import { S3Client } from "../clients/S3Client";
+import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 
 export interface DBLoggableProps {
   response: {
@@ -49,6 +51,7 @@ export interface DBLoggableProps {
     threat: boolean | null;
     flaggedForModeration: boolean | null;
     request_ip: string | null;
+    country_code: string | null;
   };
   timing: {
     startTime: Date;
@@ -87,8 +90,8 @@ export function dbLoggableRequestFromProxyRequest(
     heliconeTemplate: proxyRequest.heliconePromptTemplate ?? undefined,
     threat: proxyRequest.threat ?? null,
     flaggedForModeration: proxyRequest.flaggedForModeration ?? null,
-    request_ip:
-      proxyRequest.requestWrapper.headers.get("CF-Connecting-IP") ?? null,
+    request_ip: null,
+    country_code: (proxyRequest.requestWrapper.cf?.country as string) ?? null,
   };
 }
 
@@ -151,6 +154,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       threat: null,
       flaggedForModeration: null,
       request_ip: null,
+      country_code: (requestWrapper.cf?.country as string) ?? null,
     },
     response: {
       responseId: crypto.randomUUID(),
@@ -572,13 +576,16 @@ export class DBLoggable {
   isSuccessResponse = (status: number | undefined | null): boolean =>
     status != null && status >= 200 && status <= 299;
 
-  async log(db: {
-    supabase: SupabaseClient<Database>; // TODO : Deprecate
-    dbWrapper: DBWrapper;
-    clickhouse: ClickhouseClientWrapper;
-    queue: RequestResponseStore;
-    s3Client: S3Client;
-  }): Promise<Result<null, string>> {
+  async log(
+    db: {
+      supabase: SupabaseClient<Database>; // TODO : Deprecate
+      dbWrapper: DBWrapper;
+      clickhouse: ClickhouseClientWrapper;
+      queue: RequestResponseStore;
+      s3Client: S3Client;
+    },
+    S3_ENABLED: Env["S3_ENABLED"]
+  ): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
       return err(`Auth failed! ${error}` ?? "Helicone organization not found");
@@ -638,35 +645,39 @@ export class DBLoggable {
     // If no data or error, return
     if (!responseResult.data || responseResult.error) {
       // Log the error in S3
-      const s3Result = await db.s3Client.storeRequestResponse(
-        authParams.organizationId,
-        this.request.requestId,
-        requestResult.data.body,
-        JSON.stringify({
-          helicone_error: "error getting response, " + responseResult.error,
-          helicone_repsonse_body_as_string: (
-            await this.response.getResponseBody()
-          ).body,
-        })
-      );
+      if (S3_ENABLED === "true") {
+        const s3Result = await db.s3Client.storeRequestResponse(
+          authParams.organizationId,
+          this.request.requestId,
+          requestResult.data.body,
+          JSON.stringify({
+            helicone_error: "error getting response, " + responseResult.error,
+            helicone_repsonse_body_as_string: (
+              await this.response.getResponseBody()
+            ).body,
+          })
+        );
 
-      if (s3Result.error) {
-        console.error("Error storing request response", s3Result.error);
+        if (s3Result.error) {
+          console.error("Error storing request response", s3Result.error);
+        }
       }
 
       return responseResult;
     }
 
-    const s3Result = await db.s3Client.storeRequestResponse(
-      authParams.organizationId,
-      this.request.requestId,
-      requestResult.data.body,
-      responseResult.data.body
-    );
+    if (S3_ENABLED === "true") {
+      const s3Result = await db.s3Client.storeRequestResponse(
+        authParams.organizationId,
+        this.request.requestId,
+        requestResult.data.body,
+        responseResult.data.body
+      );
 
-    if (s3Result.error) {
-      console.error("Error storing request response", s3Result.error);
-      // Continue logging to clickhouse
+      if (s3Result.error) {
+        console.error("Error storing request response", s3Result.error);
+        // Continue logging to clickhouse
+      }
     }
 
     await logInClickhouse(
@@ -725,5 +736,217 @@ export class DBLoggable {
     }
 
     return ok(null);
+  }
+}
+
+const MAX_USER_ID_LENGTH = 7000;
+
+// Replaces all the image_url that is not a url or not { url: url }  with
+// { unsupported_image: true }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function unsupportedImage(body: any): any {
+  if (typeof body !== "object" || body === null) {
+    return body;
+  }
+  if (Array.isArray(body)) {
+    return body.map((item) => unsupportedImage(item));
+  }
+  const notSupportMessage = {
+    helicone_message:
+      "Storing images as bytes is currently not supported within Helicone.",
+  };
+  if (body["image_url"] !== undefined) {
+    const imageUrl = body["image_url"];
+    if (typeof imageUrl === "string" && !imageUrl.startsWith("http")) {
+      body.image_url = notSupportMessage;
+    }
+    if (
+      typeof imageUrl === "object" &&
+      imageUrl.url !== undefined &&
+      typeof imageUrl.url === "string" &&
+      !imageUrl.url.startsWith("http")
+    ) {
+      body.image_url = notSupportMessage;
+    }
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result: any = {};
+  for (const key in body) {
+    result[key] = unsupportedImage(body[key]);
+  }
+  return result;
+}
+
+export async function logRequest(
+  request: DBLoggableProps["request"],
+  responseId: string,
+  dbClient: SupabaseClient<Database>,
+  insertQueue: RequestResponseStore,
+  authParams: AuthParams
+): Promise<
+  Result<
+    {
+      request: Database["public"]["Tables"]["request"]["Row"];
+      properties: Database["public"]["Tables"]["properties"]["Insert"][];
+      node: {
+        id: string | null;
+        job: string | null;
+      };
+      body: string; // For S3 storage
+    },
+    string
+  >
+> {
+  try {
+    if (!authParams.organizationId) {
+      return { data: null, error: "Helicone organization not found" };
+    }
+
+    let bodyText = request.bodyText ?? "{}";
+    bodyText = bodyText.replace(/\\u0000/g, ""); // Remove unsupported null character in JSONB
+
+    let requestBody = {
+      error: `error parsing request body: ${bodyText}`,
+    };
+    try {
+      requestBody = JSON.parse(bodyText ?? "{}");
+    } catch (e) {
+      console.error("Error parsing request body", e);
+    }
+
+    let truncatedUserId = request.userId ?? "";
+
+    if (truncatedUserId.length > MAX_USER_ID_LENGTH) {
+      truncatedUserId =
+        truncatedUserId.substring(0, MAX_USER_ID_LENGTH) + "...";
+    }
+
+    const jobNode = request.nodeId
+      ? await dbClient
+          .from("job_node")
+          .select("*")
+          .eq("id", request.nodeId)
+          .single()
+      : null;
+    if (jobNode && jobNode.error) {
+      return { data: null, error: `No task found for id ${request.nodeId}` };
+    }
+
+    const getModelFromRequest = () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (requestBody && (requestBody as any).model) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (requestBody as any).model;
+      }
+
+      const modelFromPath = getModelFromPath(request.path);
+      if (modelFromPath) {
+        return modelFromPath;
+      }
+
+      return null;
+    };
+
+    const body = request.omitLog
+      ? {
+          model:
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (requestBody as any).model !== "undefined"
+              ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (requestBody as any).model
+              : null,
+        }
+      : unsupportedImage(requestBody);
+
+    const createdAt = request.startTime ?? new Date();
+    const requestData = {
+      id: request.requestId,
+      path: request.path,
+      body: body, // TODO: Remove in favor of S3 storage
+      auth_hash: "",
+      user_id: request.userId ?? null,
+      prompt_id: request.promptId ?? null,
+      properties: request.properties,
+      formatted_prompt_id: null,
+      prompt_values: null,
+      helicone_user: authParams.userId ?? null,
+      helicone_api_key_id: authParams.heliconeApiKeyId ?? null,
+      helicone_org_id: authParams.organizationId,
+      provider: request.provider,
+      helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
+      model: getModelFromRequest(),
+      model_override: request.modelOverride ?? null,
+      created_at: createdAt.toISOString(),
+      threat: request.threat ?? null,
+      target_url: request.targetUrl,
+      request_ip: null,
+      country_code: request.country_code,
+    };
+
+    const customPropertyRows = Object.entries(request.properties).map(
+      (entry) => ({
+        request_id: request.requestId,
+        auth_hash: null,
+        user_id: null,
+        key: entry[0],
+        value: entry[1],
+        created_at: createdAt.toISOString(),
+      })
+    );
+
+    const requestResult = await insertQueue.addRequest(
+      requestData,
+      customPropertyRows,
+      responseId
+    );
+
+    if (requestResult.error) {
+      return { data: null, error: requestResult.error };
+    }
+    if (jobNode && jobNode.data) {
+      const jobNodeResult = await insertQueue.addRequestNodeRelationship(
+        jobNode.data.job,
+        jobNode.data.id,
+        request.requestId
+      );
+      if (jobNodeResult.error) {
+        return {
+          data: null,
+          error: `Node Relationship error: ${jobNodeResult.error}`,
+        };
+      }
+    }
+
+    return {
+      data: {
+        request: requestData,
+        properties: customPropertyRows,
+        node: {
+          id: jobNode?.data.id ?? null,
+          job: jobNode?.data.job ?? null,
+        },
+        body: body,
+      },
+      error: null,
+    };
+  } catch (e) {
+    return { data: null, error: JSON.stringify(e) };
+  }
+
+  function getModelFromPath(path: string) {
+    const regex1 = /\/engines\/([^/]+)/;
+    const regex2 = /models\/([^/:]+)/;
+
+    let match = path.match(regex1);
+
+    if (!match) {
+      match = path.match(regex2);
+    }
+
+    if (match && match[1]) {
+      return match[1];
+    } else {
+      return undefined;
+    }
   }
 }

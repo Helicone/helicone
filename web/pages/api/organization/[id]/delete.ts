@@ -22,7 +22,7 @@ async function handler({
       .update({
         soft_delete: true,
       })
-      .eq("id", id);
+      .eq("id", id || "");
 
     if (deleteRes.error) {
       res

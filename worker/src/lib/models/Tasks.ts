@@ -1,4 +1,4 @@
-import { Result } from "../../results";
+import { Result } from "../util/results";
 
 export interface HeliconeNode {
   name: string;

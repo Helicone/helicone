@@ -6,14 +6,16 @@ const S3_ACCESS_KEY = process.env.S3_ACCESS_KEY ?? "";
 const S3_SECRET_KEY = process.env.S3_SECRET_KEY ?? "";
 const S3_ENDPOINT = process.env.S3_ENDPOINT ?? "";
 const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME ?? "";
+const S3_ENABLED = (process.env.S3_ENABLED ?? "true") === "true";
 
 // S3 endpoint can be empty string
 if (
-  !S3_ACCESS_KEY ||
-  !S3_SECRET_KEY ||
-  S3_ENDPOINT === null ||
-  S3_ENDPOINT === undefined ||
-  !S3_BUCKET_NAME
+  S3_ENABLED &&
+  (!S3_ACCESS_KEY ||
+    !S3_SECRET_KEY ||
+    S3_ENDPOINT === null ||
+    S3_ENDPOINT === undefined ||
+    !S3_BUCKET_NAME)
 ) {
   throw new Error("S3 env variables not set");
 }
@@ -71,6 +73,6 @@ export class S3Client {
   }
 
   getRequestResponseKey = (requestId: string, orgId: string) => {
-    return `organizations/${orgId}/requests/${requestId}`;
+    return `organizations/${orgId}/requests/${requestId}/request_response_body`;
   };
 }

@@ -56,7 +56,7 @@ export class SupabaseServerWrapper<T> {
     const orgAccessCheck = await this.client
       .from("organization")
       .select("*")
-      .eq("id", this.ctx.req.cookies[ORG_ID_COOKIE_KEY]);
+      .eq("id", this.ctx.req.cookies[ORG_ID_COOKIE_KEY] || "");
 
     if (orgAccessCheck.data?.length === 0) {
       return ok({
@@ -94,7 +94,7 @@ export class SupabaseServerWrapper<T> {
       const memberCheck = await this.client
         .from("organization_member")
         .select("*")
-        .eq("member", user.data.user?.id)
+        .eq("member", user.data.user?.id ?? "")
         .eq("organization", orgId)
         .single();
 

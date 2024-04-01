@@ -1,0 +1,20 @@
+{
+  "entryFile": "src/index.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["src/controllers/**/*Controller.ts"],
+  "spec": {
+    "outputDirectory": "src/tsoa-build",
+    "specVersion": 3,
+    "securityDefinitions": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "authorization",
+        "in": "header"
+      }
+    }
+  },
+  "routes": {
+    "routesDir": "src/tsoa-build",
+    "authenticationModule": "./src/authentication.ts"
+  }
+}

@@ -39,11 +39,8 @@ export type AnyOperator =
   | SingleKey<TimestampOperators>
   | SingleKey<TimestampOperatorsTyped>
   | SingleKey<BooleanOperators>;
-export type SingleKey<T> = {
-  [K in keyof T]: Partial<{
-    [P in keyof T]: P extends K ? T[P] : never;
-  }>;
-}[keyof T];
+
+export type SingleKey<T> = Partial<T>;
 
 export type RequestTableToOperators = {
   prompt: SingleKey<TextOperators>;

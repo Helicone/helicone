@@ -5,12 +5,16 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from "..";
 import { Database } from "../../supabase/database.types";
-import { HeliconeAuth } from "../db/DBWrapper";
-import { Result, err, map, mapPostgrestErr, ok } from "../results";
-import { HeliconeHeaders } from "./HeliconeHeaders";
-import { checkLimits, checkLimitsSingle } from "./limits/check";
-import { getAndStoreInCache } from "./secureCache";
+import { HeliconeAuth } from "./db/DBWrapper";
+import { Result, err, map, mapPostgrestErr, ok } from "./util/results";
+import { HeliconeHeaders } from "./models/HeliconeHeaders";
+import {
+  checkLimits,
+  checkLimitsSingle,
+} from "./managers/UsageLimitManager.ts";
+import { getAndStoreInCache } from "./util/cache/secureCache";
 import { parseJSXObject } from "../api/lib/promptHelpers";
+import { CfProperties } from "@cloudflare/workers-types";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -26,6 +30,7 @@ export class RequestWrapper {
   headers: Headers;
   heliconeProxyKeyId: string | undefined;
   baseURLOverride: string | null;
+  cf: CfProperties | undefined;
 
   private cachedText: string | null = null;
   private bodyKeyOverride: object | null = null;
@@ -79,6 +84,7 @@ export class RequestWrapper {
     this.headers = this.mutatedAuthorizationHeaders(request);
     this.heliconeHeaders = new HeliconeHeaders(request.headers);
     this.baseURLOverride = null;
+    this.cf = request.cf;
   }
 
   static async create(

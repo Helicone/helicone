@@ -48,7 +48,6 @@
     "events": "^3.3.0",
     "itty-router": "^4.0.13",
     "node-gzip": "^1.1.2",
-    "package.json": "^2.0.1",
     "pg": "^8.11.2"
   }
 }
