@@ -89,6 +89,7 @@ export async function getRequests(
       THEN '{"helicone_message": "request body too large"}'::jsonb
       ELSE request.body::jsonb
     END AS request_body,
+    request.country_code as country_code,
     request.path AS request_path,
     request.user_id AS request_user_id,
     request.properties AS request_properties,
