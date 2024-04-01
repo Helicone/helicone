@@ -175,6 +175,7 @@ openai.completion("give me a random number") -> "17"
 ### Cache Response Headers
 
 When cache is enabled the following headers will be returned.
+
 ```ts
 helicone-cache:	"HIT" | "MISS"
 helicone-cache-bucket-idx: number
@@ -185,8 +186,8 @@ Ex extracting headers from python with OpenAI:
 ```python
 client = OpenAI(
     api_key="<OPENAI_API_KEY>",
-    base_url="http://oai.hconeai.com/v1",
-    default_headers={ 
+    base_url="https://oai.hconeai.com/v1",
+    default_headers={
         "Helicone-Auth": f"Bearer <API_KEY>",
     }
 )
@@ -212,4 +213,3 @@ cache_hit = chat_completion_raw.http_response.headers.get(
 print(cache_hit) # Will print "HIT" or "MISS"
 
 ```
-
