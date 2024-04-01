@@ -1,16 +1,19 @@
-import { FilterNode } from "../filters/filterDefs";
+import { FilterNode } from "../../shared/filters/filterDefs";
 import {
   buildFilterWithAuth,
   buildFilterWithAuthCacheHits,
   buildFilterWithAuthClickHouse,
-} from "../filters/filters";
-import { SortLeafRequest, buildRequestSort } from "../sorts/requests/sorts";
-import { Result, resultMap, ok } from "../result";
-import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
-import { LlmSchema } from "../requestResponseModel";
+} from "../../shared/filters/filters";
+import {
+  SortLeafRequest,
+  buildRequestSort,
+} from "../../shared/sorts/requests/sorts";
+import { Result, resultMap, ok } from "../../shared/result";
+import { dbExecute, dbQueryClickhouse } from "../../shared/db/dbExecute";
+import { LlmSchema } from "../../shared/requestResponseModel";
 import { Json } from "../../db/database.types";
 import { mapGeminiPro } from "./mappers";
-import { S3Client } from "../db/s3Client";
+import { S3Client } from "../../shared/db/s3Client";
 
 export type Provider =
   | "OPENAI"
@@ -21,6 +24,9 @@ export type Provider =
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
 export interface HeliconeRequest {
+  /**
+   * @example "Happy"
+   */
   response_id: string;
   response_created_at: string;
   response_body?: any;

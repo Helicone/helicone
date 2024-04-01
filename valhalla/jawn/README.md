@@ -1,6 +1,6 @@
 # Code overview
 
-This project is structured using the MVC (Model-View-Controller) pattern, with an emphasis on separating concerns to make the codebase easier to navigate and scale. Below is an overview of the main directories and their roles:
+Below is an overview of the main directories and their roles:
 
 ```
 src/
@@ -10,8 +10,8 @@ src/
 |-- models/
 |   |-- userModel.ts
 |   `-- anotherModel.ts
-|-- services/
-|   |-- userService.ts
+|-- managers/
+|   |-- userManager.ts
 |   `-- anotherService.ts
 |-- middleware/
 |   |-- authMiddleware.ts
@@ -24,7 +24,7 @@ src/
 
 - `controllers/`: Contains all the route handlers for each REST object, orchestrating the application's response to client requests.
 - `models/`: Defines the data models of the application, representing the structure of the data within the database.
-- `services/`: Houses the business logic of the application, interacting with models to process data and handle application-specific tasks.
+- `managers/`: Houses the business logic of the application, interacting with models to process data and handle application-specific tasks.
 - `middleware/`: Stores Express middleware functions, including authentication (e.g., JWT verification) and error handling.
 - `types/`: Contains custom TypeScript type definitions and interfaces that don't fit directly into models but are used across multiple parts of the application.
 - `utils/`: Includes utility functions and helper methods, providing common functionality that can be reused throughout the application.
@@ -60,23 +60,6 @@ The `lib` directory contains core components that support the application's oper
   }
   ```
 
-- `lib/managers/`: Coordinate operations and the flow of data between components. They oversee high-level business logic and data processing, such as an `AlertManager` managing the lifecycle of alerts from retrieval to processing.
-
-  ```typescript
-  class AlertManager {
-    private alertStore: AlertStore;
-
-    constructor(alertStore: AlertStore) {
-      this.alertStore = alertStore;
-    }
-
-    async processAlerts() {
-      const alerts = await this.alertStore.getAlerts();
-      // Process alerts
-    }
-  }
-  ```
-
 - `lib/clients/`: Facilitate interaction with external services or resources, such as an `S3Client` handling file operations with AWS S3.
 
   ```typescript
@@ -92,3 +75,7 @@ The `lib` directory contains core components that support the application's oper
   ```
 
 These components are designed to be reusable and modular, promoting a clean architecture and separation of concerns within the application.
+
+# Creating a new endpoint
+
+Each endpoint goes from `controllers` -> `managers` -> [`stores`, `clients`, `wrappers`]
