@@ -13,10 +13,16 @@ export function costOf({
   model: string;
   provider: string;
 }) {
-  const modelLower = model.toLowerCase();
+  const modelLower = model?.toLowerCase();
+
+  if (!modelLower) {
+    return null;
+  }
+
   const providerCost = providers.find((p) => {
     return p.provider === provider;
   });
+
   if (!providerCost || !providerCost.costs) {
     return null;
   }
