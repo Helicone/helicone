@@ -3,7 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2023-02-04"
 
 [triggers]
-crons = ["* * * * *"]
+crons = ["* * * * *", "10 0 * * *"]
 
 [env.production]
 name = "helicone-heartbeat-prod"

@@ -35,6 +35,11 @@ export interface Env {
   HB_ASYNC_LOGGER: string;
   HB_GRAPHQL: string;
   HEARTBEAT_URLS_JSON: string;
+  SUPABASE_SERVICE_ROLE_KEY: string;
+  SUPABASE_URL: string;
+  CLICKHOUSE_HOST: string;
+  CLICKHOUSE_USER: string;
+  CLICKHOUSE_PASSWORD: string;
 }
 
 const constructorMapping: Record<string, any> = {
@@ -56,23 +61,27 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<void> {
-    const heartBeats = JSON.parse(env.HEARTBEAT_URLS_JSON) as HeartBeatItem[];
+    if (controller.cron === "* * * * *") {
+      const heartBeats = JSON.parse(env.HEARTBEAT_URLS_JSON) as HeartBeatItem[];
 
-    const heartBeatPromises = heartBeats.map(async (item) => {
-      const constructor = constructorMapping[item.constructorName];
-      if (!constructor) {
-        console.error(`Instance for ${item.constructorName} not found.`);
-        return;
-      }
+      const heartBeatPromises = heartBeats.map(async (item) => {
+        const constructor = constructorMapping[item.constructorName];
+        if (!constructor) {
+          console.error(`Instance for ${item.constructorName} not found.`);
+          return;
+        }
 
-      const status = await constructor.beat(env);
+        const status = await constructor.beat(env);
 
-      if (status === 200) {
-        const urlPromises = item.urls.map((url) => fetch(url));
-        await Promise.all(urlPromises);
-      }
-    });
+        if (status === 200) {
+          const urlPromises = item.urls.map((url) => fetch(url));
+          await Promise.all(urlPromises);
+        }
+      });
 
-    await Promise.all(heartBeatPromises);
+      await Promise.all(heartBeatPromises);
+    } else if (controller.cron === "10 0 * * *") {
+      // Stripe volumetric pricing calculation
+    }
   },
 };
