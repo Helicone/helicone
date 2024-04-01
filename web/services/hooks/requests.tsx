@@ -142,6 +142,8 @@ const useGetRequests = (
           string
         >;
 
+        console.log("result", result.data);
+
         const requests = await Promise.all(
           result.data?.map(async (request: HeliconeRequest) => {
             if (request.signed_body_url) {
