@@ -1,0 +1,60 @@
+{
+  "name": "youch",
+  "version": "2.2.2",
+  "description": "HTML Pretty error stack viewer",
+  "main": "src/Youch.js",
+  "files": [
+    "src",
+    "index.d.ts"
+  ],
+  "types": "./index.d.ts",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "pretest": "npm run lint",
+    "prepublishOnly": "npm run build",
+    "build": "node bin/compile.js",
+    "test": "npm run build && node test/youch.spec.js",
+    "lint": "standard"
+  },
+  "author": "amanvirk",
+  "license": "MIT",
+  "devDependencies": {
+    "concat": "^1.0.3",
+    "cz-conventional-changelog": "^3.3.0",
+    "japa": "^3.1.1",
+    "standard": "^16.0.3",
+    "supertest": "^6.1.3",
+    "uglify-js": "^3.13.5"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "dependencies": {
+    "@types/stack-trace": "0.0.29",
+    "cookie": "^0.4.1",
+    "mustache": "^4.2.0",
+    "stack-trace": "0.0.10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/poppinss/youch.git"
+  },
+  "keywords": [
+    "errors",
+    "error-reporting",
+    "whoops"
+  ],
+  "bugs": {
+    "url": "https://github.com/poppinss/youch/issues"
+  },
+  "standard": {
+    "ignore": [
+      "static"
+    ]
+  },
+  "homepage": "https://github.com/poppinss/youch#readme"
+}

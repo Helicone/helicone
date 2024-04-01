@@ -1,0 +1,117 @@
+{
+  "name": "cron-schedule",
+  "description": "A zero-dependency cron parser and scheduler for Node.js, Deno and the browser.",
+  "version": "3.0.6",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/P4sca1/cron-schedule.git"
+  },
+  "author": "P4sca1 <sthamer.pascal@gmail.com>",
+  "contributors": [
+    "buffcode <l.stoetzel@meeva.de>"
+  ],
+  "keywords": [
+    "cron",
+    "schedule",
+    "typescript",
+    "job parser",
+    "interval",
+    "iterator",
+    "deno",
+    "javascript",
+    "timer",
+    "cron-schedule",
+    "cron-expression",
+    "schedule-tasks",
+    "nodejs"
+  ],
+  "main": "dist/cron-schedule.cjs.min.js",
+  "module": "dist/cron-schedule.min.mjs",
+  "unpkg": "dist/cron-schedule.iife.min.js",
+  "exports": {
+    "require": "./dist/cron-schedule.cjs.min.js",
+    "import": "./dist/cron-schedule.min.mjs"
+  },
+  "release": {
+    "branches": [
+      "master",
+      {
+        "name": "next",
+        "prelease": true
+      }
+    ],
+    "preset": "angular",
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      [
+        "@semantic-release/github",
+        {
+          "assets": [
+            "dist/*.js"
+          ]
+        }
+      ],
+      "@semantic-release/git"
+    ]
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.js.map",
+    "dist/**/*.mjs",
+    "dist/**/*.mjs.map",
+    "dist/**/*.d.ts"
+  ],
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "build": "rimraf ./dist && tsc -p ./tsconfig.json --emitDeclarationOnly && node build.js",
+    "tsc:check": "tsc --project ./tsconfig.json --noEmit",
+    "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
+    "lint:fix": "eslint --fix \"src/**/*.ts\" \"test/**/*.ts\"",
+    "test": "jest -c jest.config.js",
+    "test:watch": "jest -c jest.config.js --watchAll",
+    "prepack": "yarn build",
+    "_postinstall": "husky install",
+    "prepublishOnly": "pinst --disable",
+    "postpublish": "pinst --enable"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "16.2.3",
+    "@commitlint/config-conventional": "16.2.1",
+    "@commitlint/prompt-cli": "16.2.3",
+    "@semantic-release/changelog": "6.0.1",
+    "@semantic-release/git": "10.0.1",
+    "@types/jest": "27.4.1",
+    "@typescript-eslint/eslint-plugin": "5.21.0",
+    "@typescript-eslint/parser": "5.21.0",
+    "@typescript-eslint/typescript-estree": "5.21.0",
+    "esbuild": "0.14.38",
+    "eslint": "8.14.0",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-prettier": "4.0.0",
+    "eslint-plugin-security": "1.5.0",
+    "husky": "7.0.4",
+    "jest": "27.5.1",
+    "pinst": "3.0.0",
+    "prettier": "2.6.2",
+    "rimraf": "3.0.2",
+    "semantic-release": "19.0.2",
+    "ts-jest": "27.1.4",
+    "tslib": "2.4.0",
+    "typescript": "4.6.3"
+  },
+  "resolutions": {
+    "npm/chalk": "4.1.2"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "packageManager": "yarn@3.2.0"
+}

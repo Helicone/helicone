@@ -1,0 +1,12 @@
+{
+  "name": "blake3-js",
+  "version": "0.1.0",
+  "files": [
+    "blake3_js_bg.wasm",
+    "blake3_js.js",
+    "blake3_js_bg.js",
+    "blake3_js.d.ts"
+  ],
+  "main": "blake3_js.js",
+  "types": "blake3_js.d.ts"
+}

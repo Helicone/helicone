@@ -1,0 +1,472 @@
+Name: browserify-fs
+Version: 1.0.0
+License: undefined
+Private: false
+Description: fs for the browser using level-filesystem and browserify
+Repository: undefined
+
+---
+
+Name: level-js
+Version: 2.2.4
+License: BSD-2-Clause
+Private: false
+Description: leveldown/leveldb library for browsers using IndexedDB
+Repository: git@github.com:maxogden/level.js.git
+Author: max ogden
+
+---
+
+Name: levelup
+Version: 0.18.6
+License: MIT
+Private: false
+Description: Fast & simple storage - a Node.js-style LevelDB wrapper
+Repository: https://github.com/rvagg/node-levelup.git
+Homepage: https://github.com/rvagg/node-levelup
+Contributors:
+  Rod Vagg <r@va.gg> (https://github.com/rvagg)
+  John Chesley <john@chesl.es> (https://github.com/chesles/)
+  Jake Verbaten <raynos2@gmail.com> (https://github.com/raynos)
+  Dominic Tarr <dominic.tarr@gmail.com> (https://github.com/dominictarr)
+  Max Ogden <max@maxogden.com> (https://github.com/maxogden)
+  Lars-Magnus Skog <lars.magnus.skog@gmail.com> (https://github.com/ralphtheninja)
+  David Björklund <david.bjorklund@gmail.com> (https://github.com/kesla)
+  Julian Gruber <julian@juliangruber.com> (https://github.com/juliangruber)
+  Paolo Fragomeni <paolo@async.ly> (https://github.com/hij1nx)
+  Anton Whalley <anton.whalley@nearform.com> (https://github.com/No9)
+  Matteo Collina <matteo.collina@gmail.com> (https://github.com/mcollina)
+  Pedro Teixeira <pedro.teixeira@gmail.com> (https://github.com/pgte)
+  James Halliday <mail@substack.net> (https://github.com/substack)
+
+---
+
+Name: level-filesystem
+Version: 1.2.0
+License: undefined
+Private: false
+Description: Full implementation of the fs module on top of leveldb
+Repository: undefined
+
+---
+
+Name: rollup-plugin-node-resolve
+Version: 5.0.1
+License: MIT
+Private: false
+Description: Bundle third-party dependencies in node_modules
+Repository: undefined
+Homepage: https://github.com/rollup/rollup-plugin-node-resolve#readme
+Author: Rich Harris <richard.a.harris@gmail.com>
+
+---
+
+Name: prr
+Version: 0.0.0
+License: MIT
+Private: false
+Description: A better Object.defineProperty()
+Repository: https://github.com/rvagg/prr.git
+Homepage: https://github.com/rvagg/prr
+
+---
+
+Name: xtend
+Version: 2.1.2
+License: (MIT)
+Private: false
+Description: extend like a boss
+Repository: undefined
+Homepage: https://github.com/Raynos/xtend
+Author: Raynos <raynos2@gmail.com>
+Contributors:
+  Jake Verbaten
+  Matt Esch
+
+---
+
+Name: once
+Version: 1.4.0
+License: ISC
+Private: false
+Description: Run a function exactly one time
+Repository: git://github.com/isaacs/once
+Author: Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)
+
+---
+
+Name: octal
+Version: 1.0.0
+License: MIT
+Private: false
+Description: Interpret a number as base 8
+Repository: https://github.com/mafintosh/octal.git
+Homepage: https://github.com/mafintosh/octal
+Author: Mathias Buus (@mafintosh)
+
+---
+
+Name: readable-stream
+Version: 1.0.34
+License: MIT
+Private: false
+Description: Streams2, a user-land copy of the stream library from Node.js v0.10.x
+Repository: git://github.com/isaacs/readable-stream
+Author: Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)
+
+---
+
+Name: level-blobs
+Version: 0.1.7
+License: undefined
+Private: false
+Description: Save binary blobs in level and stream then back
+Repository: undefined
+
+---
+
+Name: level-sublevel
+Version: 5.2.3
+License: MIT
+Private: false
+Description: partition levelup databases
+Repository: git://github.com/dominictarr/level-sublevel.git
+Homepage: https://github.com/dominictarr/level-sublevel
+Author: Dominic Tarr <dominic.tarr@gmail.com> (http://dominictarr.com)
+
+---
+
+Name: fwd-stream
+Version: 1.0.4
+License: undefined
+Private: false
+Description: Forward a readable stream to another readable stream or a writable stream to another writable stream
+Repository: undefined
+
+---
+
+Name: level-peek
+Version: 1.0.6
+License: MIT
+Private: false
+Repository: git://github.com/dominictarr/level-peek.git
+Homepage: https://github.com/dominictarr/level-peek
+Author: Dominic Tarr <dominic.tarr@gmail.com> (http://dominictarr.com)
+
+---
+
+Name: errno
+Version: 0.1.7
+License: MIT
+Private: false
+Description: libuv errno details exposed
+Repository: https://github.com/rvagg/node-errno.git
+
+---
+
+Name: concat-stream
+Version: 1.6.2
+License: MIT
+Private: false
+Description: writable stream that concatenates strings or binary data and calls a callback with the result
+Repository: http://github.com/maxogden/concat-stream.git
+Author: Max Ogden <max@maxogden.com>
+
+---
+
+Name: inherits
+Version: 2.0.3
+License: ISC
+Private: false
+Description: Browser-friendly inheritance fully compatible with standard node.js inherits()
+Repository: undefined
+
+---
+
+Name: idb-wrapper
+Version: 1.7.2
+License: MIT
+Private: false
+Description: A cross-browser wrapper for IndexedDB
+Repository: undefined
+Homepage: https://github.com/jensarps/IDBWrapper
+Author: jensarps <mail@jensarps.de> (http://jensarps.de/)
+Contributors:
+  Github Contributors (https://github.com/jensarps/IDBWrapper/graphs/contributors)
+
+---
+
+Name: typedarray-to-buffer
+Version: 1.0.4
+License: MIT
+Private: false
+Description: Convert a typed array to a Buffer without a copy
+Repository: git://github.com/feross/typedarray-to-buffer.git
+Homepage: http://feross.org
+Author: Feross Aboukhadijeh <feross@feross.org> (http://feross.org/)
+
+---
+
+Name: abstract-leveldown
+Version: 0.12.4
+License: MIT
+Private: false
+Description: An abstract prototype matching the LevelDOWN API
+Repository: https://github.com/rvagg/node-abstract-leveldown.git
+Homepage: https://github.com/rvagg/node-abstract-leveldown
+Contributors:
+  Rod Vagg <r@va.gg> (https://github.com/rvagg)
+  John Chesley <john@chesl.es> (https://github.com/chesles/)
+  Jake Verbaten <raynos2@gmail.com> (https://github.com/raynos)
+  Dominic Tarr <dominic.tarr@gmail.com> (https://github.com/dominictarr)
+  Max Ogden <max@maxogden.com> (https://github.com/maxogden)
+  Lars-Magnus Skog <lars.magnus.skog@gmail.com> (https://github.com/ralphtheninja)
+  David Björklund <david.bjorklund@gmail.com> (https://github.com/kesla)
+  Julian Gruber <julian@juliangruber.com> (https://github.com/juliangruber)
+  Paolo Fragomeni <paolo@async.ly> (https://github.com/hij1nx)
+  Anton Whalley <anton.whalley@nearform.com> (https://github.com/No9)
+  Matteo Collina <matteo.collina@gmail.com> (https://github.com/mcollina)
+  Pedro Teixeira <pedro.teixeira@gmail.com> (https://github.com/pgte)
+  James Halliday <mail@substack.net> (https://github.com/substack)
+
+---
+
+Name: isbuffer
+Version: 0.0.0
+License: MIT
+Private: false
+Description: isBuffer for node and browser (supports typed arrays)
+Repository: git://github.com/juliangruber/isbuffer.git
+Homepage: https://github.com/juliangruber/isbuffer
+Author: Julian Gruber <mail@juliangruber.com> (http://juliangruber.com)
+
+---
+
+Name: deferred-leveldown
+Version: 0.2.0
+License: MIT
+Private: false
+Description: For handling delayed-open on LevelDOWN compatible libraries
+Repository: https://github.com/Level/deferred-leveldown.git
+Homepage: https://github.com/Level/deferred-leveldown
+Contributors:
+  Rod Vagg <r@va.gg> (https://github.com/rvagg)
+  John Chesley <john@chesl.es> (https://github.com/chesles/)
+  Jake Verbaten <raynos2@gmail.com> (https://github.com/raynos)
+  Dominic Tarr <dominic.tarr@gmail.com> (https://github.com/dominictarr)
+  Max Ogden <max@maxogden.com> (https://github.com/maxogden)
+  Lars-Magnus Skog <lars.magnus.skog@gmail.com> (https://github.com/ralphtheninja)
+  David Björklund <david.bjorklund@gmail.com> (https://github.com/kesla)
+  Julian Gruber <julian@juliangruber.com> (https://github.com/juliangruber)
+  Paolo Fragomeni <paolo@async.ly> (https://github.com/hij1nx)
+  Anton Whalley <anton.whalley@nearform.com> (https://github.com/No9)
+  Matteo Collina <matteo.collina@gmail.com> (https://github.com/mcollina)
+  Pedro Teixeira <pedro.teixeira@gmail.com> (https://github.com/pgte)
+  James Halliday <mail@substack.net> (https://github.com/substack)
+
+---
+
+Name: wrappy
+Version: 1.0.2
+License: ISC
+Private: false
+Description: Callback wrapping utility
+Repository: https://github.com/npm/wrappy
+Homepage: https://github.com/npm/wrappy
+Author: Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)
+
+---
+
+Name: bl
+Version: 0.8.2
+License: MIT
+Private: false
+Description: Buffer List: collect buffers and access with a standard readable Buffer interface, streamable too!
+Repository: https://github.com/rvagg/bl.git
+Homepage: https://github.com/rvagg/bl
+
+---
+
+Name: object-keys
+Version: 0.4.0
+License: MIT
+Private: false
+Description: An Object.keys replacement, in case Object.keys is not available. From https://github.com/kriskowal/es5-shim
+Repository: git://github.com/ljharb/object-keys.git
+Author: Jordan Harband
+
+---
+
+Name: ltgt
+Version: 2.2.1
+License: MIT
+Private: false
+Repository: git://github.com/dominictarr/ltgt.git
+Homepage: https://github.com/dominictarr/ltgt
+Author: Dominic Tarr <dominic.tarr@gmail.com> (http://dominictarr.com)
+
+---
+
+Name: typedarray
+Version: 0.0.6
+License: MIT
+Private: false
+Description: TypedArray polyfill for old browsers
+Repository: git://github.com/substack/typedarray.git
+Homepage: https://github.com/substack/typedarray
+Author: James Halliday <mail@substack.net> (http://substack.net)
+
+---
+
+Name: level-fix-range
+Version: 2.0.0
+License: MIT
+Private: false
+Description: make using levelup reverse ranges easy
+Repository: git://github.com/dominictarr/level-fix-range.git
+Homepage: https://github.com/dominictarr/level-fix-range
+Author: Dominic Tarr <dominic.tarr@gmail.com> (http://dominictarr.com)
+
+---
+
+Name: buffer-from
+Version: 1.1.1
+License: MIT
+Private: false
+Repository: undefined
+
+---
+
+Name: isarray
+Version: 0.0.1
+License: MIT
+Private: false
+Description: Array#isArray for older browsers
+Repository: git://github.com/juliangruber/isarray.git
+Homepage: https://github.com/juliangruber/isarray
+Author: Julian Gruber <mail@juliangruber.com> (http://juliangruber.com)
+
+---
+
+Name: string_decoder
+Version: 0.10.31
+License: MIT
+Private: false
+Description: The string_decoder module from Node core
+Repository: git://github.com/rvagg/string_decoder.git
+Homepage: https://github.com/rvagg/string_decoder
+
+---
+
+Name: safe-buffer
+Version: 5.1.2
+License: MIT
+Private: false
+Description: Safer Node.js Buffer API
+Repository: git://github.com/feross/safe-buffer.git
+Homepage: https://github.com/feross/safe-buffer
+Author: Feross Aboukhadijeh <feross@feross.org> (http://feross.org)
+
+---
+
+Name: level-hooks
+Version: 4.5.0
+License: undefined
+Private: false
+Description: pre/post hooks for leveldb
+Repository: git://github.com/dominictarr/level-hooks.git
+Homepage: https://github.com/dominictarr/level-hooks
+Author: Dominic Tarr <dominic.tarr@gmail.com> (http://bit.ly/dominictarr)
+
+---
+
+Name: core-util-is
+Version: 1.0.2
+License: MIT
+Private: false
+Description: The `util.is*` functions introduced in Node v0.12.
+Repository: git://github.com/isaacs/core-util-is
+Author: Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)
+
+---
+
+Name: string-range
+Version: 1.2.2
+License: MIT
+Private: false
+Description: check if a string is within a range
+Repository: git://github.com/dominictarr/string-range.git
+Homepage: https://github.com/dominictarr/string-range
+Author: Dominic Tarr <dominic.tarr@gmail.com> (http://dominictarr.com)
+
+---
+
+Name: process-nextick-args
+Version: 2.0.0
+License: MIT
+Private: false
+Description: process.nextTick but always with args
+Repository: https://github.com/calvinmetcalf/process-nextick-args.git
+Homepage: https://github.com/calvinmetcalf/process-nextick-args
+
+---
+
+Name: util-deprecate
+Version: 1.0.2
+License: MIT
+Private: false
+Description: The Node.js `util.deprecate()` function with browser support
+Repository: git://github.com/TooTallNate/util-deprecate.git
+Homepage: https://github.com/TooTallNate/util-deprecate
+Author: Nathan Rajlich <nathan@tootallnate.net> (http://n8.io/)
+
+---
+
+Name: clone
+Version: 0.1.19
+License: MIT
+Private: false
+Description: deep cloning of objects and arrays
+Repository: git://github.com/pvorb/node-clone.git
+Author: Paul Vorbach <paul@vorba.ch> (http://paul.vorba.ch/)
+Contributors:
+  Blake Miner <miner.blake@gmail.com> (http://www.blakeminer.com/)
+  Tian You <axqd001@gmail.com> (http://blog.axqd.net/)
+  George Stagas <gstagas@gmail.com> (http://stagas.com/)
+  Tobiasz Cudnik <tobiasz.cudnik@gmail.com> (https://github.com/TobiaszCudnik)
+  Pavel Lang <langpavel@phpskelet.org> (https://github.com/langpavel)
+  Dan MacTough (http://yabfog.com/)
+  w1nk (https://github.com/w1nk)
+  Hugh Kennedy (http://twitter.com/hughskennedy)
+  Dustin Diaz (http://dustindiaz.com)
+  Ilya Shaisultanov (https://github.com/diversario)
+  Nathan MacInnes <nathan@macinn.es> (http://macinn.es/)
+  Benjamin E. Coe <ben@npmjs.com> (https://twitter.com/benjamincoe)
+  Nathan Zadoks (https://github.com/nathan7)
+  Róbert Oroszi <robert+gh@oroszi.net> (https://github.com/oroce)
+
+---
+
+Name: is
+Version: 0.2.7
+License: undefined
+Private: false
+Description: the definitive JavaScript type testing library
+Repository: git://github.com/enricomarino/is.git
+Homepage: https://github.com/enricomarino/is
+Author: Enrico Marino (http://onirame.com)
+Contributors:
+  Jordan Harband (https://github.com/ljharb)
+
+---
+
+Name: foreach
+Version: 2.0.5
+License: MIT
+Private: false
+Description: foreach component + npm package
+Repository: git://github.com/manuelstofer/foreach
+Author: Manuel Stofer <manuel@takimata.ch>
+Contributors:
+  Manuel Stofer
+  Jordan Harband (https://github.com/ljharb)

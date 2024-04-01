@@ -1,0 +1,62 @@
+{
+  "name": "urlpattern-polyfill",
+  "version": "4.0.3",
+  "description": "Polyfill for the URLPattern API",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kenchris/urlpattern-polyfill"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
+  },
+  "tags": [
+    "url",
+    "urlpattern",
+    "url-pattern",
+    "browser",
+    "node",
+    "polyfill",
+    "w3c",
+    "wicg"
+  ],
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@ava/typescript": "^3.0.1",
+    "ava": "^4.1.0",
+    "esbuild": "^0.14.31",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.6.3"
+  },
+  "ava": {
+    "files": [
+      "test/**/*",
+      "!test/wpt"
+    ],
+    "typescript": {
+      "rewritePaths": {
+        "src/": "dist/"
+      },
+      "compile": false
+    }
+  },
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build:esm": "esbuild --bundle --format=esm src/patch-global.mts --outfile=dist/index.js",
+    "build:cjs": "esbuild --bundle --format=cjs src/patch-global.cts --outfile=dist/index.cjs",
+    "copy:dts": "cp ./src/index.d.ts ./dist",
+    "build": "npm run build:esm && npm run build:cjs && npm run copy:dts",
+    "pretest": "npm run build",
+    "test": "ava --fail-fast -s",
+    "manual-test": "npx http-server -o /index.html -p 4203",
+    "publish-dev": "npm test && VERSION=${npm_package_version%-*}-dev.`git rev-parse --short HEAD` && npm version --no-git-tag-version $VERSION && npm publish --tag dev"
+  },
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,63 @@
+{
+  "name": "blake3-wasm",
+  "version": "2.1.5",
+  "description": "BLAKE3 hashing for JavaScript: native Node bindings (where available) and WebAssembly",
+  "keywords": [
+    "blake3",
+    "node-addon",
+    "hash",
+    "webassembly",
+    "wasm"
+  ],
+  "module": "./esm/index",
+  "browser": "./esm/browser/index",
+  "main": "./dist/index",
+  "scripts": {
+    "prepack": "make clean && make MODE=release && npm test && rimraf dist/native.node",
+    "test": "mocha --require source-map-support/register --recursive \"dist/**/*.test.js\" --timeout 5000",
+    "fmt": "make fmt",
+    "compile": "tsc && tsc -p tsconfig.esm.json && node dist/build/add-js-extensions",
+    "watch": "tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/connor4312/blake3.git"
+  },
+  "bugs": {
+    "url": "https://github.com/connor4312/blake3/issues"
+  },
+  "homepage": "https://github.com/connor4312/blake3#readme",
+  "author": "Connor Peet <connor@peet.io>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chai": "^4.2.7",
+    "@types/js-yaml": "^3.12.1",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^13.1.6",
+    "@types/node-fetch": "^2.5.4",
+    "@types/puppeteer": "^2.0.0",
+    "@types/serve-handler": "^6.1.0",
+    "@types/stream-buffers": "^3.0.3",
+    "@types/webpack": "^4.41.2",
+    "chai": "^4.2.0",
+    "js-yaml": "^3.13.1",
+    "mocha": "^7.0.0",
+    "neon-cli": "^0.3.3",
+    "node-fetch": "^2.6.0",
+    "prettier": "^1.19.1",
+    "puppeteer": "^2.0.0",
+    "remark-cli": "^7.0.1",
+    "remark-toc": "^6.0.0",
+    "rimraf": "^3.0.0",
+    "serve-handler": "^6.1.2",
+    "source-map-support": "^0.5.16",
+    "stream-buffers": "^3.0.2",
+    "typescript": "^3.8.0-beta",
+    "webpack": "^4.41.5"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "trailingComma": "all"
+  }
+}

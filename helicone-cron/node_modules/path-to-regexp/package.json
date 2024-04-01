@@ -1,0 +1,62 @@
+{
+  "name": "path-to-regexp",
+  "version": "6.2.1",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Express style path to RegExp utility",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pillarjs/path-to-regexp.git"
+  },
+  "main": "dist/index.js",
+  "module": "dist.es2015/index.js",
+  "scripts": {
+    "build": "ts-scripts build",
+    "format": "ts-scripts format",
+    "lint": "ts-scripts lint",
+    "prepare": "ts-scripts install && npm run build",
+    "size": "size-limit",
+    "specs": "ts-scripts specs",
+    "test": "ts-scripts test && npm run size"
+  },
+  "files": [
+    "dist.es2015/",
+    "dist/"
+  ],
+  "keywords": [
+    "express",
+    "regexp",
+    "route",
+    "routing"
+  ],
+  "devDependencies": {
+    "@borderless/ts-scripts": "^0.8.0",
+    "@size-limit/preset-small-lib": "^7.0.8",
+    "@types/jest": "^27.4.0",
+    "@types/node": "^17.0.17",
+    "@types/semver": "^7.3.1",
+    "semver": "^7.3.5",
+    "size-limit": "^7.0.8",
+    "typescript": "^4.5.5"
+  },
+  "typings": "dist/index.d.ts",
+  "sideEffects": false,
+  "size-limit": [
+    {
+      "path": "dist.es2015/index.js",
+      "limit": "2.1 kB"
+    }
+  ],
+  "ts-scripts": {
+    "dist": [
+      "dist",
+      "dist.es2015"
+    ],
+    "project": [
+      "tsconfig.build.json",
+      "tsconfig.es2015.json"
+    ]
+  }
+}

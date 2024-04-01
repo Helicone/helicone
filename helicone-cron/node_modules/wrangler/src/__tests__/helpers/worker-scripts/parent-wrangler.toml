@@ -1,0 +1,5 @@
+name = 'parent'
+
+[[services]]
+binding = "CHILD"
+service = 'child'

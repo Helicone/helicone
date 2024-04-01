@@ -1,0 +1,82 @@
+{
+  "name": "xxhash-wasm",
+  "version": "1.0.2",
+  "description": "A WebAssembly implementation of xxHash",
+  "type": "module",
+  "main": "./cjs/xxhash-wasm.cjs",
+  "module": "./esm/xxhash-wasm.js",
+  "exports": {
+    "types": "./types.d.ts",
+    "import": "./esm/xxhash-wasm.js",
+    "require": "./cjs/xxhash-wasm.cjs"
+  },
+  "types": "./types.d.ts",
+  "author": "Michael Jungo <michaeljungo92@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jungomi/xxhash-wasm.git"
+  },
+  "files": [
+    "cjs",
+    "esm",
+    "umd",
+    "types.d.ts"
+  ],
+  "keywords": [
+    "xxhash",
+    "hash",
+    "wasm",
+    "webassembly"
+  ],
+  "scripts": {
+    "build": "yarn run build-wasm && yarn run build-js",
+    "build-js": "rollup -c",
+    "build-wasm": "wasm-opt --enable-bulk-memory -O4 src/xxhash.wat -o src/xxhash.wasm",
+    "clean": "rimraf coverage cjs esm umd",
+    "fix": "eslint . --fix",
+    "lint": "eslint .",
+    "size": "bundlewatch",
+    "test": "jest",
+    "test-update": "jest --updateSnapshot",
+    "test-coverage": "jest --coverage",
+    "prebuild": "yarn run clean",
+    "prepublish": "yarn run build"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.19.6",
+    "@babel/eslint-parser": "^7.19.1",
+    "@babel/preset-env": "^7.19.4",
+    "bundlewatch": "^0.3.3",
+    "eslint": "^8.26.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "jest": "^29.2.2",
+    "jest-t-assert": "^0.3.0",
+    "node-gyp": "^9.3.0",
+    "prettier": "^2.7.1",
+    "rimraf": "^3.0.2",
+    "rollup": "^3.2.5",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-replace": "^2.2.0",
+    "rollup-plugin-terser": "^7.0.2"
+  },
+  "bundlewatch": {
+    "files": [
+      {
+        "path": "./cjs/xxhash-wasm.cjs",
+        "maxSize": "2.2kb"
+      },
+      {
+        "path": "./esm/xxhash-wasm.js",
+        "maxSize": "2.2kb"
+      },
+      {
+        "path": "./umd/xxhash-wasm.js",
+        "maxSize": "2.3kb"
+      }
+    ]
+  },
+  "packageManager": "yarn@3.2.4"
+}
