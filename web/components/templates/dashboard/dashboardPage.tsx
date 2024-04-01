@@ -1,5 +1,6 @@
 import {
   ArrowPathIcon,
+  ArrowsPointingOutIcon,
   ChartBarIcon,
   HomeIcon,
   PresentationChartLineIcon,
@@ -56,6 +57,7 @@ import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 import { useCountries } from "../../../services/hooks/country";
 import { CountryData } from "../../../services/lib/country";
 import { COUTNRY_CODE_DIRECTORY } from "../requestsV2/countryCodeDirectory";
+import CountryPanel from "./panels/countryPanel";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -186,11 +188,6 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const { isLoading, models } = useModels(timeFilter, 5);
 
-  const { isLoading: isCountriesLoading, countries } = useCountries(
-    timeFilter,
-    5
-  );
-
   const onSetAdvancedFilters = (
     filters: UIFilterRow[],
     layoutFilterId?: string
@@ -277,20 +274,6 @@ const DashboardPage = (props: DashboardPageProps) => {
       color: listColors[index % listColors.length],
       // href: urlString,
       // target: "_self",
-    };
-  };
-
-  const countryMapper = (country: CountryData, index: number) => {
-    const countryInfo = COUTNRY_CODE_DIRECTORY.find(
-      (c) => c.isoCode === country.country
-    );
-
-    return {
-      name: `${countryInfo?.country} (${countryInfo?.isoCode})` || "n/a",
-      value: country.total_requests,
-      icon: function TwitterIcon() {
-        return <div className="pr-2">{countryInfo?.emojiFlag}</div>;
-      },
     };
   };
 
@@ -712,32 +695,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 </StyledAreaChart>
               </div>
               <div key="countries">
-                <StyledAreaChart
-                  title={`Top Countries`}
-                  value={undefined}
-                  isDataOverTimeLoading={isCountriesLoading}
-                >
-                  <div className="flex flex-row justify-between items-center pb-2">
-                    <p className="text-xs font-semibold text-gray-700">
-                      Country
-                    </p>
-                    <p className="text-xs font-semibold text-gray-700">
-                      Requests
-                    </p>
-                  </div>
-                  <BarList
-                    showAnimation={true}
-                    data={
-                      countries?.data
-                        ?.map((country, index) => countryMapper(country, index))
-                        .sort(
-                          (a, b) =>
-                            b.value - a.value - (b.name === "n/a" ? 1 : 0)
-                        ) ?? []
-                    }
-                    className="overflow-auto h-full"
-                  />
-                </StyledAreaChart>
+                <CountryPanel timeFilter={timeFilter} />
               </div>
               <div key="latency">
                 <StyledAreaChart

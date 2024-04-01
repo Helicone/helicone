@@ -4,9 +4,14 @@ import { Result } from "../../lib/result";
 import { CountryData } from "../lib/country";
 
 const useCountries = (timeFilter: TimeFilter, limit: number) => {
-  const { data: countries, isLoading } = useQuery({
-    queryKey: ["countries", timeFilter],
+  const {
+    data: countries,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["countries", timeFilter, limit],
     queryFn: async (query) => {
+      const [, timeFilter, limit] = query.queryKey;
       return await fetch("/api/country", {
         method: "POST",
         headers: {
@@ -23,7 +28,7 @@ const useCountries = (timeFilter: TimeFilter, limit: number) => {
     refetchOnWindowFocus: false,
   });
 
-  return { countries, isLoading };
+  return { countries, isLoading, refetch };
 };
 
 export { useCountries };
