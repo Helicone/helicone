@@ -3,8 +3,8 @@ title: "OpenAI Compatible Endpoints"
 ---
 
 <Note>
-  If you are utilizing an OpenAI compatible endpoint, you can conveniently log your
-  requests to Helicone by modifying the base URL from
+  If you are utilizing an OpenAI compatible endpoint, you can conveniently log
+  your requests to Helicone by modifying the base URL from
   `https://oai.hconeai.com/v1` to any of the following supported dedicated
   endpoints:
   <br></br>- `https://together.hconeai.com/v1`
@@ -24,7 +24,7 @@ Instead of using the base URL
 
 You can use the base URL
 
-<code>base_url="http://together.hconeai.com/v1", </code>
+<code>base_url="https://together.hconeai.com/v1", </code>
 
 </Note>
 
@@ -43,7 +43,7 @@ Initialize the OpenAI client. This can also be done via a global client.
 ```python
 client = OpenAI(
   api_key="your-api-key-here",  # Replace with your OpenAI API key
-  base_url="http://oai.hconeai.com/v1",  # Set the API endpoint
+  base_url="https://oai.hconeai.com/v1",  # Set the API endpoint
   default_headers= {  # Optionally set default headers or set per request (see below)
     "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
   }
