@@ -34,48 +34,21 @@ export interface Env {
   HB_API_HCONEAI_COM: string;
   HB_ASYNC_LOGGER: string;
   HB_GRAPHQL: string;
+  HEARTBEAT_URLS_JSON: string;
 }
 
-const heartBeats: {
+const constructorMapping: Record<string, any> = {
+  AsyncHeartBeat: new AsyncHeartBeat(),
+  FeedbackHeartBeat: new FeedbackHeartBeat(),
+  GraphQLHeartBeat: new GraphQLHeartBeat(),
+  OpenAIProxyHeartBeat: new OpenAIProxyHeartBeat(),
+  AnthropicProxyHeartBeat: new AnthropicProxyHeartBeat(),
+};
+
+interface HeartBeatItem {
   urls: string[];
-  constructor: IHeartBeat;
-}[] = [
-  {
-    urls: [
-      "https://uptime.betterstack.com/api/v1/heartbeat/4yUxCvyuQVpYBa6pfR8gZKjw",
-      "https://uptime.betterstack.com/api/v1/heartbeat/HvqUUnbgbwL7WgXitDEnkxXM",
-    ],
-    constructor: new AsyncHeartBeat(),
-  },
-  {
-    urls: [
-      "https://uptime.betterstack.com/api/v1/heartbeat/5BdXzeVoGNc9HsNUzuKnbYk1",
-      "https://uptime.betterstack.com/api/v1/heartbeat/TyTqEpAvgQr7cVnoDHYM8gYZ",
-    ],
-    constructor: new FeedbackHeartBeat(),
-  },
-  {
-    urls: [
-      "https://uptime.betterstack.com/api/v1/heartbeat/5Hk6ZSKTiz8pwQzTDDWyKyip",
-      "https://uptime.betterstack.com/api/v1/heartbeat/JvcXcqvsgZjvbhbint1X5M7U",
-    ],
-    constructor: new GraphQLHeartBeat(),
-  },
-  {
-    urls: [
-      "https://uptime.betterstack.com/api/v1/heartbeat/AjcLW9UgnmfCAaEk8htYZhhq",
-      "https://uptime.betterstack.com/api/v1/heartbeat/68vwpUCYwEMpLzhy7Lr2KDQo",
-    ],
-    constructor: new OpenAIProxyHeartBeat(),
-  },
-  {
-    urls: [
-      "https://uptime.betterstack.com/api/v1/heartbeat/PbpjAnktvt8Mheoi9RhqXfmJ",
-      "https://uptime.betterstack.com/api/v1/heartbeat/zZcubPLuGgvSBPXwSd8nyQxS",
-    ],
-    constructor: new AnthropicProxyHeartBeat(),
-  },
-];
+  constructorName: string; // You can extend this interface to include any other properties as needed.
+}
 
 export default {
   async scheduled(
@@ -83,8 +56,16 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<void> {
+    const heartBeats = JSON.parse(env.HEARTBEAT_URLS_JSON) as HeartBeatItem[];
+
     const heartBeatPromises = heartBeats.map(async (item) => {
-      const status = await item.constructor.beat(env);
+      const constructor = constructorMapping[item.constructorName];
+      if (!constructor) {
+        console.error(`Instance for ${item.constructorName} not found.`);
+        return;
+      }
+
+      const status = await constructor.beat(env);
 
       if (status === 200) {
         const urlPromises = item.urls.map((url) => fetch(url));
