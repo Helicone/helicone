@@ -153,7 +153,6 @@ export const REQUEST_TABLE_FILTERS: [
   SingleFilterDef<"response">,
   SingleFilterDef<"response">,
   SingleFilterDef<"request">,
-  SingleFilterDef<"request">,
   SingleFilterDef<"feedback">
 ] = [
   {
@@ -251,13 +250,6 @@ export const REQUEST_TABLE_FILTERS: [
     category: "response",
     table: "response",
     column: "status",
-  },
-  {
-    label: "Country Code",
-    operators: textOperators,
-    table: "request",
-    column: "country_code",
-    category: "request",
   },
   {
     label: "Path",

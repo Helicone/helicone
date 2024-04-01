@@ -203,5 +203,6 @@ export const getInitialColumns: (
         </span>
       );
     },
+    minSize: 200,
   },
 ];
