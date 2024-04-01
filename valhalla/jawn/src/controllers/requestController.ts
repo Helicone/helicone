@@ -1,30 +1,11 @@
 // src/users/usersController.ts
-import {
-  Body,
-  Controller,
-  Get,
-  Path,
-  Post,
-  Query,
-  Route,
-  Security,
-  Request,
-  SuccessResponse,
-  Tags,
-} from "tsoa";
-import { User } from "../models/user";
-import express from "express";
-import { UsersService, UserCreationParams } from "../managers/usersService";
-import { JawnAuthenticatedRequest } from "../types/request";
-import { Result, ok } from "../lib/modules/result";
-import {
-  HeliconeRequest,
-  getRequests,
-  getRequestsCached,
-} from "../lib/stores/request/request";
-import { FilterLeaf, FilterNode } from "../lib/shared/filters/filterDefs";
+import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
+import { Result } from "../lib/modules/result";
+import { FilterNode } from "../lib/shared/filters/filterDefs";
 import { SortLeafRequest } from "../lib/shared/sorts/requests/sorts";
+import { HeliconeRequest } from "../lib/stores/request/request";
 import { RequestManager } from "../managers/request/RequestManager";
+import { JawnAuthenticatedRequest } from "../types/request";
 
 export interface RequestQueryParams {
   filter: FilterNode;
