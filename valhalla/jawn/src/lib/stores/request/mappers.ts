@@ -1,4 +1,4 @@
-import { LlmSchema } from "../requestResponseModel";
+import { LlmSchema } from "../../shared/requestResponseModel";
 import { HeliconeRequest } from "./request";
 
 export function mapGeminiPro(

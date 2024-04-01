@@ -9,10 +9,10 @@ import { PostHog } from "posthog-node";
 
 import { hashAuth } from "./lib/db/hash";
 import { SupabaseConnector } from "./lib/db/supabase";
-import { FineTuningManager } from "./lib/managers/FineTuningManager";
+import { FineTuningManager } from "./managers/FineTuningManager";
 import { withAuth } from "./lib/routers/withAuth";
 import { FilterNode } from "./lib/shared/filters/filterDefs";
-import { getRequests, getRequestsCached } from "./lib/shared/request/request";
+import { getRequests, getRequestsCached } from "./lib/stores/request/request";
 import { paths } from "./schema/types";
 import {
   getTokenCountAnthropic,
