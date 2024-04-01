@@ -10,7 +10,6 @@ import { COUTNRY_CODE_DIRECTORY } from "../../requestsV2/countryCodeDirectory";
 import { CountryData } from "../../../../services/lib/country";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { useState } from "react";
-import { set } from "date-fns";
 
 interface CountryPanelProps {
   timeFilter: TimeFilter;

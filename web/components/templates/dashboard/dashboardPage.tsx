@@ -1,6 +1,5 @@
 import {
   ArrowPathIcon,
-  ArrowsPointingOutIcon,
   ChartBarIcon,
   HomeIcon,
   PresentationChartLineIcon,
@@ -54,9 +53,6 @@ import { useOrg } from "../../layout/organizationContext";
 import { v4 as uuidv4 } from "uuid";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
-import { useCountries } from "../../../services/hooks/country";
-import { CountryData } from "../../../services/lib/country";
-import { COUTNRY_CODE_DIRECTORY } from "../requestsV2/countryCodeDirectory";
 import CountryPanel from "./panels/countryPanel";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
