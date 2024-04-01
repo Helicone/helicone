@@ -14,7 +14,7 @@ import {
 } from "tsoa";
 import { User } from "../models/user";
 import express from "express";
-import { UsersService, UserCreationParams } from "../services/usersService";
+import { UsersService, UserCreationParams } from "../managers/usersService";
 import { JawnAuthenticatedRequest } from "../types/request";
 
 @Route("v1/users")
