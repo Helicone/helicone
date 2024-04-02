@@ -4547,7 +4547,19 @@ openai@^4.24.7:
     node-fetch "^2.6.7"
     web-streams-polyfill "^3.2.1"
 
-openapi-typescript@^6.7.1:
+openapi-fetch@^0.9.3:
+  version "0.9.3"
+  resolved "https://registry.yarnpkg.com/openapi-fetch/-/openapi-fetch-0.9.3.tgz#37c1dbde7faec885eaa40f351cab1c231b794761"
+  integrity sha512-tC1NDn71vJHeCzu+lYdrnIpgRt4GxR0B4eSwXNb15ypWpZcpaEOwHFkoz8FcfG5Fvqkz2P0Fl9zQF1JJwBjuvA==
+  dependencies:
+    openapi-typescript-helpers "^0.0.7"
+
+openapi-typescript-helpers@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/openapi-typescript-helpers/-/openapi-typescript-helpers-0.0.7.tgz#1d0ead67c35864d189c2cb2d0556854ccbb16c38"
+  integrity sha512-7nwlAtdA1fULipibFRBWE/rnF114q6ejRYzNvhdA/x+qTWAZhXGLc/368dlwMlyJDvCQMCnADjpzb5BS5ZmNSA==
+
+openapi-typescript@^6.7.5:
   version "6.7.5"
   resolved "https://registry.yarnpkg.com/openapi-typescript/-/openapi-typescript-6.7.5.tgz#3e7f0d080d540396ef8db3df4ed07e1a4a5bb1d8"
   integrity sha512-ZD6dgSZi0u1QCP55g8/2yS5hNJfIpgqsSGHLxxdOjvY7eIrXzj271FJEQw33VwsZ6RCtO/NOuhxa7GBWmEudyA==
