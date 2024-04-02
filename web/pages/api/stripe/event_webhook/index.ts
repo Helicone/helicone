@@ -28,6 +28,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Handle the event
     switch (event.type) {
+      case "customer.subscription.created":
       case "checkout.session.completed":
         // The user has completed the checkout process and has been charged.
 
@@ -46,6 +47,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         // Assuming you passed the organization's ID in the `metadata` when creating the checkout session:
         const orgId = checkoutCompleted.metadata?.orgId;
 
+        const tier =
+          event.type === "checkout.session.completed" ? "pro" : "growth";
         const { data, error } = await supabaseServer
           .from("organization")
           .update({
