@@ -1,24 +1,12 @@
-import { ChangeEvent, Fragment, useState } from "react";
-import { CheckCircleIcon, MinusIcon } from "@heroicons/react/20/solid";
+import { Fragment, useState } from "react";
+import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
 import NavBarV2 from "../../layout/navbar/navBarV2";
 import Footer from "../../layout/footer";
 import Link from "next/link";
-import { Tooltip } from "@mui/material";
 import ContactForm from "../../shared/contactForm";
 import Image from "next/image";
-import {
-  Accordion,
-  AccordionBody,
-  AccordionHeader,
-  AccordionList,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeaderCell,
-  TableRow,
-} from "@tremor/react";
+
 import {
   ChevronRightIcon,
   DocumentTextIcon,
