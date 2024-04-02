@@ -42,7 +42,6 @@ import { formatNumber } from "../users/initialColumns";
 import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
-import { useModels } from "../../../services/hooks/models";
 import { QuantilesGraph } from "./quantilesGraph";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import {
@@ -52,8 +51,9 @@ import {
 import { useOrg } from "../../layout/organizationContext";
 import { v4 as uuidv4 } from "uuid";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
-import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
+import { ok } from "../../../lib/result";
 import CountryPanel from "./panels/countryPanel";
+import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -173,16 +173,22 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
 
-  const { metrics, filterMap, overTimeData, isAnyLoading, refetch, remove } =
-    useDashboardPage({
-      timeFilter,
-      uiFilters: debouncedAdvancedFilters,
-      apiKeyFilter: null,
-      timeZoneDifference: new Date().getTimezoneOffset(),
-      dbIncrement: timeIncrement,
-    });
-
-  const { isLoading, models } = useModels(timeFilter, 5);
+  const {
+    metrics,
+    filterMap,
+    overTimeData,
+    isAnyLoading,
+    refetch,
+    remove,
+    models,
+    isModelsLoading,
+  } = useDashboardPage({
+    timeFilter,
+    uiFilters: debouncedAdvancedFilters,
+    apiKeyFilter: null,
+    timeZoneDifference: new Date().getTimezoneOffset(),
+    dbIncrement: timeIncrement,
+  });
 
   const onSetAdvancedFilters = (
     filters: UIFilterRow[],
@@ -481,7 +487,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       ) : (
         <div className="space-y-4">
           <ThemedTableHeader
-            isFetching={isAnyLoading || isLoading}
+            isFetching={isAnyLoading || isModelsLoading}
             timeFilter={{
               currentTimeFilter: timeFilter,
               customTimeFilter: true,
@@ -515,8 +521,11 @@ const DashboardPage = (props: DashboardPageProps) => {
               filterMap,
               onAdvancedFilter: onSetAdvancedFilters,
               filters: advancedFilters,
-              searchPropertyFilters: () => {
-                throw new Error("not implemented");
+              searchPropertyFilters: async (
+                property: string,
+                search: string
+              ) => {
+                return ok(undefined);
               },
             }}
             savedFilters={{
@@ -612,7 +621,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 <StyledAreaChart
                   title={`Top Models`}
                   value={undefined}
-                  isDataOverTimeLoading={isLoading}
+                  isDataOverTimeLoading={isModelsLoading}
                 >
                   <div className="flex flex-row justify-between items-center pb-2">
                     <p className="text-xs font-semibold text-gray-700">Name</p>
