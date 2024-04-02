@@ -16,14 +16,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     let event: Stripe.Event;
 
     // This try catch is failing. Let's log everything so I can figure out why:
-
-    console.log("buf", buf.toString());
-    console.log("sig", sig);
-    console.log(
-      "process.env.STRIPE_WEBHOOK_SECRET",
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
-
     try {
       event = stripe.webhooks.constructEvent(
         buf.toString(),
@@ -43,14 +35,33 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
         const checkoutCompleted = event.data.object as Stripe.Checkout.Session;
 
-        // const session = await stripe.checkout.sessions.retrieve(
-        //   checkoutCompleted.id
-        // );
+        let subscriptionId = checkoutCompleted.subscription?.toString();
+
+        console.log(`Checkout Completed: ${JSON.stringify(checkoutCompleted)}`);
+
+        if (!subscriptionId) {
+          console.log("Retrieving session to get subscription ID");
+          const session = await stripe.checkout.sessions.retrieve(
+            checkoutCompleted.id
+          );
+          subscriptionId = session.subscription?.toString();
+
+          console.log(`Session: ${JSON.stringify(session)}`);
+        }
+
+        if (!subscriptionId) {
+          console.error(
+            "Subscription ID is missing after retrieving the session."
+          );
+          // Handle the error appropriately
+          break;
+        }
 
         const subscription = await stripe.subscriptions.retrieve(
-          checkoutCompleted.subscription?.toString() || ""
+          subscriptionId
         );
 
+        console.log(`Subscription: ${JSON.stringify(subscription)}`);
         const subscriptionItemId = subscription?.items.data[0].id;
 
         // Assuming you passed the organization's ID in the `metadata` when creating the checkout session:
@@ -64,7 +75,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             subscription_status: "active",
             stripe_subscription_id: checkoutCompleted.subscription?.toString(), // this is the ID of the subscription created by the checkout
             stripe_subscription_item_id: subscriptionItemId,
-            tier: "pro",
+            tier: tier,
           })
           .eq("id", orgId || "");
 
