@@ -38,7 +38,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
         createdAt: new Date().toISOString(),
         softDelete: false,
       };
-      if (savedFilters && savedFilters.length > 0) {
+      if (savedFilters !== undefined) {
         const updatedFilters = [...savedFilters, saveFilter];
         await fetch(
           `/api/organization/${orgContext?.currentOrg?.id!}/update_filter`,
