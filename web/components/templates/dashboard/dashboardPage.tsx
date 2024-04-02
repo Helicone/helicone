@@ -49,10 +49,10 @@ import {
   OrganizationLayout,
 } from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
-import { v4 as uuidv4 } from "uuid";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { ok } from "../../../lib/result";
 import CountryPanel from "./panels/countryPanel";
+import useNotification from "../../shared/notification/useNotification";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -172,6 +172,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   const timeIncrement = getTimeInterval(timeFilter);
 
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
+  const { setNotification } = useNotification();
 
   const {
     metrics,
@@ -190,17 +191,16 @@ const DashboardPage = (props: DashboardPageProps) => {
     dbIncrement: timeIncrement,
   });
 
-  const onSetAdvancedFilters = (
+  const onSetAdvancedFiltersHandler = (
     filters: UIFilterRow[],
-    layoutFilterId?: string
+    layoutFilterId?: string | null
   ) => {
-    if (filters.length && layoutFilterId) {
-      searchParams.set("filter", layoutFilterId);
-    } else {
-      searchParams.delete("filter");
-    }
-
     setAdvancedFilters(filters);
+    if (layoutFilterId === null) {
+      searchParams.delete("filter");
+    } else {
+      searchParams.set("filter", layoutFilterId ?? "");
+    }
   };
 
   const metricsData: MetricsPanelProps["metric"][] = [
@@ -353,57 +353,13 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
 
-  const onSaveFilter = async (name: string) => {
-    // handle adding the new filter or updating the current filter
-
-    // once thats done, then call `refetch`
-    if (advancedFilters.length > 0) {
-      const saveFilter: OrganizationFilter = {
-        id: uuidv4(),
-        name: name,
-        filter: advancedFilters,
-        createdAt: new Date().toISOString(),
-        softDelete: false,
-      };
-      if (orgLayout && orgLayout.filters.length > 0) {
-        const updatedFilters = [...orgLayout.filters, saveFilter];
-        await fetch(
-          `/api/organization/${orgContext?.currentOrg?.id!}/update_filter`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              type: "dashboard",
-              filters: updatedFilters,
-            }),
-          }
-        );
-      } else {
-        await fetch(
-          `/api/organization/${orgContext?.currentOrg?.id!}/create_filter`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              type: "dashboard",
-              filters: [saveFilter],
-            }),
-          }
-        );
-      }
-      onLayoutFilterChange(saveFilter);
-      await orgLayoutRefetch();
-    }
-  };
-
-  const onLayoutFilterChange = (layoutFilter: OrganizationFilter) => {
-    if (layoutFilter) {
-      onSetAdvancedFilters(layoutFilter?.filter, layoutFilter.id);
+  const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
+    if (layoutFilter !== null) {
+      onSetAdvancedFiltersHandler(layoutFilter?.filter, layoutFilter.id);
       setCurrFilter(layoutFilter?.id);
+    } else {
+      setCurrFilter(null);
+      onSetAdvancedFiltersHandler([], null);
     }
   };
 
@@ -519,7 +475,7 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
             advancedFilter={{
               filterMap,
-              onAdvancedFilter: onSetAdvancedFilters,
+              onAdvancedFilter: onSetAdvancedFiltersHandler,
               filters: advancedFilters,
               searchPropertyFilters: async (
                 property: string,
@@ -532,7 +488,9 @@ const DashboardPage = (props: DashboardPageProps) => {
               currentFilter: currFilter ?? undefined,
               filters: orgLayout?.filters ?? undefined,
               onFilterChange: onLayoutFilterChange,
-              onSaveFilter: onSaveFilter,
+              onSaveFilterCallback: async () => {
+                await orgLayoutRefetch();
+              },
             }}
           />
           <section id="panels" className="-m-2">

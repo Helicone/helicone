@@ -24,6 +24,7 @@ const ThemedNumberDropdown = (props: ThemedNumberDropdownProps) => {
           setSelected(value);
           onChange(value);
         }}
+        enableClear={false}
       >
         {options.map((option, i) => (
           <SearchSelectItem value={option.key} key={i}>
