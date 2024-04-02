@@ -390,6 +390,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   );
 
   const onSetAdvancedFilters = (filters: UIFilterRow[]) => {
+    // TODO: remove this url param setting once we move to filter persistence
     if (filters.length > 0) {
       const currentAdvancedFilters = encodeURIComponent(
         JSON.stringify(filters.map(encodeFilter).join("|"))
