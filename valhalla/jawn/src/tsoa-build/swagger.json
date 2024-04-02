@@ -1239,7 +1239,7 @@
 				}
 			}
 		},
-		"/v1/request/v2/query": {
+		"/v1/request/query": {
 			"post": {
 				"operationId": "GetRequests",
 				"responses": {

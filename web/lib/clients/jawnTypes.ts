@@ -11,7 +11,7 @@ export interface paths {
   "/v1/users": {
     post: operations["CreateUser"];
   };
-  "/v1/request/v2/query": {
+  "/v1/request/query": {
     post: operations["GetRequests"];
   };
 }

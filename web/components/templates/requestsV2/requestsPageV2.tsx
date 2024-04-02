@@ -32,6 +32,7 @@ import getNormalizedRequest from "./builder/requestBuilder";
 import { getHeliconeCookie } from "../../../lib/cookies";
 import { useOrg } from "../../layout/organizationContext";
 import { CreateDataSetModal } from "../fine-tune/dataSetModal";
+import { useJawnClient } from "../../../lib/clients/jawnHook";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -113,51 +114,35 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     userId,
   } = props;
   const [isLive, setIsLive] = useLocalStorage("isLive", false);
-  const org = useOrg();
+  const jawn = useJawnClient();
 
   // set the initial selected data on component load
   useEffect(() => {
     if (initialRequestId) {
       const fetchRequest = async () => {
-        if (!org?.currentOrg?.id) {
-          return;
-        }
-        const authFromCookie = getHeliconeCookie();
-        const resp = await fetch(
-          `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/request/query`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "helicone-authorization": JSON.stringify({
-                _type: "jwt",
-                token: authFromCookie.data?.jwtToken,
-                orgId: org?.currentOrg?.id,
-              }),
-            },
-            body: JSON.stringify({
-              filter: {
-                left: {
-                  request: {
-                    id: {
-                      equals: initialRequestId,
-                    },
+        const response = await jawn.POST("/v1/request/query", {
+          body: {
+            filter: {
+              left: {
+                request: {
+                  id: {
+                    equals: initialRequestId,
                   },
                 },
-                operator: "and",
-                right: "all",
-              } as FilterNode,
-              offset: 0,
-              limit: 1,
-              sort: {},
-            }),
-          }
-        );
+              },
+              operator: "and",
+              right: "all",
+            },
+            offset: 0,
+            limit: 1,
+            sort: {},
+          },
+        });
 
-        const result = (await resp.json()) as Result<HeliconeRequest[], string>;
+        const result = response.data;
 
         // update below logic to work for single request
-        if (result.data?.[0] && !result.error) {
+        if (result?.data?.[0] && !result.error) {
           const request = result.data[0];
           if (request?.signed_body_url) {
             try {
@@ -177,14 +162,16 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             }
           }
 
-          const normalizedRequest = getNormalizedRequest(result.data[0]);
+          const normalizedRequest = getNormalizedRequest(
+            result.data[0] as HeliconeRequest
+          );
           setSelectedData(normalizedRequest);
           setOpen(true);
         }
       };
       fetchRequest();
     }
-  }, [initialRequestId, org?.currentOrg?.id]);
+  }, [initialRequestId]);
 
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);

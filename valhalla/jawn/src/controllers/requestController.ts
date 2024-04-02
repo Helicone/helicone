@@ -15,7 +15,7 @@ export interface RequestQueryParams {
   isCached?: boolean;
 }
 
-@Route("v1/request/v2")
+@Route("v1/request")
 @Tags("Request")
 @Security("api_key")
 export class RequestController extends Controller {
@@ -29,10 +29,9 @@ export class RequestController extends Controller {
     const requests = await reqManager.getRequests(requestBody);
     if (requests.error || !requests.data) {
       this.setStatus(500);
-      throw new Error(requests.error);
     } else {
       this.setStatus(200); // set return status 201
-      return requests;
     }
+    return requests;
   }
 }
