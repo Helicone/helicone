@@ -65,6 +65,7 @@ export default async function handler(
       line_items: [
         {
           price: process.env.STRIPE_GROWTH_PRICE_ID,
+          // No quantity for usage based pricing
         },
       ],
       mode: "subscription",
