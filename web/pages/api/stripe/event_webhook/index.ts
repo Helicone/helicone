@@ -15,6 +15,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     let event: Stripe.Event;
 
+    // This try catch is failing. Let's log everything so I can figure out why:
+
+    console.log("buf", buf.toString());
+    console.log("sig", sig);
+    console.log(
+      "process.env.STRIPE_WEBHOOK_SECRET",
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+
     try {
       event = stripe.webhooks.constructEvent(
         buf.toString(),
