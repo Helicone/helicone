@@ -140,51 +140,6 @@ legacyRouter.post(
   })
 );
 
-legacyRouter.post(
-  "/v1/request/query",
-  withAuth<
-    paths["/v1/request/query"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, authParams }) => {
-    const body = await request.getRawBody<any>();
-
-    const { filter, offset, limit, sort, isCached } = body;
-
-    const metrics = isCached
-      ? await getRequestsCached(
-          authParams.organizationId,
-          filter,
-          offset,
-          limit,
-          sort
-        )
-      : await getRequests(
-          authParams.organizationId,
-          filter,
-          offset,
-          limit,
-          sort
-        );
-    postHogClient?.capture({
-      distinctId: `${await hashAuth(body)}-${authParams.organizationId}`,
-      event: "fetch_requests",
-      properties: {
-        success: metrics.error === null,
-        org_id: authParams.organizationId,
-        request_body: body,
-      },
-    });
-    res
-      .header("Access-Control-Allow-Origin", "*")
-      .header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE")
-      .header(
-        "Access-Control-Allow-Headers",
-        "Content-Type, helicone-authorization"
-      )
-      .status(metrics.error === null ? 200 : 500)
-      .json(metrics);
-  })
-);
-
 legacyRouter.get(
   "/v1/fine-tune/:jobId/stats",
   withAuth<paths["/v1/fine-tune/{jobId}/stats"]["get"]>(

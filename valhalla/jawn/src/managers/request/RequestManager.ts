@@ -16,7 +16,15 @@ export class RequestManager extends BaseManager {
   async getRequests(
     params: RequestQueryParams
   ): Promise<Result<HeliconeRequest[], string>> {
-    const { filter, offset, limit, sort, isCached } = params;
+    const {
+      filter,
+      offset = 0,
+      limit = 10,
+      sort = {
+        created_at: "desc",
+      },
+      isCached,
+    } = params;
 
     return isCached
       ? await getRequestsCached(

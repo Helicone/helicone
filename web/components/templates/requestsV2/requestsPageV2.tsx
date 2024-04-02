@@ -1,37 +1,35 @@
-import React, { useEffect, useState } from "react";
-import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
-import AuthHeader from "../../shared/authHeader";
-import useRequestsPageV2 from "./useRequestsPageV2";
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
-import RequestDrawerV2 from "./requestDrawerV2";
-import TableFooter from "./tableFooter";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { HeliconeRequest } from "../../../lib/api/request/request";
+import {
+  TimeInterval,
+  getTimeIntervalAgo,
+} from "../../../lib/timeCalculations/time";
+import { useDebounce } from "../../../services/hooks/debounce";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   SortDirection,
   SortLeafRequest,
 } from "../../../services/lib/sorts/requests/sorts";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import {
-  getTimeIntervalAgo,
-  TimeInterval,
-} from "../../../lib/timeCalculations/time";
-import { getInitialColumns } from "./initialColumns";
-import { useDebounce } from "../../../services/hooks/debounce";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
-import { useRouter } from "next/router";
-import { HeliconeRequest } from "../../../lib/api/request/request";
-import { Result } from "../../../lib/result";
-import { useLocalStorage } from "../../../services/hooks/localStorage";
+import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import { NormalizedRequest } from "./builder/abstractRequestBuilder";
+import { getInitialColumns } from "./initialColumns";
+import RequestDrawerV2 from "./requestDrawerV2";
+import TableFooter from "./tableFooter";
+import useRequestsPageV2 from "./useRequestsPageV2";
 
+import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { TimeFilter } from "../dashboard/dashboardPage";
-import RequestCard from "./requestCard";
-import getNormalizedRequest from "./builder/requestBuilder";
-import { getHeliconeCookie } from "../../../lib/cookies";
-import { useOrg } from "../../layout/organizationContext";
 import { CreateDataSetModal } from "../fine-tune/dataSetModal";
+import getNormalizedRequest from "./builder/requestBuilder";
+import RequestCard from "./requestCard";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -113,51 +111,35 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     userId,
   } = props;
   const [isLive, setIsLive] = useLocalStorage("isLive", false);
-  const org = useOrg();
+  const jawn = useJawnClient();
 
   // set the initial selected data on component load
   useEffect(() => {
     if (initialRequestId) {
       const fetchRequest = async () => {
-        if (!org?.currentOrg?.id) {
-          return;
-        }
-        const authFromCookie = getHeliconeCookie();
-        const resp = await fetch(
-          `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/request/query`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "helicone-authorization": JSON.stringify({
-                _type: "jwt",
-                token: authFromCookie.data?.jwtToken,
-                orgId: org?.currentOrg?.id,
-              }),
-            },
-            body: JSON.stringify({
-              filter: {
-                left: {
-                  request: {
-                    id: {
-                      equals: initialRequestId,
-                    },
+        const response = await jawn.POST("/v1/request/query", {
+          body: {
+            filter: {
+              left: {
+                request: {
+                  id: {
+                    equals: initialRequestId,
                   },
                 },
-                operator: "and",
-                right: "all",
-              } as FilterNode,
-              offset: 0,
-              limit: 1,
-              sort: {},
-            }),
-          }
-        );
+              },
+              operator: "and",
+              right: "all",
+            },
+            offset: 0,
+            limit: 1,
+            sort: {},
+          },
+        });
 
-        const result = (await resp.json()) as Result<HeliconeRequest[], string>;
+        const result = response.data;
 
         // update below logic to work for single request
-        if (result.data?.[0] && !result.error) {
+        if (result?.data?.[0] && !result.error) {
           const request = result.data[0];
           if (request?.signed_body_url) {
             try {
@@ -177,14 +159,16 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             }
           }
 
-          const normalizedRequest = getNormalizedRequest(result.data[0]);
+          const normalizedRequest = getNormalizedRequest(
+            result.data[0] as HeliconeRequest
+          );
           setSelectedData(normalizedRequest);
           setOpen(true);
         }
       };
       fetchRequest();
     }
-  }, [initialRequestId, org?.currentOrg?.id]);
+  }, [initialRequestId, jawn]);
 
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
