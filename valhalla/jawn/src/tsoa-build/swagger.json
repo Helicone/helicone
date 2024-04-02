@@ -419,6 +419,10 @@
 							}
 						],
 						"nullable": true
+					},
+					"country_code": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -446,7 +450,8 @@
 					"completion_tokens",
 					"provider",
 					"node_id",
-					"llmSchema"
+					"llmSchema",
+					"country_code"
 				],
 				"type": "object",
 				"additionalProperties": false

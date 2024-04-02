@@ -138,6 +138,7 @@ export interface components {
       feedback_rating?: boolean | null;
       signed_body_url?: string | null;
       llmSchema: components["schemas"]["LlmSchema"] | null;
+      country_code: string | null;
     };
     "SuccessResult_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];

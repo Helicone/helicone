@@ -61,6 +61,7 @@ export interface HeliconeRequest {
   feedback_rating?: boolean | null;
   signed_body_url?: string | null;
   llmSchema: LlmSchema | null;
+  country_code: string | null;
 }
 
 export async function getRequests(
@@ -95,6 +96,7 @@ export async function getRequests(
       THEN '{"helicone_message": "request body too large"}'::jsonb
       ELSE request.body::jsonb
     END AS request_body,
+    request.country_code as country_code,
     request.path AS request_path,
     request.user_id AS request_user_id,
     request.properties AS request_properties,
@@ -125,6 +127,7 @@ export async function getRequests(
   OFFSET ${offset}
 `;
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
+
   const s3Client = new S3Client(
     process.env.S3_ACCESS_KEY ?? "",
     process.env.S3_SECRET_KEY ?? "",
@@ -161,6 +164,7 @@ export async function getRequestsCached(
       WHEN request.path LIKE '%embeddings%' THEN '{"helicone_message": "embeddings response omitted"}'::jsonb
       ELSE response.body::jsonb
     END AS response_body,
+    request.country_code as country_code,
     response.status AS response_status,
     request.id AS request_id,
     cache_hits.created_at as request_created_at,
