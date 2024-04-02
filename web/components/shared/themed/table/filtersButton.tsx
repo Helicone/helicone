@@ -106,11 +106,11 @@ export default function FiltersButton({
                             filter.id === currentFilter
                               ? "bg-sky-50 dark:bg-sky-950"
                               : "",
-                            "flex justify-between items-center p-2"
+                            "flex justify-between items-center rounded-md"
                           )}
                         >
                           <button
-                            className="group flex w-full items-center rounded-md text-sm text-gray-900 dark:text-gray-100"
+                            className="p-2 group flex w-full items-center text-sm text-gray-900 dark:text-gray-100"
                             onClick={() => {
                               if (onFilterChange) {
                                 setSelectedFilter(filter);
@@ -128,7 +128,7 @@ export default function FiltersButton({
                               setIsDeleteModalOpen(true);
                             }}
                           >
-                            <TrashIcon className="h-4 w-4 text-red-500" />
+                            <TrashIcon className="m-2 h-4 w-4 text-red-500" />
                           </button>
                         </div>
                       )}
