@@ -49,29 +49,25 @@ export class S3Client {
   async storeRequestResponseImage(
     orgId: string,
     requestId: string,
-    requestString: any,
+    request: any,
     response: string
   ): Promise<Result<string, string>> {
-    console.log("image model");
-    console.log(requestString);
-    const parsedRequest = requestString;
     const uploadPromises = [];
 
-    for (const message of parsedRequest.messages) {
+    for (const message of request.messages) {
       for (const item of message.content) {
         if (item.type === "image_url") {
-          console.log(`item: ${JSON.stringify(item)}`);
-          console.log(`image url: ${item.image_url.url}`);
           const imageUrl = item.image_url.url;
 
           const uploadPromise = (async () => {
             try {
               let assetUrl = "";
               if (imageUrl.startsWith("data:image/")) {
-                const [mimeType, base64Data] = this.extractBase64Data(imageUrl);
+                const [assetType, base64Data] =
+                  this.extractBase64Data(imageUrl);
                 assetUrl = await this.uploadBase64ToS3(
                   base64Data,
-                  mimeType,
+                  assetType,
                   requestId,
                   orgId
                 );
@@ -101,7 +97,7 @@ export class S3Client {
     const url = this.getRequestResponseUrl(requestId, orgId);
     return await this.store(
       url,
-      JSON.stringify({ request: parsedRequest, response })
+      JSON.stringify({ request: request, response })
     );
   }
 
@@ -147,19 +143,19 @@ export class S3Client {
 
   async uploadBase64ToS3(
     base64Data: string,
-    mimeType: string,
+    assetType: string,
     requestId: string,
     orgId: string
   ): Promise<string> {
     const buffer = Buffer.from(base64Data, "base64");
-    const fileExtension = this.getFileExtension(mimeType);
+    const fileExtension = this.getFileExtension(assetType);
     const uploadUrl = this.getRequestResponseImageUrl(
       requestId,
       orgId,
       fileExtension
     );
 
-    await this.uploadToS3(uploadUrl, buffer, mimeType);
+    await this.uploadToS3(uploadUrl, buffer, assetType);
     return uploadUrl;
   }
 

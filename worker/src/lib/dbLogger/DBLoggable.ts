@@ -795,15 +795,7 @@ function unsupportedImage(body: any): any {
   };
   if (body["image_url"] !== undefined) {
     const imageUrl = body["image_url"];
-    if (typeof imageUrl === "string" && !imageUrl.startsWith("http")) {
-      body.image_url = notSupportMessage;
-    }
-    if (
-      typeof imageUrl === "object" &&
-      imageUrl.url !== undefined &&
-      typeof imageUrl.url === "string" &&
-      !imageUrl.url.startsWith("http")
-    ) {
+    if (typeof imageUrl === "string") {
       body.image_url = notSupportMessage;
     }
   }
