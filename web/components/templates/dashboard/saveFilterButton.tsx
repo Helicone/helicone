@@ -56,7 +56,6 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
           .then(() => {
             setNotification("Filter created successfully", "success");
             setIsSaveFiltersModalOpen(false);
-
             onSaveFilterCallback();
             searchParams.set("filter", saveFilter.id);
           })
