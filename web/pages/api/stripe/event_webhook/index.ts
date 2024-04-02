@@ -9,6 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  console.log(`Request.method: ${req.method}`);
   if (req.method === "POST") {
     const buf = await buffer(req);
     const sig = req.headers["stripe-signature"]!;
@@ -23,17 +24,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         process.env.STRIPE_WEBHOOK_SECRET!
       ) as Stripe.Event;
     } catch (err) {
+      console.log("Died");
       res.status(400).send(`Webhook Error: ${err}`);
       return;
     }
 
+    console.log(`Event: ${event.type}`);
     if (event.type === "customer.subscription.created") {
+      console.log("here");
       const subscription = event.data.object as Stripe.Subscription;
       const subscriptionId = subscription.id;
       const subscriptionItemId = subscription?.items.data[0].id;
 
+      console.log(`Subscription: ${JSON.stringify(subscription, null, 2)}`);
+      console.log(`Subscription ID: ${subscriptionId}`);
+      console.log(`Subscription Item ID: ${subscriptionItemId}`);
+
       // Assuming you passed the organization's ID in the `metadata` when creating the checkout session:
       const orgId = subscription.metadata?.orgId;
+
+      console.log(`Org ID: ${orgId}`);
       const { data, error } = await supabaseServer
         .from("organization")
         .update({
