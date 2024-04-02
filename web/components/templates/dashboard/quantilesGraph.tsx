@@ -48,8 +48,8 @@ export const QuantilesGraph = ({
 
   return (
     <Card>
-      <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-col space-y-0.5">
+      <div className="flex flex-row items-center justify-between w-full">
+        <div className="flex flex-col space-y-0.5 w-full">
           <p className="text-gray-500 text-sm">Quantiles</p>
           {currentMetric === "Latency" ? (
             <p className="text-black dark:text-white text-xl font-semibold">
@@ -63,20 +63,22 @@ export const QuantilesGraph = ({
             </p>
           )}
         </div>
-        {!quantilesIsLoading && (
-          <Select
-            placeholder="Select property"
-            value={currentMetric}
-            onValueChange={setCurrentMetric}
-            className="border border-gray-400 rounded-lg w-fit min-w-[250px] max-w-xl"
-          >
-            {Array.from(quantilesMetrics.entries()).map(([key, value]) => (
-              <SelectItem key={key} value={key}>
-                {key}
-              </SelectItem>
-            ))}
-          </Select>
-        )}
+        <div>
+          {!quantilesIsLoading && (
+            <Select
+              placeholder="Select property"
+              value={currentMetric}
+              onValueChange={setCurrentMetric}
+              className="border border-gray-400 rounded-lg w-fit min-w-[250px] max-w-xl"
+            >
+              {Array.from(quantilesMetrics.entries()).map(([key, value]) => (
+                <SelectItem key={key} value={key}>
+                  {key}
+                </SelectItem>
+              ))}
+            </Select>
+          )}
+        </div>
       </div>
 
       <div
