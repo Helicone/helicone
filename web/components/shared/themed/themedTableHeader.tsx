@@ -35,7 +35,6 @@ import { ThemedMultiSelect } from "./themedMultiSelect";
 import { TimeFilter } from "../../templates/dashboard/dashboardPage";
 import FiltersButton from "./table/filtersButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
-import { TextInput } from "@tremor/react";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {

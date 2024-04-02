@@ -50,7 +50,6 @@ import {
   OrganizationLayout,
 } from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
-import { v4 as uuidv4 } from "uuid";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 import CountryPanel from "./panels/countryPanel";

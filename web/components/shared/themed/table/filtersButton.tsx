@@ -2,14 +2,11 @@ import { Menu, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import {
   ArrowPathIcon,
-  CheckIcon,
   Square2StackIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { clsx } from "../../clsx";
-import { XCircleIcon } from "@heroicons/react/24/solid";
-import { set } from "date-fns";
 import ThemedModal from "../themedModal";
 import { useOrg } from "../../../layout/organizationContext";
 import useNotification from "../../notification/useNotification";

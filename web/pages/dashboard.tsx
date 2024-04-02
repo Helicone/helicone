@@ -4,7 +4,6 @@ import { ReactElement } from "react";
 import AuthLayout from "../components/layout/authLayout";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
-import { useTheme } from "../components/shared/theme/themeContext";
 import {
   OrganizationFilter,
   OrganizationLayout,
