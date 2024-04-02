@@ -187,10 +187,14 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const onSetAdvancedFiltersHandler = (
     filters: UIFilterRow[],
-    layoutFilterId?: string
+    layoutFilterId?: string | null
   ) => {
     setAdvancedFilters(filters);
-    searchParams.set("filter", layoutFilterId ?? "");
+    if (layoutFilterId === null) {
+      searchParams.delete("filter");
+    } else {
+      searchParams.set("filter", layoutFilterId ?? "");
+    }
   };
 
   const metricsData: MetricsPanelProps["metric"][] = [
@@ -349,6 +353,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       setCurrFilter(layoutFilter?.id);
     } else {
       setCurrFilter(null);
+      onSetAdvancedFiltersHandler([], null);
     }
   };
 

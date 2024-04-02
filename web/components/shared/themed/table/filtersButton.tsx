@@ -76,7 +76,7 @@ export default function FiltersButton({
                   if (onFilterChange) {
                     setSelectedFilter(null);
                     onFilterChange(null);
-                    searchParams.delete("filter");
+                    // searchParams.delete("filter");
                   }
                 }}
                 className="pl-1 text-gray-500"
