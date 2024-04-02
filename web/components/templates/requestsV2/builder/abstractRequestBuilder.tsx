@@ -5,6 +5,7 @@ import { modelCost } from "../../../../lib/api/metrics/costCalc";
 type CommonFields = {
   id: string;
   path: string;
+  countryCode: string | null;
   createdAt: string;
   totalTokens: number | null;
   promptTokens: number | null;
@@ -62,6 +63,7 @@ abstract class AbstractRequestBuilder {
     return {
       model: this.model,
       id: this.response.request_id,
+      countryCode: this.response.country_code,
       cost: modelCost({
         model: this.model,
         sum_completion_tokens: this.response.completion_tokens || 0,

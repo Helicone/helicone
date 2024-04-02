@@ -1,0 +1,6 @@
+{
+  "exec": "tsoa spec-and-routes && python3 genTypes.ts && ts-node src/index.ts ",
+  "watch": ["src"],
+  "ignore": ["src/tsoa-build"],
+  "ext": "ts"
+}

@@ -33,18 +33,13 @@ interface Request {
   tooLarge?: boolean;
   heliconeMessage?: string;
 }
-
-interface Completion {
-  [index: number]: string;
-}
-
 interface ErrorInfo {
   code?: string | null;
   message?: string | null;
 }
 
 interface Response {
-  completions?: Completion[] | null;
+  completions?: Record<number, string> | null;
   message?: Message | null;
   error?: ErrorInfo | null;
   model?: string | null;
