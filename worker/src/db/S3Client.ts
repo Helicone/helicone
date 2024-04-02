@@ -31,18 +31,37 @@ export class S3Client {
     }
   };
 
+  getRequestResponseImageUrl = (
+    requestId: string,
+    orgId: string,
+    fileExtension: string
+  ) => {
+    const key = `organizations/${orgId}/requests/${requestId}/assets/${requestId}-${fileExtension}-${Date.now()}`;
+    if (this.endpoint) {
+      // For MinIO or another S3-compatible service
+      return `${this.endpoint}/${this.bucketName}/${key}`;
+    } else {
+      // For AWS S3
+      return `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${key}`;
+    }
+  };
+
   async storeRequestResponseImage(
     orgId: string,
     requestId: string,
-    requestString: string,
+    requestString: any,
     response: string
-  ) {
-    const parsedRequest = JSON.parse(requestString);
+  ): Promise<Result<string, string>> {
+    console.log("image model");
+    console.log(requestString);
+    const parsedRequest = requestString;
     const uploadPromises = [];
 
     for (const message of parsedRequest.messages) {
       for (const item of message.content) {
         if (item.type === "image_url") {
+          console.log(`item: ${JSON.stringify(item)}`);
+          console.log(`image url: ${item.image_url.url}`);
           const imageUrl = item.image_url.url;
 
           const uploadPromise = (async () => {
@@ -53,10 +72,15 @@ export class S3Client {
                 assetUrl = await this.uploadBase64ToS3(
                   base64Data,
                   mimeType,
-                  requestId
+                  requestId,
+                  orgId
                 );
               } else {
-                assetUrl = await this.uploadImageToS3(imageUrl, requestId);
+                assetUrl = await this.uploadImageToS3(
+                  imageUrl,
+                  requestId,
+                  orgId
+                );
               }
 
               if (assetUrl) {
@@ -74,11 +98,10 @@ export class S3Client {
     }
 
     await Promise.all(uploadPromises);
-    const finalRequest = JSON.stringify(parsedRequest);
     const url = this.getRequestResponseUrl(requestId, orgId);
     return await this.store(
       url,
-      JSON.stringify({ request: finalRequest, response })
+      JSON.stringify({ request: parsedRequest, response })
     );
   }
 
@@ -125,19 +148,26 @@ export class S3Client {
   async uploadBase64ToS3(
     base64Data: string,
     mimeType: string,
-    requestId: string
+    requestId: string,
+    orgId: string
   ): Promise<string> {
     const buffer = Buffer.from(base64Data, "base64");
     const fileExtension = this.getFileExtension(mimeType);
-    // Adjusted assetKey format for consistency
-    const assetKey = `organizations/${requestId}/assets/${requestId}-${fileExtension}-${Date.now()}`;
-    const uploadUrl = this.getUploadUrl(assetKey);
+    const uploadUrl = this.getRequestResponseImageUrl(
+      requestId,
+      orgId,
+      fileExtension
+    );
 
     await this.uploadToS3(uploadUrl, buffer, mimeType);
     return uploadUrl;
   }
 
-  async uploadImageToS3(imageUrl: string, requestId: string): Promise<string> {
+  async uploadImageToS3(
+    imageUrl: string,
+    requestId: string,
+    orgId: string
+  ): Promise<string> {
     const response = await fetch(imageUrl);
     if (!response.ok) {
       console.error(`Failed to download image: ${response.statusText}`);
@@ -147,8 +177,11 @@ export class S3Client {
     const fileExtension =
       this.getFileExtensionFromBlob(blob) ||
       this.getFileExtensionFromUrl(imageUrl);
-    const assetKey = `organizations/${requestId}/assets/${requestId}-${fileExtension}-${Date.now()}`;
-    const uploadUrl = this.getUploadUrl(assetKey);
+    const uploadUrl = this.getRequestResponseImageUrl(
+      requestId,
+      orgId,
+      fileExtension ?? "jpg"
+    );
 
     await this.uploadToS3(uploadUrl, await blob.arrayBuffer(), blob.type);
     return uploadUrl;
@@ -165,10 +198,15 @@ export class S3Client {
     return lastSegment?.split(".").pop();
   }
 
-  private getUploadUrl(assetKey: string): string {
-    return this.endpoint
-      ? `${this.endpoint}/${this.bucketName}/${assetKey}`
-      : `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${assetKey}`;
+  private getFileExtension(mimeType: string): string {
+    const mimeExtensionMap = new Map<string, string>([
+      ["image/jpeg", "jpg"],
+      ["image/png", "png"],
+      ["image/gif", "gif"],
+      ["image/webp", "webp"],
+    ]);
+
+    return mimeExtensionMap.get(mimeType) || "jpg";
   }
 
   private extractBase64Data(dataUri: string): [string, string] {

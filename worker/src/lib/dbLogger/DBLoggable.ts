@@ -640,16 +640,31 @@ export class DBLoggable {
     }
 
     const responseResult = await this.readAndLogResponse(db.queue);
+    const model =
+      requestResult.data.request.model_override ??
+      responseResult.data?.response.model ??
+      requestResult.data.request.model ??
+      "not-found";
+
+    let s3Result: Result<string, string>;
     // If no data or error, return
     if (!responseResult.data || responseResult.error) {
       // Log the error in S3
       if (S3_ENABLED === "true") {
-        let s3Result: Result<string, string>;
-
-        //TODO: check if it's vision/dalle model and save image
-        if (requestResult.data.body) {
-        } else {
+        if (this.isImageModel(model)) {
           s3Result = await db.s3Client.storeRequestResponseImage(
+            authParams.organizationId,
+            this.request.requestId,
+            requestResult.data.body,
+            JSON.stringify({
+              helicone_error: "error getting response, " + responseResult.error,
+              helicone_repsonse_body_as_string: (
+                await this.response.getResponseBody()
+              ).body,
+            })
+          );
+        } else {
+          s3Result = await db.s3Client.storeRequestResponse(
             authParams.organizationId,
             this.request.requestId,
             requestResult.data.body,
@@ -670,15 +685,22 @@ export class DBLoggable {
       return responseResult;
     }
 
-    //TODO: map by model that support images and next call save image
-
     if (S3_ENABLED === "true") {
-      const s3Result = await db.s3Client.storeRequestResponseImage(
-        authParams.organizationId,
-        this.request.requestId,
-        requestResult.data.body,
-        responseResult.data.body
-      );
+      if (this.isImageModel(model)) {
+        s3Result = await db.s3Client.storeRequestResponseImage(
+          authParams.organizationId,
+          this.request.requestId,
+          requestResult.data.body,
+          responseResult.data.body
+        );
+      } else {
+        s3Result = await db.s3Client.storeRequestResponse(
+          authParams.organizationId,
+          this.request.requestId,
+          requestResult.data.body,
+          responseResult.data.body
+        );
+      }
 
       if (s3Result.error) {
         console.error("Error storing request response", s3Result.error);
@@ -742,5 +764,13 @@ export class DBLoggable {
     }
 
     return ok(null);
+  }
+
+  isImageModel(modelName: string): boolean {
+    const models = new Set<string>([
+      "gpt-4-vision-preview",
+      "gpt-4-1106-vision-preview",
+    ]);
+    return models.has(modelName);
   }
 }
