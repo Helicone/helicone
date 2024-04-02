@@ -69,7 +69,7 @@ export const QuantilesGraph = ({
               placeholder="Select property"
               value={currentMetric}
               onValueChange={setCurrentMetric}
-              className="border border-gray-400 rounded-lg w-fit min-w-[250px] max-w-xl"
+              className="border border-gray-400 rounded-lg w-fit"
             >
               {Array.from(quantilesMetrics.entries()).map(([key, value]) => (
                 <SelectItem key={key} value={key}>

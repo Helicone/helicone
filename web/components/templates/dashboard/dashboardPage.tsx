@@ -188,12 +188,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     filters: UIFilterRow[],
     layoutFilterId?: string
   ) => {
-    if (filters.length && layoutFilterId) {
-      searchParams.set("filter", layoutFilterId);
-    } else {
-      searchParams.delete("filter");
-    }
-
     setAdvancedFilters(filters);
   };
 
@@ -348,9 +342,6 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
 
   const onSaveFilter = async (name: string) => {
-    // handle adding the new filter or updating the current filter
-
-    // once thats done, then call `refetch`
     if (advancedFilters.length > 0) {
       const saveFilter: OrganizationFilter = {
         id: uuidv4(),

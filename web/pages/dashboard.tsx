@@ -19,7 +19,6 @@ interface DashboardProps {
 
 const Dashboard = (props: DashboardProps) => {
   const { user, currentFilter, orgLayout } = props;
-  const theme = useTheme();
 
   return (
     <DashboardPage
