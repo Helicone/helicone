@@ -53,6 +53,8 @@ import { useOrg } from "../../layout/organizationContext";
 import { v4 as uuidv4 } from "uuid";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { ok } from "../../../lib/result";
+import CountryPanel from "./panels/countryPanel";
+import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -189,29 +191,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     dbIncrement: timeIncrement,
   });
 
-  function encodeFilter(filter: UIFilterRow): string {
-    return `${filter.filterMapIdx}:${filter.operatorIdx}:${encodeURIComponent(
-      filter.value
-    )}`;
-  }
-
-  function decodeFilter(encoded: string): UIFilterRow | null {
-    try {
-      const parts = encoded.split(":");
-      if (parts.length !== 3) return null;
-      const filterMapIdx = parseInt(parts[0], 10);
-      const operatorIdx = parseInt(parts[1], 10);
-      const value = decodeURIComponent(parts[2]);
-
-      if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
-
-      return { filterMapIdx, operatorIdx, value };
-    } catch (error) {
-      console.error("Error decoding filter:", error);
-      return null;
-    }
-  }
-
   const onSetAdvancedFilters = (
     filters: UIFilterRow[],
     layoutFilterId?: string
@@ -286,275 +265,18 @@ const DashboardPage = (props: DashboardPageProps) => {
     },
   ];
 
-  const initialLayout: ReactGridLayout.Layout[] = [
-    {
-      i: "cost-req",
-      x: 0,
-      y: 0,
-      w: 3,
-      h: 1,
-    },
-    {
-      i: "prompt-tokens",
-      x: 3,
-      y: 0,
-      w: 3,
-      h: 1,
-    },
-    {
-      i: "completion-tokens",
-      x: 6,
-      y: 0,
-      w: 3,
-      h: 1,
-    },
-    {
-      i: "total-tokens",
-      x: 9,
-      y: 0,
-      w: 3,
-      h: 1,
-    },
-    {
-      i: "requests",
-      x: 0,
-      y: 1,
-      w: 6,
-      h: 3,
-    },
-    {
-      i: "errors",
-      x: 6,
-      y: 1,
-      w: 3,
-      h: 3,
-    },
-    {
-      i: "models",
-      x: 9,
-      y: 1,
-      w: 3,
-      h: 3,
-    },
-    {
-      i: "costs",
-      x: 0,
-      y: 4,
-      w: 4,
-      h: 3,
-    },
-    {
-      i: "users",
-      x: 4,
-      y: 4,
-      w: 4,
-      h: 3,
-    },
-    {
-      i: "latency",
-      x: 8,
-      y: 4,
-      w: 4,
-      h: 3,
-    },
-    {
-      i: "tokens-per-min-over-time",
-      x: 0,
-      y: 7,
-      w: 6,
-      h: 3,
-    },
-    {
-      i: "quantiles",
-      x: 6,
-      y: 7,
-      w: 6,
-      h: 3,
-    },
-    {
-      i: "time-to-first-token",
-      x: 0,
-      y: 10,
-      w: 4,
-      h: 3,
-    },
-    {
-      i: "threats",
-      x: 4,
-      y: 10,
-      w: 4,
-      h: 3,
-    },
-    {
-      i: "suggest-more-graphs",
-      x: 8,
-      y: 10,
-      w: 4,
-      h: 3,
-    },
-  ];
-
-  const smallLayout: ReactGridLayout.Layout[] = [
-    {
-      i: "requests",
-      x: 0,
-      y: 0,
-      w: 12,
-      h: 3,
-      static: true,
-    },
-    {
-      i: "cost-req",
-      x: 0,
-      y: 3,
-      w: 12,
-      h: 3,
-      static: true,
-    },
-    {
-      i: "prompt-tokens",
-      x: 0,
-      y: 6,
-      w: 12,
-      h: 3,
-      static: true,
-    },
-    {
-      i: "completion-tokens",
-      x: 0,
-      y: 9,
-      w: 12,
-      h: 3,
-      static: true,
-    },
-    {
-      i: "total-tokens",
-      x: 0,
-      y: 12,
-      w: 12,
-      h: 3,
-      static: true,
-    },
-    {
-      i: "models",
-      x: 0,
-      y: 15,
-      w: 15,
-      h: 3,
-      static: true,
-    },
-    {
-      i: "errors",
-      x: 0,
-      y: 18,
-      w: 12,
-      h: 3,
-      static: true,
-    },
-    {
-      i: "costs",
-      x: 0,
-      y: 21,
-      w: 12,
-      h: 3,
-      static: true,
-    },
-    {
-      i: "users",
-      x: 0,
-      y: 24,
-      w: 12,
-      h: 3,
-
-      static: true,
-    },
-    {
-      i: "latency",
-      x: 0,
-      y: 27,
-      w: 12,
-      h: 3,
-
-      static: true,
-    },
-    {
-      i: "quantiles",
-      x: 0,
-      y: 30,
-      w: 12,
-      h: 3,
-
-      static: true,
-    },
-    {
-      i: "time-to-first-token",
-      x: 0,
-      y: 33,
-      w: 12,
-      h: 3,
-
-      static: true,
-    },
-    {
-      i: "threats",
-      x: 0,
-      y: 36,
-      w: 12,
-      h: 3,
-
-      static: true,
-    },
-    {
-      i: "tokens-per-min-over-time",
-      x: 0,
-      y: 39,
-      w: 12,
-      h: 3,
-    },
-    {
-      i: "suggest-more-graphs",
-      x: 0,
-      y: 42,
-      w: 12,
-      h: 3,
-    },
-  ];
-
   const gridCols = { lg: 12, md: 12, sm: 12, xs: 4, xxs: 2 };
 
-  const modelColors = ["purple", "blue", "green", "yellow", "orange"];
+  const listColors = ["purple", "blue", "green", "yellow", "orange"];
 
   const modelMapper = (model: ModelMetric, index: number) => {
-    const currentAdvancedFilters = encodeURIComponent(
-      JSON.stringify(
-        [
-          {
-            filterMapIdx: 0,
-            operatorIdx: 0,
-            value: model.model,
-          },
-        ]
-          .map(encodeFilter)
-          .join("|")
-      )
-    );
-
-    const url = new URL("/dashboard", window.location.origin);
-
-    const params = new URLSearchParams(window.location.search);
-
-    params.set("filters", `"${currentAdvancedFilters}"`);
-
-    url.search = params.toString();
-
-    const urlString = url.toString();
-
+    // TODO add the filter to the advancedFilters
     return {
       name: model.model || "n/a",
       value: model.total_requests,
-      color: modelColors[index % modelColors.length],
-      href: urlString,
-      target: "_self",
+      color: listColors[index % listColors.length],
+      // href: urlString,
+      // target: "_self",
     };
   };
 
@@ -818,11 +540,11 @@ const DashboardPage = (props: DashboardPageProps) => {
             <ResponsiveGridLayout
               className="layout"
               layouts={{
-                lg: initialLayout,
-                md: initialLayout,
-                sm: initialLayout,
-                xs: smallLayout,
-                xxs: smallLayout,
+                lg: INITIAL_LAYOUT,
+                md: INITIAL_LAYOUT,
+                sm: INITIAL_LAYOUT,
+                xs: SMALL_LAYOUT,
+                xxs: SMALL_LAYOUT,
               }}
               autoSize={true}
               isBounded={true}
@@ -895,13 +617,14 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </div>
                 </Card>
               </div>
+
               <div key="models">
                 <StyledAreaChart
                   title={`Top Models`}
                   value={undefined}
                   isDataOverTimeLoading={isModelsLoading}
                 >
-                  <div className="flex flex-row justify-between items-center">
+                  <div className="flex flex-row justify-between items-center pb-2">
                     <p className="text-xs font-semibold text-gray-700">Name</p>
                     <p className="text-xs font-semibold text-gray-700">
                       Requests
@@ -977,7 +700,9 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </StyledAreaChart>
               </div>
-
+              <div key="countries">
+                <CountryPanel timeFilter={timeFilter} />
+              </div>
               <div key="latency">
                 <StyledAreaChart
                   title={"Latency"}

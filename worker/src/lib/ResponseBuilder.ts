@@ -1,4 +1,7 @@
-import { RateLimitOptions, RateLimitResponse } from "../rateLimit";
+import {
+  RateLimitOptions,
+  RateLimitResponse,
+} from "./clients/KVRateLimiterClient";
 
 export interface BuildParams {
   body: BodyInit | null;

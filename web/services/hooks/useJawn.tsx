@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { usePostHog } from "posthog-js/react";
+import { useCallback } from "react";
 import { useOrg } from "../../components/layout/organizationContext";
 import { getHeliconeCookie } from "../../lib/cookies";
-import { usePostHog } from "posthog-js/react";
 
 export const useJawn = () => {
   const org = useOrg();

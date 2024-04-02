@@ -1,4 +1,4 @@
-import { Result } from "../../results";
+import { Result } from "../util/results";
 
 const VALID_STATUS = ["RUNNING", "SUCCESS", "FAILED", "CANCELLED"];
 

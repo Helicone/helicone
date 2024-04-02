@@ -1,10 +1,12 @@
 import { Env } from "..";
-import { enumerate } from "../helpers";
-import { proxyForwarder } from "../lib/HeliconeProxyRequest/forwarder";
+import { enumerate } from "../lib/util/helpers";
+import { proxyForwarder } from "../lib/HeliconeProxyRequest/ProxyForwarder";
 import { RequestWrapper } from "../lib/RequestWrapper";
-import { approvedDomains } from "../lib/gateway/approvedDomains";
-import { providers } from "../packages/cost/providers/mappings";
-import { Result, err, ok } from "../results";
+import {
+  approvedDomains,
+  providers,
+} from "../packages/cost/providers/mappings";
+import { Result, err, ok } from "../lib/util/results";
 import { BaseRouter } from "./routerFactory";
 
 function validateURL(url: string) {
