@@ -67,6 +67,35 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
       body: JSON.stringify({
         orgId: orgContext?.currentOrg?.id,
         userEmail: user?.email,
+        tier: "pro",
+      }),
+    });
+
+    const { sessionId } = await res.json();
+
+    const result = await stripe.redirectToCheckout({ sessionId });
+
+    if (result.error) {
+      console.error(result.error.message);
+    }
+  }
+
+  async function handleGrowthCheckout() {
+    const stripe = await getStripe();
+
+    if (!stripe) {
+      console.error("Stripe failed to initialize.");
+      return;
+    }
+
+    const res = await fetch("/api/stripe/create_growth_subscription", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        orgId: orgContext?.currentOrg?.id,
+        userEmail: user?.email,
       }),
     });
 
@@ -153,6 +182,12 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
             className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             Upgrade to Pro
+          </button>
+          <button
+            onClick={() => handleGrowthCheckout()}
+            className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            Upgrade to Growth
           </button>
         </div>
       </div>

@@ -31,88 +31,67 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     console.log(`Event: ${event.type}`);
     if (event.type === "customer.subscription.created") {
-      console.log("here");
       const subscription = event.data.object as Stripe.Subscription;
       const subscriptionId = subscription.id;
       const subscriptionItemId = subscription?.items.data[0].id;
-
-      console.log(`Subscription: ${JSON.stringify(subscription, null, 2)}`);
-      console.log(`Subscription ID: ${subscriptionId}`);
-      console.log(`Subscription Item ID: ${subscriptionItemId}`);
-
-      // Assuming you passed the organization's ID in the `metadata` when creating the checkout session:
       const orgId = subscription.metadata?.orgId;
 
-      console.log(`Org ID: ${orgId}`);
       const { data, error } = await supabaseServer
         .from("organization")
         .update({
           subscription_status: "active",
-          stripe_subscription_id: subscriptionId, // this is the ID of the subscription created by the checkout
-          stripe_subscription_item_id: subscriptionItemId,
+          stripe_subscription_id: subscriptionId,
+          stripe_subscription_item_id: subscriptionItemId, // Required for usage based pricing
           tier: "growth",
         })
         .eq("id", orgId || "");
     } else if (event.type === "checkout.session.completed") {
       const checkoutCompleted = event.data.object as Stripe.Checkout.Session;
+      const orgId = checkoutCompleted.metadata?.orgId;
+      const tier = checkoutCompleted.metadata?.tier;
 
-      const session = await stripe.checkout.sessions.retrieve(
-        checkoutCompleted.id
-      );
-
-      // Assuming you passed the organization's ID in the `metadata` when creating the checkout session:
-      const orgId = session.metadata?.orgId;
       const { data, error } = await supabaseServer
         .from("organization")
         .update({
           subscription_status: "active",
           stripe_subscription_id: checkoutCompleted.subscription?.toString(), // this is the ID of the subscription created by the checkout
-          tier: "pro",
+          tier: tier,
         })
         .eq("id", orgId || "");
+    } else if (event.type === "customer.subscription.updated") {
+      const subscriptionUpdated = event.data.object as Stripe.Subscription;
+
+      // check to see if the sub is active
+      let status = false;
+
+      // TODO: double check to see if this is the best way to do things
+      if (subscriptionUpdated.cancel_at === null) {
+        status = true;
+      }
+
+      // Update the organization's status based on Stripe's subscription status.
+      await supabaseServer
+        .from("organization")
+        .update({ subscription_status: status ? "active" : "pending-cancel" })
+        .eq("stripe_subscription_id", subscriptionUpdated.id);
+    } else if (event.type === "customer.subscription.deleted") {
+      // Subscription has been deleted, either due to non-payment or being manually canceled.
+      const subscriptionDeleted = event.data.object as Stripe.Subscription;
+
+      await supabaseServer
+        .from("organization")
+        .update({ tier: "free" })
+        .eq("stripe_subscription_id", subscriptionDeleted.id);
+
+      // Set the organization's status to 'inactive' or a similar status to indicate the subscription has ended.
+      await supabaseServer
+        .from("organization")
+        .update({ subscription_status: "inactive" })
+        .eq("stripe_subscription_id", subscriptionDeleted.id);
+    } else {
+      return res.status(400).end();
     }
 
-    // Handle the event
-    switch (event.type) {
-      case "customer.subscription.updated":
-        // Subscription details, like billing details or status, have changed.
-        const subscriptionUpdated = event.data.object as Stripe.Subscription;
-
-        // check to see if the sub is active
-        let status = false;
-
-        // TODO: double check to see if this is the best way to do things
-        if (subscriptionUpdated.cancel_at === null) {
-          status = true;
-        }
-
-        // Update the organization's status based on Stripe's subscription status.
-        await supabaseServer
-          .from("organization")
-          .update({ subscription_status: status ? "active" : "pending-cancel" })
-          .eq("stripe_subscription_id", subscriptionUpdated.id);
-        break;
-
-      case "customer.subscription.deleted":
-        // Subscription has been deleted, either due to non-payment or being manually canceled.
-        const subscriptionDeleted = event.data.object as Stripe.Subscription;
-
-        await supabaseServer
-          .from("organization")
-          .update({ tier: "free" })
-          .eq("stripe_subscription_id", subscriptionDeleted.id);
-
-        // Set the organization's status to 'inactive' or a similar status to indicate the subscription has ended.
-        await supabaseServer
-          .from("organization")
-          .update({ subscription_status: "inactive" })
-          .eq("stripe_subscription_id", subscriptionDeleted.id);
-        break;
-
-      default:
-        // Unexpected event type
-        return res.status(400).end();
-    }
     res.json({ received: true });
   } else {
     res.setHeader("Allow", "POST");
