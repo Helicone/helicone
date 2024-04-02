@@ -1010,6 +1010,7 @@ export type Database = {
           soft_delete: boolean
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
+          stripe_subscription_item_id: string | null
           subscription_status: string | null
           tier: string | null
         }
@@ -1034,6 +1035,7 @@ export type Database = {
           soft_delete?: boolean
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
           subscription_status?: string | null
           tier?: string | null
         }
@@ -1058,6 +1060,7 @@ export type Database = {
           soft_delete?: boolean
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
           subscription_status?: string | null
           tier?: string | null
         }

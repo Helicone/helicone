@@ -33,18 +33,25 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
         const checkoutCompleted = event.data.object as Stripe.Checkout.Session;
 
-        const session = await stripe.checkout.sessions.retrieve(
-          checkoutCompleted.id
+        // const session = await stripe.checkout.sessions.retrieve(
+        //   checkoutCompleted.id
+        // );
+
+        const subscription = await stripe.subscriptions.retrieve(
+          checkoutCompleted.subscription?.toString() || ""
         );
 
+        const subscriptionItemId = subscription?.items.data[0].id;
+
         // Assuming you passed the organization's ID in the `metadata` when creating the checkout session:
-        const orgId = session.metadata?.orgId;
+        const orgId = checkoutCompleted.metadata?.orgId;
 
         const { data, error } = await supabaseServer
           .from("organization")
           .update({
             subscription_status: "active",
             stripe_subscription_id: checkoutCompleted.subscription?.toString(), // this is the ID of the subscription created by the checkout
+            stripe_subscription_item_id: subscriptionItemId,
             tier: "pro",
           })
           .eq("id", orgId || "");
