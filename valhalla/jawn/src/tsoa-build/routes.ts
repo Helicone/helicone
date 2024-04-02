@@ -341,10 +341,10 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "filter": {"ref":"FilterNode","required":true},
-            "offset": {"dataType":"double","required":true},
-            "limit": {"dataType":"double","required":true},
-            "sort": {"ref":"SortLeafRequest","required":true},
-            "isCached": {"dataType":"boolean","required":true},
+            "offset": {"dataType":"double"},
+            "limit": {"dataType":"double"},
+            "sort": {"ref":"SortLeafRequest"},
+            "isCached": {"dataType":"boolean"},
         },
         "additionalProperties": false,
     },
@@ -424,7 +424,7 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/v1/request/v2/query',
+        app.post('/v1/request/query',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(RequestController)),
             ...(fetchMiddlewares<RequestHandler>(RequestController.prototype.getRequests)),

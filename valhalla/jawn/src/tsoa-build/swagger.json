@@ -1145,11 +1145,7 @@
 					}
 				},
 				"required": [
-					"filter",
-					"offset",
-					"limit",
-					"sort",
-					"isCached"
+					"filter"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1243,7 +1239,7 @@
 				}
 			}
 		},
-		"/v1/request/v2/query": {
+		"/v1/request/query": {
 			"post": {
 				"operationId": "GetRequests",
 				"responses": {
