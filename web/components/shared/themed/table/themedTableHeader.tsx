@@ -10,12 +10,10 @@ import { ThemedPill } from "../themedPill";
 import ThemedTimeFilter from "../themedTimeFilter";
 import ExportButton from "./exportButton";
 import ViewColumns from "../../../templates/requestsV2/viewColumns";
-import useNotification from "../../notification/useNotification";
 import useSearchParams from "../../utils/useSearchParams";
 import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
 import ViewButton from "./viewButton";
 import { RequestViews } from "./themedTableV5";
-import { useOrg } from "../../../layout/organizationContext";
 
 interface ThemedTableHeaderProps<T> {
   rows?: T[];

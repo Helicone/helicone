@@ -42,7 +42,6 @@ import { formatNumber } from "../users/initialColumns";
 import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
-import { useModels } from "../../../services/hooks/models";
 import { QuantilesGraph } from "./quantilesGraph";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import {
