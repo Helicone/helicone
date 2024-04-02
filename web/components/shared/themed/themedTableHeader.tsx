@@ -77,7 +77,7 @@ interface ThemedHeaderProps {
     filters?: OrganizationFilter[];
     currentFilter?: string;
     onFilterChange?: (value: OrganizationFilter | null) => void;
-    onSaveFilter?: (name: string) => void;
+    onSaveFilterCallback?: () => void;
   };
 }
 
@@ -150,6 +150,11 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                           filters={savedFilters.filters}
                           currentFilter={savedFilters.currentFilter}
                           onFilterChange={savedFilters.onFilterChange}
+                          onDeleteCallback={() => {
+                            if (savedFilters.onSaveFilterCallback) {
+                              savedFilters.onSaveFilterCallback();
+                            }
+                          }}
                         />
                       </div>
                     </>
@@ -223,11 +228,8 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                     filters={advancedFilter.filters}
                     setAdvancedFilters={advancedFilter.onAdvancedFilter}
                     searchPropertyFilters={advancedFilter.searchPropertyFilters}
-                    onSaveFilters={(filterName: string) => {
-                      if (savedFilters?.onSaveFilter) {
-                        savedFilters.onSaveFilter(filterName);
-                      }
-                    }}
+                    onSaveFilterCallback={savedFilters?.onSaveFilterCallback}
+                    savedFilters={savedFilters?.filters}
                   />
                 )}
               </>

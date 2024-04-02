@@ -3,23 +3,92 @@ import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import { TextInput } from "@tremor/react";
+import { v4 as uuidv4 } from "uuid";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
 import { FunnelIcon } from "@heroicons/react/24/outline";
+import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
+import { useOrg } from "../../layout/organizationContext";
+import { PlusIcon } from "@heroicons/react/24/solid";
+import useSearchParams from "../../shared/utils/useSearchParams";
 
 interface SaveFilterButtonProps {
   filters: UIFilterRow[];
-  onSaveFilter: (filterName: string) => void;
+  onSaveFilterCallback: () => void;
   filterMap: SingleFilterDef<any>[];
+  savedFilters?: OrganizationFilter[];
 }
 
 const SaveFilterButton = (props: SaveFilterButtonProps) => {
-  const { filters, onSaveFilter, filterMap } = props;
+  const { filters, onSaveFilterCallback, filterMap, savedFilters } = props;
 
   const { setNotification } = useNotification();
+  const orgContext = useOrg();
+  const searchParams = useSearchParams();
 
   const [isSaveFiltersModalOpen, setIsSaveFiltersModalOpen] = useState(false);
   const [filterName, setFilterName] = useState("");
+
+  const onSaveFilter = async (name: string) => {
+    if (filters.length > 0) {
+      const saveFilter: OrganizationFilter = {
+        id: uuidv4(),
+        name: name,
+        filter: filters,
+        createdAt: new Date().toISOString(),
+        softDelete: false,
+      };
+      if (savedFilters && savedFilters.length > 0) {
+        const updatedFilters = [...savedFilters, saveFilter];
+        await fetch(
+          `/api/organization/${orgContext?.currentOrg?.id!}/update_filter`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: "dashboard",
+              filters: updatedFilters,
+            }),
+          }
+        )
+          .then(() => {
+            setNotification("Filter created successfully", "success");
+            setIsSaveFiltersModalOpen(false);
+
+            onSaveFilterCallback();
+            searchParams.set("filter", saveFilter.id);
+          })
+          .catch((err) => {
+            setNotification(err, "error");
+          });
+      } else {
+        await fetch(
+          `/api/organization/${orgContext?.currentOrg?.id!}/create_filter`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: "dashboard",
+              filters: [saveFilter],
+            }),
+          }
+        )
+          .then(() => {
+            setNotification("Filter created successfully", "success");
+            setIsSaveFiltersModalOpen(false);
+            onSaveFilterCallback();
+            searchParams.set("filter", saveFilter.id);
+          })
+          .catch((err) => {
+            setNotification(err, "error");
+          });
+      }
+    }
+  };
 
   return (
     <>
@@ -35,6 +104,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
           "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
         )}
       >
+        <PlusIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
         <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
           Create New Filter
         </p>
@@ -102,7 +172,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
               }}
               className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
-              Save Filter
+              Create New Filter
             </button>
           </div>
         </div>

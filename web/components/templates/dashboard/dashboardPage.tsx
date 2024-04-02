@@ -54,6 +54,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 import CountryPanel from "./panels/countryPanel";
+import useNotification from "../../shared/notification/useNotification";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -172,6 +173,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   const timeIncrement = getTimeInterval(timeFilter);
 
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
+  const { setNotification } = useNotification();
 
   const { metrics, filterMap, overTimeData, isAnyLoading, refetch, remove } =
     useDashboardPage({
@@ -184,11 +186,12 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const { isLoading, models } = useModels(timeFilter, 5);
 
-  const onSetAdvancedFilters = (
+  const onSetAdvancedFiltersHandler = (
     filters: UIFilterRow[],
     layoutFilterId?: string
   ) => {
     setAdvancedFilters(filters);
+    searchParams.set("filter", layoutFilterId ?? "");
   };
 
   const metricsData: MetricsPanelProps["metric"][] = [
@@ -341,56 +344,11 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
 
-  const onSaveFilter = async (name: string) => {
-    if (advancedFilters.length > 0) {
-      const saveFilter: OrganizationFilter = {
-        id: uuidv4(),
-        name: name,
-        filter: advancedFilters,
-        createdAt: new Date().toISOString(),
-        softDelete: false,
-      };
-      if (orgLayout && orgLayout.filters.length > 0) {
-        const updatedFilters = [...orgLayout.filters, saveFilter];
-        await fetch(
-          `/api/organization/${orgContext?.currentOrg?.id!}/update_filter`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              type: "dashboard",
-              filters: updatedFilters,
-            }),
-          }
-        );
-      } else {
-        await fetch(
-          `/api/organization/${orgContext?.currentOrg?.id!}/create_filter`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              type: "dashboard",
-              filters: [saveFilter],
-            }),
-          }
-        );
-      }
-      onLayoutFilterChange(saveFilter);
-      await orgLayoutRefetch();
-    }
-  };
-
   const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
     if (layoutFilter !== null) {
-      onSetAdvancedFilters(layoutFilter?.filter, layoutFilter.id);
+      onSetAdvancedFiltersHandler(layoutFilter?.filter, layoutFilter.id);
       setCurrFilter(layoutFilter?.id);
     } else {
-      setAdvancedFilters([]);
       setCurrFilter(null);
     }
   };
@@ -507,7 +465,7 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
             advancedFilter={{
               filterMap,
-              onAdvancedFilter: onSetAdvancedFilters,
+              onAdvancedFilter: onSetAdvancedFiltersHandler,
               filters: advancedFilters,
               searchPropertyFilters: () => {
                 throw new Error("not implemented");
@@ -517,7 +475,9 @@ const DashboardPage = (props: DashboardPageProps) => {
               currentFilter: currFilter ?? undefined,
               filters: orgLayout?.filters ?? undefined,
               onFilterChange: onLayoutFilterChange,
-              onSaveFilter: onSaveFilter,
+              onSaveFilterCallback: async () => {
+                await orgLayoutRefetch();
+              },
             }}
           />
           <section id="panels" className="-m-2">

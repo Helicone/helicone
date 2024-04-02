@@ -17,13 +17,15 @@ import ThemedNumberDropdown from "./themedNumberDropdown";
 import { clsx } from "../clsx";
 import useNotification from "../notification/useNotification";
 import SaveFilterButton from "../../templates/dashboard/saveFilterButton";
+import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 
 export function AdvancedFilters({
   filterMap,
   filters,
   setAdvancedFilters,
   searchPropertyFilters,
-  onSaveFilters,
+  onSaveFilterCallback,
+  savedFilters,
 }: {
   filterMap: SingleFilterDef<any>[];
   filters: UIFilterRow[];
@@ -32,7 +34,8 @@ export function AdvancedFilters({
     property: string,
     search: string
   ) => Promise<Result<void, string>>;
-  onSaveFilters?: (filterName: string) => void;
+  onSaveFilterCallback?: () => void;
+  savedFilters?: OrganizationFilter[];
 }) {
   return (
     <div className="flex flex-col bg-white dark:bg-black p-4 rounded-lg border border-gray-300 dark:border-gray-700 mt-8">
@@ -89,11 +92,12 @@ export function AdvancedFilters({
         </button>
       </div>
       <div className="flex flex-row w-full items-end justify-end">
-        {onSaveFilters && (
+        {onSaveFilterCallback && (
           <SaveFilterButton
             filters={filters}
-            onSaveFilter={(filterName: string) => onSaveFilters(filterName)}
+            onSaveFilterCallback={onSaveFilterCallback}
             filterMap={filterMap}
+            savedFilters={savedFilters}
           />
         )}
       </div>
