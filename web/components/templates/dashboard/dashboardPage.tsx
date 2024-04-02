@@ -385,10 +385,13 @@ const DashboardPage = (props: DashboardPageProps) => {
     }
   };
 
-  const onLayoutFilterChange = (layoutFilter: OrganizationFilter) => {
-    if (layoutFilter) {
+  const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
+    if (layoutFilter !== null) {
       onSetAdvancedFilters(layoutFilter?.filter, layoutFilter.id);
       setCurrFilter(layoutFilter?.id);
+    } else {
+      setAdvancedFilters([]);
+      setCurrFilter(null);
     }
   };
 

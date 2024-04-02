@@ -1,12 +1,14 @@
 import { Menu, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { CheckIcon, Square2StackIcon } from "@heroicons/react/24/outline";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
+import { clsx } from "../../clsx";
+import { XCircleIcon } from "@heroicons/react/24/solid";
 
 interface FilterButtonProps {
   filters?: OrganizationFilter[];
   currentFilter?: string;
-  onFilterChange?: (value: OrganizationFilter) => void;
+  onFilterChange?: (value: OrganizationFilter | null) => void;
 }
 
 export default function FiltersButton({
@@ -14,19 +16,47 @@ export default function FiltersButton({
   currentFilter,
   onFilterChange,
 }: FilterButtonProps) {
+  const [currentFilterName, setCurrentFilterName] = useState<string>("");
   return (
     <div className="hidden md:block text-right">
       <Menu as="div" className="relative inline-block text-left">
-        <div>
-          <Menu.Button className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2">
+        <div className="flex items-center gap-1">
+          <Menu.Button
+            className={clsx(
+              currentFilterName !== ""
+                ? "bg-sky-50 dark:bg-sky-900"
+                : "bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900",
+              "border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 flex flex-row items-center gap-2"
+            )}
+          >
             <Square2StackIcon
               className="h-5 w-5 text-gray-900 dark:text-gray-100"
               aria-hidden="true"
             />
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-              Saved Filters
-            </p>
+            <div className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:flex items-center">
+              {currentFilterName !== "" ? (
+                <>
+                  <span className="">Filter:</span>
+                  <span className="pl-1 text-sky-500">{currentFilterName}</span>
+                </>
+              ) : (
+                "Saved Filters"
+              )}
+            </div>
           </Menu.Button>
+          {currentFilterName !== "" && (
+            <button
+              onClick={() => {
+                if (onFilterChange) {
+                  setCurrentFilterName("");
+                  onFilterChange(null);
+                }
+              }}
+              className="pl-1 text-gray-500"
+            >
+              Clear
+            </button>
+          )}
         </div>
         <Transition
           as={Fragment}
@@ -47,11 +77,16 @@ export default function FiltersButton({
                         className={`${
                           active ? "bg-sky-100 dark:bg-sky-900" : ""
                         } group flex w-full items-center rounded-md px-2 py-2 text-sm text-gray-900 dark:text-gray-100`}
-                        onClick={() => onFilterChange && onFilterChange(filter)}
+                        onClick={() => {
+                          if (onFilterChange) {
+                            setCurrentFilterName(filter.name);
+                            onFilterChange(filter);
+                          }
+                        }}
                       >
                         {filter.name}
                         {currentFilter && currentFilter === filter.id && (
-                          <CheckIcon className="ml-auto h-5 w-5" />
+                          <CheckIcon className="ml-auto h-4 w-4" />
                         )}
                       </button>
                     )}
