@@ -241,6 +241,10 @@ async function mapLLMCalls(
           return heliconeRequest;
         }
 
+        // generate signed url for assets
+        // const signedImageUrl = s3Client.getRequestResponseImageUrl(
+        // Record<assetId, signedImageUrl>
+
         heliconeRequest.signed_body_url = signedBodyUrl;
       }
 

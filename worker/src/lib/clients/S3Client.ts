@@ -34,9 +34,9 @@ export class S3Client {
   getRequestResponseImageUrl = (
     requestId: string,
     orgId: string,
-    fileExtension: string
+    assetId: string
   ) => {
-    const key = `organizations/${orgId}/requests/${requestId}/assets/${requestId}-${fileExtension}-${Date.now()}`;
+    const key = `organizations/${orgId}/requests/${requestId}/assets/${assetId}`;
     if (this.endpoint) {
       // For MinIO or another S3-compatible service
       return `${this.endpoint}/${this.bucketName}/${key}`;
@@ -45,72 +45,6 @@ export class S3Client {
       return `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${key}`;
     }
   };
-
-  async storeRequestResponseImage(
-    orgId: string,
-    requestId: string,
-    request: any,
-    response: string
-  ): Promise<Result<string, string>> {
-    const uploadPromises = [];
-
-    for (const message of request.messages) {
-      for (const item of message.content) {
-        if (item.type === "image_url") {
-          const imageUrl = item.image_url.url;
-
-          const uploadPromise = (async () => {
-            try {
-              let assetUrl = "";
-              if (imageUrl.startsWith("data:image/")) {
-                const [assetType, base64Data] =
-                  this.extractBase64Data(imageUrl);
-                assetUrl = await this.uploadBase64ToS3(
-                  base64Data,
-                  assetType,
-                  requestId,
-                  orgId
-                );
-              } else {
-                assetUrl = await this.uploadImageToS3(
-                  imageUrl,
-                  requestId,
-                  orgId
-                );
-              }
-
-              if (assetUrl) {
-                item.image_url.url = assetUrl;
-              }
-            } catch (error) {
-              console.error("Error processing image:", error);
-              return null;
-            }
-          })();
-
-          uploadPromises.push(uploadPromise);
-        }
-      }
-    }
-
-    await Promise.all(uploadPromises);
-    const url = this.getRequestResponseUrl(requestId, orgId);
-    return await this.store(
-      url,
-      JSON.stringify({ request: request, response })
-    );
-  }
-
-  async storeRequestResponse(
-    orgId: string,
-    requestId: string,
-    request: string,
-    response: string
-  ): Promise<Result<string, string>> {
-    const url = this.getRequestResponseUrl(requestId, orgId);
-
-    return await this.store(url, JSON.stringify({ request, response }));
-  }
 
   async store(url: string, value: string): Promise<Result<string, string>> {
     try {
@@ -142,17 +76,16 @@ export class S3Client {
   }
 
   async uploadBase64ToS3(
-    base64Data: string,
+    buffer: Buffer,
     assetType: string,
     requestId: string,
-    orgId: string
+    orgId: string,
+    assetId: string
   ): Promise<string> {
-    const buffer = Buffer.from(base64Data, "base64");
-    const fileExtension = this.getFileExtension(assetType);
     const uploadUrl = this.getRequestResponseImageUrl(
       requestId,
       orgId,
-      fileExtension
+      assetId
     );
 
     await this.uploadToS3(uploadUrl, buffer, assetType);
@@ -160,60 +93,19 @@ export class S3Client {
   }
 
   async uploadImageToS3(
-    imageUrl: string,
+    image: Blob,
     requestId: string,
-    orgId: string
+    orgId: string,
+    assetId: string
   ): Promise<string> {
-    const response = await fetch(imageUrl);
-    if (!response.ok) {
-      console.error(`Failed to download image: ${response.statusText}`);
-      return "";
-    }
-    const blob = await response.blob();
-    const fileExtension =
-      this.getFileExtensionFromBlob(blob) ||
-      this.getFileExtensionFromUrl(imageUrl);
     const uploadUrl = this.getRequestResponseImageUrl(
       requestId,
       orgId,
-      fileExtension ?? "jpg"
+      assetId
     );
 
-    await this.uploadToS3(uploadUrl, await blob.arrayBuffer(), blob.type);
+    await this.uploadToS3(uploadUrl, await image.arrayBuffer(), image.type);
     return uploadUrl;
-  }
-
-  private getFileExtensionFromBlob(blob: Blob) {
-    const mimeType = blob.type;
-    return mimeType.split("/").pop();
-  }
-
-  private getFileExtensionFromUrl(url: string) {
-    const pathname = new URL(url).pathname;
-    const lastSegment = pathname.split("/").pop();
-    return lastSegment?.split(".").pop();
-  }
-
-  private getFileExtension(mimeType: string): string {
-    const mimeExtensionMap = new Map<string, string>([
-      ["image/jpeg", "jpg"],
-      ["image/png", "png"],
-      ["image/gif", "gif"],
-      ["image/webp", "webp"],
-    ]);
-
-    return mimeExtensionMap.get(mimeType) || "jpg";
-  }
-
-  private extractBase64Data(dataUri: string): [string, string] {
-    const matches = dataUri.match(
-      /^data:(image\/(?:png|jpeg|jpg|gif|webp));base64,(.*)$/
-    );
-    if (!matches || matches.length !== 3) {
-      console.log("Invalid base64 image data");
-      return ["", ""];
-    }
-    return [matches[1], matches[2]];
   }
 
   private async uploadToS3(
