@@ -20,7 +20,7 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { getTokenCount } from "../clients/TokenCounterClient";
 import { S3Client } from "../clients/S3Client";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
-import { S3Manager } from "../managers/S3Manager";
+import { RequestResponseManager } from "../managers/RequestResponseManager";
 
 export interface DBLoggableProps {
   response: {
@@ -583,7 +583,7 @@ export class DBLoggable {
       dbWrapper: DBWrapper;
       clickhouse: ClickhouseClientWrapper;
       queue: RequestResponseStore;
-      s3Manager: S3Manager;
+      s3Manager: RequestResponseManager;
     },
     S3_ENABLED: Env["S3_ENABLED"]
   ): Promise<Result<null, string>> {

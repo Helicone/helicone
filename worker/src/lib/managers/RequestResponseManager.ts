@@ -1,7 +1,9 @@
+import { SupabaseClient } from "@supabase/supabase-js";
 import { Env } from "../..";
 import { S3Client } from "../clients/S3Client";
 import { err, Result } from "../util/results";
 import { uuid } from "uuidv4";
+import { Database } from "../../../supabase/database.types";
 
 export type RequestResponseContent = {
   requestId: string;
@@ -10,8 +12,11 @@ export type RequestResponseContent = {
   responseBody: string;
 };
 
-export class S3Manager {
-  constructor(private s3Client: S3Client) {}
+export class RequestResponseManager {
+  constructor(
+    private s3Client: S3Client,
+    private supabase: SupabaseClient<Database>
+  ) {}
 
   async storeRequestResponseData({
     organizationId,
@@ -71,7 +76,7 @@ export class S3Manager {
               }
 
               if (assetUrl) {
-                item.image_url.url = `{helicone-asset-id: ${assetId}}`;
+                item.image_url.url = `<helicone-asset-id key="${assetId}"></helicone-asset-id>`;
               }
             } catch (error) {
               return err(JSON.stringify(error));
@@ -91,7 +96,9 @@ export class S3Manager {
     );
   }
 
-  private async saveRequestResponseAssets(env: Env) {}
+  private async saveRequestResponseAssets(assetId: string, requestId: string) {
+    //await this.supabase.from("assets")
+  }
 
   private extractBase64Data(dataUri: string): [string, string] {
     const matches = dataUri.match(

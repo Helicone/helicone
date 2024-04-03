@@ -30,7 +30,7 @@ import {
   HeliconeProxyRequestMapper,
   HeliconeProxyRequest,
 } from "../models/HeliconeProxyRequest";
-import { S3Manager } from "../managers/S3Manager";
+import { RequestResponseManager } from "../managers/RequestResponseManager";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -281,10 +281,14 @@ export async function proxyForwarder(
       console.error("Error getting auth", authError);
       return;
     }
+    const supabase = createClient(
+      env.SUPABASE_URL,
+      env.SUPABASE_SERVICE_ROLE_KEY
+    );
     const res = await loggable.log(
       {
         clickhouse: new ClickhouseClientWrapper(env),
-        supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+        supabase: supabase,
         dbWrapper: new DBWrapper(env, auth),
         queue: new RequestResponseStore(
           createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
@@ -297,13 +301,14 @@ export async function proxyForwarder(
           env.FALLBACK_QUEUE,
           env.REQUEST_AND_RESPONSE_QUEUE_KV
         ),
-        s3Manager: new S3Manager(
+        s3Manager: new RequestResponseManager(
           new S3Client(
             env.S3_ACCESS_KEY ?? "",
             env.S3_SECRET_KEY ?? "",
             env.S3_ENDPOINT ?? "",
             env.S3_BUCKET_NAME ?? ""
-          )
+          ),
+          supabase
         ),
       },
       env.S3_ENABLED ?? "true"
