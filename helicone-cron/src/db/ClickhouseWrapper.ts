@@ -9,7 +9,7 @@ export interface ClickhouseEnv {
   CLICKHOUSE_PASSWORD: string;
 }
 
-export class ClickhouseClientWrapper {
+export class ClickhouseWrapper {
   private clickHouseClient: WebClickHouseClient;
 
   constructor(env: ClickhouseEnv) {

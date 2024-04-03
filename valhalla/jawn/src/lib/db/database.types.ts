@@ -1163,6 +1163,50 @@ export type Database = {
           },
         ]
       }
+      organization_usage: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          organization_id: string
+          recorded: boolean | null
+          stripe_record: Json | null
+          usage_count: number
+          usage_date: string
+          usage_type: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          organization_id: string
+          recorded?: boolean | null
+          stripe_record?: Json | null
+          usage_count: number
+          usage_date: string
+          usage_type: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          organization_id?: string
+          recorded?: boolean | null
+          stripe_record?: Json | null
+          usage_count?: number
+          usage_date?: string
+          usage_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_usage_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prompt: {
         Row: {
           auth_hash: string

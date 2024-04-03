@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "@clickhouse/client-web": "^0.3.1",
-    "@stripe/stripe-js": "^3.2.0",
     "@supabase/supabase-js": "^2.41.1",
-    "dateformat": "^5.0.3"
+    "dateformat": "^5.0.3",
+    "stripe": "^14.23.0"
   }
 }

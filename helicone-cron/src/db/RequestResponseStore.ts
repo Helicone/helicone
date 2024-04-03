@@ -1,13 +1,13 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Result } from "../util/results";
-import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
+import { ClickhouseWrapper } from "./ClickhouseWrapper";
 import { Database } from "../db/database.types";
 
 export type Tier = "free" | "pro" | "growth" | "enterprise";
 
 export class RequestResponseStore {
   constructor(
-    private clickhouseClient: ClickhouseClientWrapper,
+    private clickhouseClient: ClickhouseWrapper,
     private supabaseClient: SupabaseClient<Database>
   ) {}
 

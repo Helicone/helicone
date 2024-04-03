@@ -1,16 +1,47 @@
-import { loadStripe, Stripe } from "@stripe/stripe-js";
-import { Result } from "../result";
+import { Stripe } from "stripe";
+import { err, ok, Result } from "../util/results";
 
-class StripeClient {
-  private constructor(private stripe: Stripe) {}
+type Action = "increment" | "set";
+type UsageRecord = {
+  subscriptionItemId: string;
+  quantity: number;
+  timestamp: number;
+  action: Action;
+};
 
-  static async create(apiKey: string): Promise<Result<StripeClient, string>> {
-    const stripe = await loadStripe(apiKey);
+export class StripeClient {
+  private stripe: Stripe;
 
-    if (!stripe) {
-      throw new Error("Failed to load Stripe client");
+  constructor(apiKey: string) {
+    this.stripe = new Stripe(apiKey, {
+      apiVersion: "2023-10-16",
+    });
+  }
+
+  async addUsageRecord({
+    subscriptionItemId,
+    quantity,
+    timestamp,
+    action,
+  }: UsageRecord): Promise<
+    Result<Stripe.Response<Stripe.UsageRecord>, string>
+  > {
+    try {
+      const usageRecord = await this.stripe.subscriptionItems.createUsageRecord(
+        subscriptionItemId,
+        {
+          quantity,
+          timestamp,
+          action,
+        },
+        {
+          idempotencyKey: `${subscriptionItemId}-${timestamp}`,
+        }
+      );
+
+      return ok(usageRecord);
+    } catch (error: any) {
+      return err(`Error adding usage record. ${error.message}`);
     }
-
-    return new StripeClient(stripe);
   }
 }

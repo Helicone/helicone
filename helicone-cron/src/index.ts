@@ -1,31 +1,16 @@
-/**
- * Welcome to Cloudflare Workers! This is your first scheduled worker.
- *
- * - Run `wrangler dev --local` in your terminal to start a development server
- * - Run `curl "http://localhost:8787/cdn-cgi/mf/scheduled"` to trigger the scheduled event
- * - Go back to the console to see what your worker has logged
- * - Update the Cron trigger in wrangler.toml (see https://developers.cloudflare.com/workers/wrangler/configuration/#triggers)
- * - Run `wrangler publish --name my-worker` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/runtime-apis/scheduled-event/
- */
-
-import { IHeartBeat } from "./heartbeats/IHeartBeat";
+import { createClient } from "@supabase/supabase-js";
+import { StripeClient } from "./client/StripeClient";
+import { ClickhouseWrapper } from "./db/ClickhouseWrapper";
+import { OrganizationStore } from "./db/OrganizationStore";
+import { RequestResponseStore } from "./db/RequestResponseStore";
 import { AnthropicProxyHeartBeat } from "./heartbeats/anthropicProxy";
 import { AsyncHeartBeat } from "./heartbeats/async";
 import { FeedbackHeartBeat } from "./heartbeats/feedback";
 import { GraphQLHeartBeat } from "./heartbeats/graphQL";
 import { OpenAIProxyHeartBeat } from "./heartbeats/oaiProxy";
+import { UsageManager } from "./managers/UsageManager";
 
 export interface Env {
-  // Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
-  // MY_KV_NAMESPACE: KVNamespace;
-  //
-  // Example binding to Durable Object. Learn more at https://developers.cloudflare.com/workers/runtime-apis/durable-objects/
-  // MY_DURABLE_OBJECT: DurableObjectNamespace;
-  //
-  // Example binding to R2. Learn more at https://developers.cloudflare.com/workers/runtime-apis/r2/
-  // MY_BUCKET: R2Bucket;
   OPENAI_API_KEY: string;
   ANTHROPIC_API_KEY: string;
   HELICONE_API_KEY: string;
@@ -40,6 +25,7 @@ export interface Env {
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
+  STRIPE_API_KEY: string;
 }
 
 const constructorMapping: Record<string, any> = {
@@ -80,8 +66,29 @@ export default {
       });
 
       await Promise.all(heartBeatPromises);
-    } else if (controller.cron === "10 0 * * *") {
-      // Stripe volumetric pricing calculation
+    } else if (controller.cron === "0 1 * * *") {
+      const clickhouseWrapper = new ClickhouseWrapper({
+        CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
+        CLICKHOUSE_USER: env.CLICKHOUSE_USER,
+        CLICKHOUSE_PASSWORD: env.CLICKHOUSE_PASSWORD,
+      });
+
+      const supabaseClient = createClient(
+        env.SUPABASE_URL,
+        env.SUPABASE_SERVICE_ROLE_KEY
+      );
+
+      const usageManager = new UsageManager(
+        new OrganizationStore(clickhouseWrapper, supabaseClient),
+        new RequestResponseStore(clickhouseWrapper, supabaseClient),
+        new StripeClient(env.STRIPE_API_KEY)
+      );
+
+      const result = await usageManager.chargeOrgUsage();
+
+      if (result.error) {
+        console.error("Error calculating usage", result.error);
+      }
     }
   },
 };
