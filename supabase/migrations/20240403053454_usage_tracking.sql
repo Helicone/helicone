@@ -9,6 +9,6 @@ CREATE TABLE organization_usage (
     stripe_record JSONB,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::TEXT, now()) NOT NULL
 );
-CREATE INDEX idx_usage_date ON organization_usage(usage_date);
+CREATE INDEX idx_organization_id_usage_date ON organization_usage(organization_id, usage_date);
 CREATE INDEX idx_organization_id ON organization_usage(organization_id);
 ALTER TABLE organization_usage ENABLE ROW LEVEL SECURITY;

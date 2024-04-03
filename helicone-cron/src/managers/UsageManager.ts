@@ -1,4 +1,4 @@
-import { Result } from "../util/results";
+import { Result, err, ok } from "../util/results";
 import { OrganizationStore } from "../db/OrganizationStore";
 import { RequestResponseStore } from "../db/RequestResponseStore";
 import { StripeClient } from "../client/StripeClient";
@@ -12,33 +12,37 @@ export class UsageManager {
   ) {}
 
   async chargeOrgUsage(): Promise<Result<string, string>> {
-    const growthOrgs = await this.organizationStore.getOrgsByTier(
-      "growth",
-      true
-    );
-
-    if (growthOrgs.error || !growthOrgs.data) {
-      return { data: null, error: growthOrgs.error };
-    }
-
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
-    const promises = growthOrgs.data.map((org) =>
-      this.handleOrganization(org, yesterday, today)
+    const eligibleGrowthOrgs =
+      await this.organizationStore.getOrganizationsByTierAndUsage("growth", {
+        isStripeCustomer: true,
+        recorded: false,
+        usageDate: yesterday,
+      });
+
+    if (eligibleGrowthOrgs.error || !eligibleGrowthOrgs.data) {
+      return err(
+        eligibleGrowthOrgs.error || "No eligible organizations found."
+      );
+    }
+
+    const promises = eligibleGrowthOrgs.data.map((org) =>
+      this.handleOrganizationUsage(org, yesterday, today)
     );
 
     await Promise.all(promises);
 
-    return { data: "Success", error: null };
+    return ok("Success");
   }
 
-  async handleOrganization(
+  async handleOrganizationUsage(
     org: Database["public"]["Tables"]["organization"]["Row"],
     yesterday: Date,
     today: Date
-  ): Promise<void> {
+  ): Promise<Result<string, string>> {
     try {
       const requestCountResult =
         await this.requestResponseStore.getRequestCountByOrgId(
@@ -47,30 +51,30 @@ export class UsageManager {
           today
         );
 
-      if (
-        requestCountResult.error ||
-        !requestCountResult.data ||
-        !org.stripe_subscription_item_id
-      ) {
+      if (requestCountResult.error || !requestCountResult.data) {
         throw new Error(
-          requestCountResult.error ||
-            "Missing necessary data for Stripe record creation."
+          requestCountResult.error || "Failed to get request count."
         );
       }
 
-      const stripeResult = await this.addStripeUsageRecord({
-        stripeSubscriptionItemId: org.stripe_subscription_item_id,
-        quantity: requestCountResult.data,
-        yesterday,
-      });
-
-      if (stripeResult.error) {
-        throw new Error(stripeResult.error);
+      if (!org.stripe_subscription_item_id) {
+        throw new Error(
+          "Organization does not have a Stripe subscription item ID."
+        );
       }
 
-      const usageRecord = stripeResult.data;
+      const { data: usageRecord, error: usageRecordErr } =
+        await this.addStripeUsageRecord({
+          stripeSubscriptionItemId: org.stripe_subscription_item_id,
+          quantity: requestCountResult.data,
+          yesterday,
+        });
 
-      await this.organizationStore.insertOrgUsage({
+      if (usageRecordErr || !usageRecord) {
+        throw new Error(`Failed to add Stripe usage record: ${usageRecordErr}`);
+      }
+
+      await this.organizationStore.upsertOrgUsage({
         organization_id: org.id,
         usage_count: requestCountResult.data,
         usage_date: yesterday.toISOString(),
@@ -79,8 +83,10 @@ export class UsageManager {
         stripe_record: usageRecord,
         recorded: true,
       });
+
+      return ok("Success");
     } catch (error: any) {
-      await this.organizationStore.insertOrgUsage({
+      await this.organizationStore.upsertOrgUsage({
         organization_id: org.id,
         usage_count: 0,
         usage_date: yesterday.toISOString(),
@@ -89,6 +95,8 @@ export class UsageManager {
         stripe_record: null,
         recorded: false,
       });
+
+      return err(error.message || "Unknown error handling organization usage.");
     }
   }
 
@@ -110,15 +118,12 @@ export class UsageManager {
       });
 
       if (usageRecord.error || !usageRecord.data) {
-        return { data: null, error: "Failed to add Stripe usage record." };
+        return err(`Failed to add Stripe usage record: ${usageRecord.error}`);
       }
 
-      return { data: JSON.stringify(usageRecord.data), error: null };
+      return ok(JSON.stringify(usageRecord.data));
     } catch (error: any) {
-      return {
-        data: null,
-        error: error.message || "Unknown error adding Stripe usage record.",
-      };
+      return err(error.message || "Unknown error adding Stripe usage record.");
     }
   }
 }
