@@ -47,12 +47,12 @@ export class RequestResponseManager {
 
           const uploadPromise = (async () => {
             try {
-              let assetUrl = "";
+              let assetUploadResult: Result<string, string>;
               if (imageUrl.startsWith("data:image/")) {
                 const [assetType, base64Data] =
                   this.extractBase64Data(imageUrl);
                 const buffer = Buffer.from(base64Data, "base64");
-                assetUrl = await this.s3Client.uploadBase64ToS3(
+                assetUploadResult = await this.s3Client.uploadBase64ToS3(
                   buffer,
                   assetType,
                   requestId,
@@ -67,7 +67,7 @@ export class RequestResponseManager {
                   );
                 }
                 const blob = await response.blob();
-                assetUrl = await this.s3Client.uploadImageToS3(
+                assetUploadResult = await this.s3Client.uploadImageToS3(
                   blob,
                   requestId,
                   organizationId,
@@ -75,7 +75,8 @@ export class RequestResponseManager {
                 );
               }
 
-              if (assetUrl) {
+              if (!assetUploadResult.error) {
+                await this.saveRequestResponseAssets(assetId, requestId);
                 item.image_url.url = `<helicone-asset-id key="${assetId}"></helicone-asset-id>`;
               }
             } catch (error) {
@@ -97,7 +98,14 @@ export class RequestResponseManager {
   }
 
   private async saveRequestResponseAssets(assetId: string, requestId: string) {
-    //await this.supabase.from("assets")
+    const result = await this.supabase
+      .from("assets")
+      .insert([{ id: assetId, request_id: requestId }])
+      .single();
+
+    if (result.error) {
+      throw new Error(`Error saving asset: ${result.error.message}`);
+    }
   }
 
   private extractBase64Data(dataUri: string): [string, string] {

@@ -81,15 +81,14 @@ export class S3Client {
     requestId: string,
     orgId: string,
     assetId: string
-  ): Promise<string> {
+  ): Promise<Result<string, string>> {
     const uploadUrl = this.getRequestResponseImageUrl(
       requestId,
       orgId,
       assetId
     );
 
-    await this.uploadToS3(uploadUrl, buffer, assetType);
-    return uploadUrl;
+    return this.uploadToS3(uploadUrl, buffer, assetType);
   }
 
   async uploadImageToS3(
@@ -97,33 +96,42 @@ export class S3Client {
     requestId: string,
     orgId: string,
     fileExtension: string
-  ): Promise<string> {
+  ): Promise<Result<string, string>> {
     const uploadUrl = this.getRequestResponseImageUrl(
       requestId,
       orgId,
       fileExtension
     );
 
-    await this.uploadToS3(uploadUrl, await image.arrayBuffer(), image.type);
-    return uploadUrl;
+    return this.uploadToS3(uploadUrl, await image.arrayBuffer(), image.type);
   }
 
   private async uploadToS3(
     url: string,
     body: ArrayBuffer | Buffer,
     contentType: string
-  ): Promise<void> {
-    const signedRequest = await this.awsClient.sign(url, {
-      method: "PUT",
-      body: body,
-      headers: {
-        "Content-Type": contentType,
-      },
-    });
+  ): Promise<Result<string, string>> {
+    try {
+      const signedRequest = await this.awsClient.sign(url, {
+        method: "PUT",
+        body: body,
+        headers: {
+          "Content-Type": contentType,
+        },
+      });
 
-    const response = await fetch(signedRequest.url, signedRequest);
-    if (!response.ok) {
-      throw new Error(`Failed to upload to S3: ${response.statusText}`);
+      const response = await fetch(signedRequest.url, signedRequest);
+      if (!response.ok) {
+        return {
+          data: null,
+          error: `Failed to store data: ${response.statusText}`,
+        };
+      }
+
+      return { data: url, error: null };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      return { data: null, error: error?.message };
     }
   }
 }
