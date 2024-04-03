@@ -96,12 +96,12 @@ export class S3Client {
     image: Blob,
     requestId: string,
     orgId: string,
-    assetId: string
+    fileExtension: string
   ): Promise<string> {
     const uploadUrl = this.getRequestResponseImageUrl(
       requestId,
       orgId,
-      assetId
+      fileExtension
     );
 
     await this.uploadToS3(uploadUrl, await image.arrayBuffer(), image.type);
@@ -122,7 +122,8 @@ export class S3Client {
     });
 
     const response = await fetch(signedRequest.url, signedRequest);
-    if (!response.ok)
-      console.log(`Failed to upload to S3: ${response.statusText}`);
+    if (!response.ok) {
+      throw new Error(`Failed to upload to S3: ${response.statusText}`);
+    }
   }
 }

@@ -1,6 +1,6 @@
 import { Env } from "../..";
 import { S3Client } from "../clients/S3Client";
-import { Result } from "../util/results";
+import { err, Result } from "../util/results";
 import { uuid } from "uuidv4";
 
 export type RequestResponseContent = {
@@ -57,10 +57,9 @@ export class S3Manager {
               } else {
                 const response = await fetch(imageUrl);
                 if (!response.ok) {
-                  console.error(
+                  return err(
                     `Failed to download image: ${response.statusText}`
                   );
-                  return "";
                 }
                 const blob = await response.blob();
                 assetUrl = await this.s3Client.uploadImageToS3(
@@ -75,8 +74,7 @@ export class S3Manager {
                 item.image_url.url = `{helicone-asset-id: ${assetId}}`;
               }
             } catch (error) {
-              console.error("Error processing image:", error);
-              return null;
+              return err(JSON.stringify(error));
             }
           })();
 
