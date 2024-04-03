@@ -231,6 +231,6 @@ export class S3Client {
 
     const response = await fetch(signedRequest.url, signedRequest);
     if (!response.ok)
-      throw new Error(`Failed to upload to S3: ${response.statusText}`);
+      console.log(`Failed to upload to S3: ${response.statusText}`);
   }
 }
