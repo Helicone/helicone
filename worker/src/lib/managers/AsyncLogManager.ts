@@ -10,6 +10,7 @@ import { RequestResponseStore } from "../db/RequestResponseStore";
 import { AsyncLogModel, validateAsyncLogModel } from "../models/AsyncLog";
 import { DBQueryTimer } from "../util/loggers/DBQueryTimer";
 import { S3Client } from "../clients/S3Client";
+import { S3Manager } from "./S3Manager";
 
 export async function logAsync(
   requestWrapper: RequestWrapper,
@@ -68,11 +69,13 @@ export async function logAsync(
         env.FALLBACK_QUEUE,
         env.REQUEST_AND_RESPONSE_QUEUE_KV
       ),
-      s3Client: new S3Client(
-        env.S3_ACCESS_KEY ?? "",
-        env.S3_SECRET_KEY ?? "",
-        env.S3_ENDPOINT ?? "",
-        env.S3_BUCKET_NAME ?? ""
+      s3Manager: new S3Manager(
+        new S3Client(
+          env.S3_ACCESS_KEY ?? "",
+          env.S3_SECRET_KEY ?? "",
+          env.S3_ENDPOINT ?? "",
+          env.S3_BUCKET_NAME ?? ""
+        )
       ),
     },
     env.S3_ENABLED ?? "true"

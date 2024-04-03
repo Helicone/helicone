@@ -20,6 +20,7 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { getTokenCount } from "../clients/TokenCounterClient";
 import { S3Client } from "../clients/S3Client";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
+import { S3Manager } from "../managers/S3Manager";
 
 export interface DBLoggableProps {
   response: {
@@ -582,7 +583,7 @@ export class DBLoggable {
       dbWrapper: DBWrapper;
       clickhouse: ClickhouseClientWrapper;
       queue: RequestResponseStore;
-      s3Client: S3Client;
+      s3Manager: S3Manager;
     },
     S3_ENABLED: Env["S3_ENABLED"]
   ): Promise<Result<null, string>> {
@@ -654,29 +655,29 @@ export class DBLoggable {
       // Log the error in S3
       if (S3_ENABLED === "true") {
         if (this.isImageModel(model)) {
-          s3Result = await db.s3Client.storeRequestResponseImage(
-            authParams.organizationId,
-            this.request.requestId,
-            requestResult.data.body,
-            JSON.stringify({
+          s3Result = await db.s3Manager.storeRequestResponseImage({
+            organizationId: authParams.organizationId,
+            requestId: this.request.requestId,
+            requestBody: requestResult.data.body,
+            responseBody: JSON.stringify({
               helicone_error: "error getting response, " + responseResult.error,
               helicone_repsonse_body_as_string: (
                 await this.response.getResponseBody()
               ).body,
-            })
-          );
+            }),
+          });
         } else {
-          s3Result = await db.s3Client.storeRequestResponse(
-            authParams.organizationId,
-            this.request.requestId,
-            requestResult.data.body,
-            JSON.stringify({
+          s3Result = await db.s3Manager.storeRequestResponseData({
+            organizationId: authParams.organizationId,
+            requestId: this.request.requestId,
+            requestBody: requestResult.data.body,
+            responseBody: JSON.stringify({
               helicone_error: "error getting response, " + responseResult.error,
               helicone_repsonse_body_as_string: (
                 await this.response.getResponseBody()
               ).body,
-            })
-          );
+            }),
+          });
         }
 
         if (s3Result.error) {
@@ -689,19 +690,19 @@ export class DBLoggable {
 
     if (S3_ENABLED === "true") {
       if (this.isImageModel(model)) {
-        s3Result = await db.s3Client.storeRequestResponseImage(
-          authParams.organizationId,
-          this.request.requestId,
-          requestResult.data.body,
-          responseResult.data.body
-        );
+        s3Result = await db.s3Manager.storeRequestResponseImage({
+          organizationId: authParams.organizationId,
+          requestId: this.request.requestId,
+          requestBody: requestResult.data.body,
+          responseBody: responseResult.data.body,
+        });
       } else {
-        s3Result = await db.s3Client.storeRequestResponse(
-          authParams.organizationId,
-          this.request.requestId,
-          requestResult.data.body,
-          responseResult.data.body
-        );
+        s3Result = await db.s3Manager.storeRequestResponseData({
+          organizationId: authParams.organizationId,
+          requestId: this.request.requestId,
+          requestBody: requestResult.data.body,
+          responseBody: responseResult.data.body,
+        });
       }
 
       if (s3Result.error) {
