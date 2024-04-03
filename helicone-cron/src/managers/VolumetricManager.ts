@@ -40,6 +40,8 @@ class VolumetricManager {
         } else {
           orgIdToRequestCount[org.id] = requestCountResult.data;
         }
+
+        await this;
       })
     );
 
