@@ -2,7 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Env } from "../..";
 import { S3Client } from "../clients/S3Client";
 import { err, Result } from "../util/results";
-import { uuid } from "uuidv4";
+import { v4 as uuidv4 } from "uuid";
 import { Database } from "../../../supabase/database.types";
 
 export type RequestResponseContent = {
@@ -43,7 +43,7 @@ export class RequestResponseManager {
       for (const item of message.content) {
         if (item.type === "image_url") {
           const imageUrl = item.image_url.url;
-          const assetId = uuid();
+          const assetId = uuidv4();
 
           const uploadPromise = (async () => {
             try {
@@ -89,7 +89,7 @@ export class RequestResponseManager {
       }
     }
 
-    await Promise.all(uploadPromises);
+    await Promise.allSettled(uploadPromises);
     const url = this.s3Client.getRequestResponseUrl(requestId, organizationId);
     return await this.s3Client.store(
       url,
@@ -99,7 +99,7 @@ export class RequestResponseManager {
 
   private async saveRequestResponseAssets(assetId: string, requestId: string) {
     const result = await this.supabase
-      .from("assets")
+      .from("asset")
       .insert([{ id: assetId, request_id: requestId }])
       .single();
 

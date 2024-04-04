@@ -95,12 +95,12 @@ export class S3Client {
     image: Blob,
     requestId: string,
     orgId: string,
-    fileExtension: string
+    assetId: string
   ): Promise<Result<string, string>> {
     const uploadUrl = this.getRequestResponseImageUrl(
       requestId,
       orgId,
-      fileExtension
+      assetId
     );
 
     return this.uploadToS3(uploadUrl, await image.arrayBuffer(), image.type);
