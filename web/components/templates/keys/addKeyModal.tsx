@@ -9,6 +9,7 @@ import {
   ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 import { getHeliconeCookie } from "../../../lib/cookies";
+import { getJawnClient } from "../../../lib/clients/jawn";
 
 interface AddKeyModalProps {
   open: boolean;
@@ -25,7 +26,6 @@ const AddKeyModal = (props: AddKeyModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { setNotification } = useNotification();
-  const supabaseClient = useSupabaseClient();
 
   const handleSubmitHandler = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -47,35 +47,25 @@ const AddKeyModal = (props: AddKeyModalProps) => {
     }).toString()}`.toLowerCase();
     setReturnedKey(apiKey);
 
-    const authFromCookie = getHeliconeCookie();
-    const resp = await fetch(
-      `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/key/generateHash`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "helicone-authorization": JSON.stringify({
-            _type: "jwt",
-            token: authFromCookie.data?.jwtToken,
-            orgId: org?.currentOrg?.id,
-          }),
-        },
-        body: JSON.stringify({
+    const jawn = getJawnClient();
+    const resp = jawn
+      .POST("/v1/key/generateHash", {
+        body: {
           apiKey,
           userId: user?.id!,
           keyName: keyName.value,
-        }),
-      }
-    ).then((res: Response) => {
-      if (res.ok) {
-        setNotification("Successfully created API key", "success");
-        setIsLoading(false);
-        onSuccess();
-      } else {
-        setNotification("Failed to create API key", "error");
-        setIsLoading(false);
-      }
-    });
+        },
+      })
+      .then((res) => {
+        if (res.response.ok) {
+          setNotification("Successfully created API key", "success");
+          setIsLoading(false);
+          onSuccess();
+        } else {
+          setNotification("Failed to create API key", "error");
+          setIsLoading(false);
+        }
+      });
   };
 
   useEffect(() => {
