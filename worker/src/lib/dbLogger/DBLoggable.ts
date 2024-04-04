@@ -18,7 +18,6 @@ import {
 } from "./streamParsers/anthropicStreamParser";
 import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { getTokenCount } from "../clients/TokenCounterClient";
-import { S3Client } from "../clients/S3Client";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
 

@@ -1,5 +1,4 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Env } from "../..";
 import { S3Client } from "../clients/S3Client";
 import { err, Result } from "../util/results";
 import { v4 as uuidv4 } from "uuid";
@@ -8,6 +7,7 @@ import { Database } from "../../../supabase/database.types";
 export type RequestResponseContent = {
   requestId: string;
   organizationId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   requestBody: any;
   responseBody: string;
 };
@@ -108,6 +108,7 @@ export class RequestResponseManager {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async updateRequestBody(requestId: string, requestBody: any) {
     await this.supabase
       .from("request")
