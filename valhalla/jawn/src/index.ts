@@ -12,6 +12,7 @@ import * as swaggerDocument from "./tsoa-build/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { redisClient } from "./lib/clients/redisClient";
+import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -101,6 +102,12 @@ unAuthenticatedRouter.use(
 );
 
 v1APIRouter.use(authMiddleware);
+
+// Create and use the rate limiter
+if (IS_RATE_LIMIT_ENABLED) {
+  app.use(limiter);
+}
+
 v1APIRouter.use(express.json({ limit: "50mb" }));
 v1APIRouter.use(express.urlencoded({ limit: "50mb" }));
 registerTSOARoutes(v1APIRouter);
