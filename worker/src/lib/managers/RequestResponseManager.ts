@@ -100,8 +100,7 @@ export class RequestResponseManager {
   private async saveRequestResponseAssets(assetId: string, requestId: string) {
     const result = await this.supabase
       .from("asset")
-      .insert([{ id: assetId, request_id: requestId }])
-      .single();
+      .insert([{ id: assetId, request_id: requestId }]);
 
     if (result.error) {
       throw new Error(`Error saving asset: ${result.error.message}`);
