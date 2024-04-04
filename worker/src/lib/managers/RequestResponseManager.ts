@@ -77,7 +77,7 @@ export class RequestResponseManager {
 
               if (!assetUploadResult.error) {
                 await this.saveRequestResponseAssets(assetId, requestId);
-                item.image_url.url = `<helicone-asset-id key="${assetId}"></helicone-asset-id>`;
+                item.image_url.url = `<helicone-asset-id key="${assetId}"/>`;
               }
             } catch (error) {
               return err(JSON.stringify(error));
