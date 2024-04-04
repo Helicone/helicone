@@ -37,6 +37,7 @@ import { REQUEST_TABLE_FILTERS } from "../../../services/lib/filters/frontendFil
 import { DiffHighlight } from "../welcome/diffHighlight";
 import { useRouter } from "next/router";
 import AuthHeader from "../../shared/authHeader";
+import { getJawnClient } from "../../../lib/clients/jawn";
 
 interface FineTuningPageProps {}
 
@@ -75,13 +76,19 @@ const FineTuningPage = (props: FineTuningPageProps) => {
         console.error(error);
         return [];
       }
+      const jawn = getJawnClient();
       return await Promise.all(
         sortedData.map(async (x) => ({
           ...x,
-          dataFromOpenAI: await fetchJawn({
-            path: `/v1/fine-tune/${x.id}/stats`,
-            method: "GET",
-          }).then((x) => x.json()),
+          dataFromOpenAI: await jawn
+            .GET("/v1/fine-tune/{jobId}/stats", {
+              params: {
+                path: {
+                  jobId: x.id,
+                },
+              },
+            })
+            .then((x) => x.data as any),
         }))
       );
     },

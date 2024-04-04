@@ -4,7 +4,7 @@ require("dotenv").config({
 
 import express from "express";
 import swaggerUi from "swagger-ui-express";
-import { legacyRouter } from "./legacy";
+
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authMiddleware } from "./middleware/auth";
 import { RegisterRoutes as registerTSOARoutes } from "./tsoa-build/routes";
@@ -12,7 +12,8 @@ import * as swaggerDocument from "./tsoa-build/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 
-export const ENVIRONMENT = process.env.VERCEL_ENV ?? "development";
+export const ENVIRONMENT: "production" | "development" = (process.env
+  .VERCEL_ENV ?? "development") as any;
 
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
@@ -38,7 +39,6 @@ if (ENVIRONMENT !== "production") {
 
 initSentry(app);
 initLogs(app);
-app.use(legacyRouter);
 
 const v1APIRouter = express.Router();
 const unAuthenticatedRouter = express.Router();
@@ -52,6 +52,37 @@ v1APIRouter.use(authMiddleware);
 v1APIRouter.use(express.json({ limit: "50mb" }));
 v1APIRouter.use(express.urlencoded({ limit: "50mb" }));
 registerTSOARoutes(v1APIRouter);
+
+const allowedOriginsEnv = {
+  production: [
+    /^https?:\/\/(www\.)?helicone\.ai$/,
+    /^https?:\/\/(www\.)?.*-helicone\.vercel\.app$/,
+    /^https?:\/\/(www\.)?helicone\.vercel\.app$/,
+    /^https?:\/\/(www\.)?helicone-git-valhalla-use-jawn-to-read-helicone\.vercel\.app$/,
+  ],
+  development: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
+};
+
+const allowedOrigins = allowedOriginsEnv[ENVIRONMENT];
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (!origin) {
+    return next();
+  }
+  if (allowedOrigins.some((allowedOrigin) => allowedOrigin.test(origin))) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  } else {
+    res.setHeader("Access-Control-Allow-Origin", "");
+  }
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, Helicone-Authorization"
+  );
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  next();
+});
 
 app.use(unAuthenticatedRouter);
 
