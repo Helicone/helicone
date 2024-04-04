@@ -51,7 +51,7 @@ export const authMiddleware = async (
 
     const rateLimit = await checkRateLimit(authParams.data?.organizationId);
     if (rateLimit && !rateLimit.success) {
-      console.error("Rate limit exceeded", authParams.data?.organizationId);
+      console.log("Rate limit exceeded", authParams.data?.organizationId);
       postHogClient?.capture({
         distinctId: "jawn-server",
         event: "rate-limited",
