@@ -8,7 +8,7 @@ import { Result, err, ok } from "../util/results";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 import { RequestWrapper } from "../RequestWrapper";
-import { INTERNAL_ERRORS } from "../util/constants";
+import { INTERNAL_ERRORS, isImageModel } from "../util/constants";
 import { AsyncLogModel } from "../models/AsyncLog";
 import { logInClickhouse } from "../db/ClickhouseStore";
 import { RequestResponseStore } from "../db/RequestResponseStore";
@@ -582,7 +582,7 @@ export class DBLoggable {
       dbWrapper: DBWrapper;
       clickhouse: ClickhouseClientWrapper;
       queue: RequestResponseStore;
-      s3Manager: RequestResponseManager;
+      requestResponseManager: RequestResponseManager;
     },
     S3_ENABLED: Env["S3_ENABLED"]
   ): Promise<Result<null, string>> {
@@ -653,8 +653,8 @@ export class DBLoggable {
     if (!responseResult.data || responseResult.error) {
       // Log the error in S3
       if (S3_ENABLED === "true") {
-        if (this.isImageModel(model)) {
-          s3Result = await db.s3Manager.storeRequestResponseImage({
+        if (isImageModel(model)) {
+          s3Result = await db.requestResponseManager.storeRequestResponseImage({
             organizationId: authParams.organizationId,
             requestId: this.request.requestId,
             requestBody: requestResult.data.body,
@@ -666,7 +666,7 @@ export class DBLoggable {
             }),
           });
         } else {
-          s3Result = await db.s3Manager.storeRequestResponseData({
+          s3Result = await db.requestResponseManager.storeRequestResponseData({
             organizationId: authParams.organizationId,
             requestId: this.request.requestId,
             requestBody: requestResult.data.body,
@@ -688,15 +688,15 @@ export class DBLoggable {
     }
 
     if (S3_ENABLED === "true") {
-      if (this.isImageModel(model)) {
-        s3Result = await db.s3Manager.storeRequestResponseImage({
+      if (isImageModel(model)) {
+        s3Result = await db.requestResponseManager.storeRequestResponseImage({
           organizationId: authParams.organizationId,
           requestId: this.request.requestId,
           requestBody: requestResult.data.body,
           responseBody: responseResult.data.body,
         });
       } else {
-        s3Result = await db.s3Manager.storeRequestResponseData({
+        s3Result = await db.requestResponseManager.storeRequestResponseData({
           organizationId: authParams.organizationId,
           requestId: this.request.requestId,
           requestBody: requestResult.data.body,
@@ -766,14 +766,6 @@ export class DBLoggable {
     }
 
     return ok(null);
-  }
-
-  isImageModel(modelName: string): boolean {
-    const models = new Set<string>([
-      "gpt-4-vision-preview",
-      "gpt-4-1106-vision-preview",
-    ]);
-    return models.has(modelName);
   }
 }
 

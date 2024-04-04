@@ -301,7 +301,7 @@ export async function proxyForwarder(
           env.FALLBACK_QUEUE,
           env.REQUEST_AND_RESPONSE_QUEUE_KV
         ),
-        s3Manager: new RequestResponseManager(
+        requestResponseManager: new RequestResponseManager(
           new S3Client(
             env.S3_ACCESS_KEY ?? "",
             env.S3_SECRET_KEY ?? "",

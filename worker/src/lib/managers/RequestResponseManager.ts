@@ -37,50 +37,23 @@ export class RequestResponseManager {
     requestBody,
     responseBody,
   }: RequestResponseContent): Promise<Result<string, string>> {
-    const uploadPromises = [];
+    const uploadPromises: Promise<void>[] = [];
 
     for (const message of requestBody.messages) {
       for (const item of message.content) {
         if (item.type === "image_url") {
-          const imageUrl = item.image_url.url;
           const assetId = uuidv4();
 
           const uploadPromise = (async () => {
-            try {
-              let assetUploadResult: Result<string, string>;
-              if (imageUrl.startsWith("data:image/")) {
-                const [assetType, base64Data] =
-                  this.extractBase64Data(imageUrl);
-                const buffer = Buffer.from(base64Data, "base64");
-                assetUploadResult = await this.s3Client.uploadBase64ToS3(
-                  buffer,
-                  assetType,
-                  requestId,
-                  organizationId,
-                  assetId
-                );
-              } else {
-                const response = await fetch(imageUrl);
-                if (!response.ok) {
-                  return err(
-                    `Failed to download image: ${response.statusText}`
-                  );
-                }
-                const blob = await response.blob();
-                assetUploadResult = await this.s3Client.uploadImageToS3(
-                  blob,
-                  requestId,
-                  organizationId,
-                  assetId
-                );
-              }
+            const uploadResult = await this.handleImageUpload(
+              item.image_url.url,
+              assetId,
+              requestId,
+              organizationId
+            );
 
-              if (!assetUploadResult.error) {
-                await this.saveRequestResponseAssets(assetId, requestId);
-                item.image_url.url = `<helicone-asset-id key="${assetId}"/>`;
-              }
-            } catch (error) {
-              return err(JSON.stringify(error));
+            if (uploadResult && !uploadResult.error) {
+              item.image_url.url = uploadResult.data;
             }
           })();
 
@@ -96,6 +69,49 @@ export class RequestResponseManager {
       url,
       JSON.stringify({ request: requestBody, response: responseBody })
     );
+  }
+
+  private async handleImageUpload(
+    imageUrl: string,
+    assetId: string,
+    requestId: string,
+    organizationId: string
+  ): Promise<Result<string, string> | undefined> {
+    try {
+      let assetUploadResult: Result<string, string>;
+      if (imageUrl.startsWith("data:image/")) {
+        const [assetType, base64Data] = this.extractBase64Data(imageUrl);
+        const buffer = Buffer.from(base64Data, "base64");
+        assetUploadResult = await this.s3Client.uploadBase64ToS3(
+          buffer,
+          assetType,
+          requestId,
+          organizationId,
+          assetId
+        );
+      } else {
+        const response = await fetch(imageUrl);
+        if (!response.ok) {
+          return err(`Failed to download image: ${response.statusText}`);
+        }
+        const blob = await response.blob();
+        assetUploadResult = await this.s3Client.uploadImageToS3(
+          blob,
+          requestId,
+          organizationId,
+          assetId
+        );
+      }
+
+      if (!assetUploadResult.error) {
+        await this.saveRequestResponseAssets(assetId, requestId);
+        // Return the new asset URL for further processing
+        return { data: `<helicone-asset-id key="${assetId}"/>`, error: null };
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      return err(JSON.stringify(error));
+    }
   }
 
   private async saveRequestResponseAssets(assetId: string, requestId: string) {
@@ -121,7 +137,7 @@ export class RequestResponseManager {
       /^data:(image\/(?:png|jpeg|jpg|gif|webp));base64,(.*)$/
     );
     if (!matches || matches.length !== 3) {
-      console.log("Invalid base64 image data");
+      console.error("Invalid base64 image data");
       return ["", ""];
     }
     return [matches[1], matches[2]];
