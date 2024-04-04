@@ -11,7 +11,7 @@ export interface GenerateHashQueryParams {
 }
 
 @Route("v1/key")
-@Tags("Request")
+@Tags("Utils")
 @Security("api_key")
 export class GenerateHashController extends Controller {
   @Post("generateHash")

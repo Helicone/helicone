@@ -57,10 +57,11 @@ export interface FineTuneBodyParams {
   providerKeyId: string;
 }
 @Route("v1/dataset")
-@Tags("Request")
+@Tags("Dataset")
 @Security("api_key")
 export class DatasetController extends Controller {
   @Post("{datasetId}/fine-tune")
+  @Tags("FineTune")
   public async datasetFineTune(
     @Path() datasetId: string,
     @Body()
