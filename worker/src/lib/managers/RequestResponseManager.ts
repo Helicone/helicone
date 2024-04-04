@@ -10,6 +10,7 @@ export type RequestResponseContent = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   requestBody: any;
   responseBody: string;
+  requestAssets: Record<string, string>;
 };
 
 export class RequestResponseManager {
@@ -36,34 +37,14 @@ export class RequestResponseManager {
     requestId,
     requestBody,
     responseBody,
+    requestAssets,
   }: RequestResponseContent): Promise<Result<string, string>> {
-    const uploadPromises: Promise<void>[] = [];
-
-    for (const message of requestBody.messages) {
-      for (const item of message.content) {
-        if (item.type === "image_url") {
-          const assetId = uuidv4();
-
-          const uploadPromise = (async () => {
-            const uploadResult = await this.handleImageUpload(
-              item.image_url.url,
-              assetId,
-              requestId,
-              organizationId
-            );
-
-            if (uploadResult && !uploadResult.error) {
-              item.image_url.url = uploadResult.data;
-            }
-          })();
-
-          uploadPromises.push(uploadPromise);
-        }
-      }
-    }
+    const uploadPromises: Promise<Result<string, string> | undefined>[] =
+      Object.entries(requestAssets).map(([key, value]) =>
+        this.handleImageUpload(value, key, requestId, organizationId)
+      );
 
     await Promise.allSettled(uploadPromises);
-    await this.updateRequestBody(requestId, requestBody);
     const url = this.s3Client.getRequestResponseUrl(requestId, organizationId);
     return await this.s3Client.store(
       url,
@@ -105,7 +86,6 @@ export class RequestResponseManager {
 
       if (!assetUploadResult.error) {
         await this.saveRequestResponseAssets(assetId, requestId);
-        // Return the new asset URL for further processing
         return { data: `<helicone-asset-id key="${assetId}"/>`, error: null };
       }
     } catch (error) {
@@ -122,14 +102,6 @@ export class RequestResponseManager {
     if (result.error) {
       throw new Error(`Error saving asset: ${result.error.message}`);
     }
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async updateRequestBody(requestId: string, requestBody: any) {
-    await this.supabase
-      .from("request")
-      .update({ body: requestBody })
-      .eq("id", requestId);
   }
 
   private extractBase64Data(dataUri: string): [string, string] {

@@ -664,6 +664,7 @@ export class DBLoggable {
                 await this.response.getResponseBody()
               ).body,
             }),
+            requestAssets: requestResult.data.requestAssets,
           });
         } else {
           s3Result = await db.requestResponseManager.storeRequestResponseData({
@@ -676,6 +677,7 @@ export class DBLoggable {
                 await this.response.getResponseBody()
               ).body,
             }),
+            requestAssets: requestResult.data.requestAssets,
           });
         }
 
@@ -694,6 +696,7 @@ export class DBLoggable {
           requestId: this.request.requestId,
           requestBody: requestResult.data.body,
           responseBody: responseResult.data.body,
+          requestAssets: requestResult.data.requestAssets,
         });
       } else {
         s3Result = await db.requestResponseManager.storeRequestResponseData({
@@ -701,6 +704,7 @@ export class DBLoggable {
           requestId: this.request.requestId,
           requestBody: requestResult.data.body,
           responseBody: responseResult.data.body,
+          requestAssets: requestResult.data.requestAssets,
         });
       }
 
@@ -815,6 +819,7 @@ export async function logRequest(
         job: string | null;
       };
       body: string; // For S3 storage
+      requestAssets: Record<string, string>;
     },
     string
   >
@@ -879,6 +884,20 @@ export async function logRequest(
               : null,
         }
       : unsupportedImage(requestBody);
+
+    const requestAssets: Record<string, string> = {};
+
+    for (const message of body.messages) {
+      for (const item of message.content) {
+        if (item.type === "image_url") {
+          const assetId = crypto.randomUUID();
+
+          requestAssets[assetId] = item.image_url.url;
+
+          item.image_url = `<helicone-asset-id key="${assetId}"/>`;
+        }
+      }
+    }
 
     const createdAt = request.startTime ?? new Date();
     const requestData = {
@@ -948,6 +967,7 @@ export async function logRequest(
           job: jobNode?.data.job ?? null,
         },
         body: body,
+        requestAssets,
       },
       error: null,
     };
