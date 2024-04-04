@@ -11,6 +11,7 @@ import { RegisterRoutes as registerTSOARoutes } from "./tsoa-build/routes";
 import * as swaggerDocument from "./tsoa-build/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
+import { redisClient } from "./lib/clients/redisClient";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -50,6 +51,26 @@ if (ENVIRONMENT !== "production") {
 
 initSentry(app);
 initLogs(app);
+
+app.get("/test-redis", async (req, res) => {
+  if (!redisClient) {
+    return res.status(500).json({
+      error: "Redis client not found",
+    });
+  }
+  const redisSet = await redisClient?.set("test", "testValue");
+
+  console.log("redisSet", redisSet);
+
+  const redisGet = await redisClient?.get("test");
+
+  console.log("redisGet", redisGet);
+
+  res.json({
+    redisSet,
+    redisGet,
+  });
+});
 
 app.options("*", (req, res) => {
   if (
