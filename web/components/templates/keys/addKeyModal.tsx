@@ -1,15 +1,14 @@
-import { FormEvent, useEffect, useState } from "react";
-import useNotification from "../../shared/notification/useNotification";
-import ThemedModal from "../../shared/themed/themedModal";
-import generateApiKey from "generate-api-key";
-import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
-import { OrgContextValue } from "../../layout/organizationContext";
 import {
   ArrowPathIcon,
   ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
-import { getHeliconeCookie } from "../../../lib/cookies";
+import { User } from "@supabase/auth-helpers-react";
+import generateApiKey from "generate-api-key";
+import { FormEvent, useEffect, useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
+import { OrgContextValue } from "../../layout/organizationContext";
+import useNotification from "../../shared/notification/useNotification";
+import ThemedModal from "../../shared/themed/themedModal";
 
 interface AddKeyModalProps {
   open: boolean;
