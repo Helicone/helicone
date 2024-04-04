@@ -77,6 +77,7 @@ interface ThemedHeaderProps {
     currentFilter?: string;
     onFilterChange?: (value: OrganizationFilter | null) => void;
     onSaveFilterCallback?: () => void;
+    layoutPage: string;
   };
 }
 
@@ -154,6 +155,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                               savedFilters.onSaveFilterCallback();
                             }
                           }}
+                          layoutPage={savedFilters.layoutPage}
                         />
                       </div>
                     </>
@@ -229,6 +231,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                     searchPropertyFilters={advancedFilter.searchPropertyFilters}
                     onSaveFilterCallback={savedFilters?.onSaveFilterCallback}
                     savedFilters={savedFilters?.filters}
+                    layoutPage={savedFilters?.layoutPage ?? ""}
                   />
                 )}
               </>

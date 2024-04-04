@@ -131,7 +131,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       .from("organization_layout")
       .select("*")
       .eq("organization_id", orgId)
-      .eq("type", "dashboard")
+      .eq("type", "requests")
       .single();
 
   if (!orgLayout || organizationLayoutError) {

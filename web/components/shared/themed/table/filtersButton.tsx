@@ -17,6 +17,7 @@ interface FilterButtonProps {
   currentFilter?: string;
   onFilterChange?: (value: OrganizationFilter | null) => void;
   onDeleteCallback?: () => void;
+  layoutPage: string;
 }
 
 export default function FiltersButton({
@@ -24,6 +25,7 @@ export default function FiltersButton({
   currentFilter,
   onFilterChange,
   onDeleteCallback,
+  layoutPage,
 }: FilterButtonProps) {
   const searchParams = useSearchParams();
 
@@ -185,7 +187,7 @@ export default function FiltersButton({
                       "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                      type: "dashboard",
+                      type: layoutPage,
                       filters: updatedFilters,
                     }),
                   }
