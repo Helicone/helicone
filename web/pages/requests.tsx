@@ -1,10 +1,14 @@
 import { User } from "@supabase/auth-helpers-react";
-import { GetServerSidePropsContext } from "next";
 import AuthLayout from "../components/layout/authLayout";
 import RequestsPageV2 from "../components/templates/requestsV2/requestsPageV2";
-import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { SortDirection } from "../services/lib/sorts/requests/sorts";
 import { ReactElement, useEffect } from "react";
+import {
+  OrganizationFilter,
+  OrganizationLayout,
+} from "../services/lib/organization_layout/organization_layout";
+import { withAuthSSR } from "../lib/api/handlerWrappers";
+import { supabaseServer } from "../lib/supabaseServer";
 
 // Got this ugly hack from https://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node
 const jsToRun = `
@@ -43,10 +47,20 @@ interface RequestsV2Props {
     isCustomProperty: boolean;
   };
   initialRequestId: string | null;
+  currentFilter: OrganizationFilter | null;
+  orgLayout: OrganizationLayout | null;
 }
 
 const RequestsV2 = (props: RequestsV2Props) => {
-  const { user, currentPage, pageSize, sort, initialRequestId } = props;
+  const {
+    user,
+    currentPage,
+    pageSize,
+    sort,
+    initialRequestId,
+    orgLayout,
+    currentFilter,
+  } = props;
 
   useEffect(() => {
     var observer = new MutationObserver(function (event) {
@@ -73,6 +87,8 @@ const RequestsV2 = (props: RequestsV2Props) => {
       initialRequestId={
         initialRequestId === null ? undefined : initialRequestId
       }
+      currentFilter={currentFilter}
+      organizationLayout={orgLayout}
     />
   );
 };
@@ -83,14 +99,12 @@ RequestsV2.getLayout = function getLayout(page: ReactElement) {
 
 export default RequestsV2;
 
-export const getServerSideProps = async (
-  context: GetServerSidePropsContext
-) => {
-  const supabase = new SupabaseServerWrapper(context).getClient();
-
+export const getServerSideProps = withAuthSSR(async (options) => {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    userData: { user, orgId },
+  } = options;
+
+  const { context } = options;
 
   if (!user)
     return {
@@ -112,6 +126,47 @@ export const getServerSideProps = async (
   const currentPage = parseInt(page as string, 10) || 1;
   const pageSize = parseInt(page_size as string, 10) || 25;
 
+  const { data: orgLayout, error: organizationLayoutError } =
+    await supabaseServer
+      .from("organization_layout")
+      .select("*")
+      .eq("organization_id", orgId)
+      .eq("type", "dashboard")
+      .single();
+
+  if (!orgLayout || organizationLayoutError) {
+    return {
+      props: {
+        user: user,
+        currentPage,
+        pageSize,
+        sort: {
+          sortKey: sortKey ? (sortKey as string) : null,
+          sortDirection: sortDirection
+            ? (sortDirection as SortDirection)
+            : null,
+          isCustomProperty: isCustomProperty === "true",
+        },
+        initialRequestId: requestId ? (requestId as string) : null,
+        currentFilter: null,
+        orgLayout: orgLayout ?? null,
+      },
+    };
+  }
+
+  const filterId = context.query.filter as string;
+
+  const filters: OrganizationFilter[] =
+    orgLayout.filters as OrganizationFilter[];
+  const layout: OrganizationLayout = {
+    id: orgLayout.id,
+    type: orgLayout.type,
+    filters: filters,
+    organization_id: orgLayout.organization_id,
+  };
+
+  const currentFilter = filters.find((x) => x.id === filterId);
+
   return {
     props: {
       user: user,
@@ -123,6 +178,8 @@ export const getServerSideProps = async (
         isCustomProperty: isCustomProperty === "true",
       },
       initialRequestId: requestId ? (requestId as string) : null,
+      currentFilter: currentFilter ?? null,
+      orgLayout: layout ?? null,
     },
   };
-};
+});

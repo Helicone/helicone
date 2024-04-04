@@ -30,6 +30,10 @@ import { TimeFilter } from "../dashboard/dashboardPage";
 import { CreateDataSetModal } from "../fine-tune/dataSetModal";
 import getNormalizedRequest from "./builder/requestBuilder";
 import RequestCard from "./requestCard";
+import {
+  OrganizationFilter,
+  OrganizationLayout,
+} from "../../../services/lib/organization_layout/organization_layout";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -42,6 +46,8 @@ interface RequestsPageV2Props {
   isCached?: boolean;
   initialRequestId?: string;
   userId?: string;
+  currentFilter: OrganizationFilter | null;
+  organizationLayout: OrganizationLayout | null;
 }
 
 function getSortLeaf(
@@ -109,6 +115,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached = false,
     initialRequestId,
     userId,
+    currentFilter,
+    organizationLayout,
   } = props;
   const [isLive, setIsLive] = useLocalStorage("isLive", false);
   const jawn = useJawnClient();
