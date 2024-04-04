@@ -41,9 +41,7 @@ export async function hasAccessToFineTune(orgId: string) {
       .from("finetune_job")
       .select("*", { count: "exact" })
       .eq("organization_id", orgId);
-    console.log("jobCountQuery", jobCountQuery);
     const jobsCount = jobCountQuery.count ?? 1;
-    console.log("jobsCount", jobsCount);
     if (jobsCount >= 1) {
       return false;
     } else {
@@ -52,6 +50,18 @@ export async function hasAccessToFineTune(orgId: string) {
   }
   return true;
 }
+
+export type FineTuneResult =
+  | {
+      error: string;
+    }
+  | {
+      success: boolean;
+      data: {
+        fineTuneJob: string;
+        url: string;
+      };
+    };
 
 export interface FineTuneBodyParams {
   providerKeyId: string;
@@ -67,18 +77,7 @@ export class DatasetController extends Controller {
     @Body()
     body: FineTuneBodyParams,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<
-    | {
-        error: string;
-      }
-    | {
-        success: boolean;
-        data: {
-          fineTuneJob: string;
-          url: string;
-        };
-      }
-  > {
+  ): Promise<FineTuneResult> {
     if (!(await hasAccessToFineTune(request.authParams.organizationId))) {
       this.setStatus(403);
       return {
@@ -93,17 +92,19 @@ export class DatasetController extends Controller {
       .eq("id", datasetId)
       .single();
 
-    let filterNode: FilterNode;
-    try {
-      filterNode = JSON.parse(dataset?.filter_node ?? "");
-    } catch (e) {
-      this.setStatus(500);
+    if (datasetError || !dataset) {
+      this.setStatus(404);
       return {
         error: "No dataset found",
       };
     }
-    if (datasetError || !dataset) {
-      this.setStatus(404);
+
+    let filterNode: FilterNode;
+
+    try {
+      filterNode = JSON.parse(dataset?.filter_node ?? "");
+    } catch (e) {
+      this.setStatus(500);
       return {
         error: "No dataset found",
       };

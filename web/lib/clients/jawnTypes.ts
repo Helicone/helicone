@@ -404,6 +404,15 @@ Json: JsonObject;
       userId: string;
       keyName: string;
     };
+    FineTuneResult: {
+      error: string;
+    } | {
+      data: {
+        url: string;
+        fineTuneJob: string;
+      };
+      success: boolean;
+    };
     FineTuneBodyParams: {
       providerKeyId: string;
     };
@@ -509,15 +518,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": {
-            error: string;
-          } | {
-            data: {
-              url: string;
-              fineTuneJob: string;
-            };
-            success: boolean;
-          };
+          "application/json": components["schemas"]["FineTuneResult"];
         };
       };
     };

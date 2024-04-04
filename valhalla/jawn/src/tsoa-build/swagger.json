@@ -1153,6 +1153,48 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"FineTuneResult": {
+				"anyOf": [
+					{
+						"properties": {
+							"error": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"error"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"data": {
+								"properties": {
+									"url": {
+										"type": "string"
+									},
+									"fineTuneJob": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"url",
+									"fineTuneJob"
+								],
+								"type": "object"
+							},
+							"success": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"data",
+							"success"
+						],
+						"type": "object"
+					}
+				]
+			},
 			"FineTuneBodyParams": {
 				"properties": {
 					"providerKeyId": {
@@ -1364,46 +1406,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"anyOf": [
-										{
-											"properties": {
-												"error": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"error"
-											],
-											"type": "object"
-										},
-										{
-											"properties": {
-												"data": {
-													"properties": {
-														"url": {
-															"type": "string"
-														},
-														"fineTuneJob": {
-															"type": "string"
-														}
-													},
-													"required": [
-														"url",
-														"fineTuneJob"
-													],
-													"type": "object"
-												},
-												"success": {
-													"type": "boolean"
-												}
-											},
-											"required": [
-												"data",
-												"success"
-											],
-											"type": "object"
-										}
-									]
+									"$ref": "#/components/schemas/FineTuneResult"
 								}
 							}
 						}
