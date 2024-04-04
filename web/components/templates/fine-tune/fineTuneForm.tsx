@@ -14,7 +14,7 @@ import {
 import ProviderKeyList from "../enterprise/portal/id/providerKeyList";
 import useNotification from "../../shared/notification/useNotification";
 import Link from "next/link";
-import { useJawn } from "../../../services/hooks/useJawn";
+import { getJawnClient } from "../../../lib/clients/jawn";
 
 interface FineTurnFormProps {
   numberOfModels: number;
@@ -28,7 +28,6 @@ const FineTurnForm = (props: FineTurnFormProps) => {
   const supabaseClient = useSupabaseClient<Database>();
   const orgContext = useOrg();
   const { setNotification } = useNotification();
-  const { fetchJawn } = useJawn();
 
   const [selectAllRequests, setSelectAllRequests] = useState(false);
   const [selectedDataSetId, setSelectedDataSetId] = useState<string>();
@@ -80,17 +79,22 @@ const FineTurnForm = (props: FineTurnFormProps) => {
       return;
     }
     setIsLoading(true);
+    const jawn = getJawnClient();
     if (selectedDataSetId) {
-      fetchJawn({
-        path: `/v1/dataset/${selectedDataSetId}/fine-tune`,
-        body: JSON.stringify({
-          providerKeyId,
-        }),
-        method: "POST",
-      })
+      jawn
+        .POST("/v1/dataset/{datasetId}/fine-tune", {
+          body: {
+            providerKeyId,
+          },
+          params: {
+            path: {
+              datasetId: selectedDataSetId,
+            },
+          },
+        })
         .then((res) => {
           setIsLoading(false);
-          if (res.ok) {
+          if (res.response.ok) {
             setNotification("Fine-tuning job successfully started!", "success");
             onSuccess();
           } else {
@@ -106,18 +110,15 @@ const FineTurnForm = (props: FineTurnFormProps) => {
           setNotification("error see console", "error");
         });
     } else {
-      fetchJawn({
-        path: "/v1/fine-tune",
-        body: JSON.stringify({
-          filter: "all", // "all"
-          providerKeyId,
-          uiFilter: [], // []
-        }),
-        method: "POST",
-      })
+      jawn
+        .POST("/v1/fine-tune", {
+          body: {
+            providerKeyId,
+          },
+        })
         .then((res) => {
           setIsLoading(false);
-          if (res.ok) {
+          if (res.response.ok) {
             setNotification("Fine-tuning job successfully started!", "success");
             onSuccess();
           } else {

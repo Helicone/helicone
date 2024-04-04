@@ -19,9 +19,10 @@ jobs:
         working-directory: valhalla/jawn
         run: |
           npm install
+          npx tsoa spec-and-routes
           python3 genTypes.py
 
-          if git status | grep "jawnTypes.ts"; then
+          if git status | grep -e "jawnTypes.ts" -e "swagger"; then
               echo "Please run the type generation script to update the types."
               git diff
               exit 1
