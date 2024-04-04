@@ -41,6 +41,7 @@
     "@clickhouse/client-web": "^0.2.2",
     "@cloudflare/itty-router-openapi": "^1.0.7",
     "@supabase/supabase-js": "^2.1.1",
+    "@types/uuid": "^9.0.8",
     "add": "^2.0.6",
     "async-retry": "^1.3.3",
     "aws4fetch": "^1.0.18",
