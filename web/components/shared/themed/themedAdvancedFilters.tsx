@@ -35,7 +35,7 @@ export function AdvancedFilters({
   ) => Promise<Result<void, string>>;
   onSaveFilterCallback?: () => void;
   savedFilters?: OrganizationFilter[];
-  layoutPage: string;
+  layoutPage: "dashboard" | "requests";
 }) {
   return (
     <div className="flex flex-col bg-white dark:bg-black p-4 rounded-lg border border-gray-300 dark:border-gray-700 mt-8">

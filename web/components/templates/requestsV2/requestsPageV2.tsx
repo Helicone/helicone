@@ -50,6 +50,7 @@ interface RequestsPageV2Props {
   userId?: string;
   currentFilter: OrganizationFilter | null;
   organizationLayout: OrganizationLayout | null;
+  organizationLayoutAvailable: boolean;
 }
 
 function getSortLeaf(
@@ -102,6 +103,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     userId,
     currentFilter,
     organizationLayout,
+    organizationLayoutAvailable,
   } = props;
   const [isLive, setIsLive] = useLocalStorage("isLive", false);
   const jawn = useJawnClient();
@@ -463,15 +465,19 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             searchPropertyFilters: searchPropertyFilters,
             show: userId ? false : true,
           }}
-          savedFilters={{
-            currentFilter: currFilter ?? undefined,
-            filters: orgLayout?.filters ?? undefined,
-            onFilterChange: onLayoutFilterChange,
-            onSaveFilterCallback: async () => {
-              await orgLayoutRefetch();
-            },
-            layoutPage: "requests",
-          }}
+          savedFilters={
+            organizationLayoutAvailable
+              ? {
+                  currentFilter: currFilter ?? undefined,
+                  filters: orgLayout?.filters ?? undefined,
+                  onFilterChange: onLayoutFilterChange,
+                  onSaveFilterCallback: async () => {
+                    await orgLayoutRefetch();
+                  },
+                  layoutPage: "requests",
+                }
+              : undefined
+          }
           onDataSet={
             userId
               ? undefined

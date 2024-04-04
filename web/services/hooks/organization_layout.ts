@@ -4,7 +4,7 @@ import { Result } from "../../lib/result";
 
 const useOrganizationLayout = (
   orgId: string,
-  layoutPage: string,
+  layoutPage: "dashboard" | "requests",
   initialData?: Result<OrganizationLayout, string>
 ) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({

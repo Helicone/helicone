@@ -66,7 +66,7 @@ interface ThemedTableV5Props<T> {
     currentFilter?: string;
     onFilterChange?: (value: OrganizationFilter | null) => void;
     onSaveFilterCallback?: () => void;
-    layoutPage: string;
+    layoutPage: "dashboard" | "requests";
   };
 }
 

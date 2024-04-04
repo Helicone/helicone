@@ -17,7 +17,7 @@ interface SaveFilterButtonProps {
   onSaveFilterCallback: () => void;
   filterMap: SingleFilterDef<any>[];
   savedFilters?: OrganizationFilter[];
-  layoutPage: string;
+  layoutPage: "dashboard" | "requests";
 }
 
 const SaveFilterButton = (props: SaveFilterButtonProps) => {

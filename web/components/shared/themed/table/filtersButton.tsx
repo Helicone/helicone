@@ -17,7 +17,7 @@ interface FilterButtonProps {
   currentFilter?: string;
   onFilterChange?: (value: OrganizationFilter | null) => void;
   onDeleteCallback?: () => void;
-  layoutPage: string;
+  layoutPage: "dashboard" | "requests";
 }
 
 export default function FiltersButton({

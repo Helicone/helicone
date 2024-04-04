@@ -89,6 +89,7 @@ const RequestsV2 = (props: RequestsV2Props) => {
       }
       currentFilter={currentFilter}
       organizationLayout={orgLayout}
+      organizationLayoutAvailable={true}
     />
   );
 };

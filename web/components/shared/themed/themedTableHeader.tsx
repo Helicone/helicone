@@ -77,7 +77,7 @@ interface ThemedHeaderProps {
     currentFilter?: string;
     onFilterChange?: (value: OrganizationFilter | null) => void;
     onSaveFilterCallback?: () => void;
-    layoutPage: string;
+    layoutPage: "dashboard" | "requests";
   };
 }
 
@@ -231,7 +231,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                     searchPropertyFilters={advancedFilter.searchPropertyFilters}
                     onSaveFilterCallback={savedFilters?.onSaveFilterCallback}
                     savedFilters={savedFilters?.filters}
-                    layoutPage={savedFilters?.layoutPage ?? ""}
+                    layoutPage={savedFilters?.layoutPage ?? "dashboard"}
                   />
                 )}
               </>
