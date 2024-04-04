@@ -9,12 +9,6 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
-  "/v1/users/{userId}": {
-    get: operations["GetUser"];
-  };
-  "/v1/users": {
-    post: operations["CreateUser"];
-  };
   "/v1/tokens/anthropic": {
     post: operations["AnthropicTokenCount"];
   };
@@ -42,17 +36,6 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
-    User: {
-      /** Format: double */
-      id: number;
-      email: string;
-      name: string;
-      /** @enum {string} */
-      status?: "Happy" | "Sad";
-      /** @enum {string} */
-      status2?: "Happy" | "Sad";
-      phoneNumbers: string[];
-    };
     TokenResponseBody: {
       /** Format: double */
       tokens: number;
@@ -445,37 +428,6 @@ export type external = Record<string, never>;
 
 export interface operations {
 
-  GetUser: {
-    parameters: {
-      query?: {
-        name?: string;
-      };
-      path: {
-        userId: number;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["User"];
-        };
-      };
-    };
-  };
-  CreateUser: {
-    requestBody: {
-      content: {
-        "application/json": unknown;
-      };
-    };
-    responses: {
-      /** @description Created */
-      201: {
-        content: never;
-      };
-    };
-  };
   AnthropicTokenCount: {
     requestBody: {
       content: {

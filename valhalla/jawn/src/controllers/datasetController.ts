@@ -1,8 +1,8 @@
 // src/users/usersController.ts
+import * as Sentry from "@sentry/node";
 import {
   Body,
   Controller,
-  Get,
   Path,
   Post,
   Request,
@@ -10,18 +10,12 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { hashAuth } from "../lib/db/hash";
+import { postHogClient } from "../lib/clients/postHogClient";
 import { supabaseServer } from "../lib/routers/withAuth";
-import { JawnAuthenticatedRequest } from "../types/request";
-import { FineTuningManager } from "../managers/FineTuningManager";
-import {
-  FineTuningJob,
-  FineTuningJobEventsPage,
-} from "openai/resources/fine-tuning/jobs";
 import { FilterNode } from "../lib/shared/filters/filterDefs";
 import { getRequests } from "../lib/stores/request/request";
-import * as Sentry from "@sentry/node";
-import { postHogClient } from "../lib/clients/postHogClient";
+import { FineTuningManager } from "../managers/FineTuningManager";
+import { JawnAuthenticatedRequest } from "../types/request";
 
 export interface GenerateHashQueryParams {
   apiKey: string;
