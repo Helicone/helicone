@@ -90,6 +90,7 @@ export class RequestResponseManager {
     }
 
     await Promise.allSettled(uploadPromises);
+    await this.updateRequestBody(requestId, requestBody);
     const url = this.s3Client.getRequestResponseUrl(requestId, organizationId);
     return await this.s3Client.store(
       url,
@@ -105,6 +106,13 @@ export class RequestResponseManager {
     if (result.error) {
       throw new Error(`Error saving asset: ${result.error.message}`);
     }
+  }
+
+  private async updateRequestBody(requestId: string, requestBody: any) {
+    await this.supabase
+      .from("request")
+      .update({ body: requestBody })
+      .eq("id", requestId);
   }
 
   private extractBase64Data(dataUri: string): [string, string] {
