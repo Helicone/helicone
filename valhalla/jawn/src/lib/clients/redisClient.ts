@@ -1,12 +1,12 @@
-// import Redis from "ioredis";
-import { Redis } from "@upstash/redis"; // see below for cloudflare and fastly adapters
+import RedisClient from "ioredis";
 
 const redisHost = process.env.REDIS_HOST;
 
-export let redisClient: Redis | null = null;
+export let redisClient: RedisClient | null = null;
 if (redisHost) {
-  redisClient = new Redis({
-    url: `${redisHost}:6379`,
-    token: "",
+  redisClient = new RedisClient({
+    port: 6379,
+    host: redisHost,
+    tls: {},
   });
 }
