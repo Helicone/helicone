@@ -6,16 +6,13 @@ import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
 import { clsx } from "../../clsx";
 import { AdvancedFilters, UIFilterRow } from "../themedAdvancedFilters";
-import { ThemedPill } from "../themedPill";
 import ThemedTimeFilter from "../themedTimeFilter";
 import ExportButton from "./exportButton";
 import ViewColumns from "../../../templates/requestsV2/viewColumns";
-import useNotification from "../../notification/useNotification";
 import useSearchParams from "../../utils/useSearchParams";
 import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
 import ViewButton from "./viewButton";
 import { RequestViews } from "./themedTableV5";
-import { useOrg } from "../../../layout/organizationContext";
 
 interface ThemedTableHeaderProps<T> {
   rows?: T[];
@@ -55,9 +52,6 @@ interface ThemedTableHeaderProps<T> {
 }
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
-  const { setNotification } = useNotification();
-  const org = useOrg();
-
   const { rows, columnsFilter, timeFilter, advancedFilters, viewToggle } =
     props;
 
@@ -120,6 +114,8 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               <FunnelIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
               <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
                 {showFilters ? "Hide" : "Show"} Filters
+                {advancedFilters.filters.length > 0 &&
+                  ` (${advancedFilters.filters.length})`}
               </p>
             </button>
           )}
@@ -169,32 +165,6 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           searchPropertyFilters={advancedFilters.searchPropertyFilters}
         />
       )}
-      {advancedFilters &&
-        advancedFilters.filters.length > 0 &&
-        advancedFilters.show &&
-        !showFilters && (
-          <div className="flex-wrap w-full flex-row space-x-4 space-y-2 mt-4">
-            {advancedFilters.filters.map((_filter, index) => {
-              return (
-                <ThemedPill
-                  key={index}
-                  label={`${
-                    advancedFilters.filterMap[_filter.filterMapIdx]?.label
-                  } ${
-                    advancedFilters.filterMap[_filter.filterMapIdx]?.operators[
-                      _filter.operatorIdx
-                    ].label
-                  } ${_filter.value}`}
-                  onDelete={() => {
-                    const prev = [...advancedFilters.filters];
-                    prev.splice(index, 1);
-                    advancedFilters.setAdvancedFilters(prev);
-                  }}
-                />
-              );
-            })}
-          </div>
-        )}
     </div>
   );
 }

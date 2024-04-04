@@ -14,14 +14,15 @@ import {
   TextInput,
 } from "@tremor/react";
 import ThemedNumberDropdown from "./themedNumberDropdown";
-import { clsx } from "../clsx";
-import useNotification from "../notification/useNotification";
+import SaveFilterButton from "../../templates/dashboard/saveFilterButton";
+import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 
 export function AdvancedFilters({
   filterMap,
   filters,
   setAdvancedFilters,
   searchPropertyFilters,
+  onSaveFilterCallback,
   savedFilters,
 }: {
   filterMap: SingleFilterDef<any>[];
@@ -31,11 +32,9 @@ export function AdvancedFilters({
     property: string,
     search: string
   ) => Promise<Result<void, string>>;
-  savedFilters?: {
-    onSaveFilters?: (value: boolean) => void;
-  };
+  onSaveFilterCallback?: () => void;
+  savedFilters?: OrganizationFilter[];
 }) {
-  const { setNotification } = useNotification();
   return (
     <div className="flex flex-col bg-white dark:bg-black p-4 rounded-lg border border-gray-300 dark:border-gray-700 mt-8">
       <div className="w-full flex flex-col sm:flex-row justify-between items-center">
@@ -59,10 +58,6 @@ export function AdvancedFilters({
                 filter={_filter}
                 setFilter={(filter) => {
                   const prev = [...filters];
-                  if (typeof filter === "function") {
-                    // filter = filter(prev[index]);
-                  }
-
                   const newFilters = [...prev];
                   newFilters[index] = filter[0];
                   setAdvancedFilters(newFilters);
@@ -80,7 +75,6 @@ export function AdvancedFilters({
         <button
           onClick={() => {
             const prev = [...filters];
-
             setAdvancedFilters([
               ...prev,
               { filterMapIdx: 0, value: "", operatorIdx: 0 },
@@ -96,25 +90,13 @@ export function AdvancedFilters({
         </button>
       </div>
       <div className="flex flex-row w-full items-end justify-end">
-        {savedFilters && (
-          <button
-            onClick={() => {
-              if (savedFilters && filters.length == 0) {
-                setNotification("Saved Filters can not be empty", "error");
-                return;
-              }
-              if (savedFilters?.onSaveFilters) {
-                savedFilters?.onSaveFilters(true);
-              }
-            }}
-            className={clsx(
-              "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
-            )}
-          >
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-              {"Create New Filter"}
-            </p>
-          </button>
+        {onSaveFilterCallback && (
+          <SaveFilterButton
+            filters={filters}
+            onSaveFilterCallback={onSaveFilterCallback}
+            filterMap={filterMap}
+            savedFilters={savedFilters}
+          />
         )}
       </div>
     </div>
@@ -257,7 +239,6 @@ function AdvancedFilterRow({
             const selected = Number(value);
             const label = filterMap[selected].label;
             if (label === "Feedback") {
-              // feedback idx
               setFilter([
                 {
                   filterMapIdx: selected,
@@ -335,7 +316,7 @@ function AdvancedFilterRow({
           }
         />
       </div>
-      <div className="w-full lg:w-fit mr-16">
+      <div className="w-full lg:w-fit mr-16 pb-1">
         <button
           onClick={onDeleteHandler}
           className="bg-red-700  text-white rounded-md p-1 hover:bg-red-500"

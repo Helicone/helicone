@@ -21,6 +21,7 @@ import {
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
   SingleFilterDef,
+  textWithSuggestions,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { LatencyOverTime } from "../../../pages/api/metrics/latencyOverTime";
@@ -28,6 +29,7 @@ import { UsersOverTime } from "../../../pages/api/metrics/usersOverTime";
 import { TokensOverTime } from "../../../pages/api/metrics/tokensOverTime";
 import { TimeToFirstToken } from "../../../pages/api/metrics/timeToFirstToken";
 import { ThreatsOverTime } from "../../../pages/api/metrics/threatsOverTime";
+import { useModels } from "../../../services/hooks/models";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -75,6 +77,29 @@ export const useDashboardPage = ({
   dbIncrement,
 }: DashboardPageData) => {
   const filterMap = DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[];
+
+  const { isLoading: isModelsLoading, models } = useModels(timeFilter, 5);
+
+  // replace the model filter inside of the filterMap with the text suggestion model
+  const modelFilterIdx = filterMap.findIndex(
+    (filter) => filter.label === "Model"
+  );
+  if (modelFilterIdx !== -1) {
+    filterMap[modelFilterIdx] = {
+      label: "Model",
+      operators: textWithSuggestions(
+        models?.data
+          ?.filter((model) => model.model)
+          .map((model) => ({
+            key: model.model,
+            param: model.model,
+          })) || []
+      ),
+      category: "request",
+      table: "request_response_log",
+      column: "model",
+    };
+  }
 
   const userFilters =
     apiKeyFilter !== null
@@ -255,5 +280,7 @@ export const useDashboardPage = ({
       Object.values(overTimeData).forEach((x) => x.remove());
       Object.values(metrics).forEach((x) => x.remove());
     },
+    models,
+    isModelsLoading,
   };
 };
