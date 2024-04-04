@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { RequestWrapper } from "../lib/requestWrapper";
-import { supabaseClient } from "../lib/routers/withAuth";
+import { supabaseServer } from "../lib/routers/withAuth";
 
 export const authMiddleware = async (
   req: Request,
@@ -16,7 +16,7 @@ export const authMiddleware = async (
       });
       return;
     }
-    const authParams = await supabaseClient.authenticate(authorization.data!);
+    const authParams = await supabaseServer.authenticate(authorization.data!);
     if (authParams.error) {
       console.error("authParams.error", authParams.error);
       const SUPABASE_CREDS = JSON.parse(process.env.SUPABASE_CREDS ?? "{}");

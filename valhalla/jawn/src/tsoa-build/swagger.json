@@ -7,44 +7,27 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"User": {
+			"TokenResponseBody": {
 				"properties": {
-					"id": {
+					"tokens": {
 						"type": "number",
 						"format": "double"
-					},
-					"email": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"status": {
-						"type": "string",
-						"enum": [
-							"Happy",
-							"Sad"
-						]
-					},
-					"status2": {
-						"type": "string",
-						"enum": [
-							"Happy",
-							"Sad"
-						]
-					},
-					"phoneNumbers": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
 					}
 				},
 				"required": [
-					"id",
-					"email",
-					"name",
-					"phoneNumbers"
+					"tokens"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TokenBodyParams": {
+				"properties": {
+					"content": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"content"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1149,6 +1132,92 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"GenerateHashQueryParams": {
+				"properties": {
+					"apiKey": {
+						"type": "string"
+					},
+					"userId": {
+						"type": "string"
+					},
+					"keyName": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"apiKey",
+					"userId",
+					"keyName"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"FineTuneResult": {
+				"anyOf": [
+					{
+						"properties": {
+							"error": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"error"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"data": {
+								"properties": {
+									"url": {
+										"type": "string"
+									},
+									"fineTuneJob": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"url",
+									"fineTuneJob"
+								],
+								"type": "object"
+							},
+							"success": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"data",
+							"success"
+						],
+						"type": "object"
+					}
+				]
+			},
+			"FineTuneBodyParams": {
+				"properties": {
+					"providerKeyId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"providerKeyId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"FineTuneBody": {
+				"properties": {
+					"providerKeyId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"providerKeyId"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {
@@ -1168,60 +1237,23 @@
 		"contact": {}
 	},
 	"paths": {
-		"/v1/users/{userId}": {
-			"get": {
-				"operationId": "GetUser",
+		"/v1/tokens/anthropic": {
+			"post": {
+				"operationId": "AnthropicTokenCount",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/User"
+									"$ref": "#/components/schemas/TokenResponseBody"
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"User"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "userId",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "name",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/users": {
-			"post": {
-				"operationId": "CreateUser",
-				"responses": {
-					"201": {
-						"description": "Created"
-					}
-				},
-				"tags": [
-					"User"
+					"TokenCounter"
 				],
 				"security": [
 					{
@@ -1233,7 +1265,45 @@
 					"required": true,
 					"content": {
 						"application/json": {
-							"schema": {}
+							"schema": {
+								"$ref": "#/components/schemas/TokenBodyParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/tokens/gpt3": {
+			"post": {
+				"operationId": "Gpt3TokenCount",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TokenResponseBody"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"TokenCounter"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TokenBodyParams"
+							}
 						}
 					}
 				}
@@ -1273,6 +1343,237 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/key/generateHash": {
+			"post": {
+				"operationId": "GenerateHash",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"error": {
+											"properties": {
+												"details": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												}
+											},
+											"type": "object"
+										},
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Utils"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/GenerateHashQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/dataset/{datasetId}/fine-tune": {
+			"post": {
+				"operationId": "DatasetFineTune",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/FineTuneResult"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"FineTune",
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "datasetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/FineTuneBodyParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/fine-tune": {
+			"post": {
+				"operationId": "FineTune",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"data": {
+													"properties": {
+														"url": {
+															"type": "string"
+														},
+														"fineTuneJob": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"url",
+														"fineTuneJob"
+													],
+													"type": "object"
+												},
+												"success": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"data",
+												"success"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"FineTune"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/FineTuneBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/fine-tune/{jobId}/stats": {
+			"get": {
+				"operationId": "FineTuneJobStats",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"events": {},
+												"job": {}
+											},
+											"required": [
+												"events",
+												"job"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"FineTune"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "jobId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		}
 	},
