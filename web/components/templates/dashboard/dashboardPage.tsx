@@ -491,6 +491,7 @@ const DashboardPage = (props: DashboardPageProps) => {
               onSaveFilterCallback: async () => {
                 await orgLayoutRefetch();
               },
+              layoutPage: "dashboard",
             }}
           />
           <section id="panels" className="-m-2">

@@ -25,6 +25,7 @@ import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import RequestRowView from "./requestRowView";
 import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
+import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 
 interface ThemedTableV5Props<T> {
   defaultData: T[];
@@ -60,6 +61,13 @@ interface ThemedTableV5Props<T> {
   hideView?: boolean;
   noDataCTA?: React.ReactNode;
   onDataSet?: () => void;
+  savedFilters?: {
+    filters?: OrganizationFilter[];
+    currentFilter?: string;
+    onFilterChange?: (value: OrganizationFilter | null) => void;
+    onSaveFilterCallback?: () => void;
+    layoutPage: "dashboard" | "requests";
+  };
 }
 
 export type RequestViews = "table" | "card" | "row";
@@ -80,6 +88,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     hideView, // hides the view columns button
     noDataCTA,
     onDataSet: onDataSet,
+    savedFilters,
   } = props;
 
   const [visibleColumns, setVisibleColumns] = useState<VisibilityState>({});
@@ -135,6 +144,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
               }
             : undefined
         }
+        savedFilters={savedFilters}
         columnsFilter={
           hideView
             ? undefined
