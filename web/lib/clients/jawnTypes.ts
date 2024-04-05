@@ -9,12 +9,6 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
-  "/v1/tokens/anthropic": {
-    post: operations["AnthropicTokenCount"];
-  };
-  "/v1/tokens/gpt3": {
-    post: operations["Gpt3TokenCount"];
-  };
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
@@ -36,13 +30,6 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
-    TokenResponseBody: {
-      /** Format: double */
-      tokens: number;
-    };
-    TokenBodyParams: {
-      content: string;
-    };
 Json: JsonObject;
     /** @enum {string} */
     Provider: "OPENAI" | "ANTHROPIC" | "TOGETHERAI" | "GROQ" | "CUSTOM";
@@ -437,36 +424,6 @@ export type external = Record<string, never>;
 
 export interface operations {
 
-  AnthropicTokenCount: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TokenBodyParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["TokenResponseBody"];
-        };
-      };
-    };
-  };
-  Gpt3TokenCount: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TokenBodyParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["TokenResponseBody"];
-        };
-      };
-    };
-  };
   GetRequests: {
     requestBody: {
       content: {
