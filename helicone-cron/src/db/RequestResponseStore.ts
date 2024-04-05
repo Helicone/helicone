@@ -21,27 +21,25 @@ export class RequestResponseStore {
     FROM request_response_log
     WHERE 
       organization_id = {val_0: UUID} AND
-      request_created_at >= {val_1: String} AND
-      request_created_at <= {val_2: String}
+      request_created_at >= {val_1: DateTime} AND
+      request_created_at <= {val_2: DateTime}
     `;
 
-    const { data, error } = await this.clickhouseClient.dbQuery<number>(query, [
-      orgId,
-      from.toISOString(),
-      to.toISOString(),
-    ]);
+    const { data, error } = await this.clickhouseClient.dbQuery<{
+      count: number;
+    }>(query, [orgId, from, to]);
 
     if (error) {
       return { data: null, error };
     }
 
-    if (!data || data.length === 0) {
+    if (!data || data.length === 0 || !data[0].count) {
       return {
         data: null,
         error: `Failed to retrieve request count for org id: ${orgId}`,
       };
     }
 
-    return { data: data[0], error: null };
+    return { data: data[0].count, error: null };
   }
 }
