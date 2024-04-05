@@ -54,7 +54,19 @@ export class FineTuningManager {
   ): Promise<Result<FineTuningJob, string>> {
     const formattedRows = requests
       .map((request) => {
-        if (request.response_status !== 200) {
+        if (
+          request.response_status !== 200 ||
+          !request.request_body ||
+          !request.request_body.messages ||
+          request.request_body.messages.length === 0 ||
+          !request.request_body.messages[0] ||
+          !request.request_body.messages[0].content ||
+          !request.response_body ||
+          !request.response_body.choices ||
+          !request.response_body.choices[0] ||
+          !request.response_body.choices[0].message ||
+          !request.response_body.choices[0].message.content
+        ) {
           return;
         }
         const requestMessages = request.request_body.messages;
