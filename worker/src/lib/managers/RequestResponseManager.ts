@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { S3Client } from "../clients/S3Client";
-import { err, Result } from "../util/results";
+import { Result } from "../util/results";
 import { Database } from "../../../supabase/database.types";
 
 export type RequestResponseContent = {
