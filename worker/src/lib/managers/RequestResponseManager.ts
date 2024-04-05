@@ -84,7 +84,11 @@ export class RequestResponseManager {
       }
 
       if (!assetUploadResult.error) {
-        await this.saveRequestResponseAssets(assetId, requestId);
+        await this.saveRequestResponseAssets(
+          assetId,
+          requestId,
+          organizationId
+        );
       }
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -92,10 +96,16 @@ export class RequestResponseManager {
     }
   }
 
-  private async saveRequestResponseAssets(assetId: string, requestId: string) {
+  private async saveRequestResponseAssets(
+    assetId: string,
+    requestId: string,
+    organizationId: string
+  ) {
     const result = await this.supabase
       .from("asset")
-      .insert([{ id: assetId, request_id: requestId }]);
+      .insert([
+        { id: assetId, request_id: requestId, organization_id: organizationId },
+      ]);
 
     if (result.error) {
       throw new Error(`Error saving asset: ${result.error.message}`);
