@@ -30,6 +30,12 @@ import { TimeFilter } from "../dashboard/dashboardPage";
 import { CreateDataSetModal } from "../fine-tune/dataSetModal";
 import getNormalizedRequest from "./builder/requestBuilder";
 import RequestCard from "./requestCard";
+import {
+  OrganizationFilter,
+  OrganizationLayout,
+} from "../../../services/lib/organization_layout/organization_layout";
+import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
+import { useOrg } from "../../layout/organizationContext";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -42,6 +48,9 @@ interface RequestsPageV2Props {
   isCached?: boolean;
   initialRequestId?: string;
   userId?: string;
+  currentFilter: OrganizationFilter | null;
+  organizationLayout: OrganizationLayout | null;
+  organizationLayoutAvailable: boolean;
 }
 
 function getSortLeaf(
@@ -84,23 +93,6 @@ function getTableName(isCached: boolean): string {
   return isCached ? "cache_hits" : "request";
 }
 
-export function decodeFilter(encoded: string): UIFilterRow | null {
-  try {
-    const parts = encoded.split(":");
-    if (parts.length !== 3) return null;
-    const filterMapIdx = parseInt(parts[0], 10);
-    const operatorIdx = parseInt(parts[1], 10);
-    const value = decodeURIComponent(parts[2]);
-
-    if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
-
-    return { filterMapIdx, operatorIdx, value };
-  } catch (error) {
-    console.error("Error decoding filter:", error);
-    return null;
-  }
-}
-
 const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const {
     currentPage,
@@ -109,9 +101,17 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached = false,
     initialRequestId,
     userId,
+    currentFilter,
+    organizationLayout,
+    organizationLayoutAvailable,
   } = props;
   const [isLive, setIsLive] = useLocalStorage("isLive", false);
   const jawn = useJawnClient();
+  const orgContext = useOrg();
+  const searchParams = useSearchParams();
+  const [currFilter, setCurrFilter] = useState(
+    searchParams.get("filter") ?? null
+  );
 
   // set the initial selected data on component load
   useEffect(() => {
@@ -177,7 +177,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [selectedData, setSelectedData] = useState<
     NormalizedRequest | undefined
   >(undefined);
-  const searchParams = useSearchParams();
 
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -218,37 +217,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   };
 
   const getAdvancedFilters = (): UIFilterRow[] => {
-    try {
-      const currentAdvancedFilters = searchParams.get("filters");
-
-      if (currentAdvancedFilters) {
-        const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
-        const decodedFilters = filters
-          .split("|")
-          .map(decodeFilter)
-          .filter((filter) => filter !== null) as UIFilterRow[];
-
-        if (userId) {
-          decodedFilters.push({
-            filterMapIdx: 3,
-            operatorIdx: 0,
-            value: userId,
-          });
-        }
-
-        return decodedFilters;
-      }
-    } catch (error) {
-      console.error("Error decoding advanced filters:", error);
-    }
-    if (userId) {
-      return [
-        {
-          filterMapIdx: 3,
-          operatorIdx: 0,
-          value: userId,
-        },
-      ];
+    if (currentFilter) {
+      return currentFilter?.filter as UIFilterRow[];
     }
     return [];
   };
@@ -389,18 +359,16 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     })
   );
 
-  const onSetAdvancedFilters = (filters: UIFilterRow[]) => {
-    // TODO: remove this url param setting once we move to filter persistence
-    if (filters.length > 0) {
-      const currentAdvancedFilters = encodeURIComponent(
-        JSON.stringify(filters.map(encodeFilter).join("|"))
-      );
-      searchParams.set("filters", JSON.stringify(currentAdvancedFilters));
-    } else {
-      searchParams.delete("filters");
-    }
-
+  const onSetAdvancedFilters = (
+    filters: UIFilterRow[],
+    layoutFilterId?: string | null
+  ) => {
     setAdvancedFilters(filters);
+    if (layoutFilterId === null) {
+      searchParams.delete("filter");
+    } else {
+      searchParams.set("filter", layoutFilterId ?? "");
+    }
   };
 
   const onRowSelectHandler = (row: NormalizedRequest, index: number) => {
@@ -408,6 +376,44 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     setSelectedData(row);
     setOpen(true);
     searchParams.set("requestId", row.id);
+  };
+
+  const {
+    organizationLayout: orgLayout,
+    isLoading: isOrgLayoutLoading,
+    refetch: orgLayoutRefetch,
+    isRefetching: isOrgLayoutRefetching,
+  } = useOrganizationLayout(
+    orgContext?.currentOrg?.id!,
+    "requests",
+    organizationLayout
+      ? {
+          data: organizationLayout,
+          error: null,
+        }
+      : undefined
+  );
+
+  const onSetAdvancedFiltersHandler = (
+    filters: UIFilterRow[],
+    layoutFilterId?: string | null
+  ) => {
+    setAdvancedFilters(filters);
+    if (layoutFilterId === null) {
+      searchParams.delete("filter");
+    } else {
+      searchParams.set("filter", layoutFilterId ?? "");
+    }
+  };
+
+  const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
+    if (layoutFilter !== null) {
+      onSetAdvancedFiltersHandler(layoutFilter?.filter, layoutFilter.id);
+      setCurrFilter(layoutFilter?.id);
+    } else {
+      setCurrFilter(null);
+      onSetAdvancedFiltersHandler([], null);
+    }
   };
 
   return (
@@ -459,6 +465,19 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             searchPropertyFilters: searchPropertyFilters,
             show: userId ? false : true,
           }}
+          savedFilters={
+            organizationLayoutAvailable
+              ? {
+                  currentFilter: currFilter ?? undefined,
+                  filters: orgLayout?.filters ?? undefined,
+                  onFilterChange: onLayoutFilterChange,
+                  onSaveFilterCallback: async () => {
+                    await orgLayoutRefetch();
+                  },
+                  layoutPage: "requests",
+                }
+              : undefined
+          }
           onDataSet={
             userId
               ? undefined
