@@ -38,10 +38,10 @@ export class RequestResponseManager {
     responseBody,
     requestAssets,
   }: RequestResponseContent): Promise<Result<string, string>> {
-    const uploadPromises: Promise<Result<string, string> | undefined>[] =
-      Object.entries(requestAssets).map(([key, value]) =>
+    const uploadPromises: Promise<void>[] = Object.entries(requestAssets).map(
+      ([key, value]) =>
         this.handleImageUpload(value, key, requestId, organizationId)
-      );
+    );
 
     await Promise.allSettled(uploadPromises);
     const url = this.s3Client.getRequestResponseUrl(requestId, organizationId);
@@ -56,7 +56,7 @@ export class RequestResponseManager {
     assetId: string,
     requestId: string,
     organizationId: string
-  ): Promise<Result<string, string> | undefined> {
+  ): Promise<void> {
     try {
       let assetUploadResult: Result<string, string>;
       if (imageUrl.startsWith("data:image/")) {
@@ -72,7 +72,7 @@ export class RequestResponseManager {
       } else {
         const response = await fetch(imageUrl);
         if (!response.ok) {
-          return err(`Failed to download image: ${response.statusText}`);
+          throw new Error(`Failed to download image: ${response.statusText}`);
         }
         const blob = await response.blob();
         assetUploadResult = await this.s3Client.uploadImageToS3(
@@ -85,11 +85,10 @@ export class RequestResponseManager {
 
       if (!assetUploadResult.error) {
         await this.saveRequestResponseAssets(assetId, requestId);
-        return { data: `<helicone-asset-id key="${assetId}"/>`, error: null };
       }
     } catch (error) {
       console.error("Error uploading image:", error);
-      return err(JSON.stringify(error));
+      throw error;
     }
   }
 
