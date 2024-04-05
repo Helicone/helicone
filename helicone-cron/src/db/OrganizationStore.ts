@@ -5,11 +5,12 @@ import { ClickhouseWrapper } from "./ClickhouseWrapper";
 import { PgWrapper } from "./PgWrapper";
 
 export type Tier = "free" | "pro" | "growth" | "enterprise";
-export type UsageEligibleOrgs = {
+export interface UsageEligibleOrgs {
   orgId: string;
+  stripeSubscriptionId: string;
   stripeSubscriptionItemId: string;
   latestEndTime?: string;
-};
+}
 
 export class OrganizationStore {
   constructor(
@@ -33,10 +34,11 @@ export class OrganizationStore {
     //   and (ou.id IS NULL OR (ou.usage_date = $1 AND ou.recorded = false))
     // `;
 
-    const query = `select
-      o.id as orgId,
-      o.stripe_subscription_item_id as stripeSubscriptionItemId,
-      MAX(ou.end_time) as latestEndTime
+    const query = `SELECT
+      o.id as "orgId",
+      o.stripe_subscription_id as "stripeSubscriptionId",
+      o.stripe_subscription_item_id as "stripeSubscriptionItemId",
+      MAX(ou.end_date) as "latestEndTime"
     from organization as o
     left join organization_usage as ou on o.id = ou.organization_id
       where o.tier = 'growth'
@@ -47,7 +49,7 @@ export class OrganizationStore {
     group by o.id`;
 
     const { data: eligibleOrgs, error: eligibleOrgsErr } =
-      await this.pg.dbExecute<UsageEligibleOrgs>(query, [usageDate]);
+      await this.pg.dbExecute<UsageEligibleOrgs>(query, []);
 
     if (eligibleOrgsErr || !eligibleOrgs) {
       return err(eligibleOrgsErr);
