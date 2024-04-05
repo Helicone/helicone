@@ -40,64 +40,6 @@ export class OrganizationStore {
     return ok(eligibleOrgs);
   }
 
-  async getOrganizationsByTier(
-    tier: Tier,
-    params: {
-      isStripeCustomer?: boolean;
-      hasStripeSubscriptionItemId?: boolean;
-    }
-  ): Promise<
-    Result<Database["public"]["Tables"]["organization"]["Row"][], string>
-  > {
-    const { isStripeCustomer } = params;
-    const query = this.supabaseClient
-      .from("organization")
-      .select("*")
-      .eq("soft_delete", false)
-      .eq("tier", tier);
-
-    if (isStripeCustomer) {
-      query.not("stripe_customer_id", "is", null).neq("stripe_customer_id", "");
-    }
-
-    if (params.hasStripeSubscriptionItemId) {
-      query
-        .not("stripe_subscription_item_id", "is", null)
-        .neq("stripe_subscription_item_id", "");
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      return err(error.message);
-    }
-
-    return ok(data);
-  }
-
-  async getOrganizationUsageByOrgIdAndDate(
-    orgId: string,
-    usageDate: string
-  ): Promise<
-    Result<Database["public"]["Tables"]["organization_usage"]["Row"], string>
-  > {
-    const { data, error } = await this.supabaseClient
-      .from("organization_usage")
-      .select("*")
-      .eq("organization_id", orgId)
-      .eq("usage_date", usageDate);
-
-    if (error) {
-      return err(error.message);
-    }
-
-    if (!data) {
-      return err("Organization usage not found.");
-    }
-
-    return ok(data[0]);
-  }
-
   async upsertOrgUsage(
     usageData: Database["public"]["Tables"]["organization_usage"]["Insert"]
   ): Promise<Result<null, string>> {
@@ -109,7 +51,6 @@ export class OrganizationStore {
       });
 
     if (error) {
-      console.log(`Failed to upsert organization usage: ${error.message}`);
       return err(error.message);
     }
 
