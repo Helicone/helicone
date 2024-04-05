@@ -1166,39 +1166,42 @@ export type Database = {
       organization_usage: {
         Row: {
           created_at: string
+          end_date: string
           error_message: string | null
           id: string
           organization_id: string
           quantity: number
           recorded: boolean | null
+          start_date: string
           stripe_record: Json | null
           type: string
           updated_at: string
-          usage_date: string
         }
         Insert: {
           created_at?: string
+          end_date: string
           error_message?: string | null
           id?: string
           organization_id: string
           quantity: number
           recorded?: boolean | null
+          start_date: string
           stripe_record?: Json | null
           type: string
           updated_at?: string
-          usage_date: string
         }
         Update: {
           created_at?: string
+          end_date?: string
           error_message?: string | null
           id?: string
           organization_id?: string
           quantity?: number
           recorded?: boolean | null
+          start_date?: string
           stripe_record?: Json | null
           type?: string
           updated_at?: string
-          usage_date?: string
         }
         Relationships: [
           {

@@ -8,6 +8,7 @@ export type Tier = "free" | "pro" | "growth" | "enterprise";
 export type UsageEligibleOrgs = {
   orgId: string;
   stripeSubscriptionItemId: string;
+  latestEndTime: string;
 };
 
 export class OrganizationStore {
@@ -20,15 +21,30 @@ export class OrganizationStore {
   async getUsageEligibleOrganizations(
     usageDate: string
   ): Promise<Result<UsageEligibleOrgs[], string>> {
-    const query = `select o.id as orgId, o.stripe_subscription_item_id as stripeSubscriptionItemId
+    // const query = `select
+    //   o.id as orgId,
+    //   o.stripe_subscription_item_id as stripeSubscriptionItemId
+    // from organization as o
+    // left join organization_usage as ou on o.id = ou.organization_id AND ou.usage_date = $1
+    //   where o.tier = 'growth'
+    //   and o.stripe_customer_id is not null
+    //   and o.stripe_subscription_item_id is not null
+    //   and o.soft_delete = false
+    //   and (ou.id IS NULL OR (ou.usage_date = $1 AND ou.recorded = false))
+    // `;
+
+    const query = `select
+      o.id as orgId,
+      o.stripe_subscription_item_id as stripeSubscriptionItemId,
+      MAX(CONCAT(ou.end_time, o.)) as latestEndTime
     from organization as o
-    left join organization_usage as ou on o.id = ou.organization_id AND ou.usage_date = $1
-    where o.tier = 'growth'
-    and o.stripe_customer_id is not null
-    and o.stripe_subscription_item_id is not null
-    and o.soft_delete = false
-    and (ou.id IS NULL OR (ou.usage_date = $1 AND ou.recorded = false))
-    `;
+    left join organization_usage as ou on o.id = ou.organization_id
+      where o.tier = 'growth'
+      and o.stripe_customer_id is not null
+      and o.stripe_subscription_item_id is not null
+      and o.soft_delete = false
+      and (ou.recorded = true OR ou.recorded IS NULL)
+    group by o.id`;
 
     const { data: eligibleOrgs, error: eligibleOrgsErr } =
       await this.pg.dbExecute<UsageEligibleOrgs>(query, [usageDate]);

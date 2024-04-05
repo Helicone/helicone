@@ -13,21 +13,21 @@ export class RequestResponseStore {
 
   async getRequestCountByOrgId(
     orgId: string,
-    fromInclusive: Date,
-    toExclusive: Date
+    fromExclusive: Date,
+    toInclusive: Date
   ): Promise<Result<number, string>> {
     const query = `SELECT
       COUNT() AS count
     FROM request_response_log
     WHERE 
       organization_id = {val_0: UUID} AND
-      request_created_at >= {val_1: DateTime} AND
-      request_created_at < {val_2: DateTime}
+      request_created_at > {val_1: DateTime} AND
+      request_created_at <= {val_2: DateTime}
     `;
 
     const { data, error } = await this.clickhouseClient.dbQuery<{
       count: number;
-    }>(query, [orgId, fromInclusive, toExclusive]);
+    }>(query, [orgId, fromExclusive, toInclusive]);
 
     if (error) {
       return err(error);

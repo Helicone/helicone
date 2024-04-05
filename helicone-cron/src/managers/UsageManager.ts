@@ -26,9 +26,7 @@ export class UsageManager {
     }
 
     const promises: Promise<Result<string, string>>[] =
-      usageEligibleOrgs.data.map((org) =>
-        this.handleOrganizationUsage(org, yesterday, today, yesterdayStr)
-      );
+      usageEligibleOrgs.data.map((org) => this.handleOrganizationUsage(org));
 
     await Promise.all(promises);
 
@@ -36,19 +34,18 @@ export class UsageManager {
   }
 
   async handleOrganizationUsage(
-    org: UsageEligibleOrgs,
-    yesterdayDateTime: Date,
-    todayDateTime: Date,
-    yesterdayStr: string
+    org: UsageEligibleOrgs
   ): Promise<Result<string, string>> {
     let requestQuantity = 0;
+    const startDate = new Date(org.latestEndTime);
+    const endDate = new Date();
 
     try {
       const requestCountResult =
         await this.requestResponseStore.getRequestCountByOrgId(
           org.orgId,
-          yesterdayDateTime,
-          todayDateTime
+          startDate,
+          endDate
         );
 
       if (requestCountResult.error || !requestCountResult.data) {
@@ -69,7 +66,7 @@ export class UsageManager {
           orgId: org.orgId,
           stripeSubscriptionItemId: org.stripeSubscriptionItemId,
           quantity: requestQuantity,
-          usageDate: yesterdayStr,
+          startDate: startDate,
         });
 
       if (usageRecordErr || !usageRecord) {
@@ -79,7 +76,8 @@ export class UsageManager {
       await this.organizationStore.upsertOrgUsage({
         organization_id: org.orgId,
         quantity: requestQuantity,
-        usage_date: yesterdayStr,
+        start_date: startDate.toISOString(),
+        end_date: endDate.toISOString(),
         error_message: null,
         type: "request",
         stripe_record: JSON.parse(usageRecord),
@@ -92,7 +90,8 @@ export class UsageManager {
       await this.organizationStore.upsertOrgUsage({
         organization_id: org.orgId,
         quantity: requestQuantity,
-        usage_date: yesterdayStr,
+        start_date: startDate.toISOString(),
+        end_date: endDate.toISOString(),
         error_message: error.message,
         type: "request",
         stripe_record: null,
@@ -108,12 +107,12 @@ export class UsageManager {
     orgId,
     stripeSubscriptionItemId,
     quantity,
-    usageDate,
+    startDate,
   }: {
     orgId: string;
     stripeSubscriptionItemId: string;
     quantity: number;
-    usageDate: string;
+    startDate: Date;
   }): Promise<Result<string, string>> {
     try {
       const usageRecord = await this.stripeClient.addUsageRecord({
@@ -121,7 +120,7 @@ export class UsageManager {
         quantity: quantity,
         timestamp: "now",
         action: "increment",
-        idempotencyKey: `${orgId}-${usageDate}`,
+        idempotencyKey: `${orgId}-${startDate}`,
       });
 
       if (usageRecord.error || !usageRecord.data) {
