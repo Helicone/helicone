@@ -92,7 +92,7 @@ export class RequestResponseManager {
       }
     } catch (error) {
       console.error("Error uploading image:", error);
-      throw error;
+      // If we fail to upload an image, we don't want to fail logging the request
     }
   }
 

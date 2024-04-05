@@ -88,7 +88,7 @@ export class S3Client {
       assetId
     );
 
-    return this.uploadToS3(uploadUrl, buffer, assetType);
+    return await this.uploadToS3(uploadUrl, buffer, assetType);
   }
 
   async uploadImageToS3(
@@ -103,7 +103,11 @@ export class S3Client {
       assetId
     );
 
-    return this.uploadToS3(uploadUrl, await image.arrayBuffer(), image.type);
+    return await this.uploadToS3(
+      uploadUrl,
+      await image.arrayBuffer(),
+      image.type
+    );
   }
 
   private async uploadToS3(
