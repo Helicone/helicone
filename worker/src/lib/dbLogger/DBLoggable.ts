@@ -8,7 +8,7 @@ import { Result, err, ok } from "../util/results";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 import { RequestWrapper } from "../RequestWrapper";
-import { INTERNAL_ERRORS } from "../util/constants";
+import { INTERNAL_ERRORS, isImageModel } from "../util/constants";
 import { AsyncLogModel } from "../models/AsyncLog";
 import { logInClickhouse } from "../db/ClickhouseStore";
 import { RequestResponseStore } from "../db/RequestResponseStore";
@@ -18,8 +18,8 @@ import {
 } from "./streamParsers/anthropicStreamParser";
 import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { getTokenCount } from "../clients/TokenCounterClient";
-import { S3Client } from "../clients/S3Client";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
+import { RequestResponseManager } from "../managers/RequestResponseManager";
 
 export interface DBLoggableProps {
   response: {
@@ -582,7 +582,7 @@ export class DBLoggable {
       dbWrapper: DBWrapper;
       clickhouse: ClickhouseClientWrapper;
       queue: RequestResponseStore;
-      s3Client: S3Client;
+      requestResponseManager: RequestResponseManager;
     },
     S3_ENABLED: Env["S3_ENABLED"]
   ): Promise<Result<null, string>> {
@@ -642,21 +642,44 @@ export class DBLoggable {
     }
 
     const responseResult = await this.readAndLogResponse(db.queue);
+    const model =
+      requestResult.data.request.model_override ??
+      responseResult.data?.response.model ??
+      requestResult.data.request.model ??
+      "not-found";
+
+    let s3Result: Result<string, string>;
     // If no data or error, return
     if (!responseResult.data || responseResult.error) {
       // Log the error in S3
       if (S3_ENABLED === "true") {
-        const s3Result = await db.s3Client.storeRequestResponse(
-          authParams.organizationId,
-          this.request.requestId,
-          requestResult.data.body,
-          JSON.stringify({
-            helicone_error: "error getting response, " + responseResult.error,
-            helicone_repsonse_body_as_string: (
-              await this.response.getResponseBody()
-            ).body,
-          })
-        );
+        if (isImageModel(model)) {
+          s3Result = await db.requestResponseManager.storeRequestResponseImage({
+            organizationId: authParams.organizationId,
+            requestId: this.request.requestId,
+            requestBody: requestResult.data.body,
+            responseBody: JSON.stringify({
+              helicone_error: "error getting response, " + responseResult.error,
+              helicone_repsonse_body_as_string: (
+                await this.response.getResponseBody()
+              ).body,
+            }),
+            requestAssets: requestResult.data.requestAssets,
+          });
+        } else {
+          s3Result = await db.requestResponseManager.storeRequestResponseData({
+            organizationId: authParams.organizationId,
+            requestId: this.request.requestId,
+            requestBody: requestResult.data.body,
+            responseBody: JSON.stringify({
+              helicone_error: "error getting response, " + responseResult.error,
+              helicone_repsonse_body_as_string: (
+                await this.response.getResponseBody()
+              ).body,
+            }),
+            requestAssets: requestResult.data.requestAssets,
+          });
+        }
 
         if (s3Result.error) {
           console.error("Error storing request response", s3Result.error);
@@ -667,12 +690,23 @@ export class DBLoggable {
     }
 
     if (S3_ENABLED === "true") {
-      const s3Result = await db.s3Client.storeRequestResponse(
-        authParams.organizationId,
-        this.request.requestId,
-        requestResult.data.body,
-        responseResult.data.body
-      );
+      if (isImageModel(model)) {
+        s3Result = await db.requestResponseManager.storeRequestResponseImage({
+          organizationId: authParams.organizationId,
+          requestId: this.request.requestId,
+          requestBody: requestResult.data.body,
+          responseBody: responseResult.data.body,
+          requestAssets: requestResult.data.requestAssets,
+        });
+      } else {
+        s3Result = await db.requestResponseManager.storeRequestResponseData({
+          organizationId: authParams.organizationId,
+          requestId: this.request.requestId,
+          requestBody: requestResult.data.body,
+          responseBody: responseResult.data.body,
+          requestAssets: requestResult.data.requestAssets,
+        });
+      }
 
       if (s3Result.error) {
         console.error("Error storing request response", s3Result.error);
@@ -757,15 +791,7 @@ function unsupportedImage(body: any): any {
   };
   if (body["image_url"] !== undefined) {
     const imageUrl = body["image_url"];
-    if (typeof imageUrl === "string" && !imageUrl.startsWith("http")) {
-      body.image_url = notSupportMessage;
-    }
-    if (
-      typeof imageUrl === "object" &&
-      imageUrl.url !== undefined &&
-      typeof imageUrl.url === "string" &&
-      !imageUrl.url.startsWith("http")
-    ) {
+    if (typeof imageUrl === "string") {
       body.image_url = notSupportMessage;
     }
   }
@@ -793,6 +819,7 @@ export async function logRequest(
         job: string | null;
       };
       body: string; // For S3 storage
+      requestAssets: Record<string, string>;
     },
     string
   >
@@ -857,6 +884,20 @@ export async function logRequest(
               : null,
         }
       : unsupportedImage(requestBody);
+
+    const requestAssets: Record<string, string> = {};
+
+    for (const message of body.messages) {
+      for (const item of message.content) {
+        if (item.type === "image_url") {
+          const assetId = crypto.randomUUID();
+
+          requestAssets[assetId] = item.image_url.url;
+
+          item.image_url = `<helicone-asset-id key="${assetId}"/>`;
+        }
+      }
+    }
 
     const createdAt = request.startTime ?? new Date();
     const requestData = {
@@ -926,6 +967,7 @@ export async function logRequest(
           job: jobNode?.data.job ?? null,
         },
         body: body,
+        requestAssets,
       },
       error: null,
     };

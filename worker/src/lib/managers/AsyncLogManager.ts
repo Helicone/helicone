@@ -10,6 +10,7 @@ import { RequestResponseStore } from "../db/RequestResponseStore";
 import { AsyncLogModel, validateAsyncLogModel } from "../models/AsyncLog";
 import { DBQueryTimer } from "../util/loggers/DBQueryTimer";
 import { S3Client } from "../clients/S3Client";
+import { RequestResponseManager } from "./RequestResponseManager";
 
 export async function logAsync(
   requestWrapper: RequestWrapper,
@@ -52,10 +53,14 @@ export async function logAsync(
       status: 401,
     });
   }
+  const supabase = createClient(
+    env.SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY
+  );
   const { error: logError } = await loggable.log(
     {
       clickhouse: new ClickhouseClientWrapper(env),
-      supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+      supabase: supabase,
       dbWrapper: new DBWrapper(env, auth),
       queue: new RequestResponseStore(
         createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
@@ -68,11 +73,14 @@ export async function logAsync(
         env.FALLBACK_QUEUE,
         env.REQUEST_AND_RESPONSE_QUEUE_KV
       ),
-      s3Client: new S3Client(
-        env.S3_ACCESS_KEY ?? "",
-        env.S3_SECRET_KEY ?? "",
-        env.S3_ENDPOINT ?? "",
-        env.S3_BUCKET_NAME ?? ""
+      requestResponseManager: new RequestResponseManager(
+        new S3Client(
+          env.S3_ACCESS_KEY ?? "",
+          env.S3_SECRET_KEY ?? "",
+          env.S3_ENDPOINT ?? "",
+          env.S3_BUCKET_NAME ?? ""
+        ),
+        supabase
       ),
     },
     env.S3_ENABLED ?? "true"
