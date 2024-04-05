@@ -103,11 +103,7 @@ v1APIRouter.use(authMiddleware);
 
 // Create and use the rate limiter
 if (IS_RATE_LIMIT_ENABLED) {
-  v1APIRouter.use((req, res) => {
-    res.json({
-      status: "rate limited",
-    });
-  });
+  v1APIRouter.use(limiter);
 }
 
 v1APIRouter.use(express.json({ limit: "50mb" }));
