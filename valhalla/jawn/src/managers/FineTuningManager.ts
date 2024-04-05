@@ -63,6 +63,7 @@ export class FineTuningManager {
           !request.request_body.messages[0].content ||
           !request.response_body ||
           !request.response_body.choices ||
+          request.response_body.choices.length === 0 ||
           !request.response_body.choices[0] ||
           !request.response_body.choices[0].message ||
           !request.response_body.choices[0].message.content
