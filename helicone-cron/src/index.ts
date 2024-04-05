@@ -9,6 +9,7 @@ import { FeedbackHeartBeat } from "./heartbeats/feedback";
 import { GraphQLHeartBeat } from "./heartbeats/graphQL";
 import { OpenAIProxyHeartBeat } from "./heartbeats/oaiProxy";
 import { UsageManager } from "./managers/UsageManager";
+import { PgWrapper } from "./db/PgWrapper";
 
 export interface Env {
   OPENAI_API_KEY: string;
@@ -26,6 +27,10 @@ export interface Env {
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
   STRIPE_API_KEY: string;
+  STRIPE_WEBHOOK_SECRET: string;
+  SUPABASE_DATEBASE_URL: string;
+  SUPABASE_DATABASE_SSL: string;
+  ENVIRONMENT: string;
 }
 
 const constructorMapping: Record<string, any> = {
@@ -79,7 +84,15 @@ export default {
       );
 
       const usageManager = new UsageManager(
-        new OrganizationStore(clickhouseWrapper, supabaseClient),
+        new OrganizationStore(
+          clickhouseWrapper,
+          supabaseClient,
+          new PgWrapper(
+            env.SUPABASE_DATEBASE_URL,
+            env.SUPABASE_DATABASE_SSL,
+            env.ENVIRONMENT
+          )
+        ),
         new RequestResponseStore(clickhouseWrapper, supabaseClient),
         new StripeClient(env.STRIPE_API_KEY)
       );

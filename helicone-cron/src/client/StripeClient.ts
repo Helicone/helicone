@@ -5,8 +5,9 @@ type Action = "increment" | "set";
 type UsageRecord = {
   subscriptionItemId: string;
   quantity: number;
-  timestamp: number;
+  timestamp: "now" | number;
   action: Action;
+  idempotencyKey: string;
 };
 
 export class StripeClient {
@@ -18,11 +19,41 @@ export class StripeClient {
     });
   }
 
+  async constructEvent(
+    body: string,
+    sig: string,
+    webhookSecret: string
+  ): Promise<Result<Stripe.Event, string>> {
+    try {
+      const event = this.stripe.webhooks.constructEvent(
+        body,
+        sig,
+        webhookSecret
+      );
+      return ok(event);
+    } catch (error: any) {
+      return err(`Error constructing event. ${error.message}`);
+    }
+  }
+
+  getDataFromSubscription(subscription: Stripe.Subscription): {
+    subscriptionId: string;
+    subscriptionItemId: string;
+    orgId: string;
+  } {
+    const subscriptionId = subscription.id;
+    const subscriptionItemId = subscription?.items.data[0].id;
+    const orgId = subscription.metadata?.orgId;
+
+    return { subscriptionId, subscriptionItemId, orgId };
+  }
+
   async addUsageRecord({
     subscriptionItemId,
     quantity,
     timestamp,
     action,
+    idempotencyKey,
   }: UsageRecord): Promise<
     Result<Stripe.Response<Stripe.UsageRecord>, string>
   > {
@@ -31,11 +62,11 @@ export class StripeClient {
         subscriptionItemId,
         {
           quantity,
-          timestamp,
           action,
+          timestamp,
         },
         {
-          idempotencyKey: `${subscriptionItemId}-${timestamp}`,
+          idempotencyKey,
         }
       );
 

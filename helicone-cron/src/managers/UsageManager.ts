@@ -1,8 +1,7 @@
 import { Result, err, ok } from "../util/results";
-import { OrganizationStore } from "../db/OrganizationStore";
+import { OrganizationStore, UsageEligibleOrgs } from "../db/OrganizationStore";
 import { RequestResponseStore } from "../db/RequestResponseStore";
 import { StripeClient } from "../client/StripeClient";
-import { Database } from "../db/database.types";
 
 export class UsageManager {
   constructor(
@@ -13,25 +12,23 @@ export class UsageManager {
 
   async chargeOrgUsage(): Promise<Result<string, string>> {
     const today = new Date();
+    today.setDate(today.getDate());
+    today.setHours(0, 0, 0, 0);
     const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setDate(today.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split("T")[0];
 
-    const eligibleGrowthOrgs =
-      await this.organizationStore.getOrganizationsByTierAndUsage("growth", {
-        isStripeCustomer: true,
-        recorded: false,
-        usageDate: yesterday,
-      });
+    const usageEligibleOrgs =
+      await this.organizationStore.getUsageEligibleOrganizations(yesterdayStr);
 
-    if (eligibleGrowthOrgs.error || !eligibleGrowthOrgs.data) {
-      return err(
-        eligibleGrowthOrgs.error || "No eligible organizations found."
-      );
+    if (usageEligibleOrgs.error || !usageEligibleOrgs.data) {
+      return err(usageEligibleOrgs.error || "No eligible organizations found.");
     }
 
-    const promises = eligibleGrowthOrgs.data.map((org) =>
-      this.handleOrganizationUsage(org, yesterday, today)
-    );
+    const promises: Promise<Result<string, string>>[] =
+      usageEligibleOrgs.data.map((org) =>
+        this.handleOrganizationUsage(org, yesterday, today, yesterdayStr)
+      );
 
     await Promise.all(promises);
 
@@ -39,16 +36,19 @@ export class UsageManager {
   }
 
   async handleOrganizationUsage(
-    org: Database["public"]["Tables"]["organization"]["Row"],
-    yesterday: Date,
-    today: Date
+    org: UsageEligibleOrgs,
+    yesterdayDateTime: Date,
+    todayDateTime: Date,
+    yesterdayStr: string
   ): Promise<Result<string, string>> {
+    let requestQuantity = 0;
+
     try {
       const requestCountResult =
         await this.requestResponseStore.getRequestCountByOrgId(
           org.id,
-          yesterday,
-          today
+          yesterdayDateTime,
+          todayDateTime
         );
 
       if (requestCountResult.error || !requestCountResult.data) {
@@ -63,11 +63,13 @@ export class UsageManager {
         );
       }
 
+      requestQuantity = requestCountResult.data;
       const { data: usageRecord, error: usageRecordErr } =
         await this.addStripeUsageRecord({
+          orgId: org.id,
           stripeSubscriptionItemId: org.stripe_subscription_item_id,
-          quantity: requestCountResult.data,
-          yesterday,
+          quantity: requestQuantity,
+          usageDate: yesterdayStr,
         });
 
       if (usageRecordErr || !usageRecord) {
@@ -76,24 +78,26 @@ export class UsageManager {
 
       await this.organizationStore.upsertOrgUsage({
         organization_id: org.id,
-        usage_count: requestCountResult.data,
-        usage_date: yesterday.toISOString(),
+        quantity: requestQuantity,
+        usage_date: yesterdayStr,
         error_message: null,
-        usage_type: "request",
-        stripe_record: usageRecord,
+        type: "request",
+        stripe_record: JSON.parse(usageRecord),
         recorded: true,
+        updated_at: new Date().toISOString(),
       });
 
       return ok("Success");
     } catch (error: any) {
       await this.organizationStore.upsertOrgUsage({
         organization_id: org.id,
-        usage_count: 0,
-        usage_date: yesterday.toISOString(),
+        quantity: requestQuantity,
+        usage_date: yesterdayStr,
         error_message: error.message,
-        usage_type: "request",
+        type: "request",
         stripe_record: null,
         recorded: false,
+        updated_at: new Date().toISOString(),
       });
 
       return err(error.message || "Unknown error handling organization usage.");
@@ -101,20 +105,23 @@ export class UsageManager {
   }
 
   async addStripeUsageRecord({
+    orgId,
     stripeSubscriptionItemId,
     quantity,
-    yesterday,
+    usageDate,
   }: {
+    orgId: string;
     stripeSubscriptionItemId: string;
     quantity: number;
-    yesterday: Date;
+    usageDate: string;
   }): Promise<Result<string, string>> {
     try {
       const usageRecord = await this.stripeClient.addUsageRecord({
         subscriptionItemId: stripeSubscriptionItemId,
         quantity: quantity,
-        timestamp: Math.floor(yesterday.getTime() / 1000),
+        timestamp: "now",
         action: "increment",
+        idempotencyKey: `${orgId}-${usageDate}`,
       });
 
       if (usageRecord.error || !usageRecord.data) {
