@@ -5,7 +5,7 @@ import {
 import { SupabaseConnector } from "../db/supabase";
 import { RequestWrapper } from "../requestWrapper";
 import { IRouterWrapperAuth } from "./iRouterWrapper";
-export const supabaseClient = new SupabaseConnector();
+export const supabaseServer = new SupabaseConnector();
 
 class AuthError extends Error {
   constructor(message: string, trace: string) {
@@ -27,7 +27,7 @@ export function withAuth<T>(
       return;
     }
 
-    const authParams = await supabaseClient.authenticate(authorization.data!);
+    const authParams = await supabaseServer.authenticate(authorization.data!);
 
     if (authParams.error) {
       console.error("authParams.error", authParams.error);
@@ -50,7 +50,7 @@ export function withAuth<T>(
       request,
       res,
       authParams: authParams.data!,
-      supabaseClient: supabaseClient,
+      supabaseClient: supabaseServer,
     });
   };
 }

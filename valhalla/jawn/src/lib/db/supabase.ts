@@ -50,7 +50,6 @@ const authCache = SupabaseAuthCache.getInstance();
 export class SupabaseConnector {
   client: SupabaseClient<Database>;
   connected: boolean = false;
-  organizationId?: string;
   authCache: SupabaseAuthCache;
 
   constructor() {
@@ -173,7 +172,6 @@ export class SupabaseConnector {
       await hashAuth(JSON.stringify(authorization) + organizationId)
     );
     if (cachedResult) {
-      this.organizationId = (await cachedResult).organizationId;
       return ok(cachedResult);
     }
 
@@ -188,7 +186,6 @@ export class SupabaseConnector {
       return err("No organization ID");
     }
 
-    this.organizationId = orgId;
     this.authCache.set(
       await hashAuth(JSON.stringify(authorization) + organizationId),
       { organizationId: orgId }

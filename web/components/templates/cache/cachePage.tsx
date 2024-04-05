@@ -278,6 +278,9 @@ const CachePage = (props: CachePageProps) => {
                     pageSize={pageSize}
                     sort={sort}
                     isCached={true}
+                    currentFilter={null}
+                    organizationLayout={null}
+                    organizationLayoutAvailable={false}
                   />
                 </div>
               </TabPanel>

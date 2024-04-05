@@ -9,14 +9,26 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
-  "/v1/users/{userId}": {
-    get: operations["GetUser"];
+  "/v1/tokens/anthropic": {
+    post: operations["AnthropicTokenCount"];
   };
-  "/v1/users": {
-    post: operations["CreateUser"];
+  "/v1/tokens/gpt3": {
+    post: operations["Gpt3TokenCount"];
   };
   "/v1/request/query": {
     post: operations["GetRequests"];
+  };
+  "/v1/key/generateHash": {
+    post: operations["GenerateHash"];
+  };
+  "/v1/dataset/{datasetId}/fine-tune": {
+    post: operations["DatasetFineTune"];
+  };
+  "/v1/fine-tune": {
+    post: operations["FineTune"];
+  };
+  "/v1/fine-tune/{jobId}/stats": {
+    get: operations["FineTuneJobStats"];
   };
 }
 
@@ -24,16 +36,12 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
-    User: {
+    TokenResponseBody: {
       /** Format: double */
-      id: number;
-      email: string;
-      name: string;
-      /** @enum {string} */
-      status?: "Happy" | "Sad";
-      /** @enum {string} */
-      status2?: "Happy" | "Sad";
-      phoneNumbers: string[];
+      tokens: number;
+    };
+    TokenBodyParams: {
+      content: string;
     };
 Json: JsonObject;
     /** @enum {string} */
@@ -391,6 +399,26 @@ Json: JsonObject;
       sort?: components["schemas"]["SortLeafRequest"];
       isCached?: boolean;
     };
+    GenerateHashQueryParams: {
+      apiKey: string;
+      userId: string;
+      keyName: string;
+    };
+    FineTuneResult: {
+      error: string;
+    } | {
+      data: {
+        url: string;
+        fineTuneJob: string;
+      };
+      success: boolean;
+    };
+    FineTuneBodyParams: {
+      providerKeyId: string;
+    };
+    FineTuneBody: {
+      providerKeyId: string;
+    };
   };
   responses: {
   };
@@ -409,34 +437,33 @@ export type external = Record<string, never>;
 
 export interface operations {
 
-  GetUser: {
-    parameters: {
-      query?: {
-        name?: string;
-      };
-      path: {
-        userId: number;
+  AnthropicTokenCount: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TokenBodyParams"];
       };
     };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["User"];
+          "application/json": components["schemas"]["TokenResponseBody"];
         };
       };
     };
   };
-  CreateUser: {
+  Gpt3TokenCount: {
     requestBody: {
       content: {
-        "application/json": unknown;
+        "application/json": components["schemas"]["TokenBodyParams"];
       };
     };
     responses: {
-      /** @description Created */
-      201: {
-        content: never;
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TokenResponseBody"];
+        };
       };
     };
   };
@@ -451,6 +478,90 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
+        };
+      };
+    };
+  };
+  GenerateHash: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GenerateHashQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            error?: {
+              details?: string;
+              message?: string;
+            };
+            success?: boolean;
+          };
+        };
+      };
+    };
+  };
+  DatasetFineTune: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FineTuneBodyParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["FineTuneResult"];
+        };
+      };
+    };
+  };
+  FineTune: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FineTuneBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            error: string;
+          } | {
+            data: {
+              url: string;
+              fineTuneJob: string;
+            };
+            success: boolean;
+          };
+        };
+      };
+    };
+  };
+  FineTuneJobStats: {
+    parameters: {
+      path: {
+        jobId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            error: string;
+          } | {
+            events: unknown;
+            job: unknown;
+          };
         };
       };
     };
