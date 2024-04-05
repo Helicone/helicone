@@ -19,6 +19,19 @@ export class StripeClient {
     });
   }
 
+  async getSubscriptionById(
+    subscriptionId: string
+  ): Promise<Result<Stripe.Subscription, string>> {
+    try {
+      const subscription = await this.stripe.subscriptions.retrieve(
+        subscriptionId
+      );
+      return ok(subscription);
+    } catch (error: any) {
+      return err(`Error getting subscription. ${error.message}`);
+    }
+  }
+
   async constructEvent(
     body: string,
     sig: string,

@@ -37,7 +37,24 @@ export class UsageManager {
     org: UsageEligibleOrgs
   ): Promise<Result<string, string>> {
     let requestQuantity = 0;
-    const startDate = new Date(org.latestEndTime);
+    let startDate: Date;
+    if (!org.latestEndTime) {
+      // Get current period start date from stripe
+      const subscription = await this.stripeClient.getSubscriptionById(
+        org.stripeSubscriptionItemId
+      );
+
+      if (subscription.error || !subscription.data) {
+        return err(
+          subscription.error || "Failed to get subscription from Stripe."
+        );
+      }
+
+      subscription.data.start_date;
+      startDate = new Date(subscription.data.current_period_start * 1000);
+    } else {
+      startDate = new Date(org.latestEndTime);
+    }
     const endDate = new Date();
 
     try {

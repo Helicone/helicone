@@ -8,7 +8,7 @@ export type Tier = "free" | "pro" | "growth" | "enterprise";
 export type UsageEligibleOrgs = {
   orgId: string;
   stripeSubscriptionItemId: string;
-  latestEndTime: string;
+  latestEndTime?: string;
 };
 
 export class OrganizationStore {
@@ -36,7 +36,7 @@ export class OrganizationStore {
     const query = `select
       o.id as orgId,
       o.stripe_subscription_item_id as stripeSubscriptionItemId,
-      MAX(CONCAT(ou.end_time, o.)) as latestEndTime
+      MAX(ou.end_time) as latestEndTime
     from organization as o
     left join organization_usage as ou on o.id = ou.organization_id
       where o.tier = 'growth'
