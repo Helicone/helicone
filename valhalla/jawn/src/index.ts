@@ -13,6 +13,8 @@ import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { redisClient } from "./lib/clients/redisClient";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
+import { filterSwaggerDocument } from "./utils/filterSwaggerDocument";
+import { tokenRouter } from "./lib/routers/tokenRouter";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -75,11 +77,27 @@ app.options("*", (req, res) => {
 
 const v1APIRouter = express.Router();
 const unAuthenticatedRouter = express.Router();
+
+// Specify tags to hide
+const tagsToHide: string[] = ["beta"]; // Adjust based on your Swagger tags
+
 unAuthenticatedRouter.use(
   "/docs",
   swaggerUi.serve,
+  swaggerUi.setup(filterSwaggerDocument(swaggerDocument as any, tagsToHide))
+);
+
+unAuthenticatedRouter.use(
+  "/docs-beta",
+  swaggerUi.serve,
   swaggerUi.setup(swaggerDocument)
 );
+
+unAuthenticatedRouter.use(tokenRouter);
+
+unAuthenticatedRouter.use("/download/swagger.json", (req, res) => {
+  res.json(filterSwaggerDocument(swaggerDocument as any, tagsToHide));
+});
 
 v1APIRouter.use(authMiddleware);
 
