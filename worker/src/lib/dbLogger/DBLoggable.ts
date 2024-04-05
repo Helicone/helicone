@@ -748,6 +748,7 @@ export class DBLoggable {
         console.error("Error upserting prompt", upsertResult.error);
         return err(JSON.stringify(upsertResult.error));
       }
+
       const propResult = await db.queue.putRequestProperty(
         requestResult.data.request.id,
         [

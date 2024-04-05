@@ -31,6 +31,7 @@ export class RequestResponseManager {
       JSON.stringify({ request: requestBody, response: responseBody })
     );
   }
+
   async storeRequestResponseImage({
     organizationId,
     requestId,
