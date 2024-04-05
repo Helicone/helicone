@@ -144,10 +144,10 @@ You must be using Helicone via Proxy. If you are not, please refer to our [Quick
     <Step title="Replace">
     Now within your prompt, replace your string with the following. Don't worry, Helicone will remove this for you before it sends it to your LLM.
 
-    Add `<helicone-input-prompt key="<INPUT_ID>" >` before your input and `</helicone-input-prompt>` after your input.
+    Add `<helicone-prompt-input key="<INPUT_ID>" >` before your input and `</helicone-prompt-input>` after your input.
 
     ```tsx
-    Write a story about <helicone-input-prompt key="scene" >a secret agent</helicone-input-prompt>
+    Write a story about <helicone-prompt-input key="scene" >a secret agent</helicone-prompt-input>
     ```
 
     </Step>
@@ -163,7 +163,7 @@ You must be using Helicone via Proxy. If you are not, please refer to our [Quick
     </Step>
     <Step title="Make a request">
 
-      Now when you make your request to your LLM, the LLM will receive the prompt with all of the `helicone-input-prompt` tags removed. However, Helicone will now keep track of all of your inputs for you.
+      Now when you make your request to your LLM, the LLM will receive the prompt with all of the `helicone-prompt-input` tags removed. However, Helicone will now keep track of all of your inputs for you.
     </Step>
 
   </Steps>
