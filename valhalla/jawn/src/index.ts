@@ -53,26 +53,6 @@ if (ENVIRONMENT !== "production") {
 initSentry(app);
 initLogs(app);
 
-app.get("/test-redis", async (req, res) => {
-  if (!redisClient) {
-    return res.status(500).json({
-      error: "Redis client not found",
-    });
-  }
-  const redisSet = await redisClient?.set("test", "testValue");
-
-  console.log("redisSet", redisSet);
-
-  const redisGet = await redisClient?.get("test");
-
-  console.log("redisGet", redisGet);
-
-  res.json({
-    redisSet,
-    redisGet,
-  });
-});
-
 app.options("*", (req, res) => {
   if (
     req.headers.origin &&
@@ -104,9 +84,9 @@ unAuthenticatedRouter.use(
 v1APIRouter.use(authMiddleware);
 
 // Create and use the rate limiter
-// if (IS_RATE_LIMIT_ENABLED) {
-//   app.use(limiter);
-// }
+if (IS_RATE_LIMIT_ENABLED) {
+  v1APIRouter.use(limiter);
+}
 
 v1APIRouter.use(express.json({ limit: "50mb" }));
 v1APIRouter.use(express.urlencoded({ limit: "50mb" }));
