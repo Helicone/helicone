@@ -1,5 +1,5 @@
 {
-  "name": "jawn",
+  "name": "helicone-api",
   "scripts": {
     "start": "ts-node src/index.ts",
     "build": "tsc",
