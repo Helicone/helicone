@@ -1,33 +1,42 @@
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
-import { Database } from "../../../supabase/database.types";
-import { DEMO_EMAIL } from "../../../lib/constants";
-import NavBarV2 from "../../layout/navbar/navBarV2";
-import Footer from "../../layout/footer";
+import { Disclosure } from "@headlessui/react";
 import {
   ChevronRightIcon,
   HeartIcon,
   XMarkIcon,
 } from "@heroicons/react/20/solid";
-import Image from "next/image";
-import { clsx } from "../../shared/clsx";
-import Link from "next/link";
-import Globe from "./globe";
-import Steps from "./components/steps";
 import {
   BuildingOffice2Icon,
   CodeBracketSquareIcon,
   CubeIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
-import Features from "./components/features";
-import gsap from "gsap";
-import Platform from "./components/platform";
-import { Disclosure } from "@headlessui/react";
-import { useLocalStorage } from "../../../services/hooks/localStorage";
 
-interface HomePageProps {}
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import gsap from "gsap";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useEffect, useRef, useState } from "react";
+import { DEMO_EMAIL } from "../../../lib/constants";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
+import { Database } from "../../../supabase/database.types";
+import Footer from "../../layout/footer";
+import NavBarV2 from "../../layout/navbar/navBarV2";
+import { clsx } from "../../shared/clsx";
+import Features from "./components/features";
+import Platform from "./components/platform";
+import Steps from "./components/steps";
+import Globe from "./globe";
+
+import { useLekkoConfig } from "@lekko/next-sdk";
+import { LekkoBanner } from "@lekko/react-banner";
+import "@lekko/react-banner/styles.css";
+import { usePathname } from "next/navigation";
+import { getBannerConfig } from "../../../lekko/default";
+
+interface HomePageProps {
+  lekkoConfigs: string | undefined;
+}
 
 const faqs = [
   {
@@ -94,11 +103,20 @@ const HomePage = (props: HomePageProps) => {
   if (!demoLoading && user?.email === DEMO_EMAIL) {
     supabaseClient.auth.signOut();
   }
+  const pathname = usePathname();
+  const bannerConfig = useLekkoConfig(getBannerConfig, { pathname });
 
   return (
     <div className="w-full bg-[#f8feff] h-full antialiased relative">
+      <LekkoBanner
+        // Banner will be animated when rendering
+        bannerConfig={bannerConfig}
+        styleConfig={{}}
+        style={{
+          position: "relative",
+        }}
+      />
       <NavBarV2 />
-
       <header className="w-full flex flex-col space-y-4 mx-auto max-w-6xl h-full py-16 sm:py-24 items-center text-center px-2 sm:px-2 lg:px-0">
         <div className="-mt-4 text-xs mx-auto flex flex-col sm:flex-row sm:divide-x-2 gap-[14px] justify-center items-center divide-gray-300 opacity-75 w-fit px-4 pb-4 rounded-xl">
           <Link
@@ -208,7 +226,6 @@ const HomePage = (props: HomePageProps) => {
           </Link>
         </div>
       </header>
-
       <section className="w-full max-w-6xl mx-auto justify-center items-center pt-8 sm:pb-16 flex flex-col space-y-16">
         <Features />
       </section>

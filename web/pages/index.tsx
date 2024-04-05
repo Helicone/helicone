@@ -8,8 +8,9 @@ import RedirectingScreen from "../components/templates/home/redirectingScreen";
 import { isCustomerDomain } from "../lib/customerPortalHelpers";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import HomePage from "../components/templates/home/homePage";
+import { getEncodedLekkoConfigs } from "@lekko/next-sdk";
 
-export const Home = () => {
+export const Home = (props: { lekkoConfigs: string | undefined }) => {
   const router = useRouter();
 
   const user = useUser();
@@ -27,7 +28,7 @@ export const Home = () => {
         }
         ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
       >
-        <HomePage />
+        <HomePage lekkoConfigs={props.lekkoConfigs} />
       </PublicMetaData>
     </>
   );
@@ -38,6 +39,8 @@ export default Home;
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
+  const lekkoConfigs = await getEncodedLekkoConfigs();
+
   if (isCustomerDomain(context.req.headers.host ?? "")) {
     return {
       redirect: {
@@ -53,6 +56,8 @@ export const getServerSideProps = async (
   } = await supabase.auth.getSession();
 
   return {
-    props: {},
+    props: {
+      lekkoConfigs,
+    },
   };
 };

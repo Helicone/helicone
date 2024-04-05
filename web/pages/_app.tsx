@@ -16,6 +16,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { ThemeContextProvider } from "../components/shared/theme/themeContext";
 import { NextPage } from "next";
+import { LekkoClientProvider } from "@lekko/next-sdk";
 
 if (
   typeof window !== "undefined" &&
@@ -52,6 +53,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
 
   const getLayout = Component.getLayout ?? ((page) => page);
   const trackingEnabled = process.env.NEXT_PUBLIC_TRACKING_ENABLED || false;
+  const { lekkoConfigs } = pageProps;
 
   return (
     <>
@@ -65,7 +67,9 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
               <DndProvider backend={HTML5Backend}>
                 <OrgContextProvider>
                   <ThemeContextProvider>
-                    {getLayout(<Component {...pageProps} />)}
+                    <LekkoClientProvider configs={lekkoConfigs}>
+                      {getLayout(<Component {...pageProps} />)}
+                    </LekkoClientProvider>
                   </ThemeContextProvider>
                   <Notification />
                 </OrgContextProvider>
