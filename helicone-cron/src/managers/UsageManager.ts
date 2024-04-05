@@ -46,7 +46,7 @@ export class UsageManager {
     try {
       const requestCountResult =
         await this.requestResponseStore.getRequestCountByOrgId(
-          org.id,
+          org.orgId,
           yesterdayDateTime,
           todayDateTime
         );
@@ -57,7 +57,7 @@ export class UsageManager {
         );
       }
 
-      if (!org.stripe_subscription_item_id) {
+      if (!org.stripeSubscriptionItemId) {
         throw new Error(
           "Organization does not have a Stripe subscription item ID."
         );
@@ -66,8 +66,8 @@ export class UsageManager {
       requestQuantity = requestCountResult.data;
       const { data: usageRecord, error: usageRecordErr } =
         await this.addStripeUsageRecord({
-          orgId: org.id,
-          stripeSubscriptionItemId: org.stripe_subscription_item_id,
+          orgId: org.orgId,
+          stripeSubscriptionItemId: org.stripeSubscriptionItemId,
           quantity: requestQuantity,
           usageDate: yesterdayStr,
         });
@@ -77,7 +77,7 @@ export class UsageManager {
       }
 
       await this.organizationStore.upsertOrgUsage({
-        organization_id: org.id,
+        organization_id: org.orgId,
         quantity: requestQuantity,
         usage_date: yesterdayStr,
         error_message: null,
@@ -90,7 +90,7 @@ export class UsageManager {
       return ok("Success");
     } catch (error: any) {
       await this.organizationStore.upsertOrgUsage({
-        organization_id: org.id,
+        organization_id: org.orgId,
         quantity: requestQuantity,
         usage_date: yesterdayStr,
         error_message: error.message,

@@ -6,8 +6,8 @@ import { PgWrapper } from "./PgWrapper";
 
 export type Tier = "free" | "pro" | "growth" | "enterprise";
 export type UsageEligibleOrgs = {
-  id: string;
-  stripe_subscription_item_id: string;
+  orgId: string;
+  stripeSubscriptionItemId: string;
 };
 
 export class OrganizationStore {
@@ -20,7 +20,7 @@ export class OrganizationStore {
   async getUsageEligibleOrganizations(
     usageDate: string
   ): Promise<Result<UsageEligibleOrgs[], string>> {
-    const query = `select o.id, o.stripe_subscription_item_id
+    const query = `select o.id as orgId, o.stripe_subscription_item_id as stripeSubscriptionItemId
     from organization as o
     left join organization_usage as ou on o.id = ou.organization_id AND ou.usage_date = $1
     where o.tier = 'growth'
@@ -39,72 +39,6 @@ export class OrganizationStore {
 
     return ok(eligibleOrgs);
   }
-
-  // async getOrganizationsByTierAndUsage(
-  //   tier: Tier,
-  //   params: {
-  //     isStripeCustomer?: boolean;
-  //     recorded?: boolean;
-  //     usageDate?: Date;
-  //   }
-  // ): Promise<
-  //   Result<Database["public"]["Tables"]["organization"]["Row"][], string>
-  // > {
-  //   const { isStripeCustomer, recorded, usageDate } = params;
-
-  //   const query = this.supabaseClient
-  //     .from("organization")
-  //     .select(
-  //       `*,
-  //       organization_usage!left(*)`
-  //     )
-  //     .eq("soft_delete", false)
-  //     .eq("tier", tier);
-  //   // 'country_id.eq.1,name.eq.Beijing'
-
-  //   // if (recorded !== undefined) {
-  //   //   query.or(`recorded.eq.${recorded},recorded.is.null`, {
-  //   //     referencedTable: "organization_usage",
-  //   //   });
-  //   // }
-
-  //   if (usageDate) {
-  //     const usageDateStr = usageDate.toISOString().split("T")[0];
-
-  //     query.or(
-  //       `usage_date.is.null,and(usage_date.eq.${usageDateStr},recorded.eq.${recorded})`,
-  //       { referencedTable: "organization_usage" } // Specify the table for the OR conditions
-  //     );
-  //   }
-
-  //   if (isStripeCustomer) {
-  //     query.not("stripe_customer_id", "is", null).neq("stripe_customer_id", "");
-  //   }
-
-  //   // if (usageDate) {
-  //   //   const usageDateStr = usageDate.toISOString().split("T")[0];
-  //   //   console.log(`Usage date: ${usageDateStr}`);
-
-  //   //   query.or(`usage_date.is.null,usage_date.eq.${usageDateStr}`, {
-  //   //     referencedTable: "organization_usage",
-  //   //   });
-
-  //   // query.eq(
-  //   //   "organization_usage.usage_date",
-  //   //   usageDate.toISOString().split("T")[0]
-  //   // );
-  //   // }
-
-  //   console.log(`Query: ${JSON.stringify(query)}`);
-
-  //   const { data, error } = await query;
-
-  //   if (error) {
-  //     return err(error.message);
-  //   }
-
-  //   return ok(data);
-  // }
 
   async getOrganizationsByTier(
     tier: Tier,
