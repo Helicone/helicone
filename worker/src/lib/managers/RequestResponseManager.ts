@@ -28,7 +28,7 @@ export class RequestResponseManager {
 
     return await this.s3Client.store(
       url,
-      JSON.stringify({ requestBody, responseBody })
+      JSON.stringify({ request: requestBody, response: responseBody })
     );
   }
   async storeRequestResponseImage({
