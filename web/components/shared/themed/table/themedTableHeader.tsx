@@ -13,6 +13,8 @@ import useSearchParams from "../../utils/useSearchParams";
 import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
 import ViewButton from "./viewButton";
 import { RequestViews } from "./themedTableV5";
+import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
+import FiltersButton from "./filtersButton";
 
 interface ThemedTableHeaderProps<T> {
   rows?: T[];
@@ -49,11 +51,24 @@ interface ThemedTableHeaderProps<T> {
     onViewChange: (value: RequestViews) => void;
   };
   onDataSet?: () => void;
+  savedFilters?: {
+    filters?: OrganizationFilter[];
+    currentFilter?: string;
+    onFilterChange?: (value: OrganizationFilter | null) => void;
+    onSaveFilterCallback?: () => void;
+    layoutPage: "dashboard" | "requests";
+  };
 }
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
-  const { rows, columnsFilter, timeFilter, advancedFilters, viewToggle } =
-    props;
+  const {
+    rows,
+    columnsFilter,
+    timeFilter,
+    advancedFilters,
+    viewToggle,
+    savedFilters,
+  } = props;
 
   const searchParams = useSearchParams();
 
@@ -120,6 +135,20 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
             </button>
           )}
 
+          {savedFilters && (
+            <FiltersButton
+              filters={savedFilters.filters}
+              currentFilter={savedFilters.currentFilter}
+              onFilterChange={savedFilters.onFilterChange}
+              onDeleteCallback={() => {
+                if (savedFilters.onSaveFilterCallback) {
+                  savedFilters.onSaveFilterCallback();
+                }
+              }}
+              layoutPage={savedFilters.layoutPage}
+            />
+          )}
+
           {columnsFilter && (
             <ViewColumns
               columns={columnsFilter.columns}
@@ -163,6 +192,9 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           filters={advancedFilters.filters}
           setAdvancedFilters={advancedFilters.setAdvancedFilters}
           searchPropertyFilters={advancedFilters.searchPropertyFilters}
+          savedFilters={savedFilters?.filters}
+          onSaveFilterCallback={savedFilters?.onSaveFilterCallback}
+          layoutPage={savedFilters?.layoutPage ?? "requests"}
         />
       )}
     </div>

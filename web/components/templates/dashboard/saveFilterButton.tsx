@@ -17,10 +17,12 @@ interface SaveFilterButtonProps {
   onSaveFilterCallback: () => void;
   filterMap: SingleFilterDef<any>[];
   savedFilters?: OrganizationFilter[];
+  layoutPage: "dashboard" | "requests";
 }
 
 const SaveFilterButton = (props: SaveFilterButtonProps) => {
-  const { filters, onSaveFilterCallback, filterMap, savedFilters } = props;
+  const { filters, onSaveFilterCallback, filterMap, savedFilters, layoutPage } =
+    props;
 
   const { setNotification } = useNotification();
   const orgContext = useOrg();
@@ -48,7 +50,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              type: "dashboard",
+              type: layoutPage,
               filters: updatedFilters,
             }),
           }
@@ -71,7 +73,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              type: "dashboard",
+              type: layoutPage,
               filters: [saveFilter],
             }),
           }

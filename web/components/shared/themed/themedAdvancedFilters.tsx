@@ -24,6 +24,7 @@ export function AdvancedFilters({
   searchPropertyFilters,
   onSaveFilterCallback,
   savedFilters,
+  layoutPage,
 }: {
   filterMap: SingleFilterDef<any>[];
   filters: UIFilterRow[];
@@ -34,6 +35,7 @@ export function AdvancedFilters({
   ) => Promise<Result<void, string>>;
   onSaveFilterCallback?: () => void;
   savedFilters?: OrganizationFilter[];
+  layoutPage: "dashboard" | "requests";
 }) {
   return (
     <div className="flex flex-col bg-white dark:bg-black p-4 rounded-lg border border-gray-300 dark:border-gray-700 mt-8">
@@ -96,6 +98,7 @@ export function AdvancedFilters({
             onSaveFilterCallback={onSaveFilterCallback}
             filterMap={filterMap}
             savedFilters={savedFilters}
+            layoutPage={layoutPage}
           />
         )}
       </div>
