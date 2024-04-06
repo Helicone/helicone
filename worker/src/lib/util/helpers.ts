@@ -42,3 +42,26 @@ export function deepCompare(a: any, b: any): boolean {
 
   return false;
 }
+
+export async function compress(str: string) {
+  // Convert the string to a byte stream.
+  const stream = new Blob([str]).stream();
+
+  // Create a compressed stream.
+  const compressedStream = stream.pipeThrough(new CompressionStream("gzip"));
+
+  // Read all the bytes from this stream.
+  const chunks = [];
+  for await (const chunk of compressedStream) {
+    chunks.push(chunk);
+  }
+  return await concatUint8Arrays(chunks);
+}
+
+async function concatUint8Arrays(
+  uint8arrays: Uint8Array[]
+): Promise<Uint8Array> {
+  const blob = new Blob(uint8arrays);
+  const buffer = await blob.arrayBuffer();
+  return new Uint8Array(buffer);
+}
