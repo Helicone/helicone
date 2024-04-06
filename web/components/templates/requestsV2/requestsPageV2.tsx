@@ -1,37 +1,41 @@
-import React, { useEffect, useState } from "react";
-import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
-import AuthHeader from "../../shared/authHeader";
-import useRequestsPageV2 from "./useRequestsPageV2";
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
-import RequestDrawerV2 from "./requestDrawerV2";
-import TableFooter from "./tableFooter";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { HeliconeRequest } from "../../../lib/api/request/request";
+import {
+  TimeInterval,
+  getTimeIntervalAgo,
+} from "../../../lib/timeCalculations/time";
+import { useDebounce } from "../../../services/hooks/debounce";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   SortDirection,
   SortLeafRequest,
 } from "../../../services/lib/sorts/requests/sorts";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import {
-  getTimeIntervalAgo,
-  TimeInterval,
-} from "../../../lib/timeCalculations/time";
-import { getInitialColumns } from "./initialColumns";
-import { useDebounce } from "../../../services/hooks/debounce";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
-import { useRouter } from "next/router";
-import { HeliconeRequest } from "../../../lib/api/request/request";
-import { Result } from "../../../lib/result";
-import { useLocalStorage } from "../../../services/hooks/localStorage";
+import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import { NormalizedRequest } from "./builder/abstractRequestBuilder";
+import { getInitialColumns } from "./initialColumns";
+import RequestDrawerV2 from "./requestDrawerV2";
+import TableFooter from "./tableFooter";
+import useRequestsPageV2 from "./useRequestsPageV2";
 
+import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { TimeFilter } from "../dashboard/dashboardPage";
-import RequestCard from "./requestCard";
-import getNormalizedRequest from "./builder/requestBuilder";
-import { getHeliconeCookie } from "../../../lib/cookies";
-import { useOrg } from "../../layout/organizationContext";
 import { CreateDataSetModal } from "../fine-tune/dataSetModal";
+import getNormalizedRequest from "./builder/requestBuilder";
+import RequestCard from "./requestCard";
+import {
+  OrganizationFilter,
+  OrganizationLayout,
+} from "../../../services/lib/organization_layout/organization_layout";
+import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
+import { useOrg } from "../../layout/organizationContext";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -44,6 +48,9 @@ interface RequestsPageV2Props {
   isCached?: boolean;
   initialRequestId?: string;
   userId?: string;
+  currentFilter: OrganizationFilter | null;
+  organizationLayout: OrganizationLayout | null;
+  organizationLayoutAvailable: boolean;
 }
 
 function getSortLeaf(
@@ -86,23 +93,6 @@ function getTableName(isCached: boolean): string {
   return isCached ? "cache_hits" : "request";
 }
 
-export function decodeFilter(encoded: string): UIFilterRow | null {
-  try {
-    const parts = encoded.split(":");
-    if (parts.length !== 3) return null;
-    const filterMapIdx = parseInt(parts[0], 10);
-    const operatorIdx = parseInt(parts[1], 10);
-    const value = decodeURIComponent(parts[2]);
-
-    if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
-
-    return { filterMapIdx, operatorIdx, value };
-  } catch (error) {
-    console.error("Error decoding filter:", error);
-    return null;
-  }
-}
-
 const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const {
     currentPage,
@@ -111,53 +101,45 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached = false,
     initialRequestId,
     userId,
+    currentFilter,
+    organizationLayout,
+    organizationLayoutAvailable,
   } = props;
   const [isLive, setIsLive] = useLocalStorage("isLive", false);
-  const org = useOrg();
+  const jawn = useJawnClient();
+  const orgContext = useOrg();
+  const searchParams = useSearchParams();
+  const [currFilter, setCurrFilter] = useState(
+    searchParams.get("filter") ?? null
+  );
 
   // set the initial selected data on component load
   useEffect(() => {
     if (initialRequestId) {
       const fetchRequest = async () => {
-        if (!org?.currentOrg?.id) {
-          return;
-        }
-        const authFromCookie = getHeliconeCookie();
-        const resp = await fetch(
-          `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/request/query`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "helicone-authorization": JSON.stringify({
-                _type: "jwt",
-                token: authFromCookie.data?.jwtToken,
-                orgId: org?.currentOrg?.id,
-              }),
-            },
-            body: JSON.stringify({
-              filter: {
-                left: {
-                  request: {
-                    id: {
-                      equals: initialRequestId,
-                    },
+        const response = await jawn.POST("/v1/request/query", {
+          body: {
+            filter: {
+              left: {
+                request: {
+                  id: {
+                    equals: initialRequestId,
                   },
                 },
-                operator: "and",
-                right: "all",
-              } as FilterNode,
-              offset: 0,
-              limit: 1,
-              sort: {},
-            }),
-          }
-        );
+              },
+              operator: "and",
+              right: "all",
+            },
+            offset: 0,
+            limit: 1,
+            sort: {},
+          },
+        });
 
-        const result = (await resp.json()) as Result<HeliconeRequest[], string>;
+        const result = response.data;
 
         // update below logic to work for single request
-        if (result.data?.[0] && !result.error) {
+        if (result?.data?.[0] && !result.error) {
           const request = result.data[0];
           if (request?.signed_body_url) {
             try {
@@ -177,14 +159,16 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             }
           }
 
-          const normalizedRequest = getNormalizedRequest(result.data[0]);
+          const normalizedRequest = getNormalizedRequest(
+            result.data[0] as HeliconeRequest
+          );
           setSelectedData(normalizedRequest);
           setOpen(true);
         }
       };
       fetchRequest();
     }
-  }, [initialRequestId, org?.currentOrg?.id]);
+  }, [initialRequestId, jawn]);
 
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
@@ -193,7 +177,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [selectedData, setSelectedData] = useState<
     NormalizedRequest | undefined
   >(undefined);
-  const searchParams = useSearchParams();
 
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -234,37 +217,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   };
 
   const getAdvancedFilters = (): UIFilterRow[] => {
-    try {
-      const currentAdvancedFilters = searchParams.get("filters");
-
-      if (currentAdvancedFilters) {
-        const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
-        const decodedFilters = filters
-          .split("|")
-          .map(decodeFilter)
-          .filter((filter) => filter !== null) as UIFilterRow[];
-
-        if (userId) {
-          decodedFilters.push({
-            filterMapIdx: 3,
-            operatorIdx: 0,
-            value: userId,
-          });
-        }
-
-        return decodedFilters;
-      }
-    } catch (error) {
-      console.error("Error decoding advanced filters:", error);
-    }
-    if (userId) {
-      return [
-        {
-          filterMapIdx: 3,
-          operatorIdx: 0,
-          value: userId,
-        },
-      ];
+    if (currentFilter) {
+      return currentFilter?.filter as UIFilterRow[];
     }
     return [];
   };
@@ -405,17 +359,16 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     })
   );
 
-  const onSetAdvancedFilters = (filters: UIFilterRow[]) => {
-    if (filters.length > 0) {
-      const currentAdvancedFilters = encodeURIComponent(
-        JSON.stringify(filters.map(encodeFilter).join("|"))
-      );
-      searchParams.set("filters", JSON.stringify(currentAdvancedFilters));
-    } else {
-      searchParams.delete("filters");
-    }
-
+  const onSetAdvancedFilters = (
+    filters: UIFilterRow[],
+    layoutFilterId?: string | null
+  ) => {
     setAdvancedFilters(filters);
+    if (layoutFilterId === null) {
+      searchParams.delete("filter");
+    } else {
+      searchParams.set("filter", layoutFilterId ?? "");
+    }
   };
 
   const onRowSelectHandler = (row: NormalizedRequest, index: number) => {
@@ -423,6 +376,44 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     setSelectedData(row);
     setOpen(true);
     searchParams.set("requestId", row.id);
+  };
+
+  const {
+    organizationLayout: orgLayout,
+    isLoading: isOrgLayoutLoading,
+    refetch: orgLayoutRefetch,
+    isRefetching: isOrgLayoutRefetching,
+  } = useOrganizationLayout(
+    orgContext?.currentOrg?.id!,
+    "requests",
+    organizationLayout
+      ? {
+          data: organizationLayout,
+          error: null,
+        }
+      : undefined
+  );
+
+  const onSetAdvancedFiltersHandler = (
+    filters: UIFilterRow[],
+    layoutFilterId?: string | null
+  ) => {
+    setAdvancedFilters(filters);
+    if (layoutFilterId === null) {
+      searchParams.delete("filter");
+    } else {
+      searchParams.set("filter", layoutFilterId ?? "");
+    }
+  };
+
+  const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
+    if (layoutFilter !== null) {
+      onSetAdvancedFiltersHandler(layoutFilter?.filter, layoutFilter.id);
+      setCurrFilter(layoutFilter?.id);
+    } else {
+      setCurrFilter(null);
+      onSetAdvancedFiltersHandler([], null);
+    }
   };
 
   return (
@@ -474,6 +465,19 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             searchPropertyFilters: searchPropertyFilters,
             show: userId ? false : true,
           }}
+          savedFilters={
+            organizationLayoutAvailable
+              ? {
+                  currentFilter: currFilter ?? undefined,
+                  filters: orgLayout?.filters ?? undefined,
+                  onFilterChange: onLayoutFilterChange,
+                  onSaveFilterCallback: async () => {
+                    await orgLayoutRefetch();
+                  },
+                  layoutPage: "requests",
+                }
+              : undefined
+          }
           onDataSet={
             userId
               ? undefined

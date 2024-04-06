@@ -9,6 +9,26 @@ on:
       - main
 
 jobs:
+
+  jawnClient:
+    name: Jawn Client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Make sure types were generated
+        working-directory: valhalla/jawn
+        run: |
+          npm install
+          npx tsoa spec-and-routes
+          python3 genTypes.py
+
+          if git status | grep -e "jawnTypes.ts" -e "swagger"; then
+              echo "Please run the type generation script to update the types."
+              git diff
+              exit 1
+          fi
+
+
   costs:
     name: Cost Calculation Package
     runs-on: ubuntu-latest
@@ -41,6 +61,7 @@ jobs:
               echo "Please run the copy script to update the contents of the directories."
               exit 1
           fi
+
 
   db-type-checks:
     name: DB type checks

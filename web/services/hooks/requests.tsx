@@ -1,85 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { HeliconeRequest } from "../../lib/api/request/request";
+import { useJawnClient } from "../../lib/clients/jawnHook";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
-import { getHeliconeCookie } from "../../lib/cookies";
-import { useOrg } from "../../components/layout/organizationContext";
-
-const useGetRequest = (requestId: string) => {
-  const org = useOrg();
-  const { data, isLoading } = useQuery({
-    queryKey: ["requestData", requestId, org?.currentOrg?.id],
-    queryFn: async (query) => {
-      const requestId = query.queryKey[1] as string;
-      const orgId = query.queryKey[2];
-      if (!orgId) {
-        return {
-          data: [],
-          error: "No org provided",
-        };
-      }
-      const authFromCookie = getHeliconeCookie();
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/request/query`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "helicone-authorization": JSON.stringify({
-              _type: "jwt",
-              token: authFromCookie.data?.jwtToken,
-              orgId: orgId,
-            }),
-          },
-          body: JSON.stringify({
-            filter: {
-              left: {
-                request: {
-                  id: {
-                    equals: requestId,
-                  },
-                },
-              },
-              operator: "and",
-              right: "all",
-            } as FilterNode,
-          }),
-        }
-      );
-
-      const result = (await response.json()) as Result<HeliconeRequest, string>;
-
-      // update below logic to work for single request
-      const request = result.data;
-
-      if (request?.signed_body_url) {
-        try {
-          const contentResponse = await fetch(request.signed_body_url);
-          if (contentResponse.ok) {
-            const text = await contentResponse.text();
-
-            const content = JSON.parse(text) as {
-              request: string;
-              response: string;
-            };
-            request.request_body = content.request;
-            request.response_body = content.response;
-          }
-        } catch (error) {
-          console.log(`Error fetching content: ${error}`);
-        }
-      }
-
-      return { data: request, error: null };
-    },
-    refetchOnWindowFocus: false,
-  });
-  return {
-    request: data?.data,
-    isLoading,
-  };
-};
 
 const useGetRequests = (
   currentPage: number,
@@ -89,7 +13,7 @@ const useGetRequests = (
   isCached: boolean = false,
   isLive: boolean = false
 ) => {
-  const org = useOrg();
+  const jawn = useJawnClient();
   return {
     requests: useQuery({
       queryKey: [
@@ -99,7 +23,6 @@ const useGetRequests = (
         advancedFilter,
         sortLeaf,
         isCached,
-        org?.currentOrg?.id,
       ],
       queryFn: async (query) => {
         const currentPage = query.queryKey[1] as number;
@@ -107,42 +30,17 @@ const useGetRequests = (
         const advancedFilter = query.queryKey[3];
         const sortLeaf = query.queryKey[4];
         const isCached = query.queryKey[5];
-        const orgId = query.queryKey[6];
-        if (!orgId) {
-          return {
-            data: [],
-            error: "No org provided",
-          };
-        }
-        const authFromCookie = getHeliconeCookie();
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/request/query`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "helicone-authorization": JSON.stringify({
-                _type: "jwt",
-                token: authFromCookie.data?.jwtToken,
-                orgId: orgId,
-              }),
-            },
-            body: JSON.stringify({
-              filter: advancedFilter,
-              offset: (currentPage - 1) * currentPageSize,
-              limit: currentPageSize,
-              sort: sortLeaf,
-              isCached,
-            }),
-          }
-        );
+        const response = await jawn.POST("/v1/request/query", {
+          body: {
+            filter: advancedFilter as any,
+            offset: (currentPage - 1) * currentPageSize,
+            limit: currentPageSize,
+            sort: sortLeaf as any,
+            isCached: isCached as any,
+          },
+        });
 
-        const result = (await response.json()) as Result<
-          HeliconeRequest[],
-          string
-        >;
-
-        console.log("result", result.data);
+        const result = response.data as Result<HeliconeRequest[], string>;
 
         const requests = await Promise.all(
           result.data?.map(async (request: HeliconeRequest) => {
@@ -252,4 +150,4 @@ const useGetRequestCountClickhouse = (
   };
 };
 
-export { useGetRequests, useGetRequestCountClickhouse, useGetRequest };
+export { useGetRequestCountClickhouse, useGetRequests };
