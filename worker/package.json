@@ -46,8 +46,6 @@
     "aws4fetch": "^1.0.18",
     "dateformat": "^5.0.3",
     "events": "^3.3.0",
-    "itty-router": "^4.0.13",
-    "node-gzip": "^1.1.2",
-    "pg": "^8.11.2"
+    "itty-router": "^4.0.13"
   }
 }
