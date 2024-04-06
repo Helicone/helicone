@@ -894,7 +894,7 @@ export async function logRequest(
 
           requestAssets[assetId] = item.image_url.url;
 
-          item.image_url = `<helicone-asset-id key="${assetId}"/>`;
+          item.image_url.url = `<helicone-asset-id key="${assetId}"/>`;
         }
       }
     }
