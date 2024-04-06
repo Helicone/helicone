@@ -59,6 +59,8 @@ export interface HeliconeRequest {
   signed_body_url?: string | null;
   llmSchema: LlmSchema | null;
   country_code: string | null;
+  asset_ids: string[] | null;
+  asset_urls: Record<string, string> | null;
 }
 
 export async function getRequests(
@@ -111,7 +113,12 @@ export async function getRequests(
     job_node_request.node_id as node_id,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
-    feedback.rating AS feedback_rating
+    feedback.rating AS feedback_rating,
+    (
+    SELECT ARRAY_AGG(asset.id)
+    FROM asset
+    WHERE asset.request_id = request.id
+    ) AS asset_ids
   FROM request
     left join response on request.id = response.request
     left join feedback on response.id = feedback.response_id
@@ -124,7 +131,10 @@ export async function getRequests(
   OFFSET ${offset}
 `;
 
+  console.log(222);
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
+  console.log(JSON.stringify(requests.data));
+  console.log(1);
   const s3Client = new S3Client(
     process.env.S3_ACCESS_KEY ?? "",
     process.env.S3_SECRET_KEY ?? "",
@@ -186,7 +196,12 @@ export async function getRequestsCached(
     response.prompt_tokens as prompt_tokens,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
-    feedback.rating AS feedback_rating
+    feedback.rating AS feedback_rating,
+    (
+    SELECT ARRAY_AGG(asset.id)
+    FROM asset
+    WHERE asset.request_id = request.id
+    ) AS asset_ids
   FROM cache_hits
     inner join request on cache_hits.request_id = request.id
     inner join response on request.id = response.request
@@ -239,6 +254,38 @@ async function mapLLMCalls(
         }
 
         heliconeRequest.signed_body_url = signedBodyUrl;
+
+        const assetUrls: Record<string, string> = {};
+
+        if (heliconeRequest.asset_ids) {
+          // Map each assetId to a promise that resolves to an object { assetId, signedImageUrl }
+          const signedUrlPromises = heliconeRequest.asset_ids.map(
+            async (assetId: string) => {
+              const { data: signedImageUrl, error: signedImageUrlErr } =
+                await s3Client.getRequestResponseImageSignedUrl(
+                  orgId,
+                  heliconeRequest.request_id,
+                  assetId
+                );
+
+              return {
+                assetId,
+                signedImageUrl:
+                  signedImageUrlErr || !signedImageUrl ? "" : signedImageUrl,
+              };
+            }
+          );
+
+          // Use Promise.all to wait for all promises to resolve
+          const signedUrls = await Promise.all(signedUrlPromises);
+
+          // Populate assetIds with the results
+          signedUrls.forEach(({ assetId, signedImageUrl }) => {
+            assetUrls[assetId] = signedImageUrl;
+          });
+
+          heliconeRequest.asset_urls = assetUrls;
+        }
       }
 
       // Next map to standardized schema

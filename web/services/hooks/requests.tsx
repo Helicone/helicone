@@ -4,6 +4,7 @@ import { useJawnClient } from "../../lib/clients/jawnHook";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 
 const useGetRequests = (
   currentPage: number,
@@ -46,14 +47,25 @@ const useGetRequests = (
           result.data?.map(async (request: HeliconeRequest) => {
             if (request.signed_body_url) {
               try {
+                console.log(1);
+                console.log(JSON.stringify(request.asset_ids));
+                console.log(1);
                 const contentResponse = await fetch(request.signed_body_url);
                 if (contentResponse.ok) {
+                  console.log(2);
                   const text = await contentResponse.text();
 
-                  const content = JSON.parse(text) as {
-                    request: string;
-                    response: string;
-                  };
+                  const content = JSON.parse(text);
+
+                  console.log(request.asset_urls);
+                  if (request.asset_urls) {
+                    // content.request = placeAssetIdValues(
+                    //   request.asset_urls,
+                    //   content
+                    // );
+                  }
+
+                  console.log(content);
                   request.request_body = content.request;
                   request.response_body = content.response;
                 }

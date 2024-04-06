@@ -276,6 +276,14 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"Record_string.string_": {
+				"properties": {},
+				"additionalProperties": {
+					"type": "string"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
 			"HeliconeRequest": {
 				"properties": {
 					"response_id": {
@@ -406,6 +414,21 @@
 					"country_code": {
 						"type": "string",
 						"nullable": true
+					},
+					"asset_ids": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array",
+						"nullable": true
+					},
+					"asset_urls": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
+						"nullable": true
 					}
 				},
 				"required": [
@@ -434,7 +457,9 @@
 					"provider",
 					"node_id",
 					"llmSchema",
-					"country_code"
+					"country_code",
+					"asset_ids",
+					"asset_urls"
 				],
 				"type": "object",
 				"additionalProperties": false

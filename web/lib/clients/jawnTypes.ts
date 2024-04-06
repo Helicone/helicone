@@ -106,6 +106,10 @@ Json: JsonObject;
       request: components["schemas"]["Request"];
       response?: components["schemas"]["Response"] | null;
     };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.string_": {
+      [key: string]: string;
+    };
     HeliconeRequest: {
       /** @example Happy */
       response_id: string;
@@ -149,6 +153,8 @@ Json: JsonObject;
       signed_body_url?: string | null;
       llmSchema: components["schemas"]["LlmSchema"] | null;
       country_code: string | null;
+      asset_ids: string[] | null;
+      asset_urls: components["schemas"]["Record_string.string_"] | null;
     };
     "SuccessResult_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];

@@ -36,6 +36,7 @@ import {
 } from "../../../services/lib/organization_layout/organization_layout";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
+import { placeAssetIdValues } from "../../../services/lib/requestTraverseHelper";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -147,10 +148,15 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
               if (contentResponse.ok) {
                 const text = await contentResponse.text();
 
-                const content = JSON.parse(text) as {
-                  request: string;
-                  response: string;
-                };
+                const content = JSON.parse(text);
+
+                if (request.asset_urls) {
+                  content.request = placeAssetIdValues(
+                    request.asset_urls,
+                    content
+                  );
+                }
+
                 request.request_body = content.request;
                 request.response_body = content.response;
               }
