@@ -82,7 +82,7 @@ export async function dbExecute<T>(
   parameters: any[]
 ): Promise<Result<T[], string>> {
   const ssl =
-    process.env.VERCEL_ENV === "production"
+    process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development"
       ? {
           rejectUnauthorized: true,
           ca: process.env.SUPABASE_SSL_CERT_CONTENTS!.split("\\n").join("\n"),
