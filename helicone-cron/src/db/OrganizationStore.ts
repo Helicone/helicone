@@ -19,21 +19,9 @@ export class OrganizationStore {
     private pg: PgWrapper
   ) {}
 
-  async getUsageEligibleOrganizations(
-    usageDate: string
-  ): Promise<Result<UsageEligibleOrgs[], string>> {
-    // const query = `select
-    //   o.id as orgId,
-    //   o.stripe_subscription_item_id as stripeSubscriptionItemId
-    // from organization as o
-    // left join organization_usage as ou on o.id = ou.organization_id AND ou.usage_date = $1
-    //   where o.tier = 'growth'
-    //   and o.stripe_customer_id is not null
-    //   and o.stripe_subscription_item_id is not null
-    //   and o.soft_delete = false
-    //   and (ou.id IS NULL OR (ou.usage_date = $1 AND ou.recorded = false))
-    // `;
-
+  async getUsageEligibleOrganizations(): Promise<
+    Result<UsageEligibleOrgs[], string>
+  > {
     const query = `SELECT
       o.id as "orgId",
       o.stripe_subscription_id as "stripeSubscriptionId",
@@ -63,10 +51,7 @@ export class OrganizationStore {
   ): Promise<Result<null, string>> {
     const { error } = await this.supabaseClient
       .from("organization_usage")
-      .upsert(usageData, {
-        ignoreDuplicates: false,
-        onConflict: "organization_id, usage_date",
-      });
+      .upsert(usageData);
 
     if (error) {
       return err(error.message);

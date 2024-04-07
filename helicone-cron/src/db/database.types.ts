@@ -125,6 +125,49 @@ export type Database = {
           },
         ]
       }
+      asset: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          request_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          request_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request_rbac"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cache_hits: {
         Row: {
           created_at: string

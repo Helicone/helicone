@@ -2,6 +2,7 @@ import { Result, err, ok } from "../util/results";
 import { OrganizationStore, UsageEligibleOrgs } from "../db/OrganizationStore";
 import { RequestResponseStore } from "../db/RequestResponseStore";
 import { StripeClient } from "../client/StripeClient";
+import { chunkArray } from "../util/helpers";
 
 export class UsageManager {
   constructor(
@@ -11,24 +12,23 @@ export class UsageManager {
   ) {}
 
   async chargeOrgUsage(): Promise<Result<string, string>> {
-    const today = new Date();
-    today.setDate(today.getDate());
-    today.setHours(0, 0, 0, 0);
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split("T")[0];
-
     const usageEligibleOrgs =
-      await this.organizationStore.getUsageEligibleOrganizations(yesterdayStr);
+      await this.organizationStore.getUsageEligibleOrganizations();
 
     if (usageEligibleOrgs.error || !usageEligibleOrgs.data) {
       return err(usageEligibleOrgs.error || "No eligible organizations found.");
     }
 
-    const promises: Promise<Result<string, string>>[] =
-      usageEligibleOrgs.data.map((org) => this.handleOrganizationUsage(org));
+    const batches: UsageEligibleOrgs[][] = chunkArray(
+      usageEligibleOrgs.data,
+      100
+    );
 
-    await Promise.all(promises);
+    // Stripe API has a rate limit of 100 requests per second.
+    for (let batch of batches) {
+      await Promise.all(batch.map((org) => this.handleOrganizationUsage(org)));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
 
     return ok("Success");
   }
@@ -37,27 +37,28 @@ export class UsageManager {
     org: UsageEligibleOrgs
   ): Promise<Result<string, string>> {
     let requestQuantity = 0;
-    let startDate: Date;
-    if (!org.latestEndTime) {
-      // Get current period start date from stripe
-      const subscription = await this.stripeClient.getSubscriptionById(
-        org.stripeSubscriptionItemId
-      );
-
-      if (subscription.error || !subscription.data) {
-        return err(
-          subscription.error || "Failed to get subscription from Stripe."
-        );
-      }
-
-      subscription.data.start_date;
-      startDate = new Date(subscription.data.current_period_start * 1000);
-    } else {
-      startDate = new Date(org.latestEndTime);
-    }
+    let startDate = new Date();
     const endDate = new Date();
 
     try {
+      if (!org.latestEndTime) {
+        // Get current period start date from stripe
+        const subscription = await this.stripeClient.getSubscriptionById(
+          org.stripeSubscriptionId
+        );
+
+        if (subscription.error || !subscription.data) {
+          throw new Error(
+            `Failed to get subscription from Stripe. ${subscription.error}`
+          );
+        }
+
+        subscription.data.start_date;
+        startDate = new Date(subscription.data.current_period_start * 1000);
+      } else {
+        startDate = new Date(org.latestEndTime);
+      }
+
       const requestCountResult =
         await this.requestResponseStore.getRequestCountByOrgId(
           org.orgId,
@@ -68,12 +69,6 @@ export class UsageManager {
       if (requestCountResult.error || !requestCountResult.data) {
         throw new Error(
           requestCountResult.error || "Failed to get request count."
-        );
-      }
-
-      if (!org.stripeSubscriptionItemId) {
-        throw new Error(
-          "Organization does not have a Stripe subscription item ID."
         );
       }
 
