@@ -71,7 +71,7 @@ export default {
       });
 
       await Promise.all(heartBeatPromises);
-    } else if (controller.cron === "0 1 * * *") {
+    } else if (controller.cron === "0 * * * *") {
       const clickhouseWrapper = new ClickhouseWrapper({
         CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
         CLICKHOUSE_USER: env.CLICKHOUSE_USER,

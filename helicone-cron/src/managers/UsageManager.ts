@@ -132,7 +132,7 @@ export class UsageManager {
         quantity: quantity,
         timestamp: "now",
         action: "increment",
-        idempotencyKey: `${orgId}-${startDate}`,
+        idempotencyKey: `${orgId}-${startDate.toISOString()}`,
       });
 
       if (usageRecord.error || !usageRecord.data) {
