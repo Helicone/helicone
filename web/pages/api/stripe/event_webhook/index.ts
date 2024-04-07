@@ -8,14 +8,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  console.log(`Request.method: ${req.method}`);
   if (req.method === "POST") {
     const buf = await buffer(req);
     const sig = req.headers["stripe-signature"]!;
 
     let event: Stripe.Event;
 
-    // This try catch is failing. Let's log everything so I can figure out why:
     try {
       event = stripe.webhooks.constructEvent(
         buf.toString(),
@@ -23,12 +21,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         process.env.STRIPE_WEBHOOK_SECRET!
       ) as Stripe.Event;
     } catch (err) {
-      console.log("Died");
       res.status(400).send(`Webhook Error: ${err}`);
       return;
     }
 
-    console.log(`Event: ${event.type}`);
     if (event.type === "customer.subscription.created") {
       const subscription = event.data.object as Stripe.Subscription;
       const subscriptionId = subscription.id;
