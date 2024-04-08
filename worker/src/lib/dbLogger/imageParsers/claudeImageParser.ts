@@ -12,7 +12,9 @@ export class ClaudeImageParser extends ImageModelParser {
         message.content.forEach((item: any) => {
           if (item.type === "image") {
             const assetId = this.generateAssetId();
-            requestAssets[assetId] = item.source.data;
+            requestAssets[
+              assetId
+            ] = `data:${item.source.media_type};${item.source.type},${item.source.data}`;
             item.source.data = `<helicone-asset-id key="${assetId}"/>`;
           }
         });

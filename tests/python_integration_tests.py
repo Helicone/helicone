@@ -1,5 +1,7 @@
 # TODO deprecate this file and move all test to helicone_python/tests
 
+import base64
+import httpx
 import requests
 import os
 from dotenv import load_dotenv
@@ -10,13 +12,16 @@ import uuid
 import time
 from helicone.openai_async import openai, Meta
 from helicone.globals import helicone_global
+import json
 
 load_dotenv()
 
 helicone_proxy_url = os.environ["HELICONE_PROXY_URL"]
+anthropic_proxy_url = os.environ["ANTHROPIC_PROXY_URL"]
 helicone_async_url = os.environ["HELICONE_ASYNC_URL"]
 helicone_gateway_url = os.environ["HELICONE_GATEWAY_URL"]
 openai_api_key = os.environ["OPENAI_API_KEY"]
+anthropic_api_key = os.environ["ANTHROPIC_API_KEY"]
 openai_org_id = os.environ["OPENAI_ORG"]
 helicone_api_key = os.environ["HELICONE_API_KEY"]
 supabase_key = os.environ["SUPABASE_KEY"]
@@ -424,3 +429,139 @@ def test_prompt_threat():
 
     print("passed")
 
+def test_gpt_vision_request():
+    url = f"{helicone_proxy_url}/chat/completions"
+    
+    requestId1 = str(uuid.uuid4())
+    messages = [
+        {
+            "role": "user",
+            "content": [
+              {"type": "text", "text": "What’s in these images?"},
+              {
+                  "type": "image_url",
+                  "image_url": {
+                      "url": "https://th-thumbnailer.cdn-si-edu.com/8ciAzzKoUyvv-4kt1rLa3mLgwU0=/fit-in/1600x0/https://tf-cmsv2-smithsonianmag-media.s3.amazonaws.com/filer/04/8e/048ed839-a581-48af-a0ae-fac6fec00948/gettyimages-168346757_web.jpg",
+                  },
+              },
+              {
+                  "type": "image_url",
+                  "image_url": {
+                      "url": "https://www.princeton.edu/sites/default/files/styles/1x_full_2x_half_crop/public/images/2022/02/KOA_Nassau_2697x1517.jpg",
+                  },
+              },
+          ]
+        }
+    ]
+    data = {
+        "model": "gpt-4-vision-preview",
+        "messages": messages,
+        "max_tokens": 1
+    }
+    headers1 = {
+        "Authorization": f"Bearer {openai_api_key}",
+        "Helicone-Auth": f"Bearer {helicone_api_key}",
+        "Helicone-Property-RequestId": requestId1,
+        "OpenAI-Organization": openai_org_id
+    }
+
+    response1 = requests.request("POST", url, json=data, headers=headers1)
+
+    try:
+        response1.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        print(e)
+        print(response1.text)
+        raise e
+    
+    assert response1.status_code == 200,  "Expected status code to be 200."
+
+    assert response1.headers.get('Helicone-Status', None) == "success", "Expected Helicone-Status to be success."
+    
+    responseJson1 = response1.json()
+    
+    assert responseJson1, "Response from OpenAI API is empty"
+
+    time.sleep(3)  # Helicone needs time to insert request into the database
+
+    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
+    request_data1 = fetch_from_db(query, (requestId1,))
+    assert request_data1, "Request data not found in the database for the given property request id"
+
+    assets_query = "SELECT * FROM asset WHERE request_id = %s"
+    assets_data1 = fetch_from_db(assets_query, (request_data1[0][3],))
+
+    assert assets_data1, "asset not found in the database for this request"
+
+    print("passed")
+
+def test_claude_vision_request():
+    url = f"{anthropic_proxy_url}/messages"
+    image1_url = "https://upload.wikimedia.org/wikipedia/commons/a/a7/Camponotus_flavomarginatus_ant.jpg"
+    image1_response = httpx.get(image1_url)
+    image1_data = base64.b64encode(image1_response.content).decode("utf-8")
+
+    requestId1 = str(uuid.uuid4())
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "image/jpeg",
+                        "data": image1_data,
+                    },
+                },
+                {
+                    "type": "text",
+                    "text": "Describe this image."
+                }
+            ]
+        }
+    ]
+    data = {
+        "model": "claude-3-opus-20240229",
+        "messages": messages,
+        "max_tokens": 5,
+    }
+    headers1 = {
+        "x-api-key": f"{anthropic_api_key}",
+        "Content-Type": "application/json",
+        "Helicone-Auth": f"Bearer {helicone_api_key}",
+        "anthropic-version": "2023-06-01",
+        "Helicone-Property-RequestId": requestId1
+    }
+
+    response1 = requests.post(url, json=data, headers=headers1)
+
+    try:
+        response1.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        print(e)
+        print(response1.text)
+        raise e
+    
+    assert response1.status_code == 200, "Expected status code to be 200."
+
+    responseJson1 = response1.json()
+    
+    assert responseJson1, "Response from Claude API is empty"
+
+    # Assuming your Helicone setup captures requests to Claude, wait for database logging
+    time.sleep(3)
+
+    # Replace 'fetch_from_db' with your actual function to query your database
+    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
+    request_data1 = fetch_from_db(query, (requestId1,))
+    assert request_data1, "Request data not found in the database for the given property request id"
+
+    print(request_data1)
+    print(request_data1[0][6])
+    assets_query = "SELECT * FROM asset WHERE request_id = %s"
+    assets_data1 = fetch_from_db(assets_query, (request_data1[0][3],))
+
+    assert assets_data1, "asset not found in the database for this request"
+
+    print("passed")
