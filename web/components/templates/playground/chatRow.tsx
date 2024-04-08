@@ -10,6 +10,8 @@ import { removeLeadingWhitespace } from "../../shared/utils/utils";
 import { RenderWithPrettyInputKeys } from "../prompts/id/promptIdPage";
 import { Message } from "../requests/chat";
 import ResizeTextArea from "./resizeTextArea";
+import RoleButton, { ROLE_COLORS } from "./new/roleButton";
+import { MessageInputItem } from "./new/messageInput";
 
 interface ChatRowProps {
   index: number;
@@ -25,11 +27,12 @@ const ChatRow = (props: ChatRowProps) => {
 
   const [currentMessage, setCurrentMessage] = useState(message);
 
-  const [role, setRole] = useState(currentMessage.role);
+  const [role, setRole] = useState<
+    "system" | "user" | "assistant" | "function"
+  >(currentMessage.role);
 
   const [isEditing, setIsEditing] = useState(false);
 
-  const isAssistant = role === "assistant";
   const isSystem = role === "system";
 
   const getContentAsString = (rawMessage: Message) => {
@@ -98,131 +101,28 @@ const ChatRow = (props: ChatRowProps) => {
     <li
       className={clsx(
         index === 0 && "rounded-t-lg",
-        role === "user"
-          ? "bg-white dark:bg-black"
-          : "bg-gray-100 dark:bg-[#17191d]",
+
+        "bg-white dark:bg-black",
+
         "flex flex-row justify-between px-8 py-6 gap-8 border-b border-gray-300 dark:border-gray-700"
       )}
     >
-      {isSystem || isAssistant ? (
-        <div className="flex flex-col gap-4 w-full">
-          <div className="flex flex-row space-x-8 w-full h-full relative">
-            <button
-              className={clsx(
-                isSystem ? "cursor-not-allowed" : "hover:bg-gray-50",
-                "bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-gray-900 border border-gray-300 dark:border-gray-700",
-                "sticky top-60 left-0 w-20 h-6 text-xs rounded-lg font-semibold text-gray-900 dark:text-gray-100"
-              )}
-              disabled={isSystem}
-              onClick={() => {
-                setRole("user");
-                callback(contentAsString || "", "user");
-              }}
-            >
-              {isSystem ? "system" : "assistant"}
-            </button>
-            {/* <div className={clsx(isEditing ? "w-5/6" : "w-2/3")}> */}
-            <div className="w-full pr-8">
-              {isEditing ? (
-                <span className="w-full">
-                  <ResizeTextArea
-                    value={contentAsString || ""}
-                    onChange={(e) => {
-                      const newMessages = { ...currentMessage };
-                      newMessages.content = e.target.value;
-                      setCurrentMessage(newMessages);
-                    }}
-                  />
-                </span>
-              ) : (
-                <>{getContent(currentMessage.content as string)}</>
-              )}
-            </div>
-            <div className="relative h-full justify-end">
-              {!isEditing ? (
-                <div className="sticky top-60 right-0 flex flex-row space-x-4">
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
-                  >
-                    <PencilIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
-                  </button>
-                  {!isSystem && (
-                    <button
-                      onClick={() => {
-                        deleteRow(currentMessage.id);
-                      }}
-                      className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
-                    >
-                      <TrashIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div className="sticky top-60 right-0 flex flex-row space-x-4">
-                  <button
-                    onClick={() => {
-                      setCurrentMessage(originalMessage);
-                      setIsEditing(false);
-                    }}
-                    className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
-                  >
-                    <XMarkIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      callback((contentAsString as string) || "", role);
-                      setIsEditing(false);
-                    }}
-                    className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
-                  >
-                    <CheckIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4 w-full">
-          <div className="flex flex-row space-x-8 w-full h-full relative">
-            <button
-              className={clsx(
-                "bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-gray-900 border border-gray-300 dark:border-gray-700",
-                "sticky top-60 left-0 w-20 h-6 text-xs rounded-lg font-semibold text-gray-900 dark:text-gray-100"
-              )}
-              disabled={isSystem}
-              onClick={() => {
-                setRole("assistant");
+      <div className="flex flex-col gap-4 w-full">
+        <div className="flex flex-col w-full h-full relative">
+          <div className="flex w-full justify-between">
+            <RoleButton
+              role={role}
+              onRoleChange={(newRole) => {
+                setRole(newRole);
                 const newMessage = {
                   ...currentMessage,
                 };
 
-                newMessage.role = "assistant";
+                newMessage.role = newRole;
                 setCurrentMessage(newMessage);
-                callback(contentAsString || "", "assistant");
+                callback(contentAsString || "", newRole);
               }}
-            >
-              user
-            </button>
-            <div className="w-full">
-              {isEditing ? (
-                <span className="w-full">
-                  <ResizeTextArea
-                    value={contentAsString || ""}
-                    onChange={(e) => {
-                      const newMessages = { ...currentMessage };
-                      newMessages.content = e.target.value;
-                      setCurrentMessage(newMessages);
-                    }}
-                    placeholder="Enter your message here..."
-                  />
-                </span>
-              ) : (
-                <>{getContent(currentMessage.content as string)}</>
-              )}
-            </div>
-
+            />
             <div className="relative h-full justify-end">
               {!isEditing ? (
                 <div className="sticky top-60 right-0 flex flex-row space-x-4">
@@ -256,11 +156,6 @@ const ChatRow = (props: ChatRowProps) => {
                   </button>
                   <button
                     onClick={() => {
-                      setCurrentMessage({
-                        role: role,
-                        content: contentAsString as string,
-                        id: currentMessage.id,
-                      });
                       callback((contentAsString as string) || "", role);
                       setIsEditing(false);
                     }}
@@ -272,8 +167,38 @@ const ChatRow = (props: ChatRowProps) => {
               )}
             </div>
           </div>
+          <div>
+            <span className="w-full">
+              <ResizeTextArea
+                value={contentAsString || ""}
+                onChange={(e) => {
+                  const newMessages = { ...currentMessage };
+                  newMessages.content = e.target.value;
+                  setCurrentMessage(newMessages);
+                }}
+              />
+            </span>
+            {/* <div className="w-full pr-8">
+            {isEditing ? (
+              <span className="w-full">
+                <ResizeTextArea
+                  value={contentAsString || ""}
+                  onChange={(e) => {
+                    const newMessages = { ...currentMessage };
+                    newMessages.content = e.target.value;
+                    setCurrentMessage(newMessages);
+                  }}
+                />
+              </span>
+            ) : (
+              // TODO: render this in markdown
+              <p className="text-sm">
+                {getContent(currentMessage.content as string)}
+              </p>
+            )} */}
+          </div>
         </div>
-      )}
+      </div>
     </li>
   );
 };

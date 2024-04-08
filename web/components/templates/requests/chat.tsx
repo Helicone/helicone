@@ -17,7 +17,7 @@ import { RenderWithPrettyInputKeys } from "../prompts/id/promptIdPage";
 
 export type Message = {
   id: string;
-  role: string;
+  role: "assistant" | "user" | "system" | "function";
   content: string | null | any[];
   function_call?: {
     name: string;

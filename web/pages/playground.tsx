@@ -5,6 +5,7 @@ import AuthLayout from "../components/layout/authLayout";
 import PlaygroundPage from "../components/templates/playground/playgroundPage";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { ReactElement } from "react";
+import PlaygroundV2 from "../components/templates/playground/playgroundV2";
 
 interface PlaygroundProps {
   user: User;
@@ -17,7 +18,14 @@ const Playground = (props: PlaygroundProps) => {
 
   const { request } = router.query;
 
-  return <PlaygroundPage request={request as string | undefined} />;
+  // return <PlaygroundV2 />;
+
+  return (
+    <div className="flex flex-col space-y-16">
+      <PlaygroundPage request={request as string | undefined} />
+      <PlaygroundV2 />
+    </div>
+  );
 };
 
 export default Playground;

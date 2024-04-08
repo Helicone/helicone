@@ -12,6 +12,7 @@ import { fetchOpenAI } from "../../../services/lib/openAI";
 import { Message } from "../requests/chat";
 import ModelPill from "../requestsV2/modelPill";
 import ChatRow from "./chatRow";
+import RoleButton, { ROLE_COLORS } from "./new/roleButton";
 
 interface ChatPlaygroundProps {
   requestId: string;
@@ -64,7 +65,6 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         // Perform the OpenAI request
         const { data, error } = await fetchOpenAI(
           historyWithoutId as unknown as ChatCompletionCreateParams[],
-          requestId,
           temperature,
           model,
           maxTokens
@@ -118,16 +118,15 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
       } else {
         if (modelMessage.length > 0) {
           renderRows.push(
-            <div className="flex flex-col px-8 py-6 space-y-4 border-b border-gray-300 bg-gray-200 dark:border-gray-700 dark:bg-[#17191d]">
+            <div className="flex flex-col px-8 py-6 space-y-4 bg-white dark:bg-black border-b border-gray-300 dark:border-gray-700">
               <button
                 className={clsx(
-                  "hover:bg-gray-50 dark:hover:bg-gray-900 hover:cursor-not-allowed",
-                  "bg-white dark:bg-black border border-gray-300 dark:border-gray-700",
-                  "text-gray-900 dark:text-gray-100 w-20 h-6 text-xs rounded-lg font-semibold text-center justify-center items-center"
+                  `border border-${ROLE_COLORS["assistant"]}-500 text-${ROLE_COLORS["assistant"]}-900 font-semibold rounded-md text-xs bg-${ROLE_COLORS["assistant"]}-100 px-2 py-1 w-fit flex items-center`
                 )}
               >
                 assistant
               </button>
+              fdsfsd
               <div className="w-full h-full flex flex-row justify-between space-x-4 divide-x divide-gray-300 dark:divide-gray-700">
                 {modelMessage.map((message, idx) => (
                   <div
@@ -163,7 +162,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             callback={(userText: string, role: string) => {
               const newChat = [...currentChat];
               newChat[i].content = userText;
-              newChat[i].role = role;
+              newChat[i].role = role as "user" | "assistant";
               setCurrentChat(newChat);
             }}
             deleteRow={(rowId) => {
@@ -184,8 +183,9 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             callback={(userText: string, role: string) => {
               const newChat = [...currentChat];
               newChat[currentChat.length - 1].content = userText;
-              newChat[currentChat.length - 1].role = role;
-              setCurrentChat(newChat);
+              newChat[currentChat.length - 1].role = role as
+                | "user"
+                | "assistant";
             }}
             deleteRow={(rowId) => {
               deleteRowHandler(rowId);
@@ -194,16 +194,14 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         );
       } else {
         renderRows.push(
-          <div className="flex flex-col px-8 py-6 space-y-8 border-b border-gray-300 bg-gray-200 dark:border-gray-700 dark:bg-[#17191d]">
-            <button
-              className={clsx(
-                "hover:bg-gray-50 dark:hover:bg-gray-900 hover:cursor-not-allowed",
-                "bg-white dark:bg-black border border-gray-300 dark:border-gray-700",
-                "text-gray-900 dark:text-gray-100 w-20 h-6 text-xs rounded-lg font-semibold text-center justify-center items-center"
-              )}
-            >
-              assistant
-            </button>
+          <div className="flex flex-col px-8 py-4 space-y-8 bg-white dark:bg-black">
+            <RoleButton
+              role={"assistant"}
+              onRoleChange={function (
+                role: "function" | "assistant" | "user" | "system"
+              ): void {}}
+              disabled={true}
+            />
             <div
               className={clsx(
                 modelMessage.length > 3
@@ -248,15 +246,13 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
       {isLoading && (
         <li className="flex flex-row justify-between px-8 py-6 gap-8">
           <div className="flex flex-col gap-4 w-full">
-            <div className="flex flex-row space-x-8 w-full h-full relative">
-              <button
-                className={clsx(
-                  "bg-white border border-gray-300 dark:border-gray-700 dark:bg-black",
-                  "text-gray-900 dark:text-gray-100 w-20 h-6 text-xs rounded-lg font-semibold"
-                )}
-              >
-                assistant
-              </button>
+            <div className="flex flex-col space-y-4 w-full h-full relative">
+              <RoleButton
+                role={"assistant"}
+                onRoleChange={function (
+                  role: "function" | "system" | "user" | "assistant"
+                ): void {}}
+              />
               <span className="flex flex-row space-x-1 items-center">
                 <ArrowPathIcon className="h-4 w-4 text-gray-500 animate-spin" />
               </span>
