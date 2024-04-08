@@ -299,7 +299,7 @@ export class RequestResponseStore {
     });
 
     if (responseUpdate.error) {
-      console.error("Error updating response in valhalla:", responseUpdate);
+      // console.error("Error updating response in valhalla:", responseUpdate);
       // return err(responseUpdate.error);
     }
     if (res.error) {

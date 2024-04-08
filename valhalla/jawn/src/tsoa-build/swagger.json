@@ -7,31 +7,6 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"TokenResponseBody": {
-				"properties": {
-					"tokens": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"tokens"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"TokenBodyParams": {
-				"properties": {
-					"content": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"content"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"Json": {
 				"anyOf": [
 					{
@@ -1254,7 +1229,7 @@
 		}
 	},
 	"info": {
-		"title": "jawn",
+		"title": "helicone-api",
 		"version": "1.0.0",
 		"license": {
 			"name": "MIT"
@@ -1262,78 +1237,6 @@
 		"contact": {}
 	},
 	"paths": {
-		"/v1/tokens/anthropic": {
-			"post": {
-				"operationId": "AnthropicTokenCount",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/TokenResponseBody"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"TokenCounter"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/TokenBodyParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/tokens/gpt3": {
-			"post": {
-				"operationId": "Gpt3TokenCount",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/TokenResponseBody"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"TokenCounter"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/TokenBodyParams"
-							}
-						}
-					}
-				}
-			}
-		},
 		"/v1/request/query": {
 			"post": {
 				"operationId": "GetRequests",
