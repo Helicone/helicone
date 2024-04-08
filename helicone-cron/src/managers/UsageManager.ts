@@ -39,6 +39,8 @@ export class UsageManager {
     let requestQuantity = 0;
     let startDate = new Date();
     const endDate = new Date();
+    // 5 minute buffer for clickhouse queue
+    endDate.setMinutes(endDate.getMinutes() - 5);
 
     try {
       if (!org.latestEndTime) {
