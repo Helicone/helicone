@@ -258,33 +258,35 @@ async function mapLLMCalls(
         const assetUrls: Record<string, string> = {};
 
         if (heliconeRequest.asset_ids) {
-          // Map each assetId to a promise that resolves to an object { assetId, signedImageUrl }
-          const signedUrlPromises = heliconeRequest.asset_ids.map(
-            async (assetId: string) => {
-              const { data: signedImageUrl, error: signedImageUrlErr } =
-                await s3Client.getRequestResponseImageSignedUrl(
-                  orgId,
-                  heliconeRequest.request_id,
-                  assetId
-                );
+          try {
+            const signedUrlPromises = heliconeRequest.asset_ids.map(
+              async (assetId: string) => {
+                const { data: signedImageUrl, error: signedImageUrlErr } =
+                  await s3Client.getRequestResponseImageSignedUrl(
+                    orgId,
+                    heliconeRequest.request_id,
+                    assetId
+                  );
 
-              return {
-                assetId,
-                signedImageUrl:
-                  signedImageUrlErr || !signedImageUrl ? "" : signedImageUrl,
-              };
-            }
-          );
+                return {
+                  assetId,
+                  signedImageUrl:
+                    signedImageUrlErr || !signedImageUrl ? "" : signedImageUrl,
+                };
+              }
+            );
 
-          // Use Promise.all to wait for all promises to resolve
-          const signedUrls = await Promise.all(signedUrlPromises);
+            const signedUrls = await Promise.all(signedUrlPromises);
 
-          // Populate assetIds with the results
-          signedUrls.forEach(({ assetId, signedImageUrl }) => {
-            assetUrls[assetId] = signedImageUrl;
-          });
+            signedUrls.forEach(({ assetId, signedImageUrl }) => {
+              assetUrls[assetId] = signedImageUrl;
+            });
 
-          heliconeRequest.asset_urls = assetUrls;
+            heliconeRequest.asset_urls = assetUrls;
+          } catch (error) {
+            console.error(`Error fetching asset: ${error}`);
+            return heliconeRequest;
+          }
         }
       }
 
