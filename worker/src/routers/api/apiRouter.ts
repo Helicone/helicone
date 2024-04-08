@@ -245,6 +245,18 @@ function getAPIRouterV1(
   );
 
   router.post(
+    "/googleapis/v1/log",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      ctx: ExecutionContext
+    ) => {
+      return await logAsync(requestWrapper, env, ctx, "GOOGLE");
+    }
+  );
+
+  router.post(
     "/anthropic/v1/log",
     async (
       _,
