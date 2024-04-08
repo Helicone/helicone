@@ -19,9 +19,6 @@ export function placeAssetIdValues(
       }
       return result;
     }
-    console.log(2);
-    console.log(obj);
-    console.log(2);
     return obj; // Return the object if it doesn't match any of the above conditions
   }
   return traverseAndTransform(heliconeTemplate);

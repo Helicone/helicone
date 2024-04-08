@@ -148,13 +148,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
               if (contentResponse.ok) {
                 const text = await contentResponse.text();
 
-                const content = JSON.parse(text);
+                let content = JSON.parse(text);
 
                 if (request.asset_urls) {
-                  content.request = placeAssetIdValues(
-                    request.asset_urls,
-                    content
-                  );
+                  content = placeAssetIdValues(request.asset_urls, content);
                 }
 
                 request.request_body = content.request;
