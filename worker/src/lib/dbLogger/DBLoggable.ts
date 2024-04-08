@@ -8,7 +8,7 @@ import { Result, err, ok } from "../util/results";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 import { RequestWrapper } from "../RequestWrapper";
-import { INTERNAL_ERRORS, isImageModel } from "../util/constants";
+import { INTERNAL_ERRORS } from "../util/constants";
 import { AsyncLogModel } from "../models/AsyncLog";
 import { logInClickhouse } from "../db/ClickhouseStore";
 import { RequestResponseStore } from "../db/RequestResponseStore";
@@ -20,6 +20,10 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { getTokenCount } from "../clients/TokenCounterClient";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
+import { isImageModel } from "../util/imageModelMapper";
+import { ImageModelParser } from "./imageParsers/imageModelParser";
+import { GptVisionImageParser } from "./imageParsers/gptVisionImageParser";
+import { ClaudeImageParser } from "./imageParsers/claudeImageParser";
 
 export interface DBLoggableProps {
   response: {
@@ -885,21 +889,15 @@ export async function logRequest(
         }
       : unsupportedImage(requestBody);
 
+    // eslint-disable-next-line prefer-const
     let requestAssets: Record<string, string> = {};
-    try {
-      for (const message of body.messages) {
-        for (const item of message.content) {
-          if (item.type === "image_url") {
-            const assetId = crypto.randomUUID();
+    const model = getModelFromRequest();
 
-            requestAssets[assetId] = item.image_url.url;
-
-            item.image_url.url = `<helicone-asset-id key="${assetId}"/>`;
-          }
-        }
+    if (model && isImageModel(model)) {
+      const imageModelParser = getImageModelParser(model);
+      if (imageModelParser) {
+        requestAssets = imageModelParser.processMessages(body.messages);
       }
-    } catch (error: any) {
-      // Do nothing
     }
 
     const createdAt = request.startTime ?? new Date();
@@ -918,7 +916,7 @@ export async function logRequest(
       helicone_org_id: authParams.organizationId,
       provider: request.provider,
       helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
-      model: getModelFromRequest(),
+      model: model,
       model_override: request.modelOverride ?? null,
       created_at: createdAt.toISOString(),
       threat: request.threat ?? null,
@@ -992,6 +990,20 @@ export async function logRequest(
       return match[1];
     } else {
       return undefined;
+    }
+  }
+
+  function getImageModelParser(modelName: string): ImageModelParser | null {
+    switch (modelName) {
+      case "gpt-4-vision-preview":
+      case "gpt-4-1106-vision-preview":
+        return new GptVisionImageParser(modelName);
+      case "claude-3-opus-20240229":
+      case "claude-3-sonnet-20240229":
+      case "claude-3-haiku-20240307":
+        return new ClaudeImageParser(modelName);
+      default:
+        return null;
     }
   }
 }
