@@ -130,11 +130,7 @@ export async function getRequests(
   LIMIT ${limit}
   OFFSET ${offset}
 `;
-
-  console.log(222);
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
-  console.log(JSON.stringify(requests.data));
-  console.log(1);
   const s3Client = new S3Client(
     process.env.S3_ACCESS_KEY ?? "",
     process.env.S3_SECRET_KEY ?? "",
