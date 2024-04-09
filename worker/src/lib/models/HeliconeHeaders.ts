@@ -21,6 +21,7 @@ export interface IHeliconeHeaders {
   featureFlags: {
     streamForceFormat: boolean;
     increaseTimeout: boolean;
+    enableImageStorage: boolean;
   };
   retryHeaders: Nullable<{
     enabled: boolean;
@@ -56,7 +57,11 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     orgId?: string;
   }>;
   rateLimitPolicy: Nullable<string>;
-  featureFlags: { streamForceFormat: boolean; increaseTimeout: boolean };
+  featureFlags: {
+    streamForceFormat: boolean;
+    increaseTimeout: boolean;
+    enableImageStorage: boolean;
+  };
   retryHeaders: Nullable<{
     enabled: boolean;
     retries: number;
@@ -239,9 +244,12 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   private getHeliconeFeatureFlags(): IHeliconeHeaders["featureFlags"] {
     const streamForceFormat = this.headers.get("helicone-stream-force-format");
     const increaseTimeout = this.headers.get("helicone-increase-timeout");
+    const enableImageStorage =
+      this.headers.get("helicone-image-storage-enabled") ?? "true";
     return {
       streamForceFormat: streamForceFormat === "true",
       increaseTimeout: increaseTimeout === "true",
+      enableImageStorage: enableImageStorage === "true",
     };
   }
 

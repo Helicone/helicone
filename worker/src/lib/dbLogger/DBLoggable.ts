@@ -50,6 +50,7 @@ export interface DBLoggableProps {
     heliconeTemplate?: Record<string, unknown>;
     threat: boolean | null;
     flaggedForModeration: boolean | null;
+    enableImageStorage: boolean;
     request_ip: string | null;
     country_code: string | null;
   };
@@ -90,6 +91,9 @@ export function dbLoggableRequestFromProxyRequest(
     heliconeTemplate: proxyRequest.heliconePromptTemplate ?? undefined,
     threat: proxyRequest.threat ?? null,
     flaggedForModeration: proxyRequest.flaggedForModeration ?? null,
+    enableImageStorage:
+      proxyRequest.requestWrapper.heliconeHeaders.featureFlags
+        .enableImageStorage ?? true,
     request_ip: null,
     country_code: (proxyRequest.requestWrapper.cf?.country as string) ?? null,
   };
@@ -153,6 +157,8 @@ export async function dbLoggableRequestFromAsyncLogModel(
       modelOverride: requestWrapper.heliconeHeaders.modelOverride ?? undefined,
       threat: null,
       flaggedForModeration: null,
+      enableImageStorage:
+        requestWrapper.heliconeHeaders.featureFlags.enableImageStorage ?? true,
       request_ip: null,
       country_code: (requestWrapper.cf?.country as string) ?? null,
     },
@@ -653,7 +659,7 @@ export class DBLoggable {
     if (!responseResult.data || responseResult.error) {
       // Log the error in S3
       if (S3_ENABLED === "true") {
-        if (model && isImageModel(model)) {
+        if (model && this.request.enableImageStorage && isImageModel(model)) {
           s3Result = await db.requestResponseManager.storeRequestResponseImage({
             organizationId: authParams.organizationId,
             requestId: this.request.requestId,
@@ -690,7 +696,7 @@ export class DBLoggable {
     }
 
     if (S3_ENABLED === "true") {
-      if (model && isImageModel(model)) {
+      if (model && this.request.enableImageStorage && isImageModel(model)) {
         s3Result = await db.requestResponseManager.storeRequestResponseImage({
           organizationId: authParams.organizationId,
           requestId: this.request.requestId,
