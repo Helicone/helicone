@@ -36,6 +36,15 @@ export class S3Client {
     return await this.getSignedUrl(key);
   }
 
+  async getRequestResponseImageSignedUrl(
+    orgId: string,
+    requestId: string,
+    assetId: string
+  ): Promise<Result<string, string>> {
+    const key = this.getRequestResponseImageKey(requestId, orgId, assetId);
+    return await this.getSignedUrl(key);
+  }
+
   async getSignedUrl(key: string): Promise<Result<string, string>> {
     try {
       this.awsClient;
@@ -56,5 +65,13 @@ export class S3Client {
 
   getRequestResponseKey = (requestId: string, orgId: string) => {
     return `organizations/${orgId}/requests/${requestId}/request_response_body`;
+  };
+
+  getRequestResponseImageKey = (
+    requestId: string,
+    orgId: string,
+    assetId: string
+  ) => {
+    return `organizations/${orgId}/requests/${requestId}/assets/${assetId}`;
   };
 }
