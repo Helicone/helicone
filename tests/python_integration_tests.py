@@ -487,10 +487,10 @@ def test_gpt_vision_request():
     request_data1 = fetch_from_db(query, (requestId1,))
     assert request_data1, "Request data not found in the database for the given property request id"
 
-    # assets_query = "SELECT * FROM asset WHERE request_id = %s"
-    # assets_data1 = fetch_from_db(assets_query, (request_data1[0][3],))
+    assets_query = "SELECT * FROM asset WHERE request_id = %s"
+    assets_data1 = fetch_from_db(assets_query, (request_data1[0][3],))
 
-    # assert assets_data1, "asset not found in the database for this request"
+    assert assets_data1, "asset not found in the database for this request"
 
     print("passed")
 
@@ -556,9 +556,9 @@ def test_claude_vision_request():
     request_data1 = fetch_from_db(query, (requestId1,))
     assert request_data1, "Request data not found in the database for the given property request id"
 
-    # assets_query = "SELECT * FROM asset WHERE request_id = %s"
-    # assets_data1 = fetch_from_db(assets_query, (request_data1[0][3],))
+    assets_query = "SELECT * FROM asset WHERE request_id = %s"
+    assets_data1 = fetch_from_db(assets_query, (request_data1[0][3],))
 
-    # assert assets_data1, "asset not found in the database for this request"
+    assert assets_data1, "asset not found in the database for this request"
 
     print("passed")
