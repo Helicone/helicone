@@ -190,11 +190,13 @@ jobs:
           HELICONE_PROXY_URL: "http://127.0.0.1:8787/v1"
           HELICONE_ASYNC_URL: "http://127.0.0.1:8788"
           HELICONE_GATEWAY_URL: "http://127.0.0.1:8789"
+          ANTHROPIC_PROXY_URL: "http://127.0.0.1:8790/v1"
           SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
           SUPABASE_URL: "http://localhost:54321"
           HELICONE_API_KEY: "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
           OPENAI_API_KEY: ${{ secrets.CI_OPENAI_API_KEY }}
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
+          ANTHROPIC_API_KEY: ${{ secrets.CI_ANTHROPIC_API_KEY }}
         run: |
           pytest python_integration_tests.py -s > ~/test-logs/integration.log
       - name: Run helicone-python tests
@@ -203,11 +205,13 @@ jobs:
           HELICONE_PROXY_URL: "http://127.0.0.1:8787/v1"
           HELICONE_ASYNC_URL: "http://127.0.0.1:8788"
           HELICONE_GATEWAY_URL: "http://127.0.0.1:8789"
+          ANTHROPIC_PROXY_URL: "http://127.0.0.1:8790/v1"
           SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
           SUPABASE_URL: "http://localhost:54321"
           HELICONE_API_KEY: "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
           OPENAI_API_KEY: ${{ secrets.CI_OPENAI_API_KEY }}
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
+          ANTHROPIC_API_KEY: ${{ secrets.CI_ANTHROPIC_API_KEY }}
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           poetry install

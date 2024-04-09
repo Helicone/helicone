@@ -5,10 +5,10 @@ export class GptVisionImageParser extends ImageModelParser {
     super(modelName);
   }
 
-  processMessages(messages: any[]): Record<string, string> {
+  processMessages(body: any): Record<string, string> {
     const requestAssets: Record<string, string> = {};
     try {
-      messages.forEach((message) => {
+      body.messages.forEach((message: any) => {
         message.content.forEach((item: any) => {
           if (item.type === "image_url") {
             const assetId = this.generateAssetId();

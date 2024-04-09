@@ -5,10 +5,10 @@ export class ClaudeImageParser extends ImageModelParser {
   constructor(modelName: string) {
     super(modelName);
   }
-  processMessages(messages: any[]): Record<string, string> {
+  processMessages(body: any): Record<string, string> {
     const requestAssets: Record<string, string> = {};
     try {
-      messages.forEach((message) => {
+      body.messages.forEach((message: any) => {
         message.content.forEach((item: any) => {
           if (item.type === "image") {
             const assetId = this.generateAssetId();

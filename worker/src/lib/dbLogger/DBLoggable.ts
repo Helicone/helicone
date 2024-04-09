@@ -21,7 +21,10 @@ import { getTokenCount } from "../clients/TokenCounterClient";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
 import { isImageModel } from "../util/imageModelMapper";
-import { ImageModelParser } from "./imageParsers/imageModelParser";
+import {
+  getImageModelParser,
+  ImageModelParser,
+} from "./imageParsers/imageModelParser";
 import { GptVisionImageParser } from "./imageParsers/gptVisionImageParser";
 import { ClaudeImageParser } from "./imageParsers/claudeImageParser";
 
@@ -896,7 +899,7 @@ export async function logRequest(
     if (model && isImageModel(model)) {
       const imageModelParser = getImageModelParser(model);
       if (imageModelParser) {
-        requestAssets = imageModelParser.processMessages(body.messages);
+        requestAssets = imageModelParser.processMessages(body);
       }
     }
 
@@ -990,20 +993,6 @@ export async function logRequest(
       return match[1];
     } else {
       return undefined;
-    }
-  }
-
-  function getImageModelParser(modelName: string): ImageModelParser | null {
-    switch (modelName) {
-      case "gpt-4-vision-preview":
-      case "gpt-4-1106-vision-preview":
-        return new GptVisionImageParser(modelName);
-      case "claude-3-opus-20240229":
-      case "claude-3-sonnet-20240229":
-      case "claude-3-haiku-20240307":
-        return new ClaudeImageParser(modelName);
-      default:
-        return null;
     }
   }
 }
