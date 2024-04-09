@@ -126,7 +126,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
               >
                 assistant
               </button>
-              fdsfsd
+
               <div className="w-full h-full flex flex-row justify-between space-x-4 divide-x divide-gray-300 dark:divide-gray-700">
                 {modelMessage.map((message, idx) => (
                   <div

@@ -37,43 +37,14 @@ const RoleButton = (props: RoleButtonProps) => {
     <Menu as="div" className="relative inline-block text-left w-full">
       <div className="w-full flex justify-between">
         <Menu.Button
-          disabled={role === "system" || disabled}
+          disabled={disabled}
           className={clsx(
-            `border border-${ROLE_COLORS[role]}-500 text-${ROLE_COLORS[role]}-900 font-semibold rounded-md text-xs bg-${ROLE_COLORS[role]}-100 px-2 py-1 w-fit flex items-center`
+            `border border-${ROLE_COLORS[role]}-500 text-${ROLE_COLORS[role]}-900 font-semibold rounded-md text-sm bg-${ROLE_COLORS[role]}-100 px-2 py-1 w-fit flex items-center`
           )}
         >
           {role}
-          {role !== "system" && !disabled && (
-            <ChevronDownIcon className="h-4 w-4 ml-1" />
-          )}
+          {!disabled && <ChevronDownIcon className="h-4 w-4 ml-1" />}
         </Menu.Button>
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => {
-              // open a big modal with the message content
-            }}
-            className="text-gray-500 font-semibold"
-          >
-            <ArrowsPointingOutIcon className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => {
-              // navigator.clipboard.writeText(JSON.stringify(message.content));
-              setNotification("Copied to clipboard", "success");
-            }}
-            className="text-gray-500 font-semibold"
-          >
-            <ClipboardIcon className="h-4 w-4" />
-          </button>
-          {onDelete && (
-            <button
-              onClick={() => onDelete()}
-              className="text-red-500 font-semibold"
-            >
-              <TrashIcon className="h-4 w-4" />
-            </button>
-          )}
-        </div>
       </div>
       <Transition
         as={Fragment}
@@ -113,6 +84,21 @@ const RoleButton = (props: RoleButtonProps) => {
                 >
                   <div className="flex w-full items-center">Assistant</div>
                   {role === "assistant" && <CheckIcon className="h-5 w-5" />}
+                </button>
+              )}
+            </Menu.Item>
+            <Menu.Item>
+              {({ active }) => (
+                <button
+                  className={`${
+                    active ? "bg-sky-100 dark:bg-sky-900" : ""
+                  } text-gray-900 dark:text-gray-100 group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                  onClick={() => {
+                    onRoleChange("system");
+                  }}
+                >
+                  <div className="flex w-full items-center">System</div>
+                  {role === "system" && <CheckIcon className="h-5 w-5" />}
                 </button>
               )}
             </Menu.Item>

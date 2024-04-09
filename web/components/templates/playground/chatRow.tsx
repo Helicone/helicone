@@ -1,6 +1,9 @@
 import {
+  ArrowsPointingOutIcon,
   CheckIcon,
+  ClipboardIcon,
   PencilIcon,
+  PencilSquareIcon,
   TrashIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -12,6 +15,8 @@ import { Message } from "../requests/chat";
 import ResizeTextArea from "./resizeTextArea";
 import RoleButton, { ROLE_COLORS } from "./new/roleButton";
 import { MessageInputItem } from "./new/messageInput";
+import useNotification from "../../shared/notification/useNotification";
+import { Tooltip } from "@mui/material";
 
 interface ChatRowProps {
   index: number;
@@ -32,6 +37,8 @@ const ChatRow = (props: ChatRowProps) => {
   >(currentMessage.role);
 
   const [isEditing, setIsEditing] = useState(false);
+
+  const { setNotification } = useNotification();
 
   const isSystem = role === "system";
 
@@ -104,12 +111,12 @@ const ChatRow = (props: ChatRowProps) => {
 
         "bg-white dark:bg-black",
 
-        "flex flex-row justify-between px-8 py-6 gap-8 border-b border-gray-300 dark:border-gray-700"
+        "flex flex-row justify-between gap-8 border-b border-gray-300 dark:border-gray-700"
       )}
     >
       <div className="flex flex-col gap-4 w-full">
         <div className="flex flex-col w-full h-full relative">
-          <div className="flex w-full justify-between">
+          <div className="flex w-full justify-between sticky top-0 bg-white px-8 py-4 rounded-t-lg">
             <RoleButton
               role={role}
               onRoleChange={(newRole) => {
@@ -123,79 +130,77 @@ const ChatRow = (props: ChatRowProps) => {
                 callback(contentAsString || "", newRole);
               }}
             />
-            <div className="relative h-full justify-end">
-              {!isEditing ? (
-                <div className="sticky top-60 right-0 flex flex-row space-x-4">
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
-                  >
-                    <PencilIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
-                  </button>
-                  {!isSystem && (
-                    <button
-                      onClick={() => {
-                        deleteRow(currentMessage.id);
-                      }}
-                      className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
-                    >
-                      <TrashIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div className="sticky top-60 right-0 flex flex-row space-x-4">
-                  <button
-                    onClick={() => {
-                      setCurrentMessage(originalMessage);
+            <div className="flex items-center space-x-2">
+              <Tooltip title="Edit" placement="top">
+                <button
+                  onClick={() => {
+                    if (isEditing) {
+                      // callback((contentAsString as string) || "", role);
                       setIsEditing(false);
-                    }}
-                    className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
-                  >
-                    <XMarkIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      callback((contentAsString as string) || "", role);
-                      setIsEditing(false);
-                    }}
-                    className="z-50 bg-white rounded-lg p-1.5 border border-gray-300 dark:bg-black dark:border-gray-700"
-                  >
-                    <CheckIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
-                  </button>
-                </div>
-              )}
+                    } else {
+                      setIsEditing(true);
+                    }
+                  }}
+                  className="text-gray-500 font-semibold"
+                >
+                  <PencilSquareIcon className="h-5 w-5" />
+                </button>
+              </Tooltip>
+              <Tooltip title="Expand" placement="top">
+                <button
+                  onClick={() => {
+                    // TODO: shrink this chat row into one line
+                  }}
+                  className="text-gray-500 font-semibold"
+                >
+                  <ArrowsPointingOutIcon className="h-5 w-5" />
+                </button>
+              </Tooltip>
+              <Tooltip title="Copy" placement="top">
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(contentAsString || "");
+                    setNotification("Copied to clipboard", "success");
+                  }}
+                  className="text-gray-500 font-semibold"
+                >
+                  <ClipboardIcon className="h-5 w-5" />
+                </button>
+              </Tooltip>
+              <Tooltip title="Delete" placement="top">
+                <button
+                  onClick={() => {
+                    // TODO: delete this chat row
+                    deleteRow(currentMessage.id);
+                  }}
+                  className="text-red-500 font-semibold"
+                >
+                  <TrashIcon className="h-5 w-5" />
+                </button>
+              </Tooltip>
             </div>
           </div>
           <div>
-            <span className="w-full">
-              <ResizeTextArea
-                value={contentAsString || ""}
-                onChange={(e) => {
-                  const newMessages = { ...currentMessage };
-                  newMessages.content = e.target.value;
-                  setCurrentMessage(newMessages);
-                }}
-              />
-            </span>
-            {/* <div className="w-full pr-8">
-            {isEditing ? (
-              <span className="w-full">
-                <ResizeTextArea
-                  value={contentAsString || ""}
-                  onChange={(e) => {
-                    const newMessages = { ...currentMessage };
-                    newMessages.content = e.target.value;
-                    setCurrentMessage(newMessages);
-                  }}
-                />
-              </span>
-            ) : (
-              // TODO: render this in markdown
-              <p className="text-sm">
-                {getContent(currentMessage.content as string)}
-              </p>
-            )} */}
+            <div className="w-full px-8 py-4">
+              {isEditing ? (
+                <span className="w-full">
+                  <ResizeTextArea
+                    value={contentAsString || ""}
+                    onChange={(e) => {
+                      const newMessages = { ...currentMessage };
+                      newMessages.content = e.target.value;
+                      setCurrentMessage(newMessages);
+                      callback((contentAsString as string) || "", role);
+                    }}
+                  />
+                </span>
+              ) : (
+                // TODO: render this in markdown
+                <p className="text-sm">
+                  {getContent(currentMessage.content as string)}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -21,9 +21,8 @@ const Playground = (props: PlaygroundProps) => {
   // return <PlaygroundV2 />;
 
   return (
-    <div className="flex flex-col space-y-16">
+    <div className="flex flex-col">
       <PlaygroundPage request={request as string | undefined} />
-      <PlaygroundV2 />
     </div>
   );
 };
