@@ -13,6 +13,7 @@ import CompletionBuilder from "./completionBuilder";
 import { LlmType } from "../../../../lib/api/models/requestResponseModel";
 import ChatBuilder from "./chatBuilder";
 import { DalleBuilder } from "./dalleBuilder";
+import GeminiBuilder from "./geminiBuilder";
 
 export type BuilderType =
   | "ChatBuilder"
@@ -24,6 +25,7 @@ export type BuilderType =
   | "ClaudeBuilder"
   | "CustomBuilder"
   | "DalleBuilder"
+  | "GeminiBuilder"
   | "UnknownBuilder";
 
 export const getBuilderType = (
@@ -58,6 +60,11 @@ export const getBuilderType = (
 
   if (model === "dall-e-3" || model === "dall-e-2") {
     return "DalleBuilder";
+  }
+
+  // check if the model contains the word gemini
+  if (model.includes("gemini")) {
+    return "GeminiBuilder";
   }
 
   // mistralai/Mistral-7B-Instruct-v[number].[number]
@@ -118,6 +125,7 @@ const builders: {
   ClaudeBuilder: ClaudeBuilder,
   CustomBuilder: CustomBuilder,
   DalleBuilder: DalleBuilder,
+  GeminiBuilder: GeminiBuilder,
   UnknownBuilder: UnknownBuilder,
 };
 
