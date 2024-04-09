@@ -8,8 +8,8 @@ CREATE TABLE organization_usage (
     error_message TEXT,
     stripe_record JSONB,
     recorded BOOLEAN DEFAULT FALSE,
-    "created_at" timestamp with time zone not null default now(),
-    "updated_at" timestamp with time zone not null default now()
+    created_at timestamp with time zone not null default now(),
+    updated_at timestamp with time zone not null default now()
 );
 CREATE UNIQUE INDEX idx_unique_org_start_type_recorded ON organization_usage (organization_id, start_date, type)
 WHERE recorded = true;
