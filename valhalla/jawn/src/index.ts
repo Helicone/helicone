@@ -11,7 +11,6 @@ import { RegisterRoutes as registerTSOARoutes } from "./tsoa-build/routes";
 import * as swaggerDocument from "./tsoa-build/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
-import { redisClient } from "./lib/clients/redisClient";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
 import { filterSwaggerDocument } from "./utils/filterSwaggerDocument";
 import { tokenRouter } from "./lib/routers/tokenRouter";
@@ -30,6 +29,7 @@ const allowedOriginsEnv = {
     /^https?:\/\/(www\.)?helicone-git-valhalla-use-jawn-to-read-helicone\.vercel\.app$/,
   ],
   development: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
+  preview: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
 };
 
 const allowedOrigins = allowedOriginsEnv[ENVIRONMENT];

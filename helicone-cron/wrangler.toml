@@ -1,9 +1,10 @@
 name = "hcone-heartbeat"
 main = "src/index.ts"
 compatibility_date = "2023-02-04"
+node_compat = true
 
 [triggers]
-crons = ["* * * * *"]
+crons = ["* * * * *", "0 * * * *"]
 
 [env.production]
 name = "helicone-heartbeat-prod"
