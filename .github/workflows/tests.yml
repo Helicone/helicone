@@ -164,6 +164,12 @@ jobs:
           wrangler dev --port 8787 --var WORKER_TYPE:OPENAI_PROXY PROMPTARMOR_API_KEY:${{ secrets.PROMPTARMOR_API_KEY }} > ~/test-logs/proxy.log &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Start Anthropic proxy worker
+        run: |
+          cd worker
+          wrangler dev --port 8790 --var WORKER_TYPE:ANTHROPIC_PROXY PROMPTARMOR_API_KEY:${{ secrets.PROMPTARMOR_API_KEY }} > ~/test-logs/proxy.log &
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start async worker
         run: |
           cd worker
