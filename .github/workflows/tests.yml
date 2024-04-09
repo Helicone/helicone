@@ -179,7 +179,7 @@ jobs:
       - name: Start Minio S3
         run: |
           pip install Minio
-          python minio_hcone.py &
+          python minio_hcone.py --start &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start Supabase DB & API
