@@ -21,7 +21,7 @@ import { getTokenCount } from "../clients/TokenCounterClient";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
 import { isImageModel } from "../util/imageModelMapper";
-import { getImageModelParser } from "./imageParsers/imageModelParser";
+import { getImageModelParser } from "./imageParsers/parserMapper";
 
 export interface DBLoggableProps {
   response: {

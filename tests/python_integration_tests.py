@@ -12,7 +12,6 @@ import uuid
 import time
 from helicone.openai_async import openai, Meta
 from helicone.globals import helicone_global
-import json
 
 load_dotenv()
 

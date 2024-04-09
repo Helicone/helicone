@@ -9,7 +9,6 @@ on:
       - main
 
 jobs:
-
   jawnClient:
     name: Jawn Client
     runs-on: ubuntu-latest
@@ -27,7 +26,6 @@ jobs:
               git diff
               exit 1
           fi
-
 
   costs:
     name: Cost Calculation Package
@@ -61,7 +59,6 @@ jobs:
               echo "Please run the copy script to update the contents of the directories."
               exit 1
           fi
-
 
   db-type-checks:
     name: DB type checks
@@ -183,7 +180,7 @@ jobs:
         run: supabase start db,api
       - name: Install python dependencies
         run: |
-          pip install requests pytest psycopg2 python-dotenv helicone
+          pip install requests pytest psycopg2 python-dotenv helicone base64 httpx
       - name: Run integration tests
         working-directory: tests
         env:
