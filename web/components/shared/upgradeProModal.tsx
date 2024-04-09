@@ -51,35 +51,6 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
     return percentage;
   };
 
-  async function handleCheckout() {
-    const stripe = await getStripe();
-
-    if (!stripe) {
-      console.error("Stripe failed to initialize.");
-      return;
-    }
-
-    const res = await fetch("/api/stripe/create_pro_subscription", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        orgId: orgContext?.currentOrg?.id,
-        userEmail: user?.email,
-        tier: "pro",
-      }),
-    });
-
-    const { sessionId } = await res.json();
-
-    const result = await stripe.redirectToCheckout({ sessionId });
-
-    if (result.error) {
-      console.error(result.error.message);
-    }
-  }
-
   async function handleGrowthCheckout() {
     const stripe = await getStripe();
 
