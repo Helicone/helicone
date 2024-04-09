@@ -206,10 +206,6 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.CI_OPENAI_API_KEY }}
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
           ANTHROPIC_API_KEY: ${{ secrets.CI_ANTHROPIC_API_KEY }}
-          S3_ENDPOINT: "http://localhost:9000"
-          S3_ACCESS_KEY: "minioadmin"
-          S3_SECRET_KEY: "minioadmin"
-          S3_BUCKET_NAME: "request-response-storage"
         run: |
           pytest python_integration_tests.py -s > ~/test-logs/integration.log
       - name: Run helicone-python tests
