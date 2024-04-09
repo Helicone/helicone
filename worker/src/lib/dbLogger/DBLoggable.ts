@@ -885,7 +885,7 @@ export async function logRequest(
         }
       : unsupportedImage(requestBody);
 
-    let requestAssets: Record<string, string> = {};
+    const requestAssets: Record<string, string> = {};
     try {
       for (const message of body.messages) {
         for (const item of message.content) {
@@ -898,7 +898,7 @@ export async function logRequest(
           }
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       // Do nothing
     }
 
