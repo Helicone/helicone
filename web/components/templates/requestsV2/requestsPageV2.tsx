@@ -171,7 +171,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       };
       fetchRequest();
     }
-  }, [initialRequestId, jawn]);
+  }, [initialRequestId]);
 
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
