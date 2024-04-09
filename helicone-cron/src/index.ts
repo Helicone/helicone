@@ -15,11 +15,6 @@ export interface Env {
   OPENAI_API_KEY: string;
   ANTHROPIC_API_KEY: string;
   HELICONE_API_KEY: string;
-  HB_OAI_HCONEAI_COM: string;
-  HB_ANTHROPIC_HCONEAI_COM: string;
-  HB_API_HCONEAI_COM: string;
-  HB_ASYNC_LOGGER: string;
-  HB_GRAPHQL: string;
   HEARTBEAT_URLS_JSON: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
   SUPABASE_URL: string;
