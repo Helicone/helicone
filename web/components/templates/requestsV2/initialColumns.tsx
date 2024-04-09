@@ -62,7 +62,12 @@ export const getInitialColumns: (
     id: "requestText",
     accessorKey: "requestText",
     header: "Request",
-    cell: (info) => info.getValue(),
+    cell: (info) => {
+      const value = info.getValue();
+      return typeof value === "object"
+        ? (value as { text: string })?.text
+        : value;
+    },
     meta: {
       sortKey: "request_prompt",
     },
