@@ -143,6 +143,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           const request = result.data[0];
           if (request?.signed_body_url) {
             try {
+              console.log("made call");
               const contentResponse = await fetch(request.signed_body_url);
               if (contentResponse.ok) {
                 const text = await contentResponse.text();
@@ -154,6 +155,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 request.request_body = content.request;
                 request.response_body = content.response;
               }
+              console.log("call finished");
             } catch (error) {
               console.log(`Error fetching content: ${error}`);
             }
@@ -168,7 +170,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       };
       fetchRequest();
     }
-  }, [initialRequestId, jawn]);
+  }, [initialRequestId]);
 
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
