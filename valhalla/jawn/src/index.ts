@@ -7,13 +7,12 @@ import swaggerUi from "swagger-ui-express";
 
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authMiddleware } from "./middleware/auth";
-import { RegisterRoutes as registerTSOARoutes } from "./tsoa-build/routes";
-import * as swaggerDocument from "./tsoa-build/swagger.json";
+import { RegisterRoutes as registerPrivateTSOARoutes } from "./tsoa-build/private/routes";
+import { RegisterRoutes as registerPublicTSOARoutes } from "./tsoa-build/public/routes";
+import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
-import { redisClient } from "./lib/clients/redisClient";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
-import { filterSwaggerDocument } from "./utils/filterSwaggerDocument";
 import { tokenRouter } from "./lib/routers/tokenRouter";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
@@ -30,6 +29,7 @@ const allowedOriginsEnv = {
     /^https?:\/\/(www\.)?helicone-git-valhalla-use-jawn-to-read-helicone\.vercel\.app$/,
   ],
   development: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
+  preview: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
 };
 
 const allowedOrigins = allowedOriginsEnv[ENVIRONMENT];
@@ -78,25 +78,16 @@ app.options("*", (req, res) => {
 const v1APIRouter = express.Router();
 const unAuthenticatedRouter = express.Router();
 
-// Specify tags to hide
-const tagsToHide: string[] = ["beta"]; // Adjust based on your Swagger tags
-
 unAuthenticatedRouter.use(
   "/docs",
   swaggerUi.serve,
-  swaggerUi.setup(filterSwaggerDocument(swaggerDocument as any, tagsToHide))
-);
-
-unAuthenticatedRouter.use(
-  "/docs-beta",
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerDocument)
+  swaggerUi.setup(publicSwaggerDoc as any)
 );
 
 unAuthenticatedRouter.use(tokenRouter);
 
 unAuthenticatedRouter.use("/download/swagger.json", (req, res) => {
-  res.json(filterSwaggerDocument(swaggerDocument as any, tagsToHide));
+  res.json(publicSwaggerDoc as any);
 });
 
 v1APIRouter.use(authMiddleware);
@@ -108,7 +99,8 @@ if (IS_RATE_LIMIT_ENABLED) {
 
 v1APIRouter.use(express.json({ limit: "50mb" }));
 v1APIRouter.use(express.urlencoded({ limit: "50mb" }));
-registerTSOARoutes(v1APIRouter);
+registerPublicTSOARoutes(v1APIRouter);
+registerPrivateTSOARoutes(v1APIRouter);
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;

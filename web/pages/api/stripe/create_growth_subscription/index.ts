@@ -1,5 +1,3 @@
-// /api/start-subscription.js
-
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { supabaseServer } from "../../../../lib/supabaseServer";
@@ -52,7 +50,6 @@ export default async function handler(
 
       customerId = customer.id;
 
-      // Save the Stripe customer ID in Supabase
       await supabaseServer
         .from("organization")
         .update({ stripe_customer_id: customerId })
@@ -62,22 +59,26 @@ export default async function handler(
     const host = req.headers.host;
     const origin = `${protocol}://${host}`;
 
-    // Create a Checkout Session instead of creating a subscription directly
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ["card"],
       line_items: [
         {
-          price: process.env.STRIPE_PRO_PRICE_ID,
-          quantity: 1,
+          price: process.env.STRIPE_GROWTH_PRICE_ID,
+          // No quantity for usage based pricing
         },
       ],
       mode: "subscription",
-      success_url: `${origin}/dashboard`, // Replace with your success URL
-      cancel_url: `${origin}/dashboard`, // Replace with your cancel/failure URL
+      success_url: `${origin}/dashboard`,
+      cancel_url: `${origin}/dashboard`,
       metadata: {
-        orgId: orgId, // Assuming `orgId` is the variable containing the organization's ID
-        tier: "pro",
+        orgId: orgId,
+      },
+      subscription_data: {
+        metadata: {
+          orgId: orgId,
+          tier: "growth",
+        },
       },
       allow_promotion_codes: true,
     });
