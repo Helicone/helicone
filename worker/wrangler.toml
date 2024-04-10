@@ -32,6 +32,10 @@ WORKER_TYPE = "OPENAI_PROXY"
 VAULT_ENABLED = "true"
 REQUEST_CACHE_KEY = "9984c295ec7d0f506b8af65e9d60773480eb0c9347a6bd8a2b08fb57b5117701"
 VALHALLA_URL = "http://localhost:8585"
+S3_ENDPOINT="http://localhost:9000"
+S3_ACCESS_KEY="minioadmin"
+S3_SECRET_KEY="minioadmin"
+S3_BUCKET_NAME="request-response-storage"
 
 [triggers]
 crons = ["* * * * *", "0 * * * *"]
