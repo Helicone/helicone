@@ -9,7 +9,6 @@ on:
       - main
 
 jobs:
-
   jawnClient:
     name: Jawn Client
     runs-on: ubuntu-latest
@@ -60,7 +59,6 @@ jobs:
               echo "Please run the copy script to update the contents of the directories."
               exit 1
           fi
-
 
   db-type-checks:
     name: DB type checks
@@ -166,6 +164,12 @@ jobs:
           wrangler dev --port 8787 --var WORKER_TYPE:OPENAI_PROXY PROMPTARMOR_API_KEY:${{ secrets.PROMPTARMOR_API_KEY }} > ~/test-logs/proxy.log &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Start Anthropic proxy worker
+        run: |
+          cd worker
+          wrangler dev --port 8790 --var WORKER_TYPE:ANTHROPIC_PROXY PROMPTARMOR_API_KEY:${{ secrets.PROMPTARMOR_API_KEY }} > ~/test-logs/proxy.log &
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start async worker
         run: |
           cd worker
@@ -178,22 +182,30 @@ jobs:
           wrangler dev --port 8789 --var WORKER_TYPE:GATEWAY_API PROMPTARMOR_API_KEY:${{ secrets.PROMPTARMOR_API_KEY }} > ~/test-logs/gateway.log &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Start Minio S3
+        run: |
+          pip install Minio
+          python minio_hcone.py --start &
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start Supabase DB & API
         run: supabase start db,api
       - name: Install python dependencies
         run: |
-          pip install requests pytest psycopg2 python-dotenv helicone
+          pip install requests pytest psycopg2 python-dotenv helicone httpx
       - name: Run integration tests
         working-directory: tests
         env:
           HELICONE_PROXY_URL: "http://127.0.0.1:8787/v1"
           HELICONE_ASYNC_URL: "http://127.0.0.1:8788"
           HELICONE_GATEWAY_URL: "http://127.0.0.1:8789"
+          ANTHROPIC_PROXY_URL: "http://127.0.0.1:8790/v1"
           SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
           SUPABASE_URL: "http://localhost:54321"
           HELICONE_API_KEY: "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
           OPENAI_API_KEY: ${{ secrets.CI_OPENAI_API_KEY }}
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
+          ANTHROPIC_API_KEY: ${{ secrets.CI_ANTHROPIC_API_KEY }}
         run: |
           pytest python_integration_tests.py -s > ~/test-logs/integration.log
       - name: Run helicone-python tests
@@ -202,11 +214,13 @@ jobs:
           HELICONE_PROXY_URL: "http://127.0.0.1:8787/v1"
           HELICONE_ASYNC_URL: "http://127.0.0.1:8788"
           HELICONE_GATEWAY_URL: "http://127.0.0.1:8789"
+          ANTHROPIC_PROXY_URL: "http://127.0.0.1:8790/v1"
           SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
           SUPABASE_URL: "http://localhost:54321"
           HELICONE_API_KEY: "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
           OPENAI_API_KEY: ${{ secrets.CI_OPENAI_API_KEY }}
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
+          ANTHROPIC_API_KEY: ${{ secrets.CI_ANTHROPIC_API_KEY }}
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           poetry install
