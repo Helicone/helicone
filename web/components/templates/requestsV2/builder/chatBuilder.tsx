@@ -17,7 +17,14 @@ class ChatBuilder extends AbstractRequestBuilder {
       // Check if there is a last message and it has content
       const lastMessageContent = requestBody.messages.at(-1)?.content;
       if (lastMessageContent) {
-        return lastMessageContent;
+        // check if lastMessageContent is an object
+        if (typeof lastMessageContent === "string") {
+          return lastMessageContent;
+        } else if (typeof lastMessageContent === "object") {
+          return JSON.stringify(lastMessageContent, null, 2);
+        } else {
+          return "";
+        }
       }
 
       // If there are messages but no content, stringify the array
@@ -47,12 +54,19 @@ class ChatBuilder extends AbstractRequestBuilder {
         // Successful response
         const message = responseBody.message;
         if (message) {
-          return hasNoContent
-            ? JSON.stringify({
-                name: message.function_call?.name,
-                arguments: message.function_call?.arguments,
-              })
-            : message.content || "";
+          if (hasNoContent) {
+            return JSON.stringify({
+              name: message.function_call?.name,
+              arguments: message.function_call?.arguments,
+            });
+          } else {
+            // check if the message is a string
+            if (typeof message.content === "string") {
+              return message.content || "";
+            } else {
+              return JSON.stringify(message.content || "", null, 2);
+            }
+          }
         }
       }
 
