@@ -54,12 +54,19 @@ class ChatBuilder extends AbstractRequestBuilder {
         // Successful response
         const message = responseBody.message;
         if (message) {
-          return hasNoContent
-            ? JSON.stringify({
-                name: message.function_call?.name,
-                arguments: message.function_call?.arguments,
-              })
-            : message.content || "";
+          if (hasNoContent) {
+            return JSON.stringify({
+              name: message.function_call?.name,
+              arguments: message.function_call?.arguments,
+            });
+          } else {
+            // check if the message is a string
+            if (typeof message.content === "string") {
+              return message.content || "";
+            } else {
+              return JSON.stringify(message.content || "", null, 2);
+            }
+          }
         }
       }
 
