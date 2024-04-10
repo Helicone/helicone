@@ -1053,6 +1053,7 @@ export type Database = {
           soft_delete: boolean
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
+          stripe_subscription_item_id: string | null
           subscription_status: string | null
           tier: string | null
         }
@@ -1077,6 +1078,7 @@ export type Database = {
           soft_delete?: boolean
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
           subscription_status?: string | null
           tier?: string | null
         }
@@ -1101,6 +1103,7 @@ export type Database = {
           soft_delete?: boolean
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
           subscription_status?: string | null
           tier?: string | null
         }
@@ -1197,6 +1200,56 @@ export type Database = {
           {
             foreignKeyName: "organization_member_organization_fkey"
             columns: ["organization"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_usage: {
+        Row: {
+          created_at: string
+          end_date: string
+          error_message: string | null
+          id: string
+          organization_id: string
+          quantity: number
+          recorded: boolean | null
+          start_date: string
+          stripe_record: Json | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          error_message?: string | null
+          id?: string
+          organization_id: string
+          quantity: number
+          recorded?: boolean | null
+          start_date: string
+          stripe_record?: Json | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          error_message?: string | null
+          id?: string
+          organization_id?: string
+          quantity?: number
+          recorded?: boolean | null
+          start_date?: string
+          stripe_record?: Json | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_usage_organization_id_fkey"
+            columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]

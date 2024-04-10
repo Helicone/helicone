@@ -62,6 +62,8 @@ export interface HeliconeRequest {
   signed_body_url?: string | null;
   llmSchema: LlmSchema | null;
   country_code: string | null;
+  asset_ids: string[] | null;
+  asset_urls: Record<string, string> | null;
 }
 
 export async function getRequests(
@@ -122,7 +124,12 @@ export async function getRequests(
     job_node_request.node_id as node_id,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
-    feedback.rating AS feedback_rating
+    feedback.rating AS feedback_rating,
+    (
+    SELECT ARRAY_AGG(asset.id)
+    FROM asset
+    WHERE asset.request_id = request.id
+    ) AS asset_ids
   FROM request
     left join response on request.id = response.request
     left join feedback on response.id = feedback.response_id
@@ -206,7 +213,12 @@ export async function getRequestsCached(
     response.prompt_tokens as prompt_tokens,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
-    feedback.rating AS feedback_rating
+    feedback.rating AS feedback_rating,
+    (
+    SELECT ARRAY_AGG(asset.id)
+    FROM asset
+    WHERE asset.request_id = request.id
+    ) AS asset_ids
   FROM cache_hits
     inner join request on cache_hits.request_id = request.id
     inner join response on request.id = response.request
@@ -259,6 +271,40 @@ async function mapLLMCalls(
         }
 
         heliconeRequest.signed_body_url = signedBodyUrl;
+
+        const assetUrls: Record<string, string> = {};
+
+        if (heliconeRequest.asset_ids) {
+          try {
+            const signedUrlPromises = heliconeRequest.asset_ids.map(
+              async (assetId: string) => {
+                const { data: signedImageUrl, error: signedImageUrlErr } =
+                  await s3Client.getRequestResponseImageSignedUrl(
+                    orgId,
+                    heliconeRequest.request_id,
+                    assetId
+                  );
+
+                return {
+                  assetId,
+                  signedImageUrl:
+                    signedImageUrlErr || !signedImageUrl ? "" : signedImageUrl,
+                };
+              }
+            );
+
+            const signedUrls = await Promise.all(signedUrlPromises);
+
+            signedUrls.forEach(({ assetId, signedImageUrl }) => {
+              assetUrls[assetId] = signedImageUrl;
+            });
+
+            heliconeRequest.asset_urls = assetUrls;
+          } catch (error) {
+            console.error(`Error fetching asset: ${error}`);
+            return heliconeRequest;
+          }
+        }
       }
 
       // Next map to standardized schema

@@ -643,9 +643,9 @@ export class DBLoggable {
 
     const responseResult = await this.readAndLogResponse(db.queue);
     const model =
-      requestResult.data.request.model_override ??
-      responseResult.data?.response.model ??
-      requestResult.data.request.model ??
+      requestResult?.data?.request?.model_override ??
+      responseResult?.data?.response?.model ??
+      requestResult?.data?.request?.model ??
       "not-found";
 
     let s3Result: Result<string, string>;
@@ -653,7 +653,7 @@ export class DBLoggable {
     if (!responseResult.data || responseResult.error) {
       // Log the error in S3
       if (S3_ENABLED === "true") {
-        if (isImageModel(model)) {
+        if (model && isImageModel(model)) {
           s3Result = await db.requestResponseManager.storeRequestResponseImage({
             organizationId: authParams.organizationId,
             requestId: this.request.requestId,
@@ -690,7 +690,7 @@ export class DBLoggable {
     }
 
     if (S3_ENABLED === "true") {
-      if (isImageModel(model)) {
+      if (model && isImageModel(model)) {
         s3Result = await db.requestResponseManager.storeRequestResponseImage({
           organizationId: authParams.organizationId,
           requestId: this.request.requestId,
@@ -885,18 +885,21 @@ export async function logRequest(
         }
       : unsupportedImage(requestBody);
 
-    const requestAssets: Record<string, string> = {};
+    let requestAssets: Record<string, string> = {};
+    try {
+      for (const message of body.messages) {
+        for (const item of message.content) {
+          if (item.type === "image_url") {
+            const assetId = crypto.randomUUID();
 
-    for (const message of body.messages) {
-      for (const item of message.content) {
-        if (item.type === "image_url") {
-          const assetId = crypto.randomUUID();
+            requestAssets[assetId] = item.image_url.url;
 
-          requestAssets[assetId] = item.image_url.url;
-
-          item.image_url = `<helicone-asset-id key="${assetId}"/>`;
+            item.image_url.url = `<helicone-asset-id key="${assetId}"/>`;
+          }
         }
       }
+    } catch (error: any) {
+      // Do nothing
     }
 
     const createdAt = request.startTime ?? new Date();
