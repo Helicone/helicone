@@ -26,6 +26,7 @@ export interface Env {
   SUPABASE_DATEBASE_URL: string;
   SUPABASE_DATABASE_SSL: string;
   ENVIRONMENT: string;
+  HYPERDRIVE: Hyperdrive;
 }
 
 const constructorMapping: Record<string, any> = {
@@ -82,11 +83,7 @@ export default {
         new OrganizationStore(
           clickhouseWrapper,
           supabaseClient,
-          new PgWrapper(
-            env.SUPABASE_DATEBASE_URL,
-            env.SUPABASE_DATABASE_SSL,
-            env.ENVIRONMENT
-          )
+          new PgWrapper(env, ctx)
         ),
         new RequestResponseStore(clickhouseWrapper, supabaseClient),
         new StripeClient(env.STRIPE_API_KEY)
