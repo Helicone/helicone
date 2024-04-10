@@ -72,7 +72,7 @@ export class RequestResponseManager {
       } else {
         const response = await fetch(imageUrl, {
           headers: {
-            "User-Agent": "Helicone-Worker (https://helicone.com)",
+            "User-Agent": "Helicone-Worker (https://helicone.ai)",
           },
         });
         if (!response.ok) {
