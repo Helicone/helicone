@@ -5,7 +5,7 @@ export abstract class ImageModelParser {
   constructor(modelName: string) {
     this.modelName = modelName;
   }
-  abstract processMessages(messages: any[]): Record<string, string>;
+  abstract processMessages(body: any): Record<string, string>;
 
   protected generateAssetId(): string {
     return crypto.randomUUID();
