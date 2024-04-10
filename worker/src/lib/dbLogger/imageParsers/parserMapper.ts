@@ -5,6 +5,9 @@ import { ImageModelParser } from "./imageModelParser";
 export function getImageModelParser(
   modelName: string
 ): ImageModelParser | null {
+  if (modelName.startsWith("gpt-4-turbo")) 
+      return new GptVisionImageParser(modelName);
+  
   switch (modelName) {
     case "gpt-4-vision-preview":
     case "gpt-4-1106-vision-preview":
