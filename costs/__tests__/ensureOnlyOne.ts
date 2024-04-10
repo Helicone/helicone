@@ -213,6 +213,7 @@ WHEN (request_response_log.model = 'gpt-35-turbo-16k') THEN 3000 * request_respo
 WHEN (request_response_log.model = 'gpt-3.5-turbo-16k-0613') THEN 3000 * request_response_log.prompt_tokens + 4000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-3.5-turbo-0125') THEN 500 * request_response_log.prompt_tokens + 1500 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-4-turbo') THEN 10000 * request_response_log.prompt_tokens + 30000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt-4-turbo-2024-04-09') THEN 10000 * request_response_log.prompt_tokens + 30000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-4-turbo-0125-preview') THEN 10000 * request_response_log.prompt_tokens + 30000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'text-embedding-ada-002') THEN 100 * request_response_log.prompt_tokens + 0 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'text-embedding-ada') THEN 100 * request_response_log.prompt_tokens + 0 * request_response_log.completion_tokens
