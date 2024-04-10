@@ -36,8 +36,8 @@ const GraphQLPage = (props: GraphQLPageProps) => {
       <div className="bg-yellow-100 dark:bg-yellow-800 p-2 rounded-lg text-yellow-800 dark:text-yellow-200 w-full">
         Notice: Our GraphQL is now deprecated, and will be completely removed by
         07/01/2024. Please use our new RESTful API at{" "}
-        <a href="https://docs.helicone.ai/api" className="text-blue-500">
-          https://docs.helicone.ai/api
+        <a href="https://docs.helicone.ai/rest" className="text-blue-500">
+          https://docs.helicone.ai/rest
         </a>
         .
         <br />

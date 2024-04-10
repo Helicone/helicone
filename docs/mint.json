@@ -25,7 +25,7 @@
     },
     {
       "name": "API",
-      "url": "v1"
+      "url": "rest"
     }
   ],
   "feedback": {
@@ -159,7 +159,7 @@
     },
     {
       "group": "Request",
-      "pages": ["v1/request/post-v1requestquery"]
+      "pages": ["rest/request/post-v1requestquery"]
     }
   ],
   "topbarLinks": [
