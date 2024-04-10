@@ -17,7 +17,14 @@ class ChatBuilder extends AbstractRequestBuilder {
       // Check if there is a last message and it has content
       const lastMessageContent = requestBody.messages.at(-1)?.content;
       if (lastMessageContent) {
-        return lastMessageContent;
+        // check if lastMessageContent is an object
+        if (typeof lastMessageContent === "string") {
+          return lastMessageContent;
+        } else if (typeof lastMessageContent === "object") {
+          return JSON.stringify(lastMessageContent, null, 2);
+        } else {
+          return "";
+        }
       }
 
       // If there are messages but no content, stringify the array
