@@ -1,5 +1,5 @@
 // src/users/usersService.ts
-import { RequestQueryParams } from "../../controllers/requestController";
+import { RequestQueryParams } from "../../controllers/public/requestController";
 import { Result } from "../../lib/modules/result";
 import {
   HeliconeRequest,

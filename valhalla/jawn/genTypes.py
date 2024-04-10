@@ -54,6 +54,17 @@ interface JsonObject { [key: string]: JsonValue; }
     return updated_content
 
 
+def fixJsonType(fileString: str) -> str:
+    with open(fileString, "r") as file:
+        content = file.read()
+
+    updated_content = update_typescript_file_with_line_detection(content)
+
+    with open(fileString, "w") as file:
+
+        file.write(updated_content)
+
+
 def main():
 
     # Read the content of the TypeScript file
@@ -61,20 +72,13 @@ def main():
 
     # npx openapi-typescript  src/tsoa-build/swagger.json -o ../../web/lib/clients/jawnTypes.ts
     os.system(
-        f"npx openapi-typescript {current_dir}/src/tsoa-build/swagger.json -o {current_dir}/../../web/lib/clients/jawnTypes.ts")
+        f"npx openapi-typescript {current_dir}/src/tsoa-build/public/swagger.json -o {current_dir}/../../web/lib/clients/jawnTypes/public.ts")
 
-    with open(f"{current_dir}/../../web/lib/clients/jawnTypes.ts", "r") as file:
-        content = file.read()
+    os.system(
+        f"npx openapi-typescript {current_dir}/src/tsoa-build/private/swagger.json -o {current_dir}/../../web/lib/clients/jawnTypes/private.ts")
 
-    # Update the TypeScript file content with line detection
-
-    updated_content = update_typescript_file_with_line_detection(content)
-
-    # Write the updated content back to the TypeScript file
-
-    with open(f"{current_dir}/../../web/lib/clients/jawnTypes.ts", "w") as file:
-
-        file.write(updated_content)
+    fixJsonType(f"{current_dir}/../../web/lib/clients/jawnTypes/public.ts")
+    fixJsonType(f"{current_dir}/../../web/lib/clients/jawnTypes/private.ts")
 
 
 if __name__ == "__main__":

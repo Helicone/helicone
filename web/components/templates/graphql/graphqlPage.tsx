@@ -33,6 +33,21 @@ const GraphQLPage = (props: GraphQLPageProps) => {
 
   return (
     <div className="flex flex-col gap-8">
+      <div className="bg-yellow-100 dark:bg-yellow-800 p-2 rounded-lg text-yellow-800 dark:text-yellow-200 w-full">
+        Notice: Our GraphQL is now deprecated, and will be completely removed by
+        07/01/2024. Please use our new RESTful API at{" "}
+        <a href="https://docs.helicone.ai/api" className="text-blue-500">
+          https://docs.helicone.ai/api
+        </a>
+        .
+        <br />
+        <br />
+        If you need help migrating, please reach out to us at{" "}
+        <a href="mailto:engineering@helicone.ai" className="text-blue-500">
+          engineering@helicone.ai
+        </a>
+        .
+      </div>
       <div className="flex flex-row justify-between items-start">
         <h1 className="text-2xl font-semibold flex flex-row gap-2 items-center text-gray-900 dark:text-gray-100">
           GraphQL Sandbox

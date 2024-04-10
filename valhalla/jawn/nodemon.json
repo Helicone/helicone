@@ -1,5 +1,5 @@
 {
-  "exec": "tsoa spec-and-routes && python3 genTypes.py && ts-node src/index.ts ",
+  "exec": "bash tsoa_run.sh && python3 genTypes.py && ts-node src/index.ts ",
   "watch": ["src"],
   "ignore": ["src/tsoa-build"],
   "ext": "ts"
