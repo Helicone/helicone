@@ -5,7 +5,7 @@
     "lib/api/graphql/schema/types/graphql.tsx",
     "lib/api/graphql/client/fragment-masking.ts",
     "lib/api/graphql/client/index.ts",
-    "lib/clients/jawnTypes.ts"
+    "lib/clients/jawnTypes/*.ts"
   ],
   "plugins": ["unused-imports"],
   "rules": {

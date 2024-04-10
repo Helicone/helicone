@@ -11,11 +11,11 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { postHogClient } from "../lib/clients/postHogClient";
-import { supabaseServer } from "../lib/routers/withAuth";
-import { getRequests } from "../lib/stores/request/request";
-import { FineTuningManager } from "../managers/FineTuningManager";
-import { JawnAuthenticatedRequest } from "../types/request";
+import { postHogClient } from "../../lib/clients/postHogClient";
+import { supabaseServer } from "../../lib/routers/withAuth";
+import { getRequests } from "../../lib/stores/request/request";
+import { FineTuningManager } from "../../managers/FineTuningManager";
+import { JawnAuthenticatedRequest } from "../../types/request";
 
 // src/users/usersController.ts
 import { hasAccessToFineTune } from "./datasetController";
