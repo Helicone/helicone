@@ -2,7 +2,7 @@ export type LlmType = "chat" | "completion";
 
 interface Message {
   role?: string;
-  content?: string;
+  content?: string | object;
   function_call?: FunctionCall;
 }
 
