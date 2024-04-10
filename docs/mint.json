@@ -1,5 +1,6 @@
 {
   "name": "Helicone",
+
   "logo": {
     "light": "/logo/light.png",
     "dark": "/logo/dark.svg"
@@ -17,17 +18,21 @@
     "name": "Sign In",
     "url": "https://www.helicone.ai/#:~:text=Discord-,Sign,-In"
   },
-
   "tabs": [
     {
       "name": "Use Cases",
       "url": "use-cases"
+    },
+    {
+      "name": "API",
+      "url": "api"
     }
   ],
   "feedback": {
     "suggestEdit": true,
     "raiseIssue": true
   },
+  "openapi": ["/swagger.json"],
   "navigation": [
     {
       "group": "Welcome",
@@ -151,6 +156,10 @@
         "faq/latency-affect",
         "faq/how-we-calculate-cost"
       ]
+    },
+    {
+      "group": "Request",
+      "pages": ["api/request/post-v1requestquery"]
     }
   ],
   "topbarLinks": [
@@ -163,6 +172,7 @@
       "url": "https://github.com/Helicone/helicone"
     }
   ],
+
   "footerSocials": {
     "twitter": "https://twitter.com/helicone_ai",
     "linkedin": "https://www.linkedin.com/company/helicone/about/",

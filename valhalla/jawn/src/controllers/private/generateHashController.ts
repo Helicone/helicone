@@ -1,8 +1,8 @@
 // src/users/usersController.ts
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
-import { hashAuth } from "../lib/db/hash";
-import { supabaseServer } from "../lib/routers/withAuth";
-import { JawnAuthenticatedRequest } from "../types/request";
+import { hashAuth } from "../../lib/db/hash";
+import { supabaseServer } from "../../lib/routers/withAuth";
+import { JawnAuthenticatedRequest } from "../../types/request";
 
 export interface GenerateHashQueryParams {
   apiKey: string;

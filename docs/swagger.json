@@ -1107,92 +1107,6 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"GenerateHashQueryParams": {
-				"properties": {
-					"apiKey": {
-						"type": "string"
-					},
-					"userId": {
-						"type": "string"
-					},
-					"keyName": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"apiKey",
-					"userId",
-					"keyName"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"FineTuneResult": {
-				"anyOf": [
-					{
-						"properties": {
-							"error": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"error"
-						],
-						"type": "object"
-					},
-					{
-						"properties": {
-							"data": {
-								"properties": {
-									"url": {
-										"type": "string"
-									},
-									"fineTuneJob": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"url",
-									"fineTuneJob"
-								],
-								"type": "object"
-							},
-							"success": {
-								"type": "boolean"
-							}
-						},
-						"required": [
-							"data",
-							"success"
-						],
-						"type": "object"
-					}
-				]
-			},
-			"FineTuneBodyParams": {
-				"properties": {
-					"providerKeyId": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"providerKeyId"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"FineTuneBody": {
-				"properties": {
-					"providerKeyId": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"providerKeyId"
-				],
-				"type": "object",
-				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {
@@ -1222,6 +1136,19 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Result_HeliconeRequest-Array.string_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"filter": "all",
+											"isCached": false,
+											"limit": 10,
+											"offset": 0,
+											"sort": {
+												"created_at": "desc"
+											}
+										}
+									}
 								}
 							}
 						}
@@ -1237,252 +1164,32 @@
 				],
 				"parameters": [],
 				"requestBody": {
+					"description": "Request query filters",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/RequestQueryParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/key/generateHash": {
-			"post": {
-				"operationId": "GenerateHash",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"error": {
-											"properties": {
-												"details": {
-													"type": "string"
-												},
-												"message": {
-													"type": "string"
-												}
-											},
-											"type": "object"
-										},
-										"success": {
-											"type": "boolean"
-										}
-									},
-									"type": "object"
+								"$ref": "#/components/schemas/RequestQueryParams",
+								"description": "Request query filters"
+							},
+							"example": {
+								"filter": "all",
+								"isCached": false,
+								"limit": 10,
+								"offset": 0,
+								"sort": {
+									"created_at": "desc"
 								}
 							}
 						}
 					}
-				},
-				"tags": [
-					"Utils"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/GenerateHashQueryParams"
-							}
-						}
-					}
 				}
-			}
-		},
-		"/v1/dataset/{datasetId}/fine-tune": {
-			"post": {
-				"operationId": "DatasetFineTune",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/FineTuneResult"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"FineTune",
-					"Dataset"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "datasetId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/FineTuneBodyParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/fine-tune": {
-			"post": {
-				"operationId": "FineTune",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"properties": {
-												"error": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"error"
-											],
-											"type": "object"
-										},
-										{
-											"properties": {
-												"data": {
-													"properties": {
-														"url": {
-															"type": "string"
-														},
-														"fineTuneJob": {
-															"type": "string"
-														}
-													},
-													"required": [
-														"url",
-														"fineTuneJob"
-													],
-													"type": "object"
-												},
-												"success": {
-													"type": "boolean"
-												}
-											},
-											"required": [
-												"data",
-												"success"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"FineTune"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/FineTuneBody"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/fine-tune/{jobId}/stats": {
-			"get": {
-				"operationId": "FineTuneJobStats",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"properties": {
-												"error": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"error"
-											],
-											"type": "object"
-										},
-										{
-											"properties": {
-												"events": {},
-												"job": {}
-											},
-											"required": [
-												"events",
-												"job"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"FineTune"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "jobId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
 			}
 		}
 	},
 	"servers": [
 		{
-			"url": "/"
+			"url": "https://api.helicone.ai/"
 		}
 	]
 }

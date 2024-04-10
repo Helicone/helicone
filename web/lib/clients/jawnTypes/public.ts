@@ -12,18 +12,6 @@ export interface paths {
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
-  "/v1/key/generateHash": {
-    post: operations["GenerateHash"];
-  };
-  "/v1/dataset/{datasetId}/fine-tune": {
-    post: operations["DatasetFineTune"];
-  };
-  "/v1/fine-tune": {
-    post: operations["FineTune"];
-  };
-  "/v1/fine-tune/{jobId}/stats": {
-    get: operations["FineTuneJobStats"];
-  };
 }
 
 export type webhooks = Record<string, never>;
@@ -386,26 +374,6 @@ Json: JsonObject;
       sort?: components["schemas"]["SortLeafRequest"];
       isCached?: boolean;
     };
-    GenerateHashQueryParams: {
-      apiKey: string;
-      userId: string;
-      keyName: string;
-    };
-    FineTuneResult: {
-      error: string;
-    } | {
-      data: {
-        url: string;
-        fineTuneJob: string;
-      };
-      success: boolean;
-    };
-    FineTuneBodyParams: {
-      providerKeyId: string;
-    };
-    FineTuneBody: {
-      providerKeyId: string;
-    };
   };
   responses: {
   };
@@ -425,8 +393,20 @@ export type external = Record<string, never>;
 export interface operations {
 
   GetRequests: {
+    /** @description Request query filters */
     requestBody: {
       content: {
+        /**
+         * @example {
+         *   "filter": "all",
+         *   "isCached": false,
+         *   "limit": 10,
+         *   "offset": 0,
+         *   "sort": {
+         *     "created_at": "desc"
+         *   }
+         * }
+         */
         "application/json": components["schemas"]["RequestQueryParams"];
       };
     };
@@ -435,90 +415,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
-        };
-      };
-    };
-  };
-  GenerateHash: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GenerateHashQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            error?: {
-              details?: string;
-              message?: string;
-            };
-            success?: boolean;
-          };
-        };
-      };
-    };
-  };
-  DatasetFineTune: {
-    parameters: {
-      path: {
-        datasetId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["FineTuneBodyParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["FineTuneResult"];
-        };
-      };
-    };
-  };
-  FineTune: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["FineTuneBody"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            error: string;
-          } | {
-            data: {
-              url: string;
-              fineTuneJob: string;
-            };
-            success: boolean;
-          };
-        };
-      };
-    };
-  };
-  FineTuneJobStats: {
-    parameters: {
-      path: {
-        jobId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            error: string;
-          } | {
-            events: unknown;
-            job: unknown;
-          };
         };
       };
     };
