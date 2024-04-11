@@ -170,13 +170,17 @@ export const SingleChat = (props: {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <div className="flex flex-wrap items-center pt-4">
             {arr.map((item, index) => {
-              if (item.type === "image_url") {
+              if (
+                item.type === "image_url" &&
+                (typeof item.image_url === "string" || item.image_url?.url)
+              ) {
                 return <div key={index}>{renderOpenAIImage(item)}</div>;
-              } else if (item.type === "image") {
+              } else if (item.type === "image" && item.source?.data) {
                 return <div key={index}>{renderClaudeImage(item)}</div>;
-              } else {
+              } else if (item.type === "image_url" || item.type === "image") {
                 return <div key={index}>{renderUnsupportedImage()}</div>;
               }
+              return null;
             })}
           </div>
         </div>
