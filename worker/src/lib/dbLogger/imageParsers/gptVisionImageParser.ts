@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ImageModelParser } from "./imageModelParser";
-export class GptVisionImageParser extends ImageModelParser {
+import { ImageModelRequestBodyParser } from "./core/ImageModelRequestBodyParser";
+export class GptVisionImageParser extends ImageModelRequestBodyParser {
   constructor(modelName: string) {
     super(modelName);
   }
 
-  processMessages(body: any): Record<string, string> {
+  processRequestBody(body: any): Record<string, string> {
     const requestAssets: Record<string, string> = {};
     try {
       body?.messages?.forEach((message: any) => {

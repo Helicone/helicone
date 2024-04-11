@@ -20,8 +20,14 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { getTokenCount } from "../clients/TokenCounterClient";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
-import { isImageModel } from "../util/imageModelMapper";
-import { getImageModelParser } from "./imageParsers/parserMapper";
+import {
+  isRequestImageModel,
+  isResponseImageModel,
+} from "../util/imageModelMapper";
+import {
+  getRequestImageModelParser,
+  getResponseImageModelParser,
+} from "./imageParsers/parserMapper";
 
 export interface DBLoggableProps {
   response: {
@@ -444,6 +450,7 @@ export class DBLoggable {
       {
         response: Database["public"]["Tables"]["response"]["Insert"];
         body: string;
+        responseAssets: Record<string, string>;
       },
       string
     >
@@ -458,11 +465,21 @@ export class DBLoggable {
         this.request.requestId,
         response
       );
+      let responseAssets: Record<string, string> = {};
+      const model =
+        this.request?.modelOverride ?? response?.model ?? "not-found";
+      console.log(body);
+      if (model && isResponseImageModel(model)) {
+        const imageModelParser = getResponseImageModelParser(model);
+        if (imageModelParser) {
+          responseAssets = imageModelParser.processResponseBody(body);
+        }
+      }
       if (error !== null) {
         console.error("Error updating response", error);
         // return err(error);
       }
-      return ok({ response, body });
+      return ok({ response, body, responsetAssets: responseAssets });
     } catch (e) {
       const { error } = await queue.updateResponse(
         this.response.responseId,
@@ -650,12 +667,17 @@ export class DBLoggable {
       requestResult?.data?.request?.model ??
       "not-found";
 
+    const assets: Record<string, string> = {
+      ...requestResult.data.requestAssets,
+      ...responseResult.data?.responseAssets,
+    };
+
     let s3Result: Result<string, string>;
     // If no data or error, return
     if (!responseResult.data || responseResult.error) {
       // Log the error in S3
       if (S3_ENABLED === "true") {
-        if (model && isImageModel(model)) {
+        if (model && isRequestImageModel(model)) {
           s3Result = await db.requestResponseManager.storeRequestResponseImage({
             organizationId: authParams.organizationId,
             requestId: this.request.requestId,
@@ -666,7 +688,7 @@ export class DBLoggable {
                 await this.response.getResponseBody()
               ).body,
             }),
-            requestAssets: requestResult.data.requestAssets,
+            requestAssets: assets,
           });
         } else {
           s3Result = await db.requestResponseManager.storeRequestResponseData({
@@ -679,7 +701,7 @@ export class DBLoggable {
                 await this.response.getResponseBody()
               ).body,
             }),
-            requestAssets: requestResult.data.requestAssets,
+            requestAssets: assets,
           });
         }
 
@@ -692,13 +714,13 @@ export class DBLoggable {
     }
 
     if (S3_ENABLED === "true") {
-      if (model && isImageModel(model)) {
+      if (model && isRequestImageModel(model)) {
         s3Result = await db.requestResponseManager.storeRequestResponseImage({
           organizationId: authParams.organizationId,
           requestId: this.request.requestId,
           requestBody: requestResult.data.body,
           responseBody: responseResult.data.body,
-          requestAssets: requestResult.data.requestAssets,
+          requestAssets: assets,
         });
       } else {
         s3Result = await db.requestResponseManager.storeRequestResponseData({
@@ -706,7 +728,7 @@ export class DBLoggable {
           requestId: this.request.requestId,
           requestBody: requestResult.data.body,
           responseBody: responseResult.data.body,
-          requestAssets: requestResult.data.requestAssets,
+          requestAssets: assets,
         });
       }
 
@@ -891,10 +913,10 @@ export async function logRequest(
     let requestAssets: Record<string, string> = {};
     const model = getModelFromRequest();
 
-    if (model && isImageModel(model)) {
-      const imageModelParser = getImageModelParser(model);
+    if (model && isRequestImageModel(model)) {
+      const imageModelParser = getRequestImageModelParser(model);
       if (imageModelParser) {
-        requestAssets = imageModelParser.processMessages(body);
+        requestAssets = imageModelParser.processRequestBody(body);
       }
     }
 

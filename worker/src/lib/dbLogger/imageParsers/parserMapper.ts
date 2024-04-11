@@ -1,10 +1,12 @@
 import { ClaudeImageParser } from "./claudeImageParser";
 import { GptVisionImageParser } from "./gptVisionImageParser";
-import { ImageModelParser } from "./imageModelParser";
+import { ImageModelRequestBodyParser } from "./core/ImageModelRequestBodyParser";
+import { DalleImageParser } from "./dalleImageParser";
+import { ImageModelResponseBodyParser } from "./core/ImageModelResponseBodyParser";
 
-export function getImageModelParser(
+export function getRequestImageModelParser(
   modelName: string
-): ImageModelParser | null {
+): ImageModelRequestBodyParser | null {
   switch (modelName) {
     case "gpt-4-vision-preview":
     case "gpt-4-1106-vision-preview":
@@ -13,6 +15,18 @@ export function getImageModelParser(
     case "claude-3-sonnet-20240229":
     case "claude-3-haiku-20240307":
       return new ClaudeImageParser(modelName);
+    default:
+      return null;
+  }
+}
+
+export function getResponseImageModelParser(
+  modelName: string
+): ImageModelResponseBodyParser | null {
+  switch (modelName) {
+    case "dall-e-3":
+    case "dall-e-2":
+      return new DalleImageParser(modelName);
     default:
       return null;
   }
