@@ -1,6 +1,4 @@
-# Updating cost calculations
-
-Please follow the README.md in the cost/ directory to update the price.
+> For **updating cost calculations** - Please follow the README.md in the cost/ directory.
 
 # Contributing to Helicone
 
