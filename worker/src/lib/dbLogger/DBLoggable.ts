@@ -21,6 +21,7 @@ import { getTokenCount } from "../clients/TokenCounterClient";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
 import {
+  isImageModel,
   isRequestImageModel,
   isResponseImageModel,
 } from "../util/imageModelMapper";
@@ -445,7 +446,10 @@ export class DBLoggable {
         };
   }
 
-  async readAndLogResponse(queue: RequestResponseStore): Promise<
+  async readAndLogResponse(
+    queue: RequestResponseStore,
+    model: string | null
+  ): Promise<
     Result<
       {
         response: Database["public"]["Tables"]["response"]["Insert"];
@@ -466,9 +470,6 @@ export class DBLoggable {
         response
       );
       let responseAssets: Record<string, string> = {};
-      const model =
-        this.request?.modelOverride ?? response?.model ?? "not-found";
-      console.log(body);
       if (model && isResponseImageModel(model)) {
         const imageModelParser = getResponseImageModelParser(model);
         if (imageModelParser) {
@@ -479,7 +480,7 @@ export class DBLoggable {
         console.error("Error updating response", error);
         // return err(error);
       }
-      return ok({ response, body, responsetAssets: responseAssets });
+      return ok({ response, body, responseAssets });
     } catch (e) {
       const { error } = await queue.updateResponse(
         this.response.responseId,
@@ -659,8 +660,10 @@ export class DBLoggable {
     if (!requestResult.data || requestResult.error) {
       return requestResult;
     }
-
-    const responseResult = await this.readAndLogResponse(db.queue);
+    const responseResult = await this.readAndLogResponse(
+      db.queue,
+      requestResult.data.request.model
+    );
     const model =
       requestResult?.data?.request?.model_override ??
       responseResult?.data?.response?.model ??
@@ -677,7 +680,7 @@ export class DBLoggable {
     if (!responseResult.data || responseResult.error) {
       // Log the error in S3
       if (S3_ENABLED === "true") {
-        if (model && isRequestImageModel(model)) {
+        if (model && isImageModel(model)) {
           s3Result = await db.requestResponseManager.storeRequestResponseImage({
             organizationId: authParams.organizationId,
             requestId: this.request.requestId,
@@ -714,7 +717,7 @@ export class DBLoggable {
     }
 
     if (S3_ENABLED === "true") {
-      if (model && isRequestImageModel(model)) {
+      if (model && isImageModel(model)) {
         s3Result = await db.requestResponseManager.storeRequestResponseImage({
           organizationId: authParams.organizationId,
           requestId: this.request.requestId,
@@ -926,10 +929,8 @@ export async function logRequest(
     // eslint-disable-next-line prefer-const
     let requestAssets: Record<string, string> = {};
     const model = getModelFromRequest();
-    console.log("Model: ", model);
 
     if (model && isRequestImageModel(model)) {
-      console.log("Processing request assets for model", model);
       const imageModelParser = getRequestImageModelParser(model);
       if (imageModelParser) {
         requestAssets = imageModelParser.processRequestBody(body);
