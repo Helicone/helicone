@@ -305,7 +305,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00001,
       completion_token: 0.00003,
     },
-  },  
+  },
   {
     model: {
       operator: "equals",

@@ -8,6 +8,8 @@ export function getRequestImageModelParser(
   modelName: string
 ): ImageModelRequestBodyParser | null {
   switch (modelName) {
+    case "gpt-4-turbo":
+    case "gpt-4-turbo-2024-04-09":
     case "gpt-4-vision-preview":
     case "gpt-4-1106-vision-preview":
       return new GptVisionImageParser(modelName);
