@@ -162,6 +162,7 @@ def test_openai_proxy():
 
     query = "SELECT * FROM response WHERE request = %s LIMIT 1"
     response_data = fetch_from_db(query, (latest_request["id"],))
+    print(response_data)
     assert response_data[0]["body"]["choices"], "Response data not found in the database for the given request ID"
     print("passed")
 
