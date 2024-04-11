@@ -150,6 +150,12 @@ export const SingleChat = (props: {
     return <img src={imageUrl} alt={""} width={600} height={600} />;
   };
 
+  const renderUnsupportedImage = () => (
+    <div className="h-[150px] w-[200px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 text-center items-center flex justify-center text-xs italic text-gray-500">
+      Unsupported Image Type
+    </div>
+  );
+
   const renderImageRow = () => {
     const arr = message.content;
     if (Array.isArray(arr)) {
@@ -168,8 +174,9 @@ export const SingleChat = (props: {
                 return <div key={index}>{renderOpenAIImage(item)}</div>;
               } else if (item.type === "image") {
                 return <div key={index}>{renderClaudeImage(item)}</div>;
+              } else {
+                return <div key={index}>{renderUnsupportedImage()}</div>;
               }
-              return null;
             })}
           </div>
         </div>
