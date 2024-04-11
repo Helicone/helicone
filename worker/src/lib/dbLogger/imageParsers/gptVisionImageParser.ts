@@ -7,6 +7,7 @@ export class GptVisionImageParser extends ImageModelRequestBodyParser {
 
   processRequestBody(body: any): Record<string, string> {
     const requestAssets: Record<string, string> = {};
+    console.log("Processing request body for GPT Vision model");
     try {
       body?.messages?.forEach((message: any) => {
         message.content.forEach((item: any) => {

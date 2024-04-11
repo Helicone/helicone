@@ -912,13 +912,17 @@ export async function logRequest(
     // eslint-disable-next-line prefer-const
     let requestAssets: Record<string, string> = {};
     const model = getModelFromRequest();
+    console.log("Model: ", model);
 
     if (model && isRequestImageModel(model)) {
+      console.log("Processing request assets for model", model);
       const imageModelParser = getRequestImageModelParser(model);
       if (imageModelParser) {
         requestAssets = imageModelParser.processRequestBody(body);
       }
     }
+
+    console.log(`requestAssets: ${JSON.stringify(requestAssets)}`);
 
     const createdAt = request.startTime ?? new Date();
     const requestData = {
