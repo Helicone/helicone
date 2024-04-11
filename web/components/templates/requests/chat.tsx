@@ -139,6 +139,23 @@ export const SingleChat = (props: {
     }
   };
 
+  const renderOpenAIImage = (item: any) => {
+    const imageUrl =
+      typeof item.image_url === "string" ? item.image_url : item.image_url.url;
+    return <img src={imageUrl} alt={""} width={600} height={600} />;
+  };
+
+  const renderClaudeImage = (item: any) => {
+    const imageUrl = item.source.data;
+    return <img src={imageUrl} alt={""} width={600} height={600} />;
+  };
+
+  const renderUnsupportedImage = () => (
+    <div className="h-[150px] w-[200px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 text-center items-center flex justify-center text-xs italic text-gray-500">
+      Unsupported Image Type
+    </div>
+  );
+
   const renderImageRow = () => {
     const arr = message.content;
     if (Array.isArray(arr)) {
@@ -152,31 +169,19 @@ export const SingleChat = (props: {
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <div className="flex flex-wrap items-center pt-4">
-            {arr.map((item, index) =>
-              item.type === "image_url" || item.type === "image" ? (
-                <div key={index}>
-                  {item.image_url?.url ? (
-                    <img
-                      src={item.image_url.url}
-                      alt={""}
-                      width={600}
-                      height={600}
-                    />
-                  ) : item.image_url ? (
-                    <img
-                      src={item.image_url}
-                      alt={""}
-                      width={600}
-                      height={600}
-                    />
-                  ) : (
-                    <div className="h-[150px] w-[200px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 text-center items-center flex justify-center text-xs italic text-gray-500">
-                      Unsupported Image Type
-                    </div>
-                  )}
-                </div>
-              ) : null
-            )}
+            {arr.map((item, index) => {
+              if (
+                item.type === "image_url" &&
+                (typeof item.image_url === "string" || item.image_url?.url)
+              ) {
+                return <div key={index}>{renderOpenAIImage(item)}</div>;
+              } else if (item.type === "image" && item.source?.data) {
+                return <div key={index}>{renderClaudeImage(item)}</div>;
+              } else if (item.type === "image_url" || item.type === "image") {
+                return <div key={index}>{renderUnsupportedImage()}</div>;
+              }
+              return null;
+            })}
           </div>
         </div>
       );
