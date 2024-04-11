@@ -793,7 +793,20 @@ function unsupportedImage(body: any): any {
   };
   if (body["image_url"] !== undefined) {
     const imageUrl = body["image_url"];
-    if (typeof imageUrl === "string") {
+    if (
+      typeof imageUrl === "string" &&
+      !imageUrl.startsWith("http") &&
+      !imageUrl.startsWith("<helicone-asset-id")
+    ) {
+      body.image_url = notSupportMessage;
+    }
+    if (
+      typeof imageUrl === "object" &&
+      imageUrl.url !== undefined &&
+      typeof imageUrl.url === "string" &&
+      !imageUrl.url.startsWith("http") &&
+      !imageUrl.url.startsWith("<helicone-asset-id")
+    ) {
       body.image_url = notSupportMessage;
     }
   }
@@ -885,7 +898,8 @@ export async function logRequest(
                 (requestBody as any).model
               : null,
         }
-      : unsupportedImage(requestBody);
+      : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (requestBody as any);
 
     // eslint-disable-next-line prefer-const
     let requestAssets: Record<string, string> = {};
@@ -898,11 +912,13 @@ export async function logRequest(
       }
     }
 
+    const reqBody = unsupportedImage(body);
+
     const createdAt = request.startTime ?? new Date();
     const requestData = {
       id: request.requestId,
       path: request.path,
-      body: body, // TODO: Remove in favor of S3 storage
+      body: reqBody, // TODO: Remove in favor of S3 storage
       auth_hash: "",
       user_id: request.userId ?? null,
       prompt_id: request.promptId ?? null,
