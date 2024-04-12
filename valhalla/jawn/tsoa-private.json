@@ -1,9 +1,9 @@
 {
   "entryFile": "src/index.ts",
   "noImplicitAdditionalProperties": "throw-on-extras",
-  "controllerPathGlobs": ["src/controllers/**/*Controller.ts"],
+  "controllerPathGlobs": ["src/controllers/private/**/*Controller.ts"],
   "spec": {
-    "outputDirectory": "src/tsoa-build",
+    "outputDirectory": "src/tsoa-build/private",
     "specVersion": 3,
     "securityDefinitions": {
       "api_key": {
@@ -11,10 +11,17 @@
         "name": "authorization",
         "in": "header"
       }
+    },
+    "spec": {
+      "servers": [
+        {
+          "url": "https://api.helicone.ai/"
+        }
+      ]
     }
   },
   "routes": {
-    "routesDir": "src/tsoa-build",
+    "routesDir": "src/tsoa-build/private",
     "authenticationModule": "./src/authentication.ts"
   }
 }

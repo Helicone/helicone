@@ -1,40 +1,37 @@
+import { Env } from "..";
 import { Result } from "../util/results";
 import { Client } from "pg";
 
 export class PgWrapper {
-  constructor(
-    private databaseUrl: string,
-    private ssl: string,
-    private environment: string
-  ) {}
+  private client: Client;
+  private ctx: ExecutionContext;
 
-  async dbExecute<T>(
+  constructor(env: Env, ctx: ExecutionContext) {
+    this.client = new Client({
+      host: env.HYPERDRIVE.host,
+      user: env.HYPERDRIVE.user,
+      password: env.HYPERDRIVE.password,
+      port: Number(env.HYPERDRIVE.port),
+      database: env.HYPERDRIVE.database,
+    });
+
+    this.ctx = ctx;
+  }
+
+  public async dbExecute<T>(
     query: string,
     parameters: any[]
   ): Promise<Result<T[], string>> {
-    const ssl =
-      this.environment === "development"
-        ? undefined
-        : {
-            rejectUnauthorized: true,
-            ca: this.ssl.split("\\n").join("\n"),
-          };
-
-    const client = new Client({
-      connectionString: this.databaseUrl,
-      ssl,
-    });
     try {
-      // Let's print out the time it takes to execute the query
-      await client.connect();
+      await this.client.connect();
 
-      const result = await client.query(query, parameters);
+      const result = await this.client.query(query, parameters);
 
-      await client.end();
+      this.ctx.waitUntil(this.client.end());
 
       return { data: result.rows, error: null };
-    } catch (err) {
-      await client.end();
+    } catch (err: any) {
+      this.ctx.waitUntil(this.client.end());
       return { data: null, error: JSON.stringify(err) };
     }
   }

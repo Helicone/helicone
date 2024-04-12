@@ -8,7 +8,7 @@ import { Result, err, ok } from "../util/results";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 import { RequestWrapper } from "../RequestWrapper";
-import { INTERNAL_ERRORS, isImageModel } from "../util/constants";
+import { INTERNAL_ERRORS } from "../util/constants";
 import { AsyncLogModel } from "../models/AsyncLog";
 import { logInClickhouse } from "../db/ClickhouseStore";
 import { RequestResponseStore } from "../db/RequestResponseStore";
@@ -20,6 +20,8 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { getTokenCount } from "../clients/TokenCounterClient";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
+import { isImageModel } from "../util/imageModelMapper";
+import { getImageModelParser } from "./imageParsers/parserMapper";
 
 export interface DBLoggableProps {
   response: {
@@ -791,7 +793,20 @@ function unsupportedImage(body: any): any {
   };
   if (body["image_url"] !== undefined) {
     const imageUrl = body["image_url"];
-    if (typeof imageUrl === "string") {
+    if (
+      typeof imageUrl === "string" &&
+      !imageUrl.startsWith("http") &&
+      !imageUrl.startsWith("<helicone-asset-id")
+    ) {
+      body.image_url = notSupportMessage;
+    }
+    if (
+      typeof imageUrl === "object" &&
+      imageUrl.url !== undefined &&
+      typeof imageUrl.url === "string" &&
+      !imageUrl.url.startsWith("http") &&
+      !imageUrl.url.startsWith("<helicone-asset-id")
+    ) {
       body.image_url = notSupportMessage;
     }
   }
@@ -883,30 +898,27 @@ export async function logRequest(
                 (requestBody as any).model
               : null,
         }
-      : unsupportedImage(requestBody);
+      : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (requestBody as any);
 
+    // eslint-disable-next-line prefer-const
     let requestAssets: Record<string, string> = {};
-    try {
-      for (const message of body.messages) {
-        for (const item of message.content) {
-          if (item.type === "image_url") {
-            const assetId = crypto.randomUUID();
+    const model = getModelFromRequest();
 
-            requestAssets[assetId] = item.image_url.url;
-
-            item.image_url.url = `<helicone-asset-id key="${assetId}"/>`;
-          }
-        }
+    if (model && isImageModel(model)) {
+      const imageModelParser = getImageModelParser(model);
+      if (imageModelParser) {
+        requestAssets = imageModelParser.processMessages(body);
       }
-    } catch (error: any) {
-      // Do nothing
     }
+
+    const reqBody = unsupportedImage(body);
 
     const createdAt = request.startTime ?? new Date();
     const requestData = {
       id: request.requestId,
       path: request.path,
-      body: body, // TODO: Remove in favor of S3 storage
+      body: reqBody, // TODO: Remove in favor of S3 storage
       auth_hash: "",
       user_id: request.userId ?? null,
       prompt_id: request.promptId ?? null,
@@ -918,7 +930,7 @@ export async function logRequest(
       helicone_org_id: authParams.organizationId,
       provider: request.provider,
       helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
-      model: getModelFromRequest(),
+      model: model,
       model_override: request.modelOverride ?? null,
       created_at: createdAt.toISOString(),
       threat: request.threat ?? null,

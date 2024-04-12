@@ -8,7 +8,7 @@ import {
   SortLeafRequest,
   buildRequestSort,
 } from "../../shared/sorts/requests/sorts";
-import { Result, resultMap, ok } from "../../shared/result";
+import { Result, resultMap, ok, err } from "../../shared/result";
 import { dbExecute, dbQueryClickhouse } from "../../shared/db/dbExecute";
 import { LlmSchema } from "../../shared/requestResponseModel";
 import { Json } from "../../db/database.types";
@@ -75,6 +75,14 @@ export async function getRequests(
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
+  }
+
+  if (offset > 10_000 || offset < 0) {
+    return err("unsupport offset value");
+  }
+
+  if (limit < 0 || limit > 1_000) {
+    return err("invalid limit");
   }
   const builtFilter = await buildFilterWithAuth({
     org_id: orgId,
@@ -157,6 +165,15 @@ export async function getRequestsCached(
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
+
+  if (offset > 10_000 || offset < 0) {
+    return err("unsupport offset value");
+  }
+
+  if (limit < 0 || limit > 1_000) {
+    return err("invalid limit");
+  }
+
   const builtFilter = await buildFilterWithAuthCacheHits({
     org_id: orgId,
     filter,
