@@ -64,7 +64,8 @@ const DeveloperPage = (props: DeveloperPageProps) => {
 
   const tier = orgContext?.currentOrg?.tier;
 
-  const isPaidPlan = tier === "pro" || tier === "enterprise";
+  const isPaidPlan =
+    tier === "pro" || tier === "enterprise" || tier === "growth";
 
   return (
     <>
