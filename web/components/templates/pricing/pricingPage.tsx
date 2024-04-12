@@ -203,6 +203,21 @@ export default function Example() {
             </Link>{" "}
             that scales with your business when you need it.
           </p>
+          <div className="flex items-center gap-4 pt-4">
+            <Link
+              href="/contact"
+              className="bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 rounded-lg px-4 py-2 text-sm font-bold shadow-lg flex w-fit items-center gap-1"
+            >
+              Get a demo
+            </Link>
+            <Link
+              href="/signup"
+              className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 text-white border-[3px] border-sky-700 rounded-lg pl-4 pr-2 py-2 text-sm font-bold shadow-lg flex w-fit items-center gap-1"
+            >
+              Start Building
+              <ChevronRightIcon className="w-5 h-5 inline text-white" />
+            </Link>
+          </div>
         </div>
         <FeatureTable />
         <div
@@ -298,7 +313,7 @@ export default function Example() {
               {renderLogCost()}
             </div>
           </div>
-          <div className="grid grid-cols-8 py-2 gap-4 sm:gap-8 border-b-2 border-gray-300">
+          {/* <div className="grid grid-cols-8 py-2 gap-4 sm:gap-8 border-b-2 border-gray-300">
             <div className="col-span-6 md:col-span-2 order-1 flex items-start">
               <div className="flex items-center">
                 <DocumentTextIcon className="h-6 w-6 text-sky-600" />
@@ -374,7 +389,7 @@ export default function Example() {
             <div className="col-span-2 order-2 sm:order-3 md:col-span-2 flex justify-end font-bold text-xl">
               {renderPromptCost()}
             </div>
-          </div>
+          </div> */}
           <div className="w-full justify-end flex items-center">
             <p className="text-xl font-bold">
               {new Intl.NumberFormat("us", {

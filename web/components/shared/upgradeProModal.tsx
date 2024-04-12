@@ -81,7 +81,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
 
   return (
     <ThemedModal open={open} setOpen={setOpen}>
-      <div className="flex flex-col w-[450px] space-y-8">
+      <div className="flex flex-col w-[512px] space-y-8">
         <div className="flex flex-col space-y-6">
           <div className="flex flex-row items-center gap-2">
             {currentIcon && (
@@ -119,21 +119,28 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
               </div>
             </div>
           </div>
-          <h1 className="text-sm text-gray-700 dark:text-gray-300">
-            This organization is on the free plan. Upgrade to Helicone Pro to
-            remove request limits and unlock the features below:
-          </h1>
+          {count && count?.data <= 50_000 ? (
+            <h1 className="text-sm text-gray-700 dark:text-gray-300">
+              Your organization is currently on the free plan and within our
+              free plan limits. As your company grows, you may want to consider
+              upgrading to the Growth plan to unlock more features, uncapped
+              request logs, and priority support.
+            </h1>
+          ) : (
+            <h1 className="text-sm text-gray-700 dark:text-gray-300">
+              Your organization is approaching the free plan limit. We recommend
+              fast-growing companies like yours to upgrade to the Growth plan to
+              uncap your request log limit and unlock other premium features.
+            </h1>
+          )}
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           {[
-            "10x more request logs",
-            "8 seats",
-            "Caching",
-            "More fine-tuning jobs",
-            "Model Load Balancing",
-            "GraphQL API",
-            "Key Vault",
-            "Evaluations (coming soon!)",
+            "Unlimited request logs (pay as you go)",
+            "Expanded access to prompt templates",
+            "Expanded access to prompt experiments",
+            "Priority support",
+            "Lower rate limits on all features",
           ].map((item, i) => (
             <div key={i} className="text-sm flex flex-row items-center">
               <SparklesIcon className="h-4 w-4 mr-2 text-yellow-500" />
