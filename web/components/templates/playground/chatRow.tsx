@@ -10,7 +10,7 @@ import {
   TrashIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
 import { RenderWithPrettyInputKeys } from "../prompts/id/promptIdPage";
@@ -20,6 +20,9 @@ import RoleButton, { ROLE_COLORS } from "./new/roleButton";
 import { MessageInputItem } from "./new/messageInput";
 import useNotification from "../../shared/notification/useNotification";
 import { Tooltip } from "@mui/material";
+import { enforceString } from "../../../lib/helpers/typeEnforcers";
+import { PlusIcon } from "@heroicons/react/20/solid";
+import AddFileButton from "./new/addFileButton";
 
 interface ChatRowProps {
   index: number;
@@ -31,6 +34,13 @@ interface ChatRowProps {
 const ChatRow = (props: ChatRowProps) => {
   const { index, message, callback, deleteRow } = props;
 
+  // on the initial render, if the current message is empty, set the mode to editing
+  useEffect(() => {
+    if (currentMessage.content === "") {
+      setIsEditing(true);
+    }
+  }, []);
+
   const [currentMessage, setCurrentMessage] = useState(message);
   const [minimize, setMinimize] = useState(false);
 
@@ -40,9 +50,9 @@ const ChatRow = (props: ChatRowProps) => {
 
   const [isEditing, setIsEditing] = useState(false);
 
-  const { setNotification } = useNotification();
+  const [file, setFile] = useState<File | null>(null);
 
-  const isSystem = role === "system";
+  const { setNotification } = useNotification();
 
   const getContentAsString = (rawMessage: Message) => {
     if (Array.isArray(rawMessage.content)) {
@@ -57,7 +67,34 @@ const ChatRow = (props: ChatRowProps) => {
 
   const contentAsString = getContentAsString(currentMessage);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleClick = () => {
+    // The non-null assertion operator after current is no longer necessary
+    // because TypeScript now knows the type of fileInputRef.current
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      const file = event.target.files[0];
+      setFile(file);
+    }
+  };
+
   const getContent = (content: string | any[] | null, minimize: boolean) => {
+    // check if the content is an array and it has an image type or image_url type
+    const hasImage = () => {
+      if (Array.isArray(content)) {
+        return content.some(
+          (element) => element.type === "image" || element.type === "image_url"
+        );
+      }
+      return false;
+    };
+
     if (Array.isArray(content)) {
       const textMessage = content.find((element) => element.type === "text");
       // if minimize is true, substring the text to 100 characters
@@ -66,46 +103,139 @@ const ChatRow = (props: ChatRowProps) => {
         : textMessage?.text;
 
       return (
-        <div className="flex flex-col space-y-4 divide-y divide-gray-100 whitespace-pre-wrap">
+        <div className="flex flex-col space-y-4 whitespace-pre-wrap">
           <RenderWithPrettyInputKeys
             text={removeLeadingWhitespace(text)}
             selectedProperties={undefined}
           />
+          <AddFileButton
+            file={file}
+            onFileChange={(file) => {
+              setFile(file);
+            }}
+          />
+          {/* <div className="flex items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              onChange={handleChange}
+              accept="image/*"
+              style={{ display: "none" }}
+            />
+            {file ? (
+              <div className="flex flex-col space-y-2 relative">
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt={file.name}
+                  width={256}
+                  height={256}
+                />
+                <button
+                  onClick={() => setFile(null)}
+                  className="absolute -top-4 -right-2"
+                >
+                  <XMarkIcon className="h-4 w-4 text-white bg-red-500 rounded-full p-0.5" />
+                </button>
+
+                <button
+                  onClick={handleClick}
+                  className="w-fit border border-gray-300 dark:border-gray-700 px-2 py-1 rounded-lg text-xs flex items-center gap-2"
+                >
+                  <PencilIcon className="h-4 w-4" />
+                  Change Image
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleClick}
+                className="w-fit border border-gray-300 dark:border-gray-700 px-2 py-1 rounded-lg text-xs flex items-center gap-2"
+              >
+                <PlusIcon className="h-4 w-4" />
+                Add Image
+              </button>
+            )}
+          </div> */}
 
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <div className="flex flex-wrap items-center pt-4">
-            {content.map((item, index) =>
-              item.type === "image_url" || item.type === "image" ? (
-                <div key={index}>
-                  {item.image_url?.url ? (
-                    <img
-                      src={item.image_url.url}
-                      alt={""}
-                      width={800}
-                      height={800}
-                      className="bg-white border border-gray-300 rounded-lg p-2"
-                    />
-                  ) : (
-                    <div className="h-[150px] w-[200px] bg-white border border-gray-300 text-center items-center flex justify-center text-xs italic text-gray-500">
-                      Unsupported Image Type
-                    </div>
-                  )}
-                </div>
-              ) : null
-            )}
-          </div>
+          {hasImage() && (
+            <div className="flex flex-wrap items-center pt-4 border-t border-gray-300 dark:border-gray-700">
+              {content.map((item, index) =>
+                item.type === "image_url" || item.type === "image" ? (
+                  <div key={index}>
+                    {item.image_url?.url ? (
+                      <img
+                        src={item.image_url.url}
+                        alt={""}
+                        width={800}
+                        height={800}
+                        className="bg-white border border-gray-300 rounded-lg p-2"
+                      />
+                    ) : (
+                      <div className="h-[150px] w-[200px] bg-white border border-gray-300 text-center items-center flex justify-center text-xs italic text-gray-500">
+                        Unsupported Image Type
+                      </div>
+                    )}
+                  </div>
+                ) : null
+              )}
+            </div>
+          )}
         </div>
       );
     } else {
+      const contentString = enforceString(content);
       return (
-        <span
-          className={clsx(
-            role === "user" ? "font-normal" : "font-semibold",
-            "text-black dark:text-white whitespace-pre-wrap w-full"
-          )}
-        >
-          {minimize ? `${content?.substring(0, 100)}...` || "" : content || ""}
-        </span>
+        <div className="flex flex-col space-y-4">
+          <RenderWithPrettyInputKeys
+            text={
+              minimize
+                ? `${contentString?.substring(0, 100)}...`
+                : contentString
+            }
+            selectedProperties={undefined}
+          />
+          <div className="flex items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              onChange={handleChange}
+              accept="image/*"
+              style={{ display: "none" }}
+            />
+            {file ? (
+              <div className="flex flex-col space-y-2 relative">
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt={file.name}
+                  width={256}
+                  height={256}
+                />
+                <button
+                  onClick={() => setFile(null)}
+                  className="absolute -top-4 -right-2"
+                >
+                  <XMarkIcon className="h-4 w-4 text-white bg-red-500 rounded-full p-0.5" />
+                </button>
+
+                <button
+                  onClick={handleClick}
+                  className="w-fit border border-gray-300 dark:border-gray-700 px-2 py-1 rounded-lg text-xs flex items-center gap-2"
+                >
+                  <PencilIcon className="h-4 w-4" />
+                  Change Image
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleClick}
+                className="w-fit border border-gray-300 dark:border-gray-700 px-2 py-1 rounded-lg text-xs flex items-center gap-2"
+              >
+                <PlusIcon className="h-4 w-4" />
+                Add Image
+              </button>
+            )}
+          </div>
+        </div>
       );
     }
   };
@@ -113,14 +243,14 @@ const ChatRow = (props: ChatRowProps) => {
   return (
     <li
       className={clsx(
-        index === 0 && "rounded-t-lg",
+        index === 0 ? "rounded-t-lg" : "border-t",
         "bg-white dark:bg-black",
-        "flex flex-row justify-between gap-8 border-b border-gray-300 dark:border-gray-700"
+        "flex flex-row justify-between gap-8 border-gray-300 dark:border-gray-700"
       )}
     >
       <div className="flex flex-col gap-4 w-full">
-        <div className="flex flex-col w-full h-full relative">
-          <div className="flex w-full justify-between sticky top-0 bg-white px-8 py-4 rounded-t-lg">
+        <div className="flex flex-col w-full h-full relative space-y-4">
+          <div className="flex w-full justify-between px-8 pt-4 rounded-t-lg">
             <RoleButton
               role={role}
               onRoleChange={(newRole) => {
@@ -139,7 +269,6 @@ const ChatRow = (props: ChatRowProps) => {
                 <button
                   onClick={() => {
                     if (isEditing) {
-                      // callback((contentAsString as string) || "", role);
                       setMinimize(false);
                       setIsEditing(false);
                     } else {
@@ -189,7 +318,7 @@ const ChatRow = (props: ChatRowProps) => {
             </div>
           </div>
           <div>
-            <div className="w-full px-8 py-4">
+            <div className="w-full px-8 pb-4">
               {isEditing ? (
                 <span className="w-full">
                   <ResizeTextArea
@@ -204,9 +333,7 @@ const ChatRow = (props: ChatRowProps) => {
                 </span>
               ) : (
                 // TODO: render this in markdown
-                <p className="text-md">
-                  {getContent(currentMessage.content as string, minimize)}
-                </p>
+                <>{getContent(currentMessage.content as string, minimize)}</>
               )}
             </div>
           </div>
