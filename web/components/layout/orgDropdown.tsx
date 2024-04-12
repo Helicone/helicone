@@ -114,9 +114,6 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                                 <p className="w-full max-w-[7.5rem] text-left truncate">
                                   {org.name}
                                 </p>
-                                <span className="text-sky-500">
-                                  {org.tier === "pro" && "(Pro)"}
-                                </span>
                               </div>
                             </div>
                             {org.id === orgContext?.currentOrg?.id && (
@@ -165,17 +162,12 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                               <div className="flex flex-row space-x-1 w-full">
                                 <p
                                   className={clsx(
-                                    org.tier === "pro"
-                                      ? "max-w-[7.5rem]"
-                                      : "max-w-[10rem]",
+                                    "max-w-[10rem]",
                                     "w-full text-left truncate"
                                   )}
                                 >
                                   {org.name}
                                 </p>
-                                <span className="text-sky-500">
-                                  {org.tier === "pro" && "(Pro)"}
-                                </span>
                               </div>
                             </div>
                             {org.id === orgContext?.currentOrg?.id && (
@@ -225,9 +217,6 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                                 <p className="w-full max-w-[10rem] text-left truncate">
                                   {org.name}
                                 </p>
-                                <span className="text-sky-500">
-                                  {org.tier === "pro" && "(Pro)"}
-                                </span>
                               </div>
                             </div>
                             {org.id === orgContext?.currentOrg?.id && (
