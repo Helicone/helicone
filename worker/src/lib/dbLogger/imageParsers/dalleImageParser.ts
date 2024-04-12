@@ -20,7 +20,7 @@ export class DalleImageParser extends ImageModelResponseBodyParser {
       });
     } catch (error) {
       console.error(
-        `Error processing messages for model: ${this.modelName}, error: ${error}`
+        `Error processing response body for model: ${this.modelName}, error: ${error}`
       );
     }
 

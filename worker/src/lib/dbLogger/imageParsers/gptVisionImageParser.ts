@@ -7,7 +7,6 @@ export class GptVisionImageParser extends ImageModelRequestBodyParser {
 
   processRequestBody(body: any): Record<string, string> {
     const requestAssets: Record<string, string> = {};
-    console.log("Processing request body for GPT Vision model");
     try {
       body?.messages?.forEach((message: any) => {
         message.content.forEach((item: any) => {
@@ -20,7 +19,7 @@ export class GptVisionImageParser extends ImageModelRequestBodyParser {
       });
     } catch (error) {
       console.error(
-        `Error processing messages for model: ${this.modelName}, error: ${error}`
+        `Error processing request body for model: ${this.modelName}, error: ${error}`
       );
     }
 

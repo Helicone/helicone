@@ -21,7 +21,7 @@ export class ClaudeImageParser extends ImageModelRequestBodyParser {
       });
     } catch (error) {
       console.error(
-        `Error processing messages for model: ${this.modelName}, error: ${error}`
+        `Error processing request body for model: ${this.modelName}, error: ${error}`
       );
     }
 
