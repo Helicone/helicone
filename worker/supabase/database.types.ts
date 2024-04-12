@@ -1193,6 +1193,30 @@ export type Database = {
           },
         ]
       }
+      prompt: {
+        Row: {
+          auth_hash: string
+          created_at: string | null
+          id: string
+          name: string
+          prompt: string
+        }
+        Insert: {
+          auth_hash: string
+          created_at?: string | null
+          id: string
+          name: string
+          prompt: string
+        }
+        Update: {
+          auth_hash?: string
+          created_at?: string | null
+          id?: string
+          name?: string
+          prompt?: string
+        }
+        Relationships: []
+      }
       prompts: {
         Row: {
           created_at: string
@@ -1401,6 +1425,7 @@ export type Database = {
           body: Json
           country_code: string | null
           created_at: string
+          formatted_prompt_id: string | null
           helicone_api_key_id: number | null
           helicone_org_id: string | null
           helicone_proxy_key_id: string | null
@@ -1423,6 +1448,7 @@ export type Database = {
           body: Json
           country_code?: string | null
           created_at?: string
+          formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null
           helicone_org_id?: string | null
           helicone_proxy_key_id?: string | null
@@ -1445,6 +1471,7 @@ export type Database = {
           body?: Json
           country_code?: string | null
           created_at?: string
+          formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null
           helicone_org_id?: string | null
           helicone_proxy_key_id?: string | null
@@ -1463,6 +1490,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "request_formatted_prompt_id_fkey"
+            columns: ["formatted_prompt_id"]
+            isOneToOne: false
+            referencedRelation: "prompt"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "request_helicone_api_key_id_fkey"
             columns: ["helicone_api_key_id"]
