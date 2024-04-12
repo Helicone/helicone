@@ -1,6 +1,5 @@
 import { Menu, Transition } from "@headlessui/react";
 import {
-  ArrowTrendingUpIcon,
   BeakerIcon,
   BookOpenIcon,
   DocumentTextIcon,

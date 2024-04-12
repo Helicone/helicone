@@ -9,7 +9,6 @@ import Image from "next/image";
 
 import {
   ChevronRightIcon,
-  DocumentTextIcon,
   HomeModernIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/solid";
