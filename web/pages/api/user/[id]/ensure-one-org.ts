@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { supabaseServer } from "../../../../lib/supabaseServer";
 
-export type Tier = "free" | "pro" | "enterprise";
+export type Tier = "free" | "pro" | "growth" | "enterprise";
 
 export default async function handler(
   req: NextApiRequest,

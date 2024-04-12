@@ -209,7 +209,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
                       className="focus:outline-none"
                     >
                       <span className="absolute inset-0" aria-hidden="true" />
-                      <span>Upgrade to Pro</span>
+                      <span>Upgrade to Growth</span>
                       <span aria-hidden="true"> &rarr;</span>
                     </button>
                   </h3>
