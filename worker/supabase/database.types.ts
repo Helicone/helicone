@@ -159,13 +159,6 @@ export type Database = {
             referencedRelation: "request"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "asset_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request_rbac"
-            referencedColumns: ["id"]
-          },
         ]
       }
       cache_hits: {
@@ -190,13 +183,6 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cache_hits_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request_rbac"
             referencedColumns: ["id"]
           },
         ]
@@ -298,24 +284,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "experiment_dataset_values_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request_rbac"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "experiment_dataset_values_result_request_id_fkey"
             columns: ["result_request_id"]
             isOneToOne: false
             referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "experiment_dataset_values_result_request_id_fkey"
-            columns: ["result_request_id"]
-            isOneToOne: false
-            referencedRelation: "request_rbac"
             referencedColumns: ["id"]
           },
         ]
@@ -462,28 +434,7 @@ export type Database = {
             foreignKeyName: "feedback_response_id_fkey"
             columns: ["response_id"]
             isOneToOne: true
-            referencedRelation: "materialized_response_and_request"
-            referencedColumns: ["response_id"]
-          },
-          {
-            foreignKeyName: "feedback_response_id_fkey"
-            columns: ["response_id"]
-            isOneToOne: true
             referencedRelation: "response"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "feedback_response_id_fkey"
-            columns: ["response_id"]
-            isOneToOne: true
-            referencedRelation: "response_and_request_rbac"
-            referencedColumns: ["response_id"]
-          },
-          {
-            foreignKeyName: "feedback_response_id_fkey"
-            columns: ["response_id"]
-            isOneToOne: true
-            referencedRelation: "response_rbac"
             referencedColumns: ["id"]
           },
         ]
@@ -562,13 +513,6 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "finetune_dataset_data_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request_rbac"
             referencedColumns: ["id"]
           },
         ]
@@ -956,13 +900,6 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "job_node_request_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request_rbac"
             referencedColumns: ["id"]
           },
         ]
@@ -1367,13 +1304,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "properties_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request_rbac"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "properties_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -1626,13 +1556,6 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "request_job_task_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request_rbac"
             referencedColumns: ["id"]
           },
           {
@@ -1966,130 +1889,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      materialized_response_and_request: {
-        Row: {
-          is_cached: boolean | null
-          prompt_name: string | null
-          prompt_regex: string | null
-          request_body: Json | null
-          request_created_at: string | null
-          request_formatted_prompt_id: string | null
-          request_id: string | null
-          request_path: string | null
-          request_prompt_values: Json | null
-          request_properties: Json | null
-          request_user_id: string | null
-          response_body: Json | null
-          response_created_at: string | null
-          response_id: string | null
-          user_api_key_hash: string | null
-          user_api_key_preview: string | null
-          user_api_key_user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_api_keys_user_id_fkey"
-            columns: ["user_api_key_user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      metrics_rbac: {
-        Row: {
-          average_response_time: number | null
-          average_tokens_per_response: number | null
-        }
-        Relationships: []
-      }
-      model_metrics: {
-        Row: {
-          model: string | null
-          request_count: number | null
-          sum_completion_tokens: number | null
-          sum_prompt_tokens: number | null
-          sum_tokens: number | null
-        }
-        Relationships: []
-      }
-      request_cache_rbac: {
-        Row: {
-          auth_hash: string | null
-          body: Json | null
-          cached_created_at: string | null
-          created_at: string | null
-          formatted_prompt_id: string | null
-          id: string | null
-          path: string | null
-          prompt_id: string | null
-          prompt_values: Json | null
-          properties: Json | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
-      request_rbac: {
-        Row: {
-          auth_hash: string | null
-          body: Json | null
-          created_at: string | null
-          id: string | null
-          path: string | null
-          properties: Json | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
-      response_and_request_rbac: {
-        Row: {
-          api_key_preview: string | null
-          formatted_prompt_id: string | null
-          is_cached: boolean | null
-          prompt_name: string | null
-          prompt_regex: string | null
-          prompt_values: Json | null
-          request_body: Json | null
-          request_created_at: string | null
-          request_id: string | null
-          request_path: string | null
-          request_properties: Json | null
-          request_user_id: string | null
-          response_body: Json | null
-          response_created_at: string | null
-          response_id: string | null
-          user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_api_keys_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      response_rbac: {
-        Row: {
-          body: Json | null
-          created_at: string | null
-          id: string | null
-          request: string | null
-        }
-        Relationships: []
-      }
-      user_metrics_rbac: {
-        Row: {
-          average_requests_per_day_active: number | null
-          average_tokens_per_request: number | null
-          first_active: string | null
-          last_active: string | null
-          total_requests: number | null
-          user_id: string | null
-        }
-        Relationships: []
       }
     }
     Functions: {
