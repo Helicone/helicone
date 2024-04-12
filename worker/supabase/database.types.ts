@@ -462,22 +462,8 @@ export type Database = {
             foreignKeyName: "feedback_response_id_fkey"
             columns: ["response_id"]
             isOneToOne: true
-            referencedRelation: "materialized_response_and_request"
-            referencedColumns: ["response_id"]
-          },
-          {
-            foreignKeyName: "feedback_response_id_fkey"
-            columns: ["response_id"]
-            isOneToOne: true
             referencedRelation: "response"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "feedback_response_id_fkey"
-            columns: ["response_id"]
-            isOneToOne: true
-            referencedRelation: "response_and_request_rbac"
-            referencedColumns: ["response_id"]
           },
           {
             foreignKeyName: "feedback_response_id_fkey"
@@ -1256,30 +1242,6 @@ export type Database = {
           },
         ]
       }
-      prompt: {
-        Row: {
-          auth_hash: string
-          created_at: string | null
-          id: string
-          name: string
-          prompt: string
-        }
-        Insert: {
-          auth_hash: string
-          created_at?: string | null
-          id: string
-          name: string
-          prompt: string
-        }
-        Update: {
-          auth_hash?: string
-          created_at?: string | null
-          id?: string
-          name?: string
-          prompt?: string
-        }
-        Relationships: []
-      }
       prompts: {
         Row: {
           created_at: string
@@ -1495,7 +1457,6 @@ export type Database = {
           body: Json
           country_code: string | null
           created_at: string
-          formatted_prompt_id: string | null
           helicone_api_key_id: number | null
           helicone_org_id: string | null
           helicone_proxy_key_id: string | null
@@ -1518,7 +1479,6 @@ export type Database = {
           body: Json
           country_code?: string | null
           created_at?: string
-          formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null
           helicone_org_id?: string | null
           helicone_proxy_key_id?: string | null
@@ -1541,7 +1501,6 @@ export type Database = {
           body?: Json
           country_code?: string | null
           created_at?: string
-          formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null
           helicone_org_id?: string | null
           helicone_proxy_key_id?: string | null
@@ -1560,13 +1519,6 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "request_formatted_prompt_id_fkey"
-            columns: ["formatted_prompt_id"]
-            isOneToOne: false
-            referencedRelation: "prompt"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "request_helicone_api_key_id_fkey"
             columns: ["helicone_api_key_id"]
@@ -1967,36 +1919,6 @@ export type Database = {
           },
         ]
       }
-      materialized_response_and_request: {
-        Row: {
-          is_cached: boolean | null
-          prompt_name: string | null
-          prompt_regex: string | null
-          request_body: Json | null
-          request_created_at: string | null
-          request_formatted_prompt_id: string | null
-          request_id: string | null
-          request_path: string | null
-          request_prompt_values: Json | null
-          request_properties: Json | null
-          request_user_id: string | null
-          response_body: Json | null
-          response_created_at: string | null
-          response_id: string | null
-          user_api_key_hash: string | null
-          user_api_key_preview: string | null
-          user_api_key_user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_api_keys_user_id_fkey"
-            columns: ["user_api_key_user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       metrics_rbac: {
         Row: {
           average_response_time: number | null
@@ -2014,22 +1936,6 @@ export type Database = {
         }
         Relationships: []
       }
-      request_cache_rbac: {
-        Row: {
-          auth_hash: string | null
-          body: Json | null
-          cached_created_at: string | null
-          created_at: string | null
-          formatted_prompt_id: string | null
-          id: string | null
-          path: string | null
-          prompt_id: string | null
-          prompt_values: Json | null
-          properties: Json | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
       request_rbac: {
         Row: {
           auth_hash: string | null
@@ -2041,35 +1947,6 @@ export type Database = {
           user_id: string | null
         }
         Relationships: []
-      }
-      response_and_request_rbac: {
-        Row: {
-          api_key_preview: string | null
-          formatted_prompt_id: string | null
-          is_cached: boolean | null
-          prompt_name: string | null
-          prompt_regex: string | null
-          prompt_values: Json | null
-          request_body: Json | null
-          request_created_at: string | null
-          request_id: string | null
-          request_path: string | null
-          request_properties: Json | null
-          request_user_id: string | null
-          response_body: Json | null
-          response_created_at: string | null
-          response_id: string | null
-          user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_api_keys_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       response_rbac: {
         Row: {
