@@ -36,12 +36,8 @@ async function handler({
     return;
   }
 
-  let limit = 1;
-  if (org.tier === "pro") {
-    limit = 3;
-  } else if (org.tier === "enterprise") {
-    limit = 100;
-  }
+  // TEMP: Limit to 100 prompts for now before we remove off beta
+  let limit = 100;
 
   const promptIds = await dbExecute<{
     id: string;

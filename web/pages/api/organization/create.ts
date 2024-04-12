@@ -6,7 +6,7 @@ import { Result, mapPostgrestErr } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { Database } from "../../../supabase/database.types";
 
-export type Tier = "free" | "pro" | "enterprise";
+export type Tier = "free" | "pro" | "growth" | "enterprise";
 
 async function handler({
   res,
