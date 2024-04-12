@@ -45,11 +45,6 @@ const tabs: {
     title: "Experiments",
     icon: BeakerIcon,
   },
-  {
-    id: 2,
-    title: "Evaluations",
-    icon: ArrowTrendingUpIcon,
-  },
 ];
 
 const PromptsPage = (props: PromptsPageProps) => {
@@ -93,24 +88,25 @@ const PromptsPage = (props: PromptsPageProps) => {
         <TabPanels>
           <TabPanel>
             {prompts?.data?.isOverLimit && (
-              <div className="flex flex-row items-center justify-between py-2">
-                <h1 className="font-semibold text-3xl text-black dark:text-white">
-                  <p className="text-green-500 text-sm">
-                    You have reached the limit of prompts{" "}
-                    <a
-                      href={
-                        org?.currentOrg?.tier === "free"
-                          ? "/settings?tab=1"
-                          : "https://cal.com/team/helicone/helicone-discovery"
-                      }
-                      className="text-blue-500 underline"
-                    >
-                      upgrade to{" "}
-                      {org?.currentOrg?.tier === "free" ? "pro" : "enterprise"}
-                    </a>{" "}
-                    get more prompts
-                  </p>
-                </h1>
+              <div className="flex flex-col w-full">
+                <DocumentTextIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+                <p className="text-xl text-black dark:text-white font-semibold mt-8">
+                  We&apos;d love to learn more about your use case
+                </p>
+                <p className="text-sm text-gray-500 max-w-sm mt-2">
+                  Please get in touch with us to discuss increasing your prompt
+                  limit.
+                </p>
+                <div className="mt-4">
+                  <Link
+                    href="https://cal.com/team/helicone/helicone-discovery"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  >
+                    Contact Us
+                  </Link>
+                </div>
               </div>
             )}
             <div className="flex flex-col space-y-4 w-full py-2">
@@ -320,26 +316,6 @@ const chatCompletion = await openai.chat.completions.create(
                   </Link>
                 </div>
               ))}
-            </div>
-          </TabPanel>
-          <TabPanel>
-            <div className="flex flex-col w-full h-96 justify-center items-center">
-              <div className="flex flex-col w-2/5">
-                <ArrowTrendingUpIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
-                <p className="text-xl text-black dark:text-white font-semibold mt-8">
-                  Evaluations is an enterprise feature
-                </p>
-                <p className="text-sm text-gray-500 max-w-sm mt-2">
-                  Please reach out to us at{" "}
-                  <Link
-                    href="mailto:sales@helicone.ai"
-                    className="underline text-blue-500"
-                  >
-                    sales@helicone.ai
-                  </Link>{" "}
-                  to get access to this feature.
-                </p>
-              </div>
             </div>
           </TabPanel>
         </TabPanels>
