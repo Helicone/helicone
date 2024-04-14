@@ -1,11 +1,10 @@
-import { ClickhouseClientWrapper } from "./ClickhouseWrapper";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Result, err, ok } from "../util/results";
 import { Database, Json } from "../../../supabase/database.types";
-import { clickhousePriceCalc } from "../../packages/cost";
-import { DBQueryTimer } from "../util/loggers/DBQueryTimer";
 import { TemplateWithInputs } from "../../api/lib/promptHelpers";
 import { deepCompare } from "../util/helpers";
+import { DBQueryTimer } from "../util/loggers/DBQueryTimer";
+import { Result, err, ok } from "../util/results";
+
 function tryModel(x: any) {
   try {
     return x.model || x.body.model || "unknown";
@@ -159,7 +158,6 @@ export class PromptStore {
         queryName: "insert_prompt_input_records",
       }
     );
-    console.log("inputRecordResult", inputRecordResult);
 
     if (inputRecordResult.error) {
       return err(inputRecordResult.error.message);
