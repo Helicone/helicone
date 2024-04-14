@@ -5,6 +5,7 @@ import { deepCompare } from "../util/helpers";
 import { DBQueryTimer } from "../util/loggers/DBQueryTimer";
 import { Result, err, ok } from "../util/results";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function tryModel(x: any) {
   try {
     return x.model || x.body.model || "unknown";
@@ -12,6 +13,7 @@ function tryModel(x: any) {
     return "unknown";
   }
 }
+
 export class PromptStore {
   constructor(
     private database: SupabaseClient<Database>,
