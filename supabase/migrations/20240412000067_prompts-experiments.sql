@@ -7,7 +7,7 @@ CREATE TABLE "public"."prompt_v2" (
     soft_delete BOOLEAN DEFAULT FALSE,
     CONSTRAINT unique_user_defined_id UNIQUE (user_defined_id, organization),
     CONSTRAINT fk_organization FOREIGN KEY (organization) REFERENCES organization(id),
-    CONSTRAINT check_user_defined_id_length CHECK (LENGTH(user_defined_id) <= 32),
+    CONSTRAINT check_user_defined_id_length CHECK (LENGTH(user_defined_id) <= 128),
     CONSTRAINT check_description_length CHECK (LENGTH(description) <= 512),
     CONSTRAINT check_pretty_name_length CHECK (LENGTH(pretty_name) <= 128)
 );
