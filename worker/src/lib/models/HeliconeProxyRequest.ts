@@ -1,7 +1,10 @@
 // This will store all of the information coming from the client.
 
 import { Env, Provider } from "../..";
-import { parseJSXObject } from "../../api/lib/promptHelpers";
+import {
+  TemplateWithInputs,
+  parseJSXObject,
+} from "../../api/lib/promptHelpers";
 import { approvedDomains } from "../../packages/cost/providers/mappings";
 import { Result, ok } from "../util/results";
 import { IHeliconeHeaders } from "./HeliconeHeaders";
@@ -47,7 +50,7 @@ export interface HeliconeProxyRequest {
   requestWrapper: RequestWrapper;
   requestId: string;
   nodeId: string | null;
-  heliconePromptTemplate: Record<string, unknown> | null;
+  heliconePromptTemplate: TemplateWithInputs | null;
   targetUrl: URL;
   threat?: boolean;
   flaggedForModeration?: boolean;
@@ -80,15 +83,12 @@ export class HeliconeProxyRequestMapper {
       return { data: null, error: api_base_error };
     }
 
-    let heliconePromptTemplate: Record<string, unknown> | null = null;
+    let heliconePromptTemplate: TemplateWithInputs | null = null;
     if (this.request.heliconeHeaders.promptId) {
       const { templateWithInputs } = parseJSXObject(
         JSON.parse(await this.request.getRawText())
       );
-      heliconePromptTemplate = templateWithInputs.template as Record<
-        string,
-        unknown
-      >;
+      heliconePromptTemplate = templateWithInputs;
 
       this.injectPromptInputs(templateWithInputs.inputs);
     }
