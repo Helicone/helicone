@@ -1414,6 +1414,7 @@ export type Database = {
           id: string
           organization: string
           pretty_name: string | null
+          soft_delete: boolean | null
           user_defined_id: string
         }
         Insert: {
@@ -1421,6 +1422,7 @@ export type Database = {
           id?: string
           organization: string
           pretty_name?: string | null
+          soft_delete?: boolean | null
           user_defined_id: string
         }
         Update: {
@@ -1428,6 +1430,7 @@ export type Database = {
           id?: string
           organization?: string
           pretty_name?: string | null
+          soft_delete?: boolean | null
           user_defined_id?: string
         }
         Relationships: [
