@@ -36,10 +36,13 @@ alter table "public"."prompts_versions" enable row level security;
 
 CREATE TABLE  "public"."prompt_input_keys" (
     id UUID PRIMARY KEY default gen_random_uuid(),
-    key TEXT NOT NULL,
-    prompt_v2 UUID NOT NULL,
-    CONSTRAINT fk_prompt FOREIGN KEY (prompt_v2) REFERENCES prompt_v2(id)
+    key TEXT NOT NULL CHECK (LENGTH(key) <= 128),
+    prompt_version UUID NOT NULL,
+    CONSTRAINT fk_prompt_version FOREIGN KEY (prompt_version) REFERENCES prompts_versions(id),
+    CONSTRAINT unique_key UNIQUE (prompt_version, key)
 );
+
+CREATE UNIQUE INDEX idx_prompt_input_keys_key ON prompt_input_keys(prompt_version, key);
 
 alter table "public"."prompt_input_keys" enable row level security;
 
@@ -47,8 +50,13 @@ CREATE TABLE "public"."prompt_input_record" (
     id UUID PRIMARY KEY default gen_random_uuid(),
     inputs JSONB NOT NULL,
     source_request UUID,
+    prompt_version UUID NOT NULL,
+    CONSTRAINT fk_prompt_version FOREIGN KEY (prompt_version) REFERENCES prompts_versions(id),
     CONSTRAINT fk_source_request FOREIGN KEY (source_request) REFERENCES request(id)
 );
+
+CREATE INDEX idx_prompt_input_record_source_request ON prompt_input_record using btree (source_request);
+CREATE INDEX idx_prompt_input_record_prompt_version ON prompt_input_record using btree(prompt_version);
 
 alter table "public"."prompt_input_record" enable row level security;
 
