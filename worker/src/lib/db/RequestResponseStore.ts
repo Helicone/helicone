@@ -14,6 +14,8 @@ import {
   DBQueryTimer,
   FREQUENT_PRECENT_LOGGING,
 } from "../util/loggers/DBQueryTimer";
+import { TemplateWithInputs } from "../../api/lib/promptHelpers";
+import { PromptStore } from "./PromptStore";
 
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];
@@ -27,15 +29,8 @@ export interface ResponsePayload {
   response: Database["public"]["Tables"]["response"]["Update"];
 }
 
-function tryModel(x: any) {
-  try {
-    return x.model || x.body.model || "unknown";
-  } catch (e) {
-    return "unknown";
-  }
-}
-
 export class RequestResponseStore {
+  private promptStore: PromptStore;
   constructor(
     private database: SupabaseClient<Database>,
     private queryTimer: DBQueryTimer,
@@ -43,7 +38,9 @@ export class RequestResponseStore {
     private clickhouseWrapper: ClickhouseClientWrapper,
     public fallBackQueue: Queue,
     public responseAndResponseQueueKV: KVNamespace
-  ) {}
+  ) {
+    this.promptStore = new PromptStore(database, queryTimer);
+  }
 
   async insertIntoRequest(
     requestPayload: RequestPayload
@@ -317,114 +314,9 @@ export class RequestResponseStore {
     return { data: null, error: null };
   }
 
-  async upsertPromptV2(
-    heliconeTemplate: Json,
-    promptId: string,
-    orgId: string
-  ): Promise<
-    Result<
-      {
-        version: number;
-        template: Json;
-      },
-      string
-    >
-  > {
-    let existingPrompt = await this.queryTimer.withTiming(
-      this.database
-        .from("prompt_v2")
-        .select("*")
-        .eq("organization", orgId)
-        .eq("user_defined_id", promptId)
-        .limit(1),
-      {
-        queryName: "select_prompt_by_id",
-      }
-    );
-
-    if (existingPrompt.error) {
-      return err(existingPrompt.error.message);
-    }
-
-    if (existingPrompt.data.length === 0) {
-      const insertResult = await this.queryTimer.withTiming(
-        this.database
-          .from("prompt_v2")
-          .insert([
-            {
-              user_defined_id: promptId,
-              organization: orgId,
-            },
-          ])
-          .select("*"),
-        {
-          queryName: "insert_initial_prompt",
-        }
-      );
-      if (insertResult.error) {
-        return err(insertResult.error.message);
-      }
-      existingPrompt = insertResult;
-    }
-
-    const existingPromptVersion = await this.queryTimer.withTiming(
-      this.database
-        .from("prompts_versions")
-        .select("*")
-        .eq("organization", orgId)
-        .eq("prompt_v2", existingPrompt.data[0].id)
-        .order("major_version", { ascending: false })
-        .limit(1),
-      {
-        queryName: "select_prompt_by_id",
-      }
-    );
-
-    if (existingPromptVersion.error) {
-      return err(existingPromptVersion.error.message);
-    }
-
-    let version = existingPromptVersion.data[0]?.major_version ?? 0;
-    if (
-      existingPromptVersion.data.length > 0 &&
-      !deepCompare(
-        existingPromptVersion.data?.[0].helicone_template,
-        heliconeTemplate
-      )
-    ) {
-      version += 1;
-    }
-    if (
-      existingPrompt.data.length === 0 ||
-      version !== existingPromptVersion.data[0]?.major_version
-    ) {
-      const insertResult = await this.queryTimer.withTiming(
-        this.database.from("prompts_versions").insert([
-          {
-            helicone_template: heliconeTemplate,
-            major_version: version,
-            minor_version: 0,
-            organization: orgId,
-            prompt_v2: existingPrompt.data[0].id,
-            model: tryModel(heliconeTemplate),
-          },
-        ]),
-        {
-          queryName: "insert_prompt_version",
-        }
-      );
-      if (insertResult.error) {
-        return err(insertResult.error.message);
-      }
-    }
-    return ok({
-      version,
-      template: heliconeTemplate,
-    });
-  }
-
+  // TODO replace this with upsertPromptV2 after prompt_v2 is fully rolled out and we are reading from it
   async upsertPrompt(
-    heliconeTemplate: Json,
+    heliconeTemplate: TemplateWithInputs,
     promptId: string,
     orgId: string
   ): Promise<
@@ -436,7 +328,7 @@ export class RequestResponseStore {
       string
     >
   > {
-    await this.upsertPromptV2(heliconeTemplate, promptId, orgId);
+    await this.promptStore.upsertPromptV2(heliconeTemplate, promptId, orgId);
     const existingPrompt = await this.queryTimer.withTiming(
       this.database
         .from("prompts")
@@ -457,7 +349,10 @@ export class RequestResponseStore {
     let version = existingPrompt.data?.[0]?.version ?? 0;
     if (existingPrompt.data.length > 0) {
       if (
-        !deepCompare(existingPrompt.data[0].heliconeTemplate, heliconeTemplate)
+        !deepCompare(
+          existingPrompt.data[0].heliconeTemplate,
+          heliconeTemplate.template
+        )
       ) {
         version = existingPrompt.data[0].version + 1;
       }
@@ -471,7 +366,7 @@ export class RequestResponseStore {
           {
             id: promptId,
             organization_id: orgId,
-            heliconeTemplate,
+            heliconeTemplate: heliconeTemplate.template as Json,
             status: "active",
             version,
           },
@@ -486,7 +381,7 @@ export class RequestResponseStore {
     }
     return ok({
       version,
-      template: heliconeTemplate,
+      template: heliconeTemplate.template as Json,
     });
   }
 

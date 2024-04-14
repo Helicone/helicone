@@ -22,6 +22,7 @@ import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
 import { isImageModel } from "../util/imageModelMapper";
 import { getImageModelParser } from "./imageParsers/parserMapper";
+import { TemplateWithInputs } from "../../api/lib/promptHelpers";
 
 export interface DBLoggableProps {
   response: {
@@ -49,7 +50,7 @@ export interface DBLoggableProps {
     provider: Provider;
     nodeId: string | null;
     modelOverride?: string;
-    heliconeTemplate?: Record<string, unknown>;
+    heliconeTemplate?: TemplateWithInputs;
     threat: boolean | null;
     flaggedForModeration: boolean | null;
     request_ip: string | null;
@@ -741,7 +742,7 @@ export class DBLoggable {
     if (this.request.heliconeTemplate && this.request.promptId) {
       const upsertResult = await db.queue.upsertPrompt(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        this.request.heliconeTemplate as any,
+        this.request.heliconeTemplate,
         this.request.promptId ?? "",
         authParams.organizationId
       );
