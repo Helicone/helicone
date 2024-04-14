@@ -246,6 +246,47 @@ export type Database = {
           },
         ]
       }
+      experiment_dataset_v2: {
+        Row: {
+          id: string
+          name: string | null
+        }
+        Insert: {
+          id?: string
+          name?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string | null
+        }
+        Relationships: []
+      }
+      experiment_dataset_v2_row: {
+        Row: {
+          dataset_id: string | null
+          id: string
+          input_record: string | null
+        }
+        Insert: {
+          dataset_id?: string | null
+          id?: string
+          input_record?: string | null
+        }
+        Update: {
+          dataset_id?: string | null
+          id?: string
+          input_record?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_dataset_id"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_dataset_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiment_dataset_values: {
         Row: {
           created_at: string
@@ -288,6 +329,104 @@ export type Database = {
             columns: ["result_request_id"]
             isOneToOne: false
             referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_v2: {
+        Row: {
+          dataset: string | null
+          id: string
+          organization: string | null
+        }
+        Insert: {
+          dataset?: string | null
+          id?: string
+          organization?: string | null
+        }
+        Update: {
+          dataset?: string | null
+          id?: string
+          organization?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_dataset"
+            columns: ["dataset"]
+            isOneToOne: false
+            referencedRelation: "experiment_dataset_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_v2_hypothesis: {
+        Row: {
+          experiment_v2: string | null
+          id: string
+          model: string
+          prompt_version: string
+          status: string
+        }
+        Insert: {
+          experiment_v2?: string | null
+          id?: string
+          model: string
+          prompt_version: string
+          status: string
+        }
+        Update: {
+          experiment_v2?: string | null
+          id?: string
+          model?: string
+          prompt_version?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_experiment"
+            columns: ["experiment_v2"]
+            isOneToOne: false
+            referencedRelation: "experiment_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_prompt_version"
+            columns: ["prompt_version"]
+            isOneToOne: false
+            referencedRelation: "prompts_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_v2_hypothesis_run: {
+        Row: {
+          dataset_row: string
+          experiment_hypothesis: string
+          id: string
+        }
+        Insert: {
+          dataset_row: string
+          experiment_hypothesis: string
+          id?: string
+        }
+        Update: {
+          dataset_row?: string
+          experiment_hypothesis?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_dataset_row"
+            columns: ["dataset_row"]
+            isOneToOne: false
+            referencedRelation: "experiment_dataset_v2_row"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_experiment_hypothesis"
+            columns: ["experiment_hypothesis"]
+            isOneToOne: false
+            referencedRelation: "experiment_v2_hypothesis"
             referencedColumns: ["id"]
           },
         ]
@@ -1217,6 +1356,90 @@ export type Database = {
         }
         Relationships: []
       }
+      prompt_input_keys: {
+        Row: {
+          id: string
+          key: string
+          prompt_v2: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          prompt_v2: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          prompt_v2?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_prompt"
+            columns: ["prompt_v2"]
+            isOneToOne: false
+            referencedRelation: "prompt_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prompt_input_record: {
+        Row: {
+          id: string
+          inputs: Json
+          source_request: string | null
+        }
+        Insert: {
+          id?: string
+          inputs: Json
+          source_request?: string | null
+        }
+        Update: {
+          id?: string
+          inputs?: Json
+          source_request?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_source_request"
+            columns: ["source_request"]
+            isOneToOne: false
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prompt_v2: {
+        Row: {
+          description: string | null
+          id: string
+          organization: string
+          pretty_name: string | null
+          user_defined_id: string
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          organization: string
+          pretty_name?: string | null
+          user_defined_id: string
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          organization?: string
+          pretty_name?: string | null
+          user_defined_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_organization"
+            columns: ["organization"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prompts: {
         Row: {
           created_at: string
@@ -1263,6 +1486,54 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prompts_versions: {
+        Row: {
+          helicone_template: Json | null
+          id: string
+          major_version: number
+          minor_version: number
+          model: string | null
+          organization: string
+          prompt_v2: string
+          soft_delete: boolean | null
+        }
+        Insert: {
+          helicone_template?: Json | null
+          id?: string
+          major_version: number
+          minor_version: number
+          model?: string | null
+          organization: string
+          prompt_v2: string
+          soft_delete?: boolean | null
+        }
+        Update: {
+          helicone_template?: Json | null
+          id?: string
+          major_version?: number
+          minor_version?: number
+          model?: string | null
+          organization?: string
+          prompt_v2?: string
+          soft_delete?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_organization"
+            columns: ["organization"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_prompt"
+            columns: ["prompt_v2"]
+            isOneToOne: false
+            referencedRelation: "prompt_v2"
             referencedColumns: ["id"]
           },
         ]
@@ -1653,6 +1924,68 @@ export type Database = {
           version?: number
         }
         Relationships: []
+      }
+      score_attribute: {
+        Row: {
+          id: string
+          organization: string
+          score_key: string
+        }
+        Insert: {
+          id?: string
+          organization: string
+          score_key: string
+        }
+        Update: {
+          id?: string
+          organization?: string
+          score_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_organization"
+            columns: ["organization"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      score_value: {
+        Row: {
+          id: string
+          int_value: number | null
+          request_id: string
+          score_attribute: string
+        }
+        Insert: {
+          id?: string
+          int_value?: number | null
+          request_id: string
+          score_attribute: string
+        }
+        Update: {
+          id?: string
+          int_value?: number | null
+          request_id?: string
+          score_attribute?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_request_id"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_score_attribute"
+            columns: ["score_attribute"]
+            isOneToOne: false
+            referencedRelation: "score_attribute"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_api_keys: {
         Row: {
