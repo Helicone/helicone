@@ -349,7 +349,10 @@ export class RequestResponseStore {
     let version = existingPrompt.data?.[0]?.version ?? 0;
     if (existingPrompt.data.length > 0) {
       if (
-        !deepCompare(existingPrompt.data[0].heliconeTemplate, heliconeTemplate)
+        !deepCompare(
+          existingPrompt.data[0].heliconeTemplate,
+          heliconeTemplate.template
+        )
       ) {
         version = existingPrompt.data[0].version + 1;
       }

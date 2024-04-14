@@ -91,7 +91,7 @@ export class PromptStore {
       existingPromptVersion.data.length > 0 &&
       !deepCompare(
         existingPromptVersion.data?.[0].helicone_template,
-        heliconeTemplate
+        heliconeTemplate.template
       )
     ) {
       version += 1;
@@ -108,7 +108,7 @@ export class PromptStore {
             minor_version: 0,
             organization: orgId,
             prompt_v2: existingPrompt.data[0].id,
-            model: tryModel(heliconeTemplate),
+            model: tryModel(heliconeTemplate.template),
           },
         ]),
         {
