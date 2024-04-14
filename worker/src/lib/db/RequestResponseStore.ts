@@ -30,7 +30,7 @@ export interface ResponsePayload {
 }
 
 export class RequestResponseStore {
-  private promptStore: PromptStore;
+  promptStore: PromptStore;
   constructor(
     private database: SupabaseClient<Database>,
     private queryTimer: DBQueryTimer,
@@ -328,7 +328,6 @@ export class RequestResponseStore {
       string
     >
   > {
-    await this.promptStore.upsertPromptV2(heliconeTemplate, promptId, orgId);
     const existingPrompt = await this.queryTimer.withTiming(
       this.database
         .from("prompts")

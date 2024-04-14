@@ -22,7 +22,8 @@ export class PromptStore {
   async upsertPromptV2(
     heliconeTemplate: TemplateWithInputs,
     promptId: string,
-    orgId: string
+    orgId: string,
+    requestId: string
   ): Promise<
     Result<
       {
@@ -87,6 +88,7 @@ export class PromptStore {
     }
 
     let version = existingPromptVersion.data[0]?.major_version ?? 0;
+    let versionId = existingPromptVersion.data[0]?.id ?? "";
     if (
       existingPromptVersion.data.length > 0 &&
       !deepCompare(
@@ -101,16 +103,20 @@ export class PromptStore {
       version !== existingPromptVersion.data[0]?.major_version
     ) {
       const insertResult = await this.queryTimer.withTiming(
-        this.database.from("prompts_versions").insert([
-          {
-            helicone_template: heliconeTemplate.template as Json,
-            major_version: version,
-            minor_version: 0,
-            organization: orgId,
-            prompt_v2: existingPrompt.data[0].id,
-            model: tryModel(heliconeTemplate.template),
-          },
-        ]),
+        this.database
+          .from("prompts_versions")
+          .upsert([
+            {
+              helicone_template: heliconeTemplate.template as Json,
+              major_version: version,
+              minor_version: 0,
+              organization: orgId,
+              prompt_v2: existingPrompt.data[0].id,
+              model: tryModel(heliconeTemplate.template),
+            },
+          ])
+          .select("*")
+          .single(),
         {
           queryName: "insert_prompt_version",
         }
@@ -118,6 +124,45 @@ export class PromptStore {
       if (insertResult.error) {
         return err(insertResult.error.message);
       }
+
+      versionId = insertResult.data.id;
+    }
+
+    const inputKeysResult = await this.queryTimer.withTiming(
+      this.database.from("prompt_input_keys").upsert(
+        Object.keys(heliconeTemplate.inputs).map((key) => ({
+          key,
+          prompt_version: versionId,
+        })),
+        {
+          onConflict: "key, prompt_version",
+        }
+      ),
+
+      {
+        queryName: "insert_prompt_input_keys",
+      }
+    );
+
+    if (inputKeysResult.error) {
+      console.error("inputKeysResult", inputKeysResult.error.message);
+      return err(inputKeysResult.error.message);
+    }
+
+    const inputRecordResult = await this.queryTimer.withTiming(
+      this.database.from("prompt_input_record").insert({
+        inputs: heliconeTemplate.inputs,
+        source_request: requestId,
+        prompt_version: versionId,
+      }),
+      {
+        queryName: "insert_prompt_input_records",
+      }
+    );
+    console.log("inputRecordResult", inputRecordResult);
+
+    if (inputRecordResult.error) {
+      return err(inputRecordResult.error.message);
     }
 
     return ok({
