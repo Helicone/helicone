@@ -13,6 +13,3 @@ drop view if exists "public"."request_cache_rbac";
 drop view if exists "public"."request_rbac";
 
 drop view if exists "public"."response_rbac";
-
-
-
