@@ -36,6 +36,10 @@ export class RateLimiter {
         windowSizeSeconds: 5,
         maxCount: 834,
       },
+      growth: {
+        windowSizeSeconds: 5,
+        maxCount: 834,
+      },
       // Previously, the enterprise was 100,000 requests per minute = 1666.6666666666667 requests per second
       // There are 12 5-second intervals in a minute
       // 100k / 12 = 8333.333333333334

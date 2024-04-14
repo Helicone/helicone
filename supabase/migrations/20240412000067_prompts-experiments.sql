@@ -4,6 +4,7 @@ CREATE TABLE "public"."prompt_v2" (
     "description" TEXT,
     pretty_name TEXT,
     organization UUID NOT NULL,
+    soft_delete BOOLEAN DEFAULT FALSE,
     CONSTRAINT unique_user_defined_id UNIQUE (user_defined_id, organization),
     CONSTRAINT fk_organization FOREIGN KEY (organization) REFERENCES organization(id),
     CONSTRAINT check_user_defined_id_length CHECK (LENGTH(user_defined_id) <= 32),
@@ -29,7 +30,7 @@ CREATE TABLE "public"."prompts_versions" (
 );
 CREATE INDEX idx_prompts_versions_major ON prompts_versions(organization, major_version DESC);
 CREATE INDEX idx_prompts_versions_minor ON prompts_versions(organization, major_version DESC, minor_version DESC);
-CREATE UNIQUE INDEX idx_prompts_versions_model ON prompts_versions(organization, prompt_v2, major_version DESC, minor_version DESC);
+CREATE UNIQUE INDEX idx_prompts_versions_model ON prompts_versions(organization, prompt_v2, major_version, minor_version);
 
 alter table "public"."prompts_versions" enable row level security;
 
