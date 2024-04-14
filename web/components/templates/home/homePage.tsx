@@ -468,7 +468,7 @@ const HomePage = (props: HomePageProps) => {
                   <div className="z-30 h-32 w-32 sm:h-40 sm:w-40 absolute rounded-lg bottom-4 mx-auto bg-white shadow-lg flex items-center justify-center border-[3px] border-black p-4">
                     <div className="flex flex-col w-full">
                       <dd className="text-3xl font-bold text-yellow-500">
-                        1.2k
+                        1.3k
                       </dd>
                       <dt className="text-gray-500 text-md">stars</dt>
                     </div>
