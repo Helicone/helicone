@@ -1360,24 +1360,24 @@ export type Database = {
         Row: {
           id: string
           key: string
-          prompt_v2: string
+          prompt_version: string
         }
         Insert: {
           id?: string
           key: string
-          prompt_v2: string
+          prompt_version: string
         }
         Update: {
           id?: string
           key?: string
-          prompt_v2?: string
+          prompt_version?: string
         }
         Relationships: [
           {
-            foreignKeyName: "fk_prompt"
-            columns: ["prompt_v2"]
+            foreignKeyName: "fk_prompt_version"
+            columns: ["prompt_version"]
             isOneToOne: false
-            referencedRelation: "prompt_v2"
+            referencedRelation: "prompts_versions"
             referencedColumns: ["id"]
           },
         ]
@@ -1386,19 +1386,29 @@ export type Database = {
         Row: {
           id: string
           inputs: Json
+          prompt_version: string
           source_request: string | null
         }
         Insert: {
           id?: string
           inputs: Json
+          prompt_version: string
           source_request?: string | null
         }
         Update: {
           id?: string
           inputs?: Json
+          prompt_version?: string
           source_request?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_prompt_version"
+            columns: ["prompt_version"]
+            isOneToOne: false
+            referencedRelation: "prompts_versions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fk_source_request"
             columns: ["source_request"]
