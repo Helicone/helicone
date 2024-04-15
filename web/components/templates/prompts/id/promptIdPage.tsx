@@ -1,6 +1,7 @@
 import {
   ArrowsPointingOutIcon,
   BookOpenIcon,
+  BookmarkIcon,
   ChevronLeftIcon,
   DocumentTextIcon,
   PaintBrushIcon,
@@ -10,8 +11,11 @@ import {
 import { Select, SelectItem } from "@tremor/react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { usePrompts } from "../../../../services/hooks/prompts/prompts";
-import { usePrompt } from "../../../../services/hooks/prompts/singlePrompt";
+import {
+  usePrompts,
+  usePrompt,
+} from "../../../../services/hooks/prompts/prompts";
+
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { Chat } from "../../requests/chat";
@@ -187,18 +191,32 @@ export const RenderWithPrettyInputKeys = (props: {
   );
 };
 
+const getTimeAgo = (date: Date): string => {
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days > 0) {
+    return `${days} days ago`;
+  } else if (hours > 0) {
+    return `${hours} hrs ago`;
+  } else if (minutes > 0) {
+    return `${minutes} min ago`;
+  } else {
+    return `${seconds} sec ago`;
+  }
+};
+
 const PromptIdPage = (props: PromptIdPageProps) => {
   const { id } = props;
-  const { prompts, isLoading } = usePrompts();
+  const { prompt, isLoading } = usePrompt(id);
 
   const org = useOrg();
-  const currentPrompt = prompts?.data?.prompts.find((p) => p.id === id);
-  const [selectedVersion, setSelectedVersion] = useState<string>();
 
-  const selectedPrompt = usePrompt({
-    version: selectedVersion || "0",
-    promptId: id,
-  });
+  const [selectedVersion, setSelectedVersion] = useState<string>();
 
   const [inputOpen, setInputOpen] = useState(false);
   const [experimentOpen, setExperimentOpen] = useState(false);
@@ -212,16 +230,11 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   }>();
 
   // set the selected version to the latest version on initial load
-  useEffect(() => {
-    if (currentPrompt) {
-      setSelectedVersion(currentPrompt.latest_version.toString());
-    }
-  }, [currentPrompt]);
 
   return (
     <>
       <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-col items-start space-y-2">
+        <div className="flex flex-col items-start space-y-2 w-full">
           <Link
             className="flex w-fit items-center text-gray-500 space-x-2 hover:text-gray-700"
             href={"/prompts"}
@@ -229,12 +242,61 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             <ChevronLeftIcon className="h-4 w-4 inline" />
             <span className="text-sm font-semibold">Prompts</span>
           </Link>
-          <h1 className="font-semibold text-3xl text-black dark:text-white">
-            {id}
-          </h1>
+          <div className="flex justify-between w-full">
+            <div className="flex gap-3  items-end">
+              <h1 className="font-semibold text-3xl text-black dark:text-white">
+                {prompt?.user_defined_id}
+              </h1>
+
+              <ThemedPill
+                label={`${(prompt?.major_version ?? 0) + 1} version(s)`}
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                className="flex items-center gap-2 text-sm font-semibold text-blue-500 hover:text-blue-700"
+                onClick={() => setExperimentOpen(!experimentOpen)}
+              >
+                <BookmarkIcon className="h-5 w-5" />
+                <span>View Prompt</span>
+              </button>
+              <button
+                className="flex items-center gap-2 text-sm font-semibold text-blue-500 hover:text-blue-700"
+                onClick={() => setExperimentOpen(!experimentOpen)}
+              >
+                <BeakerIcon className="h-5 w-5" />
+                <span>Start Experiment</span>
+              </button>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <div className=" text-black dark:text-white opacity-60">
+              lasted used:{" "}
+              {prompt?.last_used && getTimeAgo(new Date(prompt?.last_used))}
+            </div>
+            <div className="rounded-full h-1 w-1 bg-slate-400" />
+            <div className=" text-black dark:text-white font-bold">
+              {prompt?.latest_model_used}
+            </div>
+            <div className="rounded-full h-1 w-1 bg-slate-400" />
+            <div className=" text-black dark:text-white opacity-60">
+              {prompt?.created_at &&
+                new Date(prompt?.created_at).toDateString()}
+            </div>
+          </div>
         </div>
       </div>
-      {isLoading ? (
+      {JSON.stringify(prompt?.versions)}
+
+      <div className="mt-2 flex flex-col min-h-[30vh] h-full bg-blue-200 items-center justify-center">
+        Graph
+      </div>
+
+      <div className="mt-2 flex flex-col min-h-[30vh] h-full bg-blue-200 items-center justify-center">
+        Experiments
+      </div>
+      {/* {isLoading ? (
         <p>Loading...</p>
       ) : (
         <div className="flex flex-col min-h-[80vh] h-full">
@@ -246,17 +308,15 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   className="w-full flex items-center justify-between"
                 >
                   <div className="flex items-center space-x-1">
-                    {org?.currentOrg?.tier === "enterprise" && (
-                      <button
-                        className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
-                        onClick={() => setExperimentOpen(!experimentOpen)}
-                      >
-                        <BeakerIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-                          Run Experiment
-                        </p>
-                      </button>
-                    )}
+                    <button
+                      className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+                      onClick={() => setExperimentOpen(!experimentOpen)}
+                    >
+                      <BeakerIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
+                        Run Experiment
+                      </p>
+                    </button>
 
                     <button
                       onClick={() => setInputOpen(!inputOpen)}
@@ -390,8 +450,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             )}
           </div>
         </div>
-      )}
-      <ThemedDrawer
+      )} */}
+      {/* <ThemedDrawer
         open={experimentOpen}
         setOpen={setExperimentOpen}
         defaultExpanded={true}
@@ -430,7 +490,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             />
           ))}
         </ul>
-      </ThemedDrawer>
+      </ThemedDrawer> */}
     </>
   );
 };
