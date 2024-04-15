@@ -22,7 +22,10 @@ import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
 import { isImageModel } from "../util/imageModelMapper";
 import { getImageModelParser } from "./imageParsers/parserMapper";
-import { TemplateWithInputs } from "../../api/lib/promptHelpers";
+import {
+  injectAssetIds,
+  TemplateWithInputs,
+} from "../../api/lib/promptHelpers";
 
 export interface DBLoggableProps {
   response: {
@@ -741,15 +744,20 @@ export class DBLoggable {
 
     if (this.request.heliconeTemplate && this.request.promptId) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const upsertResult2 = await db.queue.promptStore.upsertPromptV2(
+      const heliconeTemplateWithAssets = injectAssetIds(
         this.request.heliconeTemplate,
+        requestResult.data.requestAssets
+      );
+
+      const upsertResult2 = await db.queue.promptStore.upsertPromptV2(
+        heliconeTemplateWithAssets,
         this.request.promptId,
         authParams.organizationId,
         this.request.requestId
       );
 
       const upsertResult = await db.queue.upsertPrompt(
-        this.request.heliconeTemplate,
+        heliconeTemplateWithAssets,
         this.request.promptId ?? "",
         authParams.organizationId
       );

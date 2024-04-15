@@ -106,3 +106,69 @@ export function parseJSXObject(input: object): {
     },
   };
 }
+
+export function injectAssetIds(
+  originalTemplateWithInputs: TemplateWithInputs,
+  assetMapping: Record<string, string>
+): TemplateWithInputs {
+  const uuids: string[] = Object.keys(assetMapping); // Get all UUID keys from the asset mapping
+  let uuidIndex = 0; // Index to access UUIDs in order
+
+  function deepClone(obj: any): any {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  function inject(obj: any): any {
+    if (Array.isArray(obj)) {
+      return obj.map((item) => inject(item)); // Process each element in the array recursively
+    } else if (obj && typeof obj === "object") {
+      const newObj: any = {};
+      for (const prop in obj) {
+        // Handle arrays separately to deeply clone and modify their contents if necessary
+        if (prop === "content" && Array.isArray(obj[prop])) {
+          newObj[prop] = obj[prop].map((item: any) => {
+            if (
+              item.type === "image_url" &&
+              item.image_url &&
+              item.image_url.url
+            ) {
+              const newItem = deepClone(item); // Deep clone the item to safely modify
+              // Regex to find helicone-prompt-input placeholders
+              const regex = /<helicone-prompt-input key="([^"]+)" \/>/g;
+              newItem.image_url.url = newItem.image_url.url.replace(
+                regex,
+                (match: any, key: any) => {
+                  if (uuidIndex < uuids.length) {
+                    const assetId = uuids[uuidIndex++]; // Use each UUID sequentially
+                    return `<helicone-prompt-input key="${key}" ><helicone-asset-id key="${assetId}"/></helicone-prompt-input>`;
+                  }
+                  return match; // Return the original match if no more UUIDs are available
+                }
+              );
+              return newItem;
+            } else {
+              return inject(item); // Recursively copy and modify non-image_url items
+            }
+          });
+        } else if (typeof obj[prop] === "object") {
+          newObj[prop] = inject(obj[prop]); // Recursive call for nested objects
+        } else {
+          newObj[prop] = obj[prop]; // Directly copy primitive properties
+        }
+      }
+      return newObj;
+    } else {
+      return obj; // Return primitive types unchanged
+    }
+  }
+
+  // Start with a deep copy of the template to ensure no modifications to the original
+  const newTemplate = deepClone(originalTemplateWithInputs.template);
+  const modifiedTemplate = inject(newTemplate);
+
+  // Construct a new TemplateWithInputs object with the modified template and the original inputs
+  return {
+    template: modifiedTemplate,
+    inputs: { ...originalTemplateWithInputs.inputs }, // Shallow copy of inputs as they don't need modification
+  };
+}
