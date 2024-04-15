@@ -681,7 +681,7 @@ export class DBLoggable {
       requestResult?.data?.request?.model ??
       "not-found";
 
-    const assets: Map<string, string> = new Map([
+    let assets: Map<string, string> = new Map([
       ...requestResult.data.requestAssets,
     ]);
 
@@ -950,7 +950,7 @@ export async function logRequest(
     // eslint-disable-next-line prefer-const
     let imageModelParsingResponse: ImageModelParsingResponse = {
       body: body,
-      assets: {},
+      assets: new Map<string, string>(),
     };
     const model = getModelFromRequest();
 
@@ -1031,7 +1031,7 @@ export async function logRequest(
           job: jobNode?.data.job ?? null,
         },
         body: body,
-        requestAssets: imageModelParsingResponse,
+        requestAssets: imageModelParsingResponse.assets,
       },
       error: null,
     };

@@ -12,12 +12,11 @@ export class DalleImageParser extends ImageModelResponseBodyParser {
     const requestBody = JSON.parse(JSON.stringify(body));
     try {
       // Assuming 'data' is the key containing the image information in DALL·E's response structure
-      body?.data?.forEach((item: any) => {
+      requestBody?.data?.forEach((item: any) => {
         if (item.url) {
           const assetId = this.generateAssetId();
-          const imageUrl = `<helicone-asset-id key="${assetId}"/>`;
-          requestAssets.set(assetId, imageUrl);
-          item.url = imageUrl;
+          requestAssets.set(assetId, item.url);
+          item.url = `<helicone-asset-id key="${assetId}"/>`;
         }
       });
     } catch (error) {
