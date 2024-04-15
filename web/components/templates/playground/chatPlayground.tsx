@@ -317,9 +317,6 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           </div>
         </li>
       )}
-      <div className="p-4 border border-red-500 whitespace-pre-wrap">
-        {JSON.stringify(currentChat, null, 2)}
-      </div>
       <li className="px-8 py-4 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg justify-between space-x-4 flex">
         <div className="w-full">
           <button
