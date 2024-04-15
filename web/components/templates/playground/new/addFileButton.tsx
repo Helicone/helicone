@@ -1,10 +1,11 @@
 import { PencilIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { ChangeEvent, useRef, useState } from "react";
 import ThemedModal from "../../../shared/themed/themedModal";
+import { Divider, TextInput } from "@tremor/react";
 
 interface AddFileButtonProps {
-  file: File | null;
-  onFileChange: (file: File | null) => void;
+  file: File | string | null;
+  onFileChange: (file: File | string | null) => void;
 }
 
 const AddFileButton = (props: AddFileButtonProps) => {
@@ -12,6 +13,7 @@ const AddFileButton = (props: AddFileButtonProps) => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
+  const [currentFile, setCurrentFile] = useState<File | string | null>(file);
 
   const handleClick = () => {
     if (fileInputRef.current) {
@@ -19,73 +21,91 @@ const AddFileButton = (props: AddFileButtonProps) => {
     }
   };
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      const file = event.target.files[0];
-      onFileChange(file);
-      //   setFile(file);
+  const onFileChangeSubmit = () => {
+    // file handler
+    if (currentFile instanceof File) {
+      onFileChange(currentFile);
+    }
+    // url handler
+    else if (currentFile) {
+      onFileChange(currentFile);
+    } else {
+      onFileChange(null);
     }
   };
 
   return (
     <div className="flex items-center gap-2">
-      <input
-        ref={fileInputRef}
-        type="file"
-        onChange={handleChange}
-        accept="image/*"
-        style={{ display: "none" }}
-      />
       <button
         onClick={() => {
           setOpen(!open);
         }}
-        className="w-fit border border-gray-300 dark:border-gray-700 px-2 py-1 rounded-lg text-xs flex items-center gap-2"
+        className="w-fit text-black dark:text-white border border-gray-300 dark:border-gray-700 px-2 py-1 rounded-lg text-xs flex items-center gap-2"
       >
-        <PlusIcon className="h-4 w-4" />
-        Add Image
+        {file ? (
+          <>
+            <PencilIcon className="h-4 w-4" />
+            Edit Image
+          </>
+        ) : (
+          <>
+            <PlusIcon className="h-4 w-4" />
+            Add Image
+          </>
+        )}
       </button>
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="w-[400px] h-full flex flex-col space-y-4">
-          <h2 className="text-2xl font-semibold text-black dark:text-white">
-            Message Image
+          <h2 className="text-xl font-semibold text-black dark:text-white">
+            Chat Image
           </h2>
-        </div>
-      </ThemedModal>
-      {file ? (
-        <div className="flex flex-col space-y-2 relative">
-          <img
-            src={URL.createObjectURL(file)}
-            alt={file.name}
-            width={256}
-            height={256}
+          <p className="text-sm text-gray-500">
+            Upload an image or enter in an image URL.
+          </p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={(e) => {
+              setCurrentFile(e.target.files ? e.target.files[0] : null);
+            }}
+            accept="image/*"
+            style={{ display: "none" }}
           />
           <button
-            onClick={() => {
-              onFileChange(null);
-            }}
-            className="absolute -top-4 -right-2"
-          >
-            <XMarkIcon className="h-4 w-4 text-white bg-red-500 rounded-full p-0.5" />
-          </button>
-
-          <button
+            disabled={true}
             onClick={handleClick}
-            className="w-fit border border-gray-300 dark:border-gray-700 px-2 py-1 rounded-lg text-xs flex items-center gap-2"
+            className="hover:cursor-not-allowed bg-gray-100 dark:bg-gray-900 w-full border border-dashed border-gray-300 dark:border-gray-700 px-4 py-8 rounded-lg text-xs flex items-center justify-center gap-2"
           >
-            <PencilIcon className="h-4 w-4" />
-            Change Image
+            <PlusIcon className="h-4 w-4" />
+            Upload from Computer
           </button>
+          <Divider className="">or</Divider>
+          <TextInput
+            placeholder={"http://exampleurl.com"}
+            onChange={(e) => {
+              setCurrentFile(e.target.value);
+            }}
+          />
+
+          <div className="border-t border-gray-300 flex justify-end gap-2 pt-4">
+            <button
+              onClick={() => setOpen(false)}
+              className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                onFileChangeSubmit();
+                setOpen(false);
+              }}
+              className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              {file ? "Change Image" : "Add Image"}
+            </button>
+          </div>
         </div>
-      ) : (
-        <button
-          onClick={handleClick}
-          className="w-fit border border-gray-300 dark:border-gray-700 px-2 py-1 rounded-lg text-xs flex items-center gap-2"
-        >
-          <PlusIcon className="h-4 w-4" />
-          Add Image
-        </button>
-      )}
+      </ThemedModal>
     </div>
   );
 };

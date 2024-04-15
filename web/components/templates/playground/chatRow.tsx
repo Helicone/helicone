@@ -27,9 +27,22 @@ import AddFileButton from "./new/addFileButton";
 interface ChatRowProps {
   index: number;
   message: Message;
-  callback: (userText: string, role: string) => void;
+  callback: (
+    userText: string,
+    role: string,
+    image: File | string | null
+  ) => void;
   deleteRow: (rowId: string) => void;
 }
+
+export const hasImage = (content: string | any[] | null) => {
+  if (Array.isArray(content)) {
+    return content.some(
+      (element) => element.type === "image" || element.type === "image_url"
+    );
+  }
+  return false;
+};
 
 const ChatRow = (props: ChatRowProps) => {
   const { index, message, callback, deleteRow } = props;
@@ -50,7 +63,19 @@ const ChatRow = (props: ChatRowProps) => {
 
   const [isEditing, setIsEditing] = useState(false);
 
-  const [file, setFile] = useState<File | null>(null);
+  const searchAndGetImage = (message: Message) => {
+    if (Array.isArray(message.content) && hasImage(message.content)) {
+      const image = message.content.find(
+        (element) => element.type === "image" || element.type === "image_url"
+      );
+      return image.image_url?.url || image.image;
+    }
+    return null;
+  };
+
+  const [file, setFile] = useState<File | string | null>(
+    searchAndGetImage(message)
+  );
 
   const { setNotification } = useNotification();
 
@@ -67,33 +92,44 @@ const ChatRow = (props: ChatRowProps) => {
 
   const contentAsString = getContentAsString(currentMessage);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleClick = () => {
-    // The non-null assertion operator after current is no longer necessary
-    // because TypeScript now knows the type of fileInputRef.current
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
+  const onFileChangeHandler = (file: File | string | null, text: string) => {
+    setFile(file);
+    const newMessage = {
+      ...currentMessage,
+    };
+    if (file instanceof File) {
+      newMessage.content = [
+        {
+          type: "text",
+          text,
+        },
+        {
+          type: "image",
+          image: file,
+        },
+      ];
     }
-  };
-
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      const file = event.target.files[0];
-      setFile(file);
+    if (typeof file === "string") {
+      newMessage.content = [
+        {
+          type: "text",
+          text,
+        },
+        {
+          type: "image_url",
+          image_url: {
+            url: file,
+          },
+        },
+      ];
     }
+
+    setCurrentMessage(newMessage);
+    callback(contentAsString || "", role, file);
   };
 
   const getContent = (content: string | any[] | null, minimize: boolean) => {
     // check if the content is an array and it has an image type or image_url type
-    const hasImage = () => {
-      if (Array.isArray(content)) {
-        return content.some(
-          (element) => element.type === "image" || element.type === "image_url"
-        );
-      }
-      return false;
-    };
 
     if (Array.isArray(content)) {
       const textMessage = content.find((element) => element.type === "text");
@@ -111,70 +147,57 @@ const ChatRow = (props: ChatRowProps) => {
           <AddFileButton
             file={file}
             onFileChange={(file) => {
-              setFile(file);
+              onFileChangeHandler(file, textMessage?.text);
             }}
           />
-          {/* <div className="flex items-center gap-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              onChange={handleChange}
-              accept="image/*"
-              style={{ display: "none" }}
-            />
-            {file ? (
-              <div className="flex flex-col space-y-2 relative">
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt={file.name}
-                  width={256}
-                  height={256}
-                />
-                <button
-                  onClick={() => setFile(null)}
-                  className="absolute -top-4 -right-2"
-                >
-                  <XMarkIcon className="h-4 w-4 text-white bg-red-500 rounded-full p-0.5" />
-                </button>
-
-                <button
-                  onClick={handleClick}
-                  className="w-fit border border-gray-300 dark:border-gray-700 px-2 py-1 rounded-lg text-xs flex items-center gap-2"
-                >
-                  <PencilIcon className="h-4 w-4" />
-                  Change Image
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={handleClick}
-                className="w-fit border border-gray-300 dark:border-gray-700 px-2 py-1 rounded-lg text-xs flex items-center gap-2"
-              >
-                <PlusIcon className="h-4 w-4" />
-                Add Image
-              </button>
-            )}
-          </div> */}
-
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          {hasImage() && (
+          {hasImage(content) && (
             <div className="flex flex-wrap items-center pt-4 border-t border-gray-300 dark:border-gray-700">
               {content.map((item, index) =>
                 item.type === "image_url" || item.type === "image" ? (
-                  <div key={index}>
+                  <div key={index} className="relative">
                     {item.image_url?.url ? (
                       <img
                         src={item.image_url.url}
                         alt={""}
-                        width={800}
-                        height={800}
-                        className="bg-white border border-gray-300 rounded-lg p-2"
+                        width={256}
+                        height={256}
+                      />
+                    ) : item.image ? (
+                      <img
+                        src={URL.createObjectURL(item.image)}
+                        alt={""}
+                        width={256}
+                        height={256}
                       />
                     ) : (
                       <div className="h-[150px] w-[200px] bg-white border border-gray-300 text-center items-center flex justify-center text-xs italic text-gray-500">
                         Unsupported Image Type
                       </div>
                     )}
+                    <button
+                      onClick={() => {
+                        setFile(null);
+                        const newMessage = {
+                          ...currentMessage,
+                        };
+                        if (
+                          newMessage.content &&
+                          Array.isArray(newMessage.content)
+                        ) {
+                          newMessage.content = newMessage.content.filter(
+                            (element) =>
+                              element.type !== "image" &&
+                              element.type !== "image_url"
+                          );
+                        }
+
+                        setCurrentMessage(newMessage);
+                        callback(contentAsString || "", role, null);
+                      }}
+                    >
+                      <XMarkIcon className="absolute -top-2 -right-2 h-4 w-4 text-white bg-red-500 rounded-full p-0.5" />
+                    </button>
                   </div>
                 ) : null
               )}
@@ -194,47 +217,12 @@ const ChatRow = (props: ChatRowProps) => {
             }
             selectedProperties={undefined}
           />
-          <div className="flex items-center gap-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              onChange={handleChange}
-              accept="image/*"
-              style={{ display: "none" }}
-            />
-            {file ? (
-              <div className="flex flex-col space-y-2 relative">
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt={file.name}
-                  width={256}
-                  height={256}
-                />
-                <button
-                  onClick={() => setFile(null)}
-                  className="absolute -top-4 -right-2"
-                >
-                  <XMarkIcon className="h-4 w-4 text-white bg-red-500 rounded-full p-0.5" />
-                </button>
-
-                <button
-                  onClick={handleClick}
-                  className="w-fit border border-gray-300 dark:border-gray-700 px-2 py-1 rounded-lg text-xs flex items-center gap-2"
-                >
-                  <PencilIcon className="h-4 w-4" />
-                  Change Image
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={handleClick}
-                className="w-fit border border-gray-300 dark:border-gray-700 px-2 py-1 rounded-lg text-xs flex items-center gap-2"
-              >
-                <PlusIcon className="h-4 w-4" />
-                Add Image
-              </button>
-            )}
-          </div>
+          <AddFileButton
+            file={file}
+            onFileChange={(file) => {
+              onFileChangeHandler(file, contentString);
+            }}
+          />
         </div>
       );
     }
@@ -261,7 +249,7 @@ const ChatRow = (props: ChatRowProps) => {
 
                 newMessage.role = newRole;
                 setCurrentMessage(newMessage);
-                callback(contentAsString || "", newRole);
+                callback(contentAsString || "", newRole, file);
               }}
             />
             <div className="flex items-center space-x-2">
@@ -325,9 +313,18 @@ const ChatRow = (props: ChatRowProps) => {
                     value={contentAsString || ""}
                     onChange={(e) => {
                       const newMessages = { ...currentMessage };
-                      newMessages.content = e.target.value;
+                      const messageContent = newMessages.content;
+                      if (Array.isArray(messageContent)) {
+                        const textMessage = messageContent.find(
+                          (element) => element.type === "text"
+                        );
+                        textMessage.text = e.target.value;
+                      } else {
+                        newMessages.content = e.target.value;
+                      }
+
                       setCurrentMessage(newMessages);
-                      callback((contentAsString as string) || "", role);
+                      callback((contentAsString as string) || "", role, file);
                     }}
                   />
                 </span>

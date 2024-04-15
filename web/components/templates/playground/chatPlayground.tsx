@@ -172,11 +172,49 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             key={c.id}
             index={i}
             message={c}
-            callback={(userText: string, role: string) => {
+            callback={(
+              userText: string,
+              role: string,
+              image: File | string | null
+            ) => {
               const newChat = [...currentChat];
-              newChat[i].content = userText;
-              newChat[i].role = role as "user" | "assistant";
-              setCurrentChat(newChat);
+
+              newChat[i].role = role as "user" | "assistant" | "system";
+              if (image) {
+                if (typeof image === "string") {
+                  newChat[i].content = [
+                    {
+                      type: "image_url",
+                      image_url: {
+                        url: image,
+                      },
+                    },
+                    { type: "text", text: userText },
+                  ];
+                  setCurrentChat(newChat);
+                  return;
+                }
+                if (image instanceof File) {
+                  // get the image from the file and set it
+                  const imageObj = URL.createObjectURL(image);
+                  // get the image from
+                  newChat[i].content = [
+                    {
+                      type: "image",
+                      image: imageObj,
+                    },
+                    { type: "text", text: userText },
+                  ];
+                  setCurrentChat(newChat);
+                  return;
+                } else {
+                  newChat[i].content = userText;
+                  setCurrentChat(newChat);
+                }
+              } else {
+                newChat[i].content = userText;
+                setCurrentChat(newChat);
+              }
             }}
             deleteRow={(rowId) => {
               deleteRowHandler(rowId);
@@ -262,7 +300,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     <ul className="w-full border border-gray-300 dark:border-gray-700 rounded-lg relative h-fit">
       {generateChatRows()}
       {isLoading && (
-        <li className="flex flex-row justify-between px-8 py-4 bg-white border-t border-gray-300 dark:border-gray-700">
+        <li className="flex flex-row justify-between px-8 py-4 bg-white dark:bg-black border-t border-gray-300 dark:border-gray-700">
           <div className="flex flex-col gap-4 w-full">
             <div className="flex flex-col space-y-4 w-full h-full relative">
               <RoleButton
@@ -279,6 +317,9 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           </div>
         </li>
       )}
+      <div className="p-4 border border-red-500 whitespace-pre-wrap">
+        {JSON.stringify(currentChat, null, 2)}
+      </div>
       <li className="px-8 py-4 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg justify-between space-x-4 flex">
         <div className="w-full">
           <button
