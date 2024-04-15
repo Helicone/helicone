@@ -5,6 +5,7 @@ CREATE TABLE "public"."prompt_v2" (
     pretty_name TEXT,
     organization UUID NOT NULL,
     soft_delete BOOLEAN DEFAULT FALSE,
+    "created_at" timestamp with time zone default now(),
     CONSTRAINT unique_user_defined_id UNIQUE (user_defined_id, organization),
     CONSTRAINT fk_organization FOREIGN KEY (organization) REFERENCES organization(id),
     CONSTRAINT check_user_defined_id_length CHECK (LENGTH(user_defined_id) <= 128),
@@ -23,6 +24,7 @@ CREATE TABLE "public"."prompts_versions" (
     prompt_v2 UUID NOT NULL,
     model TEXT,
     organization UUID NOT NULL,
+    "created_at" timestamp with time zone default now(),
     CONSTRAINT fk_prompt FOREIGN KEY (prompt_v2) REFERENCES prompt_v2(id),
     CONSTRAINT fk_organization FOREIGN KEY (organization) REFERENCES organization(id),
     CONSTRAINT check_major_version CHECK (major_version >= 0),
@@ -38,6 +40,7 @@ CREATE TABLE  "public"."prompt_input_keys" (
     id UUID PRIMARY KEY default gen_random_uuid(),
     key TEXT NOT NULL CHECK (LENGTH(key) <= 128),
     prompt_version UUID NOT NULL,
+    "created_at" timestamp with time zone default now(),
     CONSTRAINT fk_prompt_version FOREIGN KEY (prompt_version) REFERENCES prompts_versions(id),
     CONSTRAINT unique_key UNIQUE (prompt_version, key)
 );
@@ -51,6 +54,7 @@ CREATE TABLE "public"."prompt_input_record" (
     inputs JSONB NOT NULL,
     source_request UUID,
     prompt_version UUID NOT NULL,
+    "created_at" timestamp with time zone default now(),
     CONSTRAINT fk_prompt_version FOREIGN KEY (prompt_version) REFERENCES prompts_versions(id),
     CONSTRAINT fk_source_request FOREIGN KEY (source_request) REFERENCES request(id)
 );
@@ -62,6 +66,7 @@ alter table "public"."prompt_input_record" enable row level security;
 
 CREATE TABLE "public"."experiment_dataset_v2" (
     id UUID PRIMARY KEY default gen_random_uuid(),
+    "created_at" timestamp with time zone default now(),
     "name" TEXT
 );
 
@@ -71,6 +76,7 @@ CREATE TABLE "public"."experiment_dataset_v2_row" (
     id UUID PRIMARY KEY default gen_random_uuid(),
     input_record UUID,
     dataset_id UUID,
+    "created_at" timestamp with time zone default now(),
     CONSTRAINT fk_dataset_id FOREIGN KEY (dataset_id) REFERENCES experiment_dataset_v2(id)
 );
 
@@ -80,6 +86,7 @@ CREATE TABLE  "public"."experiment_v2" (
     id UUID PRIMARY KEY default gen_random_uuid(),
     dataset UUID,
     organization UUID,
+    "created_at" timestamp with time zone default now(),
     CONSTRAINT fk_dataset FOREIGN KEY (dataset) REFERENCES experiment_dataset_v2(id)
 );
 
@@ -91,6 +98,7 @@ CREATE TABLE  "public"."experiment_v2_hypothesis" (
     model TEXT NOT NULL,
     status TEXT NOT NULL CHECK (status IN ('PENDING', 'RUNNING', 'COMPLETED', 'CANCELLED', 'ERROR')),
     experiment_v2 UUID,
+    "created_at" timestamp with time zone default now(),
     CONSTRAINT fk_experiment FOREIGN KEY (experiment_v2) REFERENCES experiment_v2(id),
     CONSTRAINT fk_prompt_version FOREIGN KEY (prompt_version) REFERENCES prompts_versions(id)
 );
@@ -101,6 +109,7 @@ CREATE TABLE  experiment_v2_hypothesis_run (
     id UUID PRIMARY KEY default gen_random_uuid(),
     experiment_hypothesis UUID NOT NULL,
     dataset_row UUID NOT NULL,
+    "created_at" timestamp with time zone default now(),
     CONSTRAINT fk_experiment_hypothesis FOREIGN KEY (experiment_hypothesis) REFERENCES experiment_v2_hypothesis(id),
     CONSTRAINT fk_dataset_row FOREIGN KEY (dataset_row) REFERENCES experiment_dataset_v2_row(id)
 );
@@ -111,6 +120,7 @@ CREATE TABLE "public"."score_attribute" (
     id UUID PRIMARY KEY default gen_random_uuid(),
     score_key TEXT NOT NULL,
     organization UUID NOT NULL,
+    "created_at" timestamp with time zone default now(),
     CONSTRAINT unique_score_key UNIQUE (score_key, organization),
     CONSTRAINT fk_organization FOREIGN KEY (organization) REFERENCES organization(id)
 );
@@ -122,6 +132,7 @@ CREATE TABLE "public"."score_value" (
     int_value BIGINT,
     score_attribute UUID NOT NULL,
     request_id UUID NOT NULL,
+    "created_at" timestamp with time zone default now(),
     CONSTRAINT fk_score_attribute FOREIGN KEY (score_attribute) REFERENCES score_attribute(id),
     CONSTRAINT fk_request_id FOREIGN KEY (request_id) REFERENCES request(id)
 );
