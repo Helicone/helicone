@@ -12,6 +12,7 @@ import { fetchOpenAI } from "../../../services/lib/openAI";
 import { Message } from "../requests/chat";
 import ModelPill from "../requestsV2/modelPill";
 import ChatRow from "./chatRow";
+import RoleButton from "./new/roleButton";
 
 interface ChatPlaygroundProps {
   requestId: string;
@@ -64,7 +65,6 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         // Perform the OpenAI request
         const { data, error } = await fetchOpenAI(
           historyWithoutId as unknown as ChatCompletionCreateParams[],
-          requestId,
           temperature,
           model,
           maxTokens
@@ -118,36 +118,48 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
       } else {
         if (modelMessage.length > 0) {
           renderRows.push(
-            <div className="flex flex-col px-8 py-6 space-y-4 border-b border-gray-300 bg-gray-200 dark:border-gray-700 dark:bg-[#17191d]">
-              <button
-                className={clsx(
-                  "hover:bg-gray-50 dark:hover:bg-gray-900 hover:cursor-not-allowed",
-                  "bg-white dark:bg-black border border-gray-300 dark:border-gray-700",
-                  "text-gray-900 dark:text-gray-100 w-20 h-6 text-xs rounded-lg font-semibold text-center justify-center items-center"
-                )}
-              >
-                assistant
-              </button>
-              <div className="w-full h-full flex flex-row justify-between space-x-4 divide-x divide-gray-300 dark:divide-gray-700">
-                {modelMessage.map((message, idx) => (
-                  <div
-                    key={idx}
-                    className={clsx(
-                      idx === 0 ? "" : "pl-4",
-                      "w-full h-auto flex flex-col space-y-2 col-span-1 relative"
-                    )}
-                  >
-                    <div className="flex justify-center items-center">
-                      <ModelPill model={message.model ?? ""} />
+            <div
+              className={clsx(
+                i !== 0 && "border-t",
+                "flex flex-col w-full h-full relative space-y-4 bg-white border-gray-300 dark:border-gray-700"
+              )}
+            >
+              <div className="flex w-full justify-between px-8 pt-4 rounded-t-lg">
+                <RoleButton
+                  role={"assistant"}
+                  onRoleChange={function (
+                    role: "function" | "assistant" | "user" | "system"
+                  ): void {}}
+                  disabled={true}
+                />
+              </div>
+              <div className="w-full px-8 pb-4">
+                <div className="w-full h-full flex flex-row justify-between space-x-4 divide-x divide-gray-300 dark:divide-gray-700">
+                  {modelMessage.map((message, idx) => (
+                    <div
+                      key={idx}
+                      className={clsx(
+                        idx === 0 ? "" : "pl-4",
+                        "w-full h-auto flex flex-col space-y-2 col-span-1 relative"
+                      )}
+                    >
+                      <div className="flex justify-center items-center">
+                        <ModelPill model={message.model ?? ""} />
+                      </div>
+                      <div className="p-4 text-gray-900 dark:text-gray-100">
+                        <p>{message.content}</p>
+                      </div>
+                      <div className="flex w-full justify-end bottom-0 absolute text-xs text-gray-900 dark:text-gray-100">
+                        <p
+                          className={clsx(
+                            "bg-gray-50 text-gray-700 ring-gray-200",
+                            `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+                          )}
+                        >{`${message.latency} ms`}</p>
+                      </div>
                     </div>
-                    <div className="p-4 text-gray-900 dark:text-gray-100">
-                      <p>{message.content}</p>
-                    </div>
-                    <div className="flex w-full justify-end bottom-0 absolute text-xs text-gray-900 dark:text-gray-100">
-                      <p>{`${message.latency} ms`}</p>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           );
@@ -160,11 +172,49 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             key={c.id}
             index={i}
             message={c}
-            callback={(userText: string, role: string) => {
+            callback={(
+              userText: string,
+              role: string,
+              image: File | string | null
+            ) => {
               const newChat = [...currentChat];
-              newChat[i].content = userText;
-              newChat[i].role = role;
-              setCurrentChat(newChat);
+
+              newChat[i].role = role as "user" | "assistant" | "system";
+              if (image) {
+                if (typeof image === "string") {
+                  newChat[i].content = [
+                    {
+                      type: "image_url",
+                      image_url: {
+                        url: image,
+                      },
+                    },
+                    { type: "text", text: userText },
+                  ];
+                  setCurrentChat(newChat);
+                  return;
+                }
+                if (image instanceof File) {
+                  // get the image from the file and set it
+                  const imageObj = URL.createObjectURL(image);
+                  // get the image from
+                  newChat[i].content = [
+                    {
+                      type: "image",
+                      image: imageObj,
+                    },
+                    { type: "text", text: userText },
+                  ];
+                  setCurrentChat(newChat);
+                  return;
+                } else {
+                  newChat[i].content = userText;
+                  setCurrentChat(newChat);
+                }
+              } else {
+                newChat[i].content = userText;
+                setCurrentChat(newChat);
+              }
             }}
             deleteRow={(rowId) => {
               deleteRowHandler(rowId);
@@ -184,8 +234,9 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             callback={(userText: string, role: string) => {
               const newChat = [...currentChat];
               newChat[currentChat.length - 1].content = userText;
-              newChat[currentChat.length - 1].role = role;
-              setCurrentChat(newChat);
+              newChat[currentChat.length - 1].role = role as
+                | "user"
+                | "assistant";
             }}
             deleteRow={(rowId) => {
               deleteRowHandler(rowId);
@@ -194,16 +245,14 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         );
       } else {
         renderRows.push(
-          <div className="flex flex-col px-8 py-6 space-y-8 border-b border-gray-300 bg-gray-200 dark:border-gray-700 dark:bg-[#17191d]">
-            <button
-              className={clsx(
-                "hover:bg-gray-50 dark:hover:bg-gray-900 hover:cursor-not-allowed",
-                "bg-white dark:bg-black border border-gray-300 dark:border-gray-700",
-                "text-gray-900 dark:text-gray-100 w-20 h-6 text-xs rounded-lg font-semibold text-center justify-center items-center"
-              )}
-            >
-              assistant
-            </button>
+          <div className="flex flex-col px-8 py-4 space-y-8 bg-white dark:bg-black border-t border-gray-300 dark:border-gray-700">
+            <RoleButton
+              role={"assistant"}
+              onRoleChange={function (
+                role: "function" | "assistant" | "user" | "system"
+              ): void {}}
+              disabled={true}
+            />
             <div
               className={clsx(
                 modelMessage.length > 3
@@ -228,8 +277,13 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                   <div className="p-4 text-gray-900 dark:text-gray-100">
                     <p>{message.content}</p>
                   </div>
-                  <div className="flex w-full justify-end bottom-0 absolute text-xs text-gray-900 dark:text-gray-100">
-                    <p>{`${message.latency} ms`}</p>
+                  <div className="flex w-full justify-end pt-4 text-xs text-gray-900 dark:text-gray-100">
+                    <p
+                      className={clsx(
+                        "bg-gray-50 text-gray-700 ring-gray-200",
+                        `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+                      )}
+                    >{`${message.latency} ms`}</p>
                   </div>
                 </div>
               ))}
@@ -246,17 +300,16 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     <ul className="w-full border border-gray-300 dark:border-gray-700 rounded-lg relative h-fit">
       {generateChatRows()}
       {isLoading && (
-        <li className="flex flex-row justify-between px-8 py-6 gap-8">
+        <li className="flex flex-row justify-between px-8 py-4 bg-white dark:bg-black border-t border-gray-300 dark:border-gray-700">
           <div className="flex flex-col gap-4 w-full">
-            <div className="flex flex-row space-x-8 w-full h-full relative">
-              <button
-                className={clsx(
-                  "bg-white border border-gray-300 dark:border-gray-700 dark:bg-black",
-                  "text-gray-900 dark:text-gray-100 w-20 h-6 text-xs rounded-lg font-semibold"
-                )}
-              >
-                assistant
-              </button>
+            <div className="flex flex-col space-y-4 w-full h-full relative">
+              <RoleButton
+                role={"assistant"}
+                onRoleChange={function (
+                  role: "function" | "system" | "user" | "assistant"
+                ): void {}}
+                disabled={true}
+              />
               <span className="flex flex-row space-x-1 items-center">
                 <ArrowPathIcon className="h-4 w-4 text-gray-500 animate-spin" />
               </span>
@@ -264,7 +317,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           </div>
         </li>
       )}
-      <li className="px-8 py-4 bg-white dark:bg-black rounded-b-lg justify-between space-x-4 flex">
+      <li className="px-8 py-4 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg justify-between space-x-4 flex">
         <div className="w-full">
           <button
             onClick={() => {

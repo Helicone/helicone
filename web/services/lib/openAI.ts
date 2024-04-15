@@ -6,10 +6,10 @@ import { Result } from "../../lib/result";
 
 export const fetchOpenAI = async (
   messages: ChatCompletionCreateParams[],
-  requestId: string,
   temperature: number,
   model: string,
-  maxTokens: number
+  maxTokens: number,
+  requestId?: string
 ) => {
   const completion = await fetch("/api/open_ai/chat", {
     method: "POST",

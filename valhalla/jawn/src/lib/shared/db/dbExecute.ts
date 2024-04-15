@@ -81,13 +81,10 @@ export async function dbExecute<T>(
   query: string,
   parameters: any[]
 ): Promise<Result<T[], string>> {
-  const ssl =
-    process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development"
-      ? {
-          rejectUnauthorized: true,
-          ca: process.env.SUPABASE_SSL_CERT_CONTENTS!.split("\\n").join("\n"),
-        }
-      : undefined;
+  const ssl = {
+    rejectUnauthorized: true,
+    ca: process.env.SUPABASE_SSL_CERT_CONTENTS!.split("\\n").join("\n"),
+  };
 
   if (!process.env.SUPABASE_DATABASE_URL) {
     console.error("SUPABASE_DATABASE_URL not set");
