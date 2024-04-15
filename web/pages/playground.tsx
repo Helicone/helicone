@@ -17,7 +17,13 @@ const Playground = (props: PlaygroundProps) => {
 
   const { request } = router.query;
 
-  return <PlaygroundPage request={request as string | undefined} />;
+  // return <PlaygroundV2 />;
+
+  return (
+    <div className="flex flex-col">
+      <PlaygroundPage request={request as string | undefined} />
+    </div>
+  );
 };
 
 export default Playground;
