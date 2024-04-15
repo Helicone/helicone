@@ -11,7 +11,6 @@ export class DalleImageParser extends ImageModelResponseBodyParser {
     const requestAssets: Map<string, string> = new Map();
     const requestBody = JSON.parse(JSON.stringify(body));
     try {
-      // Assuming 'data' is the key containing the image information in DALL·E's response structure
       requestBody?.data?.forEach((item: any) => {
         if (item.url) {
           const assetId = this.generateAssetId();
