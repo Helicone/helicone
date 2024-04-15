@@ -30,6 +30,7 @@ import {
   getResponseImageModelParser,
 } from "./imageParsers/parserMapper";
 import { TemplateWithInputs } from "../../api/lib/promptHelpers";
+import { ImageModelParsingResponse } from "./imageParsers/core/parsingResponse";
 
 export interface DBLoggableProps {
   response: {
@@ -455,7 +456,7 @@ export class DBLoggable {
       {
         response: Database["public"]["Tables"]["response"]["Insert"];
         body: string;
-        responseAssets: Record<string, string>;
+        responseAssets: Map<string, string>;
       },
       string
     >
@@ -465,23 +466,32 @@ export class DBLoggable {
         this.getResponse(),
         1000 * 60 * 30
       ); // 30 minutes
+      let imageModelParsingResponse: ImageModelParsingResponse = {
+        body,
+        assets: new Map<string, string>(),
+      };
+      if (model && isResponseImageModel(model)) {
+        const imageModelParser = getResponseImageModelParser(model);
+        if (imageModelParser) {
+          imageModelParsingResponse =
+            imageModelParser.processResponseBody(body);
+        }
+      }
+      response.body = imageModelParsingResponse.body;
       const { error } = await queue.updateResponse(
         this.response.responseId,
         this.request.requestId,
         response
       );
-      let responseAssets: Record<string, string> = {};
-      if (model && isResponseImageModel(model)) {
-        const imageModelParser = getResponseImageModelParser(model);
-        if (imageModelParser) {
-          responseAssets = imageModelParser.processResponseBody(body);
-        }
-      }
       if (error !== null) {
         console.error("Error updating response", error);
         // return err(error);
       }
-      return ok({ response, body, responseAssets });
+      return ok({
+        response,
+        body,
+        responseAssets: imageModelParsingResponse.assets,
+      });
     } catch (e) {
       const { error } = await queue.updateResponse(
         this.response.responseId,
@@ -671,10 +681,13 @@ export class DBLoggable {
       requestResult?.data?.request?.model ??
       "not-found";
 
-    const assets: Record<string, string> = {
+    const assets: Map<string, string> = new Map([
       ...requestResult.data.requestAssets,
-      ...responseResult.data?.responseAssets,
-    };
+    ]);
+
+    if (responseResult?.data?.responseAssets) {
+      assets = new Map([...assets, ...responseResult.data.responseAssets]);
+    }
 
     let s3Result: Result<string, string>;
     // If no data or error, return
@@ -692,7 +705,7 @@ export class DBLoggable {
                 await this.response.getResponseBody()
               ).body,
             }),
-            requestAssets: assets,
+            assets: assets,
           });
         } else {
           s3Result = await db.requestResponseManager.storeRequestResponseData({
@@ -705,7 +718,7 @@ export class DBLoggable {
                 await this.response.getResponseBody()
               ).body,
             }),
-            requestAssets: assets,
+            assets: assets,
           });
         }
 
@@ -724,7 +737,7 @@ export class DBLoggable {
           requestId: this.request.requestId,
           requestBody: requestResult.data.body,
           responseBody: responseResult.data.body,
-          requestAssets: assets,
+          assets: assets,
         });
       } else {
         s3Result = await db.requestResponseManager.storeRequestResponseData({
@@ -732,7 +745,7 @@ export class DBLoggable {
           requestId: this.request.requestId,
           requestBody: requestResult.data.body,
           responseBody: responseResult.data.body,
-          requestAssets: assets,
+          assets: assets,
         });
       }
 
@@ -867,7 +880,7 @@ export async function logRequest(
         job: string | null;
       };
       body: string; // For S3 storage
-      requestAssets: Record<string, string>;
+      requestAssets: Map<string, string>;
     },
     string
   >
@@ -935,17 +948,20 @@ export async function logRequest(
         (requestBody as any);
 
     // eslint-disable-next-line prefer-const
-    let requestAssets: Record<string, string> = {};
+    let imageModelParsingResponse: ImageModelParsingResponse = {
+      body: body,
+      assets: {},
+    };
     const model = getModelFromRequest();
 
     if (model && isRequestImageModel(model)) {
       const imageModelParser = getRequestImageModelParser(model);
       if (imageModelParser) {
-        requestAssets = imageModelParser.processRequestBody(body);
+        imageModelParsingResponse = imageModelParser.processRequestBody(body);
       }
     }
 
-    const reqBody = unsupportedImage(body);
+    const reqBody = unsupportedImage(imageModelParsingResponse.body);
 
     const createdAt = request.startTime ?? new Date();
     const requestData = {
@@ -1015,7 +1031,7 @@ export async function logRequest(
           job: jobNode?.data.job ?? null,
         },
         body: body,
-        requestAssets,
+        requestAssets: imageModelParsingResponse,
       },
       error: null,
     };

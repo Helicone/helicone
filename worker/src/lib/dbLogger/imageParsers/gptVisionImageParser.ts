@@ -1,19 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ImageModelRequestBodyParser } from "./core/ImageModelRequestBodyParser";
+import { ImageModelRequestBodyParser } from "./core/imageModelRequestBodyParser";
+import { ImageModelParsingResponse } from "./core/parsingResponse";
 export class GptVisionImageParser extends ImageModelRequestBodyParser {
   constructor(modelName: string) {
     super(modelName);
   }
 
-  processRequestBody(body: any): Record<string, string> {
-    const requestAssets: Record<string, string> = {};
+  processRequestBody(body: any): ImageModelParsingResponse {
+    const requestAssets: Map<string, string> = new Map();
     try {
       body?.messages?.forEach((message: any) => {
         message.content.forEach((item: any) => {
           if (item.type === "image_url") {
             const assetId = this.generateAssetId();
-            requestAssets[assetId] = item.image_url.url;
-            item.image_url.url = `<helicone-asset-id key="${assetId}"/>`;
+            const imageUrl = `<helicone-asset-id key="${assetId}"/>`;
+            requestAssets.set(assetId, imageUrl);
+            item.image_url.url = imageUrl;
           }
         });
       });
@@ -23,6 +25,9 @@ export class GptVisionImageParser extends ImageModelRequestBodyParser {
       );
     }
 
-    return requestAssets;
+    return {
+      body: body,
+      assets: requestAssets,
+    };
   }
 }

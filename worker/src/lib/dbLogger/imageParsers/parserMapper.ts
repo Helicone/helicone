@@ -1,8 +1,8 @@
 import { ClaudeImageParser } from "./claudeImageParser";
 import { GptVisionImageParser } from "./gptVisionImageParser";
-import { ImageModelRequestBodyParser } from "./core/ImageModelRequestBodyParser";
+import { ImageModelRequestBodyParser } from "./core/imageModelRequestBodyParser";
 import { DalleImageParser } from "./dalleImageParser";
-import { ImageModelResponseBodyParser } from "./core/ImageModelResponseBodyParser";
+import { ImageModelResponseBodyParser } from "./core/imageModelResponseBodyParser";
 
 export function getRequestImageModelParser(
   modelName: string
