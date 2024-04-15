@@ -7,7 +7,6 @@ import {
   UserMinusIcon,
 } from "@heroicons/react/20/solid";
 import {
-  ChartBarIcon,
   ChartPieIcon,
   DocumentTextIcon,
   TableCellsIcon,
