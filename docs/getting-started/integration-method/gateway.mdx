@@ -86,6 +86,38 @@ This is achieved by allowing you to determine the destination of your request by
       ```
 
     </Accordion>
+    <Accordion title="Vertex AI SDK">
+    <Note>
+      ENSURE YOU ARE USING VERTEX AI SDK **1.1.0** OR HIGHER.
+    </Note>
+      ```typescript
+      import {
+        VertexAI,
+        RequestOptions,
+      } from "@google-cloud/vertexai";
+      const vertex_ai = new VertexAI({
+        project: project,
+        location: location,
+        apiEndpoint: "gateway.hconeai.com",
+      });
+
+      const customHeaders = new Headers({
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+        "Helicone-Target-URL": "https://[LOCATION]-aiplatform.googleapis.com",
+      });
+
+      const requestOptions = {
+        customHeaders: customHeaders,
+      } as RequestOptions;
+
+      const generativeModel = vertex_ai.getGenerativeModel(
+        {
+          model: "gemini-pro-vision",
+        },
+        requestOptions
+      );
+      ```
+    </Accordion>
 
   </AccordionGroup>
 
