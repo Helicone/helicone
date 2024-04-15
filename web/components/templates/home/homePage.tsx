@@ -105,8 +105,9 @@ const HomePage = (props: HomePageProps) => {
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
+        className="mb-16"
       >
-        <div className="relative w-full flex flex-col space-y-4 mx-auto max-w-6xl h-full py-16 sm:pt-32 sm:pb-16 items-center text-center px-2 sm:px-2 lg:px-0">
+        <div className="relative w-full flex flex-col space-y-4 mx-auto max-w-6xl h-full py-16 sm:pt-32  items-center text-center px-2 sm:px-2 lg:px-0">
           <div className="-mt-4 text-xs mx-auto flex flex-col sm:flex-row sm:divide-x-2 gap-[14px] justify-center items-center divide-gray-300 opacity-75 w-fit px-4 pb-4 rounded-xl">
             <Link
               href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
@@ -566,7 +567,7 @@ client = OpenAI(
           </dl>
         </div>
       </section>
-      {showStars && (
+      {/* {showStars && (
         <div className="bg-emerald-500 text-xs rounded-3xl w-fit px-4 py-2 bottom-8 mx-auto flex sticky z-50 justify-between items-center gap-4">
           <p className="text-white font-mono font-bold tracking-tighter">
             Star us on Github
@@ -603,7 +604,7 @@ client = OpenAI(
             <XMarkIcon className="h-4 w-4 text-white" />
           </button>
         </div>
-      )}
+      )} */}
       <Footer />
     </div>
   );
