@@ -6,6 +6,14 @@ import {
   TagIcon,
   UserMinusIcon,
 } from "@heroicons/react/20/solid";
+import {
+  ChartBarIcon,
+  ChartPieIcon,
+  DocumentTextIcon,
+  TableCellsIcon,
+} from "@heroicons/react/24/solid";
+import { useState } from "react";
+import { clsx } from "../../../shared/clsx";
 
 const features = [
   {
@@ -46,29 +54,80 @@ const features = [
   },
 ];
 
+const tabs = [
+  {
+    key: "monitoring",
+    name: "Monitoring and Analytics",
+    description: "Monitor performance and analyze data in real-time",
+    icon: ChartPieIcon,
+    src: "/assets/home/dashboard-demo.png",
+  },
+  {
+    key: "logs",
+    name: "Request Logs",
+    description: "View and search logs for your requests",
+    icon: TableCellsIcon,
+    src: "/assets/home/request-demo.png",
+  },
+  {
+    key: "templates",
+    name: "Prompt Templates",
+    description: "Create and manage templates for your requests",
+    icon: DocumentTextIcon,
+    src: "/assets/home/prompt-demo.png",
+  },
+];
+
 export default function Platform() {
+  const [activeTab, setActiveTab] = useState<
+    "monitoring" | "logs" | "templates"
+  >("monitoring");
   return (
     <>
-      <div className="flex flex-col space-y-2 pb-2 w-full items-center">
+      <div className="flex flex-col space-y-4 pb-2 w-full items-center">
         <h3 className="text-3xl sm:text-5xl font-bold text-black text-center tracking-tight leading-tight">
-          One platform,{" "}
-          <span className="text-green-500">everything you need</span>
+          One observability platform,{" "}
+          <span className="text-sky-500">everything you need</span>
         </h3>
-        <p className="text-lg md:text-xl text-gray-600 max-w-2xl text-center">
-          Everything you need to build, deploy, and scale your application
+        <p className="text-lg md:text-xl text-gray-600 max-w-4xl text-center">
+          Collect data, monitor performance, and improve your LLM-powered
+          application over time
         </p>
+        <ul className="flex items-center justify-between w-full px-4 sm:px-16 pt-8">
+          {tabs.map((tab) => (
+            <li key={tab.name}>
+              <button
+                onClick={() =>
+                  setActiveTab(tab.key as "monitoring" | "logs" | "templates")
+                }
+                className={clsx(
+                  "w-72 justify-center text-md border px-8 py-4 rounded-lg font-semibold flex items-center gap-2",
+                  activeTab === tab.key
+                    ? "bg-sky-500 text-white border-sky-700"
+                    : "border-gray-300 bg-gray-200 text-gray-500"
+                )}
+              >
+                <tab.icon className="w-5 h-5" />
+                {tab.name}
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
-      <div className="relative overflow-hidden pt-8">
+      <div className="relative overflow-hidden pt-2">
         <div className="mx-auto max-w-8xl px-6 lg:px-8">
           <img
-            src="/assets/home/bento/dashboard.webp"
+            src={
+              tabs.find((tab) => tab.key === activeTab)?.src ||
+              "/assets/home/dashboard.png"
+            }
             alt="App screenshot"
-            className="mb-[-12%] rounded-xl shadow-2xl ring-1 ring-gray-900/10"
+            className="mb-[-7%] rounded-xl shadow-2xl ring-1 ring-gray-900/10"
             width={2432}
             height={1442}
           />
           <div className="relative" aria-hidden="true">
-            <div className="absolute -inset-x-20 bottom-0 bg-gradient-to-t from-gray-50 pt-[7%]" />
+            <div className="absolute -inset-x-20 bottom-0 bg-gradient-to-t from-gray-50 pt-[9%]" />
           </div>
         </div>
       </div>
@@ -78,7 +137,7 @@ export default function Platform() {
             <div key={feature.name} className="relative pl-9">
               <dt className="inline font-semibold text-gray-900">
                 <feature.icon
-                  className="absolute left-1 top-1 h-5 w-5 text-green-500"
+                  className="absolute left-1 top-1 h-5 w-5 text-sky-500"
                   aria-hidden="true"
                 />
                 {feature.name}

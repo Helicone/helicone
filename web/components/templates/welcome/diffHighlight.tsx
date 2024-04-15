@@ -34,7 +34,7 @@ export function DiffHighlight(props: DiffHighlightProps) {
                 className,
                 textSize === "sm" && "text-xs",
                 textSize === "md" && "text-xs md:text-sm",
-                textSize === "lg" && "text-sm md:text-md",
+                textSize === "lg" && "text-sm md:text-lg",
                 minHeight ? "min-h-[300px] md:min-h-[420px]" : "",
                 "p-6 rounded-xl mt-3 overflow-auto relative"
               )}
