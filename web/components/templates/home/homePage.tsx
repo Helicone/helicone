@@ -11,6 +11,7 @@ import { clsx } from "../../shared/clsx";
 import Link from "next/link";
 import {
   BuildingOffice2Icon,
+  ClipboardIcon,
   CodeBracketSquareIcon,
   CubeIcon,
   ShieldCheckIcon,
@@ -20,6 +21,8 @@ import Platform from "./components/platform";
 import { Disclosure } from "@headlessui/react";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { DiffHighlight } from "../welcome/diffHighlight";
+import { Tooltip } from "@mui/material";
+import useNotification from "../../shared/notification/useNotification";
 
 interface HomePageProps {}
 
@@ -47,7 +50,7 @@ const HomePage = (props: HomePageProps) => {
 
   const [demoLoading, setDemoLoading] = useState(false);
 
-  const router = useRouter();
+  const { setNotification } = useNotification();
   const user = useUser();
   const [showStars, setShowStars] = useLocalStorage("showStars", true);
 
@@ -210,7 +213,7 @@ const HomePage = (props: HomePageProps) => {
           </div>
         </div>
         <div className="flex gap-4 flex-col justify-center items-center space-y-4 pb-32">
-          <div className="flex flex-col w-[40rem]">
+          <div className="flex flex-col space-y-4 w-[42rem]">
             <DiffHighlight
               code={`
 from openai import OpenAI
@@ -229,9 +232,6 @@ client = OpenAI(
               minHeight={false}
               textSize="lg"
             />
-            <i className="text-gray-500 text-xs text-center pt-2">
-              Example Python integration with OpenAI
-            </i>
           </div>
         </div>
         <ul className="grid grid-cols-1 sm:grid-cols-4 gap-8 mx-auto max-w-6xl py-32 px-4">
