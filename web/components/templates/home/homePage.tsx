@@ -1,5 +1,4 @@
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import { Database } from "../../../supabase/database.types";
 import { DEMO_EMAIL } from "../../../lib/constants";
@@ -11,7 +10,6 @@ import { clsx } from "../../shared/clsx";
 import Link from "next/link";
 import {
   BuildingOffice2Icon,
-  ClipboardIcon,
   CodeBracketSquareIcon,
   CubeIcon,
   ShieldCheckIcon,
@@ -21,7 +19,6 @@ import Platform from "./components/platform";
 import { Disclosure } from "@headlessui/react";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { DiffHighlight } from "../welcome/diffHighlight";
-import { Tooltip } from "@mui/material";
 import useNotification from "../../shared/notification/useNotification";
 
 interface HomePageProps {}
