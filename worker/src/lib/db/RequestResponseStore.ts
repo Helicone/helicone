@@ -14,6 +14,8 @@ import {
   DBQueryTimer,
   FREQUENT_PRECENT_LOGGING,
 } from "../util/loggers/DBQueryTimer";
+import { TemplateWithInputs } from "../../api/lib/promptHelpers";
+import { PromptStore } from "./PromptStore";
 
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];
@@ -28,6 +30,7 @@ export interface ResponsePayload {
 }
 
 export class RequestResponseStore {
+  promptStore: PromptStore;
   constructor(
     private database: SupabaseClient<Database>,
     private queryTimer: DBQueryTimer,
@@ -35,7 +38,9 @@ export class RequestResponseStore {
     private clickhouseWrapper: ClickhouseClientWrapper,
     public fallBackQueue: Queue,
     public responseAndResponseQueueKV: KVNamespace
-  ) {}
+  ) {
+    this.promptStore = new PromptStore(database, queryTimer);
+  }
 
   async insertIntoRequest(
     requestPayload: RequestPayload
@@ -309,8 +314,9 @@ export class RequestResponseStore {
     return { data: null, error: null };
   }
 
+  // TODO replace this with upsertPromptV2 after prompt_v2 is fully rolled out and we are reading from it
   async upsertPrompt(
-    heliconeTemplate: Json,
+    heliconeTemplate: TemplateWithInputs,
     promptId: string,
     orgId: string
   ): Promise<
@@ -342,7 +348,10 @@ export class RequestResponseStore {
     let version = existingPrompt.data?.[0]?.version ?? 0;
     if (existingPrompt.data.length > 0) {
       if (
-        !deepCompare(existingPrompt.data[0].heliconeTemplate, heliconeTemplate)
+        !deepCompare(
+          existingPrompt.data[0].heliconeTemplate,
+          heliconeTemplate.template
+        )
       ) {
         version = existingPrompt.data[0].version + 1;
       }
@@ -356,7 +365,7 @@ export class RequestResponseStore {
           {
             id: promptId,
             organization_id: orgId,
-            heliconeTemplate,
+            heliconeTemplate: heliconeTemplate.template as Json,
             status: "active",
             version,
           },
@@ -371,7 +380,7 @@ export class RequestResponseStore {
     }
     return ok({
       version,
-      template: heliconeTemplate,
+      template: heliconeTemplate.template as Json,
     });
   }
 

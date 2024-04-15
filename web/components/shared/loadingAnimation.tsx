@@ -51,6 +51,8 @@ const LoadingAnimation = (props: LoadingAnimationProps) => {
   }
 
   useEffect(() => {
+    // check to see if document is defined
+    if (typeof document === "undefined") return;
     if (animation !== undefined) return;
 
     const animationItems = [chicky, hamster, plane, boxbee];

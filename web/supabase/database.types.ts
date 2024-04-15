@@ -159,13 +159,6 @@ export type Database = {
             referencedRelation: "request"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "asset_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request_rbac"
-            referencedColumns: ["id"]
-          },
         ]
       }
       cache_hits: {
@@ -190,13 +183,6 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cache_hits_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request_rbac"
             referencedColumns: ["id"]
           },
         ]
@@ -260,6 +246,53 @@ export type Database = {
           },
         ]
       }
+      experiment_dataset_v2: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string | null
+        }
+        Relationships: []
+      }
+      experiment_dataset_v2_row: {
+        Row: {
+          created_at: string | null
+          dataset_id: string | null
+          id: string
+          input_record: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          dataset_id?: string | null
+          id?: string
+          input_record?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          dataset_id?: string | null
+          id?: string
+          input_record?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_dataset_id"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_dataset_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiment_dataset_values: {
         Row: {
           created_at: string
@@ -298,24 +331,117 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "experiment_dataset_values_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request_rbac"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "experiment_dataset_values_result_request_id_fkey"
             columns: ["result_request_id"]
             isOneToOne: false
             referencedRelation: "request"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      experiment_v2: {
+        Row: {
+          created_at: string | null
+          dataset: string | null
+          id: string
+          organization: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          dataset?: string | null
+          id?: string
+          organization?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          dataset?: string | null
+          id?: string
+          organization?: string | null
+        }
+        Relationships: [
           {
-            foreignKeyName: "experiment_dataset_values_result_request_id_fkey"
-            columns: ["result_request_id"]
+            foreignKeyName: "fk_dataset"
+            columns: ["dataset"]
             isOneToOne: false
-            referencedRelation: "request_rbac"
+            referencedRelation: "experiment_dataset_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_v2_hypothesis: {
+        Row: {
+          created_at: string | null
+          experiment_v2: string | null
+          id: string
+          model: string
+          prompt_version: string
+          status: string
+        }
+        Insert: {
+          created_at?: string | null
+          experiment_v2?: string | null
+          id?: string
+          model: string
+          prompt_version: string
+          status: string
+        }
+        Update: {
+          created_at?: string | null
+          experiment_v2?: string | null
+          id?: string
+          model?: string
+          prompt_version?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_experiment"
+            columns: ["experiment_v2"]
+            isOneToOne: false
+            referencedRelation: "experiment_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_prompt_version"
+            columns: ["prompt_version"]
+            isOneToOne: false
+            referencedRelation: "prompts_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_v2_hypothesis_run: {
+        Row: {
+          created_at: string | null
+          dataset_row: string
+          experiment_hypothesis: string
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          dataset_row: string
+          experiment_hypothesis: string
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          dataset_row?: string
+          experiment_hypothesis?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_dataset_row"
+            columns: ["dataset_row"]
+            isOneToOne: false
+            referencedRelation: "experiment_dataset_v2_row"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_experiment_hypothesis"
+            columns: ["experiment_hypothesis"]
+            isOneToOne: false
+            referencedRelation: "experiment_v2_hypothesis"
             referencedColumns: ["id"]
           },
         ]
@@ -462,28 +588,7 @@ export type Database = {
             foreignKeyName: "feedback_response_id_fkey"
             columns: ["response_id"]
             isOneToOne: true
-            referencedRelation: "materialized_response_and_request"
-            referencedColumns: ["response_id"]
-          },
-          {
-            foreignKeyName: "feedback_response_id_fkey"
-            columns: ["response_id"]
-            isOneToOne: true
             referencedRelation: "response"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "feedback_response_id_fkey"
-            columns: ["response_id"]
-            isOneToOne: true
-            referencedRelation: "response_and_request_rbac"
-            referencedColumns: ["response_id"]
-          },
-          {
-            foreignKeyName: "feedback_response_id_fkey"
-            columns: ["response_id"]
-            isOneToOne: true
-            referencedRelation: "response_rbac"
             referencedColumns: ["id"]
           },
         ]
@@ -562,13 +667,6 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "finetune_dataset_data_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request_rbac"
             referencedColumns: ["id"]
           },
         ]
@@ -958,13 +1056,6 @@ export type Database = {
             referencedRelation: "request"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "job_node_request_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request_rbac"
-            referencedColumns: ["id"]
-          },
         ]
       }
       layout: {
@@ -1280,6 +1371,112 @@ export type Database = {
         }
         Relationships: []
       }
+      prompt_input_keys: {
+        Row: {
+          created_at: string | null
+          id: string
+          key: string
+          prompt_version: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          key: string
+          prompt_version: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          key?: string
+          prompt_version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_prompt_version"
+            columns: ["prompt_version"]
+            isOneToOne: false
+            referencedRelation: "prompts_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prompt_input_record: {
+        Row: {
+          created_at: string | null
+          id: string
+          inputs: Json
+          prompt_version: string
+          source_request: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          inputs: Json
+          prompt_version: string
+          source_request?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          inputs?: Json
+          prompt_version?: string
+          source_request?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_prompt_version"
+            columns: ["prompt_version"]
+            isOneToOne: false
+            referencedRelation: "prompts_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_source_request"
+            columns: ["source_request"]
+            isOneToOne: false
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prompt_v2: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          organization: string
+          pretty_name: string | null
+          soft_delete: boolean | null
+          user_defined_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          organization: string
+          pretty_name?: string | null
+          soft_delete?: boolean | null
+          user_defined_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          organization?: string
+          pretty_name?: string | null
+          soft_delete?: boolean | null
+          user_defined_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_organization"
+            columns: ["organization"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prompts: {
         Row: {
           created_at: string
@@ -1330,6 +1527,57 @@ export type Database = {
           },
         ]
       }
+      prompts_versions: {
+        Row: {
+          created_at: string | null
+          helicone_template: Json | null
+          id: string
+          major_version: number
+          minor_version: number
+          model: string | null
+          organization: string
+          prompt_v2: string
+          soft_delete: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          helicone_template?: Json | null
+          id?: string
+          major_version: number
+          minor_version: number
+          model?: string | null
+          organization: string
+          prompt_v2: string
+          soft_delete?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          helicone_template?: Json | null
+          id?: string
+          major_version?: number
+          minor_version?: number
+          model?: string | null
+          organization?: string
+          prompt_v2?: string
+          soft_delete?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_organization"
+            columns: ["organization"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_prompt"
+            columns: ["prompt_v2"]
+            isOneToOne: false
+            referencedRelation: "prompt_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       properties: {
         Row: {
           auth_hash: string | null
@@ -1364,13 +1612,6 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "properties_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request_rbac"
             referencedColumns: ["id"]
           },
           {
@@ -1629,13 +1870,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "request_job_task_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request_rbac"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "request_job_task_task_id_fkey"
             columns: ["task_id"]
             isOneToOne: false
@@ -1730,6 +1964,74 @@ export type Database = {
           version?: number
         }
         Relationships: []
+      }
+      score_attribute: {
+        Row: {
+          created_at: string | null
+          id: string
+          organization: string
+          score_key: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          organization: string
+          score_key: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          organization?: string
+          score_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_organization"
+            columns: ["organization"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      score_value: {
+        Row: {
+          created_at: string | null
+          id: string
+          int_value: number | null
+          request_id: string
+          score_attribute: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          int_value?: number | null
+          request_id: string
+          score_attribute: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          int_value?: number | null
+          request_id?: string
+          score_attribute?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_request_id"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_score_attribute"
+            columns: ["score_attribute"]
+            isOneToOne: false
+            referencedRelation: "score_attribute"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_api_keys: {
         Row: {
@@ -1966,130 +2268,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      materialized_response_and_request: {
-        Row: {
-          is_cached: boolean | null
-          prompt_name: string | null
-          prompt_regex: string | null
-          request_body: Json | null
-          request_created_at: string | null
-          request_formatted_prompt_id: string | null
-          request_id: string | null
-          request_path: string | null
-          request_prompt_values: Json | null
-          request_properties: Json | null
-          request_user_id: string | null
-          response_body: Json | null
-          response_created_at: string | null
-          response_id: string | null
-          user_api_key_hash: string | null
-          user_api_key_preview: string | null
-          user_api_key_user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_api_keys_user_id_fkey"
-            columns: ["user_api_key_user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      metrics_rbac: {
-        Row: {
-          average_response_time: number | null
-          average_tokens_per_response: number | null
-        }
-        Relationships: []
-      }
-      model_metrics: {
-        Row: {
-          model: string | null
-          request_count: number | null
-          sum_completion_tokens: number | null
-          sum_prompt_tokens: number | null
-          sum_tokens: number | null
-        }
-        Relationships: []
-      }
-      request_cache_rbac: {
-        Row: {
-          auth_hash: string | null
-          body: Json | null
-          cached_created_at: string | null
-          created_at: string | null
-          formatted_prompt_id: string | null
-          id: string | null
-          path: string | null
-          prompt_id: string | null
-          prompt_values: Json | null
-          properties: Json | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
-      request_rbac: {
-        Row: {
-          auth_hash: string | null
-          body: Json | null
-          created_at: string | null
-          id: string | null
-          path: string | null
-          properties: Json | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
-      response_and_request_rbac: {
-        Row: {
-          api_key_preview: string | null
-          formatted_prompt_id: string | null
-          is_cached: boolean | null
-          prompt_name: string | null
-          prompt_regex: string | null
-          prompt_values: Json | null
-          request_body: Json | null
-          request_created_at: string | null
-          request_id: string | null
-          request_path: string | null
-          request_properties: Json | null
-          request_user_id: string | null
-          response_body: Json | null
-          response_created_at: string | null
-          response_id: string | null
-          user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_api_keys_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      response_rbac: {
-        Row: {
-          body: Json | null
-          created_at: string | null
-          id: string | null
-          request: string | null
-        }
-        Relationships: []
-      }
-      user_metrics_rbac: {
-        Row: {
-          average_requests_per_day_active: number | null
-          average_tokens_per_request: number | null
-          first_active: string | null
-          last_active: string | null
-          total_requests: number | null
-          user_id: string | null
-        }
-        Relationships: []
       }
     }
     Functions: {

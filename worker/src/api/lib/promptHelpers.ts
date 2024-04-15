@@ -36,16 +36,13 @@
  */
 
 export interface TemplateWithInputs {
-  template: string;
+  template: object;
   inputs: { [key: string]: string };
 }
 
 export function parseJSXObject(input: object): {
   objectWithoutJSXTags: object;
-  templateWithInputs: {
-    template: object;
-    inputs: { [key: string]: string };
-  };
+  templateWithInputs: TemplateWithInputs;
 } {
   const inputs: { [key: string]: string } = {};
 

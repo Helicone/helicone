@@ -23,7 +23,7 @@ export default async function handler(
     maxTokens: number;
   };
 
-  if (!requestId || !temperature || !model) {
+  if (!temperature || !model) {
     res.status(400).json({
       error: "Bad request - missing required body parameters",
       data: null,

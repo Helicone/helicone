@@ -7,7 +7,7 @@ import {
 import { Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
 
-export type Tier = "free" | "pro" | "enterprise";
+export type Tier = "free" | "pro" | "growth" | "enterprise";
 
 async function handler({
   res,
