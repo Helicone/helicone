@@ -227,6 +227,26 @@ type NodesToOperators = {
 
 export type FilterLeafNode = SingleKey<NodesToOperators>;
 
+type PromptVersionsToOperators = {
+  minor_version: SingleKey<NumberOperators>;
+  major_version: SingleKey<NumberOperators>;
+  id: SingleKey<TextOperators>;
+};
+
+export type FilterLeafPromptVersions = SingleKey<PromptVersionsToOperators>;
+
+type PromptToOperators = {
+  id: SingleKey<TextOperators>;
+  user_defined_id: SingleKey<TextOperators>;
+};
+
+export type FilterLeafPrompt = SingleKey<PromptToOperators>;
+
+export type PromptInputTableFilters = {
+  prompt_v2: FilterLeafPrompt;
+  prompt_versions: FilterLeafPromptVersions;
+};
+
 export type TablesAndViews = {
   user_metrics: FilterLeafUserMetrics;
   user_api_keys: FilterLeafUserApiKeys;
@@ -251,7 +271,7 @@ export type TablesAndViews = {
   values: {
     [key: string]: SingleKey<TextOperators>;
   };
-};
+} & PromptInputTableFilters;
 
 export type FilterLeaf = SingleKey<TablesAndViews>;
 
