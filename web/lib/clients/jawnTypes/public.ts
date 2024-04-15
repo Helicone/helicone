@@ -12,6 +12,12 @@ export interface paths {
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
+  "/v1/prompt/query": {
+    post: operations["GetPrompts"];
+  };
+  "/v1/prompt/{promptId}/query": {
+    post: operations["GetPrompt"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -318,6 +324,17 @@ Json: JsonObject;
       created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
     };
     /** @description Make all properties in T optional */
+    Partial_PromptToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      user_defined_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_PromptVersionsToOperators_: {
+      minor_version?: components["schemas"]["Partial_NumberOperators_"];
+      major_version?: components["schemas"]["Partial_NumberOperators_"];
+      id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
     Partial_TablesAndViews_: {
       user_metrics?: components["schemas"]["Partial_UserMetricsToOperators_"];
       user_api_keys?: components["schemas"]["Partial_UserApiKeysTableToOperators_"];
@@ -339,6 +356,8 @@ Json: JsonObject;
       values?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
+      prompt_v2?: components["schemas"]["Partial_PromptToOperators_"];
+      prompt_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
     };
     SingleKey_TablesAndViews_: components["schemas"]["Partial_TablesAndViews_"];
     FilterLeaf: components["schemas"]["SingleKey_TablesAndViews_"];
@@ -379,6 +398,47 @@ Json: JsonObject;
       limit?: number;
       sort?: components["schemas"]["SortLeafRequest"];
       isCached?: boolean;
+      includeInputs?: boolean;
+    };
+    PromptsResult: {
+      id: string;
+      user_defined_id: string;
+      description: string;
+      pretty_name: string;
+      /** Format: double */
+      major_version: number;
+    };
+    "SuccessResult_PromptsResult-Array_": {
+      data: components["schemas"]["PromptsResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptsResult-Array.string_": components["schemas"]["SuccessResult_PromptsResult-Array_"] | components["schemas"]["ErrorResult_string_"];
+    PromptsQueryParams: Record<string, never>;
+    PromptResult: {
+      id: string;
+      user_defined_id: string;
+      description: string;
+      pretty_name: string;
+      /** Format: double */
+      major_version: number;
+      latest_version_id: string;
+      latest_model_used: string;
+      created_at: string;
+      last_used: string;
+      versions: string[];
+    };
+    SuccessResult_PromptResult_: {
+      data: components["schemas"]["PromptResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptResult.string_": components["schemas"]["SuccessResult_PromptResult_"] | components["schemas"]["ErrorResult_string_"];
+    PromptQueryParams: {
+      timeFilter: {
+        end: string;
+        start: string;
+      };
     };
   };
   responses: {
@@ -421,6 +481,41 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPrompts: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptsQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptsResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptResult.string_"];
         };
       };
     };
