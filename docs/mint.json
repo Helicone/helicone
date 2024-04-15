@@ -1,6 +1,5 @@
 {
   "name": "Helicone",
-
   "logo": {
     "light": "/logo/light.png",
     "dark": "/logo/dark.svg"
@@ -32,7 +31,6 @@
     "suggestEdit": true,
     "raiseIssue": true
   },
-  "openapi": ["/swagger.json"],
   "navigation": [
     {
       "group": "Welcome",
@@ -159,7 +157,16 @@
     },
     {
       "group": "Request",
-      "pages": ["rest/request/post-v1requestquery"]
+      "pages": [
+        "rest/request/request/post-v1requestquery"
+      ]
+    },
+    {
+      "group": "Prompt",
+      "pages": [
+        "rest/request/prompt/post-v1promptquery",
+        "rest/request/prompt/post-v1prompt-query"
+      ]
     }
   ],
   "topbarLinks": [
