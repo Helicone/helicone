@@ -82,6 +82,21 @@ const NOT_IMPLEMENTED = () => {
 };
 
 const whereKeyMappings: KeyMappings = {
+  prompt_v2: easyKeyMappingsWithTable(
+    {
+      id: "id",
+      user_defined_id: "user_defined_id",
+    },
+    "prompt_v2"
+  ),
+  prompt_versions: easyKeyMappingsWithTable(
+    {
+      id: "id",
+      major_version: "major_version",
+      minor_version: "minor_version",
+    },
+    "prompt_versions"
+  ),
   user_metrics: easyKeyMappingsWithTable(
     {
       user_id: "user_id",
@@ -278,6 +293,8 @@ const havingKeyMappings: KeyMappings = {
   feedback: NOT_IMPLEMENTED,
   cache_hits: NOT_IMPLEMENTED,
   rate_limit_log: NOT_IMPLEMENTED,
+  prompt_v2: NOT_IMPLEMENTED,
+  prompt_versions: NOT_IMPLEMENTED,
 };
 
 export function buildFilterLeaf(
