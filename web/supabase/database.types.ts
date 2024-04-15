@@ -248,14 +248,17 @@ export type Database = {
       }
       experiment_dataset_v2: {
         Row: {
+          created_at: string | null
           id: string
           name: string | null
         }
         Insert: {
+          created_at?: string | null
           id?: string
           name?: string | null
         }
         Update: {
+          created_at?: string | null
           id?: string
           name?: string | null
         }
@@ -263,16 +266,19 @@ export type Database = {
       }
       experiment_dataset_v2_row: {
         Row: {
+          created_at: string | null
           dataset_id: string | null
           id: string
           input_record: string | null
         }
         Insert: {
+          created_at?: string | null
           dataset_id?: string | null
           id?: string
           input_record?: string | null
         }
         Update: {
+          created_at?: string | null
           dataset_id?: string | null
           id?: string
           input_record?: string | null
@@ -335,16 +341,19 @@ export type Database = {
       }
       experiment_v2: {
         Row: {
+          created_at: string | null
           dataset: string | null
           id: string
           organization: string | null
         }
         Insert: {
+          created_at?: string | null
           dataset?: string | null
           id?: string
           organization?: string | null
         }
         Update: {
+          created_at?: string | null
           dataset?: string | null
           id?: string
           organization?: string | null
@@ -361,6 +370,7 @@ export type Database = {
       }
       experiment_v2_hypothesis: {
         Row: {
+          created_at: string | null
           experiment_v2: string | null
           id: string
           model: string
@@ -368,6 +378,7 @@ export type Database = {
           status: string
         }
         Insert: {
+          created_at?: string | null
           experiment_v2?: string | null
           id?: string
           model: string
@@ -375,6 +386,7 @@ export type Database = {
           status: string
         }
         Update: {
+          created_at?: string | null
           experiment_v2?: string | null
           id?: string
           model?: string
@@ -400,16 +412,19 @@ export type Database = {
       }
       experiment_v2_hypothesis_run: {
         Row: {
+          created_at: string | null
           dataset_row: string
           experiment_hypothesis: string
           id: string
         }
         Insert: {
+          created_at?: string | null
           dataset_row: string
           experiment_hypothesis: string
           id?: string
         }
         Update: {
+          created_at?: string | null
           dataset_row?: string
           experiment_hypothesis?: string
           id?: string
@@ -1358,16 +1373,19 @@ export type Database = {
       }
       prompt_input_keys: {
         Row: {
+          created_at: string | null
           id: string
           key: string
           prompt_version: string
         }
         Insert: {
+          created_at?: string | null
           id?: string
           key: string
           prompt_version: string
         }
         Update: {
+          created_at?: string | null
           id?: string
           key?: string
           prompt_version?: string
@@ -1384,18 +1402,21 @@ export type Database = {
       }
       prompt_input_record: {
         Row: {
+          created_at: string | null
           id: string
           inputs: Json
           prompt_version: string
           source_request: string | null
         }
         Insert: {
+          created_at?: string | null
           id?: string
           inputs: Json
           prompt_version: string
           source_request?: string | null
         }
         Update: {
+          created_at?: string | null
           id?: string
           inputs?: Json
           prompt_version?: string
@@ -1420,6 +1441,7 @@ export type Database = {
       }
       prompt_v2: {
         Row: {
+          created_at: string | null
           description: string | null
           id: string
           organization: string
@@ -1428,6 +1450,7 @@ export type Database = {
           user_defined_id: string
         }
         Insert: {
+          created_at?: string | null
           description?: string | null
           id?: string
           organization: string
@@ -1436,6 +1459,7 @@ export type Database = {
           user_defined_id: string
         }
         Update: {
+          created_at?: string | null
           description?: string | null
           id?: string
           organization?: string
@@ -1505,6 +1529,7 @@ export type Database = {
       }
       prompts_versions: {
         Row: {
+          created_at: string | null
           helicone_template: Json | null
           id: string
           major_version: number
@@ -1515,6 +1540,7 @@ export type Database = {
           soft_delete: boolean | null
         }
         Insert: {
+          created_at?: string | null
           helicone_template?: Json | null
           id?: string
           major_version: number
@@ -1525,6 +1551,7 @@ export type Database = {
           soft_delete?: boolean | null
         }
         Update: {
+          created_at?: string | null
           helicone_template?: Json | null
           id?: string
           major_version?: number
@@ -1940,16 +1967,19 @@ export type Database = {
       }
       score_attribute: {
         Row: {
+          created_at: string | null
           id: string
           organization: string
           score_key: string
         }
         Insert: {
+          created_at?: string | null
           id?: string
           organization: string
           score_key: string
         }
         Update: {
+          created_at?: string | null
           id?: string
           organization?: string
           score_key?: string
@@ -1966,18 +1996,21 @@ export type Database = {
       }
       score_value: {
         Row: {
+          created_at: string | null
           id: string
           int_value: number | null
           request_id: string
           score_attribute: string
         }
         Insert: {
+          created_at?: string | null
           id?: string
           int_value?: number | null
           request_id: string
           score_attribute: string
         }
         Update: {
+          created_at?: string | null
           id?: string
           int_value?: number | null
           request_id?: string
