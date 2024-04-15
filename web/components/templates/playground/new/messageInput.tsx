@@ -1,19 +1,8 @@
-import {
-  CheckIcon,
-  ChevronDownIcon,
-  PlusIcon,
-} from "@heroicons/react/20/solid";
-import { ChangeEvent, Fragment, useState } from "react";
+import { PlusIcon } from "@heroicons/react/20/solid";
+import { ChangeEvent, useState } from "react";
 import { clsx } from "../../../shared/clsx";
-import { Menu, Transition } from "@headlessui/react";
-import {
-  ArrowsPointingOutIcon,
-  ClipboardIcon,
-  PencilIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
+
 import useNotification from "../../../shared/notification/useNotification";
-import RoleButton from "./roleButton";
 import ResizeTextArea from "../resizeTextArea";
 
 type ImageUrlItem =

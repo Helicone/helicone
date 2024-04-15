@@ -1,25 +1,13 @@
-import {
-  MultiSelect,
-  MultiSelectItem,
-  NumberInput,
-  SearchSelect,
-  SearchSelectItem,
-} from "@tremor/react";
+import { MultiSelect, MultiSelectItem, NumberInput } from "@tremor/react";
 import AuthHeader from "../../shared/authHeader";
 import { MODEL_LIST } from "./new/modelList";
 import { Disclosure } from "@headlessui/react";
-import {
-  ChevronDownIcon,
-  ChevronRightIcon,
-  PlusCircleIcon,
-  PlusIcon,
-} from "@heroicons/react/20/solid";
+import { ChevronRightIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
 import ModelPill from "../requestsV2/modelPill";
 import { useState } from "react";
-import { PaperAirplaneIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { TrashIcon } from "@heroicons/react/24/outline";
 import MessageInput, { MessageInputItem } from "./new/messageInput";
-import RoleButton from "./new/roleButton";
 import useNotification from "../../shared/notification/useNotification";
 import { fetchOpenAI } from "../../../services/lib/openAI";
 import { ChatCompletionCreateParams } from "openai/resources";

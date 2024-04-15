@@ -5,7 +5,6 @@ import AuthLayout from "../components/layout/authLayout";
 import PlaygroundPage from "../components/templates/playground/playgroundPage";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { ReactElement } from "react";
-import PlaygroundV2 from "../components/templates/playground/playgroundV2";
 
 interface PlaygroundProps {
   user: User;

@@ -1,13 +1,7 @@
 import { Menu, Transition } from "@headlessui/react";
 import { clsx } from "../../../shared/clsx";
-import {
-  ArrowsPointingOutIcon,
-  CheckIcon,
-  ClipboardIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
+import { CheckIcon } from "@heroicons/react/24/outline";
 import { Fragment } from "react";
-import { MessageInputItem } from "./messageInput";
 import useNotification from "../../../shared/notification/useNotification";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 

@@ -1,27 +1,21 @@
 import {
-  ArrowsPointingInIcon,
-  ArrowsPointingOutIcon,
-  CheckIcon,
   ClipboardIcon,
   EyeIcon,
   EyeSlashIcon,
-  PencilIcon,
   PencilSquareIcon,
   TrashIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
 import { RenderWithPrettyInputKeys } from "../prompts/id/promptIdPage";
 import { Message } from "../requests/chat";
 import ResizeTextArea from "./resizeTextArea";
-import RoleButton, { ROLE_COLORS } from "./new/roleButton";
-import { MessageInputItem } from "./new/messageInput";
+import RoleButton from "./new/roleButton";
 import useNotification from "../../shared/notification/useNotification";
 import { Tooltip } from "@mui/material";
 import { enforceString } from "../../../lib/helpers/typeEnforcers";
-import { PlusIcon } from "@heroicons/react/20/solid";
 import AddFileButton from "./new/addFileButton";
 
 interface ChatRowProps {

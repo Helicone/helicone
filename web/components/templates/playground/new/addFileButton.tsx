@@ -1,5 +1,5 @@
-import { PencilIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { ChangeEvent, useRef, useState } from "react";
+import { PencilIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { useRef, useState } from "react";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { Divider, TextInput } from "@tremor/react";
 

@@ -12,7 +12,7 @@ import { fetchOpenAI } from "../../../services/lib/openAI";
 import { Message } from "../requests/chat";
 import ModelPill from "../requestsV2/modelPill";
 import ChatRow from "./chatRow";
-import RoleButton, { ROLE_COLORS } from "./new/roleButton";
+import RoleButton from "./new/roleButton";
 
 interface ChatPlaygroundProps {
   requestId: string;
