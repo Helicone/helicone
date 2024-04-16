@@ -56,19 +56,46 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     } else if (event.type === "customer.subscription.updated") {
       const subscriptionUpdated = event.data.object as Stripe.Subscription;
 
-      // check to see if the sub is active
-      let status = false;
-
-      // TODO: double check to see if this is the best way to do things
-      if (subscriptionUpdated.cancel_at === null) {
-        status = true;
+      const isSubscriptionActive = subscriptionUpdated.status === "active";
+      let growthPlanItem = null;
+      let proPlanItem = null;
+      for (const item of subscriptionUpdated?.items?.data) {
+        if (
+          item.plan.id === process.env.STRIPE_GROWTH_PRICE_ID &&
+          item.plan.usage_type === "metered"
+        ) {
+          growthPlanItem = item;
+          break;
+        } else if (
+          item.plan.id === process.env.STRIPE_PRICE_ID &&
+          item.plan.usage_type !== "metered"
+        ) {
+          proPlanItem = item;
+          break;
+        }
       }
 
-      // Update the organization's status based on Stripe's subscription status.
-      await supabaseServer
+      let updateFields: any = {
+        subscription_status: isSubscriptionActive ? "active" : "inactive",
+      };
+
+      if (isSubscriptionActive && growthPlanItem && !proPlanItem) {
+        updateFields.tier = "growth";
+        updateFields.stripe_subscription_item_id = growthPlanItem.id;
+      } else if (isSubscriptionActive && proPlanItem && !growthPlanItem) {
+        updateFields.tier = "pro";
+      }
+
+      const { data, error } = await supabaseServer
         .from("organization")
-        .update({ subscription_status: status ? "active" : "pending-cancel" })
+        .update(updateFields)
         .eq("stripe_subscription_id", subscriptionUpdated.id);
+
+      if (error) {
+        console.error("Failed to update organization:", error);
+      } else {
+        console.log("Organization updated successfully:", data);
+      }
     } else if (event.type === "customer.subscription.deleted") {
       // Subscription has been deleted, either due to non-payment or being manually canceled.
       const subscriptionDeleted = event.data.object as Stripe.Subscription;
