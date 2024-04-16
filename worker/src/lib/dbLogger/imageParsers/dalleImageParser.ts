@@ -9,9 +9,10 @@ export class DalleImageParser extends ImageModelResponseBodyParser {
 
   processResponseBody(body: any): ImageModelParsingResponse {
     const requestAssets: Map<string, string> = new Map();
+    let responseBody = body;
     try {
-      const requestBody = JSON.parse(JSON.stringify(body));
-      requestBody?.data?.forEach((item: any) => {
+      responseBody = JSON.parse(JSON.stringify(body));
+      responseBody?.data?.forEach((item: any) => {
         if (item.url) {
           const assetId = this.generateAssetId();
           requestAssets.set(assetId, item.url);
@@ -25,7 +26,7 @@ export class DalleImageParser extends ImageModelResponseBodyParser {
     }
 
     return {
-      body: requestBody,
+      body: responseBody,
       assets: requestAssets,
     };
   }

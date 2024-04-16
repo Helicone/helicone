@@ -489,7 +489,7 @@ export class DBLoggable {
       }
       return ok({
         response,
-        body,
+        body: imageModelParsingResponse.body,
         responseAssets: imageModelParsingResponse.assets,
       });
     } catch (e) {
@@ -683,6 +683,7 @@ export class DBLoggable {
 
     let assets: Map<string, string> = new Map();
 
+    console.log(requestResult.data.requestAssets.size);
     if (requestResult?.data?.requestAssets) {
       assets = new Map([...assets, ...requestResult.data.requestAssets]);
     }
@@ -1032,7 +1033,7 @@ export async function logRequest(
           id: jobNode?.data.id ?? null,
           job: jobNode?.data.job ?? null,
         },
-        body: body,
+        body: imageModelParsingResponse.body,
         requestAssets: imageModelParsingResponse.assets,
       },
       error: null,

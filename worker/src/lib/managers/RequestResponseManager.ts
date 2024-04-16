@@ -40,7 +40,7 @@ export class RequestResponseManager {
   }: RequestResponseContent): Promise<Result<string, string>> {
     const uploadPromises: Promise<void>[] = Array.from(assets.entries()).map(
       ([assetId, imageUrl]) =>
-        this.handleImageUpload(imageUrl, assetId, requestId, organizationId)
+        this.handleImageUpload(assetId, imageUrl, requestId, organizationId)
     );
 
     await Promise.allSettled(uploadPromises);
@@ -52,8 +52,8 @@ export class RequestResponseManager {
   }
 
   private async handleImageUpload(
-    imageUrl: string,
     assetId: string,
+    imageUrl: string,
     requestId: string,
     organizationId: string
   ): Promise<void> {
