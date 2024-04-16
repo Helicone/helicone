@@ -142,7 +142,7 @@ def test_openai_proxy():
     headers = {
         "Authorization": f"Bearer {openai_api_key}",
         "Helicone-Auth": f"Bearer {helicone_api_key}",
-        "Helicone-Request-Id"
+        "Helicone-Request-Id": requestId,
         "OpenAI-Organization": openai_org_id
     }
 
