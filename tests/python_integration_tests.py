@@ -124,7 +124,7 @@ def test_gateway_api():
 
 
 def test_openai_proxy():
-    print("\n---------Running test_proxy---------")
+    print("\n---------Running test_openai_proxy---------")
     requestId = str(uuid.uuid4())
     print("Request ID: " + requestId + "")
     message_content = test_openai_proxy.__name__ + " - " + requestId
@@ -149,9 +149,14 @@ def test_openai_proxy():
     response = fetch(helicone_proxy_url, "chat/completions",
                      method="POST", json=data, headers=headers)
     print(response)
+    print(response.headers)
     assert response, "Response from OpenAI API is empty"
 
     time.sleep(3)  # Helicone needs time to insert request into the database
+
+    query2 = "SELECT * FROM request"
+    request_data2 = fetch_from_db(query2)
+    print(request_data2)
 
     query = "SELECT * FROM request WHERE id = %s"
     request_data = fetch_from_db(query, (requestId,))
@@ -168,7 +173,7 @@ def test_openai_proxy():
 
 
 def test_openai_proxy_stream():
-    print("\n---------Running test_proxy---------")
+    print("\n---------Running test_openai_proxy_stream---------")
     requestId = str(uuid.uuid4())
     print("Request ID: " + requestId + "")
     message_content = test_openai_proxy.__name__ + " - " + requestId
