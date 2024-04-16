@@ -482,10 +482,6 @@ Json: JsonObject;
     "Result_PromptVersionResult.string_": components["schemas"]["SuccessResult_PromptVersionResult_"] | components["schemas"]["ErrorResult_string_"];
     PromptCreateSubversionParams: {
       newHeliconeTemplate: unknown;
-      /** Format: double */
-      newMajorVersion: number;
-      /** Format: double */
-      newMinorVersion: number;
     };
     "SuccessResult_PromptVersionResult-Array_": {
       data: components["schemas"]["PromptVersionResult"][];
@@ -528,7 +524,6 @@ Json: JsonObject;
     "Result__experimentId-string_.string_": components["schemas"]["SuccessResult__experimentId-string__"] | components["schemas"]["ErrorResult_string_"];
     NewExperimentParams: {
       datasetId: string;
-      sourcePromptVersion: string;
       promptVersion: string;
       model: string;
     };

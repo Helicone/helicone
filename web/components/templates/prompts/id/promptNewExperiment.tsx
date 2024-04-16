@@ -315,10 +315,14 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                   body: {
                     newHeliconeTemplate: {
                       model: "gpt-3.5-turbo",
-                      prompt: "test",
+                      messages: [
+                        {
+                          role: "system",
+                          content:
+                            '<helicone-prompt-input key="test2" />sdafsadfadsfads <helicone-prompt-input key="test" />Applsadfslaksdjlfd!',
+                        },
+                      ],
                     },
-                    newMajorVersion: prompts?.[0].major_version ?? 0,
-                    newMinorVersion: (prompts?.[0].minor_version ?? 0) + 1,
                   },
                   params: {
                     path: {
@@ -330,10 +334,9 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
 
               jawn.POST("/v1/experiment", {
                 body: {
-                  datasetId: "asd",
+                  datasetId: "2c55f92f-e004-450c-b74e-d85c8c60194b",
                   model: "gpt-3.5-turbo",
-                  promptVersion: "asd",
-                  sourcePromptVersion: res.data?.data?.id ?? "",
+                  promptVersion: res.data?.data?.id ?? "",
                 },
               });
             }}
