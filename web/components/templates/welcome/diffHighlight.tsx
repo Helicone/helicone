@@ -34,9 +34,9 @@ export function DiffHighlight(props: DiffHighlightProps) {
                 className,
                 textSize === "sm" && "text-xs",
                 textSize === "md" && "text-xs md:text-sm",
-                textSize === "lg" && "text-sm md:text-md",
+                textSize === "lg" && "text-md md:text-lg",
                 minHeight ? "min-h-[300px] md:min-h-[420px]" : "",
-                "p-6 rounded-xl mt-3 overflow-auto relative"
+                "p-6 rounded-xl mt-3 overflow-auto relative space-y-0.5"
               )}
               style={style}
             >
@@ -47,31 +47,27 @@ export function DiffHighlight(props: DiffHighlightProps) {
                   navigator.clipboard.writeText(props.code);
                 }}
               >
-                <ClipboardIcon className="w-5 h-5 text-gray-500" />
+                <ClipboardIcon className="w-6 h-6 text-gray-500" />
               </button>
               {tokens.map((line, i) => {
                 const lineProps = getLineProps({ line, key: i });
-                const newLine =
-                  props.newLines &&
-                  props.newLines.length > 0 &&
-                  props.newLines.find((n) => n === i) !== undefined;
-                const oldLine =
-                  props.oldLines &&
-                  props.oldLines.length > 0 &&
-                  props.oldLines.find((n) => n === i) !== undefined;
-                if (newLine) {
-                  const className = " bg-green-500 bg-opacity-40";
-                  lineProps.className += className;
-                }
-                if (oldLine) {
-                  const className = " bg-red-800 bg-opacity-40";
-                  lineProps.className += className;
-                }
+                const lineNumber = i;
+                const newLine = props.newLines.includes(lineNumber);
+                const oldLine = props.oldLines.includes(lineNumber);
+                let lineClasses = "flex";
+                if (newLine) lineClasses += " bg-green-500 bg-opacity-40";
+                if (oldLine) lineClasses += " bg-red-800 bg-opacity-40";
+
                 return (
-                  <div key={i} {...lineProps}>
-                    {line.map((token, key) => (
-                      <span key={key} {...getTokenProps({ token, key })} />
-                    ))}
+                  <div key={i} {...lineProps} className={lineClasses}>
+                    <span className="select-none text-right w-8 pr-4 text-gray-500">
+                      {lineNumber + 1}
+                    </span>
+                    <code className="flex-1">
+                      {line.map((token, key) => (
+                        <span key={key} {...getTokenProps({ token, key })} />
+                      ))}
+                    </code>
                   </div>
                 );
               })}
