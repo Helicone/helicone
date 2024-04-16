@@ -23,6 +23,7 @@ import { RequestResponseManager } from "../managers/RequestResponseManager";
 import { isImageModel } from "../util/imageModelMapper";
 import { getImageModelParser } from "./imageParsers/parserMapper";
 import { TemplateWithInputs } from "../../api/lib/promptHelpers";
+import { PostHog } from "posthog-node";
 
 export interface DBLoggableProps {
   response: {
@@ -1017,5 +1018,25 @@ export async function logRequest(
     } else {
       return undefined;
     }
+  }
+
+  async function capturePosthogEvent(
+    posthogApiKey: string,
+    request: any,
+    response: any
+  ) {
+    const client = new PostHog(posthogApiKey);
+
+    client.capture({
+      distinctId: "distinct_id",
+      event: "order_created",
+      properties: {
+        order_id: "#0054",
+        subtotal: 3599,
+        customer_name: "Max Hedgehog",
+      },
+    });
+
+    await client.shutdown();
   }
 }
