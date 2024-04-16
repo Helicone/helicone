@@ -179,12 +179,14 @@ const HomePage = (props: HomePageProps) => {
           </div>
           <h1
             ref={heroTextRef}
-            className="font-mono text-4xl sm:text-7xl block font-bold w-full h-full tracking-tight text-center items-center sm:leading-[1]"
+            className="font-mono text-4xl sm:text-6xl block font-bold w-full h-full tracking-tight text-center items-center sm:leading-[1]"
           >
-            <span>How</span> <span>developers</span>{" "}
+            <span>Observability Platform for</span>{" "}
+            <span className="text-sky-500">LLM-developers</span>
+            {/* <span>How</span> <span>developers</span>{" "}
             <span className="text-sky-500 ">build</span>{" "}
             <span className="text-sky-500">AI</span>{" "}
-            <span className="text-sky-500">applications</span>
+            <span className="text-sky-500">applications</span> */}
           </h1>
           <p
             ref={subTextRef}
