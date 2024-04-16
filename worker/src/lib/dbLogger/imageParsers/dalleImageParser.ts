@@ -9,8 +9,8 @@ export class DalleImageParser extends ImageModelResponseBodyParser {
 
   processResponseBody(body: any): ImageModelParsingResponse {
     const requestAssets: Map<string, string> = new Map();
-    const requestBody = JSON.parse(JSON.stringify(body));
     try {
+      const requestBody = JSON.parse(JSON.stringify(body));
       requestBody?.data?.forEach((item: any) => {
         if (item.url) {
           const assetId = this.generateAssetId();

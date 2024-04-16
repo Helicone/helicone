@@ -8,8 +8,8 @@ export class GptVisionImageParser extends ImageModelRequestBodyParser {
 
   processRequestBody(body: any): ImageModelParsingResponse {
     const requestAssets: Map<string, string> = new Map();
-    const requestBody = JSON.parse(JSON.stringify(body));
     try {
+      const requestBody = JSON.parse(JSON.stringify(body));
       requestBody?.messages?.forEach((message: any) => {
         message.content.forEach((item: any) => {
           if (item.type === "image_url") {
