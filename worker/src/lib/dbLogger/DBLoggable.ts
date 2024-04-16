@@ -763,6 +763,9 @@ export class DBLoggable {
       }
     }
 
+    const model =
+      request.model_override ?? response.model ?? request.model ?? "not-found";
+
     await logInClickhouse(
       requestResult.data.request,
       responseResult.data.response,
@@ -826,6 +829,7 @@ export class DBLoggable {
     }
 
     if (requestHeaders?.posthogKey) {
+      requestResult.data.request.
       await this.capturePosthogEvent(
         requestHeaders.posthogKey,
         requestResult.data.body,
@@ -844,6 +848,26 @@ export class DBLoggable {
   ) {
     const client = new PostHog(posthogApiKey);
 
+    interface HeliconeRequestResponseToPosthog {
+      model: string;
+      temperature: number;
+      n: number;
+      size: number;
+      promptId: string;
+      timeToFirstToken: number;
+      cost: number;
+      provider: string;
+      path: string;
+      completetionTokens: number; 
+      promptTokens: number;
+      totalTokens: number;
+      user: string;
+      countryCode:  string;
+      requestBodySize: number;
+      responseBodySize: number;
+      delayMs: number;
+    }
+    // "/v1/chat/completions";
     if (request) {
       client.capture({
         distinctId: crypto.randomUUID(),
