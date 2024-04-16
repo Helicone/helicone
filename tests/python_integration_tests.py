@@ -142,7 +142,7 @@ def test_openai_proxy():
     headers = {
         "Authorization": f"Bearer {openai_api_key}",
         "Helicone-Auth": f"Bearer {helicone_api_key}",
-        "Helicone-Property-RequestId": requestId,
+        "Helicone-Request-Id"
         "OpenAI-Organization": openai_org_id
     }
 
@@ -152,7 +152,7 @@ def test_openai_proxy():
 
     time.sleep(3)  # Helicone needs time to insert request into the database
 
-    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
+    query = "SELECT * FROM request WHERE id = %s"
     request_data = fetch_from_db(query, (requestId,))
     assert request_data, "Request data not found in the database for the given property request id"
 
