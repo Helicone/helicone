@@ -276,10 +276,14 @@ export class DBLoggable {
         }
       } else if (!isStream && this.provider === "GOOGLE") {
         const responseJson = JSON.parse(result);
-        const usageMetadataItem = responseJson.find(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (item: any) => item.usageMetadata
-        );
+        let usageMetadataItem;
+        if (Array.isArray(responseJson)) {
+          usageMetadataItem = responseJson.find((item) => item.usageMetadata);
+        } else {
+          usageMetadataItem = responseJson.usageMetadata
+            ? responseJson
+            : undefined;
+        }
 
         return ok({
           usage: {

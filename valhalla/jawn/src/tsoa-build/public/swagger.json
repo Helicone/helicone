@@ -936,6 +936,33 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
+			"Partial_PromptToOperators_": {
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"user_defined_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_PromptVersionsToOperators_": {
+				"properties": {
+					"minor_version": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"major_version": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
 			"Partial_TablesAndViews_": {
 				"properties": {
 					"user_metrics": {
@@ -993,6 +1020,12 @@
 							"$ref": "#/components/schemas/Partial_TextOperators_"
 						},
 						"type": "object"
+					},
+					"prompt_v2": {
+						"$ref": "#/components/schemas/Partial_PromptToOperators_"
+					},
+					"prompt_versions": {
+						"$ref": "#/components/schemas/Partial_PromptVersionsToOperators_"
 					}
 				},
 				"type": "object",
@@ -1125,10 +1158,186 @@
 					},
 					"isCached": {
 						"type": "boolean"
+					},
+					"includeInputs": {
+						"type": "boolean"
 					}
 				},
 				"required": [
 					"filter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PromptsResult": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"user_defined_id": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"pretty_name": {
+						"type": "string"
+					},
+					"major_version": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id",
+					"user_defined_id",
+					"description",
+					"pretty_name",
+					"major_version"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SuccessResult_PromptsResult-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/PromptsResult"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptsResult-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/SuccessResult_PromptsResult-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ErrorResult_string_"
+					}
+				]
+			},
+			"PromptsQueryParams": {
+				"properties": {},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PromptResult": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"user_defined_id": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"pretty_name": {
+						"type": "string"
+					},
+					"major_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"latest_version_id": {
+						"type": "string"
+					},
+					"latest_model_used": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"last_used": {
+						"type": "string"
+					},
+					"versions": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"user_defined_id",
+					"description",
+					"pretty_name",
+					"major_version",
+					"latest_version_id",
+					"latest_model_used",
+					"created_at",
+					"last_used",
+					"versions"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SuccessResult_PromptResult_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/PromptResult"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptResult.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/SuccessResult_PromptResult_"
+					},
+					{
+						"$ref": "#/components/schemas/ErrorResult_string_"
+					}
+				]
+			},
+			"PromptQueryParams": {
+				"properties": {
+					"timeFilter": {
+						"properties": {
+							"end": {
+								"type": "string"
+							},
+							"start": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"end",
+							"start"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"timeFilter"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1205,6 +1414,87 @@
 								"sort": {
 									"created_at": "desc"
 								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/query": {
+			"post": {
+				"operationId": "GetPrompts",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptsResult-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PromptsQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/{promptId}/query": {
+			"post": {
+				"operationId": "GetPrompt",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PromptQueryParams"
 							}
 						}
 					}

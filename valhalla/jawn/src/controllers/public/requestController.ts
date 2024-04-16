@@ -22,6 +22,7 @@ export interface RequestQueryParams {
   limit?: number;
   sort?: SortLeafRequest;
   isCached?: boolean;
+  includeInputs?: boolean;
 }
 
 @Route("v1/request")
