@@ -15,10 +15,10 @@ const steps = [
 from openai import OpenAI
 
 client = OpenAI(
-  api_key={{OPENAI_API_KEY}},
+  api_key=OPENAI_API_KEY,
   base_url="http://oai.hconeai.com/v1", 
   default_headers= { 
-    "Helicone-Auth": f"Bearer {{HELICONE_API_KEY}}",
+    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
   }
 )
         `}
