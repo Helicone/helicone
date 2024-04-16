@@ -67,7 +67,9 @@ alter table "public"."prompt_input_record" enable row level security;
 CREATE TABLE "public"."experiment_dataset_v2" (
     id UUID PRIMARY KEY default gen_random_uuid(),
     "created_at" timestamp with time zone default now(),
-    "name" TEXT
+    "name" TEXT,
+    organization UUID NOT NULL,
+    CONSTRAINT fk_organization FOREIGN KEY (organization) REFERENCES organization(id)
 );
 
 alter table "public"."experiment_dataset_v2" enable row level security;

@@ -20,12 +20,20 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { getTokenCount } from "../clients/TokenCounterClient";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
-import { isImageModel } from "../util/imageModelMapper";
-import { getImageModelParser } from "./imageParsers/parserMapper";
+import {
+  isImageModel,
+  isRequestImageModel,
+  isResponseImageModel,
+} from "../util/imageModelMapper";
+import {
+  getRequestImageModelParser,
+  getResponseImageModelParser,
+} from "./imageParsers/parserMapper";
 import {
   injectAssetIds,
   TemplateWithInputs,
 } from "../../api/lib/promptHelpers";
+import { ImageModelParsingResponse } from "./imageParsers/core/parsingResponse";
 
 export interface DBLoggableProps {
   response: {
@@ -271,10 +279,14 @@ export class DBLoggable {
         }
       } else if (!isStream && this.provider === "GOOGLE") {
         const responseJson = JSON.parse(result);
-        const usageMetadataItem = responseJson.find(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (item: any) => item.usageMetadata
-        );
+        let usageMetadataItem;
+        if (Array.isArray(responseJson)) {
+          usageMetadataItem = responseJson.find((item) => item.usageMetadata);
+        } else {
+          usageMetadataItem = responseJson.usageMetadata
+            ? responseJson
+            : undefined;
+        }
 
         return ok({
           usage: {
@@ -443,11 +455,15 @@ export class DBLoggable {
         };
   }
 
-  async readAndLogResponse(queue: RequestResponseStore): Promise<
+  async readAndLogResponse(
+    queue: RequestResponseStore,
+    model: string | null
+  ): Promise<
     Result<
       {
         response: Database["public"]["Tables"]["response"]["Insert"];
         body: string;
+        responseAssets: Map<string, string>;
       },
       string
     >
@@ -457,6 +473,18 @@ export class DBLoggable {
         this.getResponse(),
         1000 * 60 * 30
       ); // 30 minutes
+      let imageModelParsingResponse: ImageModelParsingResponse = {
+        body,
+        assets: new Map<string, string>(),
+      };
+      if (model && isResponseImageModel(model)) {
+        const imageModelParser = getResponseImageModelParser(model);
+        if (imageModelParser) {
+          imageModelParsingResponse =
+            imageModelParser.processResponseBody(body);
+        }
+      }
+      response.body = imageModelParsingResponse.body;
       const { error } = await queue.updateResponse(
         this.response.responseId,
         this.request.requestId,
@@ -466,7 +494,11 @@ export class DBLoggable {
         console.error("Error updating response", error);
         // return err(error);
       }
-      return ok({ response, body });
+      return ok({
+        response,
+        body: imageModelParsingResponse.body,
+        responseAssets: imageModelParsingResponse.assets,
+      });
     } catch (e) {
       const { error } = await queue.updateResponse(
         this.response.responseId,
@@ -646,13 +678,25 @@ export class DBLoggable {
     if (!requestResult.data || requestResult.error) {
       return requestResult;
     }
-
-    const responseResult = await this.readAndLogResponse(db.queue);
+    const responseResult = await this.readAndLogResponse(
+      db.queue,
+      requestResult.data.request.model
+    );
     const model =
       requestResult?.data?.request?.model_override ??
       responseResult?.data?.response?.model ??
       requestResult?.data?.request?.model ??
       "not-found";
+
+    let assets: Map<string, string> = new Map();
+
+    if (requestResult?.data?.requestAssets) {
+      assets = new Map([...assets, ...requestResult.data.requestAssets]);
+    }
+
+    if (responseResult?.data?.responseAssets) {
+      assets = new Map([...assets, ...responseResult.data.responseAssets]);
+    }
 
     let s3Result: Result<string, string>;
     // If no data or error, return
@@ -670,7 +714,7 @@ export class DBLoggable {
                 await this.response.getResponseBody()
               ).body,
             }),
-            requestAssets: requestResult.data.requestAssets,
+            assets: assets,
           });
         } else {
           s3Result = await db.requestResponseManager.storeRequestResponseData({
@@ -683,7 +727,7 @@ export class DBLoggable {
                 await this.response.getResponseBody()
               ).body,
             }),
-            requestAssets: requestResult.data.requestAssets,
+            assets: assets,
           });
         }
 
@@ -702,7 +746,7 @@ export class DBLoggable {
           requestId: this.request.requestId,
           requestBody: requestResult.data.body,
           responseBody: responseResult.data.body,
-          requestAssets: requestResult.data.requestAssets,
+          assets: assets,
         });
       } else {
         s3Result = await db.requestResponseManager.storeRequestResponseData({
@@ -710,7 +754,7 @@ export class DBLoggable {
           requestId: this.request.requestId,
           requestBody: requestResult.data.body,
           responseBody: responseResult.data.body,
-          requestAssets: requestResult.data.requestAssets,
+          assets: assets,
         });
       }
 
@@ -850,7 +894,7 @@ export async function logRequest(
         job: string | null;
       };
       body: string; // For S3 storage
-      requestAssets: Record<string, string>;
+      requestAssets: Map<string, string>;
     },
     string
   >
@@ -918,17 +962,20 @@ export async function logRequest(
         (requestBody as any);
 
     // eslint-disable-next-line prefer-const
-    let requestAssets: Record<string, string> = {};
+    let imageModelParsingResponse: ImageModelParsingResponse = {
+      body: body,
+      assets: new Map<string, string>(),
+    };
     const model = getModelFromRequest();
 
-    if (model && isImageModel(model)) {
-      const imageModelParser = getImageModelParser(model);
+    if (model && isRequestImageModel(model)) {
+      const imageModelParser = getRequestImageModelParser(model);
       if (imageModelParser) {
-        requestAssets = imageModelParser.processMessages(body);
+        imageModelParsingResponse = imageModelParser.processRequestBody(body);
       }
     }
 
-    const reqBody = unsupportedImage(body);
+    const reqBody = unsupportedImage(imageModelParsingResponse.body);
 
     const createdAt = request.startTime ?? new Date();
     const requestData = {
@@ -997,8 +1044,8 @@ export async function logRequest(
           id: jobNode?.data.id ?? null,
           job: jobNode?.data.job ?? null,
         },
-        body: body,
-        requestAssets,
+        body: imageModelParsingResponse.body,
+        requestAssets: imageModelParsingResponse.assets,
       },
       error: null,
     };

@@ -1,28 +1,34 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ImageModelParser } from "./imageModelParser";
-export class GptVisionImageParser extends ImageModelParser {
+import { ImageModelRequestBodyParser } from "./core/modelRequestBodyParser";
+import { ImageModelParsingResponse } from "./core/parsingResponse";
+export class GptVisionImageParser extends ImageModelRequestBodyParser {
   constructor(modelName: string) {
     super(modelName);
   }
 
-  processMessages(body: any): Record<string, string> {
-    const requestAssets: Record<string, string> = {};
+  processRequestBody(body: any): ImageModelParsingResponse {
+    const requestAssets: Map<string, string> = new Map();
+    let requestBody = body;
     try {
-      body?.messages?.forEach((message: any) => {
+      requestBody = JSON.parse(JSON.stringify(body));
+      requestBody?.messages?.forEach((message: any) => {
         message.content.forEach((item: any) => {
           if (item.type === "image_url") {
             const assetId = this.generateAssetId();
-            requestAssets[assetId] = item.image_url.url;
+            requestAssets.set(assetId, item.image_url.url);
             item.image_url.url = `<helicone-asset-id key="${assetId}"/>`;
           }
         });
       });
     } catch (error) {
       console.error(
-        `Error processing messages for model: ${this.modelName}, error: ${error}`
+        `Error processing request body for model: ${this.modelName}, error: ${error}`
       );
     }
 
-    return requestAssets;
+    return {
+      body: requestBody,
+      assets: requestAssets,
+    };
   }
 }

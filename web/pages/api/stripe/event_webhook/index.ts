@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { buffer } from "micro";
 import { supabaseServer } from "../../../../lib/supabaseServer";
+import { Database } from "../../../../supabase/database.types";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2022-11-15",
@@ -56,19 +57,50 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     } else if (event.type === "customer.subscription.updated") {
       const subscriptionUpdated = event.data.object as Stripe.Subscription;
 
-      // check to see if the sub is active
-      let status = false;
-
-      // TODO: double check to see if this is the best way to do things
-      if (subscriptionUpdated.cancel_at === null) {
-        status = true;
+      const isSubscriptionActive = subscriptionUpdated.status === "active";
+      let growthPlanItem = null;
+      let proPlanItem = null;
+      for (const item of subscriptionUpdated?.items?.data) {
+        if (
+          item.plan.id === process.env.STRIPE_GROWTH_PRICE_ID &&
+          item.plan.usage_type === "metered"
+        ) {
+          growthPlanItem = item;
+          break;
+        } else if (
+          item.plan.id === process.env.STRIPE_PRICE_ID &&
+          item.plan.usage_type !== "metered"
+        ) {
+          proPlanItem = item;
+          break;
+        }
       }
 
-      // Update the organization's status based on Stripe's subscription status.
-      await supabaseServer
+      let updateFields: Database["public"]["Tables"]["organization"]["Update"] =
+        {
+          subscription_status: isSubscriptionActive ? "active" : "inactive",
+        };
+
+      if (isSubscriptionActive && growthPlanItem && !proPlanItem) {
+        updateFields.tier = "growth";
+        updateFields.stripe_subscription_item_id = growthPlanItem.id;
+      } else if (isSubscriptionActive && proPlanItem && !growthPlanItem) {
+        updateFields.tier = "pro";
+      }
+
+      const { data, error } = await supabaseServer
         .from("organization")
-        .update({ subscription_status: status ? "active" : "pending-cancel" })
-        .eq("stripe_subscription_id", subscriptionUpdated.id);
+        .update(updateFields)
+        .eq("stripe_customer_id", subscriptionUpdated.customer);
+
+      if (error) {
+        console.error("Failed to update organization:", JSON.stringify(error));
+      } else {
+        console.log(
+          "Organization updated successfully: ",
+          JSON.stringify(data)
+        );
+      }
     } else if (event.type === "customer.subscription.deleted") {
       // Subscription has been deleted, either due to non-payment or being manually canceled.
       const subscriptionDeleted = event.data.object as Stripe.Subscription;
