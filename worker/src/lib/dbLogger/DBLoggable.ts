@@ -790,7 +790,7 @@ export class DBLoggable {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const heliconeTemplateWithAssets = injectAssetIds(
         this.request.heliconeTemplate,
-        requestResult.data.requestAssets
+        Array.from(requestResult.data.requestAssets.keys())
       );
 
       const upsertResult2 = await db.queue.promptStore.upsertPromptV2(

@@ -109,9 +109,8 @@ export function parseJSXObject(input: object): {
 
 export function injectAssetIds(
   originalTemplateWithInputs: TemplateWithInputs,
-  assetMapping: Record<string, string>
+  assetIds: string[]
 ): TemplateWithInputs {
-  const uuids: string[] = Object.keys(assetMapping); // Get all UUID keys from the asset mapping
   let uuidIndex = 0; // Index to access UUIDs in order
 
   function deepClone(obj: any): any {
@@ -138,8 +137,8 @@ export function injectAssetIds(
               newItem.image_url.url = newItem.image_url.url.replace(
                 regex,
                 (match: any, key: any) => {
-                  if (uuidIndex < uuids.length) {
-                    const assetId = uuids[uuidIndex++]; // Use each UUID sequentially
+                  if (uuidIndex < assetIds.length) {
+                    const assetId = assetIds[uuidIndex++]; // Use each UUID sequentially
                     return `<helicone-prompt-input key="${key}" ><helicone-asset-id key="${assetId}"/></helicone-prompt-input>`;
                   }
                   return match; // Return the original match if no more UUIDs are available
