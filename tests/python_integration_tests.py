@@ -152,6 +152,10 @@ def test_openai_proxy():
 
     time.sleep(3)  # Helicone needs time to insert request into the database
 
+    query1 = "SELECT * from request"
+    request_data1 = fetch_from_db(query1)
+    print("All requests: ", request_data1)
+
     query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
     request_data = fetch_from_db(query, (requestId,))
     assert request_data, "Request data not found in the database for the given property request id"
@@ -159,6 +163,10 @@ def test_openai_proxy():
     latest_request = request_data[0]
     assert message_content in latest_request["body"]["messages"][
         0]["content"], "Request not found in the database"
+    
+    query3 = "SELECT * FROM response"
+    response_data3 = fetch_from_db(query3)
+    print("All responses: ", response_data3)
 
     query = "SELECT * FROM response WHERE request = %s LIMIT 1"
     response_data = fetch_from_db(query, (latest_request["id"],))

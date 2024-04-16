@@ -207,7 +207,7 @@ jobs:
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
           ANTHROPIC_API_KEY: ${{ secrets.CI_ANTHROPIC_API_KEY }}
         run: |
-          pytest python_integration_tests.py -s > ~/test-logs/integration.log
+          pytest python_integration_tests.py
       - name: Run helicone-python tests
         working-directory: helicone-python
         env:
