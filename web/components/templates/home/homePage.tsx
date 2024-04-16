@@ -20,6 +20,7 @@ import { Disclosure } from "@headlessui/react";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import useNotification from "../../shared/notification/useNotification";
+import Enterprise from "./components/enterprise";
 
 interface HomePageProps {}
 
@@ -250,7 +251,7 @@ client = OpenAI(
           </div>
         </div>
 
-        <div className="w-full flex flex-col max-w-6xl mx-auto space-y-4 px-4 py-8">
+        <div className="w-full flex flex-col max-w-6xl mx-auto space-y-4 px-4 py-32">
           <div className="flex flex-col w-full items-center text-center">
             <h3 className="text-xl sm:text-3xl font-bold text-black text-center tracking-tight leading-tight">
               Trusted by thousands of{" "}
@@ -259,7 +260,7 @@ client = OpenAI(
               </span>
               <span className=" inline sm:hidden">companies</span>
             </h3>
-            <p className="text-gray-700 font-medium text-md sm:text-lg sm:leading-9">
+            <p className="text-gray-900 font-medium text-md sm:text-lg sm:leading-9">
               <span className="hidden sm:inline">Helicone is built</span>
               <span className="inline sm:hidden">Built</span> to scale with your
               business
@@ -351,68 +352,66 @@ client = OpenAI(
                 />
               </div>
             </div>
-            <ul className="grid grid-cols-1 sm:grid-cols-4 gap-16 sm:gap-8 mx-auto max-w-6xl pt-32 px-4">
-              <li className="col-span-1 flex items-start space-x-2">
-                <div>
-                  <CodeBracketSquareIcon className="w-6 h-6 text-sky-950" />
-                </div>
-                <div className="flex flex-col space-y-1">
-                  <h2 className="text-md font-bold text-black">Any Model</h2>
-                  <p className="text-sm text-gray-700 font-medium">
-                    Bring any model from any provider to Helicone.
-                  </p>
-                </div>
-              </li>
-              <li className="col-span-1 flex items-start space-x-2">
-                <div>
-                  <BuildingOffice2Icon className="w-6 h-6 text-sky-950" />
-                </div>
-                <div className="flex flex-col space-y-1">
-                  <h2 className="text-md font-bold text-black">Any Scale</h2>
-                  <p className="text-sm text-gray-700 font-medium">
-                    Log millions of requests per second with no latency impact.
-                  </p>
-                </div>
-              </li>
-              <li className="col-span-1 flex items-start space-x-2">
-                <div>
-                  <CubeIcon className="w-6 h-6 text-sky-950" />
-                </div>
-                <div className="flex flex-col space-y-1">
-                  <h2 className="text-md font-bold text-black">
-                    Async Packages
-                  </h2>
-                  <p className="text-sm text-gray-700 font-medium">
-                    We offer async packages for all major languages.
-                  </p>
-                </div>
-              </li>
-              <li className="col-span-1 flex items-start space-x-2">
-                <div>
-                  <ShieldCheckIcon className="w-6 h-6 text-sky-950" />
-                </div>
-                <div className="flex flex-col space-y-1">
-                  <h2 className="text-md font-bold text-black">
-                    On-prem deployments
-                  </h2>
-                  <p className="text-sm text-gray-700 font-medium">
-                    Deploy Helicone on-prem for maximum security.
-                  </p>
-                </div>
-              </li>
-            </ul>
           </div>
         </div>
+        <ul className="grid grid-cols-1 sm:grid-cols-4 gap-16 mx-auto max-w-6xl pt-32 pb-8 px-4">
+          <li className="col-span-1 flex items-start space-x-2">
+            <div>
+              <CodeBracketSquareIcon className="w-8 h-8 text-sky-700" />
+            </div>
+            <div className="flex flex-col space-y-1">
+              <h2 className="text-xl font-bold text-black">Any Model</h2>
+              <p className="text-md text-gray-700 font-medium">
+                We support models from OpenAI, Claude, Gemini, and more.
+              </p>
+            </div>
+          </li>
+          <li className="col-span-1 flex items-start space-x-2">
+            <div>
+              <BuildingOffice2Icon className="w-8 h-8 text-sky-700" />
+            </div>
+            <div className="flex flex-col space-y-1">
+              <h2 className="text-xl font-bold text-black">Any Scale</h2>
+              <p className="text-md text-gray-700 font-medium">
+                Log millions of requests per second with no latency impact.
+              </p>
+            </div>
+          </li>
+          <li className="col-span-1 flex items-start space-x-2">
+            <div>
+              <CubeIcon className="w-8 h-8 text-sky-700" />
+            </div>
+            <div className="flex flex-col space-y-1">
+              <h2 className="text-xl font-bold text-black">Async Packages</h2>
+              <p className="text-md text-gray-700 font-medium">
+                We offer async packages for all major languages and frameworks.
+              </p>
+            </div>
+          </li>
+          <li className="col-span-1 flex items-start space-x-2">
+            <div>
+              <ShieldCheckIcon className="w-8 h-8 text-sky-700" />
+            </div>
+            <div className="flex flex-col space-y-1">
+              <h2 className="text-xl font-bold text-black">
+                Fully Open-Source
+              </h2>
+              <p className="text-md text-gray-700 font-medium">
+                Deploy Helicone on-prem for maximum security.
+              </p>
+            </div>
+          </li>
+        </ul>
       </header>
 
       <section className="w-full flex flex-col max-w-6xl mx-auto space-y-4 py-32 px-4">
         <Platform />
       </section>
-      {/* <section id="enterprise" className="py-36">
+      <section id="enterprise" className="py-36">
         <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
-          hello
+          <Enterprise />
         </div>
-      </section> */}
+      </section>
       <section id="integration" className="py-36">
         <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
           <div className="flex flex-col space-y-2 pb-2 w-full items-center">
