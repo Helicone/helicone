@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ImageModelRequestBodyParser } from "./core/imageModelRequestBodyParser";
+import { ImageModelRequestBodyParser } from "./core/modelRequestBodyParser";
 import { ImageModelParsingResponse } from "./core/parsingResponse";
 
 export class ClaudeImageParser extends ImageModelRequestBodyParser {
