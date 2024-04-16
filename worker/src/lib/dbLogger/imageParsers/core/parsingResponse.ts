@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export type ImageModelParsingResponse = {
+export interface ImageModelParsingResponse {
   body: any;
   assets: Map<string, string>;
-};
+}
