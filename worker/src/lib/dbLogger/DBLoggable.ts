@@ -681,9 +681,11 @@ export class DBLoggable {
       requestResult?.data?.request?.model ??
       "not-found";
 
-    let assets: Map<string, string> = new Map([
-      ...requestResult.data.requestAssets,
-    ]);
+    let assets: Map<string, string> = new Map();
+
+    if (requestResult?.data?.requestAssets) {
+      assets = new Map([...assets, ...requestResult.data.requestAssets]);
+    }
 
     if (responseResult?.data?.responseAssets) {
       assets = new Map([...assets, ...responseResult.data.responseAssets]);
