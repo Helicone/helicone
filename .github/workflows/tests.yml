@@ -156,7 +156,7 @@ jobs:
         run: |
           mkdir -p ~/test-logs
           cd worker
-          npm install -g wrangler
+          npm install -g wrangler@3.48.0
           npm install
       - name: Start proxy worker
         run: |
