@@ -149,7 +149,6 @@ def test_openai_proxy():
     response = fetch(helicone_proxy_url, "chat/completions",
                      method="POST", json=data, headers=headers)
     print(response)
-    print(response.headers)
     assert response, "Response from OpenAI API is empty"
 
     time.sleep(3)  # Helicone needs time to insert request into the database
