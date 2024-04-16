@@ -592,7 +592,8 @@ export class DBLoggable {
       queue: RequestResponseStore;
       requestResponseManager: RequestResponseManager;
     },
-    S3_ENABLED: Env["S3_ENABLED"]
+    S3_ENABLED: Env["S3_ENABLED"],
+    requestHeaders?: HeliconeHeaders
   ): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
@@ -784,7 +785,46 @@ export class DBLoggable {
       }
     }
 
+    if (requestHeaders?.posthogKey) {
+      await this.capturePosthogEvent(
+        requestHeaders.posthogKey,
+        requestResult.data.body,
+        responseResult.data.body
+      );
+    }
+
     return ok(null);
+  }
+  async capturePosthogEvent(
+    posthogApiKey: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    request: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    response: any
+  ) {
+    const client = new PostHog(posthogApiKey);
+
+    if (request) {
+      client.capture({
+        distinctId: crypto.randomUUID(),
+        event: "helicone_request",
+        properties: {
+          ...request,
+        },
+      });
+    }
+
+    if (response) {
+      client.capture({
+        distinctId: crypto.randomUUID(),
+        event: "helicone_response",
+        properties: {
+          ...response,
+        },
+      });
+    }
+
+    await client.shutdown();
   }
 }
 
@@ -1018,25 +1058,5 @@ export async function logRequest(
     } else {
       return undefined;
     }
-  }
-
-  async function capturePosthogEvent(
-    posthogApiKey: string,
-    request: any,
-    response: any
-  ) {
-    const client = new PostHog(posthogApiKey);
-
-    client.capture({
-      distinctId: "distinct_id",
-      event: "order_created",
-      properties: {
-        order_id: "#0054",
-        subtotal: 3599,
-        customer_name: "Max Hedgehog",
-      },
-    });
-
-    await client.shutdown();
   }
 }
