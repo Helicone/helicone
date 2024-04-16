@@ -210,7 +210,7 @@ const HomePage = (props: HomePageProps) => {
           </div>
         </div>
         <div className="flex gap-4 flex-col justify-center items-center space-y-4 pb-32">
-          <div className="flex flex-col space-y-4 w-[42rem]">
+          <div className="hidden md:flex flex-col space-y-4 w-[42rem]">
             <DiffHighlight
               code={`
 from openai import OpenAI
@@ -230,8 +230,28 @@ client = OpenAI(
               textSize="lg"
             />
           </div>
+          <div className="flex md:hidden flex-col space-y-4 w-full px-4">
+            <DiffHighlight
+              code={`
+from openai import OpenAI
+
+client = OpenAI(
+  api_key={{OPENAI_API_KEY}},
+  base_url="http://oai.hconeai.com/v1", 
+  default_headers= { 
+    "Helicone-Auth": f"Bearer {{HELICONE_API_KEY}}",
+  }
+)
+        `}
+              language={"python"}
+              newLines={[4, 6]}
+              oldLines={[]}
+              minHeight={false}
+              textSize="sm"
+            />
+          </div>
         </div>
-        <ul className="grid grid-cols-1 sm:grid-cols-4 gap-8 mx-auto max-w-6xl py-32 px-4">
+        <ul className="grid grid-cols-1 sm:grid-cols-4 gap-16 sm:gap-8 mx-auto max-w-6xl py-32 px-4">
           <li className="col-span-1 flex items-start space-x-2">
             <div>
               <CodeBracketSquareIcon className="w-6 h-6 text-sky-950" />

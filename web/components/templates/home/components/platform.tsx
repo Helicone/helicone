@@ -92,7 +92,7 @@ export default function Platform() {
           Collect data, monitor performance, and improve your LLM-powered
           application over time
         </p>
-        <ul className="flex items-center justify-between w-full px-4 sm:px-16 pt-8">
+        <ul className="hidden md:flex items-center justify-between w-full px-4 sm:px-16 pt-8">
           {tabs.map((tab) => (
             <li key={tab.name}>
               <button
