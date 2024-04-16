@@ -683,7 +683,6 @@ export class DBLoggable {
 
     let assets: Map<string, string> = new Map();
 
-    console.log(requestResult.data.requestAssets.size);
     if (requestResult?.data?.requestAssets) {
       assets = new Map([...assets, ...requestResult.data.requestAssets]);
     }
