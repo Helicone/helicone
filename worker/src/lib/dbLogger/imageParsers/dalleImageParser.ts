@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ImageModelResponseBodyParser } from "./core/imageModelResponseBodyParser";
+import { ImageModelResponseBodyParser } from "./core/ImageModelResponseBodyParser";
 import { ImageModelParsingResponse } from "./core/parsingResponse";
 
 export class DalleImageParser extends ImageModelResponseBodyParser {
