@@ -144,14 +144,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18"
-      - name: Cache npm packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ./worker/node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('./worker/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+      # - name: Cache npm packages
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: |
+      #       ./worker/node_modules
+      #     key: ${{ runner.os }}-node-${{ hashFiles('./worker/package-lock.json') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-node-
       - name: Install node dependencies
         run: |
           mkdir -p ~/test-logs
