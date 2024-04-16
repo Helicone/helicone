@@ -362,6 +362,7 @@ export class DBLoggable {
   async getResponse() {
     const { body: responseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
+    console.log(`Response body: ${responseBody}`);
     const endTime = this.timing.endTime ?? responseEndTime;
     const delay_ms = endTime.getTime() - this.timing.startTime.getTime();
     const timeToFirstToken = this.request.isStream

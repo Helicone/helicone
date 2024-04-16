@@ -232,6 +232,7 @@ export async function proxyForwarder(
   }
 
   const { data, error } = await handleProxyRequest(proxyRequest);
+  console.log(`Data: ${JSON.stringify(data)}`);
   if (error !== null) {
     return responseBuilder.build({
       body: error,
