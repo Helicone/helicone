@@ -346,8 +346,8 @@ client = OpenAI(
                 <Image
                   src={"/assets/home/logos/onboard.png"}
                   alt={""}
-                  width={600}
-                  height={600}
+                  width={700}
+                  height={700}
                 />
               </div>
             </div>
