@@ -216,32 +216,22 @@ export class DBLoggable {
   ): Promise<Result<any, string>> {
     let result = responseBody;
     const isStream = this.request.isStream;
-    console.log(`Is stream: ${isStream}`);
     const responseStatus = await this.response.status();
-    console.log(`Got response status`);
     const requestBody = this.request.bodyText;
     const tokenCounter = (t: string) => this.tokenCounter(t);
-    console.log(`Got token counter`);
     if (isStream && status === INTERNAL_ERRORS["Cancelled"]) {
       // Remove last line of stream from result
       result = result.split("\n").slice(0, -1).join("\n");
     }
-
-    console.log(`Check if error range`);
 
     const HTTPSErrorRange = responseStatus >= 400 && responseStatus < 600;
     const HTTPSRedirect = responseStatus >= 300 && responseStatus < 400;
 
     try {
       if (HTTPSErrorRange || HTTPSRedirect) {
-        console.log("HTTPSErrorRange or HTTPSRedirect");
         return ok(JSON.parse(result));
       } else if (!isStream && this.provider === "ANTHROPIC" && requestBody) {
-        console.log(`ANTHROPIC and not stream`);
-        console.log(`Result: ${JSON.stringify(result)}`);
         const responseJson = JSON.parse(result);
-        console.log(`Parsed response json`);
-        console.log(`Response json: ${JSON.stringify(responseJson)}`);
         if (getModel(requestBody ?? "{}").includes("claude-3")) {
           if (
             !responseJson?.usage?.output_tokens ||
@@ -301,12 +291,7 @@ export class DBLoggable {
       } else if (isStream) {
         return parseOpenAIStream(result, tokenCounter, requestBody);
       } else {
-        console.log("Not stream");
-        console.log(`Result: ${JSON.stringify(result)}`);
-        const responseJson = ok(JSON.parse(result)) as Result<any, string>;
-        console.log(`Parsed response json`);
-        console.log(`Response json: ${JSON.stringify(responseJson)}`);
-        return responseJson;
+        return ok(JSON.parse(result));
       }
     } catch (e) {
       console.log("Error parsing response", e);
@@ -362,7 +347,6 @@ export class DBLoggable {
   async getResponse() {
     const { body: responseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
-    console.log(`Response body: ${responseBody}`);
     const endTime = this.timing.endTime ?? responseEndTime;
     const delay_ms = endTime.getTime() - this.timing.startTime.getTime();
     const timeToFirstToken = this.request.isStream
