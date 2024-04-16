@@ -98,7 +98,7 @@ const HomePage = (props: HomePageProps) => {
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
-        className="mb-16"
+        className="pb-32"
       >
         <div className="relative w-full flex flex-col space-y-4 mx-auto max-w-6xl h-full py-16 sm:pt-32  items-center text-center px-2 sm:px-2 lg:px-0">
           <div className="-mt-4 text-xs mx-auto flex flex-col sm:flex-row sm:divide-x-2 gap-[14px] justify-center items-center divide-gray-300 opacity-75 w-fit px-4 pb-4 rounded-xl">
@@ -251,54 +251,7 @@ client = OpenAI(
             />
           </div>
         </div>
-        <ul className="grid grid-cols-1 sm:grid-cols-4 gap-16 sm:gap-8 mx-auto max-w-6xl py-32 px-4">
-          <li className="col-span-1 flex items-start space-x-2">
-            <div>
-              <CodeBracketSquareIcon className="w-6 h-6 text-sky-950" />
-            </div>
-            <div className="flex flex-col space-y-1">
-              <h2 className="text-md font-bold text-black">Any Model</h2>
-              <p className="text-sm text-gray-700 font-medium">
-                Bring any model from any provider to Helicone.
-              </p>
-            </div>
-          </li>
-          <li className="col-span-1 flex items-start space-x-2">
-            <div>
-              <BuildingOffice2Icon className="w-6 h-6 text-sky-950" />
-            </div>
-            <div className="flex flex-col space-y-1">
-              <h2 className="text-md font-bold text-black">Any Scale</h2>
-              <p className="text-sm text-gray-700 font-medium">
-                Log millions of requests per second with no latency impact.
-              </p>
-            </div>
-          </li>
-          <li className="col-span-1 flex items-start space-x-2">
-            <div>
-              <CubeIcon className="w-6 h-6 text-sky-950" />
-            </div>
-            <div className="flex flex-col space-y-1">
-              <h2 className="text-md font-bold text-black">Async Packages</h2>
-              <p className="text-sm text-gray-700 font-medium">
-                We offer async packages for all major languages.
-              </p>
-            </div>
-          </li>
-          <li className="col-span-1 flex items-start space-x-2">
-            <div>
-              <ShieldCheckIcon className="w-6 h-6 text-sky-950" />
-            </div>
-            <div className="flex flex-col space-y-1">
-              <h2 className="text-md font-bold text-black">
-                On-prem deployments
-              </h2>
-              <p className="text-sm text-gray-700 font-medium">
-                Deploy Helicone on-prem for maximum security.
-              </p>
-            </div>
-          </li>
-        </ul>
+
         <div className="w-full flex flex-col max-w-6xl mx-auto space-y-4 px-4 py-8">
           <div className="flex flex-col w-full items-center text-center">
             <h3 className="text-xl sm:text-3xl font-bold text-black text-center tracking-tight leading-tight">
@@ -400,6 +353,56 @@ client = OpenAI(
                 />
               </div>
             </div>
+            <ul className="grid grid-cols-1 sm:grid-cols-4 gap-16 sm:gap-8 mx-auto max-w-6xl pt-32 px-4">
+              <li className="col-span-1 flex items-start space-x-2">
+                <div>
+                  <CodeBracketSquareIcon className="w-6 h-6 text-sky-950" />
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <h2 className="text-md font-bold text-black">Any Model</h2>
+                  <p className="text-sm text-gray-700 font-medium">
+                    Bring any model from any provider to Helicone.
+                  </p>
+                </div>
+              </li>
+              <li className="col-span-1 flex items-start space-x-2">
+                <div>
+                  <BuildingOffice2Icon className="w-6 h-6 text-sky-950" />
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <h2 className="text-md font-bold text-black">Any Scale</h2>
+                  <p className="text-sm text-gray-700 font-medium">
+                    Log millions of requests per second with no latency impact.
+                  </p>
+                </div>
+              </li>
+              <li className="col-span-1 flex items-start space-x-2">
+                <div>
+                  <CubeIcon className="w-6 h-6 text-sky-950" />
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <h2 className="text-md font-bold text-black">
+                    Async Packages
+                  </h2>
+                  <p className="text-sm text-gray-700 font-medium">
+                    We offer async packages for all major languages.
+                  </p>
+                </div>
+              </li>
+              <li className="col-span-1 flex items-start space-x-2">
+                <div>
+                  <ShieldCheckIcon className="w-6 h-6 text-sky-950" />
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <h2 className="text-md font-bold text-black">
+                    On-prem deployments
+                  </h2>
+                  <p className="text-sm text-gray-700 font-medium">
+                    Deploy Helicone on-prem for maximum security.
+                  </p>
+                </div>
+              </li>
+            </ul>
           </div>
         </div>
       </header>
