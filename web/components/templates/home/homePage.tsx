@@ -183,10 +183,6 @@ const HomePage = (props: HomePageProps) => {
           >
             <span>Observability Platform for</span>{" "}
             <span className="text-sky-500">LLM-developers</span>
-            {/* <span>How</span> <span>developers</span>{" "}
-            <span className="text-sky-500 ">build</span>{" "}
-            <span className="text-sky-500">AI</span>{" "}
-            <span className="text-sky-500">applications</span> */}
           </h1>
           <p
             ref={subTextRef}
@@ -212,7 +208,7 @@ const HomePage = (props: HomePageProps) => {
           </div>
         </div>
         <div className="flex gap-4 flex-col justify-center items-center space-y-4 pb-32">
-          <div className="hidden md:flex flex-col space-y-4 w-[42rem]">
+          <div className="hidden md:flex flex-col space-y-4 w-[44rem]">
             <DiffHighlight
               code={`
 from openai import OpenAI
