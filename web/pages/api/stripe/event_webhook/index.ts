@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { buffer } from "micro";
 import { supabaseServer } from "../../../../lib/supabaseServer";
+import { Database } from "../../../../supabase/database.types";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2022-11-15",
@@ -75,9 +76,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         }
       }
 
-      let updateFields: any = {
-        subscription_status: isSubscriptionActive ? "active" : "inactive",
-      };
+      let updateFields: Database["public"]["Tables"]["organization"]["Update"] =
+        {
+          subscription_status: isSubscriptionActive ? "active" : "inactive",
+        };
 
       if (isSubscriptionActive && growthPlanItem && !proPlanItem) {
         updateFields.tier = "growth";
@@ -89,12 +91,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const { data, error } = await supabaseServer
         .from("organization")
         .update(updateFields)
-        .eq("stripe_subscription_id", subscriptionUpdated.id);
+        .eq("stripe_customer_id", subscriptionUpdated.customer);
 
       if (error) {
-        console.error("Failed to update organization:", error);
+        console.error("Failed to update organization:", JSON.stringify(error));
       } else {
-        console.log("Organization updated successfully:", data);
+        console.log(
+          "Organization updated successfully: ",
+          JSON.stringify(data)
+        );
       }
     } else if (event.type === "customer.subscription.deleted") {
       // Subscription has been deleted, either due to non-payment or being manually canceled.
