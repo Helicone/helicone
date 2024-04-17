@@ -784,16 +784,34 @@ export class DBLoggable {
     }
 
     if (this.request.heliconeTemplate && this.request.promptId) {
+      const assets = requestResult.data.requestAssets;
+
+      const inverseAssets: Map<string, string> = new Map();
+      assets.forEach((value, key) => inverseAssets.set(value, key));
+
+      const inputs = Object.entries(
+        this.request.heliconeTemplate.inputs
+      ).reduce<{ [key: string]: string }>((acc, [key, value]) => {
+        const assetId = inverseAssets.get(value);
+        acc[key] = assetId ? `<helicone-asset-id key="${assetId}"/>` : value;
+        return acc;
+      }, {});
+
+      const newTemplateWithInputs: TemplateWithInputs = {
+        template: this.request.heliconeTemplate.template,
+        inputs: inputs,
+      };
+
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const upsertResult2 = await db.queue.promptStore.upsertPromptV2(
-        this.request.heliconeTemplate,
+        newTemplateWithInputs,
         this.request.promptId,
         authParams.organizationId,
         this.request.requestId
       );
 
       const upsertResult = await db.queue.upsertPrompt(
-        this.request.heliconeTemplate,
+        newTemplateWithInputs,
         this.request.promptId ?? "",
         authParams.organizationId
       );
