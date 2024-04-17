@@ -47,34 +47,38 @@ const PrettyInput = ({
 
   return (
     <>
-      <Tooltip title={keyName} placement="top">
-        {renderText.length > TEXT_LIMIT ? (
-          <button
-            onClick={() => setOpen(!open)}
-            className={clsx(
-              selectedProperties
-                ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
-                : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
-              "relative text-sm text-gray-900 dark:text-gray-100 border rounded-lg py-1 px-3 text-left"
-            )}
-            title={renderText}
-          >
-            <ArrowsPointingOutIcon className="h-4 w-4 text-sky-500 absolute right-2 top-1.5 transform" />
-            <p className="pr-8">{renderText.slice(0, TEXT_LIMIT)}...</p>
-          </button>
-        ) : (
-          <span
-            className={clsx(
-              selectedProperties
-                ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
-                : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
-              "inline-block border text-gray-900 dark:text-gray-100 rounded-lg py-1 px-3 text-sm"
-            )}
-          >
-            {renderText}
-          </span>
-        )}
-      </Tooltip>
+      {renderText.startsWith("http") ? (
+        <img src={renderText} alt={""} width={600} height={600} />
+      ) : (
+        <Tooltip title={keyName} placement="top">
+          {renderText.length > TEXT_LIMIT ? (
+            <button
+              onClick={() => setOpen(!open)}
+              className={clsx(
+                selectedProperties
+                  ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
+                  : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
+                "relative text-sm text-gray-900 dark:text-gray-100 border rounded-lg py-1 px-3 text-left"
+              )}
+              title={renderText}
+            >
+              <ArrowsPointingOutIcon className="h-4 w-4 text-sky-500 absolute right-2 top-1.5 transform" />
+              <p className="pr-8">{renderText.slice(0, TEXT_LIMIT)}...</p>
+            </button>
+          ) : (
+            <span
+              className={clsx(
+                selectedProperties
+                  ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
+                  : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
+                "inline-block border text-gray-900 dark:text-gray-100 rounded-lg py-1 px-3 text-sm"
+              )}
+            >
+              {renderText}
+            </span>
+          )}
+        </Tooltip>
+      )}
 
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="w-[66vw] h-full flex flex-col space-y-4">
@@ -205,6 +209,9 @@ export const RenderImageWithPrettyInputKeys = (props: {
     const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
     const parts = [];
     let lastIndex = 0;
+
+    console.log(inputText);
+    console.log(selectedProperties);
 
     // Use the regular expression to find and replace all occurrences
     inputText.replace(regex, (match: any, keyName: string, offset: number) => {

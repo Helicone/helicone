@@ -13,7 +13,10 @@ import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { LlmSchema } from "../../../lib/api/models/requestResponseModel";
 import ThemedModal from "../../shared/themed/themedModal";
-import { RenderWithPrettyInputKeys } from "../prompts/id/promptIdPage";
+import {
+  RenderImageWithPrettyInputKeys,
+  RenderWithPrettyInputKeys,
+} from "../prompts/id/promptIdPage";
 
 export type Message = {
   id: string;
@@ -146,7 +149,7 @@ export const SingleChat = (props: {
       typeof item.image_url === "string" ? item.image_url : item.image_url.url;
     if (isHeliconeTemplate) {
       return (
-        <RenderWithPrettyInputKeys
+        <RenderImageWithPrettyInputKeys
           text={imageUrl}
           selectedProperties={props.selectedProperties}
         />
@@ -159,7 +162,7 @@ export const SingleChat = (props: {
     const imageUrl = item.source.data;
     if (isHeliconeTemplate) {
       return (
-        <RenderWithPrettyInputKeys
+        <RenderImageWithPrettyInputKeys
           text={imageUrl}
           selectedProperties={props.selectedProperties}
         />
