@@ -13,6 +13,7 @@ import {
   CodeBracketSquareIcon,
   CubeIcon,
   ShieldCheckIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import gsap from "gsap";
 import Platform from "./components/platform";
@@ -21,6 +22,7 @@ import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import useNotification from "../../shared/notification/useNotification";
 import Enterprise from "./components/enterprise";
+import Globe from "./globe";
 
 interface HomePageProps {}
 
@@ -412,127 +414,106 @@ client = OpenAI(
           <Enterprise />
         </div>
       </section>
-      <section id="integration" className="py-36">
-        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
-          <div className="flex flex-col space-y-2 pb-2 w-full items-center">
-            <h3 className="text-3xl sm:text-5xl font-bold text-black text-center tracking-tight leading-tight">
-              Proudly <span className="text-amber-500">Open Source</span>
-            </h3>
-            <p className="text-lg md:text-xl text-gray-600 max-w-2xl text-center">
-              We believe in the power of community and the importance of
-              transparency.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 md:justify-center w-full">
-            <div className="relative isolate bg-inherit h-[32rem] w-full border-[3px] border-black shadow-sm rounded-xl flex justify-center items-center">
-              <div className="w-full h-full rounded-xl p-8 flex flex-col space-y-4 text-left">
-                <h2 className="text-2xl font-semibold text-gray-900">
-                  Deploy Anywhere
+      <section className="w-full bg-[#0b1c2d] relative isolate py-36 overflow-hidden">
+        <div className="flex flex-col space-y-16 w-full">
+          <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
+            <div className="flex items-start w-full">
+              <div className="flex flex-col space-y-4 w-full md:w-2/3 text-center md:text-left">
+                <p className="text-lg font-bold text-cyan-500">Developer</p>
+                <h2 className="text-3xl sm:text-5xl font-bold sm:leading-[1.15] text-white">
+                  Fully <span className="text-cyan-400">Open-Source</span>
                 </h2>
-                <p className="text-lg text-gray-600 max-w-[18rem]">
-                  We have a cloud-hosted solution, but also offer on-prem
-                  deployments for maximum security.
+                <p className="text-md md:text-lg text-gray-300 leading-7">
+                  We believe in the power of community and the importance of
+                  transparency. Helicone is fully open-source and available for
+                  anyone to use.
                 </p>
-                <Link
-                  href="/contact"
-                  className="bg-white text-black border-2 border-gray-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1"
-                >
-                  Deploy on Prem
-                  <ChevronRightIcon className="w-5 h-5 inline text-black" />
-                </Link>
-              </div>
-              <div className="bottom-0 absolute w-full">
-                <div className="w-full flex flex-wrap-reverse gap-4 justify-end p-8 relative h-full">
-                  <div className="h-28 w-28 rounded-lg bg-white shadow-lg flex items-center justify-center border-[3px] border-black p-4">
-                    <Image
-                      src={"/assets/landing/aws.svg.png"}
-                      alt={"aws"}
-                      width={80}
-                      height={80}
-                      className=""
-                    />
-                  </div>
-                  <div className="h-28 w-28 rounded-lg bg-white shadow-lg flex items-center justify-center border-[3px] border-black p-4">
-                    <Image
-                      src={"/assets/landing/gcp.svg.png"}
-                      alt={"aws"}
-                      width={80}
-                      height={80}
-                      className=""
-                    />
-                  </div>
-                  <div className="h-28 w-28 rounded-lg bg-white shadow-lg flex items-center justify-center border-[3px] border-black p-4">
-                    <Image
-                      src={"/assets/landing/azure.svg.png"}
-                      alt={"aws"}
-                      width={80}
-                      height={80}
-                      className=""
-                    />
-                  </div>
+                <div id="tech-stack" className="flex flex-col space-y-4 py-8">
+                  <h3 className="text-xl text-white font-semibold">
+                    Our Tech Stack
+                  </h3>
+                  <ul className="font-semibold flex flex-col space-y-4 text-gray-300">
+                    <li>
+                      <span className="text-cyan-400">Frontend:</span> React,
+                      Next.js, TailwindCSS
+                    </li>
+                    <li>
+                      <span className="text-cyan-400">Backend:</span> Supabase,
+                      Clickhouse, Node, Express
+                    </li>
+                    <li>
+                      <span className="text-cyan-400">Infrastructure:</span>{" "}
+                      Cloudflare, Docker, Kubernetes
+                    </li>
+                  </ul>
                 </div>
-              </div>
-            </div>
-            <div className="overflow-hidden relative isolate bg-inherit h-[32rem] w-full border-[3px] border-black shadow-sm rounded-xl flex justify-center items-center">
-              <div className="w-full h-full rounded-xl p-8 flex flex-col space-y-4 text-left">
-                <h2 className="text-2xl font-semibold text-gray-900">
-                  Join Our Community
-                </h2>
-                <p className="text-lg text-gray-600 max-w-[18rem]">
-                  Have a question? Want to contribute? Join our Discord server
-                  or check out our GitHub.
-                </p>
-                <div className="flex items-center gap-4">
-                  <Link
-                    href="https://discord.gg/2TkeWdXNPQ"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-white text-black border-2 border-gray-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1"
-                  >
-                    Join Discord
-                    <ChevronRightIcon className="w-5 h-5 inline text-black" />
-                  </Link>
-                  <Link
-                    href="https://github.com/Helicone/helicone"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-white text-black border-2 border-gray-500 rounded-lg pl-4 pr-2 py-2 font-bold shadow-lg hover:shadow-sky-300 transition-shadow duration-500 flex w-fit items-center gap-1"
-                  >
-                    View Github
-                    <ChevronRightIcon className="w-5 h-5 inline text-black" />
-                  </Link>
-                </div>
-              </div>
-              <div className="bottom-0 absolute w-full">
-                <div className="w-full flex flex-row justify-center items-center p-8 relative h-full">
-                  <div className="h-32 w-32 sm:h-40 sm:w-40 absolute bottom-16 sm:bottom-12 left-4 sm:left-12 -rotate-6 rounded-lg bg-white shadow-lg flex items-center justify-center border-[3px] border-black p-4">
-                    <div className="flex flex-col w-full">
-                      <dd className="text-violet-500 text-3xl font-bold">{`>50`}</dd>
-                      <dt className="text-gray-500 text-md">contributors</dt>
+                <ul className="py-4 flex flex-col space-y-8">
+                  <li className="flex items-start space-x-2">
+                    <div>
+                      <ShieldCheckIcon className="w-6 h-6 text-cyan-400" />
                     </div>
-                  </div>
-                  <div className="z-30 h-32 w-32 sm:h-40 sm:w-40 absolute rounded-lg bottom-4 mx-auto bg-white shadow-lg flex items-center justify-center border-[3px] border-black p-4">
-                    <div className="flex flex-col w-full">
-                      <dd className="text-3xl font-bold text-yellow-500">
-                        1.3k
-                      </dd>
-                      <dt className="text-gray-500 text-md">stars</dt>
+                    <div className="flex flex-col space-y-1 -mt-0.5">
+                      <h2 className="text-lg font-bold text-white">
+                        Interested in deploying Helicone on-prem?
+                      </h2>
+                      <Link
+                        className="text-md text-gray-500 font-medium flex items-center space-x-1"
+                        href={"/contact"}
+                      >
+                        <span>Get in touch</span>
+                        <ChevronRightIcon className="w-4 h-4" />
+                      </Link>
                     </div>
-                  </div>
-                  <div className="h-32 w-32 sm:h-40 sm:w-40  rotate-6 bottom-16 sm:bottom-12 right-4 sm:right-12 absolute rounded-lg bg-white shadow-lg flex items-end sm:items-center justify-center border-[3px] border-black p-4">
-                    <div className="flex flex-col w-full">
-                      <dd className="text-green-500 text-3xl font-bold text-right sm:text-center">{`>1B`}</dd>
-                      <dt className="text-gray-500 text-md text-right sm:text-center">
-                        requests logged
-                      </dt>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <div>
+                      <UserGroupIcon className="w-6 h-6 text-cyan-400" />
                     </div>
-                  </div>
-                </div>
+                    <div className="flex flex-col space-y-1 -mt-0.5">
+                      <h2 className="text-lg font-bold text-white">
+                        Want to ask the team a question?
+                      </h2>
+                      <Link
+                        className="text-md text-gray-500 font-medium flex items-center space-x-1"
+                        href={"https://discord.gg/HwUbV3Q8qz"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span>Join our discord server</span>
+                        <ChevronRightIcon className="w-4 h-4" />
+                      </Link>
+                    </div>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <div>
+                      <UserGroupIcon className="w-6 h-6 text-cyan-400" />
+                    </div>
+                    <div className="flex flex-col space-y-1 -mt-0.5">
+                      <h2 className="text-lg font-bold text-white">
+                        Want to contribute or star us on Github?
+                      </h2>
+                      <Link
+                        className="text-md text-gray-500 font-medium flex items-center space-x-1"
+                        href={"https://github.com/Helicone/helicone"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span>Check us out</span>
+                        <ChevronRightIcon className="w-4 h-4" />
+                      </Link>
+                    </div>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
         </div>
+
+        <div className="-bottom-44 md:-bottom-72 items-center flex absolute md:-right-1/3 w-full justify-end opacity-20 -z-10">
+          <Globe />
+        </div>
       </section>
+
       <section id="faq" className="bg-inherit py-36">
         <div className="mx-auto px-4 md:px-8 max-w-6xl">
           <div className="flex flex-col space-y-4  text-left sm:text-center ">
