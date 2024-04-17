@@ -524,6 +524,20 @@ export class RequestResponseStore {
       })
     );
 
+    await this.clickhouseWrapper.dbInsertClickhouse(
+      "request_response_versioned",
+      newProperties.map((p) => {
+        return {
+          id: 1,
+          request_id: requestId,
+          key: p.key,
+          value: p.value,
+          organization_id: orgId,
+          created_at: formatTimeString(new Date().toISOString()),
+        };
+      })
+    );
+
     return ok({ request: request.data });
   }
 }

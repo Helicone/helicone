@@ -192,6 +192,29 @@ export interface RateLimitLog {
   organization_id: string;
 }
 
+export interface RequestResponseVersioned {
+  response_id: Nullable<string>;
+  response_created_at: Nullable<string>;
+  latency: Nullable<number>;
+  status: number;
+  completion_tokens: Nullable<number>;
+  prompt_tokens: Nullable<number>;
+  model: string;
+  request_id: string;
+  request_created_at: string;
+  user_id: string;
+  organization_id: string;
+  proxy_key_id: Nullable<string>;
+  threat: Nullable<boolean>;
+  time_to_first_token: Nullable<number>;
+  provider: Nullable<string>;
+  country_code: Nullable<string>;
+  created_at?: string;
+  sign: number;
+  version: number;
+  properties: Record<string, string>;
+}
+
 export interface ClickhouseDB {
   Tables: {
     properties_v3: PropertiesV3;
@@ -199,5 +222,6 @@ export interface ClickhouseDB {
     property_with_response_v1: PropertyWithResponseV1;
     cache_hits: CacheHits;
     rate_limit_log: RateLimitLog;
+    request_response_versioned: RequestResponseVersioned;
   };
 }
