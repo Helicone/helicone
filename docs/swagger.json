@@ -958,6 +958,9 @@
 					},
 					"id": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"prompt_v2": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
 					}
 				},
 				"type": "object",
@@ -1024,7 +1027,7 @@
 					"prompt_v2": {
 						"$ref": "#/components/schemas/Partial_PromptToOperators_"
 					},
-					"prompt_versions": {
+					"prompts_versions": {
 						"$ref": "#/components/schemas/Partial_PromptVersionsToOperators_"
 					}
 				},
@@ -1232,7 +1235,14 @@
 				]
 			},
 			"PromptsQueryParams": {
-				"properties": {},
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/FilterNode"
+					}
+				},
+				"required": [
+					"filter"
+				],
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -1338,6 +1348,282 @@
 				},
 				"required": [
 					"timeFilter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PromptVersionResult": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"minor_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"major_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"helicone_template": {
+						"type": "string"
+					},
+					"prompt_v2": {
+						"type": "string"
+					},
+					"model": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"minor_version",
+					"major_version",
+					"helicone_template",
+					"prompt_v2",
+					"model"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SuccessResult_PromptVersionResult_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/PromptVersionResult"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptVersionResult.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/SuccessResult_PromptVersionResult_"
+					},
+					{
+						"$ref": "#/components/schemas/ErrorResult_string_"
+					}
+				]
+			},
+			"PromptCreateSubversionParams": {
+				"properties": {
+					"newHeliconeTemplate": {}
+				},
+				"required": [
+					"newHeliconeTemplate"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SuccessResult_PromptVersionResult-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/PromptVersionResult"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptVersionResult-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/SuccessResult_PromptVersionResult-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ErrorResult_string_"
+					}
+				]
+			},
+			"SuccessResult_null_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_null.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/SuccessResult_null_"
+					},
+					{
+						"$ref": "#/components/schemas/ErrorResult_string_"
+					}
+				]
+			},
+			"NewDatasetParams": {
+				"properties": {
+					"datasetName": {
+						"type": "string"
+					},
+					"requestIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"datasetName",
+					"requestIds"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RandomDatasetParams": {
+				"properties": {
+					"datasetName": {
+						"type": "string"
+					},
+					"filter": {
+						"$ref": "#/components/schemas/FilterNode"
+					},
+					"offset": {
+						"type": "number",
+						"format": "double"
+					},
+					"limit": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"datasetName",
+					"filter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SuccessResult___-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {},
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result___-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/SuccessResult___-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ErrorResult_string_"
+					}
+				]
+			},
+			"SuccessResult__experimentId-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"experimentId": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"experimentId"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__experimentId-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/SuccessResult__experimentId-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ErrorResult_string_"
+					}
+				]
+			},
+			"NewExperimentParams": {
+				"properties": {
+					"datasetId": {
+						"type": "string"
+					},
+					"promptVersion": {
+						"type": "string"
+					},
+					"model": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"datasetId",
+					"promptVersion",
+					"model"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1495,6 +1781,296 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/PromptQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/version/{promptVersionId}/subversion": {
+			"post": {
+				"operationId": "CreateSubversion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PromptCreateSubversionParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/{promptId}/versions/query": {
+			"post": {
+				"operationId": "GetPromptVersions",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResult-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {},
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/dataset": {
+			"post": {
+				"operationId": "AddDataset",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/NewDatasetParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/dataset/random": {
+			"post": {
+				"operationId": "AddRandomDataset",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RandomDatasetParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/dataset/{datasetId}/query": {
+			"post": {
+				"operationId": "GetDataset",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result___-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {},
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/dataset/{datasetId}/mutate": {
+			"post": {
+				"operationId": "MutateDataset",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result___-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"removeRequests": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"addRequests": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"removeRequests",
+									"addRequests"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment": {
+			"post": {
+				"operationId": "CreateNewExperiment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__experimentId-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/NewExperimentParams"
 							}
 						}
 					}

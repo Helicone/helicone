@@ -2,7 +2,6 @@
 import {
   Body,
   Controller,
-  Example,
   Path,
   Post,
   Request,
@@ -12,13 +11,12 @@ import {
 } from "tsoa";
 import { Result } from "../../lib/modules/result";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
-import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
-import { HeliconeRequest } from "../../lib/stores/request/request";
-import { RequestManager } from "../../managers/request/RequestManager";
-import { JawnAuthenticatedRequest } from "../../types/request";
 import { PromptManager } from "../../managers/prompt/PromptManager";
+import { JawnAuthenticatedRequest } from "../../types/request";
 
-export interface PromptsQueryParams {}
+export interface PromptsQueryParams {
+  filter: FilterNode;
+}
 
 export interface PromptsResult {
   id: string;
@@ -57,6 +55,10 @@ export interface PromptVersionResult {
   helicone_template: string;
   prompt_v2: string;
   model: string;
+}
+
+export interface PromptCreateSubversionParams {
+  newHeliconeTemplate: any;
 }
 
 @Route("v1/prompt")
@@ -98,38 +100,50 @@ export class PromptController extends Controller {
     return result;
   }
 
-  // @Post("version/{promptVersionId}/query")
-  // public async getPromptVersion(
-  //   @Body()
-  //   requestBody: PromptQueryParams,
-  //   @Request() request: JawnAuthenticatedRequest,
-  //   @Path() promptVersionId: string
-  // ): Promise<Result<PromptVersionResult[], string>> {
-  //   const promptManager = new PromptManager(request.authParams);
+  @Post("version/{promptVersionId}/subversion")
+  public async createSubversion(
+    @Body()
+    requestBody: PromptCreateSubversionParams,
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() promptVersionId: string
+  ): Promise<Result<PromptVersionResult, string>> {
+    const promptManager = new PromptManager(request.authParams);
 
-  //   const result = await promptManager.getPromptVersion({ promptVersionId });
-  //   if (result.error || !result.data) {
-  //     this.setStatus(500);
-  //   } else {
-  //     this.setStatus(200); // set return status 201
-  //   }
-  //   return result;
-  // }
+    const result = await promptManager.createNewPromptVersion(
+      promptVersionId,
+      requestBody
+    );
+    if (result.error || !result.data) {
+      console.log(result.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(201); // set return status 201
+    }
+    return result;
+  }
 
-  // @Post("{promptId}/experiments/query")
-  // public async getPromptExperiments(
-  //   @Body()
-  //   requestBody: {},
-  //   @Request() request: JawnAuthenticatedRequest
-  // ): Promise<Result<PromptsResult[], string>> {
-  //   const promptManager = new PromptManager(request.authParams);
+  @Post("{promptId}/versions/query")
+  public async getPromptVersions(
+    @Body()
+    requestBody: {},
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() promptId: string
+  ): Promise<Result<PromptVersionResult[], string>> {
+    const promptManager = new PromptManager(request.authParams);
 
-  //   const result = await promptManager.getPrompt(requestBody);
-  //   if (result.error || !result.data) {
-  //     this.setStatus(500);
-  //   } else {
-  //     this.setStatus(200); // set return status 201
-  //   }
-  //   return result;
-  // }
+    const result = await promptManager.getPromptVersions({
+      prompts_versions: {
+        prompt_v2: {
+          equals: promptId,
+        },
+      },
+    });
+    if (result.error || !result.data) {
+      console.error(result.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200); // set return status 201
+    }
+    return result;
+  }
 }

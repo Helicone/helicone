@@ -231,6 +231,7 @@ type PromptVersionsToOperators = {
   minor_version: SingleKey<NumberOperators>;
   major_version: SingleKey<NumberOperators>;
   id: SingleKey<TextOperators>;
+  prompt_v2: SingleKey<TextOperators>;
 };
 
 export type FilterLeafPromptVersions = SingleKey<PromptVersionsToOperators>;
@@ -244,7 +245,7 @@ export type FilterLeafPrompt = SingleKey<PromptToOperators>;
 
 export type PromptInputTableFilters = {
   prompt_v2: FilterLeafPrompt;
-  prompt_versions: FilterLeafPromptVersions;
+  prompts_versions: FilterLeafPromptVersions;
 };
 
 export type TablesAndViews = {
