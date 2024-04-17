@@ -802,6 +802,7 @@ export class DBLoggable {
         inputs: inputs,
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const upsertResult2 = await db.queue.promptStore.upsertPromptV2(
         newTemplateWithInputs,
         this.request.promptId,
