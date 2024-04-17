@@ -47,34 +47,38 @@ const PrettyInput = ({
 
   return (
     <>
-      <Tooltip title={keyName} placement="top">
-        {renderText.length > TEXT_LIMIT ? (
-          <button
-            onClick={() => setOpen(!open)}
-            className={clsx(
-              selectedProperties
-                ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
-                : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
-              "relative text-sm text-gray-900 dark:text-gray-100 border rounded-lg py-1 px-3 text-left"
-            )}
-            title={renderText}
-          >
-            <ArrowsPointingOutIcon className="h-4 w-4 text-sky-500 absolute right-2 top-1.5 transform" />
-            <p className="pr-8">{renderText.slice(0, TEXT_LIMIT)}...</p>
-          </button>
-        ) : (
-          <span
-            className={clsx(
-              selectedProperties
-                ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
-                : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
-              "inline-block border text-gray-900 dark:text-gray-100 rounded-lg py-1 px-3 text-sm"
-            )}
-          >
-            {renderText}
-          </span>
-        )}
-      </Tooltip>
+      {renderText.startsWith("http") ? (
+        <img src={renderText} alt={""} width={600} height={600} />
+      ) : (
+        <Tooltip title={keyName} placement="top">
+          {renderText.length > TEXT_LIMIT ? (
+            <button
+              onClick={() => setOpen(!open)}
+              className={clsx(
+                selectedProperties
+                  ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
+                  : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
+                "relative text-sm text-gray-900 dark:text-gray-100 border rounded-lg py-1 px-3 text-left"
+              )}
+              title={renderText}
+            >
+              <ArrowsPointingOutIcon className="h-4 w-4 text-sky-500 absolute right-2 top-1.5 transform" />
+              <p className="pr-8">{renderText.slice(0, TEXT_LIMIT)}...</p>
+            </button>
+          ) : (
+            <span
+              className={clsx(
+                selectedProperties
+                  ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
+                  : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
+                "inline-block border text-gray-900 dark:text-gray-100 rounded-lg py-1 px-3 text-sm"
+              )}
+            >
+              {renderText}
+            </span>
+          )}
+        </Tooltip>
+      )}
 
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="w-[66vw] h-full flex flex-col space-y-4">
@@ -149,6 +153,65 @@ export const RenderWithPrettyInputKeys = (props: {
     const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
     const parts = [];
     let lastIndex = 0;
+
+    // Use the regular expression to find and replace all occurrences
+    inputText.replace(regex, (match: any, keyName: string, offset: number) => {
+      // Push preceding text if any
+      if (offset > lastIndex) {
+        parts.push(inputText.substring(lastIndex, offset));
+      }
+
+      // Push the PrettyInput component for the current match
+      parts.push(
+        <PrettyInput
+          keyName={keyName}
+          key={offset}
+          selectedProperties={selectedProperties}
+        />
+      );
+
+      // Update lastIndex to the end of the current match
+      lastIndex = offset + match.length;
+
+      // This return is not used but is necessary for the replace function
+      return match;
+    });
+
+    // Add any remaining text after the last match
+    if (lastIndex < inputText.length) {
+      parts.push(inputText.substring(lastIndex));
+    }
+    return parts;
+  };
+
+  return (
+    <div className="text-md leading-8 text-black dark:text-white">
+      {replaceInputKeysWithComponents(text)}
+    </div>
+  );
+};
+
+export const RenderImageWithPrettyInputKeys = (props: {
+  text: string;
+
+  selectedProperties: Record<string, string> | undefined;
+}) => {
+  const { text, selectedProperties } = props;
+
+  // Function to replace matched patterns with JSX components
+  const replaceInputKeysWithComponents = (inputText: string) => {
+    if (typeof inputText !== "string") {
+      // don't throw, stringify the input and return it
+      return JSON.stringify(inputText);
+    }
+
+    // Regular expression to match the pattern
+    const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
+    const parts = [];
+    let lastIndex = 0;
+
+    console.log(inputText);
+    console.log(selectedProperties);
 
     // Use the regular expression to find and replace all occurrences
     inputText.replace(regex, (match: any, keyName: string, offset: number) => {
@@ -358,6 +421,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                             requestId={""}
                             model={selectedPrompt.heliconeTemplate.model}
                             selectedProperties={selectedInput?.properties}
+                            isHeliconeTemplate={true}
                           />
                         </div>
                       )}
