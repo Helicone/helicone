@@ -442,11 +442,11 @@ client = OpenAI(
                     </li>
                     <li>
                       <span className="text-cyan-400">Backend:</span> Supabase,
-                      Clickhouse, Node, Express
+                      Clickhouse, Postgres, Node, Express
                     </li>
                     <li>
                       <span className="text-cyan-400">Infrastructure:</span>{" "}
-                      Cloudflare, Docker, Kubernetes
+                      Cloudflare, AWS, Vercel
                     </li>
                   </ul>
                 </div>
