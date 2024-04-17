@@ -92,15 +92,15 @@ export default function Platform() {
           Collect data, monitor performance, and improve your LLM-powered
           application over time
         </p>
-        <ul className="hidden md:flex items-center justify-between w-full px-4 sm:px-16 pt-8">
+        <ul className="hidden md:flex items-center justify-between w-full px-4 sm:px-8 pt-8 relative gap-8">
           {tabs.map((tab) => (
-            <li key={tab.name}>
+            <li key={tab.name} className="w-full z-10">
               <button
                 onClick={() =>
                   setActiveTab(tab.key as "monitoring" | "logs" | "templates")
                 }
                 className={clsx(
-                  "w-72 justify-center text-md border px-8 py-4 rounded-lg font-semibold flex items-center gap-2",
+                  "w-full justify-center text-md border px-8 py-4 rounded-lg font-semibold flex items-center gap-2",
                   activeTab === tab.key
                     ? "bg-sky-500 text-white border-sky-700"
                     : "border-gray-300 bg-gray-200 text-gray-500"
@@ -109,8 +109,12 @@ export default function Platform() {
                 <tab.icon className="w-5 h-5" />
                 {tab.name}
               </button>
+              {/* display a gray line that connects these list items */}
             </li>
           ))}
+          <div className="w-full flex items-center justify-center absolute">
+            <div className="h-0.5 w-2/3 bg-gray-200 flex mx-auto" />
+          </div>
         </ul>
       </div>
       <div className="relative overflow-hidden pt-2">
