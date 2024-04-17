@@ -3,7 +3,6 @@ import Image from "next/image";
 import {
   BeakerIcon,
   ChartBarIcon,
-  ChartPieIcon,
   CircleStackIcon,
   DocumentTextIcon,
   FolderArrowDownIcon,
@@ -22,7 +21,7 @@ const ENTERPRISE_TABS: {
   id: string;
   name: string;
   description: string;
-  bullets?: {
+  bullets: {
     icon: React.ForwardRefExoticComponent<
       Omit<React.SVGProps<SVGSVGElement>, "ref"> & {
         title?: string | undefined;
@@ -31,8 +30,9 @@ const ENTERPRISE_TABS: {
     >;
     text: string;
   }[];
-  cta?: React.ReactNode;
+  cta: React.ReactNode;
   src: string;
+  graphic: string;
   new: boolean;
 }[] = [
   {
@@ -63,6 +63,7 @@ const ENTERPRISE_TABS: {
       </Link>
     ),
     src: "/assets/home/experiment-graphic.png",
+    graphic: "/assets/home/experiments-example.png",
     new: false,
   },
   {
@@ -93,6 +94,7 @@ const ENTERPRISE_TABS: {
       </Link>
     ),
     src: "/assets/home/portal-graphic.png",
+    graphic: "/assets/home/portal-example.png",
     new: false,
   },
   {
@@ -123,6 +125,7 @@ const ENTERPRISE_TABS: {
       </Link>
     ),
     src: "/assets/home/finetune-graphic.png",
+    graphic: "/assets/home/finetune-example.png",
     new: false,
   },
   {
@@ -130,6 +133,16 @@ const ENTERPRISE_TABS: {
     name: "Evaluations",
     description: "Analyze model performance to make informed decisions.",
     src: "/assets/home/eval-graphic.png",
+    bullets: [],
+    cta: (
+      <Link
+        href="/signup"
+        className="bg-violet-500 hover:bg-violet-600 ease-in-out duration-500 text-white border-2 border-violet-700 rounded-lg px-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
+      >
+        Get Started
+      </Link>
+    ),
+    graphic: "/assets/home/experiments-example.png",
     new: true,
   },
 ];
@@ -142,17 +155,17 @@ const Enterprise = (props: EnterpriseProps) => {
   const currentTab = ENTERPRISE_TABS.find((tab) => tab.id === activeTab);
 
   return (
-    <div className="flex flex-col space-y-8 w-full">
+    <div className="flex flex-col space-y-16 w-full">
       <div className="flex items-start w-full">
         <div className="flex flex-col space-y-4 w-full md:w-2/3 text-center md:text-left">
           <p className="text-lg font-bold text-violet-700">Enterprise</p>
           <h2 className="text-3xl sm:text-5xl font-bold sm:leading-[1.15]">
             Get to production-quality{" "}
-            <span className="text-violet-700">faster</span>
+            <span className="text-violet-800">faster</span>
           </h2>
           <p className="text-md md:text-lg text-gray-500 leading-7">
             Helicone makes it easy for companies to innovate faster and smarter,
-            ensuring your team can stay ahead in the AI revolution.
+            ensuring your team can stay ahead of the competition.
           </p>
         </div>
         <div className="w-full h-full hidden md:flex items-center justify-center py-12">
@@ -164,7 +177,7 @@ const Enterprise = (props: EnterpriseProps) => {
           />
         </div>
       </div>
-      <ul className="w-full hidden md:flex justify-between items-center gap-8 pt-8">
+      <ul className="w-full hidden md:flex justify-between items-center gap-8">
         <li className="flex items-center justify-center w-full">
           <button
             onClick={() => {
@@ -202,7 +215,7 @@ const Enterprise = (props: EnterpriseProps) => {
               {tab.name}
             </button>
             {tab.new && (
-              <div className="absolute -top-2 -right-4 bg-violet-700 text-white px-2 py-1 text-sm rounded-lg rotate-12">
+              <div className="absolute -top-2 -right-4 bg-violet-800 text-white px-2 py-1 text-sm rounded-lg rotate-12">
                 Coming Soon
               </div>
             )}
@@ -251,7 +264,17 @@ const Enterprise = (props: EnterpriseProps) => {
             </ul>
             <div className="pt-4">{currentTab?.cta}</div>
           </div>
-          <div className="col-span-1 h-full w-full border border-gray-300 rounded-lg"></div>
+          <div className="col-span-1 h-full w-full rounded-lg p-4 flex justify-center items-center">
+            <Image
+              src={
+                currentTab?.graphic || "/assets/home/experiments-example.png"
+              }
+              alt={"123"}
+              width={500}
+              height={500}
+              className="rounded-lg shadow-xl"
+            />
+          </div>
         </div>
       </div>
       <ul className="flex flex-col md:hidden space-y-8">
@@ -264,27 +287,40 @@ const Enterprise = (props: EnterpriseProps) => {
                     <Image
                       src={tab?.src || "/assets/home/enterprise-graphic.png"}
                       alt={tab?.name || "enterprise-graphic"}
-                      width={25}
-                      height={25}
+                      width={20}
+                      height={20}
                     />
-                    <h2 className="text-3xl font-semibold">{tab?.name}</h2>
+                    <h2 className="text-2xl font-semibold">{tab?.name}</h2>
                   </div>
 
-                  <p className="text-lg text-gray-500">{tab?.description}</p>
-                  <ul className="pt-4 flex flex-col space-y-6">
+                  <p className="text-sm text-gray-500">{tab?.description}</p>
+                  <ul className="pt-8 pb-4 flex flex-col space-y-6">
                     {tab?.bullets?.map((bullet) => (
                       <li
                         key={bullet.text}
                         className="flex items-center space-x-2"
                       >
                         <bullet.icon className="h-6 w-6 text-violet-700" />
-                        <span className="font-semibold">{bullet.text}</span>
+                        <span className="font-semibold text-sm">
+                          {bullet.text}
+                        </span>
                       </li>
                     ))}
                   </ul>
                   <div className="pt-4">{tab?.cta}</div>
                 </div>
-                <div className="col-span-1 h-full w-full border border-gray-300 rounded-lg"></div>
+                <div className="col-span-1 h-full w-full rounded-lg p-4 hidden md:flex justify-center items-center">
+                  <Image
+                    src={
+                      currentTab?.graphic ||
+                      "/assets/home/experiments-example.png"
+                    }
+                    alt={"123"}
+                    width={700}
+                    height={700}
+                    className="rounded-lg shadow-xl"
+                  />
+                </div>
               </div>
             </div>
           )
