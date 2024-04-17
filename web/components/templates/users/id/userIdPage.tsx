@@ -69,7 +69,7 @@ const UserIdPage = (props: UserIdPageProps) => {
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">Total Cost</p>
                     <p className="text-sm text-gray-500">
-                      ${formatNumber(user.cost, 6)}
+                      ${formatNumber(Number(user.cost || 0), 6)}
                     </p>
                   </div>
                   <div className="flex flex-col items-start space-y-1">
