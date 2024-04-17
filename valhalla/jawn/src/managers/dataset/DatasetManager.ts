@@ -1,13 +1,17 @@
 // src/users/usersService.ts
 import {
-  PromptCreateSubversionParams,
+  NewDatasetParams,
+  RandomDatasetParams,
+} from "../../controllers/public/experimentDatasetController";
+import {
   PromptQueryParams,
   PromptResult,
   PromptVersionResult,
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
-import { Result, err } from "../../lib/modules/result";
+import { supabaseServer } from "../../lib/db/supabase";
+import { Result, err, ok } from "../../lib/modules/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { buildFilterPostgres } from "../../lib/shared/filters/filters";
@@ -15,59 +19,80 @@ import { resultMap } from "../../lib/shared/result";
 import { User } from "../../models/user";
 import { BaseManager } from "../BaseManager";
 
-export class PromptManager extends BaseManager {
-  async createNewPromptVersion(
-    parentPromptVersionId: string,
-    params: PromptCreateSubversionParams
-  ): Promise<Result<PromptVersionResult, string>> {
-    if (JSON.stringify(params.newHeliconeTemplate).length > 1_000_000_000) {
-      return err("Helicone template too large");
+// A post request should not contain an id.
+export type UserCreationParams = Pick<User, "email" | "name" | "phoneNumbers">;
+
+export class DatasetManager extends BaseManager {
+  async addDataset(params: NewDatasetParams): Promise<Result<null, string>> {
+    const dataset = await supabaseServer.client
+      .from("experiment_dataset_v2")
+      .insert({
+        name: params.datasetName,
+        organization: this.authParams.organizationId,
+      })
+      .select("*")
+      .single();
+
+    if (dataset.error) {
+      return err(dataset.error.message);
     }
 
-    const result = await dbExecute<{
-      id: string;
-      minor_version: number;
-      major_version: number;
-      helicone_template: string;
-      prompt_v2: string;
-      model: string;
-    }>(
+    const res = await dbExecute(
       `
-    WITH parent_prompt_version AS (
-      SELECT * FROM prompts_versions WHERE id = $1
-    )
-    INSERT INTO prompts_versions (prompt_v2, helicone_template, model, organization, major_version, minor_version)
-    SELECT
-        ppv.prompt_v2,
-        $2, 
-        $3,
-        $4,
-        ppv.major_version,
-        (SELECT minor_version + 1
-         FROM prompts_versions pv1
-         WHERE pv1.major_version = ppv.major_version
-         ORDER BY pv1.major_version DESC, pv1.minor_version DESC
-         LIMIT 1)
-    FROM parent_prompt_version ppv
-    RETURNING 
-        id,
-        minor_version,
-        major_version,
-        helicone_template,
-        prompt_v2,
-        model;
-    
-    `,
-      [
-        parentPromptVersionId,
-        params.newHeliconeTemplate,
-        "",
-        this.authParams.organizationId,
-      ]
+      INSERT INTO experiment_dataset_v2_row (dataset_id, input_record)
+      SELECT $1, id
+      FROM prompt_input_record
+      WHERE source_request = ANY($2)
+      `,
+      [dataset.data.id, params.requestIds]
     );
 
-    console.log("result", result);
-    return resultMap(result, (data) => data[0]);
+    if (res.error) {
+      return err(res.error);
+    }
+
+    return ok(null);
+  }
+
+  async addRandomDataset(
+    params: RandomDatasetParams
+  ): Promise<Result<null, string>> {
+    const dataset = await supabaseServer.client
+      .from("experiment_dataset_v2")
+      .insert({
+        name: params.datasetName,
+        organization: this.authParams.organizationId,
+      })
+      .select("*")
+      .single();
+
+    if (dataset.error) {
+      return err(dataset.error.message);
+    }
+
+    const filterWithAuth = buildFilterPostgres({
+      filter: params.filter,
+      argsAcc: [dataset.data.id],
+    });
+
+    const res = await dbExecute(
+      `
+      INSERT INTO experiment_dataset_v2_row (dataset_id, input_record)
+      SELECT $1, prompt_input_record.id
+      FROM prompt_input_record
+      left join request on request.id = prompt_input_record.source_request
+      left join prompts_versions on prompts_versions.id = prompt_input_record.prompt_version
+      WHERE (${filterWithAuth.filter})
+      ORDER BY random()
+      `,
+      filterWithAuth.argsAcc
+    );
+
+    if (res.error) {
+      return err(res.error);
+    }
+
+    return ok(null);
   }
 
   async getPromptVersions(
