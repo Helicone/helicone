@@ -5,6 +5,7 @@ import path from "path";
 import fs from "fs";
 import NavBarV2 from "../../../components/layout/navbar/navBarV2";
 import Footer from "../../../components/layout/footer";
+import "@mintlify/mdx/dist/styles.css";
 
 export const getServerSideProps: GetServerSideProps<{
   mdxSource: MDXCompiledResult;
