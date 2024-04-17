@@ -260,4 +260,4 @@ We are extremely open to contributors on documentation, integrations, and featur
 
 ## License
 
-Helicone is licensed under the [MIT License](LICENSE).
+Helicone is licensed under the [ASFv2.0 License](LICENSE).
