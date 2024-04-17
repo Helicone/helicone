@@ -280,7 +280,10 @@ const Enterprise = (props: EnterpriseProps) => {
       <ul className="flex flex-col lg:hidden space-y-8">
         {ENTERPRISE_TABS.filter((tab) => tab.id !== "evaluations").map(
           (tab) => (
-            <div className="h-full w-full border border-gray-300 rounded-lg flex items-center justify-center">
+            <div
+              key={tab.id}
+              className="h-full w-full border border-gray-300 rounded-lg flex items-center justify-center"
+            >
               <div className="w-full grid grid-cols-1 lg:grid-cols-2 h-full bg-sky-50 rounded-lg">
                 <div className="col-span-1 h-full w-full flex flex-col items-start p-8 text-left space-y-2">
                   <div className="flex items-center space-x-4">
