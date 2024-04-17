@@ -9,6 +9,7 @@ import "../styles/globals.css";
 import "../styles/index.css";
 import "../node_modules/react-grid-layout/css/styles.css";
 import "../node_modules/react-resizable/css/styles.css";
+import "@mintlify/mdx/dist/styles.css";
 import posthog from "posthog-js";
 import { OrgContextProvider } from "../components/layout/organizationContext";
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
@@ -51,7 +52,6 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const [supabaseClient] = useState(() => createBrowserSupabaseClient());
 
   const getLayout = Component.getLayout ?? ((page) => page);
-  const trackingEnabled = process.env.NEXT_PUBLIC_TRACKING_ENABLED || false;
 
   return (
     <>

@@ -20,6 +20,22 @@ type blogStructure = {
 
 const blogContent: blogStructure[] = [
   {
+    title: "Langsmith v Helicone",
+    description:
+      "As AI continues to shape our world, the need for ethical practices and robust observability has never been greater. Learn how Helicone is rising to the challenge.",
+    badgeText: "AI Safety",
+    badgeColor: "bg-red-50 text-red-700 ring-red-600/10",
+    date: "Sep 18, 2023",
+    href: "/blog/hello",
+    imageUrl: "/assets/blog/AI.webp",
+    authors: [
+      {
+        name: "Scott Nguyen",
+        imageUrl: "/assets/blog/scottnguyen-headshot.webp",
+      },
+    ],
+  },
+  {
     title:
       "Why Observability is the key to ethical and safe Artificial Intelligence",
     description:
@@ -192,7 +208,7 @@ const BlogPage = (props: BlogPageProps) => {
               className="w-full flex flex-col sm:flex-row gap-8 h-full sm:h-80 hover:bg-gray-100 hover:cursor-pointer rounded-xl p-4"
             >
               <div className="w-full sm:w-2/5 rounded-xl h-full bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:rounded-2xl">
-                <Image
+                <img
                   src={blog.imageUrl}
                   alt="App screenshot"
                   style={{
@@ -223,7 +239,7 @@ const BlogPage = (props: BlogPageProps) => {
                       )}
                       key={i}
                     >
-                      <Image
+                      <img
                         className="inline-block h-8 w-8 rounded-full"
                         src={author.imageUrl}
                         alt=""
