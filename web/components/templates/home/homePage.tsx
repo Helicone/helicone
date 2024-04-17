@@ -428,7 +428,10 @@ client = OpenAI(
                   transparency. Helicone is fully open-source and available for
                   anyone to use.
                 </p>
-                <div id="tech-stack" className="flex flex-col space-y-4 py-8">
+                <div
+                  id="tech-stack"
+                  className="flex flex-col space-y-4 py-8 text-left"
+                >
                   <h3 className="text-xl text-white font-semibold">
                     Our Tech Stack
                   </h3>
@@ -453,11 +456,11 @@ client = OpenAI(
                       <ShieldCheckIcon className="w-6 h-6 text-cyan-400" />
                     </div>
                     <div className="flex flex-col space-y-1 -mt-0.5">
-                      <h2 className="text-lg font-bold text-white">
+                      <h2 className="text-sm md:text-lg font-bold text-white">
                         Interested in deploying Helicone on-prem?
                       </h2>
                       <Link
-                        className="text-md text-gray-500 font-medium flex items-center space-x-1"
+                        className="text-sm md:text-md text-gray-500 font-medium flex items-center space-x-1"
                         href={"/contact"}
                       >
                         <span>Get in touch</span>
@@ -470,11 +473,11 @@ client = OpenAI(
                       <UserGroupIcon className="w-6 h-6 text-cyan-400" />
                     </div>
                     <div className="flex flex-col space-y-1 -mt-0.5">
-                      <h2 className="text-lg font-bold text-white">
+                      <h2 className="text-sm md:text-lg font-bold text-white">
                         Want to ask the team a question?
                       </h2>
                       <Link
-                        className="text-md text-gray-500 font-medium flex items-center space-x-1"
+                        className="text-sm md:text-md text-gray-500 font-medium flex items-center space-x-1"
                         href={"https://discord.gg/HwUbV3Q8qz"}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -486,14 +489,14 @@ client = OpenAI(
                   </li>
                   <li className="flex items-start space-x-2">
                     <div>
-                      <UserGroupIcon className="w-6 h-6 text-cyan-400" />
+                      <CodeBracketSquareIcon className="w-6 h-6 text-cyan-400" />
                     </div>
                     <div className="flex flex-col space-y-1 -mt-0.5">
-                      <h2 className="text-lg font-bold text-white">
+                      <h2 className="text-sm md:text-lg font-bold text-white">
                         Want to contribute or star us on Github?
                       </h2>
                       <Link
-                        className="text-md text-gray-500 font-medium flex items-center space-x-1"
+                        className="text-sm md:text-md text-gray-500 font-medium flex items-center space-x-1"
                         href={"https://github.com/Helicone/helicone"}
                         target="_blank"
                         rel="noopener noreferrer"

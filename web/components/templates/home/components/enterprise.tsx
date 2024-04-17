@@ -157,18 +157,18 @@ const Enterprise = (props: EnterpriseProps) => {
   return (
     <div className="flex flex-col space-y-16 w-full">
       <div className="flex items-start w-full">
-        <div className="flex flex-col space-y-4 w-full md:w-2/3 text-center md:text-left">
+        <div className="flex flex-col space-y-4 w-full lg:w-2/3 text-center lg:text-left">
           <p className="text-lg font-bold text-violet-700">Enterprise</p>
           <h2 className="text-3xl sm:text-5xl font-bold sm:leading-[1.15]">
             Get to production-quality{" "}
             <span className="text-violet-800">faster</span>
           </h2>
-          <p className="text-md md:text-lg text-gray-500 leading-7">
+          <p className="text-md lg:text-lg text-gray-500 leading-7">
             Helicone makes it easy for companies to innovate faster and smarter,
             ensuring your team can stay ahead of the competition.
           </p>
         </div>
-        <div className="w-full h-full hidden md:flex items-center justify-center py-12">
+        <div className="w-full h-full hidden lg:flex items-center justify-center py-12">
           <Image
             src={"/assets/home/enterprise-graphic.png"}
             alt={"enterprise-graphic"}
@@ -177,7 +177,7 @@ const Enterprise = (props: EnterpriseProps) => {
           />
         </div>
       </div>
-      <ul className="w-full hidden md:flex justify-between items-center gap-8">
+      <ul className="w-full hidden lg:flex justify-between items-center gap-8">
         <li className="flex items-center justify-center w-full">
           <button
             onClick={() => {
@@ -240,8 +240,8 @@ const Enterprise = (props: EnterpriseProps) => {
           </button>
         </li>
       </ul>
-      <div className="h-full w-full border border-gray-300 rounded-lg hidden md:flex items-center justify-center">
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 h-full bg-sky-50 rounded-lg">
+      <div className="h-full w-full border border-gray-300 rounded-lg hidden lg:flex items-center justify-center">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-2 h-full bg-sky-50 rounded-lg">
           <div className="col-span-1 h-full w-full flex flex-col items-start p-8 text-left space-y-2">
             <div className="flex items-center space-x-4">
               <Image
@@ -277,11 +277,11 @@ const Enterprise = (props: EnterpriseProps) => {
           </div>
         </div>
       </div>
-      <ul className="flex flex-col md:hidden space-y-8">
+      <ul className="flex flex-col lg:hidden space-y-8">
         {ENTERPRISE_TABS.filter((tab) => tab.id !== "evaluations").map(
           (tab) => (
             <div className="h-full w-full border border-gray-300 rounded-lg flex items-center justify-center">
-              <div className="w-full grid grid-cols-1 md:grid-cols-2 h-full bg-sky-50 rounded-lg">
+              <div className="w-full grid grid-cols-1 lg:grid-cols-2 h-full bg-sky-50 rounded-lg">
                 <div className="col-span-1 h-full w-full flex flex-col items-start p-8 text-left space-y-2">
                   <div className="flex items-center space-x-4">
                     <Image
@@ -309,7 +309,7 @@ const Enterprise = (props: EnterpriseProps) => {
                   </ul>
                   <div className="pt-4">{tab?.cta}</div>
                 </div>
-                <div className="col-span-1 h-full w-full rounded-lg p-4 hidden md:flex justify-center items-center">
+                <div className="col-span-1 h-full w-full rounded-lg p-4 hidden lg:flex justify-center items-center">
                   <Image
                     src={
                       currentTab?.graphic ||
