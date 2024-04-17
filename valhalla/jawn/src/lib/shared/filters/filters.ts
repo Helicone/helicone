@@ -28,7 +28,7 @@ const extractOperatorAndValueFromAnOperator = (
       value: operator[key as keyof typeof operator],
     };
   }
-  throw new Error(`Invalid operator${operator}`);
+  throw new Error(`Invalid operator ${operator}`);
 };
 
 function easyKeyMappings<T extends keyof TablesAndViews>(keyMappings: {
@@ -82,21 +82,6 @@ const NOT_IMPLEMENTED = () => {
 };
 
 const whereKeyMappings: KeyMappings = {
-  prompt_v2: easyKeyMappingsWithTable(
-    {
-      id: "id",
-      user_defined_id: "user_defined_id",
-    },
-    "prompt_v2"
-  ),
-  prompt_versions: easyKeyMappingsWithTable(
-    {
-      id: "id",
-      major_version: "major_version",
-      minor_version: "minor_version",
-    },
-    "prompt_versions"
-  ),
   user_metrics: easyKeyMappingsWithTable(
     {
       user_id: "user_id",
@@ -150,6 +135,17 @@ const whereKeyMappings: KeyMappings = {
     model: "request.model",
     modelOverride: "request.model_override",
     path: "request.path",
+  }),
+
+  prompt_v2: easyKeyMappings<"prompt_v2">({
+    id: "prompt_v2.id",
+    user_defined_id: "prompt_v2.user_defined_id",
+  }),
+  prompts_versions: easyKeyMappings<"prompts_versions">({
+    id: "prompts_versions.id",
+    major_version: "prompts_versions.major_version",
+    minor_version: "prompts_versions.minor_version",
+    prompt_v2: "prompts_versions.prompt_v2",
   }),
   response: easyKeyMappings<"response">({
     body_completion:
@@ -294,7 +290,7 @@ const havingKeyMappings: KeyMappings = {
   cache_hits: NOT_IMPLEMENTED,
   rate_limit_log: NOT_IMPLEMENTED,
   prompt_v2: NOT_IMPLEMENTED,
-  prompt_versions: NOT_IMPLEMENTED,
+  prompts_versions: NOT_IMPLEMENTED,
 };
 
 export function buildFilterLeaf(
@@ -456,7 +452,7 @@ export function buildFilterClickHouse(
   });
 }
 
-function buildFilterPostgres(
+export function buildFilterPostgres(
   args: ExternalBuildFilterArgs
 ): ReturnType<typeof buildFilter> {
   return buildFilter({
