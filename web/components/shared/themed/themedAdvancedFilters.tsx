@@ -16,6 +16,7 @@ import {
 import ThemedNumberDropdown from "./themedNumberDropdown";
 import SaveFilterButton from "../../templates/dashboard/saveFilterButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
+import useSearchParams from "../utils/useSearchParams";
 
 export function AdvancedFilters({
   filterMap,
@@ -233,31 +234,31 @@ function AdvancedFilterRow({
     search: string
   ) => Promise<Result<void, string>>;
 }) {
+  const searchParams = useSearchParams();
+  const updateFilterAndParams = (newFilter: any) => {
+    setFilter([newFilter]);
+
+    // Update URL search params
+    const currentFilterDef = filterMap[newFilter.filterMapIdx];
+    const operator = currentFilterDef.operators[newFilter.operatorIdx];
+    const paramName = `${currentFilterDef.label}_${operator.label}`;
+    searchParams.set(paramName, newFilter.value);
+    //setSearchParams(searchParams);
+  };
   return (
     <div className="w-full flex flex-col lg:flex-row gap-3 items-left lg:items-end ml-4">
       <div className="w-full max-w-[12.5rem]">
         <SearchSelect
           value={filter.filterMapIdx.toString()}
           onValueChange={(value) => {
-            const selected = Number(value);
-            const label = filterMap[selected].label;
-            if (label === "Feedback") {
-              setFilter([
-                {
-                  filterMapIdx: selected,
-                  operatorIdx: 0,
-                  value: "1",
-                },
-              ]);
-            } else {
-              setFilter([
-                {
-                  filterMapIdx: selected,
-                  operatorIdx: 0,
-                  value: "",
-                },
-              ]);
-            }
+            const selectedIdx = Number(value);
+            const newFilter = {
+              ...filter,
+              filterMapIdx: selectedIdx,
+              operatorIdx: 0,
+              value: "",
+            };
+            updateFilterAndParams(newFilter);
           }}
           enableClear={false}
         >
@@ -272,15 +273,14 @@ function AdvancedFilterRow({
       <div className="w-full max-w-[12.5rem]">
         <Select
           value={filter.operatorIdx.toString()}
-          onValueChange={(value: string) => {
-            const selected = Number(value);
-            setFilter([
-              {
-                filterMapIdx: filter.filterMapIdx,
-                operatorIdx: selected,
-                value: "",
-              },
-            ]);
+          onValueChange={(value) => {
+            const selectedOperatorIdx = Number(value);
+            const newFilter = {
+              ...filter,
+              operatorIdx: selectedOperatorIdx,
+              value: "",
+            };
+            updateFilterAndParams(newFilter);
           }}
           enableClear={false}
         >
@@ -302,14 +302,9 @@ function AdvancedFilterRow({
             filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx]
               .inputParams
           }
-          onChange={(value) => {
-            setFilter([
-              {
-                filterMapIdx: filter.filterMapIdx,
-                operatorIdx: filter.operatorIdx,
-                value: value ?? "",
-              },
-            ]);
+          onChange={(newValue) => {
+            const newFilter = { ...filter, value: newValue || "" };
+            updateFilterAndParams(newFilter);
           }}
           onSearchHandler={(search: string) =>
             onSearchHandler(

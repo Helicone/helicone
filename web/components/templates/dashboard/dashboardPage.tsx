@@ -199,6 +199,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     if (layoutFilterId === null) {
       searchParams.delete("filter");
     } else {
+      console.log(filters);
       searchParams.set("filter", layoutFilterId ?? "");
     }
   };
