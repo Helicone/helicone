@@ -45,6 +45,7 @@ export interface Env {
   ALERTER: DurableObjectNamespace;
   RESEND_API_KEY: string;
   PROMPTARMOR_API_KEY: string;
+  DATADOG_ENABLED: string;
   DATADOG_API_KEY: string;
   DATADOG_ENDPOINT: string;
   GATEWAY_TARGET?: string;
