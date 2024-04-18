@@ -30,11 +30,11 @@ export interface UserQueryParams {
   };
 }
 
-@Route("v1/users")
+@Route("v1/user")
 @Tags("Request")
 @Security("api_key")
 export class UserController extends Controller {
-  @Post("temp/query")
+  @Post("query")
   public async getUsers(
     @Body()
     requestBody: UserQueryParams,

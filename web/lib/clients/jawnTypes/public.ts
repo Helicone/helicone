@@ -12,7 +12,7 @@ export interface paths {
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
-  "/v1/users/temp/query": {
+  "/v1/user/query": {
     post: operations["GetUsers"];
   };
   "/v1/prompt/query": {

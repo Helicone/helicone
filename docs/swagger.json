@@ -1791,7 +1791,7 @@
 				}
 			}
 		},
-		"/v1/users/temp/query": {
+		"/v1/user/query": {
 			"post": {
 				"operationId": "GetUsers",
 				"responses": {
