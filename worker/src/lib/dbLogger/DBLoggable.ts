@@ -868,13 +868,6 @@ export async function logRequest(
       console.error("Error parsing request body", e);
     }
 
-    let truncatedUserId = request.userId ?? "";
-
-    if (truncatedUserId.length > MAX_USER_ID_LENGTH) {
-      truncatedUserId =
-        truncatedUserId.substring(0, MAX_USER_ID_LENGTH) + "...";
-    }
-
     const jobNode = request.nodeId
       ? await dbClient
           .from("job_node")

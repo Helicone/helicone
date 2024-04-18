@@ -4,6 +4,7 @@ import { PromiseGenericResult, err, ok } from "../modules/result";
 import { Database } from "./database.types";
 import { hashAuth } from "./hash";
 import { HeliconeAuth } from "../requestWrapper";
+import { Result } from "../shared/result";
 
 // SINGLETON
 class SupabaseAuthCache extends InMemoryCache {
@@ -25,10 +26,39 @@ class SupabaseAuthCache extends InMemoryCache {
   }
 }
 
+class SupabaseOrganizationCache extends InMemoryCache {
+  private static instance: SupabaseOrganizationCache;
+  private ORGANIZATION_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  constructor() {
+    super(1_000);
+  }
+
+  static getInstance(): SupabaseOrganizationCache {
+    if (!SupabaseOrganizationCache.instance) {
+      SupabaseOrganizationCache.instance = new SupabaseOrganizationCache();
+    }
+    return SupabaseOrganizationCache.instance;
+  }
+
+  set<T>(key: string, value: T): void {
+    super.set(key, value, this.ORGANIZATION_CACHE_TTL);
+  }
+}
+
 export interface AuthParams {
   organizationId: string;
+  userId?: string;
+  heliconeApiKeyId?: number;
 }
 type AuthResult = PromiseGenericResult<AuthParams>;
+
+export interface OrgParams {
+  tier: string;
+  id: string;
+  percentLog: number;
+}
+
+type OrgResult = PromiseGenericResult<OrgParams>;
 
 const SUPABASE_CREDS = JSON.parse(process.env.SUPABASE_CREDS ?? "{}");
 const supabaseURL = SUPABASE_CREDS?.url ?? process.env.SUPABASE_URL;
@@ -46,15 +76,18 @@ const staticClient: SupabaseClient<Database> = createClient(
   supabaseServiceRoleKey
 );
 const authCache = SupabaseAuthCache.getInstance();
+const orgCache = SupabaseOrganizationCache.getInstance();
 
 export class SupabaseConnector {
   client: SupabaseClient<Database>;
   connected: boolean = false;
   authCache: SupabaseAuthCache;
+  orgCache: SupabaseOrganizationCache;
 
   constructor() {
     this.client = staticClient;
     this.authCache = authCache;
+    this.orgCache = orgCache;
   }
 
   private async authenticateJWT(jwt: string, orgId?: string): AuthResult {
@@ -113,6 +146,8 @@ export class SupabaseConnector {
     }
     return ok({
       organizationId: apiKey.data[0].organization_id,
+      userId: apiKey.data[0].user_id,
+      heliconeApiKeyId: apiKey.data[0].id,
     });
   }
 
@@ -192,6 +227,34 @@ export class SupabaseConnector {
     );
     return ok({
       organizationId: orgId,
+    });
+  }
+
+  async getOrganization(authParams: AuthParams): OrgResult {
+    const cachedResult = this.orgCache.get<{
+      tier: string;
+      id: string;
+      percentLog: number;
+    }>(authParams.organizationId);
+
+    if (cachedResult) {
+      return ok(cachedResult);
+    }
+
+    const { data, error } = await this.client
+      .from("organization")
+      .select("*")
+      .eq("id", authParams.organizationId)
+      .single();
+
+    if (error || !data) {
+      return err(error.message);
+    }
+
+    return ok({
+      tier: data.tier ?? "free",
+      id: data.id ?? "",
+      percentLog: data.percent_to_log ?? 100_000,
     });
   }
 }

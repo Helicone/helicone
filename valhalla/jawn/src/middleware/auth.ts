@@ -18,17 +18,10 @@ export const authMiddleware = async (
     }
     const authParams = await supabaseServer.authenticate(authorization.data!);
     if (authParams.error || !authParams.data?.organizationId) {
-      console.error("authParams.error", authParams.error);
-      const SUPABASE_CREDS = JSON.parse(process.env.SUPABASE_CREDS ?? "{}");
-      const supabaseURL = SUPABASE_CREDS?.url ?? process.env.SUPABASE_URL;
-      const pingUrl = `${supabaseURL}`;
-
+      console.log("authParams.error", authParams.error);
       res.status(401).json({
         error: authParams.error,
         trace: "isAuthenticated.error",
-        authorizationString: authorization,
-        supabaseURL: supabaseURL,
-        pingUrl,
       });
       return;
     }
