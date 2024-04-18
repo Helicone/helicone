@@ -7,6 +7,111 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"user_id": {
+									"type": "string"
+								},
+								"completion_tokens": {
+									"type": "number",
+									"format": "double"
+								},
+								"prompt_tokens": {
+									"type": "number",
+									"format": "double"
+								},
+								"count": {
+									"type": "number",
+									"format": "double"
+								}
+							},
+							"required": [
+								"user_id",
+								"completion_tokens",
+								"prompt_tokens",
+								"count"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ErrorResult_string_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ErrorResult_string_"
+					}
+				]
+			},
+			"UserQueryParams": {
+				"properties": {
+					"userIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"timeFilter": {
+						"properties": {
+							"endTimeUnixSeconds": {
+								"type": "number",
+								"format": "double"
+							},
+							"startTimeUnixSeconds": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"endTimeUnixSeconds",
+							"startTimeUnixSeconds"
+						],
+						"type": "object"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Json": {
 				"anyOf": [
 					{
@@ -453,26 +558,6 @@
 							null
 						],
 						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ErrorResult_string_": {
-				"properties": {
-					"data": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					},
-					"error": {
-						"type": "string"
 					}
 				},
 				"required": [
@@ -1172,91 +1257,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"properties": {
-								"user_id": {
-									"type": "string"
-								},
-								"completion_tokens": {
-									"type": "number",
-									"format": "double"
-								},
-								"prompt_tokens": {
-									"type": "number",
-									"format": "double"
-								},
-								"count": {
-									"type": "number",
-									"format": "double"
-								}
-							},
-							"required": [
-								"user_id",
-								"completion_tokens",
-								"prompt_tokens",
-								"count"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ErrorResult_string_"
-					}
-				]
-			},
-			"UserQueryParams": {
-				"properties": {
-					"userIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"timeFilter": {
-						"properties": {
-							"endTimeUnixSeconds": {
-								"type": "number",
-								"format": "double"
-							},
-							"startTimeUnixSeconds": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"endTimeUnixSeconds",
-							"startTimeUnixSeconds"
-						],
-						"type": "object"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
 			"PromptsResult": {
 				"properties": {
 					"id": {
@@ -1731,6 +1731,42 @@
 		"contact": {}
 	},
 	"paths": {
+		"/v1/user/query": {
+			"post": {
+				"operationId": "GetUsers",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UserQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/request/query": {
 			"post": {
 				"operationId": "GetRequests",
@@ -1785,42 +1821,6 @@
 								"sort": {
 									"created_at": "desc"
 								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/user/query": {
-			"post": {
-				"operationId": "GetUsers",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Request"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/UserQueryParams"
 							}
 						}
 					}

@@ -9,11 +9,11 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
-  "/v1/request/query": {
-    post: operations["GetRequests"];
-  };
   "/v1/user/query": {
     post: operations["GetUsers"];
+  };
+  "/v1/request/query": {
+    post: operations["GetRequests"];
   };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];
@@ -48,6 +48,34 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    "SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array_": {
+      data: {
+          user_id: string;
+          /** Format: double */
+          completion_tokens: number;
+          /** Format: double */
+          prompt_tokens: number;
+          /** Format: double */
+          count: number;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    ErrorResult_string_: {
+      /** @enum {number|null} */
+      data: null;
+      error: string;
+    };
+    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array.string_": components["schemas"]["SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array_"] | components["schemas"]["ErrorResult_string_"];
+    UserQueryParams: {
+      userIds?: string[];
+      timeFilter?: {
+        /** Format: double */
+        endTimeUnixSeconds: number;
+        /** Format: double */
+        startTimeUnixSeconds: number;
+      };
+    };
 Json: JsonObject;
     /** @enum {string} */
     Provider: "OPENAI" | "ANTHROPIC" | "TOGETHERAI" | "GROQ" | "CUSTOM";
@@ -165,11 +193,6 @@ Json: JsonObject;
       data: components["schemas"]["HeliconeRequest"][];
       /** @enum {number|null} */
       error: null;
-    };
-    ErrorResult_string_: {
-      /** @enum {number|null} */
-      data: null;
-      error: string;
     };
     "Result_HeliconeRequest-Array.string_": components["schemas"]["SuccessResult_HeliconeRequest-Array_"] | components["schemas"]["ErrorResult_string_"];
     /** @description Make all properties in T optional */
@@ -425,29 +448,6 @@ Json: JsonObject;
       isCached?: boolean;
       includeInputs?: boolean;
     };
-    "SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array_": {
-      data: {
-          user_id: string;
-          /** Format: double */
-          completion_tokens: number;
-          /** Format: double */
-          prompt_tokens: number;
-          /** Format: double */
-          count: number;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array.string_": components["schemas"]["SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array_"] | components["schemas"]["ErrorResult_string_"];
-    UserQueryParams: {
-      userIds?: string[];
-      timeFilter?: {
-        /** Format: double */
-        endTimeUnixSeconds: number;
-        /** Format: double */
-        startTimeUnixSeconds: number;
-      };
-    };
     PromptsResult: {
       id: string;
       user_defined_id: string;
@@ -571,6 +571,21 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  GetUsers: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array.string_"];
+        };
+      };
+    };
+  };
   GetRequests: {
     /** @description Request query filters */
     requestBody: {
@@ -594,21 +609,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
-        };
-      };
-    };
-  };
-  GetUsers: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array.string_"];
         };
       };
     };

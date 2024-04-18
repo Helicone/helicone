@@ -1,26 +1,13 @@
 // src/users/usersController.ts
-import {
-  Body,
-  Controller,
-  Example,
-  Post,
-  Request,
-  Route,
-  Security,
-  Tags,
-} from "tsoa";
+import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
 import { Result } from "../../lib/modules/result";
+import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import {
   FilterLeaf,
-  FilterNode,
   filterListToTree,
 } from "../../lib/shared/filters/filterDefs";
-import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
-import { HeliconeRequest } from "../../lib/stores/request/request";
-import { RequestManager } from "../../managers/request/RequestManager";
-import { JawnAuthenticatedRequest } from "../../types/request";
-import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
+import { JawnAuthenticatedRequest } from "../../types/request";
 
 export interface UserQueryParams {
   userIds?: string[];
