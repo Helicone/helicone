@@ -1,42 +1,16 @@
 import {
-  ArrowsPointingOutIcon,
   BookOpenIcon,
-  BookmarkIcon,
-  ChevronLeftIcon,
-  DocumentTextIcon,
-  PaintBrushIcon,
   PresentationChartLineIcon,
-  SparklesIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
-import {
-  MultiSelect,
-  MultiSelectItem,
-  Select,
-  SelectItem,
-} from "@tremor/react";
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import {
-  usePrompts,
-  usePrompt,
-} from "../../../../services/hooks/prompts/prompts";
+import { MultiSelect, MultiSelectItem } from "@tremor/react";
+import { useState } from "react";
+import { usePrompt } from "../../../../services/hooks/prompts/prompts";
 
-import ThemedDrawer from "../../../shared/themed/themedDrawer";
-import ThemedModal from "../../../shared/themed/themedModal";
-import { Chat } from "../../requests/chat";
-import { clsx } from "../../../shared/clsx";
-import { Tooltip } from "@mui/material";
 import { BeakerIcon } from "@heroicons/react/24/solid";
-import { ThemedPill } from "../../../shared/themed/themedPill";
-import ExperimentForm from "./experimentForm";
-import PromptPropertyCard from "./promptPropertyCard";
-import { useOrg } from "../../../layout/organizationContext";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
 import HcBadge from "../../../ui/hcBadge";
 import HcButton from "../../../ui/hcButton";
 import { useRouter } from "next/router";
-import ModelPill from "../../requestsV2/modelPill";
 import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
 import { AreaChartUsageExample, DUMMY_DATA } from "./dummyChart";
 import StyledAreaChart from "../../dashboard/styledAreaChart";

@@ -3,7 +3,6 @@ import { GetServerSidePropsContext } from "next";
 
 import { ReactElement } from "react";
 import AuthLayout from "../../../components/layout/authLayout";
-import PromptIdPage from "../../../components/templates/prompts/id/promptIdPage";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 import PromptNewExperimentPage from "../../../components/templates/prompts/id/promptNewExperiment";
 

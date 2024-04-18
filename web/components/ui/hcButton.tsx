@@ -1,4 +1,4 @@
-import React, { PropsWithChildren } from "react";
+import React from "react";
 import { Button, ButtonProps, ButtonVariant } from "@tremor/react";
 
 // Here, HcButtonProps extends ButtonProps but overrides the 'variant' and 'size' to make them non-optional and customized.

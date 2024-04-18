@@ -3,7 +3,6 @@ import {
   ChevronLeftIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Tooltip } from "@mui/material";
 import {
   Table,
   TableBody,
@@ -13,7 +12,7 @@ import {
   TableRow,
 } from "@tremor/react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import ReactDiffViewer from "react-diff-viewer";
 import { useExperiment } from "../../../../../services/hooks/prompts/experiments";
 import { clsx } from "../../../../shared/clsx";

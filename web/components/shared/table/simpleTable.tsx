@@ -1,5 +1,4 @@
 import {
-  Badge,
   Card,
   Table,
   TableBody,

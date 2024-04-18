@@ -1,31 +1,6 @@
-import {
-  ArrowsPointingOutIcon,
-  BookOpenIcon,
-  BookmarkIcon,
-  ChevronLeftIcon,
-  DocumentTextIcon,
-  PaintBrushIcon,
-  SparklesIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
-import { Select, SelectItem } from "@tremor/react";
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import {
-  usePrompts,
-  usePrompt,
-  usePromptVersions,
-} from "../../../../services/hooks/prompts/prompts";
+import { useState } from "react";
+import { usePromptVersions } from "../../../../services/hooks/prompts/prompts";
 
-import ThemedDrawer from "../../../shared/themed/themedDrawer";
-import ThemedModal from "../../../shared/themed/themedModal";
-import { Chat } from "../../requests/chat";
-import { clsx } from "../../../shared/clsx";
-import { Tooltip } from "@mui/material";
-import { BeakerIcon } from "@heroicons/react/24/solid";
-import { ThemedPill } from "../../../shared/themed/themedPill";
-import ExperimentForm from "./experimentForm";
-import PromptPropertyCard from "./promptPropertyCard";
 import { useOrg } from "../../../layout/organizationContext";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";
 

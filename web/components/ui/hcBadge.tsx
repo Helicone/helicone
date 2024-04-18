@@ -1,4 +1,3 @@
-import { ChevronDoubleDownIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@tremor/react";
 
 interface HcBadgeProps {
