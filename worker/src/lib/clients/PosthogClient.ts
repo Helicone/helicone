@@ -28,19 +28,19 @@ export class PosthogClient {
 
 export type HeliconeRequestResponseToPosthog = {
   model: string;
-  temperature: number | null;
+  temperature: number;
   n: number;
-  promptId: string | null;
-  timeToFirstToken: number | null | undefined;
+  promptId: string;
+  timeToFirstToken: number;
   cost: number;
   provider: string;
   path: string;
-  completetionTokens: number | null | undefined;
-  promptTokens: number | null | undefined;
+  completetionTokens: number;
+  promptTokens: number;
   totalTokens: number;
-  userId: string | null;
-  countryCode: string | null;
-  requestBodySize: number | undefined;
-  responseBodySize: number | undefined;
-  delayMs: number | null | undefined;
+  userId: string;
+  countryCode: string;
+  requestBodySize: number;
+  responseBodySize: number;
+  delayMs: number;
 };
