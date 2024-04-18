@@ -1,4 +1,5 @@
 import {
+  ArrowsPointingOutIcon,
   ClipboardIcon,
   EyeIcon,
   EyeSlashIcon,
@@ -9,7 +10,6 @@ import {
 import { useEffect, useState } from "react";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
-import { RenderWithPrettyInputKeys } from "../prompts/id/promptIdPage";
 import { Message } from "../requests/chat";
 import ResizeTextArea from "./resizeTextArea";
 import RoleButton from "./new/roleButton";
@@ -17,6 +17,7 @@ import useNotification from "../../shared/notification/useNotification";
 import { Tooltip } from "@mui/material";
 import { enforceString } from "../../../lib/helpers/typeEnforcers";
 import AddFileButton from "./new/addFileButton";
+import ThemedModal from "../../shared/themed/themedModal";
 
 interface ChatRowProps {
   index: number;
@@ -36,6 +37,129 @@ export const hasImage = (content: string | any[] | null) => {
     );
   }
   return false;
+};
+
+const PrettyInput = ({
+  keyName,
+  selectedProperties,
+}: {
+  keyName: string;
+  selectedProperties: Record<string, string> | undefined;
+}) => {
+  const getRenderText = () => {
+    if (selectedProperties) {
+      return selectedProperties[keyName] || "{{undefined}}";
+    } else {
+      return keyName;
+    }
+  };
+  const renderText = getRenderText();
+  const [open, setOpen] = useState(false);
+  const TEXT_LIMIT = 120;
+
+  return (
+    <>
+      <Tooltip title={keyName} placement="top">
+        {renderText.length > TEXT_LIMIT ? (
+          <button
+            onClick={() => setOpen(!open)}
+            className={clsx(
+              selectedProperties
+                ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
+                : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
+              "relative text-sm text-gray-900 dark:text-gray-100 border rounded-lg py-1 px-3 text-left"
+            )}
+            title={renderText}
+          >
+            <ArrowsPointingOutIcon className="h-4 w-4 text-sky-500 absolute right-2 top-1.5 transform" />
+            <p className="pr-8">{renderText.slice(0, TEXT_LIMIT)}...</p>
+          </button>
+        ) : (
+          <span
+            className={clsx(
+              selectedProperties
+                ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
+                : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
+              "inline-block border text-gray-900 dark:text-gray-100 rounded-lg py-1 px-3 text-sm"
+            )}
+          >
+            {renderText}
+          </span>
+        )}
+      </Tooltip>
+
+      <ThemedModal open={open} setOpen={setOpen}>
+        <div className="w-[66vw] h-full flex flex-col space-y-4">
+          <div className="flex items-center w-full justify-center">
+            <h3 className="text-2xl font-semibold">{keyName}</h3>
+            <button onClick={() => setOpen(false)} className="ml-auto">
+              <XMarkIcon className="h-6 w-6 text-gray-500" />
+            </button>
+          </div>
+
+          <div className="bg-white border-gray-300 dark:bg-black dark:border-gray-700 p-4 border rounded-lg flex flex-col space-y-4">
+            {selectedProperties?.[keyName]}
+          </div>
+        </div>
+      </ThemedModal>
+    </>
+  );
+};
+
+export const RenderWithPrettyInputKeys = (props: {
+  text: string;
+
+  selectedProperties: Record<string, string> | undefined;
+}) => {
+  const { text, selectedProperties } = props;
+
+  // Function to replace matched patterns with JSX components
+  const replaceInputKeysWithComponents = (inputText: string) => {
+    if (typeof inputText !== "string") {
+      // don't throw, stringify the input and return it
+      return JSON.stringify(inputText);
+    }
+
+    // Regular expression to match the pattern
+    const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
+    const parts = [];
+    let lastIndex = 0;
+
+    // Use the regular expression to find and replace all occurrences
+    inputText.replace(regex, (match: any, keyName: string, offset: number) => {
+      // Push preceding text if any
+      if (offset > lastIndex) {
+        parts.push(inputText.substring(lastIndex, offset));
+      }
+
+      // Push the PrettyInput component for the current match
+      parts.push(
+        <PrettyInput
+          keyName={keyName}
+          key={offset}
+          selectedProperties={selectedProperties}
+        />
+      );
+
+      // Update lastIndex to the end of the current match
+      lastIndex = offset + match.length;
+
+      // This return is not used but is necessary for the replace function
+      return match;
+    });
+
+    // Add any remaining text after the last match
+    if (lastIndex < inputText.length) {
+      parts.push(inputText.substring(lastIndex));
+    }
+    return parts;
+  };
+
+  return (
+    <div className="text-md leading-8 text-black dark:text-white">
+      {replaceInputKeysWithComponents(text)}
+    </div>
+  );
 };
 
 const ChatRow = (props: ChatRowProps) => {

@@ -13,7 +13,7 @@ import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { LlmSchema } from "../../../lib/api/models/requestResponseModel";
 import ThemedModal from "../../shared/themed/themedModal";
-import { RenderWithPrettyInputKeys } from "../prompts/id/promptIdPage";
+import { RenderWithPrettyInputKeys } from "../playground/chatRow";
 
 export type Message = {
   id: string;
