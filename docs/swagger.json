@@ -7,11 +7,15 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array_": {
+			"SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
 				"properties": {
 					"data": {
 						"items": {
 							"properties": {
+								"cost_usd": {
+									"type": "number",
+									"format": "double"
+								},
 								"user_id": {
 									"type": "string"
 								},
@@ -29,6 +33,7 @@
 								}
 							},
 							"required": [
+								"cost_usd",
 								"user_id",
 								"completion_tokens",
 								"prompt_tokens",
@@ -73,10 +78,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array.string_": {
+			"Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array_"
+						"$ref": "#/components/schemas/SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ErrorResult_string_"
@@ -1740,7 +1745,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array.string_"
+									"$ref": "#/components/schemas/Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_"
 								}
 							}
 						}

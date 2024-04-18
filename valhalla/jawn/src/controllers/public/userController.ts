@@ -8,6 +8,7 @@ import {
 } from "../../lib/shared/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import { JawnAuthenticatedRequest } from "../../types/request";
+import { clickhousePriceCalc } from "../../packages/cost";
 
 export interface UserQueryParams {
   userIds?: string[];
@@ -33,6 +34,7 @@ export class UserController extends Controller {
         prompt_tokens: number;
         completion_tokens: number;
         user_id: string;
+        cost_usd: number;
       }[],
       string
     >
@@ -82,13 +84,15 @@ export class UserController extends Controller {
       prompt_tokens: number;
       completion_tokens: number;
       user_id: string;
+      cost_usd: number;
     }>(
       `
     SELECT 
       count(*) as count, 
       sum(prompt_tokens) as prompt_tokens, 
       sum(completion_tokens) as completion_tokens, 
-      user_id
+      user_id,
+      ${clickhousePriceCalc("request_response_log")} as cost_usd
     from request_response_log
     WHERE (
       ${filter.filter}

@@ -12,7 +12,7 @@
     "test": "jest",
     "rm-remote": "rm -rf ../web/packages/cost && rm -rf ../worker/src/packages/cost",
     "mkdir-remote": "mkdir -p ../web/packages/cost && mkdir -p ../worker/src/packages/cost",
-    "copy": "yarn rm-remote && yarn mkdir-remote && cp -r src/* ../web/packages/cost && cp -r src/* ../worker/src/packages/cost "
+    "copy": "yarn rm-remote && yarn mkdir-remote && cp -r src/* ../web/packages/cost && cp -r src/* ../worker/src/packages/cost && cp -r src/* ../valhalla/jawn/src/packages/cost"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
