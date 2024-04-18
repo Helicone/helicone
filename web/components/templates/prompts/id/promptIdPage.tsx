@@ -47,7 +47,8 @@ const PrettyInput = ({
 
   return (
     <>
-      {renderText.startsWith("http") ? (
+      {renderText.startsWith("http") || renderText.startsWith("data:image") ? (
+        // eslint-disable-next-line @next/next/no-img-element
         <img src={renderText} alt={""} width={600} height={600} />
       ) : (
         <Tooltip title={keyName} placement="top">
