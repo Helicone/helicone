@@ -18,6 +18,23 @@ export type BlogStructure = {
 const blogContent: BlogStructure[] = [
   {
     title:
+      "A LangSmith Alternative that Takes LLM Observability to the Next Level",
+    description:
+      "Both Helicone and LangSmith are capable, powerful DevOps platform used by enterprises and developers building LLM applications. But which is better?",
+    badgeText: "Compare",
+    badgeColor: "bg-red-50 text-red-700 ring-red-600/10",
+    date: "Apr 18, 2024",
+    href: "/blog/langsmith",
+    imageUrl: "assets/blog/langsmith-vs-helicone/cover-image.webp",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/assets/blog/linalam-headshot.webp",
+      },
+    ],
+  },
+  {
+    title:
       "Why Observability is the key to ethical and safe Artificial Intelligence",
     description:
       "As AI continues to shape our world, the need for ethical practices and robust observability has never been greater. Learn how Helicone is rising to the challenge.",
