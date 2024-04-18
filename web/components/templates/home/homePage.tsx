@@ -221,12 +221,11 @@ client = OpenAI(
   base_url="http://oai.hconeai.com/v1", 
   default_headers= { 
     "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-    "Helicone-Posthog-Key": POSTHOG_API_KEY
   }
 )
         `}
               language={"python"}
-              newLines={[4, 6, 7]}
+              newLines={[4, 6]}
               oldLines={[]}
               minHeight={false}
               textSize="lg"
