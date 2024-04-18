@@ -5,10 +5,16 @@ import {
   ChevronLeftIcon,
   DocumentTextIcon,
   PaintBrushIcon,
+  PresentationChartLineIcon,
   SparklesIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Select, SelectItem } from "@tremor/react";
+import {
+  MultiSelect,
+  MultiSelectItem,
+  Select,
+  SelectItem,
+} from "@tremor/react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -26,6 +32,16 @@ import { ThemedPill } from "../../../shared/themed/themedPill";
 import ExperimentForm from "./experimentForm";
 import PromptPropertyCard from "./promptPropertyCard";
 import { useOrg } from "../../../layout/organizationContext";
+import HcBreadcrumb from "../../../ui/hcBreadcrumb";
+import HcBadge from "../../../ui/hcBadge";
+import HcButton from "../../../ui/hcButton";
+import { useRouter } from "next/router";
+import ModelPill from "../../requestsV2/modelPill";
+import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
+import { AreaChartUsageExample, DUMMY_DATA } from "./dummyChart";
+import StyledAreaChart from "../../dashboard/styledAreaChart";
+import { SimpleTable } from "../../../shared/table/simpleTable";
+import TableFooter from "../../requestsV2/tableFooter";
 
 interface PromptIdPageProps {
   id: string;
@@ -229,72 +245,189 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     response: string;
   }>();
 
+  const router = useRouter();
+
   // set the selected version to the latest version on initial load
 
   return (
-    <>
+    <div className="w-full h-full flex flex-col space-y-8">
       <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-col items-start space-y-2 w-full">
-          <Link
-            className="flex w-fit items-center text-gray-500 space-x-2 hover:text-gray-700"
-            href={"/prompts"}
-          >
-            <ChevronLeftIcon className="h-4 w-4 inline" />
-            <span className="text-sm font-semibold">Prompts</span>
-          </Link>
+        <div className="flex flex-col items-start space-y-4 w-full">
+          <HcBreadcrumb
+            pages={[
+              {
+                href: "/prompts",
+                name: "Prompts",
+              },
+              {
+                href: `/prompts/${id}`,
+                name: prompt?.user_defined_id || "Loading...",
+              },
+            ]}
+          />
           <div className="flex justify-between w-full">
-            <div className="flex gap-3  items-end">
-              <h1 className="font-semibold text-3xl text-black dark:text-white">
+            <div className="flex gap-4 items-end">
+              <h1 className="font-semibold text-4xl text-black dark:text-white">
                 {prompt?.user_defined_id}
               </h1>
-
-              <ThemedPill
-                label={`${(prompt?.major_version ?? 0) + 1} version(s)`}
+              <HcBadge
+                title={`${(prompt?.major_version ?? 0) + 1} version${
+                  (prompt?.major_version ?? 0) + 1 > 1 ? "s" : ""
+                }`}
+                size={"sm"}
               />
             </div>
-
             <div className="flex gap-2">
-              <button
-                className="flex items-center gap-2 text-sm font-semibold text-blue-500 hover:text-blue-700"
+              <HcButton
                 onClick={() => setExperimentOpen(!experimentOpen)}
-              >
-                <BookmarkIcon className="h-5 w-5" />
-                <span>View Prompt</span>
-              </button>
-              <a
-                className="flex items-center gap-2 text-sm font-semibold text-blue-500 hover:text-blue-700"
-                href={`/prompts/${id}/new-experiment`}
-              >
-                <BeakerIcon className="h-5 w-5" />
-                <span>Start Experiment</span>
-              </a>
+                variant={"secondary"}
+                size={"sm"}
+                title="View Prompt"
+                icon={BookOpenIcon}
+              />
+              <HcButton
+                onClick={() => {
+                  router.push(`/prompts/${id}/new-experiment`);
+                }}
+                variant={"primary"}
+                size={"sm"}
+                title="Start Experiment"
+                icon={BeakerIcon}
+              />
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs">
-            <div className=" text-black dark:text-white opacity-60">
-              lasted used:{" "}
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <p className="">
+              last used{" "}
               {prompt?.last_used && getTimeAgo(new Date(prompt?.last_used))}
-            </div>
+            </p>
+            {/* <div className="rounded-full h-1 w-1 bg-slate-400" />
+            <ModelPill model={prompt?.latest_model_used || "unknown"} /> */}
             <div className="rounded-full h-1 w-1 bg-slate-400" />
-            <div className=" text-black dark:text-white font-bold">
-              {prompt?.latest_model_used}
-            </div>
-            <div className="rounded-full h-1 w-1 bg-slate-400" />
-            <div className=" text-black dark:text-white opacity-60">
+            <p className="">
+              created on{" "}
               {prompt?.created_at &&
                 new Date(prompt?.created_at).toDateString()}
-            </div>
+            </p>
           </div>
         </div>
       </div>
-      {JSON.stringify(prompt?.versions)}
+      <div className="w-full h-full flex flex-col space-y-4">
+        <div className="flex items-center justify-between w-full">
+          <ThemedTimeFilter
+            timeFilterOptions={[
+              {
+                key: "24H",
+                value: "24H",
+              },
+              {
+                key: "7D",
+                value: "7D",
+              },
+              {
+                key: "1M",
+                value: "1M",
+              },
+              {
+                key: "3M",
+                value: "3M",
+              },
+              {
+                key: "all",
+                value: "all",
+              },
+            ]}
+            custom={true}
+            onSelect={function (key: string, value: string): void {
+              throw new Error("Function not implemented.");
+            }}
+            isFetching={false}
+            defaultValue={"24H"}
+            currentTimeFilter={{
+              start: new Date(),
+              end: new Date(),
+            }}
+          />
+        </div>
 
-      <div className="mt-2 flex flex-col min-h-[30vh] h-full bg-blue-200 items-center justify-center">
-        Graph
+        <div>
+          <StyledAreaChart
+            title={"Total Requests"}
+            value={"1063"}
+            isDataOverTimeLoading={false}
+          >
+            <AreaChartUsageExample />
+          </StyledAreaChart>
+        </div>
       </div>
-
-      <div className="mt-2 flex flex-col min-h-[30vh] h-full bg-blue-200 items-center justify-center">
-        Experiments
+      <div className="flex flex-col space-y-4 h-full w-full">
+        <h2 className="text-2xl font-semibold">Experiment Logs</h2>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center space-x-2">
+            <MultiSelect placeholder="Version(s)">
+              <MultiSelectItem value="1">Version 1</MultiSelectItem>
+              <MultiSelectItem value="2">Version 2</MultiSelectItem>
+              <MultiSelectItem value="3">Version 3</MultiSelectItem>
+            </MultiSelect>{" "}
+            <MultiSelect placeholder="Dataset">
+              <MultiSelectItem value="1">Version 1</MultiSelectItem>
+              <MultiSelectItem value="2">Version 2</MultiSelectItem>
+              <MultiSelectItem value="3">Version 3</MultiSelectItem>
+            </MultiSelect>{" "}
+            <MultiSelect placeholder="Model">
+              <MultiSelectItem value="1">Version 1</MultiSelectItem>
+              <MultiSelectItem value="2">Version 2</MultiSelectItem>
+              <MultiSelectItem value="3">Version 3</MultiSelectItem>
+            </MultiSelect>
+            <div className="pl-2">
+              <HcButton variant={"light"} size={"sm"} title={"Clear All"} />
+            </div>
+          </div>
+          <HcButton
+            variant={"secondary"}
+            size={"sm"}
+            title={"Add Metrics"}
+            icon={PresentationChartLineIcon}
+          />
+        </div>
+        <SimpleTable
+          data={DUMMY_DATA}
+          columns={[
+            {
+              key: "name",
+              header: "Name",
+              render: (item) => item.name,
+            },
+            {
+              key: "departement",
+              header: "Departement",
+              render: (item) => item.departement,
+            },
+            {
+              key: "Role",
+              header: "Role",
+              render: (item) => item.Role,
+            },
+            {
+              key: "status",
+              header: "Status",
+              render: (item) => item.status,
+            },
+          ]}
+        />
+        <TableFooter
+          currentPage={0}
+          pageSize={0}
+          count={0}
+          isCountLoading={false}
+          onPageChange={function (newPageNumber: number): void {
+            // throw new Error("Function not implemented.");
+          }}
+          onPageSizeChange={function (newPageSize: number): void {
+            // throw new Error("Function not implemented.");
+          }}
+          pageSizeOptions={[]}
+        />
       </div>
       {/* {isLoading ? (
         <p>Loading...</p>
@@ -491,7 +624,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           ))}
         </ul>
       </ThemedDrawer> */}
-    </>
+    </div>
   );
 };
 

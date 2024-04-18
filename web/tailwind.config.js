@@ -18,7 +18,7 @@ module.exports = {
             faint: "#f0f9ff", // sky-50
             muted: "#bae6fd", // sky-200
             subtle: "#38bdf8", // sky-400
-            DEFAULT: "#0ea5e9", // sky-500
+            DEFAULT: "#0284c7", // sky-500: #0ea5e9 | sky-600: #0284c7
             emphasis: "#0369a1", // sky-700
             inverted: "#ffffff", // white
           },
@@ -45,12 +45,12 @@ module.exports = {
         // // dark mode
         "dark-tremor": {
           brand: {
-            faint: "#0B1229", // custom
-            muted: "#172554", // blue-950
-            subtle: "#1e40af", // blue-800
-            DEFAULT: "#3b82f6", // blue-500
-            emphasis: "#60a5fa", // blue-400
-            inverted: "#030712", // gray-950
+            faint: "#ffffff", // custom
+            muted: "#0369a1", // blue-950
+            subtle: "#0ea5e9", // blue-800
+            DEFAULT: "#0284c7", // blue-500
+            emphasis: "#38bdf8", // blue-400
+            inverted: "#f0f9ff", // gray-950
           },
           background: {
             muted: "#131A2B", // custom
