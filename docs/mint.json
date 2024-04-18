@@ -159,7 +159,10 @@
     },
     {
       "group": "Request",
-      "pages": ["rest/request/post-v1requestquery"]
+      "pages": [
+        "rest/request/post-v1requestquery",
+        "rest/user/post-v1userquery"
+      ]
     }
   ],
   "topbarLinks": [

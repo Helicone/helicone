@@ -52,6 +52,7 @@ export async function handleFeedback(
   );
 
   const dbQueryTimer = new DBQueryTimer(_ctx, {
+    enabled: (env.DATADOG_ENABLED ?? "false") === "true",
     apiKey: env.DATADOG_API_KEY,
     endpoint: env.DATADOG_ENDPOINT,
   });
