@@ -48,8 +48,10 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
-    "SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array_": {
+    "SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
       data: {
+          /** Format: double */
+          cost_usd: number;
           user_id: string;
           /** Format: double */
           completion_tokens: number;
@@ -66,7 +68,7 @@ export interface components {
       data: null;
       error: string;
     };
-    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array.string_": components["schemas"]["SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array_"] | components["schemas"]["ErrorResult_string_"];
+    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": components["schemas"]["SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"] | components["schemas"]["ErrorResult_string_"];
     UserQueryParams: {
       userIds?: string[];
       timeFilter?: {
@@ -581,7 +583,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string_-Array.string_"];
+          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_"];
         };
       };
     };
