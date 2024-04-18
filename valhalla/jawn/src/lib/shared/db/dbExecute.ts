@@ -1,16 +1,16 @@
 import { Client } from "pg";
 import { Result } from "../result";
 import { createClient as clickhouseCreateClient } from "@clickhouse/client";
-// import dateFormat from "dateformat";
-// const dateFormat = require("dateformat");
 
 export function paramsToValues(params: (number | string | boolean | Date)[]) {
   return params
     .map((p) => {
       if (p instanceof Date) {
-        //ex: 2023-05-27T08:21:26
-        // return dateFormat(p, "yyyy-mm-dd HH:MM:ss", true);
-        return p.toISOString().replace("T", " ").replace("Z", "");
+        return p
+          .toISOString()
+          .replace("T", " ")
+          .replace("Z", "")
+          .replace(/\.\d+$/, "");
       } else {
         return p;
       }
@@ -42,10 +42,17 @@ export async function dbQueryClickhouse<T>(
   try {
     const query_params = paramsToValues(parameters);
 
+    const { CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_HOST } =
+      JSON.parse(process.env.CLICKHOUSE_CREDS ?? "{}") as {
+        CLICKHOUSE_USER?: string;
+        CLICKHOUSE_PASSWORD?: string;
+        CLICKHOUSE_HOST?: string;
+      };
+
     const client = clickhouseCreateClient({
-      host: process.env.CLICKHOUSE_HOST ?? "http://localhost:18123",
-      username: process.env.CLICKHOUSE_USER ?? "default",
-      password: process.env.CLICKHOUSE_PASSWORD ?? "",
+      host: CLICKHOUSE_HOST ?? "http://localhost:18123",
+      username: CLICKHOUSE_USER ?? "default",
+      password: CLICKHOUSE_PASSWORD ?? "",
     });
 
     const queryResult = await client.query({
@@ -62,7 +69,7 @@ export async function dbQueryClickhouse<T>(
     });
     return { data: await queryResult.json<T[]>(), error: null };
   } catch (err) {
-    console.error("Error executing query: ", query, parameters);
+    console.error("Error executing clickhouse query: ", query, parameters);
     console.error(err);
     return {
       data: null,
