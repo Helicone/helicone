@@ -4,7 +4,6 @@ import Image from "next/image";
 import { BlogStructure } from "../../../pages/blog";
 import NavBarV2 from "../../layout/navbar/navBarV2";
 import Footer from "../../layout/footer";
-import { StarIcon } from "@heroicons/react/20/solid";
 
 interface BlogPageProps {
   content: BlogStructure[];
