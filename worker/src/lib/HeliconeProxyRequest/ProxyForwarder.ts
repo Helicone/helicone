@@ -312,7 +312,8 @@ export async function proxyForwarder(
           supabase
         ),
       },
-      env.S3_ENABLED ?? "true"
+      env.S3_ENABLED ?? "true",
+      proxyRequest?.requestWrapper.heliconeHeaders
     );
 
     if (res.error !== null) {
