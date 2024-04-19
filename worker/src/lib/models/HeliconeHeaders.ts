@@ -45,6 +45,8 @@ export interface IHeliconeHeaders {
   modelOverride: Nullable<string>;
   promptSecurityEnabled: Nullable<string>;
   moderationsEnabled: boolean;
+  posthogKey: Nullable<string>;
+  posthogHost: Nullable<string>;
 }
 
 export class HeliconeHeaders implements IHeliconeHeaders {
@@ -77,6 +79,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   modelOverride: Nullable<string>;
   promptSecurityEnabled: Nullable<string>;
   moderationsEnabled: boolean;
+  posthogKey: Nullable<string>;
+  posthogHost: Nullable<string>;
 
   constructor(private headers: Headers) {
     const heliconeHeaders = this.getHeliconeHeaders();
@@ -99,6 +103,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.modelOverride = heliconeHeaders.modelOverride;
     this.promptSecurityEnabled = heliconeHeaders.promptSecurityEnabled;
     this.moderationsEnabled = heliconeHeaders.moderationsEnabled;
+    this.posthogKey = heliconeHeaders.posthogKey;
+    this.posthogHost = heliconeHeaders.posthogHost;
   }
 
   private getFallBacks(): Nullable<HeliconeFallback[]> {
@@ -213,6 +219,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         this.headers.get("Helicone-Moderations-Enabled") == "true"
           ? true
           : false,
+      posthogKey: this.headers.get("Helicone-Posthog-Key") ?? null,
+      posthogHost: this.headers.get("Helicone-Posthog-Host") ?? null,
     };
   }
 
