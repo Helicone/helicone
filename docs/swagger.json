@@ -1262,6 +1262,40 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"SuccessResult_null_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_null.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/SuccessResult_null_"
+					},
+					{
+						"$ref": "#/components/schemas/ErrorResult_string_"
+					}
+				]
+			},
 			"PromptsResult": {
 				"properties": {
 					"id": {
@@ -1549,40 +1583,6 @@
 					}
 				]
 			},
-			"SuccessResult_null_": {
-				"properties": {
-					"data": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_null.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/SuccessResult_null_"
-					},
-					{
-						"$ref": "#/components/schemas/ErrorResult_string_"
-					}
-				]
-			},
 			"NewDatasetParams": {
 				"properties": {
 					"datasetName": {
@@ -1752,7 +1752,7 @@
 					}
 				},
 				"tags": [
-					"Request"
+					"User"
 				],
 				"security": [
 					{
@@ -1826,6 +1826,59 @@
 								"sort": {
 									"created_at": "desc"
 								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/request/{requestId}/feedback": {
+			"post": {
+				"operationId": "FeedbackRequest",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"rating": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"rating"
+								],
+								"type": "object"
 							}
 						}
 					}

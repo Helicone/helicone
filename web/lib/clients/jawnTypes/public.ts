@@ -15,6 +15,9 @@ export interface paths {
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
+  "/v1/request/{requestId}/feedback": {
+    post: operations["FeedbackRequest"];
+  };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];
   };
@@ -450,6 +453,13 @@ Json: JsonObject;
       isCached?: boolean;
       includeInputs?: boolean;
     };
+    SuccessResult_null_: {
+      /** @enum {number|null} */
+      data: null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_null.string_": components["schemas"]["SuccessResult_null_"] | components["schemas"]["ErrorResult_string_"];
     PromptsResult: {
       id: string;
       user_defined_id: string;
@@ -517,13 +527,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_PromptVersionResult-Array.string_": components["schemas"]["SuccessResult_PromptVersionResult-Array_"] | components["schemas"]["ErrorResult_string_"];
-    SuccessResult_null_: {
-      /** @enum {number|null} */
-      data: null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_null.string_": components["schemas"]["SuccessResult_null_"] | components["schemas"]["ErrorResult_string_"];
     NewDatasetParams: {
       datasetName: string;
       requestIds: string[];
@@ -611,6 +614,28 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
+        };
+      };
+    };
+  };
+  FeedbackRequest: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          rating: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
