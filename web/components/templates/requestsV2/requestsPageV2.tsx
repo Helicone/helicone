@@ -84,12 +84,6 @@ function getSortLeaf(
   }
 }
 
-export function encodeFilter(filter: UIFilterRow): string {
-  return `${filter.filterMapIdx}:${filter.operatorIdx}:${encodeURIComponent(
-    filter.value
-  )}`;
-}
-
 function getTableName(isCached: boolean): string {
   return isCached ? "cache_hits" : "request";
 }
@@ -180,6 +174,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [selectedData, setSelectedData] = useState<
     NormalizedRequest | undefined
   >(undefined);
+  function encodeFilter(filter: UIFilterRow): string {
+    return `${filterMap[filter.filterMapIdx].label}:${
+      filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label
+    }:${filter.value}`;
+  }
 
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -220,11 +219,45 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   };
 
   const getAdvancedFilters = (): UIFilterRow[] => {
-    if (currentFilter) {
-      return currentFilter?.filter as UIFilterRow[];
+    try {
+      const currentAdvancedFilters = searchParams.get("filters");
+
+      if (currentAdvancedFilters) {
+        const filters = decodeURIComponent(currentAdvancedFilters).slice(1, -1);
+        const decodedFilters = filters
+          .split("|")
+          .map(decodeFilter)
+          .filter((filter) => filter !== null) as UIFilterRow[];
+
+        return decodedFilters;
+      }
+    } catch (error) {
+      console.error("Error decoding advanced filters:", error);
     }
     return [];
   };
+
+  function decodeFilter(encoded: string): UIFilterRow | null {
+    try {
+      const parts = encoded.split(":");
+      if (parts.length !== 3) return null;
+      const filterLabel = decodeURIComponent(parts[0]);
+      const operator = decodeURIComponent(parts[1]);
+      const value = decodeURIComponent(parts[2]);
+
+      const filterMapIdx = filterMap.findIndex((f) => f.label === filterLabel);
+      const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
+        (o) => o.label === operator
+      );
+
+      if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
+
+      return { filterMapIdx, operatorIdx, value };
+    } catch (error) {
+      console.error("Error decoding filter:", error);
+      return null;
+    }
+  }
 
   const getTimeRange = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -252,9 +285,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
   const [timeRange, setTimeRange] = useState<TimeFilter>(getTimeRange());
 
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>(
-    getAdvancedFilters()
-  );
+  const [advancedFilters, setAdvancedFilters] =
+    useState<UIFilterRow[]>(getAdvancedFilters);
 
   const router = useRouter();
 
@@ -362,18 +394,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     })
   );
 
-  const onSetAdvancedFilters = (
-    filters: UIFilterRow[],
-    layoutFilterId?: string | null
-  ) => {
-    setAdvancedFilters(filters);
-    if (layoutFilterId === null) {
-      searchParams.delete("filter");
-    } else {
-      searchParams.set("filter", layoutFilterId ?? "");
-    }
-  };
-
   const onRowSelectHandler = (row: NormalizedRequest, index: number) => {
     setSelectedDataIndex(index);
     setSelectedData(row);
@@ -403,9 +423,13 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   ) => {
     setAdvancedFilters(filters);
     if (layoutFilterId === null) {
-      searchParams.delete("filter");
+      searchParams.delete("filters");
     } else {
-      searchParams.set("filter", layoutFilterId ?? "");
+      const currentAdvancedFilters = encodeURIComponent(
+        JSON.stringify(filters.map(encodeFilter).join("|"))
+      );
+
+      searchParams.set("filters", currentAdvancedFilters ?? "");
     }
   };
 
@@ -464,7 +488,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           advancedFilters={{
             filterMap: filterMap,
             filters: advancedFilters,
-            setAdvancedFilters: onSetAdvancedFilters,
+            setAdvancedFilters: onSetAdvancedFiltersHandler,
             searchPropertyFilters: searchPropertyFilters,
             show: userId ? false : true,
           }}

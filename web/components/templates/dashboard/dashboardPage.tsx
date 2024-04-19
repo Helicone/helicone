@@ -115,7 +115,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       : undefined
   );
 
-  const [currFilter, setCurrFilter] = useState("");
+  const [currFilter, setCurrFilter] = useState<string | null>("");
 
   const getInterval = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -219,7 +219,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   ) => {
     setAdvancedFilters(filters);
     if (layoutFilterId === null) {
-      searchParams.delete("filter");
+      searchParams.delete("filters");
     } else {
       const currentAdvancedFilters = encodeURIComponent(
         JSON.stringify(filters.map(encodeFilter).join("|"))
