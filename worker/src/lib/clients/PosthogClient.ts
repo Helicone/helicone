@@ -4,9 +4,10 @@ import { PostHog } from "posthog-node";
 export class PosthogClient {
   private readonly posthog: PostHog;
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, posthogHost: string | null = null) {
+    console.log(posthogHost);
     this.posthog = new PostHog(apiKey, {
-      host: "https://app.posthog.com",
+      host: posthogHost ?? "https://app.posthog.com",
     });
   }
 
@@ -14,15 +15,20 @@ export class PosthogClient {
     event: string,
     properties: Record<string, any>
   ): Promise<void> {
-    this.posthog.capture({
-      distinctId: crypto.randomUUID(),
-      event: event,
-      properties: {
-        ...properties,
-      },
-    });
+    try {
+      this.posthog.capture({
+        distinctId: crypto.randomUUID(),
+        event: event,
+        properties: {
+          ...properties,
+        },
+      });
 
-    await this.posthog.shutdown();
+      await this.posthog.shutdown();
+    } catch (error: any) {
+      console.error(`Error capturing PostHog event: ${error.message}`);
+    }
+    console.log("done");
   }
 }
 

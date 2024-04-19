@@ -830,7 +830,10 @@ export class DBLoggable {
     }
 
     if (requestHeaders?.posthogKey) {
-      const posthogClient = new PosthogClient(requestHeaders.posthogKey);
+      const posthogClient = new PosthogClient(
+        requestHeaders.posthogKey,
+        requestHeaders.posthogHost
+      );
       const reqBody = JSON.parse(this.request.bodyText ?? "{}") ?? null;
       const heliconeRequestResponse: HeliconeRequestResponseToPosthog = {
         model: model ?? "",
