@@ -26,24 +26,8 @@ const BlogPage = (props: BlogPageProps) => {
         <p className="text-lg text-gray-700">
           Thoughts about the future of AI - from the team helping to build it.
         </p>
-        <div className="border-b border-gray-300 py-4 w-full flex items-center justify-center">
-          {/* <ul className="flex items-center space-x-4">
-            <li className="flex items-center space-x-1 px-4 py-2 bg-gray-300 rounded-lg">
-              <StarIcon className="h-5 w-5 text-yellow-500" />
-              <span className="text-gray-600">Latest</span>
-            </li>
-            <li className="flex items-center space-x-1 px-4 py-2 bg-gray-300 rounded-lg">
-              <StarIcon className="h-5 w-5 text-yellow-500" />
-              <span className="text-gray-600">Latest</span>
-            </li>
-            <li className="flex items-center space-x-1 px-4 py-2 bg-gray-300 rounded-lg">
-              <StarIcon className="h-5 w-5 text-yellow-500" />
-              <span className="text-gray-600">Latest</span>
-            </li>
-          </ul> */}
-        </div>
+        <div className="border-b border-gray-300 py-4 w-full flex items-center justify-center"></div>
         <div className="grid grid-cols-2 space-y-8">
-          {/* render the featured one in two columns, otherwise, render it regularly in the grid */}
           {content.map((blog, i) => {
             if (i === 0) {
               return (
@@ -59,9 +43,7 @@ const BlogPage = (props: BlogPageProps) => {
                         /{blog.badgeText.toLowerCase()}
                       </span>
                       <span className="text-gray-400 text-sm">-</span>
-                      <span className="text-gray-400 text-sm">
-                        4 minute read
-                      </span>
+                      <span className="text-gray-400 text-sm">{blog.time}</span>
                     </div>
 
                     <h2 className="font-semibold text-3xl pt-2">
@@ -98,7 +80,7 @@ const BlogPage = (props: BlogPageProps) => {
                     style={{
                       objectFit: "cover",
                     }}
-                    className="rounded-lg h-96 w-full border border-gray-300"
+                    className="rounded-lg h-96 w-full max-w-[36rem] border border-gray-300"
                   />
                 </Link>
               );
@@ -132,9 +114,7 @@ const BlogPage = (props: BlogPageProps) => {
                         /{blog.badgeText.toLowerCase()}
                       </span>
                       <span className="text-gray-400 text-sm">-</span>
-                      <span className="text-gray-400 text-sm">
-                        4 minute read
-                      </span>
+                      <span className="text-gray-400 text-sm">{blog.time}</span>
                     </div>
                     <h2 className="font-semibold text-lg pt-2">{blog.title}</h2>
                     <p className="text-gray-500 text-sm">{blog.description}</p>

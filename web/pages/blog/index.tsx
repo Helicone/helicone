@@ -13,6 +13,7 @@ export type BlogStructure = {
     name: string;
     imageUrl: string;
   }[];
+  time: string; // the amount of time it takes to read the blog
 };
 
 const blogContent: BlogStructure[] = [
@@ -32,6 +33,7 @@ const blogContent: BlogStructure[] = [
         imageUrl: "/assets/blog/linalam-headshot.webp",
       },
     ],
+    time: "4 minute read",
   },
   {
     title:
@@ -49,6 +51,7 @@ const blogContent: BlogStructure[] = [
         imageUrl: "/assets/blog/scottnguyen-headshot.webp",
       },
     ],
+    time: "5 minute read",
   },
   {
     title:
@@ -66,6 +69,7 @@ const blogContent: BlogStructure[] = [
         imageUrl: "/assets/blog/colegottdank-headshot.png",
       },
     ],
+    time: "3 minute read",
   },
   {
     title: "Life after Y Combinator: Three Key Lessons for Startups",
@@ -82,6 +86,7 @@ const blogContent: BlogStructure[] = [
         imageUrl: "/assets/blog/scottnguyen-headshot.webp",
       },
     ],
+    time: "4 minute read",
   },
   {
     title: "Helicone: The Next Evolution in OpenAI Monitoring and Optimization",
@@ -98,6 +103,7 @@ const blogContent: BlogStructure[] = [
         imageUrl: "/assets/blog/scottnguyen-headshot.webp",
       },
     ],
+    time: "3 minute read",
   },
   {
     title: "Helicone partners with AutoGPT",
@@ -115,6 +121,7 @@ const blogContent: BlogStructure[] = [
           "https://media.licdn.com/dms/image/D5603AQG1fVqLULxCYA/profile-displayphoto-shrink_800_800/0/1673810039348?e=1696464000&v=beta&t=UTxO3PbbnF8bLmP2CosOwCnmh5yxyOJYAIG2XmV8uAM",
       },
     ],
+    time: "1 minute read",
   },
   {
     title: "Generative AI with Helicone",
@@ -131,6 +138,7 @@ const blogContent: BlogStructure[] = [
         imageUrl: "https://dailybaileyai.com/images/avatars/my_profile.png",
       },
     ],
+    time: "3 minute read",
   },
   {
     title: "(a16z) Emerging Architectures for LLM Applications",
@@ -154,6 +162,7 @@ const blogContent: BlogStructure[] = [
           "https://a16z.com/wp-content/uploads/2023/05/Rajko-Radovanovic-400x400.png",
       },
     ],
+    time: "5 minute read",
   },
   {
     title: "(Sequoia) The New Language Model Stack",
@@ -176,6 +185,7 @@ const blogContent: BlogStructure[] = [
           "https://www.sequoiacap.com/wp-content/uploads/sites/6/2022/01/211118_clifford_sequoia-laurenreeder_DSF9377.jpg?resize=880,880",
       },
     ],
+    time: "4 minute read",
   },
 ];
 
