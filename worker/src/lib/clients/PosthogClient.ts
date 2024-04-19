@@ -5,7 +5,6 @@ export class PosthogClient {
   private readonly posthog: PostHog;
 
   constructor(apiKey: string, posthogHost: string | null = null) {
-    console.log(posthogHost);
     this.posthog = new PostHog(apiKey, {
       host: posthogHost ?? "https://app.posthog.com",
     });
