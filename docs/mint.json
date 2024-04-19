@@ -158,10 +158,14 @@
       ]
     },
     {
+      "group": "User",
+      "pages": ["rest/user/post-v1userquery"]
+    },
+    {
       "group": "Request",
       "pages": [
         "rest/request/post-v1requestquery",
-        "rest/user/post-v1userquery"
+        "rest/request/post-v1request-feedback"
       ]
     }
   ],
