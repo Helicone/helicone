@@ -19,7 +19,7 @@ export interface UserQueryParams {
 }
 
 @Route("v1/user")
-@Tags("Request")
+@Tags("User")
 @Security("api_key")
 export class UserController extends Controller {
   @Post("query")

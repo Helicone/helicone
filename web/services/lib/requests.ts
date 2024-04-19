@@ -1,5 +1,6 @@
 import Cookies from "js-cookie";
 import { SUPABASE_AUTH_TOKEN } from "../../lib/constants";
+import { getJawnClient } from "../../lib/clients/jawn";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
@@ -9,26 +10,18 @@ export const updateRequestFeedback = async (
   requestId: string,
   rating: boolean
 ) => {
-  const authFromCookie = Cookies.get(SUPABASE_AUTH_TOKEN);
-  if (!authFromCookie) {
-    console.error("No auth token found in cookie");
-    return;
-  }
-  const decodedCookie = decodeURIComponent(authFromCookie);
-  const parsedCookie = JSON.parse(decodedCookie);
-  const jwtToken = parsedCookie[0];
+  const jawn = getJawnClient();
 
-  return fetch(`${BASE_PATH}/feedback`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "helicone-jwt": jwtToken,
-    },
-    body: JSON.stringify({
-      "helicone-id": requestId,
-      rating: rating,
-    }),
-  });
+  return (
+    await jawn.POST("/v1/request/{requestId}/feedback", {
+      params: {
+        path: { requestId },
+      },
+      body: {
+        rating,
+      },
+    })
+  ).response;
 };
 
 export const addRequestLabel = async (

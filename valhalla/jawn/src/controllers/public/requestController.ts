@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Example,
+  Path,
   Post,
   Request,
   Route,
@@ -67,5 +68,27 @@ export class RequestController extends Controller {
       this.setStatus(200); // set return status 201
     }
     return requests;
+  }
+
+  @Post("/{requestId}/feedback")
+  public async feedbackRequest(
+    @Body()
+    requestBody: { rating: boolean },
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() requestId: string
+  ): Promise<Result<null, string>> {
+    const reqManager = new RequestManager(request.authParams);
+
+    const requestFeedback = await reqManager.feedbackRequest(
+      requestId,
+      requestBody.rating
+    );
+    if (requestFeedback.error) {
+      console.log(requestFeedback.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200); // set return status 201
+    }
+    return requestFeedback;
   }
 }
