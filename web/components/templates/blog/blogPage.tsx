@@ -33,11 +33,11 @@ const BlogPage = (props: BlogPageProps) => {
               return (
                 <Link
                   id="featured"
-                  className="flex items-start gap-8 w-full hover:bg-sky-50 rounded-lg p-8 col-span-2"
+                  className="flex flex-col md:flex-row items-start gap-8 w-full hover:bg-sky-50 rounded-lg p-8 col-span-2"
                   href={blog.href}
                   key={i}
                 >
-                  <div className="w-[36rem] h-full rounded-lg flex flex-col space-y-4 text-left">
+                  <div className="w-full md:w-[36rem] h-full rounded-lg flex flex-col space-y-4 text-left order-2 md:order-1">
                     <div className="flex items-center gap-2">
                       <span className="bg-blue-50 text-blue-700 ring-blue-200 w-max items-center rounded-lg px-2 py-1 -my-1 text-sm font-medium ring-1 ring-inset">
                         /{blog.badgeText.toLowerCase()}
@@ -80,7 +80,7 @@ const BlogPage = (props: BlogPageProps) => {
                     style={{
                       objectFit: "cover",
                     }}
-                    className="rounded-lg h-96 w-full max-w-[36rem] border border-gray-300"
+                    className="rounded-lg h-full md:h-96 w-full max-w-[36rem] border border-gray-300 order-1 md:order-2"
                   />
                 </Link>
               );
@@ -88,7 +88,7 @@ const BlogPage = (props: BlogPageProps) => {
               return (
                 <Link
                   id="featured"
-                  className="flex flex-col gap-6 w-full hover:bg-sky-50 rounded-lg p-8 col-span-1"
+                  className="flex flex-col gap-6 w-full hover:bg-sky-50 rounded-lg p-8 col-span-2 md:col-span-1"
                   href={blog.href}
                   key={i}
                 >
