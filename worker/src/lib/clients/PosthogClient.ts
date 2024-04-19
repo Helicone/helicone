@@ -28,7 +28,6 @@ export class PosthogClient {
     } catch (error: any) {
       console.error(`Error capturing PostHog event: ${error.message}`);
     }
-    console.log("done");
   }
 }
 
