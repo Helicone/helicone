@@ -1,6 +1,6 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import {
   TimeInterval,
@@ -108,9 +108,169 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     searchParams.get("filter") ?? null
   );
 
+  const [page, setPage] = useState<number>(currentPage);
+  const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
+  const [open, setOpen] = useState(false);
+  const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
+  const [selectedData, setSelectedData] = useState<
+    NormalizedRequest | undefined
+  >(undefined);
+  function encodeFilter(filter: UIFilterRow): string {
+    return `${filterMap[filter.filterMapIdx].label}:${
+      filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label
+    }:${filter.value}`;
+  }
+
+  const getTimeFilter = () => {
+    const currentTimeFilter = searchParams.get("t");
+    const tableName = getTableName(isCached);
+
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      const [_, start, end] = currentTimeFilter.split("_");
+
+      const filter: FilterNode = {
+        left: {
+          [tableName]: {
+            created_at: {
+              gte: new Date(start).toISOString(),
+            },
+          },
+        },
+        operator: "and",
+        right: {
+          [tableName]: {
+            created_at: {
+              lte: new Date(end).toISOString(),
+            },
+          },
+        },
+      };
+      return filter;
+    } else {
+      return {
+        [tableName]: {
+          created_at: {
+            gte: getTimeIntervalAgo(
+              (searchParams.get("t") as TimeInterval) || "24h"
+            ).toISOString(),
+          },
+        },
+      };
+    }
+  };
+
+  //convert this using useCallback
+  const getAdvancedFilters = useCallback(() => {
+    try {
+      const currentAdvancedFilters = searchParams.get("filters");
+
+      if (currentAdvancedFilters) {
+        const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
+        const decodedFilters = filters
+          .split("|")
+          .map(decodeFilter)
+          .filter((filter) => filter !== null) as UIFilterRow[];
+
+        return decodedFilters;
+      }
+    } catch (error) {
+      console.error("Error decoding advanced filters:", error);
+    }
+    return [];
+  }, [searchParams]);
+
+  function decodeFilter(encoded: string): UIFilterRow | null {
+    try {
+      const parts = encoded.split(":");
+      if (parts.length !== 3) return null;
+      const filterLabel = decodeURIComponent(parts[0]);
+      const operator = decodeURIComponent(parts[1]);
+      const value = decodeURIComponent(parts[2]);
+
+      const filterMapIdx = filterMap.findIndex(
+        (f) => f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
+      );
+      const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
+        (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
+      );
+
+      if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
+
+      return { filterMapIdx, operatorIdx, value };
+    } catch (error) {
+      console.error("Error decoding filter:", error);
+      return null;
+    }
+  }
+
+  const getTimeRange = () => {
+    const currentTimeFilter = searchParams.get("t");
+    let range: TimeFilter;
+
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      const start = currentTimeFilter.split("_")[1]
+        ? new Date(currentTimeFilter.split("_")[1])
+        : getTimeIntervalAgo("24h");
+      const end = new Date(currentTimeFilter.split("_")[2] || new Date());
+      range = {
+        start,
+        end,
+      };
+    } else {
+      range = {
+        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "24h"),
+        end: new Date(),
+      };
+    }
+    return range;
+  };
+
+  const [fineTuneModalOpen, setFineTuneModalOpen] = useState<boolean>(false);
+  const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
+  const [timeRange, setTimeRange] = useState<TimeFilter>(getTimeRange());
+
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
+
+  const router = useRouter();
+
+  const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
+
+  const sortLeaf: SortLeafRequest = getSortLeaf(
+    sort.sortKey,
+    sort.sortDirection,
+    sort.isCustomProperty,
+    isCached
+  );
+
+  const {
+    count,
+    isDataLoading,
+    isCountLoading,
+    requests,
+    properties,
+    refetch,
+    filterMap,
+    searchPropertyFilters,
+    remove,
+    filter: builtFilter,
+  } = useRequestsPageV2(
+    page,
+    currentPageSize,
+    debouncedAdvancedFilter,
+    {
+      left: timeFilter,
+      operator: "and",
+      right: "all",
+    },
+    sortLeaf,
+    isCached,
+    isLive
+  );
+
   // set the initial selected data on component load
   useEffect(() => {
-    if (initialRequestId) {
+    if (initialRequestId && selectedData === undefined) {
+      console.log(initialRequestId);
       const fetchRequest = async () => {
         const response = await jawn.POST("/v1/request/query", {
           body: {
@@ -167,173 +327,13 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   }, [initialRequestId]);
 
-  const [page, setPage] = useState<number>(currentPage);
-  const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
-  const [open, setOpen] = useState(false);
-  const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
-  const [selectedData, setSelectedData] = useState<
-    NormalizedRequest | undefined
-  >(undefined);
-  function encodeFilter(filter: UIFilterRow): string {
-    return `${filterMap[filter.filterMapIdx].label}:${
-      filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label
-    }:${filter.value}`;
-  }
-
-  const getTimeFilter = () => {
-    const currentTimeFilter = searchParams.get("t");
-    const tableName = getTableName(isCached);
-
-    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
-      const [_, start, end] = currentTimeFilter.split("_");
-
-      const filter: FilterNode = {
-        left: {
-          [tableName]: {
-            created_at: {
-              gte: new Date(start).toISOString(),
-            },
-          },
-        },
-        operator: "and",
-        right: {
-          [tableName]: {
-            created_at: {
-              lte: new Date(end).toISOString(),
-            },
-          },
-        },
-      };
-      return filter;
-    } else {
-      return {
-        [tableName]: {
-          created_at: {
-            gte: getTimeIntervalAgo(
-              (searchParams.get("t") as TimeInterval) || "24h"
-            ).toISOString(),
-          },
-        },
-      };
-    }
-  };
-
-  const getAdvancedFilters = (): UIFilterRow[] => {
-    try {
-      const currentAdvancedFilters = searchParams.get("filters");
-
-      if (currentAdvancedFilters) {
-        const filters = decodeURIComponent(currentAdvancedFilters).slice(1, -1);
-        const decodedFilters = filters
-          .split("|")
-          .map(decodeFilter)
-          .filter((filter) => filter !== null) as UIFilterRow[];
-
-        return decodedFilters;
-      }
-    } catch (error) {
-      console.error("Error decoding advanced filters:", error);
-    }
-    return [];
-  };
-
-  function decodeFilter(encoded: string): UIFilterRow | null {
-    try {
-      const parts = encoded.split(":");
-      if (parts.length !== 3) return null;
-      const filterLabel = decodeURIComponent(parts[0]);
-      const operator = decodeURIComponent(parts[1]);
-      const value = decodeURIComponent(parts[2]);
-
-      const filterMapIdx = filterMap.findIndex((f) => f.label === filterLabel);
-      const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
-        (o) => o.label === operator
-      );
-
-      if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
-
-      return { filterMapIdx, operatorIdx, value };
-    } catch (error) {
-      console.error("Error decoding filter:", error);
-      return null;
-    }
-  }
-
-  const getTimeRange = () => {
-    const currentTimeFilter = searchParams.get("t");
-    let range: TimeFilter;
-
-    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
-      const start = currentTimeFilter.split("_")[1]
-        ? new Date(currentTimeFilter.split("_")[1])
-        : getTimeIntervalAgo("24h");
-      const end = new Date(currentTimeFilter.split("_")[2] || new Date());
-      range = {
-        start,
-        end,
-      };
-    } else {
-      range = {
-        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "24h"),
-        end: new Date(),
-      };
-    }
-    return range;
-  };
-
-  const [fineTuneModalOpen, setFineTuneModalOpen] = useState<boolean>(false);
-  const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
-  const [timeRange, setTimeRange] = useState<TimeFilter>(getTimeRange());
-
-  const [advancedFilters, setAdvancedFilters] =
-    useState<UIFilterRow[]>(getAdvancedFilters);
-
-  const router = useRouter();
-
-  const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
-
-  const sortLeaf: SortLeafRequest = getSortLeaf(
-    sort.sortKey,
-    sort.sortDirection,
-    sort.isCustomProperty,
-    isCached
-  );
-
-  const {
-    count,
-    isDataLoading,
-    isCountLoading,
-    requests,
-    properties,
-    refetch,
-    filterMap,
-    searchPropertyFilters,
-    remove,
-    filter: builtFilter,
-  } = useRequestsPageV2(
-    page,
-    currentPageSize,
-    debouncedAdvancedFilter,
-    {
-      left: timeFilter,
-      operator: "and",
-      right: "all",
-    },
-    sortLeaf,
-    isCached,
-    isLive
-  );
-
   useEffect(() => {
-    if (router.query.page) {
-      setPage(1);
-      router.replace({
-        pathname: router.pathname,
-        query: { ...router.query, page: 1 },
-      });
+    const currentAdvancedFilters = searchParams.get("filters");
+
+    if (filterMap && advancedFilters.length === 0 && currentAdvancedFilters) {
+      setAdvancedFilters(getAdvancedFilters());
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedAdvancedFilter]);
+  }, [filterMap, advancedFilters]);
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
@@ -422,14 +422,14 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     layoutFilterId?: string | null
   ) => {
     setAdvancedFilters(filters);
-    if (layoutFilterId === null) {
+    if (layoutFilterId === null || filters.length === 0) {
       searchParams.delete("filters");
     } else {
       const currentAdvancedFilters = encodeURIComponent(
         JSON.stringify(filters.map(encodeFilter).join("|"))
       );
 
-      searchParams.set("filters", currentAdvancedFilters ?? "");
+      searchParams.set("filters", JSON.stringify(currentAdvancedFilters));
     }
   };
 

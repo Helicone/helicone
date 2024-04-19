@@ -153,7 +153,8 @@ const DashboardPage = (props: DashboardPageProps) => {
       const currentAdvancedFilters = searchParams.get("filters");
 
       if (currentAdvancedFilters) {
-        const filters = decodeURIComponent(currentAdvancedFilters).slice(1, -1);
+        const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
+        console.log("filters", filters);
         const decodedFilters = filters
           .split("|")
           .map(decodeFilter)
@@ -217,16 +218,16 @@ const DashboardPage = (props: DashboardPageProps) => {
     filters: UIFilterRow[],
     layoutFilterId?: string | null
   ) => {
-    setAdvancedFilters(filters);
-    if (layoutFilterId === null) {
+    if (layoutFilterId === null || filters.length === 0) {
       searchParams.delete("filters");
     } else {
       const currentAdvancedFilters = encodeURIComponent(
         JSON.stringify(filters.map(encodeFilter).join("|"))
       );
 
-      searchParams.set("filters", currentAdvancedFilters ?? "");
+      searchParams.set("filters", JSON.stringify(currentAdvancedFilters));
     }
+    setAdvancedFilters(filters);
   };
 
   const metricsData: MetricsPanelProps["metric"][] = [
@@ -313,9 +314,11 @@ const DashboardPage = (props: DashboardPageProps) => {
       const operator = decodeURIComponent(parts[1]);
       const value = decodeURIComponent(parts[2]);
 
-      const filterMapIdx = filterMap.findIndex((f) => f.label === filterLabel);
+      const filterMapIdx = filterMap.findIndex(
+        (f) => f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
+      );
       const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
-        (o) => o.label === operator
+        (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
       );
 
       if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
