@@ -21,6 +21,31 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
   const jawn = useJawnClient();
   const [currentStep, setCurrentStep] = useState(0);
 
+  const renderStepArray = [
+    <div className="flex flex-col">
+      <div className="mt-2 flex flex-col min-h-[30vh] h-full bg-blue-200 items-center justify-center">
+        {prompts?.map((prompt) => (
+          <div key={prompt.id} className="flex flex-col gap-4">
+            <div>
+              {prompt.major_version}.{prompt.minor_version}
+            </div>
+
+            <pre className="whitespace-pre-wrap">
+              {JSON.stringify(prompt, null, 2)}
+            </pre>
+          </div>
+        ))}
+      </div>
+    </div>,
+    <div className="flex items-center space-x-2">Step 2: - Edit prompt</div>,
+    <div className="flex items-center space-x-2">
+      Step 3: - Select model and dataset
+    </div>,
+    <div className="flex items-center space-x-2">
+      Step 4: - Submit new prompt and run experiment
+    </div>,
+  ];
+
   return (
     <>
       <div className="w-full h-full flex flex-col space-y-8 relative">
@@ -55,27 +80,23 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
             {
               id: 0,
               name: "Choose Prompt",
-              description: "Select a prompt to run an experiment.",
             },
             {
               id: 1,
               name: "Edit Prompt",
-              description: "Edit the prompt to suit your experiment.",
             },
             {
               id: 2,
               name: "Select Model and Dataset",
-              description: "Configure the experiment",
             },
             {
               id: 3,
               name: "Confirm",
-              description: "Finalize and run experiment",
             },
           ]}
         />
         <div id="step-render" className="h-[200vh] w-full">
-          x
+          {renderStepArray[currentStep]}
         </div>
         <div
           id="step-inc"

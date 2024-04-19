@@ -8,7 +8,6 @@ interface StepActionsProps {
   steps: {
     id: number; // index at 0
     name: string;
-    description: string;
   }[];
 }
 
@@ -44,11 +43,11 @@ export default function StepActions(props: StepActionsProps) {
                     <span
                       className={clsx(
                         stepIdx !== 0 ? "lg:pl-9" : "",
-                        "flex items-start px-6 py-5 text-sm font-medium"
+                        "flex items-center px-6 py-5 text-sm font-medium"
                       )}
                     >
                       <span className="flex-shrink-0">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-600">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-600">
                           <CheckIcon
                             className="h-4 w-4 text-white"
                             aria-hidden="true"
@@ -57,9 +56,6 @@ export default function StepActions(props: StepActionsProps) {
                       </span>
                       <span className="ml-4 mt-0.5 flex min-w-0 flex-col text-left">
                         <span className="text-sm font-medium">{step.name}</span>
-                        <span className="text-xs font-medium text-gray-500 mt-0.5">
-                          {step.description}
-                        </span>
                       </span>
                     </span>
                   </button>
@@ -77,20 +73,17 @@ export default function StepActions(props: StepActionsProps) {
                     <span
                       className={clsx(
                         stepIdx !== 0 ? "lg:pl-9" : "",
-                        "flex items-start px-6 py-5 text-sm font-medium"
+                        "flex items-center px-6 py-5 text-sm font-medium"
                       )}
                     >
                       <span className="flex-shrink-0">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-sky-600">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-sky-600">
                           <span className="text-sky-600">{step.id + 1}</span>
                         </span>
                       </span>
                       <span className="ml-4 mt-0.5 flex min-w-0 flex-col text-left">
                         <span className="text-sm font-medium text-sky-600">
                           {step.name}
-                        </span>
-                        <span className="text-xs font-medium text-gray-500 mt-0.5">
-                          {step.description}
                         </span>
                       </span>
                     </span>
@@ -109,20 +102,17 @@ export default function StepActions(props: StepActionsProps) {
                     <span
                       className={clsx(
                         stepIdx !== 0 ? "lg:pl-9" : "",
-                        "flex items-start px-6 py-5 text-sm font-medium"
+                        "flex items-center px-6 py-5 text-sm font-medium"
                       )}
                     >
                       <span className="flex-shrink-0">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-gray-300">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-gray-300">
                           <span className="text-gray-500">{step.id + 1}</span>
                         </span>
                       </span>
                       <span className="ml-4 mt-0.5 flex min-w-0 flex-col text-left">
                         <span className="text-sm font-medium text-gray-500">
                           {step.name}
-                        </span>
-                        <span className="text-xs font-medium text-gray-500 mt-0.5">
-                          {step.description}
                         </span>
                       </span>
                     </span>
