@@ -14,7 +14,7 @@ import {
   Legend,
 } from "@tremor/react";
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { ModelMetric } from "../../../lib/api/models/models";
 import {
@@ -115,9 +115,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       : undefined
   );
 
-  const [currFilter, setCurrFilter] = useState(
-    searchParams.get("filter") ?? null
-  );
+  const [currFilter, setCurrFilter] = useState("");
 
   const getInterval = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -151,14 +149,23 @@ const DashboardPage = (props: DashboardPageProps) => {
   };
 
   const getAdvancedFilters = (): UIFilterRow[] => {
-    if (currentFilter) {
-      return currentFilter?.filter as UIFilterRow[];
+    try {
+      const currentAdvancedFilters = searchParams.get("filters");
+
+      if (currentAdvancedFilters) {
+        const filters = decodeURIComponent(currentAdvancedFilters).slice(1, -1);
+        const decodedFilters = filters
+          .split("|")
+          .map(decodeFilter)
+          .filter((filter) => filter !== null) as UIFilterRow[];
+
+        return decodedFilters;
+      }
+    } catch (error) {
+      console.error("Error decoding advanced filters:", error);
     }
     return [];
   };
-
-  const [advancedFilters, setAdvancedFilters] =
-    useState<UIFilterRow[]>(getAdvancedFilters);
 
   const [interval, setInterval] = useState<TimeInterval>(
     getInterval() as TimeInterval
@@ -167,12 +174,20 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [open, setOpen] = useState(false);
 
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
+
   const debouncedAdvancedFilters = useDebounce(advancedFilters, 500);
 
   const timeIncrement = getTimeInterval(timeFilter);
 
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
   const { setNotification } = useNotification();
+
+  function encodeFilter(filter: UIFilterRow): string {
+    return `${filterMap[filter.filterMapIdx].label}:${
+      filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label
+    }:${filter.value}`;
+  }
 
   const {
     metrics,
@@ -191,6 +206,13 @@ const DashboardPage = (props: DashboardPageProps) => {
     dbIncrement: timeIncrement,
   });
 
+  useEffect(() => {
+    if (filterMap) {
+      setAdvancedFilters(getAdvancedFilters());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterMap]);
+
   const onSetAdvancedFiltersHandler = (
     filters: UIFilterRow[],
     layoutFilterId?: string | null
@@ -199,7 +221,11 @@ const DashboardPage = (props: DashboardPageProps) => {
     if (layoutFilterId === null) {
       searchParams.delete("filter");
     } else {
-      searchParams.set("filter", layoutFilterId ?? "");
+      const currentAdvancedFilters = encodeURIComponent(
+        JSON.stringify(filters.map(encodeFilter).join("|"))
+      );
+
+      searchParams.set("filters", currentAdvancedFilters ?? "");
     }
   };
 
@@ -278,6 +304,28 @@ const DashboardPage = (props: DashboardPageProps) => {
       // target: "_self",
     };
   };
+
+  function decodeFilter(encoded: string): UIFilterRow | null {
+    try {
+      const parts = encoded.split(":");
+      if (parts.length !== 3) return null;
+      const filterLabel = decodeURIComponent(parts[0]);
+      const operator = decodeURIComponent(parts[1]);
+      const value = decodeURIComponent(parts[2]);
+
+      const filterMapIdx = filterMap.findIndex((f) => f.label === filterLabel);
+      const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
+        (o) => o.label === operator
+      );
+
+      if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
+
+      return { filterMapIdx, operatorIdx, value };
+    } catch (error) {
+      console.error("Error decoding filter:", error);
+      return null;
+    }
+  }
 
   // put this forEach inside of a useCallback to prevent unnecessary re-renders
   const getStatusCountsOverTime = useCallback(() => {
