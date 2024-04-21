@@ -1,10 +1,4 @@
-import Cookies from "js-cookie";
-import { SUPABASE_AUTH_TOKEN } from "../../lib/constants";
 import { getJawnClient } from "../../lib/clients/jawn";
-
-const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
-
-const API_BASE_PATH = process.env.NEXT_PUBLIC_API_BASE_PATH || "";
 
 export const updateRequestFeedback = async (
   requestId: string,

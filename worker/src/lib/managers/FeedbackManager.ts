@@ -1,14 +1,11 @@
-import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import { Env, hash } from "../..";
-import { RequestWrapper } from "../RequestWrapper";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";
-import { Result } from "../util/results";
-import { IHeliconeHeaders } from "../models/HeliconeHeaders";
-import { Valhalla } from "../db/valhalla";
+import { RequestWrapper } from "../RequestWrapper";
 import {
   DBQueryTimer,
   FREQUENT_PRECENT_LOGGING,
 } from "../util/loggers/DBQueryTimer";
+import { Result } from "../util/results";
 
 interface FeedbackRequestBodyV2 {
   "helicone-id": string;

@@ -5,6 +5,10 @@ import {
 import { dbExecute } from "../../shared/db/dbExecute";
 import { Result, err, ok, resultMap } from "../../shared/result";
 
+export function formatTimeString(timeString: string): string {
+  return new Date(timeString).toISOString().replace("Z", "");
+}
+
 export class VersionedRequestStore {
   constructor(private orgId: string) {}
 
@@ -101,6 +105,42 @@ export class VersionedRequestStore {
         properties: newVersion.properties,
       },
     ]);
+  }
+
+  async addPropertiesToLegacyTables(
+    request: InsertRequestResponseVersioned,
+    newProperties: { key: string; value: string }[]
+  ): Promise<Result<null, string>> {
+    const { error: e } = await clickhouseDb.dbInsertClickhouse(
+      "property_with_response_v1",
+      newProperties.map((p) => {
+        return {
+          ...request,
+          auth_hash: "",
+          property_key: p.key,
+          property_value: p.value,
+        };
+      })
+    );
+    if (e) {
+      console.error("Error inserting into clickhouse:", e);
+    }
+
+    await clickhouseDb.dbInsertClickhouse(
+      "properties_v3",
+      newProperties.map((p) => {
+        return {
+          id: 1,
+          request_id: request.request_id,
+          key: p.key,
+          value: p.value,
+          organization_id: request.organization_id,
+          created_at: formatTimeString(new Date().toISOString()),
+        };
+      })
+    );
+
+    return ok(null);
   }
 
   async addPropertyToRequest(

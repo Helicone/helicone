@@ -820,25 +820,6 @@ export class DBLoggable {
         console.error("Error upserting prompt", upsertResult.error);
         return err(JSON.stringify(upsertResult.error));
       }
-      const propResult = await db.queue.putRequestProperty(
-        requestResult.data.request.id,
-        [
-          {
-            key: "Helicone-Prompt-Id",
-            value: this.request.promptId,
-          },
-          {
-            key: "Helicone-Prompt-Version",
-            value: upsertResult.data.version.toString() ?? "",
-          },
-        ],
-        authParams.organizationId
-      );
-
-      if (propResult.error || !propResult.data) {
-        console.error("Error adding properties", propResult.error);
-        return err(JSON.stringify(propResult.error));
-      }
     }
 
     return ok(null);
