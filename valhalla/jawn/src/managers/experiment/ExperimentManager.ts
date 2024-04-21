@@ -1,7 +1,7 @@
 // src/users/usersService.ts
 import { NewExperimentParams } from "../../controllers/public/experimentController";
 import { supabaseServer } from "../../lib/db/supabase";
-import { Result, err, ok } from "../../lib/modules/result";
+import { Result, err, ok } from "../../lib/shared/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { BaseManager } from "../BaseManager";
 

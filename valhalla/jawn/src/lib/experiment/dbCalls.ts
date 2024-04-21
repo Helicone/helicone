@@ -1,6 +1,6 @@
 import { Json } from "../db/database.types";
 import { supabaseServer } from "../db/supabase";
-import { Result, err, ok } from "../modules/result";
+import { Result, err, ok } from "../shared/result";
 import { dbExecute } from "../shared/db/dbExecute";
 
 export interface ExperimentDB {

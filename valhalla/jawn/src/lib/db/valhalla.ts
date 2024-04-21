@@ -1,6 +1,6 @@
 import { Pool, QueryResult, PoolClient } from "pg";
 import { getEnvironment } from "../environment/get";
-import { PromiseGenericResult, err, ok } from "../modules/result";
+import { PromiseGenericResult, err, ok } from "../shared/result";
 import {
   ValhallaFeedback,
   ValhallaRequest,
