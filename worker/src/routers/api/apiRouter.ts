@@ -273,50 +273,26 @@ function getAPIRouterV1(
     async (
       { params: { id } },
       requestWrapper: RequestWrapper,
-      env: Env,
+      _env: Env,
       _ctx: ExecutionContext
     ) => {
-      const client = await createAPIClient(env, _ctx, requestWrapper);
-      const authParams = await client.db.getAuthParams();
-      if (authParams.error !== null) {
-        return client.response.unauthorized();
-      }
-
       interface Body {
         key: string;
         value: string;
       }
 
       const newProperty = await requestWrapper.getJson<Body>();
-      if (!newProperty) {
-        return client.response.newError("Request body is missing.", 400);
-      }
 
-      if (!newProperty.key) {
-        return client.response.newError(
-          "Invalid request body. 'key' is required.",
-          400
-        );
-      }
+      const auth = await requestWrapper.auth();
 
-      if (!newProperty.value) {
-        return client.response.newError(
-          "Invalid request body. 'value' is required.",
-          400
-        );
-      }
-
-      const res = await client.queue.putRequestProperty(
-        id,
-        [newProperty],
-        authParams.data.organizationId
-      );
-
-      if (res.error) {
-        return client.response.newError(res.error, 500);
-      }
-
-      return client.response.successJSON({ ok: "true" }, true);
+      return fetch(`https://api.helicone.ai/v1/request/${id}/feedback`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: JSON.stringify(auth.data) ?? "",
+        },
+        body: JSON.stringify(newProperty),
+      });
     }
   );
 

@@ -30,25 +30,18 @@ export const addRequestLabel = async (
   key: string,
   value: string
 ) => {
-  const authFromCookie = Cookies.get(SUPABASE_AUTH_TOKEN);
-  if (!authFromCookie) {
-    console.error("No auth token found in cookie");
-    return;
-  }
-  const decodedCookie = decodeURIComponent(authFromCookie);
-  const parsedCookie = JSON.parse(decodedCookie);
-  const jwtToken = parsedCookie[0];
-
-  return fetch(`${API_BASE_PATH}/request/${requestId}/property`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      "helicone-jwt": jwtToken,
-      "helicone-org-id": orgId,
-    },
-    body: JSON.stringify({
-      key,
-      value,
-    }),
-  });
+  const jawn = getJawnClient(orgId);
+  return (
+    await jawn.PUT("/v1/request/{requestId}/property", {
+      body: {
+        key,
+        value,
+      },
+      params: {
+        path: {
+          requestId,
+        },
+      },
+    })
+  ).response;
 };
