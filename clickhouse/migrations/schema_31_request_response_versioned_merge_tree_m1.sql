@@ -22,9 +22,7 @@ CREATE TABLE IF NOT EXISTS default.request_response_versioned (
     `properties` Map(LowCardinality(String), String) CODEC(ZSTD(1)),
     `scores` Map(LowCardinality(String), Int64) CODEC(ZSTD(1)),
     INDEX idx_properties_key mapKeys(properties) TYPE bloom_filter(0.01) GRANULARITY 1,
-    INDEX idx_properties_value mapValues(properties) TYPE bloom_filter(0.01) GRANULARITY 1,
-    INDEX idx_scores_key mapKeys(scores) TYPE bloom_filter(0.01) GRANULARITY 1,
-    INDEX idx_scores_value mapValues(scores) TYPE bloom_filter(0.01) GRANULARITY 1
+    INDEX idx_properties_value mapValues(properties) TYPE bloom_filter(0.01) GRANULARITY 1
 ) ENGINE = VersionedCollapsingMergeTree(sign, version)
 PRIMARY KEY (
     organization_id,
