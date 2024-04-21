@@ -9,8 +9,14 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
+  "/v1/user/query": {
+    post: operations["GetUsers"];
+  };
   "/v1/request/query": {
     post: operations["GetRequests"];
+  };
+  "/v1/request/{requestId}/feedback": {
+    post: operations["FeedbackRequest"];
   };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];
@@ -45,6 +51,36 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    "SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
+      data: {
+          /** Format: double */
+          cost_usd: number;
+          user_id: string;
+          /** Format: double */
+          completion_tokens: number;
+          /** Format: double */
+          prompt_tokens: number;
+          /** Format: double */
+          count: number;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    ErrorResult_string_: {
+      /** @enum {number|null} */
+      data: null;
+      error: string;
+    };
+    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": components["schemas"]["SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"] | components["schemas"]["ErrorResult_string_"];
+    UserQueryParams: {
+      userIds?: string[];
+      timeFilter?: {
+        /** Format: double */
+        endTimeUnixSeconds: number;
+        /** Format: double */
+        startTimeUnixSeconds: number;
+      };
+    };
 Json: JsonObject;
     /** @enum {string} */
     Provider: "OPENAI" | "ANTHROPIC" | "TOGETHERAI" | "GROQ" | "CUSTOM";
@@ -162,11 +198,6 @@ Json: JsonObject;
       data: components["schemas"]["HeliconeRequest"][];
       /** @enum {number|null} */
       error: null;
-    };
-    ErrorResult_string_: {
-      /** @enum {number|null} */
-      data: null;
-      error: string;
     };
     "Result_HeliconeRequest-Array.string_": components["schemas"]["SuccessResult_HeliconeRequest-Array_"] | components["schemas"]["ErrorResult_string_"];
     /** @description Make all properties in T optional */
@@ -422,6 +453,13 @@ Json: JsonObject;
       isCached?: boolean;
       includeInputs?: boolean;
     };
+    SuccessResult_null_: {
+      /** @enum {number|null} */
+      data: null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_null.string_": components["schemas"]["SuccessResult_null_"] | components["schemas"]["ErrorResult_string_"];
     PromptsResult: {
       id: string;
       user_defined_id: string;
@@ -489,13 +527,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_PromptVersionResult-Array.string_": components["schemas"]["SuccessResult_PromptVersionResult-Array_"] | components["schemas"]["ErrorResult_string_"];
-    SuccessResult_null_: {
-      /** @enum {number|null} */
-      data: null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_null.string_": components["schemas"]["SuccessResult_null_"] | components["schemas"]["ErrorResult_string_"];
     NewDatasetParams: {
       datasetName: string;
       requestIds: string[];
@@ -545,6 +576,21 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  GetUsers: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_"];
+        };
+      };
+    };
+  };
   GetRequests: {
     /** @description Request query filters */
     requestBody: {
@@ -568,6 +614,28 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
+        };
+      };
+    };
+  };
+  FeedbackRequest: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          rating: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
