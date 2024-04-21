@@ -15,41 +15,6 @@ import { initSentry } from "./utils/injectSentry";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
 import { tokenRouter } from "./lib/routers/tokenRouter";
 
-class SetOnce {
-  private _values: any = {};
-  private _isSet: any = {};
-
-  constructor() {
-    return new Proxy(this, {
-      set: (target, prop, value) => {
-        if (Reflect.has(target._isSet, prop) && target._isSet[prop]) {
-          throw new Error(
-            `Property ${String(prop)} is already set and cannot be modified.`
-          );
-        }
-        target._values[prop] = value;
-        target._isSet[prop] = true;
-        return true; // indicate success
-      },
-      get: (target, prop) => {
-        if (Reflect.has(target._values, prop)) {
-          return target._values[prop];
-        }
-        return (target as any)[prop]; // default behavior
-      },
-    });
-  }
-}
-
-class Example extends SetOnce {
-  public name?: string;
-  public age?: number;
-}
-
-const example = new Example();
-example.name = "John";
-example.name = "Johnz";
-
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
 
