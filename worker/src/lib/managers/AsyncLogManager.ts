@@ -84,7 +84,8 @@ export async function logAsync(
         supabase
       ),
     },
-    env.S3_ENABLED ?? "true"
+    env.S3_ENABLED ?? "true",
+    heliconeHeaders
   );
 
   if (logError !== null) {
