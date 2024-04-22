@@ -1,6 +1,6 @@
 // src/users/usersController.ts
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
-import { Result, err, ok } from "../../lib/modules/result";
+import { Result, err, ok } from "../../lib/shared/result";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { DatasetManager } from "../../managers/dataset/DatasetManager";
 import { JawnAuthenticatedRequest } from "../../types/request";

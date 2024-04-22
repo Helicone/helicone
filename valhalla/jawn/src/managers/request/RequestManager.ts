@@ -2,7 +2,7 @@
 import { RequestQueryParams } from "../../controllers/public/requestController";
 import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
-import { Result, err, ok } from "../../lib/modules/result";
+import { Result, err, ok } from "../../lib/shared/result";
 import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequestStore";
 import {
   HeliconeRequest,
