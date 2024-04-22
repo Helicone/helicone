@@ -18,7 +18,7 @@ export const costs: ModelRow[] = [
   },
   {
     model: {
-      operator: "includes",
+      operator: "equals",
       value: "gemini-1.0-pro-vision-001",
     },
     cost: {
