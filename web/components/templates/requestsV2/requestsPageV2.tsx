@@ -320,7 +320,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       const currentAdvancedFilters = searchParams.get("filters");
 
       if (currentAdvancedFilters) {
-        const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
+        const filters = decodeURIComponent(currentAdvancedFilters).slice(1, -1);
         const decodedFilters = filters
           .split("|")
           .map(decodeFilter)
@@ -424,11 +424,12 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     if (layoutFilterId === null || filters.length === 0) {
       searchParams.delete("filters");
     } else {
-      const currentAdvancedFilters = encodeURIComponent(
-        JSON.stringify(filters.map(encodeFilter).join("|"))
-      );
+      const currentAdvancedFilters = filters.map(encodeFilter).join("|");
 
-      searchParams.set("filters", JSON.stringify(currentAdvancedFilters));
+      searchParams.set(
+        "filters",
+        `"${encodeURIComponent(currentAdvancedFilters)}"`
+      );
     }
   };
 
