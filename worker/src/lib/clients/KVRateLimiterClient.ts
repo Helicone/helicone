@@ -110,8 +110,6 @@ export async function checkRateLimit(
   const currentQuota =
     relevantTimestamps.reduce((acc, x) => acc + x.unit, 0) * 100;
 
-  console.log("currentQuota", currentQuota);
-  console.log("quota", quota);
   const remaining = Math.max(0, quota - currentQuota);
 
   const reset = Math.ceil(
@@ -159,7 +157,6 @@ export async function updateRateLimitCounter(
       unit: 1,
     });
   } else if (props.rateLimitOptions.unit === "cents") {
-    console.log("saving dollar", props.cost);
     prunedTimestamps.push({
       timestamp: now,
       unit: props.cost,
