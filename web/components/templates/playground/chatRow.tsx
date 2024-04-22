@@ -39,7 +39,7 @@ export const hasImage = (content: string | any[] | null) => {
   return false;
 };
 
-const PrettyInput = ({
+export const PrettyInput = ({
   keyName,
   selectedProperties,
 }: {

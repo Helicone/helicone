@@ -16,6 +16,7 @@ import { AreaChartUsageExample, DUMMY_DATA } from "./dummyChart";
 import StyledAreaChart from "../../dashboard/styledAreaChart";
 import { SimpleTable } from "../../../shared/table/simpleTable";
 import TableFooter from "../../requestsV2/tableFooter";
+import { PrettyInput } from "../../playground/chatRow";
 
 interface PromptIdPageProps {
   id: string;
