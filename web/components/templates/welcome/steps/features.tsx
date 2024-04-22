@@ -70,7 +70,7 @@ const featureSet = [
   {
     title: "GraphQL",
     subtitle: "Fetch and manage your data",
-    description: `Helicone provides a GraphQL API to fetch and manage your data. You can use this to:
+    description: `Helicone provides a REST API to fetch and manage your data. You can use this to:
 
     - Fetch your requests and metrics
     - Fetch your users and their metrics
