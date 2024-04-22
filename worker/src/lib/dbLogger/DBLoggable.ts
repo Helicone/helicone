@@ -31,6 +31,11 @@ import {
 } from "./imageParsers/parserMapper";
 import { TemplateWithInputs } from "../../api/lib/promptHelpers";
 import { ImageModelParsingResponse } from "./imageParsers/core/parsingResponse";
+import {
+  HeliconeRequestResponseToPosthog,
+  PosthogClient,
+} from "../clients/PosthogClient";
+import { costOfPrompt } from "../../../../costs/src/index";
 
 export interface DBLoggableProps {
   response: {
@@ -619,7 +624,8 @@ export class DBLoggable {
       queue: RequestResponseStore;
       requestResponseManager: RequestResponseManager;
     },
-    S3_ENABLED: Env["S3_ENABLED"]
+    S3_ENABLED: Env["S3_ENABLED"],
+    requestHeaders?: HeliconeHeaders
   ): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
@@ -822,7 +828,73 @@ export class DBLoggable {
       }
     }
 
+    if (requestHeaders?.posthogKey) {
+      const posthogClient = new PosthogClient(
+        requestHeaders.posthogKey,
+        requestHeaders.posthogHost
+      );
+      const reqBody = JSON.parse(this.request.bodyText ?? "{}") ?? null;
+      const heliconeRequestResponse: HeliconeRequestResponseToPosthog = {
+        model: model ?? "",
+        temperature: reqBody.temperature ?? 0.0,
+        n: reqBody.n ?? 0,
+        promptId: requestResult.data.request.prompt_id ?? "",
+        timeToFirstToken: responseResult.data.response.time_to_first_token ?? 0,
+        cost:
+          this.modelCost({
+            model: model ?? null,
+            sum_completion_tokens:
+              responseResult.data.response.completion_tokens ?? 0,
+            sum_prompt_tokens:
+              responseResult.data.response.completion_tokens ?? 0,
+            sum_tokens:
+              (responseResult.data.response.completion_tokens ?? 0) +
+              (responseResult.data.response.prompt_tokens ?? 0),
+            provider: requestResult.data.request.provider ?? "",
+          }) ?? 0,
+        provider: requestResult.data.request.provider ?? "",
+        path: requestResult.data.request.path ?? "",
+        completetionTokens: responseResult.data.response.completion_tokens ?? 0,
+        promptTokens: responseResult.data.response.prompt_tokens ?? 0,
+        totalTokens:
+          (responseResult.data.response.completion_tokens ?? 0) +
+          (responseResult.data.response.prompt_tokens ?? 0),
+        userId: requestResult.data.request.user_id ?? "",
+        countryCode: requestResult.data.request.country_code ?? "",
+        requestBodySize:
+          requestResult.data.request.body?.toString().length ?? 0,
+        responseBodySize:
+          responseResult.data.response.body?.toString().length ?? 0,
+        delayMs: responseResult.data.response.delay_ms ?? 0,
+      };
+
+      await posthogClient.captureEvent(
+        "helicone_request_response",
+        heliconeRequestResponse
+      );
+    }
+
     return ok(null);
+  }
+
+  modelCost(modelRow: {
+    model: string;
+    provider: string;
+    sum_prompt_tokens: number;
+    sum_completion_tokens: number;
+    sum_tokens: number;
+  }): number {
+    const model = modelRow.model;
+    const promptTokens = modelRow.sum_prompt_tokens;
+    const completionTokens = modelRow.sum_completion_tokens;
+    return (
+      costOfPrompt({
+        model,
+        promptTokens,
+        completionTokens,
+        provider: modelRow.provider,
+      }) ?? 0
+    );
   }
 }
 
