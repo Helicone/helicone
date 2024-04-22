@@ -8,6 +8,7 @@ interface StepActionsProps {
   steps: {
     id: number; // index at 0
     name: string;
+    description?: string;
   }[];
 }
 
@@ -56,6 +57,11 @@ export default function StepActions(props: StepActionsProps) {
                       </span>
                       <span className="ml-4 mt-0.5 flex min-w-0 flex-col text-left">
                         <span className="text-sm font-medium">{step.name}</span>
+                        {step.description && (
+                          <span className="text-xs text-gray-500">
+                            {step.description}
+                          </span>
+                        )}
                       </span>
                     </span>
                   </button>
@@ -82,9 +88,12 @@ export default function StepActions(props: StepActionsProps) {
                         </span>
                       </span>
                       <span className="ml-4 mt-0.5 flex min-w-0 flex-col text-left">
-                        <span className="text-sm font-medium text-sky-600">
-                          {step.name}
-                        </span>
+                        <span className="text-sm font-medium">{step.name}</span>
+                        {step.description && (
+                          <span className="text-xs text-gray-500">
+                            {step.description}
+                          </span>
+                        )}
                       </span>
                     </span>
                   </button>
@@ -111,9 +120,12 @@ export default function StepActions(props: StepActionsProps) {
                         </span>
                       </span>
                       <span className="ml-4 mt-0.5 flex min-w-0 flex-col text-left">
-                        <span className="text-sm font-medium text-gray-500">
-                          {step.name}
-                        </span>
+                        <span className="text-sm font-medium">{step.name}</span>
+                        {step.description && (
+                          <span className="text-xs text-gray-500">
+                            {step.description}
+                          </span>
+                        )}
                       </span>
                     </span>
                   </button>
