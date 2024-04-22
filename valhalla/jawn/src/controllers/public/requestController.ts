@@ -11,7 +11,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { Result } from "../../lib/modules/result";
+import { Result } from "../../lib/shared/result";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { HeliconeRequest } from "../../lib/stores/request/request";

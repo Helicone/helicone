@@ -10,7 +10,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { Result, err, ok } from "../../lib/modules/result";
+import { Result, err, ok } from "../../lib/shared/result";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { HeliconeRequest } from "../../lib/stores/request/request";
