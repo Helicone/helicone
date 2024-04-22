@@ -48,7 +48,7 @@ const features = [
   {
     name: "Exporting.",
     description:
-      "Extract, transform, and load your data using our GraphQL API, webhooks, and more.",
+      "Extract, transform, and load your data using our REST API, webhooks, and more.",
     icon: FolderArrowDownIcon,
   },
 ];
