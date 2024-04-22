@@ -159,50 +159,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   };
 
-  //convert this using useCallback
-  const getAdvancedFilters = useCallback(() => {
-    try {
-      const currentAdvancedFilters = searchParams.get("filters");
-
-      if (currentAdvancedFilters) {
-        const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
-        const decodedFilters = filters
-          .split("|")
-          .map(decodeFilter)
-          .filter((filter) => filter !== null) as UIFilterRow[];
-
-        return decodedFilters;
-      }
-    } catch (error) {
-      console.error("Error decoding advanced filters:", error);
-    }
-    return [];
-  }, [searchParams]);
-
-  function decodeFilter(encoded: string): UIFilterRow | null {
-    try {
-      const parts = encoded.split(":");
-      if (parts.length !== 3) return null;
-      const filterLabel = decodeURIComponent(parts[0]);
-      const operator = decodeURIComponent(parts[1]);
-      const value = decodeURIComponent(parts[2]);
-
-      const filterMapIdx = filterMap.findIndex(
-        (f) => f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
-      );
-      const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
-        (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
-      );
-
-      if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
-
-      return { filterMapIdx, operatorIdx, value };
-    } catch (error) {
-      console.error("Error decoding filter:", error);
-      return null;
-    }
-  }
-
   const getTimeRange = () => {
     const currentTimeFilter = searchParams.get("t");
     let range: TimeFilter;
@@ -270,7 +226,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   // set the initial selected data on component load
   useEffect(() => {
     if (initialRequestId && selectedData === undefined) {
-      console.log(initialRequestId);
       const fetchRequest = async () => {
         const response = await jawn.POST("/v1/request/query", {
           body: {
@@ -333,7 +288,51 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     if (filterMap && advancedFilters.length === 0 && currentAdvancedFilters) {
       setAdvancedFilters(getAdvancedFilters());
     }
-  }, [filterMap, advancedFilters]);
+  }, []);
+
+  //convert this using useCallback
+  const getAdvancedFilters = useCallback(() => {
+    function decodeFilter(encoded: string): UIFilterRow | null {
+      try {
+        const parts = encoded.split(":");
+        if (parts.length !== 3) return null;
+        const filterLabel = decodeURIComponent(parts[0]);
+        const operator = decodeURIComponent(parts[1]);
+        const value = decodeURIComponent(parts[2]);
+
+        const filterMapIdx = filterMap.findIndex(
+          (f) =>
+            f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
+        );
+        const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
+          (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
+        );
+
+        if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
+
+        return { filterMapIdx, operatorIdx, value };
+      } catch (error) {
+        console.error("Error decoding filter:", error);
+        return null;
+      }
+    }
+    try {
+      const currentAdvancedFilters = searchParams.get("filters");
+
+      if (currentAdvancedFilters) {
+        const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
+        const decodedFilters = filters
+          .split("|")
+          .map(decodeFilter)
+          .filter((filter) => filter !== null) as UIFilterRow[];
+
+        return decodedFilters;
+      }
+    } catch (error) {
+      console.error("Error decoding advanced filters:", error);
+    }
+    return [];
+  }, [searchParams, filterMap]);
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
