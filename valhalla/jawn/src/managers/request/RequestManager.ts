@@ -1,8 +1,9 @@
 // src/users/usersService.ts
 import { RequestQueryParams } from "../../controllers/public/requestController";
 import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
-import { supabaseServer } from "../../lib/db/supabase";
+import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { Result, err, ok } from "../../lib/modules/result";
+import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequestStore";
 import {
   HeliconeRequest,
   getRequests,
@@ -11,6 +12,33 @@ import {
 import { BaseManager } from "../BaseManager";
 
 export class RequestManager extends BaseManager {
+  private versionedRequestStore: VersionedRequestStore;
+  constructor(authParams: AuthParams) {
+    super(authParams);
+
+    this.versionedRequestStore = new VersionedRequestStore(
+      authParams.organizationId
+    );
+  }
+
+  async addPropertyToRequest(
+    requestId: string,
+    property: string,
+    value: string
+  ): Promise<Result<null, string>> {
+    const res = await this.versionedRequestStore.addPropertyToRequest(
+      requestId,
+      property,
+      value
+    );
+
+    if (res.error) {
+      return err(res.error);
+    }
+
+    return ok(null);
+  }
+
   private async waitForRequestAndResponse(
     heliconeId: string,
     organizationId: string
