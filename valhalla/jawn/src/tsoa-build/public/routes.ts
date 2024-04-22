@@ -22,7 +22,7 @@ const expressAuthenticationRecasted = expressAuthentication as (req: ExRequest, 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
-    "SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
+    "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
         "dataType": "refObject",
         "properties": {
             "data": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"cost_usd":{"dataType":"double","required":true},"user_id":{"dataType":"string","required":true},"completion_tokens":{"dataType":"double","required":true},"prompt_tokens":{"dataType":"double","required":true},"count":{"dataType":"double","required":true}}},"required":true},
@@ -31,7 +31,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ErrorResult_string_": {
+    "ResultError_string_": {
         "dataType": "refObject",
         "properties": {
             "data": {"dataType":"enum","enums":[null],"required":true},
@@ -42,7 +42,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"SuccessResult__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"},{"ref":"ErrorResult_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "UserQueryParams": {
@@ -195,7 +195,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "SuccessResult_HeliconeRequest-Array_": {
+    "ResultSuccess_HeliconeRequest-Array_": {
         "dataType": "refObject",
         "properties": {
             "data": {"dataType":"array","array":{"dataType":"refObject","ref":"HeliconeRequest"},"required":true},
@@ -206,7 +206,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Result_HeliconeRequest-Array.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"SuccessResult_HeliconeRequest-Array_"},{"ref":"ErrorResult_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_HeliconeRequest-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Partial_TextOperators_": {
@@ -383,7 +383,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "SuccessResult_null_": {
+    "ResultSuccess_null_": {
         "dataType": "refObject",
         "properties": {
             "data": {"dataType":"enum","enums":[null],"required":true},
@@ -394,7 +394,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Result_null.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"SuccessResult_null_"},{"ref":"ErrorResult_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_null_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "PromptsResult": {
@@ -409,7 +409,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "SuccessResult_PromptsResult-Array_": {
+    "ResultSuccess_PromptsResult-Array_": {
         "dataType": "refObject",
         "properties": {
             "data": {"dataType":"array","array":{"dataType":"refObject","ref":"PromptsResult"},"required":true},
@@ -420,7 +420,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Result_PromptsResult-Array.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"SuccessResult_PromptsResult-Array_"},{"ref":"ErrorResult_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_PromptsResult-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "PromptsQueryParams": {
@@ -448,7 +448,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "SuccessResult_PromptResult_": {
+    "ResultSuccess_PromptResult_": {
         "dataType": "refObject",
         "properties": {
             "data": {"ref":"PromptResult","required":true},
@@ -459,7 +459,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Result_PromptResult.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"SuccessResult_PromptResult_"},{"ref":"ErrorResult_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_PromptResult_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "PromptQueryParams": {
@@ -483,7 +483,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "SuccessResult_PromptVersionResult_": {
+    "ResultSuccess_PromptVersionResult_": {
         "dataType": "refObject",
         "properties": {
             "data": {"ref":"PromptVersionResult","required":true},
@@ -494,7 +494,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Result_PromptVersionResult.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"SuccessResult_PromptVersionResult_"},{"ref":"ErrorResult_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_PromptVersionResult_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "PromptCreateSubversionParams": {
@@ -505,7 +505,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "SuccessResult_PromptVersionResult-Array_": {
+    "ResultSuccess_PromptVersionResult-Array_": {
         "dataType": "refObject",
         "properties": {
             "data": {"dataType":"array","array":{"dataType":"refObject","ref":"PromptVersionResult"},"required":true},
@@ -516,7 +516,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Result_PromptVersionResult-Array.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"SuccessResult_PromptVersionResult-Array_"},{"ref":"ErrorResult_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_PromptVersionResult-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "NewDatasetParams": {
@@ -539,7 +539,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "SuccessResult___-Array_": {
+    "ResultSuccess___-Array_": {
         "dataType": "refObject",
         "properties": {
             "data": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{}},"required":true},
@@ -550,10 +550,10 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Result___-Array.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"SuccessResult___-Array_"},{"ref":"ErrorResult_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess___-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "SuccessResult__experimentId-string__": {
+    "ResultSuccess__experimentId-string__": {
         "dataType": "refObject",
         "properties": {
             "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"experimentId":{"dataType":"string","required":true}},"required":true},
@@ -564,7 +564,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Result__experimentId-string_.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"SuccessResult__experimentId-string__"},{"ref":"ErrorResult_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__experimentId-string__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "NewExperimentParams": {
