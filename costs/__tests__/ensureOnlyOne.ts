@@ -162,7 +162,7 @@ END
 WHEN (request_response_log.provider = 'GOOGLE') THEN (
   CASE
   WHEN (request_response_log.model ILIKE '%gemini-pro%') THEN 125 * request_response_log.prompt_tokens + 375 * request_response_log.completion_tokens
-WHEN (request_response_log.model ILIKE '%gemini-1.0-pro-vision-001%') THEN 125 * request_response_log.prompt_tokens + 375 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gemini-1.0-pro-vision-001') THEN 125 * request_response_log.prompt_tokens + 375 * request_response_log.completion_tokens
   ELSE 0
 END
 )
