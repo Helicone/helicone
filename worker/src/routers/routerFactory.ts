@@ -81,10 +81,10 @@ function addBaseRoutes(router: BaseRouter | BaseOpenAPIRouter): void {
     async (
       _: unknown,
       requestWrapper: RequestWrapper,
-      env: Env,
+      _env: Env,
       _ctx: ExecutionContext
     ) => {
-      return await handleFeedback(requestWrapper, env, _ctx);
+      return await handleFeedback(requestWrapper);
     }
   );
 
