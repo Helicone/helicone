@@ -7,6 +7,89 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"ResultSuccess_null_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultError_string_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_null.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_null_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"Record_string.number_": {
+				"properties": {},
+				"additionalProperties": {
+					"type": "number",
+					"format": "double"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"ScoreRequest": {
+				"properties": {
+					"request_id": {
+						"type": "string"
+					},
+					"organization_id": {
+						"type": "string"
+					},
+					"scores": {
+						"$ref": "#/components/schemas/Record_string.number_"
+					}
+				},
+				"required": [
+					"request_id",
+					"organization_id",
+					"scores"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
 				"properties": {
 					"data": {
@@ -49,26 +132,6 @@
 							null
 						],
 						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultError_string_": {
-				"properties": {
-					"data": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					},
-					"error": {
-						"type": "string"
 					}
 				},
 				"required": [
@@ -1263,40 +1326,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultSuccess_null_": {
-				"properties": {
-					"data": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_null.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_null_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
 			"PromptsResult": {
 				"properties": {
 					"id": {
@@ -1737,6 +1766,42 @@
 		"contact": {}
 	},
 	"paths": {
+		"/v1/webhook/score": {
+			"post": {
+				"operationId": "AddScores",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Webhook"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ScoreRequest"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/user/query": {
 			"post": {
 				"operationId": "GetUsers",

@@ -9,6 +9,9 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
+  "/v1/webhook/score": {
+    post: operations["AddScores"];
+  };
   "/v1/user/query": {
     post: operations["GetUsers"];
   };
@@ -54,6 +57,27 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    ResultSuccess_null_: {
+      /** @enum {number|null} */
+      data: null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultError_string_: {
+      /** @enum {number|null} */
+      data: null;
+      error: string;
+    };
+    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.number_": {
+      [key: string]: number;
+    };
+    ScoreRequest: {
+      request_id: string;
+      organization_id: string;
+      scores: components["schemas"]["Record_string.number_"];
+    };
     "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
       data: {
           /** Format: double */
@@ -68,11 +92,6 @@ export interface components {
         }[];
       /** @enum {number|null} */
       error: null;
-    };
-    ResultError_string_: {
-      /** @enum {number|null} */
-      data: null;
-      error: string;
     };
     "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": components["schemas"]["ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"] | components["schemas"]["ResultError_string_"];
     UserQueryParams: {
@@ -456,13 +475,6 @@ Json: JsonObject;
       isCached?: boolean;
       includeInputs?: boolean;
     };
-    ResultSuccess_null_: {
-      /** @enum {number|null} */
-      data: null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
     PromptsResult: {
       id: string;
       user_defined_id: string;
@@ -579,6 +591,21 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  AddScores: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScoreRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
   GetUsers: {
     requestBody: {
       content: {
