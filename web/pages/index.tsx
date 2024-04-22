@@ -10,14 +10,10 @@ import PublicMetaData from "../components/layout/public/publicMetaData";
 import HomePage from "../components/templates/home/homePage";
 
 export const Home = () => {
-  const router = useRouter();
-
-  const user = useUser();
-
-  if (user && user.email !== DEMO_EMAIL) {
-    router.push("/dashboard");
-    return <RedirectingScreen />;
-  }
+  // if (user && user.email !== DEMO_EMAIL) {
+  //   router.push("/dashboard");
+  //   return <RedirectingScreen />;
+  // }
 
   return (
     <>
@@ -27,7 +23,6 @@ export const Home = () => {
         }
         ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
       >
-        {/* <HomePageV2 /> */}
         <HomePage />
       </PublicMetaData>
     </>
@@ -52,6 +47,15 @@ export const getServerSideProps = async (
   const {
     data: { session },
   } = await supabase.auth.getSession();
+
+  if (session) {
+    return {
+      redirect: {
+        destination: "/dashboard",
+        permanent: false,
+      },
+    };
+  }
 
   return {
     props: {},
