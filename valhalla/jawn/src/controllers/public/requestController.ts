@@ -5,6 +5,7 @@ import {
   Example,
   Path,
   Post,
+  Put,
   Request,
   Route,
   Security,
@@ -82,6 +83,29 @@ export class RequestController extends Controller {
     const requestFeedback = await reqManager.feedbackRequest(
       requestId,
       requestBody.rating
+    );
+    if (requestFeedback.error) {
+      console.log(requestFeedback.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200); // set return status 201
+    }
+    return requestFeedback;
+  }
+
+  @Put("/{requestId}/property")
+  public async putProperty(
+    @Body()
+    requestBody: { key: string; value: string },
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() requestId: string
+  ): Promise<Result<null, string>> {
+    const reqManager = new RequestManager(request.authParams);
+
+    const requestFeedback = await reqManager.addPropertyToRequest(
+      requestId,
+      requestBody.key,
+      requestBody.value
     );
     if (requestFeedback.error) {
       console.log(requestFeedback.error);

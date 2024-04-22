@@ -1,16 +1,14 @@
-import { Result } from "../util/results";
-import { createClient } from "@clickhouse/client-web";
-import { WebClickHouseClient } from "@clickhouse/client-web/dist/client";
-import dateFormat from "dateformat";
+import { createClient, ClickHouseClient } from "@clickhouse/client";
+import { Result } from "../shared/result";
 
-export interface ClickhouseEnv {
+interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
 }
 
-export class ClickhouseClientWrapper {
-  private clickHouseClient: WebClickHouseClient;
+class ClickhouseClientWrapper {
+  private clickHouseClient: ClickHouseClient;
 
   constructor(env: ClickhouseEnv) {
     this.clickHouseClient = createClient({
@@ -48,29 +46,6 @@ export class ClickhouseClientWrapper {
     }
   }
 
-  async dbUpdateClickhouse(query: string): Promise<Result<string, string>> {
-    try {
-      const commandResult = await this.clickHouseClient.command({
-        query,
-        // Recommended for cluster usage to avoid situations
-        // where a query processing error occurred after the response code
-        // and HTTP headers were sent to the client.
-        // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
-        clickhouse_settings: {
-          wait_end_of_query: 1,
-        },
-      });
-
-      return { data: commandResult.query_id, error: null };
-    } catch (error: unknown) {
-      console.error("dbUpdateClickhouseError", error);
-      return {
-        data: null,
-        error: JSON.stringify(error),
-      };
-    }
-  }
-
   async dbQuery<T>(
     query: string,
     parameters: (number | string | boolean | Date)[]
@@ -92,7 +67,7 @@ export class ClickhouseClientWrapper {
       });
       return { data: await queryResult.json<T[]>(), error: null };
     } catch (err) {
-      console.error("Error executing query: ", query, parameters);
+      console.error("Error executing Clickhouse query: ", query, parameters);
       console.error(err);
       return {
         data: null,
@@ -106,8 +81,11 @@ function paramsToValues(params: (number | string | boolean | Date)[]) {
   return params
     .map((p) => {
       if (p instanceof Date) {
-        //ex: 2023-05-27T08:21:26
-        return dateFormat(p, "yyyy-mm-dd HH:MM:ss", true);
+        return p
+          .toISOString()
+          .replace("T", " ")
+          .replace("Z", "")
+          .replace(/\.\d+$/, "");
       } else {
         return p;
       }
@@ -121,30 +99,6 @@ function paramsToValues(params: (number | string | boolean | Date)[]) {
 }
 
 type Nullable<T> = T | null;
-
-export interface RequestResponseLog {
-  response_id: Nullable<string>;
-  response_created_at: Nullable<string>;
-  latency: Nullable<number>;
-  status: Nullable<number>;
-  completion_tokens: Nullable<number>;
-  prompt_tokens: Nullable<number>;
-  model: Nullable<string>;
-  request_id: string;
-  request_created_at: string;
-  auth_hash: string;
-  user_id: Nullable<string>;
-  organization_id: string;
-  node_id: Nullable<string>;
-  job_id: Nullable<string>;
-  proxy_key_id: Nullable<string>;
-  threat: Nullable<boolean>;
-  time_to_first_token: Nullable<number>;
-  target_url: Nullable<string>;
-  request_ip: Nullable<string>;
-  provider: Nullable<string>;
-  country_code: Nullable<string>;
-}
 
 interface PropertiesV3 {
   id: number;
@@ -176,23 +130,17 @@ export interface PropertyWithResponseV1 {
   country_code: Nullable<string>;
 }
 
-export interface CacheHits {
-  request_id: string;
+interface DeleteRequestResponseVersioned {
   organization_id: string;
-  completion_tokens: Nullable<number>;
-  prompt_tokens: Nullable<number>;
-  latency: Nullable<number>;
-  model: string;
-  created_at: Nullable<string>;
   provider: Nullable<string>;
-  country_code: Nullable<string>;
+  model: string;
+  request_created_at: string;
+  request_id: string;
+  sign: -1;
+  version: number;
 }
 
-export interface RateLimitLog {
-  organization_id: string;
-}
-
-export interface RequestResponseVersioned {
+export interface InsertRequestResponseVersioned {
   response_id: Nullable<string>;
   response_created_at: Nullable<string>;
   latency: Nullable<number>;
@@ -210,18 +158,32 @@ export interface RequestResponseVersioned {
   provider: Nullable<string>;
   country_code: Nullable<string>;
   created_at?: string;
-  sign: number;
+  sign: 1;
   version: number;
   properties: Record<string, string>;
 }
+export type RequestResponseVersioned =
+  | InsertRequestResponseVersioned
+  | DeleteRequestResponseVersioned;
 
 export interface ClickhouseDB {
   Tables: {
     properties_v3: PropertiesV3;
-    request_response_log: RequestResponseLog;
     property_with_response_v1: PropertyWithResponseV1;
-    cache_hits: CacheHits;
-    rate_limit_log: RateLimitLog;
     request_response_versioned: RequestResponseVersioned;
   };
 }
+
+const { CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_HOST } = JSON.parse(
+  process.env.CLICKHOUSE_CREDS ?? "{}"
+) as {
+  CLICKHOUSE_USER?: string;
+  CLICKHOUSE_PASSWORD?: string;
+  CLICKHOUSE_HOST?: string;
+};
+
+export const clickhouseDb = new ClickhouseClientWrapper({
+  CLICKHOUSE_HOST: CLICKHOUSE_HOST ?? "http://localhost:18123",
+  CLICKHOUSE_USER: CLICKHOUSE_USER ?? "default",
+  CLICKHOUSE_PASSWORD: CLICKHOUSE_PASSWORD ?? "",
+});

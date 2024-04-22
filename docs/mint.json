@@ -165,7 +165,8 @@
       "group": "Request",
       "pages": [
         "rest/request/post-v1requestquery",
-        "rest/request/post-v1request-feedback"
+        "rest/request/post-v1request-feedback",
+        "rest/request/put-v1request-property"
       ]
     }
   ],

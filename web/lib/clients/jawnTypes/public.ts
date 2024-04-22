@@ -18,6 +18,9 @@ export interface paths {
   "/v1/request/{requestId}/feedback": {
     post: operations["FeedbackRequest"];
   };
+  "/v1/request/{requestId}/property": {
+    put: operations["PutProperty"];
+  };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];
   };
@@ -628,6 +631,29 @@ export interface operations {
       content: {
         "application/json": {
           rating: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  PutProperty: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          value: string;
+          key: string;
         };
       };
     };
