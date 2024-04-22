@@ -101,11 +101,7 @@
       "pages": [
         {
           "group": "Prompts",
-          "pages": [
-            "features/prompts/intro",
-            "features/prompts/quick-start",
-            "features/prompts/quick-start-async"
-          ]
+          "pages": ["features/prompts/intro", "features/prompts/quick-start"]
         },
         {
           "group": "Customer Portal",
@@ -158,8 +154,16 @@
       ]
     },
     {
+      "group": "User",
+      "pages": ["rest/user/post-v1userquery"]
+    },
+    {
       "group": "Request",
-      "pages": ["rest/request/post-v1requestquery"]
+      "pages": [
+        "rest/request/post-v1requestquery",
+        "rest/request/post-v1request-feedback",
+        "rest/request/put-v1request-property"
+      ]
     }
   ],
   "topbarLinks": [

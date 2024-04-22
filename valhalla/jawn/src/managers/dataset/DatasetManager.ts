@@ -11,7 +11,7 @@ import {
   PromptsResult,
 } from "../../controllers/public/promptController";
 import { supabaseServer } from "../../lib/db/supabase";
-import { Result, err, ok } from "../../lib/modules/result";
+import { Result, err, ok } from "../../lib/shared/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { buildFilterPostgres } from "../../lib/shared/filters/filters";

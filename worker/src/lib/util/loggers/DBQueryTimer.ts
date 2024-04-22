@@ -7,6 +7,7 @@ interface WithTimingParams {
 }
 
 interface DataDogConfig {
+  enabled: boolean;
   apiKey: string;
   endpoint: string;
 }
@@ -36,7 +37,7 @@ export class DBQueryTimer {
     const randomNumber = Math.random();
 
     // Log based on the percentage
-    if (randomNumber < percentLogging) {
+    if (this.dataDogConfig.enabled && randomNumber < percentLogging) {
       this.ctx.waitUntil(
         this.logDistributionMetric(timestamp, end - start, queryName)
       );

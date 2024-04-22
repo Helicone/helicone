@@ -59,6 +59,7 @@ export class APIClient {
     this.queue = new RequestResponseStore(
       createClient<Database>(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
       new DBQueryTimer(ctx, {
+        enabled: (env.DATADOG_ENABLED ?? "false") === "true",
         apiKey: env.DATADOG_API_KEY,
         endpoint: env.DATADOG_ENDPOINT,
       }),

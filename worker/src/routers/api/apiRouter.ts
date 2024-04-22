@@ -13,7 +13,6 @@ import { CustomerGet } from "../../api/routes/customer-portal/customer/get";
 import { ProviderKeyGet } from "../../api/routes/customer-portal/customer/provderKey/get";
 import { CustomerUsageGet } from "../../api/routes/customer-portal/customer/usage/get";
 import { PromptsGet } from "../../api/routes/prompts/get";
-import { AutoPromptInputs } from "../../api/routes/request/prompt/autoInputs";
 
 function getOpenAPIRouter(
   router: OpenAPIRouterType<
@@ -27,12 +26,6 @@ function getOpenAPIRouter(
   router.get("/v1/customer/:customerId/provider-key", ProviderKeyGet as any);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   router.get("/v1/customers", CustomerGet as any);
-  router.post(
-    "/v1/request/:requestId/prompt/:promptId/inputs",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    AutoPromptInputs as any
-  );
-
   router.get(
     "/v1/prompts",
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -273,50 +266,55 @@ function getAPIRouterV1(
     async (
       { params: { id } },
       requestWrapper: RequestWrapper,
-      env: Env,
+      _env: Env,
       _ctx: ExecutionContext
     ) => {
-      const client = await createAPIClient(env, _ctx, requestWrapper);
-      const authParams = await client.db.getAuthParams();
-      if (authParams.error !== null) {
-        return client.response.unauthorized();
-      }
-
       interface Body {
         key: string;
         value: string;
       }
 
       const newProperty = await requestWrapper.getJson<Body>();
-      if (!newProperty) {
-        return client.response.newError("Request body is missing.", 400);
+
+      const auth = await requestWrapper.auth();
+
+      if (auth.error) {
+        return new Response(auth.error, { status: 401 });
       }
 
-      if (!newProperty.key) {
-        return client.response.newError(
-          "Invalid request body. 'key' is required.",
-          400
-        );
+      if (auth.data?._type !== "bearer") {
+        return new Response("Invalid token type.", { status: 401 });
       }
 
-      if (!newProperty.value) {
-        return client.response.newError(
-          "Invalid request body. 'value' is required.",
-          400
-        );
-      }
-
-      const res = await client.queue.putRequestProperty(
-        id,
-        [newProperty],
-        authParams.data.organizationId
+      const result = await fetch(
+        `https://api.helicone.ai/v1/request/${id}/property`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: auth.data.token,
+          },
+          body: JSON.stringify(newProperty),
+        }
       );
 
-      if (res.error) {
-        return client.response.newError(res.error, 500);
+      if (!result.ok) {
+        return new Response(`error ${await result.text()}`, {
+          status: 500,
+        });
       }
 
-      return client.response.successJSON({ ok: "true" }, true);
+      return new Response(
+        JSON.stringify({
+          ok: "true",
+        }),
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
   );
 

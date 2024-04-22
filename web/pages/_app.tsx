@@ -51,7 +51,6 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const [supabaseClient] = useState(() => createBrowserSupabaseClient());
 
   const getLayout = Component.getLayout ?? ((page) => page);
-  const trackingEnabled = process.env.NEXT_PUBLIC_TRACKING_ENABLED || false;
 
   return (
     <>

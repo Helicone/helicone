@@ -9,7 +9,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { Result } from "../../lib/modules/result";
+import { Result } from "../../lib/shared/result";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { PromptManager } from "../../managers/prompt/PromptManager";
 import { JawnAuthenticatedRequest } from "../../types/request";

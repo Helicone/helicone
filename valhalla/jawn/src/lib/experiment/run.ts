@@ -1,5 +1,5 @@
 import { uuid } from "uuidv4";
-import { Result, err } from "../modules/result";
+import { Result, err } from "../shared/result";
 import { ExperimentType } from "./dbCalls";
 import { generateProxyKey } from "./tempProxyKey";
 import { supabaseServer } from "../db/supabase";

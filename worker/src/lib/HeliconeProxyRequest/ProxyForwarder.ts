@@ -293,6 +293,7 @@ export async function proxyForwarder(
         queue: new RequestResponseStore(
           createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
           new DBQueryTimer(ctx, {
+            enabled: (env.DATADOG_ENABLED ?? "false") === "true",
             apiKey: env.DATADOG_API_KEY,
             endpoint: env.DATADOG_ENDPOINT,
           }),
@@ -311,7 +312,8 @@ export async function proxyForwarder(
           supabase
         ),
       },
-      env.S3_ENABLED ?? "true"
+      env.S3_ENABLED ?? "true",
+      proxyRequest?.requestWrapper.heliconeHeaders
     );
 
     if (res.error !== null) {

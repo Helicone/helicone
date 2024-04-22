@@ -14,6 +14,7 @@ import { useRouter } from "next/router";
 import { LlmSchema } from "../../../lib/api/models/requestResponseModel";
 import ThemedModal from "../../shared/themed/themedModal";
 import { RenderWithPrettyInputKeys } from "../playground/chatRow";
+import { RenderImageWithPrettyInputKeys } from "../prompts/id/promptIdPage";
 
 export type Message = {
   id: string;
@@ -39,12 +40,14 @@ export const SingleChat = (props: {
     setExpanded: (expanded: boolean) => void;
   };
   selectedProperties?: Record<string, string>;
+  isHeliconeTemplate?: boolean;
 }) => {
   const {
     message,
     index,
     isLast,
     expandedProps: { expanded, setExpanded },
+    isHeliconeTemplate,
   } = props;
 
   const [showButton, setShowButton] = useState(true);
@@ -142,11 +145,27 @@ export const SingleChat = (props: {
   const renderOpenAIImage = (item: any) => {
     const imageUrl =
       typeof item.image_url === "string" ? item.image_url : item.image_url.url;
+    if (isHeliconeTemplate) {
+      return (
+        <RenderImageWithPrettyInputKeys
+          text={imageUrl}
+          selectedProperties={props.selectedProperties}
+        />
+      );
+    }
     return <img src={imageUrl} alt={""} width={600} height={600} />;
   };
 
   const renderClaudeImage = (item: any) => {
     const imageUrl = item.source.data;
+    if (isHeliconeTemplate) {
+      return (
+        <RenderImageWithPrettyInputKeys
+          text={imageUrl}
+          selectedProperties={props.selectedProperties}
+        />
+      );
+    }
     return <img src={imageUrl} alt={""} width={600} height={600} />;
   };
 
@@ -316,6 +335,7 @@ interface ChatProps {
   model: string;
   selectedProperties?: Record<string, string>;
   editable?: boolean;
+  isHeliconeTemplate?: boolean;
 }
 
 export const Chat = (props: ChatProps) => {
@@ -327,6 +347,7 @@ export const Chat = (props: ChatProps) => {
     model,
     selectedProperties,
     editable,
+    isHeliconeTemplate,
   } = props;
 
   const [open, setOpen] = useState(false);
@@ -405,6 +426,7 @@ export const Chat = (props: ChatProps) => {
                 }}
                 key={index}
                 selectedProperties={selectedProperties}
+                isHeliconeTemplate={isHeliconeTemplate}
               />
             );
           })}
@@ -441,6 +463,7 @@ export const Chat = (props: ChatProps) => {
                 }}
                 key={index}
                 selectedProperties={selectedProperties}
+                isHeliconeTemplate={isHeliconeTemplate}
               />
             );
           })}
@@ -464,6 +487,7 @@ export const Chat = (props: ChatProps) => {
             }}
             key={index}
             selectedProperties={selectedProperties}
+            isHeliconeTemplate={isHeliconeTemplate}
           />
         );
       });

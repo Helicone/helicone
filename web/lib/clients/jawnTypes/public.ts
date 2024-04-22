@@ -9,8 +9,17 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
+  "/v1/user/query": {
+    post: operations["GetUsers"];
+  };
   "/v1/request/query": {
     post: operations["GetRequests"];
+  };
+  "/v1/request/{requestId}/feedback": {
+    post: operations["FeedbackRequest"];
+  };
+  "/v1/request/{requestId}/property": {
+    put: operations["PutProperty"];
   };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];
@@ -45,6 +54,36 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
+      data: {
+          /** Format: double */
+          cost_usd: number;
+          user_id: string;
+          /** Format: double */
+          completion_tokens: number;
+          /** Format: double */
+          prompt_tokens: number;
+          /** Format: double */
+          count: number;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultError_string_: {
+      /** @enum {number|null} */
+      data: null;
+      error: string;
+    };
+    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": components["schemas"]["ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"] | components["schemas"]["ResultError_string_"];
+    UserQueryParams: {
+      userIds?: string[];
+      timeFilter?: {
+        /** Format: double */
+        endTimeUnixSeconds: number;
+        /** Format: double */
+        startTimeUnixSeconds: number;
+      };
+    };
 Json: JsonObject;
     /** @enum {string} */
     Provider: "OPENAI" | "ANTHROPIC" | "TOGETHERAI" | "GROQ" | "CUSTOM";
@@ -158,17 +197,12 @@ Json: JsonObject;
       asset_ids: string[] | null;
       asset_urls: components["schemas"]["Record_string.string_"] | null;
     };
-    "SuccessResult_HeliconeRequest-Array_": {
+    "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
       /** @enum {number|null} */
       error: null;
     };
-    ErrorResult_string_: {
-      /** @enum {number|null} */
-      data: null;
-      error: string;
-    };
-    "Result_HeliconeRequest-Array.string_": components["schemas"]["SuccessResult_HeliconeRequest-Array_"] | components["schemas"]["ErrorResult_string_"];
+    "Result_HeliconeRequest-Array.string_": components["schemas"]["ResultSuccess_HeliconeRequest-Array_"] | components["schemas"]["ResultError_string_"];
     /** @description Make all properties in T optional */
     Partial_TextOperators_: {
       "not-equals"?: string;
@@ -422,6 +456,13 @@ Json: JsonObject;
       isCached?: boolean;
       includeInputs?: boolean;
     };
+    ResultSuccess_null_: {
+      /** @enum {number|null} */
+      data: null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
     PromptsResult: {
       id: string;
       user_defined_id: string;
@@ -430,12 +471,12 @@ Json: JsonObject;
       /** Format: double */
       major_version: number;
     };
-    "SuccessResult_PromptsResult-Array_": {
+    "ResultSuccess_PromptsResult-Array_": {
       data: components["schemas"]["PromptsResult"][];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_PromptsResult-Array.string_": components["schemas"]["SuccessResult_PromptsResult-Array_"] | components["schemas"]["ErrorResult_string_"];
+    "Result_PromptsResult-Array.string_": components["schemas"]["ResultSuccess_PromptsResult-Array_"] | components["schemas"]["ResultError_string_"];
     PromptsQueryParams: {
       filter: components["schemas"]["FilterNode"];
     };
@@ -452,12 +493,12 @@ Json: JsonObject;
       last_used: string;
       versions: string[];
     };
-    SuccessResult_PromptResult_: {
+    ResultSuccess_PromptResult_: {
       data: components["schemas"]["PromptResult"];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_PromptResult.string_": components["schemas"]["SuccessResult_PromptResult_"] | components["schemas"]["ErrorResult_string_"];
+    "Result_PromptResult.string_": components["schemas"]["ResultSuccess_PromptResult_"] | components["schemas"]["ResultError_string_"];
     PromptQueryParams: {
       timeFilter: {
         end: string;
@@ -474,28 +515,21 @@ Json: JsonObject;
       prompt_v2: string;
       model: string;
     };
-    SuccessResult_PromptVersionResult_: {
+    ResultSuccess_PromptVersionResult_: {
       data: components["schemas"]["PromptVersionResult"];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_PromptVersionResult.string_": components["schemas"]["SuccessResult_PromptVersionResult_"] | components["schemas"]["ErrorResult_string_"];
+    "Result_PromptVersionResult.string_": components["schemas"]["ResultSuccess_PromptVersionResult_"] | components["schemas"]["ResultError_string_"];
     PromptCreateSubversionParams: {
       newHeliconeTemplate: unknown;
     };
-    "SuccessResult_PromptVersionResult-Array_": {
+    "ResultSuccess_PromptVersionResult-Array_": {
       data: components["schemas"]["PromptVersionResult"][];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_PromptVersionResult-Array.string_": components["schemas"]["SuccessResult_PromptVersionResult-Array_"] | components["schemas"]["ErrorResult_string_"];
-    SuccessResult_null_: {
-      /** @enum {number|null} */
-      data: null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_null.string_": components["schemas"]["SuccessResult_null_"] | components["schemas"]["ErrorResult_string_"];
+    "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
     NewDatasetParams: {
       datasetName: string;
       requestIds: string[];
@@ -508,20 +542,20 @@ Json: JsonObject;
       /** Format: double */
       limit?: number;
     };
-    "SuccessResult___-Array_": {
+    "ResultSuccess___-Array_": {
       data: Record<string, never>[];
       /** @enum {number|null} */
       error: null;
     };
-    "Result___-Array.string_": components["schemas"]["SuccessResult___-Array_"] | components["schemas"]["ErrorResult_string_"];
-    "SuccessResult__experimentId-string__": {
+    "Result___-Array.string_": components["schemas"]["ResultSuccess___-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__experimentId-string__": {
       data: {
         experimentId: string;
       };
       /** @enum {number|null} */
       error: null;
     };
-    "Result__experimentId-string_.string_": components["schemas"]["SuccessResult__experimentId-string__"] | components["schemas"]["ErrorResult_string_"];
+    "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
     NewExperimentParams: {
       datasetId: string;
       promptVersion: string;
@@ -545,6 +579,21 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  GetUsers: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_"];
+        };
+      };
+    };
+  };
   GetRequests: {
     /** @description Request query filters */
     requestBody: {
@@ -568,6 +617,51 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
+        };
+      };
+    };
+  };
+  FeedbackRequest: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          rating: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  PutProperty: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          value: string;
+          key: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
