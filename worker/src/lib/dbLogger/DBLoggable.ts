@@ -626,7 +626,14 @@ export class DBLoggable {
     },
     S3_ENABLED: Env["S3_ENABLED"],
     requestHeaders?: HeliconeHeaders
-  ): Promise<Result<null, string>> {
+  ): Promise<
+    Result<
+      {
+        cost: number;
+      } | null,
+      string
+    >
+  > {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
       return err(`Auth failed! ${error}` ?? "Helicone organization not found");
@@ -828,6 +835,18 @@ export class DBLoggable {
       }
     }
 
+    const cost =
+      this.modelCost({
+        model: model ?? null,
+        sum_completion_tokens:
+          responseResult.data.response.completion_tokens ?? 0,
+        sum_prompt_tokens: responseResult.data.response.completion_tokens ?? 0,
+        sum_tokens:
+          (responseResult.data.response.completion_tokens ?? 0) +
+          (responseResult.data.response.prompt_tokens ?? 0),
+        provider: requestResult.data.request.provider ?? "",
+      }) ?? 0;
+
     if (requestHeaders?.posthogKey) {
       const posthogClient = new PosthogClient(
         requestHeaders.posthogKey,
@@ -840,18 +859,7 @@ export class DBLoggable {
         n: reqBody.n ?? 0,
         promptId: requestResult.data.request.prompt_id ?? "",
         timeToFirstToken: responseResult.data.response.time_to_first_token ?? 0,
-        cost:
-          this.modelCost({
-            model: model ?? null,
-            sum_completion_tokens:
-              responseResult.data.response.completion_tokens ?? 0,
-            sum_prompt_tokens:
-              responseResult.data.response.completion_tokens ?? 0,
-            sum_tokens:
-              (responseResult.data.response.completion_tokens ?? 0) +
-              (responseResult.data.response.prompt_tokens ?? 0),
-            provider: requestResult.data.request.provider ?? "",
-          }) ?? 0,
+        cost: cost,
         provider: requestResult.data.request.provider ?? "",
         path: requestResult.data.request.path ?? "",
         completetionTokens: responseResult.data.response.completion_tokens ?? 0,
@@ -873,8 +881,11 @@ export class DBLoggable {
         heliconeRequestResponse
       );
     }
+    console.log("cost", cost);
 
-    return ok(null);
+    return ok({
+      cost,
+    });
   }
 
   modelCost(modelRow: {
