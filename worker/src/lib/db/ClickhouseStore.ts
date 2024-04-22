@@ -49,6 +49,35 @@ export async function logInClickhouse(
   const model =
     request.model_override ?? response.model ?? request.model ?? "not-found";
   return Promise.all([
+    clickhouseDb.dbInsertClickhouse("request_response_versioned", [
+      {
+        user_id: request.user_id ?? "",
+        request_id: request.id,
+        completion_tokens: response.completion_tokens ?? null,
+        latency: response.delay_ms ?? null,
+        model: model,
+        prompt_tokens: response.prompt_tokens ?? null,
+        request_created_at: formatTimeString(request.created_at),
+        response_created_at: response.created_at
+          ? formatTimeString(response.created_at)
+          : null,
+        response_id: response.id ?? null,
+        status: response.status ?? -99,
+        organization_id:
+          request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
+        threat: request.threat ?? null,
+        time_to_first_token: response.time_to_first_token ?? null,
+        proxy_key_id: request.helicone_proxy_key_id ?? null,
+        provider: request.provider ?? null,
+        country_code: request.country_code ?? null,
+        version: 0,
+        properties: properties.reduce((acc, p) => {
+          acc[p.key] = p.value;
+          return acc;
+        }, {} as Record<string, string>),
+        sign: 1,
+      },
+    ]),
     clickhouseDb.dbInsertClickhouse("request_response_log", [
       {
         auth_hash: request.auth_hash,

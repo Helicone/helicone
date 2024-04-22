@@ -1885,6 +1885,63 @@
 				}
 			}
 		},
+		"/v1/request/{requestId}/property": {
+			"put": {
+				"operationId": "PutProperty",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"value": {
+										"type": "string"
+									},
+									"key": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"value",
+									"key"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/prompt/query": {
 			"post": {
 				"operationId": "GetPrompts",
