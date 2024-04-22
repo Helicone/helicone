@@ -152,6 +152,7 @@
 					"ANTHROPIC",
 					"TOGETHERAI",
 					"GROQ",
+					"GOOGLE",
 					"CUSTOM"
 				]
 			},
