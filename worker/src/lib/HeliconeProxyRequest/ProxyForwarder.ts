@@ -65,6 +65,7 @@ export async function proxyForwarder(
       rateLimitKV: env.RATE_LIMIT_KV,
       rateLimitOptions: proxyRequest.rateLimitOptions,
       userId: proxyRequest.userId,
+      cost: 0,
     });
 
     responseBuilder.addRateLimitHeaders(
@@ -319,26 +320,22 @@ export async function proxyForwarder(
     if (res.error !== null) {
       console.error("Error logging", res.error);
     }
+
+    if (proxyRequest && proxyRequest.rateLimitOptions) {
+      await updateRateLimitCounter({
+        providerAuthHash: proxyRequest.providerAuthHash,
+        heliconeProperties:
+          proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
+        rateLimitKV: env.RATE_LIMIT_KV,
+        rateLimitOptions: proxyRequest.rateLimitOptions,
+        userId: proxyRequest.userId,
+        cost: res.data?.cost ?? 0,
+      });
+    }
   }
 
   if (request?.heliconeHeaders?.heliconeAuth || request.heliconeProxyKeyId) {
     ctx.waitUntil(log(loggable));
-  }
-
-  if (proxyRequest.rateLimitOptions) {
-    if (!proxyRequest.providerAuthHash) {
-      return new Response("Authorization header required for rate limiting", {
-        status: 401,
-      });
-    }
-    updateRateLimitCounter({
-      providerAuthHash: proxyRequest.providerAuthHash,
-      heliconeProperties:
-        proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
-      rateLimitKV: env.RATE_LIMIT_KV,
-      rateLimitOptions: proxyRequest.rateLimitOptions,
-      userId: proxyRequest.userId,
-    });
   }
 
   return responseBuilder.build({

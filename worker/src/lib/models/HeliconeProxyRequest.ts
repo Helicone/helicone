@@ -11,11 +11,9 @@ import { IHeliconeHeaders } from "./HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
 import { buildTargetUrl } from "../clients/ProviderClient";
 
-import {
-  RateLimitOptions,
-  RateLimitOptionsBuilder,
-} from "../util/rateLimitOptions";
+import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
 import { CfProperties } from "@cloudflare/workers-types";
+import { RateLimitOptions } from "../clients/KVRateLimiterClient";
 
 export type RetryOptions = {
   retries: number; // number of times to retry the request
@@ -180,6 +178,7 @@ export class HeliconeProxyRequestMapper {
     ).build();
 
     if (rateLimitOptions.error) {
+      rateLimitOptions.error = `Invalid rate limit policy: ${rateLimitOptions.error}`;
       this.heliconeErrors.push(rateLimitOptions.error);
     }
     return rateLimitOptions.data ?? null;
