@@ -1,10 +1,6 @@
-import { useUser } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
-import { useRouter } from "next/router";
 
-import { DEMO_EMAIL } from "../lib/constants";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
-import RedirectingScreen from "../components/templates/home/redirectingScreen";
 import { isCustomerDomain } from "../lib/customerPortalHelpers";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import HomePage from "../components/templates/home/homePage";
