@@ -172,17 +172,12 @@ export class VersionedRequestStore {
     );
 
     if (requestInClickhouse.error || !requestInClickhouse.data) {
-      console.error(
-        "Error updating request in clickhouse:",
-        requestInClickhouse.error
-      );
-
       return requestInClickhouse;
-    } else {
-      await this.addPropertiesToLegacyTables(requestInClickhouse.data, [
-        { key: property, value },
-      ]);
     }
+
+    await this.addPropertiesToLegacyTables(requestInClickhouse.data, [
+      { key: property, value },
+    ]);
 
     return ok(null);
   }
