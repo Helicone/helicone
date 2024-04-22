@@ -1,6 +1,6 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
-import { use, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import {
   TimeInterval,
@@ -22,7 +22,6 @@ import { getInitialColumns } from "./initialColumns";
 import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
 import useRequestsPageV2 from "./useRequestsPageV2";
-
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import useSearchParams from "../../shared/utils/useSearchParams";
