@@ -18,6 +18,7 @@ export interface IHeliconeHeaders {
     token: string;
   }>;
   rateLimitPolicy: Nullable<string>;
+  rateLimitPolicyV2: Nullable<string>;
   featureFlags: {
     streamForceFormat: boolean;
     increaseTimeout: boolean;
@@ -58,6 +59,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     orgId?: string;
   }>;
   rateLimitPolicy: Nullable<string>;
+  rateLimitPolicyV2: Nullable<string>;
   featureFlags: { streamForceFormat: boolean; increaseTimeout: boolean };
   retryHeaders: Nullable<{
     enabled: boolean;
@@ -87,6 +89,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.heliconeAuth = heliconeHeaders.heliconeAuth;
     this.heliconeAuthV2 = heliconeHeaders.heliconeAuthV2;
     this.rateLimitPolicy = heliconeHeaders.rateLimitPolicy;
+    this.rateLimitPolicyV2 = heliconeHeaders.rateLimitPolicyV2;
     this.featureFlags = heliconeHeaders.featureFlags;
     this.retryHeaders = heliconeHeaders.retryHeaders;
     this.openaiBaseUrl = heliconeHeaders.openaiBaseUrl;
@@ -196,6 +199,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       heliconeAuthV2: this.getHeliconeAuthV2(),
       featureFlags: this.getHeliconeFeatureFlags(),
       rateLimitPolicy: this.headers.get("Helicone-RateLimit-Policy") ?? null,
+      rateLimitPolicy: this.headers.get("Helicone-RateLimit-Policy-V2") ?? null,
       openaiBaseUrl: this.headers.get("Helicone-OpenAI-Api-Base") ?? null,
       targetBaseUrl: this.headers.get("Helicone-Target-URL") ?? null,
       retryHeaders: this.getRetryHeaders(),
