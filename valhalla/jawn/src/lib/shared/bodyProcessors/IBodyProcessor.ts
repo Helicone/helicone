@@ -10,14 +10,13 @@ export interface ParseInput {
 export type ParseOutput = {
   processedBody: any;
   usage?: Usage;
-  assets?: Record<string, string>;
 };
 
 export type Usage = {
-  promptTokens: number | undefined;
-  completionTokens: number | undefined;
-  totalTokens: number | undefined;
-  heliconeCalculated: boolean;
+  promptTokens?: number;
+  completionTokens?: number;
+  totalTokens?: number;
+  heliconeCalculated?: boolean;
 };
 
 export interface IBodyProcessor {

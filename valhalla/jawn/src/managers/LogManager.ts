@@ -3,44 +3,55 @@ import { RateLimitHandler } from "../lib/handlers/RateLimitHandler";
 import { AuthenticationHandler } from "../lib/handlers/AuthenticationHandler";
 import { RequestBodyHandler } from "../lib/handlers/RequestBodyHandler";
 import { LoggingHandler } from "../lib/handlers/LoggingHandler";
-import { PropertiesHandler } from "../lib/handlers/PropertiesHandler";
 import { ResponseBodyHandler } from "../lib/handlers/ResponseBodyHandler";
 import { HandlerContext, Message } from "../lib/handlers/HandlerContext";
+import { LogStore } from "../lib/stores/LogStore";
+import { RequestResponseStore } from "../lib/stores/RequestResponseStore";
 
 class LogManager {
-  public async processLogEntries(logMessages: Message[]): Promise<void> {
+  public async processLogEntries(
+    logMessages: Message[],
+    batchId: string
+  ): Promise<void> {
     const authHandler = new AuthenticationHandler();
     const rateLimitHandler = new RateLimitHandler(new RateLimitStore());
     const requestHandler = new RequestBodyHandler();
-    const propertiesHandler = new PropertiesHandler();
     const responseBodyHandler = new ResponseBodyHandler();
-    const loggingHandler = new LoggingHandler();
+    const loggingHandler = new LoggingHandler(
+      new LogStore(),
+      new RequestResponseStore()
+    );
 
     authHandler
       .setNext(rateLimitHandler)
       .setNext(requestHandler)
-      .setNext(propertiesHandler)
       .setNext(responseBodyHandler)
       .setNext(loggingHandler);
 
-    for (const logMessage of logMessages) {
-      const handlerContext = new HandlerContext(logMessage);
-      await authHandler.handle(handlerContext);
-    }
+    await Promise.all(
+      logMessages.map(async (logMessage) => {
+        const handlerContext = new HandlerContext(logMessage);
+        await authHandler.handle(handlerContext);
+      })
+    );
 
-    // Need to pull out all database payloads and make into list
-
+    // Insert rate limit entries
     const { data: rateLimitInsId, error: rateLimitErr } =
       await rateLimitHandler.handleResults();
 
     if (rateLimitErr || !rateLimitInsId) {
-      console.log("Error inserting rate limits:", rateLimitErr);
+      console.error(
+        `Error inserting rate limits: ${rateLimitErr} for batch ${batchId}`
+      );
+    }
+
+    // Inserts everything in transaction
+    const upsertResult = await loggingHandler.handleResults();
+
+    if (upsertResult.error) {
+      console.error(
+        `Error inserting logs: ${upsertResult.error} for batch ${batchId}`
+      );
     }
   }
 }
-
-/* TODO:
-- Upsert request
-- Map & Upsert properties
-- Upsert response
-*/

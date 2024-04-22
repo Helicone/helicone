@@ -4,6 +4,10 @@ import { createClient as clickhouseCreateClient } from "@clickhouse/client";
 // import dateFormat from "dateformat";
 // const dateFormat = require("dateformat");
 
+export function formatTimeString(timeString: string): string {
+  return new Date(timeString).toISOString().replace("Z", "");
+}
+
 export function paramsToValues(params: (number | string | boolean | Date)[]) {
   return params
     .map((p) => {

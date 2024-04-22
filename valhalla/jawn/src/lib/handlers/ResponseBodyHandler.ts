@@ -24,7 +24,10 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     const omitResponseLog = context.message.heliconeMeta.omitResponseLog;
 
     const processedResponseBody = await this.processBody(context);
-    if (processedResponseBody.error || !processedResponseBody.data) {
+    if (
+      processedResponseBody.error ||
+      !processedResponseBody?.data?.processedBody
+    ) {
       console.error(
         "Error processing response body",
         processedResponseBody.error
@@ -37,15 +40,17 @@ export class ResponseBodyHandler extends AbstractLogHandler {
           ? {
               model: context.message.log.response.model, // Put response model here, not calculated model
             }
-          : processedResponseBody.data ?? undefined,
+          : processedResponseBody.data?.processedBody ?? undefined,
       };
     } else {
       context.processedLog.response.body = omitResponseLog
         ? {
             model: context.message.log.response.model, // Put response model here, not calculated model
           }
-        : processedResponseBody.data ?? undefined;
+        : processedResponseBody.data.processedBody ?? undefined;
     }
+
+    context.usage = processedResponseBody.data?.usage ?? {};
 
     return super.handle(context);
   }

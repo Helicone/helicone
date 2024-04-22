@@ -28,8 +28,9 @@ export class RateLimitHandler extends AbstractLogHandler {
     } else if (context.orgParams?.id && isRateLimited) {
       this.rateLimitLogs.push({
         organization_id: context.orgParams?.id || "",
-        created_at: new Date().toISOString(), // TODO: Use the actual request time
+        created_at: context.message.log.request.requestCreatedAt.toISOString(),
       });
+      // Do not continue to the next handler if rate limited
     } else {
       await super.handle(context);
     }
