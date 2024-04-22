@@ -20,6 +20,7 @@ export type Provider =
   | "ANTHROPIC"
   | "TOGETHERAI"
   | "GROQ"
+  | "GOOGLE"
   | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
@@ -320,7 +321,10 @@ async function mapLLMCalls(
         "";
 
       try {
-        if (model === "gemini-pro" || model === "gemini-pro-vision") {
+        if (
+          model.toLowerCase().includes("gemini") &&
+          heliconeRequest.provider === "GOOGLE"
+        ) {
           const mappedSchema = mapGeminiPro(heliconeRequest, model);
           heliconeRequest.llmSchema = mappedSchema;
           return heliconeRequest;
