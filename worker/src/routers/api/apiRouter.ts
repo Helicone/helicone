@@ -278,7 +278,7 @@ function getAPIRouterV1(
 
       const auth = await requestWrapper.auth();
 
-      return fetch(`https://api.helicone.ai/v1/request/${id}/feedback`, {
+      return fetch(`https://api.helicone.ai/v1/request/${id}/property`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
