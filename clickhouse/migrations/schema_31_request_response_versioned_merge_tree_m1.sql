@@ -1,40 +1,17 @@
-CREATE TABLE IF NOT EXISTS default.request_response_versioned (
-    `response_id` Nullable(UUID),
-    `response_created_at` Nullable(DateTime64),
-    `latency` Nullable(Int64),
-    `status` Int64,
-    `completion_tokens` Nullable(Int64),
-    `prompt_tokens` Nullable(Int64),
-    `model` String,
-    `request_id` UUID,
-    `request_created_at` DateTime64,
-    `user_id` String,
-    `organization_id` UUID,
-    `proxy_key_id` Nullable(UUID),
-    `threat` Nullable(Bool),
-    `time_to_first_token` Nullable(Int64),
-    `provider` String,
-    `target_url` Nullable(String),
-    `country_code` Nullable(String),
-    `created_at` DateTime DEFAULT now(),
-    `sign` Int8,
-    `version` UInt32, 
-    `properties` Map(LowCardinality(String), String) CODEC(ZSTD(1)),
-    `scores` Map(LowCardinality(String), Int64) CODEC(ZSTD(1)),
-    INDEX idx_properties_key mapKeys(properties) TYPE bloom_filter(0.01) GRANULARITY 1,
-    INDEX idx_properties_value mapValues(properties) TYPE bloom_filter(0.01) GRANULARITY 1
-) ENGINE = VersionedCollapsingMergeTree(sign, version)
-PRIMARY KEY (
-    organization_id,
+INSERT INTO default.request_response_versioned
+(
+    response_id, response_created_at, latency, status, completion_tokens, prompt_tokens, model, request_id, request_created_at, user_id, organization_id, threat, time_to_first_token,
     provider,
-    model,
-    request_created_at,
-    request_id
+    target_url, country_code, created_at,
+    sign,
+    version,
+    properties
 )
-ORDER BY (
-    organization_id,
-    provider,
-    model,
-    request_created_at,
-    request_id
-)
+SELECT
+    response_id, response_created_at, latency, status, completion_tokens, prompt_tokens, model, request_id, request_created_at, user_id, organization_id, threat, time_to_first_token,
+    coalesce(provider, 'default_provider'),
+    target_url, country_code, created_at,
+    1 AS sign,
+    0,
+    map()
+FROM request_response_log
