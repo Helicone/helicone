@@ -569,6 +569,32 @@ export class DBLoggable {
         },
       });
     }
+
+    const shouldScore =
+      subscriptions
+        .map((subscription) => {
+          return subscription.event === "score";
+        })
+        .filter((x) => x).length > 0;
+
+    if (shouldScore) {
+      console.log(
+        "SENDING SCORE REQUEST",
+        webhook.destination,
+        payload.request?.request.id
+      );
+      await fetch(webhook.destination, {
+        method: "POST",
+        body: JSON.stringify({
+          request_id: payload.request?.request.id,
+          organization_id: payload.request?.request.helicone_org_id,
+          request_body: payload.request?.request.body,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    }
     return {
       data: undefined,
       error: null,
