@@ -70,7 +70,7 @@ export async function logInClickhouse(
         proxy_key_id: request.helicone_proxy_key_id ?? null,
         provider: request.provider ?? null,
         country_code: request.country_code ?? null,
-        version: 1,
+        version: 0,
         properties: properties.reduce((acc, p) => {
           acc[p.key] = p.value;
           return acc;
