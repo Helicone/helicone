@@ -154,7 +154,6 @@ const DashboardPage = (props: DashboardPageProps) => {
 
       if (currentAdvancedFilters) {
         const filters = decodeURIComponent(currentAdvancedFilters).slice(1, -1);
-        console.log("filters", filters);
         const decodedFilters = filters
           .split("|")
           .map(decodeFilter)
