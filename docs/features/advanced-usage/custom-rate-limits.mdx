@@ -14,11 +14,12 @@ To set up rate limiting, you only need to provide the `Helicone-RateLimit-Policy
 The header value should follow this format:
 
 ```
-[quota];w=[time_window];s=[segment]
+[quota];w=[time_window];u=[unit];s=[segment]
 ```
 
 - `quota` (required): The maximum number of requests allowed within the specified time window.
 - `time_window` (required): The length of the time window in seconds. The minimum value is 60.
+- `unit` (optional): must be either `request` or `cents`. This will change your rate limit to be by cents (cost) or request (count)
 - `segment` (optional): The rate limiting segment. Can be "user" or a custom property. If left blank, this rate limits all of your requests made with the api key.
 
 <CodeGroup>

@@ -18,6 +18,7 @@ export interface IHeliconeHeaders {
     token: string;
   }>;
   rateLimitPolicy: Nullable<string>;
+
   featureFlags: {
     streamForceFormat: boolean;
     increaseTimeout: boolean;
@@ -87,6 +88,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.heliconeAuth = heliconeHeaders.heliconeAuth;
     this.heliconeAuthV2 = heliconeHeaders.heliconeAuthV2;
     this.rateLimitPolicy = heliconeHeaders.rateLimitPolicy;
+
     this.featureFlags = heliconeHeaders.featureFlags;
     this.retryHeaders = heliconeHeaders.retryHeaders;
     this.openaiBaseUrl = heliconeHeaders.openaiBaseUrl;
