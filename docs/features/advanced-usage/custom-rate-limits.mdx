@@ -22,6 +22,9 @@ The header value should follow this format:
 - `unit` (optional): must be either `request` or `cents`. This will change your rate limit to be by cents (cost) or request (count)
 - `segment` (optional): The rate limiting segment. Can be "user" or a custom property. If left blank, this rate limits all of your requests made with the api key.
 
+Example: `10;w=1000;u=cents;s=user`
+This policy allows 10 cents of requests per 1000 seconds per user.
+
 <CodeGroup>
 ```bash Curl
 curl https://oai.hconeai.com/v1/completions \
