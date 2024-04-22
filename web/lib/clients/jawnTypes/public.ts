@@ -86,7 +86,7 @@ export interface components {
     };
 Json: JsonObject;
     /** @enum {string} */
-    Provider: "OPENAI" | "ANTHROPIC" | "TOGETHERAI" | "GROQ" | "CUSTOM";
+    Provider: "OPENAI" | "ANTHROPIC" | "TOGETHERAI" | "GROQ" | "GOOGLE" | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
     FunctionCall: {
