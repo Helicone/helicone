@@ -1764,6 +1764,7 @@ export type Database = {
           target_url: string | null
           threat: boolean | null
           user_id: string | null
+          version: number
         }
         Insert: {
           auth_hash: string
@@ -1787,6 +1788,7 @@ export type Database = {
           target_url?: string | null
           threat?: boolean | null
           user_id?: string | null
+          version?: number
         }
         Update: {
           auth_hash?: string
@@ -1810,6 +1812,7 @@ export type Database = {
           target_url?: string | null
           threat?: boolean | null
           user_id?: string | null
+          version?: number
         }
         Relationships: [
           {

@@ -1063,6 +1063,7 @@ export async function logRequest(
       target_url: request.targetUrl,
       request_ip: null,
       country_code: request.country_code,
+      version: 0,
     };
 
     const customPropertyRows = Object.entries(request.properties).map(
