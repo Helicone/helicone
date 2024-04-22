@@ -59,24 +59,13 @@ export async function proxyForwarder(
       });
     }
 
-    console.log(
-      "proxyRequest.rateLimitOptions.error",
-      proxyRequest.rateLimitOptions.error
-    );
-
-    if (proxyRequest.rateLimitOptions.error) {
-      return responseBuilder.build({
-        body: proxyRequest.rateLimitOptions.error,
-        status: 400,
-      });
-    }
-
     const rateLimitCheckResult = await checkRateLimit({
       providerAuthHash: proxyRequest.providerAuthHash,
       heliconeProperties: proxyRequest.heliconeProperties,
       rateLimitKV: env.RATE_LIMIT_KV,
       rateLimitOptions: proxyRequest.rateLimitOptions,
       userId: proxyRequest.userId,
+      cost: 0,
     });
 
     responseBuilder.addRateLimitHeaders(

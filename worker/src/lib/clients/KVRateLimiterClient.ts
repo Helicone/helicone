@@ -5,7 +5,6 @@ export interface RateLimitOptions {
   segment: string | undefined;
   quota: number;
   unit: "request" | "cents";
-  error?: string;
 }
 
 export interface RateLimitResponse {

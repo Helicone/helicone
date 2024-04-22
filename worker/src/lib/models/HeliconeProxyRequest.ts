@@ -174,8 +174,7 @@ export class HeliconeProxyRequestMapper {
 
   rateLimitOptions(): HeliconeProxyRequest["rateLimitOptions"] {
     const rateLimitOptions = new RateLimitOptionsBuilder(
-      this.request.heliconeHeaders.rateLimitPolicy,
-      this.request.heliconeHeaders.rateLimitPolicyV2
+      this.request.heliconeHeaders.rateLimitPolicy
     ).build();
 
     if (rateLimitOptions.error) {
