@@ -48,7 +48,7 @@ const faqs = [
 const HomePage = (props: HomePageProps) => {
   const {} = props;
 
-  const [showStars, setShowStars] = useLocalStorage("showStars", true);
+  // const [showStars, setShowStars] = useLocalStorage("showStars", true);
 
   return (
     <div className="w-full bg-[#f8feff] h-full antialiased relative">
