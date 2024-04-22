@@ -10,16 +10,11 @@ import PublicMetaData from "../components/layout/public/publicMetaData";
 import HomePage from "../components/templates/home/homePage";
 
 export const Home = () => {
-  // if (user && user.email !== DEMO_EMAIL) {
-  //   router.push("/dashboard");
-  //   return <RedirectingScreen />;
-  // }
-
   return (
     <>
       <PublicMetaData
         description={
-          "How developers build AI applications. Get observability, tooling, fine-tuning, and evaluations out of the box. "
+          "Meet the open-source observability platform built for LLM-developers. Whether you use OpenAI, Anthropic, or open-source models like Llama3, easily monitor your requests and prompts in real-time."
         }
         ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
       >

@@ -48,9 +48,6 @@ const faqs = [
 const HomePage = (props: HomePageProps) => {
   const {} = props;
 
-  const [demoLoading, setDemoLoading] = useState(false);
-
-  const { setNotification } = useNotification();
   const user = useUser();
   const [showStars, setShowStars] = useLocalStorage("showStars", true);
 
@@ -87,10 +84,6 @@ const HomePage = (props: HomePageProps) => {
       });
     }
   }, []);
-
-  if (!demoLoading && user?.email === DEMO_EMAIL) {
-    supabaseClient.auth.signOut();
-  }
 
   return (
     <div className="w-full bg-[#f8feff] h-full antialiased relative">
@@ -175,10 +168,15 @@ const HomePage = (props: HomePageProps) => {
               </svg>{" "}
               Combinator
             </Link>
-            <div className="font-semibold text-gray-600 pl-4 flex items-center">
+            <Link
+              href="https://github.com/Helicone/helicone"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-gray-600 pl-4 flex items-center"
+            >
               Fully open-source{" "}
               <HeartIcon className="h-4 w-4 inline ml-2 text-pink-500" />
-            </div>
+            </Link>
           </div>
           <h1
             ref={heroTextRef}
@@ -211,7 +209,7 @@ const HomePage = (props: HomePageProps) => {
           </div>
         </div>
         <div className="flex gap-4 flex-col justify-center items-center space-y-4 pb-32">
-          <div className="hidden md:flex flex-col space-y-4 w-[44rem]">
+          <div className="hidden md:flex flex-col space-y-4 w-[44rem] justify-center items-center">
             <DiffHighlight
               code={`
 from openai import OpenAI
@@ -230,6 +228,17 @@ client = OpenAI(
               minHeight={false}
               textSize="lg"
             />
+            <div className="text-xs italic">
+              Python code example. Learn more about our other integrations{" "}
+              <Link
+                href={"https://docs.helicone.ai/getting-started/quick-start"}
+                className="text-blue-500"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                here.
+              </Link>
+            </div>
           </div>
           <div className="flex md:hidden flex-col space-y-4 w-full px-4">
             <DiffHighlight
@@ -255,13 +264,13 @@ client = OpenAI(
 
         <div className="w-full flex flex-col max-w-6xl mx-auto space-y-4 px-4 py-32">
           <div className="flex flex-col w-full items-center text-center">
-            <h3 className="text-xl sm:text-3xl font-bold text-black text-center tracking-tight leading-tight">
+            <h2 className="text-xl sm:text-3xl font-bold text-black text-center tracking-tight leading-tight">
               Trusted by thousands of{" "}
               <span className=" hidden sm:inline">
                 startups and enterprises
               </span>
               <span className=" inline sm:hidden">companies</span>
-            </h3>
+            </h2>
             <p className="text-gray-900 font-medium text-md sm:text-lg sm:leading-9">
               <span className="hidden sm:inline">Helicone is built</span>
               <span className="inline sm:hidden">Built</span> to scale with your
@@ -276,7 +285,7 @@ client = OpenAI(
               >
                 <Image
                   src={"/assets/home/logos/logo.svg"}
-                  alt={""}
+                  alt={"filevine"}
                   width={400}
                   height={400}
                 />
@@ -286,7 +295,7 @@ client = OpenAI(
               >
                 <Image
                   src={"/assets/home/logos/qawolf.png"}
-                  alt={""}
+                  alt={"qawolf"}
                   width={400}
                   height={400}
                 />
@@ -296,7 +305,7 @@ client = OpenAI(
               >
                 <Image
                   src={"/assets/home/logos/carta.png"}
-                  alt={""}
+                  alt={"carta"}
                   width={100}
                   height={100}
                 />
@@ -306,7 +315,7 @@ client = OpenAI(
               >
                 <Image
                   src={"/assets/home/logos/reworkd.png"}
-                  alt={""}
+                  alt={"reworkd"}
                   width={60}
                   height={60}
                 />
@@ -318,7 +327,7 @@ client = OpenAI(
               >
                 <Image
                   src={"/assets/home/logos/lex.svg"}
-                  alt={""}
+                  alt={"lex"}
                   width={60}
                   height={60}
                 />
@@ -328,7 +337,7 @@ client = OpenAI(
               >
                 <Image
                   src={"/assets/home/logos/particl.png"}
-                  alt={""}
+                  alt={"particl"}
                   width={120}
                   height={120}
                 />
@@ -338,7 +347,7 @@ client = OpenAI(
               >
                 <Image
                   src={"/assets/home/logos/mintlify.svg"}
-                  alt={""}
+                  alt={"mintlify"}
                   width={400}
                   height={400}
                 />
@@ -348,7 +357,7 @@ client = OpenAI(
               >
                 <Image
                   src={"/assets/home/logos/onboard.png"}
-                  alt={""}
+                  alt={"onboard"}
                   width={700}
                   height={700}
                 />
@@ -361,55 +370,85 @@ client = OpenAI(
             <div>
               <CodeBracketSquareIcon className="w-8 h-8 text-sky-700" />
             </div>
-            <div className="flex flex-col space-y-1">
-              <h2 className="text-xl font-bold text-black">Any Model</h2>
+            <Link
+              href={
+                "https://docs.helicone.ai/getting-started/integration-method/gateway"
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col space-y-1"
+            >
+              <p className="text-xl font-bold text-black">Any Model</p>
               <p className="text-md text-gray-700 font-medium">
                 We support models from OpenAI, Claude, Gemini, and more.
               </p>
-            </div>
+            </Link>
           </li>
           <li className="col-span-1 flex items-start space-x-2">
             <div>
               <BuildingOffice2Icon className="w-8 h-8 text-sky-700" />
             </div>
-            <div className="flex flex-col space-y-1">
-              <h2 className="text-xl font-bold text-black">Any Scale</h2>
+            <Link
+              href={"https://docs.helicone.ai/faq/latency-affect"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col space-y-1"
+            >
+              <p className="text-xl font-bold text-black">Any Scale</p>
               <p className="text-md text-gray-700 font-medium">
                 Log millions of requests per second with no latency impact.
               </p>
-            </div>
+            </Link>
           </li>
           <li className="col-span-1 flex items-start space-x-2">
             <div>
               <CubeIcon className="w-8 h-8 text-sky-700" />
             </div>
-            <div className="flex flex-col space-y-1">
-              <h2 className="text-xl font-bold text-black">Async Packages</h2>
+            <Link
+              href={
+                "https://docs.helicone.ai/getting-started/integration-method/openai"
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col space-y-1"
+            >
+              <p className="text-xl font-bold text-black">Async Packages</p>
               <p className="text-md text-gray-700 font-medium">
                 We offer async packages for all major languages and frameworks.
               </p>
-            </div>
+            </Link>
           </li>
           <li className="col-span-1 flex items-start space-x-2">
             <div>
               <ShieldCheckIcon className="w-8 h-8 text-sky-700" />
             </div>
-            <div className="flex flex-col space-y-1">
-              <h2 className="text-xl font-bold text-black">
-                Fully Open-Source
-              </h2>
+            <Link
+              href={"https://github.com/Helicone/helicone"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col space-y-1"
+            >
+              <p className="text-xl font-bold text-black">Fully Open-Source</p>
               <p className="text-md text-gray-700 font-medium">
                 Deploy Helicone on-prem for maximum security.
               </p>
-            </div>
+            </Link>
           </li>
         </ul>
       </header>
 
       <section className="w-full flex flex-col max-w-6xl mx-auto space-y-4 py-32 px-4">
+        <h2 className="sr-only">
+          One observability platform,{" "}
+          <span className="text-sky-500">everything you need</span>
+        </h2>
         <Platform />
       </section>
       <section id="enterprise" className="py-36">
+        <h2 className="sr-only">
+          Get to production-quality{" "}
+          <span className="text-violet-800">faster</span>
+        </h2>
         <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
           <Enterprise />
         </div>
@@ -437,16 +476,109 @@ client = OpenAI(
                   </h3>
                   <ul className="font-semibold flex flex-col space-y-4 text-gray-300">
                     <li>
-                      <span className="text-cyan-400">Frontend:</span> React,
-                      Next.js, TailwindCSS
+                      <span className="text-cyan-400">Frontend:</span>{" "}
+                      <Link
+                        href="https://react.dev/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        React
+                      </Link>
+                      ,{" "}
+                      <Link
+                        href="https://nextjs.org/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        Next.js
+                      </Link>
+                      ,{" "}
+                      <Link
+                        href="https://tailwindcss.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        TailwindCSS
+                      </Link>
                     </li>
                     <li>
-                      <span className="text-cyan-400">Backend:</span> Supabase,
-                      Clickhouse, Postgres, Node, Express
+                      <span className="text-cyan-400">Backend:</span>{" "}
+                      <Link
+                        href="https://supabase.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        Supabase
+                      </Link>
+                      ,{" "}
+                      <Link
+                        href="https://clickhouse.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        Clickhouse
+                      </Link>
+                      ,{" "}
+                      <Link
+                        href="https://www.postgresql.org/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        Postgres
+                      </Link>
+                      ,{" "}
+                      <Link
+                        href="https://nodejs.org/en"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        Node
+                      </Link>
+                      ,{" "}
+                      <Link
+                        href="https://expressjs.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        Express
+                      </Link>
                     </li>
                     <li>
                       <span className="text-cyan-400">Infrastructure:</span>{" "}
-                      Cloudflare, AWS, Vercel
+                      <Link
+                        href="https://www.cloudflare.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        Cloudflare
+                      </Link>
+                      ,{" "}
+                      <Link
+                        href="https://aws.amazon.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        AWS
+                      </Link>
+                      ,{" "}
+                      <Link
+                        href="https://vercel.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        Vercel
+                      </Link>
                     </li>
                   </ul>
                 </div>
@@ -456,9 +588,9 @@ client = OpenAI(
                       <ShieldCheckIcon className="w-6 h-6 text-cyan-400" />
                     </div>
                     <div className="flex flex-col space-y-1 -mt-0.5">
-                      <h2 className="text-sm md:text-lg font-bold text-white">
+                      <p className="text-sm md:text-lg font-bold text-white">
                         Interested in deploying Helicone on-prem?
-                      </h2>
+                      </p>
                       <Link
                         className="text-sm md:text-md text-gray-500 font-medium flex items-center space-x-1"
                         href={"/contact"}
@@ -473,9 +605,9 @@ client = OpenAI(
                       <UserGroupIcon className="w-6 h-6 text-cyan-400" />
                     </div>
                     <div className="flex flex-col space-y-1 -mt-0.5">
-                      <h2 className="text-sm md:text-lg font-bold text-white">
+                      <p className="text-sm md:text-lg font-bold text-white">
                         Want to ask the team a question?
-                      </h2>
+                      </p>
                       <Link
                         className="text-sm md:text-md text-gray-500 font-medium flex items-center space-x-1"
                         href={"https://discord.gg/HwUbV3Q8qz"}
@@ -492,9 +624,9 @@ client = OpenAI(
                       <CodeBracketSquareIcon className="w-6 h-6 text-cyan-400" />
                     </div>
                     <div className="flex flex-col space-y-1 -mt-0.5">
-                      <h2 className="text-sm md:text-lg font-bold text-white">
+                      <p className="text-sm md:text-lg font-bold text-white">
                         Want to contribute or star us on Github?
-                      </h2>
+                      </p>
                       <Link
                         className="text-sm md:text-md text-gray-500 font-medium flex items-center space-x-1"
                         href={"https://github.com/Helicone/helicone"}
@@ -520,9 +652,9 @@ client = OpenAI(
       <section id="faq" className="bg-inherit py-36">
         <div className="mx-auto px-4 md:px-8 max-w-6xl">
           <div className="flex flex-col space-y-4  text-left sm:text-center ">
-            <h2 className="text-4xl md:text-5xl font-semibold tracking-tighter leading-tight">
+            <p className="text-4xl md:text-5xl font-semibold tracking-tighter leading-tight">
               Frequently asked questions
-            </h2>
+            </p>
           </div>
           <dl className="mt-10 flex flex-col space-y-4">
             {faqs.map((faq) => (
