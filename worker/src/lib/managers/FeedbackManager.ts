@@ -18,15 +18,44 @@ export async function handleFeedback(request: RequestWrapper) {
   const rating = body["rating"];
 
   const auth = await request.auth();
+  if (auth.error) {
+    return new Response(auth.error, { status: 401 });
+  }
 
-  return fetch(`https://api.helicone.ai/v1/request/${heliconeId}/feedback`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: JSON.stringify(auth.data) ?? "",
-    },
-    body: JSON.stringify({ rating }),
-  });
+  if (auth.data?._type !== "bearer") {
+    return new Response("Invalid token type.", { status: 401 });
+  }
+
+  const result = await fetch(
+    `https://api.helicone.ai/v1/request/${heliconeId}/feedback`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: auth.data.token,
+      },
+      body: JSON.stringify({ rating }),
+    }
+  );
+
+  if (!result.ok) {
+    return new Response(`error ${await result.text()}`, {
+      status: 500,
+    });
+  }
+
+  return new Response(
+    JSON.stringify({
+      message: "Feedback added successfully.",
+      helicone_id: heliconeId,
+    }),
+    {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 }
 
 export async function getResponse(

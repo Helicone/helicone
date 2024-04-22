@@ -45,7 +45,7 @@ export class VersionedRequestStore {
     version: number;
     provider: string;
     properties: Record<string, string>;
-  }) {
+  }): Promise<Result<InsertRequestResponseVersioned, string>> {
     let rowContents = resultMap(
       await clickhouseDb.dbQuery<InsertRequestResponseVersioned>(
         `
@@ -86,28 +86,37 @@ export class VersionedRequestStore {
       return err("Could not find previous version of request");
     }
 
-    return await clickhouseDb.dbInsertClickhouse("request_response_versioned", [
-      // Delete the previous version
-      {
-        sign: -1,
-        version: rowContents.data.version,
-        request_id: newVersion.id,
-        organization_id: this.orgId,
-        provider: newVersion.provider,
-        model: rowContents.data.model,
-        request_created_at: rowContents.data.request_created_at,
-      },
-      // Insert the new version
-      {
-        ...rowContents.data,
-        sign: 1,
-        version: newVersion.version,
-        properties: newVersion.properties,
-      },
-    ]);
+    const res = await clickhouseDb.dbInsertClickhouse(
+      "request_response_versioned",
+      [
+        // Delete the previous version
+        {
+          sign: -1,
+          version: rowContents.data.version,
+          request_id: newVersion.id,
+          organization_id: this.orgId,
+          provider: newVersion.provider,
+          model: rowContents.data.model,
+          request_created_at: rowContents.data.request_created_at,
+        },
+        // Insert the new version
+        {
+          ...rowContents.data,
+          sign: 1,
+          version: newVersion.version,
+          properties: newVersion.properties,
+        },
+      ]
+    );
+
+    if (res.error) {
+      return err(res.error);
+    }
+
+    return ok(rowContents.data);
   }
 
-  async addPropertiesToLegacyTables(
+  private async addPropertiesToLegacyTables(
     request: InsertRequestResponseVersioned,
     newProperties: { key: string; value: string }[]
   ): Promise<Result<null, string>> {
@@ -162,9 +171,13 @@ export class VersionedRequestStore {
       request.data[0]
     );
 
-    if (requestInClickhouse.error) {
+    if (requestInClickhouse.error || !requestInClickhouse.data) {
       return requestInClickhouse;
     }
+
+    await this.addPropertiesToLegacyTables(requestInClickhouse.data, [
+      { key: property, value },
+    ]);
 
     return ok(null);
   }

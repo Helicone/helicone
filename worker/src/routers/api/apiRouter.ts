@@ -278,14 +278,43 @@ function getAPIRouterV1(
 
       const auth = await requestWrapper.auth();
 
-      return fetch(`https://api.helicone.ai/v1/request/${id}/feedback`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: JSON.stringify(auth.data) ?? "",
-        },
-        body: JSON.stringify(newProperty),
-      });
+      if (auth.error) {
+        return new Response(auth.error, { status: 401 });
+      }
+
+      if (auth.data?._type !== "bearer") {
+        return new Response("Invalid token type.", { status: 401 });
+      }
+
+      const result = await fetch(
+        `https://api.helicone.ai/v1/request/${id}/property`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: auth.data.token,
+          },
+          body: JSON.stringify(newProperty),
+        }
+      );
+
+      if (!result.ok) {
+        return new Response(`error ${await result.text()}`, {
+          status: 500,
+        });
+      }
+
+      return new Response(
+        JSON.stringify({
+          ok: "true",
+        }),
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
   );
 
