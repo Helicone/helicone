@@ -101,11 +101,7 @@
       "pages": [
         {
           "group": "Prompts",
-          "pages": [
-            "features/prompts/intro",
-            "features/prompts/quick-start",
-            "features/prompts/quick-start-async"
-          ]
+          "pages": ["features/prompts/intro", "features/prompts/quick-start"]
         },
         {
           "group": "Customer Portal",
