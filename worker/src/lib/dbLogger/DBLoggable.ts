@@ -267,15 +267,26 @@ export class DBLoggable {
           });
         }
       } else if (!isStream && this.provider === "GOOGLE") {
+        console.log("Parsing google response");
         const responseJson = JSON.parse(result);
         let usageMetadataItem;
         if (Array.isArray(responseJson)) {
+          console.log(`Is an array`);
           usageMetadataItem = responseJson.find((item) => item.usageMetadata);
+          // usageMetadataItem = foundItem ? foundItem.usageMetadata : undefined;
         } else {
           usageMetadataItem = responseJson.usageMetadata
             ? responseJson
             : undefined;
         }
+
+        console.log(
+          `Usage metadata item: ${JSON.stringify(usageMetadataItem)}`
+        );
+
+        // const test = ;
+
+        console.log(`Test: ${JSON.stringify(test)}`);
 
         return ok({
           usage: {

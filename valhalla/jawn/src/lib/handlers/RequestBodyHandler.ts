@@ -1,6 +1,5 @@
 import { tryParse } from "../../utils/helpers";
 import { getModelFromRequest } from "../../utils/modelMapper";
-import { Database } from "../db/database.types";
 import { GenericResult, ok } from "../modules/result";
 import {
   getImageModelParser,

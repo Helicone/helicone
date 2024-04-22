@@ -1,10 +1,12 @@
 import { getModelFromResponse } from "../../../utils/modelMapper";
 import { PromiseGenericResult, ok } from "../../modules/result";
-import { IBodyProcessor, ParseInput } from "./IBodyProcessor";
+import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 
 export class AnthropicBodyProcessor implements IBodyProcessor {
-  public async parse(parseInput: ParseInput): PromiseGenericResult<any> {
-    const { responseBody } = parseInput;
+  public async parse(
+    parseInput: ParseInput
+  ): PromiseGenericResult<ParseOutput> {
+    const { responseBody, tokenCounter } = parseInput;
     const parsedResponseBody = JSON.parse(responseBody);
     const responseModel = getModelFromResponse(parsedResponseBody);
     if (responseModel.includes("claude-3")) {
@@ -12,17 +14,20 @@ export class AnthropicBodyProcessor implements IBodyProcessor {
         !parsedResponseBody?.usage?.output_tokens ||
         !parsedResponseBody?.usage?.input_tokens
       ) {
-        return ok(parsedResponseBody);
+        return ok({
+          processedBody: parsedResponseBody,
+          usage: undefined,
+        });
       } else {
         return ok({
-          ...parsedResponseBody,
+          processedBody: parsedResponseBody,
           usage: {
-            total_tokens:
+            totalTokens:
               parsedResponseBody?.usage?.output_tokens +
               parsedResponseBody?.usage?.input_tokens,
-            prompt_tokens: parsedResponseBody?.usage?.input_tokens,
-            completion_tokens: parsedResponseBody?.usage?.output_tokens,
-            helicone_calculated: true,
+            promptTokens: parsedResponseBody?.usage?.input_tokens,
+            completionTokens: parsedResponseBody?.usage?.output_tokens,
+            heliconeCalculated: true,
           },
         });
       }
@@ -32,12 +37,12 @@ export class AnthropicBodyProcessor implements IBodyProcessor {
       const completionTokens = await tokenCounter(completion);
       const promptTokens = await tokenCounter(prompt);
       return ok({
-        ...parsedResponseBody,
+        processedBody: parsedResponseBody,
         usage: {
-          total_tokens: promptTokens + completionTokens,
-          prompt_tokens: promptTokens,
-          completion_tokens: completionTokens,
-          helicone_calculated: true,
+          totalTokens: promptTokens + completionTokens,
+          promptTokens: promptTokens,
+          completionTokens: completionTokens,
+          heliconeCalculated: true,
         },
       });
     }

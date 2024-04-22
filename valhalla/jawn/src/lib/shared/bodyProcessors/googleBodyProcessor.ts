@@ -1,8 +1,10 @@
 import { PromiseGenericResult, ok } from "../../modules/result";
-import { IBodyProcessor, ParseInput } from "./IBodyProcessor";
+import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 
 export class GoogleBodyProcessor implements IBodyProcessor {
-  public async parse(parseInput: ParseInput): PromiseGenericResult<any> {
+  public async parse(
+    parseInput: ParseInput
+  ): PromiseGenericResult<ParseOutput> {
     const { responseBody } = parseInput;
     const parsedResponseBody = JSON.parse(responseBody);
 
@@ -16,12 +18,13 @@ export class GoogleBodyProcessor implements IBodyProcessor {
     }
 
     return ok({
+      processedBody: parsedResponseBody,
       usage: {
-        total_tokens: usageMetadataItem?.usageMetadata?.totalTokenCount,
-        prompt_tokens: usageMetadataItem?.usageMetadata?.promptTokenCount,
-        completion_tokens:
+        totalTokens: usageMetadataItem?.usageMetadata?.totalTokenCount,
+        promptTokens: usageMetadataItem?.usageMetadata?.promptTokenCount,
+        completionTokens:
           usageMetadataItem?.usageMetadata?.candidatesTokenCount,
-        helicone_calculated: false,
+        heliconeCalculated: false,
       },
     });
   }
