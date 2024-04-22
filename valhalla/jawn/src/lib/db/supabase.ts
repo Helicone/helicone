@@ -1,6 +1,6 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { InMemoryCache } from "../memoryCache/staticMemCache";
-import { PromiseGenericResult, err, ok } from "../modules/result";
+import { PromiseGenericResult, err, ok } from "../shared/result";
 import { Database } from "./database.types";
 import { hashAuth } from "./hash";
 import { HeliconeAuth } from "../requestWrapper";
