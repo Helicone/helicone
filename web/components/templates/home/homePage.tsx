@@ -48,42 +48,7 @@ const faqs = [
 const HomePage = (props: HomePageProps) => {
   const {} = props;
 
-  const user = useUser();
   const [showStars, setShowStars] = useLocalStorage("showStars", true);
-
-  const supabaseClient = useSupabaseClient<Database>();
-
-  // Create a ref for the hero text
-  const heroTextRef = useRef<HTMLDivElement>(null);
-  const subTextRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const animationDelay = setTimeout(() => {
-      if (subTextRef.current) {
-        subTextRef.current.classList.remove("invisible", "opacity-0");
-        gsap.from(subTextRef.current, {
-          duration: 2,
-          autoAlpha: 0,
-          y: -50,
-          ease: "power3.out",
-        });
-      }
-    }, 300);
-
-    return () => clearTimeout(animationDelay);
-  }, []);
-
-  useEffect(() => {
-    if (heroTextRef.current) {
-      gsap.from(heroTextRef.current.children, {
-        duration: 0.8,
-        y: 50,
-        opacity: 0,
-        stagger: 0.2, // Stagger the animation for each child
-        ease: "power3.out",
-      });
-    }
-  }, []);
 
   return (
     <div className="w-full bg-[#f8feff] h-full antialiased relative">
@@ -178,17 +143,11 @@ const HomePage = (props: HomePageProps) => {
               <HeartIcon className="h-4 w-4 inline ml-2 text-pink-500" />
             </Link>
           </div>
-          <h1
-            ref={heroTextRef}
-            className="font-mono text-4xl sm:text-6xl block font-bold w-full h-full tracking-tight text-center items-center sm:leading-[1]"
-          >
+          <h1 className="font-mono text-4xl sm:text-6xl block font-bold w-full h-full tracking-tight text-center items-center sm:leading-[1]">
             <span>Observability Platform for</span>{" "}
             <span className="text-sky-500">LLM-developers</span>
           </h1>
-          <p
-            ref={subTextRef}
-            className="text-gray-700 font-medium text-md sm:text-2xl sm:leading-7 invisible opacity-0 font-[Roboto Mono]"
-          >
+          <p className="text-gray-700 font-medium text-md sm:text-2xl sm:leading-7">
             Meet the lightweight, yet powerful platform purpose-built for
             Generative AI
           </p>

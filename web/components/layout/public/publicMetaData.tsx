@@ -22,6 +22,7 @@ const PublicMetaData = (props: PublicMetaDataProps) => {
         <title>{`Helicone - Open-Source Generative AI Platform for Developers`}</title>
         {/* Update the favicon path based on the environment */}
         <link rel="icon" href={faviconPath} />
+        <link rel="canonical" href="https://www.helicone.ai/" />
         <meta property="og:title" content={"Helicone"} />
         <meta content="https://helicone.ai" property="og:url" />
         <meta name="description" content={description} />
