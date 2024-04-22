@@ -1,5 +1,5 @@
 import { RateLimitOptions } from "../clients/KVRateLimiterClient";
-import { Result, err, ok } from "./results";
+import { Result, err } from "./results";
 
 export class RateLimitOptionsBuilder {
   constructor(private policy: string | null) {}
