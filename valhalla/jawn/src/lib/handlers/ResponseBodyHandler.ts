@@ -1,12 +1,18 @@
 import { getTokenCount } from "../../utils/helpers";
+import { getModelFromResponse } from "../../utils/modelMapper";
 import { PromiseGenericResult, err, ok } from "../modules/result";
-import { IBodyProcessor } from "../shared/bodyProcessors/IBodyProcessor";
+import {
+  IBodyProcessor,
+  ParseOutput,
+} from "../shared/bodyProcessors/IBodyProcessor";
 import { AnthropicBodyProcessor } from "../shared/bodyProcessors/anthropicBodyProcessor";
 import { AnthropicStreamBodyProcessor } from "../shared/bodyProcessors/anthropicStreamBodyProcessor";
 import { GenericBodyProcessor } from "../shared/bodyProcessors/genericBodyProcessor";
 import { GoogleBodyProcessor } from "../shared/bodyProcessors/googleBodyProcessor";
+import { OpenAIStreamProcessor } from "../shared/bodyProcessors/openAIStreamProcessor";
 import { AbstractLogHandler } from "./AbstractLogHandler";
-import { HandlerContext } from "./HandlerContext";
+import { BatchContext } from "./BatchContext";
+import { MessageContext } from "./MessageContext";
 
 export const INTERNAL_ERRORS = {
   Cancelled: -3,
@@ -15,9 +21,10 @@ export const INTERNAL_ERRORS = {
 // Pulls out usage
 // Some modification to body
 export class ResponseBodyHandler extends AbstractLogHandler {
-  public async handle(context: HandlerContext): Promise<void> {
+  public async handle(context: MessageContext): Promise<void> {
     const request = context.message.log.request;
     const response = context.message.log.response;
+    const heliconeMeta = context.message.heliconeMeta;
     const isStream = request.isStream;
 
     const processedResponseBody = await this.processBody(
@@ -28,11 +35,18 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       request.body
     );
 
+    const model = getModelFromResponse(processedResponseBody.data);
     if (processedResponseBody.error) {
       console.error(
         "Error processing response body",
         processedResponseBody.error
       );
+
+      context.processedResponseBody = heliconeMeta.omitResponseLog
+        ? {
+            model: model,
+          }
+        : processedResponseBody.data;
     } else {
       context.processedResponseBody = processedResponseBody.data;
     }
@@ -46,7 +60,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     requestModel: string,
     responseBody: string,
     requestBody: string
-  ): PromiseGenericResult<any> {
+  ): PromiseGenericResult<ParseOutput> {
     try {
       responseBody = this.preprocess(isStream, 200, responseBody);
       const parser = this.getBodyProcessor(isStream, provider, responseBody);
@@ -87,6 +101,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       return new GoogleBodyProcessor();
     } else if (isStream && provider === "ANTHROPIC") {
       return new AnthropicStreamBodyProcessor();
+    } else if (isStream) {
+      return new OpenAIStreamProcessor();
     } else {
       return new GenericBodyProcessor();
     }

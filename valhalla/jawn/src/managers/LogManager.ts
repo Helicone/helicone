@@ -1,11 +1,11 @@
 import { RateLimitStore } from "../lib/stores/RateLimitStore";
 import { RateLimitHandler } from "../lib/handlers/RateLimitHandler";
 import { AuthenticationHandler } from "../lib/handlers/AuthenticationHandler";
-import { HandlerContext, Message } from "../lib/handlers/HandlerContext";
 import { RequestBodyHandler } from "../lib/handlers/RequestBodyHandler";
 import { LoggingHandler } from "../lib/handlers/LoggingHandler";
 import { PropertiesHandler } from "../lib/handlers/PropertiesHandler";
 import { ResponseBodyHandler } from "../lib/handlers/ResponseBodyHandler";
+import { HandlerContext, Message } from "../lib/handlers/HandlerContext";
 
 class LogManager {
   public async processLogEntries(logMessages: Message[]): Promise<void> {
@@ -20,6 +20,7 @@ class LogManager {
       .setNext(rateLimitHandler)
       .setNext(requestHandler)
       .setNext(propertiesHandler)
+      .setNext(responseBodyHandler)
       .setNext(loggingHandler);
 
     for (const logMessage of logMessages) {

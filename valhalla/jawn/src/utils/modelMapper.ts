@@ -29,9 +29,5 @@ function getModelFromPath(path: string) {
 }
 
 export function getModelFromResponse(responseBody: any) {
-  if (responseBody && responseBody.model) {
-    return responseBody.model;
-  }
-
-  return null;
+  return responseBody?.model ?? responseBody?.body?.model ?? null;
 }

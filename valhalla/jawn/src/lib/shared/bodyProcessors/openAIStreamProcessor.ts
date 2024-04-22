@@ -1,5 +1,5 @@
 import { consolidateTextFields } from "../../../utils/streamParser";
-import { PromiseGenericResult, ok } from "../../modules/result";
+import { PromiseGenericResult, err, ok } from "../../modules/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 
 export class OpenAIStreamProcessor implements IBodyProcessor {
@@ -11,8 +11,8 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
       try {
         return JSON.parse(line.replace("data:", ""));
       } catch (e) {
-        console.error("Error parsing line", line);
-        return {};
+        console.log("Error parsing line", line);
+        return err(`Error parsing line`);
       }
     });
 
@@ -32,7 +32,7 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
         },
       });
     } catch (e) {
-      console.error("Error parsing response", e);
+      console.log("Error parsing response", e);
       return ok({
         processedBody: {
           streamed_data: data,

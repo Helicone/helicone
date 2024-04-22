@@ -16,7 +16,6 @@ export class AnthropicBodyProcessor implements IBodyProcessor {
       ) {
         return ok({
           processedBody: parsedResponseBody,
-          usage: undefined,
         });
       } else {
         return ok({
