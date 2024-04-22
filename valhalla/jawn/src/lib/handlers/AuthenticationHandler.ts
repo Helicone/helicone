@@ -18,8 +18,8 @@ export class AuthenticationHandler extends AbstractLogHandler {
       return;
     }
 
-    context.addAuthParams(authResult.data);
-    context.addOrgParams(orgResult.data);
+    context.authParams = authResult.data;
+    context.orgParams = orgResult.data;
 
     await super.handle(context);
   }

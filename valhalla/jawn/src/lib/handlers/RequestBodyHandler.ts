@@ -1,10 +1,6 @@
 import { tryParse } from "../../utils/helpers";
 import { getModelFromRequest } from "../../utils/modelMapper";
 import { GenericResult, ok } from "../modules/result";
-import {
-  getImageModelParser,
-  isImageModel,
-} from "../shared/imageParsers/parserMapper";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
@@ -17,43 +13,26 @@ export class RequestBodyHandler extends AbstractLogHandler {
       return;
     }
 
-    context.processedRequestBody = processedBody.data;
+    context.processedLog.request.body = processedBody.data;
+
     await super.handle(context);
   }
 
-  processRequestBody(context: HandlerContext): GenericResult<string> {
-    const request = context.message.log.request;
-    let requestBody = request.body;
+  processRequestBody(context: HandlerContext): GenericResult<any> {
+    const log = context.message.log;
+    let requestBody = log.request.body as any;
     requestBody = requestBody.replace(/\\u0000/g, ""); // Remove unsupported null character in JSONB
     requestBody = tryParse(requestBody, "request body");
-    requestBody = this.handleOmitLog(
-      requestBody,
-      context.message.heliconeMeta.omitRequestLog
-    );
+    requestBody = context.message.heliconeMeta.omitRequestLog
+      ? {
+          model: log.request.model, // Put request model here, not calculated model
+        }
+      : requestBody;
 
-    // RIP out assets
-    // eslint-disable-next-line prefer-const
-    let requestAssets: Record<string, string> = {};
-    const model = getModelFromRequest(requestBody, request.path);
-
-    if (model && isImageModel(model)) {
-      const imageModelParser = getImageModelParser(model);
-      if (imageModelParser) {
-        requestAssets = imageModelParser.processMessages(requestBody);
-      }
-    }
-
+    // Ensure no image is stored as bytes
     requestBody = this.unsupportedImage(requestBody);
 
     return ok(requestBody);
-  }
-
-  handleOmitLog(body: any, omitLog: boolean): any {
-    if (omitLog) {
-      return { model: body.model || null };
-    }
-
-    return body;
   }
 
   // Replaces all the image_url that is not a url or not { url: url }  with

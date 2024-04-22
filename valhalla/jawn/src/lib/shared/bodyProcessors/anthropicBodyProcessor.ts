@@ -6,10 +6,9 @@ export class AnthropicBodyProcessor implements IBodyProcessor {
   public async parse(
     parseInput: ParseInput
   ): PromiseGenericResult<ParseOutput> {
-    const { responseBody, tokenCounter } = parseInput;
+    const { responseBody, tokenCounter, model } = parseInput;
     const parsedResponseBody = JSON.parse(responseBody);
-    const responseModel = getModelFromResponse(parsedResponseBody);
-    if (responseModel.includes("claude-3")) {
+    if (model?.includes("claude-3")) {
       if (
         !parsedResponseBody?.usage?.output_tokens ||
         !parsedResponseBody?.usage?.input_tokens

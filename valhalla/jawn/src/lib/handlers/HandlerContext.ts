@@ -7,34 +7,25 @@ export class HandlerContext extends SetOnce {
   public message: Message;
   public authParams?: AuthParams;
   public orgParams?: OrgParams;
-  public processedRequestBody?: string;
-  public processedResponseBody?: string;
-  public batchPayload: BatchPayload;
+  public processedLog: ProcessedLog;
+  public payload: Payload;
 
   constructor(message: Message) {
     super();
     this.message = message;
-    this.batchPayload = {
-      requests: [],
-      responses: [],
-      propoerties: [],
+    this.processedLog = {
+      request: {},
+      response: {},
     };
-  }
-
-  addRequest(request: Database["public"]["Tables"]["request"]["Insert"]): void {
-    this.batchPayload.requests.push(request);
-  }
-
-  addResponse(
-    response: Database["public"]["Tables"]["response"]["Insert"]
-  ): void {
-    this.batchPayload.responses.push(response);
+    this.payload = {
+      properties: [],
+    };
   }
 
   addProperties(
     property: Database["public"]["Tables"]["properties"]["Insert"][]
   ): void {
-    this.batchPayload.propoerties.push(...property);
+    this.payload.properties.push(...property);
   }
 }
 
@@ -60,6 +51,18 @@ export type Log = {
     id: string;
     body: string;
     status: number;
+    model: string;
+  };
+  model: string;
+};
+
+export type ProcessedLog = {
+  model?: string;
+  request: {
+    body?: any;
+  };
+  response: {
+    body?: any;
   };
 };
 
@@ -75,8 +78,8 @@ export type Message = {
   log: Log;
 };
 
-export type BatchPayload = {
-  requests: Database["public"]["Tables"]["request"]["Insert"][];
-  responses: Database["public"]["Tables"]["response"]["Insert"][];
-  propoerties: Database["public"]["Tables"]["properties"]["Insert"][];
+export type Payload = {
+  request?: Database["public"]["Tables"]["request"]["Insert"];
+  response?: Database["public"]["Tables"]["response"]["Insert"];
+  properties: Database["public"]["Tables"]["properties"]["Insert"][];
 };

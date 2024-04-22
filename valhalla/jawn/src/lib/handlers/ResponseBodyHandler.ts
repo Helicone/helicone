@@ -11,8 +11,7 @@ import { GenericBodyProcessor } from "../shared/bodyProcessors/genericBodyProces
 import { GoogleBodyProcessor } from "../shared/bodyProcessors/googleBodyProcessor";
 import { OpenAIStreamProcessor } from "../shared/bodyProcessors/openAIStreamProcessor";
 import { AbstractLogHandler } from "./AbstractLogHandler";
-import { BatchContext } from "./BatchContext";
-import { MessageContext } from "./MessageContext";
+import { HandlerContext } from "./HandlerContext";
 
 export const INTERNAL_ERRORS = {
   Cancelled: -3,
@@ -21,55 +20,57 @@ export const INTERNAL_ERRORS = {
 // Pulls out usage
 // Some modification to body
 export class ResponseBodyHandler extends AbstractLogHandler {
-  public async handle(context: MessageContext): Promise<void> {
-    const request = context.message.log.request;
-    const response = context.message.log.response;
-    const heliconeMeta = context.message.heliconeMeta;
-    const isStream = request.isStream;
+  public async handle(context: HandlerContext): Promise<void> {
+    const omitResponseLog = context.message.heliconeMeta.omitResponseLog;
 
-    const processedResponseBody = await this.processBody(
-      isStream,
-      request.provider,
-      request.model,
-      response.body,
-      request.body
-    );
-
-    const model = getModelFromResponse(processedResponseBody.data);
-    if (processedResponseBody.error) {
+    const processedResponseBody = await this.processBody(context);
+    if (processedResponseBody.error || !processedResponseBody.data) {
       console.error(
         "Error processing response body",
         processedResponseBody.error
       );
 
-      context.processedResponseBody = heliconeMeta.omitResponseLog
-        ? {
-            model: model,
-          }
-        : processedResponseBody.data;
+      context.processedLog.response.body = {
+        helicone_error: "error parsing response",
+        parse_response_error: processedResponseBody.error,
+        body: omitResponseLog
+          ? {
+              model: context.message.log.response.model, // Put response model here, not calculated model
+            }
+          : processedResponseBody.data ?? undefined,
+      };
     } else {
-      context.processedResponseBody = processedResponseBody.data;
+      context.processedLog.response.body = omitResponseLog
+        ? {
+            model: context.message.log.response.model, // Put response model here, not calculated model
+          }
+        : processedResponseBody.data ?? undefined;
     }
 
     return super.handle(context);
   }
 
   async processBody(
-    isStream: boolean,
-    provider: string,
-    requestModel: string,
-    responseBody: string,
-    requestBody: string
+    context: HandlerContext
   ): PromiseGenericResult<ParseOutput> {
+    const log = context.message.log;
+    const isStream = log.request.isStream;
+    const provider = log.request.provider;
+
+    let responseBody = log.response.body;
     try {
-      responseBody = this.preprocess(isStream, 200, responseBody);
+      responseBody = this.preprocess(
+        isStream,
+        log.response.status,
+        log.response.body
+      );
       const parser = this.getBodyProcessor(isStream, provider, responseBody);
       return await parser.parse({
         responseBody: responseBody,
-        requestBody: requestBody,
+        requestBody: log.request.body,
         tokenCounter: async (text: string) =>
           await getTokenCount(text, provider),
-        model: requestModel,
+        model: log.model,
       });
     } catch (error: any) {
       console.log("Error parsing response", error);

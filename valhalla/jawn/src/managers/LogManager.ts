@@ -28,6 +28,8 @@ class LogManager {
       await authHandler.handle(handlerContext);
     }
 
+    // Need to pull out all database payloads and make into list
+
     const { data: rateLimitInsId, error: rateLimitErr } =
       await rateLimitHandler.handleResults();
 
