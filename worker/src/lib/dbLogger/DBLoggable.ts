@@ -881,7 +881,6 @@ export class DBLoggable {
         heliconeRequestResponse
       );
     }
-    console.log("cost", cost);
 
     return ok({
       cost,
