@@ -149,6 +149,7 @@ export class PromptController extends Controller {
     @Body()
     requestBody: {
       limit: number;
+      random: boolean;
     },
     @Request() request: JawnAuthenticatedRequest,
     @Path() promptVersionId: string
@@ -157,7 +158,8 @@ export class PromptController extends Controller {
 
     const result = await inputManager.getInputs(
       requestBody.limit,
-      promptVersionId
+      promptVersionId,
+      requestBody.random
     );
     if (result.error || !result.data) {
       console.log(result.error);

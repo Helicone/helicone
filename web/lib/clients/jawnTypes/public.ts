@@ -289,6 +289,8 @@ Json: JsonObject;
     /** @enum {string} */
     SortDirection: "asc" | "desc";
     SortLeafRequest: {
+      /** @enum {boolean} */
+      random?: true;
       created_at?: components["schemas"]["SortDirection"];
       cache_created_at?: components["schemas"]["SortDirection"];
       latency?: components["schemas"]["SortDirection"];
@@ -422,10 +424,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
-    NewDatasetParams: {
-      datasetName: string;
-      requestIds: string[];
-    };
     "ResultSuccess__datasetId-string__": {
       data: {
         datasetId: string;
@@ -434,6 +432,10 @@ Json: JsonObject;
       error: null;
     };
     "Result__datasetId-string_.string_": components["schemas"]["ResultSuccess__datasetId-string__"] | components["schemas"]["ResultError_string_"];
+    NewDatasetParams: {
+      datasetName: string;
+      requestIds: string[];
+    };
     /** @description Make all properties in T optional */
     Partial_PromptVersionsToOperators_: {
       minor_version?: components["schemas"]["Partial_NumberOperators_"];
@@ -696,6 +698,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          random: boolean;
           /** Format: double */
           limit: number;
         };
@@ -740,7 +743,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_null.string_"];
+          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
         };
       };
     };

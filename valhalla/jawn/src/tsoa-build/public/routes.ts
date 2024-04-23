@@ -272,6 +272,7 @@ const models: TsoaRoute.Models = {
     "SortLeafRequest": {
         "dataType": "refObject",
         "properties": {
+            "random": {"dataType":"enum","enums":[true]},
             "created_at": {"ref":"SortDirection"},
             "cache_created_at": {"ref":"SortDirection"},
             "latency": {"ref":"SortDirection"},
@@ -490,15 +491,6 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_PromptVersionResult-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "NewDatasetParams": {
-        "dataType": "refObject",
-        "properties": {
-            "datasetName": {"dataType":"string","required":true},
-            "requestIds": {"dataType":"array","array":{"dataType":"string"},"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess__datasetId-string__": {
         "dataType": "refObject",
         "properties": {
@@ -511,6 +503,15 @@ const models: TsoaRoute.Models = {
     "Result__datasetId-string_.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__datasetId-string__"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "NewDatasetParams": {
+        "dataType": "refObject",
+        "properties": {
+            "datasetName": {"dataType":"string","required":true},
+            "requestIds": {"dataType":"array","array":{"dataType":"string"},"required":true},
+        },
+        "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Partial_PromptVersionsToOperators_": {
@@ -882,7 +883,7 @@ export function RegisterRoutes(app: Router) {
 
             function PromptController_getInputs(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"limit":{"dataType":"double","required":true}}},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"random":{"dataType":"boolean","required":true},"limit":{"dataType":"double","required":true}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
                     promptVersionId: {"in":"path","name":"promptVersionId","required":true,"dataType":"string"},
             };

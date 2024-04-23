@@ -23,7 +23,7 @@ import { BaseManager } from "../BaseManager";
 export type UserCreationParams = Pick<User, "email" | "name" | "phoneNumbers">;
 
 export class DatasetManager extends BaseManager {
-  async addDataset(params: NewDatasetParams): Promise<Result<null, string>> {
+  async addDataset(params: NewDatasetParams): Promise<Result<string, string>> {
     const dataset = await supabaseServer.client
       .from("experiment_dataset_v2")
       .insert({
@@ -51,7 +51,7 @@ export class DatasetManager extends BaseManager {
       return err(res.error);
     }
 
-    return ok(null);
+    return ok(dataset.data.id);
   }
 
   async addRandomDataset(params: RandomDatasetParams): Promise<

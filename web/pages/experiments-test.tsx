@@ -1,15 +1,14 @@
 import { User } from "@supabase/auth-helpers-nextjs";
+import { ReactElement, useEffect, useState } from "react";
 import AuthLayout from "../components/layout/authLayout";
 import AuthHeader from "../components/shared/authHeader";
-import AlertsPage from "../components/templates/alerts/alertsPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
-import { ReactElement, use, useEffect, useState } from "react";
+import { useJawnClient } from "../lib/clients/jawnHook";
+import { useInputs } from "../services/hooks/prompts/inputs";
 import {
   usePromptVersions,
   usePrompts,
 } from "../services/hooks/prompts/prompts";
-import { useJawnClient } from "../lib/clients/jawnHook";
-import { useInputs } from "../services/hooks/prompts/inputs";
 
 interface AlertProps {
   user: User;
@@ -66,18 +65,26 @@ const Alert = (props: AlertProps) => {
         <button
           className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
           onClick={async () => {
-            const dataset = await jawn.POST("/v1/experiment/dataset/random", {
-              body: {
-                datasetName: "testRandom",
-                filter: {
-                  prompts_versions: {
-                    prompt_v2: {
-                      equals: promptId,
-                    },
+            const requestIds = await jawn.POST(
+              "/v1/prompt/version/{promptVersionId}/inputs/query",
+              {
+                body: {
+                  limit: 2,
+                  random: true,
+                },
+                params: {
+                  path: {
+                    promptVersionId: promptVersionId,
                   },
                 },
-                limit: 2,
-                offset: 0,
+              }
+            );
+
+            const dataset = await jawn.POST("/v1/experiment/dataset", {
+              body: {
+                datasetName: "test Set Hi Scott",
+                requestIds:
+                  requestIds.data?.data?.map((r) => r.source_request) ?? [],
               },
             });
 

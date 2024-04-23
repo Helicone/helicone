@@ -19,7 +19,8 @@ import { BaseManager } from "../BaseManager";
 export class InputsManager extends BaseManager {
   async getInputs(
     limit: number,
-    promptVersion: string
+    promptVersion: string,
+    random: boolean
   ): Promise<Result<PromptInputRecord[], string>> {
     return await dbExecute<PromptInputRecord>(
       `
@@ -33,6 +34,11 @@ export class InputsManager extends BaseManager {
       left join request on prompt_input_record.source_request = request.id
       WHERE  request.helicone_org_id = $1 AND
       prompt_input_record.prompt_version = $2
+      ${
+        random
+          ? "ORDER BY random()"
+          : "ORDER BY prompt_input_record.created_at DESC"
+      }
       LIMIT $3
 
       `,

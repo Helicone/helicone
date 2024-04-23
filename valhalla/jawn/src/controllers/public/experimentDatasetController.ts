@@ -39,7 +39,14 @@ export class ExperimentDatasetController extends Controller {
     @Body()
     requestBody: NewDatasetParams,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
+  ): Promise<
+    Result<
+      {
+        datasetId: string;
+      },
+      string
+    >
+  > {
     const datasetManager = new DatasetManager(request.authParams);
 
     const result = await datasetManager.addDataset(requestBody);
@@ -49,7 +56,9 @@ export class ExperimentDatasetController extends Controller {
       return err("Not implemented");
     } else {
       this.setStatus(200); // set return status 201
-      return ok(null);
+      return ok({
+        datasetId: result.data,
+      });
     }
   }
 

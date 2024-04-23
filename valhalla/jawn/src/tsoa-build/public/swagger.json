@@ -805,6 +805,13 @@
 			},
 			"SortLeafRequest": {
 				"properties": {
+					"random": {
+						"type": "boolean",
+						"enum": [
+							true
+						],
+						"nullable": false
+					},
 					"created_at": {
 						"$ref": "#/components/schemas/SortDirection"
 					},
@@ -1333,25 +1340,6 @@
 					}
 				]
 			},
-			"NewDatasetParams": {
-				"properties": {
-					"datasetName": {
-						"type": "string"
-					},
-					"requestIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"datasetName",
-					"requestIds"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"ResultSuccess__datasetId-string__": {
 				"properties": {
 					"data": {
@@ -1389,6 +1377,25 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
+			},
+			"NewDatasetParams": {
+				"properties": {
+					"datasetName": {
+						"type": "string"
+					},
+					"requestIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"datasetName",
+					"requestIds"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"Partial_PromptVersionsToOperators_": {
 				"properties": {
@@ -2164,12 +2171,16 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"random": {
+										"type": "boolean"
+									},
 									"limit": {
 										"type": "number",
 										"format": "double"
 									}
 								},
 								"required": [
+									"random",
 									"limit"
 								],
 								"type": "object"
@@ -2234,7 +2245,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
+									"$ref": "#/components/schemas/Result__datasetId-string_.string_"
 								}
 							}
 						}
