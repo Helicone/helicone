@@ -25,8 +25,8 @@ import {
 } from "../../../services/lib/filters/filterDefs";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { useRouter } from "next/router";
-import { encodeFilter } from "../requestsV2/requestsPageV2";
 import ThemedTabs from "../../../components/shared/themed/themedTabs";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 interface UserModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -48,11 +48,11 @@ const UserModal = (props: UserModalProps) => {
   const valueFormatter = function (number: number) {
     return "$" + number;
   };
+  const filterMap = DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[];
 
   useEffect(() => {
     setIsLoading(true);
     setIsCostLoading(true);
-    const filterMap = DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[];
 
     const userFilters = filterUIToFilterLeafs(filterMap, []).concat([
       {
@@ -139,6 +139,12 @@ const UserModal = (props: UserModalProps) => {
   const handleOptionSelect = (option: string) => {
     setGraphOption(option);
   };
+
+  function encodeFilter(filter: UIFilterRow): string {
+    return `${filterMap[filter.filterMapIdx].label}:${
+      filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label
+    }:${filter.value}`;
+  }
 
   return (
     <ThemedModal open={open} setOpen={setOpen}>
