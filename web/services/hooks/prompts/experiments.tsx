@@ -12,7 +12,9 @@ const useExperiments = () => {
       const jawn = query.queryKey[1] as ReturnType<typeof useJawnClient>;
 
       return jawn.POST("/v1/experiment/query", {
-        body: {},
+        body: {
+          filter: "all",
+        },
       });
     },
     refetchOnWindowFocus: false,

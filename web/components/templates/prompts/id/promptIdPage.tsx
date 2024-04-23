@@ -252,6 +252,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           />
         </div>
         {experimentsLoading && "Loading..."}
+        {experiments.length}
         <SimpleTable
           data={experiments}
           columns={[

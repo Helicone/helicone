@@ -1291,6 +1291,44 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ResultSuccess__datasetId-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"datasetId": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"datasetId"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__datasetId-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__datasetId-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"Partial_PromptVersionsToOperators_": {
 				"properties": {
 					"minor_version": {
@@ -1613,48 +1651,6 @@
 					}
 				]
 			},
-			"Partial_UserMetricsToOperators_": {
-				"properties": {
-					"user_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"last_active": {
-						"$ref": "#/components/schemas/Partial_TimestampOperators_"
-					},
-					"total_requests": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_UserApiKeysTableToOperators_": {
-				"properties": {
-					"api_key_hash": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"api_key_name": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_PropertiesTableToOperators_": {
-				"properties": {
-					"auth_hash": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"key": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"value": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
 			"Partial_ExperimentToOperators_": {
 				"properties": {
 					"id": {
@@ -1667,336 +1663,25 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Partial_TimestampOperatorsTyped_": {
+			"Pick_FilterLeaf.experiment_": {
 				"properties": {
-					"gte": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"lte": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"lt": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"gt": {
-						"type": "string",
-						"format": "date-time"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_RequestResponseLogToOperators_": {
-				"properties": {
-					"latency": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"status": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"request_created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
-					},
-					"response_created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
-					},
-					"auth_hash": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"model": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"user_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"organization_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"node_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"job_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"threat": {
-						"$ref": "#/components/schemas/Partial_BooleanOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_UserViewToOperators_": {
-				"properties": {
-					"user_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"active_for": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"first_active": {
-						"$ref": "#/components/schemas/Partial_TimestampOperators_"
-					},
-					"last_active": {
-						"$ref": "#/components/schemas/Partial_TimestampOperators_"
-					},
-					"total_requests": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"average_requests_per_day_active": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"average_tokens_per_request": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"total_completion_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"total_prompt_token": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"cost": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_PropertiesCopyV2ToOperators_": {
-				"properties": {
-					"key": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"value": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"organization_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_PropertyWithResponseV1ToOperators_": {
-				"properties": {
-					"property_key": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"property_value": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"request_created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
-					},
-					"organization_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"threat": {
-						"$ref": "#/components/schemas/Partial_BooleanOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_JobToOperators_": {
-				"properties": {
-					"id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"name": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"description": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"status": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperators_"
-					},
-					"updated_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperators_"
-					},
-					"timeout_seconds": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"custom_properties": {
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/Partial_TextOperators_"
-						},
-						"type": "object"
-					},
-					"org_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_NodesToOperators_": {
-				"properties": {
-					"id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"name": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"description": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"job_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"status": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperators_"
-					},
-					"updated_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperators_"
-					},
-					"timeout_seconds": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"custom_properties": {
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/Partial_TextOperators_"
-						},
-						"type": "object"
-					},
-					"org_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_CacheHitsTableToOperators_": {
-				"properties": {
-					"organization_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"request_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"latency": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"completion_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"prompt_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_RateLimitTableToOperators_": {
-				"properties": {
-					"organization_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_TablesAndViews_": {
-				"properties": {
-					"user_metrics": {
-						"$ref": "#/components/schemas/Partial_UserMetricsToOperators_"
-					},
-					"user_api_keys": {
-						"$ref": "#/components/schemas/Partial_UserApiKeysTableToOperators_"
-					},
-					"response": {
-						"$ref": "#/components/schemas/Partial_ResponseTableToOperators_"
-					},
-					"request": {
-						"$ref": "#/components/schemas/Partial_RequestTableToOperators_"
-					},
-					"feedback": {
-						"$ref": "#/components/schemas/Partial_FeedbackTableToOperators_"
-					},
-					"properties_table": {
-						"$ref": "#/components/schemas/Partial_PropertiesTableToOperators_"
-					},
-					"prompt_v2": {
-						"$ref": "#/components/schemas/Partial_PromptToOperators_"
-					},
-					"prompts_versions": {
-						"$ref": "#/components/schemas/Partial_PromptVersionsToOperators_"
-					},
 					"experiment": {
 						"$ref": "#/components/schemas/Partial_ExperimentToOperators_"
-					},
-					"request_response_log": {
-						"$ref": "#/components/schemas/Partial_RequestResponseLogToOperators_"
-					},
-					"users_view": {
-						"$ref": "#/components/schemas/Partial_UserViewToOperators_"
-					},
-					"properties_v3": {
-						"$ref": "#/components/schemas/Partial_PropertiesCopyV2ToOperators_"
-					},
-					"property_with_response_v1": {
-						"$ref": "#/components/schemas/Partial_PropertyWithResponseV1ToOperators_"
-					},
-					"job": {
-						"$ref": "#/components/schemas/Partial_JobToOperators_"
-					},
-					"job_node": {
-						"$ref": "#/components/schemas/Partial_NodesToOperators_"
-					},
-					"cache_hits": {
-						"$ref": "#/components/schemas/Partial_CacheHitsTableToOperators_"
-					},
-					"rate_limit_log": {
-						"$ref": "#/components/schemas/Partial_RateLimitTableToOperators_"
-					},
-					"properties": {
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/Partial_TextOperators_"
-						},
-						"type": "object"
-					},
-					"values": {
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/Partial_TextOperators_"
-						},
-						"type": "object"
 					}
 				},
 				"type": "object",
-				"description": "Make all properties in T optional"
+				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
-			"SingleKey_TablesAndViews_": {
-				"$ref": "#/components/schemas/Partial_TablesAndViews_"
+			"FilterLeafSubset_experiment_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.experiment_"
 			},
-			"FilterLeaf": {
-				"$ref": "#/components/schemas/SingleKey_TablesAndViews_"
-			},
-			"FilterNode": {
+			"ExperimentFilterNode": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/FilterLeaf"
+						"$ref": "#/components/schemas/FilterLeafSubset_experiment_"
 					},
 					{
-						"$ref": "#/components/schemas/FilterBranch"
+						"$ref": "#/components/schemas/ExperimentFilterBranch"
 					},
 					{
 						"type": "string",
@@ -2006,10 +1691,10 @@
 					}
 				]
 			},
-			"FilterBranch": {
+			"ExperimentFilterBranch": {
 				"properties": {
-					"left": {
-						"$ref": "#/components/schemas/FilterNode"
+					"right": {
+						"$ref": "#/components/schemas/ExperimentFilterNode"
 					},
 					"operator": {
 						"type": "string",
@@ -2018,17 +1703,16 @@
 							"and"
 						]
 					},
-					"right": {
-						"$ref": "#/components/schemas/FilterNode"
+					"left": {
+						"$ref": "#/components/schemas/ExperimentFilterNode"
 					}
 				},
 				"required": [
-					"left",
+					"right",
 					"operator",
-					"right"
+					"left"
 				],
-				"type": "object",
-				"additionalProperties": false
+				"type": "object"
 			}
 		},
 		"securitySchemes": {
@@ -2471,7 +2155,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
+									"$ref": "#/components/schemas/Result__datasetId-string_.string_"
 								}
 							}
 						}
@@ -2655,22 +2339,11 @@
 						"application/json": {
 							"schema": {
 								"properties": {
-									"request": {
-										"$ref": "#/components/schemas/HeliconeRequest"
-									},
-									"sort": {
-										"items": {
-											"$ref": "#/components/schemas/SortLeafRequest"
-										},
-										"type": "array"
-									},
 									"filter": {
-										"$ref": "#/components/schemas/FilterNode"
+										"$ref": "#/components/schemas/ExperimentFilterNode"
 									}
 								},
 								"required": [
-									"request",
-									"sort",
 									"filter"
 								],
 								"type": "object"

@@ -10,7 +10,7 @@ export const usePromptVersions = (promptId?: string) => {
     queryKey: ["prompts", jawn, promptId],
     queryFn: async (query) => {
       const jawn = query.queryKey[1] as ReturnType<typeof useJawnClient>;
-      const promptId = query.queryKey[2] as string;
+      const promptId = query.queryKey[2] as string | undefined;
 
       return jawn.POST("/v1/prompt/{promptId}/versions/query", {
         params: {

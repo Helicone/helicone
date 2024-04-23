@@ -54,9 +54,14 @@ export class DatasetManager extends BaseManager {
     return ok(null);
   }
 
-  async addRandomDataset(
-    params: RandomDatasetParams
-  ): Promise<Result<null, string>> {
+  async addRandomDataset(params: RandomDatasetParams): Promise<
+    Result<
+      {
+        datasetId: string;
+      },
+      string
+    >
+  > {
     const dataset = await supabaseServer.client
       .from("experiment_dataset_v2")
       .insert({
@@ -92,7 +97,9 @@ export class DatasetManager extends BaseManager {
       return err(res.error);
     }
 
-    return ok(null);
+    return ok({
+      datasetId: dataset.data.id,
+    });
   }
 
   async getPromptVersions(

@@ -76,7 +76,7 @@ export class ExperimentController extends Controller {
     if (result.error || !result.data) {
       this.setStatus(500);
       console.error(result.error);
-      return err("Not implemented");
+      return err(result.error);
     } else {
       this.setStatus(200); // set return status 201
       return result;
@@ -87,9 +87,7 @@ export class ExperimentController extends Controller {
   public async getExperiments(
     @Body()
     requestBody: {
-      filter: FilterNode;
-      sort: SortLeafRequest[];
-      request: HeliconeRequest;
+      filter: ExperimentFilterNode;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Experiment[], string>> {

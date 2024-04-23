@@ -2,6 +2,7 @@ import { Json } from "../db/database.types";
 import { supabaseServer } from "../db/supabase";
 import { Result, err, ok } from "../shared/result";
 import { dbExecute } from "../shared/db/dbExecute";
+import { ServerExperimentStore } from "../stores/experimentStore";
 
 export interface ExperimentDB {
   id: string;
@@ -151,40 +152,43 @@ async function fetchDataset(
   return ok(dataset);
 }
 
-export async function experimentPop(): Promise<Result<ExperimentType, string>> {
-  const experiment = await fetchLatestExperimentDb();
+// export async function experimentPop(): Promise<Result<ExperimentType, string>> {
+//   // const experiment = await fetchLatestExperimentDb();
+//   const { data: experiment, error: experimentError } =
+//     await ServerExperimentStore.getLatestExperiment();
 
-  if (experiment.error || !experiment.data) {
-    return err(experiment.error);
-  }
+//   if (experimentError || !experiment) {
+//     return err(experimentError);
+//   }
 
-  const dataset = await fetchDataset(experiment.data.dataset ?? "");
+//   experiment.dataset.id
+//   const dataset = await fetchDataset(experiment.data.dataset ?? "");
 
-  if (dataset.error || !dataset.data) {
-    return err(dataset.error);
-  }
+//   if (dataset.error || !dataset.data) {
+//     return err(dataset.error);
+//   }
 
-  const testPrompt = await supabaseServer.client
-    .from("prompts")
-    .select("*")
-    .eq("uuid", experiment.data.test_prompt_uuid)
-    .eq("organization_id", experiment.data.organization_id)
-    .single();
+//   const testPrompt = await supabaseServer.client
+//     .from("prompts")
+//     .select("*")
+//     .eq("uuid", experiment.data.test_prompt_uuid)
+//     .eq("organization_id", experiment.data.organization_id)
+//     .single();
 
-  if (testPrompt.error) {
-    return err(testPrompt.error.message);
-  }
+//   if (testPrompt.error) {
+//     return err(testPrompt.error.message);
+//   }
 
-  return ok({
-    id: experiment.data.id,
-    status: experiment.data.status,
-    name: experiment.data.name,
-    created_at: experiment.data.created_at,
-    provider_key: experiment.data.provider_key,
-    test_prompt: {
-      heliconeTemplate: testPrompt.data.heliconeTemplate,
-    },
-    dataset: dataset.data,
-    organizationId: experiment.data.organization_id,
-  });
-}
+//   return ok({
+//     id: experiment.data.id,
+//     status: experiment.data.status,
+//     name: experiment.data.name,
+//     created_at: experiment.data.created_at,
+//     provider_key: experiment.data.provider_key,
+//     test_prompt: {
+//       heliconeTemplate: testPrompt.data.heliconeTemplate,
+//     },
+//     dataset: dataset.data,
+//     organizationId: experiment.data.organization_id,
+//   });
+// }
