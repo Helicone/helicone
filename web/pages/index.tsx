@@ -1,6 +1,5 @@
 import { GetServerSidePropsContext } from "next";
 
-import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { isCustomerDomain } from "../lib/customerPortalHelpers";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import HomePage from "../components/templates/home/homePage";
