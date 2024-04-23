@@ -10,12 +10,25 @@ import {
   Tags,
 } from "tsoa";
 import { Result } from "../../lib/shared/result";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import {
+  FilterLeafSubset,
+  FilterNode,
+} from "../../lib/shared/filters/filterDefs";
 import { PromptManager } from "../../managers/prompt/PromptManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 
+export type PromptsFilterBranch = {
+  left: PromptsFilterNode;
+  operator: "or" | "and";
+  right: PromptsFilterNode;
+};
+type PromptsFilterNode =
+  | FilterLeafSubset<"prompt_v2">
+  | PromptsFilterBranch
+  | "all";
+
 export interface PromptsQueryParams {
-  filter: FilterNode;
+  filter: PromptsFilterNode;
 }
 
 export interface PromptsResult {

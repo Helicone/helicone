@@ -1,27 +1,11 @@
 // src/users/usersController.ts
-import {
-  Body,
-  Controller,
-  Example,
-  Path,
-  Post,
-  Request,
-  Route,
-  Security,
-  Tags,
-} from "tsoa";
-import { Result, err, ok } from "../../lib/shared/result";
-import {
-  FilterNode,
-  FilterNodeSubnet,
-} from "../../lib/shared/filters/filterDefs";
+import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
+import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import { Result, err } from "../../lib/shared/result";
 import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { HeliconeRequest } from "../../lib/stores/request/request";
-import { RequestManager } from "../../managers/request/RequestManager";
-import { JawnAuthenticatedRequest } from "../../types/request";
-import { PromptManager } from "../../managers/prompt/PromptManager";
-import { DatasetManager } from "../../managers/dataset/DatasetManager";
 import { ExperimentManager } from "../../managers/experiment/ExperimentManager";
+import { JawnAuthenticatedRequest } from "../../types/request";
 
 export interface NewExperimentParams {
   datasetId: string;
@@ -90,7 +74,7 @@ export class ExperimentController extends Controller {
   public async getExperiments(
     @Body()
     requestBody: {
-      filter: FilterNodeSubnet<["feedback"]>;
+      filter: FilterNode;
       sort: SortLeafRequest[];
       request: HeliconeRequest;
     },

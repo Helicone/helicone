@@ -1,9 +1,22 @@
 // src/users/usersController.ts
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
 import { Result, err, ok } from "../../lib/shared/result";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import {
+  FilterLeafSubset,
+  FilterNode,
+} from "../../lib/shared/filters/filterDefs";
 import { DatasetManager } from "../../managers/dataset/DatasetManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
+
+export type DatasetFilterBranch = {
+  left: DatasetFilterNode;
+  operator: "or" | "and";
+  right: DatasetFilterNode;
+};
+type DatasetFilterNode =
+  | FilterLeafSubset<"request" | "prompts_versions">
+  | DatasetFilterBranch
+  | "all";
 
 export interface NewDatasetParams {
   datasetName: string;
@@ -12,7 +25,7 @@ export interface NewDatasetParams {
 
 export interface RandomDatasetParams {
   datasetName: string;
-  filter: FilterNode;
+  filter: DatasetFilterNode;
   offset?: number;
   limit?: number;
 }

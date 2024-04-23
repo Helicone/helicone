@@ -91,6 +91,14 @@ const sections: {
         tiers: { Free: true, Growth: true, Enterprise: true },
       },
       {
+        name: "Cost Tracking",
+        tiers: {
+          Free: true,
+          Growth: true,
+          Enterprise: true,
+        },
+      },
+      {
         name: "Labeling and Tagging",
         tiers: { Free: true, Growth: true, Enterprise: true },
       },
@@ -144,7 +152,7 @@ const sections: {
         tiers: { Free: true, Growth: true, Enterprise: true },
       },
       {
-        name: "GraphQL API",
+        name: "REST API",
         tiers: { Free: true, Growth: true, Enterprise: true },
       },
       {
