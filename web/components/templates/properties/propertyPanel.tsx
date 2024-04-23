@@ -24,7 +24,6 @@ import {
   SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { formatNumber } from "../users/initialColumns";
-import { encodeFilter } from "../requestsV2/requestsPageV2";
 import { useState } from "react";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import {
@@ -34,6 +33,7 @@ import {
 import ExportButton from "../../shared/themed/table/exportButton";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import LoadingAnimation from "../../shared/loadingAnimation";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 
 interface PropertyPanelProps {
   property: string;
@@ -83,6 +83,12 @@ const PropertyPanel = (props: PropertyPanelProps) => {
   const filterMap = (REQUEST_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
     propertyFilters
   );
+
+  function encodeFilter(filter: UIFilterRow): string {
+    return `${filterMap[filter.filterMapIdx].label}:${
+      filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label
+    }:${filter.value}`;
+  }
 
   const propertyValueData =
     valueMetrics.aggregatedKeyMetrics?.data?.data?.map((d) => ({
