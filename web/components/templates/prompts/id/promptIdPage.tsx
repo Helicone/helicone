@@ -17,6 +17,7 @@ import StyledAreaChart from "../../dashboard/styledAreaChart";
 import { SimpleTable } from "../../../shared/table/simpleTable";
 import TableFooter from "../../requestsV2/tableFooter";
 import { PrettyInput } from "../../playground/chatRow";
+import { useExperiments } from "../../../../services/hooks/prompts/experiments";
 
 interface PromptIdPageProps {
   id: string;
@@ -108,6 +109,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
 
   const router = useRouter();
 
+  const { experiments, isLoading: experimentsLoading } = useExperiments();
   return (
     <div className="w-full h-full flex flex-col space-y-8">
       <div className="flex flex-row items-center justify-between">
@@ -249,23 +251,41 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             icon={PresentationChartLineIcon}
           />
         </div>
+        {experimentsLoading && "Loading..."}
         <SimpleTable
-          data={DUMMY_DATA}
+          data={experiments}
           columns={[
             {
-              key: "name",
-              header: "Name",
-              render: (item) => item.name,
+              key: "id",
+              header: "ID",
+              render: (item) => (
+                <a
+                  className="text-blue-500"
+                  href={`/prompts/${id}/experiments/${item.id}`}
+                >
+                  {item.id}
+                </a>
+              ),
             },
             {
-              key: "departement",
-              header: "Departement",
-              render: (item) => item.departement,
+              key: "createdAt",
+              header: "Created At",
+              render: (item) => item.createdAt,
             },
             {
-              key: "Role",
-              header: "Role",
-              render: (item) => item.Role,
+              key: "datasetId",
+              header: "Dataset",
+              render: (item) => item.datasetName,
+            },
+            {
+              key: "model",
+              header: "Model",
+              render: (item) => item.model,
+            },
+            {
+              key: "runCount",
+              header: "Run Count",
+              render: (item) => item.runCount,
             },
             {
               key: "status",
