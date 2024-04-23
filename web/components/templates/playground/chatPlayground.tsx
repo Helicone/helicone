@@ -323,7 +323,15 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             onClick={() => {
               // check to see if the last message was a user
               const lastMessage = currentChat[currentChat.length - 1];
-              if (lastMessage.role === "user") {
+              if (lastMessage === undefined) {
+                const newChat = [...currentChat];
+                newChat.push({
+                  id: crypto.randomUUID(),
+                  content: "",
+                  role: "user",
+                });
+                setCurrentChat(newChat);
+              } else if (lastMessage.role === "user") {
                 const newChat = [...currentChat];
                 newChat.push({
                   id: crypto.randomUUID(),
@@ -377,7 +385,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
               }
             }}
             className={clsx(
-              "bg-sky-500 hover:bg-sky-600",
+              "bg-sky-600 hover:bg-sky-700",
               "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-white dark:text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             )}
           >

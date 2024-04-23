@@ -14,6 +14,7 @@ import HcBadge from "../../../ui/hcBadge";
 import { clsx } from "../../../shared/clsx";
 import { RenderImageWithPrettyInputKeys } from "./promptIdPage";
 import { RenderWithPrettyInputKeys } from "../../playground/chatRow";
+import ChatPlayground from "../../playground/chatPlayground";
 
 interface PromptIdPageProps {
   id: string;
@@ -33,6 +34,10 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
     prompt_v2: string;
     model: string;
   }>();
+
+  const template = JSON.parse(
+    JSON.stringify(selectedPrompt?.helicone_template ?? "")
+  ).messages;
 
   const renderStepArray = [
     <div className="flex flex-col">
@@ -118,7 +123,16 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
         </div>
       </div>
     </div>,
-    <div className="flex items-center space-x-2">Step 2: - Edit prompt</div>,
+    <div className="">
+      <ChatPlayground
+        requestId={""}
+        chat={template}
+        models={[]}
+        temperature={0.5}
+        maxTokens={256}
+        submitText={"Save Changes"}
+      />
+    </div>,
     <div className="flex items-center space-x-2">
       Step 3: - Select model and dataset
     </div>,
@@ -129,7 +143,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
 
   return (
     <>
-      <div className="w-full h-full flex flex-col space-y-8 relative">
+      <div className="w-full h-full flex flex-col space-y-4 relative">
         <div className="flex flex-col items-start w-full">
           <HcBreadcrumb
             pages={[
@@ -147,7 +161,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
               },
             ]}
           />
-          <h1 className="font-semibold text-4xl text-black dark:text-white pt-4">
+          <h1 className="font-semibold text-4xl text-black dark:text-white pt-8">
             Experiment
           </h1>
           <p className="text-sm text-gray-500 pt-2">
