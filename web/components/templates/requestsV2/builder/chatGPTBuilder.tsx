@@ -73,9 +73,20 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
 
           // Attempt to find a text type within any message's content
           for (const message of [...messages].reverse()) {
-            const textContent = message.content?.find(
+            if (typeof message.content === "string") {
+              return message.content;
+            }
+
+            let textContent = message.content?.find(
               (c: any) => c.type === "text"
             );
+
+            if (!textContent) {
+              textContent = message.content?.find(
+                (c: any) => typeof c === "string"
+              );
+            }
+
             if (textContent && textContent.text) {
               return textContent.text;
             }

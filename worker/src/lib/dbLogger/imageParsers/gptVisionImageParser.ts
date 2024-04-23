@@ -12,13 +12,19 @@ export class GptVisionImageParser extends ImageModelRequestBodyParser {
     try {
       requestBody = JSON.parse(JSON.stringify(body));
       requestBody?.messages?.forEach((message: any) => {
-        message.content.forEach((item: any) => {
-          if (item.type === "image_url") {
-            const assetId = this.generateAssetId();
-            requestAssets.set(assetId, item.image_url.url);
-            item.image_url.url = `<helicone-asset-id key="${assetId}"/>`;
+        if (Array.isArray(message.content)) {
+          message.content.forEach((item: any) => {
+            const result = this.processContentItem(item);
+            if (result && result.assetId) {
+              requestAssets.set(result.assetId, result.imageUrl);
+            }
+          });
+        } else if (message.content) {
+          const result = this.processContentItem(message.content);
+          if (result && result.assetId) {
+            requestAssets.set(result.assetId, result.imageUrl);
           }
-        });
+        }
       });
     } catch (error) {
       console.error(
@@ -30,5 +36,15 @@ export class GptVisionImageParser extends ImageModelRequestBodyParser {
       body: requestBody,
       assets: requestAssets,
     };
+  }
+
+  processContentItem(item: any) {
+    if (item.type === "image_url") {
+      const assetId = this.generateAssetId();
+      const oldUrl = item.image_url.url;
+      item.image_url.url = `<helicone-asset-id key="${assetId}"/>`;
+      return { assetId: assetId, imageUrl: oldUrl };
+    }
+    return null;
   }
 }
