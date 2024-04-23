@@ -1,9 +1,15 @@
 import { Experiment } from "../../controllers/public/experimentController";
 import { dbExecute } from "../shared/db/dbExecute";
-import { resultMap } from "../shared/result";
+import { Result, err, resultMap } from "../shared/result";
 import { BaseStore } from "./baseStore";
 
-function getExperimentsQuery(filter?: string, limit?: number) {
+function getExperimentsQuery(
+  filter?: string,
+  limit?: number,
+  include?: {
+    inputs?: boolean;
+  }
+) {
   return `
         SELECT jsonb_build_object(
           'id', e.id,
@@ -25,6 +31,7 @@ function getExperimentsQuery(filter?: string, limit?: number) {
               SELECT json_agg(
                   jsonb_build_object(
                       'id', h.id,
+                      'providerKey', h.provider_key,
                       'promptVersionId', h.prompt_version,
                       'model', h.model,
                       'status', h.status,
@@ -63,13 +70,58 @@ export class ExperimentStore extends BaseStore {
   }
 }
 
-export const ServerExperimentStore = {
-  getLatestExperiment: async () => {
+export const ServerExperimentStore: {
+  experimentPop: () => Promise<Result<Experiment, string>>;
+  getExperiment: (id: string) => Promise<Result<Experiment, string>>;
+  popLatestExperiment: () => Promise<Result<string, string>>;
+} = {
+  experimentPop: async () => {
+    const { data: experimentId, error: experimentIdError } =
+      await ServerExperimentStore.popLatestExperiment();
+
+    if (experimentIdError) {
+      return err(experimentIdError);
+    }
+
+    if (!experimentId) {
+      return err("No experiment found");
+    }
+
+    return await ServerExperimentStore.getExperiment(experimentId!);
+  },
+  getExperiment: async (id: string) => {
     return resultMap(
       await dbExecute<{
         jsonb_build_object: Experiment;
-      }>(getExperimentsQuery(undefined, 1), []),
+      }>(getExperimentsQuery("e.id = $1"), [id]),
       (d) => d[0].jsonb_build_object
+    );
+  },
+
+  popLatestExperiment: async () => {
+    return resultMap(
+      await dbExecute<{
+        experimentId: string;
+      }>(
+        `
+    WITH selected_experiment AS (
+      SELECT id
+      FROM experiment_v2
+      AND status = 'PENDING'
+      ORDER BY created_at ASC
+      LIMIT 1
+    ), updated_experiment AS (
+      UPDATE experiment_v2
+      SET status = 'RUNNING'
+      WHERE id IN (SELECT id FROM selected_experiment)
+      RETURNING id
+    )
+    SELECT id as experimentId
+    FROM updated_experiment
+    `,
+        []
+      ),
+      (d) => d[0].experimentId
     );
   },
 };

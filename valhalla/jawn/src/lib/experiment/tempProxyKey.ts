@@ -130,10 +130,14 @@ class TempProxyKey {
     }
 
     this.keyUsed = true;
-    return callback(this.proxyKey).then(async (t) => {
-      await this.cleanup();
-      return t;
-    });
+    return callback(this.proxyKey)
+      .then(async (t) => {
+        await this.cleanup();
+        return t;
+      })
+      .finally(async () => {
+        await this.cleanup();
+      });
   }
 }
 
