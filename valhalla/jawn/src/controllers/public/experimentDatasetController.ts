@@ -25,7 +25,7 @@ export interface NewDatasetParams {
 
 export interface RandomDatasetParams {
   datasetName: string;
-  filter: FilterNode;
+  filter: DatasetFilterNode;
   offset?: number;
   limit?: number;
 }
