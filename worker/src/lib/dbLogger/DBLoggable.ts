@@ -796,6 +796,9 @@ export class DBLoggable {
       };
     }
 
+    console.log("this.request.heliconeTemplate", this.request.heliconeTemplate);
+
+    console.log("this.request.promptId", this.request.promptId);
     if (this.request.heliconeTemplate && this.request.promptId) {
       const assets = requestResult.data.requestAssets;
 
@@ -822,6 +825,8 @@ export class DBLoggable {
         authParams.organizationId,
         this.request.requestId
       );
+
+      console.log("upsertResult2", upsertResult2);
 
       const upsertResult = await db.queue.upsertPrompt(
         newTemplateWithInputs,

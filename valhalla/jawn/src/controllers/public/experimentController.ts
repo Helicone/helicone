@@ -26,6 +26,32 @@ export interface NewExperimentParams {
   model: string;
 }
 
+export interface ExperimentRun {}
+
+export interface Experiment {
+  id: string;
+  dataset: {
+    id: string;
+    name: string;
+    rows: {
+      rowId: string;
+      requestId: string;
+    }[];
+  };
+  createdAt: string;
+  hypotheses: {
+    id: string;
+    promptVersionId: string;
+    model: string;
+    status: string;
+    createdAt: string;
+    runs: {
+      datasetRowId: string;
+      resultRequestId: string;
+    }[];
+  }[];
+}
+
 @Route("v1/experiment")
 @Tags("Experiment")
 @Security("api_key")
@@ -43,9 +69,29 @@ export class ExperimentController extends Controller {
       string
     >
   > {
-    const datasetManager = new ExperimentManager(request.authParams);
+    const experimentManager = new ExperimentManager(request.authParams);
 
-    const result = await datasetManager.addNewExperiment(requestBody);
+    const result = await experimentManager.addNewExperiment(requestBody);
+    // const result = await promptManager.getPrompts(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err("Not implemented");
+    } else {
+      this.setStatus(200); // set return status 201
+      return result;
+    }
+  }
+
+  @Post("/query")
+  public async getExperiments(
+    @Body()
+    requestBody: {},
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Experiment[], string>> {
+    const experimentManager = new ExperimentManager(request.authParams);
+
+    const result = await experimentManager.getExperiments();
     // const result = await promptManager.getPrompts(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);

@@ -89,6 +89,9 @@ export class HeliconeProxyRequestMapper {
       heliconePromptTemplate = templateWithInputs;
 
       this.injectPromptInputs(templateWithInputs.inputs);
+
+      this.request.heliconeHeaders.heliconeProperties[`Helicone-Prompt-Id`] =
+        this.request.heliconeHeaders.promptId;
     }
 
     const targetUrl = buildTargetUrl(this.request.url, api_base);
