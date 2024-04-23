@@ -35,7 +35,6 @@ import {
   HeliconeRequestResponseToPosthog,
   PosthogClient,
 } from "../clients/PosthogClient";
-import { costOfPrompt } from "../../../../costs/src/index";
 
 export interface DBLoggableProps {
   response: {
