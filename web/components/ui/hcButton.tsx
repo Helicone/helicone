@@ -4,7 +4,7 @@ import { Button, ButtonProps, ButtonVariant } from "@tremor/react";
 // Here, HcButtonProps extends ButtonProps but overrides the 'variant' and 'size' to make them non-optional and customized.
 interface HcButtonProps extends Omit<ButtonProps, "variant" | "size"> {
   variant: ButtonVariant;
-  size: "sm" | "md" | "lg";
+  size: "xs" | "sm" | "md" | "lg";
   title: string;
   icon?: React.ForwardRefExoticComponent<
     Omit<React.SVGProps<SVGSVGElement>, "ref"> & {

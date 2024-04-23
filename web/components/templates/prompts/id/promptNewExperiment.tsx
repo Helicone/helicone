@@ -9,12 +9,17 @@ import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
 import StepActions from "../../../shared/stepActions";
 import HcButton from "../../../ui/hcButton";
-import { Select, SelectItem } from "@tremor/react";
+import { Select, SelectItem, Switch } from "@tremor/react";
 import HcBadge from "../../../ui/hcBadge";
 import { clsx } from "../../../shared/clsx";
 import { RenderImageWithPrettyInputKeys } from "./promptIdPage";
 import { RenderWithPrettyInputKeys } from "../../playground/chatRow";
 import ChatPlayground from "../../playground/chatPlayground";
+import { PLAYGROUND_MODELS } from "../../playground/playgroundPage";
+import ProviderKeyList from "../../enterprise/portal/id/providerKeyList";
+import { PlusIcon } from "@heroicons/react/20/solid";
+import { Message } from "../../requests/chat";
+import ReactDiffViewer from "react-diff-viewer";
 
 interface PromptIdPageProps {
   id: string;
@@ -34,6 +39,9 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
     prompt_v2: string;
     model: string;
   }>();
+  const [selectedModel, setSelectedModel] = useState<string>();
+  const [selectedDataset, setSelectedDataset] = useState<string[]>();
+  const [currentChat, setCurrentChat] = useState<Message[]>();
 
   const template = JSON.parse(
     JSON.stringify(selectedPrompt?.helicone_template ?? "")
@@ -42,7 +50,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
   const renderStepArray = [
     <div className="flex flex-col">
       <div className="mt-2 flex flex-col h-full items-center justify-center">
-        <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg">
+        <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white">
           <div className="w-full flex justify-between items-center py-2 px-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
             <div className="flex items-center space-x-2">
               <label className="text-sm text-gray-500">Version:</label>
@@ -85,11 +93,12 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                       name="selected-prompt"
                       className="border border-gray-300 dark:border-gray-700 rounded-full p-2.5 hover:cursor-pointer"
                       checked={selectedPrompt?.id === prompt.id}
-                      onClick={() => {
-                        if (selectedPrompt?.id === prompt.id) {
-                          setSelectedPrompt(undefined);
-                        } else {
+                      onChange={(e) => {
+                        const isChecked = e.target.checked;
+                        if (isChecked) {
                           setSelectedPrompt(prompt);
+                        } else {
+                          setSelectedPrompt(undefined);
                         }
                       }}
                     />
@@ -131,13 +140,142 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
         temperature={0.5}
         maxTokens={256}
         submitText={"Save Changes"}
+        onSubmit={(chat) => {
+          console.log("chat", chat);
+          setCurrentChat(chat);
+        }}
       />
     </div>,
-    <div className="flex items-center space-x-2">
-      Step 3: - Select model and dataset
+    <div className="flex flex-col">
+      <div className="mt-2 flex flex-col h-full items-center justify-center">
+        <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-black">
+          <div className="w-full flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
+            <div className="flex items-center space-x-2">
+              <p className="text-sm text-gray-500">New Config</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch />
+              <label className="text-sm text-black dark:text-white">
+                Apply source config
+              </label>
+            </div>
+          </div>
+          <ul className="p-4 flex flex-col space-y-4">
+            <li className="flex items-start space-x-2">
+              <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
+                Dataset
+              </label>
+              <div className="flex w-full max-w-lg space-x-2 items-center">
+                <Select>
+                  <SelectItem value={"gpt-3.5-turbo"}>GPT-3.5 Turbo</SelectItem>
+                  <SelectItem value={"gpt-4"}>GPT-4</SelectItem>
+                </Select>
+                <HcButton
+                  variant={"secondary"}
+                  size={"xs"}
+                  title={"Generate random dataset"}
+                  icon={PlusIcon}
+                />
+              </div>
+            </li>
+            <li className="flex items-start space-x-2">
+              <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
+                Model
+              </label>
+              <div className="flex w-full max-w-xs">
+                <Select placeholder="Select a model">
+                  {PLAYGROUND_MODELS.map((model) => (
+                    <SelectItem value={model}>{model}</SelectItem>
+                  ))}
+                </Select>
+              </div>
+            </li>
+
+            <li className="flex items-start space-x-2">
+              <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
+                Provider Keys
+              </label>
+              <div className="flex w-full max-w-lg">
+                <ProviderKeyList showTitle={false} />
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>,
-    <div className="flex items-center space-x-2">
-      Step 4: - Submit new prompt and run experiment
+    <div className="flex flex-col space-y-8">
+      {/* TODO: make this diff more sophisticated */}
+      <div className="p-8 rounded-lg bg-white border border-gray-300 flex flex-col space-y-4">
+        <div className="grid grid-cols-4">
+          <div className="col-span-2">
+            <h2 className="text-md font-semibold">Original Prompt</h2>
+          </div>
+          <div className="col-span-2">
+            <h2 className="text-md font-semibold">Experiment Prompt</h2>
+          </div>
+        </div>
+        <ReactDiffViewer
+          oldValue={template?.[0]?.content}
+          newValue={(currentChat?.[0]?.content as string) ?? ""}
+          splitView={true}
+        />
+      </div>
+
+      <div className="mt-2 flex flex-col h-full items-center justify-center">
+        <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-black">
+          <div className="w-full flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
+            <div className="flex items-center space-x-2">
+              <p className="text-sm text-gray-500">Experiment Configuration</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch />
+              <label className="text-sm text-black dark:text-white">
+                Apply source config
+              </label>
+            </div>
+          </div>
+          <ul className="p-4 flex flex-col space-y-4">
+            <li className="flex items-start space-x-2">
+              <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
+                Dataset
+              </label>
+              <div className="flex w-full max-w-lg space-x-2 items-center">
+                <Select>
+                  <SelectItem value={"gpt-3.5-turbo"}>GPT-3.5 Turbo</SelectItem>
+                  <SelectItem value={"gpt-4"}>GPT-4</SelectItem>
+                </Select>
+                <HcButton
+                  variant={"secondary"}
+                  size={"xs"}
+                  title={"Generate random dataset"}
+                  icon={PlusIcon}
+                />
+              </div>
+            </li>
+            <li className="flex items-start space-x-2">
+              <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
+                Model
+              </label>
+              <div className="flex w-full max-w-xs">
+                <Select placeholder="Select a model">
+                  {PLAYGROUND_MODELS.map((model) => (
+                    <SelectItem value={model}>{model}</SelectItem>
+                  ))}
+                </Select>
+              </div>
+            </li>
+
+            <li className="flex items-start space-x-2">
+              <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
+                Provider Keys
+              </label>
+              <div className="flex w-full max-w-lg">
+                <ProviderKeyList showTitle={false} />
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>,
   ];
 
@@ -192,6 +330,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
               name: "Confirm",
             },
           ]}
+          allowStepSelection={false}
         />
         <div id="step-render" className="w-full">
           {renderStepArray[currentStep]}
