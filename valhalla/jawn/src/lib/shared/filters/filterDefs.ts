@@ -285,7 +285,7 @@ export interface FilterBranch {
 export type FilterNode = FilterLeaf | FilterBranch | "all";
 
 export type FilterLeafSubset<T extends keyof TablesAndViews> = Pick<
-  TablesAndViews,
+  FilterLeaf,
   T
 >;
 

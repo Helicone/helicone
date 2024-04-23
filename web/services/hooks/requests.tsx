@@ -33,6 +33,7 @@ const useGetRequests = (
         const isCached = query.queryKey[5];
         const response = await jawn.POST("/v1/request/query", {
           body: {
+            filter: advancedFilter as any,
             offset: (currentPage - 1) * currentPageSize,
             limit: currentPageSize,
             sort: sortLeaf as any,

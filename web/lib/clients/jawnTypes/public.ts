@@ -267,12 +267,12 @@ Json: JsonObject;
       model?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_TablesAndViews.feedback-or-request-or-response_": {
-      feedback: components["schemas"]["Partial_FeedbackTableToOperators_"];
-      request: components["schemas"]["Partial_RequestTableToOperators_"];
-      response: components["schemas"]["Partial_ResponseTableToOperators_"];
+    "Pick_FilterLeaf.feedback-or-request-or-response_": {
+      feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
+      request?: components["schemas"]["Partial_RequestTableToOperators_"];
+      response?: components["schemas"]["Partial_ResponseTableToOperators_"];
     };
-    "FilterLeafSubset_feedback-or-request-or-response_": components["schemas"]["Pick_TablesAndViews.feedback-or-request-or-response_"];
+    "FilterLeafSubset_feedback-or-request-or-response_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response_"];
     RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response_"] | components["schemas"]["RequestFilterBranch"] | "all";
     RequestFilterBranch: {
       right: components["schemas"]["RequestFilterNode"];
@@ -339,10 +339,10 @@ Json: JsonObject;
       user_defined_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_TablesAndViews.prompt_v2_": {
-      prompt_v2: components["schemas"]["Partial_PromptToOperators_"];
+    "Pick_FilterLeaf.prompt_v2_": {
+      prompt_v2?: components["schemas"]["Partial_PromptToOperators_"];
     };
-    FilterLeafSubset_prompt_v2_: components["schemas"]["Pick_TablesAndViews.prompt_v2_"];
+    FilterLeafSubset_prompt_v2_: components["schemas"]["Pick_FilterLeaf.prompt_v2_"];
     PromptsFilterNode: components["schemas"]["FilterLeafSubset_prompt_v2_"] | components["schemas"]["PromptsFilterBranch"] | "all";
     PromptsFilterBranch: {
       right: components["schemas"]["PromptsFilterNode"];

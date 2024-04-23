@@ -739,7 +739,7 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Pick_TablesAndViews.feedback-or-request-or-response_": {
+			"Pick_FilterLeaf.feedback-or-request-or-response_": {
 				"properties": {
 					"feedback": {
 						"$ref": "#/components/schemas/Partial_FeedbackTableToOperators_"
@@ -751,16 +751,11 @@
 						"$ref": "#/components/schemas/Partial_ResponseTableToOperators_"
 					}
 				},
-				"required": [
-					"feedback",
-					"request",
-					"response"
-				],
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
 			"FilterLeafSubset_feedback-or-request-or-response_": {
-				"$ref": "#/components/schemas/Pick_TablesAndViews.feedback-or-request-or-response_"
+				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response_"
 			},
 			"RequestFilterNode": {
 				"anyOf": [
@@ -1001,20 +996,17 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Pick_TablesAndViews.prompt_v2_": {
+			"Pick_FilterLeaf.prompt_v2_": {
 				"properties": {
 					"prompt_v2": {
 						"$ref": "#/components/schemas/Partial_PromptToOperators_"
 					}
 				},
-				"required": [
-					"prompt_v2"
-				],
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
 			"FilterLeafSubset_prompt_v2_": {
-				"$ref": "#/components/schemas/Pick_TablesAndViews.prompt_v2_"
+				"$ref": "#/components/schemas/Pick_FilterLeaf.prompt_v2_"
 			},
 			"PromptsFilterNode": {
 				"anyOf": [
