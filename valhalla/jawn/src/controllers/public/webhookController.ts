@@ -2,10 +2,10 @@ import { Route, Tags, Security, Controller, Post, Body, Request } from "tsoa";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { err, ok, Result } from "../../lib/shared/result";
 import { ScoreManager } from "../../managers/score/ScoreManager";
+import { hashAuth } from "../../lib/db/hash";
 
 export interface ScoreRequest {
   request_id: string;
-  organization_id: string;
   scores: Record<string, number>;
 }
 
@@ -19,11 +19,16 @@ export class WebhookControler extends Controller {
     requestBody: ScoreRequest,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
+    const heliconeAuth = request.headers["Helicone-Auth"] as string;
+    if (!heliconeAuth) {
+      return err("No Helicone-Auth header provided");
+    }
+    const heliconeApiKey = await hashAuth(heliconeAuth.replace("Bearer ", ""));
     const scoreManager = new ScoreManager(request.authParams);
 
     const result = await scoreManager.addScores(
       requestBody.request_id,
-      requestBody.organization_id,
+      heliconeApiKey,
       requestBody.scores
     );
     if (result.error || !result.data) {

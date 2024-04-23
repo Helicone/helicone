@@ -75,7 +75,6 @@ export interface components {
     };
     ScoreRequest: {
       request_id: string;
-      organization_id: string;
       scores: components["schemas"]["Record_string.number_"];
     };
     "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {

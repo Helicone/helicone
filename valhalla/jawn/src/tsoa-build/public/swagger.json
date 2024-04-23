@@ -75,16 +75,12 @@
 					"request_id": {
 						"type": "string"
 					},
-					"organization_id": {
-						"type": "string"
-					},
 					"scores": {
 						"$ref": "#/components/schemas/Record_string.number_"
 					}
 				},
 				"required": [
 					"request_id",
-					"organization_id",
 					"scores"
 				],
 				"type": "object",

@@ -56,7 +56,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "request_id": {"dataType":"string","required":true},
-            "organization_id": {"dataType":"string","required":true},
             "scores": {"ref":"Record_string.number_","required":true},
         },
         "additionalProperties": false,
