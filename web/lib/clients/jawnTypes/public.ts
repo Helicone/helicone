@@ -204,22 +204,6 @@ Json: JsonObject;
     };
     "Result_HeliconeRequest-Array.string_": components["schemas"]["ResultSuccess_HeliconeRequest-Array_"] | components["schemas"]["ResultError_string_"];
     /** @description Make all properties in T optional */
-    Partial_TextOperators_: {
-      "not-equals"?: string;
-      equals?: string;
-      like?: string;
-      ilike?: string;
-      contains?: string;
-      "not-contains"?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_TimestampOperators_: {
-      gte?: string;
-      lte?: string;
-      lt?: string;
-      gt?: string;
-    };
-    /** @description Make all properties in T optional */
     Partial_NumberOperators_: {
       /** Format: double */
       "not-equals"?: number;
@@ -235,23 +219,31 @@ Json: JsonObject;
       gt?: number;
     };
     /** @description Make all properties in T optional */
-    Partial_UserMetricsToOperators_: {
-      user_id?: components["schemas"]["Partial_TextOperators_"];
-      last_active?: components["schemas"]["Partial_TimestampOperators_"];
-      total_requests?: components["schemas"]["Partial_NumberOperators_"];
+    Partial_TimestampOperators_: {
+      gte?: string;
+      lte?: string;
+      lt?: string;
+      gt?: string;
     };
     /** @description Make all properties in T optional */
-    Partial_UserApiKeysTableToOperators_: {
-      api_key_hash?: components["schemas"]["Partial_TextOperators_"];
-      api_key_name?: components["schemas"]["Partial_TextOperators_"];
+    Partial_BooleanOperators_: {
+      equals?: boolean;
     };
     /** @description Make all properties in T optional */
-    Partial_ResponseTableToOperators_: {
-      body_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      body_model?: components["schemas"]["Partial_TextOperators_"];
-      body_completion?: components["schemas"]["Partial_TextOperators_"];
-      status?: components["schemas"]["Partial_NumberOperators_"];
-      model?: components["schemas"]["Partial_TextOperators_"];
+    Partial_TextOperators_: {
+      "not-equals"?: string;
+      equals?: string;
+      like?: string;
+      ilike?: string;
+      contains?: string;
+      "not-contains"?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_FeedbackTableToOperators_: {
+      id?: components["schemas"]["Partial_NumberOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperators_"];
+      rating?: components["schemas"]["Partial_BooleanOperators_"];
+      response_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_RequestTableToOperators_: {
@@ -267,15 +259,164 @@ Json: JsonObject;
       path?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
-    Partial_BooleanOperators_: {
-      equals?: boolean;
+    Partial_ResponseTableToOperators_: {
+      body_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      body_model?: components["schemas"]["Partial_TextOperators_"];
+      body_completion?: components["schemas"]["Partial_TextOperators_"];
+      status?: components["schemas"]["Partial_NumberOperators_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_TablesAndViews.feedback-or-request-or-response_": {
+      feedback: components["schemas"]["Partial_FeedbackTableToOperators_"];
+      request: components["schemas"]["Partial_RequestTableToOperators_"];
+      response: components["schemas"]["Partial_ResponseTableToOperators_"];
+    };
+    "FilterLeafSubset_feedback-or-request-or-response_": components["schemas"]["Pick_TablesAndViews.feedback-or-request-or-response_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    RequestFilterBranch: {
+      right: components["schemas"]["RequestFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["RequestFilterNode"];
+    };
+    /** @enum {string} */
+    SortDirection: "asc" | "desc";
+    SortLeafRequest: {
+      created_at?: components["schemas"]["SortDirection"];
+      cache_created_at?: components["schemas"]["SortDirection"];
+      latency?: components["schemas"]["SortDirection"];
+      last_active?: components["schemas"]["SortDirection"];
+      total_tokens?: components["schemas"]["SortDirection"];
+      completion_tokens?: components["schemas"]["SortDirection"];
+      prompt_tokens?: components["schemas"]["SortDirection"];
+      user_id?: components["schemas"]["SortDirection"];
+      body_model?: components["schemas"]["SortDirection"];
+      is_cached?: components["schemas"]["SortDirection"];
+      request_prompt?: components["schemas"]["SortDirection"];
+      response_text?: components["schemas"]["SortDirection"];
+      properties?: {
+        [key: string]: components["schemas"]["SortDirection"];
+      };
+      values?: {
+        [key: string]: components["schemas"]["SortDirection"];
+      };
+    };
+    RequestQueryParams: {
+      filter: components["schemas"]["RequestFilterNode"];
+      /** Format: double */
+      offset?: number;
+      /** Format: double */
+      limit?: number;
+      sort?: components["schemas"]["SortLeafRequest"];
+      isCached?: boolean;
+      includeInputs?: boolean;
+    };
+    ResultSuccess_null_: {
+      /** @enum {number|null} */
+      data: null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
+    PromptsResult: {
+      id: string;
+      user_defined_id: string;
+      description: string;
+      pretty_name: string;
+      /** Format: double */
+      major_version: number;
+    };
+    "ResultSuccess_PromptsResult-Array_": {
+      data: components["schemas"]["PromptsResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptsResult-Array.string_": components["schemas"]["ResultSuccess_PromptsResult-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_PromptToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      user_defined_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_TablesAndViews.prompt_v2_": {
+      prompt_v2: components["schemas"]["Partial_PromptToOperators_"];
+    };
+    FilterLeafSubset_prompt_v2_: components["schemas"]["Pick_TablesAndViews.prompt_v2_"];
+    PromptsFilterNode: components["schemas"]["FilterLeafSubset_prompt_v2_"] | components["schemas"]["PromptsFilterBranch"] | "all";
+    PromptsFilterBranch: {
+      right: components["schemas"]["PromptsFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["PromptsFilterNode"];
+    };
+    PromptsQueryParams: {
+      filter: components["schemas"]["PromptsFilterNode"];
+    };
+    PromptResult: {
+      id: string;
+      user_defined_id: string;
+      description: string;
+      pretty_name: string;
+      /** Format: double */
+      major_version: number;
+      latest_version_id: string;
+      latest_model_used: string;
+      created_at: string;
+      last_used: string;
+      versions: string[];
+    };
+    ResultSuccess_PromptResult_: {
+      data: components["schemas"]["PromptResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptResult.string_": components["schemas"]["ResultSuccess_PromptResult_"] | components["schemas"]["ResultError_string_"];
+    PromptQueryParams: {
+      timeFilter: {
+        end: string;
+        start: string;
+      };
+    };
+    PromptVersionResult: {
+      id: string;
+      /** Format: double */
+      minor_version: number;
+      /** Format: double */
+      major_version: number;
+      helicone_template: string;
+      prompt_v2: string;
+      model: string;
+    };
+    ResultSuccess_PromptVersionResult_: {
+      data: components["schemas"]["PromptVersionResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResult.string_": components["schemas"]["ResultSuccess_PromptVersionResult_"] | components["schemas"]["ResultError_string_"];
+    PromptCreateSubversionParams: {
+      newHeliconeTemplate: unknown;
+    };
+    "ResultSuccess_PromptVersionResult-Array_": {
+      data: components["schemas"]["PromptVersionResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    NewDatasetParams: {
+      datasetName: string;
+      requestIds: string[];
     };
     /** @description Make all properties in T optional */
-    Partial_FeedbackTableToOperators_: {
-      id?: components["schemas"]["Partial_NumberOperators_"];
-      created_at?: components["schemas"]["Partial_TimestampOperators_"];
-      rating?: components["schemas"]["Partial_BooleanOperators_"];
-      response_id?: components["schemas"]["Partial_TextOperators_"];
+    Partial_UserMetricsToOperators_: {
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      last_active?: components["schemas"]["Partial_TimestampOperators_"];
+      total_requests?: components["schemas"]["Partial_NumberOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_UserApiKeysTableToOperators_: {
+      api_key_hash?: components["schemas"]["Partial_TextOperators_"];
+      api_key_name?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_PropertiesTableToOperators_: {
@@ -379,11 +520,6 @@ Json: JsonObject;
       created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
     };
     /** @description Make all properties in T optional */
-    Partial_PromptToOperators_: {
-      id?: components["schemas"]["Partial_TextOperators_"];
-      user_defined_id?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description Make all properties in T optional */
     Partial_PromptVersionsToOperators_: {
       minor_version?: components["schemas"]["Partial_NumberOperators_"];
       major_version?: components["schemas"]["Partial_NumberOperators_"];
@@ -423,116 +559,6 @@ Json: JsonObject;
       /** @enum {string} */
       operator: "or" | "and";
       right: components["schemas"]["FilterNode"];
-    };
-    /** @enum {string} */
-    SortDirection: "asc" | "desc";
-    SortLeafRequest: {
-      created_at?: components["schemas"]["SortDirection"];
-      cache_created_at?: components["schemas"]["SortDirection"];
-      latency?: components["schemas"]["SortDirection"];
-      last_active?: components["schemas"]["SortDirection"];
-      total_tokens?: components["schemas"]["SortDirection"];
-      completion_tokens?: components["schemas"]["SortDirection"];
-      prompt_tokens?: components["schemas"]["SortDirection"];
-      user_id?: components["schemas"]["SortDirection"];
-      body_model?: components["schemas"]["SortDirection"];
-      is_cached?: components["schemas"]["SortDirection"];
-      request_prompt?: components["schemas"]["SortDirection"];
-      response_text?: components["schemas"]["SortDirection"];
-      properties?: {
-        [key: string]: components["schemas"]["SortDirection"];
-      };
-      values?: {
-        [key: string]: components["schemas"]["SortDirection"];
-      };
-    };
-    RequestQueryParams: {
-      filter: components["schemas"]["FilterNode"];
-      /** Format: double */
-      offset?: number;
-      /** Format: double */
-      limit?: number;
-      sort?: components["schemas"]["SortLeafRequest"];
-      isCached?: boolean;
-      includeInputs?: boolean;
-    };
-    ResultSuccess_null_: {
-      /** @enum {number|null} */
-      data: null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
-    PromptsResult: {
-      id: string;
-      user_defined_id: string;
-      description: string;
-      pretty_name: string;
-      /** Format: double */
-      major_version: number;
-    };
-    "ResultSuccess_PromptsResult-Array_": {
-      data: components["schemas"]["PromptsResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptsResult-Array.string_": components["schemas"]["ResultSuccess_PromptsResult-Array_"] | components["schemas"]["ResultError_string_"];
-    PromptsQueryParams: {
-      filter: components["schemas"]["FilterNode"];
-    };
-    PromptResult: {
-      id: string;
-      user_defined_id: string;
-      description: string;
-      pretty_name: string;
-      /** Format: double */
-      major_version: number;
-      latest_version_id: string;
-      latest_model_used: string;
-      created_at: string;
-      last_used: string;
-      versions: string[];
-    };
-    ResultSuccess_PromptResult_: {
-      data: components["schemas"]["PromptResult"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptResult.string_": components["schemas"]["ResultSuccess_PromptResult_"] | components["schemas"]["ResultError_string_"];
-    PromptQueryParams: {
-      timeFilter: {
-        end: string;
-        start: string;
-      };
-    };
-    PromptVersionResult: {
-      id: string;
-      /** Format: double */
-      minor_version: number;
-      /** Format: double */
-      major_version: number;
-      helicone_template: string;
-      prompt_v2: string;
-      model: string;
-    };
-    ResultSuccess_PromptVersionResult_: {
-      data: components["schemas"]["PromptVersionResult"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptVersionResult.string_": components["schemas"]["ResultSuccess_PromptVersionResult_"] | components["schemas"]["ResultError_string_"];
-    PromptCreateSubversionParams: {
-      newHeliconeTemplate: unknown;
-    };
-    "ResultSuccess_PromptVersionResult-Array_": {
-      data: components["schemas"]["PromptVersionResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
-    NewDatasetParams: {
-      datasetName: string;
-      requestIds: string[];
     };
     RandomDatasetParams: {
       datasetName: string;
