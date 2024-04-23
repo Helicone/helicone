@@ -1,8 +1,8 @@
-import pgPromise from "pg-promise";
 import { BatchPayload } from "../handlers/LoggingHandler";
 import { PromiseGenericResult, err, ok } from "../modules/result";
 import { deepCompare } from "../../utils/helpers";
-import { Database } from "../db/database.types";
+import pgPromise from "pg-promise";
+import { PromptRecord } from "../handlers/HandlerContext";
 
 const pgp = pgPromise();
 const db = pgp({
@@ -112,13 +112,24 @@ export class LogStore {
           await t.none(insertProperties);
         }
 
-        for (const request of payload.requests) {
-          await this.processPrompt(
-            t,
-            request,
-            request.organizationId,
-            request.promptId
-          );
+        payload.prompts.sort((a, b) => {
+          if (a.createdAt && b.createdAt) {
+            if (a.createdAt < b.createdAt) {
+              return -1;
+            }
+            if (a.createdAt > b.createdAt) {
+              return 1;
+            }
+          }
+          return 0;
+        });
+
+        for (const promptRecord of payload.prompts) {
+          // acquire an exclusive lock on the prompt record for the duration of the transaction
+          await t.none("SELECT pg_advisory_xact_lock($1)", [
+            [promptRecord.promptId],
+          ]);
+          await this.processPrompt(promptRecord, t);
         }
       });
 
@@ -130,21 +141,99 @@ export class LogStore {
   }
 
   async processPrompt(
-    request: Database["public"]["Tables"]["request"]["Insert"],
+    newPromptRecord: PromptRecord,
     t: pgPromise.ITask<{}>
   ): PromiseGenericResult<string> {
-    const heliconeTemplate = request.heliconeTemplate;
+    const { promptId, orgId, requestId, heliconeTemplate, model } =
+      newPromptRecord;
 
-    // Select existing prompt or insert new one
-    const existingPrompt = await t.oneOrNone(
-      `SELECT * FROM prompt_v2 WHERE organization = $1 AND user_defined_id = $2 LIMIT 1`,
+    if (!heliconeTemplate) {
+      return ok("No Helicone template to process");
+    }
+
+    // Ensure the prompt exists or create it, and lock the row
+    let existingPrompt = await t.oneOrNone<{
+      id: string;
+    }>(
+      `SELECT id FROM prompt_v2 WHERE organization = $1 AND user_defined_id = $2`,
       [orgId, promptId]
     );
     if (!existingPrompt) {
-      await t.none(
-        `INSERT INTO prompt_v2 (user_defined_id, organization) VALUES ($1, $2)`,
-        [promptId, orgId]
+      existingPrompt = await t.one<{
+        id: string;
+      }>(
+        `INSERT INTO prompt_v2 (user_defined_id, organization, created_at) VALUES ($1, $2, $3) RETURNING id`,
+        [promptId, orgId, newPromptRecord.createdAt]
       );
     }
+
+    // Check the latest version and decide whether to update
+    const existingPromptVersion = await t.oneOrNone<{
+      id: string;
+      major_version: number;
+      helicone_template: any;
+      created_at: Date;
+    }>(
+      `SELECT id, major_version, helicone_template, created_at FROM prompts_versions 
+       WHERE organization = $1 AND prompt_v2 = $2 ORDER BY major_version DESC LIMIT 1`,
+      [orgId, existingPrompt.id]
+    );
+
+    let versionId = existingPromptVersion?.id ?? "";
+
+    // Check if an update is necessary based on template comparison
+    if (
+      !existingPromptVersion ||
+      (existingPromptVersion &&
+        existingPromptVersion.created_at <= newPromptRecord.createdAt &&
+        !deepCompare(existingPromptVersion.helicone_template, heliconeTemplate))
+    ) {
+      // Create a new version if the template has changed
+      let majorVersion = existingPromptVersion
+        ? existingPromptVersion.major_version + 1
+        : 0;
+      const newVersionResult = await t.one(
+        `INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at)
+         VALUES ($1, $2, $3, 0, $4, $5, $6) RETURNING id`,
+        [
+          existingPrompt.id,
+          orgId,
+          majorVersion,
+          heliconeTemplate,
+          model,
+          newPromptRecord.createdAt,
+        ]
+      );
+      versionId = newVersionResult.id;
+    }
+
+    // Insert or update prompt input keys if there's a new version or no existing version
+    if (versionId) {
+      await t.none(
+        `INSERT INTO prompt_input_keys (key, prompt_version, created_at)
+         SELECT unnest($1::text[]), $2
+         FROM unnest($1::text[]), unnest($3::timestamp[])
+         ON CONFLICT (key, prompt_version) DO NOTHING`,
+        [
+          Object.keys(heliconeTemplate.inputs),
+          versionId,
+          newPromptRecord.createdAt,
+        ]
+      );
+
+      // Record the inputs and source request
+      await t.none(
+        `INSERT INTO prompt_input_record (inputs, source_request, prompt_version, created_at)
+         VALUES ($1, $2, $3, $4)`,
+        [
+          JSON.stringify(heliconeTemplate.inputs),
+          requestId,
+          versionId,
+          newPromptRecord.createdAt,
+        ]
+      );
+    }
+
+    return ok("Prompt processed successfully");
   }
 }

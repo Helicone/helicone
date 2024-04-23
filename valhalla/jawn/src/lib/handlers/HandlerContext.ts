@@ -22,10 +22,6 @@ export class HandlerContext extends SetOnce {
     };
     this.payload = {
       properties: [],
-      prompts: [],
-      promptVersions: [],
-      promptInputKeys: [],
-      promptInputRecords: [],
       propertiesV3CH: [],
       propertyWithResponseV1CH: [],
     };
@@ -99,14 +95,20 @@ export type Message = {
   log: Log;
 };
 
+export type PromptRecord = {
+  promptId: string;
+  orgId: string;
+  requestId: string;
+  model: string;
+  heliconeTemplate: TemplateWithInputs;
+  createdAt: Date;
+};
+
 export type Payload = {
   request?: Database["public"]["Tables"]["request"]["Insert"];
   response?: Database["public"]["Tables"]["response"]["Insert"];
   properties: Database["public"]["Tables"]["properties"]["Insert"][];
-  prompts: Database["public"]["Tables"]["prompt_v2"]["Insert"][];
-  promptVersions: Database["public"]["Tables"]["prompts_versions"]["Insert"][];
-  promptInputKeys: Database["public"]["Tables"]["prompt_input_keys"]["Insert"][];
-  promptInputRecords: Database["public"]["Tables"]["prompt_input_record"]["Insert"][];
+  prompt?: PromptRecord;
   requestResponseLogCH?: ClickhouseDB["Tables"]["request_response_log"];
   propertiesV3CH: ClickhouseDB["Tables"]["properties_v3"][];
   propertyWithResponseV1CH: ClickhouseDB["Tables"]["property_with_response_v1"][];

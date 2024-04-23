@@ -4,11 +4,13 @@ import { ClickhouseDB, formatTimeString } from "../shared/db/dbExecute";
 import { LogStore } from "../stores/LogStore";
 import { RequestResponseStore } from "../stores/RequestResponseStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
-import { HandlerContext } from "./HandlerContext";
+import { HandlerContext, PromptRecord } from "./HandlerContext";
+
 export type BatchPayload = {
   properties: Database["public"]["Tables"]["properties"]["Insert"][];
   responses: Database["public"]["Tables"]["response"]["Insert"][];
   requests: Database["public"]["Tables"]["request"]["Insert"][];
+  prompts: PromptRecord[];
   requestResponseLogCH: ClickhouseDB["Tables"]["request_response_log"][];
   propertiesV3CH: ClickhouseDB["Tables"]["properties_v3"][];
   propertyWithResponseV1CH: ClickhouseDB["Tables"]["property_with_response_v1"][];
@@ -27,6 +29,7 @@ export class LoggingHandler extends AbstractLogHandler {
       properties: [],
       responses: [],
       requests: [],
+      prompts: [],
       requestResponseLogCH: [],
       propertiesV3CH: [],
       propertyWithResponseV1CH: [],
@@ -34,6 +37,7 @@ export class LoggingHandler extends AbstractLogHandler {
   }
 
   async handle(context: HandlerContext): Promise<void> {
+    // Postgres
     context.payload.request = this.mapRequest(context);
     this.batchPayload.requests.push(context.payload.request);
 
@@ -43,6 +47,16 @@ export class LoggingHandler extends AbstractLogHandler {
     context.addProperties(this.mapProperties(context));
     this.batchPayload.properties.push(...context.payload.properties);
 
+    // Prompts
+    if (context.message.log.request.promptId) {
+      const prompt = this.mapPrompt(context);
+      if (prompt) {
+        context.payload.prompt = prompt;
+        this.batchPayload.prompts.push(prompt);
+      }
+    }
+
+    // Clickhouse
     context.payload.requestResponseLogCH = this.mapRequestResponseLog(context);
     this.batchPayload.requestResponseLogCH.push(
       context.payload.requestResponseLogCH
@@ -56,6 +70,8 @@ export class LoggingHandler extends AbstractLogHandler {
     this.batchPayload.propertyWithResponseV1CH.push(
       ...context.payload.propertyWithResponseV1CH
     );
+
+    await super.handle(context);
   }
 
   public async handleResult(): PromiseGenericResult<string> {
@@ -119,6 +135,27 @@ export class LoggingHandler extends AbstractLogHandler {
         }`
       );
     }
+  }
+
+  mapPrompt(context: HandlerContext): PromptRecord | null {
+    if (
+      !context.message.log.request.promptId ||
+      !context.orgParams?.id ||
+      !context.message.log.request.heliconeTemplate
+    ) {
+      return null;
+    }
+
+    const promptRecord: PromptRecord = {
+      promptId: context.message.log.request.promptId,
+      requestId: context.message.log.request.id,
+      orgId: context.orgParams.id,
+      model: context.message.log.model,
+      heliconeTemplate: context.message.log.request.heliconeTemplate,
+      createdAt: context.message.log.request.requestCreatedAt,
+    };
+
+    return promptRecord;
   }
 
   mapPropertiesV3(

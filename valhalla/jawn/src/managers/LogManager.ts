@@ -35,22 +35,22 @@ class LogManager {
       })
     );
 
-    // Insert rate limit entries
-    const { data: rateLimitInsId, error: rateLimitErr } =
-      await rateLimitHandler.handleResults();
-
-    if (rateLimitErr || !rateLimitInsId) {
-      console.error(
-        `Error inserting rate limits: ${rateLimitErr} for batch ${batchId}`
-      );
-    }
-
     // Inserts everything in transaction
     const upsertResult = await loggingHandler.handleResults();
 
     if (upsertResult.error) {
       console.error(
         `Error inserting logs: ${upsertResult.error} for batch ${batchId}`
+      );
+    }
+
+    // Insert rate limit entries after logs
+    const { data: rateLimitInsId, error: rateLimitErr } =
+      await rateLimitHandler.handleResults();
+
+    if (rateLimitErr || !rateLimitInsId) {
+      console.error(
+        `Error inserting rate limits: ${rateLimitErr} for batch ${batchId}`
       );
     }
   }
