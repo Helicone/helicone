@@ -4,7 +4,7 @@ import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { Result } from "../../../lib/result";
 import { Experiment } from "../../../pages/api/experiment/[id]";
 
-const useExperiments = () => {
+const useExperiments = (req: { page: number; pageSize: number }) => {
   const jawn = useJawnClient();
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["experiments", jawn],

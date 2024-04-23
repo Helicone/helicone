@@ -1,7 +1,7 @@
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 
 interface StatusBadgeProps {
-  statusType: NormalizedRequest["status"]["statusType"];
+  statusType: string;
   errorCode?: number;
 }
 

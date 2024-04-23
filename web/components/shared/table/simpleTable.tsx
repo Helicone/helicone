@@ -7,6 +7,7 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@tremor/react";
+import { clsx } from "../clsx";
 
 type ColumnConfig<T> = {
   key: keyof T; // Ensures that `key` is a valid property of T
@@ -19,6 +20,7 @@ interface SimpleTableProps<T> {
   columns: ColumnConfig<T>[];
   tableHeader?: string;
   emptyMessage?: string; // what to display when data is empty
+  onSelect?: (item: T) => void;
 }
 
 export function SimpleTable<T>(props: SimpleTableProps<T>) {
@@ -27,6 +29,7 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
     columns,
     tableHeader,
     emptyMessage = "No data available",
+    onSelect,
   } = props;
   return (
     <Card className="p-2">
@@ -48,7 +51,14 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
 
         <TableBody>
           {data.map((item, index) => (
-            <TableRow key={`row-${index}`}>
+            <TableRow
+              key={`row-${index}`}
+              className={clsx(
+                onSelect !== undefined &&
+                  "hover:bg-gray-100 hover:cursor-pointer"
+              )}
+              onClick={() => onSelect && onSelect(item)}
+            >
               {columns.map((column) => (
                 <TableCell key={String(column.key)}>
                   {column.render(item)}

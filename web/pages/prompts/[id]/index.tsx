@@ -9,12 +9,14 @@ import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 interface PlaygroundProps {
   user: User;
   id: string;
+  page: number;
+  pageSize: number;
 }
 
 const Prompts = (props: PlaygroundProps) => {
-  const { user, id } = props;
+  const { user, id, page, pageSize } = props;
 
-  return <PromptIdPage id={id} />;
+  return <PromptIdPage id={id} pageSize={pageSize} currentPage={page} />;
 };
 
 export default Prompts;
@@ -42,11 +44,15 @@ export const getServerSideProps = async (
   // get the id from the query params
   const id = context.params?.id as string;
 
+  const { page, page_size } = context.query;
+
   return {
     props: {
       initialSession: session,
       user: session.user,
       id,
+      page: parseInt(page as string, 10) || 1,
+      pageSize: parseInt(page_size as string, 10) || 25,
     },
   };
 };

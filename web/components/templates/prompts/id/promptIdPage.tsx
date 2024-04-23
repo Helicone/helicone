@@ -1,5 +1,6 @@
 import {
   BookOpenIcon,
+  ChartBarIcon,
   PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
 import { MultiSelect, MultiSelectItem } from "@tremor/react";
@@ -18,9 +19,14 @@ import { SimpleTable } from "../../../shared/table/simpleTable";
 import TableFooter from "../../requestsV2/tableFooter";
 import { PrettyInput } from "../../playground/chatRow";
 import { useExperiments } from "../../../../services/hooks/prompts/experiments";
+import ModelPill from "../../requestsV2/modelPill";
+import StatusBadge from "../../requestsV2/statusBadge";
+import { getUSDateFromString } from "../../../shared/utils/utils";
 
 interface PromptIdPageProps {
   id: string;
+  currentPage: number;
+  pageSize: number;
 }
 
 const getTimeAgo = (date: Date): string => {
@@ -102,14 +108,20 @@ export const RenderImageWithPrettyInputKeys = (props: {
 };
 
 const PromptIdPage = (props: PromptIdPageProps) => {
-  const { id } = props;
+  const { id, currentPage, pageSize } = props;
   const { prompt, isLoading } = usePrompt(id);
 
   const [experimentOpen, setExperimentOpen] = useState(false);
+  const [page, setPage] = useState<number>(currentPage);
+  const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
 
   const router = useRouter();
 
-  const { experiments, isLoading: experimentsLoading } = useExperiments();
+  const { experiments, isLoading: experimentsLoading } = useExperiments({
+    page,
+    pageSize: currentPageSize,
+  });
+
   return (
     <div className="w-full h-full flex flex-col space-y-8">
       <div className="flex flex-row items-center justify-between">
@@ -171,7 +183,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           </div>
         </div>
       </div>
-      {/* <div className="w-full h-full flex flex-col space-y-4">
+      <div className="w-full h-full flex flex-col space-y-4">
         <div className="flex items-center justify-between w-full">
           <ThemedTimeFilter
             timeFilterOptions={[
@@ -212,16 +224,22 @@ const PromptIdPage = (props: PromptIdPageProps) => {
         <div>
           <StyledAreaChart
             title={"Total Requests"}
-            value={"1063"}
+            value={"coming soon..."}
             isDataOverTimeLoading={false}
           >
-            <AreaChartUsageExample />
+            <div className="h-[12rem] w-full bg-white dark:bg-black flex flex-col items-center justify-center">
+              <ChartBarIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+              <p className="text-lg font-semibold">
+                Requests over time coming soon...
+              </p>
+            </div>
+            {/* <AreaChartUsageExample /> */}
           </StyledAreaChart>
         </div>
-      </div> */}
+      </div>
       <div className="flex flex-col space-y-4 h-full w-full">
         <h2 className="text-2xl font-semibold">Experiment Logs</h2>
-        <div className="flex items-center justify-between w-full">
+        {/* <div className="flex items-center justify-between w-full">
           <div className="flex items-center space-x-2">
             <MultiSelect placeholder="Version(s)">
               <MultiSelectItem value="1">Version 1</MultiSelectItem>
@@ -248,7 +266,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             title={"Add Metrics"}
             icon={PresentationChartLineIcon}
           />
-        </div>
+        </div> */}
 
         <SimpleTable
           data={experiments}
@@ -257,45 +275,49 @@ const PromptIdPage = (props: PromptIdPageProps) => {
               key: "id",
               header: "ID",
               render: (item) => (
-                <a
-                  className="text-blue-500"
-                  href={`/prompts/${id}/experiments/${item.id}`}
-                >
+                <span className="underline text-black dark:text-white">
                   {item.id}
-                </a>
+                </span>
+              ),
+            },
+            {
+              key: "status",
+              header: "Status",
+              render: (item) => (
+                <StatusBadge statusType={item.status || "unknown"} />
               ),
             },
             {
               key: "createdAt",
               header: "Created At",
-              render: (item) => item.createdAt,
+              render: (item) => (
+                <span>{getUSDateFromString(item.createdAt)}</span>
+              ),
             },
             {
-              key: "datasetId",
+              key: "datasetName",
               header: "Dataset",
               render: (item) => item.datasetName,
             },
             {
               key: "model",
               header: "Model",
-              render: (item) => item.model,
+              render: (item) => <ModelPill model={item.model || "unknown"} />,
             },
             {
               key: "runCount",
               header: "Run Count",
-              render: (item) => item.runCount,
-            },
-            {
-              key: "status",
-              header: "Status",
-              render: (item) => item.status,
+              render: (item) => item.runCount || 0,
             },
           ]}
+          onSelect={(item) => {
+            router.push(`/prompts/${id}/experiments/${item.id}`);
+          }}
         />
         <TableFooter
-          currentPage={0}
-          pageSize={0}
-          count={0}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          count={experiments.length}
           isCountLoading={false}
           onPageChange={function (newPageNumber: number): void {
             // throw new Error("Function not implemented.");
@@ -303,7 +325,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           onPageSizeChange={function (newPageSize: number): void {
             // throw new Error("Function not implemented.");
           }}
-          pageSizeOptions={[]}
+          pageSizeOptions={[25, 50, 100]}
         />
       </div>
     </div>
