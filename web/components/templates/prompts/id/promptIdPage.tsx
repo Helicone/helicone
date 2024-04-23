@@ -5,7 +5,10 @@ import {
 } from "@heroicons/react/24/outline";
 import { MultiSelect, MultiSelectItem } from "@tremor/react";
 import { useState } from "react";
-import { usePrompt } from "../../../../services/hooks/prompts/prompts";
+import {
+  usePrompt,
+  usePromptVersions,
+} from "../../../../services/hooks/prompts/prompts";
 
 import { BeakerIcon } from "@heroicons/react/24/solid";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
@@ -22,6 +25,10 @@ import { useExperiments } from "../../../../services/hooks/prompts/experiments";
 import ModelPill from "../../requestsV2/modelPill";
 import StatusBadge from "../../requestsV2/statusBadge";
 import { getUSDateFromString } from "../../../shared/utils/utils";
+import ThemedDrawer from "../../../shared/themed/themedDrawer";
+import { Chat } from "../../requests/chat";
+import ChatPlayground from "../../playground/chatPlayground";
+import ViewPromptButton from "./viewPromptButton";
 
 interface PromptIdPageProps {
   id: string;
@@ -110,8 +117,6 @@ export const RenderImageWithPrettyInputKeys = (props: {
 const PromptIdPage = (props: PromptIdPageProps) => {
   const { id, currentPage, pageSize } = props;
   const { prompt, isLoading } = usePrompt(id);
-
-  const [experimentOpen, setExperimentOpen] = useState(false);
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
 
@@ -123,123 +128,118 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   });
 
   return (
-    <div className="w-full h-full flex flex-col space-y-8">
-      <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-col items-start space-y-4 w-full">
-          <HcBreadcrumb
-            pages={[
-              {
-                href: "/prompts",
-                name: "Prompts",
-              },
-              {
-                href: `/prompts/${id}`,
-                name: prompt?.user_defined_id || "Loading...",
-              },
-            ]}
-          />
-          <div className="flex justify-between w-full">
-            <div className="flex gap-4 items-end">
-              <h1 className="font-semibold text-4xl text-black dark:text-white">
-                {prompt?.user_defined_id}
-              </h1>
-              <HcBadge
-                title={`${(prompt?.major_version ?? 0) + 1} version${
-                  (prompt?.major_version ?? 0) + 1 > 1 ? "s" : ""
-                }`}
-                size={"sm"}
-              />
+    <>
+      <div className="w-full h-full flex flex-col space-y-8">
+        <div className="flex flex-row items-center justify-between">
+          <div className="flex flex-col items-start space-y-4 w-full">
+            <HcBreadcrumb
+              pages={[
+                {
+                  href: "/prompts",
+                  name: "Prompts",
+                },
+                {
+                  href: `/prompts/${id}`,
+                  name: prompt?.user_defined_id || "Loading...",
+                },
+              ]}
+            />
+            <div className="flex justify-between w-full">
+              <div className="flex gap-4 items-end">
+                <h1 className="font-semibold text-4xl text-black dark:text-white">
+                  {prompt?.user_defined_id}
+                </h1>
+                <HcBadge
+                  title={`${(prompt?.major_version ?? 0) + 1} version${
+                    (prompt?.major_version ?? 0) + 1 > 1 ? "s" : ""
+                  }`}
+                  size={"sm"}
+                />
+              </div>
+              <div className="flex gap-2">
+                <ViewPromptButton promptId={id} />
+                <HcButton
+                  onClick={() => {
+                    router.push(`/prompts/${id}/new-experiment`);
+                  }}
+                  variant={"primary"}
+                  size={"sm"}
+                  title="Start Experiment"
+                  icon={BeakerIcon}
+                />
+              </div>
             </div>
-            <div className="flex gap-2">
-              <HcButton
-                onClick={() => setExperimentOpen(!experimentOpen)}
-                variant={"secondary"}
-                size={"sm"}
-                title="View Prompt"
-                icon={BookOpenIcon}
-              />
-              <HcButton
-                onClick={() => {
-                  router.push(`/prompts/${id}/new-experiment`);
-                }}
-                variant={"primary"}
-                size={"sm"}
-                title="Start Experiment"
-                icon={BeakerIcon}
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <p className="">
-              last used{" "}
-              {prompt?.last_used && getTimeAgo(new Date(prompt?.last_used))}
-            </p>
-            <div className="rounded-full h-1 w-1 bg-slate-400" />
-            <p className="">
-              created on{" "}
-              {prompt?.created_at &&
-                new Date(prompt?.created_at).toDateString()}
-            </p>
-          </div>
-        </div>
-      </div>
-      <div className="w-full h-full flex flex-col space-y-4">
-        <div className="flex items-center justify-between w-full">
-          <ThemedTimeFilter
-            timeFilterOptions={[
-              {
-                key: "24H",
-                value: "24H",
-              },
-              {
-                key: "7D",
-                value: "7D",
-              },
-              {
-                key: "1M",
-                value: "1M",
-              },
-              {
-                key: "3M",
-                value: "3M",
-              },
-              {
-                key: "all",
-                value: "all",
-              },
-            ]}
-            custom={true}
-            onSelect={function (key: string, value: string): void {
-              throw new Error("Function not implemented.");
-            }}
-            isFetching={false}
-            defaultValue={"24H"}
-            currentTimeFilter={{
-              start: new Date(),
-              end: new Date(),
-            }}
-          />
-        </div>
-
-        <div>
-          <StyledAreaChart
-            title={"Total Requests"}
-            value={"coming soon..."}
-            isDataOverTimeLoading={false}
-          >
-            <div className="h-[12rem] w-full bg-white dark:bg-black flex flex-col items-center justify-center">
-              <ChartBarIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
-              <p className="text-lg font-semibold">
-                Requests over time coming soon...
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <p className="">
+                last used{" "}
+                {prompt?.last_used && getTimeAgo(new Date(prompt?.last_used))}
+              </p>
+              <div className="rounded-full h-1 w-1 bg-slate-400" />
+              <p className="">
+                created on{" "}
+                {prompt?.created_at &&
+                  new Date(prompt?.created_at).toDateString()}
               </p>
             </div>
-            {/* <AreaChartUsageExample /> */}
-          </StyledAreaChart>
+          </div>
         </div>
-      </div>
-      <div className="flex flex-col space-y-4 h-full w-full">
-        <h2 className="text-2xl font-semibold">Experiment Logs</h2>
-        {/* <div className="flex items-center justify-between w-full">
+        <div className="w-full h-full flex flex-col space-y-4">
+          <div className="flex items-center justify-between w-full">
+            <ThemedTimeFilter
+              timeFilterOptions={[
+                {
+                  key: "24H",
+                  value: "24H",
+                },
+                {
+                  key: "7D",
+                  value: "7D",
+                },
+                {
+                  key: "1M",
+                  value: "1M",
+                },
+                {
+                  key: "3M",
+                  value: "3M",
+                },
+                {
+                  key: "all",
+                  value: "all",
+                },
+              ]}
+              custom={true}
+              onSelect={function (key: string, value: string): void {
+                throw new Error("Function not implemented.");
+              }}
+              isFetching={false}
+              defaultValue={"24H"}
+              currentTimeFilter={{
+                start: new Date(),
+                end: new Date(),
+              }}
+            />
+          </div>
+
+          <div>
+            <StyledAreaChart
+              title={"Total Requests"}
+              value={"coming soon..."}
+              isDataOverTimeLoading={false}
+            >
+              <div className="h-[12rem] w-full bg-white dark:bg-black flex flex-col items-center justify-center">
+                <ChartBarIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+                <p className="text-lg font-semibold">
+                  Requests over time coming soon...
+                </p>
+              </div>
+              {/* <AreaChartUsageExample /> */}
+            </StyledAreaChart>
+          </div>
+        </div>
+        <div className="flex flex-col space-y-4 h-full w-full">
+          <h2 className="text-2xl font-semibold">Experiment Logs</h2>
+          {/* <div className="flex items-center justify-between w-full">
           <div className="flex items-center space-x-2">
             <MultiSelect placeholder="Version(s)">
               <MultiSelectItem value="1">Version 1</MultiSelectItem>
@@ -268,67 +268,68 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           />
         </div> */}
 
-        <SimpleTable
-          data={experiments}
-          columns={[
-            {
-              key: "id",
-              header: "ID",
-              render: (item) => (
-                <span className="underline text-black dark:text-white">
-                  {item.id}
-                </span>
-              ),
-            },
-            {
-              key: "status",
-              header: "Status",
-              render: (item) => (
-                <StatusBadge statusType={item.status || "unknown"} />
-              ),
-            },
-            {
-              key: "createdAt",
-              header: "Created At",
-              render: (item) => (
-                <span>{getUSDateFromString(item.createdAt)}</span>
-              ),
-            },
-            {
-              key: "datasetName",
-              header: "Dataset",
-              render: (item) => item.datasetName,
-            },
-            {
-              key: "model",
-              header: "Model",
-              render: (item) => <ModelPill model={item.model || "unknown"} />,
-            },
-            {
-              key: "runCount",
-              header: "Run Count",
-              render: (item) => item.runCount || 0,
-            },
-          ]}
-          onSelect={(item) => {
-            router.push(`/prompts/${id}/experiments/${item.id}`);
-          }}
-        />
-        <TableFooter
-          currentPage={currentPage}
-          pageSize={pageSize}
-          count={experiments.length}
-          isCountLoading={false}
-          onPageChange={function (newPageNumber: number): void {
-            // throw new Error("Function not implemented.");
-          }}
-          onPageSizeChange={function (newPageSize: number): void {
-            // throw new Error("Function not implemented.");
-          }}
-          pageSizeOptions={[25, 50, 100]}
-        />
+          <SimpleTable
+            data={experiments}
+            columns={[
+              {
+                key: "id",
+                header: "ID",
+                render: (item) => (
+                  <span className="underline text-black dark:text-white">
+                    {item.id}
+                  </span>
+                ),
+              },
+              {
+                key: "status",
+                header: "Status",
+                render: (item) => (
+                  <StatusBadge statusType={item.status || "unknown"} />
+                ),
+              },
+              {
+                key: "createdAt",
+                header: "Created At",
+                render: (item) => (
+                  <span>{getUSDateFromString(item.createdAt)}</span>
+                ),
+              },
+              {
+                key: "datasetName",
+                header: "Dataset",
+                render: (item) => item.datasetName,
+              },
+              {
+                key: "model",
+                header: "Model",
+                render: (item) => <ModelPill model={item.model || "unknown"} />,
+              },
+              {
+                key: "runCount",
+                header: "Run Count",
+                render: (item) => item.runCount || 0,
+              },
+            ]}
+            onSelect={(item) => {
+              router.push(`/prompts/${id}/experiments/${item.id}`);
+            }}
+          />
+          <TableFooter
+            currentPage={currentPage}
+            pageSize={pageSize}
+            count={experiments.length}
+            isCountLoading={false}
+            onPageChange={function (newPageNumber: number): void {
+              // throw new Error("Function not implemented.");
+            }}
+            onPageSizeChange={function (newPageSize: number): void {
+              // throw new Error("Function not implemented.");
+            }}
+            pageSizeOptions={[25, 50, 100]}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
