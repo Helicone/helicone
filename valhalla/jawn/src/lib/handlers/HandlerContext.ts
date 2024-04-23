@@ -22,6 +22,10 @@ export class HandlerContext extends SetOnce {
     };
     this.payload = {
       properties: [],
+      prompts: [],
+      promptVersions: [],
+      promptInputKeys: [],
+      promptInputRecords: [],
       propertiesV3CH: [],
       propertyWithResponseV1CH: [],
     };
@@ -35,11 +39,16 @@ export class HandlerContext extends SetOnce {
   }
 }
 
+export interface TemplateWithInputs {
+  template: object;
+  inputs: { [key: string]: string };
+}
+
 export type Log = {
   request: {
     id: string;
     userId: string;
-    promptId: string;
+    promptId?: string;
     properties: Record<string, string>;
     heliconeApiKeyId: string;
     heliconeProxyKeyId?: string;
@@ -53,6 +62,7 @@ export type Log = {
     requestCreatedAt: Date;
     isStream: boolean;
     assets: Record<string, string>;
+    heliconeTemplate: TemplateWithInputs;
   };
   response: {
     id: string;
@@ -93,6 +103,10 @@ export type Payload = {
   request?: Database["public"]["Tables"]["request"]["Insert"];
   response?: Database["public"]["Tables"]["response"]["Insert"];
   properties: Database["public"]["Tables"]["properties"]["Insert"][];
+  prompts: Database["public"]["Tables"]["prompt_v2"]["Insert"][];
+  promptVersions: Database["public"]["Tables"]["prompts_versions"]["Insert"][];
+  promptInputKeys: Database["public"]["Tables"]["prompt_input_keys"]["Insert"][];
+  promptInputRecords: Database["public"]["Tables"]["prompt_input_record"]["Insert"][];
   requestResponseLogCH?: ClickhouseDB["Tables"]["request_response_log"];
   propertiesV3CH: ClickhouseDB["Tables"]["properties_v3"][];
   propertyWithResponseV1CH: ClickhouseDB["Tables"]["property_with_response_v1"][];
