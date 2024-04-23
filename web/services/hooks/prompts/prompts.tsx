@@ -3,14 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { JawnFilterNode } from "../../../lib/clients/jawn";
 
-export const usePromptVersions = (promptId?: string) => {
+export const usePromptVersions = (promptId: string) => {
   const jawn = useJawnClient();
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["prompts", jawn, promptId],
     queryFn: async (query) => {
       const jawn = query.queryKey[1] as ReturnType<typeof useJawnClient>;
-      const promptId = query.queryKey[2] as string | undefined;
+      const promptId = query.queryKey[2] as string;
 
       return jawn.POST("/v1/prompt/{promptId}/versions/query", {
         params: {
