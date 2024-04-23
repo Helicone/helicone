@@ -1852,6 +1852,26 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
+			},
+			"FilterLeafSubset_any-at-number_": {
+				"properties": {},
+				"type": "object"
+			},
+			"FilterNodeSubnet_any_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/FilterLeafSubset_any-at-number_"
+					},
+					{
+						"$ref": "#/components/schemas/FilterBranch"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
+					}
+				]
 			}
 		},
 		"securitySchemes": {
@@ -2477,7 +2497,25 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {},
+								"properties": {
+									"request": {
+										"$ref": "#/components/schemas/HeliconeRequest"
+									},
+									"sort": {
+										"items": {
+											"$ref": "#/components/schemas/SortLeafRequest"
+										},
+										"type": "array"
+									},
+									"filter": {
+										"$ref": "#/components/schemas/FilterNodeSubnet_any_"
+									}
+								},
+								"required": [
+									"request",
+									"sort",
+									"filter"
+								],
 								"type": "object"
 							}
 						}

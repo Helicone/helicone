@@ -284,6 +284,16 @@ export interface FilterBranch {
 
 export type FilterNode = FilterLeaf | FilterBranch | "all";
 
+type FilterLeafSubset<K extends keyof TablesAndViews> = {
+  [P in K]: TablesAndViews[P];
+};
+
+// Modify the FilterNode to take a generic parameter
+export type FilterNodeSubnet<T extends (keyof TablesAndViews)[]> =
+  | FilterLeafSubset<T[number]>
+  | FilterBranch
+  | "all";
+
 export function timeFilterToFilterNode(
   filter: TimeFilter,
   table: keyof TablesAndViews

@@ -11,7 +11,10 @@ import {
   Tags,
 } from "tsoa";
 import { Result, err, ok } from "../../lib/shared/result";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import {
+  FilterNode,
+  FilterNodeSubnet,
+} from "../../lib/shared/filters/filterDefs";
 import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { HeliconeRequest } from "../../lib/stores/request/request";
 import { RequestManager } from "../../managers/request/RequestManager";
@@ -86,7 +89,11 @@ export class ExperimentController extends Controller {
   @Post("/query")
   public async getExperiments(
     @Body()
-    requestBody: {},
+    requestBody: {
+      filter: FilterNodeSubnet<["feedback"]>;
+      sort: SortLeafRequest[];
+      request: HeliconeRequest;
+    },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Experiment[], string>> {
     const experimentManager = new ExperimentManager(request.authParams);
