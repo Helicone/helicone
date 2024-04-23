@@ -2,6 +2,7 @@ import pgPromise from "pg-promise";
 import { BatchPayload } from "../handlers/LoggingHandler";
 import { PromiseGenericResult, err, ok } from "../modules/result";
 import { deepCompare } from "../../utils/helpers";
+import { Database } from "../db/database.types";
 
 const pgp = pgPromise();
 const db = pgp({
@@ -110,12 +111,40 @@ export class LogStore {
             onConflictProperties;
           await t.none(insertProperties);
         }
+
+        for (const request of payload.requests) {
+          await this.processPrompt(
+            t,
+            request,
+            request.organizationId,
+            request.promptId
+          );
+        }
       });
 
       return ok("Successfully inserted log batch");
     } catch (error: any) {
       console.error("Failed to insert log batch", error);
       return err("Failed to insert log batch");
+    }
+  }
+
+  async processPrompt(
+    request: Database["public"]["Tables"]["request"]["Insert"],
+    t: pgPromise.ITask<{}>
+  ): PromiseGenericResult<string> {
+    const heliconeTemplate = request.heliconeTemplate;
+
+    // Select existing prompt or insert new one
+    const existingPrompt = await t.oneOrNone(
+      `SELECT * FROM prompt_v2 WHERE organization = $1 AND user_defined_id = $2 LIMIT 1`,
+      [orgId, promptId]
+    );
+    if (!existingPrompt) {
+      await t.none(
+        `INSERT INTO prompt_v2 (user_defined_id, organization) VALUES ($1, $2)`,
+        [promptId, orgId]
+      );
     }
   }
 }
