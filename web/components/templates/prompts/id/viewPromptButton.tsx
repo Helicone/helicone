@@ -59,50 +59,52 @@ const ViewPromptButton = (props: ViewPromptButtonProps) => {
         title="View Prompt"
         icon={BookOpenIcon}
       />
-
       <ThemedDrawer
         open={promptOpen}
         setOpen={setPromptOpen}
         defaultExpanded={true}
+        defaultWidth="md:min-w-[80vw] w-full md:w-[80vw]"
       >
-        <div>
-          {inputs?.length}
-          {inputs?.map((input) => (
-            <div key={input.id} className="p-4">
-              {JSON.stringify(input.inputs)}
-              {input.source_request}
-            </div>
-          ))}
-        </div>
-        <div className="p-4 flex flex-col space-y-4">
-          <div className="w-full flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <DocumentTextIcon className="h-5 w-5 text-black dark:text-white" />
-              <p className="font-semibold text-lg">Prompt</p>
-            </div>
-            <div className="flex items-center space-x-2 w-full max-w-xs">
-              <label className="text-sm text-gray-500">Version:</label>
-              <Select
-                value={selectedVersion}
-                onValueChange={(value) => setSelectedVersion(value)}
-              >
-                {sortedPrompts?.map((prompt) => (
-                  <SelectItem
-                    value={`${prompt.major_version}.${prompt.minor_version}`}
-                  >
-                    {prompt.major_version}.{prompt.minor_version}
-                  </SelectItem>
-                ))}
-              </Select>
-            </div>
+        <div className="flex items-start gap-4 p-4 divide-x divide-gray-300 dark:divide-gray-700">
+          <div className="min-w-[25rem] w-1/3">
+            {inputs?.length}
+            {inputs?.map((input) => (
+              <div key={input.id} className="p-4">
+                {JSON.stringify(input.inputs)}
+                {input.source_request}
+              </div>
+            ))}
           </div>
-          <Chat
-            requestBody={selectedPrompt?.helicone_template}
-            responseBody={{}}
-            status={200}
-            requestId={""}
-            model={prompts?.at(0)?.model || "unknown"}
-          />
+          <div className="p-4 flex flex-col space-y-4 w-full">
+            <div className="w-full flex justify-between items-center">
+              <div className="flex items-center space-x-2">
+                <DocumentTextIcon className="h-5 w-5 text-black dark:text-white" />
+                <p className="font-semibold text-lg">Prompt</p>
+              </div>
+              <div className="flex items-center space-x-2 w-full max-w-xs">
+                <label className="text-sm text-gray-500">Version:</label>
+                <Select
+                  value={selectedVersion}
+                  onValueChange={(value) => setSelectedVersion(value)}
+                >
+                  {sortedPrompts?.map((prompt) => (
+                    <SelectItem
+                      value={`${prompt.major_version}.${prompt.minor_version}`}
+                    >
+                      {prompt.major_version}.{prompt.minor_version}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </div>
+            </div>
+            <Chat
+              requestBody={selectedPrompt?.helicone_template}
+              responseBody={{}}
+              status={200}
+              requestId={""}
+              model={prompts?.at(0)?.model || "unknown"}
+            />
+          </div>
         </div>
       </ThemedDrawer>
     </>
