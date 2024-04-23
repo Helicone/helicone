@@ -31,6 +31,12 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
   const [isSaveFiltersModalOpen, setIsSaveFiltersModalOpen] = useState(false);
   const [filterName, setFilterName] = useState("");
 
+  function encodeFilter(filter: UIFilterRow): string {
+    return `${filterMap[filter.filterMapIdx].label}:${
+      filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label
+    }:${encodeURIComponent(filter.value)}`;
+  }
+
   const onSaveFilter = async (name: string) => {
     if (filters.length > 0) {
       const saveFilter: OrganizationFilter = {
@@ -59,7 +65,10 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
             setNotification("Filter created successfully", "success");
             setIsSaveFiltersModalOpen(false);
             onSaveFilterCallback();
-            searchParams.set("filter", saveFilter.id);
+            const currentAdvancedFilters = encodeURIComponent(
+              JSON.stringify(filters.map(encodeFilter).join("|"))
+            );
+            searchParams.set("filters", currentAdvancedFilters);
           })
           .catch((err) => {
             setNotification(err, "error");
@@ -82,7 +91,10 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
             setNotification("Filter created successfully", "success");
             setIsSaveFiltersModalOpen(false);
             onSaveFilterCallback();
-            searchParams.set("filter", saveFilter.id);
+            const currentAdvancedFilters = encodeURIComponent(
+              JSON.stringify(filters.map(encodeFilter).join("|"))
+            );
+            searchParams.set("filters", currentAdvancedFilters);
           })
           .catch((err) => {
             setNotification(err, "error");
