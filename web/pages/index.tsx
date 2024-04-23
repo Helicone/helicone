@@ -1,6 +1,5 @@
 import { GetServerSidePropsContext } from "next";
 
-import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { isCustomerDomain } from "../lib/customerPortalHelpers";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import HomePage from "../components/templates/home/homePage";
@@ -29,20 +28,6 @@ export const getServerSideProps = async (
     return {
       redirect: {
         destination: "/signin",
-        permanent: false,
-      },
-    };
-  }
-
-  const supabase = new SupabaseServerWrapper(context).getClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (session) {
-    return {
-      redirect: {
-        destination: "/dashboard",
         permanent: false,
       },
     };
