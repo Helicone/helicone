@@ -45,7 +45,6 @@ const Alert = (props: AlertProps) => {
       <AuthHeader title={"Alerts"} />
       <div>
         <div>Hello Scott</div>
-        {inputs.inputs?.length}
         ENTER PROMPT ID (Default latest prompt)
         <input
           type="text"

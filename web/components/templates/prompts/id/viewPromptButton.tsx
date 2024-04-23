@@ -8,6 +8,7 @@ import {
 } from "../../../../services/hooks/prompts/prompts";
 import { Chat } from "../../requests/chat";
 import { Select, SelectItem } from "@tremor/react";
+import { useInputs } from "../../../../services/hooks/prompts/inputs";
 
 interface ViewPromptButtonProps {
   promptId: string;
@@ -47,6 +48,8 @@ const ViewPromptButton = (props: ViewPromptButtonProps) => {
       p.minor_version === parseInt(selectedVersion.split(".")[1])
   );
 
+  const { inputs } = useInputs(selectedPrompt?.id);
+
   return (
     <>
       <HcButton
@@ -62,6 +65,15 @@ const ViewPromptButton = (props: ViewPromptButtonProps) => {
         setOpen={setPromptOpen}
         defaultExpanded={true}
       >
+        <div>
+          {inputs?.length}
+          {inputs?.map((input) => (
+            <div key={input.id} className="p-4">
+              {JSON.stringify(input.inputs)}
+              {input.source_request}
+            </div>
+          ))}
+        </div>
         <div className="p-4 flex flex-col space-y-4">
           <div className="w-full flex justify-between items-center">
             <div className="flex items-center space-x-2">
