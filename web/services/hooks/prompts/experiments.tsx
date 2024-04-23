@@ -1,32 +1,52 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { UserMetric } from "../../../lib/api/users/users";
+import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { Result } from "../../../lib/result";
-import { FilterNode } from "../../lib/filters/filterDefs";
-import { SortLeafUsers } from "../../lib/sorts/users/sorts";
-import { PromptsResult } from "../../../pages/api/prompt";
-import { ExperimentResult } from "../../../pages/api/experiment";
 import { Experiment } from "../../../pages/api/experiment/[id]";
 
 const useExperiments = () => {
+  const jawn = useJawnClient();
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["experiments"],
+    queryKey: ["experiments", jawn],
     queryFn: async (query) => {
-      return await fetch("/api/experiment", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }).then((res) => res.json() as Promise<ExperimentResult>);
+      const jawn = query.queryKey[1] as ReturnType<typeof useJawnClient>;
+
+      return jawn.POST("/v1/experiment/query", {
+        body: {},
+      });
     },
     refetchOnWindowFocus: false,
+  });
+
+  const experiments = data?.data?.data;
+
+  if (!experiments) {
+    return {
+      isLoading,
+      refetch,
+      isRefetching,
+      experiments: [],
+    };
+  }
+
+  const frontEndExperiments = experiments.map((experiment) => {
+    const hypothesis = experiment.hypotheses.at(0) ?? null;
+    return {
+      id: experiment.id,
+      datasetId: experiment.dataset.id,
+      datasetName: experiment.dataset.name,
+      model: hypothesis?.model,
+      createdAt: experiment.createdAt,
+      runCount: hypothesis?.runs?.length,
+      status: hypothesis?.status,
+    };
   });
 
   return {
     isLoading,
     refetch,
     isRefetching,
-    experiments: data?.data?.experiments,
+    experiments: frontEndExperiments,
   };
 };
 
@@ -53,4 +73,4 @@ const useExperiment = (id: string) => {
   };
 };
 
-export { useExperiments, useExperiment };
+export { useExperiment, useExperiments };

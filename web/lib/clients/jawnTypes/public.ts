@@ -48,6 +48,9 @@ export interface paths {
   "/v1/experiment": {
     post: operations["CreateNewExperiment"];
   };
+  "/v1/experiment/query": {
+    post: operations["GetExperiments"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -561,6 +564,35 @@ Json: JsonObject;
       promptVersion: string;
       model: string;
     };
+    Experiment: {
+      id: string;
+      dataset: {
+        rows: {
+            requestId: string;
+            rowId: string;
+          }[];
+        name: string;
+        id: string;
+      };
+      createdAt: string;
+      hypotheses: {
+          runs: {
+              resultRequestId: string;
+              datasetRowId: string;
+            }[];
+          createdAt: string;
+          status: string;
+          model: string;
+          promptVersionId: string;
+          id: string;
+        }[];
+    };
+    "ResultSuccess_Experiment-Array_": {
+      data: components["schemas"]["Experiment"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Experiment-Array.string_": components["schemas"]["ResultSuccess_Experiment-Array_"] | components["schemas"]["ResultError_string_"];
   };
   responses: {
   };
@@ -815,6 +847,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  GetExperiments: {
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Experiment-Array.string_"];
         };
       };
     };
