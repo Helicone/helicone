@@ -284,6 +284,26 @@ export interface FilterBranch {
 
 export type FilterNode = FilterLeaf | FilterBranch | "all";
 
+export type FilterLeafSubset<T extends keyof TablesAndViews> = Pick<
+  FilterLeaf,
+  T
+>;
+
+// I am keeping this here just incase anyone in the future tries to do this... we know it has been done before.
+// Basically this would be awesome instead of having to create types like RequestFilterNode, but tsoa is not
+// sophisticated enough to handle this.
+//
+// export type FilterBranchSubset<T extends TableAndViewKeys> = {
+//   left: FilterNodeSubset<T>;
+//   operator: "or" | "and";
+//   right: FilterNodeSubset<T>;
+// };
+
+// export type FilterNodeSubset<T extends TableAndViewKeys> =
+//   | FilterLeafSubset<T>
+//   | FilterBranchSubset<T>
+//   | "all";
+
 export function timeFilterToFilterNode(
   filter: TimeFilter,
   table: keyof TablesAndViews

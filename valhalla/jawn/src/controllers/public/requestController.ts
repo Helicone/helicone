@@ -11,15 +11,25 @@ import {
   Security,
   Tags,
 } from "tsoa";
+import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
 import { Result } from "../../lib/shared/result";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { HeliconeRequest } from "../../lib/stores/request/request";
 import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 
+export type RequestFilterBranch = {
+  left: RequestFilterNode;
+  operator: "or" | "and";
+  right: RequestFilterNode;
+};
+type RequestFilterNode =
+  | FilterLeafSubset<"feedback" | "request" | "response">
+  | RequestFilterBranch
+  | "all";
+
 export interface RequestQueryParams {
-  filter: FilterNode;
+  filter: RequestFilterNode;
   offset?: number;
   limit?: number;
   sort?: SortLeafRequest;
