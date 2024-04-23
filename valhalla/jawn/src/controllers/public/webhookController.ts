@@ -19,7 +19,7 @@ export class WebhookControler extends Controller {
     requestBody: ScoreRequest,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
-    const heliconeAuth = request.headers["Helicone-Auth"] as string;
+    const heliconeAuth = request.headers.authorization;
     if (!heliconeAuth) {
       return err("No Helicone-Auth header provided");
     }

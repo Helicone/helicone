@@ -550,12 +550,7 @@ export class DBLoggable {
           .eq("webhook_id", webhook.id)
       ).data ?? [];
 
-    const shouldSend =
-      subscriptions
-        .map((subscription) => {
-          return subscription.event === "beta";
-        })
-        .filter((x) => x).length > 0;
+    const shouldSend = webhook.destination.includes("helicone-scoring-webhook");
 
     if (shouldSend) {
       console.log("SENDING", webhook.destination, payload.request?.request.id);
@@ -563,6 +558,8 @@ export class DBLoggable {
         method: "POST",
         body: JSON.stringify({
           request_id: payload.request?.request.id,
+          requestBody: payload.request?.request.body,
+          responseBody: payload.response.body,
         }),
         headers: {
           "Content-Type": "application/json",

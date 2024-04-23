@@ -23,14 +23,25 @@ export class ScoreManager extends BaseManager {
 
       const scorePromises = Object.entries(scores).map(
         async ([attribute, value]) => {
-          const scoreAttribute = await supabaseServer.client
+          let scoreAttribute = await supabaseServer.client
             .from("score_attribute")
-            .upsert({
-              organization: apiKey.data[0].organization_id,
-              score_key: attribute,
-            })
             .select("*")
+            .eq("score_key", attribute)
+            .eq("organization", apiKey.data[0].organization_id)
             .single();
+
+          if (!scoreAttribute.data) {
+            scoreAttribute = await supabaseServer.client
+              .from("score_attribute")
+              .insert([
+                {
+                  score_key: attribute,
+                  organization: apiKey.data[0].organization_id,
+                },
+              ])
+              .select("*")
+              .single();
+          }
 
           if (scoreAttribute.error) {
             return err(scoreAttribute.error.message);
@@ -47,6 +58,8 @@ export class ScoreManager extends BaseManager {
           if (scoreValue.error) {
             return err(scoreValue.error.message);
           }
+
+          console.log(scoreValue.data);
         }
       );
 
