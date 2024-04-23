@@ -20,6 +20,7 @@ import ProviderKeyList from "../../enterprise/portal/id/providerKeyList";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { Message } from "../../requests/chat";
 import ReactDiffViewer from "react-diff-viewer";
+import ModelPill from "../../requestsV2/modelPill";
 
 interface PromptIdPageProps {
   id: string;
@@ -42,6 +43,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
   const [selectedModel, setSelectedModel] = useState<string>();
   const [selectedDataset, setSelectedDataset] = useState<string[]>();
   const [currentChat, setCurrentChat] = useState<Message[]>();
+  const [selectedProviderKey, setSelectedProviderKey] = useState<string>();
 
   const template = JSON.parse(
     JSON.stringify(selectedPrompt?.helicone_template ?? "")
@@ -196,7 +198,12 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                 Provider Keys
               </label>
               <div className="flex w-full max-w-lg">
-                <ProviderKeyList showTitle={false} />
+                <ProviderKeyList
+                  showTitle={false}
+                  setProviderKeyCallback={(providerKey) =>
+                    setSelectedProviderKey(providerKey)
+                  }
+                />
               </div>
             </li>
           </ul>
@@ -234,43 +241,35 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
               </label>
             </div>
           </div>
-          <ul className="p-4 flex flex-col space-y-4">
-            <li className="flex items-start space-x-2">
-              <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
+          <ul className="px-4 py-8 flex flex-col space-y-8">
+            <li className="flex items-center space-x-2">
+              <label className="text-sm text-black dark:text-white font-semibold w-28">
                 Dataset
               </label>
               <div className="flex w-full max-w-lg space-x-2 items-center">
-                <Select>
-                  <SelectItem value={"gpt-3.5-turbo"}>GPT-3.5 Turbo</SelectItem>
-                  <SelectItem value={"gpt-4"}>GPT-4</SelectItem>
-                </Select>
-                <HcButton
-                  variant={"secondary"}
-                  size={"xs"}
-                  title={"Generate random dataset"}
-                  icon={PlusIcon}
-                />
+                {selectedDataset}
               </div>
             </li>
-            <li className="flex items-start space-x-2">
-              <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
+            <li className="flex items-center space-x-2">
+              <label className="text-sm text-black dark:text-white font-semibold w-28">
                 Model
               </label>
               <div className="flex w-full max-w-xs">
-                <Select placeholder="Select a model">
-                  {PLAYGROUND_MODELS.map((model) => (
-                    <SelectItem value={model}>{model}</SelectItem>
-                  ))}
-                </Select>
+                <ModelPill model={selectedModel || "unselected"} />
               </div>
             </li>
 
-            <li className="flex items-start space-x-2">
+            <li className="flex items-center space-x-2">
               <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
-                Provider Keys
+                Provider Key
               </label>
               <div className="flex w-full max-w-lg">
-                <ProviderKeyList showTitle={false} />
+                <input
+                  type="password"
+                  value={selectedProviderKey}
+                  className="border-none focus:ring-0 focus:outline-none w-full py-0"
+                  disabled
+                />
               </div>
             </li>
           </ul>
