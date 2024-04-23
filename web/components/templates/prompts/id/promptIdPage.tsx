@@ -171,7 +171,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           </div>
         </div>
       </div>
-      <div className="w-full h-full flex flex-col space-y-4">
+      {/* <div className="w-full h-full flex flex-col space-y-4">
         <div className="flex items-center justify-between w-full">
           <ThemedTimeFilter
             timeFilterOptions={[
@@ -218,7 +218,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             <AreaChartUsageExample />
           </StyledAreaChart>
         </div>
-      </div>
+      </div> */}
       <div className="flex flex-col space-y-4 h-full w-full">
         <h2 className="text-2xl font-semibold">Experiment Logs</h2>
         <div className="flex items-center justify-between w-full">
@@ -249,8 +249,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             icon={PresentationChartLineIcon}
           />
         </div>
-        {experimentsLoading && "Loading..."}
-        {experiments.length}
+
         <SimpleTable
           data={experiments}
           columns={[
