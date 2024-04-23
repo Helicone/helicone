@@ -162,8 +162,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
               last used{" "}
               {prompt?.last_used && getTimeAgo(new Date(prompt?.last_used))}
             </p>
-            {/* <div className="rounded-full h-1 w-1 bg-slate-400" />
-            <ModelPill model={prompt?.latest_model_used || "unknown"} /> */}
             <div className="rounded-full h-1 w-1 bg-slate-400" />
             <p className="">
               created on{" "}

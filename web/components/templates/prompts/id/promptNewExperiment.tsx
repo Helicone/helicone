@@ -185,7 +185,11 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                 Model
               </label>
               <div className="flex w-full max-w-xs">
-                <Select placeholder="Select a model">
+                <Select
+                  placeholder="Select a model"
+                  value={selectedModel}
+                  onValueChange={(value) => setSelectedModel(value)}
+                >
                   {PLAYGROUND_MODELS.map((model) => (
                     <SelectItem value={model}>{model}</SelectItem>
                   ))}
