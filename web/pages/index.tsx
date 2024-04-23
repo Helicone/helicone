@@ -34,20 +34,6 @@ export const getServerSideProps = async (
     };
   }
 
-  const supabase = new SupabaseServerWrapper(context).getClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (session) {
-    return {
-      redirect: {
-        destination: "/dashboard",
-        permanent: false,
-      },
-    };
-  }
-
   return {
     props: {},
   };
