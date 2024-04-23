@@ -30,6 +30,9 @@ export interface paths {
   "/v1/prompt/version/{promptVersionId}/subversion": {
     post: operations["CreateSubversion"];
   };
+  "/v1/prompt/version/{promptVersionId}/inputs/query": {
+    post: operations["GetInputs"];
+  };
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
   };
@@ -400,6 +403,19 @@ Json: JsonObject;
     PromptCreateSubversionParams: {
       newHeliconeTemplate: unknown;
     };
+    PromptInputRecord: {
+      id: string;
+      inputs: components["schemas"]["Record_string.string_"];
+      source_request: string;
+      prompt_version: string;
+      created_at: string;
+    };
+    "ResultSuccess_PromptInputRecord-Array_": {
+      data: components["schemas"]["PromptInputRecord"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptInputRecord-Array.string_": components["schemas"]["ResultSuccess_PromptInputRecord-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_PromptVersionResult-Array_": {
       data: components["schemas"]["PromptVersionResult"][];
       /** @enum {number|null} */
@@ -667,6 +683,29 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
+        };
+      };
+    };
+  };
+  GetInputs: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          limit: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptInputRecord-Array.string_"];
         };
       };
     };

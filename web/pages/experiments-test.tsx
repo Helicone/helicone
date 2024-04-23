@@ -9,6 +9,7 @@ import {
   usePrompts,
 } from "../services/hooks/prompts/prompts";
 import { useJawnClient } from "../lib/clients/jawnHook";
+import { useInputs } from "../services/hooks/prompts/inputs";
 
 interface AlertProps {
   user: User;
@@ -23,6 +24,8 @@ const Alert = (props: AlertProps) => {
   const promptVersions = usePromptVersions(promptId);
 
   const [promptVersionId, setPromptVersionId] = useState<string>("");
+
+  const inputs = useInputs(promptVersionId);
 
   useEffect(() => {
     if (prompts.prompts?.[0].id) {
@@ -42,6 +45,7 @@ const Alert = (props: AlertProps) => {
       <AuthHeader title={"Alerts"} />
       <div>
         <div>Hello Scott</div>
+        {inputs.inputs?.length}
         ENTER PROMPT ID (Default latest prompt)
         <input
           type="text"
