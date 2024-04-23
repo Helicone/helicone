@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import HcButton from "../../../ui/hcButton";
 import { BookOpenIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
@@ -21,8 +21,6 @@ const ViewPromptButton = (props: ViewPromptButtonProps) => {
   const { prompts } = usePromptVersions(promptId);
 
   const sortedPrompts = prompts?.sort((a, b) => {
-    // sort by the major version, then the minor version.
-    // ex: 5.4 -> 5.3 -> 4.5 -> 4.4
     if (a.major_version === b.major_version) {
       return b.minor_version - a.minor_version;
     }
@@ -30,11 +28,18 @@ const ViewPromptButton = (props: ViewPromptButtonProps) => {
   });
 
   const [selectedVersion, setSelectedVersion] = useState<string>(
-    // default to the latest version
     `${sortedPrompts?.at(0)?.major_version}.${
       sortedPrompts?.at(0)?.minor_version
     }`
   );
+
+  useEffect(() => {
+    if (sortedPrompts?.length) {
+      setSelectedVersion(
+        `${sortedPrompts[0].major_version}.${sortedPrompts[0].minor_version}`
+      );
+    }
+  }, [sortedPrompts]);
 
   const selectedPrompt = prompts?.find(
     (p) =>
@@ -58,11 +63,6 @@ const ViewPromptButton = (props: ViewPromptButtonProps) => {
         defaultExpanded={true}
       >
         <div className="p-4 flex flex-col space-y-4">
-          <h1 className="whitespace-pre-wrap">
-            {JSON.stringify(prompt, null, 4)}
-            ===============================
-            {JSON.stringify(prompts, null, 4)}
-          </h1>
           <div className="w-full flex justify-between items-center">
             <div className="flex items-center space-x-2">
               <DocumentTextIcon className="h-5 w-5 text-black dark:text-white" />
