@@ -18,10 +18,16 @@ interface SimpleTableProps<T> {
   data: T[];
   columns: ColumnConfig<T>[];
   tableHeader?: string;
+  emptyMessage?: string; // what to display when data is empty
 }
 
 export function SimpleTable<T>(props: SimpleTableProps<T>) {
-  const { data, columns, tableHeader } = props;
+  const {
+    data,
+    columns,
+    tableHeader,
+    emptyMessage = "No data available",
+  } = props;
   return (
     <Card className="p-2">
       {tableHeader && tableHeader !== "" && (
@@ -39,6 +45,7 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
             ))}
           </TableRow>
         </TableHead>
+
         <TableBody>
           {data.map((item, index) => (
             <TableRow key={`row-${index}`}>
@@ -51,6 +58,13 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
           ))}
         </TableBody>
       </Table>
+      {data.length === 0 && (
+        <div className="h-48 w-full bg-white dark:bg-black flex items-center justify-center">
+          <p className="text-tremor-content dark:text-dark-tremor-content mx-auto">
+            {emptyMessage}
+          </p>
+        </div>
+      )}
     </Card>
   );
 }

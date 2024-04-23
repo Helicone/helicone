@@ -10,10 +10,16 @@ interface StepActionsProps {
     name: string;
     description?: string;
   }[];
+  allowStepSelection?: boolean;
 }
 
 export default function StepActions(props: StepActionsProps) {
-  const { currentStep, setCurrentStep, steps } = props;
+  const {
+    currentStep,
+    setCurrentStep,
+    steps,
+    allowStepSelection = "true",
+  } = props;
   return (
     <div className="border border-gray-300 rounded-lg bg-white">
       <nav className="w-full" aria-label="Progress">
@@ -32,6 +38,7 @@ export default function StepActions(props: StepActionsProps) {
               >
                 {step.id < currentStep ? (
                   <button
+                    disabled={!allowStepSelection}
                     onClick={() => {
                       setCurrentStep(step.id);
                     }}
@@ -71,6 +78,7 @@ export default function StepActions(props: StepActionsProps) {
                       setCurrentStep(step.id);
                     }}
                     aria-current="step"
+                    disabled={!allowStepSelection}
                   >
                     <span
                       className="absolute left-0 top-0 h-full w-1 bg-sky-600 lg:bottom-0 lg:top-auto lg:h-1 lg:w-full"
@@ -103,6 +111,7 @@ export default function StepActions(props: StepActionsProps) {
                       setCurrentStep(step.id);
                     }}
                     className="group"
+                    disabled={!allowStepSelection}
                   >
                     <span
                       className="absolute left-0 top-0 h-full w-1 bg-transparent group-hover:bg-gray-200 lg:bottom-0 lg:top-auto lg:h-1 lg:w-full"
