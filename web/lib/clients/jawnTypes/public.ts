@@ -504,6 +504,11 @@ Json: JsonObject;
       value?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
+    Partial_ExperimentToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
     Partial_TimestampOperatorsTyped_: {
       /** Format: date-time */
       gte?: string;
@@ -606,6 +611,9 @@ Json: JsonObject;
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
       feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
       properties_table?: components["schemas"]["Partial_PropertiesTableToOperators_"];
+      prompt_v2?: components["schemas"]["Partial_PromptToOperators_"];
+      prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
+      experiment?: components["schemas"]["Partial_ExperimentToOperators_"];
       request_response_log?: components["schemas"]["Partial_RequestResponseLogToOperators_"];
       users_view?: components["schemas"]["Partial_UserViewToOperators_"];
       properties_v3?: components["schemas"]["Partial_PropertiesCopyV2ToOperators_"];
@@ -620,8 +628,6 @@ Json: JsonObject;
       values?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
-      prompt_v2?: components["schemas"]["Partial_PromptToOperators_"];
-      prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
     };
     SingleKey_TablesAndViews_: components["schemas"]["Partial_TablesAndViews_"];
     FilterLeaf: components["schemas"]["SingleKey_TablesAndViews_"];

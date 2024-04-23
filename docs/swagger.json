@@ -1655,6 +1655,18 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
+			"Partial_ExperimentToOperators_": {
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"prompt_v2": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
 			"Partial_TimestampOperatorsTyped_": {
 				"properties": {
 					"gte": {
@@ -1921,6 +1933,15 @@
 					"properties_table": {
 						"$ref": "#/components/schemas/Partial_PropertiesTableToOperators_"
 					},
+					"prompt_v2": {
+						"$ref": "#/components/schemas/Partial_PromptToOperators_"
+					},
+					"prompts_versions": {
+						"$ref": "#/components/schemas/Partial_PromptVersionsToOperators_"
+					},
+					"experiment": {
+						"$ref": "#/components/schemas/Partial_ExperimentToOperators_"
+					},
 					"request_response_log": {
 						"$ref": "#/components/schemas/Partial_RequestResponseLogToOperators_"
 					},
@@ -1958,12 +1979,6 @@
 							"$ref": "#/components/schemas/Partial_TextOperators_"
 						},
 						"type": "object"
-					},
-					"prompt_v2": {
-						"$ref": "#/components/schemas/Partial_PromptToOperators_"
-					},
-					"prompts_versions": {
-						"$ref": "#/components/schemas/Partial_PromptVersionsToOperators_"
 					}
 				},
 				"type": "object",

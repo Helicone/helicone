@@ -1,11 +1,24 @@
 // src/users/usersController.ts
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import {
+  FilterLeafSubset,
+  FilterNode,
+} from "../../lib/shared/filters/filterDefs";
 import { Result, err } from "../../lib/shared/result";
 import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { HeliconeRequest } from "../../lib/stores/request/request";
 import { ExperimentManager } from "../../managers/experiment/ExperimentManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
+
+export type ExperimentFilterBranch = {
+  left: ExperimentFilterNode;
+  operator: "or" | "and";
+  right: ExperimentFilterNode;
+};
+type ExperimentFilterNode =
+  | FilterLeafSubset<"experiment">
+  | ExperimentFilterBranch
+  | "all";
 
 export interface NewExperimentParams {
   datasetId: string;

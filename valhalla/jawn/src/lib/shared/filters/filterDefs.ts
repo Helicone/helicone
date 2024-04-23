@@ -243,10 +243,12 @@ type PromptToOperators = {
 
 export type FilterLeafPrompt = SingleKey<PromptToOperators>;
 
-export type PromptInputTableFilters = {
-  prompt_v2: FilterLeafPrompt;
-  prompts_versions: FilterLeafPromptVersions;
+type ExperimentToOperators = {
+  id: SingleKey<TextOperators>;
+  prompt_v2: SingleKey<TextOperators>;
 };
+
+export type FilterLeafExperiment = SingleKey<ExperimentToOperators>;
 
 export type TablesAndViews = {
   user_metrics: FilterLeafUserMetrics;
@@ -255,6 +257,9 @@ export type TablesAndViews = {
   request: FilterLeafRequest;
   feedback: FilterLeafFeedback;
   properties_table: FilterLeafPropertiesTable;
+  prompt_v2: FilterLeafPrompt;
+  prompts_versions: FilterLeafPromptVersions;
+  experiment: FilterLeafExperiment;
 
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
@@ -272,7 +277,7 @@ export type TablesAndViews = {
   values: {
     [key: string]: SingleKey<TextOperators>;
   };
-} & PromptInputTableFilters;
+};
 
 export type FilterLeaf = SingleKey<TablesAndViews>;
 
