@@ -567,12 +567,9 @@ export class DBLoggable {
       });
     }
 
-    const shouldScore =
-      subscriptions
-        .map((subscription) => {
-          return subscription.event === "score";
-        })
-        .filter((x) => x).length > 0;
+    const shouldScore = webhook.destination.includes(
+      "helicone-scoring-webhook"
+    );
 
     if (shouldScore) {
       console.log(
