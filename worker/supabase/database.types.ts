@@ -251,18 +251,29 @@ export type Database = {
           created_at: string | null
           id: string
           name: string | null
+          organization: string
         }
         Insert: {
           created_at?: string | null
           id?: string
           name?: string | null
+          organization: string
         }
         Update: {
           created_at?: string | null
           id?: string
           name?: string | null
+          organization?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_organization"
+            columns: ["organization"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       experiment_dataset_v2_row: {
         Row: {
@@ -1753,6 +1764,7 @@ export type Database = {
           target_url: string | null
           threat: boolean | null
           user_id: string | null
+          version: number
         }
         Insert: {
           auth_hash: string
@@ -1776,6 +1788,7 @@ export type Database = {
           target_url?: string | null
           threat?: boolean | null
           user_id?: string | null
+          version?: number
         }
         Update: {
           auth_hash?: string
@@ -1799,6 +1812,7 @@ export type Database = {
           target_url?: string | null
           threat?: boolean | null
           user_id?: string | null
+          version?: number
         }
         Relationships: [
           {

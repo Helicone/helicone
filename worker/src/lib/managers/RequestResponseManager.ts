@@ -9,7 +9,7 @@ export type RequestResponseContent = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   requestBody: any;
   responseBody: string;
-  requestAssets: Record<string, string>;
+  assets: Map<string, string>;
 };
 
 export class RequestResponseManager {
@@ -36,11 +36,11 @@ export class RequestResponseManager {
     requestId,
     requestBody,
     responseBody,
-    requestAssets,
+    assets,
   }: RequestResponseContent): Promise<Result<string, string>> {
-    const uploadPromises: Promise<void>[] = Object.entries(requestAssets).map(
-      ([key, value]) =>
-        this.handleImageUpload(value, key, requestId, organizationId)
+    const uploadPromises: Promise<void>[] = Array.from(assets.entries()).map(
+      ([assetId, imageUrl]) =>
+        this.handleImageUpload(assetId, imageUrl, requestId, organizationId)
     );
 
     await Promise.allSettled(uploadPromises);
@@ -52,8 +52,8 @@ export class RequestResponseManager {
   }
 
   private async handleImageUpload(
-    imageUrl: string,
     assetId: string,
+    imageUrl: string,
     requestId: string,
     organizationId: string
   ): Promise<void> {

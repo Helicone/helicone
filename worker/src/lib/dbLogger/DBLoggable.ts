@@ -20,9 +20,22 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { getTokenCount } from "../clients/TokenCounterClient";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
-import { isImageModel } from "../util/imageModelMapper";
-import { getImageModelParser } from "./imageParsers/parserMapper";
+import {
+  isImageModel,
+  isRequestImageModel,
+  isResponseImageModel,
+} from "../util/imageModelMapper";
+import {
+  getRequestImageModelParser,
+  getResponseImageModelParser,
+} from "./imageParsers/parserMapper";
 import { TemplateWithInputs } from "../../api/lib/promptHelpers";
+import { ImageModelParsingResponse } from "./imageParsers/core/parsingResponse";
+import {
+  HeliconeRequestResponseToPosthog,
+  PosthogClient,
+} from "../clients/PosthogClient";
+import { costOfPrompt } from "../../packages/cost";
 
 export interface DBLoggableProps {
   response: {
@@ -455,11 +468,15 @@ export class DBLoggable {
         };
   }
 
-  async readAndLogResponse(queue: RequestResponseStore): Promise<
+  async readAndLogResponse(
+    queue: RequestResponseStore,
+    model: string | null
+  ): Promise<
     Result<
       {
         response: Database["public"]["Tables"]["response"]["Insert"];
         body: string;
+        responseAssets: Map<string, string>;
       },
       string
     >
@@ -469,6 +486,18 @@ export class DBLoggable {
         this.getResponse(),
         1000 * 60 * 30
       ); // 30 minutes
+      let imageModelParsingResponse: ImageModelParsingResponse = {
+        body,
+        assets: new Map<string, string>(),
+      };
+      if (model && isResponseImageModel(model)) {
+        const imageModelParser = getResponseImageModelParser(model);
+        if (imageModelParser) {
+          imageModelParsingResponse =
+            imageModelParser.processResponseBody(body);
+        }
+      }
+      response.body = imageModelParsingResponse.body;
       const { error } = await queue.updateResponse(
         this.response.responseId,
         this.request.requestId,
@@ -478,7 +507,11 @@ export class DBLoggable {
         console.error("Error updating response", error);
         // return err(error);
       }
-      return ok({ response, body });
+      return ok({
+        response,
+        body: imageModelParsingResponse.body,
+        responseAssets: imageModelParsingResponse.assets,
+      });
     } catch (e) {
       const { error } = await queue.updateResponse(
         this.response.responseId,
@@ -602,8 +635,16 @@ export class DBLoggable {
       queue: RequestResponseStore;
       requestResponseManager: RequestResponseManager;
     },
-    S3_ENABLED: Env["S3_ENABLED"]
-  ): Promise<Result<null, string>> {
+    S3_ENABLED: Env["S3_ENABLED"],
+    requestHeaders?: HeliconeHeaders
+  ): Promise<
+    Result<
+      {
+        cost: number;
+      } | null,
+      string
+    >
+  > {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
       return err(`Auth failed! ${error}` ?? "Helicone organization not found");
@@ -658,13 +699,25 @@ export class DBLoggable {
     if (!requestResult.data || requestResult.error) {
       return requestResult;
     }
-
-    const responseResult = await this.readAndLogResponse(db.queue);
+    const responseResult = await this.readAndLogResponse(
+      db.queue,
+      requestResult.data.request.model
+    );
     const model =
       requestResult?.data?.request?.model_override ??
       responseResult?.data?.response?.model ??
       requestResult?.data?.request?.model ??
       "not-found";
+
+    let assets: Map<string, string> = new Map();
+
+    if (requestResult?.data?.requestAssets) {
+      assets = new Map([...assets, ...requestResult.data.requestAssets]);
+    }
+
+    if (responseResult?.data?.responseAssets) {
+      assets = new Map([...assets, ...responseResult.data.responseAssets]);
+    }
 
     let s3Result: Result<string, string>;
     // If no data or error, return
@@ -682,7 +735,7 @@ export class DBLoggable {
                 await this.response.getResponseBody()
               ).body,
             }),
-            requestAssets: requestResult.data.requestAssets,
+            assets: assets,
           });
         } else {
           s3Result = await db.requestResponseManager.storeRequestResponseData({
@@ -695,7 +748,7 @@ export class DBLoggable {
                 await this.response.getResponseBody()
               ).body,
             }),
-            requestAssets: requestResult.data.requestAssets,
+            assets: assets,
           });
         }
 
@@ -714,7 +767,7 @@ export class DBLoggable {
           requestId: this.request.requestId,
           requestBody: requestResult.data.body,
           responseBody: responseResult.data.body,
-          requestAssets: requestResult.data.requestAssets,
+          assets: assets,
         });
       } else {
         s3Result = await db.requestResponseManager.storeRequestResponseData({
@@ -722,7 +775,7 @@ export class DBLoggable {
           requestId: this.request.requestId,
           requestBody: requestResult.data.body,
           responseBody: responseResult.data.body,
-          requestAssets: requestResult.data.requestAssets,
+          assets: assets,
         });
       }
 
@@ -755,16 +808,34 @@ export class DBLoggable {
     }
 
     if (this.request.heliconeTemplate && this.request.promptId) {
+      const assets = requestResult.data.requestAssets;
+
+      const inverseAssets: Map<string, string> = new Map();
+      assets.forEach((value, key) => inverseAssets.set(value, key));
+
+      const inputs = Object.entries(
+        this.request.heliconeTemplate.inputs
+      ).reduce<{ [key: string]: string }>((acc, [key, value]) => {
+        const assetId = inverseAssets.get(value);
+        acc[key] = assetId ? `<helicone-asset-id key="${assetId}"/>` : value;
+        return acc;
+      }, {});
+
+      const newTemplateWithInputs: TemplateWithInputs = {
+        template: this.request.heliconeTemplate.template,
+        inputs: inputs,
+      };
+
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const upsertResult2 = await db.queue.promptStore.upsertPromptV2(
-        this.request.heliconeTemplate,
+        newTemplateWithInputs,
         this.request.promptId,
         authParams.organizationId,
         this.request.requestId
       );
 
       const upsertResult = await db.queue.upsertPrompt(
-        this.request.heliconeTemplate,
+        newTemplateWithInputs,
         this.request.promptId ?? "",
         authParams.organizationId
       );
@@ -773,28 +844,78 @@ export class DBLoggable {
         console.error("Error upserting prompt", upsertResult.error);
         return err(JSON.stringify(upsertResult.error));
       }
-      const propResult = await db.queue.putRequestProperty(
-        requestResult.data.request.id,
-        [
-          {
-            key: "Helicone-Prompt-Id",
-            value: this.request.promptId,
-          },
-          {
-            key: "Helicone-Prompt-Version",
-            value: upsertResult.data.version.toString() ?? "",
-          },
-        ],
-        authParams.organizationId
-      );
-
-      if (propResult.error || !propResult.data) {
-        console.error("Error adding properties", propResult.error);
-        return err(JSON.stringify(propResult.error));
-      }
     }
 
-    return ok(null);
+    const cost =
+      this.modelCost({
+        model: model ?? null,
+        sum_completion_tokens:
+          responseResult.data.response.completion_tokens ?? 0,
+        sum_prompt_tokens: responseResult.data.response.completion_tokens ?? 0,
+        sum_tokens:
+          (responseResult.data.response.completion_tokens ?? 0) +
+          (responseResult.data.response.prompt_tokens ?? 0),
+        provider: requestResult.data.request.provider ?? "",
+      }) ?? 0;
+
+    if (requestHeaders?.posthogKey) {
+      const posthogClient = new PosthogClient(
+        requestHeaders.posthogKey,
+        requestHeaders.posthogHost
+      );
+      const reqBody = JSON.parse(this.request.bodyText ?? "{}") ?? null;
+      const heliconeRequestResponse: HeliconeRequestResponseToPosthog = {
+        model: model ?? "",
+        temperature: reqBody.temperature ?? 0.0,
+        n: reqBody.n ?? 0,
+        promptId: requestResult.data.request.prompt_id ?? "",
+        timeToFirstToken: responseResult.data.response.time_to_first_token ?? 0,
+        cost: cost,
+        provider: requestResult.data.request.provider ?? "",
+        path: requestResult.data.request.path ?? "",
+        completetionTokens: responseResult.data.response.completion_tokens ?? 0,
+        promptTokens: responseResult.data.response.prompt_tokens ?? 0,
+        totalTokens:
+          (responseResult.data.response.completion_tokens ?? 0) +
+          (responseResult.data.response.prompt_tokens ?? 0),
+        userId: requestResult.data.request.user_id ?? "",
+        countryCode: requestResult.data.request.country_code ?? "",
+        requestBodySize:
+          requestResult.data.request.body?.toString().length ?? 0,
+        responseBodySize:
+          responseResult.data.response.body?.toString().length ?? 0,
+        delayMs: responseResult.data.response.delay_ms ?? 0,
+      };
+
+      await posthogClient.captureEvent(
+        "helicone_request_response",
+        heliconeRequestResponse
+      );
+    }
+
+    return ok({
+      cost,
+    });
+  }
+
+  modelCost(modelRow: {
+    model: string;
+    provider: string;
+    sum_prompt_tokens: number;
+    sum_completion_tokens: number;
+    sum_tokens: number;
+  }): number {
+    const model = modelRow.model;
+    const promptTokens = modelRow.sum_prompt_tokens;
+    const completionTokens = modelRow.sum_completion_tokens;
+    return (
+      costOfPrompt({
+        model,
+        promptTokens,
+        completionTokens,
+        provider: modelRow.provider,
+      }) ?? 0
+    );
   }
 }
 
@@ -857,7 +978,7 @@ export async function logRequest(
         job: string | null;
       };
       body: string; // For S3 storage
-      requestAssets: Record<string, string>;
+      requestAssets: Map<string, string>;
     },
     string
   >
@@ -918,17 +1039,20 @@ export async function logRequest(
         (requestBody as any);
 
     // eslint-disable-next-line prefer-const
-    let requestAssets: Record<string, string> = {};
+    let imageModelParsingResponse: ImageModelParsingResponse = {
+      body: body,
+      assets: new Map<string, string>(),
+    };
     const model = getModelFromRequest();
 
-    if (model && isImageModel(model)) {
-      const imageModelParser = getImageModelParser(model);
+    if (model && isRequestImageModel(model)) {
+      const imageModelParser = getRequestImageModelParser(model);
       if (imageModelParser) {
-        requestAssets = imageModelParser.processMessages(body);
+        imageModelParsingResponse = imageModelParser.processRequestBody(body);
       }
     }
 
-    const reqBody = unsupportedImage(body);
+    const reqBody = unsupportedImage(imageModelParsingResponse.body);
 
     const createdAt = request.startTime ?? new Date();
     const requestData = {
@@ -953,6 +1077,7 @@ export async function logRequest(
       target_url: request.targetUrl,
       request_ip: null,
       country_code: request.country_code,
+      version: 0,
     };
 
     const customPropertyRows = Object.entries(request.properties).map(
@@ -997,8 +1122,8 @@ export async function logRequest(
           id: jobNode?.data.id ?? null,
           job: jobNode?.data.job ?? null,
         },
-        body: body,
-        requestAssets,
+        body: imageModelParsingResponse.body,
+        requestAssets: imageModelParsingResponse.assets,
       },
       error: null,
     };

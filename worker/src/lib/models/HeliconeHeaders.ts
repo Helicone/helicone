@@ -18,6 +18,7 @@ export interface IHeliconeHeaders {
     token: string;
   }>;
   rateLimitPolicy: Nullable<string>;
+
   featureFlags: {
     streamForceFormat: boolean;
     increaseTimeout: boolean;
@@ -45,6 +46,8 @@ export interface IHeliconeHeaders {
   modelOverride: Nullable<string>;
   promptSecurityEnabled: Nullable<string>;
   moderationsEnabled: boolean;
+  posthogKey: Nullable<string>;
+  posthogHost: Nullable<string>;
 }
 
 export class HeliconeHeaders implements IHeliconeHeaders {
@@ -77,12 +80,15 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   modelOverride: Nullable<string>;
   promptSecurityEnabled: Nullable<string>;
   moderationsEnabled: boolean;
+  posthogKey: Nullable<string>;
+  posthogHost: Nullable<string>;
 
   constructor(private headers: Headers) {
     const heliconeHeaders = this.getHeliconeHeaders();
     this.heliconeAuth = heliconeHeaders.heliconeAuth;
     this.heliconeAuthV2 = heliconeHeaders.heliconeAuthV2;
     this.rateLimitPolicy = heliconeHeaders.rateLimitPolicy;
+
     this.featureFlags = heliconeHeaders.featureFlags;
     this.retryHeaders = heliconeHeaders.retryHeaders;
     this.openaiBaseUrl = heliconeHeaders.openaiBaseUrl;
@@ -99,6 +105,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.modelOverride = heliconeHeaders.modelOverride;
     this.promptSecurityEnabled = heliconeHeaders.promptSecurityEnabled;
     this.moderationsEnabled = heliconeHeaders.moderationsEnabled;
+    this.posthogKey = heliconeHeaders.posthogKey;
+    this.posthogHost = heliconeHeaders.posthogHost;
   }
 
   private getFallBacks(): Nullable<HeliconeFallback[]> {
@@ -213,6 +221,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         this.headers.get("Helicone-Moderations-Enabled") == "true"
           ? true
           : false,
+      posthogKey: this.headers.get("Helicone-Posthog-Key") ?? null,
+      posthogHost: this.headers.get("Helicone-Posthog-Host") ?? null,
     };
   }
 

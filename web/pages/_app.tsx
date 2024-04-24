@@ -16,6 +16,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { ThemeContextProvider } from "../components/shared/theme/themeContext";
 import { NextPage } from "next";
+import { Analytics } from "@vercel/analytics/react";
 
 if (
   typeof window !== "undefined" &&
@@ -51,6 +52,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const [supabaseClient] = useState(() => createBrowserSupabaseClient());
 
   const getLayout = Component.getLayout ?? ((page) => page);
+
   const trackingEnabled = process.env.NEXT_PUBLIC_TRACKING_ENABLED || false;
 
   return (
@@ -74,6 +76,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
           </QueryClientProvider>
         </ApolloProvider>
       </SessionContextProvider>
+      {trackingEnabled && <Analytics />}
     </>
   );
 }

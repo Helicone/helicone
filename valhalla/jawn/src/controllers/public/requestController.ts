@@ -3,21 +3,33 @@ import {
   Body,
   Controller,
   Example,
+  Path,
   Post,
+  Put,
   Request,
   Route,
   Security,
   Tags,
 } from "tsoa";
-import { Result } from "../../lib/modules/result";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
+import { Result } from "../../lib/shared/result";
 import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { HeliconeRequest } from "../../lib/stores/request/request";
 import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 
+export type RequestFilterBranch = {
+  left: RequestFilterNode;
+  operator: "or" | "and";
+  right: RequestFilterNode;
+};
+type RequestFilterNode =
+  | FilterLeafSubset<"feedback" | "request" | "response">
+  | RequestFilterBranch
+  | "all";
+
 export interface RequestQueryParams {
-  filter: FilterNode;
+  filter: RequestFilterNode;
   offset?: number;
   limit?: number;
   sort?: SortLeafRequest;
@@ -67,5 +79,50 @@ export class RequestController extends Controller {
       this.setStatus(200); // set return status 201
     }
     return requests;
+  }
+
+  @Post("/{requestId}/feedback")
+  public async feedbackRequest(
+    @Body()
+    requestBody: { rating: boolean },
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() requestId: string
+  ): Promise<Result<null, string>> {
+    const reqManager = new RequestManager(request.authParams);
+
+    const requestFeedback = await reqManager.feedbackRequest(
+      requestId,
+      requestBody.rating
+    );
+    if (requestFeedback.error) {
+      console.log(requestFeedback.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200); // set return status 201
+    }
+    return requestFeedback;
+  }
+
+  @Put("/{requestId}/property")
+  public async putProperty(
+    @Body()
+    requestBody: { key: string; value: string },
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() requestId: string
+  ): Promise<Result<null, string>> {
+    const reqManager = new RequestManager(request.authParams);
+
+    const requestFeedback = await reqManager.addPropertyToRequest(
+      requestId,
+      requestBody.key,
+      requestBody.value
+    );
+    if (requestFeedback.error) {
+      console.log(requestFeedback.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200); // set return status 201
+    }
+    return requestFeedback;
   }
 }

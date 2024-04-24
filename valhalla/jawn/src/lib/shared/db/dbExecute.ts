@@ -1,8 +1,7 @@
 import { Client } from "pg";
 import { Result } from "../result";
 import { createClient as clickhouseCreateClient } from "@clickhouse/client";
-// import dateFormat from "dateformat";
-// const dateFormat = require("dateformat");
+import { clickhouseDb } from "../../db/ClickhouseWrapper";
 
 export function formatTimeString(timeString: string): string {
   return new Date(timeString).toISOString().replace("Z", "");
@@ -12,9 +11,11 @@ export function paramsToValues(params: (number | string | boolean | Date)[]) {
   return params
     .map((p) => {
       if (p instanceof Date) {
-        //ex: 2023-05-27T08:21:26
-        // return dateFormat(p, "yyyy-mm-dd HH:MM:ss", true);
-        return p.toISOString().replace("T", " ").replace("Z", "");
+        return p
+          .toISOString()
+          .replace("T", " ")
+          .replace("Z", "")
+          .replace(/\.\d+$/, "");
       } else {
         return p;
       }
@@ -39,40 +40,12 @@ export function printRunnableQuery(
   console.log(`\n\n${setParams}\n\n${query}\n\n`);
 }
 
+// DEPRECATED
 export async function dbQueryClickhouse<T>(
   query: string,
   parameters: (number | string | boolean | Date)[]
 ): Promise<Result<T[], string>> {
-  try {
-    const query_params = paramsToValues(parameters);
-
-    const client = clickhouseCreateClient({
-      host: process.env.CLICKHOUSE_HOST ?? "http://localhost:18123",
-      username: process.env.CLICKHOUSE_USER ?? "default",
-      password: process.env.CLICKHOUSE_PASSWORD ?? "",
-    });
-
-    const queryResult = await client.query({
-      query,
-      query_params,
-      format: "JSONEachRow",
-      // Recommended for cluster usage to avoid situations
-      // where a query processing error occurred after the response code
-      // and HTTP headers were sent to the client.
-      // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
-      clickhouse_settings: {
-        wait_end_of_query: 1,
-      },
-    });
-    return { data: await queryResult.json<T[]>(), error: null };
-  } catch (err) {
-    console.error("Error executing query: ", query, parameters);
-    console.error(err);
-    return {
-      data: null,
-      error: JSON.stringify(err),
-    };
-  }
+  return clickhouseDb.dbQuery<T>(query, parameters);
 }
 
 export async function dbInsertClickhouse<

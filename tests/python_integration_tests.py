@@ -562,3 +562,51 @@ def test_claude_vision_request():
     assert assets_data1, "asset not found in the database for this request"
 
     print("passed")
+
+def test_dalle_image_generation():
+    url = f"{helicone_proxy_url}/images/generations"
+    
+    requestId1 = str(uuid.uuid4())
+    data = {
+        "model": "dall-e-3",
+        "prompt": "a white siamese cat",
+        "n": 1,
+        "size": "1024x1024"
+    }
+    headers2 = {
+        "Authorization": f"Bearer {openai_api_key}",
+        "Helicone-Auth": f"Bearer {helicone_api_key}",
+        "Helicone-Property-RequestId": requestId1,
+        "OpenAI-Organization": openai_org_id,
+        "Content-Type": "application/json"
+    }
+
+    response2 = requests.post(url, json=data, headers=headers2)
+
+    try:
+        response2.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        print(e)
+        print(response2.text)
+        raise e
+    
+    assert response2.status_code == 200, "Expected status code to be 200."
+
+    assert response2.headers.get('Helicone-Status', None) == "success", "Expected Helicone-Status to be success."
+    
+    responseJson2 = response2.json()
+    
+    assert responseJson2, "Response from DALL·E API is empty"
+
+    time.sleep(3)  # Assuming time is needed for internal processing
+
+    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
+    request_data2 = fetch_from_db(query, (requestId1,))
+    assert request_data2, "Request data not found in the database for the given property request id"
+
+    assets_query = "SELECT * FROM asset WHERE request_id = %s"
+    assets_data2 = fetch_from_db(assets_query, (request_data2[0][3],))
+
+    assert assets_data2, "asset not found in the database for this request"
+
+    print("passed")

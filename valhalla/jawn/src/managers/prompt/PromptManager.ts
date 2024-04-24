@@ -1,24 +1,120 @@
 // src/users/usersService.ts
 import {
+  PromptCreateSubversionParams,
   PromptQueryParams,
   PromptResult,
   PromptVersionResult,
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
-import { Result } from "../../lib/modules/result";
+import { Result, err } from "../../lib/shared/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import { buildFilterPostgres } from "../../lib/shared/filters/filters";
 import { resultMap } from "../../lib/shared/result";
 import { User } from "../../models/user";
 import { BaseManager } from "../BaseManager";
 
-// A post request should not contain an id.
-export type UserCreationParams = Pick<User, "email" | "name" | "phoneNumbers">;
-
 export class PromptManager extends BaseManager {
+  async createNewPromptVersion(
+    parentPromptVersionId: string,
+    params: PromptCreateSubversionParams
+  ): Promise<Result<PromptVersionResult, string>> {
+    if (JSON.stringify(params.newHeliconeTemplate).length > 1_000_000_000) {
+      return err("Helicone template too large");
+    }
+
+    const result = await dbExecute<{
+      id: string;
+      minor_version: number;
+      major_version: number;
+      helicone_template: string;
+      prompt_v2: string;
+      model: string;
+    }>(
+      `
+    WITH parent_prompt_version AS (
+      SELECT * FROM prompts_versions WHERE id = $1
+    )
+    INSERT INTO prompts_versions (prompt_v2, helicone_template, model, organization, major_version, minor_version)
+    SELECT
+        ppv.prompt_v2,
+        $2, 
+        $3,
+        $4,
+        ppv.major_version,
+        (SELECT minor_version + 1
+         FROM prompts_versions pv1
+         WHERE pv1.major_version = ppv.major_version
+         ORDER BY pv1.major_version DESC, pv1.minor_version DESC
+         LIMIT 1)
+    FROM parent_prompt_version ppv
+    RETURNING 
+        id,
+        minor_version,
+        major_version,
+        helicone_template,
+        prompt_v2,
+        model;
+    
+    `,
+      [
+        parentPromptVersionId,
+        params.newHeliconeTemplate,
+        "",
+        this.authParams.organizationId,
+      ]
+    );
+
+    console.log("result", result);
+    return resultMap(result, (data) => data[0]);
+  }
+
+  async getPromptVersions(
+    filter: FilterNode
+  ): Promise<Result<PromptVersionResult[], string>> {
+    const filterWithAuth = buildFilterPostgres({
+      filter,
+      argsAcc: [this.authParams.organizationId],
+    });
+
+    const result = dbExecute<{
+      id: string;
+      minor_version: number;
+      major_version: number;
+      helicone_template: string;
+      prompt_v2: string;
+      model: string;
+    }>(
+      `
+    SELECT 
+      prompts_versions.id,
+      minor_version,
+      major_version,
+      helicone_template,
+      prompt_v2,
+      model
+    FROM prompts_versions
+    left join prompt_v2 on prompt_v2.id = prompts_versions.prompt_v2
+    WHERE prompt_v2.organization = $1
+    AND prompt_v2.soft_delete = false
+    AND (${filterWithAuth.filter})
+    `,
+      filterWithAuth.argsAcc
+    );
+
+    return result;
+  }
+
   async getPrompts(
     params: PromptsQueryParams
   ): Promise<Result<PromptsResult[], string>> {
+    const filterWithAuth = buildFilterPostgres({
+      filter: params.filter,
+      argsAcc: [this.authParams.organizationId],
+    });
+
+    filterWithAuth.argsAcc;
     const result = dbExecute<{
       id: string;
       user_defined_id: string;
@@ -36,8 +132,9 @@ export class PromptManager extends BaseManager {
     FROM prompt_v2
     WHERE prompt_v2.organization = $1
     AND prompt_v2.soft_delete = false
+    AND (${filterWithAuth.filter})
     `,
-      [this.authParams.organizationId]
+      filterWithAuth.argsAcc
     );
     return result;
   }
