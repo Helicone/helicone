@@ -13,6 +13,7 @@ import { Message } from "../requests/chat";
 import ModelPill from "../requestsV2/modelPill";
 import ChatRow from "./chatRow";
 import RoleButton from "./new/roleButton";
+import HcButton from "../../ui/hcButton";
 
 interface ChatPlaygroundProps {
   requestId: string;
@@ -22,7 +23,10 @@ interface ChatPlaygroundProps {
   maxTokens: number;
   onSubmit?: (history: Message[]) => void;
   submitText?: string;
-  customNavBar?: React.ReactNode;
+  customNavBar?: {
+    onBack: () => void;
+    onContinue: () => void;
+  };
 }
 
 const ChatPlayground = (props: ChatPlaygroundProps) => {
@@ -401,7 +405,30 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           </div>
         </li>
       </ul>
-      {customNavBar && <>{customNavBar}</>}
+      {customNavBar && (
+        <div
+          id="step-inc"
+          className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+        >
+          <HcButton
+            variant={"secondary"}
+            size={"sm"}
+            title={"Back"}
+            onClick={() => customNavBar.onBack()}
+          />
+          <HcButton
+            variant={"primary"}
+            size={"sm"}
+            title={"Continue"}
+            onClick={() => {
+              if (onSubmit) {
+                onSubmit(currentChat);
+              }
+              customNavBar.onContinue();
+            }}
+          />
+        </div>
+      )}
     </>
   );
 };
