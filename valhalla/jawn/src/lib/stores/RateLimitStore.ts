@@ -1,13 +1,20 @@
-import { PromiseGenericResult, err, ok } from "../modules/result";
-import { ClickhouseDB, dbInsertClickhouse } from "../shared/db/dbExecute";
+import { ClickhouseClientWrapper, ClickhouseDB } from "../db/ClickhouseWrapper";
+import { PromiseGenericResult, err, ok } from "../shared/result";
 
 export class RateLimitStore {
-  constructor() {}
+  private clickhouse: ClickhouseClientWrapper;
+
+  constructor(clickhouse: ClickhouseClientWrapper) {
+    this.clickhouse = clickhouse;
+  }
 
   public async batchInsertRateLimits(
     rateLimitLogs: ClickhouseDB["Tables"]["rate_limit_log"][]
   ): PromiseGenericResult<string> {
-    const result = await dbInsertClickhouse("rate_limit_log", rateLimitLogs);
+    const result = await this.clickhouse.dbInsertClickhouse(
+      "rate_limit_log",
+      rateLimitLogs
+    );
 
     if (result.error || !result.data) {
       return err(`Error inserting rate limit logs: ${result.error}`);

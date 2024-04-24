@@ -1,5 +1,5 @@
 import { consolidateTextFields } from "../../../utils/streamParser";
-import { PromiseGenericResult, ok } from "../../modules/result";
+import { PromiseGenericResult, ok } from "../result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 
 export class AnthropicStreamBodyProcessor implements IBodyProcessor {

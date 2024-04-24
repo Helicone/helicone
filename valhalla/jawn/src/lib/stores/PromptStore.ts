@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { PromiseGenericResult, err, ok } from "../modules/result";
 import { Database } from "../db/database.types";
+import { PromiseGenericResult, err, ok } from "../shared/result";
 
 export class PromptStore {
   private supabaseClient: SupabaseClient<Database>;

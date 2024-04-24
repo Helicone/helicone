@@ -7,7 +7,7 @@ interface ClickhouseEnv {
   CLICKHOUSE_PASSWORD: string;
 }
 
-class ClickhouseClientWrapper {
+export class ClickhouseClientWrapper {
   private clickHouseClient: ClickHouseClient;
 
   constructor(env: ClickhouseEnv) {
@@ -98,6 +98,10 @@ function paramsToValues(params: (number | string | boolean | Date)[]) {
     }, {});
 }
 
+export function formatTimeString(timeString: string): string {
+  return new Date(timeString).toISOString().replace("Z", "");
+}
+
 type Nullable<T> = T | null;
 
 interface PropertiesV3 {
@@ -140,6 +144,23 @@ interface DeleteRequestResponseVersioned {
   version: number;
 }
 
+export interface CacheHits {
+  request_id: string;
+  organization_id: string;
+  completion_tokens: Nullable<number>;
+  prompt_tokens: Nullable<number>;
+  latency: Nullable<number>;
+  model: string;
+  created_at: Nullable<string>;
+  provider: Nullable<string>;
+  country_code: Nullable<string>;
+}
+
+export interface RateLimitLog {
+  organization_id: string;
+  created_at: string;
+}
+
 export interface InsertRequestResponseVersioned {
   response_id: Nullable<string>;
   response_created_at: Nullable<string>;
@@ -157,6 +178,7 @@ export interface InsertRequestResponseVersioned {
   time_to_first_token: Nullable<number>;
   provider: Nullable<string>;
   country_code: Nullable<string>;
+  target_url: Nullable<string>;
   created_at?: string;
   sign: 1;
   version: number;
@@ -171,6 +193,8 @@ export interface ClickhouseDB {
     properties_v3: PropertiesV3;
     property_with_response_v1: PropertyWithResponseV1;
     request_response_versioned: RequestResponseVersioned;
+    rate_limit_log: RateLimitLog;
+    cache_hits: CacheHits;
   };
 }
 

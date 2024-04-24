@@ -1,6 +1,6 @@
+import { ClickhouseDB, formatTimeString } from "../db/ClickhouseWrapper";
 import { Database } from "../db/database.types";
-import { PromiseGenericResult, err, ok } from "../modules/result";
-import { ClickhouseDB, formatTimeString } from "../shared/db/dbExecute";
+import { PromiseGenericResult, err, ok } from "../shared/result";
 import { LogStore } from "../stores/LogStore";
 import { RequestResponseStore } from "../stores/RequestResponseStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
@@ -11,9 +11,7 @@ export type BatchPayload = {
   responses: Database["public"]["Tables"]["response"]["Insert"][];
   requests: Database["public"]["Tables"]["request"]["Insert"][];
   prompts: PromptRecord[];
-  requestResponseLogCH: ClickhouseDB["Tables"]["request_response_log"][];
-  propertiesV3CH: ClickhouseDB["Tables"]["properties_v3"][];
-  propertyWithResponseV1CH: ClickhouseDB["Tables"]["property_with_response_v1"][];
+  requestResponseVersionedCH: ClickhouseDB["Tables"]["request_response_versioned"][];
 };
 
 export class LoggingHandler extends AbstractLogHandler {
@@ -30,9 +28,7 @@ export class LoggingHandler extends AbstractLogHandler {
       responses: [],
       requests: [],
       prompts: [],
-      requestResponseLogCH: [],
-      propertiesV3CH: [],
-      propertyWithResponseV1CH: [],
+      requestResponseVersionedCH: [],
     };
   }
 
@@ -57,18 +53,10 @@ export class LoggingHandler extends AbstractLogHandler {
     }
 
     // Clickhouse
-    context.payload.requestResponseLogCH = this.mapRequestResponseLog(context);
-    this.batchPayload.requestResponseLogCH.push(
-      context.payload.requestResponseLogCH
-    );
-
-    context.payload.propertiesV3CH = this.mapPropertiesV3(context);
-    this.batchPayload.propertiesV3CH.push(...context.payload.propertiesV3CH);
-
-    context.payload.propertyWithResponseV1CH =
-      this.mapPropertiesWithResponse(context);
-    this.batchPayload.propertyWithResponseV1CH.push(
-      ...context.payload.propertyWithResponseV1CH
+    context.payload.requestResponseVersionedCH =
+      this.mapRequestResponseVersionedCH(context);
+    this.batchPayload.requestResponseVersionedCH.push(
+      context.payload.requestResponseVersionedCH
     );
 
     await super.handle(context);
@@ -92,40 +80,16 @@ export class LoggingHandler extends AbstractLogHandler {
 
   async logToClickhouse(): PromiseGenericResult<string> {
     try {
-      // Prepare all promises for concurrent execution
-      const results = await Promise.all([
-        this.requestResponseStore.insertRequestResponseLog(
-          this.batchPayload.requestResponseLogCH
-        ),
-        this.requestResponseStore.insertPropertiesV3(
-          this.batchPayload.propertiesV3CH
-        ),
-        this.requestResponseStore.insertPropertyWithResponseV1(
-          this.batchPayload.propertyWithResponseV1CH
-        ),
-      ]);
+      const result =
+        await this.requestResponseStore.insertRequestResponseVersioned(
+          this.batchPayload.requestResponseVersionedCH
+        );
 
-      // Check results for any errors
-      const errors = results
-        .map((res, index) => {
-          if (res.error) {
-            const description =
-              index === 0
-                ? "request response logs"
-                : index === 1
-                ? "properties v3"
-                : "property with response v1";
-            return `Error inserting ${description}: ${res.error}`;
-          }
-          return null;
-        })
-        .filter((error) => error !== null);
-
-      // Return the first error found or success message
-      if (errors.length > 0) {
-        console.error("Failed to log to Clickhouse:", errors.join(", "));
-        return err(errors.join(", "));
+      if (result.error) {
+        console.error("Failed to log to Clickhouse:", result.error);
+        return err(`Error inserting request response logs: ${result.error}`);
       }
+
       return ok("All logs inserted successfully.");
     } catch (error: any) {
       console.error("Failed to log to Clickhouse:", error);
@@ -158,99 +122,42 @@ export class LoggingHandler extends AbstractLogHandler {
     return promptRecord;
   }
 
-  mapPropertiesV3(
+  mapRequestResponseVersionedCH(
     context: HandlerContext
-  ): ClickhouseDB["Tables"]["properties_v3"][] {
-    const request = context.message.log.request;
-    const properties = context.payload.properties;
-    const orgParams = context.orgParams;
-
-    const propertiesV3 = properties.map((property) => ({
-      id: property.id ?? 0,
-      created_at: property.created_at
-        ? formatTimeString(property.created_at)
-        : formatTimeString(new Date().toISOString()),
-      request_id: request.id,
-      key: property.key,
-      value: property.value,
-      organization_id: orgParams?.id ?? "00000000-0000-0000-0000-000000000000",
-    }));
-
-    return propertiesV3;
-  }
-
-  mapPropertiesWithResponse(
-    context: HandlerContext
-  ): ClickhouseDB["Tables"]["property_with_response_v1"][] {
-    const request = context.message.log.request;
-    const response = context.message.log.response;
-    const properties = context.payload.properties;
-    const orgParams = context.orgParams;
-    const usage = context.usage;
-
-    const propertyWithResponse = properties.map((property) => ({
-      response_id: response.id ?? "",
-      response_created_at: response.responseCreatedAt
-        ? formatTimeString(response.responseCreatedAt.toISOString())
-        : null,
-      latency: response.delayMs ?? 0,
-      status: response.status ?? 0,
-      completion_tokens: usage.completionTokens ?? 0,
-      prompt_tokens: usage.promptTokens ?? 0,
-      model: context.message.log.model,
-      request_id: request.id,
-      request_created_at: formatTimeString(
-        request.requestCreatedAt.toISOString()
-      ),
-      auth_hash: "",
-      user_id: request.userId ?? "",
-      organization_id: orgParams?.id ?? "00000000-0000-0000-0000-000000000000",
-      time_to_first_token: response.timeToFirstToken ?? null,
-      threat: request.threat ?? null,
-      property_key: property.key,
-      property_value: property.value,
-      provider: request.provider ?? null,
-      country_code: request.countryCode ?? null,
-    }));
-
-    return propertyWithResponse;
-  }
-
-  mapRequestResponseLog(
-    context: HandlerContext
-  ): ClickhouseDB["Tables"]["request_response_log"] {
+  ): ClickhouseDB["Tables"]["request_response_versioned"] {
     const request = context.message.log.request;
     const response = context.message.log.response;
     const usage = context.usage;
     const orgParams = context.orgParams;
 
-    const requestResponseLog: ClickhouseDB["Tables"]["request_response_log"] = {
-      auth_hash: "", // TODO: Do we need this?
-      user_id: request.userId,
-      request_id: request.id,
-      completion_tokens: usage.completionTokens ?? null,
-      latency: response.delayMs ?? null,
-      model: context.message.log.model,
-      prompt_tokens: usage.promptTokens ?? null,
-      request_created_at: formatTimeString(
-        request.requestCreatedAt.toISOString()
-      ),
-      response_created_at: response.responseCreatedAt
-        ? formatTimeString(response.responseCreatedAt.toISOString())
-        : null,
-      response_id: response.id ?? null,
-      status: response.status ?? null,
-      organization_id: orgParams?.id ?? "00000000-0000-0000-0000-000000000000",
-      job_id: null,
-      node_id: null,
-      proxy_key_id: request.heliconeProxyKeyId ?? null,
-      threat: request.threat ?? null,
-      time_to_first_token: response.timeToFirstToken ?? null,
-      target_url: request.targetUrl ?? null,
-      request_ip: null,
-      provider: request.provider ?? null,
-      country_code: request.countryCode ?? null,
-    };
+    const requestResponseLog: ClickhouseDB["Tables"]["request_response_versioned"] =
+      {
+        user_id: request.userId,
+        request_id: request.id,
+        completion_tokens: usage.completionTokens ?? null,
+        latency: response.delayMs ?? null,
+        model: context.message.log.model,
+        prompt_tokens: usage.promptTokens ?? null,
+        request_created_at: formatTimeString(
+          request.requestCreatedAt.toISOString()
+        ),
+        response_created_at: response.responseCreatedAt
+          ? formatTimeString(response.responseCreatedAt.toISOString())
+          : null,
+        response_id: response.id ?? null,
+        status: response.status ?? null,
+        organization_id:
+          orgParams?.id ?? "00000000-0000-0000-0000-000000000000",
+        proxy_key_id: request.heliconeProxyKeyId ?? null,
+        threat: request.threat ?? null,
+        time_to_first_token: response.timeToFirstToken ?? null,
+        target_url: request.targetUrl ?? null,
+        provider: request.provider ?? null,
+        country_code: request.countryCode ?? null,
+        properties: request.properties,
+        sign: 1,
+        version: 1,
+      };
 
     return requestResponseLog;
   }

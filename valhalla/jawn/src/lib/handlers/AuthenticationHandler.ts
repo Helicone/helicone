@@ -1,6 +1,6 @@
 import { AuthParams, OrgParams, supabaseServer } from "../db/supabase";
-import { PromiseGenericResult, err, ok } from "../modules/result";
 import { BearerAuth } from "../requestWrapper";
+import { PromiseGenericResult, err, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 

@@ -7,19 +7,28 @@ import { ResponseBodyHandler } from "../lib/handlers/ResponseBodyHandler";
 import { HandlerContext, Message } from "../lib/handlers/HandlerContext";
 import { LogStore } from "../lib/stores/LogStore";
 import { RequestResponseStore } from "../lib/stores/RequestResponseStore";
+import { ClickhouseClientWrapper } from "../lib/db/ClickhouseWrapper";
 
 class LogManager {
   public async processLogEntries(
     logMessages: Message[],
     batchId: string
   ): Promise<void> {
+    const clickhouseClientWrapper = new ClickhouseClientWrapper({
+      CLICKHOUSE_HOST: process.env.CLICKHOUSE_HOST ?? "http://localhost:18123",
+      CLICKHOUSE_USER: process.env.CLICKHOUSE_USER ?? "default",
+      CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD ?? "",
+    });
+
     const authHandler = new AuthenticationHandler();
-    const rateLimitHandler = new RateLimitHandler(new RateLimitStore());
+    const rateLimitHandler = new RateLimitHandler(
+      new RateLimitStore(clickhouseClientWrapper)
+    );
     const requestHandler = new RequestBodyHandler();
     const responseBodyHandler = new ResponseBodyHandler();
     const loggingHandler = new LoggingHandler(
       new LogStore(),
-      new RequestResponseStore()
+      new RequestResponseStore(clickhouseClientWrapper)
     );
 
     authHandler

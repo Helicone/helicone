@@ -1,4 +1,4 @@
-import { PromiseGenericResult, ok } from "../../modules/result";
+import { PromiseGenericResult, ok } from "../result";
 import {
   IBodyProcessor,
   ParseInput,

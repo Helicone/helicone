@@ -1,8 +1,8 @@
 import { BatchPayload } from "../handlers/LoggingHandler";
-import { PromiseGenericResult, err, ok } from "../modules/result";
 import { deepCompare } from "../../utils/helpers";
 import pgPromise from "pg-promise";
 import { PromptRecord } from "../handlers/HandlerContext";
+import { PromiseGenericResult, ok, err } from "../shared/result";
 
 const pgp = pgPromise();
 const db = pgp({

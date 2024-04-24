@@ -1,6 +1,4 @@
 import { getTokenCount } from "../../utils/helpers";
-import { getModelFromResponse } from "../../utils/modelMapper";
-import { PromiseGenericResult, err, ok } from "../modules/result";
 import {
   IBodyProcessor,
   ParseOutput,
@@ -10,6 +8,7 @@ import { AnthropicStreamBodyProcessor } from "../shared/bodyProcessors/anthropic
 import { GenericBodyProcessor } from "../shared/bodyProcessors/genericBodyProcessor";
 import { GoogleBodyProcessor } from "../shared/bodyProcessors/googleBodyProcessor";
 import { OpenAIStreamProcessor } from "../shared/bodyProcessors/openAIStreamProcessor";
+import { PromiseGenericResult, err } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 

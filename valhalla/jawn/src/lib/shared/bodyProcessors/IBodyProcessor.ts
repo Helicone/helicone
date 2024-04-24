@@ -1,4 +1,4 @@
-import { PromiseGenericResult } from "../../modules/result";
+import { PromiseGenericResult } from "../result";
 
 export interface ParseInput {
   responseBody: string;

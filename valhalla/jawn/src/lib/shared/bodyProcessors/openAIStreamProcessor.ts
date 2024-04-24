@@ -1,5 +1,5 @@
 import { consolidateTextFields } from "../../../utils/streamParser";
-import { PromiseGenericResult, err, ok } from "../../modules/result";
+import { PromiseGenericResult, err, ok } from "../result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 
 export class OpenAIStreamProcessor implements IBodyProcessor {

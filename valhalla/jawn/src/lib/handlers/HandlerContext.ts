@@ -1,9 +1,9 @@
 import { Provider } from "../../models/models";
 import { SetOnce } from "../../utils/setOnce";
+import { ClickhouseDB } from "../db/ClickhouseWrapper";
 import { Database } from "../db/database.types";
 import { AuthParams, OrgParams } from "../db/supabase";
 import { Usage } from "../shared/bodyProcessors/IBodyProcessor";
-import { ClickhouseDB } from "../shared/db/dbExecute";
 
 export class HandlerContext extends SetOnce {
   public message: Message;
@@ -22,8 +22,6 @@ export class HandlerContext extends SetOnce {
     };
     this.payload = {
       properties: [],
-      propertiesV3CH: [],
-      propertyWithResponseV1CH: [],
     };
     this.usage = {};
   }
@@ -109,7 +107,5 @@ export type Payload = {
   response?: Database["public"]["Tables"]["response"]["Insert"];
   properties: Database["public"]["Tables"]["properties"]["Insert"][];
   prompt?: PromptRecord;
-  requestResponseLogCH?: ClickhouseDB["Tables"]["request_response_log"];
-  propertiesV3CH: ClickhouseDB["Tables"]["properties_v3"][];
-  propertyWithResponseV1CH: ClickhouseDB["Tables"]["property_with_response_v1"][];
+  requestResponseVersionedCH?: ClickhouseDB["Tables"]["request_response_versioned"];
 };

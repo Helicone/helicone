@@ -1,6 +1,5 @@
 import { tryParse } from "../../utils/helpers";
-import { getModelFromRequest } from "../../utils/modelMapper";
-import { GenericResult, ok } from "../modules/result";
+import { GenericResult, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
