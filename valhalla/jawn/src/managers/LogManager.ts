@@ -8,6 +8,7 @@ import { HandlerContext, Message } from "../lib/handlers/HandlerContext";
 import { LogStore } from "../lib/stores/LogStore";
 import { RequestResponseStore } from "../lib/stores/RequestResponseStore";
 import { ClickhouseClientWrapper } from "../lib/db/ClickhouseWrapper";
+import { PromptHandler } from "../lib/handlers/PromptHandler";
 
 class LogManager {
   public async processLogEntries(
@@ -26,6 +27,7 @@ class LogManager {
     );
     const requestHandler = new RequestBodyHandler();
     const responseBodyHandler = new ResponseBodyHandler();
+    const promptHandler = new PromptHandler();
     const loggingHandler = new LoggingHandler(
       new LogStore(),
       new RequestResponseStore(clickhouseClientWrapper)
@@ -35,6 +37,7 @@ class LogManager {
       .setNext(rateLimitHandler)
       .setNext(requestHandler)
       .setNext(responseBodyHandler)
+      .setNext(promptHandler)
       .setNext(loggingHandler);
 
     await Promise.all(
