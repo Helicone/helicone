@@ -21,6 +21,10 @@ import { PlusIcon } from "@heroicons/react/20/solid";
 import { Message } from "../../requests/chat";
 import ReactDiffViewer from "react-diff-viewer";
 import ModelPill from "../../requestsV2/modelPill";
+import ThemedModal from "../../../shared/themed/themedModal";
+import PromptPropertyCard from "./promptPropertyCard";
+import ThemedDrawer from "../../../shared/themed/themedDrawer";
+import SelectRandomDataset from "./selectRandomDataset";
 
 interface PromptIdPageProps {
   id: string;
@@ -44,6 +48,18 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
   const [selectedDataset, setSelectedDataset] = useState<string[]>();
   const [currentChat, setCurrentChat] = useState<Message[]>();
   const [selectedProviderKey, setSelectedProviderKey] = useState<string>();
+  const [openConfirmModal, setOpenConfirmModal] = useState(false);
+  const [requestIds, setRequestIds] = useState<
+    {
+      id: string;
+      inputs: {
+        [key: string]: string;
+      };
+      source_request: string;
+      prompt_version: string;
+      created_at: string;
+    }[]
+  >();
 
   const template = JSON.parse(
     JSON.stringify(selectedPrompt?.helicone_template ?? "")
@@ -148,72 +164,102 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
         }}
       />
     </div>,
-    <div className="flex flex-col">
-      <div className="mt-2 flex flex-col h-full items-center justify-center">
-        <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-black">
-          <div className="w-full flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
-            <div className="flex items-center space-x-2">
-              <p className="text-sm text-gray-500">New Config</p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch />
-              <label className="text-sm text-black dark:text-white">
-                Apply source config
-              </label>
-            </div>
-          </div>
-          <ul className="p-4 flex flex-col space-y-4">
-            <li className="flex items-start space-x-2">
-              <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
-                Dataset
-              </label>
-              <div className="flex w-full max-w-lg space-x-2 items-center">
-                <Select>
-                  <SelectItem value={"gpt-3.5-turbo"}>GPT-3.5 Turbo</SelectItem>
-                  <SelectItem value={"gpt-4"}>GPT-4</SelectItem>
-                </Select>
-                <HcButton
-                  variant={"secondary"}
-                  size={"xs"}
-                  title={"Generate random dataset"}
-                  icon={PlusIcon}
-                />
+    <>
+      <div className="flex flex-col">
+        <div className="mt-2 flex flex-col h-full items-center justify-center">
+          <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-black">
+            <div className="w-full flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
+              <div className="flex items-center space-x-2">
+                <p className="text-sm text-gray-500">New Config</p>
               </div>
-            </li>
-            <li className="flex items-start space-x-2">
-              <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
-                Model
-              </label>
-              <div className="flex w-full max-w-xs">
-                <Select
-                  placeholder="Select a model"
-                  value={selectedModel}
-                  onValueChange={(value) => setSelectedModel(value)}
-                >
-                  {PLAYGROUND_MODELS.map((model) => (
-                    <SelectItem value={model}>{model}</SelectItem>
-                  ))}
-                </Select>
+              <div className="flex items-center space-x-2">
+                <Switch />
+                <label className="text-sm text-black dark:text-white">
+                  Apply source config
+                </label>
               </div>
-            </li>
+            </div>
+            <ul className="p-4 flex flex-col space-y-4">
+              <li className="flex items-start space-x-2">
+                <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
+                  Dataset
+                </label>
+                <div className="flex w-full max-w-lg space-x-2 items-center">
+                  <Select>
+                    <SelectItem value={"gpt-3.5-turbo"}>
+                      GPT-3.5 Turbo
+                    </SelectItem>
+                    <SelectItem value={"gpt-4"}>GPT-4</SelectItem>
+                  </Select>
+                  <HcButton
+                    variant={"secondary"}
+                    size={"xs"}
+                    title={"Generate random dataset"}
+                    icon={PlusIcon}
+                    onClick={async () => {
+                      const requestIds = await jawn.POST(
+                        "/v1/prompt/version/{promptVersionId}/inputs/query",
+                        {
+                          body: {
+                            limit: 100,
+                            random: true,
+                          },
+                          params: {
+                            path: {
+                              promptVersionId: selectedPrompt?.id ?? "",
+                            },
+                          },
+                        }
+                      );
 
-            <li className="flex items-start space-x-2">
-              <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
-                Provider Keys
-              </label>
-              <div className="flex w-full max-w-lg">
-                <ProviderKeyList
-                  showTitle={false}
-                  setProviderKeyCallback={(providerKey) =>
-                    setSelectedProviderKey(providerKey)
-                  }
-                />
-              </div>
-            </li>
-          </ul>
+                      requestIds.data?.data;
+
+                      setRequestIds(requestIds.data?.data || undefined);
+                      setOpenConfirmModal(true);
+                    }}
+                  />
+                </div>
+              </li>
+              <li className="flex items-start space-x-2">
+                <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
+                  Model
+                </label>
+                <div className="flex w-full max-w-xs">
+                  <Select
+                    placeholder="Select a model"
+                    value={selectedModel}
+                    onValueChange={(value) => setSelectedModel(value)}
+                  >
+                    {PLAYGROUND_MODELS.map((model) => (
+                      <SelectItem value={model}>{model}</SelectItem>
+                    ))}
+                  </Select>
+                </div>
+              </li>
+
+              <li className="flex items-start space-x-2">
+                <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
+                  Provider Keys
+                </label>
+                <div className="flex w-full max-w-lg">
+                  <ProviderKeyList
+                    showTitle={false}
+                    setProviderKeyCallback={(providerKey) =>
+                      setSelectedProviderKey(providerKey)
+                    }
+                  />
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
-    </div>,
+      <SelectRandomDataset
+        open={openConfirmModal}
+        setOpen={setOpenConfirmModal}
+        requestIds={requestIds}
+      />
+    </>,
     <div className="flex flex-col space-y-8">
       {/* TODO: make this diff more sophisticated */}
       <div className="p-8 rounded-lg bg-white border border-gray-300 flex flex-col space-y-4">
