@@ -45,7 +45,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
     model: string;
   }>();
   const [selectedModel, setSelectedModel] = useState<string>();
-  const [selectedDataset, setSelectedDataset] = useState<string[]>();
+  const [selectedDatasetId, setSelectedDatasetId] = useState<string>();
   const [currentChat, setCurrentChat] = useState<Message[]>();
   const [selectedProviderKey, setSelectedProviderKey] = useState<string>();
   const [openConfirmModal, setOpenConfirmModal] = useState(false);
@@ -66,7 +66,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
   ).messages;
 
   const renderStepArray = [
-    <div className="flex flex-col">
+    <>
       <div className="mt-2 flex flex-col h-full items-center justify-center">
         <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white">
           <div className="w-full flex justify-between items-center py-2 px-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
@@ -149,8 +149,37 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
           </ul>
         </div>
       </div>
-    </div>,
-    <div className="">
+      <div
+        id="step-inc"
+        className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+      >
+        <HcButton
+          variant={"secondary"}
+          size={"sm"}
+          title={"Back"}
+          onClick={() => {
+            if (currentStep === 0) {
+              // dont do anything
+            } else {
+              setCurrentStep(currentStep - 1);
+            }
+          }}
+        />
+        <HcButton
+          variant={"primary"}
+          size={"sm"}
+          title={"Continue"}
+          onClick={() => {
+            if (currentStep === renderStepArray.length - 1) {
+              // submit experiment
+            } else {
+              setCurrentStep(currentStep + 1);
+            }
+          }}
+        />
+      </div>
+    </>,
+    <>
       <ChatPlayground
         requestId={""}
         chat={template}
@@ -162,8 +191,39 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
           console.log("chat", chat);
           setCurrentChat(chat);
         }}
+        customNavBar={
+          <div
+            id="step-inc"
+            className="mt-4 w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+          >
+            <HcButton
+              variant={"secondary"}
+              size={"sm"}
+              title={"Back"}
+              onClick={() => {
+                if (currentStep === 0) {
+                  // dont do anything
+                } else {
+                  setCurrentStep(currentStep - 1);
+                }
+              }}
+            />
+            <HcButton
+              variant={"primary"}
+              size={"sm"}
+              title={"Continue"}
+              onClick={() => {
+                if (currentStep === renderStepArray.length - 1) {
+                  // submit experiment
+                } else {
+                  setCurrentStep(currentStep + 1);
+                }
+              }}
+            />
+          </div>
+        }
       />
-    </div>,
+    </>,
     <>
       <div className="flex flex-col">
         <div className="mt-2 flex flex-col h-full items-center justify-center">
@@ -254,78 +314,137 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
           </div>
         </div>
       </div>
+      <div
+        id="step-inc"
+        className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+      >
+        <HcButton
+          variant={"secondary"}
+          size={"sm"}
+          title={"Back"}
+          onClick={() => {
+            if (currentStep === 0) {
+              // dont do anything
+            } else {
+              setCurrentStep(currentStep - 1);
+            }
+          }}
+        />
+        <HcButton
+          variant={"primary"}
+          size={"sm"}
+          title={"Continue"}
+          onClick={() => {
+            if (currentStep === renderStepArray.length - 1) {
+              // submit experiment
+            } else {
+              setCurrentStep(currentStep + 1);
+            }
+          }}
+        />
+      </div>
       <SelectRandomDataset
         open={openConfirmModal}
         setOpen={setOpenConfirmModal}
         requestIds={requestIds}
+        onSuccess={(datasetId) => {
+          setSelectedDatasetId(datasetId);
+        }}
       />
     </>,
-    <div className="flex flex-col space-y-8">
-      {/* TODO: make this diff more sophisticated */}
-      <div className="p-8 rounded-lg bg-white border border-gray-300 flex flex-col space-y-4">
-        <div className="grid grid-cols-4">
-          <div className="col-span-2">
-            <h2 className="text-md font-semibold">Original Prompt</h2>
+    <>
+      <div className="flex flex-col space-y-8">
+        {/* TODO: make this diff more sophisticated */}
+        <div className="p-8 rounded-lg bg-white border border-gray-300 flex flex-col space-y-4">
+          <div className="grid grid-cols-4">
+            <div className="col-span-2">
+              <h2 className="text-md font-semibold">Original Prompt</h2>
+            </div>
+            <div className="col-span-2">
+              <h2 className="text-md font-semibold">Experiment Prompt</h2>
+            </div>
           </div>
-          <div className="col-span-2">
-            <h2 className="text-md font-semibold">Experiment Prompt</h2>
+          <ReactDiffViewer
+            oldValue={JSON.stringify(template, null, 4)}
+            newValue={JSON.stringify(currentChat, null, 4)}
+            splitView={true}
+          />
+        </div>
+
+        <div className="mt-2 flex flex-col h-full items-center justify-center">
+          <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-black">
+            <div className="w-full flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
+              <div className="flex items-center space-x-2">
+                <p className="text-sm text-gray-500">
+                  Experiment Configuration
+                </p>
+              </div>
+            </div>
+            <ul className="px-4 py-8 flex flex-col space-y-8">
+              <li className="flex items-center space-x-2">
+                <label className="text-sm text-black dark:text-white font-semibold w-28">
+                  Dataset
+                </label>
+                <div className="flex w-full max-w-lg space-x-2 items-center">
+                  {selectedDatasetId}
+                </div>
+              </li>
+              <li className="flex items-center space-x-2">
+                <label className="text-sm text-black dark:text-white font-semibold w-28">
+                  Model
+                </label>
+                <div className="flex w-full max-w-xs">
+                  <ModelPill model={selectedModel || "unselected"} />
+                </div>
+              </li>
+
+              <li className="flex items-center space-x-2">
+                <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
+                  Provider Key
+                </label>
+                <div className="flex w-full max-w-lg">
+                  <input
+                    type="password"
+                    value={selectedProviderKey}
+                    className="border-none focus:ring-0 focus:outline-none w-full py-0"
+                    disabled
+                  />
+                </div>
+              </li>
+            </ul>
           </div>
         </div>
-        <ReactDiffViewer
-          oldValue={template?.[0]?.content}
-          newValue={(currentChat?.[0]?.content as string) ?? ""}
-          splitView={true}
+      </div>
+      <div
+        id="step-inc"
+        className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+      >
+        <HcButton
+          variant={"secondary"}
+          size={"sm"}
+          title={"Back"}
+          onClick={() => {
+            if (currentStep === 0) {
+              // dont do anything
+            } else {
+              setCurrentStep(currentStep - 1);
+            }
+          }}
+        />
+        <HcButton
+          variant={"primary"}
+          size={"sm"}
+          title={"Continue"}
+          onClick={() => {
+            if (currentStep === renderStepArray.length - 1) {
+              // submit experiment
+            } else {
+              setCurrentStep(currentStep + 1);
+            }
+          }}
         />
       </div>
-
-      <div className="mt-2 flex flex-col h-full items-center justify-center">
-        <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-black">
-          <div className="w-full flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
-            <div className="flex items-center space-x-2">
-              <p className="text-sm text-gray-500">Experiment Configuration</p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch />
-              <label className="text-sm text-black dark:text-white">
-                Apply source config
-              </label>
-            </div>
-          </div>
-          <ul className="px-4 py-8 flex flex-col space-y-8">
-            <li className="flex items-center space-x-2">
-              <label className="text-sm text-black dark:text-white font-semibold w-28">
-                Dataset
-              </label>
-              <div className="flex w-full max-w-lg space-x-2 items-center">
-                {selectedDataset}
-              </div>
-            </li>
-            <li className="flex items-center space-x-2">
-              <label className="text-sm text-black dark:text-white font-semibold w-28">
-                Model
-              </label>
-              <div className="flex w-full max-w-xs">
-                <ModelPill model={selectedModel || "unselected"} />
-              </div>
-            </li>
-
-            <li className="flex items-center space-x-2">
-              <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
-                Provider Key
-              </label>
-              <div className="flex w-full max-w-lg">
-                <input
-                  type="password"
-                  value={selectedProviderKey}
-                  className="border-none focus:ring-0 focus:outline-none w-full py-0"
-                  disabled
-                />
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>,
+    </>,
   ];
 
   return (
@@ -384,142 +503,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
         <div id="step-render" className="w-full">
           {renderStepArray[currentStep]}
         </div>
-        <div
-          id="step-inc"
-          className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-gray-900"
-        >
-          <HcButton
-            variant={"secondary"}
-            size={"sm"}
-            title={"Back"}
-            onClick={() => {
-              if (currentStep === 0) {
-                // dont do anything
-              } else {
-                setCurrentStep(currentStep - 1);
-              }
-            }}
-          />
-          <HcButton
-            variant={"primary"}
-            size={"sm"}
-            title={"Continue"}
-            onClick={() => {
-              if (currentStep === renderStepArray.length - 1) {
-                // submit experiment
-              } else {
-                setCurrentStep(currentStep + 1);
-              }
-            }}
-          />
-        </div>
       </div>
-      {/* <div className="pt-36">
-        <div className="flex items-center space-x-2">
-          Step 1: - Choose prompt
-        </div>
-        <div className="mt-2 flex flex-col min-h-[30vh] h-full bg-blue-200 items-center justify-center">
-          {prompts?.map((prompt) => (
-            <div key={prompt.id} className="flex items-center space-x-2 gap-2">
-              <div>
-                {prompt.major_version}.{prompt.minor_version}
-              </div>
-              {" - "}
-              {JSON.stringify(prompt.helicone_template).substring(0, 30)}
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="flex items-center space-x-2">Step 2: - Edit prompt</div>
-      <div>
-        <div className="flex items-center space-x-2">
-          Step 3: - Select model and dataset
-        </div>
-        <div className="mt-2 flex flex-col min-h-[30vh] h-full bg-blue-200 items-center justify-center">
-          <div className="flex flex-col items-center space-x-2">
-            Step 3.1: - Create Dataset
-            <button
-              className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
-              onClick={() =>
-                jawn.POST("/v1/experiment/dataset", {
-                  body: {
-                    datasetName: "test",
-                    requestIds: [
-                      "3e257235-0343-4ed6-bb44-f9a63d321615",
-                      "a1263ab8-f0ec-4d15-9c25-61485213a69f",
-                    ],
-                  },
-                })
-              }
-            >
-              Create Dataset From request Ids
-            </button>
-            <button
-              className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
-              onClick={() =>
-                jawn.POST("/v1/experiment/dataset/random", {
-                  body: {
-                    datasetName: "testRandom",
-                    filter: {
-                      prompts_versions: {
-                        prompt_v2: {
-                          equals: id,
-                        },
-                      },
-                    },
-                    limit: 2,
-                    offset: 0,
-                  },
-                })
-              }
-            >
-              Create random dataset
-            </button>
-          </div>
-        </div>
-        <div className="flex items-center space-x-2">
-          Step 4: - Submit new prompt and run experiment
-        </div>
-        <div className="mt-2 flex flex-col min-h-[30vh] h-full bg-blue-200 items-center justify-center">
-          <button
-            className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
-            onClick={async () => {
-              const res = await jawn.POST(
-                "/v1/prompt/version/{promptVersionId}/subversion",
-                {
-                  body: {
-                    newHeliconeTemplate: {
-                      model: "gpt-3.5-turbo",
-                      messages: [
-                        {
-                          role: "system",
-                          content:
-                            '<helicone-prompt-input key="test2" />sdafsadfadsfads <helicone-prompt-input key="test" />Applsadfslaksdjlfd!',
-                        },
-                      ],
-                    },
-                  },
-                  params: {
-                    path: {
-                      promptVersionId: prompts?.[0].id ?? "",
-                    },
-                  },
-                }
-              );
-
-              jawn.POST("/v1/experiment", {
-                body: {
-                  datasetId: "2c55f92f-e004-450c-b74e-d85c8c60194b",
-                  model: "gpt-3.5-turbo",
-                  promptVersion: res.data?.data?.id ?? "",
-                },
-              });
-            }}
-          >
-            Run Experiment
-          </button>
-        </div>
-      </div> */}
     </>
   );
 };

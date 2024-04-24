@@ -3,6 +3,9 @@ import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import HcButton from "../../../ui/hcButton";
 import PromptPropertyCard from "./promptPropertyCard";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { useJawn } from "../../../../services/hooks/useJawn";
+import { useJawnClient } from "../../../../lib/clients/jawnHook";
+import useNotification from "../../../shared/notification/useNotification";
 
 interface SelectRandomDatasetProps {
   open: boolean;
@@ -16,12 +19,15 @@ interface SelectRandomDatasetProps {
     prompt_version: string;
     created_at: string;
   }[];
+  onSuccess?: (dataSetId: string | undefined) => void;
 }
 
 const RANDOM_SAMPLE_SIZE = 5;
 
 const SelectRandomDataset = (props: SelectRandomDatasetProps) => {
-  const { open, setOpen, requestIds } = props;
+  const { open, setOpen, requestIds, onSuccess } = props;
+  const jawn = useJawnClient();
+  const { setNotification } = useNotification();
 
   const [selectedRequests, setSelectedRequests] = useState<
     {
@@ -74,39 +80,30 @@ const SelectRandomDataset = (props: SelectRandomDatasetProps) => {
           </p>
 
           <ul className="flex flex-col items-center space-y-4 w-full pt-4">
-            {selectedRequests
-              ?.sort((a, b) => {
-                // sort by created_at
-                return new Date(a.created_at) > new Date(b.created_at) ? -1 : 1;
-              })
-              ?.map((request) => (
-                <li key={request.id} className="w-full">
-                  <PromptPropertyCard
-                    isSelected={false}
-                    onRemove={() => {
-                      // make a deep copy of the selectedRequests
-                      const copy = JSON.parse(JSON.stringify(selectedRequests));
+            {selectedRequests?.map((request) => (
+              <li key={request.id} className="w-full">
+                <PromptPropertyCard
+                  isSelected={false}
+                  onRemove={() => {
+                    const copy = JSON.parse(JSON.stringify(selectedRequests));
 
-                      // grab a random request from the requestIds that is not in the selectedRequests
-                      const randomRequest = requestIds?.find(
-                        (r) => !copy.find((s: any) => s.id === r.id)
-                      );
+                    const randomRequest = requestIds?.find(
+                      (r) => !copy.find((s: any) => s.id === r.id)
+                    );
 
-                      // find the index of the request and replace it with the random request
-                      const index = copy.findIndex(
-                        (r: any) => r.id === request.id
-                      );
-                      copy[index] = randomRequest;
+                    const index = copy.findIndex(
+                      (r: any) => r.id === request.id
+                    );
+                    copy[index] = randomRequest;
 
-                      // set the new selectedRequests
-                      setSelectedRequests(copy);
-                    }}
-                    requestId={request.source_request}
-                    createdAt={request.created_at}
-                    properties={request.inputs}
-                  />
-                </li>
-              ))}
+                    setSelectedRequests(copy);
+                  }}
+                  requestId={request.source_request}
+                  createdAt={request.created_at}
+                  properties={request.inputs}
+                />
+              </li>
+            ))}
           </ul>
         </div>
 
@@ -121,8 +118,26 @@ const SelectRandomDataset = (props: SelectRandomDatasetProps) => {
             variant={"primary"}
             size={"sm"}
             title={"Confirm"}
-            onClick={() => {
-              // TODO: create the dataset and close this drawer once its don
+            onClick={async () => {
+              const dataset = await jawn.POST("/v1/experiment/dataset", {
+                body: {
+                  datasetName: `EXP-DATASET-${new Date().getTime()}`,
+                  requestIds:
+                    selectedRequests?.map((r) => r.source_request) ?? [],
+                },
+              });
+              if (dataset.data?.error !== null) {
+                setNotification(
+                  "Error creating dataset. Please try again",
+                  "error"
+                );
+                return;
+              }
+              if (onSuccess) {
+                onSuccess(dataset.data?.data?.datasetId);
+                setNotification("Dataset created successfully", "success");
+                setOpen(false);
+              }
             }}
           />
         </div>
