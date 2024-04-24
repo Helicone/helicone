@@ -1,11 +1,11 @@
 {
   "name": "helicone-worker",
   "version": "0.0.0",
-  "resolutions": {
-    "@types/node": "18.15.3"
+  "overrides": {
+    "@types/node": "20.8.3"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20221111.1",
+    "@cloudflare/workers-types": "^4.20240423.0",
     "@types/async-retry": "^1.4.5",
     "@types/dateformat": "^5.0.0",
     "@types/dotenv": "^8.2.0",
