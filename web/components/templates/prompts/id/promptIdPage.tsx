@@ -1,18 +1,26 @@
 import {
   BookOpenIcon,
   ChartBarIcon,
+  DocumentTextIcon,
+  GlobeAmericasIcon,
+  ListBulletIcon,
   PresentationChartLineIcon,
+  Squares2X2Icon,
+  VariableIcon,
 } from "@heroicons/react/24/outline";
 import {
   MultiSelect,
   MultiSelectItem,
+  Select,
+  SelectItem,
   Tab,
   TabGroup,
   TabList,
   TabPanel,
   TabPanels,
+  TextInput,
 } from "@tremor/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   usePrompt,
   usePromptVersions,
@@ -36,7 +44,9 @@ import { getUSDateFromString } from "../../../shared/utils/utils";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import { Chat } from "../../requests/chat";
 import ChatPlayground from "../../playground/chatPlayground";
-import ViewPromptButton from "./viewPromptButton";
+import { useInputs } from "../../../../services/hooks/prompts/inputs";
+import ThemedTabs from "../../../shared/themed/themedTabs";
+import PromptPropertyCard from "./promptPropertyCard";
 
 interface PromptIdPageProps {
   id: string;
@@ -127,6 +137,17 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   const { prompt, isLoading } = usePrompt(id);
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
+  const [inputView, setInputView] = useState<"list" | "grid">("list");
+  const [selectedInput, setSelectedInput] = useState<{
+    id: string;
+    inputs: {
+      [key: string]: string;
+    };
+    source_request: string;
+    prompt_version: string;
+    created_at: string;
+  }>();
+  const [searchRequestId, setSearchRequestId] = useState<string>("");
 
   const router = useRouter();
 
@@ -134,6 +155,37 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     page,
     pageSize: currentPageSize,
   });
+
+  const { prompts } = usePromptVersions(id);
+
+  const sortedPrompts = prompts?.sort((a, b) => {
+    if (a.major_version === b.major_version) {
+      return b.minor_version - a.minor_version;
+    }
+    return b.major_version - a.major_version;
+  });
+
+  const [selectedVersion, setSelectedVersion] = useState<string>(
+    `${sortedPrompts?.at(0)?.major_version}.${
+      sortedPrompts?.at(0)?.minor_version
+    }`
+  );
+
+  useEffect(() => {
+    if (sortedPrompts?.length) {
+      setSelectedVersion(
+        `${sortedPrompts[0].major_version}.${sortedPrompts[0].minor_version}`
+      );
+    }
+  }, [sortedPrompts]);
+
+  const selectedPrompt = prompts?.find(
+    (p) =>
+      p.major_version === parseInt(selectedVersion.split(".")[0]) &&
+      p.minor_version === parseInt(selectedVersion.split(".")[1])
+  );
+
+  const { inputs } = useInputs(selectedPrompt?.id);
 
   return (
     <>
@@ -165,7 +217,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                 />
               </div>
               <div className="flex gap-2">
-                <ViewPromptButton promptId={id} />
                 <HcButton
                   onClick={() => {
                     router.push(`/prompts/${id}/new-experiment`);
@@ -193,8 +244,12 @@ const PromptIdPage = (props: PromptIdPageProps) => {
         </div>
         <TabGroup>
           <TabList variant="line" defaultValue="1">
-            <Tab value="1">Overview</Tab>
-            <Tab value="2">Inputs</Tab>
+            <Tab value="1" icon={ChartBarIcon}>
+              Overview
+            </Tab>
+            <Tab value="2" icon={BookOpenIcon}>
+              Prompt & Inputs
+            </Tab>
           </TabList>
           <TabPanels>
             <TabPanel>
@@ -349,11 +404,76 @@ const PromptIdPage = (props: PromptIdPageProps) => {
               </div>
             </TabPanel>
             <TabPanel>
-              <p className="mt-4 leading-6 text-tremor-default text-tremor-content dark:text-dark-tremor-content">
-                Diam nonumy eirmod tempor invidunt ut labore et dolore magna
-                aliquyam erat. Lorem ipsum dolor sit amet, consetetur sadipscing
-                elitr.
-              </p>
+              <div className="flex items-start divide-x divide-gray-300 dark:divide-gray-700 relative">
+                <div className="min-w-[25rem] w-1/3 p-4 flex flex-col space-y-4">
+                  <div className="flex flex-col w-full space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <GlobeAmericasIcon className="h-5 w-5 text-black dark:text-white" />
+                      <p className="font-semibold text-lg">Inputs</p>
+                    </div>
+                    <TextInput
+                      placeholder="Search by request id..."
+                      value={searchRequestId}
+                      onValueChange={(value) => setSearchRequestId(value)}
+                    />
+                  </div>
+                  <ul className="flex flex-col space-y-4">
+                    {inputs
+                      ?.filter((input) =>
+                        input.source_request.includes(searchRequestId)
+                      )
+                      .map((input) => (
+                        <li key={input.id}>
+                          <PromptPropertyCard
+                            isSelected={selectedInput?.id === input.id}
+                            onSelect={function (): void {
+                              if (selectedInput?.id === input.id) {
+                                setSelectedInput(undefined);
+                              } else {
+                                setSelectedInput(input);
+                              }
+                            }}
+                            requestId={input.source_request}
+                            createdAt={input.created_at}
+                            properties={input.inputs}
+                            view={inputView}
+                          />
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+                <div className="p-4 flex flex-col space-y-4 w-full sticky top-4">
+                  <div className="w-full flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                      <DocumentTextIcon className="h-5 w-5 text-black dark:text-white" />
+                      <p className="font-semibold text-lg">Prompt</p>
+                    </div>
+                    <div className="flex items-center space-x-2 w-full max-w-xs">
+                      <label className="text-sm text-gray-500">Version:</label>
+                      <Select
+                        value={selectedVersion}
+                        onValueChange={(value) => setSelectedVersion(value)}
+                      >
+                        {sortedPrompts?.map((prompt) => (
+                          <SelectItem
+                            value={`${prompt.major_version}.${prompt.minor_version}`}
+                          >
+                            {prompt.major_version}.{prompt.minor_version}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    </div>
+                  </div>
+                  <Chat
+                    requestBody={selectedPrompt?.helicone_template}
+                    responseBody={{}}
+                    status={200}
+                    requestId={""}
+                    model={prompts?.at(0)?.model || "unknown"}
+                    selectedProperties={selectedInput?.inputs}
+                  />
+                </div>
+              </div>
             </TabPanel>
           </TabPanels>
         </TabGroup>
