@@ -1599,7 +1599,7 @@
 							"rows": {
 								"items": {
 									"properties": {
-										"inputsRecord": {
+										"inputRecord": {
 											"properties": {
 												"inputs": {
 													"$ref": "#/components/schemas/Record_string.string_"

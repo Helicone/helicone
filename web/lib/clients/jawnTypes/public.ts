@@ -488,7 +488,7 @@ Json: JsonObject;
       id: string;
       dataset: {
         rows: {
-            inputsRecord?: {
+            inputRecord?: {
               inputs: components["schemas"]["Record_string.string_"];
               requestPath: string;
               requestId: string;

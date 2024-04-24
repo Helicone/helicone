@@ -34,13 +34,14 @@ async function runHypothesis(
   datasetRow: Experiment["dataset"]["rows"][number]
 ): Promise<Result<string, string>> {
   const requestId = uuid();
+  console.log("datasetRow.inputsRecord?.inputs", datasetRow.inputRecord);
   const newRequestBody = placeInputValues(
-    datasetRow.inputsRecord!.inputs,
-    hypothesis.promptVersion!.template
+    datasetRow.inputRecord?.inputs ?? {},
+    hypothesis.promptVersion?.template ?? {}
   );
   const fetchUrl = process.env.EXPERIMENTS_HCONE_URL_OVERRIDE
     ? new URL(process.env.EXPERIMENTS_HCONE_URL_OVERRIDE)
-    : new URL(datasetRow.inputsRecord!.requestPath);
+    : new URL(datasetRow.inputRecord!.requestPath);
   let headers: { [key: string]: string } = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${proxyKey}`,

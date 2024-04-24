@@ -12,15 +12,15 @@ interface PlaygroundProps {
   promptId: string;
 }
 
-const Prompts = (props: PlaygroundProps) => {
+const Experiments = (props: PlaygroundProps) => {
   const { user, experimentId } = props;
 
   return <ExperimentIdPage id={experimentId} />;
 };
 
-export default Prompts;
+export default Experiments;
 
-Prompts.getLayout = function getLayout(page: ReactElement) {
+Experiments.getLayout = function getLayout(page: ReactElement) {
   return <AuthLayout>{page}</AuthLayout>;
 };
 

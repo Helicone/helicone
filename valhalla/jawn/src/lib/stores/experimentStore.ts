@@ -9,7 +9,7 @@ export interface Experiment {
     name: string;
     rows: {
       rowId: string;
-      inputsRecord?: {
+      inputRecord?: {
         requestId: string;
         requestPath: string;
         inputs: Record<string, string>;
@@ -52,23 +52,22 @@ function getExperimentsQuery(
               'name', ds.name,
               'rows', json_agg(
                   jsonb_build_object(
+                    ${
+                      include?.inputs
+                        ? `
+                    'inputRecord', (
+                      SELECT jsonb_build_object(
+                        'requestId', pir.source_request,
+                        'requestPath', re.path,
+                        'inputs', pir.inputs
+                      )
+                      FROM prompt_input_record pir
+                      left join request re on re.id = pir.source_request
+                      WHERE pir.id = dsr.input_record
+                    ),`
+                        : ""
+                    }
                       'rowId', dsr.id
-                      -- Select from request table to get the request id
-                      ${
-                        include?.inputs
-                          ? `
-                      ,'inputRecord', (
-                        SELECT jsonb_build_object(
-                          'requestId', pir.source_request,
-                          'requestPath', re.path,
-                          'inputs', pir.inputs
-                        )
-                        FROM prompt_input_record pir
-                        left join request re on re.id = pir.source_request
-                        WHERE pir.id = dsr.input_record AND 1 = 0
-                      )`
-                          : ""
-                      }
                   )
               )
           ),
@@ -86,7 +85,7 @@ function getExperimentsQuery(
                         SELECT jsonb_build_object(
                           'template', pv.helicone_template
                         )
-                        FROM prompt_version pv
+                        FROM prompts_versions pv
                         WHERE pv.id = h.prompt_version
                       ),`
                           : ""
@@ -132,8 +131,11 @@ export const ServerExperimentStore: {
   experimentPop: (
     include?: IncludeExperimentKeys
   ) => Promise<Result<Experiment, string>>;
-  getExperiment: (id: string) => Promise<Result<Experiment, string>>;
-  popLatestExperiment: (include?: IncludeExperimentKeys) => Promise<
+  getExperiment: (
+    id: string,
+    include?: IncludeExperimentKeys
+  ) => Promise<Result<Experiment, string>>;
+  popLatestExperiment: () => Promise<
     Result<
       {
         experimentId?: string;
@@ -142,7 +144,7 @@ export const ServerExperimentStore: {
     >
   >;
 } = {
-  experimentPop: async () => {
+  experimentPop: async (include?: IncludeExperimentKeys) => {
     const { data: experimentId, error: experimentIdError } =
       await ServerExperimentStore.popLatestExperiment();
 
@@ -155,7 +157,10 @@ export const ServerExperimentStore: {
       return err("No experiment found");
     }
 
-    return await ServerExperimentStore.getExperiment(experimentId.experimentId);
+    return await ServerExperimentStore.getExperiment(
+      experimentId.experimentId,
+      include
+    );
   },
   getExperiment: async (id: string, include?: IncludeExperimentKeys) => {
     return resultMap(
