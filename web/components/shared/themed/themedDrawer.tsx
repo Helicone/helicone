@@ -15,10 +15,18 @@ interface ThemedDrawerProps {
   children: React.ReactNode;
   actions?: React.ReactNode;
   defaultExpanded?: boolean;
+  defaultWidth?: string;
 }
 
 const ThemedDrawer = (props: ThemedDrawerProps) => {
-  const { open, setOpen, children, actions, defaultExpanded = false } = props;
+  const {
+    open,
+    setOpen,
+    children,
+    actions,
+    defaultExpanded = false,
+    defaultWidth = "md:min-w-[60rem] w-full md:w-[60vw]",
+  } = props;
 
   const [expanded, setExpanded] = useState(defaultExpanded);
 
@@ -62,7 +70,7 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
                 <Dialog.Panel
                   className={clsx(
                     defaultExpanded
-                      ? "md:min-w-[60rem] w-full md:w-[60vw]"
+                      ? defaultWidth
                       : expanded
                       ? "md:min-w-[60rem] w-full md:w-[60vw]"
                       : "md:min-w-[35rem] w-full md:w-[36vw]",
