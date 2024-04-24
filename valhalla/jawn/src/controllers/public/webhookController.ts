@@ -11,7 +11,6 @@ import {
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { err, ok, Result } from "../../lib/shared/result";
 import { ScoreManager } from "../../managers/score/ScoreManager";
-import { hashAuth } from "../../lib/db/hash";
 
 export interface ScoreRequest {
   scores: Record<string, number>;
