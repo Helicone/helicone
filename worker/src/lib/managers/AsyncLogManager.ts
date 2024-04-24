@@ -11,6 +11,7 @@ import { AsyncLogModel, validateAsyncLogModel } from "../models/AsyncLog";
 import { DBQueryTimer } from "../util/loggers/DBQueryTimer";
 import { S3Client } from "../clients/S3Client";
 import { RequestResponseManager } from "./RequestResponseManager";
+import { KafkaProducer } from "../clients/KafkaProducer";
 
 export async function logAsync(
   requestWrapper: RequestWrapper,
@@ -83,6 +84,15 @@ export async function logAsync(
         ),
         supabase
       ),
+      kafkaProducer: new KafkaProducer({
+        brokers: [env.KAFKA_BROKER ?? ""],
+        ssl: {},
+        sasl: {
+          mechanism: "scram-sha-256",
+          username: env.KAFKA_USERNAME ?? "",
+          password: env.KAFKA_PASSWORD ?? "",
+        },
+      }),
     },
     env.S3_ENABLED ?? "true",
     heliconeHeaders

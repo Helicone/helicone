@@ -9,6 +9,8 @@ import { LogStore } from "../lib/stores/LogStore";
 import { RequestResponseStore } from "../lib/stores/RequestResponseStore";
 import { ClickhouseClientWrapper } from "../lib/db/ClickhouseWrapper";
 import { PromptHandler } from "../lib/handlers/PromptHandler";
+import { PosthogClient, postHogClient } from "../lib/clients/postHogClient";
+import { PostHogHandler } from "../lib/handlers/PostHogHandler";
 
 class LogManager {
   public async processLogEntries(
@@ -32,13 +34,15 @@ class LogManager {
       new LogStore(),
       new RequestResponseStore(clickhouseClientWrapper)
     );
+    const posthogHandler = new PostHogHandler(new PosthogClient(postHogClient));
 
     authHandler
       .setNext(rateLimitHandler)
       .setNext(requestHandler)
       .setNext(responseBodyHandler)
       .setNext(promptHandler)
-      .setNext(loggingHandler);
+      .setNext(loggingHandler)
+      .setNext(posthogHandler);
 
     await Promise.all(
       logMessages.map(async (logMessage) => {

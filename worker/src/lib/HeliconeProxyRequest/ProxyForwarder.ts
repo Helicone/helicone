@@ -31,6 +31,7 @@ import {
   HeliconeProxyRequest,
 } from "../models/HeliconeProxyRequest";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
+import { KafkaProducer } from "../clients/KafkaProducer";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -312,6 +313,15 @@ export async function proxyForwarder(
           ),
           supabase
         ),
+        kafkaProducer: new KafkaProducer({
+          brokers: [env.KAFKA_BROKER ?? ""],
+          ssl: {},
+          sasl: {
+            mechanism: "scram-sha-256",
+            username: env.KAFKA_USERNAME ?? "",
+            password: env.KAFKA_PASSWORD ?? "",
+          },
+        }),
       },
       env.S3_ENABLED ?? "true",
       proxyRequest?.requestWrapper.heliconeHeaders
@@ -321,17 +331,17 @@ export async function proxyForwarder(
       console.error("Error logging", res.error);
     }
 
-    if (proxyRequest && proxyRequest.rateLimitOptions) {
-      await updateRateLimitCounter({
-        providerAuthHash: proxyRequest.providerAuthHash,
-        heliconeProperties:
-          proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
-        rateLimitKV: env.RATE_LIMIT_KV,
-        rateLimitOptions: proxyRequest.rateLimitOptions,
-        userId: proxyRequest.userId,
-        cost: res.data?.cost ?? 0,
-      });
-    }
+    // if (proxyRequest && proxyRequest.rateLimitOptions) {
+    //   await updateRateLimitCounter({
+    //     providerAuthHash: proxyRequest.providerAuthHash,
+    //     heliconeProperties:
+    //       proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
+    //     rateLimitKV: env.RATE_LIMIT_KV,
+    //     rateLimitOptions: proxyRequest.rateLimitOptions,
+    //     userId: proxyRequest.userId,
+    //     cost: res.data?.cost ?? 0,
+    //   });
+    // }
   }
 
   if (request?.heliconeHeaders?.heliconeAuth || request.heliconeProxyKeyId) {

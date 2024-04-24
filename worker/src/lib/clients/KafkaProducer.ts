@@ -1,4 +1,4 @@
-import { CompressionTypes, Kafka } from "kafkajs";
+import { CompressionTypes, Kafka, KafkaConfig } from "kafkajs";
 import os from "os";
 import { TemplateWithInputs } from "../../api/lib/promptHelpers";
 import { Provider } from "../..";
@@ -9,7 +9,7 @@ export type Log = {
     userId: string;
     promptId?: string;
     properties: Record<string, string>;
-    heliconeApiKeyId: string;
+    heliconeApiKeyId?: number;
     heliconeProxyKeyId?: string;
     targetUrl: string;
     provider: Provider;
@@ -20,81 +20,62 @@ export type Log = {
     countryCode?: string;
     requestCreatedAt: Date;
     isStream: boolean;
-    assets: Record<string, string>;
-    heliconeTemplate: TemplateWithInputs;
+    heliconeTemplate?: TemplateWithInputs;
   };
   response: {
     id: string;
     body: string;
     status: number;
     model: string;
-    timeToFirstToken: number;
+    timeToFirstToken?: number;
     responseCreatedAt: Date;
     delayMs: number;
-    assets: Record<string, string>;
   };
+  assets: Map<string, string>;
   model: string;
 };
 
 export type HeliconeMeta = {
-  modelOverride: string;
+  modelOverride?: string;
   omitRequestLog: boolean;
   omitResponseLog: boolean;
 };
 
-export type Message = {
+export type KafkaMessage = {
+  id: string;
   authorization: string;
   heliconeMeta: HeliconeMeta;
   log: Log;
 };
 
-const redpanda = new Kafka({
-  brokers: [
-    "coev36dpu5ejhljb56q0.any.us-east-1.mpx.prd.cloud.redpanda.com:9092",
-  ],
-  ssl: {},
-  sasl: {
-    mechanism: "scram-sha-256",
-    username: "jawn-prod",
-    password: "",
-  },
-});
-const producer = redpanda.producer();
+export class KafkaProducer {
+  private kafka: Kafka;
 
-const sendMessage = async (msg: string) => {
-  try {
-    return await producer.send({
-      topic: "hello-world",
-      compression: CompressionTypes.GZIP,
-      messages: [
-        {
-          key: os.hostname(),
-          value: JSON.stringify(msg),
-        },
-      ],
-    });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    console.error(`Unable to send message: ${error.message}`, error);
+  constructor(kafkaConfig: KafkaConfig) {
+    this.kafka = new Kafka(kafkaConfig);
   }
-};
 
-const run = async () => {
-  await producer.connect();
-  for (let i = 0; i < 100; i++) {
-    sendMessage(`message ${i}`).then((resp) => {
-      console.log(`Message sent: ${JSON.stringify(resp)}`);
-    });
+  async sendMessage(msg: KafkaMessage) {
+    const producer = this.kafka.producer();
+    try {
+      await producer.connect();
+      return await producer.send({
+        topic: "helicone-logs",
+        compression: CompressionTypes.GZIP,
+        messages: [
+          {
+            key: msg.id,
+            value: JSON.stringify(msg),
+          },
+        ],
+      });
+    } catch (error: any) {
+      console.error(
+        `Failed to send message for message id ${msg.id}: ${error.message}`,
+        error
+      );
+    } finally {
+      await producer.disconnect();
+    }
   }
-};
-
-run().catch(console.error);
-
-process.once("SIGINT", async () => {
-  try {
-    await producer.disconnect();
-    console.log("Producer disconnected");
-  } finally {
-    process.kill(process.pid, "SIGINT");
-  }
-});
+}

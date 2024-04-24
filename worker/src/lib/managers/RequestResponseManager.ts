@@ -1,7 +1,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { S3Client } from "../clients/S3Client";
-import { Result } from "../util/results";
+import { Result, ok } from "../util/results";
 import { Database } from "../../../supabase/database.types";
+import { isImageModel } from "../util/imageModelMapper";
 
 export type RequestResponseContent = {
   requestId: string;
@@ -9,6 +10,7 @@ export type RequestResponseContent = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   requestBody: any;
   responseBody: string;
+  model: string;
   assets: Map<string, string>;
 };
 
@@ -23,7 +25,21 @@ export class RequestResponseManager {
     requestId,
     requestBody,
     responseBody,
+    model,
+    assets,
   }: RequestResponseContent): Promise<Result<string, string>> {
+    // If image model, store images in S3
+    if (model && isImageModel(model) && assets?.size > 0) {
+      await this.storeRequestResponseImage({
+        organizationId,
+        requestId,
+        requestBody,
+        responseBody,
+        model,
+        assets,
+      });
+    }
+
     const url = this.s3Client.getRequestResponseUrl(requestId, organizationId);
 
     return await this.s3Client.store(
@@ -31,11 +47,9 @@ export class RequestResponseManager {
       JSON.stringify({ request: requestBody, response: responseBody })
     );
   }
-  async storeRequestResponseImage({
+  private async storeRequestResponseImage({
     organizationId,
     requestId,
-    requestBody,
-    responseBody,
     assets,
   }: RequestResponseContent): Promise<Result<string, string>> {
     const uploadPromises: Promise<void>[] = Array.from(assets.entries()).map(
@@ -44,11 +58,8 @@ export class RequestResponseManager {
     );
 
     await Promise.allSettled(uploadPromises);
-    const url = this.s3Client.getRequestResponseUrl(requestId, organizationId);
-    return await this.s3Client.store(
-      url,
-      JSON.stringify({ request: requestBody, response: responseBody })
-    );
+
+    return ok("Images uploaded successfully");
   }
 
   private async handleImageUpload(
@@ -86,33 +97,9 @@ export class RequestResponseManager {
           assetId
         );
       }
-
-      if (!assetUploadResult.error) {
-        await this.saveRequestResponseAssets(
-          assetId,
-          requestId,
-          organizationId
-        );
-      }
     } catch (error) {
       console.error("Error uploading image:", error);
       // If we fail to upload an image, we don't want to fail logging the request
-    }
-  }
-
-  private async saveRequestResponseAssets(
-    assetId: string,
-    requestId: string,
-    organizationId: string
-  ) {
-    const result = await this.supabase
-      .from("asset")
-      .insert([
-        { id: assetId, request_id: requestId, organization_id: organizationId },
-      ]);
-
-    if (result.error) {
-      throw new Error(`Error saving asset: ${result.error.message}`);
     }
   }
 

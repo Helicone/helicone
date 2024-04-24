@@ -4,6 +4,7 @@ import { Env, Provider } from "../..";
 import { Database, Json } from "../../../supabase/database.types";
 import { DBWrapper } from "../db/DBWrapper";
 import {
+  getModelFromPath,
   getModelFromRequest,
   getModelFromResponse,
   withTimeout,
@@ -39,6 +40,7 @@ import {
   PosthogClient,
 } from "../clients/PosthogClient";
 import { costOfPrompt } from "../../packages/cost";
+import { KafkaMessage, KafkaProducer } from "../clients/KafkaProducer";
 
 export interface DBLoggableProps {
   response: {
@@ -626,19 +628,20 @@ export class DBLoggable {
       clickhouse: ClickhouseClientWrapper;
       queue: RequestResponseStore;
       requestResponseManager: RequestResponseManager;
+      kafkaProducer: KafkaProducer;
     },
     S3_ENABLED: Env["S3_ENABLED"],
     requestHeaders?: HeliconeHeaders
-  ): Promise<
-    Result<
-      {
-        cost: number;
-      } | null,
-      string
-    >
-  > {
+  ): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
-    if (error || !authParams?.organizationId) {
+    if (
+      error ||
+      !authParams?.organizationId ||
+      // Must be helicone api key or proxy key
+      !requestHeaders?.heliconeAuthV2 ||
+      (!requestHeaders?.heliconeAuthV2?.token &&
+        !this.request.heliconeProxyKeyId)
+    ) {
       return err(`Auth failed! ${error}` ?? "Helicone organization not found");
     }
 
@@ -648,114 +651,119 @@ export class DBLoggable {
       return err(org.error);
     }
 
-    let requestBody: any;
-    let responseBody: any;
+    // Process request body
+    const requestBody = this.tryParseBody(
+      this.request.bodyText ?? "{}",
+      "request"
+    );
 
-    try {
-      requestBody = JSON.parse(this.request.bodyText ?? "{}");
-    } catch (e) {
-      console.error("Error parsing request body", e);
-    }
+    // Process response body
+    const { body: rawResponseBody, endTime: responseEndTime } =
+      await this.response.getResponseBody();
 
-    try {
-      responseBody = JSON.parse((await this.response.getResponseBody()).body);
-    } catch (e) {
-      console.error("Error parsing response body", e);
-    }
+    const responseBody = this.tryParseBody(rawResponseBody, "response");
 
+    // Calculate model
     const requestModel = getModelFromRequest(requestBody, this.request.path);
     const responseModel = getModelFromResponse(responseBody);
+    const model = this.calculateModel(
+      requestModel,
+      responseModel,
+      requestHeaders?.modelOverride ?? null
+    );
 
-    const model =
-      this.request.modelOverride ??
-      responseModel ??
-      requestModel ??
-      "not-found";
+    // eslint-disable-next-line prefer-const
+    const { body: requestBodyFinal, assets: requestBodyAssets } =
+      this.processRequestBodyImages(
+        model,
+        this.omitBody(
+          requestHeaders?.omitHeaders?.omitRequest ?? false,
+          requestBody,
+          model
+        )
+      );
 
-    // private response: DBLoggableProps["response"];
-    // private request: DBLoggableProps["request"];
-    // private timing: DBLoggableProps["timing"];
-    // private provider: Provider;
-    // private tokenCalcUrl: string;
-    // const model =
-    //   requestResult?.data?.request?.model_override ??
-    //   responseResult?.data?.response?.model ??
-    //   requestResult?.data?.request?.model ??
-    //   "not-found";
+    const { body: responseBodyFinal, assets: responseBodyAssets } =
+      this.processResponseBodyImages(
+        model,
+        this.omitBody(
+          requestHeaders?.omitHeaders?.omitResponse ?? false,
+          responseBody,
+          model
+        )
+      );
 
-    let s3Result: Result<string, string>;
-    // If no data or error, return
-    if (response) {
-      // Log the error in S3
-      if (S3_ENABLED === "true") {
-        if (model && isImageModel(model)) {
-          s3Result = await db.requestResponseManager.storeRequestResponseImage({
-            organizationId: authParams.organizationId,
-            requestId: this.request.requestId,
-            requestBody: requestResult.data.body,
-            responseBody: JSON.stringify({
-              helicone_error: "error getting response, " + responseResult.error,
-              helicone_repsonse_body_as_string: (
-                await this.response.getResponseBody()
-              ).body,
-            }),
-            assets: assets,
-          });
-        } else {
-          s3Result = await db.requestResponseManager.storeRequestResponseData({
-            organizationId: authParams.organizationId,
-            requestId: this.request.requestId,
-            requestBody: requestResult.data.body,
-            responseBody: JSON.stringify({
-              helicone_error: "error getting response, " + responseResult.error,
-              helicone_repsonse_body_as_string: (
-                await this.response.getResponseBody()
-              ).body,
-            }),
-            assets: assets,
-          });
-        }
+    let assets: Map<string, string> = new Map();
+    if (requestBodyAssets) {
+      assets = new Map([...assets, ...requestBodyAssets]);
+    }
 
-        if (s3Result.error) {
-          console.error("Error storing request response", s3Result.error);
-        }
-      }
-
-      return responseResult;
+    if (responseBodyAssets) {
+      assets = new Map([...assets, ...responseBodyAssets]);
     }
 
     if (S3_ENABLED === "true") {
-      if (model && isImageModel(model)) {
-        s3Result = await db.requestResponseManager.storeRequestResponseImage({
+      const s3Result = await db.requestResponseManager.storeRequestResponseData(
+        {
           organizationId: authParams.organizationId,
           requestId: this.request.requestId,
-          requestBody: requestResult.data.body,
-          responseBody: responseResult.data.body,
+          requestBody: requestBodyFinal,
+          responseBody: responseBodyFinal,
+          model: model,
           assets: assets,
-        });
-      } else {
-        s3Result = await db.requestResponseManager.storeRequestResponseData({
-          organizationId: authParams.organizationId,
-          requestId: this.request.requestId,
-          requestBody: requestResult.data.body,
-          responseBody: responseResult.data.body,
-          assets: assets,
-        });
-      }
+        }
+      );
 
       if (s3Result.error) {
-        console.error("Error storing request response", s3Result.error);
-        // Continue logging to clickhouse
+        console.error(
+          `Error storing request response in S3: ${s3Result.error}`
+        );
       }
     }
 
-    // await logInClickhouse(
-    //   requestResult.data.request,
-    //   responseResult.data.response,
-    //   requestResult.data.properties,
-    //   requestResult.data.node,
-    //   db.clickhouse
-    // );
+    const endTime = this.timing.endTime ?? responseEndTime;
+    const kafkaMessage: KafkaMessage = {
+      id: this.request.requestId,
+      authorization: requestHeaders.heliconeAuthV2.token,
+      heliconeMeta: {
+        modelOverride: requestHeaders.modelOverride ?? undefined,
+        omitRequestLog: requestHeaders.omitHeaders.omitRequest,
+        omitResponseLog: requestHeaders.omitHeaders.omitResponse,
+      },
+      log: {
+        model: model,
+        assets: assets,
+        request: {
+          id: this.request.requestId,
+          userId: authParams.userId ?? "",
+          promptId: requestHeaders.promptId ?? "",
+          properties: this.request.properties,
+          heliconeApiKeyId: authParams.heliconeApiKeyId, // If undefined, proxy key id must be present
+          heliconeProxyKeyId: this.request.heliconeProxyKeyId ?? undefined,
+          targetUrl: this.request.targetUrl,
+          provider: this.request.provider,
+          model: requestModel,
+          path: this.request.path,
+          body: requestBodyFinal,
+          threat: this.request.threat ?? undefined,
+          countryCode: this.request.country_code ?? undefined,
+          requestCreatedAt: this.request.startTime ?? new Date(),
+          isStream: this.request.isStream,
+          heliconeTemplate: this.request.heliconeTemplate ?? undefined,
+        },
+        response: {
+          id: this.response.responseId,
+          body: responseBodyFinal,
+          status: await this.response.status(),
+          model: responseModel,
+          timeToFirstToken: (await this.timing.timeToFirstToken()) ?? undefined,
+          responseCreatedAt: endTime,
+          delayMs: endTime.getTime() - this.timing.startTime.getTime(),
+        },
+      },
+    };
+
+    await db.kafkaProducer.sendMessage(kafkaMessage);
 
     // // TODO We should probably move the webhook stuff out of dbLogger
     // const { error: webhookError } = await this.sendToWebhooks(db.supabase, {
@@ -771,95 +779,74 @@ export class DBLoggable {
     //   };
     // }
 
-    if (this.request.heliconeTemplate && this.request.promptId) {
-      const assets = requestResult.data.requestAssets;
+    return ok(null);
+  }
 
-      const inverseAssets: Map<string, string> = new Map();
-      assets.forEach((value, key) => inverseAssets.set(value, key));
-
-      const inputs = Object.entries(
-        this.request.heliconeTemplate.inputs
-      ).reduce<{ [key: string]: string }>((acc, [key, value]) => {
-        const assetId = inverseAssets.get(value);
-        acc[key] = assetId ? `<helicone-asset-id key="${assetId}"/>` : value;
-        return acc;
-      }, {});
-
-      const newTemplateWithInputs: TemplateWithInputs = {
-        template: this.request.heliconeTemplate.template,
-        inputs: inputs,
+  tryParseBody(body: string, bodyType: "request" | "response"): any {
+    try {
+      return JSON.parse(body);
+    } catch (e) {
+      console.error(`Error parsing ${bodyType} body: ${e}`);
+      return {
+        helicone_error: `error parsing ${bodyType} body: ${e}`,
+        parse_response_error: e,
+        body: body,
       };
+    }
+  }
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const upsertResult2 = await db.queue.promptStore.upsertPromptV2(
-        newTemplateWithInputs,
-        this.request.promptId,
-        authParams.organizationId,
-        this.request.requestId
-      );
+  omitBody(omitBody: boolean, body: any, model: string): any {
+    return omitBody
+      ? {
+          model: model,
+        }
+      : body;
+  }
 
-      const upsertResult = await db.queue.upsertPrompt(
-        newTemplateWithInputs,
-        this.request.promptId ?? "",
-        authParams.organizationId
-      );
-
-      if (upsertResult.error || !upsertResult.data) {
-        console.error("Error upserting prompt", upsertResult.error);
-        return err(JSON.stringify(upsertResult.error));
+  processRequestBodyImages(
+    model: string,
+    requestBody: any
+  ): ImageModelParsingResponse {
+    let imageModelParsingResponse: ImageModelParsingResponse = {
+      body: requestBody,
+      assets: new Map<string, string>(),
+    };
+    if (model && isRequestImageModel(model)) {
+      const imageModelParser = getRequestImageModelParser(model);
+      if (imageModelParser) {
+        imageModelParsingResponse =
+          imageModelParser.processRequestBody(requestBody);
       }
     }
 
-    const cost =
-      this.modelCost({
-        model: model ?? null,
-        sum_completion_tokens:
-          responseResult.data.response.completion_tokens ?? 0,
-        sum_prompt_tokens: responseResult.data.response.completion_tokens ?? 0,
-        sum_tokens:
-          (responseResult.data.response.completion_tokens ?? 0) +
-          (responseResult.data.response.prompt_tokens ?? 0),
-        provider: requestResult.data.request.provider ?? "",
-      }) ?? 0;
+    imageModelParsingResponse.body = unsupportedImage(
+      imageModelParsingResponse.body
+    );
 
-    if (requestHeaders?.posthogKey) {
-      const posthogClient = new PosthogClient(
-        requestHeaders.posthogKey,
-        requestHeaders.posthogHost
-      );
-      const reqBody = JSON.parse(this.request.bodyText ?? "{}") ?? null;
-      const heliconeRequestResponse: HeliconeRequestResponseToPosthog = {
-        model: model ?? "",
-        temperature: reqBody.temperature ?? 0.0,
-        n: reqBody.n ?? 0,
-        promptId: requestResult.data.request.prompt_id ?? "",
-        timeToFirstToken: responseResult.data.response.time_to_first_token ?? 0,
-        cost: cost,
-        provider: requestResult.data.request.provider ?? "",
-        path: requestResult.data.request.path ?? "",
-        completetionTokens: responseResult.data.response.completion_tokens ?? 0,
-        promptTokens: responseResult.data.response.prompt_tokens ?? 0,
-        totalTokens:
-          (responseResult.data.response.completion_tokens ?? 0) +
-          (responseResult.data.response.prompt_tokens ?? 0),
-        userId: requestResult.data.request.user_id ?? "",
-        countryCode: requestResult.data.request.country_code ?? "",
-        requestBodySize:
-          requestResult.data.request.body?.toString().length ?? 0,
-        responseBodySize:
-          responseResult.data.response.body?.toString().length ?? 0,
-        delayMs: responseResult.data.response.delay_ms ?? 0,
-      };
+    return imageModelParsingResponse;
+  }
 
-      await posthogClient.captureEvent(
-        "helicone_request_response",
-        heliconeRequestResponse
-      );
+  processResponseBodyImages(
+    model: string,
+    responseBody: any
+  ): ImageModelParsingResponse {
+    let imageModelParsingResponse: ImageModelParsingResponse = {
+      body: responseBody,
+      assets: new Map<string, string>(),
+    };
+    if (model && isResponseImageModel(model)) {
+      const imageModelParser = getResponseImageModelParser(model);
+      if (imageModelParser) {
+        imageModelParsingResponse =
+          imageModelParser.processResponseBody(responseBody);
+      }
     }
 
-    return ok({
-      cost,
-    });
+    imageModelParsingResponse.body = unsupportedImage(
+      imageModelParsingResponse.body
+    );
+
+    return imageModelParsingResponse;
   }
 
   modelCost(modelRow: {
@@ -880,6 +867,14 @@ export class DBLoggable {
         provider: modelRow.provider,
       }) ?? 0
     );
+  }
+
+  calculateModel(
+    requestModel: string | null,
+    responseModel: string | null,
+    modelOverride: string | null
+  ): string {
+    return modelOverride ?? responseModel ?? requestModel ?? "not-found";
   }
 }
 

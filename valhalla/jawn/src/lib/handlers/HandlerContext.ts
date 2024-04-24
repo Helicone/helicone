@@ -3,7 +3,6 @@ import { SetOnce } from "../../utils/setOnce";
 import { ClickhouseDB } from "../db/ClickhouseWrapper";
 import { Database } from "../db/database.types";
 import { AuthParams, OrgParams } from "../db/supabase";
-import { Usage } from "../shared/bodyProcessors/IBodyProcessor";
 
 export class HandlerContext extends SetOnce {
   public message: Message;
@@ -44,7 +43,7 @@ export type Log = {
     userId: string;
     promptId?: string;
     properties: Record<string, string>;
-    heliconeApiKeyId: string;
+    heliconeApiKeyId?: number;
     heliconeProxyKeyId?: string;
     targetUrl: string;
     provider: Provider;
@@ -63,12 +62,20 @@ export type Log = {
     body: string;
     status: number;
     model: string;
-    timeToFirstToken: number;
+    timeToFirstToken?: number;
     responseCreatedAt: Date;
     delayMs: number;
     assets?: Map<string, string>;
   };
   model: string;
+};
+
+export type Usage = {
+  promptTokens?: number;
+  completionTokens?: number;
+  totalTokens?: number;
+  heliconeCalculated?: boolean;
+  cost?: number;
 };
 
 export type ProcessedLog = {
@@ -83,7 +90,7 @@ export type ProcessedLog = {
 };
 
 export type HeliconeMeta = {
-  modelOverride: string;
+  modelOverride?: string;
   omitRequestLog: boolean;
   omitResponseLog: boolean;
 };
