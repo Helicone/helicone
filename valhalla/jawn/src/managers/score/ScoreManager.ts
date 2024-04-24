@@ -1,69 +1,56 @@
-import { supabaseServer } from "../../lib/db/supabase";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { err, Result } from "../../lib/shared/result";
 import { BaseManager } from "../BaseManager";
 
 export class ScoreManager extends BaseManager {
   public async addScores(
     requestId: string,
-    heliconeAuth: string,
     scores: Record<string, number>
   ): Promise<Result<string, string>> {
     try {
-      const apiKey = await supabaseServer.client
-        .from("helicone_api_keys")
-        .select("*")
-        .eq("api_key_hash", heliconeAuth);
+      const organizationId = this.authParams.organizationId;
+      const scoreKeys = Object.keys(scores);
+      const scoreValues = Object.values(scores);
 
-      if (apiKey.error) {
-        return err(JSON.stringify(apiKey.error));
-      }
-      if (apiKey.data.length === 0) {
-        return err("No API key found");
-      }
-
-      const scorePromises = Object.entries(scores).map(
-        async ([attribute, value]) => {
-          let scoreAttribute = await supabaseServer.client
-            .from("score_attribute")
-            .select("*")
-            .eq("score_key", attribute)
-            .eq("organization", apiKey.data[0].organization_id)
-            .single();
-
-          if (!scoreAttribute.data) {
-            scoreAttribute = await supabaseServer.client
-              .from("score_attribute")
-              .insert([
-                {
-                  score_key: attribute,
-                  organization: apiKey.data[0].organization_id,
-                },
-              ])
-              .select("*")
-              .single();
-          }
-
-          if (scoreAttribute.error) {
-            return err(scoreAttribute.error.message);
-          }
-
-          const scoreValue = await supabaseServer.client
-            .from("score_value")
-            .insert({
-              score_attribute: scoreAttribute.data.id,
-              request_id: requestId,
-              int_value: value,
-            });
-
-          if (scoreValue.error) {
-            return err(scoreValue.error.message);
-          }
-
-          console.log(scoreValue.data);
-        }
+      const { error: requestError } = await dbExecute(
+        `SELECT id FROM request WHERE id = $1 AND helicone_org_id = $2`,
+        [requestId, organizationId]
       );
 
-      await Promise.allSettled(scorePromises);
+      if (requestError) {
+        return err(`${requestId} not found in organization ${organizationId}`);
+      }
+
+      const organizationIds = Array(scoreKeys.length).fill(organizationId);
+
+      const query = `
+        WITH upserted_attributes AS (
+            INSERT INTO score_attribute (score_key, organization)
+            SELECT unnest($1::text[]), unnest($2::uuid[])
+            ON CONFLICT (score_key, organization) DO UPDATE SET
+                score_key = EXCLUDED.score_key
+            RETURNING id
+        ),
+        inserted_values AS (
+            INSERT INTO score_value (score_attribute, request_id, int_value)
+            SELECT id, $3, unnest($4::bigint[])
+            FROM upserted_attributes
+            RETURNING *
+        )
+        SELECT * FROM inserted_values;
+    `;
+
+      const { error } = await dbExecute(query, [
+        scoreKeys,
+        organizationIds,
+        requestId,
+        scoreValues,
+      ]);
+
+      if (error) {
+        return err(`Error adding scores: ${error}`);
+      }
+
       return { data: "Scores added successfully", error: null };
     } catch (error: any) {
       return err(error.message);

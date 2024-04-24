@@ -9,7 +9,7 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
-  "/v1/webhook/score": {
+  "/v1/webhook/request/{requestId}/score": {
     post: operations["AddScores"];
   };
   "/v1/user/query": {
@@ -74,7 +74,6 @@ export interface components {
       [key: string]: number;
     };
     ScoreRequest: {
-      request_id: string;
       scores: components["schemas"]["Record_string.number_"];
     };
     "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
@@ -591,6 +590,11 @@ export type external = Record<string, never>;
 export interface operations {
 
   AddScores: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
     requestBody: {
       content: {
         "application/json": components["schemas"]["ScoreRequest"];

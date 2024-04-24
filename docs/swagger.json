@@ -72,15 +72,11 @@
 			},
 			"ScoreRequest": {
 				"properties": {
-					"request_id": {
-						"type": "string"
-					},
 					"scores": {
 						"$ref": "#/components/schemas/Record_string.number_"
 					}
 				},
 				"required": [
-					"request_id",
 					"scores"
 				],
 				"type": "object",
@@ -1762,7 +1758,7 @@
 		"contact": {}
 	},
 	"paths": {
-		"/v1/webhook/score": {
+		"/v1/webhook/request/{requestId}/score": {
 			"post": {
 				"operationId": "AddScores",
 				"responses": {
@@ -1785,7 +1781,16 @@
 						"api_key": []
 					}
 				],
-				"parameters": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
 				"requestBody": {
 					"required": true,
 					"content": {

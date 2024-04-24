@@ -55,7 +55,6 @@ const models: TsoaRoute.Models = {
     "ScoreRequest": {
         "dataType": "refObject",
         "properties": {
-            "request_id": {"dataType":"string","required":true},
             "scores": {"ref":"Record_string.number_","required":true},
         },
         "additionalProperties": false,
@@ -603,7 +602,7 @@ export function RegisterRoutes(app: Router) {
     //  NOTE: If you do not see routes for all of your controllers in this file, then you might not have informed tsoa of where to look
     //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
     // ###########################################################################################################
-        app.post('/v1/webhook/score',
+        app.post('/v1/webhook/request/:requestId/score',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(WebhookControler)),
             ...(fetchMiddlewares<RequestHandler>(WebhookControler.prototype.addScores)),
@@ -612,6 +611,7 @@ export function RegisterRoutes(app: Router) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"ref":"ScoreRequest"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    requestId: {"in":"path","name":"requestId","required":true,"dataType":"string"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

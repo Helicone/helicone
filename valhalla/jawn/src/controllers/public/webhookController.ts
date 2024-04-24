@@ -1,11 +1,19 @@
-import { Route, Tags, Security, Controller, Post, Body, Request } from "tsoa";
+import {
+  Route,
+  Tags,
+  Security,
+  Controller,
+  Post,
+  Body,
+  Request,
+  Path,
+} from "tsoa";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { err, ok, Result } from "../../lib/shared/result";
 import { ScoreManager } from "../../managers/score/ScoreManager";
 import { hashAuth } from "../../lib/db/hash";
 
 export interface ScoreRequest {
-  request_id: string;
   scores: Record<string, number>;
 }
 
@@ -13,24 +21,16 @@ export interface ScoreRequest {
 @Tags("Webhook")
 @Security("api_key")
 export class WebhookControler extends Controller {
-  @Post("/score")
+  @Post("/request/{requestId}/score")
   public async addScores(
     @Body()
     requestBody: ScoreRequest,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() requestId: string
   ): Promise<Result<null, string>> {
-    const heliconeAuth = request.headers.authorization;
-    if (!heliconeAuth) {
-      return err("No Helicone-Auth header provided");
-    }
-    const heliconeApiKey = await hashAuth(heliconeAuth.replace("Bearer ", ""));
     const scoreManager = new ScoreManager(request.authParams);
 
-    const result = await scoreManager.addScores(
-      requestBody.request_id,
-      heliconeApiKey,
-      requestBody.scores
-    );
+    const result = await scoreManager.addScores(requestId, requestBody.scores);
     if (result.error || !result.data) {
       this.setStatus(500);
       return err("Not implemented");
