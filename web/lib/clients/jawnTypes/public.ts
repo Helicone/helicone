@@ -42,6 +42,9 @@ export interface paths {
   "/v1/experiment/dataset/random": {
     post: operations["AddRandomDataset"];
   };
+  "/v1/experiment/dataset/query": {
+    post: operations["GetDatasets"];
+  };
   "/v1/experiment/dataset/{datasetId}/query": {
     post: operations["GetDataset"];
   };
@@ -464,6 +467,18 @@ Json: JsonObject;
       /** Format: double */
       limit?: number;
     };
+    DatasetResult: {
+      id: string;
+      dataset_name: string;
+      request_ids: string[];
+      created_at: string;
+    };
+    "ResultSuccess_DatasetResult-Array_": {
+      data: components["schemas"]["DatasetResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_DatasetResult-Array.string_": components["schemas"]["ResultSuccess_DatasetResult-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess___-Array_": {
       data: Record<string, never>[];
       /** @enum {number|null} */
@@ -792,6 +807,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__datasetId-string_.string_"];
+        };
+      };
+    };
+  };
+  GetDatasets: {
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_DatasetResult-Array.string_"];
         };
       };
     };

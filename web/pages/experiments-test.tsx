@@ -41,11 +41,28 @@ const Alert = (props: AlertProps) => {
 
   const [providerKey, setProviderKey] = useState<string>("");
 
+  const [dataset, setDataset] = useState<any>(null);
   const jawn = useJawnClient();
   return (
     <>
       <AuthHeader title={"Alerts"} />
       <div>
+        <button
+          className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+          onClick={async () => {
+            const dataset = await jawn.POST("/v1/experiment/dataset/query", {
+              body: {},
+            });
+
+            setDataset(dataset.data?.data);
+          }}
+        >
+          CLICK ME TO VIEW DATASETS
+        </button>
+        <br />
+        {JSON.stringify(dataset)}
+        <br />
+        <br />
         <div>Hello Scott</div>
         ENTER PROMPT ID (Default latest prompt)
         <input

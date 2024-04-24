@@ -1493,6 +1493,66 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"DatasetResult": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"dataset_name": {
+						"type": "string"
+					},
+					"request_ids": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"created_at": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"dataset_name",
+					"request_ids",
+					"created_at"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_DatasetResult-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/DatasetResult"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_DatasetResult-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_DatasetResult-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResultSuccess___-Array_": {
 				"properties": {
 					"data": {
@@ -2410,6 +2470,43 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/RandomDatasetParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/experiment/dataset/query": {
+			"post": {
+				"operationId": "GetDatasets",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_DatasetResult-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {},
+								"type": "object"
 							}
 						}
 					}

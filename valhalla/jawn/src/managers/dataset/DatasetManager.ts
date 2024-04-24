@@ -1,5 +1,6 @@
 // src/users/usersService.ts
 import {
+  DatasetResult,
   NewDatasetParams,
   RandomDatasetParams,
 } from "../../controllers/public/experimentDatasetController";
@@ -23,6 +24,27 @@ import { BaseManager } from "../BaseManager";
 export type UserCreationParams = Pick<User, "email" | "name" | "phoneNumbers">;
 
 export class DatasetManager extends BaseManager {
+  async getDatasets(): Promise<Result<DatasetResult[], string>> {
+    const result = dbExecute<{
+      id: string;
+      dataset_name: string;
+      request_ids: string[];
+      created_at: string;
+    }>(
+      `
+    SELECT 
+      id,
+      name,
+      created_at
+    FROM experiment_dataset_v2
+    WHERE organization = $1
+    LIMIT 100
+    `,
+      [this.authParams.organizationId]
+    );
+    return result;
+  }
+
   async addDataset(params: NewDatasetParams): Promise<Result<string, string>> {
     const dataset = await supabaseServer.client
       .from("experiment_dataset_v2")
