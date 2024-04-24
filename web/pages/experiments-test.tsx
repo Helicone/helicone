@@ -74,11 +74,12 @@ const Alert = (props: AlertProps) => {
         <button
           className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
           onClick={async () => {
+            // gets the random request id's
             const requestIds = await jawn.POST(
               "/v1/prompt/version/{promptVersionId}/inputs/query",
               {
                 body: {
-                  limit: 2,
+                  limit: 100,
                   random: true,
                 },
                 params: {
@@ -89,6 +90,7 @@ const Alert = (props: AlertProps) => {
               }
             );
 
+            // creates the dataset based on request id
             const dataset = await jawn.POST("/v1/experiment/dataset", {
               body: {
                 datasetName: "test Set Hi Scott",
@@ -99,6 +101,7 @@ const Alert = (props: AlertProps) => {
 
             dataset.data?.data?.datasetId;
 
+            // creates a new subversion of the prompt
             const newSubVersion = await jawn.POST(
               "/v1/prompt/version/{promptVersionId}/subversion",
               {
@@ -122,6 +125,7 @@ const Alert = (props: AlertProps) => {
               }
             );
 
+            // runs the experiment with the new dataset and new subversion
             jawn.POST("/v1/experiment", {
               body: {
                 datasetId: dataset.data?.data?.datasetId!,
