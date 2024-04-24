@@ -20,7 +20,7 @@ export class InputsManager extends BaseManager {
   async getInputs(
     limit: number,
     promptVersion: string,
-    random: boolean
+    random?: boolean
   ): Promise<Result<PromptInputRecord[], string>> {
     return await dbExecute<PromptInputRecord>(
       `

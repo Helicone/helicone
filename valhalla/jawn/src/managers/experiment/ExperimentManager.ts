@@ -1,13 +1,10 @@
 // src/users/usersService.ts
-import {
-  Experiment,
-  NewExperimentParams,
-} from "../../controllers/public/experimentController";
+import { NewExperimentParams } from "../../controllers/public/experimentController";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { Result, err, ok } from "../../lib/shared/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { BaseManager } from "../BaseManager";
-import { ExperimentStore } from "../../lib/stores/experimentStore";
+import { Experiment, ExperimentStore } from "../../lib/stores/experimentStore";
 
 export class ExperimentManager extends BaseManager {
   private ExperimentStore: ExperimentStore;
@@ -18,6 +15,7 @@ export class ExperimentManager extends BaseManager {
 
   async getExperiments(): Promise<Result<Experiment[], string>> {
     const result = await this.ExperimentStore.getExperiments();
+    console.log(result);
     if (result.error || !result.data) {
       return err(result.error);
     }

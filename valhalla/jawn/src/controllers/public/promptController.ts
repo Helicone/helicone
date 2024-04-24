@@ -149,7 +149,7 @@ export class PromptController extends Controller {
     @Body()
     requestBody: {
       limit: number;
-      random: boolean;
+      random?: boolean;
     },
     @Request() request: JawnAuthenticatedRequest,
     @Path() promptVersionId: string

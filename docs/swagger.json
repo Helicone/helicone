@@ -1599,15 +1599,30 @@
 							"rows": {
 								"items": {
 									"properties": {
-										"requestId": {
-											"type": "string"
+										"inputsRecord": {
+											"properties": {
+												"inputs": {
+													"$ref": "#/components/schemas/Record_string.string_"
+												},
+												"requestPath": {
+													"type": "string"
+												},
+												"requestId": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"inputs",
+												"requestPath",
+												"requestId"
+											],
+											"type": "object"
 										},
 										"rowId": {
 											"type": "string"
 										}
 									},
 									"required": [
-										"requestId",
 										"rowId"
 									],
 									"type": "object"
@@ -1663,6 +1678,15 @@
 								},
 								"model": {
 									"type": "string"
+								},
+								"promptVersion": {
+									"properties": {
+										"template": {}
+									},
+									"required": [
+										"template"
+									],
+									"type": "object"
 								},
 								"promptVersionId": {
 									"type": "string"
@@ -2188,7 +2212,6 @@
 									}
 								},
 								"required": [
-									"random",
 									"limit"
 								],
 								"type": "object"

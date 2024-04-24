@@ -488,7 +488,11 @@ Json: JsonObject;
       id: string;
       dataset: {
         rows: {
-            requestId: string;
+            inputsRecord?: {
+              inputs: components["schemas"]["Record_string.string_"];
+              requestPath: string;
+              requestId: string;
+            };
             rowId: string;
           }[];
         name: string;
@@ -504,6 +508,9 @@ Json: JsonObject;
           createdAt: string;
           status: string;
           model: string;
+          promptVersion?: {
+            template: unknown;
+          };
           promptVersionId: string;
           id: string;
         }[];
@@ -700,7 +707,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          random: boolean;
+          random?: boolean;
           /** Format: double */
           limit: number;
         };

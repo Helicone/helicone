@@ -9,6 +9,7 @@ import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { HeliconeRequest } from "../../lib/stores/request/request";
 import { ExperimentManager } from "../../managers/experiment/ExperimentManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
+import { Experiment } from "../../lib/stores/experimentStore";
 
 export type ExperimentFilterBranch = {
   left: ExperimentFilterNode;
@@ -28,31 +29,6 @@ export interface NewExperimentParams {
 }
 
 export interface ExperimentRun {}
-
-export interface Experiment {
-  id: string;
-  dataset: {
-    id: string;
-    name: string;
-    rows: {
-      rowId: string;
-      requestId: string;
-    }[];
-  };
-  createdAt: string;
-  hypotheses: {
-    id: string;
-    promptVersionId: string;
-    model: string;
-    status: string;
-    createdAt: string;
-    providerKey: string;
-    runs: {
-      datasetRowId: string;
-      resultRequestId: string;
-    }[];
-  }[];
-}
 
 @Route("v1/experiment")
 @Tags("Experiment")

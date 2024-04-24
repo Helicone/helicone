@@ -1,14 +1,48 @@
-import { Experiment } from "../../controllers/public/experimentController";
 import { dbExecute } from "../shared/db/dbExecute";
 import { Result, err, resultMap } from "../shared/result";
 import { BaseStore } from "./baseStore";
 
+export interface Experiment {
+  id: string;
+  dataset: {
+    id: string;
+    name: string;
+    rows: {
+      rowId: string;
+      inputsRecord?: {
+        requestId: string;
+        requestPath: string;
+        inputs: Record<string, string>;
+      };
+    }[];
+  };
+  createdAt: string;
+  hypotheses: {
+    id: string;
+    promptVersionId: string;
+    promptVersion?: {
+      template: any;
+    };
+    model: string;
+    status: string;
+    createdAt: string;
+    providerKey: string;
+    runs: {
+      datasetRowId: string;
+      resultRequestId: string;
+    }[];
+  }[];
+}
+
+export interface IncludeExperimentKeys {
+  inputs?: true;
+  promptVersion?: true;
+}
+
 function getExperimentsQuery(
   filter?: string,
   limit?: number,
-  include?: {
-    inputs?: boolean;
-  }
+  include?: IncludeExperimentKeys
 ) {
   return `
         SELECT jsonb_build_object(
@@ -18,11 +52,23 @@ function getExperimentsQuery(
               'name', ds.name,
               'rows', json_agg(
                   jsonb_build_object(
-                      'rowId', dsr.id,
-                      'requestId', dsr.input_record
-                      --inputs', SELECT inputs 
-                      --  FROM prompt_input_record
-                      --  WHERE prompt_input_record.id = dsr.input_record
+                      'rowId', dsr.id
+                      -- Select from request table to get the request id
+                      ${
+                        include?.inputs
+                          ? `
+                      ,'inputRecord', (
+                        SELECT jsonb_build_object(
+                          'requestId', pir.source_request,
+                          'requestPath', re.path,
+                          'inputs', pir.inputs
+                        )
+                        FROM prompt_input_record pir
+                        left join request re on re.id = pir.source_request
+                        WHERE pir.id = dsr.input_record AND 1 = 0
+                      )`
+                          : ""
+                      }
                   )
               )
           ),
@@ -33,6 +79,18 @@ function getExperimentsQuery(
                       'id', h.id,
                       'providerKey', h.provider_key,
                       'promptVersionId', h.prompt_version,
+                      ${
+                        include?.promptVersion
+                          ? `
+                      'promptVersion', (
+                        SELECT jsonb_build_object(
+                          'template', pv.helicone_template
+                        )
+                        FROM prompt_version pv
+                        WHERE pv.id = h.prompt_version
+                      ),`
+                          : ""
+                      }
                       'model', h.model,
                       'status', h.status,
                       'createdAt', h.created_at,
@@ -71,9 +129,13 @@ export class ExperimentStore extends BaseStore {
 }
 
 export const ServerExperimentStore: {
-  experimentPop: () => Promise<Result<Experiment, string>>;
+  experimentPop: (
+    include?: IncludeExperimentKeys
+  ) => Promise<Result<Experiment, string>>;
   getExperiment: (id: string) => Promise<Result<Experiment, string>>;
-  popLatestExperiment: () => Promise<Result<string, string>>;
+  popLatestExperiment: (
+    include?: IncludeExperimentKeys
+  ) => Promise<Result<string, string>>;
 } = {
   experimentPop: async () => {
     const { data: experimentId, error: experimentIdError } =
@@ -89,11 +151,11 @@ export const ServerExperimentStore: {
 
     return await ServerExperimentStore.getExperiment(experimentId!);
   },
-  getExperiment: async (id: string) => {
+  getExperiment: async (id: string, include?: IncludeExperimentKeys) => {
     return resultMap(
       await dbExecute<{
         jsonb_build_object: Experiment;
-      }>(getExperimentsQuery("e.id = $1"), [id]),
+      }>(getExperimentsQuery("e.id = $1", 1, include), [id]),
       (d) => d[0].jsonb_build_object
     );
   },
