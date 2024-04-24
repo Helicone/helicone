@@ -55,8 +55,8 @@ export type Log = {
     countryCode?: string;
     requestCreatedAt: Date;
     isStream: boolean;
-    assets: Record<string, string>;
-    heliconeTemplate: TemplateWithInputs;
+    assets?: Map<string, string>;
+    heliconeTemplate?: TemplateWithInputs;
   };
   response: {
     id: string;
@@ -66,7 +66,7 @@ export type Log = {
     timeToFirstToken: number;
     responseCreatedAt: Date;
     delayMs: number;
-    assets: Record<string, string>;
+    assets?: Map<string, string>;
   };
   model: string;
 };
@@ -75,6 +75,7 @@ export type ProcessedLog = {
   model?: string;
   request: {
     body?: any;
+    heliconeTemplate?: TemplateWithInputs;
   };
   response: {
     body?: any;

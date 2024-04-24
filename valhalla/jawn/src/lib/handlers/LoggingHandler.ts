@@ -44,7 +44,10 @@ export class LoggingHandler extends AbstractLogHandler {
     this.batchPayload.properties.push(...context.payload.properties);
 
     // Prompts
-    if (context.message.log.request.promptId) {
+    if (
+      context.message.log.request.promptId &&
+      context.processedLog.request.heliconeTemplate
+    ) {
       const prompt = this.mapPrompt(context);
       if (prompt) {
         context.payload.prompt = prompt;
@@ -105,7 +108,7 @@ export class LoggingHandler extends AbstractLogHandler {
     if (
       !context.message.log.request.promptId ||
       !context.orgParams?.id ||
-      !context.message.log.request.heliconeTemplate
+      !context.processedLog.request.heliconeTemplate
     ) {
       return null;
     }
@@ -115,7 +118,7 @@ export class LoggingHandler extends AbstractLogHandler {
       requestId: context.message.log.request.id,
       orgId: context.orgParams.id,
       model: context.message.log.model,
-      heliconeTemplate: context.message.log.request.heliconeTemplate,
+      heliconeTemplate: context.processedLog.request.heliconeTemplate,
       createdAt: context.message.log.request.requestCreatedAt,
     };
 
