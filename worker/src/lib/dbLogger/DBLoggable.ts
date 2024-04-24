@@ -3,14 +3,17 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
 import { Database, Json } from "../../../supabase/database.types";
 import { DBWrapper } from "../db/DBWrapper";
-import { withTimeout } from "../util/helpers";
+import {
+  getModelFromRequest,
+  getModelFromResponse,
+  withTimeout,
+} from "../util/helpers";
 import { Result, err, ok } from "../util/results";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 import { RequestWrapper } from "../RequestWrapper";
 import { INTERNAL_ERRORS } from "../util/constants";
 import { AsyncLogModel } from "../models/AsyncLog";
-import { logInClickhouse } from "../db/ClickhouseStore";
 import { RequestResponseStore } from "../db/RequestResponseStore";
 import {
   anthropicAIStream,
@@ -639,78 +642,50 @@ export class DBLoggable {
       return err(`Auth failed! ${error}` ?? "Helicone organization not found");
     }
 
-    const rateLimiter = await db.dbWrapper.getRateLimiter();
-    if (rateLimiter.error !== null) {
-      return rateLimiter;
-    }
-
     const org = await db.dbWrapper.getOrganization();
 
     if (org.error !== null) {
       return err(org.error);
     }
-    const tier = org.data?.tier;
 
-    if (org.data.percentLog !== 100_000) {
-      const random = Math.random() * 100_000;
-      console.log(
-        `NOT LOGGING FOR ORG ID: ${authParams.organizationId} ${random} ${org.data.percentLog}`
-      );
-      if (random > org.data.percentLog) {
-        return ok(null);
-      }
+    let requestBody: any;
+    let responseBody: any;
+
+    try {
+      requestBody = JSON.parse(this.request.bodyText ?? "{}");
+    } catch (e) {
+      console.error("Error parsing request body", e);
     }
 
-    const rateLimit = await rateLimiter.data.checkRateLimit(tier);
-
-    if (rateLimit.error) {
-      console.error(`Error checking rate limit: ${rateLimit.error}`);
+    try {
+      responseBody = JSON.parse((await this.response.getResponseBody()).body);
+    } catch (e) {
+      console.error("Error parsing response body", e);
     }
 
-    if (!rateLimit.error && rateLimit.data?.isRateLimited) {
-      await db.clickhouse.dbInsertClickhouse("rate_limit_log", [
-        {
-          organization_id: authParams.organizationId,
-        },
-      ]);
-      return err("Rate limited");
-    }
+    const requestModel = getModelFromRequest(requestBody, this.request.path);
+    const responseModel = getModelFromResponse(responseBody);
 
-    const requestResult = await logRequest(
-      this.request,
-      this.response.responseId,
-      db.supabase,
-      db.queue,
-      authParams
-    );
-
-    // If no data or error, return
-    if (!requestResult.data || requestResult.error) {
-      return requestResult;
-    }
-    const responseResult = await this.readAndLogResponse(
-      db.queue,
-      requestResult.data.request.model
-    );
     const model =
-      requestResult?.data?.request?.model_override ??
-      responseResult?.data?.response?.model ??
-      requestResult?.data?.request?.model ??
+      this.request.modelOverride ??
+      responseModel ??
+      requestModel ??
       "not-found";
 
-    let assets: Map<string, string> = new Map();
-
-    if (requestResult?.data?.requestAssets) {
-      assets = new Map([...assets, ...requestResult.data.requestAssets]);
-    }
-
-    if (responseResult?.data?.responseAssets) {
-      assets = new Map([...assets, ...responseResult.data.responseAssets]);
-    }
+    // private response: DBLoggableProps["response"];
+    // private request: DBLoggableProps["request"];
+    // private timing: DBLoggableProps["timing"];
+    // private provider: Provider;
+    // private tokenCalcUrl: string;
+    // const model =
+    //   requestResult?.data?.request?.model_override ??
+    //   responseResult?.data?.response?.model ??
+    //   requestResult?.data?.request?.model ??
+    //   "not-found";
 
     let s3Result: Result<string, string>;
     // If no data or error, return
-    if (!responseResult.data || responseResult.error) {
+    if (response) {
       // Log the error in S3
       if (S3_ENABLED === "true") {
         if (model && isImageModel(model)) {
@@ -774,27 +749,27 @@ export class DBLoggable {
       }
     }
 
-    await logInClickhouse(
-      requestResult.data.request,
-      responseResult.data.response,
-      requestResult.data.properties,
-      requestResult.data.node,
-      db.clickhouse
-    );
+    // await logInClickhouse(
+    //   requestResult.data.request,
+    //   responseResult.data.response,
+    //   requestResult.data.properties,
+    //   requestResult.data.node,
+    //   db.clickhouse
+    // );
 
-    // TODO We should probably move the webhook stuff out of dbLogger
-    const { error: webhookError } = await this.sendToWebhooks(db.supabase, {
-      request: requestResult.data,
-      response: responseResult.data.response,
-    });
+    // // TODO We should probably move the webhook stuff out of dbLogger
+    // const { error: webhookError } = await this.sendToWebhooks(db.supabase, {
+    //   request: requestResult.data,
+    //   response: responseResult.data.response,
+    // });
 
-    if (webhookError !== null) {
-      console.error("Error sending to webhooks", webhookError);
-      return {
-        data: null,
-        error: webhookError,
-      };
-    }
+    // if (webhookError !== null) {
+    //   console.error("Error sending to webhooks", webhookError);
+    //   return {
+    //     data: null,
+    //     error: webhookError,
+    //   };
+    // }
 
     if (this.request.heliconeTemplate && this.request.promptId) {
       const assets = requestResult.data.requestAssets;
@@ -1116,22 +1091,5 @@ export async function logRequest(
     };
   } catch (e) {
     return { data: null, error: JSON.stringify(e) };
-  }
-
-  function getModelFromPath(path: string) {
-    const regex1 = /\/engines\/([^/]+)/;
-    const regex2 = /models\/([^/:]+)/;
-
-    let match = path.match(regex1);
-
-    if (!match) {
-      match = path.match(regex2);
-    }
-
-    if (match && match[1]) {
-      return match[1];
-    } else {
-      return undefined;
-    }
   }
 }
