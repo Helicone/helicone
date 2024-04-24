@@ -482,6 +482,7 @@ Json: JsonObject;
       datasetId: string;
       promptVersion: string;
       model: string;
+      providerKeyId: string;
     };
     Experiment: {
       id: string;
@@ -499,6 +500,7 @@ Json: JsonObject;
               resultRequestId: string;
               datasetRowId: string;
             }[];
+          providerKey: string;
           createdAt: string;
           status: string;
           model: string;

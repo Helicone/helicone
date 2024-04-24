@@ -1575,12 +1575,16 @@
 					},
 					"model": {
 						"type": "string"
+					},
+					"providerKeyId": {
+						"type": "string"
 					}
 				},
 				"required": [
 					"datasetId",
 					"promptVersion",
-					"model"
+					"model",
+					"providerKeyId"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1648,6 +1652,9 @@
 									},
 									"type": "array"
 								},
+								"providerKey": {
+									"type": "string"
+								},
 								"createdAt": {
 									"type": "string"
 								},
@@ -1666,6 +1673,7 @@
 							},
 							"required": [
 								"runs",
+								"providerKey",
 								"createdAt",
 								"status",
 								"model",

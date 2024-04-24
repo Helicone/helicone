@@ -9,6 +9,7 @@ import {
   usePromptVersions,
   usePrompts,
 } from "../services/hooks/prompts/prompts";
+import ProviderKeyList from "../components/templates/enterprise/portal/id/providerKeyList";
 
 interface AlertProps {
   user: User;
@@ -38,6 +39,8 @@ const Alert = (props: AlertProps) => {
     }
   }, [promptVersions.prompts?.[0].id]);
 
+  const [providerKey, setProviderKey] = useState<string>("");
+
   const jawn = useJawnClient();
   return (
     <>
@@ -61,6 +64,12 @@ const Alert = (props: AlertProps) => {
           onChange={(e) =>
             setPromptVersionId(e.target.value === "" ? "" : e.target.value)
           }
+        />
+        <ProviderKeyList
+          setProviderKeyCallback={(providerKey) => {
+            console.log(providerKey);
+            setProviderKey(providerKey);
+          }}
         />
         <button
           className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
@@ -118,6 +127,7 @@ const Alert = (props: AlertProps) => {
                 datasetId: dataset.data?.data?.datasetId!,
                 model: "gpt-3.5-turbo",
                 promptVersion: newSubVersion.data?.data?.id!,
+                providerKeyId: providerKey,
               },
             });
           }}

@@ -49,11 +49,18 @@ export class ExperimentManager extends BaseManager {
         prompt_version,
         model,
         status,
-        experiment_v2
+        experiment_v2,
+        provider_key
       )
-      VALUES ($1, $2, $3, $4)
+      VALUES ($1, $2, $3, $4, $5)
       `,
-      [params.promptVersion, params.model, "PENDING", experiment.data.id]
+      [
+        params.promptVersion,
+        params.model,
+        "PENDING",
+        experiment.data.id,
+        params.providerKeyId,
+      ]
     );
 
     if (result.error) {

@@ -24,6 +24,7 @@ export interface NewExperimentParams {
   datasetId: string;
   promptVersion: string;
   model: string;
+  providerKeyId: string;
 }
 
 export interface ExperimentRun {}
@@ -45,6 +46,7 @@ export interface Experiment {
     model: string;
     status: string;
     createdAt: string;
+    providerKey: string;
     runs: {
       datasetRowId: string;
       resultRequestId: string;
