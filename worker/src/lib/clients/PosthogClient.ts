@@ -23,17 +23,13 @@ export class PosthogClient {
     });
 
     try {
-      const response = await fetch(url, {
+      await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: body,
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
     } catch (error: any) {
       console.error(`Error capturing PostHog event: ${error.message}`);
     }
