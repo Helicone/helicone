@@ -51,7 +51,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
 
     context.usage = processedResponseBody.data?.usage ?? {};
 
-    return super.handle(context);
+    return await super.handle(context);
   }
 
   async processBody(

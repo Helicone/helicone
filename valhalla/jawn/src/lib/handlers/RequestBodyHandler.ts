@@ -14,7 +14,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
 
     context.processedLog.request.body = processedBody.data;
 
-    await super.handle(context);
+    return await super.handle(context);
   }
 
   processRequestBody(context: HandlerContext): GenericResult<any> {

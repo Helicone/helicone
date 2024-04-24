@@ -25,9 +25,10 @@ export class RateLimitHandler extends AbstractLogHandler {
         organization_id: context.orgParams?.id || "",
         created_at: context.message.log.request.requestCreatedAt.toISOString(),
       });
+      return;
       // Do not continue to the next handler if rate limited
     } else {
-      await super.handle(context);
+      return await super.handle(context);
     }
   }
 
