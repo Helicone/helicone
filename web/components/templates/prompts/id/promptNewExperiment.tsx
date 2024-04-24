@@ -188,40 +188,16 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
         maxTokens={256}
         submitText={"Save Changes"}
         onSubmit={(chat) => {
-          console.log("chat", chat);
           setCurrentChat(chat);
         }}
-        customNavBar={
-          <div
-            id="step-inc"
-            className="mt-4 w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-gray-900"
-          >
-            <HcButton
-              variant={"secondary"}
-              size={"sm"}
-              title={"Back"}
-              onClick={() => {
-                if (currentStep === 0) {
-                  // dont do anything
-                } else {
-                  setCurrentStep(currentStep - 1);
-                }
-              }}
-            />
-            <HcButton
-              variant={"primary"}
-              size={"sm"}
-              title={"Continue"}
-              onClick={() => {
-                if (currentStep === renderStepArray.length - 1) {
-                  // submit experiment
-                } else {
-                  setCurrentStep(currentStep + 1);
-                }
-              }}
-            />
-          </div>
-        }
+        customNavBar={{
+          onBack: () => {
+            setCurrentStep(0);
+          },
+          onContinue: () => {
+            setCurrentStep(2);
+          },
+        }}
       />
     </>,
     <>
