@@ -133,9 +133,14 @@ export const ServerExperimentStore: {
     include?: IncludeExperimentKeys
   ) => Promise<Result<Experiment, string>>;
   getExperiment: (id: string) => Promise<Result<Experiment, string>>;
-  popLatestExperiment: (
-    include?: IncludeExperimentKeys
-  ) => Promise<Result<string, string>>;
+  popLatestExperiment: (include?: IncludeExperimentKeys) => Promise<
+    Result<
+      {
+        experimentId?: string;
+      },
+      string
+    >
+  >;
 } = {
   experimentPop: async () => {
     const { data: experimentId, error: experimentIdError } =
@@ -145,11 +150,12 @@ export const ServerExperimentStore: {
       return err(experimentIdError);
     }
 
-    if (!experimentId) {
+    console.log("experimentId", experimentId);
+    if (!experimentId?.experimentId) {
       return err("No experiment found");
     }
 
-    return await ServerExperimentStore.getExperiment(experimentId!);
+    return await ServerExperimentStore.getExperiment(experimentId.experimentId);
   },
   getExperiment: async (id: string, include?: IncludeExperimentKeys) => {
     return resultMap(
@@ -163,27 +169,32 @@ export const ServerExperimentStore: {
   popLatestExperiment: async () => {
     return resultMap(
       await dbExecute<{
-        experimentId: string;
+        experiment_id?: string;
       }>(
         `
-    WITH selected_experiment AS (
-      SELECT id
-      FROM experiment_v2
-      AND status = 'PENDING'
-      ORDER BY created_at ASC
-      LIMIT 1
-    ), updated_experiment AS (
-      UPDATE experiment_v2
-      SET status = 'RUNNING'
-      WHERE id IN (SELECT id FROM selected_experiment)
-      RETURNING id
-    )
-    SELECT id as experimentId
-    FROM updated_experiment
+      WITH selected_experiment AS (
+          SELECT experiment_v2
+          FROM experiment_v2_hypothesis
+          WHERE status = 'PENDING'
+          ORDER BY created_at ASC
+          LIMIT 1
+      ), updated_experiment_hypothesis AS (
+          UPDATE experiment_v2_hypothesis
+          SET status = 'RUNNING'
+          WHERE experiment_v2 IN (SELECT experiment_v2 FROM selected_experiment)
+          RETURNING experiment_v2
+      )
+      SELECT experiment_v2 as experiment_id
+      FROM updated_experiment_hypothesis
+      LIMIT 1;      
     `,
         []
       ),
-      (d) => d[0].experimentId
+      (d) => {
+        return {
+          experimentId: d[0].experiment_id,
+        };
+      }
     );
   },
 };

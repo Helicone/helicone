@@ -50,11 +50,22 @@ async function runHypothesis(
     headers["Helicone-OpenAI-API-Base"] = fetchUrl.origin;
     headers["api-key"] = process.env.AZURE_API_KEY;
   }
+
+  console.log(
+    "fetching",
+    fetchUrl,
+    "with headers",
+    headers,
+    "and body",
+    newRequestBody
+  );
   const response = await fetch(fetchUrl, {
     method: "POST",
     headers: headers,
     body: JSON.stringify(newRequestBody),
   });
+
+  console.log("response", response);
   // wait 1 seconds for the request to be processed
   await new Promise((resolve) => setTimeout(resolve, 1000));
   const putResultInDataset = await supabaseServer.client
@@ -74,11 +85,18 @@ export async function run(
   experiment: Experiment
 ): Promise<Result<string, string>> {
   for (const hypothesis of experiment.hypotheses) {
+    console.log("running hypothesis", hypothesis.id);
     const proxyKey = await generateProxyKey(
       hypothesis.providerKey,
       "helicone-experiment" + uuid()
     );
     await proxyKey.data?.with(async (proxyKey) => {
+      console.log(
+        "running hypothesis",
+        hypothesis.id,
+        "with proxy key",
+        proxyKey
+      );
       for (const data of experiment.dataset.rows) {
         await runHypothesis(hypothesis, proxyKey, data);
       }
