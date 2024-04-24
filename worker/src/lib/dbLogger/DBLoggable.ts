@@ -908,8 +908,6 @@ export class DBLoggable {
   }
 }
 
-const MAX_USER_ID_LENGTH = 7000;
-
 // Replaces all the image_url that is not a url or not { url: url }  with
 // { unsupported_image: true }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
