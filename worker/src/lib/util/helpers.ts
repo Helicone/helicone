@@ -65,3 +65,52 @@ async function concatUint8Arrays(
   const buffer = await blob.arrayBuffer();
   return new Uint8Array(buffer);
 }
+
+export function getModelFromRequest(requestBody: string, path: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (requestBody && (requestBody as any).model) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (requestBody as any).model;
+  }
+
+  const modelFromPath = getModelFromPath(path);
+  if (modelFromPath) {
+    return modelFromPath;
+  }
+
+  return null;
+}
+
+export function getModelFromPath(path: string) {
+  const regex1 = /\/engines\/([^/]+)/;
+  const regex2 = /models\/([^/:]+)/;
+
+  let match = path.match(regex1);
+
+  if (!match) {
+    match = path.match(regex2);
+  }
+
+  if (match && match[1]) {
+    return match[1];
+  } else {
+    return undefined;
+  }
+}
+
+export function getModelFromResponse(responseBody: any) {
+  try {
+    if (typeof responseBody !== "object" || !responseBody) {
+      return "unknown";
+    }
+    if (Array.isArray(responseBody)) {
+      return "unknown";
+    }
+
+    return (
+      responseBody["model"] || (responseBody.body as any)["model"] || "unknown"
+    );
+  } catch (e) {
+    return "unknown";
+  }
+}
