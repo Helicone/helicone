@@ -4,7 +4,12 @@ import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { Result, err, ok } from "../../lib/shared/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { BaseManager } from "../BaseManager";
-import { Experiment, ExperimentStore } from "../../lib/stores/experimentStore";
+import {
+  Experiment,
+  ExperimentStore,
+  IncludeExperimentKeys,
+} from "../../lib/stores/experimentStore";
+import { FilterNode } from "../../lib/shared/filters/filterDefs";
 
 export class ExperimentManager extends BaseManager {
   private ExperimentStore: ExperimentStore;
@@ -13,8 +18,11 @@ export class ExperimentManager extends BaseManager {
     this.ExperimentStore = new ExperimentStore(authParams.organizationId);
   }
 
-  async getExperiments(): Promise<Result<Experiment[], string>> {
-    const result = await this.ExperimentStore.getExperiments();
+  async getExperiments(
+    filter: FilterNode,
+    include: IncludeExperimentKeys
+  ): Promise<Result<Experiment[], string>> {
+    const result = await this.ExperimentStore.getExperiments(filter, include);
     console.log(result);
     if (result.error || !result.data) {
       return err(result.error);

@@ -53,16 +53,27 @@ const useExperiments = (req: { page: number; pageSize: number }) => {
 };
 
 const useExperiment = (id: string) => {
+  const jawn = useJawnClient();
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["experiment", id],
     queryFn: async (query) => {
       const id = query.queryKey[1];
-      return await fetch(`/api/experiment/${id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
+      return jawn.POST("/v1/experiment/query", {
+        body: {
+          filter: {
+            experiment: {
+              id: {
+                equals: id,
+              },
+            },
+          },
+          include: {
+            inputs: true,
+            promptVersion: true,
+            responseBodies: true,
+          },
         },
-      }).then((res) => res.json() as Promise<Result<Experiment, string>>);
+      });
     },
     refetchOnWindowFocus: false,
   });
@@ -71,7 +82,7 @@ const useExperiment = (id: string) => {
     isLoading,
     refetch,
     isRefetching,
-    experiment: data?.data,
+    experiment: data?.data?.data?.[0],
   };
 };
 

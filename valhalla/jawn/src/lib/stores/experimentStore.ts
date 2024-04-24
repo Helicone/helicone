@@ -1,7 +1,17 @@
 import { dbExecute } from "../shared/db/dbExecute";
+import { FilterNode } from "../shared/filters/filterDefs";
+import { buildFilterPostgres } from "../shared/filters/filters";
 import { Result, err, resultMap } from "../shared/result";
 import { BaseStore } from "./baseStore";
 
+export interface ResponseObj {
+  body: any;
+  createdAt: string;
+  completionTokens: number;
+  promptTokens: number;
+  delayMs: number;
+  model: string;
+}
 export interface Experiment {
   id: string;
   dataset: {
@@ -13,6 +23,7 @@ export interface Experiment {
         requestId: string;
         requestPath: string;
         inputs: Record<string, string>;
+        response: ResponseObj;
       };
     }[];
   };
@@ -23,6 +34,9 @@ export interface Experiment {
     promptVersion?: {
       template: any;
     };
+    parentPromptVersion?: {
+      template: any;
+    };
     model: string;
     status: string;
     createdAt: string;
@@ -30,6 +44,7 @@ export interface Experiment {
     runs: {
       datasetRowId: string;
       resultRequestId: string;
+      response: ResponseObj;
     }[];
   }[];
 }
@@ -37,6 +52,7 @@ export interface Experiment {
 export interface IncludeExperimentKeys {
   inputs?: true;
   promptVersion?: true;
+  responseBodies?: true;
 }
 
 function getExperimentsQuery(
@@ -44,6 +60,21 @@ function getExperimentsQuery(
   limit?: number,
   include?: IncludeExperimentKeys
 ) {
+  const responseObjectString = (filter: string) => {
+    return `(
+      SELECT jsonb_build_object(
+        'body', response.body,
+        'createdAt', response.created_at,
+        'completionTokens', response.completion_tokens,
+        'promptTokens', response.prompt_tokens,
+        'delayMs', response.delay_ms,
+        'model', response.model
+      )
+      FROM response
+      WHERE ${filter}
+    )`;
+  };
+
   return `
         SELECT jsonb_build_object(
           'id', e.id,
@@ -52,11 +83,21 @@ function getExperimentsQuery(
               'name', ds.name,
               'rows', json_agg(
                   jsonb_build_object(
+
                     ${
                       include?.inputs
                         ? `
                     'inputRecord', (
                       SELECT jsonb_build_object(
+                        ${
+                          include?.responseBodies
+                            ? `
+                        'response', ${responseObjectString(
+                          "response.request = pir.source_request"
+                        )},
+                        `
+                            : ""
+                        }
                         'requestId', pir.source_request,
                         'requestPath', re.path,
                         'inputs', pir.inputs
@@ -90,12 +131,35 @@ function getExperimentsQuery(
                       ),`
                           : ""
                       }
+                      ${
+                        include?.promptVersion
+                          ? `
+                      'parentPromptVersion', (
+                        SELECT jsonb_build_object(
+                          'template', pv_parent.helicone_template
+                        )
+                        FROM prompts_versions pv_current
+                        JOIN prompts_versions pv_parent ON pv_parent.major_version = pv_current.major_version AND pv_parent.minor_version = 0
+                        WHERE pv_current.id = h.prompt_version
+
+                      ),`
+                          : ""
+                      }
                       'model', h.model,
                       'status', h.status,
                       'createdAt', h.created_at,
                       'runs', (
                           SELECT json_agg(
                               jsonb_build_object(
+                                  ${
+                                    include?.responseBodies
+                                      ? `
+                                  'response', ${responseObjectString(
+                                    "response.request = hr.result_request_id"
+                                  )},
+                                  `
+                                      : ""
+                                  }
                                   'datasetRowId', hr.dataset_row,
                                   'resultRequestId', hr.id
                               )
@@ -120,10 +184,21 @@ function getExperimentsQuery(
 }
 
 export class ExperimentStore extends BaseStore {
-  async getExperiments() {
+  async getExperiments(filter: FilterNode, include: IncludeExperimentKeys) {
+    const builtFilter = buildFilterPostgres({
+      filter,
+      argsAcc: [this.organizationId],
+    });
+
+    const experimentQuery = getExperimentsQuery(
+      `e.organization = $1 AND ${builtFilter.filter}`,
+      30,
+      include
+    );
+
     return await dbExecute<{
       jsonb_build_object: Experiment;
-    }>(getExperimentsQuery("e.organization = $1"), [this.organizationId]);
+    }>(experimentQuery, builtFilter.argsAcc);
   }
 }
 

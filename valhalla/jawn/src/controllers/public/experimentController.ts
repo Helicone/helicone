@@ -9,7 +9,10 @@ import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { HeliconeRequest } from "../../lib/stores/request/request";
 import { ExperimentManager } from "../../managers/experiment/ExperimentManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
-import { Experiment } from "../../lib/stores/experimentStore";
+import {
+  Experiment,
+  IncludeExperimentKeys,
+} from "../../lib/stores/experimentStore";
 
 export type ExperimentFilterBranch = {
   left: ExperimentFilterNode;
@@ -65,13 +68,17 @@ export class ExperimentController extends Controller {
   public async getExperiments(
     @Body()
     requestBody: {
-      filter: ExperimentFilterNode;
+      filter?: ExperimentFilterNode;
+      include?: IncludeExperimentKeys;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Experiment[], string>> {
     const experimentManager = new ExperimentManager(request.authParams);
 
-    const result = await experimentManager.getExperiments();
+    const result = await experimentManager.getExperiments(
+      requestBody.filter ?? "all",
+      requestBody.include ?? {}
+    );
     // const result = await promptManager.getPrompts(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);

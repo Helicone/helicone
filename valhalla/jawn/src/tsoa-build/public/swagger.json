@@ -1589,6 +1589,39 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ResponseObj": {
+				"properties": {
+					"body": {},
+					"createdAt": {
+						"type": "string"
+					},
+					"completionTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"promptTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"delayMs": {
+						"type": "number",
+						"format": "double"
+					},
+					"model": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"body",
+					"createdAt",
+					"completionTokens",
+					"promptTokens",
+					"delayMs",
+					"model"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Experiment": {
 				"properties": {
 					"id": {
@@ -1601,6 +1634,9 @@
 									"properties": {
 										"inputRecord": {
 											"properties": {
+												"response": {
+													"$ref": "#/components/schemas/ResponseObj"
+												},
 												"inputs": {
 													"$ref": "#/components/schemas/Record_string.string_"
 												},
@@ -1612,6 +1648,7 @@
 												}
 											},
 											"required": [
+												"response",
 												"inputs",
 												"requestPath",
 												"requestId"
@@ -1652,6 +1689,9 @@
 								"runs": {
 									"items": {
 										"properties": {
+											"response": {
+												"$ref": "#/components/schemas/ResponseObj"
+											},
 											"resultRequestId": {
 												"type": "string"
 											},
@@ -1660,6 +1700,7 @@
 											}
 										},
 										"required": [
+											"response",
 											"resultRequestId",
 											"datasetRowId"
 										],
@@ -1678,6 +1719,15 @@
 								},
 								"model": {
 									"type": "string"
+								},
+								"parentPromptVersion": {
+									"properties": {
+										"template": {}
+									},
+									"required": [
+										"template"
+									],
+									"type": "object"
 								},
 								"promptVersion": {
 									"properties": {
@@ -1813,6 +1863,33 @@
 					"left"
 				],
 				"type": "object"
+			},
+			"IncludeExperimentKeys": {
+				"properties": {
+					"inputs": {
+						"type": "boolean",
+						"enum": [
+							true
+						],
+						"nullable": false
+					},
+					"promptVersion": {
+						"type": "boolean",
+						"enum": [
+							true
+						],
+						"nullable": false
+					},
+					"responseBodies": {
+						"type": "boolean",
+						"enum": [
+							true
+						],
+						"nullable": false
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {
@@ -2496,13 +2573,13 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"include": {
+										"$ref": "#/components/schemas/IncludeExperimentKeys"
+									},
 									"filter": {
 										"$ref": "#/components/schemas/ExperimentFilterNode"
 									}
 								},
-								"required": [
-									"filter"
-								],
 								"type": "object"
 							}
 						}

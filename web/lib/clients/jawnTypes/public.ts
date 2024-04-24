@@ -484,11 +484,23 @@ Json: JsonObject;
       model: string;
       providerKeyId: string;
     };
+    ResponseObj: {
+      body: unknown;
+      createdAt: string;
+      /** Format: double */
+      completionTokens: number;
+      /** Format: double */
+      promptTokens: number;
+      /** Format: double */
+      delayMs: number;
+      model: string;
+    };
     Experiment: {
       id: string;
       dataset: {
         rows: {
             inputRecord?: {
+              response: components["schemas"]["ResponseObj"];
               inputs: components["schemas"]["Record_string.string_"];
               requestPath: string;
               requestId: string;
@@ -501,6 +513,7 @@ Json: JsonObject;
       createdAt: string;
       hypotheses: {
           runs: {
+              response: components["schemas"]["ResponseObj"];
               resultRequestId: string;
               datasetRowId: string;
             }[];
@@ -508,6 +521,9 @@ Json: JsonObject;
           createdAt: string;
           status: string;
           model: string;
+          parentPromptVersion?: {
+            template: unknown;
+          };
           promptVersion?: {
             template: unknown;
           };
@@ -537,6 +553,14 @@ Json: JsonObject;
       /** @enum {string} */
       operator: "or" | "and";
       left: components["schemas"]["ExperimentFilterNode"];
+    };
+    IncludeExperimentKeys: {
+      /** @enum {boolean} */
+      inputs?: true;
+      /** @enum {boolean} */
+      promptVersion?: true;
+      /** @enum {boolean} */
+      responseBodies?: true;
     };
   };
   responses: {
@@ -824,7 +848,8 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          filter: components["schemas"]["ExperimentFilterNode"];
+          include?: components["schemas"]["IncludeExperimentKeys"];
+          filter?: components["schemas"]["ExperimentFilterNode"];
         };
       };
     };

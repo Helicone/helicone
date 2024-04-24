@@ -148,8 +148,8 @@ const whereKeyMappings: KeyMappings = {
     prompt_v2: "prompts_versions.prompt_v2",
   }),
   experiment: easyKeyMappings<"experiment">({
-    id: "experiment.id",
-    prompt_v2: "experiment.prompt_v2",
+    id: "e.id",
+    prompt_v2: "e.prompt_v2",
   }),
   response: easyKeyMappings<"response">({
     body_completion:
