@@ -88,4 +88,5 @@ export function resultsAll<T extends Result<any, any>[]>(
   return ok(data as AllSuccessTuple<T>);
 }
 
+export type GenericResult<T> = Result<T, string>;
 export type PromiseGenericResult<T> = Promise<Result<T, string>>;
