@@ -67,6 +67,29 @@ def fixJsonType(fileString: str) -> str:
 
 def main():
 
+    os.system(
+        "find src/controllers -type f -print0 | sort -z | xargs -0 sha256sum | awk '{print $1}' > /tmp/.helicone_jawn_controller_dir_hash")
+
+    tmp_controller_hash = ""
+
+    with open("/tmp/.helicone_jawn_controller_dir_hash", "r") as file:
+        tmp_controller_hash = file.read()
+
+    controller_hash = ""
+
+    with open(".controller_dir_hash", "r") as file:
+        controller_hash = file.read()
+
+    if controller_hash == tmp_controller_hash:
+        print("No changes in the controller directory, not generating types.")
+        return
+    else:
+        print("Changes detected in the controller directory, generating types.")
+        with open(".controller_dir_hash", "w") as file:
+            file.write(tmp_controller_hash)
+
+    os.system("bash tsoa_run.sh")
+
     # Read the content of the TypeScript file
     current_dir = os.path.dirname(os.path.realpath(__file__))
 
