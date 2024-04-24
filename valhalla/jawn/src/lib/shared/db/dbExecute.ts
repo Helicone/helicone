@@ -1,6 +1,5 @@
 import { Client } from "pg";
 import { Result } from "../result";
-import { createClient as clickhouseCreateClient } from "@clickhouse/client";
 import { clickhouseDb } from "../../db/ClickhouseWrapper";
 
 export function paramsToValues(params: (number | string | boolean | Date)[]) {

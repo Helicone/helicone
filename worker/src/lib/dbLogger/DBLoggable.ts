@@ -908,8 +908,6 @@ export class DBLoggable {
   }
 }
 
-const MAX_USER_ID_LENGTH = 7000;
-
 // Replaces all the image_url that is not a url or not { url: url }  with
 // { unsupported_image: true }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -987,13 +985,6 @@ export async function logRequest(
       requestBody = JSON.parse(bodyText ?? "{}");
     } catch (e) {
       console.error("Error parsing request body", e);
-    }
-
-    let truncatedUserId = request.userId ?? "";
-
-    if (truncatedUserId.length > MAX_USER_ID_LENGTH) {
-      truncatedUserId =
-        truncatedUserId.substring(0, MAX_USER_ID_LENGTH) + "...";
     }
 
     const jobNode = request.nodeId
