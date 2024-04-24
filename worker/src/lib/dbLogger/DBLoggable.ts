@@ -550,7 +550,13 @@ export class DBLoggable {
           .eq("webhook_id", webhook.id)
       ).data ?? [];
 
-    const shouldSend = webhook.destination.includes("helicone-scoring-webhook");
+    const shouldSend =
+      webhook.destination.includes("helicone-scoring-webhook") ||
+      subscriptions
+        .map((subscription) => {
+          return subscription.event === "beta";
+        })
+        .filter((x) => x).length > 0;
 
     if (shouldSend) {
       console.log("SENDING", webhook.destination, payload.request?.request.id);
@@ -567,28 +573,6 @@ export class DBLoggable {
       });
     }
 
-    const shouldScore = webhook.destination.includes(
-      "helicone-scoring-webhook"
-    );
-
-    if (shouldScore) {
-      console.log(
-        "SENDING SCORE REQUEST",
-        webhook.destination,
-        payload.request?.request.id
-      );
-      await fetch(webhook.destination, {
-        method: "POST",
-        body: JSON.stringify({
-          request_id: payload.request?.request.id,
-          organization_id: payload.request?.request.helicone_org_id,
-          request_body: payload.request?.request.body,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    }
     return {
       data: undefined,
       error: null,
