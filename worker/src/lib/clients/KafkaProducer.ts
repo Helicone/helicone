@@ -60,7 +60,7 @@ export class KafkaProducer {
     try {
       await producer.connect();
       return await producer.send({
-        topic: "helicone-logs",
+        topic: "request-response-log-prod",
         compression: CompressionTypes.GZIP,
         messages: [
           {
