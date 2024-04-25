@@ -277,22 +277,22 @@ export type Database = {
       }
       experiment_dataset_v2_row: {
         Row: {
-          created_at: string
-          dataset_id: string
+          created_at: string | null
+          dataset_id: string | null
           id: string
-          input_record: string
+          input_record: string | null
         }
         Insert: {
-          created_at?: string
-          dataset_id: string
+          created_at?: string | null
+          dataset_id?: string | null
           id?: string
-          input_record: string
+          input_record?: string | null
         }
         Update: {
-          created_at?: string
-          dataset_id?: string
+          created_at?: string | null
+          dataset_id?: string | null
           id?: string
-          input_record?: string
+          input_record?: string | null
         }
         Relationships: [
           {
@@ -300,13 +300,6 @@ export type Database = {
             columns: ["dataset_id"]
             isOneToOne: false
             referencedRelation: "experiment_dataset_v2"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_experiment_dataset_v2_row_input_record_fkey"
-            columns: ["input_record"]
-            isOneToOne: false
-            referencedRelation: "prompt_input_record"
             referencedColumns: ["id"]
           },
         ]
@@ -393,7 +386,6 @@ export type Database = {
           id: string
           model: string
           prompt_version: string
-          provider_key: string
           status: string
         }
         Insert: {
@@ -402,7 +394,6 @@ export type Database = {
           id?: string
           model: string
           prompt_version: string
-          provider_key: string
           status: string
         }
         Update: {
@@ -411,7 +402,6 @@ export type Database = {
           id?: string
           model?: string
           prompt_version?: string
-          provider_key?: string
           status?: string
         }
         Relationships: [
@@ -427,20 +417,6 @@ export type Database = {
             columns: ["prompt_version"]
             isOneToOne: false
             referencedRelation: "prompts_versions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_experiment_v2_hypothesis_provider_key_fkey"
-            columns: ["provider_key"]
-            isOneToOne: false
-            referencedRelation: "decrypted_provider_keys"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_experiment_v2_hypothesis_provider_key_fkey"
-            columns: ["provider_key"]
-            isOneToOne: false
-            referencedRelation: "provider_keys"
             referencedColumns: ["id"]
           },
         ]
@@ -2502,101 +2478,6 @@ export type Database = {
           },
         ]
       }
-      s3_multipart_uploads: {
-        Row: {
-          bucket_id: string
-          created_at: string
-          id: string
-          in_progress_size: number
-          key: string
-          owner_id: string | null
-          upload_signature: string
-          version: string
-        }
-        Insert: {
-          bucket_id: string
-          created_at?: string
-          id: string
-          in_progress_size?: number
-          key: string
-          owner_id?: string | null
-          upload_signature: string
-          version: string
-        }
-        Update: {
-          bucket_id?: string
-          created_at?: string
-          id?: string
-          in_progress_size?: number
-          key?: string
-          owner_id?: string | null
-          upload_signature?: string
-          version?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "s3_multipart_uploads_bucket_id_fkey"
-            columns: ["bucket_id"]
-            isOneToOne: false
-            referencedRelation: "buckets"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      s3_multipart_uploads_parts: {
-        Row: {
-          bucket_id: string
-          created_at: string
-          etag: string
-          id: string
-          key: string
-          owner_id: string | null
-          part_number: number
-          size: number
-          upload_id: string
-          version: string
-        }
-        Insert: {
-          bucket_id: string
-          created_at?: string
-          etag: string
-          id?: string
-          key: string
-          owner_id?: string | null
-          part_number: number
-          size?: number
-          upload_id: string
-          version: string
-        }
-        Update: {
-          bucket_id?: string
-          created_at?: string
-          etag?: string
-          id?: string
-          key?: string
-          owner_id?: string | null
-          part_number?: number
-          size?: number
-          upload_id?: string
-          version?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "s3_multipart_uploads_parts_bucket_id_fkey"
-            columns: ["bucket_id"]
-            isOneToOne: false
-            referencedRelation: "buckets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "s3_multipart_uploads_parts_upload_id_fkey"
-            columns: ["upload_id"]
-            isOneToOne: false
-            referencedRelation: "s3_multipart_uploads"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never
@@ -2634,37 +2515,6 @@ export type Database = {
         Returns: {
           size: number
           bucket_id: string
-        }[]
-      }
-      list_multipart_uploads_with_delimiter: {
-        Args: {
-          bucket_id: string
-          prefix_param: string
-          delimiter_param: string
-          max_keys?: number
-          next_key_token?: string
-          next_upload_token?: string
-        }
-        Returns: {
-          key: string
-          id: string
-          created_at: string
-        }[]
-      }
-      list_objects_with_delimiter: {
-        Args: {
-          bucket_id: string
-          prefix_param: string
-          delimiter_param: string
-          max_keys?: number
-          start_after?: string
-          next_token?: string
-        }
-        Returns: {
-          name: string
-          id: string
-          metadata: Json
-          updated_at: string
         }[]
       }
       search: {
