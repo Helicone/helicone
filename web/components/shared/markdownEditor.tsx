@@ -3,6 +3,7 @@ import Editor from "react-simple-code-editor";
 import { highlight, languages } from "prismjs";
 import "prismjs/components/prism-markdown";
 import "prismjs/components/prism-markup-templating";
+import "prismjs/themes/prism.css";
 
 interface MarkdownEditorProps {
   text: string;

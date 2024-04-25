@@ -9,7 +9,7 @@ import "../styles/globals.css";
 import "../styles/index.css";
 import "../node_modules/react-grid-layout/css/styles.css";
 import "../node_modules/react-resizable/css/styles.css";
-import "prismjs/themes/prism.css";
+
 import posthog from "posthog-js";
 import { OrgContextProvider } from "../components/layout/organizationContext";
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
