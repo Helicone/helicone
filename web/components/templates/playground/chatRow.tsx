@@ -18,6 +18,7 @@ import { Tooltip } from "@mui/material";
 import { enforceString } from "../../../lib/helpers/typeEnforcers";
 import AddFileButton from "./new/addFileButton";
 import ThemedModal from "../../shared/themed/themedModal";
+import MarkdownEditor from "../../shared/markdownEditor";
 
 interface ChatRowProps {
   index: number;
@@ -426,28 +427,25 @@ const ChatRow = (props: ChatRowProps) => {
           <div>
             <div className="w-full px-8 pb-4">
               {isEditing ? (
-                <span className="w-full">
-                  <ResizeTextArea
-                    value={contentAsString || ""}
-                    onChange={(e) => {
-                      const newMessages = { ...currentMessage };
-                      const messageContent = newMessages.content;
-                      if (Array.isArray(messageContent)) {
-                        const textMessage = messageContent.find(
-                          (element) => element.type === "text"
-                        );
-                        textMessage.text = e.target.value;
-                      } else {
-                        newMessages.content = e.target.value;
-                      }
+                <MarkdownEditor
+                  text={contentAsString || ""}
+                  setText={function (text: string): void {
+                    const newMessages = { ...currentMessage };
+                    const messageContent = newMessages.content;
+                    if (Array.isArray(messageContent)) {
+                      const textMessage = messageContent.find(
+                        (element) => element.type === "text"
+                      );
+                      textMessage.text = text;
+                    } else {
+                      newMessages.content = text;
+                    }
 
-                      setCurrentMessage(newMessages);
-                      callback((contentAsString as string) || "", role, file);
-                    }}
-                  />
-                </span>
+                    setCurrentMessage(newMessages);
+                    callback(text, role, file);
+                  }}
+                />
               ) : (
-                // TODO: render this in markdown
                 <>{getContent(currentMessage.content as string, minimize)}</>
               )}
             </div>

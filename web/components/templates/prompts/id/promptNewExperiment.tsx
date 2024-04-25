@@ -22,6 +22,7 @@ import ModelPill from "../../requestsV2/modelPill";
 import SelectRandomDataset from "./selectRandomDataset";
 import useNotification from "../../../shared/notification/useNotification";
 import { useRouter } from "next/router";
+import MarkdownEditor from "../../../shared/markdownEditor";
 
 interface PromptIdPageProps {
   id: string;
@@ -70,6 +71,11 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
       b.major_version - a.major_version || b.minor_version - a.minor_version
   );
 
+  // find the most major version. major versions have a 0 minor version
+  const latestMajorVersion = sortedPrompts?.find(
+    (prompt) => prompt.minor_version === 0
+  );
+
   const [datasets, setDatasets] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const selectedDataset = datasets.find(
@@ -111,6 +117,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
               </Select>
             </div>
           </div>
+
           <ul className="divide-y divide-gray-300 dark:divide-gray-700">
             {sortedPrompts
               ?.filter((prompt) => {
@@ -160,10 +167,16 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                         {index === 0 && (
                           <HcBadge title={"Latest"} size={"sm"} />
                         )}
+                        {latestMajorVersion?.major_version ===
+                          prompt.major_version &&
+                          prompt.minor_version === 0 && (
+                            <HcBadge title={"Production"} size={"sm"} />
+                          )}
                       </div>
-                      <div className="text-sm text-gray-500">
-                        created on 03-29-2024
-                      </div>
+                      {/* TODO: add the version created at */}
+                      {/* <div className="text-sm text-gray-500">
+                        created on {prompt.}
+                      </div> */}
                     </div>
                     <div className="w-full border border-gray-300 dark:border-gray-700 border-dashed p-4 bg-gray-100 rounded-lg text-sm whitespace-pre-wrap">
                       <RenderWithPrettyInputKeys
