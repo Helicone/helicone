@@ -78,6 +78,7 @@ jobs:
 
           if git status | grep "database.types.ts"; then
               git --no-pager diff -- ./**/database.types.ts
+              git diff
               echo "Detected uncommitted changes after build in web/supabase/database.types.ts. See status below:"
               git diff
               exit 1
