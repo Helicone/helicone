@@ -558,9 +558,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
               <div className="w-full pointer-events-auto flex items-center justify-center gap-x-6 bg-red-500 shadow-md py-2.5 px-6 sm:py-3 sm:pr-3.5 sm:pl-4">
                 <ExclamationCircleIcon className="h-6 w-6 text-white" />
                 <p className="text-white font-semibold">
-                  We are currently experiencing issues with our servers. We are
-                  working on getting the /request page back up and running. We
-                  apologize for the inconvenience.
+                  We are currently experiencing issues with our servers. We
+                  apologize for the inconvenience - we are still logging
+                  requests and are working to resolve the issue as soon as
+                  possible.
                 </p>
               </div>
             </div>
