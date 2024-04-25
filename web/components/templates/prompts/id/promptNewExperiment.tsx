@@ -1,18 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   usePrompt,
   usePromptVersions,
 } from "../../../../services/hooks/prompts/prompts";
 
-import { useOrg } from "../../../layout/organizationContext";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
 import StepActions from "../../../shared/stepActions";
 import HcButton from "../../../ui/hcButton";
-import { Select, SelectItem, Switch } from "@tremor/react";
+import { Select, SelectItem } from "@tremor/react";
 import HcBadge from "../../../ui/hcBadge";
 import { clsx } from "../../../shared/clsx";
-import { RenderImageWithPrettyInputKeys } from "./promptIdPage";
 import { RenderWithPrettyInputKeys } from "../../playground/chatRow";
 import ChatPlayground from "../../playground/chatPlayground";
 import { PLAYGROUND_MODELS } from "../../playground/playgroundPage";
@@ -21,10 +19,9 @@ import { PlusIcon } from "@heroicons/react/20/solid";
 import { Message } from "../../requests/chat";
 import ReactDiffViewer from "react-diff-viewer";
 import ModelPill from "../../requestsV2/modelPill";
-import ThemedModal from "../../../shared/themed/themedModal";
-import PromptPropertyCard from "./promptPropertyCard";
-import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import SelectRandomDataset from "./selectRandomDataset";
+import useNotification from "../../../shared/notification/useNotification";
+import { useRouter } from "next/router";
 
 interface PromptIdPageProps {
   id: string;
@@ -32,9 +29,11 @@ interface PromptIdPageProps {
 
 const PromptNewExperimentPage = (props: PromptIdPageProps) => {
   const { id } = props;
-  const { prompt, isLoading } = usePrompt(id);
+  const { prompt } = usePrompt(id);
   const { prompts } = usePromptVersions(id);
+  const router = useRouter();
   const jawn = useJawnClient();
+  const { setNotification } = useNotification();
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedPrompt, setSelectedPrompt] = useState<{
     id: string;
@@ -70,6 +69,24 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
     (a, b) =>
       b.major_version - a.major_version || b.minor_version - a.minor_version
   );
+
+  const [datasets, setDatasets] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const selectedDataset = datasets.find(
+    (dataset) => dataset.id === selectedDatasetId
+  );
+
+  useEffect(() => {
+    if (datasets.length === 0) {
+      jawn
+        .POST("/v1/experiment/dataset/query", {
+          body: {},
+        })
+        .then((datasets) => {
+          setDatasets(datasets.data?.data ?? []);
+        });
+    }
+  }, []);
 
   const renderStepArray = [
     <>
@@ -165,29 +182,21 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
       </div>
       <div
         id="step-inc"
-        className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+        className="w-full flex justify-end sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-gray-900"
       >
-        <HcButton
-          variant={"secondary"}
-          size={"sm"}
-          title={"Back"}
-          onClick={() => {
-            if (currentStep === 0) {
-              // dont do anything
-            } else {
-              setCurrentStep(currentStep - 1);
-            }
-          }}
-        />
         <HcButton
           variant={"primary"}
           size={"sm"}
           title={"Continue"}
           onClick={() => {
-            if (currentStep === renderStepArray.length - 1) {
-              // submit experiment
+            if (!selectedPrompt) {
+              setNotification(
+                "Please select a version to run the experiment.",
+                "error"
+              );
+              return;
             } else {
-              setCurrentStep(currentStep + 1);
+              setCurrentStep(1);
             }
           }}
         />
@@ -222,12 +231,6 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
               <div className="flex items-center space-x-2">
                 <p className="text-sm text-gray-500">New Config</p>
               </div>
-              <div className="flex items-center space-x-2">
-                <Switch />
-                <label className="text-sm text-black dark:text-white">
-                  Apply source config
-                </label>
-              </div>
             </div>
             <ul className="p-4 flex flex-col space-y-4">
               <li className="flex items-start space-x-2">
@@ -235,11 +238,13 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                   Dataset
                 </label>
                 <div className="flex w-full max-w-lg space-x-2 items-center">
-                  <Select>
-                    <SelectItem value={"gpt-3.5-turbo"}>
-                      GPT-3.5 Turbo
-                    </SelectItem>
-                    <SelectItem value={"gpt-4"}>GPT-4</SelectItem>
+                  <Select
+                    value={selectedDatasetId}
+                    onValueChange={(value) => setSelectedDatasetId(value)}
+                  >
+                    {datasets.map((dataset) => (
+                      <SelectItem value={dataset.id}>{dataset.name}</SelectItem>
+                    ))}
                   </Select>
                   <HcButton
                     variant={"secondary"}
@@ -313,11 +318,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
           size={"sm"}
           title={"Back"}
           onClick={() => {
-            if (currentStep === 0) {
-              // dont do anything
-            } else {
-              setCurrentStep(currentStep - 1);
-            }
+            setCurrentStep(1);
           }}
         />
         <HcButton
@@ -325,11 +326,14 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
           size={"sm"}
           title={"Continue"}
           onClick={() => {
-            if (currentStep === renderStepArray.length - 1) {
-              // submit experiment
-            } else {
-              setCurrentStep(currentStep + 1);
+            if (!selectedModel || !selectedDatasetId || !selectedProviderKey) {
+              setNotification(
+                "Please select a model, dataset, and provider key.",
+                "error"
+              );
+              return;
             }
+            setCurrentStep(3);
           }}
         />
       </div>
@@ -370,14 +374,14 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                 </p>
               </div>
             </div>
-            <ul className="px-4 py-8 flex flex-col space-y-8">
+            <ul className="p-4 flex flex-col space-y-4">
               <li className="flex items-center space-x-2">
                 <label className="text-sm text-black dark:text-white font-semibold w-28">
                   Dataset
                 </label>
-                <div className="flex w-full max-w-lg space-x-2 items-center">
-                  {selectedDatasetId}
-                </div>
+                <p className="flex w-full max-w-lg space-x-2 items-center text-sm">
+                  {selectedDataset?.name}
+                </p>
               </li>
               <li className="flex items-center space-x-2">
                 <label className="text-sm text-black dark:text-white font-semibold w-28">
@@ -414,23 +418,80 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
           size={"sm"}
           title={"Back"}
           onClick={() => {
-            if (currentStep === 0) {
-              // dont do anything
-            } else {
-              setCurrentStep(currentStep - 1);
-            }
+            setCurrentStep(2);
           }}
         />
         <HcButton
+          loading={isLoading}
           variant={"primary"}
           size={"sm"}
-          title={"Continue"}
-          onClick={() => {
-            if (currentStep === renderStepArray.length - 1) {
-              // submit experiment
-            } else {
-              setCurrentStep(currentStep + 1);
+          title={"Confirm and run experiment"}
+          onClick={async () => {
+            if (!selectedModel || !selectedDatasetId || !selectedProviderKey) {
+              setNotification(
+                "Please select a model, dataset, and provider key.",
+                "error"
+              );
+              return;
             }
+            setIsLoading(true);
+            // do a dummy delay for 2s
+
+            // creates a new subversion of the prompt
+            const newSubVersion = await jawn.POST(
+              "/v1/prompt/version/{promptVersionId}/subversion",
+              {
+                body: {
+                  newHeliconeTemplate: {
+                    model: selectedModel,
+                    messages: currentChat,
+                  },
+                },
+                params: {
+                  path: {
+                    promptVersionId: selectedPrompt?.id!,
+                  },
+                },
+              }
+            );
+
+            if (newSubVersion.data?.error) {
+              setIsLoading(false);
+              setNotification(
+                "Error creating subversion. Please try again.",
+                "error"
+              );
+              return;
+            }
+
+            // runs the experiment with the new dataset and new subversion
+            const res = await jawn.POST("/v1/experiment", {
+              body: {
+                datasetId: selectedDatasetId,
+                model: selectedModel,
+                promptVersion: newSubVersion.data?.data?.id!,
+                providerKeyId: selectedProviderKey,
+              },
+            });
+
+            if (res.data?.error) {
+              setIsLoading(false);
+              setNotification(
+                "Error running experiment. Please try again.",
+                "error"
+              );
+              return;
+            }
+
+            setIsLoading(false);
+            setNotification(
+              "Experiment started successfully. Redirecting you to the prompt page",
+              "success"
+            );
+            // reroute the user after 2 seconds
+            setTimeout(() => {
+              router.push(`/prompts/${id}`);
+            }, 2000);
           }}
         />
       </div>

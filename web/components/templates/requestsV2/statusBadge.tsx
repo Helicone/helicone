@@ -1,5 +1,3 @@
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
-
 interface StatusBadgeProps {
   statusType: string;
   errorCode?: number;

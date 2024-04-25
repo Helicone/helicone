@@ -1,6 +1,5 @@
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { clsx } from "./clsx";
-import { useState } from "react";
 
 interface StepActionsProps {
   currentStep: number;

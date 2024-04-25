@@ -31,7 +31,6 @@ interface ChatPlaygroundProps {
 
 const ChatPlayground = (props: ChatPlaygroundProps) => {
   const {
-    requestId,
     chat,
     models,
     temperature,
@@ -419,7 +418,12 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           <HcButton
             variant={"primary"}
             size={"sm"}
-            title={"Continue"}
+            title={
+              // if there is no changes, say "Continue without changes" else "Continue"
+              JSON.stringify(currentChat) === JSON.stringify(chat)
+                ? "Continue without changes"
+                : "Continue"
+            }
             onClick={() => {
               if (onSubmit) {
                 onSubmit(currentChat);

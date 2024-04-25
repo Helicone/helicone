@@ -3,7 +3,6 @@ import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import HcButton from "../../../ui/hcButton";
 import PromptPropertyCard from "./promptPropertyCard";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { useJawn } from "../../../../services/hooks/useJawn";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import useNotification from "../../../shared/notification/useNotification";
 

@@ -1,16 +1,5 @@
+import { BookOpenIcon, ChartBarIcon } from "@heroicons/react/24/outline";
 import {
-  BookOpenIcon,
-  ChartBarIcon,
-  DocumentTextIcon,
-  GlobeAmericasIcon,
-  ListBulletIcon,
-  PresentationChartLineIcon,
-  Squares2X2Icon,
-  VariableIcon,
-} from "@heroicons/react/24/outline";
-import {
-  MultiSelect,
-  MultiSelectItem,
   Select,
   SelectItem,
   Tab,
@@ -32,7 +21,6 @@ import HcBadge from "../../../ui/hcBadge";
 import HcButton from "../../../ui/hcButton";
 import { useRouter } from "next/router";
 import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
-import { AreaChartUsageExample, DUMMY_DATA } from "./dummyChart";
 import StyledAreaChart from "../../dashboard/styledAreaChart";
 import { SimpleTable } from "../../../shared/table/simpleTable";
 import TableFooter from "../../requestsV2/tableFooter";
@@ -41,11 +29,8 @@ import { useExperiments } from "../../../../services/hooks/prompts/experiments";
 import ModelPill from "../../requestsV2/modelPill";
 import StatusBadge from "../../requestsV2/statusBadge";
 import { getUSDateFromString } from "../../../shared/utils/utils";
-import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import { Chat } from "../../requests/chat";
-import ChatPlayground from "../../playground/chatPlayground";
 import { useInputs } from "../../../../services/hooks/prompts/inputs";
-import ThemedTabs from "../../../shared/themed/themedTabs";
 import PromptPropertyCard from "./promptPropertyCard";
 
 interface PromptIdPageProps {
