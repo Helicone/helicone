@@ -446,6 +446,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                           .map((prompt) => (
                             <SelectItem
                               value={`${prompt.major_version}.${prompt.minor_version}`}
+                              key={prompt.id}
                             >
                               {prompt.major_version}.{prompt.minor_version}
                             </SelectItem>
