@@ -65,7 +65,46 @@ def fixJsonType(fileString: str) -> str:
         file.write(updated_content)
 
 
+def quick_check():
+    os.system(
+        "find src/controllers -type f -print0 | sort -z | xargs -0 sha256sum | awk '{print $1}' > /tmp/.helicone_jawn_controller_dir_hash")
+
+    tmp_controller_hash = ""
+
+    with open("/tmp/.helicone_jawn_controller_dir_hash", "r") as file:
+        tmp_controller_hash = file.read()
+
+    controller_hash = ""
+
+    with open(".controller_dir_hash", "r") as file:
+        controller_hash = file.read()
+
+    if controller_hash == tmp_controller_hash:
+        print("No changes in the controller directory, not generating types.")
+        import time
+        time.sleep(.5)  # Wait for the nodemon server to die
+        exit(0)
+    else:
+        print("Changes detected in the controller directory, generating types.")
+        with open(".controller_dir_hash", "w") as file:
+            file.write(tmp_controller_hash)
+
+
 def main():
+    import argparse
+
+    # if --quick is passed, check if the controllers have changed
+
+    parser = argparse.ArgumentParser(
+        description='Generate TypeScript types from TSOA controllers.')
+    parser.add_argument('--quick', action='store_true',
+                        help='Quick check to see if the controllers have changed.')
+    args = parser.parse_args()
+
+    if args.quick:
+        quick_check()
+
+    os.system("bash tsoa_run.sh")
 
     # Read the content of the TypeScript file
     current_dir = os.path.dirname(os.path.realpath(__file__))
