@@ -30,6 +30,9 @@ export interface paths {
   "/v1/prompt/version/{promptVersionId}/subversion": {
     post: operations["CreateSubversion"];
   };
+  "/v1/prompt/version/{promptVersionId}/inputs/query": {
+    post: operations["GetInputs"];
+  };
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
   };
@@ -39,6 +42,9 @@ export interface paths {
   "/v1/experiment/dataset/random": {
     post: operations["AddRandomDataset"];
   };
+  "/v1/experiment/dataset/query": {
+    post: operations["GetDatasets"];
+  };
   "/v1/experiment/dataset/{datasetId}/query": {
     post: operations["GetDataset"];
   };
@@ -47,6 +53,9 @@ export interface paths {
   };
   "/v1/experiment": {
     post: operations["CreateNewExperiment"];
+  };
+  "/v1/experiment/query": {
+    post: operations["GetExperiments"];
   };
 }
 
@@ -283,6 +292,8 @@ Json: JsonObject;
     /** @enum {string} */
     SortDirection: "asc" | "desc";
     SortLeafRequest: {
+      /** @enum {boolean} */
+      random?: true;
       created_at?: components["schemas"]["SortDirection"];
       cache_created_at?: components["schemas"]["SortDirection"];
       latency?: components["schemas"]["SortDirection"];
@@ -397,12 +408,33 @@ Json: JsonObject;
     PromptCreateSubversionParams: {
       newHeliconeTemplate: unknown;
     };
+    PromptInputRecord: {
+      id: string;
+      inputs: components["schemas"]["Record_string.string_"];
+      source_request: string;
+      prompt_version: string;
+      created_at: string;
+    };
+    "ResultSuccess_PromptInputRecord-Array_": {
+      data: components["schemas"]["PromptInputRecord"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptInputRecord-Array.string_": components["schemas"]["ResultSuccess_PromptInputRecord-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_PromptVersionResult-Array_": {
       data: components["schemas"]["PromptVersionResult"][];
       /** @enum {number|null} */
       error: null;
     };
     "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__datasetId-string__": {
+      data: {
+        datasetId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__datasetId-string_.string_": components["schemas"]["ResultSuccess__datasetId-string__"] | components["schemas"]["ResultError_string_"];
     NewDatasetParams: {
       datasetName: string;
       requestIds: string[];
@@ -435,6 +467,18 @@ Json: JsonObject;
       /** Format: double */
       limit?: number;
     };
+    DatasetResult: {
+      id: string;
+      dataset_name: string;
+      request_ids: string[];
+      created_at: string;
+    };
+    "ResultSuccess_DatasetResult-Array_": {
+      data: components["schemas"]["DatasetResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_DatasetResult-Array.string_": components["schemas"]["ResultSuccess_DatasetResult-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess___-Array_": {
       data: Record<string, never>[];
       /** @enum {number|null} */
@@ -453,6 +497,85 @@ Json: JsonObject;
       datasetId: string;
       promptVersion: string;
       model: string;
+      providerKeyId: string;
+    };
+    ResponseObj: {
+      body: unknown;
+      createdAt: string;
+      /** Format: double */
+      completionTokens: number;
+      /** Format: double */
+      promptTokens: number;
+      /** Format: double */
+      delayMs: number;
+      model: string;
+    };
+    Experiment: {
+      id: string;
+      dataset: {
+        rows: {
+            inputRecord?: {
+              response: components["schemas"]["ResponseObj"];
+              inputs: components["schemas"]["Record_string.string_"];
+              requestPath: string;
+              requestId: string;
+            };
+            rowId: string;
+          }[];
+        name: string;
+        id: string;
+      };
+      createdAt: string;
+      hypotheses: {
+          runs: {
+              response: components["schemas"]["ResponseObj"];
+              resultRequestId: string;
+              datasetRowId: string;
+            }[];
+          providerKey: string;
+          createdAt: string;
+          status: string;
+          model: string;
+          parentPromptVersion?: {
+            template: unknown;
+          };
+          promptVersion?: {
+            template: unknown;
+          };
+          promptVersionId: string;
+          id: string;
+        }[];
+    };
+    "ResultSuccess_Experiment-Array_": {
+      data: components["schemas"]["Experiment"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Experiment-Array.string_": components["schemas"]["ResultSuccess_Experiment-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_ExperimentToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.experiment_": {
+      experiment?: components["schemas"]["Partial_ExperimentToOperators_"];
+    };
+    FilterLeafSubset_experiment_: components["schemas"]["Pick_FilterLeaf.experiment_"];
+    ExperimentFilterNode: components["schemas"]["FilterLeafSubset_experiment_"] | components["schemas"]["ExperimentFilterBranch"] | "all";
+    ExperimentFilterBranch: {
+      right: components["schemas"]["ExperimentFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["ExperimentFilterNode"];
+    };
+    IncludeExperimentKeys: {
+      /** @enum {boolean} */
+      inputs?: true;
+      /** @enum {boolean} */
+      promptVersion?: true;
+      /** @enum {boolean} */
+      responseBodies?: true;
     };
   };
   responses: {
@@ -614,6 +737,30 @@ export interface operations {
       };
     };
   };
+  GetInputs: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          random?: boolean;
+          /** Format: double */
+          limit: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptInputRecord-Array.string_"];
+        };
+      };
+    };
+  };
   GetPromptVersions: {
     parameters: {
       path: {
@@ -644,7 +791,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_null.string_"];
+          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
         };
       };
     };
@@ -659,7 +806,22 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_null.string_"];
+          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
+        };
+      };
+    };
+  };
+  GetDatasets: {
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_DatasetResult-Array.string_"];
         };
       };
     };
@@ -708,6 +870,24 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  GetExperiments: {
+    requestBody: {
+      content: {
+        "application/json": {
+          include?: components["schemas"]["IncludeExperimentKeys"];
+          filter?: components["schemas"]["ExperimentFilterNode"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Experiment-Array.string_"];
         };
       };
     };
