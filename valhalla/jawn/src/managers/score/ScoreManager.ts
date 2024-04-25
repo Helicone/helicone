@@ -12,12 +12,12 @@ export class ScoreManager extends BaseManager {
       const scoreKeys = Object.keys(scores);
       const scoreValues = Object.values(scores);
 
-      const { error: requestError } = await dbExecute(
+      const { data: requestData, error: requestError } = await dbExecute(
         `SELECT id FROM request WHERE id = $1 AND helicone_org_id = $2`,
         [requestId, organizationId]
       );
 
-      if (requestError) {
+      if (!requestData || requestError) {
         return err(`${requestId} not found in organization ${organizationId}`);
       }
 
@@ -40,14 +40,14 @@ export class ScoreManager extends BaseManager {
         SELECT * FROM inserted_values;
     `;
 
-      const { error } = await dbExecute(query, [
+      const { data, error } = await dbExecute(query, [
         scoreKeys,
         organizationIds,
         requestId,
         scoreValues,
       ]);
 
-      if (error) {
+      if (!data || error) {
         return err(`Error adding scores: ${error}`);
       }
 
