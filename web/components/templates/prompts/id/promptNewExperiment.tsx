@@ -60,10 +60,16 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
       created_at: string;
     }[]
   >();
+  const [searchVersion, setSearchVersion] = useState<string>("");
 
   const template = JSON.parse(
     JSON.stringify(selectedPrompt?.helicone_template ?? "")
   ).messages;
+
+  const sortedPrompts = prompts?.sort(
+    (a, b) =>
+      b.major_version - a.major_version || b.minor_version - a.minor_version
+  );
 
   const renderStepArray = [
     <>
@@ -72,7 +78,11 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
           <div className="w-full flex justify-between items-center py-2 px-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
             <div className="flex items-center space-x-2">
               <label className="text-sm text-gray-500">Version:</label>
-              <Select>
+              <Select
+                value={searchVersion}
+                onValueChange={(value) => setSearchVersion(value)}
+                enableClear={true}
+              >
                 {prompts?.map((prompt) => (
                   <SelectItem
                     value={`${prompt.major_version}.${prompt.minor_version}`}
@@ -84,13 +94,17 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
             </div>
           </div>
           <ul className="divide-y divide-gray-300 dark:divide-gray-700">
-            {prompts
-              ?.sort(
-                (a, b) =>
-                  // sort by major version first, then minor version. ex. 5.4 -> 5.3 -> 5.2 -> 4.5 -> 4.4
-                  b.major_version - a.major_version ||
-                  b.minor_version - a.minor_version
-              )
+            {sortedPrompts
+              ?.filter((prompt) => {
+                if (!searchVersion) {
+                  return true;
+                }
+                return (
+                  // filter by major version and minor version
+                  `${prompt.major_version}.${prompt.minor_version}` ===
+                  searchVersion
+                );
+              })
               .map((prompt, index) => {
                 const template = JSON.parse(
                   JSON.stringify(prompt.helicone_template)
@@ -99,7 +113,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                   <li
                     key={prompt.id}
                     className={clsx(
-                      index === prompts.length - 1 ? "rounded-b-lg" : "",
+                      index === sortedPrompts.length - 1 ? "rounded-b-lg" : "",
                       selectedPrompt?.id === prompt.id
                         ? "bg-sky-50"
                         : "bg-white",

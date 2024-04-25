@@ -404,11 +404,10 @@ const PromptIdPage = (props: PromptIdPageProps) => {
               </div>
             </TabPanel>
             <TabPanel>
-              <div className="flex items-start divide-x divide-gray-300 dark:divide-gray-700 relative">
+              <div className="flex items-start relative">
                 <div className="min-w-[25rem] w-1/3 p-4 flex flex-col space-y-4">
                   <div className="flex flex-col w-full space-y-2">
                     <div className="flex items-center space-x-2">
-                      <GlobeAmericasIcon className="h-5 w-5 text-black dark:text-white" />
                       <p className="font-semibold text-lg">Inputs</p>
                     </div>
                     <TextInput
@@ -445,7 +444,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                 <div className="p-4 flex flex-col space-y-4 w-full sticky top-4">
                   <div className="w-full flex justify-between items-center">
                     <div className="flex items-center space-x-2">
-                      <DocumentTextIcon className="h-5 w-5 text-black dark:text-white" />
                       <p className="font-semibold text-lg">Prompt</p>
                     </div>
                     <div className="flex items-center space-x-2 w-full max-w-xs">
