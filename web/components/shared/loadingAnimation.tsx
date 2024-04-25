@@ -81,7 +81,6 @@ const LoadingAnimation = (props: LoadingAnimationProps) => {
           background: "transparent",
         }}
       />
-
       {title && (
         <p className="font-medium text-lg text-gray-900 dark:text-gray-100">
           {title}

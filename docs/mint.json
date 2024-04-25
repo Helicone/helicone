@@ -164,6 +164,28 @@
         "rest/request/post-v1request-feedback",
         "rest/request/put-v1request-property"
       ]
+    },
+    {
+      "group": "Prompt",
+      "pages": [
+        "rest/prompt/post-v1promptquery",
+        "rest/prompt/post-v1prompt-query",
+        "rest/prompt/post-v1promptversion-subversion",
+        "rest/prompt/post-v1prompt-versionsquery"
+      ]
+    },
+    {
+      "group": "Dataset",
+      "pages": [
+        "rest/dataset/post-v1experimentdataset",
+        "rest/dataset/post-v1experimentdatasetrandom",
+        "rest/dataset/post-v1experimentdataset-query",
+        "rest/dataset/post-v1experimentdataset-mutate"
+      ]
+    },
+    {
+      "group": "Experiment",
+      "pages": ["rest/experiment/post-v1experiment"]
     }
   ],
   "topbarLinks": [
