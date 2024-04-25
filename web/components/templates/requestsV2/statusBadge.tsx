@@ -14,15 +14,23 @@ const StatusBadge = (props: StatusBadgeProps) => {
         </span>
       );
     case "success":
+    case "COMPLETED":
       return (
         <span className="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900 px-2 py-1 -my-1 text-xs font-medium text-green-700 dark:text-green-300 ring-1 ring-inset ring-green-600/20">
           Success
         </span>
       );
     case "pending":
+    case "PENDING":
       return (
         <span className="inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-900 px-2 py-1 -my-1 text-xs font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20">
           Pending
+        </span>
+      );
+    case "RUNNING":
+      return (
+        <span className="inline-flex items-center rounded-md bg-blue-200 dark:bg-gray-900 px-2 py-1 -my-1 text-xs font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20">
+          Running
         </span>
       );
 

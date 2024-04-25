@@ -111,6 +111,48 @@
 		"contact": {}
 	},
 	"paths": {
+		"/v1/settings": {
+			"get": {
+				"operationId": "GenerateHash",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"error": {
+											"properties": {
+												"details": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												}
+											},
+											"type": "object"
+										},
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Settings"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/key/generateHash": {
 			"post": {
 				"operationId": "GenerateHash",

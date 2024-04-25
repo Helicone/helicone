@@ -235,7 +235,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
             <ul className="p-4 flex flex-col space-y-4">
               <li className="flex items-start space-x-2">
                 <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
-                  Dataset
+                  Dataset {datasets.length}
                 </label>
                 <div className="flex w-full max-w-lg space-x-2 items-center">
                   <Select
