@@ -219,7 +219,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
     <>
       <ChatPlayground
         requestId={""}
-        chat={template}
+        chat={currentChat || template}
         models={[]}
         temperature={0.5}
         maxTokens={256}

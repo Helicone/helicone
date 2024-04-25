@@ -327,7 +327,7 @@ const ChatRow = (props: ChatRowProps) => {
     } else {
       const contentString = enforceString(content);
       return (
-        <div className="flex flex-col space-y-4">
+        <div className="flex flex-col space-y-4 whitespace-pre-wrap">
           <RenderWithPrettyInputKeys
             text={
               minimize

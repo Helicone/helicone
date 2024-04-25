@@ -455,6 +455,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   </div>
                   <Chat
                     requestBody={selectedPrompt?.helicone_template}
+                    // TODO: Justin add response body and input properties
                     responseBody={{}}
                     status={200}
                     requestId={""}
