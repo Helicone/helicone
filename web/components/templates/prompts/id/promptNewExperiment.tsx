@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   usePrompt,
   usePromptVersions,
@@ -25,6 +25,7 @@ import MarkdownEditor from "../../../shared/markdownEditor";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { Tooltip } from "@mui/material";
+import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
 
 interface PromptIdPageProps {
   id: string;
@@ -83,23 +84,18 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
   // find the latest version, which is the first element in the sorted array
   const latestVersion = sortedPrompts?.[0];
 
-  const [datasets, setDatasets] = useState<any[]>([]);
+  // const [datasets, setDatasets] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    datasets: datasets,
+    isLoading: isDataSetsLoading,
+    refetch: refetchDataSets,
+  } = useGetDataSets();
+
   const selectedDataset = datasets.find(
     (dataset) => dataset.id === selectedDatasetId
   );
-
-  useEffect(() => {
-    if (datasets.length === 0) {
-      jawn
-        .POST("/v1/experiment/dataset/query", {
-          body: {},
-        })
-        .then((datasets) => {
-          setDatasets(datasets.data?.data ?? []);
-        });
-    }
-  }, []);
 
   const renderStepArray = [
     <>
@@ -174,10 +170,6 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                           <span className="font-semibold">
                             V{prompt.major_version}.{prompt.minor_version}
                           </span>
-                          {searchVersion === undefined ||
-                            (latestVersion === prompt && (
-                              <HcBadge title={"Latest"} size={"sm"} />
-                            ))}
                           {latestMajorVersion?.major_version ===
                             prompt.major_version &&
                             prompt.minor_version === 0 && (
@@ -397,6 +389,8 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
         requestIds={requestIds}
         onSuccess={(datasetId) => {
           setSelectedDatasetId(datasetId);
+
+          refetchDataSets();
         }}
       />
     </>,

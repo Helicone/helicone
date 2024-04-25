@@ -21,7 +21,7 @@ interface SelectRandomDatasetProps {
   onSuccess?: (dataSetId: string | undefined) => void;
 }
 
-const RANDOM_SAMPLE_SIZE = 5;
+const RANDOM_SAMPLE_SIZE = 10;
 
 const SelectRandomDataset = (props: SelectRandomDatasetProps) => {
   const { open, setOpen, requestIds, onSuccess } = props;
