@@ -437,13 +437,19 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                         value={selectedVersion}
                         onValueChange={(value) => setSelectedVersion(value)}
                       >
-                        {sortedPrompts?.map((prompt) => (
-                          <SelectItem
-                            value={`${prompt.major_version}.${prompt.minor_version}`}
-                          >
-                            {prompt.major_version}.{prompt.minor_version}
-                          </SelectItem>
-                        ))}
+                        {sortedPrompts
+                          ?.sort(
+                            (a, b) =>
+                              b.major_version - a.major_version ||
+                              a.minor_version - b.minor_version
+                          )
+                          .map((prompt) => (
+                            <SelectItem
+                              value={`${prompt.major_version}.${prompt.minor_version}`}
+                            >
+                              {prompt.major_version}.{prompt.minor_version}
+                            </SelectItem>
+                          ))}
                       </Select>
                     </div>
                   </div>
