@@ -73,6 +73,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                 </Link>
                 <button
                   onClick={() => {
+                    supabaseClient.auth.refreshSession();
                     supabaseClient.auth.signOut().then(() => {
                       router.push("/");
                     });
@@ -197,6 +198,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                     {user ? (
                       <button
                         onClick={() => {
+                          supabaseClient.auth.refreshSession();
                           supabaseClient.auth.signOut().then(() => {
                             router.push("/");
                           });
