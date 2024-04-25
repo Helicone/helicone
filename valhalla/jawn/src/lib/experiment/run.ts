@@ -28,6 +28,50 @@ function placeInputValues(
   return traverseAndTransform(heliconeTemplate);
 }
 
+function prepareRequest(
+  requestPath: string,
+  proxyKey: string,
+  requestId: string
+): {
+  url: URL;
+  headers: { [key: string]: string };
+} {
+  let headers: { [key: string]: string } = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${proxyKey}`,
+    "Helicone-Request-Id": requestId,
+  };
+  let fetchUrl = requestPath;
+  if (process.env.AZURE_API_KEY) {
+    const azureAPIKey = process.env.AZURE_API_KEY ?? "";
+    const apiVersion = process.env.AZURE_API_VERSION;
+    const azureDeploymentName = process.env.AZURE_DEPLOYMENT_NAME;
+    const azureBaseUrl = process.env.AZURE_BASE_URL ?? "";
+    if (requestPath.includes("/chat/completions")) {
+      fetchUrl = `https://oai.hconeai.com/openai/deployments/${azureDeploymentName}/chat/completions?api-version=${apiVersion}`;
+    } else {
+      //otherwise let's try to extract what would've been the path
+      const url = new URL(requestPath);
+
+      const path = url.pathname;
+
+      const lastTwo = path.split("/").slice(-2);
+
+      fetchUrl = `https://oai.hconeai.com/openai/deployments/${azureDeploymentName}/${lastTwo.join(
+        "/"
+      )}?api-version=${apiVersion}`;
+    }
+
+    headers["Helicone-OpenAI-API-Base"] = azureBaseUrl;
+    headers["api-key"] = azureAPIKey;
+  }
+
+  return {
+    url: new URL(fetchUrl),
+    headers,
+  };
+}
+
 async function runHypothesis(
   hypothesis: Experiment["hypotheses"][number],
   proxyKey: string,
@@ -39,36 +83,21 @@ async function runHypothesis(
     datasetRow.inputRecord?.inputs ?? {},
     hypothesis.promptVersion?.template ?? {}
   );
-  const fetchUrl = process.env.EXPERIMENTS_HCONE_URL_OVERRIDE
-    ? new URL(process.env.EXPERIMENTS_HCONE_URL_OVERRIDE)
-    : new URL(datasetRow.inputRecord!.requestPath);
-  let headers: { [key: string]: string } = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${proxyKey}`,
-    "Helicone-Request-Id": requestId,
-  };
-  if (process.env.AZURE_API_KEY) {
-    headers["Helicone-OpenAI-API-Base"] = fetchUrl.origin;
-    headers["api-key"] = process.env.AZURE_API_KEY;
-  }
 
-  console.log(
-    "fetching",
-    fetchUrl,
-    "with headers",
-    headers,
-    "and body",
-    newRequestBody
+  const { url: fetchUrl, headers } = prepareRequest(
+    datasetRow.inputRecord!.requestPath,
+    proxyKey,
+    requestId
   );
+
   const response = await fetch(fetchUrl, {
     method: "POST",
     headers: headers,
     body: JSON.stringify(newRequestBody),
   });
 
-  console.log("response", response);
-  // wait 1 seconds for the request to be processed
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  // wait 10 seconds for the request to be processed
+  await new Promise((resolve) => setTimeout(resolve, 10_000));
   const putResultInDataset = await supabaseServer.client
     .from("experiment_v2_hypothesis_run")
     .insert({
