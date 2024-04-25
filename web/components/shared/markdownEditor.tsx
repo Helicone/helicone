@@ -7,10 +7,11 @@ import "prismjs/components/prism-markup-templating";
 interface MarkdownEditorProps {
   text: string;
   setText: (text: string) => void;
+  disabled?: boolean;
 }
 
 const MarkdownEditor = (props: MarkdownEditorProps) => {
-  const { text, setText } = props;
+  const { text, setText, disabled = false } = props;
 
   return (
     <Editor
@@ -24,6 +25,7 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
         fontFamily: '"Fira Code", "Fira Mono", monospace',
         fontSize: 12,
       }}
+      disabled={disabled}
     />
   );
 };

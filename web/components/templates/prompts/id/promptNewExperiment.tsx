@@ -23,6 +23,9 @@ import SelectRandomDataset from "./selectRandomDataset";
 import useNotification from "../../../shared/notification/useNotification";
 import { useRouter } from "next/router";
 import MarkdownEditor from "../../../shared/markdownEditor";
+import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
+import ThemedModal from "../../../shared/themed/themedModal";
+import { Tooltip } from "@mui/material";
 
 interface PromptIdPageProps {
   id: string;
@@ -61,6 +64,8 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
     }[]
   >();
   const [searchVersion, setSearchVersion] = useState<string>("");
+  const [open, setOpen] = useState(false);
+  const [selectedVersionTemplate, setSelectedVersionTemplate] = useState("");
 
   const template = JSON.parse(
     JSON.stringify(selectedPrompt?.helicone_template ?? "")
@@ -135,60 +140,78 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                   JSON.stringify(prompt.helicone_template)
                 ).messages[0].content;
                 return (
-                  <li
-                    key={prompt.id}
-                    className={clsx(
-                      index === sortedPrompts.length - 1 ? "rounded-b-lg" : "",
-                      selectedPrompt?.id === prompt.id
-                        ? "bg-sky-50"
-                        : "bg-white",
-                      "flex items-start space-x-2 gap-2  p-6"
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="selected-prompt"
-                      className="border border-gray-300 dark:border-gray-700 rounded-full p-2.5 hover:cursor-pointer"
-                      checked={selectedPrompt?.id === prompt.id}
-                      onChange={(e) => {
-                        const isChecked = e.target.checked;
-                        if (isChecked) {
-                          setSelectedPrompt(prompt);
-                        } else {
-                          setSelectedPrompt(undefined);
-                        }
-                      }}
-                    />
-                    <div className="flex flex-col space-y-1 w-1/4">
-                      <div className="flex items-center space-x-2">
-                        <span className="font-semibold">
-                          V{prompt.major_version}.{prompt.minor_version}
-                        </span>
-                        {index === 0 && (
-                          <HcBadge title={"Latest"} size={"sm"} />
-                        )}
-                        {latestMajorVersion?.major_version ===
-                          prompt.major_version &&
-                          prompt.minor_version === 0 && (
-                            <HcBadge title={"Production"} size={"sm"} />
+                  <>
+                    <li
+                      key={prompt.id}
+                      className={clsx(
+                        index === sortedPrompts.length - 1
+                          ? "rounded-b-lg"
+                          : "",
+                        selectedPrompt?.id === prompt.id
+                          ? "bg-sky-50"
+                          : "bg-white",
+                        "flex items-start space-x-2 gap-2  p-6"
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="selected-prompt"
+                        className="border border-gray-300 dark:border-gray-700 rounded-full p-2.5 hover:cursor-pointer"
+                        checked={selectedPrompt?.id === prompt.id}
+                        onChange={(e) => {
+                          const isChecked = e.target.checked;
+                          if (isChecked) {
+                            setSelectedPrompt(prompt);
+                          } else {
+                            setSelectedPrompt(undefined);
+                          }
+                        }}
+                      />
+                      <div className="flex flex-col space-y-1 w-1/4">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold">
+                            V{prompt.major_version}.{prompt.minor_version}
+                          </span>
+                          {index === 0 && (
+                            <HcBadge title={"Latest"} size={"sm"} />
                           )}
-                      </div>
-                      {/* TODO: add the version created at */}
-                      {/* <div className="text-sm text-gray-500">
+                          {latestMajorVersion?.major_version ===
+                            prompt.major_version &&
+                            prompt.minor_version === 0 && (
+                              <HcBadge title={"Production"} size={"sm"} />
+                            )}
+                        </div>
+                        {/* TODO: add the version created at */}
+                        {/* <div className="text-sm text-gray-500">
                         created on {prompt.}
                       </div> */}
-                    </div>
-                    <div className="w-full border border-gray-300 dark:border-gray-700 border-dashed p-4 bg-gray-100 rounded-lg text-sm whitespace-pre-wrap">
-                      <RenderWithPrettyInputKeys
-                        text={
-                          template.length > 200
-                            ? `${template.substring(0, 200)}...`
-                            : template
-                        }
-                        selectedProperties={undefined}
-                      />
-                    </div>
-                  </li>
+                      </div>
+                      <div className="relative w-full">
+                        <MarkdownEditor
+                          text={
+                            template.length > 200
+                              ? `${template.substring(0, 200)}...`
+                              : template
+                          }
+                          setText={() => {}}
+                          disabled={true}
+                        />
+                        {template.length > 200 && (
+                          <Tooltip title="Expand">
+                            <button
+                              onClick={() => {
+                                setSelectedVersionTemplate(template);
+                                setOpen(true);
+                              }}
+                              className="absolute top-4 right-4"
+                            >
+                              <ArrowsPointingOutIcon className="h-4 w-4 text-gray-500" />
+                            </button>
+                          </Tooltip>
+                        )}
+                      </div>
+                    </li>
+                  </>
                 );
               })}
           </ul>
@@ -215,6 +238,15 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
           }}
         />
       </div>
+      <ThemedModal open={open} setOpen={setOpen}>
+        <div className="flex flex-col w-[80vw]">
+          <MarkdownEditor
+            text={selectedVersionTemplate}
+            setText={() => {}}
+            disabled={true}
+          />
+        </div>
+      </ThemedModal>
     </>,
     <>
       <ChatPlayground
