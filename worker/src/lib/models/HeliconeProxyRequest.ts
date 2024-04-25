@@ -88,8 +88,6 @@ export class HeliconeProxyRequestMapper {
       );
       heliconePromptTemplate = templateWithInputs;
 
-      this.injectPromptInputs(templateWithInputs.inputs);
-
       this.request.heliconeHeaders.heliconeProperties[`Helicone-Prompt-Id`] =
         this.request.heliconeHeaders.promptId;
     }
@@ -124,14 +122,6 @@ export class HeliconeProxyRequestMapper {
       },
       error: null,
     };
-  }
-
-  private injectPromptInputs(inputs: Record<string, string>) {
-    Object.entries(inputs).forEach(([key, value]) => {
-      this.request.heliconeHeaders.heliconeProperties[
-        `Helicone-Prompt-Input-${key}`
-      ] = value;
-    });
   }
 
   private async getBody(): Promise<string | null> {
