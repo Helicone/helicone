@@ -62,7 +62,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
       created_at: string;
     }[]
   >();
-  const [searchVersion, setSearchVersion] = useState<string>("");
+  const [searchVersion, setSearchVersion] = useState<string>();
   const [open, setOpen] = useState(false);
   const [selectedVersionTemplate, setSelectedVersionTemplate] = useState("");
 
@@ -79,6 +79,9 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
   const latestMajorVersion = sortedPrompts?.find(
     (prompt) => prompt.minor_version === 0
   );
+
+  // find the latest version, which is the first element in the sorted array
+  const latestVersion = sortedPrompts?.[0];
 
   const [datasets, setDatasets] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -171,9 +174,10 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                           <span className="font-semibold">
                             V{prompt.major_version}.{prompt.minor_version}
                           </span>
-                          {index === 0 && (
-                            <HcBadge title={"Latest"} size={"sm"} />
-                          )}
+                          {searchVersion === undefined ||
+                            (latestVersion === prompt && (
+                              <HcBadge title={"Latest"} size={"sm"} />
+                            ))}
                           {latestMajorVersion?.major_version ===
                             prompt.major_version &&
                             prompt.minor_version === 0 && (
