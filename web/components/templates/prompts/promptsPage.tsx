@@ -18,7 +18,6 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ElementType, Fragment, useState } from "react";
-import { useExperiments } from "../../../services/hooks/prompts/experiments";
 import { usePrompts } from "../../../services/hooks/prompts/prompts";
 import { useOrg } from "../../layout/organizationContext";
 import { clsx } from "../../shared/clsx";
@@ -44,7 +43,6 @@ const PromptsPage = (props: PromptsPageProps) => {
   const { defaultIndex } = props;
 
   const { prompts } = usePrompts();
-  const { experiments } = useExperiments();
   const [currentPrompt, setCurrentPrompt] = useState<{
     id: string;
     latest_version: number;
