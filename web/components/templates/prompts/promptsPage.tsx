@@ -39,11 +39,6 @@ const tabs: {
     title: "Prompts",
     icon: DocumentTextIcon,
   },
-  {
-    id: 1,
-    title: "Experiments",
-    icon: BeakerIcon,
-  },
 ];
 
 const PromptsPage = (props: PromptsPageProps) => {
@@ -255,42 +250,6 @@ const chatCompletion = await openai.chat.completions.create(
                   ))}
                 </ul>
               )}
-            </div>
-          </TabPanel>
-          <TabPanel>
-            <div className="w-full h-full grid grid-cols-4 gap-4 py-2">
-              {experiments?.map((experiment, i) => (
-                <div
-                  key={i}
-                  className="col-span-1 bg-white border border-gray-300 dark:border-gray-700 rounded-lg"
-                >
-                  <Link
-                    href={`/prompts/experiments/${experiment.id}`}
-                    className={clsx(
-                      "bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-950 rounded-md p-2",
-                      i === 0 ? "rounded-t-md" : "",
-                      "w-full flex flex-col space-x-2"
-                    )}
-                  >
-                    <div className="flex items-start w-full justify-between relative">
-                      <p className="text-md font-semibold text-black dark:text-white p-2">
-                        {experiment.name}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-row justify-between w-full pr-2">
-                      <div className="text-gray-500 text-xs">
-                        {new Date(experiment.created_at).toLocaleString()}
-                      </div>
-
-                      <div className="flex flex-row items-center space-x-1 text-xs">
-                        <div className="text-gray-500">Status:</div>
-                        <div className="text-gray-500">{experiment.status}</div>
-                      </div>
-                    </div>
-                  </Link>
-                </div>
-              ))}
             </div>
           </TabPanel>
         </TabPanels>
