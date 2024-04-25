@@ -276,13 +276,19 @@ Json: JsonObject;
       model?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.feedback-or-request-or-response_": {
+    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values_": {
       feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
       response?: components["schemas"]["Partial_ResponseTableToOperators_"];
+      properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      values?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
     };
-    "FilterLeafSubset_feedback-or-request-or-response_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response_"];
-    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values_"] | components["schemas"]["RequestFilterBranch"] | "all";
     RequestFilterBranch: {
       right: components["schemas"]["RequestFilterNode"];
       /** @enum {string} */
