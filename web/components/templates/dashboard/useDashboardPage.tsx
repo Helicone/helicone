@@ -30,6 +30,7 @@ import { TokensOverTime } from "../../../pages/api/metrics/tokensOverTime";
 import { TimeToFirstToken } from "../../../pages/api/metrics/timeToFirstToken";
 import { ThreatsOverTime } from "../../../pages/api/metrics/threatsOverTime";
 import { useModels } from "../../../services/hooks/models";
+import { useGetProperties } from "../../../services/hooks/properties";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -76,7 +77,15 @@ export const useDashboardPage = ({
   timeZoneDifference,
   dbIncrement,
 }: DashboardPageData) => {
-  const filterMap = DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[];
+  const {
+    properties,
+    isLoading: isPropertiesLoading,
+    propertyFilters,
+    searchPropertyFilters,
+  } = useGetProperties();
+  const filterMap = (
+    DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]
+  ).concat(propertyFilters);
 
   const { isLoading: isModelsLoading, models } = useModels(timeFilter, 5);
 
@@ -265,7 +274,8 @@ export const useDashboardPage = ({
 
   const isAnyLoading =
     Object.values(overTimeData).some(isLoading) ||
-    Object.values(metrics).some(isLoading);
+    Object.values(metrics).some(isLoading) ||
+    isPropertiesLoading;
 
   return {
     filterMap,
@@ -282,5 +292,7 @@ export const useDashboardPage = ({
     },
     models,
     isModelsLoading,
+    searchPropertyFilters,
+    properties,
   };
 };
