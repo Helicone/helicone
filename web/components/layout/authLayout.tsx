@@ -13,7 +13,6 @@ import {
   CodeBracketIcon,
   Cog6ToothIcon,
   DocumentTextIcon,
-  ExclamationCircleIcon,
   HomeIcon,
   MoonIcon,
   QuestionMarkCircleIcon,
