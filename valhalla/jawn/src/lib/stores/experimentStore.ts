@@ -272,7 +272,7 @@ export const ServerExperimentStore: {
       ),
       (d) => {
         return {
-          experimentId: d[0].experiment_id,
+          experimentId: d?.[0]?.experiment_id,
         };
       }
     );

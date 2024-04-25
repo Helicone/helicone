@@ -9,6 +9,9 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
+  "/v1/settings": {
+    get: operations["GenerateHash"];
+  };
   "/v1/key/generateHash": {
     post: operations["GenerateHash"];
   };
