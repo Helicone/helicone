@@ -21,14 +21,10 @@ export class SettingController extends Controller {
   public async generateHash(
     @Request() request: JawnAuthenticatedRequest
   ): Promise<{
-    success?: boolean;
-    error?: {
-      message?: string;
-      details?: string;
-    };
+    useAzureForExperiment: boolean;
   }> {
     return {
-      success: true,
+      useAzureForExperiment: !!process.env.EXPERIMENTS_HCONE_URL_OVERRIDE,
     };
   }
 }

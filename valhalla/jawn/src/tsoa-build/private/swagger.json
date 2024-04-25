@@ -121,21 +121,13 @@
 							"application/json": {
 								"schema": {
 									"properties": {
-										"error": {
-											"properties": {
-												"details": {
-													"type": "string"
-												},
-												"message": {
-													"type": "string"
-												}
-											},
-											"type": "object"
-										},
-										"success": {
+										"useAzureForExperiment": {
 											"type": "boolean"
 										}
 									},
+									"required": [
+										"useAzureForExperiment"
+									],
 									"type": "object"
 								}
 							}
