@@ -564,8 +564,8 @@ export class DBLoggable {
         method: "POST",
         body: JSON.stringify({
           request_id: payload.request?.request.id,
-          requestBody: payload.request?.request.body,
-          responseBody: payload.response.body,
+          request_body: payload.request?.request.body,
+          response_body: payload.response.body,
         }),
         headers: {
           "Content-Type": "application/json",
