@@ -11,7 +11,6 @@ import { useEffect, useState } from "react";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
 import { Message } from "../requests/chat";
-import ResizeTextArea from "./resizeTextArea";
 import RoleButton from "./new/roleButton";
 import useNotification from "../../shared/notification/useNotification";
 import { Tooltip } from "@mui/material";

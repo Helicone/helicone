@@ -1,8 +1,4 @@
-import {
-  ArrowsPointingOutIcon,
-  ChevronLeftIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowsPointingOutIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import {
   Table,
   TableBody,
@@ -11,7 +7,6 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@tremor/react";
-import Link from "next/link";
 import { useState } from "react";
 import ReactDiffViewer from "react-diff-viewer";
 import { useExperiment } from "../../../../../services/hooks/prompts/experiments";

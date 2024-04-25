@@ -11,7 +11,6 @@ import HcButton from "../../../ui/hcButton";
 import { Select, SelectItem } from "@tremor/react";
 import HcBadge from "../../../ui/hcBadge";
 import { clsx } from "../../../shared/clsx";
-import { RenderWithPrettyInputKeys } from "../../playground/chatRow";
 import ChatPlayground from "../../playground/chatPlayground";
 import { PLAYGROUND_MODELS } from "../../playground/playgroundPage";
 import ProviderKeyList from "../../enterprise/portal/id/providerKeyList";

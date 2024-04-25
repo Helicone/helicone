@@ -1,6 +1,5 @@
 import { ChevronRightIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
-import { useEffect } from "react";
 
 interface HcBreadcrumbProps {
   pages: { name: string; href: string }[];
