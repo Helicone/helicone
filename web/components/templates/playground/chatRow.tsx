@@ -118,7 +118,7 @@ export const RenderWithPrettyInputKeys = (props: {
   const replaceInputKeysWithComponents = (inputText: string) => {
     if (typeof inputText !== "string") {
       // don't throw, stringify the input and return it
-      return JSON.stringify(inputText);
+      return JSON.stringify(inputText || "");
     }
 
     // Regular expression to match the pattern
