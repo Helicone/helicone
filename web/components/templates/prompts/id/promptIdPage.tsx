@@ -238,7 +238,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           </TabList>
           <TabPanels>
             <TabPanel>
-              <div className="flex flex-col space-y-4 py-4">
+              <div className="flex flex-col space-y-8 py-4">
                 <div className="w-full h-full flex flex-col space-y-4">
                   <div className="flex items-center justify-between w-full">
                     <ThemedTimeFilter
