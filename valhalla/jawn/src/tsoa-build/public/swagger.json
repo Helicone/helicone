@@ -739,7 +739,7 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Pick_FilterLeaf.feedback-or-request-or-response_": {
+			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values_": {
 				"properties": {
 					"feedback": {
 						"$ref": "#/components/schemas/Partial_FeedbackTableToOperators_"
@@ -749,18 +749,32 @@
 					},
 					"response": {
 						"$ref": "#/components/schemas/Partial_ResponseTableToOperators_"
+					},
+					"properties": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Partial_TextOperators_"
+						},
+						"type": "object"
+					},
+					"values": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Partial_TextOperators_"
+						},
+						"type": "object"
 					}
 				},
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
-			"FilterLeafSubset_feedback-or-request-or-response_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response_"
+			"FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values_"
 			},
 			"RequestFilterNode": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response_"
+						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values_"
 					},
 					{
 						"$ref": "#/components/schemas/RequestFilterBranch"
