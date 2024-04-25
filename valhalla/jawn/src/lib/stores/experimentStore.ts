@@ -141,7 +141,8 @@ function getExperimentsQuery(
                         FROM prompts_versions pv_current
                         JOIN prompts_versions pv_parent ON pv_parent.major_version = pv_current.major_version AND pv_parent.minor_version = 0
                         WHERE pv_current.id = h.prompt_version
-
+                        AND pv_parent.helicone_template is not null
+                        limit 1
                       ),`
                           : ""
                       }
