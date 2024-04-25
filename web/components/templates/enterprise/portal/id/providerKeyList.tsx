@@ -10,13 +10,15 @@ import ThemedModal from "../../../../shared/themed/themedModal";
 import { DecryptedProviderKey } from "../../../../../services/lib/keys";
 import useNotification from "../../../../shared/notification/useNotification";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { CheckCircleIcon, PlusCircleIcon } from "@heroicons/react/20/solid";
+import { CheckCircleIcon, PlusIcon } from "@heroicons/react/20/solid";
+import HcButton from "../../../../ui/hcButton";
 
 interface ProviderKeyListProps {
   variant?: "portal" | "basic";
   setProviderKeyCallback?: (key: string) => void;
   orgId?: string; // the id of the org that we want to change provider keys for
   orgProviderKey?: string;
+  showTitle?: boolean;
 }
 
 const ProviderKeyList = (props: ProviderKeyListProps) => {
@@ -25,6 +27,7 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
     orgId,
     orgProviderKey,
     variant = "portal",
+    showTitle = true,
   } = props;
 
   const { providerKeys, refetchProviderKeys } = useVaultPage();
@@ -80,27 +83,20 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
     <>
       <div className="w-full">
         <div className="mx-auto w-full space-y-2">
-          <div className="flex flex-row justify-between items-center">
-            <div className="flex items-center space-x-1">
-              <Tooltip title="Provider Keys are used to authenticate your requests to the API. This key is securely stored using our vault technologies, with the state of the art encryption.">
-                <label
-                  htmlFor="alert-metric"
-                  className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
-                >
-                  Provider Keys
-                </label>
-              </Tooltip>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsProviderOpen(true);
-                }}
-                className="items-center rounded-lg text-xs flex font-medium text-gray-900 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              >
-                <PlusCircleIcon className="h-4 w-4 dark:text-gray-100" />
-              </button>
+          {showTitle && (
+            <div className="flex flex-row justify-between items-center">
+              <div className="flex items-center space-x-1">
+                <Tooltip title="Provider Keys are used to authenticate your requests to the API. This key is securely stored using our vault technologies, with the state of the art encryption.">
+                  <label
+                    htmlFor="alert-metric"
+                    className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
+                  >
+                    Provider Keys
+                  </label>
+                </Tooltip>
+              </div>
             </div>
-          </div>
+          )}
           {providerKeys.length === 0 ? (
             <button
               onClick={(e) => {
@@ -137,7 +133,7 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
                         checked
                           ? "bg-sky-100 ring-sky-300 dark:bg-sky-900 dark:ring-sky-700"
                           : "bg-white ring-gray-300 dark:bg-black dark:ring-gray-700",
-                        "ring-1 relative flex cursor-pointer rounded-lg py-1.5 px-3 shadow-sm focus:outline-none"
+                        "ring-1 relative flex cursor-pointer rounded-lg py-1 px-2 shadow-sm focus:outline-none"
                       )
                     }
                   >
@@ -190,6 +186,13 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
               </div>
             </RadioGroup>
           )}
+          <HcButton
+            variant={"secondary"}
+            size={"xs"}
+            title={"Add new key"}
+            onClick={() => setIsProviderOpen(true)}
+            icon={PlusIcon}
+          />
         </div>
       </div>
       <CreateProviderKeyModal
