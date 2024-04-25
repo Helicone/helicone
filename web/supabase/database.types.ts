@@ -451,18 +451,21 @@ export type Database = {
           dataset_row: string
           experiment_hypothesis: string
           id: string
+          result_request_id: string
         }
         Insert: {
           created_at?: string | null
           dataset_row: string
           experiment_hypothesis: string
           id?: string
+          result_request_id: string
         }
         Update: {
           created_at?: string | null
           dataset_row?: string
           experiment_hypothesis?: string
           id?: string
+          result_request_id?: string
         }
         Relationships: [
           {
@@ -477,6 +480,13 @@ export type Database = {
             columns: ["experiment_hypothesis"]
             isOneToOne: false
             referencedRelation: "experiment_v2_hypothesis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_experiment_v2_hypothesis_run_result_request_id_fkey"
+            columns: ["result_request_id"]
+            isOneToOne: false
+            referencedRelation: "request"
             referencedColumns: ["id"]
           },
         ]
