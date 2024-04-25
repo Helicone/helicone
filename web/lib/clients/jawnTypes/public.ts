@@ -469,7 +469,7 @@ Json: JsonObject;
     };
     DatasetResult: {
       id: string;
-      dataset_name: string;
+      name: string;
       request_ids: string[];
       created_at: string;
     };

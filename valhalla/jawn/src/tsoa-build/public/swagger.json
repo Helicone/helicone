@@ -1498,7 +1498,7 @@
 					"id": {
 						"type": "string"
 					},
-					"dataset_name": {
+					"name": {
 						"type": "string"
 					},
 					"request_ids": {
@@ -1513,7 +1513,7 @@
 				},
 				"required": [
 					"id",
-					"dataset_name",
+					"name",
 					"request_ids",
 					"created_at"
 				],

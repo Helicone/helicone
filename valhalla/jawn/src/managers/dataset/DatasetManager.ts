@@ -27,7 +27,7 @@ export class DatasetManager extends BaseManager {
   async getDatasets(): Promise<Result<DatasetResult[], string>> {
     const result = dbExecute<{
       id: string;
-      dataset_name: string;
+      name: string;
       request_ids: string[];
       created_at: string;
     }>(
