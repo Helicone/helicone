@@ -102,6 +102,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
               >
                 {prompts?.map((prompt) => (
                   <SelectItem
+                    key={prompt.id}
                     value={`${prompt.major_version}.${prompt.minor_version}`}
                   >
                     {prompt.major_version}.{prompt.minor_version}
@@ -220,6 +221,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
           onContinue: () => {
             setCurrentStep(2);
           },
+          // check if the current chat is equal to the template
         }}
       />
     </>,
@@ -243,7 +245,9 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                     onValueChange={(value) => setSelectedDatasetId(value)}
                   >
                     {datasets.map((dataset) => (
-                      <SelectItem value={dataset.id}>{dataset.name}</SelectItem>
+                      <SelectItem key={dataset.id} value={dataset.id}>
+                        {dataset.name}
+                      </SelectItem>
                     ))}
                   </Select>
                   <HcButton
@@ -286,7 +290,9 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                     onValueChange={(value) => setSelectedModel(value)}
                   >
                     {PLAYGROUND_MODELS.map((model) => (
-                      <SelectItem value={model}>{model}</SelectItem>
+                      <SelectItem key={model} value={model}>
+                        {model}
+                      </SelectItem>
                     ))}
                   </Select>
                 </div>

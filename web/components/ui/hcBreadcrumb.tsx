@@ -1,5 +1,6 @@
 import { ChevronRightIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
+import { useEffect } from "react";
 
 interface HcBreadcrumbProps {
   pages: { name: string; href: string }[];
@@ -7,6 +8,8 @@ interface HcBreadcrumbProps {
 
 export default function HcBreadcrumb(props: HcBreadcrumbProps) {
   const { pages } = props;
+  // rerender if pages changes
+
   return (
     <nav className="flex" aria-label="Breadcrumb">
       <ol role="list" className="flex items-center space-x-2">

@@ -40,6 +40,9 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     customNavBar,
   } = props;
 
+  // make a deep copy of the chat
+  const deepCopy = JSON.parse(JSON.stringify(chat));
+
   const { setNotification } = useNotification();
 
   const [currentChat, setCurrentChat] = useState<Message[]>(chat);
@@ -124,6 +127,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         if (modelMessage.length > 0) {
           renderRows.push(
             <div
+              key={i}
               className={clsx(
                 i !== 0 && "border-t",
                 "flex flex-col w-full h-full relative space-y-4 bg-white border-gray-300 dark:border-gray-700"
@@ -234,6 +238,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
       if (modelMessage.length === 1) {
         renderRows.push(
           <ChatRow
+            key={modelMessage[0].id}
             index={currentChat.length - 1}
             message={modelMessage[0]}
             callback={(userText: string, role: string) => {
@@ -250,7 +255,10 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         );
       } else {
         renderRows.push(
-          <div className="flex flex-col px-8 py-4 space-y-8 bg-white dark:bg-black border-t border-gray-300 dark:border-gray-700">
+          <div
+            key={currentChat.length - 1}
+            className="flex flex-col px-8 py-4 space-y-8 bg-white dark:bg-black border-t border-gray-300 dark:border-gray-700"
+          >
             <RoleButton
               role={"assistant"}
               onRoleChange={function (
@@ -418,12 +426,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           <HcButton
             variant={"primary"}
             size={"sm"}
-            title={
-              // if there is no changes, say "Continue without changes" else "Continue"
-              JSON.stringify(currentChat) === JSON.stringify(chat)
-                ? "Continue without changes"
-                : "Continue"
-            }
+            title={"Continue"}
             onClick={() => {
               if (onSubmit) {
                 onSubmit(currentChat);

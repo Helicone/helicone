@@ -19,14 +19,18 @@ import { clsx } from "../../../../shared/clsx";
 import LoadingAnimation from "../../../../shared/loadingAnimation";
 import ThemedModal from "../../../../shared/themed/themedModal";
 import ModelPill from "../../../requestsV2/modelPill";
+import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
+import { usePrompt } from "../../../../../services/hooks/prompts/prompts";
 
 interface PromptIdPageProps {
   id: string;
+  promptId: string;
 }
 
 const ExperimentIdPage = (props: PromptIdPageProps) => {
-  const { id } = props;
+  const { id, promptId } = props;
   const { experiment, isLoading } = useExperiment(id);
+  const { prompt, isLoading: isPromptsLoading } = usePrompt(promptId);
 
   const [selectedObj, setSelectedObj] = useState<{
     key: string;
@@ -98,13 +102,24 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
   return (
     <>
       <div className="flex flex-col w-full space-y-4">
-        <Link
-          className="flex w-fit items-center text-gray-500 space-x-2 hover:text-gray-700"
-          href={"/prompts?tab=1"}
-        >
-          <ChevronLeftIcon className="h-4 w-4 inline" />
-          <span className="text-sm font-semibold">Experiments</span>
-        </Link>
+        <HcBreadcrumb
+          pages={[
+            {
+              href: "/prompts",
+              name: "Prompts",
+            },
+            {
+              href: `/prompts/${promptId}`,
+              name: isPromptsLoading
+                ? "Loading..."
+                : prompt?.user_defined_id || "",
+            },
+            {
+              href: `/prompts/${promptId}/experiments/${id}`,
+              name: experiment?.id || "",
+            },
+          ]}
+        />
         {isLoading ? (
           <div className="h-96 flex justify-center items-center w-full">
             <LoadingAnimation title="Loading Experiment Info" />

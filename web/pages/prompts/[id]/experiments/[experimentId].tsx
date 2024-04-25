@@ -13,9 +13,9 @@ interface PlaygroundProps {
 }
 
 const Experiments = (props: PlaygroundProps) => {
-  const { user, experimentId } = props;
+  const { user, experimentId, promptId } = props;
 
-  return <ExperimentIdPage id={experimentId} />;
+  return <ExperimentIdPage id={experimentId} promptId={promptId} />;
 };
 
 export default Experiments;
