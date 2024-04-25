@@ -6,16 +6,20 @@ export interface LoopedSubscriber {
 }
 
 const mainLoops: LoopedSubscriber[] = [
-  // {
-  //   cronInterval: 1000, // 1 second
-  //   onLoop: experimentsLoop,
-  // },
+  {
+    cronInterval: 1000, // 1 second
+    onLoop: experimentsLoop,
+  },
 ];
 
 const runSingleLoop = async (loop: LoopedSubscriber) => {
   while (true) {
-    await loop.onLoop({});
-    await new Promise((resolve) => setTimeout(resolve, loop.cronInterval));
+    try {
+      await loop.onLoop({});
+      await new Promise((resolve) => setTimeout(resolve, loop.cronInterval));
+    } catch (e) {
+      console.error(e);
+    }
   }
 };
 
