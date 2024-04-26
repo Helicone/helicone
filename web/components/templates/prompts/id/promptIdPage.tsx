@@ -136,10 +136,13 @@ const PromptIdPage = (props: PromptIdPageProps) => {
 
   const router = useRouter();
 
-  const { experiments, isLoading: experimentsLoading } = useExperiments({
-    page,
-    pageSize: currentPageSize,
-  });
+  const { experiments, isLoading: experimentsLoading } = useExperiments(
+    {
+      page,
+      pageSize: currentPageSize,
+    },
+    props.id
+  );
 
   const { prompts } = usePromptVersions(id);
 
