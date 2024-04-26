@@ -19,9 +19,9 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
       value={text}
       onValueChange={setText}
       highlight={(code) => {
-        if (!code) return;
-        if (typeof code !== "string") return;
-        highlight(code, languages.markdown, "markdown");
+        if (!code) return "";
+        if (typeof code !== "string") return "";
+        return highlight(code, languages.markdown, "markdown");
       }}
       padding={10}
       className="text-sm border border-gray-300 dark:border-gray-700 rounded-lg"
