@@ -10,4 +10,4 @@ RUN rm .env.* || true
 
 EXPOSE 3000
 
-CMD ["yarn", "dev"]
+CMD ["yarn", "dev:local"]
