@@ -560,17 +560,21 @@ export class DBLoggable {
 
     if (shouldSend) {
       console.log("SENDING", webhook.destination, payload.request?.request.id);
-      await fetch(webhook.destination, {
-        method: "POST",
-        body: JSON.stringify({
-          request_id: payload.request?.request.id,
-          request_body: payload.request?.request.body,
-          response_body: payload.response.body,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      try {
+        await fetch(webhook.destination, {
+          method: "POST",
+          body: JSON.stringify({
+            request_id: payload.request?.request.id,
+            request_body: payload.request?.request.body,
+            response_body: payload.response.body,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      } catch (error: any) {
+        console.error("Error sending to webhook", error.message);
+      }
     }
 
     return {
