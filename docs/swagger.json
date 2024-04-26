@@ -1747,7 +1747,7 @@
 		},
 		"/v1/request/{requestId}/assets/{assetId}": {
 			"post": {
-				"operationId": "GetRequestAsset",
+				"operationId": "GetRequestAssetById",
 				"responses": {
 					"200": {
 						"description": "Ok",

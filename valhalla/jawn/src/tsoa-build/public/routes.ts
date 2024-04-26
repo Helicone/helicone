@@ -712,9 +712,9 @@ export function RegisterRoutes(app: Router) {
         app.post('/v1/request/:requestId/assets/:assetId',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(RequestController)),
-            ...(fetchMiddlewares<RequestHandler>(RequestController.prototype.getRequestAsset)),
+            ...(fetchMiddlewares<RequestHandler>(RequestController.prototype.getRequestAssetById)),
 
-            function RequestController_getRequestAsset(request: ExRequest, response: ExResponse, next: any) {
+            function RequestController_getRequestAssetById(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
                     requestId: {"in":"path","name":"requestId","required":true,"dataType":"string"},
@@ -730,7 +730,7 @@ export function RegisterRoutes(app: Router) {
                 const controller = new RequestController();
 
               templateService.apiHandler({
-                methodName: 'getRequestAsset',
+                methodName: 'getRequestAssetById',
                 controller,
                 response,
                 next,
