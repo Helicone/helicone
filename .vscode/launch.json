@@ -11,6 +11,7 @@
       "cwd": "${workspaceFolder}/valhalla/jawn",
       "program": "${workspaceFolder}/valhalla/jawn/src/index.ts",
       "request": "launch",
+
       "restart": true,
       "runtimeExecutable": "nodemon",
       "skipFiles": ["<node_internals>/**"],

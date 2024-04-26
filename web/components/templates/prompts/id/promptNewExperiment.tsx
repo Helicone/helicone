@@ -26,6 +26,7 @@ import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { Tooltip } from "@mui/material";
 import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
+import { useJawnSettings } from "../../../../services/hooks/useJawnSettings";
 
 interface PromptIdPageProps {
   id: string;
@@ -37,6 +38,9 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
   const { prompts } = usePromptVersions(id);
   const router = useRouter();
   const jawn = useJawnClient();
+
+  const jawnSettings = useJawnSettings();
+
   const { setNotification } = useNotification();
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedPrompt, setSelectedPrompt] = useState<{
@@ -337,20 +341,21 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                   </Select>
                 </div>
               </li>
-
-              <li className="flex items-start space-x-2">
-                <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
-                  Provider Keys
-                </label>
-                <div className="flex w-full max-w-lg">
-                  <ProviderKeyList
-                    showTitle={false}
-                    setProviderKeyCallback={(providerKey) =>
-                      setSelectedProviderKey(providerKey)
-                    }
-                  />
-                </div>
-              </li>
+              {!!jawnSettings.data?.data?.useAzureForExperiment || (
+                <li className="flex items-start space-x-2">
+                  <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
+                    Provider Keys
+                  </label>
+                  <div className="flex w-full max-w-lg">
+                    <ProviderKeyList
+                      showTitle={false}
+                      setProviderKeyCallback={(providerKey) =>
+                        setSelectedProviderKey(providerKey)
+                      }
+                    />
+                  </div>
+                </li>
+              )}
             </ul>
           </div>
         </div>
@@ -372,7 +377,17 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
           size={"sm"}
           title={"Continue"}
           onClick={() => {
-            if (!selectedModel || !selectedDatasetId || !selectedProviderKey) {
+            if (
+              jawnSettings.data?.data?.useAzureForExperiment &&
+              (!selectedModel || !selectedDatasetId)
+            ) {
+              setNotification("Please select a model, and dataset.", "error");
+              return;
+            }
+            if (
+              !jawnSettings.data?.data?.useAzureForExperiment &&
+              (!selectedModel || !selectedDatasetId || !selectedProviderKey)
+            ) {
               setNotification(
                 "Please select a model, dataset, and provider key.",
                 "error"
@@ -475,7 +490,17 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
           size={"sm"}
           title={"Confirm and run experiment"}
           onClick={async () => {
-            if (!selectedModel || !selectedDatasetId || !selectedProviderKey) {
+            if (
+              jawnSettings.data?.data?.useAzureForExperiment &&
+              (!selectedModel || !selectedDatasetId)
+            ) {
+              setNotification("Please select a model, and dataset.", "error");
+              return;
+            }
+            if (
+              !jawnSettings.data?.data?.useAzureForExperiment &&
+              (!selectedModel || !selectedDatasetId || !selectedProviderKey)
+            ) {
               setNotification(
                 "Please select a model, dataset, and provider key.",
                 "error"
@@ -515,10 +540,12 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
             // runs the experiment with the new dataset and new subversion
             const res = await jawn.POST("/v1/experiment", {
               body: {
-                datasetId: selectedDatasetId,
-                model: selectedModel,
+                datasetId: selectedDatasetId!,
+                model: selectedModel!,
                 promptVersion: newSubVersion.data?.data?.id!,
-                providerKeyId: selectedProviderKey,
+                providerKeyId: jawnSettings.data?.data?.useAzureForExperiment
+                  ? "NOKEY"
+                  : selectedProviderKey!,
               },
             });
 

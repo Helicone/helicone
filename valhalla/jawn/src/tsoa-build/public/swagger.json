@@ -1701,6 +1701,9 @@
 					"id": {
 						"type": "string"
 					},
+					"organization": {
+						"type": "string"
+					},
 					"dataset": {
 						"properties": {
 							"rows": {
@@ -1835,6 +1838,7 @@
 				},
 				"required": [
 					"id",
+					"organization",
 					"dataset",
 					"createdAt",
 					"hypotheses"

@@ -518,6 +518,7 @@ Json: JsonObject;
     };
     Experiment: {
       id: string;
+      organization: string;
       dataset: {
         rows: {
             inputRecord?: {

@@ -40,6 +40,7 @@ const useExperiments = (
 
   const frontEndExperiments = experiments.map((experiment) => {
     const hypothesis = experiment.hypotheses.at(0) ?? null;
+    console.log(hypothesis?.runs);
     return {
       id: experiment.id,
       datasetId: experiment.dataset.id,

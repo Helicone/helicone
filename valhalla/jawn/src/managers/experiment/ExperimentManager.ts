@@ -65,7 +65,7 @@ export class ExperimentManager extends BaseManager {
         params.model,
         "PENDING",
         experiment.data.id,
-        params.providerKeyId,
+        params.providerKeyId === "NOKEY" ? null : params.providerKeyId,
       ]
     );
 
