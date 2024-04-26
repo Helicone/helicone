@@ -540,12 +540,12 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
             // runs the experiment with the new dataset and new subversion
             const res = await jawn.POST("/v1/experiment", {
               body: {
-                datasetId: selectedDatasetId,
-                model: selectedModel,
+                datasetId: selectedDatasetId!,
+                model: selectedModel!,
                 promptVersion: newSubVersion.data?.data?.id!,
                 providerKeyId: jawnSettings.data?.data?.useAzureForExperiment
                   ? "NOKEY"
-                  : selectedProviderKey,
+                  : selectedProviderKey!,
               },
             });
 
