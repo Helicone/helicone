@@ -61,12 +61,12 @@ export function RegisterRoutes(app: Router) {
     //  NOTE: If you do not see routes for all of your controllers in this file, then you might not have informed tsoa of where to look
     //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
     // ###########################################################################################################
-        app.get('/v1/settings',
+        app.get('/v1/settings/query',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SettingController)),
-            ...(fetchMiddlewares<RequestHandler>(SettingController.prototype.generateHash)),
+            ...(fetchMiddlewares<RequestHandler>(SettingController.prototype.getSettings)),
 
-            function SettingController_generateHash(request: ExRequest, response: ExResponse, next: any) {
+            function SettingController_getSettings(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
@@ -80,7 +80,7 @@ export function RegisterRoutes(app: Router) {
                 const controller = new SettingController();
 
               templateService.apiHandler({
-                methodName: 'generateHash',
+                methodName: 'getSettings',
                 controller,
                 response,
                 next,

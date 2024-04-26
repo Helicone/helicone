@@ -14,6 +14,7 @@ export interface ResponseObj {
 }
 export interface Experiment {
   id: string;
+  organization: string;
   dataset: {
     id: string;
     name: string;
@@ -78,6 +79,7 @@ function getExperimentsQuery(
   return `
         SELECT jsonb_build_object(
           'id', e.id,
+          'organization', e.organization,
           'dataset', jsonb_build_object(
               'id', ds.id,
               'name', ds.name,
@@ -169,8 +171,8 @@ function getExperimentsQuery(
                               )
                           )
                           FROM experiment_v2_hypothesis_run hr
-                          left join experiment_v2_hypothesis h on h.id = hr.experiment_hypothesis
-                          left join experiment_v2 on experiment_v2.id = h.experiment_v2
+                          left join experiment_v2_hypothesis evh on evh.id = hr.experiment_hypothesis
+                          left join experiment_v2 on experiment_v2.id = evh.experiment_v2
                           WHERE hr.experiment_hypothesis = h.id
                           AND experiment_v2.organization = e.organization
                       )
