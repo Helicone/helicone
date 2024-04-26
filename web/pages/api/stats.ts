@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { dbExecute, dbQueryClickhouse } from "../../lib/api/db/dbExecute";
 import { Result } from "../../lib/result";
+import dateFormat from "dateformat";
 
 type CountOverTime = {
   count_step: number;
@@ -33,14 +34,30 @@ export interface HeliconeStats {
   weeklyUserBounceRate: RetentionAndChurnRate[];
 }
 
-export async function getModelUsageOverTime(): Promise<
-  Result<HeliconeStats, string>
-> {
+function chDate(date: Date) {
+  return dateFormat(date, "yyyy-mm-dd HH:MM:ss");
+}
+
+export async function getModelUsageOverTime(
+  time: "all" | "30" | "90" | "365"
+): Promise<Result<HeliconeStats, string>> {
+  // 30 days ago
+  const startTime = new Date();
+  if (time === "30") startTime.setDate(startTime.getDate() - 30);
+  if (time === "90") startTime.setDate(startTime.getDate() - 90);
+  if (time === "365") startTime.setDate(startTime.getDate() - 365);
+  if (time === "all") startTime.setFullYear(2023, 1, 1);
+
+  const endTime = new Date();
+
   const weeklyActiveUsersQuery = `
   SELECT date_trunc('week'::text, request_created_at) AS time_step,
     count(DISTINCT request_response_log.organization_id) AS user_count_step,
     count(request_response_log.request_id) AS request_count_step
   FROM request_response_log
+  WHERE '${chDate(
+    startTime
+  )}' <= request_created_at AND request_created_at <= '${chDate(endTime)}'
   GROUP BY (date_trunc('week'::text, request_created_at))
   ORDER BY (date_trunc('week'::text, request_created_at)) DESC;
 `;
@@ -49,6 +66,9 @@ SELECT date_trunc('month'::text, request_created_at) AS time_step,
   count(DISTINCT request_response_log.organization_id) AS user_count_step,
   count(request_response_log.request_id) AS request_count_step
 FROM request_response_log
+WHERE '${chDate(
+    startTime
+  )}' <= request_created_at AND request_created_at <= '${chDate(endTime)}'
 GROUP BY (date_trunc('month'::text, request_created_at))
 ORDER BY (date_trunc('month'::text, request_created_at)) DESC;
 `;
@@ -58,6 +78,9 @@ SELECT date_trunc('day'::text, request_created_at) AS time_step,
   count(DISTINCT request_response_log.organization_id) AS user_count_step,
   count(request_response_log.request_id) AS request_count_step
 FROM request_response_log
+WHERE '${chDate(
+    startTime
+  )}' <= request_created_at AND request_created_at <= '${chDate(endTime)}'
 GROUP BY (date_trunc('day'::text, request_created_at))
 ORDER BY (date_trunc('day'::text, request_created_at)) DESC;
 `;
@@ -69,6 +92,7 @@ ORDER BY (date_trunc('day'::text, request_created_at)) DESC;
       COUNT(u.id) AS new_users
     FROM
       auth.users u
+      WHERE '${startTime.toISOString()}' <= u.created_at AND u.created_at <= '${endTime.toISOString()}'
     GROUP BY
       date_trunc('day', u.created_at)
   )
@@ -93,6 +117,7 @@ date_trunc('day', u.created_at) AS time_step,
 COUNT(u.id) AS count_step
 FROM
   auth.users u
+WHERE '${startTime.toISOString()}' <= u.created_at AND u.created_at <= '${endTime.toISOString()}'
 GROUP BY
   date_trunc('day', u.created_at)
 ORDER BY
@@ -104,6 +129,7 @@ date_trunc('month', u.created_at) AS time_step,
 COUNT(u.id) AS count_step
 FROM
   auth.users u
+WHERE '${startTime.toISOString()}' <= u.created_at AND u.created_at <= '${endTime.toISOString()}'
 GROUP BY
   date_trunc('month', u.created_at)
 ORDER BY
@@ -115,6 +141,7 @@ date_trunc('week', u.created_at) AS time_step,
 COUNT(u.id) AS count_step
 FROM
   auth.users u
+WHERE '${startTime.toISOString()}' <= u.created_at AND u.created_at <= '${endTime.toISOString()}'
 GROUP BY
   date_trunc('week', u.created_at)
 ORDER BY
@@ -128,6 +155,7 @@ FROM
     auth.users u
 WHERE
     u.last_sign_in_at - u.created_at > INTERVAL '1 day'
+    AND u.created_at >= '${startTime.toISOString()}' AND u.created_at <= '${endTime.toISOString()}'
 GROUP BY 
     DATE_TRUNC('month', u.created_at)
 ORDER BY 
@@ -142,6 +170,7 @@ FROM
     auth.users u
 WHERE
     u.last_sign_in_at - u.created_at > INTERVAL '1 day'
+    AND u.created_at >= '${startTime.toISOString()}' AND u.created_at <= '${endTime.toISOString()}'
 GROUP BY 
     DATE_TRUNC('week', u.created_at)
 ORDER BY 
@@ -156,6 +185,7 @@ FROM
     auth.users u
 WHERE
     u.last_sign_in_at - u.created_at > INTERVAL '1 day'
+    AND u.created_at >= '${startTime.toISOString()}' AND u.created_at <= '${endTime.toISOString()}'
 GROUP BY 
     DATE_TRUNC('month', u.created_at)
 ORDER BY 
@@ -170,6 +200,7 @@ FROM
     auth.users u
 WHERE
     u.last_sign_in_at - u.created_at > INTERVAL '1 day'
+    AND u.created_at >= '${startTime.toISOString()}' AND u.created_at <= '${endTime.toISOString()}'
 GROUP BY 
     DATE_TRUNC('week', u.created_at)
 ORDER BY 
@@ -184,6 +215,7 @@ FROM
     auth.users u
 WHERE 
     u.last_sign_in_at - u.created_at < INTERVAL '1 day'
+    AND u.created_at >= '${startTime.toISOString()}' AND u.created_at <= '${endTime.toISOString()}'
 GROUP BY 
     DATE_TRUNC('week', u.created_at)
 ORDER BY 
@@ -221,104 +253,68 @@ ORDER BY
     dbExecute<RetentionAndChurnRate>(weeklyUserBounceRateQuery, []),
   ]);
 
-  if (integratedUsersError !== null) {
-    return { data: null, error: integratedUsersError };
-  }
-
-  if (weeklyActiveUsersError !== null) {
-    return { data: null, error: weeklyActiveUsersError };
-  }
-
-  if (monthlyActiveUsersError !== null) {
-    return { data: null, error: monthlyActiveUsersError };
-  }
-
-  if (dailyActiveError !== null) {
-    return { data: null, error: dailyActiveError };
-  }
-
-  if (growthOverTimeError !== null) {
-    return { data: null, error: growthOverTimeError };
-  }
-
-  if (growthPerMonthError !== null) {
-    return { data: null, error: growthPerMonthError };
-  }
-
-  if (growthPerWeekError !== null) {
-    return { data: null, error: growthPerWeekError };
-  }
-
-  if (monthlyRetentionRateError !== null) {
-    return { data: null, error: monthlyRetentionRateError };
-  }
-
-  if (weeklyRetentionRateError !== null) {
-    return { data: null, error: weeklyRetentionRateError };
-  }
-
-  if (monthlyChurnRateError !== null) {
-    return { data: null, error: monthlyChurnRateError };
-  }
-
-  if (weeklyChurnRateError !== null) {
-    return { data: null, error: weeklyChurnRateError };
-  }
-
-  if (weeklyUserBounceRateError !== null) {
-    return { data: null, error: weeklyUserBounceRateError };
-  }
-
   return {
     data: {
-      weeklyActiveUsers: weeklyActiveUsers!.map((d) => ({
-        ...d,
-        time_step: new Date(d.time_step),
-      })),
-      monthlyActiveUsers: monthlyActiveUsers!.map((d) => ({
-        ...d,
-        time_step: new Date(d.time_step),
-      })),
-      integratedUsers: integratedUsers!.map((d) => ({
-        ...d,
-        time_step: new Date(d.time_step),
-      })),
-      dailyActiveUsers: dailyActive!.map((d) => ({
-        ...d,
-        time_step: new Date(d.time_step),
-      })),
-      growthOverTime: growthOverTime!.map((d) => ({
-        ...d,
-        time_step: new Date(d.time_step),
-      })),
-      growthPerMonth: growthPerMonth!.map((d) => ({
-        ...d,
-        time_step: new Date(d.time_step),
-      })),
-      growthPerWeek: growthPerWeek!.map((d) => ({
-        ...d,
-        time_step: new Date(d.time_step),
-      })),
-      monthlyRetentionRate: monthlyRetentionRate!.map((d) => ({
-        ...d,
-        time_step: new Date(d.time_step),
-      })),
-      weeklyRetentionRate: weeklyRetentionRate!.map((d) => ({
-        ...d,
-        time_step: new Date(d.time_step),
-      })),
-      monthlyChurnRate: monthlyChurnRate!.map((d) => ({
-        ...d,
-        time_step: new Date(d.time_step),
-      })),
-      weeklyChurnRate: weeklyChurnRate!.map((d) => ({
-        ...d,
-        time_step: new Date(d.time_step),
-      })),
-      weeklyUserBounceRate: weeklyUserBounceRate!.map((d) => ({
-        ...d,
-        time_step: new Date(d.time_step),
-      })),
+      weeklyActiveUsers:
+        weeklyActiveUsers?.map((d) => ({
+          ...d,
+          time_step: new Date(d.time_step),
+        })) ?? [],
+      monthlyActiveUsers:
+        monthlyActiveUsers?.map((d) => ({
+          ...d,
+          time_step: new Date(d.time_step),
+        })) ?? [],
+      integratedUsers:
+        integratedUsers?.map((d) => ({
+          ...d,
+          time_step: new Date(d.time_step),
+        })) ?? [],
+      dailyActiveUsers:
+        dailyActive?.map((d) => ({
+          ...d,
+          time_step: new Date(d.time_step),
+        })) ?? [],
+      growthOverTime:
+        growthOverTime?.map((d) => ({
+          ...d,
+          time_step: new Date(d.time_step),
+        })) ?? [],
+      growthPerMonth:
+        growthPerMonth?.map((d) => ({
+          ...d,
+          time_step: new Date(d.time_step),
+        })) ?? [],
+      growthPerWeek:
+        growthPerWeek?.map((d) => ({
+          ...d,
+          time_step: new Date(d.time_step),
+        })) ?? [],
+      monthlyRetentionRate:
+        monthlyRetentionRate?.map((d) => ({
+          ...d,
+          time_step: new Date(d.time_step),
+        })) ?? [],
+      weeklyRetentionRate:
+        weeklyRetentionRate?.map((d) => ({
+          ...d,
+          time_step: new Date(d.time_step),
+        })) ?? [],
+      monthlyChurnRate:
+        monthlyChurnRate?.map((d) => ({
+          ...d,
+          time_step: new Date(d.time_step),
+        })) ?? [],
+      weeklyChurnRate:
+        weeklyChurnRate?.map((d) => ({
+          ...d,
+          time_step: new Date(d.time_step),
+        })) ?? [],
+      weeklyUserBounceRate:
+        weeklyUserBounceRate?.map((d) => ({
+          ...d,
+          time_step: new Date(d.time_step),
+        })) ?? [],
     },
     error: null,
   };
@@ -330,5 +326,9 @@ export default async function handler(
 ) {
   res.setHeader("Cache-Control", `s-maxage=${60 * 10}, public`); // 10 minutes
 
-  res.status(200).json(await getModelUsageOverTime());
+  const { time } = req.body as {
+    time: "all" | "30" | "90" | "365";
+  };
+
+  res.status(200).json(await getModelUsageOverTime(time));
 }
