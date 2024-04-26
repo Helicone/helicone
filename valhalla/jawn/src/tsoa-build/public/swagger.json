@@ -2691,6 +2691,9 @@
 										"$ref": "#/components/schemas/ExperimentFilterNode"
 									}
 								},
+								"required": [
+									"filter"
+								],
 								"type": "object"
 							}
 						}

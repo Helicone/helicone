@@ -68,7 +68,7 @@ export class ExperimentController extends Controller {
   public async getExperiments(
     @Body()
     requestBody: {
-      filter?: ExperimentFilterNode;
+      filter: ExperimentFilterNode;
       include?: IncludeExperimentKeys;
     },
     @Request() request: JawnAuthenticatedRequest
@@ -76,7 +76,7 @@ export class ExperimentController extends Controller {
     const experimentManager = new ExperimentManager(request.authParams);
 
     const result = await experimentManager.getExperiments(
-      requestBody.filter ?? "all",
+      requestBody.filter,
       requestBody.include ?? {}
     );
     // const result = await promptManager.getPrompts(requestBody);
