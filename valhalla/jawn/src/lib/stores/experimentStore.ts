@@ -105,6 +105,7 @@ function getExperimentsQuery(
                       FROM prompt_input_record pir
                       left join request re on re.id = pir.source_request
                       WHERE pir.id = dsr.input_record
+                      AND re.helicone_org_id = e.organization
                     ),`
                         : ""
                     }
@@ -142,6 +143,8 @@ function getExperimentsQuery(
                         JOIN prompts_versions pv_parent ON pv_parent.major_version = pv_current.major_version AND pv_parent.minor_version = 0
                         WHERE pv_current.id = h.prompt_version
                         AND pv_parent.helicone_template is not null
+                        AND pv_parent.organization = e.organization
+                        AND pv_current.organization = e.organization
                         limit 1
                       ),`
                           : ""
@@ -166,7 +169,10 @@ function getExperimentsQuery(
                               )
                           )
                           FROM experiment_v2_hypothesis_run hr
+                          left join experiment_v2_hypothesis h on h.id = hr.experiment_hypothesis
+                          left join experiment_v2 on experiment_v2.id = h.experiment_v2
                           WHERE hr.experiment_hypothesis = h.id
+                          AND experiment_v2.organization = e.organization
                       )
                   )
               )
@@ -175,6 +181,9 @@ function getExperimentsQuery(
           ), '[]'::json)
         )
         FROM experiment_v2 e
+        left join experiment_v2_hypothesis eh on e.id = eh.experiment_v2
+        left join prompts_versions pv on pv.id = eh.prompt_version
+        left join prompt_v2 p_v2 on p_v2.id = pv.prompt_v2
         LEFT JOIN experiment_dataset_v2 ds ON e.dataset = ds.id
         LEFT JOIN experiment_dataset_v2_row dsr ON dsr.dataset_id = ds.id
         ${filter ? `WHERE ${filter}` : ""}

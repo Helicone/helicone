@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { useJawnClient } from "../../../lib/clients/jawnHook";
-import { Result } from "../../../lib/result";
-import { Experiment } from "../../../pages/api/experiment/[id]";
 
-const useExperiments = (req: { page: number; pageSize: number }) => {
+const useExperiments = (
+  req: { page: number; pageSize: number },
+  promptId: string
+) => {
   const jawn = useJawnClient();
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["experiments", jawn],
@@ -13,7 +14,13 @@ const useExperiments = (req: { page: number; pageSize: number }) => {
 
       return jawn.POST("/v1/experiment/query", {
         body: {
-          filter: "all",
+          filter: {
+            experiment: {
+              prompt_v2: {
+                equals: promptId,
+              },
+            },
+          },
         },
       });
     },

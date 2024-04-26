@@ -885,7 +885,7 @@ export interface operations {
       content: {
         "application/json": {
           include?: components["schemas"]["IncludeExperimentKeys"];
-          filter?: components["schemas"]["ExperimentFilterNode"];
+          filter: components["schemas"]["ExperimentFilterNode"];
         };
       };
     };
