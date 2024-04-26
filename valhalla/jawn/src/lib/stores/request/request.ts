@@ -24,6 +24,10 @@ export type Provider =
   | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
+export interface HeliconeRequestAsset {
+  assetUrl: string;
+}
+
 export interface HeliconeRequest {
   /**
    * @example "Happy"

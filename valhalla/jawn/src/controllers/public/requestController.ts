@@ -14,7 +14,10 @@ import {
 import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
 import { Result } from "../../lib/shared/result";
 import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
-import { HeliconeRequest } from "../../lib/stores/request/request";
+import {
+  HeliconeRequest,
+  HeliconeRequestAsset,
+} from "../../lib/stores/request/request";
 import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 
@@ -124,5 +127,23 @@ export class RequestController extends Controller {
       this.setStatus(200); // set return status 201
     }
     return requestFeedback;
+  }
+
+  @Put("/{requestId}/assets/{assetId}")
+  public async getRequestAsset(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() requestId: string,
+    @Path() assetId: string
+  ): Promise<Result<HeliconeRequestAsset, string>> {
+    const reqManager = new RequestManager(request.authParams);
+
+    const requestAsset = await reqManager.getAsset(requestId, assetId);
+    if (requestAsset.error) {
+      console.log(requestAsset.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return requestAsset;
   }
 }
