@@ -160,6 +160,16 @@ async function runHypothesis(props: {
     headers: headers,
     body: JSON.stringify(body),
   });
+
+  if (response.status !== 200) {
+    console.error(
+      "error running hypothesis",
+      hypothesisId,
+      datasetRowId,
+      requestId,
+      response.status
+    );
+  }
   // wait 10 seconds for the request to be processed
   let retries = 3;
   while (retries > 0) {
@@ -187,6 +197,7 @@ export async function run(
   experiment: Experiment
 ): Promise<Result<string, string>> {
   if (process.env.AZURE_BASE_URL) {
+    console.log("running experiment on azure");
     return runAzure(experiment);
   } else {
     return runOpenAI(experiment);
@@ -250,6 +261,7 @@ async function runAzure(
           requestId
         );
 
+        console.log("running hypothesis", hypothesis.id);
         await runHypothesis({
           body: preparedRequest.body,
           headers: preparedRequest.headers,
