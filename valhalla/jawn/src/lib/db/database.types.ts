@@ -393,7 +393,7 @@ export type Database = {
           id: string
           model: string
           prompt_version: string
-          provider_key: string
+          provider_key: string | null
           status: string
         }
         Insert: {
@@ -402,7 +402,7 @@ export type Database = {
           id?: string
           model: string
           prompt_version: string
-          provider_key: string
+          provider_key?: string | null
           status: string
         }
         Update: {
@@ -411,7 +411,7 @@ export type Database = {
           id?: string
           model?: string
           prompt_version?: string
-          provider_key?: string
+          provider_key?: string | null
           status?: string
         }
         Relationships: [
