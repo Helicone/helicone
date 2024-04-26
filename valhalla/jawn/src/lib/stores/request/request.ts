@@ -28,6 +28,13 @@ export interface HeliconeRequestAsset {
   assetUrl: string;
 }
 
+export interface Asset {
+  id: string;
+  request_id: string;
+  organization_id: string;
+  created_at: string;
+}
+
 export interface HeliconeRequest {
   /**
    * @example "Happy"
@@ -475,4 +482,22 @@ WHERE (${builtFilter.filter})
     return { data: null, error: error };
   }
   return { data: data[0].count, error: null };
+}
+
+export async function getRequestAssetById(
+  assetId: string,
+  requestId: string,
+  organizationId: string
+): Promise<Result<Asset, string>> {
+  const query = `
+    SELECT * FROM asset
+    WHERE id = $1 AND request_id = $2 AND organization_id = $3`;
+  const { data: requestAsset, error: requestAssetError } =
+    await dbExecute<Asset>(query, [assetId, requestId, organizationId]);
+
+  if (requestAssetError || !requestAsset || requestAsset.length === 0) {
+    return err("Asset not found");
+  }
+
+  return ok(requestAsset[0]);
 }

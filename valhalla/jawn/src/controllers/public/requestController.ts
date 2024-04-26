@@ -137,7 +137,10 @@ export class RequestController extends Controller {
   ): Promise<Result<HeliconeRequestAsset, string>> {
     const reqManager = new RequestManager(request.authParams);
 
-    const requestAsset = await reqManager.getAsset(requestId, assetId);
+    const requestAsset = await reqManager.getRequestAssetById(
+      requestId,
+      assetId
+    );
     if (requestAsset.error) {
       console.log(requestAsset.error);
       this.setStatus(500);

@@ -9,6 +9,7 @@ import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequest
 import {
   HeliconeRequest,
   HeliconeRequestAsset,
+  getRequestAssetById,
   getRequests,
   getRequestsCached,
 } from "../../lib/stores/request/request";
@@ -179,27 +180,23 @@ export class RequestManager extends BaseManager {
         );
   }
 
-  async getAsset(
+  async getRequestAssetById(
     requestId: string,
     assetId: string
   ): Promise<Result<HeliconeRequestAsset, string>> {
-    const query = `
-    SELECT * FROM asset
-    WHERE id = $1 AND request_id = $2 AND organization_id = $3`;
-    const { data: requestAsset, error: requestAssetError } = await dbExecute(
-      query,
-      [assetId, requestId, this.authParams.organizationId]
+    const { data: assetData, error: assetError } = await getRequestAssetById(
+      assetId,
+      requestId,
+      this.authParams.organizationId
     );
 
-    console.log("requestAsset", requestAsset, requestAssetError);
-
-    if (requestAssetError || !requestAsset || requestAsset.length === 0) {
-      return err("Asset not found");
+    if (assetError || !assetData) {
+      return err(`${assetError}`);
     }
     const assetUrl = await this.s3Client.getRequestResponseImageSignedUrl(
       this.authParams.organizationId,
       requestId,
-      assetId
+      assetData.id
     );
     if (assetUrl.error || !assetUrl.data) {
       return err(`Error getting asset: ${assetUrl.error}`);
