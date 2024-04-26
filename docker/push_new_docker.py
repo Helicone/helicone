@@ -12,9 +12,11 @@ def run_or_echo(test_mode, command):
         subprocess.run(command, check=True)
 
 
-def main(test_mode):
+def main(test_mode, dont_prune=False):
     # Can comment out next line if you don't want to prune all images
-    subprocess.run("echo y | docker system prune -a", shell=True, check=True)
+    if not dont_prune:
+        subprocess.run("echo y | docker system prune -a",
+                       shell=True, check=True)
     date = datetime.datetime.now().strftime("%Y.%m.%d")
     version_tag = f"v{date}"
 
@@ -67,6 +69,9 @@ if __name__ == "__main__":
         description="Build and push Docker images with custom contexts.")
     parser.add_argument("-t", "--test", action="store_true",
                         help="Enable test mode (commands will only be printed)")
+
+    parser.add_argument("--dont-prune", action="store_true",
+                        help="Do not prune all images before building and pushing")
     args = parser.parse_args()
 
-    main(test_mode=args.test)
+    main(test_mode=args.test, dont_prune=args.dont_prune)
