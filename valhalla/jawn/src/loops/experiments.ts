@@ -7,12 +7,10 @@ export const experimentsLoop = async () => {
     inputs: true,
     promptVersion: true,
   });
-  console.log("experiment", experiment);
   if (experiment.error || !experiment.data) {
     return;
   }
 
-  console.log("running experiment", experiment.data.id);
   const experimentResult = await run(experiment.data);
   return;
 };
