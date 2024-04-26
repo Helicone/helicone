@@ -129,7 +129,7 @@ export class RequestController extends Controller {
     return requestFeedback;
   }
 
-  @Put("/{requestId}/assets/{assetId}")
+  @Post("/{requestId}/assets/{assetId}")
   public async getRequestAsset(
     @Request() request: JawnAuthenticatedRequest,
     @Path() requestId: string,

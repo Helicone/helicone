@@ -22,7 +22,7 @@ export interface paths {
     put: operations["PutProperty"];
   };
   "/v1/request/{requestId}/assets/{assetId}": {
-    put: operations["GetRequestAsset"];
+    post: operations["GetRequestAsset"];
   };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];

@@ -1746,7 +1746,7 @@
 			}
 		},
 		"/v1/request/{requestId}/assets/{assetId}": {
-			"put": {
+			"post": {
 				"operationId": "GetRequestAsset",
 				"responses": {
 					"200": {

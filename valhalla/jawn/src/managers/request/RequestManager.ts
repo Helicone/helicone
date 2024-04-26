@@ -2,6 +2,7 @@
 import { RequestQueryParams } from "../../controllers/public/requestController";
 import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import { Result, err, ok } from "../../lib/shared/result";
 import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequestStore";
@@ -182,6 +183,19 @@ export class RequestManager extends BaseManager {
     requestId: string,
     assetId: string
   ): Promise<Result<HeliconeRequestAsset, string>> {
+    const query = `
+    SELECT * FROM asset
+    WHERE id = $1 AND request_id = $2 AND organization_id = $3`;
+    const { data: requestAsset, error: requestAssetError } = await dbExecute(
+      query,
+      [assetId, requestId, this.authParams.organizationId]
+    );
+
+    console.log("requestAsset", requestAsset, requestAssetError);
+
+    if (requestAssetError || !requestAsset || requestAsset.length === 0) {
+      return err("Asset not found");
+    }
     const assetUrl = await this.s3Client.getRequestResponseImageSignedUrl(
       this.authParams.organizationId,
       requestId,
