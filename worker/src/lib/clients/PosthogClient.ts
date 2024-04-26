@@ -1,29 +1,35 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { PostHog } from "posthog-node";
 
 export class PosthogClient {
-  private readonly posthog: PostHog;
+  private readonly apiKey: string;
+  private readonly posthogHost: string;
 
   constructor(apiKey: string, posthogHost: string | null = null) {
-    this.posthog = new PostHog(apiKey, {
-      host: posthogHost ?? "https://app.posthog.com",
-    });
+    this.apiKey = apiKey;
+    this.posthogHost = posthogHost ?? "https://app.posthog.com";
   }
 
   public async captureEvent(
     event: string,
-    properties: Record<string, any>
+    properties: Record<string, any>,
+    distinctId: string = crypto.randomUUID()
   ): Promise<void> {
-    try {
-      this.posthog.capture({
-        distinctId: crypto.randomUUID(),
-        event: event,
-        properties: {
-          ...properties,
-        },
-      });
+    const url = `${this.posthogHost}/capture/`;
+    const body = JSON.stringify({
+      api_key: this.apiKey,
+      event: event,
+      properties: properties,
+      distinct_id: distinctId,
+    });
 
-      await this.posthog.shutdown();
+    try {
+      await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: body,
+      });
     } catch (error: any) {
       console.error(`Error capturing PostHog event: ${error.message}`);
     }
