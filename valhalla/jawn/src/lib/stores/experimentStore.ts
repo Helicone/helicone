@@ -239,7 +239,6 @@ export const ServerExperimentStore: {
       return err(experimentIdError);
     }
 
-    console.log("experimentId", experimentId);
     if (!experimentId?.experimentId) {
       return err("No experiment found");
     }
