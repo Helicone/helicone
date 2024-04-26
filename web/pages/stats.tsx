@@ -5,26 +5,16 @@ import { BarChart } from "@tremor/react";
 import { Result } from "../lib/result";
 import { HeliconeStats } from "./api/stats";
 import { getTimeMap } from "../lib/timeCalculations/constants";
-import { useState } from "react";
 
 interface HomeProps {}
 
 const Home = (props: HomeProps) => {
-  const [time, setTime] = useState<"all" | "30" | "90" | "365">("30");
   const {} = props;
   const { isLoading, data } = useQuery({
-    queryKey: ["issues", time],
-    queryFn: async (query) => {
-      const time = query.queryKey[1] as string;
+    queryKey: ["issues"],
+    queryFn: async () => {
       const response = await fetch("/api/stats", {
         next: { revalidate: 1000 },
-        body: JSON.stringify({
-          time: time,
-        }),
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
       });
       return (await response.json()) as Result<HeliconeStats, string>;
     },
@@ -245,7 +235,7 @@ const Home = (props: HomeProps) => {
               </div>
 
               <h1 className="text-3xl font-bold text-center">
-                Requests week over week {weeklyActiveUsers.length}
+                Requests week over week
               </h1>
               <div className="h-96">
                 <BarChart
