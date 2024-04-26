@@ -111,9 +111,9 @@
 		"contact": {}
 	},
 	"paths": {
-		"/v1/settings": {
+		"/v1/settings/query": {
 			"get": {
-				"operationId": "GenerateHash",
+				"operationId": "GetSettings",
 				"responses": {
 					"200": {
 						"description": "Ok",

@@ -9,8 +9,8 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
-  "/v1/settings": {
-    get: operations["GenerateHash"];
+  "/v1/settings/query": {
+    get: operations["GetSettings"];
   };
   "/v1/key/generateHash": {
     post: operations["GenerateHash"];
@@ -68,6 +68,18 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  GetSettings: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            useAzureForExperiment: boolean;
+          };
+        };
+      };
+    };
+  };
   GenerateHash: {
     requestBody: {
       content: {
