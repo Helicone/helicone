@@ -352,8 +352,25 @@ export const Chat = (props: ChatProps) => {
 
   const [open, setOpen] = useState(false);
 
-  const requestMessages =
+  let requestMessages =
     llmSchema?.request.messages ?? requestBody?.messages ?? [];
+
+  if (
+    requestBody?.system &&
+    !requestMessages.some(
+      (msg: any) =>
+        msg?.role === "system" && msg?.content === requestBody?.system
+    )
+  ) {
+    requestMessages = [
+      {
+        id: crypto.randomUUID(),
+        role: "system",
+        content: requestBody?.system,
+      },
+      ...requestMessages,
+    ];
+  }
 
   const getResponseMessage = () => {
     if (/^claude/.test(model)) {
