@@ -355,12 +355,6 @@ export const Chat = (props: ChatProps) => {
   let requestMessages =
     llmSchema?.request.messages ?? requestBody?.messages ?? [];
 
-  const systemMessage = {
-    id: crypto.randomUUID(),
-    role: "system",
-    content: requestBody.system,
-  };
-
   if (
     requestBody?.system &&
     !requestMessages.some(
@@ -368,7 +362,14 @@ export const Chat = (props: ChatProps) => {
         msg?.role === "system" && msg?.content === requestBody?.system
     )
   ) {
-    requestMessages = [systemMessage, ...requestMessages];
+    requestMessages = [
+      {
+        id: crypto.randomUUID(),
+        role: "system",
+        content: requestBody?.system,
+      },
+      ...requestMessages,
+    ];
   }
 
   const getResponseMessage = () => {
