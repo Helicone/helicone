@@ -65,6 +65,7 @@ export interface HeliconeRequest {
   country_code: string | null;
   asset_ids: string[] | null;
   asset_urls: Record<string, string> | null;
+  costUSD?: number | null;
 }
 
 export async function getRequests(
