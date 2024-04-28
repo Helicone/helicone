@@ -205,6 +205,8 @@ Json: JsonObject;
       country_code: string | null;
       asset_ids: string[] | null;
       asset_urls: components["schemas"]["Record_string.string_"] | null;
+      /** Format: double */
+      costUSD?: number | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];

@@ -515,6 +515,11 @@
 							}
 						],
 						"nullable": true
+					},
+					"costUSD": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
 					}
 				},
 				"required": [
