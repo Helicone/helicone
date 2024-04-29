@@ -55,7 +55,10 @@ export interface HeliconeProxyRequest {
   cf?: CfProperties;
 }
 
-const providerBaseUrlMappings: Record<Provider, string> = {
+const providerBaseUrlMappings: Record<
+  "OPENAI" | "ANTHROPIC" | "CUSTOM",
+  string
+> = {
   OPENAI: "https://api.openai.com",
   ANTHROPIC: "https://api.anthropic.com",
   CUSTOM: "",
@@ -88,7 +91,8 @@ export class HeliconeProxyRequestMapper {
       );
       heliconePromptTemplate = templateWithInputs;
 
-      this.injectPromptInputs(templateWithInputs.inputs);
+      this.request.heliconeHeaders.heliconeProperties[`Helicone-Prompt-Id`] =
+        this.request.heliconeHeaders.promptId;
     }
 
     const targetUrl = buildTargetUrl(this.request.url, api_base);
@@ -123,14 +127,6 @@ export class HeliconeProxyRequestMapper {
     };
   }
 
-  private injectPromptInputs(inputs: Record<string, string>) {
-    Object.entries(inputs).forEach(([key, value]) => {
-      this.request.heliconeHeaders.heliconeProperties[
-        `Helicone-Prompt-Input-${key}`
-      ] = value;
-    });
-  }
-
   private async getBody(): Promise<string | null> {
     if (this.request.getMethod() === "GET") {
       return null;
@@ -162,12 +158,22 @@ export class HeliconeProxyRequestMapper {
       };
     }
 
+    // this is kind of legacy stuff. the correct way to add providers is to add it to `modifyEnvBasedOnPath` (04/28/2024)
     if (api_base) {
       return { data: api_base, error: null };
-    } else {
+    } else if (
+      this.provider === "CUSTOM" ||
+      this.provider === "ANTHROPIC" ||
+      this.provider === "OPENAI"
+    ) {
       return {
         data: providerBaseUrlMappings[this.provider],
         error: null,
+      };
+    } else {
+      return {
+        data: null,
+        error: `Invalid provider "${this.provider}"`,
       };
     }
   }

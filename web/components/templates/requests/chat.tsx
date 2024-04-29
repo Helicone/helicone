@@ -13,10 +13,8 @@ import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { LlmSchema } from "../../../lib/api/models/requestResponseModel";
 import ThemedModal from "../../shared/themed/themedModal";
-import {
-  RenderImageWithPrettyInputKeys,
-  RenderWithPrettyInputKeys,
-} from "../prompts/id/promptIdPage";
+import { RenderWithPrettyInputKeys } from "../playground/chatRow";
+import { RenderImageWithPrettyInputKeys } from "../prompts/id/promptIdPage";
 
 export type Message = {
   id: string;
@@ -354,8 +352,25 @@ export const Chat = (props: ChatProps) => {
 
   const [open, setOpen] = useState(false);
 
-  const requestMessages =
+  let requestMessages =
     llmSchema?.request.messages ?? requestBody?.messages ?? [];
+
+  if (
+    requestBody?.system &&
+    !requestMessages.some(
+      (msg: any) =>
+        msg?.role === "system" && msg?.content === requestBody?.system
+    )
+  ) {
+    requestMessages = [
+      {
+        id: crypto.randomUUID(),
+        role: "system",
+        content: requestBody?.system,
+      },
+      ...requestMessages,
+    ];
+  }
 
   const getResponseMessage = () => {
     if (/^claude/.test(model)) {

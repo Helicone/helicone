@@ -14,13 +14,9 @@ import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { LlmSchema } from "../models/requestResponseModel";
 import { S3Client } from "../db/s3Client";
 import { mapGeminiPro } from "../graphql/helpers/mappers";
+import { ProviderName } from "../../../packages/cost/providers/mappings";
 
-export type Provider =
-  | "OPENAI"
-  | "ANTHROPIC"
-  | "TOGETHERAI"
-  | "GROQ"
-  | "CUSTOM";
+export type Provider = ProviderName | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 3 * 1024 * 1024;
 
 export interface HeliconeRequest {

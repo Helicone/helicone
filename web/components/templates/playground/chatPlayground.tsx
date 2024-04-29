@@ -13,6 +13,7 @@ import { Message } from "../requests/chat";
 import ModelPill from "../requestsV2/modelPill";
 import ChatRow from "./chatRow";
 import RoleButton from "./new/roleButton";
+import HcButton from "../../ui/hcButton";
 
 interface ChatPlaygroundProps {
   requestId: string;
@@ -22,18 +23,25 @@ interface ChatPlaygroundProps {
   maxTokens: number;
   onSubmit?: (history: Message[]) => void;
   submitText?: string;
+  customNavBar?: {
+    onBack: () => void;
+    onContinue: () => void;
+  };
 }
 
 const ChatPlayground = (props: ChatPlaygroundProps) => {
   const {
-    requestId,
     chat,
     models,
     temperature,
     maxTokens,
     onSubmit,
     submitText = "Submit",
+    customNavBar,
   } = props;
+
+  // make a deep copy of the chat
+  const deepCopy = JSON.parse(JSON.stringify(chat));
 
   const { setNotification } = useNotification();
 
@@ -119,6 +127,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         if (modelMessage.length > 0) {
           renderRows.push(
             <div
+              key={i}
               className={clsx(
                 i !== 0 && "border-t",
                 "flex flex-col w-full h-full relative space-y-4 bg-white border-gray-300 dark:border-gray-700"
@@ -229,6 +238,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
       if (modelMessage.length === 1) {
         renderRows.push(
           <ChatRow
+            key={modelMessage[0].id}
             index={currentChat.length - 1}
             message={modelMessage[0]}
             callback={(userText: string, role: string) => {
@@ -245,7 +255,10 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         );
       } else {
         renderRows.push(
-          <div className="flex flex-col px-8 py-4 space-y-8 bg-white dark:bg-black border-t border-gray-300 dark:border-gray-700">
+          <div
+            key={currentChat.length - 1}
+            className="flex flex-col px-8 py-4 space-y-8 bg-white dark:bg-black border-t border-gray-300 dark:border-gray-700"
+          >
             <RoleButton
               role={"assistant"}
               onRoleChange={function (
@@ -297,97 +310,133 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
   };
 
   return (
-    <ul className="w-full border border-gray-300 dark:border-gray-700 rounded-lg relative h-fit">
-      {generateChatRows()}
-      {isLoading && (
-        <li className="flex flex-row justify-between px-8 py-4 bg-white dark:bg-black border-t border-gray-300 dark:border-gray-700">
-          <div className="flex flex-col gap-4 w-full">
-            <div className="flex flex-col space-y-4 w-full h-full relative">
-              <RoleButton
-                role={"assistant"}
-                onRoleChange={function (
-                  role: "function" | "system" | "user" | "assistant"
-                ): void {}}
-                disabled={true}
-              />
-              <span className="flex flex-row space-x-1 items-center">
-                <ArrowPathIcon className="h-4 w-4 text-gray-500 animate-spin" />
-              </span>
+    <>
+      <ul className="w-full border border-gray-300 dark:border-gray-700 rounded-lg relative h-fit">
+        {generateChatRows()}
+        {isLoading && (
+          <li className="flex flex-row justify-between px-8 py-4 bg-white dark:bg-black border-t border-gray-300 dark:border-gray-700">
+            <div className="flex flex-col gap-4 w-full">
+              <div className="flex flex-col space-y-4 w-full h-full relative">
+                <RoleButton
+                  role={"assistant"}
+                  onRoleChange={function (
+                    role: "function" | "system" | "user" | "assistant"
+                  ): void {}}
+                  disabled={true}
+                />
+                <span className="flex flex-row space-x-1 items-center">
+                  <ArrowPathIcon className="h-4 w-4 text-gray-500 animate-spin" />
+                </span>
+              </div>
             </div>
+          </li>
+        )}
+        <li className="px-8 py-4 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg justify-between space-x-4 flex">
+          <div className="w-full">
+            <button
+              onClick={() => {
+                // check to see if the last message was a user
+                const lastMessage = currentChat[currentChat.length - 1];
+                if (lastMessage === undefined) {
+                  const newChat = [...currentChat];
+                  newChat.push({
+                    id: crypto.randomUUID(),
+                    content: "",
+                    role: "user",
+                  });
+                  setCurrentChat(newChat);
+                } else if (lastMessage.role === "user") {
+                  const newChat = [...currentChat];
+                  newChat.push({
+                    id: crypto.randomUUID(),
+                    content: "",
+                    role: "assistant",
+                  });
+                  setCurrentChat(newChat);
+                } else {
+                  const newChat = [...currentChat];
+                  newChat.push({
+                    id: crypto.randomUUID(),
+                    content: "",
+                    role: "user",
+                  });
+                  setCurrentChat(newChat);
+                }
+              }}
+              className={clsx(
+                "bg-white hover:bg-gray-100 border border-gray-300 text-black dark:bg-black dark:hover:bg-gray-900 dark:border-gray-700 dark:text-white",
+                "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-black dark:text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              )}
+            >
+              <PlusIcon className="h-4 w-4 inline  text-black dark:text-white rounded-lg mr-2" />
+              Add Message
+            </button>
+          </div>
+
+          <div className="flex space-x-4 w-full justify-end">
+            <button
+              onClick={() => {
+                //  reset the chat to the original chat
+                const originalCopy = chat.map((message, index) => {
+                  return { ...message, id: crypto.randomUUID() };
+                });
+                setCurrentChat(originalCopy);
+              }}
+              className={clsx(
+                "bg-white hover:bg-gray-100 border border-gray-300 text-black dark:bg-black dark:hover:bg-gray-900 dark:border-gray-700 dark:text-white",
+                "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-black dark:text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              )}
+            >
+              <ArrowPathIcon className="h-4 w-4 inline text-black dark:text-white rounded-lg mr-2" />
+              Reset
+            </button>
+            {!customNavBar && (
+              <button
+                onClick={() => {
+                  if (onSubmit) {
+                    onSubmit(currentChat);
+                  } else {
+                    handleSubmit(currentChat);
+                  }
+                }}
+                className={clsx(
+                  "bg-sky-600 hover:bg-sky-700",
+                  "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-white dark:text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                )}
+              >
+                <PaperAirplaneIcon className="h-4 w-4 inline text-white dark:text-black rounded-lg mr-2" />
+
+                {submitText}
+              </button>
+            )}
           </div>
         </li>
-      )}
-      <li className="px-8 py-4 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg justify-between space-x-4 flex">
-        <div className="w-full">
-          <button
-            onClick={() => {
-              // check to see if the last message was a user
-              const lastMessage = currentChat[currentChat.length - 1];
-              if (lastMessage.role === "user") {
-                const newChat = [...currentChat];
-                newChat.push({
-                  id: crypto.randomUUID(),
-                  content: "",
-                  role: "assistant",
-                });
-                setCurrentChat(newChat);
-              } else {
-                const newChat = [...currentChat];
-                newChat.push({
-                  id: crypto.randomUUID(),
-                  content: "",
-                  role: "user",
-                });
-                setCurrentChat(newChat);
-              }
-            }}
-            className={clsx(
-              "bg-white hover:bg-gray-100 border border-gray-300 text-black dark:bg-black dark:hover:bg-gray-900 dark:border-gray-700 dark:text-white",
-              "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-black dark:text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            )}
-          >
-            <PlusIcon className="h-4 w-4 inline  text-black dark:text-white rounded-lg mr-2" />
-            Add Message
-          </button>
-        </div>
-
-        <div className="flex space-x-4 w-full justify-end">
-          <button
-            onClick={() => {
-              //  reset the chat to the original chat
-              const originalCopy = chat.map((message, index) => {
-                return { ...message, id: crypto.randomUUID() };
-              });
-              setCurrentChat(originalCopy);
-            }}
-            className={clsx(
-              "bg-white hover:bg-gray-100 border border-gray-300 text-black dark:bg-black dark:hover:bg-gray-900 dark:border-gray-700 dark:text-white",
-              "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-black dark:text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            )}
-          >
-            <ArrowPathIcon className="h-4 w-4 inline text-black dark:text-white rounded-lg mr-2" />
-            Reset
-          </button>
-          <button
+      </ul>
+      {customNavBar && (
+        <div
+          id="step-inc"
+          className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+        >
+          <HcButton
+            variant={"secondary"}
+            size={"sm"}
+            title={"Back"}
+            onClick={() => customNavBar.onBack()}
+          />
+          <HcButton
+            variant={"primary"}
+            size={"sm"}
+            title={"Continue"}
             onClick={() => {
               if (onSubmit) {
                 onSubmit(currentChat);
-              } else {
-                handleSubmit(currentChat);
               }
+              customNavBar.onContinue();
             }}
-            className={clsx(
-              "bg-sky-500 hover:bg-sky-600",
-              "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-white dark:text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            )}
-          >
-            <PaperAirplaneIcon className="h-4 w-4 inline text-white dark:text-black rounded-lg mr-2" />
-
-            {submitText}
-          </button>
+          />
         </div>
-      </li>
-    </ul>
+      )}
+    </>
   );
 };
 

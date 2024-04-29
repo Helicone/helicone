@@ -69,6 +69,7 @@ export async function dbExecute<T>(
   const client = new Client({
     connectionString: process.env.SUPABASE_DATABASE_URL,
     ssl,
+    statement_timeout: 10000,
   });
 
   try {

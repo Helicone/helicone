@@ -147,6 +147,10 @@ const whereKeyMappings: KeyMappings = {
     minor_version: "prompts_versions.minor_version",
     prompt_v2: "prompts_versions.prompt_v2",
   }),
+  experiment: easyKeyMappings<"experiment">({
+    id: "e.id",
+    prompt_v2: "pv.prompt_v2",
+  }),
   response: easyKeyMappings<"response">({
     body_completion:
       "(coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text",
@@ -291,6 +295,7 @@ const havingKeyMappings: KeyMappings = {
   rate_limit_log: NOT_IMPLEMENTED,
   prompt_v2: NOT_IMPLEMENTED,
   prompts_versions: NOT_IMPLEMENTED,
+  experiment: NOT_IMPLEMENTED,
 };
 
 export function buildFilterLeaf(
