@@ -47,24 +47,25 @@ export type Log = {
     heliconeProxyKeyId?: string;
     targetUrl: string;
     provider: Provider;
+    bodySize: number;
     model: string;
     path: string;
     threat?: boolean;
     countryCode?: string;
     requestCreatedAt: Date;
     isStream: boolean;
-    assets?: Map<string, string>;
     heliconeTemplate?: TemplateWithInputs;
   };
   response: {
     id: string;
     status: number;
+    bodySize: number;
     model: string;
     timeToFirstToken?: number;
     responseCreatedAt: Date;
     delayMs: number;
-    assets?: Map<string, string>;
   };
+  assets?: Map<string, string>;
   model: string;
 };
 

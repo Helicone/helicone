@@ -732,6 +732,7 @@ export class DBLoggable {
           heliconeProxyKeyId: this.request.heliconeProxyKeyId ?? undefined,
           targetUrl: this.request.targetUrl,
           provider: this.request.provider,
+          bodySize: this.request.bodyText?.length ?? 0,
           model: requestModel,
           path: this.request.path,
           threat: this.request.threat ?? undefined,
@@ -743,6 +744,7 @@ export class DBLoggable {
         response: {
           id: this.response.responseId,
           status: await this.response.status(),
+          bodySize: rawResponseBody.length,
           model: responseModel,
           timeToFirstToken: (await this.timing.timeToFirstToken()) ?? undefined,
           responseCreatedAt: endTime,

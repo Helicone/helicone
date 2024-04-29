@@ -8,7 +8,7 @@ export class PromptHandler extends AbstractLogHandler {
       context.message.log.request.promptId &&
       context.message.log.request.heliconeTemplate
     ) {
-      const assets = context.message.log.request.assets;
+      const assets = context.message.log.assets;
       const heliconeTemplate = context.message.log.request.heliconeTemplate;
 
       // If assets are present, replace the inputs with the asset ids

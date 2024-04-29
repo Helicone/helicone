@@ -26,7 +26,7 @@ const requestColumns = new pgp.helpers.ColumnSet(
     "helicone_org_id",
     "helicone_proxy_key_id",
     "helicone_user",
-    { name: "id", cdn: true },
+    "id",
     "model",
     "model_override",
     "path",
@@ -52,7 +52,7 @@ const responseColumns = new pgp.helpers.ColumnSet(
     "created_at",
     "delay_ms",
     "feedback",
-    { name: "id", cdn: true },
+    "id",
     "model",
     "prompt_tokens",
     "request",
@@ -66,16 +66,7 @@ const onConflictResponse =
   responseColumns.assignColumns({ from: "EXCLUDED", skip: "id" });
 
 const propertiesColumns = new pgp.helpers.ColumnSet(
-  [
-    "auth_hash",
-    "created_at",
-    { name: "id", cdn: true },
-    ,
-    "key",
-    "request_id",
-    "user_id",
-    "value",
-  ],
+  ["auth_hash", "created_at", "id", "key", "request_id", "user_id", "value"],
   { table: "properties" }
 );
 const onConflictProperties =

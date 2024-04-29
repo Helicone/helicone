@@ -58,8 +58,8 @@ export class PostHogHandler extends AbstractLogHandler {
       totalTokens: (usage.completionTokens ?? 0) + (usage.promptTokens ?? 0),
       userId: request.userId ?? "",
       countryCode: request.countryCode ?? "",
-      requestBodySize: request.body?.length ?? 0, // Get length of ORIGINAL request body, not processed
-      responseBodySize: response.body?.length ?? 0, // Get length of ORIGINAL response body, not processed
+      requestBodySize: request.bodySize ?? 0,
+      responseBodySize: response.bodySize ?? 0,
       delayMs: response.delayMs ?? 0,
     };
 

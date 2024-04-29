@@ -14,7 +14,7 @@ import { PostHogHandler } from "../lib/handlers/PostHogHandler";
 import { S3Client } from "../lib/shared/db/s3Client";
 import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
 
-class LogManager {
+export class LogManager {
   public async processLogEntries(
     logMessages: Message[],
     batchId: string

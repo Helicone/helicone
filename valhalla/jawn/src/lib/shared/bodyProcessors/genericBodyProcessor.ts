@@ -1,10 +1,6 @@
+import { Usage } from "../../handlers/HandlerContext";
 import { PromiseGenericResult, ok } from "../result";
-import {
-  IBodyProcessor,
-  ParseInput,
-  ParseOutput,
-  Usage,
-} from "./IBodyProcessor";
+import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 
 export class GenericBodyProcessor implements IBodyProcessor {
   public async parse(

@@ -12,6 +12,7 @@ export type Log = {
     heliconeProxyKeyId?: string;
     targetUrl: string;
     provider: Provider;
+    bodySize: number;
     model: string;
     path: string;
     threat?: boolean;
@@ -23,12 +24,13 @@ export type Log = {
   response: {
     id: string;
     status: number;
+    bodySize: number;
     model: string;
     timeToFirstToken?: number;
     responseCreatedAt: Date;
     delayMs: number;
   };
-  assets: Map<string, string>;
+  assets?: Map<string, string>;
   model: string;
 };
 
@@ -65,11 +67,12 @@ export class KafkaProducer {
     while (attempts < maxAttempts) {
       try {
         const message = JSON.stringify({
-          key: msg.log.request.id,
           value: JSON.stringify(msg),
         });
 
-        const res = await p.produce("logs", message);
+        const res = await p.produce("logs", message, {
+          key: msg.log.request.id,
+        });
 
         console.log(JSON.stringify(res));
         return res; // Exit function after a successful fetch
