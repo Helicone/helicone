@@ -46,6 +46,7 @@ routes = [
 	{ pattern = "oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "api.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "openrouter.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "together.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "gateway.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "2yfv.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
@@ -84,6 +85,7 @@ routes = [
 	{ pattern = "oai_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "api_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	# openrouter_staging.hconeai.com was failing to deploy
 	{ pattern = "openrouterstaging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "together_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "gateway_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
