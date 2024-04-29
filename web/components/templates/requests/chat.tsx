@@ -15,6 +15,7 @@ import { LlmSchema } from "../../../lib/api/models/requestResponseModel";
 import ThemedModal from "../../shared/themed/themedModal";
 import { RenderWithPrettyInputKeys } from "../playground/chatRow";
 import { RenderImageWithPrettyInputKeys } from "../prompts/id/promptIdPage";
+import RoleButton from "../playground/new/roleButton";
 
 export type Message = {
   id: string;
@@ -258,13 +259,15 @@ export const SingleChat = (props: {
         key={index}
       >
         <div className="flex items-center justify-center">
-          <div
-            className={clsx(
-              "bg-white dark:bg-black border border-gray-300 dark:border-gray-700",
-              "flex text-gray-900 dark:text-gray-100 w-20 h-6 px-1 text-xs rounded-lg font-semibold text-center justify-center items-center"
-            )}
-          >
-            <p>{message.role}</p>
+          <div className="w-20">
+            <RoleButton
+              role={message.role}
+              onRoleChange={function (
+                role: "function" | "assistant" | "user" | "system"
+              ): void {}}
+              disabled={true}
+              size={"small"}
+            />
           </div>
         </div>
         <div className="relative whitespace-pre-wrap items-center h-full w-full">
@@ -601,7 +604,7 @@ export const Chat = (props: ChatProps) => {
               </div>
             </div>
           ) : messages.length > 0 ? (
-            <div>{renderMessages(messages)}</div>
+            <>{renderMessages(messages)}</>
           ) : (
             <div className="">
               <div
