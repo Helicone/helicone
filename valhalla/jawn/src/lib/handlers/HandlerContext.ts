@@ -65,7 +65,6 @@ export type Log = {
     delayMs: number;
     assets?: Map<string, string>;
   };
-  s3Url: string;
   model: string;
 };
 
