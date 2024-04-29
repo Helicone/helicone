@@ -9,6 +9,7 @@ import { costs as googleCosts } from "./google";
 import { costs as anthropicCosts } from "./anthropic";
 import { costs as cohereCosts } from "./cohere";
 import { costs as mistralCosts } from "./mistral";
+import { costs as openRouterCosts } from "./openrouter";
 import { ModelRow } from "../interfaces/Cost";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
@@ -37,9 +38,30 @@ const cohere = /^https:\/\/api\.cohere\.ai/;
 // api.mistral.ai
 const mistral = /^https:\/\/api\.mistral\.ai/;
 
+export type ProviderName =
+  | "OPENAI"
+  | "ANTHROPIC"
+  | "AZURE"
+  | "LOCAL"
+  | "HELICONE"
+  | "AMDBARTEK"
+  | "ANYSCALE"
+  | "CLOUDFLARE"
+  | "2YFV"
+  | "TOGETHER"
+  | "LEMONFOX"
+  | "FIREWORKS"
+  | "PERPLEXITY"
+  | "GOOGLE"
+  | "OPENROUTER"
+  | "WISDOMINANUTSHELL"
+  | "GROQ"
+  | "COHERE"
+  | "MISTRAL";
+
 export const providers: {
   pattern: RegExp;
-  provider: string;
+  provider: ProviderName;
   costs?: ModelRow[];
 }[] = [
   {
@@ -111,6 +133,7 @@ export const providers: {
   {
     pattern: openRouter,
     provider: "OPENROUTER",
+    costs: openRouterCosts,
   },
   {
     pattern: wisdomInANutshell,

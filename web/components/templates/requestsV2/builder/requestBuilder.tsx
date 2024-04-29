@@ -32,6 +32,9 @@ export const getBuilderType = (
   path?: string | null,
   llmType?: LlmType | null
 ): BuilderType => {
+  if (provider === "OPENROUTER") {
+    return "ChatGPTBuilder";
+  }
   if (llmType === "chat") {
     return "ChatBuilder";
   }
@@ -49,7 +52,8 @@ export const getBuilderType = (
   }
 
   if (
-    provider === "TOGETHERAI" ||
+    provider === "TOGETHER" ||
+    (provider as any) === "TOGETHERAI" ||
     model == "gpt-4-vision-preview" ||
     model == "gpt-4-1106-vision-preview"
   ) {
