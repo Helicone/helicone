@@ -18,7 +18,7 @@ export type BlogStructure = {
 
 const blogContent: BlogStructure[] = [
   {
-    title: "A Guide for Datadog Users Building with LLM",
+    title: "A Guide for Datadog Users Building with LLM's",
     description:
       "Datadog has long been a favourite among developers for monitoring and observability. But recently, LLM developers have been exploring new options. Why? We have some answers.",
     badgeText: "Compare",
