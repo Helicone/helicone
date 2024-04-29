@@ -7,10 +7,6 @@ import { ModelRow } from "../../interfaces/Cost";
 
 export const costs: ModelRow[] = [
   {
-    model: { operator: "equals", value: "openrouter/auto" },
-    cost: { prompt_token: -1.0, completion_token: -1.0 },
-  },
-  {
     model: { operator: "equals", value: "nousresearch/nous-capybara-7b:free" },
     cost: { prompt_token: 0.0, completion_token: 0.0 },
   },
