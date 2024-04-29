@@ -56,43 +56,48 @@
     },
     {
       "group": "Getting Started",
+      "pages": ["getting-started/quick-start", "getting-started/up-next"]
+    },
+    {
+      "group": "Integrations",
       "pages": [
-        "getting-started/quick-start",
-        "getting-started/proxy-vs-async",
+        {
+          "group": "OpenAI",
+          "pages": [
+            "getting-started/integration-method/openai-proxy",
+            "getting-started/integration-method/openai"
+          ]
+        },
+        "getting-started/integration-method/azure",
+        "getting-started/integration-method/anthropic",
+        "getting-started/integration-method/anyscale",
+        "getting-started/integration-method/together",
+        "getting-started/integration-method/openrouter",
+        "getting-started/integration-method/litellm",
+        {
+          "group": "Other",
+          "pages": [
+            "getting-started/integration-method/gateway",
+            "getting-started/integration-method/custom"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "Self Hosting",
+      "pages": [
         "getting-started/self-deploy",
         "getting-started/self-deploy-cloud",
         "getting-started/self-deploy-docker"
       ]
     },
     {
-      "group": "Integrations",
+      "group": "FAQ",
       "pages": [
-        {
-          "group": "Proxy",
-          "pages": [
-            "getting-started/integration-method/gateway",
-            "getting-started/integration-method/gateway-fallbacks",
-            "getting-started/integration-method/openai-proxy",
-            "getting-started/integration-method/anthropic",
-            "getting-started/integration-method/azure",
-            "getting-started/integration-method/anyscale",
-            "getting-started/integration-method/together"
-          ]
-        },
-        {
-          "group": "Async",
-          "pages": [
-            "getting-started/integration-method/openai",
-            "getting-started/integration-method/custom"
-          ]
-        },
-        {
-          "group": "Community",
-          "pages": [
-            "getting-started/integration-method/openrouter",
-            "getting-started/integration-method/litellm"
-          ]
-        }
+        "getting-started/self-deploy",
+        "getting-started/self-deploy-cloud",
+        "getting-started/self-deploy-docker",
+        "getting-started/proxy-vs-async"
       ]
     },
 
@@ -115,6 +120,7 @@
           "group": "Jobs",
           "pages": ["features/jobs/quick-start", "features/jobs/example"]
         },
+        "getting-started/integration-method/gateway-fallbacks",
         "features/advanced-usage/custom-properties",
         "features/advanced-usage/user-metrics",
         "features/advanced-usage/feedback",
