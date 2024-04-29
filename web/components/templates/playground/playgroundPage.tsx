@@ -176,18 +176,18 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                           value={temperature}
                           onChange={(e) => {
                             const value = parseFloat(e.target.value);
-                            if (value < 0.01) {
-                              setTemperature(0.01);
+                            if (value < 0) {  // Adjusting from 0.01 to 0 to allow setting 0.00
+                              setTemperature(0);
                               return;
                             }
                             if (value > 1.99) {
                               setTemperature(1.99);
                               return;
                             }
-                            setTemperature(parseFloat(e.target.value));
+                            setTemperature(value);
                           }}
-                          min={0}
-                          max={1}
+                          min={0.00}  // Adjusted min value
+                          max={1.99}
                           step={0.01}
                           className="w-16 text-sm px-2 py-1 rounded-lg border border-gray-500"
                         />
@@ -196,21 +196,21 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                         type="range"
                         id="temp-range"
                         name="temp-range"
-                        min={0}
+                        min={0.00}  // Adjusted min value
                         max={1.99}
                         step={0.01}
                         value={temperature}
                         onChange={(e) => {
                           const value = parseFloat(e.target.value);
-                          if (value < 0.01) {
-                            setTemperature(0.01);
+                          if (value < 0) {  // Adjusting from 0.01 to 0 to allow setting 0.00
+                            setTemperature(0);
                             return;
                           }
                           if (value > 1.99) {
                             setTemperature(1.99);
                             return;
                           }
-                          setTemperature(parseFloat(e.target.value));
+                          setTemperature(value);
                         }}
                         className="text-black"
                         style={{
