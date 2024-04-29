@@ -4,7 +4,7 @@ export interface RateLimitOptions {
   time_window: number;
   segment: string | undefined;
   quota: number;
-  unit: "token" | "request" | "dollar";
+  unit: "request" | "cents";
 }
 
 export interface RateLimitResponse {
@@ -13,6 +13,11 @@ export interface RateLimitResponse {
   remaining: number;
   reset?: number;
 }
+
+type KVObject = {
+  timestamp: number;
+  unit: number;
+}[];
 
 async function getSegmentKeyValue(
   properties: HeliconeProperties,
@@ -63,6 +68,7 @@ interface RateLimitProps {
   rateLimitOptions: RateLimitOptions;
   providerAuthHash: string | undefined;
   rateLimitKV: KVNamespace;
+  cost: number;
 }
 
 export async function checkRateLimit(
@@ -82,39 +88,33 @@ export async function checkRateLimit(
     userId,
     segment
   );
-  const kvKey = `rl_${segmentKeyValue}_${providerAuthHash}`;
+  const kvKey = `rl_${segmentKeyValue}_${providerAuthHash}_3`;
   const kv = await rateLimitKV.get(kvKey, "text");
-  const timestamps = kv !== null ? JSON.parse(kv) : [];
+  const timestamps: KVObject = kv !== null ? JSON.parse(kv) : [];
 
   const now = Date.now();
   const timeWindowMillis = time_window * 1000; // Convert time_window to milliseconds
 
   const firstRelevantIndex = binarySearchFirstRelevantIndex(
-    timestamps,
+    timestamps.map((x) => x.timestamp),
     now,
     timeWindowMillis
   );
-  const relevantTimestampsCount = timestamps.length - firstRelevantIndex;
 
-  const remaining = Math.max(0, quota - relevantTimestampsCount);
+  const relevantTimestamps = timestamps.slice(firstRelevantIndex);
+
+  if (relevantTimestamps.length === 0) {
+    return { status: "ok", limit: quota, remaining: quota };
+  }
+  const currentQuota = relevantTimestamps.reduce((acc, x) => acc + x.unit, 0);
+
+  const remaining = Math.max(0, quota - currentQuota);
+
   const reset = Math.ceil(
-    (timestamps[firstRelevantIndex] + timeWindowMillis - now) / 1000
+    (timestamps[firstRelevantIndex].timestamp + timeWindowMillis - now) / 1000
   );
 
-  if (timestamps.length < quota) {
-    return { status: "ok", limit: quota, remaining };
-  }
-
-  // Check if the first timestamp is within the time window when the length is exactly equal to the quota
-  if (timestamps.length === quota) {
-    if (now - timestamps[0] >= timeWindowMillis) {
-      return { status: "ok", limit: quota, remaining };
-    } else {
-      return { status: "rate_limited", limit: quota, remaining, reset };
-    }
-  }
-
-  if (relevantTimestampsCount >= quota) {
+  if (currentQuota >= quota) {
     return { status: "rate_limited", limit: quota, remaining, reset };
   }
 
@@ -139,17 +139,27 @@ export async function updateRateLimitCounter(
     segment
   );
 
-  const kvKey = `rl_${segmentKeyValue}_${heliconeAuthHash}`;
+  const kvKey = `rl_${segmentKeyValue}_${heliconeAuthHash}_3`;
   const kv = await rateLimitKV.get(kvKey, "text");
-  const timestamps = kv !== null ? JSON.parse(kv) : [];
+  const timestamps: KVObject = kv !== null ? JSON.parse(kv) : [];
 
   const now = Date.now();
   const timeWindowMillis = time_window * 1000; // Convert time_window to milliseconds
-  const prunedTimestamps = timestamps.filter((timestamp: number) => {
-    return now - timestamp < timeWindowMillis;
+  const prunedTimestamps = timestamps.filter((timestamp) => {
+    return now - timestamp.timestamp < timeWindowMillis;
   });
 
-  prunedTimestamps.push(now);
+  if (props.rateLimitOptions.unit === "request") {
+    prunedTimestamps.push({
+      timestamp: now,
+      unit: 1,
+    });
+  } else if (props.rateLimitOptions.unit === "cents") {
+    prunedTimestamps.push({
+      timestamp: now,
+      unit: props.cost * 100,
+    });
+  }
 
   await rateLimitKV.put(kvKey, JSON.stringify(prunedTimestamps), {
     expirationTtl: Math.ceil(timeWindowMillis / 1000), // Convert timeWindowMillis to seconds for expirationTtl

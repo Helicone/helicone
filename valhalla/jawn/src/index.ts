@@ -2,7 +2,7 @@ require("dotenv").config({
   path: "./.env",
 });
 
-import express from "express";
+import express, { NextFunction } from "express";
 import swaggerUi from "swagger-ui-express";
 
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
@@ -124,6 +124,23 @@ app.use((req, res, next) => {
 app.use(unAuthenticatedRouter);
 
 app.use(v1APIRouter);
+
+function setRouteTimeout(
+  req: express.Request,
+  res: express.Response,
+  next: NextFunction
+) {
+  const timeout = setTimeout(() => {
+    if (!res.headersSent) {
+      res.status(408).send("Request timed out");
+    }
+  }, 10000); // 10 seconds
+
+  res.on("finish", () => clearTimeout(timeout));
+  next();
+}
+
+app.use(setRouteTimeout);
 
 const server = app.listen(
   parseInt(process.env.PORT ?? "8585"),

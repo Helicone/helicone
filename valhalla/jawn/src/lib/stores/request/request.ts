@@ -20,6 +20,7 @@ export type Provider =
   | "ANTHROPIC"
   | "TOGETHERAI"
   | "GROQ"
+  | "GOOGLE"
   | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
@@ -64,6 +65,7 @@ export interface HeliconeRequest {
   country_code: string | null;
   asset_ids: string[] | null;
   asset_urls: Record<string, string> | null;
+  costUSD?: number | null;
 }
 
 export async function getRequests(
@@ -90,6 +92,17 @@ export async function getRequests(
     argsAcc: [],
   });
   const sortSQL = buildRequestSort(sort);
+
+  let joinQuery = "";
+
+  if (
+    JSON.stringify(filter).includes("prompts_versions") ||
+    JSON.stringify(filter).includes("prompt_input_record")
+  ) {
+    joinQuery = `left join prompt_input_record on request.id = prompt_input_record.source_request
+    left join prompts_versions on prompts_versions.id = prompt_input_record.prompt_version`;
+  }
+
   const query = `
   SELECT response.id AS response_id,
     response.created_at as response_created_at,
@@ -121,7 +134,6 @@ export async function getRequests(
     (response.prompt_tokens + response.completion_tokens) as total_tokens,
     response.completion_tokens as completion_tokens,
     response.prompt_tokens as prompt_tokens,
-    job_node_request.node_id as node_id,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
     feedback.rating AS feedback_rating,
@@ -133,7 +145,7 @@ export async function getRequests(
   FROM request
     left join response on request.id = response.request
     left join feedback on response.id = feedback.response_id
-    left join job_node_request on request.id = job_node_request.request_id
+    ${joinQuery}
   WHERE (
     (${builtFilter.filter})
   )
@@ -320,7 +332,10 @@ async function mapLLMCalls(
         "";
 
       try {
-        if (model === "gemini-pro" || model === "gemini-pro-vision") {
+        if (
+          model.toLowerCase().includes("gemini") &&
+          heliconeRequest.provider === "GOOGLE"
+        ) {
           const mappedSchema = mapGeminiPro(heliconeRequest, model);
           heliconeRequest.llmSchema = mappedSchema;
           return heliconeRequest;

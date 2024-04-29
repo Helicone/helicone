@@ -2,7 +2,7 @@ import {
   Request as ExpressRequest,
   Response as ExpressResponse,
 } from "express";
-import { Result, err, ok } from "../modules/result";
+import { Result, err, ok } from "../shared/result";
 
 export type JwtAuth = {
   _type: "jwt";

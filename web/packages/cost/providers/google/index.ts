@@ -16,4 +16,14 @@ export const costs: ModelRow[] = [
       completion_token: 0.000000375,
     },
   },
+  {
+    model: {
+      operator: "equals",
+      value: "gemini-1.0-pro-vision-001",
+    },
+    cost: {
+      prompt_token: 0.000000125,
+      completion_token: 0.000000375,
+    },
+  },
 ];

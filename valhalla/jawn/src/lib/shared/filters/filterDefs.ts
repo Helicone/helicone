@@ -243,10 +243,12 @@ type PromptToOperators = {
 
 export type FilterLeafPrompt = SingleKey<PromptToOperators>;
 
-export type PromptInputTableFilters = {
-  prompt_v2: FilterLeafPrompt;
-  prompts_versions: FilterLeafPromptVersions;
+type ExperimentToOperators = {
+  id: SingleKey<TextOperators>;
+  prompt_v2: SingleKey<TextOperators>;
 };
+
+export type FilterLeafExperiment = SingleKey<ExperimentToOperators>;
 
 export type TablesAndViews = {
   user_metrics: FilterLeafUserMetrics;
@@ -255,6 +257,9 @@ export type TablesAndViews = {
   request: FilterLeafRequest;
   feedback: FilterLeafFeedback;
   properties_table: FilterLeafPropertiesTable;
+  prompt_v2: FilterLeafPrompt;
+  prompts_versions: FilterLeafPromptVersions;
+  experiment: FilterLeafExperiment;
 
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
@@ -272,7 +277,7 @@ export type TablesAndViews = {
   values: {
     [key: string]: SingleKey<TextOperators>;
   };
-} & PromptInputTableFilters;
+};
 
 export type FilterLeaf = SingleKey<TablesAndViews>;
 
@@ -283,6 +288,26 @@ export interface FilterBranch {
 }
 
 export type FilterNode = FilterLeaf | FilterBranch | "all";
+
+export type FilterLeafSubset<T extends keyof TablesAndViews> = Pick<
+  FilterLeaf,
+  T
+>;
+
+// I am keeping this here just incase anyone in the future tries to do this... we know it has been done before.
+// Basically this would be awesome instead of having to create types like RequestFilterNode, but tsoa is not
+// sophisticated enough to handle this.
+//
+// export type FilterBranchSubset<T extends TableAndViewKeys> = {
+//   left: FilterNodeSubset<T>;
+//   operator: "or" | "and";
+//   right: FilterNodeSubset<T>;
+// };
+
+// export type FilterNodeSubset<T extends TableAndViewKeys> =
+//   | FilterLeafSubset<T>
+//   | FilterBranchSubset<T>
+//   | "all";
 
 export function timeFilterToFilterNode(
   filter: TimeFilter,

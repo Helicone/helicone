@@ -36,7 +36,7 @@ import OrgContext, { useOrg } from "./organizationContext";
 import UpgradeProModal from "../shared/upgradeProModal";
 import OrgDropdown from "./orgDropdown";
 
-import ReferralModal from "../common/referralModal";
+import ReferralModal from "../shared/referralModal";
 import { useTheme } from "../shared/theme/themeContext";
 import { ThemedSwitch } from "../shared/themed/themedSwitch";
 import MetaData from "./public/authMetaData";

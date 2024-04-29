@@ -1,6 +1,6 @@
 // src/users/usersController.ts
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
-import { Result } from "../../lib/modules/result";
+import { Result } from "../../lib/shared/result";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import {
   FilterLeaf,
@@ -19,7 +19,7 @@ export interface UserQueryParams {
 }
 
 @Route("v1/user")
-@Tags("Request")
+@Tags("User")
 @Security("api_key")
 export class UserController extends Controller {
   @Post("query")

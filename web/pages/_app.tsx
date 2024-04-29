@@ -9,6 +9,7 @@ import "../styles/globals.css";
 import "../styles/index.css";
 import "../node_modules/react-grid-layout/css/styles.css";
 import "../node_modules/react-resizable/css/styles.css";
+
 import posthog from "posthog-js";
 import { OrgContextProvider } from "../components/layout/organizationContext";
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
@@ -16,6 +17,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { ThemeContextProvider } from "../components/shared/theme/themeContext";
 import { NextPage } from "next";
+import { Analytics } from "@vercel/analytics/react";
 
 if (
   typeof window !== "undefined" &&
@@ -52,6 +54,8 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
 
   const getLayout = Component.getLayout ?? ((page) => page);
 
+  const trackingEnabled = process.env.NEXT_PUBLIC_TRACKING_ENABLED || false;
+
   return (
     <>
       <SessionContextProvider
@@ -73,6 +77,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
           </QueryClientProvider>
         </ApolloProvider>
       </SessionContextProvider>
+      {trackingEnabled && <Analytics />}
     </>
   );
 }
