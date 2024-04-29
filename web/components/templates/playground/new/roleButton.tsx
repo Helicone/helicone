@@ -18,12 +18,19 @@ interface RoleButtonProps {
   onRoleChange: (role: "system" | "user" | "assistant" | "function") => void;
   // setMessage: (message: MessageInputItem) => void;
   // deleteMessage?: (messageInputId: string) => void;
+  size?: "small" | "medium";
   onDelete?: () => void;
   disabled?: boolean;
 }
 
 const RoleButton = (props: RoleButtonProps) => {
-  const { role, onRoleChange, onDelete, disabled = false } = props;
+  const {
+    role,
+    onRoleChange,
+    onDelete,
+    size = "medium",
+    disabled = false,
+  } = props;
 
   const { setNotification } = useNotification();
 
@@ -33,7 +40,8 @@ const RoleButton = (props: RoleButtonProps) => {
         <Menu.Button
           disabled={disabled}
           className={clsx(
-            `border border-${ROLE_COLORS[role]}-500 text-${ROLE_COLORS[role]}-900 dark:text-${ROLE_COLORS[role]}-300 font-semibold rounded-md text-sm bg-${ROLE_COLORS[role]}-100 dark:bg-${ROLE_COLORS[role]}-900  px-2 py-1 w-fit flex items-center`
+            size === "small" ? "text-xs" : "text-sm",
+            `border border-${ROLE_COLORS[role]}-500 text-${ROLE_COLORS[role]}-900 dark:text-${ROLE_COLORS[role]}-300 font-semibold rounded-md bg-${ROLE_COLORS[role]}-100 dark:bg-${ROLE_COLORS[role]}-900  px-2 py-1 w-fit flex items-center`
           )}
         >
           {role}

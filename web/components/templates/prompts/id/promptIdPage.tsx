@@ -392,8 +392,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
               </div>
             </TabPanel>
             <TabPanel>
-              <div className="flex items-start relative">
-                <div className="min-w-[25rem] w-1/3 p-4 flex flex-col space-y-4">
+              <div className="flex items-start relative h-[75vh]">
+                <div className="min-w-[25rem] w-1/3 p-4 flex flex-col space-y-4 h-full">
                   <div className="flex flex-col w-full space-y-2">
                     <div className="flex items-center space-x-2">
                       <p className="font-semibold text-lg">Inputs</p>
@@ -404,7 +404,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       onValueChange={(value) => setSearchRequestId(value)}
                     />
                   </div>
-                  <ul className="flex flex-col space-y-4">
+                  <ul className="flex flex-col space-y-4 overflow-auto h-full">
                     {inputs
                       ?.filter((input) =>
                         input.source_request.includes(searchRequestId)
@@ -429,8 +429,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       ))}
                   </ul>
                 </div>
-                <div className="p-4 flex flex-col space-y-4 w-full sticky top-4">
-                  <div className="w-full flex justify-between items-center">
+                <div className="p-4 flex flex-col space-y-4 w-full h-full">
+                  <div className="w-full flex justify-between items-center flex-1">
                     <div className="flex items-center space-x-2">
                       <p className="font-semibold text-lg">Prompt</p>
                     </div>
@@ -457,15 +457,17 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       </Select>
                     </div>
                   </div>
-                  <Chat
-                    requestBody={selectedPrompt?.helicone_template}
-                    // TODO: Justin add response body and input properties
-                    responseBody={{}}
-                    status={200}
-                    requestId={""}
-                    model={prompts?.at(0)?.model || "unknown"}
-                    selectedProperties={selectedInput?.inputs}
-                  />
+                  <div className="overflow-auto h-full">
+                    <Chat
+                      requestBody={selectedPrompt?.helicone_template}
+                      // TODO: Justin add response body and input properties
+                      responseBody={{}}
+                      status={200}
+                      requestId={""}
+                      model={prompts?.at(0)?.model || "unknown"}
+                      selectedProperties={selectedInput?.inputs}
+                    />
+                  </div>
                 </div>
               </div>
             </TabPanel>
