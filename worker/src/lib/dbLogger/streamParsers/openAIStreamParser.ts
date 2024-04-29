@@ -5,7 +5,10 @@ export async function parseOpenAIStream(
   tokenCounter: (text: string) => Promise<number>,
   requestBody?: string
 ) {
-  const lines = result.split("\n").filter((line) => line !== "");
+  const lines = result
+    .split("\n")
+    .filter((line) => !line.includes("OPENROUTER PROCESSING"))
+    .filter((line) => line !== "");
   const data = lines.map((line, i) => {
     if (i === lines.length - 1) return {};
     try {
