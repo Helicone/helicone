@@ -47,7 +47,6 @@
     "dateformat": "^5.0.3",
     "events": "^3.3.0",
     "itty-router": "^4.0.13",
-    "kafkajs": "^2.2.4",
     "posthog-node": "^4.0.0"
   }
 }

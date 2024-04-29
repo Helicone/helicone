@@ -20,15 +20,16 @@ export class S3Client {
     });
   }
 
+  getRequestResponseRawUrl = (requestId: string, orgId: string) => {
+    return this.getBaseUrl(
+      `organizations/${orgId}/requests/${requestId}/raw_request_response_body`
+    );
+  };
+
   getRequestResponseUrl = (requestId: string, orgId: string) => {
-    const key = `organizations/${orgId}/requests/${requestId}/request_response_body`;
-    if (this.endpoint) {
-      // For MinIO or another S3-compatible service
-      return `${this.endpoint}/${this.bucketName}/${key}`;
-    } else {
-      // For AWS S3
-      return `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${key}`;
-    }
+    return this.getBaseUrl(
+      `organizations/${orgId}/requests/${requestId}/request_response_body`
+    );
   };
 
   getRequestResponseImageUrl = (
@@ -36,14 +37,15 @@ export class S3Client {
     orgId: string,
     assetId: string
   ) => {
-    const key = `organizations/${orgId}/requests/${requestId}/assets/${assetId}`;
-    if (this.endpoint) {
-      // For MinIO or another S3-compatible service
-      return `${this.endpoint}/${this.bucketName}/${key}`;
-    } else {
-      // For AWS S3
-      return `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${key}`;
-    }
+    return this.getBaseUrl(
+      `organizations/${orgId}/requests/${requestId}/assets/${assetId}`
+    );
+  };
+
+  getBaseUrl = (key: string) => {
+    return this.endpoint
+      ? `${this.endpoint}/${this.bucketName}/${key}`
+      : `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${key}`;
   };
 
   async store(url: string, value: string): Promise<Result<string, string>> {

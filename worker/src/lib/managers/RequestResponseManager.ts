@@ -20,6 +20,37 @@ export class RequestResponseManager {
     private supabase: SupabaseClient<Database>
   ) {}
 
+  async storeRequestResponseRaw({
+    organizationId,
+    requestId,
+    requestBody,
+    responseBody,
+    model,
+    assets,
+  }: RequestResponseContent): Promise<Result<string, string>> {
+    // If assets, must be image model, store images in S3
+    if (assets?.size > 0) {
+      await this.storeRequestResponseImage({
+        organizationId,
+        requestId,
+        requestBody,
+        responseBody,
+        model,
+        assets,
+      });
+    }
+
+    const url = this.s3Client.getRequestResponseRawUrl(
+      requestId,
+      organizationId
+    );
+
+    return await this.s3Client.store(
+      url,
+      JSON.stringify({ request: requestBody, response: responseBody })
+    );
+  }
+
   async storeRequestResponseData({
     organizationId,
     requestId,

@@ -35,10 +35,6 @@ import {
 } from "./imageParsers/parserMapper";
 import { TemplateWithInputs } from "../../api/lib/promptHelpers";
 import { ImageModelParsingResponse } from "./imageParsers/core/parsingResponse";
-import {
-  HeliconeRequestResponseToPosthog,
-  PosthogClient,
-} from "../clients/PosthogClient";
 import { costOfPrompt } from "../../packages/cost";
 import { KafkaMessage, KafkaProducer } from "../clients/KafkaProducer";
 
@@ -693,26 +689,20 @@ export class DBLoggable {
         )
       );
 
-    let assets: Map<string, string> = new Map();
-    if (requestBodyAssets) {
-      assets = new Map([...assets, ...requestBodyAssets]);
-    }
-
-    if (responseBodyAssets) {
-      assets = new Map([...assets, ...responseBodyAssets]);
-    }
+    const assets = new Map([
+      ...(requestBodyAssets ?? []),
+      ...(responseBodyAssets ?? []),
+    ]);
 
     if (S3_ENABLED === "true") {
-      const s3Result = await db.requestResponseManager.storeRequestResponseData(
-        {
-          organizationId: authParams.organizationId,
-          requestId: this.request.requestId,
-          requestBody: requestBodyFinal,
-          responseBody: responseBodyFinal,
-          model: model,
-          assets: assets,
-        }
-      );
+      const s3Result = await db.requestResponseManager.storeRequestResponseRaw({
+        organizationId: authParams.organizationId,
+        requestId: this.request.requestId,
+        requestBody: requestBodyFinal,
+        responseBody: responseBodyFinal,
+        model: model,
+        assets: assets,
+      });
 
       if (s3Result.error) {
         console.error(

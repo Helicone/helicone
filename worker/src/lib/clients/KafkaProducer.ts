@@ -1,7 +1,5 @@
-import { CompressionTypes, Kafka, KafkaConfig } from "kafkajs";
-import os from "os";
 import { TemplateWithInputs } from "../../api/lib/promptHelpers";
-import { Provider } from "../..";
+import { Env, Provider } from "../..";
 
 export type Log = {
   request: {
@@ -49,33 +47,40 @@ export type KafkaMessage = {
 };
 
 export class KafkaProducer {
-  private kafka: Kafka;
+  private env: Env;
 
-  constructor(kafkaConfig: KafkaConfig) {
-    this.kafka = new Kafka(kafkaConfig);
+  constructor(env: Env) {
+    this.env = env;
   }
 
   async sendMessage(msg: KafkaMessage) {
-    const producer = this.kafka.producer();
-    try {
-      await producer.connect();
-      return await producer.send({
-        topic: "request-response-log-prod",
-        compression: CompressionTypes.GZIP,
-        messages: [
+    let attempts = 0;
+    const maxAttempts = 3;
+    const timeout = 1000; // Time in milliseconds between retries
+
+    while (attempts < maxAttempts) {
+      try {
+        const response = await fetch(
+          `https://native-koala-11924-us1-rest-kafka.upstash.io/produce/logs`,
           {
-            key: msg.id,
-            value: JSON.stringify(msg),
-          },
-        ],
-      });
-    } catch (error: any) {
-      console.error(
-        `Failed to send message for message id ${msg.id}: ${error.message}`,
-        error
-      );
-    } finally {
-      await producer.disconnect();
+            body: JSON.stringify(msg),
+            headers: {
+              Authorization: `Basic ${this.env.UPSTASH_KAFKA_API_KEY}`,
+            },
+          }
+        );
+        const data = await response.json();
+        console.log(data);
+        return data; // Exit function after a successful fetch
+      } catch (error: any) {
+        console.log(`Attempt ${attempts + 1} failed: ${error.message}`);
+        attempts++;
+        if (attempts < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, timeout));
+        } else {
+          throw error; // Rethrow the last error after all attempts fail
+        }
+      }
     }
   }
 }

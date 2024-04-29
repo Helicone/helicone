@@ -11,6 +11,8 @@ import { ClickhouseClientWrapper } from "../lib/db/ClickhouseWrapper";
 import { PromptHandler } from "../lib/handlers/PromptHandler";
 import { PosthogClient, postHogClient } from "../lib/clients/postHogClient";
 import { PostHogHandler } from "../lib/handlers/PostHogHandler";
+import { S3Client } from "../lib/shared/db/s3Client";
+import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
 
 class LogManager {
   public async processLogEntries(
@@ -27,6 +29,14 @@ class LogManager {
     const rateLimitHandler = new RateLimitHandler(
       new RateLimitStore(clickhouseClientWrapper)
     );
+    const s3Reader = new S3ReaderHandler(
+      new S3Client(
+        process.env.S3_ACCESS_KEY ?? "",
+        process.env.S3_SECRET_KEY ?? "",
+        process.env.S3_ENDPOINT ?? "",
+        process.env.S3_BUCKET_NAME ?? ""
+      )
+    );
     const requestHandler = new RequestBodyHandler();
     const responseBodyHandler = new ResponseBodyHandler();
     const promptHandler = new PromptHandler();
@@ -38,6 +48,7 @@ class LogManager {
 
     authHandler
       .setNext(rateLimitHandler)
+      .setNext(s3Reader)
       .setNext(requestHandler)
       .setNext(responseBodyHandler)
       .setNext(promptHandler)

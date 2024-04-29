@@ -49,7 +49,6 @@ export type Log = {
     provider: Provider;
     model: string;
     path: string;
-    body: string;
     threat?: boolean;
     countryCode?: string;
     requestCreatedAt: Date;
@@ -59,7 +58,6 @@ export type Log = {
   };
   response: {
     id: string;
-    body: string;
     status: number;
     model: string;
     timeToFirstToken?: number;
@@ -67,6 +65,7 @@ export type Log = {
     delayMs: number;
     assets?: Map<string, string>;
   };
+  s3Url: string;
   model: string;
 };
 
@@ -81,10 +80,12 @@ export type Usage = {
 export type ProcessedLog = {
   model?: string;
   request: {
+    rawBody?: any;
     body?: any;
     heliconeTemplate?: TemplateWithInputs;
   };
   response: {
+    rawBody?: any;
     body?: any;
   };
 };

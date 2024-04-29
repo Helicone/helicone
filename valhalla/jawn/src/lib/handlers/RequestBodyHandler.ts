@@ -19,7 +19,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
 
   processRequestBody(context: HandlerContext): GenericResult<any> {
     const log = context.message.log;
-    let requestBody = log.request.body as any;
+    let requestBody = context.processedLog.request.rawBody as any;
     requestBody = requestBody.replace(/\\u0000/g, ""); // Remove unsupported null character in JSONB
     requestBody = tryParse(requestBody, "request body");
     requestBody = context.message.heliconeMeta.omitRequestLog

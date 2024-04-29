@@ -313,15 +313,16 @@ export async function proxyForwarder(
           ),
           supabase
         ),
-        kafkaProducer: new KafkaProducer({
-          brokers: [env.KAFKA_BROKER ?? ""],
-          ssl: {},
-          sasl: {
-            mechanism: "scram-sha-256",
-            username: env.KAFKA_USERNAME ?? "",
-            password: env.KAFKA_PASSWORD ?? "",
-          },
-        }),
+        kafkaProducer: new KafkaProducer(env),
+        // kafkaProducer: new KafkaProducer({
+        //   brokers: [env.KAFKA_BROKER ?? ""],
+        //   ssl: {},
+        //   sasl: {
+        //     mechanism: "scram-sha-256",
+        //     username: env.KAFKA_USERNAME ?? "",
+        //     password: env.KAFKA_PASSWORD ?? "",
+        //   },
+        // }),
       },
       env.S3_ENABLED ?? "true",
       proxyRequest?.requestWrapper.heliconeHeaders

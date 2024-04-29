@@ -61,17 +61,17 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     const isStream = log.request.isStream;
     const provider = log.request.provider;
 
-    let responseBody = log.response.body;
+    let responseBody = context.processedLog.request.rawBody;
     try {
       responseBody = this.preprocess(
         isStream,
         log.response.status,
-        log.response.body
+        responseBody
       );
       const parser = this.getBodyProcessor(isStream, provider, responseBody);
       return await parser.parse({
         responseBody: responseBody,
-        requestBody: log.request.body,
+        requestBody: responseBody,
         tokenCounter: async (text: string) =>
           await getTokenCount(text, provider),
         model: log.model,
