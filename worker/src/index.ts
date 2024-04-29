@@ -57,7 +57,9 @@ export interface Env {
   KAFKA_BROKER: string;
   KAFKA_USERNAME: string;
   KAFKA_PASSWORD: string;
+  UPSTASH_KAFKA_USERNAME: string;
   UPSTASH_KAFKA_API_KEY: string;
+  UPSTASH_KAFKA_PASSWORD: string;
 }
 
 export async function hash(key: string): Promise<string> {

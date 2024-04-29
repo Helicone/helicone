@@ -1,5 +1,6 @@
 import { TemplateWithInputs } from "../../api/lib/promptHelpers";
 import { Env, Provider } from "../..";
+import { Kafka } from "@upstash/kafka";
 
 export type Log = {
   request: {
@@ -13,7 +14,6 @@ export type Log = {
     provider: Provider;
     model: string;
     path: string;
-    body: string;
     threat?: boolean;
     countryCode?: string;
     requestCreatedAt: Date;
@@ -22,7 +22,6 @@ export type Log = {
   };
   response: {
     id: string;
-    body: string;
     status: number;
     model: string;
     timeToFirstToken?: number;
@@ -47,31 +46,33 @@ export type KafkaMessage = {
 };
 
 export class KafkaProducer {
-  private env: Env;
+  private kafka: Kafka;
 
   constructor(env: Env) {
-    this.env = env;
+    this.kafka = new Kafka({
+      url: "https://native-koala-11924-us1-rest-kafka.upstash.io",
+      username: env.UPSTASH_KAFKA_USERNAME,
+      password: env.UPSTASH_KAFKA_PASSWORD,
+    });
   }
 
   async sendMessage(msg: KafkaMessage) {
-    let attempts = 0;
-    const maxAttempts = 3;
-    const timeout = 1000; // Time in milliseconds between retries
+    const p = this.kafka.producer();
 
+    let attempts = 0;
+    const maxAttempts = 1;
+    const timeout = 1000; // Time in milliseconds between retries
     while (attempts < maxAttempts) {
       try {
-        const response = await fetch(
-          `https://native-koala-11924-us1-rest-kafka.upstash.io/produce/logs`,
-          {
-            body: JSON.stringify(msg),
-            headers: {
-              Authorization: `Basic ${this.env.UPSTASH_KAFKA_API_KEY}`,
-            },
-          }
-        );
-        const data = await response.json();
-        console.log(data);
-        return data; // Exit function after a successful fetch
+        const message = JSON.stringify({
+          key: msg.log.request.id,
+          value: JSON.stringify(msg),
+        });
+
+        const res = await p.produce("logs", message);
+
+        console.log(JSON.stringify(res));
+        return res; // Exit function after a successful fetch
       } catch (error: any) {
         console.log(`Attempt ${attempts + 1} failed: ${error.message}`);
         attempts++;

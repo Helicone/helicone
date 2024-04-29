@@ -734,7 +734,6 @@ export class DBLoggable {
           provider: this.request.provider,
           model: requestModel,
           path: this.request.path,
-          body: requestBodyFinal,
           threat: this.request.threat ?? undefined,
           countryCode: this.request.country_code ?? undefined,
           requestCreatedAt: this.request.startTime ?? new Date(),
@@ -743,7 +742,6 @@ export class DBLoggable {
         },
         response: {
           id: this.response.responseId,
-          body: responseBodyFinal,
           status: await this.response.status(),
           model: responseModel,
           timeToFirstToken: (await this.timing.timeToFirstToken()) ?? undefined,
