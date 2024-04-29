@@ -32,6 +32,9 @@ export const getBuilderType = (
   path?: string | null,
   llmType?: LlmType | null
 ): BuilderType => {
+  if (provider === "OPENROUTER") {
+    return "ChatGPTBuilder";
+  }
   if (llmType === "chat") {
     return "ChatBuilder";
   }
