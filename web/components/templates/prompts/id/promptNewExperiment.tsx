@@ -32,6 +32,9 @@ interface PromptIdPageProps {
   id: string;
 }
 
+// omit id from Message
+export type MessageWithoutId = Omit<Message, "id">;
+
 const PromptNewExperimentPage = (props: PromptIdPageProps) => {
   const { id } = props;
   const { prompt } = usePrompt(id);
@@ -53,7 +56,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
   }>();
   const [selectedModel, setSelectedModel] = useState<string>();
   const [selectedDatasetId, setSelectedDatasetId] = useState<string>();
-  const [currentChat, setCurrentChat] = useState<Message[]>();
+  const [currentChat, setCurrentChat] = useState<MessageWithoutId[]>();
   const [selectedProviderKey, setSelectedProviderKey] = useState<string>();
   const [openConfirmModal, setOpenConfirmModal] = useState(false);
   const [requestIds, setRequestIds] = useState<
@@ -256,7 +259,12 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
         maxTokens={256}
         submitText={"Save Changes"}
         onSubmit={(chat) => {
-          setCurrentChat(chat);
+          // strip the id's from the messages
+          const cleanedChat = chat.map((message) => {
+            const { id, ...rest } = message;
+            return rest;
+          });
+          setCurrentChat(cleanedChat);
         }}
         customNavBar={{
           onBack: () => {
