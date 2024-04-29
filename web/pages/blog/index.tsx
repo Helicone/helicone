@@ -18,6 +18,23 @@ export type BlogStructure = {
 const blogContent: BlogStructure[] = [
   {
     title:
+      "A Guide for Datadog Users Building with LLM",
+    description:
+      "Datadog has long been a favourite among developers for monitoring and observability. But recently, LLM developers have been exploring new options. Why? We have some answers.",
+    badgeText: "Compare",
+    badgeColor: "bg-red-50 text-red-700 ring-red-600/10",
+    date: "Apr 29, 2024",
+    href: "/blog/datadog",
+    imageUrl: "assets/blog/datadog/title.webp",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/assets/blog/linalam-headshot.webp",
+      },
+    ],
+  },
+  {
+    title:
       "A LangSmith Alternative that Takes LLM Observability to the Next Level",
     description:
       "Both Helicone and LangSmith are capable, powerful DevOps platform used by enterprises and developers building LLM applications. But which is better?",
