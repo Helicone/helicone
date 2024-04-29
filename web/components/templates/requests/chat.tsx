@@ -181,7 +181,7 @@ export const SingleChat = (props: {
       const textMessage = arr.find((message) => message.type === "text");
 
       return (
-        <div className="flex flex-col space-y-4 divide-y divide-gray-100 dark:divide-gray-900">
+        <div className="flex flex-col space-y-4 divide-y divide-gray-100 dark:divide-gray-900 ">
           <RenderWithPrettyInputKeys
             text={textMessage?.text}
             selectedProperties={props.selectedProperties}
@@ -289,7 +289,7 @@ export const SingleChat = (props: {
                 ref={textContainerRef}
                 className={clsx(
                   !expanded && showButton ? "truncate-text" : "",
-                  "leading-6 pb-2"
+                  "leading-6 pb-2 max-w-full"
                 )}
                 style={{ maxHeight: expanded ? "none" : "10.5rem" }}
               >
@@ -601,7 +601,7 @@ export const Chat = (props: ChatProps) => {
               </div>
             </div>
           ) : messages.length > 0 ? (
-            <>{renderMessages(messages)}</>
+            <div>{renderMessages(messages)}</div>
           ) : (
             <div className="">
               <div
