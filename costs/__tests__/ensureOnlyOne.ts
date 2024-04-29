@@ -1,9 +1,7 @@
-import { describe, expect, test } from "@jest/globals";
+import { expect, test } from "@jest/globals";
 
-import { costs as openaiCosts } from "../src/providers/openai";
 import { clickhousePriceCalc } from "../src";
-
-console.log(openaiCosts.map((cost) => cost.model.value));
+import { costs as openaiCosts } from "../src/providers/openai";
 
 test("check that there are no two models that are the same", () => {
   openaiCosts.forEach((cost) => {
@@ -168,8 +166,7 @@ END
 )
 WHEN (request_response_log.provider = 'OPENROUTER') THEN (
   CASE
-  WHEN (request_response_log.model = 'openrouter/auto') THEN -1000000000 * request_response_log.prompt_tokens + -1000000000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'nousresearch/nous-capybara-7b:free') THEN 0 * request_response_log.prompt_tokens + 0 * request_response_log.completion_tokens
+  WHEN (request_response_log.model = 'nousresearch/nous-capybara-7b:free') THEN 0 * request_response_log.prompt_tokens + 0 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'mistralai/mistral-7b-instruct:free') THEN 0 * request_response_log.prompt_tokens + 0 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'openchat/openchat-7b:free') THEN 0 * request_response_log.prompt_tokens + 0 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gryphe/mythomist-7b:free') THEN 0 * request_response_log.prompt_tokens + 0 * request_response_log.completion_tokens
@@ -185,10 +182,10 @@ WHEN (request_response_log.model = 'alpindale/goliath-120b') THEN 9375 * request
 WHEN (request_response_log.model = 'neversleep/noromaid-20b') THEN 2250 * request_response_log.prompt_tokens + 2250 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gryphe/mythomist-7b') THEN 375 * request_response_log.prompt_tokens + 375 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'sophosympatheia/midnight-rose-70b') THEN 9000 * request_response_log.prompt_tokens + 9000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'sao10k/fimbulvetr-11b-v2') THEN 549.9375 * request_response_log.prompt_tokens + 2825.625 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'sao10k/fimbulvetr-11b-v2') THEN 550 * request_response_log.prompt_tokens + 2826 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'undi95/remm-slerp-l2-13b:extended') THEN 1125 * request_response_log.prompt_tokens + 1125 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gryphe/mythomax-l2-13b:extended') THEN 1125 * request_response_log.prompt_tokens + 1125 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'meta-llama/llama-3-8b-instruct:extended') THEN 275.0625 * request_response_log.prompt_tokens + 2825.625 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'meta-llama/llama-3-8b-instruct:extended') THEN 275 * request_response_log.prompt_tokens + 2826 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'mancer/weaver') THEN 3375 * request_response_log.prompt_tokens + 3375 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'nousresearch/nous-capybara-7b') THEN 180 * request_response_log.prompt_tokens + 180 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'meta-llama/codellama-34b-instruct') THEN 720 * request_response_log.prompt_tokens + 720 * request_response_log.completion_tokens
@@ -199,7 +196,7 @@ WHEN (request_response_log.model = 'undi95/remm-slerp-l2-13b') THEN 270 * reques
 WHEN (request_response_log.model = 'openrouter/cinematika-7b') THEN 180 * request_response_log.prompt_tokens + 180 * request_response_log.completion_tokens
 WHEN (request_response_log.model = '01-ai/yi-34b-chat') THEN 720 * request_response_log.prompt_tokens + 720 * request_response_log.completion_tokens
 WHEN (request_response_log.model = '01-ai/yi-34b') THEN 720 * request_response_log.prompt_tokens + 720 * request_response_log.completion_tokens
-WHEN (request_response_log.model = '01-ai/yi-6b') THEN 125.99999999999999 * request_response_log.prompt_tokens + 125.99999999999999 * request_response_log.completion_tokens
+WHEN (request_response_log.model = '01-ai/yi-6b') THEN 126 * request_response_log.prompt_tokens + 126 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'togethercomputer/stripedhyena-nous-7b') THEN 180 * request_response_log.prompt_tokens + 180 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'togethercomputer/stripedhyena-hessian-7b') THEN 180 * request_response_log.prompt_tokens + 180 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'mistralai/mixtral-8x7b') THEN 540 * request_response_log.prompt_tokens + 540 * request_response_log.completion_tokens
@@ -208,8 +205,8 @@ WHEN (request_response_log.model = 'nousresearch/nous-hermes-2-mixtral-8x7b-sft'
 WHEN (request_response_log.model = 'nousresearch/nous-hermes-2-mistral-7b-dpo') THEN 180 * request_response_log.prompt_tokens + 180 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'meta-llama/llama-3-70b-instruct') THEN 810 * request_response_log.prompt_tokens + 810 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'mistralai/mixtral-8x7b-instruct:nitro') THEN 540 * request_response_log.prompt_tokens + 540 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'open-orca/mistral-7b-openorca') THEN 142.5 * request_response_log.prompt_tokens + 142.5 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'huggingfaceh4/zephyr-7b-beta') THEN 142.5 * request_response_log.prompt_tokens + 142.5 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'open-orca/mistral-7b-openorca') THEN 143 * request_response_log.prompt_tokens + 143 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'huggingfaceh4/zephyr-7b-beta') THEN 143 * request_response_log.prompt_tokens + 143 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'openai/gpt-3.5-turbo') THEN 500 * request_response_log.prompt_tokens + 1500 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'openai/gpt-3.5-turbo-0125') THEN 500 * request_response_log.prompt_tokens + 1500 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'openai/gpt-3.5-turbo-1106') THEN 1000 * request_response_log.prompt_tokens + 2000 * request_response_log.completion_tokens
@@ -268,7 +265,7 @@ WHEN (request_response_log.model = 'openchat/openchat-7b') THEN 100 * request_re
 WHEN (request_response_log.model = 'undi95/toppy-m-7b') THEN 150 * request_response_log.prompt_tokens + 150 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'lizpreciatior/lzlv-70b-fp16-hf') THEN 700 * request_response_log.prompt_tokens + 800 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'jebcarter/psyfighter-13b') THEN -1000000000 * request_response_log.prompt_tokens + -1000000000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'mistralai/mixtral-8x7b-instruct') THEN 239.99999999999997 * request_response_log.prompt_tokens + 239.99999999999997 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'mistralai/mixtral-8x7b-instruct') THEN 240 * request_response_log.prompt_tokens + 240 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'cognitivecomputations/dolphin-mixtral-8x7b') THEN 500 * request_response_log.prompt_tokens + 500 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'neversleep/noromaid-mixtral-8x7b-instruct') THEN 8000 * request_response_log.prompt_tokens + 8000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'nousresearch/nous-hermes-2-mixtral-8x7b-dpo') THEN 270 * request_response_log.prompt_tokens + 270 * request_response_log.completion_tokens
