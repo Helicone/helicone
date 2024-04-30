@@ -572,7 +572,7 @@ export class DBLoggable {
             "Content-Type": "application/json",
           },
         });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error("Error sending to webhook", error.message);
       }
