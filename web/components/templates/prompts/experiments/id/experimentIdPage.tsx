@@ -151,6 +151,8 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                     ).substring(100) ?? ""
                   }
                   splitView={true}
+                  showDiffOnly={true}
+                  extraLinesSurroundingDiff={1}
                 />
               </div>
 

@@ -433,6 +433,8 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
             oldValue={JSON.stringify(template, null, 4)}
             newValue={JSON.stringify(currentChat, null, 4)}
             splitView={true}
+            showDiffOnly={true}
+            extraLinesSurroundingDiff={3}
           />
         </div>
 
