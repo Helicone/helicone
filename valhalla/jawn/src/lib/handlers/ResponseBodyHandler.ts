@@ -10,7 +10,7 @@ import { GoogleBodyProcessor } from "../shared/bodyProcessors/googleBodyProcesso
 import { OpenAIStreamProcessor } from "../shared/bodyProcessors/openAIStreamProcessor";
 import { PromiseGenericResult, err } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
-import { HandlerContext } from "./HandlerContext";
+import { HandlerContext, Usage } from "./HandlerContext";
 
 export const INTERNAL_ERRORS = {
   Cancelled: -3,
@@ -20,6 +20,7 @@ export const INTERNAL_ERRORS = {
 // Some modification to body
 export class ResponseBodyHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): Promise<void> {
+    console.log(`ResponseBodyHandler: ${context.message.log.request.id}`);
     const omitResponseLog = context.message.heliconeMeta.omitResponseLog;
 
     const processedResponseBody = await this.processBody(context);
@@ -49,9 +50,17 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         : processedResponseBody.data.processedBody ?? undefined;
     }
 
-    context.usage = processedResponseBody.data?.usage ?? {};
+    this.setUsage(processedResponseBody.data?.usage ?? {}, context);
 
     return await super.handle(context);
+  }
+
+  private setUsage(usage: Usage, context: HandlerContext) {
+    context.usage.completionTokens = usage.completionTokens;
+    context.usage.promptTokens = usage.promptTokens;
+    context.usage.totalTokens = usage.totalTokens;
+    context.usage.heliconeCalculated = usage.heliconeCalculated;
+    context.usage.cost = usage.cost;
   }
 
   async processBody(
@@ -61,17 +70,17 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     const isStream = log.request.isStream;
     const provider = log.request.provider;
 
-    let responseBody = log.response.body;
+    let responseBody = context.processedLog.response.rawBody;
     try {
       responseBody = this.preprocess(
         isStream,
         log.response.status,
-        log.response.body
+        responseBody
       );
       const parser = this.getBodyProcessor(isStream, provider, responseBody);
       return await parser.parse({
         responseBody: responseBody,
-        requestBody: log.request.body,
+        requestBody: responseBody,
         tokenCounter: async (text: string) =>
           await getTokenCount(text, provider),
         model: log.model,

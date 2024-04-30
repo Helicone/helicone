@@ -5,7 +5,6 @@ const isValidSortDirection = (sort: SortDirection) => {
 };
 
 export interface SortLeafRequest {
-  random?: true;
   created_at?: SortDirection;
   cache_created_at?: SortDirection;
   latency?: SortDirection;
@@ -33,9 +32,6 @@ function assertValidSortDirection(direction: SortDirection) {
 }
 
 export function buildRequestSort(sort: SortLeafRequest) {
-  if (sort.random) {
-    return "random()";
-  }
   if (sort.cache_created_at) {
     assertValidSortDirection(sort.cache_created_at);
     return `cache_hits.created_at ${sort.cache_created_at}`;

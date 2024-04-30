@@ -1,3 +1,3 @@
 export class BaseStore {
-  constructor(protected organizationId: string) {}
+  constructor(private organizationId: string) {}
 }

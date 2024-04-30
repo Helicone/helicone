@@ -515,11 +515,6 @@
 							}
 						],
 						"nullable": true
-					},
-					"costUSD": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
 					}
 				},
 				"required": [
@@ -744,7 +739,7 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values_": {
+			"Pick_FilterLeaf.feedback-or-request-or-response_": {
 				"properties": {
 					"feedback": {
 						"$ref": "#/components/schemas/Partial_FeedbackTableToOperators_"
@@ -754,32 +749,18 @@
 					},
 					"response": {
 						"$ref": "#/components/schemas/Partial_ResponseTableToOperators_"
-					},
-					"properties": {
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/Partial_TextOperators_"
-						},
-						"type": "object"
-					},
-					"values": {
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/Partial_TextOperators_"
-						},
-						"type": "object"
 					}
 				},
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
-			"FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values_"
+			"FilterLeafSubset_feedback-or-request-or-response_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response_"
 			},
 			"RequestFilterNode": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values_"
+						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response_"
 					},
 					{
 						"$ref": "#/components/schemas/RequestFilterBranch"
@@ -824,13 +805,6 @@
 			},
 			"SortLeafRequest": {
 				"properties": {
-					"random": {
-						"type": "boolean",
-						"enum": [
-							true
-						],
-						"nullable": false
-					},
 					"created_at": {
 						"$ref": "#/components/schemas/SortDirection"
 					},
@@ -1265,71 +1239,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"PromptInputRecord": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"inputs": {
-						"$ref": "#/components/schemas/Record_string.string_"
-					},
-					"source_request": {
-						"type": "string"
-					},
-					"prompt_version": {
-						"type": "string"
-					},
-					"created_at": {
-						"type": "string"
-					},
-					"response_body": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"id",
-					"inputs",
-					"source_request",
-					"prompt_version",
-					"created_at",
-					"response_body"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_PromptInputRecord-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/PromptInputRecord"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_PromptInputRecord-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_PromptInputRecord-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
 			"ResultSuccess_PromptVersionResult-Array_": {
 				"properties": {
 					"data": {
@@ -1357,44 +1266,6 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess_PromptVersionResult-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"ResultSuccess__datasetId-string__": {
-				"properties": {
-					"data": {
-						"properties": {
-							"datasetId": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"datasetId"
-						],
-						"type": "object"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__datasetId-string_.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__datasetId-string__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -1516,66 +1387,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"DatasetResult": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"request_ids": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"created_at": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"id",
-					"name",
-					"request_ids",
-					"created_at"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_DatasetResult-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/DatasetResult"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_DatasetResult-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_DatasetResult-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
 			"ResultSuccess___-Array_": {
 				"properties": {
 					"data": {
@@ -1658,323 +1469,13 @@
 					},
 					"model": {
 						"type": "string"
-					},
-					"providerKeyId": {
-						"type": "string"
 					}
 				},
 				"required": [
 					"datasetId",
 					"promptVersion",
-					"model",
-					"providerKeyId"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResponseObj": {
-				"properties": {
-					"body": {},
-					"createdAt": {
-						"type": "string"
-					},
-					"completionTokens": {
-						"type": "number",
-						"format": "double"
-					},
-					"promptTokens": {
-						"type": "number",
-						"format": "double"
-					},
-					"delayMs": {
-						"type": "number",
-						"format": "double"
-					},
-					"model": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"body",
-					"createdAt",
-					"completionTokens",
-					"promptTokens",
-					"delayMs",
 					"model"
 				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Experiment": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"organization": {
-						"type": "string"
-					},
-					"dataset": {
-						"properties": {
-							"rows": {
-								"items": {
-									"properties": {
-										"inputRecord": {
-											"properties": {
-												"response": {
-													"$ref": "#/components/schemas/ResponseObj"
-												},
-												"inputs": {
-													"$ref": "#/components/schemas/Record_string.string_"
-												},
-												"requestPath": {
-													"type": "string"
-												},
-												"requestId": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"response",
-												"inputs",
-												"requestPath",
-												"requestId"
-											],
-											"type": "object"
-										},
-										"rowId": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"rowId"
-									],
-									"type": "object"
-								},
-								"type": "array"
-							},
-							"name": {
-								"type": "string"
-							},
-							"id": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"rows",
-							"name",
-							"id"
-						],
-						"type": "object"
-					},
-					"createdAt": {
-						"type": "string"
-					},
-					"hypotheses": {
-						"items": {
-							"properties": {
-								"runs": {
-									"items": {
-										"properties": {
-											"response": {
-												"$ref": "#/components/schemas/ResponseObj"
-											},
-											"resultRequestId": {
-												"type": "string"
-											},
-											"datasetRowId": {
-												"type": "string"
-											}
-										},
-										"required": [
-											"response",
-											"resultRequestId",
-											"datasetRowId"
-										],
-										"type": "object"
-									},
-									"type": "array"
-								},
-								"providerKey": {
-									"type": "string"
-								},
-								"createdAt": {
-									"type": "string"
-								},
-								"status": {
-									"type": "string"
-								},
-								"model": {
-									"type": "string"
-								},
-								"parentPromptVersion": {
-									"properties": {
-										"template": {}
-									},
-									"required": [
-										"template"
-									],
-									"type": "object"
-								},
-								"promptVersion": {
-									"properties": {
-										"template": {}
-									},
-									"required": [
-										"template"
-									],
-									"type": "object"
-								},
-								"promptVersionId": {
-									"type": "string"
-								},
-								"id": {
-									"type": "string"
-								}
-							},
-							"required": [
-								"runs",
-								"providerKey",
-								"createdAt",
-								"status",
-								"model",
-								"promptVersionId",
-								"id"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"id",
-					"organization",
-					"dataset",
-					"createdAt",
-					"hypotheses"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_Experiment-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/Experiment"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_Experiment-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_Experiment-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"Partial_ExperimentToOperators_": {
-				"properties": {
-					"id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"prompt_v2": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Pick_FilterLeaf.experiment_": {
-				"properties": {
-					"experiment": {
-						"$ref": "#/components/schemas/Partial_ExperimentToOperators_"
-					}
-				},
-				"type": "object",
-				"description": "From T, pick a set of properties whose keys are in the union K"
-			},
-			"FilterLeafSubset_experiment_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.experiment_"
-			},
-			"ExperimentFilterNode": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/FilterLeafSubset_experiment_"
-					},
-					{
-						"$ref": "#/components/schemas/ExperimentFilterBranch"
-					},
-					{
-						"type": "string",
-						"enum": [
-							"all"
-						]
-					}
-				]
-			},
-			"ExperimentFilterBranch": {
-				"properties": {
-					"right": {
-						"$ref": "#/components/schemas/ExperimentFilterNode"
-					},
-					"operator": {
-						"type": "string",
-						"enum": [
-							"or",
-							"and"
-						]
-					},
-					"left": {
-						"$ref": "#/components/schemas/ExperimentFilterNode"
-					}
-				},
-				"required": [
-					"right",
-					"operator",
-					"left"
-				],
-				"type": "object"
-			},
-			"IncludeExperimentKeys": {
-				"properties": {
-					"inputs": {
-						"type": "boolean",
-						"enum": [
-							true
-						],
-						"nullable": false
-					},
-					"promptVersion": {
-						"type": "boolean",
-						"enum": [
-							true
-						],
-						"nullable": false
-					},
-					"responseBodies": {
-						"type": "boolean",
-						"enum": [
-							true
-						],
-						"nullable": false
-					}
-				},
 				"type": "object",
 				"additionalProperties": false
 			}
@@ -2328,63 +1829,6 @@
 				}
 			}
 		},
-		"/v1/prompt/version/{promptVersionId}/inputs/query": {
-			"post": {
-				"operationId": "GetInputs",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_PromptInputRecord-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Prompt"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "promptVersionId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"random": {
-										"type": "boolean"
-									},
-									"limit": {
-										"type": "number",
-										"format": "double"
-									}
-								},
-								"required": [
-									"limit"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
 		"/v1/prompt/{promptId}/versions/query": {
 			"post": {
 				"operationId": "GetPromptVersions",
@@ -2440,7 +1884,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__datasetId-string_.string_"
+									"$ref": "#/components/schemas/Result_null.string_"
 								}
 							}
 						}
@@ -2476,7 +1920,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__datasetId-string_.string_"
+									"$ref": "#/components/schemas/Result_null.string_"
 								}
 							}
 						}
@@ -2497,43 +1941,6 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/RandomDatasetParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/experiment/dataset/query": {
-			"post": {
-				"operationId": "GetDatasets",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_DatasetResult-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Dataset"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {},
-								"type": "object"
 							}
 						}
 					}
@@ -2661,53 +2068,6 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/NewExperimentParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/experiment/query": {
-			"post": {
-				"operationId": "GetExperiments",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_Experiment-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Experiment"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"include": {
-										"$ref": "#/components/schemas/IncludeExperimentKeys"
-									},
-									"filter": {
-										"$ref": "#/components/schemas/ExperimentFilterNode"
-									}
-								},
-								"required": [
-									"filter"
-								],
-								"type": "object"
 							}
 						}
 					}

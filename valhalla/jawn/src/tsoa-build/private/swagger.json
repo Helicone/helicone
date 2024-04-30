@@ -111,40 +111,6 @@
 		"contact": {}
 	},
 	"paths": {
-		"/v1/settings/query": {
-			"get": {
-				"operationId": "GetSettings",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"useAzureForExperiment": {
-											"type": "boolean"
-										}
-									},
-									"required": [
-										"useAzureForExperiment"
-									],
-									"type": "object"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Settings"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
 		"/v1/key/generateHash": {
 			"post": {
 				"operationId": "GenerateHash",

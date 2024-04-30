@@ -3,7 +3,6 @@ import { supabaseServer } from "../db/supabase";
 import { Result, err, ok } from "../shared/result";
 import { uuid } from "uuidv4";
 import { dbExecute } from "../shared/db/dbExecute";
-import { hashAuth } from "../db/hash";
 
 type HashedPasswordRow = {
   hashed_password: string;
@@ -16,75 +15,6 @@ export type DecryptedProviderKey = {
   provider_name: string | null;
   provider_key_name: string | null;
 };
-
-async function getHeliconeApiKey() {
-  const apiKey = `sk-${generateApiKey({
-    method: "base32",
-    dashes: true,
-  }).toString()}`.toLowerCase();
-  return apiKey;
-}
-
-class TempHeliconeAPIKey {
-  private keyUsed = false;
-  constructor(private apiKey: string, private heliconeApiKeyId: number) {}
-
-  private async cleanup() {
-    if (this.keyUsed) {
-      return;
-    }
-    return await supabaseServer.client
-      .from("helicone_api_keys")
-      .delete({
-        count: "exact",
-      })
-      .eq("id", this.heliconeApiKeyId);
-  }
-
-  with<T>(callback: (apiKey: string) => Promise<T>) {
-    if (this.keyUsed) {
-      return err("Key already used");
-    }
-
-    this.keyUsed = true;
-    return callback(this.apiKey)
-      .then(async (t) => {
-        await this.cleanup();
-        return t;
-      })
-      .finally(async () => {
-        await this.cleanup();
-      });
-  }
-}
-
-export async function generateHeliconeAPIKey(
-  organizationId: string
-): Promise<Result<TempHeliconeAPIKey, string>> {
-  const apiKey = await getHeliconeApiKey();
-  const organization = await supabaseServer.client
-    .from("organization")
-    .select("*")
-    .eq("id", organizationId)
-    .single();
-
-  const res = await supabaseServer.client
-    .from("helicone_api_keys")
-    .insert({
-      api_key_hash: await hashAuth(apiKey),
-      user_id: organization.data?.owner ?? "",
-      api_key_name: "auto-generated-experiment-key",
-      organization_id: organizationId,
-    })
-    .select("*")
-    .single();
-
-  if (res?.error || !res.data?.id) {
-    return err("Failed to create apiKey key");
-  } else {
-    return ok(new TempHeliconeAPIKey(apiKey, res.data?.id));
-  }
-}
 
 async function getDecryptedProviderKeyById(
   providerKeyId: string
@@ -200,14 +130,10 @@ class TempProxyKey {
     }
 
     this.keyUsed = true;
-    return callback(this.proxyKey)
-      .then(async (t) => {
-        await this.cleanup();
-        return t;
-      })
-      .finally(async () => {
-        await this.cleanup();
-      });
+    return callback(this.proxyKey).then(async (t) => {
+      await this.cleanup();
+      return t;
+    });
   }
 }
 

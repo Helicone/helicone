@@ -14,12 +14,8 @@ const mainLoops: LoopedSubscriber[] = [
 
 const runSingleLoop = async (loop: LoopedSubscriber) => {
   while (true) {
-    try {
-      await loop.onLoop({});
-      await new Promise((resolve) => setTimeout(resolve, loop.cronInterval));
-    } catch (e) {
-      console.error(e);
-    }
+    await loop.onLoop({});
+    await new Promise((resolve) => setTimeout(resolve, loop.cronInterval));
   }
 };
 

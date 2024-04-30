@@ -5,5 +5,3 @@
 node_modules/
 
 /dist
-
-.controller_dir_hash

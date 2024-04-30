@@ -18,26 +18,26 @@ const db = pgp({
 
 const requestColumns = new pgp.helpers.ColumnSet(
   [
+    "id",
     "auth_hash",
     "body",
-    "created_at",
-    "formatted_prompt_id",
-    "helicone_api_key_id",
-    "helicone_org_id",
-    "helicone_proxy_key_id",
-    "helicone_user",
-    { name: "id", cdn: true },
-    "model",
-    "model_override",
     "path",
-    "prompt_id",
-    "prompt_values",
-    "properties",
     "provider",
-    "request_ip",
-    "target_url",
-    "threat",
-    "user_id",
+    "created_at",
+    { name: "formatted_prompt_id", def: null }, // Default to null if not provided
+    { name: "helicone_api_key_id", def: null },
+    { name: "helicone_org_id", def: null },
+    { name: "helicone_proxy_key_id", def: null },
+    { name: "helicone_user", def: null },
+    { name: "model", def: null },
+    { name: "model_override", def: null },
+    { name: "prompt_id", def: null },
+    { name: "prompt_values", def: null },
+    { name: "properties", def: null },
+    { name: "request_ip", def: null },
+    { name: "target_url", def: null },
+    { name: "threat", def: null },
+    { name: "user_id", def: null },
   ],
   { table: "request" }
 );
@@ -47,40 +47,24 @@ const onConflictRequest =
 
 const responseColumns = new pgp.helpers.ColumnSet(
   [
+    "id",
     "body",
-    "completion_tokens",
-    "created_at",
-    "delay_ms",
-    "feedback",
-    { name: "id", cdn: true },
-    "model",
-    "prompt_tokens",
     "request",
-    "status",
-    "time_to_first_token",
+    "created_at",
+    { name: "model", def: null },
+    { name: "completion_tokens", def: null },
+    { name: "delay_ms", def: null },
+    { name: "feedback", def: null },
+    { name: "prompt_tokens", def: null },
+    { name: "status", def: null },
+    { name: "time_to_first_token", def: null },
   ],
   { table: "response" }
 );
+
 const onConflictResponse =
   " ON CONFLICT (id) DO UPDATE SET " +
   responseColumns.assignColumns({ from: "EXCLUDED", skip: "id" });
-
-const propertiesColumns = new pgp.helpers.ColumnSet(
-  [
-    "auth_hash",
-    "created_at",
-    { name: "id", cdn: true },
-    ,
-    "key",
-    "request_id",
-    "user_id",
-    "value",
-  ],
-  { table: "properties" }
-);
-const onConflictProperties =
-  " ON CONFLICT (id) DO UPDATE SET " +
-  propertiesColumns.assignColumns({ from: "EXCLUDED", skip: "id" });
 
 export class LogStore {
   constructor() {}
@@ -104,14 +88,6 @@ export class LogStore {
           await t.none(insertResponse);
         }
 
-        // Insert into the 'properties' table with conflict resolution
-        if (payload.properties && payload.properties.length > 0) {
-          const insertProperties =
-            pgp.helpers.insert(payload.properties, propertiesColumns) +
-            onConflictProperties;
-          await t.none(insertProperties);
-        }
-
         payload.prompts.sort((a, b) => {
           if (a.createdAt && b.createdAt) {
             if (a.createdAt < b.createdAt) {
@@ -126,9 +102,9 @@ export class LogStore {
 
         for (const promptRecord of payload.prompts) {
           // acquire an exclusive lock on the prompt record for the duration of the transaction
-          await t.none("SELECT pg_advisory_xact_lock($1)", [
-            [promptRecord.promptId],
-          ]);
+          // await t.none("SELECT pg_advisory_xact_lock($1)", [
+          //   [promptRecord.promptId],
+          // ]);
           await this.processPrompt(promptRecord, t);
         }
       });
@@ -208,16 +184,15 @@ export class LogStore {
     }
 
     // Insert or update prompt input keys if there's a new version or no existing version
-    if (versionId) {
+    if (versionId && Object.keys(heliconeTemplate.inputs).length > 0) {
       await t.none(
         `INSERT INTO prompt_input_keys (key, prompt_version, created_at)
-         SELECT unnest($1::text[]), $2
-         FROM unnest($1::text[]), unnest($3::timestamp[])
+         SELECT unnest($1::text[]), $2, unnest($3::timestamp[])
          ON CONFLICT (key, prompt_version) DO NOTHING`,
         [
-          Object.keys(heliconeTemplate.inputs),
+          `{${Object.keys(heliconeTemplate.inputs).join(",")}}`, // Properly formatted text array
           versionId,
-          newPromptRecord.createdAt,
+          `{${newPromptRecord.createdAt.toISOString()}}`, // Properly formatted timestamp array
         ]
       );
 

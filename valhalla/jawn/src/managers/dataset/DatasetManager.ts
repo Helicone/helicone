@@ -1,6 +1,5 @@
 // src/users/usersService.ts
 import {
-  DatasetResult,
   NewDatasetParams,
   RandomDatasetParams,
 } from "../../controllers/public/experimentDatasetController";
@@ -24,28 +23,7 @@ import { BaseManager } from "../BaseManager";
 export type UserCreationParams = Pick<User, "email" | "name" | "phoneNumbers">;
 
 export class DatasetManager extends BaseManager {
-  async getDatasets(): Promise<Result<DatasetResult[], string>> {
-    const result = dbExecute<{
-      id: string;
-      name: string;
-      request_ids: string[];
-      created_at: string;
-    }>(
-      `
-    SELECT 
-      id,
-      name,
-      created_at
-    FROM experiment_dataset_v2
-    WHERE organization = $1
-    LIMIT 100
-    `,
-      [this.authParams.organizationId]
-    );
-    return result;
-  }
-
-  async addDataset(params: NewDatasetParams): Promise<Result<string, string>> {
+  async addDataset(params: NewDatasetParams): Promise<Result<null, string>> {
     const dataset = await supabaseServer.client
       .from("experiment_dataset_v2")
       .insert({
@@ -73,17 +51,12 @@ export class DatasetManager extends BaseManager {
       return err(res.error);
     }
 
-    return ok(dataset.data.id);
+    return ok(null);
   }
 
-  async addRandomDataset(params: RandomDatasetParams): Promise<
-    Result<
-      {
-        datasetId: string;
-      },
-      string
-    >
-  > {
+  async addRandomDataset(
+    params: RandomDatasetParams
+  ): Promise<Result<null, string>> {
     const dataset = await supabaseServer.client
       .from("experiment_dataset_v2")
       .insert({
@@ -119,9 +92,7 @@ export class DatasetManager extends BaseManager {
       return err(res.error);
     }
 
-    return ok({
-      datasetId: dataset.data.id,
-    });
+    return ok(null);
   }
 
   async getPromptVersions(
