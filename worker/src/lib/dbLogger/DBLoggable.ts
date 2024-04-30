@@ -722,7 +722,7 @@ export class DBLoggable {
       },
       log: {
         model: model,
-        assets: assets,
+        assets: Object.fromEntries(assets),
         request: {
           id: this.request.requestId,
           userId: authParams.userId ?? "",

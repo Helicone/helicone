@@ -62,6 +62,7 @@ export class LogManager {
       })
     );
 
+    console.log(`Finished processing batch ${batchId}`);
     // Inserts everything in transaction
     const upsertResult = await loggingHandler.handleResults();
 

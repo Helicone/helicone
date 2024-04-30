@@ -53,13 +53,17 @@ export const consume = async () => {
       heartbeat,
       commitOffsetsIfNecessary,
     }) => {
+      const batchId = `${
+        batch.partition
+      }-${batch.firstOffset()}-${batch.lastOffset()}`;
+
       const messages = batch.messages
         .map((message) => {
           if (message.value) {
             try {
               const kafkaValue = JSON.parse(message.value.toString());
-              const parsedMsg = JSON.parse(kafkaValue.value);
-              return parsedMsg as Message;
+              const parsedMsg = JSON.parse(kafkaValue.value) as Message;
+              return mapMessageDates(parsedMsg);
             } catch (error) {
               console.error("Failed to parse message:", error);
               return null;
@@ -69,13 +73,12 @@ export const consume = async () => {
         })
         .filter((msg) => msg !== null) as Message[];
 
-      const batchId = `${
-        batch.partition
-      }-${batch.firstOffset()}-${batch.lastOffset()}`;
       try {
         const logManager = new LogManager();
+        console.log(
+          `Processing batch ${batchId} with ${messages.length} messages`
+        );
         await logManager.processLogEntries(messages, batchId);
-        // If processLogEntries succeeds, mark all messages in the batch as processed
         resolveOffset(batch.messages[batch.messages.length - 1].offset);
         await commitOffsetsIfNecessary();
         await heartbeat();
@@ -87,3 +90,20 @@ export const consume = async () => {
     },
   });
 };
+
+function mapMessageDates(message: Message): Message {
+  return {
+    ...message,
+    log: {
+      ...message.log,
+      request: {
+        ...message.log.request,
+        requestCreatedAt: new Date(message.log.request.requestCreatedAt),
+      },
+      response: {
+        ...message.log.response,
+        responseCreatedAt: new Date(message.log.response.responseCreatedAt),
+      },
+    },
+  };
+}

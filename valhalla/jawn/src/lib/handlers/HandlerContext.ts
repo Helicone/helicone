@@ -10,7 +10,6 @@ export class HandlerContext extends SetOnce {
   public orgParams?: OrgParams;
   public usage: Usage;
   public processedLog: ProcessedLog;
-  public payload: Payload;
 
   constructor(message: Message) {
     super();
@@ -19,16 +18,7 @@ export class HandlerContext extends SetOnce {
       request: {},
       response: {},
     };
-    this.payload = {
-      properties: [],
-    };
     this.usage = {};
-  }
-
-  addProperties(
-    properties: Database["public"]["Tables"]["properties"]["Insert"][]
-  ): void {
-    this.payload.properties.push(...properties);
   }
 }
 
@@ -65,7 +55,7 @@ export type Log = {
     responseCreatedAt: Date;
     delayMs: number;
   };
-  assets?: Map<string, string>;
+  assets?: Record<string, string>;
   model: string;
 };
 
@@ -109,12 +99,4 @@ export type PromptRecord = {
   model: string;
   heliconeTemplate: TemplateWithInputs;
   createdAt: Date;
-};
-
-export type Payload = {
-  request?: Database["public"]["Tables"]["request"]["Insert"];
-  response?: Database["public"]["Tables"]["response"]["Insert"];
-  properties: Database["public"]["Tables"]["properties"]["Insert"][];
-  prompt?: PromptRecord;
-  requestResponseVersionedCH?: ClickhouseDB["Tables"]["request_response_versioned"];
 };

@@ -30,7 +30,7 @@ export type Log = {
     responseCreatedAt: Date;
     delayMs: number;
   };
-  assets?: Map<string, string>;
+  assets?: Record<string, string>;
   model: string;
 };
 

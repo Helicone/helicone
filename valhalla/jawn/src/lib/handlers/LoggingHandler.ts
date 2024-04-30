@@ -33,15 +33,11 @@ export class LoggingHandler extends AbstractLogHandler {
   }
 
   async handle(context: HandlerContext): Promise<void> {
+    console.log(`LoggingHandler: ${context.message.log.request.id}`);
     // Postgres
-    context.payload.request = this.mapRequest(context);
-    this.batchPayload.requests.push(context.payload.request);
-
-    context.payload.response = this.mapResponse(context);
-    this.batchPayload.responses.push(context.payload.response);
-
-    context.addProperties(this.mapProperties(context));
-    this.batchPayload.properties.push(...context.payload.properties);
+    this.batchPayload.requests.push(this.mapRequest(context));
+    this.batchPayload.responses.push(this.mapResponse(context));
+    this.batchPayload.properties.push(...this.mapProperties(context));
 
     // Prompts
     if (
@@ -50,22 +46,19 @@ export class LoggingHandler extends AbstractLogHandler {
     ) {
       const prompt = this.mapPrompt(context);
       if (prompt) {
-        context.payload.prompt = prompt;
         this.batchPayload.prompts.push(prompt);
       }
     }
 
     // Clickhouse
-    context.payload.requestResponseVersionedCH =
-      this.mapRequestResponseVersionedCH(context);
     this.batchPayload.requestResponseVersionedCH.push(
-      context.payload.requestResponseVersionedCH
+      this.mapRequestResponseVersionedCH(context)
     );
 
     await super.handle(context);
   }
 
-  public async handleResult(): PromiseGenericResult<string> {
+  public async handleResults(): PromiseGenericResult<string> {
     const pgResult = await this.logStore.insertLogBatch(this.batchPayload);
 
     if (pgResult.error) {

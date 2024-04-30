@@ -3,6 +3,7 @@ import { HandlerContext, TemplateWithInputs } from "./HandlerContext";
 
 export class PromptHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): Promise<void> {
+    console.log(`PromptHandler: ${context.message.log.request.id}`);
     // Process Helicone Template
     if (
       context.message.log.request.promptId &&
@@ -14,7 +15,9 @@ export class PromptHandler extends AbstractLogHandler {
       // If assets are present, replace the inputs with the asset ids
       if (assets) {
         const inverseAssets: Map<string, string> = new Map();
-        assets.forEach((value, key) => inverseAssets.set(value, key));
+        for (const [key, value] of Object.entries(assets)) {
+          inverseAssets.set(value, key);
+        }
 
         const inputs = Object.entries(heliconeTemplate.inputs).reduce<{
           [key: string]: string;

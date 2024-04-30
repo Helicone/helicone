@@ -5,6 +5,7 @@ import { HandlerContext } from "./HandlerContext";
 
 export class RequestBodyHandler extends AbstractLogHandler {
   async handle(context: HandlerContext): Promise<void> {
+    console.log(`RequestBodyHandler: ${context.message.log.request.id}`);
     const processedBody = this.processRequestBody(context);
 
     if (processedBody.error || !processedBody.data) {
@@ -19,8 +20,9 @@ export class RequestBodyHandler extends AbstractLogHandler {
 
   processRequestBody(context: HandlerContext): GenericResult<any> {
     const log = context.message.log;
-    let requestBody = context.processedLog.request.rawBody as any;
-    requestBody = requestBody.replace(/\\u0000/g, ""); // Remove unsupported null character in JSONB
+    let requestBody = context.processedLog.request.rawBody;
+
+    requestBody = this.cleanRequestBody(requestBody);
     requestBody = tryParse(requestBody, "request body");
     requestBody = context.message.heliconeMeta.omitRequestLog
       ? {
@@ -32,6 +34,11 @@ export class RequestBodyHandler extends AbstractLogHandler {
     requestBody = this.unsupportedImage(requestBody);
 
     return ok(requestBody);
+  }
+
+  cleanRequestBody(requestBody: any): string {
+    const requestBodyString = JSON.stringify(requestBody);
+    return requestBodyString.replace(/\\u0000/g, "");
   }
 
   // Replaces all the image_url that is not a url or not { url: url }  with
