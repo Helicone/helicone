@@ -28,6 +28,14 @@ export class S3Client {
     });
   }
 
+  async getRawRequestResponseBody(
+    orgId: string,
+    requestId: string
+  ): Promise<Result<string, string>> {
+    const key = this.getRawRequestResponseKey(requestId, orgId);
+    return await this.getSignedUrl(key);
+  }
+
   async getRequestResponseBodySignedUrl(
     orgId: string,
     requestId: string
@@ -62,6 +70,10 @@ export class S3Client {
       return { data: null, error: error.message };
     }
   }
+
+  getRawRequestResponseKey = (requestId: string, orgId: string) => {
+    return `organizations/${orgId}/requests/${requestId}/raw_request_response_body`;
+  };
 
   getRequestResponseKey = (requestId: string, orgId: string) => {
     return `organizations/${orgId}/requests/${requestId}/request_response_body`;

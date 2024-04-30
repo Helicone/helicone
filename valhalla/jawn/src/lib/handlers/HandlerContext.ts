@@ -3,7 +3,6 @@ import { SetOnce } from "../../utils/setOnce";
 import { ClickhouseDB } from "../db/ClickhouseWrapper";
 import { Database } from "../db/database.types";
 import { AuthParams, OrgParams } from "../db/supabase";
-import { Usage } from "../shared/bodyProcessors/IBodyProcessor";
 
 export class HandlerContext extends SetOnce {
   public message: Message;
@@ -11,7 +10,6 @@ export class HandlerContext extends SetOnce {
   public orgParams?: OrgParams;
   public usage: Usage;
   public processedLog: ProcessedLog;
-  public payload: Payload;
 
   constructor(message: Message) {
     super();
@@ -20,16 +18,7 @@ export class HandlerContext extends SetOnce {
       request: {},
       response: {},
     };
-    this.payload = {
-      properties: [],
-    };
     this.usage = {};
-  }
-
-  addProperties(
-    properties: Database["public"]["Tables"]["properties"]["Insert"][]
-  ): void {
-    this.payload.properties.push(...properties);
   }
 }
 
@@ -44,46 +33,55 @@ export type Log = {
     userId: string;
     promptId?: string;
     properties: Record<string, string>;
-    heliconeApiKeyId: string;
+    heliconeApiKeyId?: number;
     heliconeProxyKeyId?: string;
     targetUrl: string;
     provider: Provider;
+    bodySize: number;
     model: string;
     path: string;
-    body: string;
     threat?: boolean;
     countryCode?: string;
     requestCreatedAt: Date;
     isStream: boolean;
-    assets?: Map<string, string>;
     heliconeTemplate?: TemplateWithInputs;
   };
   response: {
     id: string;
-    body: string;
     status: number;
+    bodySize: number;
     model: string;
-    timeToFirstToken: number;
+    timeToFirstToken?: number;
     responseCreatedAt: Date;
     delayMs: number;
-    assets?: Map<string, string>;
   };
+  assets?: Record<string, string>;
   model: string;
+};
+
+export type Usage = {
+  promptTokens?: number;
+  completionTokens?: number;
+  totalTokens?: number;
+  heliconeCalculated?: boolean;
+  cost?: number;
 };
 
 export type ProcessedLog = {
   model?: string;
   request: {
+    rawBody?: any;
     body?: any;
     heliconeTemplate?: TemplateWithInputs;
   };
   response: {
+    rawBody?: any;
     body?: any;
   };
 };
 
 export type HeliconeMeta = {
-  modelOverride: string;
+  modelOverride?: string;
   omitRequestLog: boolean;
   omitResponseLog: boolean;
 };
@@ -101,12 +99,4 @@ export type PromptRecord = {
   model: string;
   heliconeTemplate: TemplateWithInputs;
   createdAt: Date;
-};
-
-export type Payload = {
-  request?: Database["public"]["Tables"]["request"]["Insert"];
-  response?: Database["public"]["Tables"]["response"]["Insert"];
-  properties: Database["public"]["Tables"]["properties"]["Insert"][];
-  prompt?: PromptRecord;
-  requestResponseVersionedCH?: ClickhouseDB["Tables"]["request_response_versioned"];
 };

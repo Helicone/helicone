@@ -15,20 +15,27 @@ export class RateLimitHandler extends AbstractLogHandler {
   }
 
   async handle(context: HandlerContext): Promise<void> {
-    const { data: isRateLimited, error: rateLimitErr } =
-      this.rateLimitEntry(context);
+    console.log(`RateLimitHandler: ${context.message.log.request.id}`);
+    try {
+      const { data: isRateLimited, error: rateLimitErr } =
+        this.rateLimitEntry(context);
 
-    if (rateLimitErr || isRateLimited === null) {
-      console.log("Rate limit failed:", rateLimitErr || "Rate limited");
-    } else if (context.orgParams?.id && isRateLimited) {
-      this.rateLimitLogs.push({
-        organization_id: context.orgParams?.id || "",
-        created_at: context.message.log.request.requestCreatedAt.toISOString(),
-      });
+      if (rateLimitErr || isRateLimited === null) {
+        console.log("Rate limit failed:", rateLimitErr || "Rate limited");
+      } else if (context.orgParams?.id && isRateLimited) {
+        this.rateLimitLogs.push({
+          organization_id: context.orgParams?.id || "",
+          created_at:
+            context.message.log.request.requestCreatedAt.toISOString(),
+        });
+        return;
+        // Do not continue to the next handler if rate limited
+      } else {
+        return await super.handle(context);
+      }
+    } catch (error: any) {
+      console.error(`Context: ${this.constructor.name}. Error: ${error}`);
       return;
-      // Do not continue to the next handler if rate limited
-    } else {
-      return await super.handle(context);
     }
   }
 
@@ -43,7 +50,7 @@ export class RateLimitHandler extends AbstractLogHandler {
     return ok(false);
   }
 
-  public async handleResult(): PromiseGenericResult<string> {
+  public async handleResults(): PromiseGenericResult<string> {
     if (this.rateLimitLogs.length === 0) {
       return ok(`No rate limits to insert.`);
     }
