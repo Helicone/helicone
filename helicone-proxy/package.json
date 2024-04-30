@@ -1,0 +1,19 @@
+{
+  "name": "helicone-proxy",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "test": "vitest",
+    "cf-typegen": "wrangler types"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.1.0",
+    "@cloudflare/workers-types": "^4.20240423.0",
+    "typescript": "^5.0.4",
+    "vitest": "1.3.0",
+    "wrangler": "^3.0.0"
+  }
+}

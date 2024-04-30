@@ -1,6 +1,6 @@
 import { S3Client as AwsS3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { Result } from "../../result";
+import { Result, ok } from "../../result";
 
 const S3_ACCESS_KEY = process.env.S3_ACCESS_KEY ?? "";
 const S3_SECRET_KEY = process.env.S3_SECRET_KEY ?? "";
@@ -75,10 +75,23 @@ export class S3Client {
         expiresIn: 1800, // 30 minutes
       });
 
-      return { data: signedUrl, error: null };
+      return ok(this.obscureSignedUrl(signedUrl));
     } catch (error: any) {
       return { data: null, error: error.message };
     }
+  }
+
+  obscureSignedUrl(signedUrl: string) {
+    const url = new URL(signedUrl);
+    const proxyBaseUrl = new URL(
+      process.env.S3_PROXY_URL || "https://proxy.hconeai.com"
+    );
+    url.hostname = proxyBaseUrl.hostname;
+    url.port = proxyBaseUrl.port;
+    url.protocol = proxyBaseUrl.protocol;
+    url.pathname = url.pathname.replace(/^\/[^\/]+/, "/obscured");
+
+    return url.toString();
   }
 
   getRequestResponseKey = (requestId: string, orgId: string) => {

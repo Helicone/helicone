@@ -1,6 +1,6 @@
 import { S3Client as AwsS3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { Result } from "../result";
+import { Result, ok } from "../result";
 
 export type RequestResponseBody = {
   request?: any;
@@ -57,10 +57,26 @@ export class S3Client {
         expiresIn: 1800, // 30 minutes
       });
 
-      return { data: signedUrl, error: null };
+      //https://s3.us-west-2.amazonaws.com/BUCKETNAME/organizations/dad350b5-4afe-4fd5-b910-ba74c0ad2f0f/requests/99a4a600-f003-4fc4-ad36-d85cd0ea4e85/request_response_body?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4LT7EZHCIBRZI3TY%2F20240430%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20240430T204833Z&X-Amz-Expires=1800&X-Amz-Signature=c8d852208b8230fad27605299db3b33dba7ced7ab33c34d98295fbfed3e18773&X-Amz-SignedHeaders=host
+      // Obscure signedUrl. Need to remove the base url and replace with https://proxy.hconeai.com and remove the bucket name. Keep everything else
+
+      return ok(this.obscureSignedUrl(signedUrl));
     } catch (error: any) {
       return { data: null, error: error.message };
     }
+  }
+
+  obscureSignedUrl(signedUrl: string) {
+    const url = new URL(signedUrl);
+    const proxyBaseUrl = new URL(
+      process.env.S3_PROXY_URL || "https://proxy.hconeai.com"
+    );
+    url.hostname = proxyBaseUrl.hostname;
+    url.port = proxyBaseUrl.port;
+    url.protocol = proxyBaseUrl.protocol;
+    url.pathname = url.pathname.replace(/^\/[^\/]+/, "/obscured");
+
+    return url.toString();
   }
 
   getRequestResponseKey = (requestId: string, orgId: string) => {
