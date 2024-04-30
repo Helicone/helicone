@@ -16,21 +16,20 @@ import {
 } from "../../../../services/hooks/prompts/prompts";
 
 import { BeakerIcon } from "@heroicons/react/24/solid";
-import HcBreadcrumb from "../../../ui/hcBreadcrumb";
-import HcBadge from "../../../ui/hcBadge";
-import HcButton from "../../../ui/hcButton";
 import { useRouter } from "next/router";
-import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
-import StyledAreaChart from "../../dashboard/styledAreaChart";
-import { SimpleTable } from "../../../shared/table/simpleTable";
-import TableFooter from "../../requestsV2/tableFooter";
-import { PrettyInput } from "../../playground/chatRow";
 import { useExperiments } from "../../../../services/hooks/prompts/experiments";
+import { useInputs } from "../../../../services/hooks/prompts/inputs";
+import { SimpleTable } from "../../../shared/table/simpleTable";
+import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
+import { getUSDateFromString } from "../../../shared/utils/utils";
+import HcBadge from "../../../ui/hcBadge";
+import HcBreadcrumb from "../../../ui/hcBreadcrumb";
+import HcButton from "../../../ui/hcButton";
+import StyledAreaChart from "../../dashboard/styledAreaChart";
+import { Chat } from "../../requests/chat";
 import ModelPill from "../../requestsV2/modelPill";
 import StatusBadge from "../../requestsV2/statusBadge";
-import { getUSDateFromString } from "../../../shared/utils/utils";
-import { Chat } from "../../requests/chat";
-import { useInputs } from "../../../../services/hooks/prompts/inputs";
+import TableFooter from "../../requestsV2/tableFooter";
 import PromptPropertyCard from "./promptPropertyCard";
 
 interface PromptIdPageProps {
