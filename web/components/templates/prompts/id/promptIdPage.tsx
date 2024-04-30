@@ -1,8 +1,4 @@
-import {
-  BookOpenIcon,
-  ChartBarIcon,
-  PresentationChartLineIcon,
-} from "@heroicons/react/24/outline";
+import { BookOpenIcon, ChartBarIcon } from "@heroicons/react/24/outline";
 import {
   MultiSelect,
   MultiSelectItem,
@@ -26,18 +22,15 @@ import { useRouter } from "next/router";
 import { useExperiments } from "../../../../services/hooks/prompts/experiments";
 import { useInputs } from "../../../../services/hooks/prompts/inputs";
 import { SimpleTable } from "../../../shared/table/simpleTable";
-import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
 import { getUSDateFromString } from "../../../shared/utils/utils";
 import HcBadge from "../../../ui/hcBadge";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
 import HcButton from "../../../ui/hcButton";
-import StyledAreaChart from "../../dashboard/styledAreaChart";
 import { Chat } from "../../requests/chat";
 import ModelPill from "../../requestsV2/modelPill";
 import StatusBadge from "../../requestsV2/statusBadge";
 import TableFooter from "../../requestsV2/tableFooter";
 import PromptPropertyCard from "./promptPropertyCard";
-import { ChatCompletion } from "openai/resources";
 import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
 import { MODEL_LIST } from "../../playground/new/modelList";
 import LoadingAnimation from "../../../shared/loadingAnimation";
