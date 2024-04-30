@@ -19,7 +19,7 @@ export const INTERNAL_ERRORS = {
 // Pulls out usage
 // Some modification to body
 export class ResponseBodyHandler extends AbstractLogHandler {
-  public async handle(context: HandlerContext): Promise<void> {
+  public async handle(context: HandlerContext): PromiseGenericResult<string> {
     console.log(`ResponseBodyHandler: ${context.message.log.request.id}`);
     const omitResponseLog = context.message.heliconeMeta.omitResponseLog;
 

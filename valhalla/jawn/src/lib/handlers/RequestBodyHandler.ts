@@ -1,16 +1,15 @@
 import { tryParse } from "../../utils/helpers";
-import { GenericResult, ok } from "../shared/result";
+import { GenericResult, PromiseGenericResult, err, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
 export class RequestBodyHandler extends AbstractLogHandler {
-  async handle(context: HandlerContext): Promise<void> {
+  async handle(context: HandlerContext): PromiseGenericResult<string> {
     console.log(`RequestBodyHandler: ${context.message.log.request.id}`);
     const processedBody = this.processRequestBody(context);
 
     if (processedBody.error || !processedBody.data) {
-      console.error(`Error processing request body: ${processedBody.error}`);
-      return;
+      return err(`Error processing request body: ${processedBody.error}`);
     }
 
     context.processedLog.request.body = processedBody.data;

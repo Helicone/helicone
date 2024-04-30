@@ -9,7 +9,7 @@ import { LogStore } from "../lib/stores/LogStore";
 import { RequestResponseStore } from "../lib/stores/RequestResponseStore";
 import { ClickhouseClientWrapper } from "../lib/db/ClickhouseWrapper";
 import { PromptHandler } from "../lib/handlers/PromptHandler";
-import { PosthogClient, postHogClient } from "../lib/clients/postHogClient";
+import { PosthogClient } from "../lib/clients/postHogClient";
 import { PostHogHandler } from "../lib/handlers/PostHogHandler";
 import { S3Client } from "../lib/shared/db/s3Client";
 import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
@@ -44,7 +44,9 @@ export class LogManager {
       new LogStore(),
       new RequestResponseStore(clickhouseClientWrapper)
     );
-    const posthogHandler = new PostHogHandler(new PosthogClient(postHogClient));
+    const posthogHandler = new PostHogHandler(
+      new PosthogClient(process.env.POSTHOG_API_KEY ?? "")
+    );
 
     authHandler
       .setNext(rateLimitHandler)
@@ -58,7 +60,15 @@ export class LogManager {
     await Promise.all(
       logMessages.map(async (logMessage) => {
         const handlerContext = new HandlerContext(logMessage);
-        await authHandler.handle(handlerContext);
+        const result = await authHandler.handle(handlerContext);
+
+        if (result.error) {
+          console.error(
+            `Error processing request ${logMessage.log.request.id} for batch ${batchId}: ${result.error}`
+          );
+
+          // TODO: Push to dead letter queue?
+        }
       })
     );
 

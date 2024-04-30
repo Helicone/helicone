@@ -11,12 +11,11 @@ export class S3ReaderHandler extends AbstractLogHandler {
     this.s3Client = s3Client;
   }
 
-  public async handle(context: HandlerContext): Promise<void> {
+  public async handle(context: HandlerContext): PromiseGenericResult<string> {
     console.log(`S3ReaderHandler: ${context.message.log.request.id}`);
     try {
       if (!context.authParams?.organizationId) {
-        console.error("Organization ID not found in auth params");
-        return;
+        return err("Organization ID not found in auth params");
       }
 
       const signedUrl = await this.s3Client.getRawRequestResponseBody(
@@ -26,25 +25,24 @@ export class S3ReaderHandler extends AbstractLogHandler {
 
       if (signedUrl.error || !signedUrl.data) {
         // There should always be a signed URL for the request/response even if omitted
-        console.error(
+        return err(
           `Error getting signed URL for request/response: ${signedUrl.error}`
         );
-        return;
       }
 
       const content = await this.fetchContent(signedUrl.data);
 
       if (content.error || !content.data) {
-        console.error(`Error fetching content from S3: ${content.error}`);
-        return;
+        return err(`Error fetching content from S3: ${content.error}`);
       }
 
       context.processedLog.request.rawBody = content.data.request;
       context.processedLog.response.rawBody = content.data.response;
-      super.handle(context);
+      return await super.handle(context);
     } catch (error) {
-      console.error(`Error fetching content from S3: ${error}`);
-      return;
+      return err(
+        `Error fetching content from S3: ${error}, Context: ${this.constructor.name}`
+      );
     }
   }
 

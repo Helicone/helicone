@@ -3,6 +3,7 @@ import {
   HeliconeRequestResponseToPosthog,
   PosthogClient,
 } from "../clients/postHogClient";
+import { PromiseGenericResult } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
@@ -14,7 +15,7 @@ export class PostHogHandler extends AbstractLogHandler {
     this.posthogClient = posthogClient;
   }
 
-  public async handle(context: HandlerContext): Promise<void> {
+  public async handle(context: HandlerContext): PromiseGenericResult<string> {
     const usage = context.usage;
 
     const cost = this.modelCost({

@@ -32,7 +32,7 @@ export class LoggingHandler extends AbstractLogHandler {
     };
   }
 
-  async handle(context: HandlerContext): Promise<void> {
+  async handle(context: HandlerContext): PromiseGenericResult<string> {
     console.log(`LoggingHandler: ${context.message.log.request.id}`);
     // Postgres
     this.batchPayload.requests.push(this.mapRequest(context));
@@ -55,7 +55,7 @@ export class LoggingHandler extends AbstractLogHandler {
       this.mapRequestResponseVersionedCH(context)
     );
 
-    await super.handle(context);
+    return await super.handle(context);
   }
 
   public async handleResults(): PromiseGenericResult<string> {

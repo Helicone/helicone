@@ -14,28 +14,29 @@ export class RateLimitHandler extends AbstractLogHandler {
     this.rateLimitLogs = [];
   }
 
-  async handle(context: HandlerContext): Promise<void> {
+  async handle(context: HandlerContext): PromiseGenericResult<string> {
     console.log(`RateLimitHandler: ${context.message.log.request.id}`);
     try {
       const { data: isRateLimited, error: rateLimitErr } =
         this.rateLimitEntry(context);
 
       if (rateLimitErr || isRateLimited === null) {
-        console.log("Rate limit failed:", rateLimitErr || "Rate limited");
+        return err(`Rate limit failed: ${rateLimitErr}`);
       } else if (context.orgParams?.id && isRateLimited) {
         this.rateLimitLogs.push({
           organization_id: context.orgParams?.id || "",
           created_at:
             context.message.log.request.requestCreatedAt.toISOString(),
         });
-        return;
+        return ok("Rate limited.");
         // Do not continue to the next handler if rate limited
       } else {
         return await super.handle(context);
       }
     } catch (error: any) {
-      console.error(`Context: ${this.constructor.name}. Error: ${error}`);
-      return;
+      return err(
+        `Error processing rate limit: ${error}, Context: ${this.constructor.name}`
+      );
     }
   }
 

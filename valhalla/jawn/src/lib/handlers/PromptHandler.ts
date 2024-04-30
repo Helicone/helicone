@@ -1,8 +1,9 @@
+import { PromiseGenericResult } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext, TemplateWithInputs } from "./HandlerContext";
 
 export class PromptHandler extends AbstractLogHandler {
-  public async handle(context: HandlerContext): Promise<void> {
+  public async handle(context: HandlerContext): PromiseGenericResult<string> {
     console.log(`PromptHandler: ${context.message.log.request.id}`);
     // Process Helicone Template
     if (
@@ -39,6 +40,6 @@ export class PromptHandler extends AbstractLogHandler {
       }
     }
 
-    await super.handle(context);
+    return await super.handle(context);
   }
 }
