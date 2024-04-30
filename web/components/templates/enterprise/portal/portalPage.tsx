@@ -156,7 +156,7 @@ const PortalPage = (props: PortalPageProps) => {
                           {filteredData?.map((org, index) => (
                             <CustomerRow
                               org={org}
-                              key={index}
+                              key={org.id}
                               refetchCustomerOrgs={refetch}
                             />
                           ))}
