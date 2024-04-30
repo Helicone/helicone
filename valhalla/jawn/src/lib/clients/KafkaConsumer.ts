@@ -1,6 +1,7 @@
-import { Kafka, logLevel } from "kafkajs";
+import { Batch, Kafka, logLevel } from "kafkajs";
 import { LogManager } from "../../managers/LogManager";
 import { Message } from "../handlers/HandlerContext";
+import { PromiseGenericResult, err, ok } from "../shared/result";
 
 let kafka;
 if (
@@ -53,43 +54,57 @@ export const consume = async () => {
       heartbeat,
       commitOffsetsIfNecessary,
     }) => {
-      const batchId = `${
-        batch.partition
-      }-${batch.firstOffset()}-${batch.lastOffset()}`;
+      const consumeResult = await consumeBatch(batch);
 
-      const messages = batch.messages
-        .map((message) => {
-          if (message.value) {
-            try {
-              const kafkaValue = JSON.parse(message.value.toString());
-              const parsedMsg = JSON.parse(kafkaValue.value) as Message;
-              return mapMessageDates(parsedMsg);
-            } catch (error) {
-              console.error("Failed to parse message:", error);
-              return null;
-            }
-          }
-          return null;
-        })
-        .filter((msg) => msg !== null) as Message[];
-
-      try {
-        const logManager = new LogManager();
-        console.log(
-          `Processing batch ${batchId} with ${messages.length} messages`
-        );
-        await logManager.processLogEntries(messages, batchId);
+      if (consumeResult.error) {
+        console.error("Failed to consume batch", consumeResult.error);
+        // TODO: Best way to handle this?
+        return;
+      } else {
         resolveOffset(batch.messages[batch.messages.length - 1].offset);
         await commitOffsetsIfNecessary();
         await heartbeat();
-      } catch (error) {
-        console.error("Failed to process batch", error);
-        // Handle failure: you might want to log the error and decide how to proceed
-        // Depending on the nature of the failure, you might choose to retry or skip this batch
       }
     },
   });
 };
+
+async function consumeBatch(batch: Batch): PromiseGenericResult<string> {
+  const batchId = `${
+    batch.partition
+  }-${batch.firstOffset()}-${batch.lastOffset()}`;
+
+  console.log(
+    `Processing batch ${batchId} with ${batch.messages.length} messages`
+  );
+
+  const messages: Message[] = [];
+  for (const message of batch.messages) {
+    if (message.value) {
+      try {
+        const kafkaValue = JSON.parse(message.value.toString());
+        const parsedMsg = JSON.parse(kafkaValue.value) as Message;
+        messages.push(mapMessageDates(parsedMsg));
+      } catch (error) {
+        // TODO: Should we skip or fail the message?
+        return err(`Failed to parse message: ${error}`);
+      }
+    } else {
+      // TODO: Should we skip or fail the batch?
+      return err("Message value is empty");
+    }
+  }
+
+  const logManager = new LogManager();
+
+  try {
+    await logManager.processLogEntries(messages, batchId);
+    return ok(batchId);
+  } catch (error) {
+    // TODO: Should we skip or fail the batch?
+    return err(`Failed to process batch ${batchId}, error: ${error}`);
+  }
+}
 
 function mapMessageDates(message: Message): Message {
   return {
