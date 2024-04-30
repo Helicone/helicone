@@ -2,7 +2,6 @@ import {
   useGetOrg,
   useGetOrgMembers,
 } from "../../../../../services/hooks/organizations";
-import Link from "next/link";
 import {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,

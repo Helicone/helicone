@@ -24,7 +24,6 @@ import { useState } from "react";
 import CustomerRow from "./customerRow";
 import { ArrowRightIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
-import { useDebounce } from "../../../../services/hooks/debounce";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
 
 import ExportCustomerButton from "./exportCustomerButton";
