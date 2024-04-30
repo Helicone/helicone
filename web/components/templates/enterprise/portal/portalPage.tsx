@@ -31,20 +31,24 @@ import ExportCustomerButton from "./exportCustomerButton";
 import usePortalPage from "../../../../services/hooks/enterprise/portal/usePortalPage";
 import CreateOrgForm from "../../organization/createOrgForm";
 
-interface PortalPageProps {
-  searchQuery: string | null;
-}
+interface PortalPageProps {}
 
 const PortalPage = (props: PortalPageProps) => {
-  const { searchQuery } = props;
+  const {} = props;
 
   const router = useRouter();
-  const [currentSearch, setCurrentSearch] = useState<string | null>(null);
+  const [currentSearch, setCurrentSearch] = useState<string>("");
   const [addCustomerModalOpen, setAddCustomerModalOpen] = useState(false);
 
-  const debouncedSearch = useDebounce(currentSearch, 700);
+  const { data, isLoading, refetch } = usePortalPage();
 
-  const { data, isLoading, refetch } = usePortalPage(debouncedSearch);
+  const filteredData = data?.filter((org) => {
+    if (currentSearch === null) {
+      return true;
+    }
+
+    return org.name.toLowerCase().includes(currentSearch.toLowerCase());
+  });
 
   return (
     <>
@@ -74,26 +78,11 @@ const PortalPage = (props: PortalPageProps) => {
 
                       setCurrentSearch(search);
 
-                      if (search === "") {
-                        // delete the query param from the url
-                        delete router.query.q;
-                        router.push({
-                          pathname: router.pathname,
-                          query: { ...router.query },
-                        });
-                        refetch();
-                        return;
-                      }
-
-                      router.push({
-                        pathname: router.pathname,
-                        query: { ...router.query, q: search },
-                      });
                       refetch();
                     }}
                   />
                   <div className="flex flex-row space-x-2 items-center">
-                    <ExportCustomerButton searchQuery={debouncedSearch} />
+                    <ExportCustomerButton searchQuery={currentSearch} />
                     <button
                       onClick={() => {
                         setAddCustomerModalOpen(true);
@@ -105,7 +94,7 @@ const PortalPage = (props: PortalPageProps) => {
                     </button>
                   </div>
                 </div>
-                {searchQuery === null && data?.length === 0 ? (
+                {data?.length === 0 ? (
                   <div className="flex flex-col w-full h-96 justify-center items-center">
                     <div className="flex flex-col w-2/5">
                       <UserGroupIcon className="h-12 w-12 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
@@ -164,7 +153,7 @@ const PortalPage = (props: PortalPageProps) => {
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {data?.map((org, index) => (
+                          {filteredData?.map((org, index) => (
                             <CustomerRow
                               org={org}
                               key={index}
