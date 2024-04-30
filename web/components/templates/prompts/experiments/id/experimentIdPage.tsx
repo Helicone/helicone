@@ -141,14 +141,14 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                         ?.template,
                       undefined,
                       4
-                    ) ?? ""
+                    ).substring(100) ?? ""
                   }
                   newValue={
                     JSON.stringify(
                       experiment?.hypotheses?.[0]?.promptVersion?.template,
                       undefined,
                       4
-                    ) ?? ""
+                    ).substring(100) ?? ""
                   }
                   splitView={true}
                 />
