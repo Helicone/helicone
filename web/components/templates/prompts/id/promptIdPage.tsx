@@ -40,6 +40,7 @@ import PromptPropertyCard from "./promptPropertyCard";
 import { ChatCompletion } from "openai/resources";
 import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
 import { MODEL_LIST } from "../../playground/new/modelList";
+import LoadingAnimation from "../../../shared/loadingAnimation";
 
 interface PromptIdPageProps {
   id: string;
@@ -139,7 +140,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
 
   const router = useRouter();
 
-  const { experiments, isLoading: experimentsLoading } = useExperiments(
+  const { experiments, isLoading: isExperimentsLoading } = useExperiments(
     {
       page,
       pageSize: currentPageSize,
@@ -386,55 +387,63 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       icon={PresentationChartLineIcon}
                     /> */}
                   </div>
+                  {isExperimentsLoading ? (
+                    <div className="h-48 flex justify-center items-center">
+                      <LoadingAnimation title="Loading Experiments..." />
+                    </div>
+                  ) : (
+                    <SimpleTable
+                      data={filteredExperiments}
+                      columns={[
+                        {
+                          key: "id",
+                          header: "ID",
+                          render: (item) => (
+                            <span className="underline text-black dark:text-white">
+                              {item.id}
+                            </span>
+                          ),
+                        },
+                        {
+                          key: "status",
+                          header: "Status",
+                          render: (item) => (
+                            <StatusBadge
+                              statusType={item.status || "unknown"}
+                            />
+                          ),
+                        },
+                        {
+                          key: "createdAt",
+                          header: "Created At",
+                          render: (item) => (
+                            <span>{getUSDateFromString(item.createdAt)}</span>
+                          ),
+                        },
+                        {
+                          key: "datasetName",
+                          header: "Dataset",
+                          render: (item) => item.datasetName,
+                        },
+                        {
+                          key: "model",
+                          header: "Model",
+                          render: (item) => (
+                            <ModelPill model={item.model || "unknown"} />
+                          ),
+                        },
+                        {
+                          key: "runCount",
+                          header: "Run Count",
+                          render: (item) => item.runCount || 0,
+                        },
+                      ]}
+                      onSelect={(item) => {
+                        router.push(`/prompts/${id}/experiments/${item.id}`);
+                      }}
+                    />
+                  )}
 
-                  <SimpleTable
-                    data={filteredExperiments}
-                    columns={[
-                      {
-                        key: "id",
-                        header: "ID",
-                        render: (item) => (
-                          <span className="underline text-black dark:text-white">
-                            {item.id}
-                          </span>
-                        ),
-                      },
-                      {
-                        key: "status",
-                        header: "Status",
-                        render: (item) => (
-                          <StatusBadge statusType={item.status || "unknown"} />
-                        ),
-                      },
-                      {
-                        key: "createdAt",
-                        header: "Created At",
-                        render: (item) => (
-                          <span>{getUSDateFromString(item.createdAt)}</span>
-                        ),
-                      },
-                      {
-                        key: "datasetName",
-                        header: "Dataset",
-                        render: (item) => item.datasetName,
-                      },
-                      {
-                        key: "model",
-                        header: "Model",
-                        render: (item) => (
-                          <ModelPill model={item.model || "unknown"} />
-                        ),
-                      },
-                      {
-                        key: "runCount",
-                        header: "Run Count",
-                        render: (item) => item.runCount || 0,
-                      },
-                    ]}
-                    onSelect={(item) => {
-                      router.push(`/prompts/${id}/experiments/${item.id}`);
-                    }}
-                  />
                   <TableFooter
                     currentPage={currentPage}
                     pageSize={100}
