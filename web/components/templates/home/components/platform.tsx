@@ -48,7 +48,7 @@ const features = [
   {
     name: "Exporting.",
     description:
-      "Extract, transform, and load your data using our GraphQL API, webhooks, and more.",
+      "Extract, transform, and load your data using our REST API, webhooks, and more.",
     icon: FolderArrowDownIcon,
   },
 ];
@@ -84,10 +84,10 @@ export default function Platform() {
   return (
     <>
       <div className="flex flex-col space-y-4 pb-2 w-full items-center">
-        <h3 className="text-3xl sm:text-5xl font-bold text-black text-center tracking-tight leading-tight">
+        <h2 className="text-3xl sm:text-5xl font-bold text-black text-center tracking-tight leading-tight">
           One observability platform,{" "}
           <span className="text-sky-500">everything you need</span>
-        </h3>
+        </h2>
         <p className="text-lg md:text-xl text-gray-600 max-w-4xl text-center">
           Collect data, monitor performance, and improve your LLM-powered
           application over time

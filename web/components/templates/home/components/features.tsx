@@ -184,7 +184,7 @@ const tabOptions: {
               <InboxStackIcon className="h-6 w-6" /> Standardized schemas
             </li>
             <li className="flex items-center gap-2">
-              <CodeBracketIcon className="h-6 w-6" /> GraphQL API
+              <CodeBracketIcon className="h-6 w-6" /> REST API
             </li>
           </ul>
         </div>
@@ -314,7 +314,7 @@ const tabOptions: {
               <InboxStackIcon className="h-6 w-6" /> Standardized schemas
             </li>
             <li className="flex items-center gap-2">
-              <CodeBracketIcon className="h-6 w-6" /> GraphQL API
+              <CodeBracketIcon className="h-6 w-6" /> REST API
             </li>
           </ul>
         </div>

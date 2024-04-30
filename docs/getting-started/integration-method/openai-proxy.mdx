@@ -131,23 +131,6 @@ openai.Completion.create(
     ```
     
   **Modify the base path and add a Helicone-Auth header**
-  
-  **OpenAI < V4**
-    ```javascript
-    import { Configuration, OpenAIApi } from "openai";
-
-    const configuration = new Configuration({
-        apiKey: process.env.OPENAI_API_KEY,
-        basePath: "https://oai.hconeai.com/v1",
-        baseOptions: {
-          headers: {
-              "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-          },
-        },
-    });
-
-    const openai = new OpenAIApi(configuration);
-    ```
 
 **OpenAI V4+**
 
@@ -162,6 +145,23 @@ const openai = new OpenAI({
   },
 });
 ```
+
+**OpenAI < V4**
+```javascript
+import { Configuration, OpenAIApi } from "openai";
+
+    const configuration = new Configuration({
+        apiKey: process.env.OPENAI_API_KEY,
+        basePath: "https://oai.hconeai.com/v1",
+        baseOptions: {
+          headers: {
+              "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+          },
+        },
+    });
+
+    const openai = new OpenAIApi(configuration);
+    ```
 
   </Tab>
   <Tab title="Node.js (w/ package)">

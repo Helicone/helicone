@@ -57,6 +57,16 @@ export function resultMap<T, K, Z>(
   return { data: f(result.data), error: null };
 }
 
+export function promiseResultMap<T, K, Z>(
+  result: Result<T, K>,
+  f: (data: T) => Promise<Z>
+): Promise<Result<Z, K>> {
+  if (isError(result)) {
+    return Promise.resolve(result);
+  }
+  return f(result.data).then((data) => ok(data));
+}
+
 export function ok<T, K>(data: T): Result<T, K> {
   return { data: data, error: null };
 }
@@ -88,4 +98,5 @@ export function resultsAll<T extends Result<any, any>[]>(
   return ok(data as AllSuccessTuple<T>);
 }
 
+export type GenericResult<T> = Result<T, string>;
 export type PromiseGenericResult<T> = Promise<Result<T, string>>;

@@ -36,6 +36,9 @@ export async function getTokenCount(
     });
 
     return result.json<{ tokens?: number }>().then((r) => r?.tokens ?? 0);
+  } else if (provider === "OPENROUTER") {
+    console.error("OpenRouter does not support token counting");
+    return 0;
   } else {
     throw new Error(`Invalid provider: ${provider}`);
   }

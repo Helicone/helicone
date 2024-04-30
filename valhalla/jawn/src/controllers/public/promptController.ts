@@ -10,12 +10,26 @@ import {
   Tags,
 } from "tsoa";
 import { Result } from "../../lib/shared/result";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import {
+  FilterLeafSubset,
+  FilterNode,
+} from "../../lib/shared/filters/filterDefs";
 import { PromptManager } from "../../managers/prompt/PromptManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
+import { InputsManager } from "../../managers/inputs/InputsManager";
+
+export type PromptsFilterBranch = {
+  left: PromptsFilterNode;
+  operator: "or" | "and";
+  right: PromptsFilterNode;
+};
+type PromptsFilterNode =
+  | FilterLeafSubset<"prompt_v2">
+  | PromptsFilterBranch
+  | "all";
 
 export interface PromptsQueryParams {
-  filter: FilterNode;
+  filter: PromptsFilterNode;
 }
 
 export interface PromptsResult {
@@ -59,6 +73,15 @@ export interface PromptVersionResult {
 
 export interface PromptCreateSubversionParams {
   newHeliconeTemplate: any;
+}
+
+export interface PromptInputRecord {
+  id: string;
+  inputs: Record<string, string>;
+  source_request: string;
+  prompt_version: string;
+  created_at: string;
+  response_body: string;
 }
 
 @Route("v1/prompt")
@@ -112,6 +135,32 @@ export class PromptController extends Controller {
     const result = await promptManager.createNewPromptVersion(
       promptVersionId,
       requestBody
+    );
+    if (result.error || !result.data) {
+      console.log(result.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(201); // set return status 201
+    }
+    return result;
+  }
+
+  @Post("version/{promptVersionId}/inputs/query")
+  public async getInputs(
+    @Body()
+    requestBody: {
+      limit: number;
+      random?: boolean;
+    },
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() promptVersionId: string
+  ): Promise<Result<PromptInputRecord[], string>> {
+    const inputManager = new InputsManager(request.authParams);
+
+    const result = await inputManager.getInputs(
+      requestBody.limit,
+      promptVersionId,
+      requestBody.random
     );
     if (result.error || !result.data) {
       console.log(result.error);

@@ -7,13 +7,12 @@ import { ReactElement } from "react";
 
 interface PortalProps {
   user: User;
-  searchQuery: string | null;
 }
 
 const Portal = (props: PortalProps) => {
-  const { user, searchQuery } = props;
+  const { user } = props;
 
-  return <PortalPage searchQuery={searchQuery} />;
+  return <PortalPage />;
 };
 
 Portal.getLayout = function getLayout(page: ReactElement) {
@@ -38,14 +37,10 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
       },
     };
 
-  // get the query param q from the url
-  const { q } = ctx.query;
-
   return {
     props: {
       initialSession: session,
       user: session.user,
-      searchQuery: q || null,
     },
   };
 };

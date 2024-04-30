@@ -2,7 +2,6 @@ import {
   useGetOrg,
   useGetOrgMembers,
 } from "../../../../../services/hooks/organizations";
-import Link from "next/link";
 import {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
@@ -11,7 +10,14 @@ import {
 import { getUSDateFromString } from "../../../../shared/utils/utils";
 import { clsx } from "../../../../shared/clsx";
 import OrgMembersPage from "../../../organization/members/orgMembersPage";
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react";
+import {
+  AreaChart,
+  Tab,
+  TabGroup,
+  TabList,
+  TabPanel,
+  TabPanels,
+} from "@tremor/react";
 import { useState } from "react";
 import LoadingAnimation from "../../../../shared/loadingAnimation";
 import ProviderKeyList from "./providerKeyList";
@@ -19,6 +25,10 @@ import { useOrg } from "../../../../layout/organizationContext";
 import { useRouter } from "next/router";
 import { DeleteOrgModal } from "../../../organization/deleteOrgModal";
 import EditCustomerOrgModal from "../editCustomerOrgModal";
+import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
+import { formatISO } from "date-fns";
+import { useRequestsOverTime } from "../../../organization/plan/renderOrgPlan";
+import StyledAreaChart from "../../../dashboard/styledAreaChart";
 
 interface PortalIdPageProps {
   orgId: string | null;
@@ -35,6 +45,47 @@ const PortalIdPage = (props: PortalIdPageProps) => {
   } = useGetOrgMembers(orgId || "");
   const orgContext = useOrg();
   const router = useRouter();
+  const startOfMonthFormatted = formatISO(
+    new Date(new Date().setDate(new Date().getDate() - 30)),
+    {
+      representation: "date",
+    }
+  );
+
+  const endOfMonthFormatted = formatISO(new Date(), {
+    representation: "date",
+  });
+
+  const timeFilter: {
+    start: Date;
+    end: Date;
+  } = {
+    start: new Date(startOfMonthFormatted),
+    end: new Date(endOfMonthFormatted),
+  };
+
+  const {
+    data,
+    isLoading: isRequestsLoading,
+    refetch: refetchRequests,
+  } = useRequestsOverTime({
+    timeFilter,
+    organizationId: orgId || undefined,
+  });
+
+  const chartData = data?.data?.map((d: any) => {
+    if (new Date(d.time) > new Date()) {
+      return {
+        requests: null,
+        date: new Date(d.time).toLocaleDateString(),
+      };
+    } else {
+      return {
+        requests: +d.count,
+        date: new Date(d.time).toLocaleDateString(),
+      };
+    }
+  });
 
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -51,19 +102,25 @@ const PortalIdPage = (props: PortalIdPageProps) => {
   const owner = members?.data?.find((member) => member.org_role === "owner");
 
   return (
-    <>
+    <div className="flex flex-col space-y-4">
+      <HcBreadcrumb
+        pages={[
+          {
+            href: "/enterprise/portal",
+            name: "Customer Portal",
+          },
+          {
+            href: `/enterprise/portal/${orgId}`,
+            name: org?.name || "n/a",
+          },
+        ]}
+      />
       <div className="flex flex-row py-2 space-x-8 w-full">
         {isLoading ? (
           <LoadingAnimation />
         ) : (
           <>
             <div className="flex flex-col items-start space-y-4 w-full max-w-[20rem]">
-              <Link
-                href={"/enterprise/portal"}
-                className="font-semibold text-sm text-sky-500 hover:underline"
-              >
-                Customer Portal
-              </Link>
               <div className="flex items-center space-x-4">
                 <div className="h-8 w-8 flex-none rounded-md bg-gray-100 dark:bg-gray-900 object-cover border border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center">
                   {currentIcon && (
@@ -114,12 +171,20 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                 <div className="flex flex-row items-center w-full justify-between space-x-2 pt-4 pr-4">
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">Costs</p>
-                    <p className="text-sm text-gray-500">{`$${orgLimits?.cost}`}</p>
+                    <p className="text-sm text-gray-500">{`${new Intl.NumberFormat(
+                      "en-US",
+                      {
+                        style: "currency",
+                        currency: "USD",
+                      }
+                    ).format(orgLimits?.cost || 0)}`}</p>
                   </div>
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">Requests</p>
                     <p className="text-sm text-gray-500">
-                      {orgLimits?.requests}
+                      {new Intl.NumberFormat("en-US").format(
+                        orgLimits?.requests || 0
+                      )}
                     </p>
                   </div>
                   <div className="flex flex-col items-start space-y-1">
@@ -159,18 +224,41 @@ const PortalIdPage = (props: PortalIdPageProps) => {
             <div className="flex flex-col w-full h-full">
               <TabGroup>
                 <TabList className="font-semibold" variant="line">
+                  <Tab>Usage</Tab>
                   <Tab>Members</Tab>
                   <Tab>Keys</Tab>
                 </TabList>
                 <TabPanels>
                   <TabPanel>
+                    <div className="pt-4">
+                      <StyledAreaChart
+                        title={"Requests Over Time"}
+                        value={undefined}
+                        isDataOverTimeLoading={false}
+                        height="400px"
+                      >
+                        <AreaChart
+                          data={chartData}
+                          categories={["requests"]}
+                          index={"date"}
+                          colors={["emerald"]}
+                          className="h-full w-full pt-8"
+                          showLegend={false}
+                          curveType="monotone"
+                        />
+                      </StyledAreaChart>
+                    </div>
+                  </TabPanel>
+                  <TabPanel>
                     {org && <OrgMembersPage org={org} wFull={true} />}
                   </TabPanel>
                   <TabPanel>
-                    <ProviderKeyList
-                      orgProviderKey={org?.org_provider_key || ""}
-                      orgId={org?.id}
-                    />
+                    <div className="pt-4">
+                      <ProviderKeyList
+                        orgProviderKey={org?.org_provider_key || ""}
+                        orgId={org?.id}
+                      />
+                    </div>
                   </TabPanel>
                 </TabPanels>
               </TabGroup>
@@ -200,7 +288,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
         orgName={org?.name || ""}
         onDeleteRoute={"/enterprise/portal"}
       />
-    </>
+    </div>
   );
 };
 

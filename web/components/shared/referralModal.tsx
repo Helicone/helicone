@@ -1,8 +1,8 @@
 import { Tooltip } from "@mui/material";
-import ThemedModal from "../shared/themed/themedModal";
+import ThemedModal from "./themed/themedModal";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { clsx } from "../shared/clsx";
-import useNotification from "../shared/notification/useNotification";
+import { clsx } from "./clsx";
+import useNotification from "./notification/useNotification";
 import { useQuery } from "@tanstack/react-query";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
 

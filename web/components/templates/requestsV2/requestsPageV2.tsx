@@ -1,6 +1,6 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import {
   TimeInterval,
@@ -22,7 +22,6 @@ import { getInitialColumns } from "./initialColumns";
 import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
 import useRequestsPageV2 from "./useRequestsPageV2";
-
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import useSearchParams from "../../shared/utils/useSearchParams";
@@ -84,12 +83,6 @@ function getSortLeaf(
   }
 }
 
-export function encodeFilter(filter: UIFilterRow): string {
-  return `${filter.filterMapIdx}:${filter.operatorIdx}:${encodeURIComponent(
-    filter.value
-  )}`;
-}
-
 function getTableName(isCached: boolean): string {
   return isCached ? "cache_hits" : "request";
 }
@@ -114,65 +107,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     searchParams.get("filter") ?? null
   );
 
-  // set the initial selected data on component load
-  useEffect(() => {
-    if (initialRequestId) {
-      const fetchRequest = async () => {
-        const response = await jawn.POST("/v1/request/query", {
-          body: {
-            filter: {
-              left: {
-                request: {
-                  id: {
-                    equals: initialRequestId,
-                  },
-                },
-              },
-              operator: "and",
-              right: "all",
-            },
-            offset: 0,
-            limit: 1,
-            sort: {},
-          },
-        });
-
-        const result = response.data;
-
-        // update below logic to work for single request
-        if (result?.data?.[0] && !result.error) {
-          const request = result.data[0];
-          if (request?.signed_body_url) {
-            try {
-              const contentResponse = await fetch(request.signed_body_url);
-              if (contentResponse.ok) {
-                const text = await contentResponse.text();
-
-                let content = JSON.parse(text);
-
-                if (request.asset_urls) {
-                  content = placeAssetIdValues(request.asset_urls, content);
-                }
-
-                request.request_body = content.request;
-                request.response_body = content.response;
-              }
-            } catch (error) {
-              console.log(`Error fetching content: ${error}`);
-            }
-          }
-
-          const normalizedRequest = getNormalizedRequest(
-            result.data[0] as HeliconeRequest
-          );
-          setSelectedData(normalizedRequest);
-          setOpen(true);
-        }
-      };
-      fetchRequest();
-    }
-  }, [initialRequestId]);
-
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const [open, setOpen] = useState(false);
@@ -180,6 +114,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [selectedData, setSelectedData] = useState<
     NormalizedRequest | undefined
   >(undefined);
+  function encodeFilter(filter: UIFilterRow): string {
+    return `${filterMap[filter.filterMapIdx].label}:${
+      filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label
+    }:${filter.value}`;
+  }
 
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -219,13 +158,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   };
 
-  const getAdvancedFilters = (): UIFilterRow[] => {
-    if (currentFilter) {
-      return currentFilter?.filter as UIFilterRow[];
-    }
-    return [];
-  };
-
   const getTimeRange = () => {
     const currentTimeFilter = searchParams.get("t");
     let range: TimeFilter;
@@ -252,9 +184,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
   const [timeRange, setTimeRange] = useState<TimeFilter>(getTimeRange());
 
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>(
-    getAdvancedFilters()
-  );
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
   const router = useRouter();
 
@@ -292,16 +222,119 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isLive
   );
 
+  // set the initial selected data on component load
+
   useEffect(() => {
-    if (router.query.page) {
-      setPage(1);
-      router.replace({
-        pathname: router.pathname,
-        query: { ...router.query, page: 1 },
-      });
+    console.log("HELLO");
+    if (initialRequestId && selectedData === undefined) {
+      const fetchRequest = async () => {
+        const response = await jawn.POST("/v1/request/query", {
+          body: {
+            filter: {
+              left: {
+                request: {
+                  id: {
+                    equals: initialRequestId,
+                  },
+                },
+              },
+              operator: "and",
+              right: "all",
+            },
+            offset: 0,
+            limit: 1,
+            sort: {},
+          },
+        });
+
+        const result = response.data;
+
+        // update below logic to work for single request
+        if (result?.data?.[0] && !result.error) {
+          const request = result.data[0];
+
+          if (request?.signed_body_url) {
+            try {
+              const contentResponse = await fetch(request.signed_body_url);
+              if (contentResponse.ok) {
+                const text = await contentResponse.text();
+
+                let content = JSON.parse(text);
+
+                if (request.asset_urls) {
+                  content = placeAssetIdValues(request.asset_urls, content);
+                }
+
+                request.request_body = content.request;
+                request.response_body = content.response;
+              }
+            } catch (error) {
+              console.log(`Error fetching content: ${error}`);
+            }
+          }
+
+          const normalizedRequest = getNormalizedRequest(
+            result.data[0] as HeliconeRequest
+          );
+          setSelectedData(normalizedRequest);
+          setOpen(true);
+        }
+      };
+      fetchRequest();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedAdvancedFilter]);
+  }, [initialRequestId]);
+
+  useEffect(() => {
+    const currentAdvancedFilters = searchParams.get("filters");
+
+    if (filterMap && advancedFilters.length === 0 && currentAdvancedFilters) {
+      setAdvancedFilters(getAdvancedFilters());
+    }
+  }, []);
+
+  //convert this using useCallback
+  const getAdvancedFilters = useCallback(() => {
+    function decodeFilter(encoded: string): UIFilterRow | null {
+      try {
+        const parts = encoded.split(":");
+        if (parts.length !== 3) return null;
+        const filterLabel = decodeURIComponent(parts[0]);
+        const operator = decodeURIComponent(parts[1]);
+        const value = decodeURIComponent(parts[2]);
+
+        const filterMapIdx = filterMap.findIndex(
+          (f) =>
+            f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
+        );
+        const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
+          (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
+        );
+
+        if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
+
+        return { filterMapIdx, operatorIdx, value };
+      } catch (error) {
+        console.error("Error decoding filter:", error);
+        return null;
+      }
+    }
+    try {
+      const currentAdvancedFilters = searchParams.get("filters");
+
+      if (currentAdvancedFilters) {
+        const filters = decodeURIComponent(currentAdvancedFilters).slice(1, -1);
+        const decodedFilters = filters
+          .split("|")
+          .map(decodeFilter)
+          .filter((filter) => filter !== null) as UIFilterRow[];
+
+        return decodedFilters;
+      }
+    } catch (error) {
+      console.error("Error decoding advanced filters:", error);
+    }
+    return [];
+  }, [searchParams, filterMap]);
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
@@ -362,18 +395,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     })
   );
 
-  const onSetAdvancedFilters = (
-    filters: UIFilterRow[],
-    layoutFilterId?: string | null
-  ) => {
-    setAdvancedFilters(filters);
-    if (layoutFilterId === null) {
-      searchParams.delete("filter");
-    } else {
-      searchParams.set("filter", layoutFilterId ?? "");
-    }
-  };
-
   const onRowSelectHandler = (row: NormalizedRequest, index: number) => {
     setSelectedDataIndex(index);
     setSelectedData(row);
@@ -402,10 +423,15 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     layoutFilterId?: string | null
   ) => {
     setAdvancedFilters(filters);
-    if (layoutFilterId === null) {
-      searchParams.delete("filter");
+    if (layoutFilterId === null || filters.length === 0) {
+      searchParams.delete("filters");
     } else {
-      searchParams.set("filter", layoutFilterId ?? "");
+      const currentAdvancedFilters = filters.map(encodeFilter).join("|");
+
+      searchParams.set(
+        "filters",
+        `"${encodeURIComponent(currentAdvancedFilters)}"`
+      );
     }
   };
 
@@ -418,7 +444,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       onSetAdvancedFiltersHandler([], null);
     }
   };
-
   return (
     <div>
       {!isCached && userId === undefined && (
@@ -453,7 +478,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           }
         />
       )}
-
       <div className="flex flex-col space-y-4">
         <ThemedTableV5
           defaultData={requests || []}
@@ -464,7 +488,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           advancedFilters={{
             filterMap: filterMap,
             filters: advancedFilters,
-            setAdvancedFilters: onSetAdvancedFilters,
+            setAdvancedFilters: onSetAdvancedFiltersHandler,
             searchPropertyFilters: searchPropertyFilters,
             show: userId ? false : true,
           }}
