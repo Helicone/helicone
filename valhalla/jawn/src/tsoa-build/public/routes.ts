@@ -460,6 +460,7 @@ const models: TsoaRoute.Models = {
             "source_request": {"dataType":"string","required":true},
             "prompt_version": {"dataType":"string","required":true},
             "created_at": {"dataType":"string","required":true},
+            "response_body": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },

@@ -60,7 +60,6 @@ const getTimeAgo = (date: Date): string => {
 
 export const RenderImageWithPrettyInputKeys = (props: {
   text: string;
-
   selectedProperties: Record<string, string> | undefined;
 }) => {
   const { text, selectedProperties } = props;
@@ -76,10 +75,6 @@ export const RenderImageWithPrettyInputKeys = (props: {
     const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
     const parts = [];
     let lastIndex = 0;
-
-    console.log(inputText);
-    console.log(selectedProperties);
-
     // Use the regular expression to find and replace all occurrences
     inputText.replace(regex, (match: any, keyName: string, offset: number) => {
       // Push preceding text if any
@@ -87,14 +82,17 @@ export const RenderImageWithPrettyInputKeys = (props: {
         parts.push(inputText.substring(lastIndex, offset));
       }
 
-      // Push the PrettyInput component for the current match
-      parts.push(
-        <PrettyInput
-          keyName={keyName}
-          key={offset}
-          selectedProperties={selectedProperties}
-        />
-      );
+      const getRenderText = () => {
+        if (selectedProperties) {
+          return selectedProperties[keyName] || "{{undefined}}";
+        } else {
+          return keyName;
+        }
+      };
+      const renderText = getRenderText();
+
+      // eslint-disable-next-line @next/next/no-img-element
+      parts.push(<img src={renderText} alt={keyName} className="max-h-24" />);
 
       // Update lastIndex to the end of the current match
       lastIndex = offset + match.length;
@@ -117,21 +115,18 @@ export const RenderImageWithPrettyInputKeys = (props: {
   );
 };
 
+type NotNullOrUndefined<T> = T extends null | undefined ? never : T;
+
+type Input = NotNullOrUndefined<ReturnType<typeof useInputs>["inputs"]>[number];
+
 const PromptIdPage = (props: PromptIdPageProps) => {
   const { id, currentPage, pageSize } = props;
   const { prompt, isLoading } = usePrompt(id);
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const [inputView, setInputView] = useState<"list" | "grid">("list");
-  const [selectedInput, setSelectedInput] = useState<{
-    id: string;
-    inputs: {
-      [key: string]: string;
-    };
-    source_request: string;
-    prompt_version: string;
-    created_at: string;
-  }>();
+  const [selectedInput, setSelectedInput] = useState<Input>();
+
   const [searchRequestId, setSearchRequestId] = useState<string>("");
 
   const router = useRouter();
@@ -461,7 +456,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                     <Chat
                       requestBody={selectedPrompt?.helicone_template}
                       // TODO: Justin add response body and input properties
-                      responseBody={{}}
+                      responseBody={selectedInput?.response_body}
                       status={200}
                       requestId={""}
                       model={prompts?.at(0)?.model || "unknown"}
