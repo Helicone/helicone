@@ -1,5 +1,11 @@
-import { BookOpenIcon, ChartBarIcon } from "@heroicons/react/24/outline";
 import {
+  BookOpenIcon,
+  ChartBarIcon,
+  PresentationChartLineIcon,
+} from "@heroicons/react/24/outline";
+import {
+  MultiSelect,
+  MultiSelectItem,
   Select,
   SelectItem,
   Tab,
@@ -31,6 +37,9 @@ import ModelPill from "../../requestsV2/modelPill";
 import StatusBadge from "../../requestsV2/statusBadge";
 import TableFooter from "../../requestsV2/tableFooter";
 import PromptPropertyCard from "./promptPropertyCard";
+import { ChatCompletion } from "openai/resources";
+import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
+import { MODEL_LIST } from "../../playground/new/modelList";
 
 interface PromptIdPageProps {
   id: string;
@@ -138,6 +147,12 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     props.id
   );
 
+  const {
+    datasets: datasets,
+    isLoading: isDataSetsLoading,
+    refetch: refetchDataSets,
+  } = useGetDataSets();
+
   const { prompts } = usePromptVersions(id);
 
   const sortedPrompts = prompts?.sort((a, b) => {
@@ -168,6 +183,28 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   );
 
   const { inputs } = useInputs(selectedPrompt?.id);
+
+  const [selectedDatasets, setSelectedDatasets] = useState<string[]>([]);
+  const [selectedModels, setSelectedModels] = useState<string[]>([]);
+
+  const filteredExperiments = experiments.filter((experiment) => {
+    if (
+      selectedDatasets.length &&
+      !selectedDatasets.includes(experiment.datasetId)
+    ) {
+      return false;
+    }
+
+    if (
+      selectedModels.length &&
+      experiment.model &&
+      !selectedModels.includes(experiment.model)
+    ) {
+      return false;
+    }
+
+    return true;
+  });
 
   return (
     <>
@@ -236,7 +273,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           <TabPanels>
             <TabPanel>
               <div className="flex flex-col space-y-8 py-4">
-                <div className="w-full h-full flex flex-col space-y-4">
+                {/* <div className="w-full h-full flex flex-col space-y-4">
                   <div className="flex items-center justify-between w-full">
                     <ThemedTimeFilter
                       timeFilterOptions={[
@@ -286,43 +323,72 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                           Requests over time coming soon...
                         </p>
                       </div>
-                      {/* <AreaChartUsageExample /> */}
+                      <AreaChartUsageExample />
                     </StyledAreaChart>
                   </div>
-                </div>
+                </div> */}
                 <div className="flex flex-col space-y-4 h-full w-full">
                   <h2 className="text-2xl font-semibold">Experiment Logs</h2>
-                  {/* <div className="flex items-center justify-between w-full">
-          <div className="flex items-center space-x-2">
-            <MultiSelect placeholder="Version(s)">
-              <MultiSelectItem value="1">Version 1</MultiSelectItem>
-              <MultiSelectItem value="2">Version 2</MultiSelectItem>
-              <MultiSelectItem value="3">Version 3</MultiSelectItem>
-            </MultiSelect>{" "}
-            <MultiSelect placeholder="Dataset">
-              <MultiSelectItem value="1">Version 1</MultiSelectItem>
-              <MultiSelectItem value="2">Version 2</MultiSelectItem>
-              <MultiSelectItem value="3">Version 3</MultiSelectItem>
-            </MultiSelect>{" "}
-            <MultiSelect placeholder="Model">
-              <MultiSelectItem value="1">Version 1</MultiSelectItem>
-              <MultiSelectItem value="2">Version 2</MultiSelectItem>
-              <MultiSelectItem value="3">Version 3</MultiSelectItem>
-            </MultiSelect>
-            <div className="pl-2">
-              <HcButton variant={"light"} size={"sm"} title={"Clear All"} />
-            </div>
-          </div>
-          <HcButton
-            variant={"secondary"}
-            size={"sm"}
-            title={"Add Metrics"}
-            icon={PresentationChartLineIcon}
-          />
-        </div> */}
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex flex-wrap items-center space-x-2 w-full">
+                      <div className="w-full max-w-[16rem]">
+                        <MultiSelect
+                          placeholder="Dataset"
+                          value={selectedDatasets}
+                          onValueChange={(value) => {
+                            setSelectedDatasets(value);
+                          }}
+                        >
+                          {datasets.map((dataset) => (
+                            <MultiSelectItem
+                              value={dataset.id}
+                              key={dataset.id}
+                            >
+                              {dataset.name}
+                            </MultiSelectItem>
+                          ))}
+                        </MultiSelect>
+                      </div>
+                      <div className="w-full max-w-[16rem]">
+                        <MultiSelect
+                          placeholder="Model"
+                          value={selectedModels}
+                          onValueChange={(value) => {
+                            setSelectedModels(value);
+                          }}
+                        >
+                          {MODEL_LIST.map((model) => (
+                            <MultiSelectItem
+                              value={model.value}
+                              key={model.value}
+                            >
+                              {model.label}
+                            </MultiSelectItem>
+                          ))}
+                        </MultiSelect>
+                      </div>
+                      <div className="pl-2">
+                        <HcButton
+                          variant={"light"}
+                          size={"sm"}
+                          title={"Clear All"}
+                          onClick={() => {
+                            setSelectedDatasets([]);
+                            setSelectedModels([]);
+                          }}
+                        />
+                      </div>
+                    </div>
+                    {/* <HcButton
+                      variant={"secondary"}
+                      size={"sm"}
+                      title={"Add Metrics"}
+                      icon={PresentationChartLineIcon}
+                    /> */}
+                  </div>
 
                   <SimpleTable
-                    data={experiments}
+                    data={filteredExperiments}
                     columns={[
                       {
                         key: "id",
@@ -371,7 +437,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   />
                   <TableFooter
                     currentPage={currentPage}
-                    pageSize={pageSize}
+                    pageSize={100}
                     count={experiments.length}
                     isCountLoading={false}
                     onPageChange={function (newPageNumber: number): void {
@@ -387,7 +453,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             </TabPanel>
             <TabPanel>
               <div className="flex items-start relative h-[75vh]">
-                <div className="min-w-[25rem] w-1/3 p-4 flex flex-col space-y-4 h-full">
+                <div className="min-w-[25rem] w-1/3 py-4 pr-4 flex flex-col space-y-4 h-full">
                   <div className="flex flex-col w-full space-y-2">
                     <div className="flex items-center space-x-2">
                       <p className="font-semibold text-lg">Inputs</p>
@@ -454,12 +520,27 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   <div className="overflow-auto h-full">
                     <Chat
                       requestBody={selectedPrompt?.helicone_template}
-                      // TODO: Justin add response body and input properties
-                      responseBody={selectedInput?.response_body}
+                      responseBody={
+                        selectedInput?.response_body || {
+                          id: "123",
+                          choices: [
+                            {
+                              message: {
+                                role: "assistant",
+                                content: `<helicone-prompt-input key="output" />`,
+                              },
+                            },
+                          ],
+                        }
+                      }
                       status={200}
                       requestId={""}
                       model={prompts?.at(0)?.model || "unknown"}
-                      selectedProperties={selectedInput?.inputs}
+                      // selectedProperties={selectedInput?.inputs}
+                      selectedProperties={
+                        // combine the selectedInput properties with output
+                        selectedInput?.inputs
+                      }
                     />
                   </div>
                 </div>

@@ -88,10 +88,6 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
     (prompt) => prompt.minor_version === 0
   );
 
-  // find the latest version, which is the first element in the sorted array
-  const latestVersion = sortedPrompts?.[0];
-
-  // const [datasets, setDatasets] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const {
