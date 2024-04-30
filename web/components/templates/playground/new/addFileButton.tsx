@@ -1,8 +1,7 @@
 import { PencilIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { Divider, TextInput } from "@tremor/react";
 import { useRef, useState } from "react";
 import ThemedModal from "../../../shared/themed/themedModal";
-import { Divider, TextInput } from "@tremor/react";
-import { ThemedTextDropDown } from "../../../shared/themed/themedTextDropDown";
 
 interface AddFileButtonProps {
   file: File | string | null;
