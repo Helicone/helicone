@@ -92,21 +92,28 @@ export const useRequestsOverTime = (props: {
   organizationId?: string;
 }) => {
   const { timeFilter } = props;
-  const timeIncrement = getTimeInterval(timeFilter);
-  const params = {
-    timeFilter: {
-      start: timeFilter.start.toISOString(),
-      end: timeFilter.end.toISOString(),
-    },
-    filter: filterListToTree([], "and"),
-    dbIncrement: timeIncrement,
-    timeZoneDifference: new Date().getTimezoneOffset(),
-    organizationId: props.organizationId ?? undefined,
-  };
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["requestOverTime"],
-    queryFn: async () => {
+    queryKey: ["requestOverTime", props.organizationId, timeFilter],
+    queryFn: async (query) => {
+      const orgId = query.queryKey[1];
+      const timeFilter = query.queryKey[2] as {
+        start: Date;
+        end: Date;
+      };
+
+      const timeIncrement = getTimeInterval(timeFilter);
+      const params = {
+        timeFilter: {
+          start: timeFilter.start.toISOString(),
+          end: timeFilter.end.toISOString(),
+        },
+        filter: filterListToTree([], "and"),
+        dbIncrement: timeIncrement,
+        timeZoneDifference: new Date().getTimezoneOffset(),
+        organizationId: orgId,
+      };
+
       const data = await fetch("/api/metrics/requestOverTime", {
         headers: {
           "Content-Type": "application/json",
@@ -117,7 +124,11 @@ export const useRequestsOverTime = (props: {
 
       return data;
     },
+    refetchOnWindowFocus: false,
+    // 1 minute refetch interval
+    refetchInterval: 60_000,
   });
+
   return {
     data,
     isLoading,
