@@ -250,7 +250,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         const result = response.data;
 
         // update below logic to work for single request
-        console.log("request");
         if (result?.data?.[0] && !result.error) {
           const request = result.data[0];
 
