@@ -81,6 +81,7 @@ export interface PromptInputRecord {
   source_request: string;
   prompt_version: string;
   created_at: string;
+  response_body: string;
 }
 
 @Route("v1/prompt")

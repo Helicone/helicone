@@ -422,6 +422,7 @@ Json: JsonObject;
       source_request: string;
       prompt_version: string;
       created_at: string;
+      response_body: string;
     };
     "ResultSuccess_PromptInputRecord-Array_": {
       data: components["schemas"]["PromptInputRecord"][];

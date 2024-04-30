@@ -16,6 +16,36 @@
       "runtimeExecutable": "nodemon",
       "skipFiles": ["<node_internals>/**"],
       "type": "node"
+    },
+    {
+      "name": "Next.js: debug server-side",
+      "type": "node-terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/web",
+      "command": "npm run dev"
+    },
+    {
+      "name": "Next.js: debug client-side",
+      "type": "chrome",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/web",
+      "url": "http://localhost:3000"
+    },
+    {
+      "name": "Next.js: debug full stack",
+      "cwd": "${workspaceFolder}/web",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/web/node_modules/.bin/next",
+      "runtimeArgs": ["--inspect"],
+      "skipFiles": ["<node_internals>/**"],
+      "serverReadyAction": {
+        "action": "debugWithEdge",
+        "killOnServerStop": true,
+        "pattern": "- Local:.+(https?://.+)",
+        "uriFormat": "%s",
+        "webRoot": "${workspaceFolder}"
+      }
     }
   ]
 }

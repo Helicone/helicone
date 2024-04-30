@@ -1281,6 +1281,9 @@
 					},
 					"created_at": {
 						"type": "string"
+					},
+					"response_body": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -1288,7 +1291,8 @@
 					"inputs",
 					"source_request",
 					"prompt_version",
-					"created_at"
+					"created_at",
+					"response_body"
 				],
 				"type": "object",
 				"additionalProperties": false
