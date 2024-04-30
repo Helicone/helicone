@@ -2,13 +2,14 @@
 import { RequestQueryParams } from "../../controllers/public/requestController";
 import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
-import { Result, err, ok } from "../../lib/shared/result";
+import { Result, err, ok, resultMap } from "../../lib/shared/result";
 import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequestStore";
 import {
   HeliconeRequest,
   getRequests,
   getRequestsCached,
 } from "../../lib/stores/request/request";
+import { costOf, costOfPrompt } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
 
 export class RequestManager extends BaseManager {
@@ -152,7 +153,7 @@ export class RequestManager extends BaseManager {
       isCached,
     } = params;
 
-    return isCached
+    const requests = isCached
       ? await getRequestsCached(
           this.authParams.organizationId,
           filter,
@@ -167,5 +168,20 @@ export class RequestManager extends BaseManager {
           limit,
           sort
         );
+
+    return resultMap(requests, (req) => {
+      return req.map((r) => {
+        return {
+          ...r,
+          costUSD: costOfPrompt({
+            model:
+              r.model_override ?? r.response_model ?? r.request_model ?? "",
+            provider: r.provider ?? "",
+            completionTokens: r.completion_tokens ?? 0,
+            promptTokens: r.prompt_tokens ?? 0,
+          }),
+        };
+      });
+    });
   }
 }

@@ -5,6 +5,8 @@ import { getHeliconeCookie } from "../cookies";
 import type { paths as publicPaths } from "./jawnTypes/public";
 import type { paths as privatePaths } from "./jawnTypes/private";
 
+export type JawnFilterNode = any;
+
 export function getJawnClient(orgId?: string) {
   orgId = orgId || Cookies.get(ORG_ID_COOKIE_KEY);
 

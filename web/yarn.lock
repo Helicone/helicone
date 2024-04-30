@@ -4341,7 +4341,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/prismjs@npm:^1.0.0":
+"@types/prismjs@npm:^1.0.0, @types/prismjs@npm:^1.26.3":
   version: 1.26.3
   resolution: "@types/prismjs@npm:1.26.3"
   checksum: 3e8a64bcf0ab5f9a47ec2590938c5a8a20ac849b4949a95ed96e73e64cb890fc56e9c9b724286914717458267b28405f965709e1b9f80db5d68817a7ce5a18a9
@@ -4373,7 +4373,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-lottie@npm:^1.2.9":
+"@types/react-lottie@npm:^1":
   version: 1.2.10
   resolution: "@types/react-lottie@npm:1.2.10"
   dependencies:
@@ -7895,10 +7895,11 @@ __metadata:
     "@types/node": "npm:18.11.9"
     "@types/papaparse": "npm:^5.3.7"
     "@types/pg": "npm:^8.6.6"
+    "@types/prismjs": "npm:^1.26.3"
     "@types/react": "npm:^18.2.72"
     "@types/react-dom": "npm:^18.2.22"
     "@types/react-grid-layout": "npm:^1.3.3"
-    "@types/react-lottie": "npm:^1.2.9"
+    "@types/react-lottie": "npm:^1"
     "@types/react-syntax-highlighter": "npm:^15.5.6"
     "@types/uuid": "npm:^9.0.8"
     "@upstash/ratelimit": "npm:^1.0.1"
@@ -7942,6 +7943,7 @@ __metadata:
     posthog-node: "npm:^3.6.3"
     prettier: "npm:^2.8.0"
     prism-react-renderer: "npm:^1.3.5"
+    prismjs: "npm:^1.29.0"
     react: "npm:18.2.0"
     react-day-picker: "npm:^8.7.1"
     react-diff-viewer: "npm:^3.1.1"
@@ -7951,8 +7953,9 @@ __metadata:
     react-grid-layout: "npm:^1.4.2"
     react-icons: "npm:^4.7.1"
     react-json-pretty: "npm:^2.2.0"
-    react-lottie: "npm:^1.2.3"
+    react-lottie: "npm:^1.2.4"
     react-resizable: "npm:^3.0.5"
+    react-simple-code-editor: "npm:^0.13.1"
     react-syntax-highlighter: "npm:^15.5.0"
     reactflow: "npm:^11.8.3"
     stripe: "npm:^11.8.0"
@@ -11016,7 +11019,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prismjs@npm:^1.27.0":
+"prismjs@npm:^1.27.0, prismjs@npm:^1.29.0":
   version: 1.29.0
   resolution: "prismjs@npm:1.29.0"
   checksum: d906c4c4d01b446db549b4f57f72d5d7e6ccaca04ecc670fb85cea4d4b1acc1283e945a9cbc3d81819084a699b382f970e02f9d1378e14af9808d366d9ed7ec6
@@ -11302,7 +11305,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-lottie@npm:^1.2.3":
+"react-lottie@npm:^1.2.4":
   version: 1.2.4
   resolution: "react-lottie@npm:1.2.4"
   dependencies:
@@ -11323,6 +11326,16 @@ __metadata:
   peerDependencies:
     react: ">= 16.3"
   checksum: cfe50aa6efb79e0aa09bd681a5beab2fcd1186737c4952eb4c3974ed9395d5d263ccd1130961d06b8f5e24c8f544dd2967b5c740ce68719962d1771de7bdb350
+  languageName: node
+  linkType: hard
+
+"react-simple-code-editor@npm:^0.13.1":
+  version: 0.13.1
+  resolution: "react-simple-code-editor@npm:0.13.1"
+  peerDependencies:
+    react: "*"
+    react-dom: "*"
+  checksum: 3d5346b43bd2bf32618f265cc36fb10702b543d0b9eee4600e68483c2c83205fdf6f18b1a665fbe8581ed84bb9e55ee379870e280801eec81b52bb5722c2d485
   languageName: node
   linkType: hard
 

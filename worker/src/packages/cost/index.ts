@@ -72,24 +72,17 @@ function caseForCost(costs: ModelRow[], table: string, multiple: number) {
   CASE
   ${costs
     .map((cost) => {
+      const costPerMultiple = {
+        prompt: Math.round(cost.cost.prompt_token * multiple),
+        completion: Math.round(cost.cost.completion_token * multiple),
+      };
+
       if (cost.model.operator === "equals") {
-        return `WHEN (${table}.model = '${cost.model.value}') THEN ${
-          cost.cost.prompt_token * multiple
-        } * ${table}.prompt_tokens + ${
-          cost.cost.completion_token * multiple
-        } * ${table}.completion_tokens`;
+        return `WHEN (${table}.model = '${cost.model.value}') THEN ${costPerMultiple.prompt} * ${table}.prompt_tokens + ${costPerMultiple.completion} * ${table}.completion_tokens`;
       } else if (cost.model.operator === "startsWith") {
-        return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${
-          cost.cost.prompt_token * multiple
-        } * ${table}.prompt_tokens + ${
-          cost.cost.completion_token * multiple
-        } * ${table}.completion_tokens`;
+        return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${costPerMultiple.prompt} * ${table}.prompt_tokens + ${costPerMultiple.completion} * ${table}.completion_tokens`;
       } else if (cost.model.operator === "includes") {
-        return `WHEN (${table}.model ILIKE '%${cost.model.value}%') THEN ${
-          cost.cost.prompt_token * multiple
-        } * ${table}.prompt_tokens + ${
-          cost.cost.completion_token * multiple
-        } * ${table}.completion_tokens`;
+        return `WHEN (${table}.model ILIKE '%${cost.model.value}%') THEN ${costPerMultiple.prompt} * ${table}.prompt_tokens + ${costPerMultiple.completion} * ${table}.completion_tokens`;
       } else {
         throw new Error("Unknown operator");
       }
@@ -99,11 +92,10 @@ function caseForCost(costs: ModelRow[], table: string, multiple: number) {
 END
 `;
 }
-
+export const COST_MULTIPLE = 1_000_000_000;
 export function clickhousePriceCalc(table: string) {
   // This is so that we don't need to do any floating point math in the database
   // and we can just divide by 1_000_000 to get the cost in dollars
-  const multiple = 1_000_000_000;
 
   const providersWithCosts = providers.filter(
     (p) => p.costs && defaultProvider.provider !== p.provider
@@ -122,11 +114,11 @@ sum(
 
       return `WHEN (${table}.provider = '${
         provider.provider
-      }') THEN (${caseForCost(provider.costs, table, multiple)})`;
+      }') THEN (${caseForCost(provider.costs, table, COST_MULTIPLE)})`;
     })
     .join("\n")}
-    ELSE ${caseForCost(defaultProvider.costs, table, multiple)}
+    ELSE ${caseForCost(defaultProvider.costs, table, COST_MULTIPLE)}
   END
-  ) / ${multiple}
+  ) / ${COST_MULTIPLE}
 `;
 }

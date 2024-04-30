@@ -23,6 +23,13 @@ export interface NewDatasetParams {
   requestIds: string[];
 }
 
+export interface DatasetResult {
+  id: string;
+  name: string;
+  request_ids: string[];
+  created_at: string;
+}
+
 export interface RandomDatasetParams {
   datasetName: string;
   filter: DatasetFilterNode;
@@ -39,7 +46,14 @@ export class ExperimentDatasetController extends Controller {
     @Body()
     requestBody: NewDatasetParams,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
+  ): Promise<
+    Result<
+      {
+        datasetId: string;
+      },
+      string
+    >
+  > {
     const datasetManager = new DatasetManager(request.authParams);
 
     const result = await datasetManager.addDataset(requestBody);
@@ -49,7 +63,9 @@ export class ExperimentDatasetController extends Controller {
       return err("Not implemented");
     } else {
       this.setStatus(200); // set return status 201
-      return ok(null);
+      return ok({
+        datasetId: result.data,
+      });
     }
   }
 
@@ -58,7 +74,14 @@ export class ExperimentDatasetController extends Controller {
     @Body()
     requestBody: RandomDatasetParams,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
+  ): Promise<
+    Result<
+      {
+        datasetId: string;
+      },
+      string
+    >
+  > {
     const datasetManager = new DatasetManager(request.authParams);
 
     const result = await datasetManager.addRandomDataset(requestBody);
@@ -69,8 +92,24 @@ export class ExperimentDatasetController extends Controller {
       return err("Not implemented");
     } else {
       this.setStatus(200); // set return status 201
-      return ok(null);
+      return ok(result.data!);
     }
+  }
+
+  @Post("/query")
+  public async getDatasets(
+    @Body()
+    requestBody: {},
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<DatasetResult[], string>> {
+    const datasetManager = new DatasetManager(request.authParams);
+    const result = await datasetManager.getDatasets();
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200); // set return status 201
+    }
+    return result;
   }
 
   @Post("/{datasetId}/query")

@@ -64,12 +64,25 @@ const NavBarV2 = (props: NavBarV2Props) => {
           </div>
           <div className="flex-1 hidden md:flex items-center justify-end gap-x-2">
             {user ? (
-              <Link
-                href="/dashboard"
-                className="bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-              >
-                Dashboard
-              </Link>
+              <>
+                <Link
+                  href="/dashboard"
+                  className="bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={() => {
+                    supabaseClient.auth.refreshSession();
+                    supabaseClient.auth.signOut().then(() => {
+                      router.push("/");
+                    });
+                  }}
+                  className="bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 text-sm rounded-lg px-4 py-1.5 font-bold shadow-lg flex w-fit items-center gap-1"
+                >
+                  Sign Out
+                </button>
+              </>
             ) : (
               <>
                 <Link
@@ -185,6 +198,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                     {user ? (
                       <button
                         onClick={() => {
+                          supabaseClient.auth.refreshSession();
                           supabaseClient.auth.signOut().then(() => {
                             router.push("/");
                           });

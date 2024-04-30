@@ -7,10 +7,11 @@ import { buildRouter } from "./routers/routerFactory";
 import { AlertManager } from "./lib/managers/AlertManager";
 import { AlertStore } from "./lib/db/AlertStore";
 import { ClickhouseClientWrapper } from "./lib/db/ClickhouseWrapper";
+import { ProviderName } from "./packages/cost/providers/mappings";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
-export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM" | string;
+export type Provider = ProviderName | "CUSTOM";
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -113,6 +114,12 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         ...env,
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://api.together.xyz",
+      };
+    } else if (hostParts[0].includes("openrouter")) {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://openrouter.ai",
       };
     }
   }
