@@ -270,7 +270,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                               </div>
                               <pre className="whitespace-pre-wrap text-sm overflow-auto h-full text-black">
                                 {
-                                  (run.testResult.response?.body as any)
+                                  (run.testResult.response?.body as any) // TODO: any
                                     ?.choices?.[0].message.content
                                 }
                               </pre>
