@@ -2,14 +2,16 @@ import { PencilIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useRef, useState } from "react";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { Divider, TextInput } from "@tremor/react";
+import { ThemedTextDropDown } from "../../../shared/themed/themedTextDropDown";
 
 interface AddFileButtonProps {
   file: File | string | null;
   onFileChange: (file: File | string | null) => void;
+  promptInput?: boolean;
 }
 
 const AddFileButton = (props: AddFileButtonProps) => {
-  const { file, onFileChange } = props;
+  const { file, onFileChange, promptInput } = props;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
@@ -87,6 +89,16 @@ const AddFileButton = (props: AddFileButtonProps) => {
             }}
           />
 
+          {/* 
+          TODO this will be needed for prompt inputs
+          <Divider className="">or</Divider>
+          <ThemedTextDropDown
+            options={["Image-1", "Image-2", "Image-3", "Image-4", "Image-5"]}
+            value="Image-2"
+            onChange={(key) => {
+              setCurrentFile(`<helicone-prompt-input key="${key}" />`);
+            }}
+          /> */}
           <div className="border-t border-gray-300 flex justify-end gap-2 pt-4">
             <button
               onClick={() => setOpen(false)}
