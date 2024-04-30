@@ -146,7 +146,7 @@ export const SingleChat = (props: {
   const renderOpenAIImage = (item: any) => {
     const imageUrl =
       typeof item.image_url === "string" ? item.image_url : item.image_url.url;
-    if (isHeliconeTemplate) {
+    if (isHeliconeTemplate || props.selectedProperties) {
       return (
         <RenderImageWithPrettyInputKeys
           text={imageUrl}
@@ -154,6 +154,7 @@ export const SingleChat = (props: {
         />
       );
     }
+    // eslint-disable-next-line @next/next/no-img-element
     return <img src={imageUrl} alt={""} width={600} height={600} />;
   };
 
@@ -167,6 +168,7 @@ export const SingleChat = (props: {
         />
       );
     }
+    // eslint-disable-next-line @next/next/no-img-element
     return <img src={imageUrl} alt={""} width={600} height={600} />;
   };
 

@@ -42,9 +42,11 @@ const useGetRequests = (
         });
 
         const result = response.data as Result<HeliconeRequest[], string>;
+        console.log("result", result);
 
         const requests = await Promise.all(
           result.data?.map(async (request: HeliconeRequest) => {
+            console.log("request", request);
             if (request.signed_body_url) {
               try {
                 const contentResponse = await fetch(request.signed_body_url);

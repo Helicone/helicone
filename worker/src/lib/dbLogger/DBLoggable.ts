@@ -304,10 +304,11 @@ export class DBLoggable {
       } else if (isStream) {
         return parseOpenAIStream(result, tokenCounter, requestBody);
       } else {
+        console.log("Error parsing response 0", result);
         return ok(JSON.parse(result));
       }
     } catch (e) {
-      console.log("Error parsing response", e);
+      console.log("Error parsing response 1", e);
       return {
         data: null,
         error: "error parsing response, " + e + ", " + result,
