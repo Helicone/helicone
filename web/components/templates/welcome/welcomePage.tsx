@@ -12,7 +12,6 @@ import EventListen from "./steps/eventListen";
 import GenerateAPIKey from "./steps/generateAPIKey";
 import GetStarted from "./steps/getStarted";
 import { IntegrationMethods, Providers } from "./steps/methodFork";
-import MfsCoupon from "./steps/mfsCoupon";
 import CreateOrg from "./steps/createOrg";
 import { useOrg } from "../../layout/organizationContext";
 import UserSettings from "./steps/userSettings";
@@ -79,15 +78,6 @@ const WelcomePage = (props: WelcomePageProps) => {
       }}
     />,
   ];
-
-  // if the user is from mfs, insert the mfsCoupon component into the second to last spot in the array
-  if (isMfs) {
-    stepArray.splice(
-      stepArray.length - 1,
-      0,
-      <MfsCoupon key={6} nextStep={nextStep} />
-    );
-  }
 
   return (
     <div className="bg-white dark:bg-black h-screen w-screen overflow-hidden items-center justify-center align-middle flex flex-col text-gray-900 dark:text-gray-100 relative isolate">
