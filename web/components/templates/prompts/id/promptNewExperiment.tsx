@@ -141,9 +141,13 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                 );
               })
               .map((prompt, index) => {
-                const template = JSON.parse(
+                let template = JSON.parse(
                   JSON.stringify(prompt.helicone_template)
                 ).messages[0].content;
+
+                if (!(typeof template === "string")) {
+                  template = JSON.stringify(template);
+                }
                 return (
                   <>
                     <li

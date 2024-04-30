@@ -246,6 +246,12 @@ const ChatRow = (props: ChatRowProps) => {
     callback(contentAsString || "", role, file);
   };
 
+  const extractKey = (text: string) => {
+    const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
+    const keyName = regex.exec(text);
+    return keyName ? keyName[1] : "";
+  };
+
   const getContent = (content: string | any[] | null, minimize: boolean) => {
     // check if the content is an array and it has an image type or image_url type
 
@@ -275,12 +281,18 @@ const ChatRow = (props: ChatRowProps) => {
                 item.type === "image_url" || item.type === "image" ? (
                   <div key={index} className="relative">
                     {item.image_url?.url ? (
-                      <img
-                        src={item.image_url.url}
-                        alt={""}
-                        width={256}
-                        height={256}
-                      />
+                      item.image_url.url.includes("helicone-prompt-input") ? (
+                        <div className="p-5 border">
+                          {extractKey(item.image_url.url)}
+                        </div>
+                      ) : (
+                        <img
+                          src={item.image_url.url}
+                          alt={""}
+                          width={256}
+                          height={256}
+                        />
+                      )
                     ) : item.image ? (
                       <img
                         src={URL.createObjectURL(item.image)}
