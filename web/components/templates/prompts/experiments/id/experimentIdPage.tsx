@@ -33,6 +33,8 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
   }>();
   const [open, setOpen] = useState(false);
 
+  const [showReactDiff, setShowReactDiff] = useState(false);
+
   const runs = experiment?.dataset?.rows.map((row) => {
     return {
       inputs: row.inputRecord?.inputs ?? {},
@@ -134,24 +136,33 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                     <h2 className="text-md font-semibold">Experiment Prompt</h2>
                   </div>
                 </div>
-                <ReactDiffViewer
-                  oldValue={
-                    JSON.stringify(
-                      experiment?.hypotheses?.[0]?.parentPromptVersion
-                        ?.template,
-                      undefined,
-                      4
-                    ) ?? ""
-                  }
-                  newValue={
-                    JSON.stringify(
-                      experiment?.hypotheses?.[0]?.promptVersion?.template,
-                      undefined,
-                      4
-                    ) ?? ""
-                  }
-                  splitView={true}
-                />
+                <button
+                  onClick={() => setShowReactDiff(!showReactDiff)}
+                  className="w-max bg-sky-500 text-white rounded-lg p-2"
+                >
+                  {showReactDiff ? "Hide" : "Show"} React Diff (May crash window
+                  ... fix is in progress)
+                </button>
+                {showReactDiff && (
+                  <ReactDiffViewer
+                    oldValue={
+                      JSON.stringify(
+                        experiment?.hypotheses?.[0]?.parentPromptVersion
+                          ?.template,
+                        undefined,
+                        4
+                      ) ?? ""
+                    }
+                    newValue={
+                      JSON.stringify(
+                        experiment?.hypotheses?.[0]?.promptVersion?.template,
+                        undefined,
+                        4
+                      ) ?? ""
+                    }
+                    splitView={true}
+                  />
+                )}
               </div>
 
               <Table className="bg-white border border-gray-300 rounded-lg p-4 w-full">
