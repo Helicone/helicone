@@ -5,7 +5,10 @@ import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 export class OpenAIStreamProcessor implements IBodyProcessor {
   async parse(parseInput: ParseInput): PromiseGenericResult<ParseOutput> {
     const { responseBody, requestBody, tokenCounter } = parseInput;
-    const lines = responseBody.split("\n").filter((line) => line !== "");
+    const lines = responseBody
+      .split("\n")
+      .filter((line) => !line.includes("OPENROUTER PROCESSING"))
+      .filter((line) => line !== "");
     const data = lines.map((line, i) => {
       if (i === lines.length - 1) return {};
       try {
