@@ -142,11 +142,12 @@ function getExperimentsQuery(
                           'template', pv_parent.helicone_template
                         )
                         FROM prompts_versions pv_current
-                        JOIN prompts_versions pv_parent ON pv_parent.major_version = pv_current.major_version AND pv_parent.minor_version = 0
+                        JOIN prompts_versions pv_parent ON pv_parent.prompt_v2 = pv_current.prompt_v2
                         WHERE pv_current.id = h.prompt_version
                         AND pv_parent.helicone_template is not null
                         AND pv_parent.organization = e.organization
                         AND pv_current.organization = e.organization
+                        AND pv_parent.major_version = 0
                         limit 1
                       ),`
                           : ""
