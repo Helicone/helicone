@@ -373,12 +373,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                         />
                       </div>
                     </div>
-                    {/* <HcButton
-                      variant={"secondary"}
-                      size={"sm"}
-                      title={"Add Metrics"}
-                      icon={PresentationChartLineIcon}
-                    /> */}
                   </div>
                   {isExperimentsLoading ? (
                     <div className="h-48 flex justify-center items-center">
@@ -536,7 +530,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                         }
                       }
                       status={200}
-                      requestId={""}
+                      requestId={selectedInput?.source_request || ""}
                       model={prompts?.at(0)?.model || "unknown"}
                       // selectedProperties={selectedInput?.inputs}
                       selectedProperties={

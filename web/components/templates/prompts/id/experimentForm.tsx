@@ -286,11 +286,6 @@ const ExperimentForm = (props: ExperimentFormProps) => {
           Confirm and Run Experiment
         </button>
       </div>
-      {/* <ReactDiffViewer
-        oldValue={JSON.stringify(originPromptCopy.messages)}
-        newValue={JSON.stringify(newPromptChat)}
-        splitView={true}
-      /> */}
     </div>,
   ];
 
