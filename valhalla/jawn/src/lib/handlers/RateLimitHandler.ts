@@ -16,15 +16,23 @@ export class RateLimitHandler extends AbstractLogHandler {
 
   async handle(context: HandlerContext): PromiseGenericResult<string> {
     console.log(`RateLimitHandler: ${context.message.log.request.id}`);
+    if (!context.orgParams?.id) {
+      return err("Organization ID not found in org params");
+    }
+
     try {
-      const { data: isRateLimited, error: rateLimitErr } =
-        this.rateLimitEntry(context);
+      const { data: isRateLimited, error: rateLimitErr } = this.rateLimitEntry(
+        context.orgParams.id,
+        context.orgParams.percentLog
+      );
 
       if (rateLimitErr || isRateLimited === null) {
         return err(`Rate limit failed: ${rateLimitErr}`);
-      } else if (context.orgParams?.id && isRateLimited) {
+      }
+
+      if (isRateLimited) {
         this.rateLimitLogs.push({
-          organization_id: context.orgParams?.id || "",
+          organization_id: context.orgParams.id,
           created_at:
             context.message.log.request.requestCreatedAt.toISOString(),
         });
@@ -40,10 +48,13 @@ export class RateLimitHandler extends AbstractLogHandler {
     }
   }
 
-  public rateLimitEntry(context: HandlerContext): GenericResult<boolean> {
-    if (context.orgParams?.id && context.orgParams?.percentLog !== 100_000) {
+  public rateLimitEntry(
+    orgId: string,
+    percentLog: number
+  ): GenericResult<boolean> {
+    if (orgId && percentLog !== 100_000) {
       const random = Math.random() * 100_000;
-      if (random > context.orgParams.percentLog) {
+      if (random > percentLog) {
         return ok(true);
       }
     }

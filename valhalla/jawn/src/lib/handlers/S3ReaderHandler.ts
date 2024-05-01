@@ -36,8 +36,8 @@ export class S3ReaderHandler extends AbstractLogHandler {
         return err(`Error fetching content from S3: ${content.error}`);
       }
 
-      context.processedLog.request.rawBody = content.data.request;
-      context.processedLog.response.rawBody = content.data.response;
+      context.rawLog.rawRequestBody = content.data.request;
+      context.rawLog.rawResponseBody = content.data.response;
       return await super.handle(context);
     } catch (error) {
       return err(

@@ -19,7 +19,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
 
   processRequestBody(context: HandlerContext): GenericResult<any> {
     const log = context.message.log;
-    let requestBody = context.processedLog.request.rawBody;
+    let requestBody = context.rawLog.rawRequestBody;
 
     requestBody = this.cleanRequestBody(requestBody);
     requestBody = tryParse(requestBody, "request body");

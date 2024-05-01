@@ -9,6 +9,7 @@ export class HandlerContext extends SetOnce {
   public authParams?: AuthParams;
   public orgParams?: OrgParams;
   public usage: Usage;
+  public rawLog: RawLog;
   public processedLog: ProcessedLog;
 
   constructor(message: Message) {
@@ -19,6 +20,7 @@ export class HandlerContext extends SetOnce {
       response: {},
     };
     this.usage = {};
+    this.rawLog = {};
   }
 }
 
@@ -67,15 +69,18 @@ export type Usage = {
   cost?: number;
 };
 
+export type RawLog = {
+  rawRequestBody?: any;
+  rawResponseBody?: any;
+};
+
 export type ProcessedLog = {
   model?: string;
   request: {
-    rawBody?: any;
     body?: any;
     heliconeTemplate?: TemplateWithInputs;
   };
   response: {
-    rawBody?: any;
     body?: any;
   };
 };

@@ -70,7 +70,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     const isStream = log.request.isStream;
     const provider = log.request.provider;
 
-    let responseBody = context.processedLog.response.rawBody;
+    let responseBody = context.rawLog.rawResponseBody;
     try {
       responseBody = this.preprocess(
         isStream,
