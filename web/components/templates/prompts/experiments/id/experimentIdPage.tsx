@@ -16,6 +16,7 @@ import ThemedModal from "../../../../shared/themed/themedModal";
 import ModelPill from "../../../requestsV2/modelPill";
 import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
 import { usePrompt } from "../../../../../services/hooks/prompts/prompts";
+import ArrayDiffViewer from "../../id/arrayDiffViewer";
 
 interface PromptIdPageProps {
   id: string;
@@ -32,8 +33,6 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
     value: string;
   }>();
   const [open, setOpen] = useState(false);
-
-  const [showReactDiff, setShowReactDiff] = useState(false);
 
   const runs = experiment?.dataset?.rows.map((row) => {
     return {
@@ -58,41 +57,44 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
     const TEXT_LIMIT = 80;
 
     return (
-      <>
-        <div className="flex flex-col space-y-1">
-          <p>{`{`}</p>
+      <div className="flex flex-col space-y-1">
+        <p>{`{`}</p>
 
-          {keys.map((key, i) => {
-            const value = inputs[key];
+        {keys.map((key, i) => {
+          const value = inputs[key];
 
-            return (
-              <div key={i} className="flex space-x-2 pl-6">
-                <h3 className="text-sm font-semibold text-black">{key}:</h3>
-                {value.length > TEXT_LIMIT ? (
-                  // show a button with truncated text
+          return (
+            <>
+              {value.length > TEXT_LIMIT ? (
+                // show a button with truncated text
+                <div key={i} className="flex flex-col pl-6 py-0.5">
+                  <h3 className="text-sm font-semibold text-black">{key}:</h3>
                   <button
                     onClick={() => {
                       setSelectedObj({ key, value });
                       setOpen(true);
                     }}
-                    className="flex space-x-2 text-left border-sky-500 bg-sky-100 border rounded-md p-2 relative"
+                    className="ml-4 space-x-2 text-left border-sky-500 bg-sky-100 border rounded-md p-2 relative"
                   >
                     <ArrowsPointingOutIcon className="h-4 w-4 text-sky-500 absolute top-2 right-2" />
-                    <pre className="text-sm text-black">
+                    <pre className="text-sm text-black truncate pr-8">
                       {value.slice(0, TEXT_LIMIT)}...
                     </pre>
                   </button>
-                ) : (
-                  <pre className="text-sm whitespace-pre-wrap text-black">
+                </div>
+              ) : (
+                <div key={i} className="flex space-x-2 pl-6 py-0.5">
+                  <h3 className="text-sm font-semibold text-black">{key}:</h3>
+                  <pre className="text-sm whitespace-pre-wrap break-words text-black truncate">
                     {value},
                   </pre>
-                )}
-              </div>
-            );
-          })}
-          <p>{`}`}</p>
-        </div>
-      </>
+                </div>
+              )}
+            </>
+          );
+        })}
+        <p>{`}`}</p>
+      </div>
     );
   };
 
@@ -126,46 +128,30 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
             <h1 className="font-semibold text-3xl text-black dark:text-white">
               {experiment?.id}
             </h1>
-            <div className="w-full flex flex-col space-y-8">
-              <div className="p-8 rounded-lg bg-white border border-gray-300 flex flex-col space-y-4">
-                <div className="grid grid-cols-4">
-                  <div className="col-span-2">
-                    <h2 className="text-md font-semibold">Original Prompt</h2>
-                  </div>
-                  <div className="col-span-2">
-                    <h2 className="text-md font-semibold">Experiment Prompt</h2>
-                  </div>
+            <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-black">
+              <div className="w-full flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
+                <div className="flex items-center space-x-2">
+                  <p className="text-sm text-gray-500">Diff Viewer</p>
                 </div>
-                <button
-                  onClick={() => setShowReactDiff(!showReactDiff)}
-                  className="w-max bg-sky-500 text-white rounded-lg p-2"
-                >
-                  {showReactDiff ? "Hide" : "Show"} React Diff (May crash window
-                  ... fix is in progress)
-                </button>
-                {showReactDiff && (
-                  <ReactDiffViewer
-                    oldValue={
-                      JSON.stringify(
-                        experiment?.hypotheses?.[0]?.parentPromptVersion
-                          ?.template,
-                        undefined,
-                        4
-                      ) ?? ""
-                    }
-                    newValue={
-                      JSON.stringify(
-                        experiment?.hypotheses?.[0]?.promptVersion?.template,
-                        undefined,
-                        4
-                      ) ?? ""
-                    }
-                    splitView={true}
-                    showDiffOnly={true}
-                    extraLinesSurroundingDiff={1}
-                  />
-                )}
               </div>
+              <div className="p-4">
+                <ArrayDiffViewer
+                  origin={
+                    (
+                      experiment?.hypotheses?.[0]?.parentPromptVersion
+                        ?.template as any
+                    ).messages
+                  }
+                  target={
+                    (
+                      experiment?.hypotheses?.[0]?.promptVersion
+                        ?.template as any
+                    ).messages
+                  }
+                />
+              </div>
+            </div>
+            <div className="w-full flex flex-col space-y-8">
               <Table className="bg-white border border-gray-300 rounded-lg p-4 w-full">
                 <TableHead className="border-b border-gray-300 w-full">
                   <TableRow>
@@ -185,7 +171,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                   {runs?.map((run, i) => {
                     return (
                       <TableRow key={i} className="w-full">
-                        <TableCell className="h-full items-start border-r border-gray-300">
+                        <TableCell className="h-full items-start border-r border-gray-300 max-w-xs">
                           {renderPrettyInputs(run.inputs)}
                         </TableCell>
                         <TableCell className="inline-flex h-full">

@@ -138,18 +138,14 @@ const chatCompletion = await openai.chat.completions.create(
               ) : (
                 <ul className="w-full h-full grid grid-cols-4 gap-4">
                   {prompts?.map((prompt, i) => (
-                    <li
-                      key={i}
-                      className="col-span-1 bg-white border border-gray-300 dark:border-gray-700 rounded-lg"
-                    >
+                    <li key={i} className="col-span-1">
                       <Link
                         href={`/prompts/${prompt.id}`}
                         className={clsx(
                           currentPrompt?.id === prompt.id
                             ? "bg-sky-200 dark:bg-sky-800"
                             : "bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-950 rounded-md p-2",
-                          i === 0 ? "rounded-t-md" : "",
-                          i === prompts.length - 1 ? "rounded-b-md" : "",
+                          "border border-gray-300 dark:border-gray-700 rounded-lg",
                           "w-full flex flex-col space-x-2"
                         )}
                       >
