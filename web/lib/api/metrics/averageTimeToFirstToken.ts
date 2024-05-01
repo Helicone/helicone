@@ -18,7 +18,7 @@ export async function getAverageTimeToFirstToken(
     {
       org_id,
       filter: {
-        left: timeFilterToFilterNode(timeFilter, "request_response_log"),
+        left: timeFilterToFilterNode(timeFilter, "request_response_versioned"),
         right: filter,
         operator: "and",
       },
@@ -29,10 +29,10 @@ export async function getAverageTimeToFirstToken(
   WITH total_count AS (
     SELECT 
       count(*) as count,
-      sum(request_response_log.time_to_first_token) as total_time_to_first_token
-    FROM request_response_log
+      sum(request_response_versioned.time_to_first_token) as total_time_to_first_token
+    FROM request_response_versioned
     WHERE (
-      (${filterString} and request_response_log.time_to_first_token > 0)
+      (${filterString} and request_response_versioned.time_to_first_token > 0)
     )
   )
   SELECT CASE

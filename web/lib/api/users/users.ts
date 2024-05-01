@@ -57,7 +57,7 @@ SELECT
   sum(r.completion_tokens) as total_completion_tokens,
   sum(r.prompt_tokens) as total_prompt_token,
   (${clickhousePriceCalc("r")}) as cost
-from request_response_log r
+from request_response_versioned r
 WHERE (${builtFilter.filter})
 GROUP BY r.user_id
 HAVING (${havingFilter.filter})
@@ -89,7 +89,7 @@ export async function userMetricsCount(
   const query = `
 SELECT
   count(DISTINCT r.user_id) as count
-from request_response_log r
+from request_response_versioned r
 WHERE (${builtFilter.filter})
   `;
   const { data, error } = await dbQueryClickhouse<{ count: number }>(
