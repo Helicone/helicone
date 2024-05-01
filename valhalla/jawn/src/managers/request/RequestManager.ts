@@ -2,16 +2,17 @@
 import { RequestQueryParams } from "../../controllers/public/requestController";
 import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
+import { S3Client } from "../../lib/shared/db/s3Client";
 import { Result, err, ok, resultMap } from "../../lib/shared/result";
 import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequestStore";
 import {
   HeliconeRequest,
   HeliconeRequestAsset,
-  getRequestAssetById,
+  getRequestAsset,
   getRequests,
   getRequestsCached,
 } from "../../lib/stores/request/request";
-import { costOf, costOfPrompt } from "../../packages/cost";
+import { costOfPrompt } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
 
 export class RequestManager extends BaseManager {
@@ -198,7 +199,7 @@ export class RequestManager extends BaseManager {
     requestId: string,
     assetId: string
   ): Promise<Result<HeliconeRequestAsset, string>> {
-    const { data: assetData, error: assetError } = await getRequestAssetById(
+    const { data: assetData, error: assetError } = await getRequestAsset(
       assetId,
       requestId,
       this.authParams.organizationId

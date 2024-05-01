@@ -495,7 +495,7 @@ WHERE (${builtFilter.filter})
   return { data: data[0].count, error: null };
 }
 
-export async function getRequestAssetById(
+export async function getRequestAsset(
   assetId: string,
   requestId: string,
   organizationId: string
