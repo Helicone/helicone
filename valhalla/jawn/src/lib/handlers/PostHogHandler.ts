@@ -1,7 +1,6 @@
 import { costOfPrompt } from "../../packages/cost";
 import {
   HeliconeRequestResponseToPosthog,
-  PosthogClient,
   postHogClient,
 } from "../clients/postHogClient";
 import { PromiseGenericResult } from "../shared/result";
