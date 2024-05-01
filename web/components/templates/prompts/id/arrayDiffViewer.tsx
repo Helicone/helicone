@@ -6,7 +6,7 @@ import {
 } from "@tremor/react";
 import ReactDiffViewer from "react-diff-viewer";
 import RoleButton from "../../playground/new/roleButton";
-import { EyeIcon } from "@heroicons/react/20/solid";
+import { ArrowRightIcon, EyeIcon } from "@heroicons/react/20/solid";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/outline";
 
 interface ArrayDiffViewerProps {
@@ -65,7 +65,7 @@ const ArrayDiffViewer = (props: ArrayDiffViewerProps) => {
                       disabled={true}
                     />
                     <div>
-                      <ArrowRightCircleIcon className="h-4 w-4 text-black dark:text-white" />
+                      <ArrowRightIcon className="h-4 w-4 text-black dark:text-white" />
                     </div>
                   </>
                 )}
