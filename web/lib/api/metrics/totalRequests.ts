@@ -18,7 +18,7 @@ export async function getTotalRequests(
     {
       org_id,
       filter: {
-        left: timeFilterToFilterNode(timeFilter, "request_response_log"),
+        left: timeFilterToFilterNode(timeFilter, "request_response_versioned"),
         right: filter,
         operator: "and",
       },
@@ -29,7 +29,7 @@ export async function getTotalRequests(
 
   WITH total_count AS (
     SELECT count(*) as count
-    FROM request_response_log
+    FROM request_response_versioned
     WHERE (
       (${filterString})
     )

@@ -154,8 +154,24 @@ interface RequestResponseLogToOperators {
   threat: SingleKey<BooleanOperators>;
 }
 
+interface RequestResponseVersionedToOperators {
+  latency: SingleKey<NumberOperators>;
+  status: SingleKey<NumberOperators>;
+  request_created_at: SingleKey<TimestampOperatorsTyped>;
+  response_created_at: SingleKey<TimestampOperatorsTyped>;
+  model: SingleKey<TextOperators>;
+  user_id: SingleKey<TextOperators>;
+  organization_id: SingleKey<TextOperators>;
+  node_id: SingleKey<TextOperators>;
+  job_id: SingleKey<TextOperators>;
+  threat: SingleKey<BooleanOperators>;
+}
+
 export type FilterLeafRequestResponseLog =
   SingleKey<RequestResponseLogToOperators>;
+
+export type FilterLeafRequestResponseVersioned =
+  SingleKey<RequestResponseVersionedToOperators>;
 
 type PropertiesCopyV2ToOperators = {
   key: SingleKey<TextOperators>;
@@ -234,6 +250,7 @@ export type TablesAndViews = {
 
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
+  request_response_versioned: FilterLeafRequestResponseVersioned;
   users_view: FilterLeafUserView;
   properties_v3: FilterLeafPropertiesCopyV2;
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
@@ -264,17 +281,17 @@ export function timeFilterToFilterNode(
   filter: TimeFilter,
   table: keyof TablesAndViews
 ): FilterNode {
-  if (table === "request_response_log") {
+  if (table === "request_response_versioned") {
     return {
       left: {
-        request_response_log: {
+        request_response_versioned: {
           request_created_at: {
             gte: filter.start,
           },
         },
       },
       right: {
-        request_response_log: {
+        request_response_versioned: {
           request_created_at: {
             lte: filter.end,
           },

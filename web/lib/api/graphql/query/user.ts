@@ -21,16 +21,16 @@ export async function getUsers(
   });
   const query = `
   select 
-  request_response_log.user_id as user_id,
+  request_response_versioned.user_id as user_id,
   count(*) as total_requests,
-  sum(request_response_log.completion_tokens) as total_completion_tokens,
-  sum(request_response_log.prompt_tokens) as total_prompt_tokens
-  from request_response_log 
+  sum(request_response_versioned.completion_tokens) as total_completion_tokens,
+  sum(request_response_versioned.prompt_tokens) as total_prompt_tokens
+  from request_response_versioned 
   where (
     ${builtFilter.filter}
   )
-  group by request_response_log.user_id
-  ORDER BY request_response_log.user_id
+  group by request_response_versioned.user_id
+  ORDER BY request_response_versioned.user_id
   limit ${limit}
   offset ${offset}  
 `;
@@ -68,7 +68,7 @@ export async function queryUser(
   let filter: FilterNode = "all";
   if (user_id !== null) {
     filter = {
-      request_response_log: {
+      request_response_versioned: {
         user_id: {
           equals: user_id,
         },
