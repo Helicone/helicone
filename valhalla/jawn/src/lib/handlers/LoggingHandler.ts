@@ -7,10 +7,10 @@ import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext, PromptRecord } from "./HandlerContext";
 
 export type BatchPayload = {
-  properties: Database["public"]["Tables"]["properties"]["Insert"][];
   responses: Database["public"]["Tables"]["response"]["Insert"][];
   requests: Database["public"]["Tables"]["request"]["Insert"][];
   prompts: PromptRecord[];
+  assets: Database["public"]["Tables"]["asset"]["Insert"][];
   requestResponseVersionedCH: ClickhouseDB["Tables"]["request_response_versioned"][];
 };
 
@@ -24,10 +24,10 @@ export class LoggingHandler extends AbstractLogHandler {
     this.logStore = logStore;
     this.requestResponseStore = requestResponseStore;
     this.batchPayload = {
-      properties: [],
       responses: [],
       requests: [],
       prompts: [],
+      assets: [],
       requestResponseVersionedCH: [],
     };
   }
@@ -37,7 +37,7 @@ export class LoggingHandler extends AbstractLogHandler {
     // Postgres
     this.batchPayload.requests.push(this.mapRequest(context));
     this.batchPayload.responses.push(this.mapResponse(context));
-    this.batchPayload.properties.push(...this.mapProperties(context));
+    this.batchPayload.assets.push(...this.mapAssets(context));
 
     // Prompts
     if (
@@ -95,6 +95,28 @@ export class LoggingHandler extends AbstractLogHandler {
         }`
       );
     }
+  }
+
+  mapAssets(
+    context: HandlerContext
+  ): Database["public"]["Tables"]["asset"]["Insert"][] {
+    const request = context.message.log.request;
+    const orgParams = context.orgParams;
+    const assets = context.message.log.assets;
+
+    if (!orgParams?.id || !assets || Object.values(assets).length === 0) {
+      return [];
+    }
+
+    const assetInserts: Database["public"]["Tables"]["asset"]["Insert"][] =
+      Object.keys(assets).map(([assetId]) => ({
+        id: assetId,
+        request_id: request.id,
+        organization_id: orgParams.id,
+        created_at: request.requestCreatedAt.toISOString(),
+      }));
+
+    return assetInserts;
   }
 
   mapPrompt(context: HandlerContext): PromptRecord | null {
@@ -156,21 +178,6 @@ export class LoggingHandler extends AbstractLogHandler {
       };
 
     return requestResponseLog;
-  }
-
-  mapProperties(
-    context: HandlerContext
-  ): Database["public"]["Tables"]["properties"]["Insert"][] {
-    const request = context.message.log.request;
-
-    const properties = Object.entries(request.properties).map((entry) => ({
-      request_id: request.id,
-      key: entry[0],
-      value: entry[1],
-      created_at: request.requestCreatedAt.toISOString(),
-    }));
-
-    return properties;
   }
 
   mapResponse(
