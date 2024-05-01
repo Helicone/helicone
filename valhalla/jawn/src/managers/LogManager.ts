@@ -9,7 +9,6 @@ import { LogStore } from "../lib/stores/LogStore";
 import { RequestResponseStore } from "../lib/stores/RequestResponseStore";
 import { ClickhouseClientWrapper } from "../lib/db/ClickhouseWrapper";
 import { PromptHandler } from "../lib/handlers/PromptHandler";
-import { PosthogClient } from "../lib/clients/postHogClient";
 import { PostHogHandler } from "../lib/handlers/PostHogHandler";
 import { S3Client } from "../lib/shared/db/s3Client";
 import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
@@ -47,9 +46,7 @@ export class LogManager {
     );
     // Store in S3 after logging to DB
     const s3BodyUploadHandler = new S3BodyUploadHandler(s3Client);
-    const posthogHandler = new PostHogHandler(
-      new PosthogClient(process.env.POSTHOG_API_KEY ?? "")
-    );
+    const posthogHandler = new PostHogHandler();
 
     authHandler
       .setNext(rateLimitHandler)

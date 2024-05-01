@@ -1,40 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export class PosthogClient {
-  private readonly apiKey: string;
-  private readonly posthogHost: string;
+import { PostHog } from "posthog-node";
 
-  constructor(apiKey: string, posthogHost: string | null = null) {
-    this.apiKey = apiKey;
-    this.posthogHost = posthogHost ?? "https://app.posthog.com";
-  }
-
-  public async captureEvent(
-    event: string,
-    properties: Record<string, any>,
-    distinctId: string = crypto.randomUUID()
-  ): Promise<void> {
-    const url = `${this.posthogHost}/capture/`;
-    const body = JSON.stringify({
-      api_key: this.apiKey,
-      event: event,
-      properties: properties,
-      distinct_id: distinctId,
-    });
-
-    try {
-      await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: body,
-      });
-    } catch (error: any) {
-      console.error(`Error capturing PostHog event: ${error.message}`);
-    }
-  }
+const ph_project_api_key = process.env.PUBLIC_POSTHOG_API_KEY;
+export let postHogClient: PostHog | null = null;
+if (ph_project_api_key) {
+  postHogClient = new PostHog(ph_project_api_key, {
+    host: "https://app.posthog.com",
+  });
 }
+
+process.on("exit", () => {
+  postHogClient?.shutdown(); // new
+});
 
 export type HeliconeRequestResponseToPosthog = {
   model: string;

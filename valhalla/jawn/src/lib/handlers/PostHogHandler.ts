@@ -2,17 +2,15 @@ import { costOfPrompt } from "../../packages/cost";
 import {
   HeliconeRequestResponseToPosthog,
   PosthogClient,
+  postHogClient,
 } from "../clients/postHogClient";
 import { PromiseGenericResult } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
 export class PostHogHandler extends AbstractLogHandler {
-  private posthogClient: PosthogClient;
-
-  constructor(posthogClient: PosthogClient) {
+  constructor() {
     super();
-    this.posthogClient = posthogClient;
   }
 
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
@@ -30,10 +28,11 @@ export class PostHogHandler extends AbstractLogHandler {
 
     const posthogLog = this.mapPostHogLog(context);
 
-    await this.posthogClient.captureEvent(
-      "helicone_request_response",
-      posthogLog
-    );
+    postHogClient?.capture({
+      distinctId: crypto.randomUUID(),
+      event: "helicone_request_response",
+      properties: posthogLog,
+    });
 
     return await super.handle(context);
   }
