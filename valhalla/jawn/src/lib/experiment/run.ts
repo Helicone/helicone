@@ -193,10 +193,17 @@ async function runHypothesis(props: {
   return ok("success");
 }
 
+export const IS_AZURE =
+  process.env.AZURE_BASE_URL &&
+  process.env.AZURE_API_VERSION &&
+  process.env.AZURE_DEPLOYMENT_NAME
+    ? true
+    : false;
+
 export async function run(
   experiment: Experiment
 ): Promise<Result<string, string>> {
-  if (process.env.AZURE_BASE_URL) {
+  if (IS_AZURE) {
     console.log("running experiment on azure");
     return runAzure(experiment);
   } else {
