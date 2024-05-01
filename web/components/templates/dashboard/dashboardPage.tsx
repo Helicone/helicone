@@ -212,7 +212,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       setAdvancedFilters(getAdvancedFilters());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterMap]);
+  }, []);
 
   const onSetAdvancedFiltersHandler = (
     filters: UIFilterRow[],

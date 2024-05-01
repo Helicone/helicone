@@ -73,7 +73,6 @@ export interface DashboardPageData {
 export const useDashboardPage = ({
   timeFilter,
   uiFilters,
-  apiKeyFilter,
   timeZoneDifference,
   dbIncrement,
 }: DashboardPageData) => {
@@ -258,7 +257,7 @@ export const useDashboardPage = ({
   };
 
   function isLoading(x: UseQueryResult<any>) {
-    return x.isLoading || x.isFetching;
+    return x.isLoading || x.isFetching || isPropertiesLoading;
   }
 
   const isAnyLoading =
