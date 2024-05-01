@@ -7,6 +7,7 @@ import {
 import ReactDiffViewer from "react-diff-viewer";
 import RoleButton from "../../playground/new/roleButton";
 import { EyeIcon } from "@heroicons/react/20/solid";
+import { ArrowRightCircleIcon } from "@heroicons/react/24/outline";
 
 interface ArrayDiffViewerProps {
   origin: any[];
@@ -47,15 +48,29 @@ const ArrayDiffViewer = (props: ArrayDiffViewerProps) => {
             return "";
           }
         };
-        const role = originItem.role;
+        const isSameRole = originItem.role === targetItem.role;
         const originContent = getContent(origin[index]);
         const targetContent = getContent(target[index]);
         return (
           <Accordion key={index} className="relative">
             <AccordionHeader className="text-sm font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong">
               <div className="flex items-center space-x-4">
+                {!isSameRole && (
+                  <>
+                    <RoleButton
+                      role={originItem.role}
+                      onRoleChange={function (
+                        role: "function" | "assistant" | "user" | "system"
+                      ): void {}}
+                      disabled={true}
+                    />
+                    <div>
+                      <ArrowRightCircleIcon className="h-4 w-4 text-black dark:text-white" />
+                    </div>
+                  </>
+                )}
                 <RoleButton
-                  role={role || "assistant"}
+                  role={targetItem.role}
                   onRoleChange={function (
                     role: "function" | "assistant" | "user" | "system"
                   ): void {}}
@@ -78,17 +93,11 @@ const ArrayDiffViewer = (props: ArrayDiffViewerProps) => {
                 <p className="text-xs text-gray-500">No changes</p>
               ) : (
                 <div className="flex flex-col mt-4 space-y-2 w-full">
-                  <div className="flex justify-between w-full">
-                    <div className="text-xs text-gray-500 w-full font-semibold">
-                      Origin
-                    </div>
-                    <div className="text-xs text-gray-500 w-full font-semibold">
-                      New
-                    </div>
-                  </div>
                   <ReactDiffViewer
                     oldValue={originContent}
                     newValue={targetContent}
+                    leftTitle={"Origin"}
+                    rightTitle={"New"}
                     splitView={true}
                   />
                 </div>
