@@ -19,7 +19,7 @@ export type ExperimentFilterBranch = {
   operator: "or" | "and";
   right: ExperimentFilterNode;
 };
-type ExperimentFilterNode =
+export type ExperimentFilterNode =
   | FilterLeafSubset<"experiment">
   | ExperimentFilterBranch
   | "all";

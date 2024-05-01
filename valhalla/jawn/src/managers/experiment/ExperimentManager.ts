@@ -1,5 +1,8 @@
 // src/users/usersService.ts
-import { NewExperimentParams } from "../../controllers/public/experimentController";
+import {
+  ExperimentFilterNode,
+  NewExperimentParams,
+} from "../../controllers/public/experimentController";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { Result, err, ok } from "../../lib/shared/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
@@ -19,16 +22,17 @@ export class ExperimentManager extends BaseManager {
   }
 
   async getExperiments(
-    filter: FilterNode,
+    filter: ExperimentFilterNode,
     include: IncludeExperimentKeys
   ): Promise<Result<Experiment[], string>> {
-    const result = await this.ExperimentStore.getExperiments(filter, include);
-    console.log(result);
-    if (result.error || !result.data) {
-      return err(result.error);
-    }
+    const result = await this.ExperimentStore.getExperimentsV2(filter, include);
+    return err("result.error");
+    // console.log(result);
+    // if (result.error || !result.data) {
+    //   return err(result.error);
+    // }
 
-    return ok(result.data.map((d) => d.jsonb_build_object));
+    // return ok(result.data.map((d) => d.jsonb_build_object));
   }
 
   async addNewExperiment(

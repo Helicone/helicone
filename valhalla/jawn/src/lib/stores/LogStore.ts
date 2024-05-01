@@ -3,18 +3,7 @@ import { deepCompare } from "../../utils/helpers";
 import pgPromise from "pg-promise";
 import { PromptRecord } from "../handlers/HandlerContext";
 import { PromiseGenericResult, ok, err } from "../shared/result";
-
-const pgp = pgPromise();
-const db = pgp({
-  connectionString: process.env.SUPABASE_DATABASE_URL,
-  ssl:
-    process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development"
-      ? {
-          rejectUnauthorized: true,
-          ca: process.env.SUPABASE_SSL_CERT_CONTENTS?.split("\\n").join("\n"),
-        }
-      : undefined,
-});
+import { dbPromise as db, pgp } from "../shared/db/dbPromise";
 
 const requestColumns = new pgp.helpers.ColumnSet(
   [

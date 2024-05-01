@@ -1,8 +1,12 @@
+import { ExperimentFilterNode } from "../../controllers/public/experimentController";
 import { dbExecute } from "../shared/db/dbExecute";
-import { FilterNode } from "../shared/filters/filterDefs";
+import { filterListToTree } from "../shared/filters/filterDefs";
 import { buildFilterPostgres } from "../shared/filters/filters";
 import { Result, err, resultMap } from "../shared/result";
+import { PromptVersionedStore } from "./PromptVersionedStore";
 import { BaseStore } from "./baseStore";
+import { DatasetStore } from "./datasetStore";
+import { ExperimentHypothesisStore } from "./experimentHypothesisStore";
 
 export interface ResponseObj {
   body: any;
@@ -142,11 +146,12 @@ function getExperimentsQuery(
                           'template', pv_parent.helicone_template
                         )
                         FROM prompts_versions pv_current
-                        JOIN prompts_versions pv_parent ON pv_parent.major_version = pv_current.major_version AND pv_parent.minor_version = 0
+                        JOIN prompts_versions pv_parent ON pv_parent.prompt_v2 = pv_current.prompt_v2
                         WHERE pv_current.id = h.prompt_version
                         AND pv_parent.helicone_template is not null
                         AND pv_parent.organization = e.organization
                         AND pv_current.organization = e.organization
+                        AND pv_parent.major_version = 0
                         limit 1
                       ),`
                           : ""
@@ -195,8 +200,84 @@ function getExperimentsQuery(
     `;
 }
 
+interface ExperimentBase {
+  id: string;
+  organization: string;
+  created_at: string;
+  dataset_id: string;
+}
+
 export class ExperimentStore extends BaseStore {
-  async getExperiments(filter: FilterNode, include: IncludeExperimentKeys) {
+  async getExperimentsV2(
+    filter: ExperimentFilterNode,
+    include: IncludeExperimentKeys
+  ) {
+    // const ex
+  }
+  async getExperiment(
+    filter: ExperimentFilterNode,
+    include: IncludeExperimentKeys
+  ) {
+    const limit = 20;
+    const experimentHypothesisStore = new ExperimentHypothesisStore(
+      this.organizationId
+    );
+    const promptVersionedStore = new PromptVersionedStore(this.organizationId);
+
+    const hypotheses = await experimentHypothesisStore.getHypotheses(
+      filter,
+      limit
+    );
+
+    const firstHypothesis = hypotheses.data![0];
+
+    const promptVersion = await promptVersionedStore.getPromptVersion({
+      prompts_versions: {
+        id: {
+          equals: firstHypothesis.jsonb_build_object.promptVersionId,
+        },
+      },
+    });
+
+    const parentPromptVersion = await promptVersionedStore.getPromptVersion(
+      filterListToTree(
+        [
+          {
+            prompts_versions: {
+              major_version: {
+                equals: promptVersion.data?.[0].major_version,
+              },
+            },
+          },
+          {
+            prompts_versions: {
+              minor_version: {
+                equals: 0,
+              },
+            },
+          },
+          {
+            prompts_versions: {
+              prompt_v2: {
+                equals: promptVersion.data?.[0].prompt_v2.id,
+              },
+            },
+          },
+        ],
+        "and"
+      )
+    );
+
+    const datasetStore = new DatasetStore(this.organizationId);
+
+    // const dataset = await datasetStore.getDataset(
+    //   firstHypothesis.jsonb_build_object.dataset_id
+    // );
+  }
+  async getExperiments(
+    filter: ExperimentFilterNode,
+    include: IncludeExperimentKeys
+  ) {
     const builtFilter = buildFilterPostgres({
       filter,
       argsAcc: [this.organizationId],
