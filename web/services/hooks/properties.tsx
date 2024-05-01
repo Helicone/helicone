@@ -24,6 +24,10 @@ const useGetProperties = () => {
       ?.map((property: Property) => {
         return property.property;
       })
+      ?.filter(
+        (property: string) =>
+          "helicone-sent-to-posthog" !== property.toLowerCase()
+      )
       // sort by property alphabetically
       .sort() ?? [];
 
