@@ -21,38 +21,44 @@ export const INTERNAL_ERRORS = {
 export class ResponseBodyHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
     console.log(`ResponseBodyHandler: ${context.message.log.request.id}`);
-    const omitResponseLog = context.message.heliconeMeta.omitResponseLog;
+    try {
+      const omitResponseLog = context.message.heliconeMeta.omitResponseLog;
 
-    const processedResponseBody = await this.processBody(context);
-    if (
-      processedResponseBody.error ||
-      !processedResponseBody?.data?.processedBody
-    ) {
-      console.error(
-        "Error processing response body",
-        processedResponseBody.error
-      );
+      const processedResponseBody = await this.processBody(context);
+      if (
+        processedResponseBody.error ||
+        !processedResponseBody?.data?.processedBody
+      ) {
+        console.error(
+          "Error processing response body",
+          processedResponseBody.error
+        );
 
-      context.processedLog.response.body = {
-        helicone_error: "error parsing response",
-        parse_response_error: processedResponseBody.error,
-        body: omitResponseLog
+        context.processedLog.response.body = {
+          helicone_error: "error parsing response",
+          parse_response_error: processedResponseBody.error,
+          body: omitResponseLog
+            ? {
+                model: context.message.log.response.model, // Put response model here, not calculated model
+              }
+            : processedResponseBody.data?.processedBody ?? undefined,
+        };
+      } else {
+        context.processedLog.response.body = omitResponseLog
           ? {
               model: context.message.log.response.model, // Put response model here, not calculated model
             }
-          : processedResponseBody.data?.processedBody ?? undefined,
-      };
-    } else {
-      context.processedLog.response.body = omitResponseLog
-        ? {
-            model: context.message.log.response.model, // Put response model here, not calculated model
-          }
-        : processedResponseBody.data.processedBody ?? undefined;
+          : processedResponseBody.data.processedBody ?? undefined;
+      }
+
+      this.setUsage(processedResponseBody.data?.usage ?? {}, context);
+
+      return await super.handle(context);
+    } catch (error: any) {
+      return err(
+        `Error processing response body: ${error}, Context: ${this.constructor.name}`
+      );
     }
-
-    this.setUsage(processedResponseBody.data?.usage ?? {}, context);
-
-    return await super.handle(context);
   }
 
   private setUsage(usage: Usage, context: HandlerContext) {

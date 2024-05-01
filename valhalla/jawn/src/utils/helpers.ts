@@ -1,9 +1,11 @@
+import { PromiseGenericResult, ok, err } from "../lib/shared/result";
 import {
   getTokenCountAnthropic,
   getTokenCountGPT3,
 } from "../lib/tokens/tokenCounter";
 import { Provider } from "../models/models";
 import crypto from "crypto";
+import zlib from "zlib";
 
 export function tryParse(text: string, errorMsg?: string): any {
   try {
@@ -55,4 +57,19 @@ export function stringToNumberHash(str: string): number {
   const integer = parseInt(hexHash.substring(0, 16), 16);
 
   return integer;
+}
+
+export async function compressData(
+  value: string
+): PromiseGenericResult<Buffer> {
+  const buffer = Buffer.from(value, "utf-8");
+  return new Promise((resolve, reject) => {
+    zlib.gzip(buffer, (error, result) => {
+      if (error) {
+        console.error(`Failed to compress value: ${error}`);
+        resolve(err("Failed to compress value"));
+      }
+      resolve(ok(result));
+    });
+  });
 }

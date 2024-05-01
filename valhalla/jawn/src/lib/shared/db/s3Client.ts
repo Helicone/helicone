@@ -1,6 +1,11 @@
-import { S3Client as AwsS3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client as AwsS3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { Result } from "../result";
+import { Result, err, ok } from "../result";
+import { compressData } from "../../../utils/helpers";
 
 export type RequestResponseBody = {
   request?: any;
@@ -68,6 +73,44 @@ export class S3Client {
       return { data: signedUrl, error: null };
     } catch (error: any) {
       return { data: null, error: error.message };
+    }
+  }
+
+  async store(key: string, value: string): Promise<Result<string, string>> {
+    try {
+      const compressedValue = await compressData(value);
+
+      let command: PutObjectCommand;
+      if (!compressedValue.data || compressedValue.error) {
+        // If compression fails, use the original value
+        command = new PutObjectCommand({
+          Bucket: this.bucketName,
+          Key: key,
+          Body: value,
+          ContentType: "application/json",
+        });
+      } else {
+        command = new PutObjectCommand({
+          Bucket: this.bucketName,
+          Key: key,
+          Body: compressedValue.data,
+          ContentEncoding: "gzip",
+          ContentType: "application/json",
+        });
+      }
+
+      const response = await this.awsClient.send(command);
+
+      if (!response || response.$metadata.httpStatusCode !== 200) {
+        return err(
+          `Failed to store data: ${response.$metadata.httpStatusCode}`
+        );
+      }
+
+      return ok(`Success`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      return { data: null, error: error?.message };
     }
   }
 

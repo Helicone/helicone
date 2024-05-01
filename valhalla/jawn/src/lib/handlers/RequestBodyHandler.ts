@@ -6,15 +6,21 @@ import { HandlerContext } from "./HandlerContext";
 export class RequestBodyHandler extends AbstractLogHandler {
   async handle(context: HandlerContext): PromiseGenericResult<string> {
     console.log(`RequestBodyHandler: ${context.message.log.request.id}`);
-    const processedBody = this.processRequestBody(context);
+    try {
+      const processedBody = this.processRequestBody(context);
 
-    if (processedBody.error || !processedBody.data) {
-      return err(`Error processing request body: ${processedBody.error}`);
+      if (processedBody.error || !processedBody.data) {
+        return err(`Error processing request body: ${processedBody.error}`);
+      }
+
+      context.processedLog.request.body = processedBody.data;
+
+      return await super.handle(context);
+    } catch (error: any) {
+      return err(
+        `Error processing request body: ${error}, Context: ${this.constructor.name}`
+      );
     }
-
-    context.processedLog.request.body = processedBody.data;
-
-    return await super.handle(context);
   }
 
   processRequestBody(context: HandlerContext): GenericResult<any> {
