@@ -7,10 +7,10 @@ import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext, PromptRecord } from "./HandlerContext";
 
 export type BatchPayload = {
-  properties: Database["public"]["Tables"]["properties"]["Insert"][];
   responses: Database["public"]["Tables"]["response"]["Insert"][];
   requests: Database["public"]["Tables"]["request"]["Insert"][];
   prompts: PromptRecord[];
+  assets: Database["public"]["Tables"]["asset"]["Insert"][];
   requestResponseVersionedCH: ClickhouseDB["Tables"]["request_response_versioned"][];
 };
 
@@ -24,24 +24,20 @@ export class LoggingHandler extends AbstractLogHandler {
     this.logStore = logStore;
     this.requestResponseStore = requestResponseStore;
     this.batchPayload = {
-      properties: [],
       responses: [],
       requests: [],
       prompts: [],
+      assets: [],
       requestResponseVersionedCH: [],
     };
   }
 
-  async handle(context: HandlerContext): Promise<void> {
+  async handle(context: HandlerContext): PromiseGenericResult<string> {
+    console.log(`LoggingHandler: ${context.message.log.request.id}`);
     // Postgres
-    context.payload.request = this.mapRequest(context);
-    this.batchPayload.requests.push(context.payload.request);
-
-    context.payload.response = this.mapResponse(context);
-    this.batchPayload.responses.push(context.payload.response);
-
-    context.addProperties(this.mapProperties(context));
-    this.batchPayload.properties.push(...context.payload.properties);
+    this.batchPayload.requests.push(this.mapRequest(context));
+    this.batchPayload.responses.push(this.mapResponse(context));
+    this.batchPayload.assets.push(...this.mapAssets(context));
 
     // Prompts
     if (
@@ -50,22 +46,19 @@ export class LoggingHandler extends AbstractLogHandler {
     ) {
       const prompt = this.mapPrompt(context);
       if (prompt) {
-        context.payload.prompt = prompt;
         this.batchPayload.prompts.push(prompt);
       }
     }
 
     // Clickhouse
-    context.payload.requestResponseVersionedCH =
-      this.mapRequestResponseVersionedCH(context);
     this.batchPayload.requestResponseVersionedCH.push(
-      context.payload.requestResponseVersionedCH
+      this.mapRequestResponseVersionedCH(context)
     );
 
-    await super.handle(context);
+    return await super.handle(context);
   }
 
-  public async handleResult(): PromiseGenericResult<string> {
+  public async handleResults(): PromiseGenericResult<string> {
     const pgResult = await this.logStore.insertLogBatch(this.batchPayload);
 
     if (pgResult.error) {
@@ -89,19 +82,39 @@ export class LoggingHandler extends AbstractLogHandler {
         );
 
       if (result.error) {
-        console.error("Failed to log to Clickhouse:", result.error);
         return err(`Error inserting request response logs: ${result.error}`);
       }
 
       return ok("All logs inserted successfully.");
     } catch (error: any) {
-      console.error("Failed to log to Clickhouse:", error);
       return err(
-        `Unexpected error during logging: ${
+        `Unexpected error during logging to Clickhouse: ${
           error.message ?? "No error message provided"
         }`
       );
     }
+  }
+
+  mapAssets(
+    context: HandlerContext
+  ): Database["public"]["Tables"]["asset"]["Insert"][] {
+    const request = context.message.log.request;
+    const orgParams = context.orgParams;
+    const assets = context.message.log.assets;
+
+    if (!orgParams?.id || !assets || Object.values(assets).length === 0) {
+      return [];
+    }
+
+    const assetInserts: Database["public"]["Tables"]["asset"]["Insert"][] =
+      Object.keys(assets).map(([assetId]) => ({
+        id: assetId,
+        request_id: request.id,
+        organization_id: orgParams.id,
+        created_at: request.requestCreatedAt.toISOString(),
+      }));
+
+    return assetInserts;
   }
 
   mapPrompt(context: HandlerContext): PromptRecord | null {
@@ -163,21 +176,6 @@ export class LoggingHandler extends AbstractLogHandler {
       };
 
     return requestResponseLog;
-  }
-
-  mapProperties(
-    context: HandlerContext
-  ): Database["public"]["Tables"]["properties"]["Insert"][] {
-    const request = context.message.log.request;
-
-    const properties = Object.entries(request.properties).map((entry) => ({
-      request_id: request.id,
-      key: entry[0],
-      value: entry[1],
-      created_at: request.requestCreatedAt.toISOString(),
-    }));
-
-    return properties;
   }
 
   mapResponse(
