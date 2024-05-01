@@ -192,6 +192,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   const {
     metrics,
     filterMap,
+    searchPropertyFilters,
     overTimeData,
     isAnyLoading,
     refetch,
@@ -529,12 +530,7 @@ const DashboardPage = (props: DashboardPageProps) => {
               filterMap,
               onAdvancedFilter: onSetAdvancedFiltersHandler,
               filters: advancedFilters,
-              searchPropertyFilters: async (
-                property: string,
-                search: string
-              ) => {
-                return ok(undefined);
-              },
+              searchPropertyFilters: searchPropertyFilters,
             }}
             savedFilters={{
               currentFilter: currFilter ?? undefined,
