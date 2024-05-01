@@ -310,8 +310,7 @@ export async function proxyForwarder(
             env.S3_SECRET_KEY ?? "",
             env.S3_ENDPOINT ?? "",
             env.S3_BUCKET_NAME ?? ""
-          ),
-          supabase
+          )
         ),
         kafkaProducer: new KafkaProducer(env),
       },

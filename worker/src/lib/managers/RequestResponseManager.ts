@@ -1,8 +1,5 @@
-import { SupabaseClient } from "@supabase/supabase-js";
 import { S3Client } from "../clients/S3Client";
 import { Result, ok } from "../util/results";
-import { Database } from "../../../supabase/database.types";
-import { isImageModel } from "../util/imageModelMapper";
 
 export type RequestResponseContent = {
   requestId: string;
@@ -15,10 +12,7 @@ export type RequestResponseContent = {
 };
 
 export class RequestResponseManager {
-  constructor(
-    private s3Client: S3Client,
-    private supabase: SupabaseClient<Database>
-  ) {}
+  constructor(private s3Client: S3Client) {}
 
   async storeRequestResponseRaw({
     organizationId,
@@ -59,7 +53,7 @@ export class RequestResponseManager {
     model,
     assets,
   }: RequestResponseContent): Promise<Result<string, string>> {
-    // If image model, store images in S3
+    // If assets, must be image model, store images in S3
     if (assets?.size > 0) {
       await this.storeRequestResponseImage({
         organizationId,
