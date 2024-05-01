@@ -11,6 +11,7 @@ import { AsyncLogModel, validateAsyncLogModel } from "../models/AsyncLog";
 import { DBQueryTimer } from "../util/loggers/DBQueryTimer";
 import { S3Client } from "../clients/S3Client";
 import { RequestResponseManager } from "./RequestResponseManager";
+import { KafkaProducer } from "../clients/KafkaProducer";
 
 export async function logAsync(
   requestWrapper: RequestWrapper,
@@ -83,6 +84,7 @@ export async function logAsync(
         ),
         supabase
       ),
+      kafkaProducer: new KafkaProducer(env),
     },
     env.S3_ENABLED ?? "true",
     heliconeHeaders
