@@ -307,7 +307,7 @@ export class DBLoggable {
         return ok(JSON.parse(result));
       }
     } catch (e) {
-      console.log("Error parsing response", e);
+      console.log("Error parsing response 1", e);
       return {
         data: null,
         error: "error parsing response, " + e + ", " + result,
@@ -551,6 +551,7 @@ export class DBLoggable {
       ).data ?? [];
 
     const shouldSend =
+      webhook.destination.includes("helicone-scoring-webhook") ||
       subscriptions
         .map((subscription) => {
           return subscription.event === "beta";
@@ -559,16 +560,24 @@ export class DBLoggable {
 
     if (shouldSend) {
       console.log("SENDING", webhook.destination, payload.request?.request.id);
-      await fetch(webhook.destination, {
-        method: "POST",
-        body: JSON.stringify({
-          request_id: payload.request?.request.id,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      try {
+        await fetch(webhook.destination, {
+          method: "POST",
+          body: JSON.stringify({
+            request_id: payload.request?.request.id,
+            request_body: payload.request?.request.body,
+            response_body: payload.response.body,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        console.error("Error sending to webhook", error.message);
+      }
     }
+
     return {
       data: undefined,
       error: null,

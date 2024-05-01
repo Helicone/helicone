@@ -13,10 +13,9 @@ import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { LlmSchema } from "../../../lib/api/models/requestResponseModel";
 import ThemedModal from "../../shared/themed/themedModal";
-import {
-  RenderImageWithPrettyInputKeys,
-  RenderWithPrettyInputKeys,
-} from "../prompts/id/promptIdPage";
+import { RenderWithPrettyInputKeys } from "../playground/chatRow";
+import { RenderImageWithPrettyInputKeys } from "../prompts/id/promptIdPage";
+import RoleButton from "../playground/new/roleButton";
 
 export type Message = {
   id: string;
@@ -147,7 +146,7 @@ export const SingleChat = (props: {
   const renderOpenAIImage = (item: any) => {
     const imageUrl =
       typeof item.image_url === "string" ? item.image_url : item.image_url.url;
-    if (isHeliconeTemplate) {
+    if (isHeliconeTemplate || props.selectedProperties) {
       return (
         <RenderImageWithPrettyInputKeys
           text={imageUrl}
@@ -155,6 +154,7 @@ export const SingleChat = (props: {
         />
       );
     }
+    // eslint-disable-next-line @next/next/no-img-element
     return <img src={imageUrl} alt={""} width={600} height={600} />;
   };
 
@@ -168,6 +168,7 @@ export const SingleChat = (props: {
         />
       );
     }
+    // eslint-disable-next-line @next/next/no-img-element
     return <img src={imageUrl} alt={""} width={600} height={600} />;
   };
 
@@ -183,7 +184,7 @@ export const SingleChat = (props: {
       const textMessage = arr.find((message) => message.type === "text");
 
       return (
-        <div className="flex flex-col space-y-4 divide-y divide-gray-100 dark:divide-gray-900">
+        <div className="flex flex-col space-y-4 divide-y divide-gray-100 dark:divide-gray-900 ">
           <RenderWithPrettyInputKeys
             text={textMessage?.text}
             selectedProperties={props.selectedProperties}
@@ -260,13 +261,15 @@ export const SingleChat = (props: {
         key={index}
       >
         <div className="flex items-center justify-center">
-          <div
-            className={clsx(
-              "bg-white dark:bg-black border border-gray-300 dark:border-gray-700",
-              "flex text-gray-900 dark:text-gray-100 w-20 h-6 px-1 text-xs rounded-lg font-semibold text-center justify-center items-center"
-            )}
-          >
-            <p>{message.role}</p>
+          <div className="w-20">
+            <RoleButton
+              role={message.role}
+              onRoleChange={function (
+                role: "function" | "assistant" | "user" | "system"
+              ): void {}}
+              disabled={true}
+              size={"small"}
+            />
           </div>
         </div>
         <div className="relative whitespace-pre-wrap items-center h-full w-full">
@@ -291,7 +294,7 @@ export const SingleChat = (props: {
                 ref={textContainerRef}
                 className={clsx(
                   !expanded && showButton ? "truncate-text" : "",
-                  "leading-6 pb-2"
+                  "leading-6 pb-2 max-w-full"
                 )}
                 style={{ maxHeight: expanded ? "none" : "10.5rem" }}
               >
@@ -354,8 +357,25 @@ export const Chat = (props: ChatProps) => {
 
   const [open, setOpen] = useState(false);
 
-  const requestMessages =
+  let requestMessages =
     llmSchema?.request.messages ?? requestBody?.messages ?? [];
+
+  if (
+    requestBody?.system &&
+    !requestMessages.some(
+      (msg: any) =>
+        msg?.role === "system" && msg?.content === requestBody?.system
+    )
+  ) {
+    requestMessages = [
+      {
+        id: crypto.randomUUID(),
+        role: "system",
+        content: requestBody?.system,
+      },
+      ...requestMessages,
+    ];
+  }
 
   const getResponseMessage = () => {
     if (/^claude/.test(model)) {
@@ -529,7 +549,8 @@ export const Chat = (props: ChatProps) => {
               {!(
                 model === "gpt-4-vision-preview" ||
                 model === "gpt-4-1106-vision-preview" ||
-                /^claude/.test(model)
+                /^claude/.test(model) ||
+                requestId === ""
               ) && (
                 <button
                   onClick={() => {

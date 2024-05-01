@@ -9,6 +9,9 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
+  "/v1/webhook/request/{requestId}/score": {
+    post: operations["AddScores"];
+  };
   "/v1/user/query": {
     post: operations["GetUsers"];
   };
@@ -33,6 +36,9 @@ export interface paths {
   "/v1/prompt/version/{promptVersionId}/subversion": {
     post: operations["CreateSubversion"];
   };
+  "/v1/prompt/version/{promptVersionId}/inputs/query": {
+    post: operations["GetInputs"];
+  };
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
   };
@@ -41,6 +47,9 @@ export interface paths {
   };
   "/v1/experiment/dataset/random": {
     post: operations["AddRandomDataset"];
+  };
+  "/v1/experiment/dataset/query": {
+    post: operations["GetDatasets"];
   };
   "/v1/experiment/dataset/{datasetId}/query": {
     post: operations["GetDataset"];
@@ -51,12 +60,34 @@ export interface paths {
   "/v1/experiment": {
     post: operations["CreateNewExperiment"];
   };
+  "/v1/experiment/query": {
+    post: operations["GetExperiments"];
+  };
 }
 
 export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    ResultSuccess_null_: {
+      /** @enum {number|null} */
+      data: null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultError_string_: {
+      /** @enum {number|null} */
+      data: null;
+      error: string;
+    };
+    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.number_": {
+      [key: string]: number;
+    };
+    ScoreRequest: {
+      scores: components["schemas"]["Record_string.number_"];
+    };
     "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
       data: {
           /** Format: double */
@@ -71,11 +102,6 @@ export interface components {
         }[];
       /** @enum {number|null} */
       error: null;
-    };
-    ResultError_string_: {
-      /** @enum {number|null} */
-      data: null;
-      error: string;
     };
     "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": components["schemas"]["ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"] | components["schemas"]["ResultError_string_"];
     UserQueryParams: {
@@ -199,6 +225,8 @@ Json: JsonObject;
       country_code: string | null;
       asset_ids: string[] | null;
       asset_urls: components["schemas"]["Record_string.string_"] | null;
+      /** Format: double */
+      costUSD?: number | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -270,13 +298,19 @@ Json: JsonObject;
       model?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.feedback-or-request-or-response_": {
+    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values_": {
       feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
       response?: components["schemas"]["Partial_ResponseTableToOperators_"];
+      properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      values?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
     };
-    "FilterLeafSubset_feedback-or-request-or-response_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response_"];
-    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values_"] | components["schemas"]["RequestFilterBranch"] | "all";
     RequestFilterBranch: {
       right: components["schemas"]["RequestFilterNode"];
       /** @enum {string} */
@@ -286,6 +320,8 @@ Json: JsonObject;
     /** @enum {string} */
     SortDirection: "asc" | "desc";
     SortLeafRequest: {
+      /** @enum {boolean} */
+      random?: true;
       created_at?: components["schemas"]["SortDirection"];
       cache_created_at?: components["schemas"]["SortDirection"];
       latency?: components["schemas"]["SortDirection"];
@@ -315,13 +351,6 @@ Json: JsonObject;
       isCached?: boolean;
       includeInputs?: boolean;
     };
-    ResultSuccess_null_: {
-      /** @enum {number|null} */
-      data: null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
     HeliconeRequestAsset: {
       assetUrl: string;
     };
@@ -409,12 +438,34 @@ Json: JsonObject;
     PromptCreateSubversionParams: {
       newHeliconeTemplate: unknown;
     };
+    PromptInputRecord: {
+      id: string;
+      inputs: components["schemas"]["Record_string.string_"];
+      source_request: string;
+      prompt_version: string;
+      created_at: string;
+      response_body: string;
+    };
+    "ResultSuccess_PromptInputRecord-Array_": {
+      data: components["schemas"]["PromptInputRecord"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptInputRecord-Array.string_": components["schemas"]["ResultSuccess_PromptInputRecord-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_PromptVersionResult-Array_": {
       data: components["schemas"]["PromptVersionResult"][];
       /** @enum {number|null} */
       error: null;
     };
     "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__datasetId-string__": {
+      data: {
+        datasetId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__datasetId-string_.string_": components["schemas"]["ResultSuccess__datasetId-string__"] | components["schemas"]["ResultError_string_"];
     NewDatasetParams: {
       datasetName: string;
       requestIds: string[];
@@ -447,6 +498,18 @@ Json: JsonObject;
       /** Format: double */
       limit?: number;
     };
+    DatasetResult: {
+      id: string;
+      name: string;
+      request_ids: string[];
+      created_at: string;
+    };
+    "ResultSuccess_DatasetResult-Array_": {
+      data: components["schemas"]["DatasetResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_DatasetResult-Array.string_": components["schemas"]["ResultSuccess_DatasetResult-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess___-Array_": {
       data: Record<string, never>[];
       /** @enum {number|null} */
@@ -465,6 +528,86 @@ Json: JsonObject;
       datasetId: string;
       promptVersion: string;
       model: string;
+      providerKeyId: string;
+    };
+    ResponseObj: {
+      body: unknown;
+      createdAt: string;
+      /** Format: double */
+      completionTokens: number;
+      /** Format: double */
+      promptTokens: number;
+      /** Format: double */
+      delayMs: number;
+      model: string;
+    };
+    Experiment: {
+      id: string;
+      organization: string;
+      dataset: {
+        rows: {
+            inputRecord?: {
+              response: components["schemas"]["ResponseObj"];
+              inputs: components["schemas"]["Record_string.string_"];
+              requestPath: string;
+              requestId: string;
+            };
+            rowId: string;
+          }[];
+        name: string;
+        id: string;
+      };
+      createdAt: string;
+      hypotheses: {
+          runs: {
+              response: components["schemas"]["ResponseObj"];
+              resultRequestId: string;
+              datasetRowId: string;
+            }[];
+          providerKey: string;
+          createdAt: string;
+          status: string;
+          model: string;
+          parentPromptVersion?: {
+            template: unknown;
+          };
+          promptVersion?: {
+            template: unknown;
+          };
+          promptVersionId: string;
+          id: string;
+        }[];
+    };
+    "ResultSuccess_Experiment-Array_": {
+      data: components["schemas"]["Experiment"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Experiment-Array.string_": components["schemas"]["ResultSuccess_Experiment-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_ExperimentToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.experiment_": {
+      experiment?: components["schemas"]["Partial_ExperimentToOperators_"];
+    };
+    FilterLeafSubset_experiment_: components["schemas"]["Pick_FilterLeaf.experiment_"];
+    ExperimentFilterNode: components["schemas"]["FilterLeafSubset_experiment_"] | components["schemas"]["ExperimentFilterBranch"] | "all";
+    ExperimentFilterBranch: {
+      right: components["schemas"]["ExperimentFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["ExperimentFilterNode"];
+    };
+    IncludeExperimentKeys: {
+      /** @enum {boolean} */
+      inputs?: true;
+      /** @enum {boolean} */
+      promptVersion?: true;
+      /** @enum {boolean} */
+      responseBodies?: true;
     };
   };
   responses: {
@@ -484,6 +627,26 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  AddScores: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScoreRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
   GetUsers: {
     requestBody: {
       content: {
@@ -642,6 +805,30 @@ export interface operations {
       };
     };
   };
+  GetInputs: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          random?: boolean;
+          /** Format: double */
+          limit: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptInputRecord-Array.string_"];
+        };
+      };
+    };
+  };
   GetPromptVersions: {
     parameters: {
       path: {
@@ -672,7 +859,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_null.string_"];
+          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
         };
       };
     };
@@ -687,7 +874,22 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_null.string_"];
+          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
+        };
+      };
+    };
+  };
+  GetDatasets: {
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_DatasetResult-Array.string_"];
         };
       };
     };
@@ -736,6 +938,24 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  GetExperiments: {
+    requestBody: {
+      content: {
+        "application/json": {
+          include?: components["schemas"]["IncludeExperimentKeys"];
+          filter: components["schemas"]["ExperimentFilterNode"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Experiment-Array.string_"];
         };
       };
     };

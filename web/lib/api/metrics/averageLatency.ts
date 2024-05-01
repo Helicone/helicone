@@ -18,7 +18,7 @@ export async function getAverageLatency(
     {
       org_id,
       filter: {
-        left: timeFilterToFilterNode(timeFilter, "request_response_log"),
+        left: timeFilterToFilterNode(timeFilter, "request_response_versioned"),
         right: filter,
         operator: "and",
       },
@@ -29,8 +29,8 @@ export async function getAverageLatency(
   WITH total_count AS (
     SELECT 
       count(*) as count,
-      sum(request_response_log.latency) as total_latency
-    FROM request_response_log
+      sum(request_response_versioned.latency) as total_latency
+    FROM request_response_versioned
     WHERE (
       (${filterString})
     )

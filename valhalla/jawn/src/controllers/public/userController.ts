@@ -41,7 +41,7 @@ export class UserController extends Controller {
   > {
     const filters: FilterLeaf[] =
       requestBody.userIds?.map((userId) => ({
-        request_response_log: {
+        request_response_versioned: {
           user_id: {
             equals: userId,
           },
@@ -60,14 +60,14 @@ export class UserController extends Controller {
         left: filterListToTree(filters, "or"),
         right: {
           right: {
-            request_response_log: {
+            request_response_versioned: {
               request_created_at: {
                 gte: startTime,
               },
             },
           },
           left: {
-            request_response_log: {
+            request_response_versioned: {
               request_created_at: {
                 lte: endTime,
               },
@@ -92,8 +92,8 @@ export class UserController extends Controller {
       sum(prompt_tokens) as prompt_tokens, 
       sum(completion_tokens) as completion_tokens, 
       user_id,
-      ${clickhousePriceCalc("request_response_log")} as cost_usd
-    from request_response_log
+      ${clickhousePriceCalc("request_response_versioned")} as cost_usd
+    from request_response_versioned
     WHERE (
       ${filter.filter}
     )

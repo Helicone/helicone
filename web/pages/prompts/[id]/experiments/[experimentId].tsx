@@ -2,24 +2,25 @@ import { User } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
 
 import { ReactElement } from "react";
-import AuthLayout from "../../components/layout/authLayout";
-import PromptIdPage from "../../components/templates/prompts/id/promptIdPage";
-import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
+import AuthLayout from "../../../../components/layout/authLayout";
+import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
+import ExperimentIdPage from "../../../../components/templates/prompts/experiments/id/experimentIdPage";
 
 interface PlaygroundProps {
   user: User;
-  id: string;
+  experimentId: string;
+  promptId: string;
 }
 
-const Prompts = (props: PlaygroundProps) => {
-  const { user, id } = props;
+const Experiments = (props: PlaygroundProps) => {
+  const { user, experimentId, promptId } = props;
 
-  return <PromptIdPage id={id} />;
+  return <ExperimentIdPage id={experimentId} promptId={promptId} />;
 };
 
-export default Prompts;
+export default Experiments;
 
-Prompts.getLayout = function getLayout(page: ReactElement) {
+Experiments.getLayout = function getLayout(page: ReactElement) {
   return <AuthLayout>{page}</AuthLayout>;
 };
 
@@ -40,13 +41,15 @@ export const getServerSideProps = async (
     };
 
   // get the id from the query params
-  const id = context.params?.id as string;
+  const promptId = context.params?.id as string;
+  const experimentId = context.params?.experimentId as string;
 
   return {
     props: {
       initialSession: session,
       user: session.user,
-      id,
+      promptId,
+      experimentId,
     },
   };
 };

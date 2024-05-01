@@ -147,6 +147,10 @@ const whereKeyMappings: KeyMappings = {
     minor_version: "prompts_versions.minor_version",
     prompt_v2: "prompts_versions.prompt_v2",
   }),
+  experiment: easyKeyMappings<"experiment">({
+    id: "e.id",
+    prompt_v2: "pv.prompt_v2",
+  }),
   response: easyKeyMappings<"response">({
     body_completion:
       "(coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text",
@@ -187,6 +191,18 @@ const whereKeyMappings: KeyMappings = {
     node_id: "request_response_log.node_id",
     job_id: "request_response_log.job_id",
     threat: "request_response_log.threat",
+  }),
+  request_response_versioned: easyKeyMappings<"request_response_versioned">({
+    latency: "request_response_versioned.latency",
+    status: "request_response_versioned.status",
+    request_created_at: "request_response_versioned.request_created_at",
+    response_created_at: "request_response_versioned.response_created_at",
+    model: "request_response_versioned.model",
+    user_id: "request_response_versioned.user_id",
+    organization_id: "request_response_versioned.organization_id",
+    node_id: "request_response_versioned.node_id",
+    job_id: "request_response_versioned.job_id",
+    threat: "request_response_versioned.threat",
   }),
   users_view: easyKeyMappings<"request_response_log">({
     status: "r.status",
@@ -282,6 +298,7 @@ const havingKeyMappings: KeyMappings = {
   values: NOT_IMPLEMENTED,
   properties_table: NOT_IMPLEMENTED,
   request_response_log: NOT_IMPLEMENTED,
+  request_response_versioned: NOT_IMPLEMENTED,
   properties_v3: NOT_IMPLEMENTED,
   property_with_response_v1: NOT_IMPLEMENTED,
   job: NOT_IMPLEMENTED,
@@ -291,6 +308,7 @@ const havingKeyMappings: KeyMappings = {
   rate_limit_log: NOT_IMPLEMENTED,
   prompt_v2: NOT_IMPLEMENTED,
   prompts_versions: NOT_IMPLEMENTED,
+  experiment: NOT_IMPLEMENTED,
 };
 
 export function buildFilterLeaf(
@@ -499,7 +517,7 @@ export async function buildFilterWithAuthClickHouse(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
-    request_response_log: {
+    request_response_versioned: {
       organization_id: {
         equals: orgId,
       },

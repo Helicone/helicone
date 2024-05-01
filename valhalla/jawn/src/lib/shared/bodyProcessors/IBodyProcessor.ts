@@ -1,3 +1,4 @@
+import { Usage } from "../../handlers/HandlerContext";
 import { PromiseGenericResult } from "../result";
 
 export interface ParseInput {
@@ -10,13 +11,6 @@ export interface ParseInput {
 export type ParseOutput = {
   processedBody: any;
   usage?: Usage;
-};
-
-export type Usage = {
-  promptTokens?: number;
-  completionTokens?: number;
-  totalTokens?: number;
-  heliconeCalculated?: boolean;
 };
 
 export interface IBodyProcessor {

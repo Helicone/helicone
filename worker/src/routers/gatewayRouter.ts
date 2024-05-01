@@ -1,4 +1,4 @@
-import { Env } from "..";
+import { Env, Provider } from "..";
 import { enumerate } from "../lib/util/helpers";
 import { proxyForwarder } from "../lib/HeliconeProxyRequest/ProxyForwarder";
 import { RequestWrapper } from "../lib/RequestWrapper";
@@ -68,7 +68,7 @@ async function getProvider(
 ): Promise<
   Result<
     {
-      provider: string;
+      provider: Provider;
     },
     Response
   >
@@ -121,7 +121,7 @@ async function getProvider(
   });
 }
 
-function getProviderFromTargetUrl(targetBaseUrl: string | null): string {
+function getProviderFromTargetUrl(targetBaseUrl: string | null): Provider {
   if (!targetBaseUrl) {
     return "CUSTOM";
   }
@@ -134,7 +134,7 @@ function getProviderFromTargetUrl(targetBaseUrl: string | null): string {
     return provider.provider;
   }
 
-  return targetBaseUrlLowerCase;
+  return targetBaseUrlLowerCase as Provider;
 }
 
 const gatewayForwarder = async (

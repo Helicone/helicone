@@ -11,6 +11,5 @@ SELECT
     1,
     arrayMap(k, v -> (k, v), groupArray(property_key), groupArray(property_value)) AS properties_map
 FROM property_with_response_v1
-WHERE property_with_response_v1.request_created_at > now() - interval '60 days' AND  property_with_response_v1.request_created_at < now() - interval '30 days'
 GROUP BY 
     organization_id, user_id, request_created_at, status,  model,  request_id, latency, status, completion_tokens, prompt_tokens, model, threat, time_to_first_token, country_code, response_created_at, response_id, provider

@@ -223,7 +223,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   );
 
   // set the initial selected data on component load
+
   useEffect(() => {
+    console.log("HELLO");
     if (initialRequestId && selectedData === undefined) {
       const fetchRequest = async () => {
         const response = await jawn.POST("/v1/request/query", {
@@ -250,6 +252,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         // update below logic to work for single request
         if (result?.data?.[0] && !result.error) {
           const request = result.data[0];
+
           if (request?.signed_body_url) {
             try {
               const contentResponse = await fetch(request.signed_body_url);
@@ -441,7 +444,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       onSetAdvancedFiltersHandler([], null);
     }
   };
-
   return (
     <div>
       {!isCached && userId === undefined && (
@@ -476,7 +478,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           }
         />
       )}
-
       <div className="flex flex-col space-y-4">
         <ThemedTableV5
           defaultData={requests || []}

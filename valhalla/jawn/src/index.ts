@@ -2,7 +2,7 @@ require("dotenv").config({
   path: "./.env",
 });
 
-import express from "express";
+import express, { NextFunction } from "express";
 import swaggerUi from "swagger-ui-express";
 
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
@@ -14,6 +14,7 @@ import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
 import { tokenRouter } from "./lib/routers/tokenRouter";
+import { consume } from "./lib/clients/KafkaConsumer";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -35,6 +36,10 @@ const allowedOriginsEnv = {
 const allowedOrigins = allowedOriginsEnv[ENVIRONMENT];
 
 const app = express();
+
+if (process.env.KAFKA_ENABLED) {
+  consume();
+}
 
 app.get("/healthcheck", (req, res) => {
   res.json({
@@ -124,6 +129,23 @@ app.use((req, res, next) => {
 app.use(unAuthenticatedRouter);
 
 app.use(v1APIRouter);
+
+function setRouteTimeout(
+  req: express.Request,
+  res: express.Response,
+  next: NextFunction
+) {
+  const timeout = setTimeout(() => {
+    if (!res.headersSent) {
+      res.status(408).send("Request timed out");
+    }
+  }, 10000); // 10 seconds
+
+  res.on("finish", () => clearTimeout(timeout));
+  next();
+}
+
+app.use(setRouteTimeout);
 
 const server = app.listen(
   parseInt(process.env.PORT ?? "8585"),

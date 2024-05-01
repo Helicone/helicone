@@ -121,7 +121,7 @@ const useGetRequestCountClickhouse = (
         body: JSON.stringify({
           filter: {
             left: {
-              request_response_log: {
+              request_response_versioned: {
                 request_created_at: {
                   gte: startDateISO,
                 },
@@ -129,7 +129,7 @@ const useGetRequestCountClickhouse = (
             },
             operator: "and",
             right: {
-              request_response_log: {
+              request_response_versioned: {
                 request_created_at: {
                   lte: endDateISO,
                 },

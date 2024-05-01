@@ -1,6 +1,11 @@
-import { S3Client as AwsS3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client as AwsS3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { Result } from "../result";
+import { Result, err, ok } from "../result";
+import { compressData } from "../../../utils/helpers";
 
 export type RequestResponseBody = {
   request?: any;
@@ -26,6 +31,14 @@ export class S3Client {
       endpoint: endpoint ? endpoint : undefined,
       forcePathStyle: true,
     });
+  }
+
+  async getRawRequestResponseBody(
+    orgId: string,
+    requestId: string
+  ): Promise<Result<string, string>> {
+    const key = this.getRawRequestResponseKey(requestId, orgId);
+    return await this.getSignedUrl(key);
   }
 
   async getRequestResponseBodySignedUrl(
@@ -62,6 +75,48 @@ export class S3Client {
       return { data: null, error: error.message };
     }
   }
+
+  async store(key: string, value: string): Promise<Result<string, string>> {
+    try {
+      const compressedValue = await compressData(value);
+
+      let command: PutObjectCommand;
+      if (!compressedValue.data || compressedValue.error) {
+        // If compression fails, use the original value
+        command = new PutObjectCommand({
+          Bucket: this.bucketName,
+          Key: key,
+          Body: value,
+          ContentType: "application/json",
+        });
+      } else {
+        command = new PutObjectCommand({
+          Bucket: this.bucketName,
+          Key: key,
+          Body: compressedValue.data,
+          ContentEncoding: "gzip",
+          ContentType: "application/json",
+        });
+      }
+
+      const response = await this.awsClient.send(command);
+
+      if (!response || response.$metadata.httpStatusCode !== 200) {
+        return err(
+          `Failed to store data: ${response.$metadata.httpStatusCode}`
+        );
+      }
+
+      return ok(`Success`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      return { data: null, error: error?.message };
+    }
+  }
+
+  getRawRequestResponseKey = (requestId: string, orgId: string) => {
+    return `organizations/${orgId}/requests/${requestId}/raw_request_response_body`;
+  };
 
   getRequestResponseKey = (requestId: string, orgId: string) => {
     return `organizations/${orgId}/requests/${requestId}/request_response_body`;

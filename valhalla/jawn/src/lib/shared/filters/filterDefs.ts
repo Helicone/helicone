@@ -155,8 +155,24 @@ interface RequestResponseLogToOperators {
   threat: SingleKey<BooleanOperators>;
 }
 
+interface RequestResponseVersionedToOperators {
+  latency: SingleKey<NumberOperators>;
+  status: SingleKey<NumberOperators>;
+  request_created_at: SingleKey<TimestampOperatorsTyped>;
+  response_created_at: SingleKey<TimestampOperatorsTyped>;
+  model: SingleKey<TextOperators>;
+  user_id: SingleKey<TextOperators>;
+  organization_id: SingleKey<TextOperators>;
+  node_id: SingleKey<TextOperators>;
+  job_id: SingleKey<TextOperators>;
+  threat: SingleKey<BooleanOperators>;
+}
+
 export type FilterLeafRequestResponseLog =
   SingleKey<RequestResponseLogToOperators>;
+
+export type FilterLeafRequestResponseVersioned =
+  SingleKey<RequestResponseVersionedToOperators>;
 
 type PropertiesCopyV2ToOperators = {
   key: SingleKey<TextOperators>;
@@ -243,10 +259,12 @@ type PromptToOperators = {
 
 export type FilterLeafPrompt = SingleKey<PromptToOperators>;
 
-export type PromptInputTableFilters = {
-  prompt_v2: FilterLeafPrompt;
-  prompts_versions: FilterLeafPromptVersions;
+type ExperimentToOperators = {
+  id: SingleKey<TextOperators>;
+  prompt_v2: SingleKey<TextOperators>;
 };
+
+export type FilterLeafExperiment = SingleKey<ExperimentToOperators>;
 
 export type TablesAndViews = {
   user_metrics: FilterLeafUserMetrics;
@@ -255,9 +273,13 @@ export type TablesAndViews = {
   request: FilterLeafRequest;
   feedback: FilterLeafFeedback;
   properties_table: FilterLeafPropertiesTable;
+  prompt_v2: FilterLeafPrompt;
+  prompts_versions: FilterLeafPromptVersions;
+  experiment: FilterLeafExperiment;
 
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
+  request_response_versioned: FilterLeafRequestResponseVersioned;
   users_view: FilterLeafUserView;
   properties_v3: FilterLeafPropertiesV3;
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
@@ -272,7 +294,7 @@ export type TablesAndViews = {
   values: {
     [key: string]: SingleKey<TextOperators>;
   };
-} & PromptInputTableFilters;
+};
 
 export type FilterLeaf = SingleKey<TablesAndViews>;
 
@@ -308,17 +330,17 @@ export function timeFilterToFilterNode(
   filter: TimeFilter,
   table: keyof TablesAndViews
 ): FilterNode {
-  if (table === "request_response_log") {
+  if (table === "request_response_versioned") {
     return {
       left: {
-        request_response_log: {
+        request_response_versioned: {
           request_created_at: {
             gte: filter.start,
           },
         },
       },
       right: {
-        request_response_log: {
+        request_response_versioned: {
           request_created_at: {
             lte: filter.end,
           },

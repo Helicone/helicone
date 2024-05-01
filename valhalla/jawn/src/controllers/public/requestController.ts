@@ -27,7 +27,9 @@ export type RequestFilterBranch = {
   right: RequestFilterNode;
 };
 type RequestFilterNode =
-  | FilterLeafSubset<"feedback" | "request" | "response">
+  | FilterLeafSubset<
+      "feedback" | "request" | "response" | "properties" | "values"
+    >
   | RequestFilterBranch
   | "all";
 

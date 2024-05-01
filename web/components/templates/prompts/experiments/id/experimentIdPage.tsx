@@ -1,9 +1,4 @@
-import {
-  ArrowsPointingOutIcon,
-  ChevronLeftIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
-import { Tooltip } from "@mui/material";
+import { ArrowsPointingOutIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import {
   Table,
   TableBody,
@@ -12,188 +7,45 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@tremor/react";
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import ReactDiffViewer from "react-diff-viewer";
+import { useState } from "react";
 import { useExperiment } from "../../../../../services/hooks/prompts/experiments";
 import { clsx } from "../../../../shared/clsx";
 import LoadingAnimation from "../../../../shared/loadingAnimation";
 import ThemedModal from "../../../../shared/themed/themedModal";
 import ModelPill from "../../../requestsV2/modelPill";
+import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
+import { usePrompt } from "../../../../../services/hooks/prompts/prompts";
+import ArrayDiffViewer from "../../id/arrayDiffViewer";
 
 interface PromptIdPageProps {
   id: string;
+  promptId: string;
 }
 
-const PrettyInput = ({
-  keyName,
-  selectedProperties,
-}: {
-  keyName: string;
-  selectedProperties: Record<string, string> | undefined;
-}) => {
-  const getRenderText = () => {
-    if (selectedProperties) {
-      return selectedProperties[keyName] || "{{undefined}}";
-    } else {
-      return keyName;
-    }
-  };
-  const renderText = getRenderText();
-  const [open, setOpen] = useState(false);
-  const TEXT_LIMIT = 120;
-
-  return (
-    <>
-      <Tooltip title={keyName} placement="top">
-        {renderText.length > TEXT_LIMIT ? (
-          <button
-            onClick={() => setOpen(!open)}
-            className={clsx(
-              selectedProperties
-                ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
-                : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
-              "relative text-sm text-gray-900 dark:text-gray-100 border rounded-lg py-1 px-3 text-left"
-            )}
-            title={renderText}
-          >
-            <ArrowsPointingOutIcon className="h-4 w-4 text-sky-500 absolute right-2 top-1.5 transform" />
-            <p className="pr-8">{renderText.slice(0, TEXT_LIMIT)}...</p>
-          </button>
-        ) : (
-          <span
-            className={clsx(
-              selectedProperties
-                ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
-                : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
-              "inline-block border text-gray-900 dark:text-gray-100 rounded-lg py-1 px-3 text-sm"
-            )}
-          >
-            {renderText}
-          </span>
-        )}
-      </Tooltip>
-
-      <ThemedModal open={open} setOpen={setOpen}>
-        <div className="w-[66vw] h-full flex flex-col space-y-4">
-          <div className="flex items-center w-full justify-center">
-            <h3 className="text-2xl font-semibold">{keyName}</h3>
-            <button onClick={() => setOpen(false)} className="ml-auto">
-              <XMarkIcon className="h-6 w-6 text-gray-500" />
-            </button>
-          </div>
-
-          <div className="bg-white border-gray-300 dark:bg-black dark:border-gray-700 p-4 border rounded-lg flex flex-col space-y-4">
-            {selectedProperties?.[keyName]}
-          </div>
-        </div>
-      </ThemedModal>
-    </>
-  );
-};
-
-const AutoResizingTextarea = ({
-  text,
-  setText,
-}: {
-  text: string;
-  setText: (text: string) => void;
-}) => {
-  const textareaRef = useRef(null);
-
-  useEffect(() => {
-    const adjustHeight = () => {
-      if (textareaRef && textareaRef.current) {
-        const textarea = textareaRef.current as HTMLTextAreaElement;
-        textarea.style.height = "inherit"; // Reset height to recalculate
-        const computed = window.getComputedStyle(textareaRef.current);
-        // Calculate the height
-        const height =
-          textarea.scrollHeight +
-          parseInt(computed.borderTopWidth, 10) +
-          parseInt(computed.borderBottomWidth, 10);
-        textarea.style.height = `${height}px`;
-      }
-    };
-    adjustHeight();
-  }, [text]); // This effect runs when 'text' changes
-
-  return (
-    <textarea
-      ref={textareaRef}
-      className="text-sm leading-8 resize-none w-full border rounded-lg p-4"
-      value={text}
-      onChange={(e) => setText(e.target.value)}
-      style={{ overflow: "hidden" }}
-    />
-  );
-};
-
-export const RenderWithPrettyInputKeys = (props: {
-  text: string;
-
-  selectedProperties: Record<string, string> | undefined;
-}) => {
-  const { text, selectedProperties } = props;
-
-  // Function to replace matched patterns with JSX components
-  const replaceInputKeysWithComponents = (inputText: string) => {
-    if (typeof inputText !== "string") {
-      throw new Error("Input text must be a string");
-    }
-
-    // Regular expression to match the pattern
-    const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
-    const parts = [];
-    let lastIndex = 0;
-
-    // Use the regular expression to find and replace all occurrences
-    inputText.replace(regex, (match: any, keyName: string, offset: number) => {
-      // Push preceding text if any
-      if (offset > lastIndex) {
-        parts.push(inputText.substring(lastIndex, offset));
-      }
-
-      // Push the PrettyInput component for the current match
-      parts.push(
-        <PrettyInput
-          keyName={keyName}
-          key={offset}
-          selectedProperties={selectedProperties}
-        />
-      );
-
-      // Update lastIndex to the end of the current match
-      lastIndex = offset + match.length;
-
-      // This return is not used but is necessary for the replace function
-      return match;
-    });
-
-    // Add any remaining text after the last match
-    if (lastIndex < inputText.length) {
-      parts.push(inputText.substring(lastIndex));
-    }
-    return parts;
-  };
-
-  return (
-    <div className="text-sm leading-8">
-      {replaceInputKeysWithComponents(text)}
-    </div>
-  );
-};
-
 const ExperimentIdPage = (props: PromptIdPageProps) => {
-  const { id } = props;
+  const { id, promptId } = props;
   const { experiment, isLoading } = useExperiment(id);
+  const { prompt, isLoading: isPromptsLoading } = usePrompt(promptId);
+
   const [selectedObj, setSelectedObj] = useState<{
     key: string;
     value: string;
   }>();
   const [open, setOpen] = useState(false);
 
-  const runs = experiment?.datasetRuns;
+  const runs = experiment?.dataset?.rows.map((row) => {
+    return {
+      inputs: row.inputRecord?.inputs ?? {},
+      originResult: {
+        response: row.inputRecord?.response,
+      },
+      testResult: {
+        response: experiment?.hypotheses?.[0]?.runs?.find(
+          (run) => run.datasetRowId === row.rowId
+        )?.response,
+      },
+    };
+  });
 
   // get the keys from the first run
   const keys = runs?.[0]?.inputs
@@ -204,53 +56,68 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
     const TEXT_LIMIT = 80;
 
     return (
-      <>
-        <div className="flex flex-col space-y-1">
-          <p>{`{`}</p>
-          {keys.map((key, i) => {
-            const value = inputs[key];
+      <div className="flex flex-col space-y-1">
+        <p>{`{`}</p>
 
-            return (
-              <div key={i} className="flex space-x-2 pl-6">
-                <h3 className="text-sm font-semibold text-black">{key}:</h3>
-                {value.length > TEXT_LIMIT ? (
-                  // show a button with truncated text
+        {keys.map((key, i) => {
+          const value = inputs[key];
+
+          return (
+            <>
+              {value.length > TEXT_LIMIT ? (
+                // show a button with truncated text
+                <div key={i} className="flex flex-col pl-6 py-0.5">
+                  <h3 className="text-sm font-semibold text-black">{key}:</h3>
                   <button
                     onClick={() => {
                       setSelectedObj({ key, value });
                       setOpen(true);
                     }}
-                    className="flex space-x-2 text-left border-sky-500 bg-sky-100 border rounded-md p-2 relative"
+                    className="ml-4 space-x-2 text-left border-sky-500 bg-sky-100 border rounded-md p-2 relative"
                   >
                     <ArrowsPointingOutIcon className="h-4 w-4 text-sky-500 absolute top-2 right-2" />
-                    <pre className="text-sm text-black">
+                    <pre className="text-sm text-black truncate pr-8">
                       {value.slice(0, TEXT_LIMIT)}...
                     </pre>
                   </button>
-                ) : (
-                  <pre className="text-sm whitespace-pre-wrap text-black">
+                </div>
+              ) : (
+                <div key={i} className="flex space-x-2 pl-6 py-0.5">
+                  <h3 className="text-sm font-semibold text-black">{key}:</h3>
+                  <pre className="text-sm whitespace-pre-wrap break-words text-black truncate">
                     {value},
                   </pre>
-                )}
-              </div>
-            );
-          })}
-          <p>{`}`}</p>
-        </div>
-      </>
+                </div>
+              )}
+            </>
+          );
+        })}
+        <p>{`}`}</p>
+      </div>
     );
   };
 
   return (
     <>
       <div className="flex flex-col w-full space-y-4">
-        <Link
-          className="flex w-fit items-center text-gray-500 space-x-2 hover:text-gray-700"
-          href={"/prompts?tab=1"}
-        >
-          <ChevronLeftIcon className="h-4 w-4 inline" />
-          <span className="text-sm font-semibold">Experiments</span>
-        </Link>
+        <HcBreadcrumb
+          pages={[
+            {
+              href: "/prompts",
+              name: "Prompts",
+            },
+            {
+              href: `/prompts/${promptId}`,
+              name: isPromptsLoading
+                ? "Loading..."
+                : prompt?.user_defined_id || "",
+            },
+            {
+              href: `/prompts/${promptId}/experiments/${id}`,
+              name: experiment?.id || "",
+            },
+          ]}
+        />
         {isLoading ? (
           <div className="h-96 flex justify-center items-center w-full">
             <LoadingAnimation title="Loading Experiment Info" />
@@ -258,31 +125,32 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
         ) : (
           <div className="flex flex-col items-start space-y-4 w-full">
             <h1 className="font-semibold text-3xl text-black dark:text-white">
-              {experiment?.name}
+              {experiment?.id}
             </h1>
-            <div className="w-full flex flex-col space-y-8">
-              <div className="p-8 rounded-lg bg-white border border-gray-300 flex flex-col space-y-4">
-                <div className="grid grid-cols-4">
-                  <div className="col-span-2">
-                    <h2 className="text-md font-semibold">Original Prompt</h2>
-                  </div>
-                  <div className="col-span-2">
-                    <h2 className="text-md font-semibold">Experiment Prompt</h2>
-                  </div>
+            <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-black">
+              <div className="w-full flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
+                <div className="flex items-center space-x-2">
+                  <p className="text-sm text-gray-500">Diff Viewer</p>
                 </div>
-                <ReactDiffViewer
-                  oldValue={
-                    experiment?.originPrompt.heliconeTemplate.messages?.[0]
-                      ?.content
+              </div>
+              <div className="p-4">
+                <ArrayDiffViewer
+                  origin={
+                    (
+                      experiment?.hypotheses?.[0]?.parentPromptVersion
+                        ?.template as any
+                    ).messages
                   }
-                  newValue={
-                    experiment?.testPrompt.heliconeTemplate.messages?.[0]
-                      ?.content
+                  target={
+                    (
+                      experiment?.hypotheses?.[0]?.promptVersion
+                        ?.template as any
+                    ).messages
                   }
-                  splitView={true}
                 />
               </div>
-
+            </div>
+            <div className="w-full flex flex-col space-y-8">
               <Table className="bg-white border border-gray-300 rounded-lg p-4 w-full">
                 <TableHead className="border-b border-gray-300 w-full">
                   <TableRow>
@@ -299,25 +167,25 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                 </TableHead>
 
                 <TableBody>
-                  {experiment?.datasetRuns.map((run, i) => {
+                  {runs?.map((run, i) => {
                     return (
                       <TableRow key={i} className="w-full">
-                        <TableCell className="h-full items-start border-r border-gray-300">
+                        <TableCell className="h-full items-start border-r border-gray-300 max-w-xs">
                           {renderPrettyInputs(run.inputs)}
-                          {/* {JSON.stringify(run.inputs, undefined, 2)} */}
                         </TableCell>
                         <TableCell className="inline-flex h-full">
                           <div className="flex flex-col h-full w-full space-y-4">
                             <div className="w-full flex items-center gap-2">
                               <span
                                 className={clsx(
-                                  run.originResult.delay <= run.testResult.delay
+                                  (run.originResult.response?.delayMs ?? 0) <=
+                                    (run.testResult.response?.delayMs ?? 0)
                                     ? "bg-green-50 text-green-700 ring-green-200"
                                     : "bg-red-50 text-red-700 ring-red-200",
                                   `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
                                 )}
                               >
-                                {run.originResult.delay} ms
+                                {run.originResult.response?.delayMs} ms
                               </span>
                               <span
                                 className={clsx(
@@ -325,30 +193,37 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                   `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
                                 )}
                               >
-                                {
-                                  run.originResult.responseBody?.usage
-                                    .total_tokens
-                                }{" "}
-                                total tokens
+                                {run.originResult.response?.promptTokens ?? 0}{" "}
+                                input tokens
+                              </span>
+                              <span
+                                className={clsx(
+                                  "bg-gray-50 text-gray-700 ring-gray-200",
+                                  `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+                                )}
+                              >
+                                {run.originResult.response?.completionTokens ??
+                                  0}{" "}
+                                output tokens
                               </span>
                               <ModelPill
-                                model={run.originResult.responseBody?.model}
+                                model={run.originResult.response?.model ?? ""}
                               />
                             </div>
                             <pre className="whitespace-pre-wrap text-sm w-full h-full text-black">
                               {
-                                run.originResult.responseBody?.choices?.[0]
-                                  .message.content
+                                (run.originResult.response?.body as any)
+                                  ?.choices?.[0].message.content
                               }
                             </pre>
                           </div>
                         </TableCell>
 
                         <TableCell className="h-full border-l border-gray-300">
-                          {run.testResult.responseBody?.error ? (
+                          {(run.testResult.response?.body as any)?.error ? (
                             <pre className="whitespace-pre-wrap bg-red-50 text-red-700 ring-red-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset">
                               {JSON.stringify(
-                                run.testResult.responseBody.error,
+                                (run.testResult.response?.body as any)?.error,
                                 undefined,
                                 2
                               )}
@@ -358,14 +233,14 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                               <div className="w-full flex items-center gap-2">
                                 <span
                                   className={clsx(
-                                    run.originResult.delay >=
-                                      run.testResult.delay
+                                    (run.originResult.response?.delayMs ?? 0) >=
+                                      (run.testResult.response?.delayMs ?? 0)
                                       ? "bg-green-50 text-green-700 ring-green-200"
                                       : "bg-red-50 text-red-700 ring-red-200",
                                     `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
                                   )}
                                 >
-                                  {run.testResult.delay} ms
+                                  {run.testResult.response?.delayMs ?? 0} ms
                                 </span>
                                 <span
                                   className={clsx(
@@ -373,20 +248,27 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                     `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
                                   )}
                                 >
-                                  {
-                                    run.testResult.responseBody?.usage
-                                      ?.total_tokens
-                                  }{" "}
+                                  {run.testResult.response?.completionTokens}{" "}
+                                  input tokens
+                                </span>
+
+                                <span
+                                  className={clsx(
+                                    "bg-gray-50 text-gray-700 ring-gray-200",
+                                    `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+                                  )}
+                                >
+                                  {run.testResult.response?.promptTokens} prompt
                                   tokens
                                 </span>
                                 <ModelPill
-                                  model={run.testResult.responseBody?.model}
+                                  model={run.testResult.response?.model ?? ""}
                                 />
                               </div>
                               <pre className="whitespace-pre-wrap text-sm overflow-auto h-full text-black">
                                 {
-                                  run.testResult.responseBody?.choices?.[0]
-                                    .message.content
+                                  (run.testResult.response?.body as any) // TODO: any
+                                    ?.choices?.[0].message.content
                                 }
                               </pre>
                             </div>
