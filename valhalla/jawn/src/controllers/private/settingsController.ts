@@ -13,7 +13,11 @@ export class SettingController extends Controller {
     useAzureForExperiment: boolean;
   }> {
     return {
-      useAzureForExperiment: !!process.env.AZURE_BASE_URL,
+      useAzureForExperiment: !!(
+        process.env.AZURE_BASE_URL &&
+        process.env.AZURE_API_VERSION &&
+        process.env.AZURE_DEPLOYMENT_NAME
+      ),
     };
   }
 }
