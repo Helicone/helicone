@@ -18,7 +18,7 @@ export async function getTotalThreats(
     {
       org_id,
       filter: {
-        left: timeFilterToFilterNode(timeFilter, "request_response_log"),
+        left: timeFilterToFilterNode(timeFilter, "request_response_versioned"),
         right: filter,
         operator: "and",
       },
@@ -27,8 +27,8 @@ export async function getTotalThreats(
   );
   const query = `
     SELECT 
-        count(request_response_log.threat) AS threats
-    FROM request_response_log
+        count(request_response_versioned.threat) AS threats
+    FROM request_response_versioned
     WHERE (
         ${filterString}
     )

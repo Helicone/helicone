@@ -18,14 +18,14 @@ const generateSubquery = (
   return `
     (
       SELECT count(*) as count,
-      ${clickhousePriceCalc("request_response_log")} as cost
-      FROM request_response_log
+      ${clickhousePriceCalc("request_response_versioned")} as cost
+      FROM request_response_versioned
       WHERE (
-        request_response_log.request_created_at >= now() - INTERVAL {${secondsVal} : Int32} SECOND
+        request_response_versioned.request_created_at >= now() - INTERVAL {${secondsVal} : Int32} SECOND
       ) AND (
-        request_response_log.organization_id = {${orgIdVal} : String}
+        request_response_versioned.organization_id = {${orgIdVal} : String}
       ) AND (
-        request_response_log.proxy_key_id = {${proxyKeyIdVal} : String}
+        request_response_versioned.proxy_key_id = {${proxyKeyIdVal} : String}
       )
     ) as x_${index}
   `;

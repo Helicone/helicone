@@ -25,7 +25,7 @@ export const useUserRequests = (
 
   const userFilters = filterUIToFilterLeafs(filterMap, uiFilters).concat([
     {
-      request_response_log: {
+      request_response_versioned: {
         user_id: {
           equals: userId,
         },
