@@ -7,7 +7,6 @@ import {
 import ReactDiffViewer from "react-diff-viewer";
 import RoleButton from "../../playground/new/roleButton";
 import { ArrowRightIcon, EyeIcon } from "@heroicons/react/20/solid";
-import { ArrowRightCircleIcon } from "@heroicons/react/24/outline";
 
 interface ArrayDiffViewerProps {
   origin: any[];

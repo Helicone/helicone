@@ -8,7 +8,6 @@ import {
   TableRow,
 } from "@tremor/react";
 import { useState } from "react";
-import ReactDiffViewer from "react-diff-viewer";
 import { useExperiment } from "../../../../../services/hooks/prompts/experiments";
 import { clsx } from "../../../../shared/clsx";
 import LoadingAnimation from "../../../../shared/loadingAnimation";

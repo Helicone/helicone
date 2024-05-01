@@ -16,7 +16,6 @@ import { PLAYGROUND_MODELS } from "../../playground/playgroundPage";
 import ProviderKeyList from "../../enterprise/portal/id/providerKeyList";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { Message } from "../../requests/chat";
-import ReactDiffViewer from "react-diff-viewer";
 import ModelPill from "../../requestsV2/modelPill";
 import SelectRandomDataset from "./selectRandomDataset";
 import useNotification from "../../../shared/notification/useNotification";
@@ -27,10 +26,7 @@ import ThemedModal from "../../../shared/themed/themedModal";
 import { Tooltip } from "@mui/material";
 import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
 import { useJawnSettings } from "../../../../services/hooks/useJawnSettings";
-import {
-  ChatCompletionContentPart,
-  ChatCompletionMessage,
-} from "openai/resources";
+
 import ArrayDiffViewer from "./arrayDiffViewer";
 
 interface PromptIdPageProps {
