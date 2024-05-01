@@ -5,23 +5,28 @@ import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
 export class AuthenticationHandler extends AbstractLogHandler {
-  async handle(context: HandlerContext): Promise<void> {
-    const authResult = await this.authenticateEntry(context);
-    if (authResult.error || !authResult.data) {
-      console.log(`Authenticated Failed: ${authResult.error}`);
-      return;
+  async handle(context: HandlerContext): PromiseGenericResult<string> {
+    console.log(`AuthenticationHandler: ${context.message.log.request.id}`);
+    try {
+      const authResult = await this.authenticateEntry(context);
+      if (authResult.error || !authResult.data) {
+        return err(`Authentication failed: ${authResult.error}`);
+      }
+
+      const orgResult = await this.getOrganization(authResult.data);
+      if (orgResult.error || !orgResult.data) {
+        return err(`Organization not found: ${orgResult.error}`);
+      }
+
+      context.authParams = authResult.data;
+      context.orgParams = orgResult.data;
+
+      return await super.handle(context);
+    } catch (error) {
+      return err(
+        `Error processing authentication: ${error}, Context: ${this.constructor.name}`
+      );
     }
-
-    const orgResult = await this.getOrganization(authResult.data);
-    if (orgResult.error || !orgResult.data) {
-      console.log(`Organization not found: ${orgResult.error}`);
-      return;
-    }
-
-    context.authParams = authResult.data;
-    context.orgParams = orgResult.data;
-
-    await super.handle(context);
   }
 
   private async authenticateEntry(

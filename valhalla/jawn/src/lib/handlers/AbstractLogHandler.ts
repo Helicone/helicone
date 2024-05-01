@@ -1,10 +1,9 @@
-import { PromiseGenericResult, err } from "../shared/result";
+import { PromiseGenericResult, err, ok } from "../shared/result";
 import { HandlerContext } from "./HandlerContext";
 
 interface LogHandler {
   setNext(handler: LogHandler): LogHandler;
-  handle(entry: HandlerContext): Promise<void>;
-  handleResults<T>(): PromiseGenericResult<T>;
+  handle(entry: HandlerContext): PromiseGenericResult<string>;
 }
 
 export abstract class AbstractLogHandler implements LogHandler {
@@ -15,13 +14,11 @@ export abstract class AbstractLogHandler implements LogHandler {
     return handler;
   }
 
-  public async handle(context: HandlerContext): Promise<void> {
+  public async handle(context: HandlerContext): PromiseGenericResult<string> {
     if (this.nextHandler) {
       return this.nextHandler.handle(context);
     }
-  }
 
-  public async handleResults<T>(): PromiseGenericResult<T> {
-    return err("Not implemented");
+    return ok("Chain complete.");
   }
 }
