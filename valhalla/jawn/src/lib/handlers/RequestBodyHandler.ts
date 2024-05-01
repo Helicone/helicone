@@ -1,26 +1,33 @@
 import { tryParse } from "../../utils/helpers";
-import { GenericResult, ok } from "../shared/result";
+import { GenericResult, PromiseGenericResult, err, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
 export class RequestBodyHandler extends AbstractLogHandler {
-  async handle(context: HandlerContext): Promise<void> {
-    const processedBody = this.processRequestBody(context);
+  async handle(context: HandlerContext): PromiseGenericResult<string> {
+    console.log(`RequestBodyHandler: ${context.message.log.request.id}`);
+    try {
+      const processedBody = this.processRequestBody(context);
 
-    if (processedBody.error || !processedBody.data) {
-      console.error(`Error processing request body: ${processedBody.error}`);
-      return;
+      if (processedBody.error || !processedBody.data) {
+        return err(`Error processing request body: ${processedBody.error}`);
+      }
+
+      context.processedLog.request.body = processedBody.data;
+
+      return await super.handle(context);
+    } catch (error: any) {
+      return err(
+        `Error processing request body: ${error}, Context: ${this.constructor.name}`
+      );
     }
-
-    context.processedLog.request.body = processedBody.data;
-
-    return await super.handle(context);
   }
 
   processRequestBody(context: HandlerContext): GenericResult<any> {
     const log = context.message.log;
-    let requestBody = log.request.body as any;
-    requestBody = requestBody.replace(/\\u0000/g, ""); // Remove unsupported null character in JSONB
+    let requestBody = context.rawLog.rawRequestBody;
+
+    requestBody = this.cleanRequestBody(requestBody);
     requestBody = tryParse(requestBody, "request body");
     requestBody = context.message.heliconeMeta.omitRequestLog
       ? {
@@ -32,6 +39,11 @@ export class RequestBodyHandler extends AbstractLogHandler {
     requestBody = this.unsupportedImage(requestBody);
 
     return ok(requestBody);
+  }
+
+  cleanRequestBody(requestBody: any): string {
+    const requestBodyString = JSON.stringify(requestBody);
+    return requestBodyString.replace(/\\u0000/g, "");
   }
 
   // Replaces all the image_url that is not a url or not { url: url }  with

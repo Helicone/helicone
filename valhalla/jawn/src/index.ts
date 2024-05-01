@@ -14,6 +14,7 @@ import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
 import { tokenRouter } from "./lib/routers/tokenRouter";
+import { consume } from "./lib/clients/KafkaConsumer";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -35,6 +36,10 @@ const allowedOriginsEnv = {
 const allowedOrigins = allowedOriginsEnv[ENVIRONMENT];
 
 const app = express();
+
+if (process.env.KAFKA_ENABLED) {
+  consume();
+}
 
 app.get("/healthcheck", (req, res) => {
   res.json({
