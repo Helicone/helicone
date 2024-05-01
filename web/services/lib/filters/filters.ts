@@ -190,7 +190,7 @@ const whereKeyMappings: KeyMappings = {
     job_id: "request_response_versioned.job_id",
     threat: "request_response_versioned.threat",
   }),
-  users_view: easyKeyMappings<"request_response_log">({
+  users_view: easyKeyMappings<"request_response_versioned">({
     status: "r.status",
     user_id: "r.user_id",
   }),
