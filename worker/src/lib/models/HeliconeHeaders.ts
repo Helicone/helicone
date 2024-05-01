@@ -266,6 +266,12 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         )
         .map(([key, value]) => [key.substring(propTag.length), value])
     );
+
+    heliconeHeaders["Helicone-Sent-To-Posthog"] = this.headers.get(
+      "Helicone-Posthog-Key"
+    )
+      ? "true"
+      : "false";
     return heliconeHeaders;
   }
 }
