@@ -343,6 +343,7 @@ Json: JsonObject;
       user_defined_id: string;
       description: string;
       pretty_name: string;
+      created_at: string;
       /** Format: double */
       major_version: number;
     };
