@@ -60,7 +60,7 @@ export class RequestResponseManager {
     assets,
   }: RequestResponseContent): Promise<Result<string, string>> {
     // If image model, store images in S3
-    if (model && isImageModel(model) && assets?.size > 0) {
+    if (assets?.size > 0) {
       await this.storeRequestResponseImage({
         organizationId,
         requestId,
