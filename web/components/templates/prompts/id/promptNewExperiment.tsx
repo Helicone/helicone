@@ -88,10 +88,6 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
     (prompt) => prompt.minor_version === 0
   );
 
-  // find the latest version, which is the first element in the sorted array
-  const latestVersion = sortedPrompts?.[0];
-
-  // const [datasets, setDatasets] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -141,9 +137,13 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                 );
               })
               .map((prompt, index) => {
-                const template = JSON.parse(
+                let template = JSON.parse(
                   JSON.stringify(prompt.helicone_template)
                 ).messages[0].content;
+
+                if (!(typeof template === "string")) {
+                  template = JSON.stringify(template);
+                }
                 return (
                   <>
                     <li
@@ -434,6 +434,8 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
             oldValue={JSON.stringify(template, null, 4)}
             newValue={JSON.stringify(currentChat, null, 4)}
             splitView={true}
+            showDiffOnly={true}
+            extraLinesSurroundingDiff={3}
           />
         </div>
 

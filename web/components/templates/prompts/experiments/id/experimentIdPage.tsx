@@ -161,10 +161,11 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                       ) ?? ""
                     }
                     splitView={true}
+                    showDiffOnly={true}
+                    extraLinesSurroundingDiff={1}
                   />
                 )}
               </div>
-
               <Table className="bg-white border border-gray-300 rounded-lg p-4 w-full">
                 <TableHead className="border-b border-gray-300 w-full">
                   <TableRow>
@@ -281,7 +282,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                               </div>
                               <pre className="whitespace-pre-wrap text-sm overflow-auto h-full text-black">
                                 {
-                                  (run.testResult.response?.body as any)
+                                  (run.testResult.response?.body as any) // TODO: any
                                     ?.choices?.[0].message.content
                                 }
                               </pre>
