@@ -38,26 +38,26 @@ export async function getModelUsageOverTime(): Promise<
 > {
   const weeklyActiveUsersQuery = `
   SELECT date_trunc('week'::text, request_created_at) AS time_step,
-    count(DISTINCT request_response_log.organization_id) AS user_count_step,
-    count(request_response_log.request_id) AS request_count_step
-  FROM request_response_log
+    count(DISTINCT request_response_versioned.organization_id) AS user_count_step,
+    count(request_response_versioned.request_id) AS request_count_step
+  FROM request_response_versioned
   GROUP BY (date_trunc('week'::text, request_created_at))
   ORDER BY (date_trunc('week'::text, request_created_at)) DESC;
 `;
   const monthlyActiveUsersQuery = `
 SELECT date_trunc('month'::text, request_created_at) AS time_step,
-  count(DISTINCT request_response_log.organization_id) AS user_count_step,
-  count(request_response_log.request_id) AS request_count_step
-FROM request_response_log
+  count(DISTINCT request_response_versioned.organization_id) AS user_count_step,
+  count(request_response_versioned.request_id) AS request_count_step
+FROM request_response_versioned
 GROUP BY (date_trunc('month'::text, request_created_at))
 ORDER BY (date_trunc('month'::text, request_created_at)) DESC;
 `;
 
   const dailyActiveUsersQuery = `
 SELECT date_trunc('day'::text, request_created_at) AS time_step,
-  count(DISTINCT request_response_log.organization_id) AS user_count_step,
-  count(request_response_log.request_id) AS request_count_step
-FROM request_response_log
+  count(DISTINCT request_response_versioned.organization_id) AS user_count_step,
+  count(request_response_versioned.request_id) AS request_count_step
+FROM request_response_versioned
 GROUP BY (date_trunc('day'::text, request_created_at))
 ORDER BY (date_trunc('day'::text, request_created_at)) DESC;
 `;

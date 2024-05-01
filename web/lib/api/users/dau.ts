@@ -12,9 +12,9 @@ export async function getDailyActiveUsers(org_id: string, filter: FilterNode) {
 
   const query = `
 SELECT date_trunc('day'::text, request_created_at) AS time_step,
-  count(DISTINCT request_response_log.user_id) AS user_count_step,
-  count(request_response_log.request_id) AS request_count_step
-FROM request_response_log
+  count(DISTINCT request_response_versioned.user_id) AS user_count_step,
+  count(request_response_versioned.request_id) AS request_count_step
+FROM request_response_versioned
 WHERE (${builtFilter.filter})
 GROUP BY (date_trunc('day'::text, request_created_at))
 ORDER BY (date_trunc('day'::text, request_created_at)) DESC;

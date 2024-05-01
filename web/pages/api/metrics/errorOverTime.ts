@@ -32,7 +32,7 @@ async function handler(
         left: userFilters,
         operator: "and",
         right: {
-          request_response_log: {
+          request_response_versioned: {
             status: {
               "not-equals": 200,
             },
