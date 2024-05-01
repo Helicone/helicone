@@ -1,5 +1,5 @@
 import { BatchPayload } from "../handlers/LoggingHandler";
-import { deepCompare } from "../../utils/helpers";
+import { deepCompare, stringToNumberHash } from "../../utils/helpers";
 import pgPromise from "pg-promise";
 import { PromptRecord } from "../handlers/HandlerContext";
 import { PromiseGenericResult, ok, err } from "../shared/result";
@@ -102,9 +102,11 @@ export class LogStore {
 
         for (const promptRecord of payload.prompts) {
           // acquire an exclusive lock on the prompt record for the duration of the transaction
-          // await t.none("SELECT pg_advisory_xact_lock($1)", [
-          //   [promptRecord.promptId],
-          // ]);
+          await t.none(
+            "SELECT pg_advisory_xact_lock($1)",
+            stringToNumberHash(promptRecord.promptId)
+          );
+
           await this.processPrompt(promptRecord, t);
         }
       });
@@ -187,12 +189,12 @@ export class LogStore {
     if (versionId && Object.keys(heliconeTemplate.inputs).length > 0) {
       await t.none(
         `INSERT INTO prompt_input_keys (key, prompt_version, created_at)
-         SELECT unnest($1::text[]), $2, unnest($3::timestamp[])
+         SELECT unnest($1::text[]), $2, $3
          ON CONFLICT (key, prompt_version) DO NOTHING`,
         [
-          `{${Object.keys(heliconeTemplate.inputs).join(",")}}`, // Properly formatted text array
+          `{${Object.keys(heliconeTemplate.inputs).join(",")}}`,
           versionId,
-          `{${newPromptRecord.createdAt.toISOString()}}`, // Properly formatted timestamp array
+          newPromptRecord.createdAt.toISOString(),
         ]
       );
 
@@ -204,7 +206,7 @@ export class LogStore {
           JSON.stringify(heliconeTemplate.inputs),
           requestId,
           versionId,
-          newPromptRecord.createdAt,
+          newPromptRecord.createdAt.toISOString(),
         ]
       );
     }

@@ -3,6 +3,7 @@ import {
   getTokenCountGPT3,
 } from "../lib/tokens/tokenCounter";
 import { Provider } from "../models/models";
+import crypto from "crypto";
 
 export function tryParse(text: string, errorMsg?: string): any {
   try {
@@ -43,4 +44,15 @@ export function deepCompare(a: any, b: any): boolean {
   }
 
   return false;
+}
+
+export function stringToNumberHash(str: string): number {
+  const hash = crypto.createHash("sha256");
+  hash.update(str);
+
+  const hexHash = hash.digest("hex");
+
+  const integer = parseInt(hexHash.substring(0, 16), 16);
+
+  return integer;
 }

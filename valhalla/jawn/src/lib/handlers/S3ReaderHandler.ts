@@ -14,12 +14,12 @@ export class S3ReaderHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
     console.log(`S3ReaderHandler: ${context.message.log.request.id}`);
     try {
-      if (!context.authParams?.organizationId) {
-        return err("Organization ID not found in auth params");
+      if (!context.orgParams?.id) {
+        return err("Organization ID not found in org params");
       }
 
       const signedUrl = await this.s3Client.getRawRequestResponseBody(
-        context.authParams?.organizationId,
+        context.orgParams.id,
         context.message.log.request.id
       );
 
@@ -59,7 +59,6 @@ export class S3ReaderHandler extends AbstractLogHandler {
         response: JSON.stringify(response),
       });
     } catch (error: any) {
-      console.error(`Error fetching content from S3: ${error}`);
       return err(`Error fetching content from S3: ${error}`);
     }
   }
