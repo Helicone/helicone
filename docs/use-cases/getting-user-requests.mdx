@@ -1,0 +1,54 @@
+---
+title: "User requests"
+description: "Get all of the requests made by a user"
+---
+
+![](/images/use-cases/request-filter.png)
+
+Navigating to our [request API page](/rest/request/post-v1requestquery) you can build a request with any filter.
+
+The the following example we are getting all the requests where user_id is equal to abc@email.com
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/request/query \
+  --header 'Content-Type: application/json' \
+  --header 'authorization: Bearer sk-helicone-6hu2kbq-yoiuiry-qtc2hsa-rtif2pi' \
+  --data '{
+  "filter": {
+    "request": {
+      "user_id": {
+        "equals": "abc@email.com"
+      }
+    }
+  }
+}'
+```
+
+Here you can structure your query to add any number of filters. Please note inorder for you to add multiple filters you will need to change the filter to a branch and nest the ANDs/ORs as an abstract syntax tree.
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/request/query \
+  --header 'Content-Type: application/json' \
+  --header 'authorization: Bearer sk-helicone-6hu2kbq-yoiuiry-qtc2hsa-rtif2pi' \
+  --data '{
+  "filter": {
+    "operator": "and",
+    "right": {
+      "request": {
+        "model": {
+          "contains": "gpt-4"
+        }
+      }
+    },
+    "left": {
+      "request": {
+        "user_id": {
+          "equals": "abc@email.com"
+        }
+      }
+    }
+  }
+}'
+```
