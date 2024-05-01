@@ -62,8 +62,9 @@ export class KafkaProducer {
     const p = this.kafka.producer();
 
     let attempts = 0;
-    const maxAttempts = 1;
-    const timeout = 1000; // Time in milliseconds between retries
+    const maxAttempts = 3;
+    const timeout = 1000;
+
     while (attempts < maxAttempts) {
       try {
         const message = JSON.stringify({
@@ -74,15 +75,14 @@ export class KafkaProducer {
           key: msg.log.request.id,
         });
 
-        console.log(JSON.stringify(res));
-        return res; // Exit function after a successful fetch
+        return res;
       } catch (error: any) {
         console.log(`Attempt ${attempts + 1} failed: ${error.message}`);
         attempts++;
         if (attempts < maxAttempts) {
           await new Promise((resolve) => setTimeout(resolve, timeout));
         } else {
-          throw error; // Rethrow the last error after all attempts fail
+          throw error;
         }
       }
     }
