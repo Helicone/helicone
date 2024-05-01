@@ -25,6 +25,8 @@ const useExperiments = (
       });
     },
     refetchOnWindowFocus: false,
+    // refetch every 5 seconds
+    refetchInterval: 5_000,
   });
 
   const experiments = data?.data?.data;

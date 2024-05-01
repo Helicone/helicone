@@ -46,6 +46,7 @@ export class PromptManager extends BaseManager {
         (SELECT minor_version + 1
          FROM prompts_versions pv1
          WHERE pv1.major_version = ppv.major_version
+         AND pv1.prompt_v2 = ppv.prompt_v2
          ORDER BY pv1.major_version DESC, pv1.minor_version DESC
          LIMIT 1)
     FROM parent_prompt_version ppv

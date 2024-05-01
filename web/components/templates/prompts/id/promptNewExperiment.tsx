@@ -88,10 +88,6 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
     (prompt) => prompt.minor_version === 0
   );
 
-  // find the latest version, which is the first element in the sorted array
-  const latestVersion = sortedPrompts?.[0];
-
-  // const [datasets, setDatasets] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -170,6 +166,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                         onChange={(e) => {
                           const isChecked = e.target.checked;
                           if (isChecked) {
+                            setSelectedModel(prompt.model);
                             setSelectedPrompt(prompt);
                           } else {
                             setSelectedPrompt(undefined);
@@ -339,7 +336,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                 <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
                   Model
                 </label>
-                <div className="flex w-full max-w-xs">
+                <div className="flex w-full max-w-xs" key={selectedModel}>
                   <Select
                     placeholder="Select a model"
                     value={selectedModel}
@@ -437,6 +434,8 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
             oldValue={JSON.stringify(template, null, 4)}
             newValue={JSON.stringify(currentChat, null, 4)}
             splitView={true}
+            showDiffOnly={true}
+            extraLinesSurroundingDiff={3}
           />
         </div>
 

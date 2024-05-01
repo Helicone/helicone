@@ -76,7 +76,7 @@ export const usePrompt = (id: string) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["prompt", jawn, id],
     queryFn: async (query) => {
-      const jawn = query.queryKey[1] as ReturnType<typeof useJawnClient>;
+      const jawn = query.queryKey[1] as ReturnType<typeof useJawnClient>; // code smelly
       const id = query.queryKey[2] as string;
 
       return jawn.POST("/v1/prompt/{promptId}/query", {
