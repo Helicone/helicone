@@ -82,15 +82,13 @@ export class LoggingHandler extends AbstractLogHandler {
         );
 
       if (result.error) {
-        console.error("Failed to log to Clickhouse:", result.error);
         return err(`Error inserting request response logs: ${result.error}`);
       }
 
       return ok("All logs inserted successfully.");
     } catch (error: any) {
-      console.error("Failed to log to Clickhouse:", error);
       return err(
-        `Unexpected error during logging: ${
+        `Unexpected error during logging to Clickhouse: ${
           error.message ?? "No error message provided"
         }`
       );
