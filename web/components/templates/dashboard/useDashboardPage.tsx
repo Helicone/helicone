@@ -77,15 +77,7 @@ export const useDashboardPage = ({
   timeZoneDifference,
   dbIncrement,
 }: DashboardPageData) => {
-  const {
-    properties,
-    isLoading: isPropertiesLoading,
-    propertyFilters,
-    searchPropertyFilters,
-  } = useGetProperties();
-  const filterMap = (
-    DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]
-  ).concat(propertyFilters);
+  const filterMap = DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[];
 
   const { isLoading: isModelsLoading, models } = useModels(timeFilter, 5);
 
@@ -274,8 +266,7 @@ export const useDashboardPage = ({
 
   const isAnyLoading =
     Object.values(overTimeData).some(isLoading) ||
-    Object.values(metrics).some(isLoading) ||
-    isPropertiesLoading;
+    Object.values(metrics).some(isLoading);
 
   return {
     filterMap,
@@ -292,7 +283,5 @@ export const useDashboardPage = ({
     },
     models,
     isModelsLoading,
-    searchPropertyFilters,
-    properties,
   };
 };

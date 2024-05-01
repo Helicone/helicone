@@ -14,7 +14,6 @@ async function handler({
   supabaseClient,
   userData: { orgId },
 }: HandlerWrapperOptions<Result<number, string>>) {
-  console.log("body", req.body);
 
   const { filter, organization_id } = req.body as {
     filter: FilterNode;
@@ -31,8 +30,6 @@ async function handler({
     res.status(400).json({ error: "Invalid org", data: null });
     return;
   }
-
-  console.log("filter123", filter);
 
   const count = await getRequestCountClickhouse(org[0].id, filter);
   res.status(count.error === null ? 200 : 500).json(count);
