@@ -28,6 +28,17 @@ export function consolidateTextFields(responseBody: any[]): any {
         if (acc.choices.length === 0 && cur.choices?.length !== 0) {
           acc.choices.push(...cur.choices.slice(acc.choices.length));
         }
+        if ("model" in cur && "model" in acc) {
+          if (!acc.model) {
+            acc.model = cur.model;
+          }
+        }
+
+        if ("id" in cur && "id" in acc) {
+          if (!acc.id) {
+            acc.id = cur.id;
+          }
+        }
         return {
           ...acc,
           choices: acc.choices.map((c: any, i: number) => {
