@@ -10,7 +10,7 @@ import {
 import { clsx } from "../clsx";
 
 type ColumnConfig<T> = {
-  key: keyof T; // Ensures that `key` is a valid property of T
+  key: keyof T | undefined; // Ensures that `key` is a valid property of T
   header: string;
   render: (item: T) => React.ReactNode; // Type-safe render function
 };

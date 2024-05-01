@@ -33,6 +33,7 @@ import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import ThemedTabs from "../../shared/themed/themedTabs";
 import ThemedModal from "../../shared/themed/themedModal";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
+import PromptDelete from "./promptDelete";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -41,7 +42,7 @@ interface PromptsPageProps {
 const PromptsPage = (props: PromptsPageProps) => {
   const { defaultIndex } = props;
 
-  const { prompts } = usePrompts();
+  const { prompts, isLoading, refetch } = usePrompts();
 
   const [view, setView] = useLocalStorage<"Card" | "Table">(
     "prompt-view",
@@ -199,6 +200,19 @@ const chatCompletion = await openai.chat.completions.create(
                         <div className="text-gray-500">
                           {prompt.major_version}
                         </div>
+                      ),
+                    },
+                    {
+                      key: undefined,
+                      header: "",
+                      render: (prompt) => (
+                        <PromptDelete
+                          promptId={prompt.id}
+                          promptName={prompt.user_defined_id}
+                          onSuccess={() => {
+                            refetch();
+                          }}
+                        />
                       ),
                     },
                   ]}

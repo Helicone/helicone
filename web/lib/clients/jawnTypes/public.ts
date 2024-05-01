@@ -27,6 +27,9 @@ export interface paths {
   "/v1/prompt/{promptId}/query": {
     post: operations["GetPrompt"];
   };
+  "/v1/prompt/{promptId}": {
+    delete: operations["DeletePrompt"];
+  };
   "/v1/prompt/version/{promptVersionId}/subversion": {
     post: operations["CreateSubversion"];
   };
@@ -725,6 +728,19 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Result_PromptResult.string_"];
         };
+      };
+    };
+  };
+  DeletePrompt: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
       };
     };
   };
