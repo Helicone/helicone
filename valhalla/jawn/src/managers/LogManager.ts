@@ -9,8 +9,12 @@ import { LogStore } from "../lib/stores/LogStore";
 import { RequestResponseStore } from "../lib/stores/RequestResponseStore";
 import { ClickhouseClientWrapper } from "../lib/db/ClickhouseWrapper";
 import { PromptHandler } from "../lib/handlers/PromptHandler";
+import { PostHogHandler } from "../lib/handlers/PostHogHandler";
+import { S3Client } from "../lib/shared/db/s3Client";
+import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
+import { S3BodyUploadHandler } from "../lib/handlers/S3BodyUploadHandler";
 
-class LogManager {
+export class LogManager {
   public async processLogEntries(
     logMessages: Message[],
     batchId: string
@@ -21,10 +25,18 @@ class LogManager {
       CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD ?? "",
     });
 
+    const s3Client = new S3Client(
+      process.env.S3_ACCESS_KEY ?? "",
+      process.env.S3_SECRET_KEY ?? "",
+      process.env.S3_ENDPOINT ?? "",
+      process.env.S3_BUCKET_NAME ?? ""
+    );
+
     const authHandler = new AuthenticationHandler();
     const rateLimitHandler = new RateLimitHandler(
       new RateLimitStore(clickhouseClientWrapper)
     );
+    const s3Reader = new S3ReaderHandler(s3Client);
     const requestHandler = new RequestBodyHandler();
     const responseBodyHandler = new ResponseBodyHandler();
     const promptHandler = new PromptHandler();
@@ -32,21 +44,36 @@ class LogManager {
       new LogStore(),
       new RequestResponseStore(clickhouseClientWrapper)
     );
+    // Store in S3 after logging to DB
+    const s3BodyUploadHandler = new S3BodyUploadHandler(s3Client);
+    const posthogHandler = new PostHogHandler();
 
     authHandler
       .setNext(rateLimitHandler)
+      .setNext(s3Reader)
       .setNext(requestHandler)
       .setNext(responseBodyHandler)
       .setNext(promptHandler)
-      .setNext(loggingHandler);
+      .setNext(loggingHandler)
+      .setNext(s3BodyUploadHandler)
+      .setNext(posthogHandler);
 
     await Promise.all(
       logMessages.map(async (logMessage) => {
         const handlerContext = new HandlerContext(logMessage);
-        await authHandler.handle(handlerContext);
+        const result = await authHandler.handle(handlerContext);
+
+        if (result.error) {
+          console.error(
+            `Error processing request ${logMessage.log.request.id} for batch ${batchId}: ${result.error}`
+          );
+
+          // TODO: Push to dead letter queue?
+        }
       })
     );
 
+    console.log(`Finished processing batch ${batchId}`);
     // Inserts everything in transaction
     const upsertResult = await loggingHandler.handleResults();
 

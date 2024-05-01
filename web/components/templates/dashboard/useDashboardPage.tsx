@@ -105,23 +105,12 @@ export const useDashboardPage = ({
           })) || []
       ),
       category: "request",
-      table: "request_response_log",
+      table: "request_response_versioned",
       column: "model",
     };
   }
 
-  const userFilters =
-    apiKeyFilter !== null
-      ? filterUIToFilterLeafs(filterMap, uiFilters).concat([
-          {
-            request_response_log: {
-              auth_hash: {
-                equals: apiKeyFilter,
-              },
-            },
-          },
-        ])
-      : filterUIToFilterLeafs(filterMap, uiFilters);
+  const userFilters = filterUIToFilterLeafs(filterMap, uiFilters);
 
   const params: BackendMetricsCall<any>["params"] = {
     timeFilter,
