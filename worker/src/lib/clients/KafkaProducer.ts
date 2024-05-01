@@ -71,11 +71,9 @@ export class KafkaProducer {
           value: JSON.stringify(msg),
         });
 
-        const res = await p.produce("logs", message, {
+        return await p.produce("logs", message, {
           key: msg.log.request.id,
         });
-
-        return res;
       } catch (error: any) {
         console.log(`Attempt ${attempts + 1} failed: ${error.message}`);
         attempts++;
