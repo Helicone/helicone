@@ -27,7 +27,7 @@ export async function getTokensPerRequest(
     {
       org_id,
       filter: {
-        left: timeFilterToFilterNode(timeFilter, "request_response_log"),
+        left: timeFilterToFilterNode(timeFilter, "request_response_versioned"),
         right: filter,
         operator: "and",
       },
@@ -38,9 +38,9 @@ export async function getTokensPerRequest(
   WITH total_count AS (
     SELECT 
       count(*) as count,
-      sum(request_response_log.prompt_tokens) as sum_prompt_tokens,
-      sum(request_response_log.completion_tokens) as sum_completion_tokens
-    FROM request_response_log
+      sum(request_response_versioned.prompt_tokens) as sum_prompt_tokens,
+      sum(request_response_versioned.completion_tokens) as sum_completion_tokens
+    FROM request_response_versioned
     WHERE (
       (${filterString})
     )
