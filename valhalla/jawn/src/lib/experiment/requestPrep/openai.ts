@@ -15,6 +15,7 @@ function prepareRequestAzure(
     "Helicone-Request-Id": requestId,
     Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     "Helicone-Auth": `Bearer ${apiKey}`,
+    Accept: "application/json",
   };
 
   const heliconeWorkerUrl = process.env.HELICONE_WORKER_URL ?? "";
