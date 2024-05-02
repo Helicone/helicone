@@ -5,7 +5,7 @@ import {
 } from "../../utils/modelMapper";
 import { ImageModelParsingResponse } from "../shared/imageParsers/core/parsingResponse";
 import { getRequestImageModelParser } from "../shared/imageParsers/parserMapper";
-import { GenericResult, PromiseGenericResult, err, ok } from "../shared/result";
+import { PromiseGenericResult, err, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
@@ -13,16 +13,15 @@ export class RequestBodyHandler extends AbstractLogHandler {
   async handle(context: HandlerContext): PromiseGenericResult<string> {
     console.log(`RequestBodyHandler: ${context.message.log.request.id}`);
     try {
-      const processedBody = this.processRequestBody(context);
+      const { body: processedBody, model: requestModel } =
+        this.processRequestBody(context);
 
       const { body: requestBodyFinal, assets: requestBodyAssets } =
-        this.processRequestBodyImages(
-          context.processedLog.request.model,
-          processedBody.data
-        );
+        this.processRequestBodyImages(processedBody, requestModel);
 
       context.processedLog.request.assets = requestBodyAssets;
       context.processedLog.request.body = requestBodyFinal;
+      context.processedLog.request.model = requestModel;
 
       return await super.handle(context);
     } catch (error: any) {
@@ -32,30 +31,39 @@ export class RequestBodyHandler extends AbstractLogHandler {
     }
   }
 
-  processRequestBody(context: HandlerContext): any {
+  processRequestBody(context: HandlerContext): {
+    body: any;
+    model: string | undefined;
+  } {
     const log = context.message.log;
     let rawRequestBody = context.rawLog.rawRequestBody;
 
     if (!rawRequestBody) {
       console.log("No request body found");
-      return {};
+      return {
+        body: {},
+        model: getModelFromRequest("{}", log.request.path),
+      };
     }
 
     const cleanedRequestBody = this.cleanRequestBody(rawRequestBody);
     let parsedRequestBody = tryParse(cleanedRequestBody, "request body");
 
-    context.processedLog.request.model = getModelFromRequest(
+    const requestModel = getModelFromRequest(
       parsedRequestBody,
       log.request.path
     );
 
     parsedRequestBody = context.message.heliconeMeta.omitRequestLog
       ? {
-          model: context.processedLog.request.model, // Put request model here, not calculated model
+          model: requestModel, // Put request model here, not calculated model
         }
       : parsedRequestBody;
 
-    return parsedRequestBody;
+    return {
+      body: parsedRequestBody,
+      model: requestModel,
+    };
   }
 
   private processRequestBodyImages(

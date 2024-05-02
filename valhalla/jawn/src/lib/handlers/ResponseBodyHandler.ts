@@ -17,14 +17,12 @@ import { ImageModelParsingResponse } from "../shared/imageParsers/core/parsingRe
 import { getResponseImageModelParser } from "../shared/imageParsers/parserMapper";
 import { PromiseGenericResult, Result, err, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
-import { HandlerContext, Usage } from "./HandlerContext";
+import { HandlerContext } from "./HandlerContext";
 
 export const INTERNAL_ERRORS = {
   Cancelled: -3,
 };
 
-// Pulls out usage
-// Some modification to body
 export class ResponseBodyHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
     console.log(`ResponseBodyHandler: ${context.message.log.request.id}`);
@@ -84,6 +82,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       body: responseBody,
       assets: new Map<string, string>(),
     };
+
     if (model && isResponseImageModel(model)) {
       const imageModelParser = getResponseImageModelParser(model);
       if (imageModelParser) {

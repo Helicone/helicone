@@ -265,12 +265,12 @@ export class LoggingHandler extends AbstractLogHandler {
     const orgParams = context.orgParams;
     const assets = context.processedLog.assets;
 
-    if (!orgParams?.id || !assets || Object.values(assets).length === 0) {
+    if (!orgParams?.id || !assets || assets.size === 0) {
       return [];
     }
 
     const assetInserts: Database["public"]["Tables"]["asset"]["Insert"][] =
-      Object.keys(assets).map(([assetId]) => ({
+      Array.from(assets.entries()).map(([assetId]) => ({
         id: assetId,
         request_id: request.id,
         organization_id: orgParams.id,

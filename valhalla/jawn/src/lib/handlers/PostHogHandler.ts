@@ -6,6 +6,7 @@ import {
 import { PromiseGenericResult } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
+import crypto from "crypto";
 
 export class PostHogHandler extends AbstractLogHandler {
   constructor() {

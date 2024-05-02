@@ -125,7 +125,7 @@ export class LogStore {
 
       return ok("Successfully inserted log batch");
     } catch (error: any) {
-      return err("Failed to insert log batch");
+      return err("Failed to insert log batch: " + error.message);
     }
   }
 
