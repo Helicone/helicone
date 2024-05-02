@@ -322,7 +322,9 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   </div>
                 </div> */}
                 <div className="flex flex-col space-y-4 h-full w-full">
-                  <h2 className="text-2xl font-semibold">Experiment Logs</h2>
+                  <h2 className="text-2xl font-semibold text-black dark:text-white">
+                    Experiment Logs
+                  </h2>
                   <div className="flex items-center justify-between w-full">
                     <div className="flex flex-wrap items-center space-x-2 w-full">
                       <div className="w-full max-w-[16rem]">
@@ -452,7 +454,9 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                 <div className="min-w-[25rem] w-1/3 py-4 pr-4 flex flex-col space-y-4 h-full">
                   <div className="flex flex-col w-full space-y-2">
                     <div className="flex items-center space-x-2">
-                      <p className="font-semibold text-lg">Inputs</p>
+                      <p className="font-semibold text-lg text-black dark:text-white">
+                        Inputs
+                      </p>
                     </div>
                     <TextInput
                       placeholder="Search by request id..."
@@ -488,7 +492,9 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                 <div className="p-4 flex flex-col space-y-4 w-full h-full">
                   <div className="w-full flex justify-between items-center flex-1">
                     <div className="flex items-center space-x-2">
-                      <p className="font-semibold text-lg">Prompt</p>
+                      <p className="font-semibold text-lg text-black dark:text-white">
+                        Prompt
+                      </p>
                     </div>
                     <div className="flex items-center space-x-2 w-full max-w-xs">
                       <label className="text-sm text-gray-500">Version:</label>

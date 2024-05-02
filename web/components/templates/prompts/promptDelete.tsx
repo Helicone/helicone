@@ -1,8 +1,9 @@
-import { ArrowPathIcon, TrashIcon } from "@heroicons/react/20/solid";
+import { ArrowPathIcon } from "@heroicons/react/20/solid";
 import { useState } from "react";
 import ThemedModal from "../../shared/themed/themedModal";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import useNotification from "../../shared/notification/useNotification";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 interface PromptDeleteProps {
   promptId: string;
@@ -25,9 +26,9 @@ const PromptDelete = (props: PromptDeleteProps) => {
           e.preventDefault();
           setOpen(true);
         }}
-        className="flex items-center hover:bg-red-200 rounded-lg p-1 -m-1 z-10"
+        className="flex items-center hover:bg-red-500 rounded-md p-1 -m-1 z-10 bg-red-600"
       >
-        <TrashIcon className="h-4 w-4 text-red-500" />
+        <TrashIcon className="h-4 w-4 text-white" />
       </button>
       <ThemedModal
         open={open}

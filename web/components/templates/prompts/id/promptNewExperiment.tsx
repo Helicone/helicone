@@ -104,7 +104,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
   const renderStepArray = [
     <>
       <div className="mt-2 flex flex-col h-full items-center justify-center">
-        <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white">
+        <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-black">
           <div className="w-full flex justify-between items-center py-2 px-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
             <div className="flex items-center space-x-2">
               <label className="text-sm text-gray-500">Version:</label>
@@ -163,9 +163,9 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                           ? "rounded-b-lg"
                           : "",
                         selectedPrompt?.id === prompt.id
-                          ? "bg-sky-50"
-                          : "bg-white",
-                        "flex items-start space-x-2 gap-2  p-6"
+                          ? "bg-sky-50 dark:bg-sky-950"
+                          : "bg-white dark:bg-black",
+                        "flex items-start space-x-2 gap-2 p-6 text-black dark:text-white"
                       )}
                     >
                       <input
@@ -229,7 +229,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
       </div>
       <div
         id="step-inc"
-        className="w-full flex justify-end sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+        className="w-full flex justify-end sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-transparent"
       >
         <HcButton
           variant={"primary"}
@@ -378,7 +378,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
       </div>
       <div
         id="step-inc"
-        className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+        className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-transparent"
       >
         <HcButton
           variant={"secondary"}
@@ -426,7 +426,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
       />
     </>,
     <>
-      <div className="flex flex-col space-y-8">
+      <div className="flex flex-col space-y-8 text-black dark:text-white">
         <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-black">
           <div className="w-full flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
             <div className="flex items-center space-x-2">
@@ -473,7 +473,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                   <input
                     type="password"
                     value={selectedProviderKey}
-                    className="border-none focus:ring-0 focus:outline-none w-full py-0"
+                    className="border-none focus:ring-0 focus:outline-none w-full py-0 bg-white dark:bg-black"
                     disabled
                   />
                 </div>
@@ -484,7 +484,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
       </div>
       <div
         id="step-inc"
-        className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+        className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-transparent"
       >
         <HcButton
           variant={"secondary"}

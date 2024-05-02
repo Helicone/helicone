@@ -415,7 +415,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
       {customNavBar && (
         <div
           id="step-inc"
-          className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+          className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-[#17191d]"
         >
           <HcButton
             variant={"secondary"}

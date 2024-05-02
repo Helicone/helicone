@@ -40,7 +40,7 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
       )}
       <Table>
         <TableHead>
-          <TableRow className="border-b border-gray-300">
+          <TableRow className="border-b border-gray-300 dark:border-gray-700">
             {columns.map((column) => (
               <TableHeaderCell key={String(column.key)}>
                 {column.header}
@@ -55,7 +55,7 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
               key={`row-${index}`}
               className={clsx(
                 onSelect !== undefined &&
-                  "hover:bg-gray-100 hover:cursor-pointer z-0"
+                  "hover:bg-gray-100 dark:hover:bg-gray-900 hover:cursor-pointer z-0"
               )}
               onClick={() => onSelect && onSelect(item)}
             >
