@@ -12,7 +12,6 @@ import { PromptHandler } from "../lib/handlers/PromptHandler";
 import { PostHogHandler } from "../lib/handlers/PostHogHandler";
 import { S3Client } from "../lib/shared/db/s3Client";
 import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
-import { S3BodyUploadHandler } from "../lib/handlers/S3BodyUploadHandler";
 
 export class LogManager {
   public async processLogEntries(
@@ -42,10 +41,10 @@ export class LogManager {
     const promptHandler = new PromptHandler();
     const loggingHandler = new LoggingHandler(
       new LogStore(),
-      new RequestResponseStore(clickhouseClientWrapper)
+      new RequestResponseStore(clickhouseClientWrapper),
+      s3Client
     );
     // Store in S3 after logging to DB
-    const s3BodyUploadHandler = new S3BodyUploadHandler(s3Client);
     const posthogHandler = new PostHogHandler();
 
     authHandler
@@ -55,7 +54,6 @@ export class LogManager {
       .setNext(responseBodyHandler)
       .setNext(promptHandler)
       .setNext(loggingHandler)
-      .setNext(s3BodyUploadHandler)
       .setNext(posthogHandler);
 
     await Promise.all(
