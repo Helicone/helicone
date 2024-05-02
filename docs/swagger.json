@@ -983,9 +983,6 @@
 					"pretty_name": {
 						"type": "string"
 					},
-					"created_at": {
-						"type": "string"
-					},
 					"major_version": {
 						"type": "number",
 						"format": "double"
@@ -996,7 +993,6 @@
 					"user_defined_id",
 					"description",
 					"pretty_name",
-					"created_at",
 					"major_version"
 				],
 				"type": "object",
@@ -2354,34 +2350,6 @@
 						}
 					}
 				}
-			}
-		},
-		"/v1/prompt/{promptId}": {
-			"delete": {
-				"operationId": "DeletePrompt",
-				"responses": {
-					"204": {
-						"description": "No content"
-					}
-				},
-				"tags": [
-					"Prompt"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "promptId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
 			}
 		},
 		"/v1/prompt/version/{promptVersionId}/subversion": {
