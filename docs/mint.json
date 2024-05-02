@@ -43,6 +43,10 @@
       "pages": ["use-cases/getting-user-requests"]
     },
     {
+      "group": "Guides",
+      "pages": ["use-cases/experiments"]
+    },
+    {
       "group": "CI/CD",
       "pages": ["use-cases/github-actions"]
     },
