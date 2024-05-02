@@ -3,9 +3,10 @@ import { PromiseGenericResult } from "../result";
 
 export interface ParseInput {
   responseBody: string;
-  requestBody: string;
+  requestBody?: string;
   tokenCounter: (text: string) => Promise<number>;
-  model?: string;
+  requestModel?: string;
+  modelOverride?: string;
 }
 
 export type ParseOutput = {

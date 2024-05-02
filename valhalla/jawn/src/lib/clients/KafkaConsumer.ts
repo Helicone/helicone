@@ -30,7 +30,7 @@ if (
 
 // Average message is 1.12KB, with 1MB max batch size, we can have ~1000 messages per batch
 const consumer = kafka?.consumer({
-  groupId: "helicone",
+  groupId: "jawn-consumer",
   maxBytes: 1024 * 1024,
 });
 
@@ -40,7 +40,6 @@ export const consume = async () => {
     return;
   }
 
-  console.log("Starting batch consumption");
   await consumer?.connect();
   await consumer?.subscribe({
     topic: "logs",
@@ -87,6 +86,11 @@ async function consumeBatch(batch: Batch): PromiseGenericResult<string> {
         messages.push(mapMessageDates(parsedMsg));
       } catch (error) {
         // TODO: Should we skip or fail the message?
+        return err(
+          `Failed to parse message: ${error}, message: ${JSON.stringify(
+            message
+          )}`
+        );
         return err(`Failed to parse message: ${error}`);
       }
     } else {
