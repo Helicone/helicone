@@ -1,4 +1,4 @@
-import { PromiseGenericResult, err, ok } from "../shared/result";
+import { PromiseGenericResult, ok } from "../shared/result";
 import { HandlerContext } from "./HandlerContext";
 
 interface LogHandler {

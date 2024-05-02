@@ -1,4 +1,9 @@
-import { getTokenCount } from "../../utils/helpers";
+import { getTokenCount, unsupportedImage } from "../../utils/helpers";
+import {
+  calculateModel,
+  getModelFromResponse,
+  isResponseImageModel,
+} from "../../utils/modelMapper";
 import {
   IBodyProcessor,
   ParseOutput,
@@ -8,50 +13,58 @@ import { AnthropicStreamBodyProcessor } from "../shared/bodyProcessors/anthropic
 import { GenericBodyProcessor } from "../shared/bodyProcessors/genericBodyProcessor";
 import { GoogleBodyProcessor } from "../shared/bodyProcessors/googleBodyProcessor";
 import { OpenAIStreamProcessor } from "../shared/bodyProcessors/openAIStreamProcessor";
-import { PromiseGenericResult, err } from "../shared/result";
+import { ImageModelParsingResponse } from "../shared/imageParsers/core/parsingResponse";
+import { getResponseImageModelParser } from "../shared/imageParsers/parserMapper";
+import { PromiseGenericResult, Result, err, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
-import { HandlerContext, Usage } from "./HandlerContext";
+import { HandlerContext } from "./HandlerContext";
 
 export const INTERNAL_ERRORS = {
   Cancelled: -3,
 };
 
-// Pulls out usage
-// Some modification to body
 export class ResponseBodyHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
     console.log(`ResponseBodyHandler: ${context.message.log.request.id}`);
     try {
-      const omitResponseLog = context.message.heliconeMeta.omitResponseLog;
-
       const processedResponseBody = await this.processBody(context);
-      if (
-        processedResponseBody.error ||
-        !processedResponseBody?.data?.processedBody
-      ) {
-        console.error(
-          "Error processing response body",
-          processedResponseBody.error
+      context.processedLog.response.model = getModelFromResponse(
+        processedResponseBody.data?.processedBody
+      );
+      context.processedLog.model =
+        calculateModel(
+          context.processedLog.request.model,
+          context.processedLog.response.model,
+          context.message.heliconeMeta.modelOverride
+        ) ?? undefined;
+
+      const omittedResponseBody = this.handleOmitResponseBody(
+        context,
+        processedResponseBody,
+        context.processedLog.response.model
+      );
+
+      const { body: responseBodyFinal, assets: responseBodyAssets } =
+        this.processResponseBodyImages(
+          omittedResponseBody,
+          context.processedLog.model
         );
 
-        context.processedLog.response.body = {
-          helicone_error: "error parsing response",
-          parse_response_error: processedResponseBody.error,
-          body: omitResponseLog
-            ? {
-                model: context.message.log.response.model, // Put response model here, not calculated model
-              }
-            : processedResponseBody.data?.processedBody ?? undefined,
-        };
-      } else {
-        context.processedLog.response.body = omitResponseLog
-          ? {
-              model: context.message.log.response.model, // Put response model here, not calculated model
-            }
-          : processedResponseBody.data.processedBody ?? undefined;
-      }
+      // Set processed response body
+      context.processedLog.response.assets = responseBodyAssets;
+      context.processedLog.assets = new Map([
+        ...(context.processedLog.request.assets ?? []),
+        ...(context.processedLog.response.assets ?? []),
+      ]);
+      context.processedLog.response.body = responseBodyFinal;
 
-      this.setUsage(processedResponseBody.data?.usage ?? {}, context);
+      // Set usage
+      const usage = processedResponseBody.data?.usage ?? {};
+      context.usage.completionTokens = usage.completionTokens;
+      context.usage.promptTokens = usage.promptTokens;
+      context.usage.totalTokens = usage.totalTokens;
+      context.usage.heliconeCalculated = usage.heliconeCalculated;
+      context.usage.cost = usage.cost;
 
       return await super.handle(context);
     } catch (error: any) {
@@ -61,12 +74,62 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     }
   }
 
-  private setUsage(usage: Usage, context: HandlerContext) {
-    context.usage.completionTokens = usage.completionTokens;
-    context.usage.promptTokens = usage.promptTokens;
-    context.usage.totalTokens = usage.totalTokens;
-    context.usage.heliconeCalculated = usage.heliconeCalculated;
-    context.usage.cost = usage.cost;
+  private processResponseBodyImages(
+    responseBody: any,
+    model?: string
+  ): ImageModelParsingResponse {
+    let imageModelParsingResponse: ImageModelParsingResponse = {
+      body: responseBody,
+      assets: new Map<string, string>(),
+    };
+
+    if (model && isResponseImageModel(model)) {
+      const imageModelParser = getResponseImageModelParser(model);
+      if (imageModelParser) {
+        imageModelParsingResponse =
+          imageModelParser.processResponseBody(responseBody);
+      }
+    }
+
+    imageModelParsingResponse.body = unsupportedImage(
+      imageModelParsingResponse.body
+    );
+
+    return imageModelParsingResponse;
+  }
+
+  private handleOmitResponseBody(
+    context: HandlerContext,
+    processedResponseBody: Result<ParseOutput, string>,
+    responseModel: any
+  ) {
+    const omitResponseLog = context.message.heliconeMeta.omitResponseLog;
+
+    if (
+      processedResponseBody.error ||
+      !processedResponseBody?.data?.processedBody
+    ) {
+      console.error(
+        "Error processing response body",
+        processedResponseBody.error
+      );
+
+      return {
+        helicone_error: "error parsing response",
+        parse_response_error: processedResponseBody.error,
+        body: omitResponseLog
+          ? {
+              model: responseModel, // Put response model here, not calculated model
+            }
+          : processedResponseBody.data?.processedBody ?? undefined,
+      };
+    } else {
+      return omitResponseLog
+        ? {
+            model: responseModel, // Put response model here, not calculated model
+          }
+        : processedResponseBody.data.processedBody ?? undefined;
+    }
   }
 
   async processBody(
@@ -77,6 +140,16 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     const provider = log.request.provider;
 
     let responseBody = context.rawLog.rawResponseBody;
+    const requestBody = context.rawLog.rawRequestBody;
+
+    if (!responseBody) {
+      console.log("No response body found");
+      return ok({
+        processedBody: {},
+        usage: {},
+      });
+    }
+
     try {
       responseBody = this.preprocess(
         isStream,
@@ -86,13 +159,13 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       const parser = this.getBodyProcessor(isStream, provider, responseBody);
       return await parser.parse({
         responseBody: responseBody,
-        requestBody: responseBody,
+        requestBody: requestBody ?? "{}",
         tokenCounter: async (text: string) =>
           await getTokenCount(text, provider),
-        model: log.model,
+        requestModel: context.processedLog.request.model,
+        modelOverride: context.message.heliconeMeta.modelOverride,
       });
     } catch (error: any) {
-      console.log("Error parsing response", error);
       return err(`Error parsing body: ${error}, ${responseBody}`);
     }
   }
