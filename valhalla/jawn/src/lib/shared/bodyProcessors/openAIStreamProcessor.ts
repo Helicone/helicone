@@ -21,7 +21,6 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
 
     try {
       const usage = await getUsage(data, requestBody, tokenCounter);
-
       return ok({
         processedBody: {
           ...consolidateTextFields(data),
@@ -35,7 +34,7 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
         },
       });
     } catch (e) {
-      console.log("Error parsing response", e);
+      console.error(`Error parsing OpenAI stream response: ${e}`);
       return ok({
         processedBody: {
           streamed_data: data,

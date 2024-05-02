@@ -1,4 +1,10 @@
-import { tryParse } from "../../utils/helpers";
+import { tryParse, unsupportedImage } from "../../utils/helpers";
+import {
+  getModelFromRequest,
+  isRequestImageModel,
+} from "../../utils/modelMapper";
+import { ImageModelParsingResponse } from "../shared/imageParsers/core/parsingResponse";
+import { getRequestImageModelParser } from "../shared/imageParsers/parserMapper";
 import { GenericResult, PromiseGenericResult, err, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
@@ -9,11 +15,14 @@ export class RequestBodyHandler extends AbstractLogHandler {
     try {
       const processedBody = this.processRequestBody(context);
 
-      if (processedBody.error || !processedBody.data) {
-        return err(`Error processing request body: ${processedBody.error}`);
-      }
+      const { body: requestBodyFinal, assets: requestBodyAssets } =
+        this.processRequestBodyImages(
+          context.processedLog.request.model,
+          processedBody.data
+        );
 
-      context.processedLog.request.body = processedBody.data;
+      context.processedLog.request.assets = requestBodyAssets;
+      context.processedLog.request.body = requestBodyFinal;
 
       return await super.handle(context);
     } catch (error: any) {
@@ -23,67 +32,56 @@ export class RequestBodyHandler extends AbstractLogHandler {
     }
   }
 
-  processRequestBody(context: HandlerContext): GenericResult<any> {
+  processRequestBody(context: HandlerContext): any {
     const log = context.message.log;
-    let requestBody = context.rawLog.rawRequestBody;
+    let rawRequestBody = context.rawLog.rawRequestBody;
 
-    requestBody = this.cleanRequestBody(requestBody);
-    requestBody = tryParse(requestBody, "request body");
-    requestBody = context.message.heliconeMeta.omitRequestLog
+    if (!rawRequestBody) {
+      console.log("No request body found");
+      return {};
+    }
+
+    const cleanedRequestBody = this.cleanRequestBody(rawRequestBody);
+    let parsedRequestBody = tryParse(cleanedRequestBody, "request body");
+
+    context.processedLog.request.model = getModelFromRequest(
+      parsedRequestBody,
+      log.request.path
+    );
+
+    parsedRequestBody = context.message.heliconeMeta.omitRequestLog
       ? {
-          model: log.request.model, // Put request model here, not calculated model
+          model: context.processedLog.request.model, // Put request model here, not calculated model
         }
-      : requestBody;
+      : parsedRequestBody;
 
-    // Ensure no image is stored as bytes
-    requestBody = this.unsupportedImage(requestBody);
-
-    return ok(requestBody);
+    return parsedRequestBody;
   }
 
-  cleanRequestBody(requestBody: any): string {
-    const requestBodyString = JSON.stringify(requestBody);
-    return requestBodyString.replace(/\\u0000/g, "");
-  }
-
-  // Replaces all the image_url that is not a url or not { url: url }  with
-  // { unsupported_image: true }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  unsupportedImage(body: any): any {
-    if (typeof body !== "object" || body === null) {
-      return body;
-    }
-    if (Array.isArray(body)) {
-      return body.map((item) => this.unsupportedImage(item));
-    }
-    const notSupportMessage = {
-      helicone_message:
-        "Storing images as bytes is currently not supported within Helicone.",
+  private processRequestBodyImages(
+    requestBody: any,
+    model?: string
+  ): ImageModelParsingResponse {
+    let imageModelParsingResponse: ImageModelParsingResponse = {
+      body: requestBody,
+      assets: new Map<string, string>(),
     };
-    if (body["image_url"] !== undefined) {
-      const imageUrl = body["image_url"];
-      if (
-        typeof imageUrl === "string" &&
-        !imageUrl.startsWith("http") &&
-        !imageUrl.startsWith("<helicone-asset-id")
-      ) {
-        body.image_url = notSupportMessage;
-      }
-      if (
-        typeof imageUrl === "object" &&
-        imageUrl.url !== undefined &&
-        typeof imageUrl.url === "string" &&
-        !imageUrl.url.startsWith("http") &&
-        !imageUrl.url.startsWith("<helicone-asset-id")
-      ) {
-        body.image_url = notSupportMessage;
+    if (model && isRequestImageModel(model)) {
+      const imageModelParser = getRequestImageModelParser(model);
+      if (imageModelParser) {
+        imageModelParsingResponse =
+          imageModelParser.processRequestBody(requestBody);
       }
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result: any = {};
-    for (const key in body) {
-      result[key] = this.unsupportedImage(body[key]);
-    }
-    return result;
+
+    imageModelParsingResponse.body = unsupportedImage(
+      imageModelParsingResponse.body
+    );
+
+    return imageModelParsingResponse;
+  }
+
+  cleanRequestBody(requestBodyStr: string): string {
+    return requestBodyStr.replace(/\\u0000/g, "");
   }
 }

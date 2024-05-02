@@ -1,16 +1,26 @@
 import { ClickhouseDB, formatTimeString } from "../db/ClickhouseWrapper";
 import { Database } from "../db/database.types";
-import { PromiseGenericResult, err, ok } from "../shared/result";
+import { S3Client } from "../shared/db/s3Client";
+import { PromiseGenericResult, Result, err, ok } from "../shared/result";
 import { LogStore } from "../stores/LogStore";
 import { RequestResponseStore } from "../stores/RequestResponseStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext, PromptRecord } from "./HandlerContext";
+
+type S3Record = {
+  requestId: string;
+  organizationId: string;
+  requestBody: string;
+  responseBody: string;
+  assets: Map<string, string>;
+};
 
 export type BatchPayload = {
   responses: Database["public"]["Tables"]["response"]["Insert"][];
   requests: Database["public"]["Tables"]["request"]["Insert"][];
   prompts: PromptRecord[];
   assets: Database["public"]["Tables"]["asset"]["Insert"][];
+  s3Records: S3Record[];
   requestResponseVersionedCH: ClickhouseDB["Tables"]["request_response_versioned"][];
 };
 
@@ -18,16 +28,23 @@ export class LoggingHandler extends AbstractLogHandler {
   private batchPayload: BatchPayload;
   private logStore: LogStore;
   private requestResponseStore: RequestResponseStore;
+  private s3Client: S3Client;
 
-  constructor(logStore: LogStore, requestResponseStore: RequestResponseStore) {
+  constructor(
+    logStore: LogStore,
+    requestResponseStore: RequestResponseStore,
+    s3Client: S3Client
+  ) {
     super();
     this.logStore = logStore;
     this.requestResponseStore = requestResponseStore;
+    this.s3Client = s3Client;
     this.batchPayload = {
       responses: [],
       requests: [],
       prompts: [],
       assets: [],
+      s3Records: [],
       requestResponseVersionedCH: [],
     };
   }
@@ -38,6 +55,12 @@ export class LoggingHandler extends AbstractLogHandler {
     this.batchPayload.requests.push(this.mapRequest(context));
     this.batchPayload.responses.push(this.mapResponse(context));
     this.batchPayload.assets.push(...this.mapAssets(context));
+
+    // S3
+    const s3Record = this.mapS3Records(context);
+    if (s3Record) {
+      this.batchPayload.s3Records.push(s3Record);
+    }
 
     // Prompts
     if (
@@ -65,6 +88,12 @@ export class LoggingHandler extends AbstractLogHandler {
       return err(`Error inserting logs: ${pgResult.error}`);
     }
 
+    const s3Result = await this.uploadToS3();
+
+    if (s3Result.error) {
+      return err(`Error uploading logs to S3: ${s3Result.error}`);
+    }
+
     const chResult = await this.logToClickhouse();
 
     if (chResult.error) {
@@ -72,6 +101,120 @@ export class LoggingHandler extends AbstractLogHandler {
     }
 
     return ok("Successfully inserted logs");
+  }
+
+  async uploadToS3(): PromiseGenericResult<string> {
+    const uploadPromises = this.batchPayload.s3Records.map(async (s3Record) => {
+      const key = this.s3Client.getRequestResponseKey(
+        s3Record.requestId,
+        s3Record.organizationId
+      );
+
+      // Upload request and response body
+      const uploadRes = await this.s3Client.store(
+        key,
+        JSON.stringify({
+          request: s3Record.requestBody,
+          response: s3Record.responseBody,
+        })
+      );
+
+      if (uploadRes.error) {
+        return err(
+          `Failed to store request body for request ID ${s3Record.requestId}: ${uploadRes.error}`
+        );
+      }
+
+      // Optionally upload assets if they exist
+      if (s3Record.assets && s3Record.assets.size > 0) {
+        const imageUploadRes = await this.storeRequestResponseImage(
+          s3Record.organizationId,
+          s3Record.requestId,
+          s3Record.assets
+        );
+
+        if (imageUploadRes.error) {
+          return err(
+            `Failed to store request response images: ${imageUploadRes.error}`
+          );
+        }
+      }
+
+      return ok(`S3 upload successful for request ID ${s3Record.requestId}`);
+    });
+
+    await Promise.all(uploadPromises);
+
+    // TODO: How to handle errors here?
+
+    return ok("All S3 uploads successful");
+  }
+
+  private async storeRequestResponseImage(
+    organizationId: string,
+    requestId: string,
+    assets: Map<string, string>
+  ): PromiseGenericResult<string> {
+    const uploadPromises: Promise<void>[] = Array.from(assets.entries()).map(
+      ([assetId, imageUrl]) =>
+        this.handleImageUpload(assetId, imageUrl, requestId, organizationId)
+    );
+
+    await Promise.allSettled(uploadPromises);
+
+    return ok("Images uploaded successfully");
+  }
+
+  private async handleImageUpload(
+    assetId: string,
+    imageUrl: string,
+    requestId: string,
+    organizationId: string
+  ): Promise<void> {
+    try {
+      let assetUploadResult: Result<string, string>;
+      if (imageUrl.startsWith("data:image/")) {
+        const [assetType, base64Data] = this.extractBase64Data(imageUrl);
+        const buffer = Buffer.from(base64Data, "base64");
+        assetUploadResult = await this.s3Client.uploadBase64ToS3(
+          buffer,
+          assetType,
+          requestId,
+          organizationId,
+          assetId
+        );
+      } else {
+        const response = await fetch(imageUrl, {
+          headers: {
+            "User-Agent": "Helicone-Worker (https://helicone.ai)",
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to download image: ${response.statusText}`);
+        }
+        const blob = await response.blob();
+        assetUploadResult = await this.s3Client.uploadImageToS3(
+          blob,
+          requestId,
+          organizationId,
+          assetId
+        );
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      // If we fail to upload an image, we don't want to fail logging the request
+    }
+  }
+
+  private extractBase64Data(dataUri: string): [string, string] {
+    const matches = dataUri.match(
+      /^data:(image\/(?:png|jpeg|jpg|gif|webp));base64,(.*)$/
+    );
+    if (!matches || matches.length !== 3) {
+      console.error("Invalid base64 image data");
+      return ["", ""];
+    }
+    return [matches[1], matches[2]];
   }
 
   async logToClickhouse(): PromiseGenericResult<string> {
@@ -95,12 +238,38 @@ export class LoggingHandler extends AbstractLogHandler {
     }
   }
 
+  mapS3Records(context: HandlerContext): S3Record | null {
+    const request = context.message.log.request;
+    const orgParams = context.orgParams;
+    const assets = new Map([
+      ...(context.processedLog.request.assets ?? []),
+      ...(context.processedLog.response.assets ?? []),
+    ]);
+
+    if (!orgParams?.id) {
+      return null;
+    }
+
+    const s3Record: S3Record = {
+      requestId: request.id,
+      organizationId: orgParams.id,
+      requestBody: context.processedLog.request.body,
+      responseBody: context.processedLog.response.body,
+      assets: assets,
+    };
+
+    return s3Record;
+  }
+
   mapAssets(
     context: HandlerContext
   ): Database["public"]["Tables"]["asset"]["Insert"][] {
     const request = context.message.log.request;
     const orgParams = context.orgParams;
-    const assets = context.message.log.assets;
+    const assets = new Map([
+      ...(context.processedLog.request.assets ?? []),
+      ...(context.processedLog.response.assets ?? []),
+    ]);
 
     if (!orgParams?.id || !assets || Object.values(assets).length === 0) {
       return [];
@@ -130,7 +299,7 @@ export class LoggingHandler extends AbstractLogHandler {
       promptId: context.message.log.request.promptId,
       requestId: context.message.log.request.id,
       orgId: context.orgParams.id,
-      model: context.message.log.model,
+      model: context.processedLog.model,
       heliconeTemplate: context.processedLog.request.heliconeTemplate,
       createdAt: context.message.log.request.requestCreatedAt,
     };
@@ -152,7 +321,7 @@ export class LoggingHandler extends AbstractLogHandler {
         request_id: request.id,
         completion_tokens: usage.completionTokens ?? null,
         latency: response.delayMs ?? null,
-        model: context.message.log.model,
+        model: context.processedLog.model ?? "",
         prompt_tokens: usage.promptTokens ?? null,
         request_created_at: formatTimeString(
           request.requestCreatedAt.toISOString()
@@ -182,14 +351,14 @@ export class LoggingHandler extends AbstractLogHandler {
     context: HandlerContext
   ): Database["public"]["Tables"]["response"]["Insert"] {
     const response = context.message.log.response;
-    const processedBody = context.processedLog.response.body;
+    const processedResponse = context.processedLog.response;
 
     const responseInsert: Database["public"]["Tables"]["response"]["Insert"] = {
       id: response.id,
       request: context.message.log.request.id,
-      body: processedBody,
+      body: processedResponse.body,
       status: response.status,
-      model: response.model,
+      model: processedResponse.model,
       completion_tokens: context.usage.completionTokens,
       prompt_tokens: context.usage.promptTokens,
       time_to_first_token: response.timeToFirstToken,
@@ -207,12 +376,12 @@ export class LoggingHandler extends AbstractLogHandler {
     const orgParams = context.orgParams;
     const authParams = context.authParams;
     const heliconeMeta = context.message.heliconeMeta;
-    const processedBody = context.processedLog.request.body;
+    const processedRequest = context.processedLog.request;
 
     const requestInsert: Database["public"]["Tables"]["request"]["Insert"] = {
       id: request.id,
       path: request.path,
-      body: processedBody,
+      body: processedRequest.body,
       auth_hash: "",
       user_id: request.userId ?? null,
       prompt_id: request.promptId ?? null,
@@ -222,7 +391,7 @@ export class LoggingHandler extends AbstractLogHandler {
       helicone_org_id: orgParams?.id ?? null,
       provider: request.provider,
       helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
-      model: request.model,
+      model: processedRequest.model,
       model_override: heliconeMeta.modelOverride ?? null,
       threat: request.threat ?? null,
       target_url: request.targetUrl,

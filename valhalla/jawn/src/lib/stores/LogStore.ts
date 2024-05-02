@@ -115,10 +115,9 @@ export class LogStore {
 
         for (const promptRecord of payload.prompts) {
           // acquire an exclusive lock on the prompt record for the duration of the transaction
-          await t.none(
-            "SELECT pg_advisory_xact_lock($1)",
-            stringToNumberHash(promptRecord.promptId)
-          );
+          await t.query("SELECT pg_advisory_xact_lock($1)", [
+            stringToNumberHash(promptRecord.promptId),
+          ]);
 
           await this.processPrompt(promptRecord, t);
         }
@@ -126,7 +125,6 @@ export class LogStore {
 
       return ok("Successfully inserted log batch");
     } catch (error: any) {
-      console.error("Failed to insert log batch", error);
       return err("Failed to insert log batch");
     }
   }

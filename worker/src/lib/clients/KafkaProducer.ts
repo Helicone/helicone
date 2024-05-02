@@ -13,7 +13,6 @@ export type Log = {
     targetUrl: string;
     provider: Provider;
     bodySize: number;
-    model: string;
     path: string;
     threat?: boolean;
     countryCode?: string;
@@ -25,13 +24,10 @@ export type Log = {
     id: string;
     status: number;
     bodySize: number;
-    model: string;
     timeToFirstToken?: number;
     responseCreatedAt: Date;
     delayMs: number;
   };
-  assets?: Record<string, string>;
-  model: string;
 };
 
 export type HeliconeMeta = {
@@ -71,9 +67,11 @@ export class KafkaProducer {
           value: JSON.stringify(msg),
         });
 
-        return await p.produce("logs", message, {
+        const res = await p.produce("logs", message, {
           key: msg.log.request.id,
         });
+        console.log(`Produced message, response: ${JSON.stringify(res)}`);
+        return res;
       } catch (error: any) {
         console.log(`Attempt ${attempts + 1} failed: ${error.message}`);
         attempts++;

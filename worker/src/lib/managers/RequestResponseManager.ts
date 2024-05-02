@@ -6,7 +6,7 @@ export type RequestResponseContent = {
   organizationId: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   requestBody: any;
-  responseBody: string;
+  responseBody: any;
   model: string;
   assets: Map<string, string>;
 };
@@ -14,34 +14,28 @@ export type RequestResponseContent = {
 export class RequestResponseManager {
   constructor(private s3Client: S3Client) {}
 
-  async storeRequestResponseRaw({
-    organizationId,
-    requestId,
-    requestBody,
-    responseBody,
-    model,
-    assets,
-  }: RequestResponseContent): Promise<Result<string, string>> {
-    // If assets, must be image model, store images in S3
-    if (assets?.size > 0) {
-      await this.storeRequestResponseImage({
-        organizationId,
-        requestId,
-        requestBody,
-        responseBody,
-        model,
-        assets,
-      });
-    }
-
+  async storeRequestResponseRaw(content: {
+    organizationId: string;
+    requestId: string;
+    requestBody: any;
+    responseBody: string;
+  }): Promise<Result<string, string>> {
     const url = this.s3Client.getRequestResponseRawUrl(
-      requestId,
-      organizationId
+      content.requestId,
+      content.organizationId
     );
+
+    const tags: Record<string, string> = {
+      name: "raw-request-response-body",
+    };
 
     return await this.s3Client.store(
       url,
-      JSON.stringify({ request: requestBody, response: responseBody })
+      JSON.stringify({
+        request: content.requestBody,
+        response: content.responseBody,
+      }),
+      tags
     );
   }
 
@@ -54,7 +48,7 @@ export class RequestResponseManager {
     assets,
   }: RequestResponseContent): Promise<Result<string, string>> {
     // If assets, must be image model, store images in S3
-    if (assets?.size > 0) {
+    if (assets && assets?.size > 0) {
       await this.storeRequestResponseImage({
         organizationId,
         requestId,

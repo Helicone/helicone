@@ -647,6 +647,7 @@ export class DBLoggable {
 
     // Kafka processing
     if (
+      authParams.organizationId ||
       authParams.organizationId === "01699b51-e07b-4d49-8cda-0c7557f5b6b1" ||
       authParams.organizationId === "dad350b5-4afe-4fd5-b910-ba74c0ad2f0f"
     ) {
@@ -910,59 +911,60 @@ export class DBLoggable {
       return err(org.error);
     }
 
-    const requestBody = this.tryParseBody(
-      this.request.bodyText ?? "{}",
-      "request"
-    ); // Process response body
-
     const { body: rawResponseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
 
-    const responseBody = this.tryParseBody(rawResponseBody, "response");
+    // console.log(
+    //   `DBLoggable, Raw Response Body: ${JSON.stringify(rawResponseBody)}`
+    // );
 
-    // Calculate model
-    const requestModel = getModelFromRequest(requestBody, this.request.path);
-    const responseModel = getModelFromResponse(responseBody);
-    const model = this.calculateModel(
-      requestModel,
-      responseModel,
-      requestHeaders?.modelOverride ?? null
-    );
+    // const responseBody = this.tryParseBody(rawResponseBody, "response");
 
-    // eslint-disable-next-line prefer-const
-    const { body: requestBodyFinal, assets: requestBodyAssets } =
-      this.processRequestBodyImages(
-        model,
-        this.omitBody(
-          requestHeaders?.omitHeaders?.omitRequest ?? false,
-          requestBody,
-          model
-        )
-      );
+    // console.log(
+    //   `DBLOGGABLE: Parsed Response Body: ${JSON.stringify(responseBody)}`
+    // );
 
-    const { body: responseBodyFinal, assets: responseBodyAssets } =
-      this.processResponseBodyImages(
-        model,
-        this.omitBody(
-          requestHeaders?.omitHeaders?.omitResponse ?? false,
-          responseBody,
-          model
-        )
-      );
+    // // Calculate model
+    // const requestModel = getModelFromRequest(requestBody, this.request.path);
+    // const responseModel = getModelFromResponse(responseBody);
+    // const model = this.calculateModel(
+    //   requestModel,
+    //   responseModel,
+    //   requestHeaders?.modelOverride ?? null
+    // );
 
-    const assets = new Map([
-      ...(requestBodyAssets ?? []),
-      ...(responseBodyAssets ?? []),
-    ]);
+    // // eslint-disable-next-line prefer-const
+    // const { body: requestBodyFinal, assets: requestBodyAssets } =
+    //   this.processRequestBodyImages(
+    //     model,
+    //     this.omitBody(
+    //       requestHeaders?.omitHeaders?.omitRequest ?? false,
+    //       requestBody,
+    //       model
+    //     )
+    //   );
+
+    // const { body: responseBodyFinal, assets: responseBodyAssets } =
+    //   this.processResponseBodyImages(
+    //     model,
+    //     this.omitBody(
+    //       requestHeaders?.omitHeaders?.omitResponse ?? false,
+    //       responseBody,
+    //       model
+    //     )
+    //   );
+
+    // const assets = new Map([
+    //   ...(requestBodyAssets ?? []),
+    //   ...(responseBodyAssets ?? []),
+    // ]);
 
     if (S3_ENABLED === "true") {
       const s3Result = await db.requestResponseManager.storeRequestResponseRaw({
         organizationId: authParams.organizationId,
         requestId: this.request.requestId,
-        requestBody: requestBodyFinal,
-        responseBody: responseBodyFinal,
-        model: model,
-        assets: assets,
+        requestBody: this.request.bodyText ?? "{}",
+        responseBody: rawResponseBody,
       });
 
       if (s3Result.error) {
@@ -982,8 +984,6 @@ export class DBLoggable {
         omitResponseLog: requestHeaders.omitHeaders.omitResponse,
       },
       log: {
-        model: model,
-        assets: Object.fromEntries(assets),
         request: {
           id: this.request.requestId,
           userId: authParams.userId ?? "",
@@ -994,7 +994,6 @@ export class DBLoggable {
           targetUrl: this.request.targetUrl,
           provider: this.request.provider,
           bodySize: this.request.bodyText?.length ?? 0,
-          model: requestModel,
           path: this.request.path,
           threat: this.request.threat ?? undefined,
           countryCode: this.request.country_code ?? undefined,
@@ -1006,7 +1005,6 @@ export class DBLoggable {
           id: this.response.responseId,
           status: await this.response.status(),
           bodySize: rawResponseBody.length,
-          model: responseModel,
           timeToFirstToken: (await this.timing.timeToFirstToken()) ?? undefined,
           responseCreatedAt: endTime,
           delayMs: endTime.getTime() - this.timing.startTime.getTime(),

@@ -38,6 +38,7 @@ export class S3ReaderHandler extends AbstractLogHandler {
 
       context.rawLog.rawRequestBody = content.data.request;
       context.rawLog.rawResponseBody = content.data.response;
+
       return await super.handle(context);
     } catch (error) {
       return err(
