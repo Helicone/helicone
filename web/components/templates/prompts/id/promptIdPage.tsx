@@ -538,11 +538,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       status={200}
                       requestId={selectedInput?.source_request || ""}
                       model={prompts?.at(0)?.model || "unknown"}
-                      // selectedProperties={selectedInput?.inputs}
-                      selectedProperties={
-                        // combine the selectedInput properties with output
-                        selectedInput?.inputs
-                      }
+                      selectedProperties={selectedInput?.inputs}
                     />
                   </div>
                 </div>
