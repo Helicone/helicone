@@ -23,6 +23,7 @@ function prepareRequestAzure(
     "Helicone-OpenAI-API-Base": azureBaseUrl,
     "api-key": azureAPIKey,
     Accept: "application/json",
+    "Accept-Encoding": "",
   };
 
   const fetchUrl = `${heliconeWorkerUrl}/openai/deployments/${azureDeploymentName}/chat/completions?api-version=${apiVersion}`;

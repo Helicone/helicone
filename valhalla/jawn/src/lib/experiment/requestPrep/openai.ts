@@ -16,6 +16,7 @@ function prepareRequestAzure(
     Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     "Helicone-Auth": `Bearer ${apiKey}`,
     Accept: "application/json",
+    "Accept-Encoding": "",
   };
 
   const heliconeWorkerUrl = process.env.HELICONE_WORKER_URL ?? "";
