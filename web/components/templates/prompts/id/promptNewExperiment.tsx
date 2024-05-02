@@ -516,8 +516,6 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
             setCurrentStep(2);
           }}
         />
-        {selectedDatasetId}
-        {selectedModel}
         <HcButton
           loading={isLoading}
           variant={"primary"}
