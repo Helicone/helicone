@@ -1,3 +1,4 @@
+import { calculateModel } from "../../../utils/modelMapper";
 import { consolidateTextFields } from "../../../utils/streamParser";
 import { PromiseGenericResult, ok } from "../result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
@@ -6,8 +7,14 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
   public async parse(
     parseInput: ParseInput
   ): PromiseGenericResult<ParseOutput> {
-    const { responseBody, requestBody, model, tokenCounter } = parseInput;
-
+    const {
+      responseBody,
+      requestBody,
+      tokenCounter,
+      requestModel,
+      modelOverride,
+    } = parseInput;
+    const model = calculateModel(requestModel, undefined, modelOverride);
     const lines = responseBody
       .split("\n")
       .filter((line) => line !== "")

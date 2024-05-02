@@ -56,6 +56,9 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
     model: string;
   }>();
   const [selectedModel, setSelectedModel] = useState<string>();
+  const [selectedDeployment, setSelectedDeployment] = useState<
+    "OPENAI" | "AZURE"
+  >("OPENAI");
   const [selectedDatasetId, setSelectedDatasetId] = useState<string>();
   const [currentChat, setCurrentChat] = useState<MessageWithoutId[]>();
   const [selectedProviderKey, setSelectedProviderKey] = useState<string>();
@@ -297,7 +300,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
             <ul className="p-4 flex flex-col space-y-4">
               <li className="flex items-start space-x-2">
                 <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
-                  Dataset {datasets.length}
+                  Dataset
                 </label>
                 <div className="flex w-full max-w-lg space-x-2 items-center">
                   <Select
@@ -357,7 +360,26 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                   </Select>
                 </div>
               </li>
-              {!!jawnSettings.data?.data?.useAzureForExperiment || (
+              {jawnSettings.data?.data?.useAzureForExperiment ? (
+                <li className="flex items-start space-x-2">
+                  <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
+                    Cloud Provider
+                  </label>
+                  <div className="flex w-full max-w-36">
+                    <Select
+                      placeholder="Select cloud"
+                      value={selectedDeployment}
+                      onValueChange={(value) => {
+                        if (value === "AZURE" || value === "OPENAI")
+                          setSelectedDeployment(value);
+                      }}
+                    >
+                      <SelectItem value={"OPENAI"}>Open AI</SelectItem>
+                      <SelectItem value={"AZURE"}>Azure</SelectItem>
+                    </Select>
+                  </div>
+                </li>
+              ) : (
                 <li className="flex items-start space-x-2">
                   <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
                     Provider Keys
@@ -556,6 +578,9 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                 providerKeyId: jawnSettings.data?.data?.useAzureForExperiment
                   ? "NOKEY"
                   : selectedProviderKey!,
+                meta: {
+                  deployment: selectedDeployment,
+                },
               },
             });
 

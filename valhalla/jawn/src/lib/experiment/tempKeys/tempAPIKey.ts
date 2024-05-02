@@ -1,90 +1,21 @@
 import generateApiKey from "generate-api-key";
-import { supabaseServer } from "../db/supabase";
-import { Result, err, ok } from "../shared/result";
+import { supabaseServer } from "../../db/supabase";
+import { Result, err, ok } from "../../shared/result";
 import { uuid } from "uuidv4";
-import { dbExecute } from "../shared/db/dbExecute";
-import { hashAuth } from "../db/hash";
-
+import { dbExecute } from "../../shared/db/dbExecute";
+import { hashAuth } from "../../db/hash";
+import { BaseTempKey } from "./baseTempKey";
 type HashedPasswordRow = {
   hashed_password: string;
 };
 
-export type DecryptedProviderKey = {
+type DecryptedProviderKey = {
   id: string | null;
   org_id: string | null;
   provider_key: string | null;
   provider_name: string | null;
   provider_key_name: string | null;
 };
-
-async function getHeliconeApiKey() {
-  const apiKey = `sk-${generateApiKey({
-    method: "base32",
-    dashes: true,
-  }).toString()}`.toLowerCase();
-  return apiKey;
-}
-
-class TempHeliconeAPIKey {
-  private keyUsed = false;
-  constructor(private apiKey: string, private heliconeApiKeyId: number) {}
-
-  private async cleanup() {
-    if (this.keyUsed) {
-      return;
-    }
-    return await supabaseServer.client
-      .from("helicone_api_keys")
-      .delete({
-        count: "exact",
-      })
-      .eq("id", this.heliconeApiKeyId);
-  }
-
-  with<T>(callback: (apiKey: string) => Promise<T>) {
-    if (this.keyUsed) {
-      return err("Key already used");
-    }
-
-    this.keyUsed = true;
-    return callback(this.apiKey)
-      .then(async (t) => {
-        await this.cleanup();
-        return t;
-      })
-      .finally(async () => {
-        await this.cleanup();
-      });
-  }
-}
-
-export async function generateHeliconeAPIKey(
-  organizationId: string
-): Promise<Result<TempHeliconeAPIKey, string>> {
-  const apiKey = await getHeliconeApiKey();
-  const organization = await supabaseServer.client
-    .from("organization")
-    .select("*")
-    .eq("id", organizationId)
-    .single();
-
-  const res = await supabaseServer.client
-    .from("helicone_api_keys")
-    .insert({
-      api_key_hash: await hashAuth(apiKey),
-      user_id: organization.data?.owner ?? "",
-      api_key_name: "auto-generated-experiment-key",
-      organization_id: organizationId,
-    })
-    .select("*")
-    .single();
-
-  if (res?.error || !res.data?.id) {
-    return err("Failed to create apiKey key");
-  } else {
-    return ok(new TempHeliconeAPIKey(apiKey, res.data?.id));
-  }
-}
 
 async function getDecryptedProviderKeyById(
   providerKeyId: string
@@ -177,11 +108,11 @@ async function createProxyKey(
     error: null,
   };
 }
-class TempProxyKey {
+class TempProxyKey implements BaseTempKey {
   private keyUsed = false;
   constructor(private proxyKey: string, private proxyKeyId: string) {}
 
-  private async cleanup() {
+  async cleanup() {
     if (this.keyUsed) {
       return;
     }
@@ -194,9 +125,9 @@ class TempProxyKey {
       .eq("experiment_use", true);
   }
 
-  with<T>(callback: (proxyKey: string) => Promise<T>) {
+  async with<T>(callback: (proxyKey: string) => Promise<T>): Promise<T> {
     if (this.keyUsed) {
-      return err("Key already used");
+      throw new Error("Proxy key already used");
     }
 
     this.keyUsed = true;

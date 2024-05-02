@@ -40,7 +40,6 @@ export type Log = {
     targetUrl: string;
     provider: Provider;
     bodySize: number;
-    model: string;
     path: string;
     threat?: boolean;
     countryCode?: string;
@@ -52,13 +51,10 @@ export type Log = {
     id: string;
     status: number;
     bodySize: number;
-    model: string;
     timeToFirstToken?: number;
     responseCreatedAt: Date;
     delayMs: number;
   };
-  assets?: Record<string, string>;
-  model: string;
 };
 
 export type Usage = {
@@ -70,18 +66,23 @@ export type Usage = {
 };
 
 export type RawLog = {
-  rawRequestBody?: any;
-  rawResponseBody?: any;
+  rawRequestBody?: string;
+  rawResponseBody?: string;
 };
 
 export type ProcessedLog = {
   model?: string;
+  assets?: Map<string, string>;
   request: {
+    model?: string;
     body?: any;
     heliconeTemplate?: TemplateWithInputs;
+    assets?: Map<string, string>;
   };
   response: {
+    model?: string;
     body?: any;
+    assets?: Map<string, string>;
   };
 };
 
@@ -101,7 +102,7 @@ export type PromptRecord = {
   promptId: string;
   orgId: string;
   requestId: string;
-  model: string;
+  model?: string;
   heliconeTemplate: TemplateWithInputs;
   createdAt: Date;
 };

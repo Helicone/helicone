@@ -4,7 +4,7 @@ import {
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { Result, err, ok } from "../result";
+import { PromiseGenericResult, Result, err, ok } from "../result";
 import { compressData } from "../../../utils/helpers";
 
 export type RequestResponseBody = {
@@ -58,6 +58,36 @@ export class S3Client {
     return await this.getSignedUrl(key);
   }
 
+  async uploadBase64ToS3(
+    buffer: Buffer,
+    assetType: string,
+    requestId: string,
+    orgId: string,
+    assetId: string
+  ): PromiseGenericResult<string> {
+    const key = this.getRequestResponseImageUrl(requestId, orgId, assetId);
+    return await this.uploadToS3(key, buffer, assetType);
+  }
+
+  async uploadImageToS3(
+    image: Blob,
+    requestId: string,
+    orgId: string,
+    assetId: string
+  ): Promise<Result<string, string>> {
+    const uploadUrl = this.getRequestResponseImageUrl(
+      requestId,
+      orgId,
+      assetId
+    );
+
+    return await this.uploadToS3(
+      uploadUrl,
+      await image.arrayBuffer(),
+      image.type
+    );
+  }
+
   async getSignedUrl(key: string): Promise<Result<string, string>> {
     try {
       this.awsClient;
@@ -73,6 +103,34 @@ export class S3Client {
       return { data: signedUrl, error: null };
     } catch (error: any) {
       return { data: null, error: error.message };
+    }
+  }
+
+  async uploadToS3(
+    key: string,
+    body: ArrayBuffer | Buffer,
+    contentType: string
+  ): PromiseGenericResult<string> {
+    const command = new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+      Body: new Uint8Array(body),
+      ContentType: contentType,
+    });
+
+    try {
+      const response = await this.awsClient.send(command);
+
+      if (!response || response.$metadata.httpStatusCode !== 200) {
+        return err(
+          `Failed to store data: ${response.$metadata.httpStatusCode}`
+        );
+      }
+
+      return ok(`Success`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      return err(`Failed to store image in S3: ${error?.message}`);
     }
   }
 
@@ -123,6 +181,14 @@ export class S3Client {
   };
 
   getRequestResponseImageKey = (
+    requestId: string,
+    orgId: string,
+    assetId: string
+  ) => {
+    return `organizations/${orgId}/requests/${requestId}/assets/${assetId}`;
+  };
+
+  getRequestResponseImageUrl = (
     requestId: string,
     orgId: string,
     assetId: string

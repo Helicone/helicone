@@ -46,7 +46,10 @@ async function handler(option: HandlerWrapperOptions<Result<boolean, string>>) {
     destination: string;
   };
   //ensure https and valid url
-  if (!destination.startsWith("https://")) {
+  if (
+    !destination.startsWith("https://") &&
+    !destination.includes("helicone-scoring-webhook")
+  ) {
     res.status(400).json({
       error: "Invalid URL",
       data: null,

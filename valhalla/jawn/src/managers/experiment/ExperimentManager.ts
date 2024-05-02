@@ -22,13 +22,7 @@ export class ExperimentManager extends BaseManager {
     filter: FilterNode,
     include: IncludeExperimentKeys
   ): Promise<Result<Experiment[], string>> {
-    const result = await this.ExperimentStore.getExperiments(filter, include);
-    console.log(result);
-    if (result.error || !result.data) {
-      return err(result.error);
-    }
-
-    return ok(result.data.map((d) => d.jsonb_build_object));
+    return this.ExperimentStore.getExperiments(filter, include);
   }
 
   async addNewExperiment(
@@ -41,6 +35,7 @@ export class ExperimentManager extends BaseManager {
       .insert({
         dataset: params.datasetId,
         organization: this.authParams.organizationId,
+        meta: params.meta,
       })
       .select("*")
       .single();
