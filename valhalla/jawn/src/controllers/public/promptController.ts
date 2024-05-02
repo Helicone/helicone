@@ -2,6 +2,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Path,
   Post,
   Request,
@@ -37,6 +38,7 @@ export interface PromptsResult {
   user_defined_id: string;
   description: string;
   pretty_name: string;
+  created_at: string;
   major_version: number;
 }
 
@@ -121,6 +123,23 @@ export class PromptController extends Controller {
       this.setStatus(200); // set return status 201
     }
     return result;
+  }
+
+  @Delete("{promptId}")
+  public async deletePrompt(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() promptId: string
+  ): Promise<void> {
+    const promptManager = new PromptManager(request.authParams);
+
+    const result = await promptManager.deletePrompt({
+      promptId,
+    });
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200); // set return status 201
+    }
   }
 
   @Post("version/{promptVersionId}/subversion")

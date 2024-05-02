@@ -326,6 +326,7 @@ const models: TsoaRoute.Models = {
             "user_defined_id": {"dataType":"string","required":true},
             "description": {"dataType":"string","required":true},
             "pretty_name": {"dataType":"string","required":true},
+            "created_at": {"dataType":"string","required":true},
             "major_version": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
@@ -884,6 +885,38 @@ export function RegisterRoutes(app: Router) {
 
               templateService.apiHandler({
                 methodName: 'getPrompt',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.delete('/v1/prompt/:promptId',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(PromptController)),
+            ...(fetchMiddlewares<RequestHandler>(PromptController.prototype.deletePrompt)),
+
+            function PromptController_deletePrompt(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    promptId: {"in":"path","name":"promptId","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new PromptController();
+
+              templateService.apiHandler({
+                methodName: 'deletePrompt',
                 controller,
                 response,
                 next,

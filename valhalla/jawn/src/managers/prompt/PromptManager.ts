@@ -7,7 +7,7 @@ import {
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
-import { Result, err } from "../../lib/shared/result";
+import { Result, err, ok } from "../../lib/shared/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { buildFilterPostgres } from "../../lib/shared/filters/filters";
@@ -121,6 +121,7 @@ export class PromptManager extends BaseManager {
       user_defined_id: string;
       description: string;
       pretty_name: string;
+      created_at: string;
       major_version: number;
     }>(
       `
@@ -129,11 +130,13 @@ export class PromptManager extends BaseManager {
       user_defined_id,
       description,
       pretty_name,
+      created_at,
       (SELECT major_version FROM prompts_versions pv WHERE pv.prompt_v2 = prompt_v2.id ORDER BY major_version DESC LIMIT 1) as major_version
     FROM prompt_v2
     WHERE prompt_v2.organization = $1
     AND prompt_v2.soft_delete = false
     AND (${filterWithAuth.filter})
+    ORDER BY created_at DESC
     `,
       filterWithAuth.argsAcc
     );
@@ -217,5 +220,21 @@ export class PromptManager extends BaseManager {
       [this.authParams.organizationId, params.promptVersionId]
     );
     return result;
+  }
+
+  async deletePrompt(params: {
+    promptId: string;
+  }): Promise<Result<void, string>> {
+    const result = await dbExecute(
+      `
+    UPDATE prompt_v2
+    SET soft_delete = true
+    WHERE id = $1
+    AND organization = $2
+    `,
+      [params.promptId, this.authParams.organizationId]
+    );
+
+    return ok(undefined);
   }
 }
