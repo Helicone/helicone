@@ -31,6 +31,7 @@ import {
   HeliconeProxyRequest,
 } from "../models/HeliconeProxyRequest";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
+import { KafkaProducer } from "../clients/KafkaProducer";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -309,9 +310,9 @@ export async function proxyForwarder(
             env.S3_SECRET_KEY ?? "",
             env.S3_ENDPOINT ?? "",
             env.S3_BUCKET_NAME ?? ""
-          ),
-          supabase
+          )
         ),
+        kafkaProducer: new KafkaProducer(env),
       },
       env.S3_ENABLED ?? "true",
       proxyRequest?.requestWrapper.heliconeHeaders

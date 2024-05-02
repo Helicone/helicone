@@ -1,29 +1,64 @@
-import { SupabaseClient } from "@supabase/supabase-js";
 import { S3Client } from "../clients/S3Client";
-import { Result } from "../util/results";
-import { Database } from "../../../supabase/database.types";
+import { Result, ok } from "../util/results";
 
 export type RequestResponseContent = {
   requestId: string;
   organizationId: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   requestBody: any;
-  responseBody: string;
+  responseBody: any;
+  model: string;
   assets: Map<string, string>;
 };
 
 export class RequestResponseManager {
-  constructor(
-    private s3Client: S3Client,
-    private supabase: SupabaseClient<Database>
-  ) {}
+  constructor(private s3Client: S3Client) {}
+
+  async storeRequestResponseRaw(content: {
+    organizationId: string;
+    requestId: string;
+    requestBody: any;
+    responseBody: string;
+  }): Promise<Result<string, string>> {
+    const url = this.s3Client.getRequestResponseRawUrl(
+      content.requestId,
+      content.organizationId
+    );
+
+    const tags: Record<string, string> = {
+      name: "raw-request-response-body",
+    };
+
+    return await this.s3Client.store(
+      url,
+      JSON.stringify({
+        request: content.requestBody,
+        response: content.responseBody,
+      }),
+      tags
+    );
+  }
 
   async storeRequestResponseData({
     organizationId,
     requestId,
     requestBody,
     responseBody,
+    model,
+    assets,
   }: RequestResponseContent): Promise<Result<string, string>> {
+    // If assets, must be image model, store images in S3
+    if (assets && assets?.size > 0) {
+      await this.storeRequestResponseImage({
+        organizationId,
+        requestId,
+        requestBody,
+        responseBody,
+        model,
+        assets,
+      });
+    }
+
     const url = this.s3Client.getRequestResponseUrl(requestId, organizationId);
 
     return await this.s3Client.store(
@@ -31,11 +66,9 @@ export class RequestResponseManager {
       JSON.stringify({ request: requestBody, response: responseBody })
     );
   }
-  async storeRequestResponseImage({
+  private async storeRequestResponseImage({
     organizationId,
     requestId,
-    requestBody,
-    responseBody,
     assets,
   }: RequestResponseContent): Promise<Result<string, string>> {
     const uploadPromises: Promise<void>[] = Array.from(assets.entries()).map(
@@ -44,11 +77,8 @@ export class RequestResponseManager {
     );
 
     await Promise.allSettled(uploadPromises);
-    const url = this.s3Client.getRequestResponseUrl(requestId, organizationId);
-    return await this.s3Client.store(
-      url,
-      JSON.stringify({ request: requestBody, response: responseBody })
-    );
+
+    return ok("Images uploaded successfully");
   }
 
   private async handleImageUpload(
@@ -86,33 +116,9 @@ export class RequestResponseManager {
           assetId
         );
       }
-
-      if (!assetUploadResult.error) {
-        await this.saveRequestResponseAssets(
-          assetId,
-          requestId,
-          organizationId
-        );
-      }
     } catch (error) {
       console.error("Error uploading image:", error);
       // If we fail to upload an image, we don't want to fail logging the request
-    }
-  }
-
-  private async saveRequestResponseAssets(
-    assetId: string,
-    requestId: string,
-    organizationId: string
-  ) {
-    const result = await this.supabase
-      .from("asset")
-      .insert([
-        { id: assetId, request_id: requestId, organization_id: organizationId },
-      ]);
-
-    if (result.error) {
-      throw new Error(`Error saving asset: ${result.error.message}`);
     }
   }
 
