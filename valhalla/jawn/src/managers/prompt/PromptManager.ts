@@ -224,7 +224,7 @@ export class PromptManager extends BaseManager {
 
   async deletePrompt(params: {
     promptId: string;
-  }): Promise<Result<void, string>> {
+  }): Promise<Result<null, string>> {
     const result = await dbExecute(
       `
     UPDATE prompt_v2
@@ -235,6 +235,10 @@ export class PromptManager extends BaseManager {
       [params.promptId, this.authParams.organizationId]
     );
 
-    return ok(undefined);
+    if (result.error) {
+      return err(`Failed to delete prompt: ${result.error}`);
+    }
+
+    return ok(null);
   }
 }

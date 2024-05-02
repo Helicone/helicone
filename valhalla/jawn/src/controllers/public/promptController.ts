@@ -135,10 +135,11 @@ export class PromptController extends Controller {
     const result = await promptManager.deletePrompt({
       promptId,
     });
-    if (result.error || !result.data) {
+
+    if (result.error) {
       this.setStatus(500);
     } else {
-      this.setStatus(200); // set return status 201
+      this.setStatus(200);
     }
   }
 
