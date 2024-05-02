@@ -29,6 +29,7 @@ export interface NewExperimentParams {
   promptVersion: string;
   model: string;
   providerKeyId: string;
+  meta?: any;
 }
 
 export interface ExperimentRun {}

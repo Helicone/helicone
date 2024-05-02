@@ -39,6 +39,10 @@
       "pages": ["introduction"]
     },
     {
+      "group": "Observability",
+      "pages": ["use-cases/getting-user-requests"]
+    },
+    {
       "group": "CI/CD",
       "pages": ["use-cases/github-actions"]
     },

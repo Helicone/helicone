@@ -16,7 +16,6 @@ import { PLAYGROUND_MODELS } from "../../playground/playgroundPage";
 import ProviderKeyList from "../../enterprise/portal/id/providerKeyList";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { Message } from "../../requests/chat";
-import ReactDiffViewer from "react-diff-viewer";
 import ModelPill from "../../requestsV2/modelPill";
 import SelectRandomDataset from "./selectRandomDataset";
 import useNotification from "../../../shared/notification/useNotification";
@@ -27,6 +26,8 @@ import ThemedModal from "../../../shared/themed/themedModal";
 import { Tooltip } from "@mui/material";
 import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
 import { useJawnSettings } from "../../../../services/hooks/useJawnSettings";
+
+import ArrayDiffViewer from "./arrayDiffViewer";
 
 interface PromptIdPageProps {
   id: string;
@@ -55,6 +56,9 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
     model: string;
   }>();
   const [selectedModel, setSelectedModel] = useState<string>();
+  const [selectedDeployment, setSelectedDeployment] = useState<
+    "OPENAI" | "AZURE"
+  >("OPENAI");
   const [selectedDatasetId, setSelectedDatasetId] = useState<string>();
   const [currentChat, setCurrentChat] = useState<MessageWithoutId[]>();
   const [selectedProviderKey, setSelectedProviderKey] = useState<string>();
@@ -137,13 +141,22 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                 );
               })
               .map((prompt, index) => {
-                let template = JSON.parse(
-                  JSON.stringify(prompt.helicone_template)
-                ).messages[0].content;
+                const getTemplate = () => {
+                  try {
+                    const content = JSON.parse(
+                      JSON.stringify(prompt.helicone_template)
+                    ).messages[0].content;
+                    if (typeof content === "string") {
+                      return content;
+                    } else if (Array.isArray(content)) {
+                      return content.find((part) => part.type === "text")?.text;
+                    }
+                  } catch (e) {
+                    return "error parsing template";
+                  }
+                };
+                const template = getTemplate();
 
-                if (!(typeof template === "string")) {
-                  template = JSON.stringify(template);
-                }
                 return (
                   <>
                     <li
@@ -166,7 +179,6 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                         onChange={(e) => {
                           const isChecked = e.target.checked;
                           if (isChecked) {
-                            setSelectedModel(prompt.model);
                             setSelectedPrompt(prompt);
                           } else {
                             setSelectedPrompt(undefined);
@@ -184,10 +196,6 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                               <HcBadge title={"Production"} size={"sm"} />
                             )}
                         </div>
-                        {/* TODO: add the version created at */}
-                        {/* <div className="text-sm text-gray-500">
-                        created on {prompt.}
-                      </div> */}
                       </div>
                       <div className="relative w-full">
                         <MarkdownEditor
@@ -203,7 +211,9 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                           <Tooltip title="Expand">
                             <button
                               onClick={() => {
-                                setSelectedVersionTemplate(template);
+                                setSelectedVersionTemplate(
+                                  prompt.helicone_template
+                                );
                                 setOpen(true);
                               }}
                               className="absolute top-4 right-4"
@@ -290,7 +300,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
             <ul className="p-4 flex flex-col space-y-4">
               <li className="flex items-start space-x-2">
                 <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
-                  Dataset {datasets.length}
+                  Dataset
                 </label>
                 <div className="flex w-full max-w-lg space-x-2 items-center">
                   <Select
@@ -336,7 +346,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                 <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
                   Model
                 </label>
-                <div className="flex w-full max-w-xs" key={selectedModel}>
+                <div className="flex w-full max-w-xs">
                   <Select
                     placeholder="Select a model"
                     value={selectedModel}
@@ -350,7 +360,26 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                   </Select>
                 </div>
               </li>
-              {!!jawnSettings.data?.data?.useAzureForExperiment || (
+              {jawnSettings.data?.data?.useAzureForExperiment ? (
+                <li className="flex items-start space-x-2">
+                  <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
+                    Cloud Provider
+                  </label>
+                  <div className="flex w-full max-w-36">
+                    <Select
+                      placeholder="Select cloud"
+                      value={selectedDeployment}
+                      onValueChange={(value) => {
+                        if (value === "AZURE" || value === "OPENAI")
+                          setSelectedDeployment(value);
+                      }}
+                    >
+                      <SelectItem value={"OPENAI"}>Open AI</SelectItem>
+                      <SelectItem value={"AZURE"}>Azure</SelectItem>
+                    </Select>
+                  </div>
+                </li>
+              ) : (
                 <li className="flex items-start space-x-2">
                   <label className="text-sm text-black dark:text-white font-semibold w-28 pt-1">
                     Provider Keys
@@ -420,23 +449,15 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
     </>,
     <>
       <div className="flex flex-col space-y-8">
-        {/* TODO: make this diff more sophisticated */}
-        <div className="p-8 rounded-lg bg-white border border-gray-300 flex flex-col space-y-4">
-          <div className="grid grid-cols-4">
-            <div className="col-span-2">
-              <h2 className="text-md font-semibold">Original Prompt</h2>
-            </div>
-            <div className="col-span-2">
-              <h2 className="text-md font-semibold">Experiment Prompt</h2>
+        <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-black">
+          <div className="w-full flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
+            <div className="flex items-center space-x-2">
+              <p className="text-sm text-gray-500">Diff Viewer</p>
             </div>
           </div>
-          <ReactDiffViewer
-            oldValue={JSON.stringify(template, null, 4)}
-            newValue={JSON.stringify(currentChat, null, 4)}
-            splitView={true}
-            showDiffOnly={true}
-            extraLinesSurroundingDiff={3}
-          />
+          <div className="p-4">
+            <ArrayDiffViewer origin={template} target={currentChat || []} />
+          </div>
         </div>
 
         <div className="mt-2 flex flex-col h-full items-center justify-center">
@@ -557,6 +578,9 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                 providerKeyId: jawnSettings.data?.data?.useAzureForExperiment
                   ? "NOKEY"
                   : selectedProviderKey!,
+                meta: {
+                  deployment: selectedDeployment,
+                },
               },
             });
 
