@@ -235,7 +235,7 @@ export const SingleChat = (props: {
   const formattedMessageContent = getFormattedMessageContent();
 
   const getBgColor = () => {
-    return "bg-gray-50 dark:bg-[#17191d]";
+    return "bg-gray-50 dark:bg-gray-950";
   };
 
   const isJSON = (content: string): boolean => {
@@ -278,7 +278,7 @@ export const SingleChat = (props: {
               <code className="text-xs whitespace-pre-wrap font-semibold">
                 {message.name}
               </code>
-              <pre className="text-xs whitespace-pre-wrap bg-gray-50 dark:bg-gray-900 p-2 rounded-lg overflow-auto">
+              <pre className="text-xs whitespace-pre-wrap bg-gray-50 dark:bg-gray-950 p-2 rounded-lg overflow-auto">
                 {isJSON(formattedMessageContent)
                   ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
                   : formattedMessageContent}
