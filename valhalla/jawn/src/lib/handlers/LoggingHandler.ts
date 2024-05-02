@@ -172,11 +172,10 @@ export class LoggingHandler extends AbstractLogHandler {
     organizationId: string
   ): Promise<void> {
     try {
-      let assetUploadResult: Result<string, string>;
       if (imageUrl.startsWith("data:image/")) {
         const [assetType, base64Data] = this.extractBase64Data(imageUrl);
         const buffer = Buffer.from(base64Data, "base64");
-        assetUploadResult = await this.s3Client.uploadBase64ToS3(
+        await this.s3Client.uploadBase64ToS3(
           buffer,
           assetType,
           requestId,
@@ -193,7 +192,7 @@ export class LoggingHandler extends AbstractLogHandler {
           throw new Error(`Failed to download image: ${response.statusText}`);
         }
         const blob = await response.blob();
-        assetUploadResult = await this.s3Client.uploadImageToS3(
+        await this.s3Client.uploadImageToS3(
           blob,
           requestId,
           organizationId,
