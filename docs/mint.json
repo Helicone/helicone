@@ -43,6 +43,10 @@
       "pages": ["use-cases/getting-user-requests"]
     },
     {
+      "group": "Guides",
+      "pages": ["use-cases/experiments"]
+    },
+    {
       "group": "CI/CD",
       "pages": ["use-cases/github-actions"]
     },
@@ -60,7 +64,7 @@
     },
     {
       "group": "Getting Started",
-      "pages": ["getting-started/quick-start", "getting-started/up-next"]
+      "pages": ["getting-started/quick-start"]
     },
     {
       "group": "Integrations",
@@ -78,6 +82,7 @@
         "getting-started/integration-method/together",
         "getting-started/integration-method/openrouter",
         "getting-started/integration-method/litellm",
+        "getting-started/integration-method/posthog",
         {
           "group": "Other",
           "pages": [
