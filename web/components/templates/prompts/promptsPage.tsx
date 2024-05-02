@@ -1,36 +1,18 @@
-import { Menu, Transition } from "@headlessui/react";
 import {
   BookOpenIcon,
   DocumentPlusIcon,
   DocumentTextIcon,
-  EyeIcon,
-  Squares2X2Icon,
-  TableCellsIcon,
-  TrashIcon,
 } from "@heroicons/react/24/outline";
-import { EllipsisVerticalIcon } from "@heroicons/react/24/solid";
-import {
-  Badge,
-  Divider,
-  Tab,
-  TabGroup,
-  TabList,
-  TabPanel,
-  TabPanels,
-  TextInput,
-} from "@tremor/react";
+import { Badge, Divider, TextInput } from "@tremor/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { ElementType, Fragment, useState } from "react";
+import { Fragment, useState } from "react";
 import { usePrompts } from "../../../services/hooks/prompts/prompts";
-import { useOrg } from "../../layout/organizationContext";
-import { clsx } from "../../shared/clsx";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import PromptCard from "./promptCard";
 import { SimpleTable } from "../../shared/table/simpleTable";
 import HcButton from "../../ui/hcButton";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
-import ThemedTabs from "../../shared/themed/themedTabs";
 import ThemedModal from "../../shared/themed/themedModal";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import PromptDelete from "./promptDelete";

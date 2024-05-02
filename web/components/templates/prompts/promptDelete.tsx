@@ -3,7 +3,6 @@ import { useState } from "react";
 import ThemedModal from "../../shared/themed/themedModal";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import useNotification from "../../shared/notification/useNotification";
-import { clsx } from "../../shared/clsx";
 
 interface PromptDeleteProps {
   promptId: string;
