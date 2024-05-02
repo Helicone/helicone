@@ -517,6 +517,7 @@ Json: JsonObject;
       promptVersion: string;
       model: string;
       providerKeyId: string;
+      meta?: unknown;
     };
     ResponseObj: {
       body: unknown;
@@ -545,6 +546,7 @@ Json: JsonObject;
         name: string;
         id: string;
       };
+      meta: unknown;
       createdAt: string;
       hypotheses: {
           runs: {
