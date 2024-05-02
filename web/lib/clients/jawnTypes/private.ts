@@ -15,6 +15,9 @@ export interface paths {
   "/v1/prompt/{promptId}/query": {
     post: operations["GetPrompt"];
   };
+  "/v1/prompt/{promptId}": {
+    delete: operations["DeletePrompt"];
+  };
   "/v1/prompt/version/{promptVersionId}/subversion": {
     post: operations["CreateSubversion"];
   };
@@ -50,6 +53,7 @@ export interface components {
       user_defined_id: string;
       description: string;
       pretty_name: string;
+      created_at: string;
       /** Format: double */
       major_version: number;
     };
@@ -231,6 +235,19 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Result_PromptResult.string_"];
         };
+      };
+    };
+  };
+  DeletePrompt: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
       };
     };
   };
