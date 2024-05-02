@@ -16,7 +16,7 @@ export class PostHogHandler extends AbstractLogHandler {
     const usage = context.usage;
 
     const cost = this.modelCost({
-      model: context.message.log.model ?? null,
+      model: context.processedLog.model ?? "",
       provider: context.message.log.request.provider ?? "",
       sum_prompt_tokens: usage.promptTokens ?? 0,
       sum_completion_tokens: usage.completionTokens ?? 0,
@@ -39,7 +39,7 @@ export class PostHogHandler extends AbstractLogHandler {
   mapPostHogLog(context: HandlerContext): HeliconeRequestResponseToPosthog {
     const request = context.message.log.request;
     const response = context.message.log.response;
-    const model = context.message.log.model;
+    const model = context.processedLog.model;
     const reqBody = context.processedLog.request.body;
     const usage = context.usage;
 

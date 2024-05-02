@@ -72,6 +72,7 @@ export type RawLog = {
 
 export type ProcessedLog = {
   model?: string;
+  assets?: Map<string, string>;
   request: {
     model?: string;
     body?: any;

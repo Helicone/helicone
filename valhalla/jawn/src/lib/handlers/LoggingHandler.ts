@@ -241,10 +241,7 @@ export class LoggingHandler extends AbstractLogHandler {
   mapS3Records(context: HandlerContext): S3Record | null {
     const request = context.message.log.request;
     const orgParams = context.orgParams;
-    const assets = new Map([
-      ...(context.processedLog.request.assets ?? []),
-      ...(context.processedLog.response.assets ?? []),
-    ]);
+    const assets = context.processedLog.assets;
 
     if (!orgParams?.id) {
       return null;
@@ -255,7 +252,7 @@ export class LoggingHandler extends AbstractLogHandler {
       organizationId: orgParams.id,
       requestBody: context.processedLog.request.body,
       responseBody: context.processedLog.response.body,
-      assets: assets,
+      assets: assets ?? new Map(),
     };
 
     return s3Record;
@@ -266,10 +263,7 @@ export class LoggingHandler extends AbstractLogHandler {
   ): Database["public"]["Tables"]["asset"]["Insert"][] {
     const request = context.message.log.request;
     const orgParams = context.orgParams;
-    const assets = new Map([
-      ...(context.processedLog.request.assets ?? []),
-      ...(context.processedLog.response.assets ?? []),
-    ]);
+    const assets = context.processedLog.assets;
 
     if (!orgParams?.id || !assets || Object.values(assets).length === 0) {
       return [];
