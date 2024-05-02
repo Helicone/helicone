@@ -20,19 +20,22 @@ export default function StepActions(props: StepActionsProps) {
     allowStepSelection = "true",
   } = props;
   return (
-    <div className="border border-gray-300 rounded-lg bg-white">
+    <div className="border border-gray-300 rounded-lg bg-white dark:border-gray-700 dark:bg-black">
       <nav className="w-full" aria-label="Progress">
         <ol
           role="list"
           className="overflow-hidden rounded-md lg:flex lg:rounded-none"
         >
           {steps.map((step, stepIdx) => (
-            <li key={step.id} className="relative overflow-hidden lg:flex-1">
+            <li
+              key={step.id}
+              className="relative overflow-hidden lg:flex-1 text-black dark:text-white"
+            >
               <div
                 className={clsx(
                   stepIdx === 0 ? "rounded-t-md border-b-0" : "",
                   stepIdx === steps.length - 1 ? "rounded-b-md border-t-0" : "",
-                  "overflow-hidden border border-gray-200 lg:border-0"
+                  "overflow-hidden border border-gray-200 dark:border-gray-800 lg:border-0"
                 )}
               >
                 {step.id < currentStep ? (
@@ -44,7 +47,7 @@ export default function StepActions(props: StepActionsProps) {
                     className="group"
                   >
                     <span
-                      className="absolute left-0 top-0 h-full w-1 bg-transparent group-hover:bg-gray-200 lg:bottom-0 lg:top-auto lg:h-1 lg:w-full"
+                      className="absolute left-0 top-0 h-full w-1 bg-transparent group-hover:bg-gray-200 dark:group-hover:bg-gray-800 lg:bottom-0 lg:top-auto lg:h-1 lg:w-full"
                       aria-hidden="true"
                     />
                     <span
@@ -54,9 +57,9 @@ export default function StepActions(props: StepActionsProps) {
                       )}
                     >
                       <span className="flex-shrink-0">
-                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-600">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-500">
                           <CheckIcon
-                            className="h-4 w-4 text-white"
+                            className="h-4 w-4 text-white dark:text-black"
                             aria-hidden="true"
                           />
                         </span>
@@ -147,7 +150,7 @@ export default function StepActions(props: StepActionsProps) {
                       aria-hidden="true"
                     >
                       <svg
-                        className="h-full w-full text-gray-300"
+                        className="h-full w-full text-gray-300 dark:text-gray-700"
                         viewBox="0 0 12 82"
                         fill="none"
                         preserveAspectRatio="none"

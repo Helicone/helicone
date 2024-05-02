@@ -174,6 +174,7 @@ export class DatasetManager extends BaseManager {
       user_defined_id: string;
       description: string;
       pretty_name: string;
+      created_at: string;
       major_version: number;
     }>(
       `
@@ -182,6 +183,7 @@ export class DatasetManager extends BaseManager {
       user_defined_id,
       description,
       pretty_name,
+      created_at,
       (SELECT major_version FROM prompts_versions pv WHERE pv.prompt_v2 = prompt_v2.id ORDER BY major_version DESC LIMIT 1) as major_version
     FROM prompt_v2
     WHERE prompt_v2.organization = $1
