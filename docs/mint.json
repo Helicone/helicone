@@ -64,7 +64,7 @@
     },
     {
       "group": "Getting Started",
-      "pages": ["getting-started/quick-start", "getting-started/up-next"]
+      "pages": ["getting-started/quick-start"]
     },
     {
       "group": "Integrations",
