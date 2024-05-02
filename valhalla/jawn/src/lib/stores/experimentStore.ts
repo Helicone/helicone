@@ -1,7 +1,8 @@
+import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
 import { dbExecute } from "../shared/db/dbExecute";
 import { FilterNode } from "../shared/filters/filterDefs";
 import { buildFilterPostgres } from "../shared/filters/filters";
-import { Result, err, resultMap } from "../shared/result";
+import { Result, err, ok, promiseResultMap, resultMap } from "../shared/result";
 import { BaseStore } from "./baseStore";
 
 export interface ResponseObj {
@@ -28,6 +29,7 @@ export interface Experiment {
       };
     }[];
   };
+  meta: any;
   createdAt: string;
   hypotheses: {
     id: string;
@@ -79,6 +81,7 @@ function getExperimentsQuery(
   return `
         SELECT jsonb_build_object(
           'id', e.id,
+          'meta', e.meta,
           'organization', e.organization,
           'dataset', jsonb_build_object(
               'id', ds.id,
@@ -196,8 +199,30 @@ function getExperimentsQuery(
     `;
 }
 
+async function enrichExperiment(
+  experiment: Experiment,
+  include: IncludeExperimentKeys
+) {
+  if (include.inputs) {
+    for (const row of experiment.dataset.rows) {
+      if (row.inputRecord) {
+        row.inputRecord.inputs = await getAllSignedURLsFromInputs(
+          row.inputRecord.inputs,
+          experiment.organization,
+          row.inputRecord.requestId
+        );
+      }
+    }
+  }
+
+  return experiment;
+}
+
 export class ExperimentStore extends BaseStore {
-  async getExperiments(filter: FilterNode, include: IncludeExperimentKeys) {
+  async getExperiments(
+    filter: FilterNode,
+    include: IncludeExperimentKeys
+  ): Promise<Result<Experiment[], string>> {
     const builtFilter = buildFilterPostgres({
       filter,
       argsAcc: [this.organizationId],
@@ -209,9 +234,22 @@ export class ExperimentStore extends BaseStore {
       include
     );
 
-    return await dbExecute<{
-      jsonb_build_object: Experiment;
-    }>(experimentQuery, builtFilter.argsAcc);
+    const experiments = resultMap(
+      await dbExecute<{
+        jsonb_build_object: Experiment;
+      }>(experimentQuery, builtFilter.argsAcc),
+      (d) => d.map((d) => d.jsonb_build_object)
+    );
+
+    if (experiments.error) {
+      return err(experiments.error);
+    }
+
+    return ok(
+      await Promise.all(
+        experiments.data!.map((d) => enrichExperiment(d, include))
+      )
+    );
   }
 }
 
@@ -250,11 +288,11 @@ export const ServerExperimentStore: {
     );
   },
   getExperiment: async (id: string, include?: IncludeExperimentKeys) => {
-    return resultMap(
+    return promiseResultMap(
       await dbExecute<{
         jsonb_build_object: Experiment;
       }>(getExperimentsQuery("e.id = $1", 1, include), [id]),
-      (d) => d[0].jsonb_build_object
+      async (d) => enrichExperiment(d[0].jsonb_build_object, include ?? {})
     );
   },
 

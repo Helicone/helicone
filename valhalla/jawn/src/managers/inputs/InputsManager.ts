@@ -17,6 +17,73 @@ import { User } from "../../models/user";
 import { BaseManager } from "../BaseManager";
 import { S3Client } from "../../lib/shared/db/s3Client";
 
+async function fetchImageAsBase64(url: string): Promise<string> {
+  try {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer(); // Get response as ArrayBuffer
+    const buffer = Buffer.from(arrayBuffer); // Convert ArrayBuffer to Buffer
+    const base64 = buffer.toString("base64"); // Convert Buffer to Base64
+    return `data:image/jpeg;base64,${base64}`; // Assuming image is JPEG
+  } catch (error) {
+    console.error("Failed to fetch or convert image", error);
+    throw new Error("Failed to fetch or convert image");
+  }
+}
+
+export async function getAllSignedURLsFromInputs(
+  inputs: PromptInputRecord["inputs"],
+  organizationId: string,
+  sourceRequest: string,
+  replaceAssetWithContent: boolean = false
+) {
+  console.log("PREPARING ALL SIGNED URLS FROM INPUTS", inputs);
+  const s3Client = new S3Client(
+    process.env.S3_ACCESS_KEY ?? "",
+    process.env.S3_SECRET_KEY ?? "",
+    process.env.S3_ENDPOINT ?? "",
+    process.env.S3_BUCKET_NAME ?? ""
+  );
+
+  const result = await Promise.all(
+    Object.entries(inputs).map(async ([key, value]) => {
+      if (value.includes("helicone-asset-id")) {
+        const regex = /<helicone-asset-id key="([^"]+)"\s*\/>/g;
+        const heliconeAssetIdKey = regex.exec(value)![1];
+        const signedUrl = await s3Client.getRequestResponseImageSignedUrl(
+          organizationId,
+          sourceRequest,
+          heliconeAssetIdKey
+        );
+
+        if (replaceAssetWithContent && signedUrl.data) {
+          console.log("REPLACING ASSET WITH CONTENT", signedUrl.data);
+
+          // image content
+          const contentResponse = await fetchImageAsBase64(signedUrl.data);
+
+          return {
+            key,
+            value: contentResponse,
+          };
+        }
+
+        return {
+          key,
+          value: signedUrl.data ?? "",
+        };
+      }
+      return { key, value };
+    })
+  );
+
+  return result.reduce((acc, { key, value }) => {
+    return {
+      ...acc,
+      [key]: value,
+    };
+  }, {} as PromptInputRecord["inputs"]);
+}
+
 export class InputsManager extends BaseManager {
   async getInputs(
     limit: number,
@@ -48,45 +115,16 @@ export class InputsManager extends BaseManager {
       [this.authParams.organizationId, promptVersion, limit]
     );
 
-    const s3Client = new S3Client(
-      process.env.S3_ACCESS_KEY ?? "",
-      process.env.S3_SECRET_KEY ?? "",
-      process.env.S3_ENDPOINT ?? "",
-      process.env.S3_BUCKET_NAME ?? ""
-    );
-
     return promiseResultMap(result, async (data) => {
       return Promise.all(
         data.map(async (record) => {
           return {
             ...record,
-            inputs: (
-              await Promise.all(
-                Object.entries(record.inputs).map(async ([key, value]) => {
-                  if (value.includes("helicone-asset-id")) {
-                    const regex = /<helicone-asset-id key="([^"]+)"\s*\/>/g;
-                    const heliconeAssetIdKey = regex.exec(value)![1];
-                    const signedUrl =
-                      await s3Client.getRequestResponseImageSignedUrl(
-                        this.authParams.organizationId,
-                        record.source_request,
-                        heliconeAssetIdKey
-                      );
-
-                    return {
-                      key,
-                      value: signedUrl.data ?? "",
-                    };
-                  }
-                  return { key, value };
-                })
-              )
-            ).reduce((acc, { key, value }) => {
-              return {
-                ...acc,
-                [key]: value,
-              };
-            }, {} as PromptInputRecord["inputs"]),
+            inputs: await getAllSignedURLsFromInputs(
+              record.inputs,
+              this.authParams.organizationId,
+              record.source_request
+            ),
           };
         })
       );
