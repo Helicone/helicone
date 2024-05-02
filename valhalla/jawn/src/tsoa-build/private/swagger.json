@@ -7,6 +7,473 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"PromptsResult": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"user_defined_id": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"pretty_name": {
+						"type": "string"
+					},
+					"major_version": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id",
+					"user_defined_id",
+					"description",
+					"pretty_name",
+					"major_version"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PromptsResult-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/PromptsResult"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultError_string_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptsResult-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptsResult-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"Partial_TextOperators_": {
+				"properties": {
+					"not-equals": {
+						"type": "string"
+					},
+					"equals": {
+						"type": "string"
+					},
+					"like": {
+						"type": "string"
+					},
+					"ilike": {
+						"type": "string"
+					},
+					"contains": {
+						"type": "string"
+					},
+					"not-contains": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_PromptToOperators_": {
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"user_defined_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Pick_FilterLeaf.prompt_v2_": {
+				"properties": {
+					"prompt_v2": {
+						"$ref": "#/components/schemas/Partial_PromptToOperators_"
+					}
+				},
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"FilterLeafSubset_prompt_v2_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.prompt_v2_"
+			},
+			"PromptsFilterNode": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/FilterLeafSubset_prompt_v2_"
+					},
+					{
+						"$ref": "#/components/schemas/PromptsFilterBranch"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
+					}
+				]
+			},
+			"PromptsFilterBranch": {
+				"properties": {
+					"right": {
+						"$ref": "#/components/schemas/PromptsFilterNode"
+					},
+					"operator": {
+						"type": "string",
+						"enum": [
+							"or",
+							"and"
+						]
+					},
+					"left": {
+						"$ref": "#/components/schemas/PromptsFilterNode"
+					}
+				},
+				"required": [
+					"right",
+					"operator",
+					"left"
+				],
+				"type": "object"
+			},
+			"PromptsQueryParams": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/PromptsFilterNode"
+					}
+				},
+				"required": [
+					"filter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PromptResult": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"user_defined_id": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"pretty_name": {
+						"type": "string"
+					},
+					"major_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"latest_version_id": {
+						"type": "string"
+					},
+					"latest_model_used": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"last_used": {
+						"type": "string"
+					},
+					"versions": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"user_defined_id",
+					"description",
+					"pretty_name",
+					"major_version",
+					"latest_version_id",
+					"latest_model_used",
+					"created_at",
+					"last_used",
+					"versions"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PromptResult_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/PromptResult"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptResult.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptResult_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"PromptQueryParams": {
+				"properties": {
+					"timeFilter": {
+						"properties": {
+							"end": {
+								"type": "string"
+							},
+							"start": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"end",
+							"start"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"timeFilter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PromptVersionResult": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"minor_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"major_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"helicone_template": {
+						"type": "string"
+					},
+					"prompt_v2": {
+						"type": "string"
+					},
+					"model": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"minor_version",
+					"major_version",
+					"helicone_template",
+					"prompt_v2",
+					"model"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PromptVersionResult_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/PromptVersionResult"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptVersionResult.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptVersionResult_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"PromptCreateSubversionParams": {
+				"properties": {
+					"newHeliconeTemplate": {}
+				},
+				"required": [
+					"newHeliconeTemplate"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Record_string.string_": {
+				"properties": {},
+				"additionalProperties": {
+					"type": "string"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"PromptInputRecord": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"inputs": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					},
+					"source_request": {
+						"type": "string"
+					},
+					"prompt_version": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"response_body": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"inputs",
+					"source_request",
+					"prompt_version",
+					"created_at",
+					"response_body"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PromptInputRecord-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/PromptInputRecord"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptInputRecord-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptInputRecord-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_PromptVersionResult-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/PromptVersionResult"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptVersionResult-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptVersionResult-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"GenerateHashQueryParams": {
 				"properties": {
 					"apiKey": {
@@ -111,6 +578,235 @@
 		"contact": {}
 	},
 	"paths": {
+		"/v1/prompt/query": {
+			"post": {
+				"operationId": "GetPrompts",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptsResult-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PromptsQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/{promptId}/query": {
+			"post": {
+				"operationId": "GetPrompt",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PromptQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/version/{promptVersionId}/subversion": {
+			"post": {
+				"operationId": "CreateSubversion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PromptCreateSubversionParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/version/{promptVersionId}/inputs/query": {
+			"post": {
+				"operationId": "GetInputs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptInputRecord-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"random": {
+										"type": "boolean"
+									},
+									"limit": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"required": [
+									"limit"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/{promptId}/versions/query": {
+			"post": {
+				"operationId": "GetPromptVersions",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResult-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {},
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/settings/query": {
 			"get": {
 				"operationId": "GetSettings",
