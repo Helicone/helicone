@@ -369,7 +369,10 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                     <Select
                       placeholder="Select cloud"
                       value={selectedDeployment}
-                      onValueChange={(value) => setSelectedDeployment(value)}
+                      onValueChange={(value) => {
+                        if (value === "AZURE" || value === "OPENAI")
+                          setSelectedDeployment(value);
+                      }}
                     >
                       <SelectItem value={"OPENAI"}>Open AI</SelectItem>
                       <SelectItem value={"AZURE"}>Azure</SelectItem>
