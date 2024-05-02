@@ -362,18 +362,21 @@ export type Database = {
           created_at: string | null
           dataset: string | null
           id: string
+          meta: Json | null
           organization: string | null
         }
         Insert: {
           created_at?: string | null
           dataset?: string | null
           id?: string
+          meta?: Json | null
           organization?: string | null
         }
         Update: {
           created_at?: string | null
           dataset?: string | null
           id?: string
+          meta?: Json | null
           organization?: string | null
         }
         Relationships: [

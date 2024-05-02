@@ -1682,7 +1682,8 @@
 					},
 					"providerKeyId": {
 						"type": "string"
-					}
+					},
+					"meta": {}
 				},
 				"required": [
 					"datasetId",
@@ -1787,6 +1788,7 @@
 						],
 						"type": "object"
 					},
+					"meta": {},
 					"createdAt": {
 						"type": "string"
 					},
@@ -1870,6 +1872,7 @@
 					"id",
 					"organization",
 					"dataset",
+					"meta",
 					"createdAt",
 					"hypotheses"
 				],
