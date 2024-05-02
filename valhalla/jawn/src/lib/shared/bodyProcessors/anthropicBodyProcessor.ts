@@ -1,3 +1,7 @@
+import {
+  calculateModel,
+  getModelFromResponse,
+} from "../../../utils/modelMapper";
 import { PromiseGenericResult, ok } from "../result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 
@@ -5,8 +9,11 @@ export class AnthropicBodyProcessor implements IBodyProcessor {
   public async parse(
     parseInput: ParseInput
   ): PromiseGenericResult<ParseOutput> {
-    const { responseBody, tokenCounter, model } = parseInput;
+    const { responseBody, tokenCounter, requestModel, modelOverride } =
+      parseInput;
     const parsedResponseBody = JSON.parse(responseBody);
+    const responseModel = getModelFromResponse(parsedResponseBody);
+    const model = calculateModel(requestModel, responseModel, modelOverride);
     if (model?.includes("claude-3")) {
       if (
         !parsedResponseBody?.usage?.output_tokens ||

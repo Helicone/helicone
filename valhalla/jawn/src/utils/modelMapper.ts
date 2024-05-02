@@ -1,6 +1,8 @@
-export function getModelFromRequest(requestBody: any, path: string) {
-  if (requestBody && requestBody.model) {
-    return requestBody.model;
+export function getModelFromRequest(requestBody: string, path: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (requestBody && (requestBody as any).model) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (requestBody as any).model;
   }
 
   const modelFromPath = getModelFromPath(path);
@@ -31,3 +33,35 @@ function getModelFromPath(path: string) {
 export function getModelFromResponse(responseBody: any) {
   return responseBody?.model ?? responseBody?.body?.model ?? null;
 }
+
+export function calculateModel(
+  requestModel?: string,
+  responseModel?: string,
+  modelOverride?: string
+): string | null {
+  return modelOverride ?? responseModel ?? requestModel ?? null;
+}
+
+const requestModels = new Set<string>([
+  "gpt-4-turbo",
+  "gpt-4-turbo-2024-04-09",
+  "gpt-4-vision-preview",
+  "gpt-4-1106-vision-preview",
+  "claude-3-opus-20240229",
+  "claude-3-sonnet-20240229",
+  "claude-3-haiku-20240307",
+]);
+
+const responseModels = new Set<string>(["dall-e-3", "dall-e-2"]);
+
+export const isRequestImageModel = (modelName: string): boolean => {
+  return requestModels.has(modelName);
+};
+
+export const isResponseImageModel = (modelName: string): boolean => {
+  return responseModels.has(modelName);
+};
+
+export const isImageModel = (modelName: string): boolean => {
+  return isRequestImageModel(modelName) || isResponseImageModel(modelName);
+};
