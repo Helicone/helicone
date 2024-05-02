@@ -19,17 +19,23 @@ const PromptDelete = (props: PromptDeleteProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   return (
-    <>
+    <div>
       <button
         onClick={(e) => {
           e.stopPropagation();
+          e.preventDefault();
           setOpen(true);
         }}
-        className="flex items-center hover:bg-red-200 rounded-lg p-1 -m-1"
+        className="flex items-center hover:bg-red-200 rounded-lg p-1 -m-1 z-10"
       >
         <TrashIcon className="h-4 w-4 text-red-500" />
       </button>
-      <ThemedModal open={open} setOpen={setOpen}>
+      <ThemedModal
+        open={open}
+        setOpen={(open) => {
+          setOpen(open);
+        }}
+      >
         <div className="flex flex-col space-y-4">
           <p className="font-semibold text-lg text-gray-900 dark:text-gray-100">
             Delete Prompt: {promptName}
@@ -84,7 +90,7 @@ const PromptDelete = (props: PromptDeleteProps) => {
           </div>
         </div>
       </ThemedModal>
-    </>
+    </div>
   );
 };
 

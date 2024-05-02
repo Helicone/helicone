@@ -55,7 +55,7 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
               key={`row-${index}`}
               className={clsx(
                 onSelect !== undefined &&
-                  "hover:bg-gray-100 hover:cursor-pointer"
+                  "hover:bg-gray-100 hover:cursor-pointer z-0"
               )}
               onClick={() => onSelect && onSelect(item)}
             >
