@@ -208,11 +208,11 @@ const DashboardPage = (props: DashboardPageProps) => {
   });
 
   useEffect(() => {
-    if (filterMap) {
+    if (!isAnyLoading && filterMap) {
       setAdvancedFilters(getAdvancedFilters());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isAnyLoading]);
 
   const onSetAdvancedFiltersHandler = (
     filters: UIFilterRow[],

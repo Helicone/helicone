@@ -1,5 +1,6 @@
 import {
   BooleanOperators,
+  FilterLeafRequestResponseVersioned,
   NumberOperators,
   TablesAndViews,
   TextOperators,
@@ -108,6 +109,7 @@ export type SingleFilterDef<T extends keyof TablesAndViews> = {
   table: T;
   column: KeyOfUnion<TablesAndViews[T]>;
   category: string;
+  isCustomProperty?: boolean;
 };
 
 export const DASHBOARD_PAGE_TABLE_FILTERS: [
@@ -434,6 +436,20 @@ export function getPropertyFilters(
     table: "properties",
     column: p,
     category: "properties",
+  }));
+}
+
+export function getPropertyFiltersV2(
+  properties: string[],
+  inputParams: InputParam[]
+): SingleFilterDef<"request_response_versioned">[] {
+  return properties.map((p) => ({
+    label: p,
+    operators: textWithSuggestions(inputParams),
+    table: "request_response_versioned",
+    column: p as keyof FilterLeafRequestResponseVersioned,
+    category: "properties",
+    isCustomProperty: true,
   }));
 }
 

@@ -30,7 +30,7 @@ import { TokensOverTime } from "../../../pages/api/metrics/tokensOverTime";
 import { TimeToFirstToken } from "../../../pages/api/metrics/timeToFirstToken";
 import { ThreatsOverTime } from "../../../pages/api/metrics/threatsOverTime";
 import { useModels } from "../../../services/hooks/models";
-import { useGetProperties } from "../../../services/hooks/properties";
+import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -81,7 +81,8 @@ export const useDashboardPage = ({
     isLoading: isPropertiesLoading,
     propertyFilters,
     searchPropertyFilters,
-  } = useGetProperties();
+  } = useGetPropertiesV2();
+
   const filterMap = (
     DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]
   ).concat(propertyFilters);
