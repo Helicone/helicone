@@ -24,6 +24,9 @@ export interface paths {
   "/v1/request/{requestId}/property": {
     put: operations["PutProperty"];
   };
+  "/v1/request/{requestId}/assets/{assetId}": {
+    post: operations["GetRequestAssetById"];
+  };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];
   };
@@ -351,6 +354,15 @@ Json: JsonObject;
       isCached?: boolean;
       includeInputs?: boolean;
     };
+    HeliconeRequestAsset: {
+      assetUrl: string;
+    };
+    ResultSuccess_HeliconeRequestAsset_: {
+      data: components["schemas"]["HeliconeRequestAsset"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HeliconeRequestAsset.string_": components["schemas"]["ResultSuccess_HeliconeRequestAsset_"] | components["schemas"]["ResultError_string_"];
     PromptsResult: {
       id: string;
       user_defined_id: string;
@@ -724,6 +736,22 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetRequestAssetById: {
+    parameters: {
+      path: {
+        requestId: string;
+        assetId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequestAsset.string_"];
         };
       };
     };
