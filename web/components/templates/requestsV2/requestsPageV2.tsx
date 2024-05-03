@@ -287,10 +287,15 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   useEffect(() => {
     const currentAdvancedFilters = searchParams.get("filters");
 
-    if (filterMap && advancedFilters.length === 0 && currentAdvancedFilters) {
+    if (
+      filterMap &&
+      advancedFilters.length === 0 &&
+      currentAdvancedFilters &&
+      !isDataLoading
+    ) {
       setAdvancedFilters(getAdvancedFilters());
     }
-  }, []);
+  }, [isDataLoading]);
 
   //convert this using useCallback
   const getAdvancedFilters = useCallback(() => {

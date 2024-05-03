@@ -165,6 +165,12 @@ interface RequestResponseVersionedToOperators {
   node_id: SingleKey<TextOperators>;
   job_id: SingleKey<TextOperators>;
   threat: SingleKey<BooleanOperators>;
+  properties: {
+    [key: string]: SingleKey<TextOperators>;
+  };
+  search_properties: {
+    [key: string]: SingleKey<TextOperators>;
+  };
 }
 
 export type FilterLeafRequestResponseLog =
@@ -247,7 +253,6 @@ export type TablesAndViews = {
   request: FilterLeafRequest;
   feedback: FilterLeafFeedback;
   properties_table: FilterLeafPropertiesTable;
-
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
   request_response_versioned: FilterLeafRequestResponseVersioned;
@@ -364,6 +369,22 @@ export function filterUIToFilterLeafs(
   return filters
     .filter((filter) => filter.value !== "")
     .map((filter) => {
+      if (
+        filterMap &&
+        filterMap[filter.filterMapIdx].isCustomProperty &&
+        filterMap[filter.filterMapIdx].isCustomProperty === true
+      ) {
+        return {
+          request_response_versioned: {
+            properties: {
+              [filterMap[filter.filterMapIdx]?.column]: {
+                [filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx]
+                  ?.value]: filter.value,
+              },
+            },
+          },
+        };
+      }
       const leaf: FilterLeaf = {
         [filterMap[filter.filterMapIdx]?.table]: {
           [filterMap[filter.filterMapIdx]?.column]: {
