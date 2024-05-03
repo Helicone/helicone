@@ -207,7 +207,7 @@ const whereKeyMappings: KeyMappings = {
     if ("search_properties" in filter && filter.search_properties) {
       const key = Object.keys(filter.search_properties)[0];
       const { operator, value } = extractOperatorAndValueFromAnOperator(
-        filter.search_properties[key as keyof typeof filter.properties]
+        filter.search_properties[key as keyof typeof filter.search_properties]
       );
       return {
         column: `key`,
