@@ -22,12 +22,5 @@ export async function getPropertiesV2(
   )
 `;
 
-  const { data, error } = await dbQueryClickhouse<Property>(
-    query,
-    builtFilter.argsAcc
-  );
-  if (error !== null) {
-    return { data: null, error: error };
-  }
-  return { data: data, error: null };
+  return await dbQueryClickhouse<Property>(query, builtFilter.argsAcc);
 }
