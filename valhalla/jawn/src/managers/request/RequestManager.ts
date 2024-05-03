@@ -2,23 +2,33 @@
 import { RequestQueryParams } from "../../controllers/public/requestController";
 import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
+import { S3Client } from "../../lib/shared/db/s3Client";
 import { Result, err, ok, resultMap } from "../../lib/shared/result";
 import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequestStore";
 import {
   HeliconeRequest,
+  HeliconeRequestAsset,
+  getRequestAsset,
   getRequests,
   getRequestsCached,
 } from "../../lib/stores/request/request";
-import { costOf, costOfPrompt } from "../../packages/cost";
+import { costOfPrompt } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
 
 export class RequestManager extends BaseManager {
   private versionedRequestStore: VersionedRequestStore;
+  private s3Client: S3Client;
   constructor(authParams: AuthParams) {
     super(authParams);
 
     this.versionedRequestStore = new VersionedRequestStore(
       authParams.organizationId
+    );
+    this.s3Client = new S3Client(
+      process.env.S3_ACCESS_KEY ?? "",
+      process.env.S3_SECRET_KEY ?? "",
+      process.env.S3_ENDPOINT ?? "",
+      process.env.S3_BUCKET_NAME ?? ""
     );
   }
 
@@ -182,6 +192,32 @@ export class RequestManager extends BaseManager {
           }),
         };
       });
+    });
+  }
+
+  async getRequestAssetById(
+    requestId: string,
+    assetId: string
+  ): Promise<Result<HeliconeRequestAsset, string>> {
+    const { data: assetData, error: assetError } = await getRequestAsset(
+      assetId,
+      requestId,
+      this.authParams.organizationId
+    );
+
+    if (assetError || !assetData) {
+      return err(`${assetError}`);
+    }
+    const assetUrl = await this.s3Client.getRequestResponseImageSignedUrl(
+      this.authParams.organizationId,
+      requestId,
+      assetData.id
+    );
+    if (assetUrl.error || !assetUrl.data) {
+      return err(`Error getting asset: ${assetUrl.error}`);
+    }
+    return ok({
+      assetUrl: assetUrl.data,
     });
   }
 }
