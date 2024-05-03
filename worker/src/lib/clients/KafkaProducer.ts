@@ -67,7 +67,7 @@ export class KafkaProducer {
           value: JSON.stringify(msg),
         });
 
-        const res = await p.produce("logs", message, {
+        const res = await p.produce("request-response-logs", message, {
           key: msg.log.request.id,
         });
         console.log(`Produced message, response: ${JSON.stringify(res)}`);
