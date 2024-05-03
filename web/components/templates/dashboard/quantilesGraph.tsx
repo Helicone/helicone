@@ -30,7 +30,7 @@ export const QuantilesGraph = ({
 
   const [currentMetric, setCurrentMetric] = useState("Latency");
 
-  const { quantiles, isLoading: quantilesIsLoading } = useQuantiles({
+  const { quantiles, isQuantilesLoading: quantilesIsLoading } = useQuantiles({
     uiFilters,
     timeFilter,
     dbIncrement: timeIncrement,

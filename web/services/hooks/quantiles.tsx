@@ -11,6 +11,7 @@ import {
   SingleFilterDef,
 } from "../lib/filters/frontendFilterDefs";
 import { UIFilterRow } from "../../components/shared/themed/themedAdvancedFilters";
+import { useGetPropertiesV2 } from "./propertiesV2";
 
 const useQuantiles = (data: {
   uiFilters: UIFilterRow[];
@@ -22,6 +23,13 @@ const useQuantiles = (data: {
   timeZoneDifference: number;
   metric: string;
 }) => {
+  const {
+    properties,
+    isLoading: isPropertiesLoading,
+    propertyFilters,
+    searchPropertyFilters,
+  } = useGetPropertiesV2();
+
   const {
     data: quantiles,
     isLoading,
@@ -36,14 +44,15 @@ const useQuantiles = (data: {
       data.timeZoneDifference,
     ],
     queryFn: async (query) => {
-      console.log(query);
       const timeFilter = query.queryKey[1];
       const metric = query.queryKey[2];
       const uiFilters = query.queryKey[3] as UIFilterRow[];
       const dbIncrement = query.queryKey[4];
       const timeZoneDifference = query.queryKey[5];
 
-      const filterMap = DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[];
+      const filterMap = (
+        DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]
+      ).concat(propertyFilters);
 
       const userFilters = filterUIToFilterLeafs(filterMap, uiFilters);
 
@@ -66,7 +75,9 @@ const useQuantiles = (data: {
     refetchOnWindowFocus: false,
   });
 
-  return { quantiles, isLoading, refetch };
+  const isQuantilesLoading = isPropertiesLoading || isLoading;
+
+  return { quantiles, isQuantilesLoading, refetch };
 };
 
 export { useQuantiles };
