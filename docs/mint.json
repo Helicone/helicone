@@ -46,7 +46,8 @@
           "pages": [
             "integrations/openai/node",
             "integrations/openai/python",
-            "integrations/openai/langchain"
+            "integrations/openai/langchain",
+            "integrations/openai/async"
           ]
         },
         "getting-started/integration-method/azure",

@@ -1,0 +1,73 @@
+---
+title: "Async Logging"
+description: "Learn how to integrate OpenAI with Helicone using Async Logging."
+---
+
+This does not use the Helicone Proxy.
+For more information on Async Logging, see the [Proxy vs Async](/getting-started/proxy-vs-async) page.
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into www.helicone.ai or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Set HELICONE_API_KEY as an environment variable">
+```typescript
+export HELICONE_API_KEY=<your API key>
+```
+  </Step>
+   <Step title="Install Helicone">
+
+```typescript
+npm install @helicone/helicone
+```
+
+  </Step>
+  <Step title="Replace the imports and add Helicone authorizations">
+<CodeGroup>
+
+```typescript example.ts
+const { HeliconeAsyncOpenAI as OpenAI,
+  IHeliconeAsyncClientOptions as ClientOptions } = require("helicone");
+
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  heliconeMeta: {
+    apiKey: process.env.HELICONE_API_KEY, // Can be set as env variable
+    // ... additional helicone meta fields
+  },
+});
+
+const chatCompletion = await openai.chat.completion.create({
+  model: "gpt-3.5-turbo",
+  messages: [{ role: "user", content: "Hello world" }],
+});
+
+console.log(chatCompletion.data.choices[0].message);
+```
+
+```python example.py
+from helicone.openai_async import openai, Meta
+
+chatResponse = openai.ChatCompletion.create(
+  model="gpt-3.5-turbo",
+  messages=[{
+    "role": "system",
+    "content": "This will be logged"
+  }],
+  max_tokens=512,
+  helicone_meta=Meta(
+    custom_properties={
+      "age": 25
+    }
+  )
+)
+
+
+```
+
+</CodeGroup>
+
+  </Step>
+</Steps>
