@@ -50,7 +50,6 @@ import {
 } from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
-import { ok } from "../../../lib/result";
 import CountryPanel from "./panels/countryPanel";
 import useNotification from "../../shared/notification/useNotification";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
@@ -192,6 +191,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   const {
     metrics,
     filterMap,
+    searchPropertyFilters,
     overTimeData,
     isAnyLoading,
     refetch,
@@ -207,11 +207,11 @@ const DashboardPage = (props: DashboardPageProps) => {
   });
 
   useEffect(() => {
-    if (filterMap) {
+    if (!isAnyLoading && filterMap) {
       setAdvancedFilters(getAdvancedFilters());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterMap]);
+  }, [isAnyLoading]);
 
   const onSetAdvancedFiltersHandler = (
     filters: UIFilterRow[],
@@ -529,12 +529,7 @@ const DashboardPage = (props: DashboardPageProps) => {
               filterMap,
               onAdvancedFilter: onSetAdvancedFiltersHandler,
               filters: advancedFilters,
-              searchPropertyFilters: async (
-                property: string,
-                search: string
-              ) => {
-                return ok(undefined);
-              },
+              searchPropertyFilters: searchPropertyFilters,
             }}
             savedFilters={{
               currentFilter: currFilter ?? undefined,

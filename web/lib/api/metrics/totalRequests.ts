@@ -26,7 +26,6 @@ export async function getTotalRequests(
     }
   );
   const query = `
-
   WITH total_count AS (
     SELECT count(*) as count
     FROM request_response_versioned
