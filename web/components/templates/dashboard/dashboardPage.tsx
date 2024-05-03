@@ -50,7 +50,6 @@ import {
 } from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
-import { ok } from "../../../lib/result";
 import CountryPanel from "./panels/countryPanel";
 import useNotification from "../../shared/notification/useNotification";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
