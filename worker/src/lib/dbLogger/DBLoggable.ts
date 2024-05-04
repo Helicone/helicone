@@ -656,16 +656,11 @@ export class DBLoggable {
 
     // Kafka processing
     if (
-      authParams.organizationId ||
+      authParams.organizationId === "83635a30-5ba6-41a8-8cc6-fb7df941b24a" ||
       authParams.organizationId === "01699b51-e07b-4d49-8cda-0c7557f5b6b1" ||
       authParams.organizationId === "dad350b5-4afe-4fd5-b910-ba74c0ad2f0f"
     ) {
-      const kafkaProcess = await this.useKafka(
-        db,
-        authParams,
-        S3_ENABLED,
-        requestHeaders
-      );
+      await this.useKafka(db, authParams, S3_ENABLED, requestHeaders);
 
       return ok(null);
     }
@@ -922,51 +917,6 @@ export class DBLoggable {
 
     const { body: rawResponseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
-
-    // console.log(
-    //   `DBLoggable, Raw Response Body: ${JSON.stringify(rawResponseBody)}`
-    // );
-
-    // const responseBody = this.tryParseBody(rawResponseBody, "response");
-
-    // console.log(
-    //   `DBLOGGABLE: Parsed Response Body: ${JSON.stringify(responseBody)}`
-    // );
-
-    // // Calculate model
-    // const requestModel = getModelFromRequest(requestBody, this.request.path);
-    // const responseModel = getModelFromResponse(responseBody);
-    // const model = this.calculateModel(
-    //   requestModel,
-    //   responseModel,
-    //   requestHeaders?.modelOverride ?? null
-    // );
-
-    // // eslint-disable-next-line prefer-const
-    // const { body: requestBodyFinal, assets: requestBodyAssets } =
-    //   this.processRequestBodyImages(
-    //     model,
-    //     this.omitBody(
-    //       requestHeaders?.omitHeaders?.omitRequest ?? false,
-    //       requestBody,
-    //       model
-    //     )
-    //   );
-
-    // const { body: responseBodyFinal, assets: responseBodyAssets } =
-    //   this.processResponseBodyImages(
-    //     model,
-    //     this.omitBody(
-    //       requestHeaders?.omitHeaders?.omitResponse ?? false,
-    //       responseBody,
-    //       model
-    //     )
-    //   );
-
-    // const assets = new Map([
-    //   ...(requestBodyAssets ?? []),
-    //   ...(responseBodyAssets ?? []),
-    // ]);
 
     if (S3_ENABLED === "true") {
       const s3Result = await db.requestResponseManager.storeRequestResponseRaw({
