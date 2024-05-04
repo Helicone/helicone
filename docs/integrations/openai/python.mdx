@@ -1,0 +1,93 @@
+---
+title: "Python"
+description: "Learn how to integrate OpenAI with Helicone using Python"
+---
+
+## Proxy Integration (recommended)
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into www.helicone.ai or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Set HELICONE_API_KEY as an environment variable">
+```Python
+export HELICONE_API_KEY=<your API key>
+```
+
+  </Step>
+  <Step title="Modify the base path and add a Helicone-Auth header">
+<CodeGroup>
+
+```Python OpenAI v1+
+client = OpenAI(
+  api_key="your-api-key-here",  # Replace with your OpenAI API key
+  base_url="https://oai.hconeai.com/v1",  # Set the API endpoint
+  default_headers= {  # Optionally set default headers or set per request (see below)
+    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+  }
+)
+```
+
+```Python OpenAI v1
+import openai
+
+openai.api_base = "https://oai.hconeai.com/v1"
+openai.Completion.create(
+  # ...other parameters
+  headers={
+    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+  }
+)
+
+```
+
+</CodeGroup>
+  </Step>
+</Steps>
+
+## Package Integration
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into www.helicone.ai or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Set HELICONE_API_KEY as an environment variable">
+    
+```Python
+export HELICONE_API_KEY=<your API key>
+```
+
+  </Step>
+  <Step title="Install the Helicone package">
+    
+```Python
+pip install helicone
+```
+
+  </Step>
+  <Step title="Modify OpenAI import to use Helicone">
+
+```Python
+from helicone.openai_proxy import openai # replace `import openai` with this line
+```
+
+  </Step>
+  <Step title="That's it! You're ready to start logging with Helicone. Here's an example of using Helicone along with our advanced features as parameters">
+
+```Python
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+    apiKey: request.env.OPENAI_API_KEY,
+    baseURL: "https://oai.hconeai.com/v1",
+    defaultHeaders: {
+        "Helicone-Auth": `Bearer ${request.env.HELICONE_API_KEY}`,
+    },
+});
+
+```
+
+  </Step>
+</Steps>

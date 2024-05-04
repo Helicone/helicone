@@ -39,6 +39,34 @@
       "pages": ["introduction"]
     },
     {
+      "group": "Integrations",
+      "pages": [
+        {
+          "group": "OpenAI",
+          "pages": [
+            "integrations/openai/node",
+            "integrations/openai/python",
+            "integrations/openai/langchain",
+            "integrations/openai/async"
+          ]
+        },
+        "getting-started/integration-method/azure",
+        "getting-started/integration-method/anthropic",
+        "getting-started/integration-method/anyscale",
+        "getting-started/integration-method/together",
+        "getting-started/integration-method/openrouter",
+        "getting-started/integration-method/litellm",
+        "getting-started/integration-method/posthog",
+        {
+          "group": "Other",
+          "pages": [
+            "getting-started/integration-method/gateway",
+            "getting-started/integration-method/custom"
+          ]
+        }
+      ]
+    },
+    {
       "group": "Observability",
       "pages": ["use-cases/getting-user-requests"]
     },
@@ -65,32 +93,6 @@
     {
       "group": "Getting Started",
       "pages": ["getting-started/quick-start"]
-    },
-    {
-      "group": "Integrations",
-      "pages": [
-        {
-          "group": "OpenAI",
-          "pages": [
-            "getting-started/integration-method/openai-proxy",
-            "getting-started/integration-method/openai"
-          ]
-        },
-        "getting-started/integration-method/azure",
-        "getting-started/integration-method/anthropic",
-        "getting-started/integration-method/anyscale",
-        "getting-started/integration-method/together",
-        "getting-started/integration-method/openrouter",
-        "getting-started/integration-method/litellm",
-        "getting-started/integration-method/posthog",
-        {
-          "group": "Other",
-          "pages": [
-            "getting-started/integration-method/gateway",
-            "getting-started/integration-method/custom"
-          ]
-        }
-      ]
     },
     {
       "group": "Self Hosting",
