@@ -16,6 +16,10 @@ const db = pgp({
       : undefined,
 });
 
+process.on("exit", () => {
+  pgp.end();
+});
+
 const requestColumns = new pgp.helpers.ColumnSet(
   [
     "id",
@@ -80,6 +84,7 @@ export class LogStore {
     try {
       await db.tx(async (t: pgPromise.ITask<{}>) => {
         // Insert into the 'request' table
+        console.log(`Here 1`);
         if (payload.requests && payload.requests.length > 0) {
           const insertRequest =
             pgp.helpers.insert(payload.requests, requestColumns) +
@@ -87,6 +92,7 @@ export class LogStore {
           await t.none(insertRequest);
         }
 
+        console.log(`Here 2`);
         // Insert into the 'response' table with conflict resolution
         if (payload.responses && payload.responses.length > 0) {
           const insertResponse =
@@ -95,12 +101,14 @@ export class LogStore {
           await t.none(insertResponse);
         }
 
+        console.log(`Here 3`);
         if (payload.assets && payload.assets.length > 0) {
           const insertResponse =
             pgp.helpers.insert(payload.assets, assetColumns) + onConflictAsset;
           await t.none(insertResponse);
         }
 
+        console.log(`Here 4`);
         payload.prompts.sort((a, b) => {
           if (a.createdAt && b.createdAt) {
             if (a.createdAt < b.createdAt) {
@@ -113,6 +121,7 @@ export class LogStore {
           return 0;
         });
 
+        console.log(`Here 5`);
         for (const promptRecord of payload.prompts) {
           // acquire an exclusive lock on the prompt record for the duration of the transaction
           await t.query("SELECT pg_advisory_xact_lock($1)", [
