@@ -30,6 +30,7 @@ import { TokensOverTime } from "../../../pages/api/metrics/tokensOverTime";
 import { TimeToFirstToken } from "../../../pages/api/metrics/timeToFirstToken";
 import { ThreatsOverTime } from "../../../pages/api/metrics/threatsOverTime";
 import { useModels } from "../../../services/hooks/models";
+import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -72,11 +73,19 @@ export interface DashboardPageData {
 export const useDashboardPage = ({
   timeFilter,
   uiFilters,
-  apiKeyFilter,
   timeZoneDifference,
   dbIncrement,
 }: DashboardPageData) => {
-  const filterMap = DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[];
+  const {
+    properties,
+    isLoading: isPropertiesLoading,
+    propertyFilters,
+    searchPropertyFilters,
+  } = useGetPropertiesV2();
+
+  const filterMap = (
+    DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]
+  ).concat(propertyFilters);
 
   const { isLoading: isModelsLoading, models } = useModels(timeFilter, 5);
 
@@ -249,18 +258,21 @@ export const useDashboardPage = ({
   };
 
   function isLoading(x: UseQueryResult<any>) {
-    return x.isLoading || x.isFetching;
+    return x.isLoading || x.isFetching || isPropertiesLoading;
   }
 
   const isAnyLoading =
     Object.values(overTimeData).some(isLoading) ||
-    Object.values(metrics).some(isLoading);
+    Object.values(metrics).some(isLoading) ||
+    isPropertiesLoading;
 
   return {
     filterMap,
     metrics,
     overTimeData,
     isAnyLoading,
+    properties,
+    searchPropertyFilters,
     refetch: () => {
       Object.values(overTimeData).forEach((x) => x.refetch());
       Object.values(metrics).forEach((x) => x.refetch());

@@ -24,11 +24,17 @@ export interface paths {
   "/v1/request/{requestId}/property": {
     put: operations["PutProperty"];
   };
+  "/v1/request/{requestId}/assets/{assetId}": {
+    post: operations["GetRequestAssetById"];
+  };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];
   };
   "/v1/prompt/{promptId}/query": {
     post: operations["GetPrompt"];
+  };
+  "/v1/prompt/{promptId}": {
+    delete: operations["DeletePrompt"];
   };
   "/v1/prompt/version/{promptVersionId}/subversion": {
     post: operations["CreateSubversion"];
@@ -348,11 +354,21 @@ Json: JsonObject;
       isCached?: boolean;
       includeInputs?: boolean;
     };
+    HeliconeRequestAsset: {
+      assetUrl: string;
+    };
+    ResultSuccess_HeliconeRequestAsset_: {
+      data: components["schemas"]["HeliconeRequestAsset"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HeliconeRequestAsset.string_": components["schemas"]["ResultSuccess_HeliconeRequestAsset_"] | components["schemas"]["ResultError_string_"];
     PromptsResult: {
       id: string;
       user_defined_id: string;
       description: string;
       pretty_name: string;
+      created_at: string;
       /** Format: double */
       major_version: number;
     };
@@ -724,6 +740,22 @@ export interface operations {
       };
     };
   };
+  GetRequestAssetById: {
+    parameters: {
+      path: {
+        requestId: string;
+        assetId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequestAsset.string_"];
+        };
+      };
+    };
+  };
   GetPrompts: {
     requestBody: {
       content: {
@@ -756,6 +788,19 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Result_PromptResult.string_"];
         };
+      };
+    };
+  };
+  DeletePrompt: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
       };
     };
   };

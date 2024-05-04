@@ -107,40 +107,41 @@ export type SingleFilterDef<T extends keyof TablesAndViews> = {
   table: T;
   column: KeyOfUnion<TablesAndViews[T]>;
   category: string;
+  isCustomProperty?: boolean;
 };
 
 export const DASHBOARD_PAGE_TABLE_FILTERS: [
-  SingleFilterDef<"request_response_log">,
-  SingleFilterDef<"request_response_log">,
-  SingleFilterDef<"request_response_log">,
-  SingleFilterDef<"request_response_log">
+  SingleFilterDef<"request_response_versioned">,
+  SingleFilterDef<"request_response_versioned">,
+  SingleFilterDef<"request_response_versioned">,
+  SingleFilterDef<"request_response_versioned">
 ] = [
   {
     label: "Model",
     operators: textOperators,
     category: "request",
-    table: "request_response_log",
+    table: "request_response_versioned",
     column: "model",
   },
   {
     label: "Status",
     operators: numberOperators,
     category: "request",
-    table: "request_response_log",
+    table: "request_response_versioned",
     column: "status",
   },
   {
     label: "Latency",
     operators: numberOperators,
     category: "request",
-    table: "request_response_log",
+    table: "request_response_versioned",
     column: "latency",
   },
   {
     label: "User",
     operators: textOperators,
     category: "request",
-    table: "request_response_log",
+    table: "request_response_versioned",
     column: "user_id",
   },
 ];

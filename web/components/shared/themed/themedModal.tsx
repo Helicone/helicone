@@ -19,6 +19,7 @@ const ThemedModal = (props: ThemedModalProps) => {
       <Dialog
         as="div"
         className={clsx(themeContext?.theme ?? "light", "relative z-40")}
+        onClick={(e) => e.stopPropagation()}
         onClose={() => setOpen(false)}
       >
         <Transition.Child

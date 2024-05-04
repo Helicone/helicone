@@ -192,18 +192,42 @@ const whereKeyMappings: KeyMappings = {
     job_id: "request_response_log.job_id",
     threat: "request_response_log.threat",
   }),
-  request_response_versioned: easyKeyMappings<"request_response_versioned">({
-    latency: "request_response_versioned.latency",
-    status: "request_response_versioned.status",
-    request_created_at: "request_response_versioned.request_created_at",
-    response_created_at: "request_response_versioned.response_created_at",
-    model: "request_response_versioned.model",
-    user_id: "request_response_versioned.user_id",
-    organization_id: "request_response_versioned.organization_id",
-    node_id: "request_response_versioned.node_id",
-    job_id: "request_response_versioned.job_id",
-    threat: "request_response_versioned.threat",
-  }),
+  request_response_versioned: (filter) => {
+    if ("properties" in filter && filter.properties) {
+      const key = Object.keys(filter.properties)[0];
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.properties[key as keyof typeof filter.properties]
+      );
+      return {
+        column: `properties['${key}']`,
+        operator: operator,
+        value: value,
+      };
+    }
+    if ("search_properties" in filter && filter.search_properties) {
+      const key = Object.keys(filter.search_properties)[0];
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.search_properties[key as keyof typeof filter.search_properties]
+      );
+      return {
+        column: `key`,
+        operator: operator,
+        value: value,
+      };
+    }
+    return easyKeyMappings<"request_response_versioned">({
+      latency: "request_response_versioned.latency",
+      status: "request_response_versioned.status",
+      request_created_at: "request_response_versioned.request_created_at",
+      response_created_at: "request_response_versioned.response_created_at",
+      model: "request_response_versioned.model",
+      user_id: "request_response_versioned.user_id",
+      organization_id: "request_response_versioned.organization_id",
+      node_id: "request_response_versioned.node_id",
+      job_id: "request_response_versioned.job_id",
+      threat: "request_response_versioned.threat",
+    })(filter);
+  },
   users_view: easyKeyMappings<"request_response_log">({
     status: "r.status",
     user_id: "r.user_id",
