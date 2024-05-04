@@ -1,5 +1,7 @@
+import { SupabaseClient } from "@supabase/supabase-js";
 import { S3Client } from "../clients/S3Client";
 import { Result, ok } from "../util/results";
+import { Database } from "../../../supabase/database.types";
 
 export type RequestResponseContent = {
   requestId: string;
@@ -12,7 +14,10 @@ export type RequestResponseContent = {
 };
 
 export class RequestResponseManager {
-  constructor(private s3Client: S3Client) {}
+  constructor(
+    private s3Client: S3Client,
+    private supabase: SupabaseClient<Database>
+  ) {}
 
   async storeRequestResponseRaw(content: {
     organizationId: string;
@@ -116,9 +121,33 @@ export class RequestResponseManager {
           assetId
         );
       }
+
+      if (!assetUploadResult.error) {
+        await this.saveRequestResponseAssets(
+          assetId,
+          requestId,
+          organizationId
+        );
+      }
     } catch (error) {
       console.error("Error uploading image:", error);
       // If we fail to upload an image, we don't want to fail logging the request
+    }
+  }
+
+  private async saveRequestResponseAssets(
+    assetId: string,
+    requestId: string,
+    organizationId: string
+  ) {
+    const result = await this.supabase
+      .from("asset")
+      .insert([
+        { id: assetId, request_id: requestId, organization_id: organizationId },
+      ]);
+
+    if (result.error) {
+      throw new Error(`Error saving asset: ${result.error.message}`);
     }
   }
 
