@@ -34,24 +34,50 @@ const consumer = kafka?.consumer({
   maxBytes: 1024 * 1024,
 });
 
+process.on("exit", async () => {
+  await consumer?.stop();
+  await consumer?.disconnect();
+  console.log("Consumer disconnected.");
+});
+
 export const consume = async () => {
   if (process.env.KAFKA_ENABLED && !consumer) {
     console.error("Failed to create Kafka consumer");
     return;
   }
 
+  let retryDelay = 100;
+  const maxDelay = 30000;
+
+  while (true) {
+    try {
+      await consumer?.connect();
+      console.log("Successfully connected to Kafka");
+      break;
+    } catch (error: any) {
+      console.error(`Failed to connect to Kafka: ${error.message}`);
+      console.log(`Retrying in ${retryDelay}ms...`);
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      retryDelay = Math.min(retryDelay * 2, maxDelay); // Exponential backoff with a cap
+    }
+  }
+
   await consumer?.connect();
   await consumer?.subscribe({
-    topic: "logs",
+    topic: "request-response-logs",
     fromBeginning: true,
   });
 
   await consumer?.run({
+    eachBatchAutoResolve: true,
     eachBatch: async ({
       batch,
       resolveOffset,
       heartbeat,
       commitOffsetsIfNecessary,
+      isRunning,
+      isStale,
+      uncommittedOffsets,
     }) => {
       const consumeResult = await consumeBatch(batch);
 
@@ -74,7 +100,9 @@ async function consumeBatch(batch: Batch): PromiseGenericResult<string> {
   }-${batch.firstOffset()}-${batch.lastOffset()}`;
 
   console.log(
-    `Processing batch ${batchId} with ${batch.messages.length} messages`
+    `Received batch with ${
+      batch.messages.length
+    } messages. Offset: ${batch.firstOffset()}`
   );
 
   const messages: Message[] = [];
@@ -91,7 +119,6 @@ async function consumeBatch(batch: Batch): PromiseGenericResult<string> {
             message
           )}`
         );
-        return err(`Failed to parse message: ${error}`);
       }
     } else {
       // TODO: Should we skip or fail the batch?
