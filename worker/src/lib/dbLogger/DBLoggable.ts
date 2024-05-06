@@ -656,7 +656,7 @@ export class DBLoggable {
 
     // Kafka processing
     if (
-      authParams.organizationId === "83635a30-5ba6-41a8-8cc6-fb7df941b24a" ||
+      // authParams.organizationId === "83635a30-5ba6-41a8-8cc6-fb7df941b24a" ||
       authParams.organizationId === "01699b51-e07b-4d49-8cda-0c7557f5b6b1" ||
       authParams.organizationId === "dad350b5-4afe-4fd5-b910-ba74c0ad2f0f"
     ) {
