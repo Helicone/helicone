@@ -6,7 +6,7 @@ import { HandlerContext } from "./HandlerContext";
 
 export class RateLimitHandler extends AbstractLogHandler {
   private rateLimitStore: RateLimitStore;
-  private rateLimitLogs: ClickhouseDB["Tables"]["rate_limit_log"][];
+  private rateLimitLogs: ClickhouseDB["Tables"]["rate_limit_log_v2"][];
 
   constructor(rateLimitStore: RateLimitStore) {
     super();
@@ -32,8 +32,9 @@ export class RateLimitHandler extends AbstractLogHandler {
 
       if (isRateLimited) {
         this.rateLimitLogs.push({
+          request_id: context.message.log.request.id,
           organization_id: context.orgParams.id,
-          created_at:
+          rate_limit_created_at:
             context.message.log.request.requestCreatedAt.toISOString(),
         });
         return ok("Rate limited.");

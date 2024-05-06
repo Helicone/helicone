@@ -161,6 +161,12 @@ export interface RateLimitLog {
   created_at: string;
 }
 
+export interface RateLimitLogV2 {
+  request_id: string;
+  organization_id: string;
+  rate_limit_created_at: string;
+}
+
 export interface InsertRequestResponseVersioned {
   response_id: Nullable<string>;
   response_created_at: Nullable<string>;
@@ -194,6 +200,7 @@ export interface ClickhouseDB {
     property_with_response_v1: PropertyWithResponseV1;
     request_response_versioned: RequestResponseVersioned;
     rate_limit_log: RateLimitLog;
+    rate_limit_log_v2: RateLimitLogV2;
     cache_hits: CacheHits;
   };
 }
