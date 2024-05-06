@@ -23,8 +23,8 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
         if (typeof code !== "string") return "";
         return highlight(code, languages.markdown, "markdown");
       }}
-      padding={10}
-      className="text-sm border border-gray-300 dark:border-gray-700 rounded-lg"
+      padding={16}
+      className="text-sm text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded-lg"
       // mono font
       style={{
         fontFamily: '"Fira Code", "Fira Mono", monospace',
