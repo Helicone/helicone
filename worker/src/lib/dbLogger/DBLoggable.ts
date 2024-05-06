@@ -21,7 +21,6 @@ import { getTokenCount } from "../clients/TokenCounterClient";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
 import {
-  isImageModel,
   isRequestImageModel,
   isResponseImageModel,
 } from "../util/imageModelMapper";
@@ -36,6 +35,7 @@ import {
   PosthogClient,
 } from "../clients/PosthogClient";
 import { costOfPrompt } from "../../packages/cost";
+import { KafkaMessage, KafkaProducer } from "../clients/KafkaProducer";
 
 export interface DBLoggableProps {
   response: {
@@ -632,6 +632,7 @@ export class DBLoggable {
       clickhouse: ClickhouseClientWrapper;
       queue: RequestResponseStore;
       requestResponseManager: RequestResponseManager;
+      kafkaProducer: KafkaProducer;
     },
     S3_ENABLED: Env["S3_ENABLED"],
     requestHeaders?: HeliconeHeaders
@@ -646,6 +647,17 @@ export class DBLoggable {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
       return err(`Auth failed! ${error}` ?? "Helicone organization not found");
+    }
+
+    // Kafka processing
+    if (
+      // authParams.organizationId === "83635a30-5ba6-41a8-8cc6-fb7df941b24a" ||
+      authParams.organizationId === "01699b51-e07b-4d49-8cda-0c7557f5b6b1" ||
+      authParams.organizationId === "dad350b5-4afe-4fd5-b910-ba74c0ad2f0f"
+    ) {
+      await this.useKafka(db, authParams, S3_ENABLED, requestHeaders);
+
+      return ok(null);
     }
 
     const rateLimiter = await db.dbWrapper.getRateLimiter();
@@ -722,60 +734,33 @@ export class DBLoggable {
     if (!responseResult.data || responseResult.error) {
       // Log the error in S3
       if (S3_ENABLED === "true") {
-        if (model && isImageModel(model)) {
-          s3Result = await db.requestResponseManager.storeRequestResponseImage({
-            organizationId: authParams.organizationId,
-            requestId: this.request.requestId,
-            requestBody: requestResult.data.body,
-            responseBody: JSON.stringify({
-              helicone_error: "error getting response, " + responseResult.error,
-              helicone_repsonse_body_as_string: (
-                await this.response.getResponseBody()
-              ).body,
-            }),
-            assets: assets,
-          });
-        } else {
-          s3Result = await db.requestResponseManager.storeRequestResponseData({
-            organizationId: authParams.organizationId,
-            requestId: this.request.requestId,
-            requestBody: requestResult.data.body,
-            responseBody: JSON.stringify({
-              helicone_error: "error getting response, " + responseResult.error,
-              helicone_repsonse_body_as_string: (
-                await this.response.getResponseBody()
-              ).body,
-            }),
-            assets: assets,
-          });
-        }
-
-        if (s3Result.error) {
-          console.error("Error storing request response", s3Result.error);
-        }
+        s3Result = await db.requestResponseManager.storeRequestResponseData({
+          organizationId: authParams.organizationId,
+          requestId: this.request.requestId,
+          requestBody: requestResult.data.body,
+          responseBody: JSON.stringify({
+            helicone_error: "error getting response, " + responseResult.error,
+            helicone_repsonse_body_as_string: (
+              await this.response.getResponseBody()
+            ).body,
+          }),
+          model: model,
+          assets: assets,
+        });
       }
 
       return responseResult;
     }
 
     if (S3_ENABLED === "true") {
-      if (model && isImageModel(model)) {
-        s3Result = await db.requestResponseManager.storeRequestResponseImage({
-          organizationId: authParams.organizationId,
-          requestId: this.request.requestId,
-          requestBody: requestResult.data.body,
-          responseBody: responseResult.data.body,
-          assets: assets,
-        });
-      } else {
-        s3Result = await db.requestResponseManager.storeRequestResponseData({
-          organizationId: authParams.organizationId,
-          requestId: this.request.requestId,
-          requestBody: requestResult.data.body,
-          responseBody: responseResult.data.body,
-          assets: assets,
-        });
-      }
+      s3Result = await db.requestResponseManager.storeRequestResponseData({
+        organizationId: authParams.organizationId,
+        requestId: this.request.requestId,
+        requestBody: requestResult.data.body,
+        responseBody: responseResult.data.body,
+        model: model,
+        assets: assets,
+      });
 
       if (s3Result.error) {
         console.error("Error storing request response", s3Result.error);
@@ -894,6 +879,175 @@ export class DBLoggable {
     return ok({
       cost,
     });
+  }
+
+  async useKafka(
+    db: {
+      supabase: SupabaseClient<Database>; // TODO : Deprecate
+      dbWrapper: DBWrapper;
+      clickhouse: ClickhouseClientWrapper;
+      queue: RequestResponseStore;
+      requestResponseManager: RequestResponseManager;
+      kafkaProducer: KafkaProducer;
+    },
+    authParams: AuthParams,
+    S3_ENABLED: Env["S3_ENABLED"],
+    requestHeaders?: HeliconeHeaders
+  ) {
+    if (
+      !authParams?.organizationId ||
+      // Must be helicone api key or proxy key
+      !requestHeaders?.heliconeAuthV2 ||
+      (!requestHeaders?.heliconeAuthV2?.token &&
+        !this.request.heliconeProxyKeyId)
+    ) {
+      return err(`Auth failed! ${authParams?.organizationId}`);
+    }
+
+    const org = await db.dbWrapper.getOrganization();
+
+    if (org.error !== null) {
+      return err(org.error);
+    }
+
+    const { body: rawResponseBody, endTime: responseEndTime } =
+      await this.response.getResponseBody();
+
+    if (S3_ENABLED === "true") {
+      const s3Result = await db.requestResponseManager.storeRequestResponseRaw({
+        organizationId: authParams.organizationId,
+        requestId: this.request.requestId,
+        requestBody: this.request.bodyText ?? "{}",
+        responseBody: rawResponseBody,
+      });
+
+      if (s3Result.error) {
+        console.error(
+          `Error storing request response in S3: ${s3Result.error}`
+        );
+      }
+    }
+
+    const endTime = this.timing.endTime ?? responseEndTime;
+    const kafkaMessage: KafkaMessage = {
+      id: this.request.requestId,
+      authorization: requestHeaders.heliconeAuthV2.token,
+      heliconeMeta: {
+        modelOverride: requestHeaders.modelOverride ?? undefined,
+        omitRequestLog: requestHeaders.omitHeaders.omitRequest,
+        omitResponseLog: requestHeaders.omitHeaders.omitResponse,
+      },
+      log: {
+        request: {
+          id: this.request.requestId,
+          userId: authParams.userId ?? "",
+          promptId: requestHeaders.promptId ?? "",
+          properties: this.request.properties,
+          heliconeApiKeyId: authParams.heliconeApiKeyId, // If undefined, proxy key id must be present
+          heliconeProxyKeyId: this.request.heliconeProxyKeyId ?? undefined,
+          targetUrl: this.request.targetUrl,
+          provider: this.request.provider,
+          bodySize: this.request.bodyText?.length ?? 0,
+          path: this.request.path,
+          threat: this.request.threat ?? undefined,
+          countryCode: this.request.country_code ?? undefined,
+          requestCreatedAt: this.request.startTime ?? new Date(),
+          isStream: this.request.isStream,
+          heliconeTemplate: this.request.heliconeTemplate ?? undefined,
+        },
+        response: {
+          id: this.response.responseId,
+          status: await this.response.status(),
+          bodySize: rawResponseBody.length,
+          timeToFirstToken: (await this.timing.timeToFirstToken()) ?? undefined,
+          responseCreatedAt: endTime,
+          delayMs: endTime.getTime() - this.timing.startTime.getTime(),
+        },
+      },
+    };
+
+    await db.kafkaProducer.sendMessage(kafkaMessage);
+
+    return ok(null);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tryParseBody(body: string, bodyType: "request" | "response"): any {
+    try {
+      return JSON.parse(body);
+    } catch (e) {
+      console.error(`Error parsing ${bodyType} body: ${e}`);
+      return {
+        helicone_error: `error parsing ${bodyType} body: ${e}`,
+        parse_response_error: e,
+        body: body,
+      };
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  omitBody(omitBody: boolean, body: any, model: string): any {
+    return omitBody
+      ? {
+          model: model,
+        }
+      : body;
+  }
+
+  processRequestBodyImages(
+    model: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    requestBody: any
+  ): ImageModelParsingResponse {
+    let imageModelParsingResponse: ImageModelParsingResponse = {
+      body: requestBody,
+      assets: new Map<string, string>(),
+    };
+    if (model && isRequestImageModel(model)) {
+      const imageModelParser = getRequestImageModelParser(model);
+      if (imageModelParser) {
+        imageModelParsingResponse =
+          imageModelParser.processRequestBody(requestBody);
+      }
+    }
+
+    imageModelParsingResponse.body = unsupportedImage(
+      imageModelParsingResponse.body
+    );
+
+    return imageModelParsingResponse;
+  }
+
+  processResponseBodyImages(
+    model: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    responseBody: any
+  ): ImageModelParsingResponse {
+    let imageModelParsingResponse: ImageModelParsingResponse = {
+      body: responseBody,
+      assets: new Map<string, string>(),
+    };
+    if (model && isResponseImageModel(model)) {
+      const imageModelParser = getResponseImageModelParser(model);
+      if (imageModelParser) {
+        imageModelParsingResponse =
+          imageModelParser.processResponseBody(responseBody);
+      }
+    }
+
+    imageModelParsingResponse.body = unsupportedImage(
+      imageModelParsingResponse.body
+    );
+
+    return imageModelParsingResponse;
+  }
+
+  calculateModel(
+    requestModel: string | null,
+    responseModel: string | null,
+    modelOverride: string | null
+  ): string {
+    return modelOverride ?? responseModel ?? requestModel ?? "not-found";
   }
 
   modelCost(modelRow: {
