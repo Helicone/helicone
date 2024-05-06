@@ -37,7 +37,9 @@ const allowedOrigins = allowedOriginsEnv[ENVIRONMENT];
 
 const app = express();
 
-if (process.env.KAFKA_ENABLED) {
+const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
+const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
+if (KAFKA_ENABLED) {
   consume();
 }
 

@@ -4,34 +4,36 @@ import { Message } from "../handlers/HandlerContext";
 import { PromiseGenericResult, err, ok } from "../shared/result";
 
 let kafka;
-if (
-  process.env.KAFKA_ENABLED &&
-  process.env.UPSTASH_KAFKA_BROKER &&
-  process.env.UPSTASH_KAFKA_USERNAME &&
-  process.env.UPSTASH_KAFKA_PASSWORD
-) {
+const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
+const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
+const KAFKA_BROKER = KAFKA_CREDS?.UPSTASH_KAFKA_BROKER;
+const KAFKA_USERNAME = KAFKA_CREDS?.UPSTASH_KAFKA_USERNAME;
+const KAFKA_PASSWORD = KAFKA_CREDS?.UPSTASH_KAFKA_PASSWORD;
+
+if (KAFKA_ENABLED && KAFKA_BROKER && KAFKA_USERNAME && KAFKA_PASSWORD) {
   kafka = new Kafka({
-    brokers: [process.env.UPSTASH_KAFKA_BROKER],
+    brokers: [KAFKA_BROKER],
     sasl: {
       mechanism: "scram-sha-512",
-      username: process.env.UPSTASH_KAFKA_USERNAME,
-      password: process.env.UPSTASH_KAFKA_PASSWORD,
+      username: KAFKA_USERNAME,
+      password: KAFKA_PASSWORD,
     },
     ssl: true,
     logLevel: logLevel.ERROR,
   });
 } else {
-  if (!process.env.KAFKA_ENABLED) {
+  if (!KAFKA_ENABLED) {
     console.log("Kafka is disabled.");
   } else {
     console.error("Required Kafka environment variables are not set.");
   }
 }
 
-// Average message is 1.12KB, with 1MB max batch size, we can have ~1000 messages per batch
+// Average message is 1kB, so we can set minBytes to 1kB and maxBytes to 10kB
 const consumer = kafka?.consumer({
   groupId: "jawn-consumer",
-  maxBytes: 1024 * 1024,
+  minBytes: 1000, // 1 kB
+  maxBytes: 10000, // 10 kB
 });
 
 process.on("exit", async () => {
@@ -41,7 +43,7 @@ process.on("exit", async () => {
 });
 
 export const consume = async () => {
-  if (process.env.KAFKA_ENABLED && !consumer) {
+  if (KAFKA_ENABLED && !consumer) {
     console.error("Failed to create Kafka consumer");
     return;
   }
@@ -64,7 +66,7 @@ export const consume = async () => {
 
   await consumer?.connect();
   await consumer?.subscribe({
-    topic: "request-response-logs",
+    topic: "request-response-logs-prod",
     fromBeginning: true,
   });
 
@@ -75,9 +77,6 @@ export const consume = async () => {
       resolveOffset,
       heartbeat,
       commitOffsetsIfNecessary,
-      isRunning,
-      isStale,
-      uncommittedOffsets,
     }) => {
       const consumeResult = await consumeBatch(batch);
 
@@ -129,7 +128,12 @@ async function consumeBatch(batch: Batch): PromiseGenericResult<string> {
   const logManager = new LogManager();
 
   try {
-    await logManager.processLogEntries(messages, batchId);
+    await logManager.processLogEntries(messages, {
+      batchId,
+      partition: batch.partition,
+      lastOffset: batch.lastOffset,
+      messageCount: batch.messages.length,
+    });
     return ok(batchId);
   } catch (error) {
     // TODO: Should we skip or fail the batch?
