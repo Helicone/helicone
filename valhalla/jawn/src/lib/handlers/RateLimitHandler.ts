@@ -15,7 +15,6 @@ export class RateLimitHandler extends AbstractLogHandler {
   }
 
   async handle(context: HandlerContext): PromiseGenericResult<string> {
-    console.log(`RateLimitHandler: ${context.message.log.request.id}`);
     if (!context.orgParams?.id) {
       return err("Organization ID not found in org params");
     }

@@ -1,4 +1,5 @@
 import { ImageModelParsingResponse } from "./parsingResponse";
+import crypto from "crypto";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export abstract class ImageModelResponseBodyParser {
