@@ -6,13 +6,13 @@ import { LoggingHandler } from "../lib/handlers/LoggingHandler";
 import { ResponseBodyHandler } from "../lib/handlers/ResponseBodyHandler";
 import { HandlerContext, Message } from "../lib/handlers/HandlerContext";
 import { LogStore } from "../lib/stores/LogStore";
-import { RequestResponseStore } from "../lib/stores/RequestResponseStore";
 import { ClickhouseClientWrapper } from "../lib/db/ClickhouseWrapper";
 import { PromptHandler } from "../lib/handlers/PromptHandler";
 import { PostHogHandler } from "../lib/handlers/PostHogHandler";
 import { S3Client } from "../lib/shared/db/s3Client";
 import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
 import * as Sentry from "@sentry/node";
+import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestStore";
 
 export class LogManager {
   public async processLogEntries(
@@ -47,7 +47,7 @@ export class LogManager {
     const promptHandler = new PromptHandler();
     const loggingHandler = new LoggingHandler(
       new LogStore(),
-      new RequestResponseStore(clickhouseClientWrapper),
+      new VersionedRequestStore(""),
       s3Client
     );
     // Store in S3 after logging to DB
