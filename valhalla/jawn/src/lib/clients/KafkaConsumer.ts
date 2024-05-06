@@ -127,7 +127,12 @@ async function consumeBatch(batch: Batch): PromiseGenericResult<string> {
   const logManager = new LogManager();
 
   try {
-    await logManager.processLogEntries(messages, batchId);
+    await logManager.processLogEntries(messages, {
+      batchId,
+      partition: batch.partition,
+      lastOffset: batch.lastOffset,
+      messageCount: batch.messages.length,
+    });
     return ok(batchId);
   } catch (error) {
     // TODO: Should we skip or fail the batch?
