@@ -50,8 +50,6 @@ export class LoggingHandler extends AbstractLogHandler {
   }
 
   async handle(context: HandlerContext): PromiseGenericResult<string> {
-    console.log(`LoggingHandler: ${context.message.log.request.id}`);
-
     // Perform all mappings first and check for failures before updating the batch payload
     try {
       const requestMapped = this.mapRequest(context);

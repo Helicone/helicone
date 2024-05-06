@@ -11,7 +11,6 @@ import { HandlerContext } from "./HandlerContext";
 
 export class RequestBodyHandler extends AbstractLogHandler {
   async handle(context: HandlerContext): PromiseGenericResult<string> {
-    console.log(`RequestBodyHandler: ${context.message.log.request.id}`);
     try {
       const { body: processedBody, model: requestModel } =
         this.processRequestBody(context);

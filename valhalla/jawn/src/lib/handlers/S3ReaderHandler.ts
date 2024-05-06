@@ -12,7 +12,6 @@ export class S3ReaderHandler extends AbstractLogHandler {
   }
 
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
-    console.log(`S3ReaderHandler: ${context.message.log.request.id}`);
     try {
       if (!context.orgParams?.id) {
         return err("Organization ID not found in org params");
