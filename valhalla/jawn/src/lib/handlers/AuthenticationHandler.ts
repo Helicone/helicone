@@ -6,7 +6,6 @@ import { HandlerContext } from "./HandlerContext";
 
 export class AuthenticationHandler extends AbstractLogHandler {
   async handle(context: HandlerContext): PromiseGenericResult<string> {
-    console.log(`AuthenticationHandler: ${context.message.log.request.id}`);
     try {
       const authResult = await this.authenticateEntry(context);
       if (authResult.error || !authResult.data) {

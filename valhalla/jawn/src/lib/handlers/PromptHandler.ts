@@ -4,7 +4,6 @@ import { HandlerContext, TemplateWithInputs } from "./HandlerContext";
 
 export class PromptHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
-    console.log(`PromptHandler: ${context.message.log.request.id}`);
     // Process Helicone Template
     if (
       context.message.log.request.promptId &&
