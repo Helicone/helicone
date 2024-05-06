@@ -28,10 +28,11 @@ if (
   }
 }
 
-// Average message is 1.12KB, with 1MB max batch size, we can have ~1000 messages per batch
+// Average message is 1kB, so we can set minBytes to 1kB and maxBytes to 10kB
 const consumer = kafka?.consumer({
   groupId: "jawn-consumer",
-  maxBytes: 1024 * 1024,
+  minBytes: 1000, // 1 kB
+  maxBytes: 10000, // 10 kB
 });
 
 process.on("exit", async () => {
@@ -75,9 +76,6 @@ export const consume = async () => {
       resolveOffset,
       heartbeat,
       commitOffsetsIfNecessary,
-      isRunning,
-      isStale,
-      uncommittedOffsets,
     }) => {
       const consumeResult = await consumeBatch(batch);
 
