@@ -1,9 +1,16 @@
 import {
+  ClickhouseDB,
   InsertRequestResponseVersioned,
   clickhouseDb,
 } from "../../db/ClickhouseWrapper";
 import { dbExecute } from "../../shared/db/dbExecute";
-import { Result, err, ok, resultMap } from "../../shared/result";
+import {
+  PromiseGenericResult,
+  Result,
+  err,
+  ok,
+  resultMap,
+} from "../../shared/result";
 
 export function formatTimeString(timeString: string): string {
   return new Date(timeString).toISOString().replace("Z", "");
@@ -11,6 +18,21 @@ export function formatTimeString(timeString: string): string {
 
 export class VersionedRequestStore {
   constructor(private orgId: string) {}
+
+  async insertRequestResponseVersioned(
+    requestResponseLog: ClickhouseDB["Tables"]["request_response_versioned"][]
+  ): PromiseGenericResult<string> {
+    const result = await clickhouseDb.dbInsertClickhouse(
+      "request_response_versioned",
+      requestResponseLog
+    );
+
+    if (result.error || !result.data) {
+      return err(`Error inserting request response logs: ${result.error}`);
+    }
+
+    return ok(result.data);
+  }
 
   // Updates the propeties column (JSONB) of the request table
   // to include {property: value}

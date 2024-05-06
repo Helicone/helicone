@@ -3,7 +3,7 @@ import { Database } from "../db/database.types";
 import { S3Client } from "../shared/db/s3Client";
 import { PromiseGenericResult, Result, err, ok } from "../shared/result";
 import { LogStore } from "../stores/LogStore";
-import { RequestResponseStore } from "../stores/RequestResponseStore";
+import { VersionedRequestStore } from "../stores/request/VersionedRequestStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext, PromptRecord } from "./HandlerContext";
 
@@ -27,17 +27,17 @@ export type BatchPayload = {
 export class LoggingHandler extends AbstractLogHandler {
   private batchPayload: BatchPayload;
   private logStore: LogStore;
-  private requestResponseStore: RequestResponseStore;
+  private requestStore: VersionedRequestStore;
   private s3Client: S3Client;
 
   constructor(
     logStore: LogStore,
-    requestResponseStore: RequestResponseStore,
+    requestStore: VersionedRequestStore,
     s3Client: S3Client
   ) {
     super();
     this.logStore = logStore;
-    this.requestResponseStore = requestResponseStore;
+    this.requestStore = requestStore;
     this.s3Client = s3Client;
     this.batchPayload = {
       responses: [],
@@ -227,10 +227,9 @@ export class LoggingHandler extends AbstractLogHandler {
 
   async logToClickhouse(): PromiseGenericResult<string> {
     try {
-      const result =
-        await this.requestResponseStore.insertRequestResponseVersioned(
-          this.batchPayload.requestResponseVersionedCH
-        );
+      const result = await this.requestStore.insertRequestResponseVersioned(
+        this.batchPayload.requestResponseVersionedCH
+      );
 
       if (result.error) {
         return err(`Error inserting request response logs: ${result.error}`);
