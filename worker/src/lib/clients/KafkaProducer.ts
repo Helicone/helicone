@@ -44,9 +44,19 @@ export type KafkaMessage = {
 };
 
 export class KafkaProducer {
-  private kafka: Kafka;
+  private kafka: Kafka | null = null;
 
   constructor(env: Env) {
+    if (
+      !env.UPSTASH_KAFKA_URL ||
+      !env.UPSTASH_KAFKA_USERNAME ||
+      !env.UPSTASH_KAFKA_PASSWORD
+    ) {
+      console.log(
+        "Required Kafka environment variables are not set, KafkaProducer will not be initialized."
+      );
+      return;
+    }
     this.kafka = new Kafka({
       url: env.UPSTASH_KAFKA_URL,
       username: env.UPSTASH_KAFKA_USERNAME,
@@ -55,6 +65,11 @@ export class KafkaProducer {
   }
 
   async sendMessage(msg: KafkaMessage) {
+    if (!this.kafka) {
+      console.log("KafkaProducer is not initialized, skipping sendMessage");
+      return;
+    }
+
     const p = this.kafka.producer();
 
     let attempts = 0;
