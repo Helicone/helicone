@@ -15,6 +15,15 @@ import * as Sentry from "@sentry/node";
 import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestStore";
 
 export class LogManager {
+  public async processLogEntry(logMessage: Message): Promise<void> {
+    await this.processLogEntries([logMessage], {
+      batchId: "",
+      partition: 0,
+      lastOffset: () => "",
+      messageCount: 1,
+    });
+  }
+
   public async processLogEntries(
     logMessages: Message[],
     batchContext: {
