@@ -9,10 +9,10 @@ export class RateLimitStore {
   }
 
   public async batchInsertRateLimits(
-    rateLimitLogs: ClickhouseDB["Tables"]["rate_limit_log"][]
+    rateLimitLogs: ClickhouseDB["Tables"]["rate_limit_log_v2"][]
   ): PromiseGenericResult<string> {
     const result = await this.clickhouse.dbInsertClickhouse(
-      "rate_limit_log",
+      "rate_limit_log_v2",
       rateLimitLogs
     );
 

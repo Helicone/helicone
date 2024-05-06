@@ -1,0 +1,97 @@
+export const ApprovedDomains = () => (
+  <table>
+    <thead>
+      <tr>
+        <th>Provider</th>
+        <th>Domain Name</th>
+        <th>Cost Support</th>
+        <th>Dedicated Domain</th>
+      </tr>
+    </thead>
+    <tbody>
+      {[
+        {
+          provider: "OpenAI",
+          domain: "api.openai.com",
+          costSupport: "✅",
+          dedicatedDomain: "oai.hconeai.com",
+        },
+        {
+          provider: "Anthropic",
+          domain: "api.anthropic.com",
+          costSupport: "✅",
+          dedicatedDomain: "anthropic.hconeai.com",
+        },
+        {
+          provider: "Together-AI",
+          domain: "api.together.xyz",
+          costSupport: "✅",
+          dedicatedDomain: "together.hconeai.com",
+        },
+        {
+          provider: "OpenRouter",
+          domain: "openrouter.ai",
+          costSupport: "✅",
+          dedicatedDomain: "openrouter.hconeai.com",
+        },
+        {
+          provider: "Azure",
+          domain: "openai.azure.com",
+          costSupport: "✅",
+          dedicatedDomain: "❌",
+        },
+        {
+          provider: "Groq",
+          domain: "api.groq.com",
+          costSupport: "❌",
+          dedicatedDomain: "❌",
+        },
+        {
+          provider: "Anyscale",
+          domain: "api.endpoints.anyscale.com",
+          costSupport: "❌",
+          dedicatedDomain: "❌",
+        },
+        {
+          provider: "Cloudflare",
+          domain: "gateway.ai.cloudflare.com",
+          costSupport: "❌",
+          dedicatedDomain: "❌",
+        },
+        {
+          provider: "LemonFox",
+          domain: "api.lemonfox.ai",
+          costSupport: "❌",
+          dedicatedDomain: "❌",
+        },
+        {
+          provider: "Fireworks",
+          domain: "api.fireworks.ai",
+          costSupport: "❌",
+          dedicatedDomain: "❌",
+        },
+        {
+          provider: "Perplexity",
+          domain: "api.perplexity.ai",
+          costSupport: "❌",
+          dedicatedDomain: "❌",
+        },
+        {
+          provider: "Mistral",
+          domain: "api.mistral.ai",
+          costSupport: "❌",
+          dedicatedDomain: "❌",
+        },
+      ].map((provider, index) => (
+        <tr key={index}>
+          <td>{provider.provider}</td>
+          <td>{provider.domain}</td>
+          <td>{provider.costSupport}</td>
+          <td>{provider.dedicatedDomain}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+);
+
+export default ApprovedDomains;
