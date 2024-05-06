@@ -12,11 +12,17 @@ import { PromptHandler } from "../lib/handlers/PromptHandler";
 import { PostHogHandler } from "../lib/handlers/PostHogHandler";
 import { S3Client } from "../lib/shared/db/s3Client";
 import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
+import * as Sentry from "@sentry/node";
 
 export class LogManager {
   public async processLogEntries(
     logMessages: Message[],
-    batchId: string
+    batchContext: {
+      batchId: string;
+      partition: number;
+      lastOffset: () => string;
+      messageCount: number;
+    }
   ): Promise<void> {
     const clickhouseClientWrapper = new ClickhouseClientWrapper({
       CLICKHOUSE_HOST: process.env.CLICKHOUSE_HOST ?? "http://localhost:18123",
@@ -62,22 +68,49 @@ export class LogManager {
         const result = await authHandler.handle(handlerContext);
 
         if (result.error) {
+          Sentry.captureException(result.error, {
+            tags: {
+              type: "HandlerError",
+              topic: "request-response-log",
+            },
+            extra: {
+              requestId: logMessage.log.request.id,
+              responseId: logMessage.log.response.id,
+              orgId: handlerContext.orgParams?.id ?? "",
+              batchId: batchContext.batchId,
+              partition: batchContext.partition,
+              offset: batchContext.lastOffset(),
+              messageCount: batchContext.messageCount,
+            },
+          });
           console.error(
-            `Error processing request ${logMessage.log.request.id} for batch ${batchId}: ${result.error}`
+            `Error processing request ${logMessage.log.request.id} for batch ${batchContext.batchId}: ${result.error}`
           );
-
           // TODO: Push to dead letter queue?
         }
       })
     );
 
-    console.log(`Finished processing batch ${batchId}`);
+    console.log(`Finished processing batch ${batchContext.batchId}`);
     // Inserts everything in transaction
     const upsertResult = await loggingHandler.handleResults();
 
     if (upsertResult.error) {
+      Sentry.captureException(upsertResult.error, {
+        tags: {
+          type: "UpsertError",
+          topic: "request-response-log",
+        },
+        extra: {
+          batchId: batchContext.batchId,
+          partition: batchContext.partition,
+          offset: batchContext.lastOffset(),
+          messageCount: batchContext.messageCount,
+        },
+      });
+
       console.error(
-        `Error inserting logs: ${upsertResult.error} for batch ${batchId}`
+        `Error inserting logs: ${upsertResult.error} for batch ${batchContext.batchId}`
       );
     }
 
@@ -86,8 +119,21 @@ export class LogManager {
       await rateLimitHandler.handleResults();
 
     if (rateLimitErr || !rateLimitInsId) {
+      Sentry.captureException(rateLimitErr, {
+        tags: {
+          type: "RateLimitError",
+          topic: "request-response-log",
+        },
+        extra: {
+          batchId: batchContext.batchId,
+          partition: batchContext.partition,
+          offset: batchContext.lastOffset(),
+          messageCount: batchContext.messageCount,
+        },
+      });
+
       console.error(
-        `Error inserting rate limits: ${rateLimitErr} for batch ${batchId}`
+        `Error inserting rate limits: ${rateLimitErr} for batch ${batchContext.batchId}`
       );
     }
   }

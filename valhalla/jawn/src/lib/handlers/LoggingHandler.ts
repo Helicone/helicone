@@ -51,34 +51,43 @@ export class LoggingHandler extends AbstractLogHandler {
 
   async handle(context: HandlerContext): PromiseGenericResult<string> {
     console.log(`LoggingHandler: ${context.message.log.request.id}`);
-    // Postgres
-    this.batchPayload.requests.push(this.mapRequest(context));
-    this.batchPayload.responses.push(this.mapResponse(context));
-    this.batchPayload.assets.push(...this.mapAssets(context));
 
-    // S3
-    const s3Record = this.mapS3Records(context);
-    if (s3Record) {
-      this.batchPayload.s3Records.push(s3Record);
-    }
+    // Perform all mappings first and check for failures before updating the batch payload
+    try {
+      const requestMapped = this.mapRequest(context);
+      const responseMapped = this.mapResponse(context);
+      const assetsMapped = this.mapAssets(context);
+      const s3RecordMapped = this.mapS3Records(context);
+      const promptMapped =
+        context.message.log.request.promptId &&
+        context.processedLog.request.heliconeTemplate
+          ? this.mapPrompt(context)
+          : null;
+      const requestResponseVersionedCHMapped =
+        this.mapRequestResponseVersionedCH(context);
 
-    // Prompts
-    if (
-      context.message.log.request.promptId &&
-      context.processedLog.request.heliconeTemplate
-    ) {
-      const prompt = this.mapPrompt(context);
-      if (prompt) {
-        this.batchPayload.prompts.push(prompt);
+      this.batchPayload.requests.push(requestMapped);
+      this.batchPayload.responses.push(responseMapped);
+      this.batchPayload.assets.push(...assetsMapped);
+
+      if (s3RecordMapped) {
+        this.batchPayload.s3Records.push(s3RecordMapped);
       }
+
+      if (promptMapped) {
+        this.batchPayload.prompts.push(promptMapped);
+      }
+
+      this.batchPayload.requestResponseVersionedCH.push(
+        requestResponseVersionedCHMapped
+      );
+
+      return await super.handle(context);
+    } catch (error: any) {
+      return err(
+        `Failed to map data: ${error.message}, Context: ${this.constructor.name}`
+      );
     }
-
-    // Clickhouse
-    this.batchPayload.requestResponseVersionedCH.push(
-      this.mapRequestResponseVersionedCH(context)
-    );
-
-    return await super.handle(context);
   }
 
   public async handleResults(): PromiseGenericResult<string> {
