@@ -25,7 +25,6 @@ export const INTERNAL_ERRORS = {
 
 export class ResponseBodyHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
-    console.log(`ResponseBodyHandler: ${context.message.log.request.id}`);
     try {
       const processedResponseBody = await this.processBody(context);
       context.processedLog.response.model = getModelFromResponse(
