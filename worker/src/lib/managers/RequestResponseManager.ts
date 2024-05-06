@@ -8,6 +8,7 @@ export type RequestResponseContent = {
   organizationId: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   requestBody: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   responseBody: any;
   model: string;
   assets: Map<string, string>;
@@ -22,6 +23,7 @@ export class RequestResponseManager {
   async storeRequestResponseRaw(content: {
     organizationId: string;
     requestId: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     requestBody: any;
     responseBody: string;
   }): Promise<Result<string, string>> {

@@ -3,11 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
 import { Database, Json } from "../../../supabase/database.types";
 import { DBWrapper } from "../db/DBWrapper";
-import {
-  getModelFromRequest,
-  getModelFromResponse,
-  withTimeout,
-} from "../util/helpers";
+import { withTimeout } from "../util/helpers";
 import { Result, err, ok } from "../util/results";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
@@ -25,7 +21,6 @@ import { getTokenCount } from "../clients/TokenCounterClient";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
 import {
-  isImageModel,
   isRequestImageModel,
   isResponseImageModel,
 } from "../util/imageModelMapper";
@@ -976,6 +971,7 @@ export class DBLoggable {
     return ok(null);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tryParseBody(body: string, bodyType: "request" | "response"): any {
     try {
       return JSON.parse(body);
@@ -989,6 +985,7 @@ export class DBLoggable {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   omitBody(omitBody: boolean, body: any, model: string): any {
     return omitBody
       ? {
@@ -999,6 +996,7 @@ export class DBLoggable {
 
   processRequestBodyImages(
     model: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     requestBody: any
   ): ImageModelParsingResponse {
     let imageModelParsingResponse: ImageModelParsingResponse = {
@@ -1022,6 +1020,7 @@ export class DBLoggable {
 
   processResponseBodyImages(
     model: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     responseBody: any
   ): ImageModelParsingResponse {
     let imageModelParsingResponse: ImageModelParsingResponse = {

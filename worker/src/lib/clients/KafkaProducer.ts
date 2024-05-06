@@ -72,6 +72,7 @@ export class KafkaProducer {
         });
         console.log(`Produced message, response: ${JSON.stringify(res)}`);
         return res;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.log(`Attempt ${attempts + 1} failed: ${error.message}`);
         attempts++;
