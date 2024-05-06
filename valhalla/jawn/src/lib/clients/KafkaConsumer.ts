@@ -4,24 +4,25 @@ import { Message } from "../handlers/HandlerContext";
 import { PromiseGenericResult, err, ok } from "../shared/result";
 
 let kafka;
-if (
-  process.env.KAFKA_ENABLED &&
-  process.env.UPSTASH_KAFKA_BROKER &&
-  process.env.UPSTASH_KAFKA_USERNAME &&
-  process.env.UPSTASH_KAFKA_PASSWORD
-) {
+const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
+const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
+const KAFKA_BROKER = KAFKA_CREDS?.UPSTASH_KAFKA_BROKER;
+const KAFKA_USERNAME = KAFKA_CREDS?.UPSTASH_KAFKA_USERNAME;
+const KAFKA_PASSWORD = KAFKA_CREDS?.UPSTASH_KAFKA_PASSWORD;
+
+if (KAFKA_ENABLED && KAFKA_BROKER && KAFKA_USERNAME && KAFKA_PASSWORD) {
   kafka = new Kafka({
-    brokers: [process.env.UPSTASH_KAFKA_BROKER],
+    brokers: [KAFKA_BROKER],
     sasl: {
       mechanism: "scram-sha-512",
-      username: process.env.UPSTASH_KAFKA_USERNAME,
-      password: process.env.UPSTASH_KAFKA_PASSWORD,
+      username: KAFKA_USERNAME,
+      password: KAFKA_PASSWORD,
     },
     ssl: true,
     logLevel: logLevel.ERROR,
   });
 } else {
-  if (!process.env.KAFKA_ENABLED) {
+  if (!KAFKA_ENABLED) {
     console.log("Kafka is disabled.");
   } else {
     console.error("Required Kafka environment variables are not set.");
@@ -42,7 +43,7 @@ process.on("exit", async () => {
 });
 
 export const consume = async () => {
-  if (process.env.KAFKA_ENABLED && !consumer) {
+  if (KAFKA_ENABLED && !consumer) {
     console.error("Failed to create Kafka consumer");
     return;
   }
@@ -65,7 +66,7 @@ export const consume = async () => {
 
   await consumer?.connect();
   await consumer?.subscribe({
-    topic: "request-response-logs",
+    topic: "request-response-logs-prod",
     fromBeginning: true,
   });
 
