@@ -20,15 +20,16 @@ export class S3Client {
     });
   }
 
+  getRequestResponseRawUrl = (requestId: string, orgId: string) => {
+    return this.getBaseUrl(
+      `organizations/${orgId}/requests/${requestId}/raw_request_response_body`
+    );
+  };
+
   getRequestResponseUrl = (requestId: string, orgId: string) => {
-    const key = `organizations/${orgId}/requests/${requestId}/request_response_body`;
-    if (this.endpoint) {
-      // For MinIO or another S3-compatible service
-      return `${this.endpoint}/${this.bucketName}/${key}`;
-    } else {
-      // For AWS S3
-      return `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${key}`;
-    }
+    return this.getBaseUrl(
+      `organizations/${orgId}/requests/${requestId}/request_response_body`
+    );
   };
 
   getRequestResponseImageUrl = (
@@ -36,27 +37,42 @@ export class S3Client {
     orgId: string,
     assetId: string
   ) => {
-    const key = `organizations/${orgId}/requests/${requestId}/assets/${assetId}`;
-    if (this.endpoint) {
-      // For MinIO or another S3-compatible service
-      return `${this.endpoint}/${this.bucketName}/${key}`;
-    } else {
-      // For AWS S3
-      return `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${key}`;
-    }
+    return this.getBaseUrl(
+      `organizations/${orgId}/requests/${requestId}/assets/${assetId}`
+    );
   };
 
-  async store(url: string, value: string): Promise<Result<string, string>> {
+  getBaseUrl = (key: string) => {
+    return this.endpoint
+      ? `${this.endpoint}/${this.bucketName}/${key}`
+      : `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${key}`;
+  };
+
+  async store(
+    url: string,
+    value: string,
+    tags?: Record<string, string>
+  ): Promise<Result<string, string>> {
     try {
       const compressedValue = await compress(value);
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        "Content-Encoding": "gzip",
+      };
+      if (tags && Object.keys(tags).length > 0) {
+        const tagsString = Object.entries(tags)
+          .map(
+            ([key, val]) =>
+              `${encodeURIComponent(key)}=${encodeURIComponent(val)}`
+          )
+          .join("&");
+        headers["x-amz-tagging"] = tagsString;
+      }
 
       const signedRequest = await this.awsClient.sign(url, {
         method: "PUT",
         body: compressedValue,
-        headers: {
-          "Content-Type": "application/json",
-          "Content-Encoding": "gzip",
-        },
+        headers,
       });
 
       const response = await fetch(signedRequest.url, signedRequest);
