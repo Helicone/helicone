@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { S3Client } from "../clients/S3Client";
-import { Result } from "../util/results";
+import { Result, ok } from "../util/results";
 import { Database } from "../../../supabase/database.types";
 
 export type RequestResponseContent = {
@@ -8,7 +8,9 @@ export type RequestResponseContent = {
   organizationId: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   requestBody: any;
-  responseBody: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  responseBody: any;
+  model: string;
   assets: Map<string, string>;
 };
 
@@ -18,12 +20,52 @@ export class RequestResponseManager {
     private supabase: SupabaseClient<Database>
   ) {}
 
+  async storeRequestResponseRaw(content: {
+    organizationId: string;
+    requestId: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    requestBody: any;
+    responseBody: string;
+  }): Promise<Result<string, string>> {
+    const url = this.s3Client.getRequestResponseRawUrl(
+      content.requestId,
+      content.organizationId
+    );
+
+    const tags: Record<string, string> = {
+      name: "raw-request-response-body",
+    };
+
+    return await this.s3Client.store(
+      url,
+      JSON.stringify({
+        request: content.requestBody,
+        response: content.responseBody,
+      }),
+      tags
+    );
+  }
+
   async storeRequestResponseData({
     organizationId,
     requestId,
     requestBody,
     responseBody,
+    model,
+    assets,
   }: RequestResponseContent): Promise<Result<string, string>> {
+    // If assets, must be image model, store images in S3
+    if (assets && assets?.size > 0) {
+      await this.storeRequestResponseImage({
+        organizationId,
+        requestId,
+        requestBody,
+        responseBody,
+        model,
+        assets,
+      });
+    }
+
     const url = this.s3Client.getRequestResponseUrl(requestId, organizationId);
 
     return await this.s3Client.store(
@@ -31,11 +73,9 @@ export class RequestResponseManager {
       JSON.stringify({ request: requestBody, response: responseBody })
     );
   }
-  async storeRequestResponseImage({
+  private async storeRequestResponseImage({
     organizationId,
     requestId,
-    requestBody,
-    responseBody,
     assets,
   }: RequestResponseContent): Promise<Result<string, string>> {
     const uploadPromises: Promise<void>[] = Array.from(assets.entries()).map(
@@ -44,11 +84,8 @@ export class RequestResponseManager {
     );
 
     await Promise.allSettled(uploadPromises);
-    const url = this.s3Client.getRequestResponseUrl(requestId, organizationId);
-    return await this.s3Client.store(
-      url,
-      JSON.stringify({ request: requestBody, response: responseBody })
-    );
+
+    return ok("Images uploaded successfully");
   }
 
   private async handleImageUpload(
