@@ -83,18 +83,7 @@ export const consume = async () => {
 
       if (consumeResult.error) {
         console.error("Failed to consume batch", consumeResult.error);
-        Sentry.captureException(new Error(consumeResult.error), {
-          tags: {
-            type: "ConsumeError",
-            topic: "request-response-log-prod",
-          },
-          extra: {
-            batchId: batch.partition,
-            partition: batch.partition,
-            offset: batch.messages[0].offset,
-            messageCount: batch.messages.length,
-          },
-        });
+
         // TODO: Best way to handle this?
         return;
       } else {
@@ -150,6 +139,18 @@ async function consumeBatch(batch: Batch): PromiseGenericResult<string> {
     return ok(batchId);
   } catch (error) {
     // TODO: Should we skip or fail the batch?
+    Sentry.captureException(error, {
+      tags: {
+        type: "ConsumeError",
+        topic: "request-response-log-prod",
+      },
+      extra: {
+        batchId: batch.partition,
+        partition: batch.partition,
+        offset: batch.messages[0].offset,
+        messageCount: batch.messages.length,
+      },
+    });
     return err(`Failed to process batch ${batchId}, error: ${error}`);
   }
 }
