@@ -24,9 +24,24 @@ if (KAFKA_ENABLED && KAFKA_BROKER && KAFKA_USERNAME && KAFKA_PASSWORD) {
   });
 } else {
   if (!KAFKA_ENABLED) {
+    Sentry.captureMessage("Kafka is disabled. Check environment variables.");
     console.log("Kafka is disabled.");
   } else {
+    // Check which environment variables are missing
     console.error("Required Kafka environment variables are not set.");
+
+    if (!KAFKA_BROKER) {
+      console.error("KAFKA_BROKER is missing.");
+      Sentry.captureMessage("KAFKA_BROKER is missing.");
+    }
+    if (!KAFKA_USERNAME) {
+      console.error("KAFKA_USERNAME is missing.");
+      Sentry.captureMessage("KAFKA_USERNAME is missing.");
+    }
+    if (!KAFKA_PASSWORD) {
+      console.error("KAFKA_PASSWORD is missing.");
+      Sentry.captureMessage("KAFKA_PASSWORD is missing.");
+    }
   }
 }
 
