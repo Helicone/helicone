@@ -77,7 +77,7 @@ export class LogManager {
         const result = await authHandler.handle(handlerContext);
 
         if (result.error) {
-          Sentry.captureException(result.error, {
+          Sentry.captureException(new Error(result.error), {
             tags: {
               type: "HandlerError",
               topic: "request-response-log",
@@ -105,7 +105,7 @@ export class LogManager {
     const upsertResult = await loggingHandler.handleResults();
 
     if (upsertResult.error) {
-      Sentry.captureException(upsertResult.error, {
+      Sentry.captureException(new Error(upsertResult.error), {
         tags: {
           type: "UpsertError",
           topic: "request-response-log",

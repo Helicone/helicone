@@ -2,6 +2,7 @@ import { Batch, Kafka, logLevel } from "kafkajs";
 import { LogManager } from "../../managers/LogManager";
 import { Message } from "../handlers/HandlerContext";
 import { PromiseGenericResult, err, ok } from "../shared/result";
+import * as Sentry from "@sentry/node";
 
 let kafka;
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
@@ -82,6 +83,18 @@ export const consume = async () => {
 
       if (consumeResult.error) {
         console.error("Failed to consume batch", consumeResult.error);
+        Sentry.captureException(new Error(consumeResult.error), {
+          tags: {
+            type: "ConsumeError",
+            topic: "request-response-log-prod",
+          },
+          extra: {
+            batchId: batch.partition,
+            partition: batch.partition,
+            offset: batch.messages[0].offset,
+            messageCount: batch.messages.length,
+          },
+        });
         // TODO: Best way to handle this?
         return;
       } else {
