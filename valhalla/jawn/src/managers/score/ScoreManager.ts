@@ -35,6 +35,7 @@ export class ScoreManager extends BaseManager {
             INSERT INTO score_value (score_attribute, request_id, int_value)
             SELECT id, $3, unnest($4::bigint[])
             FROM upserted_attributes
+            ON CONFLICT (score_attribute, request_id) DO NOTHING
             RETURNING *
         )
         SELECT * FROM inserted_values;

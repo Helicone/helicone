@@ -478,6 +478,187 @@
 					}
 				]
 			},
+			"HeliconeMeta": {
+				"properties": {
+					"omitResponseLog": {
+						"type": "boolean"
+					},
+					"omitRequestLog": {
+						"type": "boolean"
+					},
+					"modelOverride": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"omitResponseLog",
+					"omitRequestLog"
+				],
+				"type": "object"
+			},
+			"Provider": {
+				"anyOf": [
+					{
+						"type": "string"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"OPENAI",
+							"ANTHROPIC",
+							"CUSTOM"
+						]
+					}
+				]
+			},
+			"TemplateWithInputs": {
+				"properties": {
+					"template": {
+						"additionalProperties": false,
+						"type": "object"
+					},
+					"inputs": {
+						"properties": {},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object"
+					}
+				},
+				"required": [
+					"template",
+					"inputs"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Log": {
+				"properties": {
+					"response": {
+						"properties": {
+							"delayMs": {
+								"type": "number",
+								"format": "double"
+							},
+							"responseCreatedAt": {
+								"type": "string",
+								"format": "date-time"
+							},
+							"timeToFirstToken": {
+								"type": "number",
+								"format": "double"
+							},
+							"bodySize": {
+								"type": "number",
+								"format": "double"
+							},
+							"status": {
+								"type": "number",
+								"format": "double"
+							},
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"delayMs",
+							"responseCreatedAt",
+							"bodySize",
+							"status",
+							"id"
+						],
+						"type": "object"
+					},
+					"request": {
+						"properties": {
+							"heliconeTemplate": {
+								"$ref": "#/components/schemas/TemplateWithInputs"
+							},
+							"isStream": {
+								"type": "boolean"
+							},
+							"requestCreatedAt": {
+								"type": "string",
+								"format": "date-time"
+							},
+							"countryCode": {
+								"type": "string"
+							},
+							"threat": {
+								"type": "boolean"
+							},
+							"path": {
+								"type": "string"
+							},
+							"bodySize": {
+								"type": "number",
+								"format": "double"
+							},
+							"provider": {
+								"$ref": "#/components/schemas/Provider"
+							},
+							"targetUrl": {
+								"type": "string"
+							},
+							"heliconeProxyKeyId": {
+								"type": "string"
+							},
+							"heliconeApiKeyId": {
+								"type": "number",
+								"format": "double"
+							},
+							"properties": {
+								"$ref": "#/components/schemas/Record_string.string_"
+							},
+							"promptId": {
+								"type": "string"
+							},
+							"userId": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"isStream",
+							"requestCreatedAt",
+							"path",
+							"bodySize",
+							"provider",
+							"targetUrl",
+							"properties",
+							"userId",
+							"id"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"response",
+					"request"
+				],
+				"type": "object"
+			},
+			"Message": {
+				"properties": {
+					"log": {
+						"$ref": "#/components/schemas/Log"
+					},
+					"heliconeMeta": {
+						"$ref": "#/components/schemas/HeliconeMeta"
+					},
+					"authorization": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"log",
+					"heliconeMeta",
+					"authorization"
+				],
+				"type": "object"
+			},
 			"GenerateHashQueryParams": {
 				"properties": {
 					"apiKey": {
@@ -871,6 +1052,37 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/v1/log/request": {
+			"post": {
+				"operationId": "GetRequests",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Log"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "Log message to log",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Message",
+								"description": "Log message to log"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/key/generateHash": {
