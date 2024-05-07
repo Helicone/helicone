@@ -53,7 +53,7 @@ const RequestRow = (props: RequestRowProps) => {
         <div className="flex flex-wrap gap-4 items-center">
           <ModelPill model={row.model} />
           <p className="text-xs font-semibold">{Number(row.latency) / 1000}s</p>
-          {row.cost ? (
+          {row.cost !== null ? (
             <p className="text-xs font-semibold">${formatNumber(row.cost)}</p>
           ) : row.status && row.status.code === 200 ? (
             <CostPill />
