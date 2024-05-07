@@ -990,6 +990,27 @@
 					}
 				]
 			},
+			"Record_string.number_": {
+				"properties": {},
+				"additionalProperties": {
+					"type": "number",
+					"format": "double"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"ScoreRequest": {
+				"properties": {
+					"scores": {
+						"$ref": "#/components/schemas/Record_string.number_"
+					}
+				},
+				"required": [
+					"scores"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"PromptsResult": {
 				"properties": {
 					"id": {
@@ -2292,6 +2313,51 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/request/{requestId}/score": {
+			"post": {
+				"operationId": "AddScores",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ScoreRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/prompt/query": {

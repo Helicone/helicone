@@ -24,6 +24,9 @@ export interface paths {
   "/v1/request/{requestId}/assets/{assetId}": {
     post: operations["GetRequestAssetById"];
   };
+  "/v1/request/{requestId}/score": {
+    post: operations["AddScores"];
+  };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];
   };
@@ -353,6 +356,13 @@ Json: JsonObject;
       error: null;
     };
     "Result_HeliconeRequestAsset.string_": components["schemas"]["ResultSuccess_HeliconeRequestAsset_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.number_": {
+      [key: string]: number;
+    };
+    ScoreRequest: {
+      scores: components["schemas"]["Record_string.number_"];
+    };
     PromptsResult: {
       id: string;
       user_defined_id: string;
@@ -722,6 +732,26 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeRequestAsset.string_"];
+        };
+      };
+    };
+  };
+  AddScores: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScoreRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
