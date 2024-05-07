@@ -20,7 +20,10 @@ export function costOf({
   }
 
   const providerCost = providers.find((p) => {
-    return p.provider === provider;
+    return (
+      p.provider === provider ||
+      (p.pattern && p.pattern.test(provider) ? true : false)
+    );
   });
 
   if (!providerCost || !providerCost.costs) {

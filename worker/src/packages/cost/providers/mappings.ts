@@ -27,8 +27,8 @@ const lemonFox = /^https:\/\/api\.lemonfox\.ai/;
 const fireworks = /^https:\/\/api\.fireworks\.ai/;
 const perplexity = /^https:\/\/api\.perplexity\.ai/;
 const googleapis = /^https:\/\/(.*\.)?googleapis\.com/;
-// openrouter.ai
-const openRouter = /^https:\/\/api\.openrouter\.ai/;
+// openrouter.ai or api.openrouter.ai
+const openRouter = /^https:\/\/(api\.)?openrouter\.ai/;
 //api.wisdominanutshell.academy
 const wisdomInANutshell = /^https:\/\/api\.wisdominanutshell\.academy/;
 // api.groq.com
