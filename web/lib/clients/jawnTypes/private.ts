@@ -30,6 +30,9 @@ export interface paths {
   "/v1/settings/query": {
     get: operations["GetSettings"];
   };
+  "/v1/log/request": {
+    post: operations["GetRequests"];
+  };
   "/v1/key/generateHash": {
     post: operations["GenerateHash"];
   };
@@ -165,6 +168,58 @@ export interface components {
       error: null;
     };
     "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    HeliconeMeta: {
+      omitResponseLog: boolean;
+      omitRequestLog: boolean;
+      modelOverride?: string;
+    };
+    Provider: string | ("OPENAI" | "ANTHROPIC" | "CUSTOM");
+    TemplateWithInputs: {
+      template: Record<string, never>;
+      inputs: {
+        [key: string]: string;
+      };
+    };
+    Log: {
+      response: {
+        /** Format: double */
+        delayMs: number;
+        /** Format: date-time */
+        responseCreatedAt: string;
+        /** Format: double */
+        timeToFirstToken?: number;
+        /** Format: double */
+        bodySize: number;
+        /** Format: double */
+        status: number;
+        id: string;
+      };
+      request: {
+        heliconeTemplate?: components["schemas"]["TemplateWithInputs"];
+        isStream: boolean;
+        /** Format: date-time */
+        requestCreatedAt: string;
+        countryCode?: string;
+        threat?: boolean;
+        path: string;
+        /** Format: double */
+        bodySize: number;
+        provider: components["schemas"]["Provider"];
+        targetUrl: string;
+        heliconeProxyKeyId?: string;
+        /** Format: double */
+        heliconeApiKeyId?: number;
+        properties: components["schemas"]["Record_string.string_"];
+        promptId?: string;
+        userId: string;
+        id: string;
+      };
+    };
+    Message: {
+      log: components["schemas"]["Log"];
+      heliconeMeta: components["schemas"]["HeliconeMeta"];
+      authorization: string;
+    };
     GenerateHashQueryParams: {
       apiKey: string;
       userId: string;
@@ -324,6 +379,20 @@ export interface operations {
             useAzureForExperiment: boolean;
           };
         };
+      };
+    };
+  };
+  GetRequests: {
+    /** @description Log message to log */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Message"];
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
       };
     };
   };
