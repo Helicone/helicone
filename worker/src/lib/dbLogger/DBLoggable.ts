@@ -635,6 +635,7 @@ export class DBLoggable {
       kafkaProducer: KafkaProducer;
     },
     S3_ENABLED: Env["S3_ENABLED"],
+    ORG_IDS: string,
     requestHeaders?: HeliconeHeaders
   ): Promise<
     Result<
@@ -649,9 +650,17 @@ export class DBLoggable {
       return err(`Auth failed! ${error}` ?? "Helicone organization not found");
     }
 
+    let orgIds: string[] = [];
+    try {
+      orgIds = ORG_IDS.split(",");
+    } catch (e) {
+      console.error("Error parsing orgIds", e);
+    }
+
     // Kafka processing
     if (
       // authParams.organizationId === "83635a30-5ba6-41a8-8cc6-fb7df941b24a" ||
+      orgIds.includes(authParams.organizationId) ||
       authParams.organizationId === "01699b51-e07b-4d49-8cda-0c7557f5b6b1" ||
       authParams.organizationId === "dad350b5-4afe-4fd5-b910-ba74c0ad2f0f"
     ) {
