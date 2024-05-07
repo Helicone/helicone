@@ -316,6 +316,7 @@ export async function proxyForwarder(
         kafkaProducer: new KafkaProducer(env),
       },
       env.S3_ENABLED ?? "true",
+      env.ORG_IDS ?? "",
       proxyRequest?.requestWrapper.heliconeHeaders
     );
 
