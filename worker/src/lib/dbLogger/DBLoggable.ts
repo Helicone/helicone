@@ -966,6 +966,7 @@ export class DBLoggable {
       },
     };
 
+    // Send to Kafka or REST if not enabled
     await db.kafkaProducer.sendMessage(kafkaMessage);
 
     return ok(null);

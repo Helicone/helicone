@@ -34,6 +34,7 @@ const consumer = kafka?.consumer({
   groupId: "jawn-consumer",
   minBytes: 1000, // 1 kB
   maxBytes: 10000, // 10 kB
+  sessionTimeout: 30000,
 });
 
 process.on("exit", async () => {
