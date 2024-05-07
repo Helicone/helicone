@@ -87,6 +87,7 @@ export async function logAsync(
       kafkaProducer: new KafkaProducer(env),
     },
     env.S3_ENABLED ?? "true",
+    env.ORG_IDS ?? "",
     heliconeHeaders
   );
 
