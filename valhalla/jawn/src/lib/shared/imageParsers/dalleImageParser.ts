@@ -12,13 +12,15 @@ export class DalleImageParser extends ImageModelResponseBodyParser {
     let responseBody = body;
     try {
       responseBody = JSON.parse(JSON.stringify(body));
-      responseBody?.data?.forEach((item: any) => {
-        if (item.url) {
-          const assetId = this.generateAssetId();
-          requestAssets.set(assetId, item.url);
-          item.url = `<helicone-asset-id key="${assetId}"/>`;
-        }
-      });
+      if (Array.isArray(responseBody?.data)) {
+        responseBody?.data?.forEach((item: any) => {
+          if (item.url) {
+            const assetId = this.generateAssetId();
+            requestAssets.set(assetId, item.url);
+            item.url = `<helicone-asset-id key="${assetId}"/>`;
+          }
+        });
+      }
     } catch (error) {
       console.error(
         `Error processing response body for model: ${this.modelName}, error: ${error}`
