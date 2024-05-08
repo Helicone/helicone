@@ -13,13 +13,14 @@ import { S3Client } from "../lib/shared/db/s3Client";
 import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
 import * as Sentry from "@sentry/node";
 import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestStore";
+import { KafkaProducer } from "../lib/clients/KafkaProducer";
 
 export class LogManager {
   public async processLogEntry(logMessage: Message): Promise<void> {
     await this.processLogEntries([logMessage], {
       batchId: "",
       partition: 0,
-      lastOffset: () => "",
+      lastOffset: "",
       messageCount: 1,
     });
   }
@@ -29,16 +30,10 @@ export class LogManager {
     batchContext: {
       batchId: string;
       partition: number;
-      lastOffset: () => string;
+      lastOffset: string;
       messageCount: number;
     }
   ): Promise<void> {
-    const clickhouseClientWrapper = new ClickhouseClientWrapper({
-      CLICKHOUSE_HOST: process.env.CLICKHOUSE_HOST ?? "http://localhost:18123",
-      CLICKHOUSE_USER: process.env.CLICKHOUSE_USER ?? "default",
-      CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD ?? "",
-    });
-
     const s3Client = new S3Client(
       process.env.S3_ACCESS_KEY ?? "",
       process.env.S3_SECRET_KEY ?? "",
@@ -47,9 +42,7 @@ export class LogManager {
     );
 
     const authHandler = new AuthenticationHandler();
-    const rateLimitHandler = new RateLimitHandler(
-      new RateLimitStore(clickhouseClientWrapper)
-    );
+    const rateLimitHandler = new RateLimitHandler(new RateLimitStore());
     const s3Reader = new S3ReaderHandler(s3Client);
     const requestHandler = new RequestBodyHandler();
     const responseBodyHandler = new ResponseBodyHandler();
@@ -80,7 +73,7 @@ export class LogManager {
           Sentry.captureException(new Error(result.error), {
             tags: {
               type: "HandlerError",
-              topic: "request-response-log",
+              topic: "request-response-logs-prod",
             },
             extra: {
               requestId: logMessage.log.request.id,
@@ -88,14 +81,41 @@ export class LogManager {
               orgId: handlerContext.orgParams?.id ?? "",
               batchId: batchContext.batchId,
               partition: batchContext.partition,
-              offset: batchContext.lastOffset(),
+              offset: batchContext.lastOffset,
               messageCount: batchContext.messageCount,
             },
           });
           console.error(
             `Error processing request ${logMessage.log.request.id} for batch ${batchContext.batchId}: ${result.error}`
           );
-          // TODO: Push to dead letter queue?
+
+          const kafkaProducer = new KafkaProducer();
+          const res = await kafkaProducer.sendMessages(
+            [logMessage],
+            "request-response-logs-prod-dlq"
+          );
+
+          if (res.error) {
+            Sentry.captureException(new Error(res.error), {
+              tags: {
+                type: "KafkaError",
+                topic: "request-response-logs-prod-dlq",
+              },
+              extra: {
+                requestId: logMessage.log.request.id,
+                responseId: logMessage.log.response.id,
+                orgId: handlerContext.orgParams?.id ?? "",
+                batchId: batchContext.batchId,
+                partition: batchContext.partition,
+                offset: batchContext.lastOffset,
+                messageCount: batchContext.messageCount,
+              },
+            });
+
+            console.error(
+              `Error sending message to DLQ: ${res.error} for request ${logMessage.log.request.id} in batch ${batchContext.batchId}`
+            );
+          }
         }
       })
     );
@@ -105,18 +125,40 @@ export class LogManager {
     const upsertResult = await loggingHandler.handleResults();
 
     if (upsertResult.error) {
-      Sentry.captureException(new Error(upsertResult.error), {
+      Sentry.captureException(new Error(JSON.stringify(upsertResult.error)), {
         tags: {
           type: "UpsertError",
-          topic: "request-response-log",
+          topic: "request-response-logs-prod",
         },
         extra: {
           batchId: batchContext.batchId,
           partition: batchContext.partition,
-          offset: batchContext.lastOffset(),
+          offset: batchContext.lastOffset,
           messageCount: batchContext.messageCount,
         },
       });
+
+      // Send to DLQ
+      const kafkaProducer = new KafkaProducer();
+      const result = await kafkaProducer.sendMessages(
+        logMessages,
+        "request-response-logs-prod-dlq"
+      );
+
+      if (result.error) {
+        Sentry.captureException(new Error(result.error), {
+          tags: {
+            type: "KafkaError",
+            topic: "request-response-logs-prod-dlq",
+          },
+          extra: {
+            batchId: batchContext.batchId,
+            partition: batchContext.partition,
+            offset: batchContext.lastOffset,
+            messageCount: batchContext.messageCount,
+          },
+        });
+      }
 
       console.error(
         `Error inserting logs: ${upsertResult.error} for batch ${batchContext.batchId}`
@@ -131,12 +173,12 @@ export class LogManager {
       Sentry.captureException(rateLimitErr, {
         tags: {
           type: "RateLimitError",
-          topic: "request-response-log",
+          topic: "request-response-logs-prod",
         },
         extra: {
           batchId: batchContext.batchId,
           partition: batchContext.partition,
-          offset: batchContext.lastOffset(),
+          offset: batchContext.lastOffset,
           messageCount: batchContext.messageCount,
         },
       });

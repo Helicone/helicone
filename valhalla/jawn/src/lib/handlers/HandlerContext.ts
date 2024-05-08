@@ -78,6 +78,7 @@ export type ProcessedLog = {
     body?: any;
     heliconeTemplate?: TemplateWithInputs;
     assets?: Map<string, string>;
+    properties?: Record<string, string>;
   };
   response: {
     model?: string;

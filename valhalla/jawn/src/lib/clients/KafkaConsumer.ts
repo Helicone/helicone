@@ -49,7 +49,7 @@ if (KAFKA_ENABLED && KAFKA_BROKER && KAFKA_USERNAME && KAFKA_PASSWORD) {
 const consumer = kafka?.consumer({
   groupId: "jawn-consumer",
   minBytes: 1000, // 1 kB
-  maxBytes: 10000, // 10 kB
+  maxBytes: 10_000_000, // 10 kB
 });
 
 process.on("exit", async () => {
@@ -111,9 +111,8 @@ export const consume = async () => {
 };
 
 async function consumeBatch(batch: Batch): PromiseGenericResult<string> {
-  const batchId = `${
-    batch.partition
-  }-${batch.firstOffset()}-${batch.lastOffset()}`;
+  const lastOffset = batch.lastOffset();
+  const batchId = `${batch.partition}-${batch.firstOffset()}-${lastOffset}`;
 
   console.log(
     `Received batch with ${
@@ -148,7 +147,7 @@ async function consumeBatch(batch: Batch): PromiseGenericResult<string> {
     await logManager.processLogEntries(messages, {
       batchId,
       partition: batch.partition,
-      lastOffset: batch.lastOffset,
+      lastOffset: lastOffset,
       messageCount: batch.messages.length,
     });
     return ok(batchId);
@@ -157,7 +156,7 @@ async function consumeBatch(batch: Batch): PromiseGenericResult<string> {
     Sentry.captureException(error, {
       tags: {
         type: "ConsumeError",
-        topic: "request-response-log-prod",
+        topic: "request-response-logs-prod",
       },
       extra: {
         batchId: batch.partition,
