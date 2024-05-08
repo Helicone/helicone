@@ -128,7 +128,6 @@ async function consumeBatch(batch: Batch): PromiseGenericResult<string> {
         const parsedMsg = JSON.parse(kafkaValue.value) as Message;
         messages.push(mapMessageDates(parsedMsg));
       } catch (error) {
-        console.error(`Failed to parse message: ${error}`);
         return err(`Failed to parse message: ${error}`);
       }
     } else {
@@ -263,7 +262,6 @@ async function consumeDlqBatch(batch: Batch): PromiseGenericResult<string> {
         const kafkaValue = JSON.parse(message.value.toString());
         messages.push(mapMessageDates(kafkaValue));
       } catch (error) {
-        console.error(`Failed to parse message: ${error}`);
         return err(`Failed to parse message: ${error}`);
       }
     } else {
