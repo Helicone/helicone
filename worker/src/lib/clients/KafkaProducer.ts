@@ -45,8 +45,11 @@ export type KafkaMessage = {
 
 export class KafkaProducer {
   private kafka: Kafka | null = null;
+  private VALHALLA_URL: string | undefined = undefined;
 
   constructor(env: Env) {
+    this.VALHALLA_URL = env.VALHALLA_URL;
+
     if (
       !env.UPSTASH_KAFKA_URL ||
       !env.UPSTASH_KAFKA_USERNAME ||
@@ -66,7 +69,7 @@ export class KafkaProducer {
 
   async sendMessage(msg: KafkaMessage) {
     if (!this.kafka) {
-      console.log("KafkaProducer is not initialized, skipping sendMessage");
+      await this.sendMessageHttp(msg);
       return;
     }
 
@@ -97,6 +100,30 @@ export class KafkaProducer {
           throw error;
         }
       }
+    }
+  }
+
+  async sendMessageHttp(msg: KafkaMessage) {
+    try {
+      const result = await fetch(`${this.VALHALLA_URL}/v1/log/request`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${msg.authorization}`,
+        },
+        body: JSON.stringify({
+          log: msg.log,
+          authorization: msg.authorization,
+          heliconeMeta: msg.heliconeMeta,
+        }),
+      });
+
+      if (result.status !== 200) {
+        console.error(`Failed to send message via REST: ${result.statusText}`);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error(`Failed to send message via REST: ${error.message}`);
     }
   }
 }

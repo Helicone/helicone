@@ -7,7 +7,7 @@ import { PromptController } from './../../controllers/public/promptController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { SettingController } from './../../controllers/private/settingsController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { RequestController } from './../../controllers/private/logController';
+import { LogController } from './../../controllers/private/logController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { GenerateHashController } from './../../controllers/private/generateHashController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -517,10 +517,10 @@ export function RegisterRoutes(app: Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/v1/log/request',
             authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(RequestController)),
-            ...(fetchMiddlewares<RequestHandler>(RequestController.prototype.getRequests)),
+            ...(fetchMiddlewares<RequestHandler>(LogController)),
+            ...(fetchMiddlewares<RequestHandler>(LogController.prototype.getRequests)),
 
-            function RequestController_getRequests(request: ExRequest, response: ExResponse, next: any) {
+            function LogController_getRequests(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     logMessage: {"in":"body","name":"logMessage","required":true,"ref":"Message"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -532,7 +532,7 @@ export function RegisterRoutes(app: Router) {
             try {
                 validatedArgs = templateService.getValidatedArgs({ args, request, response });
 
-                const controller = new RequestController();
+                const controller = new LogController();
 
               templateService.apiHandler({
                 methodName: 'getRequests',
