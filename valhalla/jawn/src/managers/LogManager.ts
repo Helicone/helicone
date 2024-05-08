@@ -13,6 +13,7 @@ import { S3Client } from "../lib/shared/db/s3Client";
 import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
 import * as Sentry from "@sentry/node";
 import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestStore";
+import { KafkaProducer } from "../lib/clients/KafkaProducer";
 
 export class LogManager {
   public async processLogEntry(logMessage: Message): Promise<void> {
@@ -105,10 +106,10 @@ export class LogManager {
     const upsertResult = await loggingHandler.handleResults();
 
     if (upsertResult.error) {
-      Sentry.captureException(new Error(upsertResult.error), {
+      Sentry.captureException(new Error(JSON.stringify(upsertResult.error)), {
         tags: {
           type: "UpsertError",
-          topic: "request-response-log",
+          topic: "request-response-log-prod",
         },
         extra: {
           batchId: batchContext.batchId,
@@ -117,6 +118,28 @@ export class LogManager {
           messageCount: batchContext.messageCount,
         },
       });
+
+      // Send to DLQ
+      const kafkaProducer = new KafkaProducer();
+      const result = await kafkaProducer.sendMessages(
+        logMessages,
+        "request-response-logs-prod-dlq"
+      );
+
+      if (result.error) {
+        Sentry.captureException(new Error(result.error), {
+          tags: {
+            type: "KafkaError",
+            topic: "request-response-log-prod-dlq",
+          },
+          extra: {
+            batchId: batchContext.batchId,
+            partition: batchContext.partition,
+            offset: batchContext.lastOffset,
+            messageCount: batchContext.messageCount,
+          },
+        });
+      }
 
       console.error(
         `Error inserting logs: ${upsertResult.error} for batch ${batchContext.batchId}`
