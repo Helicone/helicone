@@ -119,11 +119,6 @@ export class LogStore {
           });
 
           for (const promptRecord of payload.prompts) {
-            // acquire an exclusive lock on the prompt record for the duration of the transaction
-            await t.query("SELECT pg_advisory_xact_lock($1)", [
-              stringToNumberHash(promptRecord.promptId),
-            ]);
-
             await this.processPrompt(promptRecord, t);
           }
         }
