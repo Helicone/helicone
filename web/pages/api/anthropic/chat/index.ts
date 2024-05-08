@@ -1,9 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Anthropic from "@anthropic-ai/sdk";
-import {
-  ChatCompletion,
-  ChatCompletionMessageParam,
-} from "openai/resources/chat";
+
 import { DEMO_EMAIL } from "../../../../lib/constants";
 import { Result } from "../../../../lib/result";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
