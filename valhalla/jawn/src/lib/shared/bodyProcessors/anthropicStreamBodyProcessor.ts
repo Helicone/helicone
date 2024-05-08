@@ -30,10 +30,31 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
 
     try {
       if (model?.includes("claude-3")) {
-        return ok({
+        const processedBody = {
           ...recursivelyConsolidateAnthropicListForClaude3(lines),
           streamed_data: responseBody,
-        });
+        };
+
+        if (
+          !processedBody?.usage?.output_tokens ||
+          !processedBody?.usage?.input_tokens
+        ) {
+          return ok({
+            processedBody: processedBody,
+          });
+        } else {
+          return ok({
+            processedBody: processedBody,
+            usage: {
+              totalTokens:
+                processedBody?.usage?.output_tokens +
+                processedBody?.usage?.input_tokens,
+              promptTokens: processedBody?.usage?.input_tokens,
+              completionTokens: processedBody?.usage?.output_tokens,
+              heliconeCalculated: true,
+            },
+          });
+        }
       } else {
         const claudeData = {
           ...lines[lines.length - 1],
