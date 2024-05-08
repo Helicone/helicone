@@ -66,6 +66,9 @@ export interface paths {
   "/v1/experiment/query": {
     post: operations["GetExperiments"];
   };
+  "/v1/experiment/{experimentId}/scores": {
+    post: operations["GetExperimentScores"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -975,6 +978,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Experiment-Array.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentScores: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
         };
       };
     };

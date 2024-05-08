@@ -1,5 +1,14 @@
 // src/users/usersController.ts
-import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
+import {
+  Body,
+  Controller,
+  Path,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+} from "tsoa";
 import {
   FilterLeafSubset,
   FilterNode,
@@ -89,5 +98,13 @@ export class ExperimentController extends Controller {
       this.setStatus(200); // set return status 201
       return result;
     }
+  }
+
+  @Post("/{experimentId}/scores")
+  public async getExperimentScores(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() experimentId: string
+  ): Promise<Result<HeliconeRequest[], string>> {
+    return err("Not implemented");
   }
 }

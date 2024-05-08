@@ -52,6 +52,25 @@ export interface Experiment {
   }[];
 }
 
+export interface ExperimentScores {
+  dataset: {
+    dateCreated: Date;
+    model: string;
+    BLUEScore: number;
+    semanticScore: number;
+    cost: number;
+    customScores: Record<string, number>;
+  };
+  hypothesis: {
+    dateCreated: Date;
+    model: string;
+    BLUEScore: number;
+    semanticScore: number;
+    cost: number;
+    customScores: Record<string, number>;
+  };
+}
+
 export interface IncludeExperimentKeys {
   inputs?: true;
   promptVersion?: true;
@@ -251,6 +270,10 @@ export class ExperimentStore extends BaseStore {
       )
     );
   }
+
+  async getExperimentScores(
+    experimentId: string
+  ): Promise<Result<ExperimentScores, string>> {}
 }
 
 export const ServerExperimentStore: {
