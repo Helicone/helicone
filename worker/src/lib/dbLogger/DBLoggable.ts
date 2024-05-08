@@ -674,7 +674,6 @@ export class DBLoggable {
       orgIds.includes(authParams.organizationId) ||
       authParams.organizationId === "01699b51-e07b-4d49-8cda-0c7557f5b6b1" ||
       authParams.organizationId === "dad350b5-4afe-4fd5-b910-ba74c0ad2f0f" ||
-      // 1% of the time
       Math.random() < percentLogKafka
     ) {
       await this.useKafka(db, authParams, S3_ENABLED, requestHeaders);
