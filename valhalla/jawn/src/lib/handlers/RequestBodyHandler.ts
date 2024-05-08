@@ -21,6 +21,17 @@ export class RequestBodyHandler extends AbstractLogHandler {
       context.processedLog.request.assets = requestBodyAssets;
       context.processedLog.request.body = requestBodyFinal;
       context.processedLog.request.model = requestModel;
+      try {
+        context.processedLog.request.properties = Object.entries(
+          context.message.log.request.properties
+        ).reduce((acc, [key, value]) => {
+          acc[key] = this.cleanRequestBody(value);
+          return acc;
+        }, {} as Record<string, string>);
+      } catch (error: any) {
+        context.processedLog.request.properties =
+          context.message.log.request.properties;
+      }
 
       return await super.handle(context);
     } catch (error: any) {
@@ -45,8 +56,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
       };
     }
 
-    const cleanedRequestBody = this.cleanRequestBody(rawRequestBody);
-    let parsedRequestBody = tryParse(cleanedRequestBody, "request body");
+    let parsedRequestBody = tryParse(rawRequestBody, "request body");
 
     const requestModel = getModelFromRequest(
       parsedRequestBody,
