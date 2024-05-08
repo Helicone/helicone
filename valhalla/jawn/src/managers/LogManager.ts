@@ -34,12 +34,6 @@ export class LogManager {
       messageCount: number;
     }
   ): Promise<void> {
-    const clickhouseClientWrapper = new ClickhouseClientWrapper({
-      CLICKHOUSE_HOST: process.env.CLICKHOUSE_HOST ?? "http://localhost:18123",
-      CLICKHOUSE_USER: process.env.CLICKHOUSE_USER ?? "default",
-      CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD ?? "",
-    });
-
     const s3Client = new S3Client(
       process.env.S3_ACCESS_KEY ?? "",
       process.env.S3_SECRET_KEY ?? "",
@@ -48,9 +42,7 @@ export class LogManager {
     );
 
     const authHandler = new AuthenticationHandler();
-    const rateLimitHandler = new RateLimitHandler(
-      new RateLimitStore(clickhouseClientWrapper)
-    );
+    const rateLimitHandler = new RateLimitHandler(new RateLimitStore());
     const s3Reader = new S3ReaderHandler(s3Client);
     const requestHandler = new RequestBodyHandler();
     const responseBodyHandler = new ResponseBodyHandler();
