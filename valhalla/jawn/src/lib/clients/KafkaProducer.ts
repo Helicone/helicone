@@ -57,7 +57,7 @@ export class KafkaProducer {
 
         const res = await p.produceMany(data);
 
-        console.log(`Produced message, response: ${JSON.stringify(res)}`);
+        console.log(`Produced ${msgs.length} messages to ${topic}`);
         return ok(`Produced ${res.length} messages`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {

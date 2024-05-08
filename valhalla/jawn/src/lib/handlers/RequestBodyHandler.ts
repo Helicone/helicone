@@ -16,7 +16,11 @@ export class RequestBodyHandler extends AbstractLogHandler {
         this.processRequestBody(context);
 
       const { body: requestBodyFinal, assets: requestBodyAssets } =
-        this.processRequestBodyImages(processedBody, requestModel);
+        this.processRequestBodyImages(
+          context.message.log.request.id,
+          processedBody,
+          requestModel
+        );
 
       context.processedLog.request.assets = requestBodyAssets;
       context.processedLog.request.body = requestBodyFinal;
@@ -76,6 +80,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
   }
 
   private processRequestBodyImages(
+    requestId: string,
     requestBody: any,
     model?: string
   ): ImageModelParsingResponse {
@@ -84,7 +89,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
       assets: new Map<string, string>(),
     };
     if (model && isRequestImageModel(model)) {
-      const imageModelParser = getRequestImageModelParser(model);
+      const imageModelParser = getRequestImageModelParser(model, requestId);
       if (imageModelParser) {
         imageModelParsingResponse =
           imageModelParser.processRequestBody(requestBody);

@@ -23,7 +23,7 @@ export function consolidateTextFields(responseBody: any[]): any {
         }
         return {
           ...acc,
-          choices: acc.choices.map((c: any, i: number) => {
+          choices: acc.choices?.map((c: any, i: number) => {
             if (!cur.choices) {
               return c;
             } else if (
@@ -60,7 +60,7 @@ export function consolidateTextFields(responseBody: any[]): any {
       }
     }, {});
 
-    consolidated.choices = consolidated.choices.map((c: any) => {
+    consolidated.choices = consolidated.choices?.map((c: any) => {
       if (c.delta !== undefined) {
         return {
           ...c,

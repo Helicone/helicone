@@ -128,12 +128,7 @@ async function consumeBatch(batch: Batch): PromiseGenericResult<string> {
         const parsedMsg = JSON.parse(kafkaValue.value) as Message;
         messages.push(mapMessageDates(parsedMsg));
       } catch (error) {
-        // TODO: Should we skip or fail the message?
-        return err(
-          `Failed to parse message: ${error}, message: ${JSON.stringify(
-            message
-          )}`
-        );
+        return err(`Failed to parse message: ${error}`);
       }
     } else {
       // TODO: Should we skip or fail the batch?
@@ -184,4 +179,121 @@ function mapMessageDates(message: Message): Message {
       },
     },
   };
+}
+
+const dlqConsumer = kafka?.consumer({
+  groupId: "jawn-consumer-local-01",
+  minBytes: 1000, // 1 kB
+  maxBytes: 10_000, // 10 kB
+});
+
+process.on("exit", async () => {
+  await dlqConsumer?.stop();
+  await dlqConsumer?.disconnect();
+  console.log("Consumer disconnected.");
+});
+
+export const consumeDlq = async () => {
+  if (KAFKA_ENABLED && !dlqConsumer) {
+    console.error("Failed to create Kafka dlq consumer");
+    return;
+  }
+
+  let retryDelay = 100;
+  const maxDelay = 30000;
+
+  while (true) {
+    try {
+      await dlqConsumer?.connect();
+      console.log("Successfully connected to DLQ Kafka");
+      break;
+    } catch (error: any) {
+      console.error(`Failed to connect to DLQ Kafka: ${error.message}`);
+      console.log(`Retrying in ${retryDelay}ms...`);
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      retryDelay = Math.min(retryDelay * 2, maxDelay); // Exponential backoff with a cap
+    }
+  }
+
+  await dlqConsumer?.connect();
+  await dlqConsumer?.subscribe({
+    topic: "request-response-logs-prod-dlq",
+    fromBeginning: true,
+  });
+
+  await dlqConsumer?.run({
+    eachBatchAutoResolve: true,
+    eachBatch: async ({
+      batch,
+      resolveOffset,
+      heartbeat,
+      commitOffsetsIfNecessary,
+    }) => {
+      const consumeResult = await consumeDlqBatch(batch);
+
+      if (consumeResult.error) {
+        console.error("Failed to consume batch", consumeResult.error);
+
+        // TODO: Best way to handle this?
+        return;
+      } else {
+        resolveOffset(batch.messages[batch.messages.length - 1].offset);
+        await commitOffsetsIfNecessary();
+        await heartbeat();
+      }
+    },
+  });
+};
+
+async function consumeDlqBatch(batch: Batch): PromiseGenericResult<string> {
+  const lastOffset = batch.lastOffset();
+  const batchId = `${batch.partition}-${batch.firstOffset()}-${lastOffset}`;
+
+  console.log(
+    `Received batch with ${
+      batch.messages.length
+    } messages. Offset: ${batch.firstOffset()}`
+  );
+
+  const messages: Message[] = [];
+  for (const message of batch.messages) {
+    if (message.value) {
+      try {
+        const kafkaValue = JSON.parse(message.value.toString());
+        messages.push(mapMessageDates(kafkaValue));
+      } catch (error) {
+        return err(`Failed to parse message: ${error}`);
+      }
+    } else {
+      // TODO: Should we skip or fail the batch?
+      return err("Message value is empty");
+    }
+  }
+
+  const logManager = new LogManager();
+
+  try {
+    await logManager.processLogEntries(messages, {
+      batchId,
+      partition: batch.partition,
+      lastOffset: lastOffset,
+      messageCount: batch.messages.length,
+    });
+    return ok(batchId);
+  } catch (error) {
+    // TODO: Should we skip or fail the batch?
+    Sentry.captureException(error, {
+      tags: {
+        type: "ConsumeError",
+        topic: "request-response-logs-prod-dlq",
+      },
+      extra: {
+        batchId: batch.partition,
+        partition: batch.partition,
+        offset: batch.messages[0].offset,
+        messageCount: batch.messages.length,
+      },
+    });
+    return err(`Failed to process batch ${batchId}, error: ${error}`);
+  }
 }
