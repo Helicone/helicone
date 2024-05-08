@@ -4,6 +4,10 @@ import morgan from "morgan";
 export function initLogs(router: express.Router) {
   router.use(
     morgan(function (tokens, req, res) {
+      if (res.statusCode === 200) {
+        return null;
+      }
+
       // Check if the request is for the specific route
       if (req.url === "/v1/tokens/anthropic" && req.method === "POST") {
         // Skip logging and return null
