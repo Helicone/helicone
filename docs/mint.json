@@ -115,10 +115,7 @@
     {
       "group": "Features",
       "pages": [
-        {
-          "group": "Prompts",
-          "pages": ["features/prompts/intro", "features/prompts/quick-start"]
-        },
+        "features/prompts",
         {
           "group": "Customer Portal",
           "pages": [
