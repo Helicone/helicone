@@ -2,36 +2,37 @@
 title: "Prompts"
 description: "Effortlessly monitor prompt versions and inputs."
 ---
-<Warning>**This feature is currently in beta.** While you're welcome to try it out, please know that our team is still working to refine it. Your feedback is valuable to help us improve! </Warning>
 <Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing).</Info>
+
+<Warning>**This feature is currently in beta.** While you're welcome to try it out, please know that our team is still working to refine it. Your feedback is valuable to help us improve! </Warning>
 
 ## Introduction
 Helicone's prompt management provides a seamless way for users to track the prompts used in their generative AI applications. With Helicone, you can effortlessly monitor versions and inputs as they evolve.
 
-<Frame caption="Example: A Prompt Template Designed for a Rap Battle">
+<Frame caption="Example: A Prompt Template designed for a rap battle between two people. ">
   <img src="/images/prompts/example-rap-battle.png" />
 </Frame>
 
 ### Why Prompts
-With the introduction of prompts, you can now create **prompt templates**. Requests are now matched to a `helicone-prompt-id`, allowing you to: 
-- version and track iterations to your prompt over time, without losing any previous versions
+Requests are now matched to a `helicone-prompt-id`, allowing you to: 
+- version and track iterations to your prompt over time, without losing any previous versions. 
 - maintain a dataset of inputs and outputs for each prompt version.
 
 
 ## Prerequisites
-To use prompts, you must set up Helicone in proxy mode via [Gateway](https://docs.helicone.ai/getting-started/integration-method/gateway) or [custom package](https://docs.helicone.ai/getting-started/integration-method/openai-proxy).
+To use Prompts, you must set up Helicone in proxy mode via [Gateway](https://docs.helicone.ai/getting-started/integration-method/gateway) or [custom package](https://docs.helicone.ai/getting-started/integration-method/openai-proxy).
 
 <Note>Not sure if proxy is for you? We created a guide to explain the difference between [Helicone Proxy vs Helicone Async integration](https://docs.helicone.ai/getting-started/proxy-vs-async).</Note>
 
 
 ## How Prompt Template Works
-As you modify your prompt, Helicone automatically adds a new version and maintains a record of it. Additionally, a dataset of input/output keys is preserved for each version. 
+As you modify your prompt in code, Helicone automatically tracks the new version and maintains a record of the old prompt. Additionally, a dataset of input/output keys is preserved for each version. 
 
 <Accordion title="Get a Deep-Dive of Prompt Templates">
 
 ### For Typescript / Javascript users:
 
-By prefixing your prompt with `hprompt` and enclosing your input variables in an additional `{}`, it allows Helicone to easily detect your prompt and inputs. We wanted to make it as easy as possible to use Prompts, **and that means minimum code change**. 
+By prefixing your prompt with `hprompt` and enclosing your input variables in an additional `{}`, it allows Helicone to easily detect your prompt and inputs. We designed for minimum code change to keep it as easy as possible to use Prompts.
 
 ```tsx
 const location = "space";
@@ -156,12 +157,12 @@ Let's say we have an app that generates a short story, where users are able to i
 
     <Step title="Add helicone-prompt-input tags">
     Add `<helicone-prompt-input key="<INPUT_ID>">` before your input variable, and `</helicone-prompt-input>` after, where `INPUT_ID` is your key name. In this example, `key=”character”`: 
-    <Check> Don't worry, Helicone will remove these tags for you before the prompt is sent to your LLM.</Check> 
 
     ```tsx
     Write a story about <helicone-prompt-input key="character" >a secret agent</helicone-prompt-input>
     ```    
-    <Warning>It is crucial that each key has a **unique identifier**; otherwise, the same variable will be replaced in multiple places. </Warning>
+    <Check> Don't worry, Helicone will remove these tags for you before the prompt is sent to your LLM.</Check> 
+    <Note>It is crucial that each key has a **unique identifier**; otherwise, the same variable will be replaced in multiple places. </Note>
 
 
     </Step>
@@ -169,8 +170,10 @@ Let's say we have an app that generates a short story, where users are able to i
     <Step title="Tag your prompt">
 
       In order to securely ensure that we know when and how to parse and categorize your prompt, please append the following header to your LLM request.
-      `Helicone-Prompt-Id: you_prompt_id`.
 
+      ```tsx
+      Helicone-Prompt-Id: you_prompt_id
+      ```
       <Note>
       The id must not include any spaces or special characters. Underscores and dashes are acceptable.
       </Note>
