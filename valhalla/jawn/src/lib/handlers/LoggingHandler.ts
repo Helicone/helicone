@@ -353,7 +353,7 @@ export class LoggingHandler extends AbstractLogHandler {
         target_url: request.targetUrl ?? null,
         provider: request.provider ?? null,
         country_code: request.countryCode ?? null,
-        properties: request.properties,
+        properties: context.processedLog.request.properties ?? {},
         sign: 1,
         version: 1,
       };
@@ -399,7 +399,7 @@ export class LoggingHandler extends AbstractLogHandler {
       auth_hash: "",
       user_id: request.userId ?? null,
       prompt_id: request.promptId ?? null,
-      properties: request.properties,
+      properties: processedRequest.properties ?? {},
       helicone_user: authParams?.userId ?? null,
       helicone_api_key_id: authParams?.heliconeApiKeyId ?? null,
       helicone_org_id: orgParams?.id ?? null,
