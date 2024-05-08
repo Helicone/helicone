@@ -1,6 +1,7 @@
 import { TemplateWithInputs } from "../../api/lib/promptHelpers";
 import { Env, Provider } from "../..";
 import { Kafka } from "@upstash/kafka";
+import { err } from "../util/results";
 
 export type Log = {
   request: {
@@ -97,7 +98,7 @@ export class KafkaProducer {
         if (attempts < maxAttempts) {
           await new Promise((resolve) => setTimeout(resolve, timeout));
         } else {
-          throw error;
+          return err(`Failed to produce message: ${error.message}`);
         }
       }
     }

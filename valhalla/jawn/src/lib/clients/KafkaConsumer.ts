@@ -156,7 +156,7 @@ async function consumeBatch(batch: Batch): PromiseGenericResult<string> {
     Sentry.captureException(error, {
       tags: {
         type: "ConsumeError",
-        topic: "request-response-log-prod",
+        topic: "request-response-logs-prod",
       },
       extra: {
         batchId: batch.partition,
