@@ -1,5 +1,5 @@
 import { AuthParams, OrgParams, supabaseServer } from "../db/supabase";
-import { BearerAuth } from "../requestWrapper";
+import { HeliconeAuth } from "../requestWrapper";
 import { PromiseGenericResult, err, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
@@ -31,12 +31,20 @@ export class AuthenticationHandler extends AbstractLogHandler {
   private async authenticateEntry(
     context: HandlerContext
   ): PromiseGenericResult<AuthParams> {
-    const bearerToken: BearerAuth = {
-      _type: "bearer",
-      token: context.message.authorization,
-    };
+    let heliconeAuth: HeliconeAuth;
+    if (context.message.authorization.startsWith("sk-helicone-proxy")) {
+      heliconeAuth = {
+        _type: "bearerProxy",
+        token: context.message.authorization,
+      };
+    } else {
+      heliconeAuth = {
+        _type: "bearer",
+        token: context.message.authorization,
+      };
+    }
 
-    const authResult = await supabaseServer.authenticate(bearerToken);
+    const authResult = await supabaseServer.authenticate(heliconeAuth);
     if (authResult.error || !authResult.data?.organizationId) {
       return err(
         `Authentication failed: ${
