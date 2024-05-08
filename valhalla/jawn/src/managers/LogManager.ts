@@ -81,7 +81,7 @@ export class LogManager {
           Sentry.captureException(new Error(result.error), {
             tags: {
               type: "HandlerError",
-              topic: "request-response-log",
+              topic: "request-response-log-prod",
             },
             extra: {
               requestId: logMessage.log.request.id,
@@ -154,7 +154,7 @@ export class LogManager {
       Sentry.captureException(rateLimitErr, {
         tags: {
           type: "RateLimitError",
-          topic: "request-response-log",
+          topic: "request-response-log-prod",
         },
         extra: {
           batchId: batchContext.batchId,
