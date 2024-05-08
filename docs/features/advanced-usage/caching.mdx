@@ -85,27 +85,28 @@ const openai = new OpenAIApi(configuration);
 
 ### Cache Parameters
 
-| Parameter                    | Description                                       |
-| ---------------------------- | ------------------------------------------------- |
-| `Helicone-Cache-Enabled`  (required)         | This will enable storing and loading from your cache  |
-| `Cache-Control` (optional)                    | Allow you to configure based on the [Cloudflare Cache Directive](https://developers.cloudflare.com/cache/about/cache-control#cache-control-directives). Currently only max-age is supported, but we will be adding more configuration options soon. |
+| Parameter                            | Description                                       |
+| ------------------------------------------- | ----------------------------------------------------- |
+| `Helicone-Cache-Enabled`  (required)        | This will enable storing and loading from your cache.  |
+| `Cache-Control` (optional)                  | Allow you to configure cache limit based on the [Cloudflare Cache Directive](https://developers.cloudflare.com/cache/about/cache-control#cache-control-directives). Currently only max-age is supported, but we will be adding more configuration options soon. |
+| `Helicone-Cache-Bucket-Max-Size` (optional) | Allows you to choose how large you want your Cache Bucket size to be.|
+| `Helicone-Cache-Seed` (optional) | Allows you to generate for predictable results and maintain separate cache states for each cache seed. | 
 
 ### Changing Cache Limit
-The default caching limit is 7 days. To change your caching limit, add the `Cache-Control` header to your request.
+The default cache limit is 7 days. To change the limit, add the `Cache-Control` header to your request. 
 
-
-**Example**: Setting the cache to **30 days**, aka `2592000 seconds`
+**Example**: Setting the cache limit to 30 days, aka `2592000 seconds`
 
 ```tsx
-"Cache-Control": "max-age=2592000"`
+"Cache-Control": "max-age=2592000"
 ```
-<Note>The max caching limit is **365 days**, or `max-age=31536000`. </Note>
+<Note>The max cache limit is 365 days, or `max-age=31536000`. </Note>
 
 
 
 ### Configuring Bucket Size
 
-Simply add `Helicone-Cache-Bucket-Max-Size` with some number to choose how large you want your Bucket size to be.
+Simply add `Helicone-Cache-Bucket-Max-Size` with some number to choose how large you want your bucket size to be.
 
 <CodeGroup>
 
@@ -117,7 +118,7 @@ model="text-davinci-003",
 prompt="Say this is a test",
 headers={
 "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-"Helicone-Cache-Enabled": "true",
+"Helicone-Cache-Enabled": "true", # mandatory 
 "Helicone-Cache-Bucket-Max-Size": "3", # set cache bucket size to 3
 }
 )
@@ -129,7 +130,7 @@ const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
   basePath: "https://oai.hconeai.com/v1",
   defaultHeaders: {
-    "Helicone-Cache-Enabled": "true",
+    "Helicone-Cache-Enabled": "true", // mandatory 
     "Helicone-Cache-Bucket-Max-Size": "3", // set cache bucket size to 3
   },
 });
@@ -152,7 +153,7 @@ openai.completion("give me a random number") -> "17"
 openai.completion("give me a random number") -> This will randomly choose 42 | 47 | 17
 # Cache Hit
 ```
-<Note>The max number of caches you can store is `20` within a bucket, if you want more you will need to upgrade to an enterprise [plan](https://www.helicone.ai/pricing) </Note>
+<Note>The max number of caches you can store is `20` within a bucket, if you want more you will need to upgrade to an enterprise [plan](https://www.helicone.ai/pricing).</Note>
 
 ### Adding Cache Seed
 When you make a request to Helicone with the same seed, you will receive the same cached response for the same query. This feature allows for predictable results, which can be beneficial in scenarios where you want to have a consistent cache across multiple requests.
@@ -214,7 +215,10 @@ chat_completion_raw = client.chat.completions.with_raw_response.create(
         {"role": "user", "content": "Hello world!"}
     ],
     extra_headers={
-        "Helicone-Cache-Enabled": "true" # make sure Cache is enabled
+        "Helicone-Cache-Enabled": "true" # make sure cache is enabled
+        "Cache-Control": "max-age = 2592000", # change cache limit (optional)
+        "Helicone-Cache-Bucket-Max-Size": "3", # configure cache bucket size (optional)
+        "Helicone-Cache-Seed": "1", # add cache seed (optional)
     },
 )
 
@@ -225,6 +229,6 @@ chat_completion = chat_completion_raw.parse()
 cache_hit = chat_completion_raw.http_response.headers.get(
     'Helicone-Cache')
 
-print(cache_hit) # Will print "HIT" or "MISS"
+print(cache_hit) # will print "HIT" or "MISS"
 
 ```
