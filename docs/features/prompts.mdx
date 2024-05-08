@@ -10,7 +10,7 @@ description: "Effortlessly monitor prompt versions and inputs."
 Helicone's prompt management provides a seamless way for users to track the prompts used in their generative AI applications. With Helicone, you can effortlessly monitor versions and inputs as they evolve.
 
 <Frame caption="Example: A Prompt Template designed for a rap battle between two people. ">
-  <img src="/images/prompts/example-rap-battle.png" />
+  <img src="/images/prompts/example-prompt-rap-battle.png" />
 </Frame>
 
 ### Why Prompts
@@ -44,7 +44,7 @@ Compose a movie scene involving ${{ character }}, set in ${{ location }}
 
 ### For other users:
 
-We are currently utilizing an adapted version of JSX to manage prompts and their input variables. 
+Currently, we only support packages for TypeScript and JavaScript for easy integration. For other users, we are utilizing an adapted version of JSX to manage prompts and their input variables.
 
 1. When you send over a prompt with the following syntax, we are able to extract the children text between the JSX element `helicone-prompt-input`, then place it back into the prompt to be sent to your LLM. 
 ```tsx
@@ -145,50 +145,49 @@ Let's say we have an app that generates a short story, where users are able to i
     ```
 
   </Tab>
-  <Tab title="Packageless (curl)">
-  <Steps>
-    <Step title="Identify the input variable, and create a key name.">
-    Given the below string, let's say `a secret agent` is our inputted variable. Let's name our key `character`.
-
-    ```tsx
-    Write a story about a secret agent
-    ```
-    </Step>
-
-    <Step title="Add helicone-prompt-input tags">
-    Add `<helicone-prompt-input key="<INPUT_ID>">` before your input variable, and `</helicone-prompt-input>` after, where `INPUT_ID` is your key name. In this example, `key=”character”`: 
-
-    ```tsx
-    Write a story about <helicone-prompt-input key="character" >a secret agent</helicone-prompt-input>
-    ```    
-    <Check> Don't worry, Helicone will remove these tags for you before the prompt is sent to your LLM.</Check> 
-    <Note>It is crucial that each key has a **unique identifier**; otherwise, the same variable will be replaced in multiple places. </Note>
-
-
-    </Step>
-
-    <Step title="Tag your prompt">
-
-      In order to securely ensure that we know when and how to parse and categorize your prompt, please append the following header to your LLM request.
+  
+  <Tab title="Packageless (cURL)">
+      Currently, we only support packages for TypeScript and JavaScript for easy integration. For other users, we recommend manually implementing input variables as follow:
+    <Steps>
+      <Step title="Identify the input variable, and create a key name.">
+      Given the below string, let's say `a secret agent` is our inputted variable. Let's name our key `character`.
 
       ```tsx
-      Helicone-Prompt-Id: you_prompt_id
+      Write a story about a secret agent
       ```
-      <Note>
-      The id must not include any spaces or special characters. Underscores and dashes are acceptable.
-      </Note>
+      </Step>
 
-    </Step>
-    <Step title="Make a request">
-      You just created a prompt template! Helicone will now keep track of all of your inputs for you. Rest assure that all of the helicone-prompt-input tags will removed before your prompt is sent to your LLM. 
-    </Step>
+      <Step title="Add helicone-prompt-input tags">
+      Add `<helicone-prompt-input key="<INPUT_ID>">` before your input variable, and `</helicone-prompt-input>` after, where `INPUT_ID` is your key name. In this example, `key=”character”`: 
 
-  </Steps>
+      ```tsx
+      Write a story about <helicone-prompt-input key="character" >a secret agent</helicone-prompt-input>
+      ```    
+      <Check> Don't worry, Helicone will remove these tags for you before the prompt is sent to your LLM.</Check> 
+      <Note>It is crucial that each key has a **unique identifier**; otherwise, the same variable will be replaced in multiple places. </Note>
 
-  </Tab>
-  <Tab title="Other">
-    Currently, we only support packages for TypeScript and JavaScript for easy integration. For now, we recommend manually implementing input variables like this:
+      </Step>
 
+      <Step title="Tag your prompt">
+
+        In order to securely ensure that we know when and how to parse and categorize your prompt, please append the following header to your LLM request.
+
+        ```tsx
+        Helicone-Prompt-Id: you_prompt_id
+        ```
+        <Note>
+        The id must not include any spaces or special characters. Underscores and dashes are acceptable.
+        </Note>
+
+      </Step>
+
+      <Step title="Make a request">
+        You just created a prompt template! Helicone will now keep track of all of your inputs for you. Rest assure that all of the helicone-prompt-input tags will removed before your prompt is sent to your LLM. 
+      </Step>
+
+    </Steps>
+
+    #### Here's what your code would look like: 
     ```python
     openai.ChatCompletion.create(
       model="[DEPLOYMENT]",
@@ -200,9 +199,6 @@ Let's say we have an app that generates a short story, where users are able to i
       }
     )
     ```
-
-    If you want more package support, please reach out to [engineering@helicone.ai](mailto:engineering@helicone.ai)
-
+    If you want more package support, please reach out to [engineering@helicone.ai](mailto:engineering@helicone.ai). 
   </Tab>
-
 </Tabs>
