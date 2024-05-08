@@ -19,7 +19,7 @@ export class LogManager {
     await this.processLogEntries([logMessage], {
       batchId: "",
       partition: 0,
-      lastOffset: () => "",
+      lastOffset: "",
       messageCount: 1,
     });
   }
@@ -29,7 +29,7 @@ export class LogManager {
     batchContext: {
       batchId: string;
       partition: number;
-      lastOffset: () => string;
+      lastOffset: string;
       messageCount: number;
     }
   ): Promise<void> {
@@ -88,7 +88,7 @@ export class LogManager {
               orgId: handlerContext.orgParams?.id ?? "",
               batchId: batchContext.batchId,
               partition: batchContext.partition,
-              offset: batchContext.lastOffset(),
+              offset: batchContext.lastOffset,
               messageCount: batchContext.messageCount,
             },
           });
@@ -113,7 +113,7 @@ export class LogManager {
         extra: {
           batchId: batchContext.batchId,
           partition: batchContext.partition,
-          offset: batchContext.lastOffset(),
+          offset: batchContext.lastOffset,
           messageCount: batchContext.messageCount,
         },
       });
@@ -136,7 +136,7 @@ export class LogManager {
         extra: {
           batchId: batchContext.batchId,
           partition: batchContext.partition,
-          offset: batchContext.lastOffset(),
+          offset: batchContext.lastOffset,
           messageCount: batchContext.messageCount,
         },
       });
