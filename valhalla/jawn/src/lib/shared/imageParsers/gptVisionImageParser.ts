@@ -2,8 +2,8 @@
 import { ImageModelRequestBodyParser } from "./core/modelRequestBodyParser";
 import { ImageModelParsingResponse } from "./core/parsingResponse";
 export class GptVisionImageParser extends ImageModelRequestBodyParser {
-  constructor(modelName: string) {
-    super(modelName);
+  constructor(modelName: string, requestId: string) {
+    super(modelName, requestId);
   }
 
   processRequestBody(body: any): ImageModelParsingResponse {
@@ -39,7 +39,7 @@ export class GptVisionImageParser extends ImageModelRequestBodyParser {
   }
 
   processContentItem(item: any) {
-    const assetId = this.generateAssetId();
+    const assetId = this.generateAssetId(this.requestId, this.assetIndex++);
     if (
       item.type === "image_url" &&
       item.image_url &&
