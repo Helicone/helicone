@@ -190,7 +190,7 @@ const dlqConsumer = kafka?.consumer({
 process.on("exit", async () => {
   await dlqConsumer?.stop();
   await dlqConsumer?.disconnect();
-  console.log("Consumer disconnected.");
+  console.log("DLQ Consumer disconnected.");
 });
 
 export const consumeDlq = async () => {
