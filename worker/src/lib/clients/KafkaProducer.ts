@@ -45,10 +45,10 @@ export type KafkaMessage = {
 
 export class KafkaProducer {
   private kafka: Kafka | null = null;
-  private JAWN_URL: string | undefined = undefined;
+  private VALHALLA_URL: string | undefined = undefined;
 
   constructor(env: Env) {
-    this.JAWN_URL = env.JAWN_URL;
+    this.VALHALLA_URL = env.VALHALLA_URL;
 
     if (
       !env.UPSTASH_KAFKA_URL ||
@@ -105,7 +105,7 @@ export class KafkaProducer {
 
   async sendMessageHttp(msg: KafkaMessage) {
     try {
-      const result = await fetch(`${this.JAWN_URL}/v1/log/request`, {
+      const result = await fetch(`${this.VALHALLA_URL}/v1/log/request`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
