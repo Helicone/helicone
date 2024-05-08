@@ -13,7 +13,7 @@ export class GptVisionImageParser extends ImageModelRequestBodyParser {
       requestBody = JSON.parse(JSON.stringify(body));
       requestBody?.messages?.forEach((message: any) => {
         if (Array.isArray(message.content)) {
-          message.content.forEach((item: any) => {
+          message.content?.forEach((item: any) => {
             const result = this.processContentItem(item);
             if (result && result.assetId) {
               requestAssets.set(result.assetId, result.imageUrl);
@@ -39,10 +39,23 @@ export class GptVisionImageParser extends ImageModelRequestBodyParser {
   }
 
   processContentItem(item: any) {
-    if (item.type === "image_url") {
-      const assetId = this.generateAssetId();
+    const assetId = this.generateAssetId();
+    if (
+      item.type === "image_url" &&
+      item.image_url &&
+      typeof item.image_url === "object" &&
+      "url" in item.image_url
+    ) {
       const oldUrl = item.image_url.url;
       item.image_url.url = `<helicone-asset-id key="${assetId}"/>`;
+      return { assetId: assetId, imageUrl: oldUrl };
+    } else if (
+      item.type === "image_url" &&
+      item.image_url &&
+      typeof item.image_url === "string"
+    ) {
+      const oldUrl = item.image_url;
+      item.image_url = `<helicone-asset-id key="${assetId}"/>`;
       return { assetId: assetId, imageUrl: oldUrl };
     }
     return null;
