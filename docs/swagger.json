@@ -1848,6 +1848,9 @@
 								"runs": {
 									"items": {
 										"properties": {
+											"scores": {
+												"$ref": "#/components/schemas/Record_string.number_"
+											},
 											"response": {
 												"$ref": "#/components/schemas/ResponseObj"
 											},
@@ -1859,6 +1862,7 @@
 											}
 										},
 										"required": [
+											"scores",
 											"response",
 											"resultRequestId",
 											"datasetRowId"

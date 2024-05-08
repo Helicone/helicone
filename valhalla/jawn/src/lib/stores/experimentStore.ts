@@ -49,6 +49,7 @@ export interface Experiment {
       datasetRowId: string;
       resultRequestId: string;
       response: ResponseObj;
+      scores: Record<string, number>;
     }[];
   }[];
 }
@@ -182,7 +183,14 @@ function getExperimentsQuery(
                                       : ""
                                   }
                                   'datasetRowId', hr.dataset_row,
-                                  'resultRequestId', hr.id
+                                  'resultRequestId', hr.id,
+                                  'scores', (
+                                    SELECT jsonb_object_agg(sa.score_key, sv.int_value)
+                                    FROM score_value sv
+                                    JOIN score_attribute sa ON sa.id = sv.score_attribute
+                                    WHERE sv.request_id = hr.result_request_id
+                                    AND sa.organization = e.organization
+                                  )
                               )
                           )
                           FROM experiment_v2_hypothesis_run hr
