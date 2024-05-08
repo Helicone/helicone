@@ -370,7 +370,7 @@ export class LoggingHandler extends AbstractLogHandler {
     const responseInsert: Database["public"]["Tables"]["response"]["Insert"] = {
       id: response.id,
       request: context.message.log.request.id,
-      body: JSON.stringify(processedResponse.body),
+      body: "",
       status: response.status,
       model: processedResponse.model,
       completion_tokens: context.usage.completionTokens,
@@ -395,7 +395,7 @@ export class LoggingHandler extends AbstractLogHandler {
     const requestInsert: Database["public"]["Tables"]["request"]["Insert"] = {
       id: request.id,
       path: request.path,
-      body: JSON.stringify(processedRequest.body),
+      body: "",
       auth_hash: "",
       user_id: request.userId ?? null,
       prompt_id: request.promptId ?? null,
