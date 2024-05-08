@@ -163,6 +163,9 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                     <TableHeaderCell className="w-1/3 border-l border-gray-300">
                       <p className="text-black text-lg">Experiment Output</p>
                     </TableHeaderCell>
+                    <TableHeaderCell className="w-1/3 border-l border-gray-300">
+                      <p className="text-black text-lg">Scores</p>
+                    </TableHeaderCell>
                   </TableRow>
                 </TableHead>
 
@@ -274,6 +277,25 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                             </div>
                           )}
                         </TableCell>
+                        {/* <TableCell className="h-full border-l border-gray-300">
+                          <div className="flex flex-col space-y-2">
+                            {run.originResult.response?.scores &&
+                              Object.keys(run.testResult.response.scores).map(
+                                (key) => {
+                                  return (
+                                    <div key={} className="flex items-center space-x-2">
+                                      <p className="text-sm font-semibold text-black">
+                                        {key}:
+                                      </p>
+                                      <p className="text-sm text-black">
+                                        {run.testResult.response.scores[key]}
+                                      </p>
+                                    </div>
+                                  );
+                                }
+                              )}
+                          </div>
+                        </TableCell> */}
                       </TableRow>
                     );
                   })}

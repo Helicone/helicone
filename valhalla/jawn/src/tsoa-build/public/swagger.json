@@ -1786,6 +1786,9 @@
 							"rows": {
 								"items": {
 									"properties": {
+										"scores": {
+											"$ref": "#/components/schemas/Record_string.number_"
+										},
 										"inputRecord": {
 											"properties": {
 												"response": {
@@ -1814,6 +1817,7 @@
 										}
 									},
 									"required": [
+										"scores",
 										"rowId"
 									],
 									"type": "object"

@@ -551,6 +551,7 @@ Json: JsonObject;
       organization: string;
       dataset: {
         rows: {
+            scores: components["schemas"]["Record_string.number_"];
             inputRecord?: {
               response: components["schemas"]["ResponseObj"];
               inputs: components["schemas"]["Record_string.string_"];
