@@ -3,8 +3,8 @@ import { ImageModelResponseBodyParser } from "./core/modelResponseBodyParser";
 import { ImageModelParsingResponse } from "./core/parsingResponse";
 
 export class DalleImageParser extends ImageModelResponseBodyParser {
-  constructor(modelName: string) {
-    super(modelName);
+  constructor(modelName: string, responseId: string) {
+    super(modelName, responseId);
   }
 
   processResponseBody(body: any): ImageModelParsingResponse {
@@ -15,7 +15,10 @@ export class DalleImageParser extends ImageModelResponseBodyParser {
       if (Array.isArray(responseBody?.data)) {
         responseBody?.data?.forEach((item: any) => {
           if (item.url) {
-            const assetId = this.generateAssetId();
+            const assetId = this.generateAssetId(
+              this.responseId,
+              this.assetIndex++
+            );
             requestAssets.set(assetId, item.url);
             item.url = `<helicone-asset-id key="${assetId}"/>`;
           }

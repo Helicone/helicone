@@ -161,7 +161,9 @@ export class LogManager {
       }
 
       console.error(
-        `Error inserting logs: ${upsertResult.error} for batch ${batchContext.batchId}`
+        `Error inserting logs: ${JSON.stringify(
+          upsertResult.error
+        )} for batch ${batchContext.batchId}`
       );
     }
 

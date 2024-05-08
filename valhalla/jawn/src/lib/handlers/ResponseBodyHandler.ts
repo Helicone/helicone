@@ -45,6 +45,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
 
       const { body: responseBodyFinal, assets: responseBodyAssets } =
         this.processResponseBodyImages(
+          context.message.log.response.id,
           omittedResponseBody,
           context.processedLog.model
         );
@@ -74,6 +75,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
   }
 
   private processResponseBodyImages(
+    responseId: string,
     responseBody: any,
     model?: string
   ): ImageModelParsingResponse {
@@ -83,7 +85,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     };
 
     if (model && isResponseImageModel(model)) {
-      const imageModelParser = getResponseImageModelParser(model);
+      const imageModelParser = getResponseImageModelParser(model, responseId);
       if (imageModelParser) {
         imageModelParsingResponse =
           imageModelParser.processResponseBody(responseBody);
