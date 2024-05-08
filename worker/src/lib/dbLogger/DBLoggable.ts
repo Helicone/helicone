@@ -652,7 +652,9 @@ export class DBLoggable {
 
     let orgIds: string[] = [];
     try {
-      orgIds = ORG_IDS.split(",");
+      if (ORG_IDS) {
+        orgIds = ORG_IDS.split(",").filter((id) => id.length > 0);
+      }
     } catch (e) {
       console.error("Error parsing orgIds", e);
     }
