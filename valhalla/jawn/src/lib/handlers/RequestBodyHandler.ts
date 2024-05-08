@@ -10,9 +10,6 @@ import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
 export class RequestBodyHandler extends AbstractLogHandler {
-  cleanRequestBody(requestBodyStr: string): string {
-    return requestBodyStr.replace(/\\u0000/g, "");
-  }
   async handle(context: HandlerContext): PromiseGenericResult<string> {
     try {
       const { body: processedBody, model: requestModel } =
@@ -99,5 +96,9 @@ export class RequestBodyHandler extends AbstractLogHandler {
     );
 
     return imageModelParsingResponse;
+  }
+
+  cleanRequestBody(requestBodyStr: string): string {
+    return requestBodyStr.replace(/\\u0000/g, "");
   }
 }
