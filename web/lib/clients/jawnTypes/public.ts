@@ -9,9 +9,6 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
-  "/v1/webhook/request/{requestId}/score": {
-    post: operations["AddScores"];
-  };
   "/v1/user/query": {
     post: operations["GetUsers"];
   };
@@ -26,6 +23,9 @@ export interface paths {
   };
   "/v1/request/{requestId}/assets/{assetId}": {
     post: operations["GetRequestAssetById"];
+  };
+  "/v1/request/{requestId}/score": {
+    post: operations["AddScores"];
   };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];
@@ -72,25 +72,6 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
-    ResultSuccess_null_: {
-      /** @enum {number|null} */
-      data: null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    ResultError_string_: {
-      /** @enum {number|null} */
-      data: null;
-      error: string;
-    };
-    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.number_": {
-      [key: string]: number;
-    };
-    ScoreRequest: {
-      scores: components["schemas"]["Record_string.number_"];
-    };
     "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
       data: {
           /** Format: double */
@@ -105,6 +86,11 @@ export interface components {
         }[];
       /** @enum {number|null} */
       error: null;
+    };
+    ResultError_string_: {
+      /** @enum {number|null} */
+      data: null;
+      error: string;
     };
     "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": components["schemas"]["ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"] | components["schemas"]["ResultError_string_"];
     UserQueryParams: {
@@ -354,6 +340,13 @@ Json: JsonObject;
       isCached?: boolean;
       includeInputs?: boolean;
     };
+    ResultSuccess_null_: {
+      /** @enum {number|null} */
+      data: null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
     HeliconeRequestAsset: {
       assetUrl: string;
     };
@@ -363,6 +356,13 @@ Json: JsonObject;
       error: null;
     };
     "Result_HeliconeRequestAsset.string_": components["schemas"]["ResultSuccess_HeliconeRequestAsset_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.number_": {
+      [key: string]: number;
+    };
+    ScoreRequest: {
+      scores: components["schemas"]["Record_string.number_"];
+    };
     PromptsResult: {
       id: string;
       user_defined_id: string;
@@ -633,26 +633,6 @@ export type external = Record<string, never>;
 
 export interface operations {
 
-  AddScores: {
-    parameters: {
-      path: {
-        requestId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ScoreRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
   GetUsers: {
     requestBody: {
       content: {
@@ -752,6 +732,26 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeRequestAsset.string_"];
+        };
+      };
+    };
+  };
+  AddScores: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScoreRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

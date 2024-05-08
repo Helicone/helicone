@@ -12,7 +12,7 @@ import {
   Tags,
 } from "tsoa";
 import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
-import { Result } from "../../lib/shared/result";
+import { err, ok, Result } from "../../lib/shared/result";
 import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import {
   HeliconeRequest,
@@ -20,12 +20,18 @@ import {
 } from "../../lib/stores/request/request";
 import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
+import { ScoreManager } from "../../managers/score/ScoreManager";
 
 export type RequestFilterBranch = {
   left: RequestFilterNode;
   operator: "or" | "and";
   right: RequestFilterNode;
 };
+
+export interface ScoreRequest {
+  scores: Record<string, number>;
+}
+
 type RequestFilterNode =
   | FilterLeafSubset<
       "feedback" | "request" | "response" | "properties" | "values"
@@ -150,5 +156,24 @@ export class RequestController extends Controller {
       this.setStatus(200);
     }
     return requestAsset;
+  }
+
+  @Post("/{requestId}/score")
+  public async addScores(
+    @Body()
+    requestBody: ScoreRequest,
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() requestId: string
+  ): Promise<Result<null, string>> {
+    const scoreManager = new ScoreManager(request.authParams);
+
+    const result = await scoreManager.addScores(requestId, requestBody.scores);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err("Not implemented");
+    } else {
+      this.setStatus(201);
+      return ok(null);
+    }
   }
 }
