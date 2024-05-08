@@ -3,8 +3,8 @@ import { ImageModelRequestBodyParser } from "./core/modelRequestBodyParser";
 import { ImageModelParsingResponse } from "./core/parsingResponse";
 
 export class ClaudeImageParser extends ImageModelRequestBodyParser {
-  constructor(modelName: string) {
-    super(modelName);
+  constructor(modelName: string, requestId: string) {
+    super(modelName, requestId);
   }
   processRequestBody(body: any): ImageModelParsingResponse {
     const requestAssets: Map<string, string> = new Map();
@@ -16,7 +16,10 @@ export class ClaudeImageParser extends ImageModelRequestBodyParser {
           if (Array.isArray(message.content)) {
             message.content.forEach((item: any) => {
               if (item.type === "image") {
-                const assetId = this.generateAssetId();
+                const assetId = this.generateAssetId(
+                  this.requestId,
+                  this.assetIndex++
+                );
                 const base64Image = `data:${item.source.media_type};${item.source.type},${item.source.data}`;
                 requestAssets.set(assetId, base64Image);
                 item.source.data = `<helicone-asset-id key="${assetId}"/>`;

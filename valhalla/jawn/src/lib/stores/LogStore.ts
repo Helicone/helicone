@@ -184,11 +184,12 @@ export class LogStore {
         : 0;
       const newVersionResult = await t.one(
         `INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at)
-         VALUES ($1, $2, $3, 0, $4, $5, $6) RETURNING id`,
+         VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
         [
           existingPrompt.id,
           orgId,
           majorVersion,
+          0,
           heliconeTemplate,
           model,
           newPromptRecord.createdAt,
