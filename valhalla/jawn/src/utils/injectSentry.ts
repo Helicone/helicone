@@ -7,9 +7,9 @@ export function initSentry(router: express.Router) {
     dsn: process.env.SENTRY_DSN,
     integrations: [
       // enable HTTP calls tracing
-      new Sentry.Integrations.Http({ tracing: true }),
+      // new Sentry.Integrations.Http({ tracing: true }),
       // enable Express.js middleware tracing
-      new Sentry.Integrations.Express({ app: router }),
+      // new Sentry.Integrations.Express({ app: router }),
       new ProfilingIntegration(),
     ],
     // Performance Monitoring
@@ -18,7 +18,7 @@ export function initSentry(router: express.Router) {
     profilesSampleRate: 1.0,
   });
 
-  router.use(Sentry.Handlers.requestHandler());
-  router.use(Sentry.Handlers.tracingHandler());
+  // router.use(Sentry.Handlers.requestHandler());
+  // router.use(Sentry.Handlers.tracingHandler());
   router.use(Sentry.Handlers.errorHandler());
 }
