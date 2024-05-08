@@ -1,5 +1,6 @@
 import { BookOpenIcon, ChartBarIcon } from "@heroicons/react/24/outline";
 import {
+  AreaChart,
   MultiSelect,
   MultiSelectItem,
   Select,
@@ -34,6 +35,18 @@ import PromptPropertyCard from "./promptPropertyCard";
 import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
 import { MODEL_LIST } from "../../playground/new/modelList";
 import LoadingAnimation from "../../../shared/loadingAnimation";
+import { useRequestsOverTime } from "../../organization/plan/renderOrgPlan";
+import { useDashboardPage } from "../../dashboard/useDashboardPage";
+import {
+  BackendMetricsCall,
+  useBackendMetricCall,
+} from "../../../../services/hooks/useBackendFunction";
+import { RequestsOverTime } from "../../../../lib/timeCalculations/fetchTimeData";
+import { Result, resultMap } from "../../../../lib/result";
+import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
+import StyledAreaChart from "../../dashboard/styledAreaChart";
+import { getTimeMap } from "../../../../lib/timeCalculations/constants";
+import { getTimeInterval } from "../../../../lib/timeCalculations/time";
 
 interface PromptIdPageProps {
   id: string;
@@ -132,6 +145,48 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   const [searchRequestId, setSearchRequestId] = useState<string>("");
 
   const router = useRouter();
+
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 1);
+  const [timeFilter, setTimeFilter] = useState<{
+    start: Date;
+    end: Date;
+  }>({
+    start: oneWeekAgo,
+    end: new Date(),
+  });
+
+  const timeIncrement = getTimeInterval(timeFilter);
+
+  const params: BackendMetricsCall<any>["params"] = {
+    timeFilter: timeFilter,
+    userFilters: [
+      {
+        request_response_versioned: {
+          properties: {
+            "Helicone-Prompt-Id": {
+              equals: prompt?.user_defined_id,
+            },
+          },
+        },
+      },
+    ],
+    dbIncrement: timeIncrement,
+    timeZoneDifference: new Date().getTimezoneOffset(),
+  };
+  const promptUsageOverTime = useBackendMetricCall<
+    Result<RequestsOverTime[], string>
+  >({
+    params,
+    endpoint: "/api/metrics/requestOverTime",
+    key: "requestOverTime",
+    postProcess: (data) => {
+      return resultMap(data, (d) =>
+        d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
+      );
+    },
+  });
+  console.log("promptUsageOverTime", promptUsageOverTime);
 
   const { experiments, isLoading: isExperimentsLoading } = useExperiments(
     {
@@ -267,7 +322,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           <TabPanels>
             <TabPanel>
               <div className="flex flex-col space-y-8 py-4">
-                {/* <div className="w-full h-full flex flex-col space-y-4">
+                <div className="w-full h-full flex flex-col space-y-4">
                   <div className="flex items-center justify-between w-full">
                     <ThemedTimeFilter
                       timeFilterOptions={[
@@ -293,9 +348,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                         },
                       ]}
                       custom={true}
-                      onSelect={function (key: string, value: string): void {
-                        throw new Error("Function not implemented.");
-                      }}
+                      onSelect={function (key: string, value: string): void {}}
                       isFetching={false}
                       defaultValue={"24H"}
                       currentTimeFilter={{
@@ -308,19 +361,31 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   <div>
                     <StyledAreaChart
                       title={"Total Requests"}
-                      value={"coming soon..."}
+                      value={"count"}
                       isDataOverTimeLoading={false}
                     >
-                      <div className="h-[12rem] w-full bg-white dark:bg-black flex flex-col items-center justify-center">
-                        <ChartBarIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
-                        <p className="text-lg font-semibold">
-                          Requests over time coming soon...
-                        </p>
-                      </div>
-                      <AreaChartUsageExample />
+                      <AreaChart
+                        className="h-[14rem]"
+                        data={
+                          promptUsageOverTime.data?.data?.map((r) => ({
+                            date: getTimeMap(timeIncrement)(r.time),
+                            count: r.count,
+                          })) ?? []
+                        }
+                        index="date"
+                        categories={["count"]}
+                        colors={["cyan"]}
+                        showYAxis={false}
+                        curveType="monotone"
+                        valueFormatter={(number: number | bigint) => {
+                          return `${new Intl.NumberFormat("us").format(
+                            Number(number)
+                          )}`;
+                        }}
+                      />
                     </StyledAreaChart>
                   </div>
-                </div> */}
+                </div>
                 <div className="flex flex-col space-y-4 h-full w-full">
                   <h2 className="text-2xl font-semibold text-black dark:text-white">
                     Experiment Logs
