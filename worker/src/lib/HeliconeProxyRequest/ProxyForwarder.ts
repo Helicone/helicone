@@ -317,6 +317,7 @@ export async function proxyForwarder(
       },
       env.S3_ENABLED ?? "true",
       env.ORG_IDS ?? "",
+      env.PERCENT_LOG_KAFKA ?? "",
       proxyRequest?.requestWrapper.heliconeHeaders
     );
 

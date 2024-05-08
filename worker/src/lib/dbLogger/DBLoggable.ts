@@ -636,6 +636,7 @@ export class DBLoggable {
     },
     S3_ENABLED: Env["S3_ENABLED"],
     ORG_IDS: string,
+    PERCENT_LOG: string,
     requestHeaders?: HeliconeHeaders
   ): Promise<
     Result<
@@ -659,12 +660,22 @@ export class DBLoggable {
       console.error("Error parsing orgIds", e);
     }
 
+    let percentLogKafka = 0;
+    if (PERCENT_LOG) {
+      try {
+        percentLogKafka = parseFloat(PERCENT_LOG);
+      } catch (e) {
+        console.error("Error parsing percentLogKafka", e);
+      }
+    }
     // Kafka processing
     if (
       // authParams.organizationId === "83635a30-5ba6-41a8-8cc6-fb7df941b24a" ||
       orgIds.includes(authParams.organizationId) ||
       authParams.organizationId === "01699b51-e07b-4d49-8cda-0c7557f5b6b1" ||
-      authParams.organizationId === "dad350b5-4afe-4fd5-b910-ba74c0ad2f0f"
+      authParams.organizationId === "dad350b5-4afe-4fd5-b910-ba74c0ad2f0f" ||
+      // 1% of the time
+      Math.random() < percentLogKafka
     ) {
       await this.useKafka(db, authParams, S3_ENABLED, requestHeaders);
 
