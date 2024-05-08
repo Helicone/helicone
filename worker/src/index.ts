@@ -56,7 +56,6 @@ export interface Env {
   S3_ENDPOINT: string;
   S3_BUCKET_NAME: string;
   JAWN_URL: string;
-  KAFKA_ENABLED: string;
   UPSTASH_KAFKA_URL: string;
   UPSTASH_KAFKA_USERNAME: string;
   UPSTASH_KAFKA_API_KEY: string;
