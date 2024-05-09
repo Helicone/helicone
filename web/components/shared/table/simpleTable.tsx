@@ -41,8 +41,8 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
       <Table>
         <TableHead>
           <TableRow className="border-b border-gray-300 dark:border-gray-700">
-            {columns.map((column) => (
-              <TableHeaderCell key={String(column.key)}>
+            {columns.map((column, index) => (
+              <TableHeaderCell key={String(column.key || index)}>
                 {column.header}
               </TableHeaderCell>
             ))}
@@ -59,8 +59,8 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
               )}
               onClick={() => onSelect && onSelect(item)}
             >
-              {columns.map((column) => (
-                <TableCell key={String(column.key)}>
+              {columns.map((column, subIndex) => (
+                <TableCell key={String(column.key || subIndex + column.header)}>
                   {column.render(item)}
                 </TableCell>
               ))}

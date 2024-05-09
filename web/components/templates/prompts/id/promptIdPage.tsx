@@ -15,6 +15,7 @@ import {
 import { useEffect, useState } from "react";
 import {
   usePrompt,
+  usePromptRequestsOverTime,
   usePromptVersions,
 } from "../../../../services/hooks/prompts/prompts";
 
@@ -206,18 +207,16 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     dbIncrement: timeIncrement,
     timeZoneDifference: new Date().getTimezoneOffset(),
   };
-  const promptUsageOverTime = useBackendMetricCall<
-    Result<RequestsOverTime[], string>
-  >({
+
+  const {
+    data,
+    isLoading: isPromptRequestsLoading,
+    refetch,
+    total,
+  } = usePromptRequestsOverTime(
     params,
-    endpoint: "/api/metrics/requestOverTime",
-    key: "requestOverTime",
-    postProcess: (data) => {
-      return resultMap(data, (d) =>
-        d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
-      );
-    },
-  });
+    "promptRequests" + prompt?.user_defined_id
+  );
 
   const { experiments, isLoading: isExperimentsLoading } = useExperiments(
     {
@@ -386,7 +385,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       onSelect={function (key: string, value: string): void {
                         onTimeSelectHandler(key as TimeInterval, value);
                       }}
-                      isFetching={promptUsageOverTime.isLoading}
+                      isFetching={isPromptRequestsLoading}
                       defaultValue={interval}
                       currentTimeFilter={timeFilter}
                     />
@@ -395,17 +394,14 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                   <div>
                     <StyledAreaChart
                       title={"Total Requests"}
-                      value={promptUsageOverTime.data?.data?.reduce(
-                        (acc, curr) => acc + curr.count,
-                        0
-                      )}
-                      isDataOverTimeLoading={promptUsageOverTime.isLoading}
+                      value={total}
+                      isDataOverTimeLoading={isPromptRequestsLoading}
                       withAnimation={true}
                     >
                       <AreaChart
                         className="h-[14rem]"
                         data={
-                          promptUsageOverTime.data?.data?.map((r) => ({
+                          data?.data?.map((r) => ({
                             date: getTimeMap(timeIncrement)(r.time),
                             count: r.count,
                           })) ?? []

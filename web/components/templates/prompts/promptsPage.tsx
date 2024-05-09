@@ -2,8 +2,10 @@ import {
   BookOpenIcon,
   DocumentPlusIcon,
   DocumentTextIcon,
+  Square2StackIcon,
+  TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { Badge, Divider, TextInput } from "@tremor/react";
+import { Badge, Divider, SparkAreaChart, TextInput } from "@tremor/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, useState } from "react";
@@ -17,6 +19,9 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import PromptDelete from "./promptDelete";
 import LoadingAnimation from "../../shared/loadingAnimation";
+import PromptUsageChart from "./promptUsageChart";
+import ThemedTabs from "../../shared/themed/themedTabs";
+import useSearchParams from "../../shared/utils/useSearchParams";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -27,14 +32,10 @@ const PromptsPage = (props: PromptsPageProps) => {
 
   const { prompts, isLoading, refetch } = usePrompts();
 
-  const [view, setView] = useLocalStorage<"Card" | "Table">(
-    "prompt-view",
-    "Table"
-  );
-
   const [searchName, setSearchName] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const filteredPrompts = prompts?.filter((prompt) =>
     prompt.user_defined_id.toLowerCase().includes(searchName.toLowerCase())
@@ -133,8 +134,28 @@ const chatCompletion = await openai.chat.completions.create(
                     }}
                   />
                 </div>
+                <ThemedTabs
+                  options={[
+                    {
+                      label: "table",
+                      icon: TableCellsIcon,
+                    },
+                    {
+                      label: "card",
+                      icon: Square2StackIcon,
+                    },
+                  ]}
+                  onOptionSelect={function (option: string): void {
+                    if (option === "table") {
+                      searchParams.set("view", "table");
+                    } else {
+                      searchParams.set("view", "card");
+                    }
+                  }}
+                  initialIndex={searchParams.get("view") === "card" ? 1 : 0}
+                />
               </div>
-              {view === "Card" ? (
+              {searchParams.get("view") === "card" ? (
                 <ul className="w-full h-full grid grid-cols-2 xl:grid-cols-4 gap-4">
                   {filteredPrompts?.map((prompt, i) => (
                     <li key={i} className="col-span-1">
@@ -172,6 +193,13 @@ const chatCompletion = await openai.chat.completions.create(
                         <div className="text-gray-500">
                           {prompt.major_version}
                         </div>
+                      ),
+                    },
+                    {
+                      key: undefined,
+                      header: "Last 30 days",
+                      render: (prompt) => (
+                        <PromptUsageChart promptId={prompt.user_defined_id} />
                       ),
                     },
                     {
