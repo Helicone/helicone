@@ -201,6 +201,7 @@ export interface RequestResponseVersioned {
   prompt_tokens: Nullable<number>;
   model: string;
   request_id: string;
+  user_request_id: Nullable<string>;
   request_created_at: string;
   user_id: string;
   organization_id: string;

@@ -24,6 +24,7 @@ process.on("exit", () => {
 const requestColumns = new pgp.helpers.ColumnSet(
   [
     "id",
+    "user_request_id",
     "auth_hash",
     "body",
     "path",

@@ -51,13 +51,13 @@ export class RequestManager extends BaseManager {
   }
 
   private async waitForRequestAndResponse(
-    heliconeId: string,
+    userRequestId: string,
     organizationId: string
   ): Promise<
     Result<
       {
-        requestId: string;
-        responseId: string;
+        requestIds: string[];
+        responseIds: string[];
       },
       string
     >
@@ -65,43 +65,58 @@ export class RequestManager extends BaseManager {
     const maxRetries = 3;
 
     for (let i = 0; i < maxRetries; i++) {
-      const { data: request, error: requestError } =
+      const { data: requests, error: requestsError } =
         await this.queryTimer.withTiming(
           supabaseServer.client
             .from("request")
             .select("*")
-            .eq("id", heliconeId)
+            .eq("user_request_id", userRequestId)
             .eq("helicone_org_id", organizationId),
           {
-            queryName: "select_request_by_id",
+            queryName: "select_request_by_user_request_id",
             percentLogging: FREQUENT_PRECENT_LOGGING,
           }
         );
 
-      if (requestError) {
-        console.error("Error fetching request:", requestError.message);
-        return err(requestError.message);
+      if (requestsError || !requests || requests.length === 0) {
+        console.error(
+          "Error fetching request:",
+          requestsError?.message ?? `Request not found: ${userRequestId}`
+        );
+        return err(
+          requestsError?.message ?? `Request not found: ${userRequestId}`
+        );
       }
 
-      const { data: response, error: responseError } =
+      const { data: responses, error: responsesError } =
         await this.queryTimer.withTiming(
           supabaseServer.client
             .from("response")
             .select("*")
-            .eq("request", heliconeId),
+            .in("request_id", requests.map((r) => r.id) ?? []),
           {
             queryName: "select_response_by_request",
             percentLogging: FREQUENT_PRECENT_LOGGING,
           }
         );
 
-      if (responseError) {
-        console.error("Error fetching response:", responseError.message);
-        return err(responseError.message);
+      if (responsesError || !responses || responses.length === 0) {
+        console.error(
+          "Error fetching responses:",
+          responsesError?.message ??
+            `No responses found for request: ${userRequestId}`
+        );
+        return err(
+          responsesError?.message ??
+            `No responses found for request: ${userRequestId}`
+        );
       }
 
-      if (request && request.length > 0) {
-        return ok({ requestId: request[0].id, responseId: response[0].id });
+      if (requests && requests.length > 0) {
+        return ok({
+          requestIds: requests.map((r) => r.id),
+          responseIds: responses.map((r) => r.id),
+        });
       }
 
       const sleepDuration = i === 0 ? 1000 : 5000;
@@ -114,30 +129,36 @@ export class RequestManager extends BaseManager {
     requestId: string,
     feedback: boolean
   ): Promise<Result<null, string>> {
-    const requestResponse = await this.waitForRequestAndResponse(
+    const requestResponses = await this.waitForRequestAndResponse(
       requestId,
       this.authParams.organizationId
     );
 
-    if (requestResponse.error || !requestResponse.data) {
-      return err("Request not found");
+    if (
+      requestResponses.error ||
+      !requestResponses.data ||
+      requestResponses.data.responseIds.length === 0
+    ) {
+      return err(
+        `Error fetching request and response: ${requestResponses.error}`
+      );
     }
 
+    const responseIds = requestResponses.data.responseIds;
     const feedbackResult = await this.queryTimer.withTiming(
       supabaseServer.client
         .from("feedback")
         .upsert(
-          {
-            response_id: requestResponse.data.responseId,
+          responseIds.map((responseId) => ({
+            response_id: responseId,
             rating: feedback,
             created_at: new Date().toISOString(),
-          },
+          })),
           { onConflict: "response_id" }
         )
-        .select("*")
-        .single(),
+        .select("*"),
       {
-        queryName: "upsert_feedback_by_response_id",
+        queryName: "upsert_feedback_by_response_ids",
         percentLogging: FREQUENT_PRECENT_LOGGING,
       }
     );

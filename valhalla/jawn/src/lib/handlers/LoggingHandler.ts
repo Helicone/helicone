@@ -333,6 +333,7 @@ export class LoggingHandler extends AbstractLogHandler {
       {
         user_id: request.userId,
         request_id: request.id,
+        user_request_id: request.userRequestId,
         completion_tokens: usage.completionTokens ?? null,
         latency: response.delayMs ?? null,
         model: context.processedLog.model ?? "",
@@ -394,6 +395,7 @@ export class LoggingHandler extends AbstractLogHandler {
 
     const requestInsert: Database["public"]["Tables"]["request"]["Insert"] = {
       id: request.id,
+      user_request_id: request.userRequestId,
       path: request.path,
       body: "{}",
       auth_hash: "",

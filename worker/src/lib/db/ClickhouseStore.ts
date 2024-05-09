@@ -53,6 +53,7 @@ export async function logInClickhouse(
       {
         user_id: request.user_id ?? "",
         request_id: request.id,
+        user_request_id: request.user_request_id ?? null,
         completion_tokens: response.completion_tokens ?? null,
         latency: response.delay_ms ?? null,
         model: model,

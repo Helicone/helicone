@@ -32,6 +32,7 @@ export interface TemplateWithInputs {
 export type Log = {
   request: {
     id: string;
+    userRequestId: string;
     userId: string;
     promptId?: string;
     properties: Record<string, string>;
