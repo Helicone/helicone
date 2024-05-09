@@ -9,25 +9,21 @@ import { getCacheCount, getModelMetrics } from "../../cache/stats";
 import { modelCost } from "../../metrics/costCalc";
 import { getTotalCostProperties } from "../../property/totalCosts";
 import { getRequestCount, getRequestsDateRange } from "../../request/request";
-import {
-  AggregatedHeliconeRequest,
-  QueryAggregatedHeliconeRequestArgs,
-} from "../schema/types/graphql";
 import { convertTextOperators } from "./helper";
 import { getTotalCost } from "../../metrics/totalCosts";
 
 export async function aggregatedHeliconeRequest(
   _root: any,
-  args: QueryAggregatedHeliconeRequestArgs,
+  args: any,
   context: Context,
   info: any
-): Promise<AggregatedHeliconeRequest> {
+): Promise<any> {
   const orgId = await context.getOrgIdOrThrow();
   const { properties } = {
     properties: args.properties ?? [],
   };
 
-  const postgrestPropertyFilter: FilterNode[] = properties.map((p) => ({
+  const postgrestPropertyFilter: FilterNode[] = properties.map((p: any) => ({
     properties: {
       [p.name]: convertTextOperators(p.value),
     },

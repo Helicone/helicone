@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.20.8",
-    "@apollo/client": "^3.7.10",
+    "@apollo/client": "^3.10.3",
     "@apollo/explorer": "^3.4.0",
     "@apollo/sandbox": "^2.4.0",
     "@aws-sdk/client-s3": "^3.537.0",
