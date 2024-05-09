@@ -47,7 +47,7 @@ export async function run(
   const tempKey: Result<BaseTempKey, string> = IS_ON_PREM
     ? await generateHeliconeAPIKey(experiment.organization)
     : await generateProxyKey(
-        experiment.organization,
+        experiment.hypotheses.find((x) => x.providerKey)?.providerKey ?? "",
         "helicone-experiment" + uuid()
       );
 

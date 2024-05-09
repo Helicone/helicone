@@ -2443,6 +2443,11 @@
   dependencies:
     "@types/yargs-parser" "*"
 
+"@upstash/kafka@^1.3.5":
+  version "1.3.5"
+  resolved "https://registry.yarnpkg.com/@upstash/kafka/-/kafka-1.3.5.tgz#17bbcead665dcb394898ece466618389adc68f9e"
+  integrity sha512-BQYwjE2gD0tbSLo7aBXLaQn+yNObHVTr9igGG4WsFM/rlFLHsHTWvuu9tkEqSdSmjicvJZg5Hf9hMzXblYUZxA==
+
 abbrev@1:
   version "1.1.1"
   resolved "https://registry.npmjs.org/abbrev/-/abbrev-1.1.1.tgz"
@@ -5529,6 +5534,11 @@ uuid@8.3.2, uuid@^8.3.2:
 uuid@^9.0.0:
   version "9.0.1"
   resolved "https://registry.npmjs.org/uuid/-/uuid-9.0.1.tgz"
+  integrity sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==
+
+uuid@^9.0.1:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.1.tgz#e188d4c8853cc722220392c424cd637f32293f30"
   integrity sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==
 
 uuidv4@^6.2.13:

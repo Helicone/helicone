@@ -16,11 +16,26 @@ export class RequestBodyHandler extends AbstractLogHandler {
         this.processRequestBody(context);
 
       const { body: requestBodyFinal, assets: requestBodyAssets } =
-        this.processRequestBodyImages(processedBody, requestModel);
+        this.processRequestBodyImages(
+          context.message.log.request.id,
+          processedBody,
+          requestModel
+        );
 
       context.processedLog.request.assets = requestBodyAssets;
       context.processedLog.request.body = requestBodyFinal;
       context.processedLog.request.model = requestModel;
+      try {
+        context.processedLog.request.properties = Object.entries(
+          context.message.log.request.properties
+        ).reduce((acc, [key, value]) => {
+          acc[key] = this.cleanRequestBody(value);
+          return acc;
+        }, {} as Record<string, string>);
+      } catch (error: any) {
+        context.processedLog.request.properties =
+          context.message.log.request.properties;
+      }
 
       return await super.handle(context);
     } catch (error: any) {
@@ -45,8 +60,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
       };
     }
 
-    const cleanedRequestBody = this.cleanRequestBody(rawRequestBody);
-    let parsedRequestBody = tryParse(cleanedRequestBody, "request body");
+    let parsedRequestBody = tryParse(rawRequestBody, "request body");
 
     const requestModel = getModelFromRequest(
       parsedRequestBody,
@@ -66,6 +80,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
   }
 
   private processRequestBodyImages(
+    requestId: string,
     requestBody: any,
     model?: string
   ): ImageModelParsingResponse {
@@ -74,7 +89,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
       assets: new Map<string, string>(),
     };
     if (model && isRequestImageModel(model)) {
-      const imageModelParser = getRequestImageModelParser(model);
+      const imageModelParser = getRequestImageModelParser(model, requestId);
       if (imageModelParser) {
         imageModelParsingResponse =
           imageModelParser.processRequestBody(requestBody);

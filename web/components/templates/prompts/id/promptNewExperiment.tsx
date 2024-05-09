@@ -352,9 +352,11 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                     value={selectedModel}
                     onValueChange={(value) => setSelectedModel(value)}
                   >
-                    {PLAYGROUND_MODELS.map((model) => (
-                      <SelectItem key={model} value={model}>
-                        {model}
+                    {PLAYGROUND_MODELS.filter(
+                      (model) => model.provider === "openai"
+                    ).map((model) => (
+                      <SelectItem key={model.name} value={model.name}>
+                        {model.provider}
                       </SelectItem>
                     ))}
                   </Select>

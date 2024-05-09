@@ -88,23 +88,38 @@ export class LoggingHandler extends AbstractLogHandler {
     }
   }
 
-  public async handleResults(): PromiseGenericResult<string> {
+  public async handleResults(): Promise<
+    Result<
+      string,
+      {
+        pgError?: string;
+        s3Error?: string;
+        chError?: string;
+      }
+    >
+  > {
     const pgResult = await this.logStore.insertLogBatch(this.batchPayload);
 
     if (pgResult.error) {
-      return err(`Error inserting logs: ${pgResult.error}`);
+      return err({
+        pgError: `Error inserting logs to Postgres: ${pgResult.error}`,
+      });
     }
 
     const s3Result = await this.uploadToS3();
 
     if (s3Result.error) {
-      return err(`Error uploading logs to S3: ${s3Result.error}`);
+      return err({
+        s3Error: `Error inserting logs to S3: ${s3Result.error}`,
+      });
     }
 
     const chResult = await this.logToClickhouse();
 
     if (chResult.error) {
-      return err(`Error inserting logs to Clickhouse: ${chResult.error}`);
+      return err({
+        chError: `Error inserting logs to Clickhouse: ${chResult.error}`,
+      });
     }
 
     return ok("Successfully inserted logs");
@@ -338,7 +353,7 @@ export class LoggingHandler extends AbstractLogHandler {
         target_url: request.targetUrl ?? null,
         provider: request.provider ?? null,
         country_code: request.countryCode ?? null,
-        properties: request.properties,
+        properties: context.processedLog.request.properties ?? {},
         sign: 1,
         version: 1,
       };
@@ -355,7 +370,7 @@ export class LoggingHandler extends AbstractLogHandler {
     const responseInsert: Database["public"]["Tables"]["response"]["Insert"] = {
       id: response.id,
       request: context.message.log.request.id,
-      body: JSON.stringify(processedResponse.body),
+      body: "{}",
       status: response.status,
       model: processedResponse.model,
       completion_tokens: context.usage.completionTokens,
@@ -380,11 +395,11 @@ export class LoggingHandler extends AbstractLogHandler {
     const requestInsert: Database["public"]["Tables"]["request"]["Insert"] = {
       id: request.id,
       path: request.path,
-      body: JSON.stringify(processedRequest.body),
+      body: "{}",
       auth_hash: "",
       user_id: request.userId ?? null,
       prompt_id: request.promptId ?? null,
-      properties: request.properties,
+      properties: processedRequest.properties ?? {},
       helicone_user: authParams?.userId ?? null,
       helicone_api_key_id: authParams?.heliconeApiKeyId ?? null,
       helicone_org_id: orgParams?.id ?? null,

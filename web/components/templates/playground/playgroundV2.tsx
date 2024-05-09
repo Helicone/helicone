@@ -9,7 +9,7 @@ import { useState } from "react";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import MessageInput, { MessageInputItem } from "./new/messageInput";
 import useNotification from "../../shared/notification/useNotification";
-import { fetchOpenAI } from "../../../services/lib/openAI";
+import { fetchOpenAI } from "../../../services/lib/providers/openAI";
 import { ChatCompletionCreateParams } from "openai/resources";
 
 interface PlaygroundV2Props {}

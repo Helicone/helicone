@@ -30,10 +30,31 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
 
     try {
       if (model?.includes("claude-3")) {
-        return ok({
+        const processedBody = {
           ...recursivelyConsolidateAnthropicListForClaude3(lines),
           streamed_data: responseBody,
-        });
+        };
+
+        if (
+          !processedBody?.usage?.output_tokens ||
+          !processedBody?.usage?.input_tokens
+        ) {
+          return ok({
+            processedBody: processedBody,
+          });
+        } else {
+          return ok({
+            processedBody: processedBody,
+            usage: {
+              totalTokens:
+                processedBody?.usage?.output_tokens +
+                processedBody?.usage?.input_tokens,
+              promptTokens: processedBody?.usage?.input_tokens,
+              completionTokens: processedBody?.usage?.output_tokens,
+              heliconeCalculated: true,
+            },
+          });
+        }
       } else {
         const claudeData = {
           ...lines[lines.length - 1],
@@ -81,7 +102,6 @@ function recursivelyConsolidateAnthropicListForClaude3(delta: any[]): any {
       return acc;
     }
     if (item.type === "message_delta") {
-      console.log("Message Delta", item);
       return recursivelyConsolidateAnthropic(acc, {
         ...item.delta,
         ...item,
@@ -128,7 +148,6 @@ function recursivelyConsolidateAnthropic(body: any, delta: any): any {
       console.log("Stop Reason", delta[key]);
     }
     if (key === "delta") {
-      console.log("Delta", delta[key]);
     } else if (key === "type") {
       body[key] = delta[key];
     } else if (body[key] === undefined || body[key] === null) {
