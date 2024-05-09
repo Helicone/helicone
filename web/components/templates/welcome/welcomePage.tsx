@@ -113,9 +113,13 @@ const WelcomePage = (props: WelcomePageProps) => {
         <div className="flex flex-row justify-between items-center w-full">
           <button
             onClick={() => {
-              supabaseClient.auth.signOut().then(() => {
-                router.push("/");
-              });
+              supabaseClient.auth
+                .signOut({
+                  scope: "global",
+                })
+                .then(() => {
+                  router.push("/");
+                });
             }}
             className="p-8 flex flex-row gap-1 text-xs items-center underline underline-offset-2 font-semibold"
           >
