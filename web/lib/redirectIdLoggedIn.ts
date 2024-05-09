@@ -12,7 +12,7 @@ export function redirectIfLoggedIn(
     } = await supabase.auth.getSession();
     if (session?.user?.email === DEMO_EMAIL) {
       supabase.auth.signOut({
-        scope: "global",
+        scope: "others",
       });
       return await getServerSideProps(ctx);
     }

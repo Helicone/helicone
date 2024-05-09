@@ -46,7 +46,7 @@ const RedirectingScreen = (props: RedirectingScreenProps) => {
         <button
           onClick={() => {
             client.auth.signOut({
-              scope: "global",
+              scope: "others",
             });
           }}
           className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl mt-8"

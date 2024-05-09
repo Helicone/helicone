@@ -115,7 +115,7 @@ const WelcomePage = (props: WelcomePageProps) => {
             onClick={() => {
               supabaseClient.auth
                 .signOut({
-                  scope: "global",
+                  scope: "others",
                 })
                 .then(() => {
                   router.push("/");
