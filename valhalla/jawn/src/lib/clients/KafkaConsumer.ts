@@ -1,8 +1,9 @@
 import { Batch, Kafka, KafkaMessage, logLevel } from "kafkajs";
 import { LogManager } from "../../managers/LogManager";
 import { Message } from "../handlers/HandlerContext";
-import { PromiseGenericResult, err, ok } from "../shared/result";
+import { GenericResult, PromiseGenericResult, err, ok } from "../shared/result";
 import * as Sentry from "@sentry/node";
+import { Topics } from "./KafkaProducer";
 
 let kafka;
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
@@ -52,12 +53,6 @@ const consumer = kafka?.consumer({
   maxBytes: 10_000_000, // 10 kB
 });
 
-process.on("exit", async () => {
-  await consumer?.stop();
-  await consumer?.disconnect();
-  console.log("Consumer disconnected.");
-});
-
 export const consume = async () => {
   if (KAFKA_ENABLED && !consumer) {
     console.error("Failed to create Kafka consumer");
@@ -87,28 +82,71 @@ export const consume = async () => {
   });
 
   await consumer?.run({
-    eachBatchAutoResolve: true,
+    eachBatchAutoResolve: false,
     eachBatch: async ({
       batch,
       resolveOffset,
       heartbeat,
       commitOffsetsIfNecessary,
     }) => {
-      const consumeResult = await consumeBatch(batch);
+      console.log(`Received batch with ${batch.messages.length} messages.`);
+      const maxMessages = 100;
+      // for ever maxMessages messages, consume and commit
+      const miniBatches = createMiniBatches(batch.messages, maxMessages);
 
-      if (consumeResult.error) {
-        console.error("Failed to consume batch", consumeResult.error);
+      for (const miniBatch of miniBatches) {
+        const firstOffset = miniBatch[0].offset;
+        const lastOffset = miniBatch[miniBatch.length - 1].offset;
+        const miniBatchId = `${batch.partition}-${firstOffset}-${lastOffset}`;
 
-        // TODO: Best way to handle this?
-        return;
-      } else {
-        resolveOffset(batch.messages[batch.messages.length - 1].offset);
-        await commitOffsetsIfNecessary();
+        resolveOffset(lastOffset);
+
+        const mappedMessages = mapKafkaMessageToMessage(miniBatch);
+        if (mappedMessages.error || !mappedMessages.data) {
+          console.error("Failed to map messages", mappedMessages.error);
+          return;
+        }
+
+        const consumeResult = await consumeMiniBatch(
+          mappedMessages.data,
+          firstOffset,
+          lastOffset,
+          miniBatchId,
+          batch.partition,
+          "request-response-logs-prod"
+        );
+        if (consumeResult.error) {
+          console.error("Failed to consume batch", consumeResult.error);
+          // TODO: Best way to handle this?
+        }
         await heartbeat();
       }
+
+      await commitOffsetsIfNecessary();
     },
   });
 };
+
+function mapKafkaMessageToMessage(
+  kafkaMessage: KafkaMessage[]
+): GenericResult<Message[]> {
+  const messages: Message[] = [];
+  for (const message of kafkaMessage) {
+    if (message.value) {
+      try {
+        const kafkaValue = JSON.parse(message.value.toString());
+        const parsedMsg = JSON.parse(kafkaValue.value) as Message;
+        messages.push(mapMessageDates(parsedMsg));
+      } catch (error) {
+        return err(`Failed to parse message: ${error}`);
+      }
+    } else {
+      return err("Message value is empty");
+    }
+  }
+
+  return ok(messages);
+}
 
 async function consumeBatch(batch: Batch): PromiseGenericResult<string> {
   const lastOffset = batch.lastOffset();
@@ -187,21 +225,6 @@ const dlqConsumer = kafka?.consumer({
   maxBytes: 10_000, // 10 kB
 });
 
-process.on("exit", async () => {
-  await dlqConsumer?.stop();
-  await dlqConsumer?.disconnect();
-  console.log("DLQ Consumer disconnected.");
-});
-
-function createMiniBatches<T>(array: T[], batchSize: number): T[][] {
-  const batches: T[][] = [];
-  for (let i = 0; i < array.length; i += batchSize) {
-    const batch = array.slice(i, i + batchSize);
-    batches.push(batch);
-  }
-  return batches;
-}
-
 export const consumeDlq = async () => {
   if (KAFKA_ENABLED && !dlqConsumer) {
     console.error("Failed to create Kafka dlq consumer");
@@ -238,38 +261,48 @@ export const consumeDlq = async () => {
       heartbeat,
       commitOffsetsIfNecessary,
     }) => {
-      const maxMessages = 10;
+      console.log(`Received batch with ${batch.messages.length} messages.`);
+      const maxMessages = 100;
       // for ever maxMessages messages, consume and commit
       const miniBatches = createMiniBatches(batch.messages, maxMessages);
 
       for (const miniBatch of miniBatches) {
         const firstOffset = miniBatch[0].offset;
         const lastOffset = miniBatch[miniBatch.length - 1].offset;
-        const batchId = `${batch.partition}-${firstOffset}-${lastOffset}`;
-        const consumeResult = await consumeMiniDlqBatch(
-          miniBatch,
-          batchId,
-          batch.partition
+        const miniBatchId = `${batch.partition}-${firstOffset}-${lastOffset}`;
+
+        resolveOffset(lastOffset);
+
+        const mappedMessages = mapDlqKafkaMessageToMessage(miniBatch);
+        if (mappedMessages.error || !mappedMessages.data) {
+          console.error("Failed to map messages", mappedMessages.error);
+          return;
+        }
+
+        const consumeResult = await consumeMiniBatch(
+          mappedMessages.data,
+          firstOffset,
+          lastOffset,
+          miniBatchId,
+          batch.partition,
+          "request-response-logs-prod-dlq"
         );
         if (consumeResult.error) {
           console.error("Failed to consume batch", consumeResult.error);
           // TODO: Best way to handle this?
         }
-        resolveOffset(lastOffset);
+
+        await heartbeat();
       }
+
       await commitOffsetsIfNecessary();
-      await heartbeat();
     },
   });
 };
 
-async function consumeMiniDlqBatch(
-  kafkaMessage: KafkaMessage[],
-  batchId: string,
-  batchPartition: number
-): PromiseGenericResult<string> {
-  console.log(`Received batch with ${kafkaMessage.length} messages. Offset: `);
-
+function mapDlqKafkaMessageToMessage(
+  kafkaMessage: KafkaMessage[]
+): GenericResult<Message[]> {
   const messages: Message[] = [];
   for (const message of kafkaMessage) {
     if (message.value) {
@@ -280,40 +313,87 @@ async function consumeMiniDlqBatch(
         return err(`Failed to parse message: ${error}`);
       }
     } else {
-      // TODO: Should we skip or fail the batch?
       return err("Message value is empty");
     }
   }
-  if (!messages) {
-    return err("No messages found");
-  }
 
-  const lastOffset = kafkaMessage[kafkaMessage.length - 1]?.offset;
+  return ok(messages);
+}
+
+async function consumeMiniBatch(
+  messages: Message[],
+  firstOffset: string,
+  lastOffset: string,
+  miniBatchId: string,
+  batchPartition: number,
+  topic: Topics
+): PromiseGenericResult<string> {
+  console.log(
+    `Received mini batch with ${messages.length} messages. Mini batch ID: ${miniBatchId}`
+  );
 
   const logManager = new LogManager();
 
   try {
     await logManager.processLogEntries(messages, {
-      batchId,
+      batchId: miniBatchId,
       partition: batchPartition,
       lastOffset: lastOffset,
       messageCount: messages.length,
     });
-    return ok(batchId);
+    return ok(miniBatchId);
   } catch (error) {
     // TODO: Should we skip or fail the batch?
     Sentry.captureException(error, {
       tags: {
         type: "ConsumeError",
-        topic: "request-response-logs-prod-dlq",
+        topic: topic,
       },
       extra: {
         batchId: batchPartition,
         partition: batchPartition,
-        offset: kafkaMessage[0].offset,
-        messageCount: kafkaMessage.length,
+        offset: firstOffset,
+        messageCount: messages.length,
       },
     });
-    return err(`Failed to process batch ${batchId}, error: ${error}`);
+    return err(`Failed to process batch ${miniBatchId}, error: ${error}`);
   }
 }
+
+function createMiniBatches<T>(array: T[], batchSize: number): T[][] {
+  const batches: T[][] = [];
+  for (let i = 0; i < array.length; i += batchSize) {
+    const batch = array.slice(i, i + batchSize);
+    batches.push(batch);
+  }
+  return batches;
+}
+
+// DISCONNECT CONSUMER
+const errorTypes = ["unhandledRejection", "uncaughtException"];
+const signalTraps = ["SIGTERM", "SIGINT", "SIGUSR2"];
+
+errorTypes.forEach((type) => {
+  process.on(type, async (e) => {
+    try {
+      console.log(`process.on ${type}`);
+      console.error(e);
+      await consumer?.disconnect();
+      await dlqConsumer?.disconnect();
+      process.exit(0);
+    } catch (_) {
+      process.exit(1);
+    }
+  });
+});
+
+signalTraps.forEach((type) => {
+  process.once(type, async () => {
+    try {
+      await consumer?.disconnect();
+      await dlqConsumer?.disconnect();
+    } finally {
+      process.kill(process.pid, type);
+    }
+  });
+});
