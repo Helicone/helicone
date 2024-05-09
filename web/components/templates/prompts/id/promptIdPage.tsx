@@ -36,12 +36,7 @@ import PromptPropertyCard from "./promptPropertyCard";
 import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
 import { MODEL_LIST } from "../../playground/new/modelList";
 import LoadingAnimation from "../../../shared/loadingAnimation";
-import {
-  BackendMetricsCall,
-  useBackendMetricCall,
-} from "../../../../services/hooks/useBackendFunction";
-import { RequestsOverTime } from "../../../../lib/timeCalculations/fetchTimeData";
-import { Result, resultMap } from "../../../../lib/result";
+import { BackendMetricsCall } from "../../../../services/hooks/useBackendFunction";
 import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
 import StyledAreaChart from "../../dashboard/styledAreaChart";
 import { getTimeMap } from "../../../../lib/timeCalculations/constants";

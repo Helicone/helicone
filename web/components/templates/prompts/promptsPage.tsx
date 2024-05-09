@@ -5,7 +5,7 @@ import {
   Square2StackIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { Badge, Divider, SparkAreaChart, TextInput } from "@tremor/react";
+import { Badge, Divider, TextInput } from "@tremor/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, useState } from "react";
@@ -16,7 +16,6 @@ import { SimpleTable } from "../../shared/table/simpleTable";
 import HcButton from "../../ui/hcButton";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import ThemedModal from "../../shared/themed/themedModal";
-import { useLocalStorage } from "../../../services/hooks/localStorage";
 import PromptDelete from "./promptDelete";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import PromptUsageChart from "./promptUsageChart";
