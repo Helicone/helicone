@@ -1,4 +1,4 @@
-import { Batch, Kafka, logLevel } from "kafkajs";
+import { Batch, Kafka, KafkaMessage, logLevel } from "kafkajs";
 import { LogManager } from "../../managers/LogManager";
 import { Message } from "../handlers/HandlerContext";
 import { PromiseGenericResult, err, ok } from "../shared/result";
@@ -193,6 +193,15 @@ process.on("exit", async () => {
   console.log("DLQ Consumer disconnected.");
 });
 
+function createBatches<T>(array: T[], batchSize: number): T[][] {
+  const batches: T[][] = [];
+  for (let i = 0; i < array.length; i += batchSize) {
+    const batch = array.slice(i, i + batchSize);
+    batches.push(batch);
+  }
+  return batches;
+}
+
 export const consumeDlq = async () => {
   if (KAFKA_ENABLED && !dlqConsumer) {
     console.error("Failed to create Kafka dlq consumer");
@@ -222,41 +231,47 @@ export const consumeDlq = async () => {
   });
 
   await dlqConsumer?.run({
-    eachBatchAutoResolve: true,
+    eachBatchAutoResolve: false,
     eachBatch: async ({
       batch,
       resolveOffset,
       heartbeat,
       commitOffsetsIfNecessary,
     }) => {
-      const consumeResult = await consumeDlqBatch(batch);
+      const maxMessages = 10;
+      // for ever maxMessages messages, consume and commit
+      const miniBatches = createBatches(batch.messages, maxMessages);
 
-      if (consumeResult.error) {
-        console.error("Failed to consume batch", consumeResult.error);
-
-        // TODO: Best way to handle this?
-        return;
-      } else {
-        resolveOffset(batch.messages[batch.messages.length - 1].offset);
-        await commitOffsetsIfNecessary();
-        await heartbeat();
+      for (const miniBatch of miniBatches) {
+        const firstOffset = miniBatch[0].offset;
+        const lastOffset = miniBatch[miniBatch.length - 1].offset;
+        const batchId = `${batch.partition}-${firstOffset}-${lastOffset}`;
+        const consumeResult = await consumeMiniDlqBatch(
+          miniBatch,
+          batchId,
+          batch.partition
+        );
+        if (consumeResult.error) {
+          console.error("Failed to consume batch", consumeResult.error);
+          // TODO: Best way to handle this?
+        }
+        resolveOffset(lastOffset);
       }
+      await commitOffsetsIfNecessary();
+      await heartbeat();
     },
   });
 };
 
-async function consumeDlqBatch(batch: Batch): PromiseGenericResult<string> {
-  const lastOffset = batch.lastOffset();
-  const batchId = `${batch.partition}-${batch.firstOffset()}-${lastOffset}`;
-
-  console.log(
-    `Received batch with ${
-      batch.messages.length
-    } messages. Offset: ${batch.firstOffset()}`
-  );
+async function consumeMiniDlqBatch(
+  kafkaMessage: KafkaMessage[],
+  batchId: string,
+  batchPartition: number
+): PromiseGenericResult<string> {
+  console.log(`Received batch with ${kafkaMessage.length} messages. Offset: `);
 
   const messages: Message[] = [];
-  for (const message of batch.messages) {
+  for (const message of kafkaMessage) {
     if (message.value) {
       try {
         const kafkaValue = JSON.parse(message.value.toString());
@@ -269,15 +284,20 @@ async function consumeDlqBatch(batch: Batch): PromiseGenericResult<string> {
       return err("Message value is empty");
     }
   }
+  if (!messages) {
+    return err("No messages found");
+  }
+
+  const lastOffset = kafkaMessage[kafkaMessage.length - 1]?.offset;
 
   const logManager = new LogManager();
 
   try {
     await logManager.processLogEntries(messages, {
       batchId,
-      partition: batch.partition,
+      partition: batchPartition,
       lastOffset: lastOffset,
-      messageCount: batch.messages.length,
+      messageCount: messages.length,
     });
     return ok(batchId);
   } catch (error) {
@@ -288,10 +308,10 @@ async function consumeDlqBatch(batch: Batch): PromiseGenericResult<string> {
         topic: "request-response-logs-prod-dlq",
       },
       extra: {
-        batchId: batch.partition,
-        partition: batch.partition,
-        offset: batch.messages[0].offset,
-        messageCount: batch.messages.length,
+        batchId: batchPartition,
+        partition: batchPartition,
+        offset: kafkaMessage[0].offset,
+        messageCount: kafkaMessage.length,
       },
     });
     return err(`Failed to process batch ${batchId}, error: ${error}`);
