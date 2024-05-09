@@ -383,7 +383,9 @@ export const ServerExperimentStore: {
 function getExperimentScores(
   experiment: Experiment
 ): Result<ExperimentScores, string> {
-  let datasetCost = 0;
+  let totalDatasetCost = 0;
+  let avgDatasetCost = 0;
+  let totalHypothesisCost = 0;
   let avgHypothesisCost = 0;
   let datasetDateCreated = new Date();
   let hypothesisDateCreated = new Date();
@@ -406,10 +408,13 @@ function getExperimentScores(
         0
       );
 
-      avgHypothesisCost += hypothesisCost / experiment.hypotheses.length;
+      totalHypothesisCost += hypothesisCost;
 
       hypothesisDateCreated = new Date(hypothesis.createdAt);
       hypothesisModel = hypothesis.model;
+    }
+    if (experiment.hypotheses.length > 0) {
+      avgHypothesisCost = totalHypothesisCost / experiment.hypotheses.length;
     }
   } catch (error) {
     console.error("Error calculating hypothesis cost", error);
@@ -422,7 +427,7 @@ function getExperimentScores(
         continue;
       }
 
-      datasetCost +=
+      const requestCost =
         modelCost({
           model: hypothesisModel,
           provider: initialRequest.request.provider,
@@ -433,8 +438,13 @@ function getExperimentScores(
             initialRequest.response.promptTokens,
         }) ?? 0;
 
+      totalDatasetCost += requestCost;
+
       datasetDateCreated = new Date(initialRequest.response.createdAt);
       datasetModel = initialRequest.response.model;
+    }
+    if (experiment.dataset.rows.length > 0) {
+      avgDatasetCost = totalDatasetCost / experiment.dataset.rows.length;
     }
   } catch (error) {
     console.error("Error calculating dataset cost", error);
@@ -444,7 +454,7 @@ function getExperimentScores(
     dataset: {
       dateCreated: datasetDateCreated,
       model: datasetModel,
-      cost: datasetCost,
+      cost: avgDatasetCost,
     },
     hypothesis: {
       dateCreated: hypothesisDateCreated,
