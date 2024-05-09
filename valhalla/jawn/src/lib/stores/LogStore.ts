@@ -3,6 +3,7 @@ import { deepCompare, stringToNumberHash } from "../../utils/helpers";
 import pgPromise from "pg-promise";
 import { PromptRecord } from "../handlers/HandlerContext";
 import { PromiseGenericResult, ok, err } from "../shared/result";
+import { Database } from "../db/database.types";
 
 const pgp = pgPromise();
 const db = pgp({
@@ -85,16 +86,24 @@ export class LogStore {
       await db.tx(async (t: pgPromise.ITask<{}>) => {
         // Insert into the 'request' table
         if (payload.requests && payload.requests.length > 0) {
+          const filteredRequests = this.filterDuplicateRequests(
+            payload.requests
+          );
+
           const insertRequest =
-            pgp.helpers.insert(payload.requests, requestColumns) +
+            pgp.helpers.insert(filteredRequests, requestColumns) +
             onConflictRequest;
           await t.none(insertRequest);
         }
 
         // Insert into the 'response' table with conflict resolution
         if (payload.responses && payload.responses.length > 0) {
+          const filteredResponses = this.filterDuplicateResponses(
+            payload.responses
+          );
+
           const insertResponse =
-            pgp.helpers.insert(payload.responses, responseColumns) +
+            pgp.helpers.insert(filteredResponses, responseColumns) +
             onConflictResponse;
           await t.none(insertResponse);
         }
@@ -225,5 +234,69 @@ export class LogStore {
     }
 
     return ok("Prompt processed successfully");
+  }
+
+  filterDuplicateRequests(
+    entries: Database["public"]["Tables"]["request"]["Insert"][]
+  ) {
+    const entryMap = new Map<
+      string,
+      Database["public"]["Tables"]["request"]["Insert"]
+    >();
+
+    entries.forEach((entry) => {
+      if (!entry.id) {
+        return;
+      }
+
+      const existingEntry = entryMap.get(entry.id);
+
+      // No existing entry, add it
+      if (!existingEntry || !existingEntry.created_at) {
+        entryMap.set(entry.id, entry);
+        return;
+      }
+
+      if (
+        entry.created_at &&
+        new Date(entry.created_at) < new Date(existingEntry.created_at)
+      ) {
+        entryMap.set(entry.id, entry);
+      }
+    });
+
+    return Array.from(entryMap.values());
+  }
+
+  filterDuplicateResponses(
+    entries: Database["public"]["Tables"]["response"]["Insert"][]
+  ) {
+    const entryMap = new Map<
+      string,
+      Database["public"]["Tables"]["response"]["Insert"]
+    >();
+
+    entries.forEach((entry) => {
+      if (!entry.id) {
+        return;
+      }
+
+      const existingEntry = entryMap.get(entry.id);
+
+      // No existing entry, add it
+      if (!existingEntry || !existingEntry.created_at) {
+        entryMap.set(entry.id, entry);
+        return;
+      }
+
+      if (
+        entry.created_at &&
+        new Date(entry.created_at) < new Date(existingEntry.created_at)
+      ) {
+        entryMap.set(entry.id, entry);
+      }
+    });
+
+    return Array.from(entryMap.values());
   }
 }
