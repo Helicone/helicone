@@ -93,11 +93,22 @@ const whereKeyMappings: KeyMappings = {
     const { operator, value } = extractOperatorAndValueFromAnOperator(
       filter[key as keyof typeof filter]
     );
-    return {
-      column: `properties ->> ${placeValueSafely(key)}`,
-      operator: operator,
-      value: placeValueSafely(value),
-    };
+
+    if (operator === "equals") {
+      return {
+        column: `properties`,
+        operator: "gin-contains",
+        value: `jsonb_build_object(${placeValueSafely(
+          key
+        )}::text, ${placeValueSafely(value)}::text)`,
+      };
+    } else {
+      return {
+        column: `properties ->> ${placeValueSafely(key)}`,
+        operator: operator,
+        value: placeValueSafely(value),
+      };
+    }
   },
   request: easyKeyMappings<"request">({
     prompt: `coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content')`,
@@ -290,6 +301,8 @@ function operatorToSql(operator: AllOperators): string {
       return "ILIKE";
     case "not-contains":
       return "NOT ILIKE";
+    case "gin-contains":
+      return "@>";
   }
 }
 
