@@ -18,19 +18,36 @@ interface PlaygroundPageProps {
   request?: string;
 }
 
-export const PLAYGROUND_MODELS = [
-  "gpt-3.5-turbo",
-  "gpt-3.5-turbo-0125",
-  "gpt-3.5-turbo-0613",
-  "gpt-3.5-turbo-16k",
-  "gpt-3.5-turbo-1106",
-  "gpt-4",
-  "gpt-4-turbo",
-  "gpt-4-0613",
-  "gpt-4-32k",
-  "gpt-4-1106-preview",
-  "gpt-4-0125-preview",
-  "gpt-4-vision-preview",
+export type PlaygroundModel = {
+  name: string;
+  provider: "openai" | "anthropic";
+};
+
+export const PLAYGROUND_MODELS: PlaygroundModel[] = [
+  { name: "gpt-3.5-turbo", provider: "openai" },
+  { name: "gpt-3.5-turbo-0125", provider: "openai" },
+  { name: "gpt-3.5-turbo-0613", provider: "openai" },
+  { name: "gpt-3.5-turbo-16k", provider: "openai" },
+  { name: "gpt-3.5-turbo-1106", provider: "openai" },
+  { name: "gpt-4", provider: "openai" },
+  { name: "gpt-4-turbo", provider: "openai" },
+  { name: "gpt-4-0613", provider: "openai" },
+  { name: "gpt-4-32k", provider: "openai" },
+  { name: "gpt-4-1106-preview", provider: "openai" },
+  { name: "gpt-4-0125-preview", provider: "openai" },
+  { name: "gpt-4-vision-preview", provider: "openai" },
+  {
+    name: "claude-3-opus-20240229",
+    provider: "anthropic",
+  },
+  {
+    name: "claude-3-sonnet-20240229",
+    provider: "anthropic",
+  },
+  {
+    name: "claude-3-haiku-20240307",
+    provider: "anthropic",
+  },
 ];
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
@@ -47,12 +64,21 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   );
 
   const singleRequest = data.length > 0 ? data[0] : null;
+  const singleModel = PLAYGROUND_MODELS.find(
+    (model) => model.name === singleRequest?.model
+  );
 
   const reqBody =
     singleRequest !== null ? (singleRequest.requestBody as any) : null;
 
-  const [selectedModels, setSelectedModels] = useState<string[]>(
-    singleRequest !== null ? [singleRequest.model] : []
+  const [selectedModels, setSelectedModels] = useState<PlaygroundModel[]>(
+    singleModel
+      ? [
+          {
+            ...singleModel,
+          },
+        ]
+      : []
   );
   const [temperature, setTemperature] = useState<number>(
     reqBody !== null ? reqBody.temperature : 0.7
@@ -146,19 +172,26 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
                       <MultiSelect
                         placeholder="Select your models..."
-                        value={selectedModels}
+                        value={selectedModels?.map((model) => model.name) || []}
                         onValueChange={(values: string[]) => {
-                          setSelectedModels(values);
+                          setSelectedModels(
+                            values.map(
+                              (value) =>
+                                PLAYGROUND_MODELS.find(
+                                  (model) => model.name === value
+                                )!
+                            )
+                          );
                         }}
                         className="border border-gray-500 rounded-lg"
                       >
                         {PLAYGROUND_MODELS.map((model, idx) => (
                           <MultiSelectItem
-                            value={model}
+                            value={model.name}
                             key={idx}
                             className="font-medium text-black"
                           >
-                            {model}
+                            {model.name}
                           </MultiSelectItem>
                         ))}
                       </MultiSelect>
