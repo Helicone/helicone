@@ -159,7 +159,7 @@ const whereKeyMappings: KeyMappings = {
       return {
         column: `properties[${placeValueSafely(key)}]`,
         operator: operator,
-        value: value,
+        value: placeValueSafely(value),
       };
     }
     if ("search_properties" in filter && filter.search_properties) {
@@ -170,7 +170,7 @@ const whereKeyMappings: KeyMappings = {
       return {
         column: `key`,
         operator: operator,
-        value: value,
+        value: placeValueSafely(value),
       };
     }
     return easyKeyMappings<"request_response_versioned">({
