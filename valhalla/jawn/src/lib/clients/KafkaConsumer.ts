@@ -1,4 +1,4 @@
-import { Batch, Kafka, logLevel } from "kafkajs";
+import { Batch, Kafka, KafkaMessage, logLevel } from "kafkajs";
 import { LogManager } from "../../managers/LogManager";
 import { Message } from "../handlers/HandlerContext";
 import { PromiseGenericResult, err, ok } from "../shared/result";
@@ -184,7 +184,7 @@ function mapMessageDates(message: Message): Message {
 const dlqConsumer = kafka?.consumer({
   groupId: "jawn-consumer-local-01",
   minBytes: 1000, // 1 kB
-  maxBytes: 10_000, // 10 kB
+  maxBytes: 5000, // 10 kB
 });
 
 process.on("exit", async () => {
@@ -223,63 +223,51 @@ export const consumeDlq = async () => {
 
   await dlqConsumer?.run({
     eachBatchAutoResolve: true,
-    eachBatch: async ({
-      batch,
-      resolveOffset,
-      heartbeat,
-      commitOffsetsIfNecessary,
-    }) => {
-      const consumeResult = await consumeDlqBatch(batch);
+    eachMessage: async ({ message, partition, heartbeat }) => {
+      const consumeResult = await consumeDlqMessage(
+        message.key?.toString() ?? "unknown",
+        message,
+        partition
+      );
 
       if (consumeResult.error) {
-        console.error("Failed to consume batch", consumeResult.error);
-
-        // TODO: Best way to handle this?
-        return;
+        console.error("Failed to consume message", consumeResult.error);
       } else {
-        resolveOffset(batch.messages[batch.messages.length - 1].offset);
-        await commitOffsetsIfNecessary();
         await heartbeat();
       }
     },
   });
 };
 
-async function consumeDlqBatch(batch: Batch): PromiseGenericResult<string> {
-  const lastOffset = batch.lastOffset();
-  const batchId = `${batch.partition}-${batch.firstOffset()}-${lastOffset}`;
-
-  console.log(
-    `Received batch with ${
-      batch.messages.length
-    } messages. Offset: ${batch.firstOffset()}`
-  );
+async function consumeDlqMessage(
+  messageId: string,
+  message: KafkaMessage,
+  partition: number
+): PromiseGenericResult<string> {
+  console.log(`Received message with offset: ${message.offset}`);
 
   const messages: Message[] = [];
-  for (const message of batch.messages) {
-    if (message.value) {
-      try {
-        const kafkaValue = JSON.parse(message.value.toString());
-        messages.push(mapMessageDates(kafkaValue));
-      } catch (error) {
-        return err(`Failed to parse message: ${error}`);
-      }
-    } else {
-      // TODO: Should we skip or fail the batch?
-      return err("Message value is empty");
+  if (message.value) {
+    try {
+      const kafkaValue = JSON.parse(message.value.toString());
+      messages.push(mapMessageDates(kafkaValue));
+    } catch (error) {
+      return err(`Failed to parse message: ${error}`);
     }
+  } else {
+    return err("Message value is empty");
   }
 
   const logManager = new LogManager();
 
   try {
     await logManager.processLogEntries(messages, {
-      batchId,
-      partition: batch.partition,
-      lastOffset: lastOffset,
-      messageCount: batch.messages.length,
+      batchId: messageId,
+      partition: partition,
+      lastOffset: message.offset,
+      messageCount: 1,
     });
-    return ok(batchId);
+    return ok(message.offset.toString());
   } catch (error) {
     // TODO: Should we skip or fail the batch?
     Sentry.captureException(error, {
@@ -288,12 +276,13 @@ async function consumeDlqBatch(batch: Batch): PromiseGenericResult<string> {
         topic: "request-response-logs-prod-dlq",
       },
       extra: {
-        batchId: batch.partition,
-        partition: batch.partition,
-        offset: batch.messages[0].offset,
-        messageCount: batch.messages.length,
+        messageId: messageId,
+        partition: partition,
+        offset: message.offset,
+        messageCount: 1,
       },
     });
-    return err(`Failed to process batch ${batchId}, error: ${error}`);
+
+    return err(`Failed to process message ${messageId}, error: ${error}`);
   }
 }
