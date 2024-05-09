@@ -1,5 +1,5 @@
 import { BatchPayload } from "../handlers/LoggingHandler";
-import { deepCompare, stringToNumberHash } from "../../utils/helpers";
+import { deepCompare } from "../../utils/helpers";
 import pgPromise from "pg-promise";
 import { PromptRecord } from "../handlers/HandlerContext";
 import { PromiseGenericResult, ok, err } from "../shared/result";
