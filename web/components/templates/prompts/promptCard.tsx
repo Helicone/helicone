@@ -82,7 +82,7 @@ const PromptCard = (props: PromptCardProps) => {
         Last Used:{" "}
         {new Date(promptInfo?.created_at || "").toLocaleString("en-US")}
       </p>
-      <div className="pt-4">
+      <div className="pt-12 pb-4">
         {isPromptRequestsLoading ? (
           <div className="h-36 w-full bg-gray-300 dark:bg-gray-700 animate-pulse" />
         ) : (
