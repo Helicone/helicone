@@ -1,8 +1,11 @@
+import { query } from 'express';
+import { clickhouseDb, InsertRequestResponseVersioned } from '../../lib/db/ClickhouseWrapper';
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { err, Result } from "../../lib/shared/result";
+import { err, Result, resultMap } from "../../lib/shared/result";
 import { BaseManager } from "../BaseManager";
 
 export class ScoreManager extends BaseManager {
+  constructor(private orgId: string) {}
   public async addScores(
     requestId: string,
     scores: Record<string, number>
@@ -56,5 +59,79 @@ export class ScoreManager extends BaseManager {
     } catch (error: any) {
       return err(error.message);
     }
+  }
+
+  private async addScoresToRequest(
+    requestId: string,
+    scores: Record<string, number>
+  ): Promise<Result<string, string>> {
+    try {
+      const organizationId = this.authParams.organizationId;
+      const scoreKeys = Object.keys(scores);
+      const scoreValues = Object.values(scores);
+
+      const request = await this.putScoresAndBumpVersion(requestId, scores);
+
+      if (request.error || !request.data) {
+        return err(request.error);
+      }
+
+      const { data, error } = await dbExecute(query, [
+        requestId,
+        organizationId,
+        scoreKeys,
+        scoreValues,
+      ]);
+
+      if (!data || error) {
+        return err(`Error adding scores to Clickhouse: ${error}`);
+      }
+
+      return { data: "Scores added to Clickhouse successfully", error: null };
+    } catch (error: any) {
+      return err(error.message);
+    }
+  }
+
+  private async putScoresIntoClickhouse(newVersion: {
+    id: string;
+    version: number;
+    scores: Record<string, string>;
+  }): Promise<Result<string, string>> {
+    let rowContents = resultMap(
+      await clickhouseDb.dbQuery<InsertRequestResponseVersioned>(
+        `
+      SELECT *
+      FROM request_response_versioned
+      WHERE request_id = {val_0: UUID}
+      AND version = {val_1: UInt64}
+      AND organization_id = {val_2: String}
+      AND provider = {val_3: String}
+    `,
+        [newVersion.id, newVersion.version - 1, this.orgId, newVersion.provider]
+      ),
+      (x) => x[0]
+    );
+  }
+
+  private async putScoresAndBumpVersion(
+    requestId: string,
+    scores: Record<string, number>
+  ) {
+    return await dbExecute<{
+      id: string;
+      version: number;
+      scores: Record<string, string>;
+    }>(
+      `
+          UPDATE request
+          SET scores = scores || $1,
+              version = version + 1
+          WHERE helicone_org_id = $2
+          AND id = $3
+          RETURNING version, id, scores
+          `,
+      [{ scores }, organizationId, requestId]
+    );
   }
 }
