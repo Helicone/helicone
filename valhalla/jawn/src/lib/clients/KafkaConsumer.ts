@@ -193,7 +193,7 @@ process.on("exit", async () => {
   console.log("DLQ Consumer disconnected.");
 });
 
-function createBatches<T>(array: T[], batchSize: number): T[][] {
+function createMiniBatches<T>(array: T[], batchSize: number): T[][] {
   const batches: T[][] = [];
   for (let i = 0; i < array.length; i += batchSize) {
     const batch = array.slice(i, i + batchSize);
@@ -240,7 +240,7 @@ export const consumeDlq = async () => {
     }) => {
       const maxMessages = 10;
       // for ever maxMessages messages, consume and commit
-      const miniBatches = createBatches(batch.messages, maxMessages);
+      const miniBatches = createMiniBatches(batch.messages, maxMessages);
 
       for (const miniBatch of miniBatches) {
         const firstOffset = miniBatch[0].offset;
