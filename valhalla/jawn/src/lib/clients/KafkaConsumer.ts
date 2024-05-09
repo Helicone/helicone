@@ -91,7 +91,6 @@ export const consume = async () => {
     }) => {
       console.log(`Received batch with ${batch.messages.length} messages.`);
       const maxMessages = 50;
-      // for ever maxMessages messages, consume and commit
       const miniBatches = createMiniBatches(batch.messages, maxMessages);
 
       for (const miniBatch of miniBatches) {
@@ -263,7 +262,6 @@ export const consumeDlq = async () => {
     }) => {
       console.log(`Received batch with ${batch.messages.length} messages.`);
       const maxMessages = 50;
-      // for ever maxMessages messages, consume and commit
       const miniBatches = createMiniBatches(batch.messages, maxMessages);
 
       for (const miniBatch of miniBatches) {
