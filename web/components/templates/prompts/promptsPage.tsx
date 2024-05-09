@@ -16,6 +16,7 @@ import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import ThemedModal from "../../shared/themed/themedModal";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import PromptDelete from "./promptDelete";
+import LoadingAnimation from "../../shared/loadingAnimation";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -30,6 +31,7 @@ const PromptsPage = (props: PromptsPageProps) => {
     "prompt-view",
     "Table"
   );
+
   const [searchName, setSearchName] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
   const router = useRouter();
@@ -46,7 +48,11 @@ const PromptsPage = (props: PromptsPageProps) => {
         </div>
 
         <div className="flex flex-col space-y-4 w-full py-2">
-          {filteredPrompts?.length === 0 ? (
+          {isLoading ? (
+            <div className="flex flex-col w-full mt-16 justify-center items-center">
+              <LoadingAnimation title="Loading Prompts..." />
+            </div>
+          ) : filteredPrompts?.length === 0 ? (
             <div className="flex flex-col w-full mt-16 justify-center items-center">
               <div className="flex flex-col">
                 <DocumentTextIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
@@ -127,22 +133,6 @@ const chatCompletion = await openai.chat.completions.create(
                     }}
                   />
                 </div>
-                {/* <ThemedTabs
-                  initialIndex={view === "Table" ? 0 : 1}
-                  options={[
-                    {
-                      icon: TableCellsIcon,
-                      label: "Table",
-                    },
-                    {
-                      icon: Squares2X2Icon,
-                      label: "Card",
-                    },
-                  ]}
-                  onOptionSelect={function (option: string): void {
-                    setView(option as "Table" | "Card");
-                  }}
-                /> */}
               </div>
               {view === "Card" ? (
                 <ul className="w-full h-full grid grid-cols-2 xl:grid-cols-4 gap-4">

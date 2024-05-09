@@ -35,8 +35,6 @@ import PromptPropertyCard from "./promptPropertyCard";
 import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
 import { MODEL_LIST } from "../../playground/new/modelList";
 import LoadingAnimation from "../../../shared/loadingAnimation";
-import { useRequestsOverTime } from "../../organization/plan/renderOrgPlan";
-import { useDashboardPage } from "../../dashboard/useDashboardPage";
 import {
   BackendMetricsCall,
   useBackendMetricCall,
@@ -46,7 +44,13 @@ import { Result, resultMap } from "../../../../lib/result";
 import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
 import StyledAreaChart from "../../dashboard/styledAreaChart";
 import { getTimeMap } from "../../../../lib/timeCalculations/constants";
-import { getTimeInterval } from "../../../../lib/timeCalculations/time";
+import {
+  TimeInterval,
+  getTimeInterval,
+  getTimeIntervalAgo,
+} from "../../../../lib/timeCalculations/time";
+import { useSearchParams } from "next/navigation";
+import { TimeFilter } from "../../dashboard/dashboardPage";
 
 interface PromptIdPageProps {
   id: string;
@@ -143,18 +147,46 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   const [selectedInput, setSelectedInput] = useState<Input>();
 
   const [searchRequestId, setSearchRequestId] = useState<string>("");
+  const searchParams = useSearchParams();
 
   const router = useRouter();
 
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 1);
-  const [timeFilter, setTimeFilter] = useState<{
-    start: Date;
-    end: Date;
-  }>({
-    start: oneWeekAgo,
-    end: new Date(),
-  });
+  const getTimeFilter = () => {
+    const currentTimeFilter = searchParams.get("t");
+    let range: TimeFilter;
+
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      const start = currentTimeFilter.split("_")[1]
+        ? new Date(currentTimeFilter.split("_")[1])
+        : getTimeIntervalAgo("24h");
+      const end = new Date(currentTimeFilter.split("_")[2] || new Date());
+      range = {
+        start,
+        end,
+      };
+    } else {
+      range = {
+        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "24h"),
+        end: new Date(),
+      };
+    }
+    return range;
+  };
+
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>(getTimeFilter());
+
+  const getInterval = () => {
+    const currentTimeFilter = searchParams.get("t");
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      return "custom";
+    } else {
+      return currentTimeFilter || "24h";
+    }
+  };
+
+  const [interval, setInterval] = useState<TimeInterval>(
+    getInterval() as TimeInterval
+  );
 
   const timeIncrement = getTimeInterval(timeFilter);
 
@@ -186,7 +218,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
       );
     },
   });
-  console.log("promptUsageOverTime", promptUsageOverTime);
 
   const { experiments, isLoading: isExperimentsLoading } = useExperiments(
     {
@@ -255,6 +286,25 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     return true;
   });
 
+  const onTimeSelectHandler = (key: TimeInterval, value: string) => {
+    if ((key as string) === "custom") {
+      value = value.replace("custom:", "");
+      const start = new Date(value.split("_")[0]);
+      const end = new Date(value.split("_")[1]);
+      setInterval(key);
+      setTimeFilter({
+        start,
+        end,
+      });
+    } else {
+      setInterval(key);
+      setTimeFilter({
+        start: getTimeIntervalAgo(key),
+        end: new Date(),
+      });
+    }
+  };
+
   return (
     <>
       <div className="w-full h-full flex flex-col space-y-8">
@@ -321,48 +371,36 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           </TabList>
           <TabPanels>
             <TabPanel>
-              <div className="flex flex-col space-y-8 py-4">
+              <div className="flex flex-col space-y-16 py-4">
                 <div className="w-full h-full flex flex-col space-y-4">
                   <div className="flex items-center justify-between w-full">
                     <ThemedTimeFilter
                       timeFilterOptions={[
-                        {
-                          key: "24H",
-                          value: "24H",
-                        },
-                        {
-                          key: "7D",
-                          value: "7D",
-                        },
-                        {
-                          key: "1M",
-                          value: "1M",
-                        },
-                        {
-                          key: "3M",
-                          value: "3M",
-                        },
-                        {
-                          key: "all",
-                          value: "all",
-                        },
+                        { key: "24h", value: "24H" },
+                        { key: "7d", value: "7D" },
+                        { key: "1m", value: "1M" },
+                        { key: "3m", value: "3M" },
+                        // { key: "all", value: "All" },
                       ]}
                       custom={true}
-                      onSelect={function (key: string, value: string): void {}}
-                      isFetching={false}
-                      defaultValue={"24H"}
-                      currentTimeFilter={{
-                        start: new Date(),
-                        end: new Date(),
+                      onSelect={function (key: string, value: string): void {
+                        onTimeSelectHandler(key as TimeInterval, value);
                       }}
+                      isFetching={promptUsageOverTime.isLoading}
+                      defaultValue={interval}
+                      currentTimeFilter={timeFilter}
                     />
                   </div>
 
                   <div>
                     <StyledAreaChart
                       title={"Total Requests"}
-                      value={"count"}
-                      isDataOverTimeLoading={false}
+                      value={promptUsageOverTime.data?.data?.reduce(
+                        (acc, curr) => acc + curr.count,
+                        0
+                      )}
+                      isDataOverTimeLoading={promptUsageOverTime.isLoading}
+                      withAnimation={true}
                     >
                       <AreaChart
                         className="h-[14rem]"
