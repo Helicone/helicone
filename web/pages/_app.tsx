@@ -5,19 +5,18 @@ import { AppProps } from "next/app";
 import { ReactElement, ReactNode, useState } from "react";
 import Notification from "../components/shared/notification/Notification";
 import { NotificationProvider } from "../components/shared/notification/NotificationContext";
-import "../styles/globals.css";
-import "../styles/index.css";
 import "../node_modules/react-grid-layout/css/styles.css";
 import "../node_modules/react-resizable/css/styles.css";
+import "../styles/globals.css";
+import "../styles/index.css";
 
+import { Analytics } from "@vercel/analytics/react";
+import { NextPage } from "next";
 import posthog from "posthog-js";
-import { OrgContextProvider } from "../components/layout/organizationContext";
-import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { OrgContextProvider } from "../components/layout/organizationContext";
 import { ThemeContextProvider } from "../components/shared/theme/themeContext";
-import { NextPage } from "next";
-import { Analytics } from "@vercel/analytics/react";
 
 if (
   typeof window !== "undefined" &&
@@ -40,14 +39,6 @@ type AppPropsWithLayout = AppProps & {
 
 export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const queryClient = new QueryClient();
-  const apolloClient = new ApolloClient({
-    uri: `/api/graphql`,
-    cache: new InMemoryCache(),
-    credentials: "include",
-    headers: {
-      "use-cookies": "true",
-    },
-  });
 
   // Create a new supabase browser client on every first render.
   const [supabaseClient] = useState(() => createBrowserSupabaseClient());
@@ -62,20 +53,18 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
         supabaseClient={supabaseClient}
         initialSession={pageProps.initialSession}
       >
-        <ApolloProvider client={apolloClient}>
-          <QueryClientProvider client={queryClient}>
-            <NotificationProvider>
-              <DndProvider backend={HTML5Backend}>
-                <OrgContextProvider>
-                  <ThemeContextProvider>
-                    {getLayout(<Component {...pageProps} />)}
-                  </ThemeContextProvider>
-                  <Notification />
-                </OrgContextProvider>
-              </DndProvider>
-            </NotificationProvider>
-          </QueryClientProvider>
-        </ApolloProvider>
+        <QueryClientProvider client={queryClient}>
+          <NotificationProvider>
+            <DndProvider backend={HTML5Backend}>
+              <OrgContextProvider>
+                <ThemeContextProvider>
+                  {getLayout(<Component {...pageProps} />)}
+                </ThemeContextProvider>
+                <Notification />
+              </OrgContextProvider>
+            </DndProvider>
+          </NotificationProvider>
+        </QueryClientProvider>
       </SessionContextProvider>
       {trackingEnabled && <Analytics />}
     </>

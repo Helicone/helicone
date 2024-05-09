@@ -18,8 +18,7 @@ import { queryUser } from "../../../lib/api/graphql/query/user";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 import { DEFAULT_EXAMPLE_QUERY } from "../../../components/templates/graphql/graphqlPage";
 import { aggregatedHeliconeRequest } from "../../../lib/api/graphql/query/aggregatedHeliconeRequest";
-import { heliconeJob } from "../../../lib/api/graphql/query/heliconeJob";
-import { heliconeNode } from "../../../lib/api/graphql/query/heliconeNode";
+
 import { Ratelimit } from "@upstash/ratelimit";
 import { kv } from "@vercel/kv";
 import { PostHog } from "posthog-node";
@@ -31,8 +30,6 @@ const resolvers = {
     heliconeRequest: heliconeRequest,
     aggregatedHeliconeRequest: aggregatedHeliconeRequest,
     user: queryUser,
-    heliconeJob: heliconeJob,
-    heliconeNode: heliconeNode,
   },
   // Mutation: {
   //   // requestNewPrompt,
