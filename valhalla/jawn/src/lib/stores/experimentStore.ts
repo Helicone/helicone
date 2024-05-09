@@ -418,6 +418,7 @@ function getExperimentScores(
     }
   } catch (error) {
     console.error("Error calculating hypothesis cost", error);
+    return err("Error calculating hypothesis cost");
   }
 
   try {
@@ -448,6 +449,7 @@ function getExperimentScores(
     }
   } catch (error) {
     console.error("Error calculating dataset cost", error);
+    return err("Error calculating dataset cost");
   }
 
   const scores: ExperimentScores = {
