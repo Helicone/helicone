@@ -112,18 +112,6 @@ const whereKeyMappings: KeyMappings = {
       value: value,
     };
   },
-  values: (filter) => {
-    const key = Object.keys(filter)[0];
-    const { operator, value } = extractOperatorAndValueFromAnOperator(
-      filter.value
-    );
-
-    return {
-      column: `prompt_values ->> '${key}'`,
-      operator: operator,
-      value: value,
-    };
-  },
   request: easyKeyMappings<"request">({
     prompt: `coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content')`,
     created_at: "request.created_at",
@@ -248,55 +236,11 @@ const whereKeyMappings: KeyMappings = {
     organization_id: "rate_limit_log.organization_id",
     created_at: "rate_limit_log.created_at",
   }),
-  job: (filter) => {
-    if ("custom_properties" in filter && filter.custom_properties) {
-      const key = Object.keys(filter.custom_properties)[0];
-      const { operator, value } = extractOperatorAndValueFromAnOperator(
-        filter.custom_properties[key as keyof typeof filter.custom_properties]
-      );
-      return {
-        column: `custom_properties ->> '${key}'`,
-        operator: operator,
-        value: value,
-      };
-    }
-    return easyKeyMappings<"job">({
-      created_at: "job.created_at",
-      org_id: "job.org_id",
-      id: "job.id",
-      description: "job.description",
-      name: "job.name",
-      status: "job.status",
-      timeout_seconds: "job.timeout_seconds",
-      updated_at: "job.updated_at",
-    })(filter);
-  },
-  job_node: (filter) => {
-    if ("custom_properties" in filter && filter.custom_properties) {
-      const key = Object.keys(filter.custom_properties)[0];
 
-      const { operator, value } = extractOperatorAndValueFromAnOperator(
-        filter.custom_properties[key as keyof typeof filter.custom_properties]
-      );
-
-      return {
-        column: `custom_properties ->> '${key}'`,
-        operator: operator,
-        value: value,
-      };
-    }
-    return easyKeyMappings<"job_node">({
-      created_at: "job_node.created_at",
-      id: "job_node.id",
-      name: "job_node.name",
-      description: "job_node.description",
-      timeout_seconds: "job_node.timeout_seconds",
-      org_id: "job_node.org_id",
-      job_id: "job_node.job",
-      status: "job_node.status",
-      updated_at: "job_node.updated_at",
-    })(filter);
-  },
+  // Deprecated
+  values: NOT_IMPLEMENTED,
+  job: NOT_IMPLEMENTED,
+  job_node: NOT_IMPLEMENTED,
 };
 
 const havingKeyMappings: KeyMappings = {
@@ -319,20 +263,22 @@ const havingKeyMappings: KeyMappings = {
   properties: NOT_IMPLEMENTED,
   request: NOT_IMPLEMENTED,
   response: NOT_IMPLEMENTED,
-  values: NOT_IMPLEMENTED,
   properties_table: NOT_IMPLEMENTED,
   request_response_log: NOT_IMPLEMENTED,
   request_response_versioned: NOT_IMPLEMENTED,
   properties_v3: NOT_IMPLEMENTED,
   property_with_response_v1: NOT_IMPLEMENTED,
-  job: NOT_IMPLEMENTED,
-  job_node: NOT_IMPLEMENTED,
   feedback: NOT_IMPLEMENTED,
   cache_hits: NOT_IMPLEMENTED,
   rate_limit_log: NOT_IMPLEMENTED,
   prompt_v2: NOT_IMPLEMENTED,
   prompts_versions: NOT_IMPLEMENTED,
   experiment: NOT_IMPLEMENTED,
+
+  // Deprecated
+  values: NOT_IMPLEMENTED,
+  job: NOT_IMPLEMENTED,
+  job_node: NOT_IMPLEMENTED,
 };
 
 export function buildFilterLeaf(
@@ -591,30 +537,6 @@ export async function buildFilterWithAuthClickHouseRateLimits(
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
     rate_limit_log: {
       organization_id: {
-        equals: orgId,
-      },
-    },
-  }));
-}
-
-export async function buildFilterWithAuthJobsTable(
-  args: ExternalBuildFilterArgs & { org_id: string }
-): Promise<{ filter: string; argsAcc: any[] }> {
-  return buildFilterWithAuth(args, "postgres", (orgId) => ({
-    job: {
-      org_id: {
-        equals: orgId,
-      },
-    },
-  }));
-}
-
-export async function buildFilterWithAuthNodesTable(
-  args: ExternalBuildFilterArgs & { org_id: string }
-): Promise<{ filter: string; argsAcc: any[] }> {
-  return buildFilterWithAuth(args, "postgres", (orgId) => ({
-    job_node: {
-      org_id: {
         equals: orgId,
       },
     },
