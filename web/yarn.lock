@@ -19,6 +19,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@anthropic-ai/sdk@npm:^0.20.8":
+  version: 0.20.8
+  resolution: "@anthropic-ai/sdk@npm:0.20.8"
+  dependencies:
+    "@types/node": "npm:^18.11.18"
+    "@types/node-fetch": "npm:^2.6.4"
+    abort-controller: "npm:^3.0.0"
+    agentkeepalive: "npm:^4.2.1"
+    form-data-encoder: "npm:1.7.2"
+    formdata-node: "npm:^4.3.2"
+    node-fetch: "npm:^2.6.7"
+    web-streams-polyfill: "npm:^3.2.1"
+  checksum: 744f27c0bc671454e47b52281e19d0949a75270e0457583752bcb55d44ac1dacf9504bec5afb5a384a54e799b8d77d280f84bb0df8875c900898713ef80c9092
+  languageName: node
+  linkType: hard
+
 "@apollo/client@npm:^3.7.10":
   version: 3.9.9
   resolution: "@apollo/client@npm:3.9.9"
@@ -7863,6 +7879,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "helicone@workspace:."
   dependencies:
+    "@anthropic-ai/sdk": "npm:^0.20.8"
     "@apollo/client": "npm:^3.7.10"
     "@apollo/explorer": "npm:^3.4.0"
     "@apollo/sandbox": "npm:^2.4.0"

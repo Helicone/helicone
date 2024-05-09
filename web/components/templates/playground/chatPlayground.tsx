@@ -8,17 +8,19 @@ import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 
 import { ChatCompletionCreateParams } from "openai/resources/chat";
-import { fetchOpenAI } from "../../../services/lib/openAI";
+import { fetchOpenAI } from "../../../services/lib/providers/openAI";
 import { Message } from "../requests/chat";
 import ModelPill from "../requestsV2/modelPill";
 import ChatRow from "./chatRow";
 import RoleButton from "./new/roleButton";
 import HcButton from "../../ui/hcButton";
+import { PlaygroundModel } from "./playgroundPage";
+import { fetchAnthropic } from "../../../services/lib/providers/anthropic";
 
 interface ChatPlaygroundProps {
   requestId: string;
   chat: Message[];
-  models: string[];
+  models: PlaygroundModel[];
   temperature: number;
   maxTokens: number;
   onSubmit?: (history: Message[]) => void;
@@ -40,9 +42,6 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     customNavBar,
   } = props;
 
-  // make a deep copy of the chat
-  const deepCopy = JSON.parse(JSON.stringify(chat));
-
   const { setNotification } = useNotification();
 
   const [currentChat, setCurrentChat] = useState<Message[]>(chat);
@@ -60,7 +59,8 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         // Filter and map the history as before
         const historyWithoutId = history
           .filter(
-            (message) => message.model === model || message.model === undefined
+            (message) =>
+              message.model === model.name || message.model === undefined
           )
           .map((message) => ({
             content: message.content,
@@ -70,20 +70,37 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         // Record the start time
         const startTime = new Date().getTime();
 
-        // Perform the OpenAI request
-        const { data, error } = await fetchOpenAI(
-          historyWithoutId as unknown as ChatCompletionCreateParams[],
-          temperature,
-          model,
-          maxTokens
-        );
+        if (model.provider === "openai") {
+          // Perform the OpenAI request
+          const { data, error } = await fetchOpenAI(
+            historyWithoutId as unknown as ChatCompletionCreateParams[],
+            temperature,
+            model.name,
+            maxTokens
+          );
 
-        // Record the end time and calculate latency
-        const endTime = new Date().getTime();
-        const latency = endTime - startTime; // Latency in milliseconds
+          // Record the end time and calculate latency
+          const endTime = new Date().getTime();
+          const latency = endTime - startTime; // Latency in milliseconds
 
-        // Return the model, data, error, and latency
-        return { model, data, error, latency };
+          // Return the model, data, error, and latency
+          return { model, data, error, latency };
+        } else {
+          // Perform the Anthropic request
+          const { data, error } = await fetchAnthropic(
+            historyWithoutId as unknown as ChatCompletionCreateParams[],
+            temperature,
+            model.name,
+            maxTokens
+          );
+
+          // Record the end time and calculate latency
+          const endTime = new Date().getTime();
+          const latency = endTime - startTime; // Latency in milliseconds
+
+          // Return the model, data, error, and latency
+          return { model, data, error, latency };
+        }
       })
     );
 
@@ -93,14 +110,32 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         return;
       }
 
+      const getContent = (data: any) => {
+        if (data.choices && data.choices[0].message?.content) {
+          return data.choices[0].message.content;
+        } else if (data.content && data.content[0].text) {
+          return data.content[0].text;
+        } else {
+          return `${model} failed to fetch response. Please try again`;
+        }
+      };
+
+      const getRole = (data: any) => {
+        if (data.choices && data.choices[0].message?.role) {
+          return data.choices[0].message.role;
+        } else if (data.role) {
+          return data.role;
+        } else {
+          return "assistant";
+        }
+      };
+
       if (data) {
         history.push({
           id: crypto.randomUUID(),
-          content:
-            data.choices[0].message?.content ||
-            `${model} failed to fetch response. Please try again`,
-          role: data.choices[0].message?.role || "assistant",
-          model, // Include the model in the message
+          content: getContent(data),
+          role: getRole(data),
+          model: model.name, // Include the model in the message
           latency, // client side calculated latency
         });
       }
