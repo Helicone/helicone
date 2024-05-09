@@ -3,35 +3,48 @@ title: "Custom Rate Limits"
 description: "Enforcing custom API usage restrictions with rate limiting"
 ---
 
-Rate limits are an important feature that allows you to control the number of requests made with your API key within a specific time window. For example, you can limit users to 1000 requests per day or 60 requests per minute. By implementing rate limits, you can prevent abuse while protecting your resources from being overwhelmed by excessive traffic.
+<Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing). </Info>
 
-Keep in mind that your custom rate limiting policy is secondary to OpenAI's rate limits for your key. For more information on OpenAI's rate limits, refer to their documentation [here](https://platform.openai.com/docs/guides/rate-limits).
+## Introduction
+Rate limits are an important feature that allows you to control the number of requests made with your API key within a specific time window. For example, you can limit users to `1000 requests per day` or `60 requests per minute`. By implementing rate limits, you can prevent abuse while protecting your resources from being overwhelmed by excessive traffic.
 
-### Getting Started
+## Why Rate Limit
+Setting rate limits is useful if you want to control the number of requests made with an API key within a specific time window. Helicone users use it to: 
+- **Prevent abuse of the API:** limit how many requests a user or a system can make in a given period to maintain availability for all users.
+- **Protect resources:** protect resources from being overwhelmed by excessive traffic. 
+- **Comply with third-party API usage policies:** your model provider has their own rate limit for your key. Helicone's rate limit is bounded by the provider's policy. 
+- **Control operational cost:** control the number of requests or the computational resources consumed.
 
-To set up rate limiting, you only need to provide the `Helicone-RateLimit-Policy` header in your request. This will rate limit all requests made with the specified API key.
 
-The header value should follow this format:
+## How Rate Limits Works
 
-```
+To set up rate limiting, simply add the `Helicone-RateLimit-Policy` header in your request. This will rate limit all requests made with the specified API key.
+
+The header value follows this format:
+
+```tsx
 [quota];w=[time_window];u=[unit];s=[segment]
 ```
 
-- `quota` (required): The maximum number of requests allowed within the specified time window.
-- `time_window` (required): The length of the time window in seconds. The minimum value is 60.
-- `unit` (optional): must be either `request` or `cents`. This will change your rate limit to be by cents (cost) or request (count)
-- `segment` (optional): The rate limiting segment. Can be "user" or a custom property. If left blank, this rate limits all of your requests made with the api key.
+### Rate Limit Parameters
 
-Example: `10;w=1000;u=cents;s=user`
-This policy allows 10 cents of requests per 1000 seconds per user.
+| Parameter                            | Description                                       |
+| ------------------------------------ | ----------------------------------------------------- |
+| `quota`  (required)                  | The maximum number of requests allowed within the specified time window. |
+| `time_window` (required)             | The length of the time window in seconds. The minimum is `60` seconds.     |
+| `unit` (optional)                    | Must be `request` or `cents`. If left blank, set to `request` by default.        |
+| `segment` (optional)                 | Must be `user`, a custom property, or global. If left blank, set to global by default. | 
 
+**Example:**
+`10;w=1000;u=cents;s=user` - A policy that allows 10 cents of requests per 1000 seconds per user. 
 <CodeGroup>
+
 ```bash Curl
 curl https://oai.hconeai.com/v1/completions \
   -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Authorization: Bearer <YOUR_API_KEY>' \
   -H 'Helicone-Property-IP: 111.1.1.1' \
-  -H 'Helicone-RateLimit-Policy: 1000;w=60;s=ip' \
+  -H 'Helicone-RateLimit-Policy: 10;w=1000;u=cents;s=user' \ # add this header and set the header value
   -d '{
     "model": "text-davinci-003",
     "prompt": "How do I enable custom rate limit policies?",
@@ -42,30 +55,28 @@ curl https://oai.hconeai.com/v1/completions \
 openai.api_base = "https://oai.hconeai.com/v1"
 
 openai.Completion.create(
-model="text-davinci-003",
-prompt="How do I enable retries?",
-headers={
-"Helicone-Property-IP": "111.1.1.1",
-"Helicone-RateLimit-Policy": "1000;w=60;s=ip",
-}
+    model="text-davinci-003",
+    prompt="How do I set custom rate limits?",
+    headers={
+      "Helicone-Property-IP": "111.1.1.1",
+      "Helicone-RateLimit-Policy": "10;w=1000;u=cents;s=user", # add this header and set the header value
+    }
 )
-
 ```
 
-```js Node
+```js Node.js 
 import { Configuration, OpenAIApi } from "openai";
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
   basePath: "https://oai.hconeai.com/v1",
   defaultHeaders: {
     "Helicone-Property-IP": "111.1.1.1",
-    "Helicone-RateLimit-Policy": "1000;w=60;s=ip",
+    "Helicone-RateLimit-Policy": "10;w=1000;u=cents;s=user", // add this header and set the header value
   },
 });
 const openai = new OpenAIApi(configuration);
 ```
-
-</CodeGroup>
+</CodeGroup> 
 
 <Info>
   {" "}
@@ -74,13 +85,52 @@ const openai = new OpenAIApi(configuration);
   twist 🍬{" "}
 </Info>
 
-### Filtering by segments
+### Filtering By Segments
 
-You can rate limit for all of your requests made with the API key, by user, or by a custom property. Here's how to set the segment field `s=[segment]`:
+The `segment` parameter is used to specify the scope in which you want to apply rate limits to requests made with an API key. You can apply rate limits **globally**, **by users**, or **by a custom property**. 
 
-- For global rate limiting, leave the `segment` field empty. Your policy can look like `1000;w=60`
-- For rate limiting by user, set the segment field to `user`. The user ID must be included as a parameter in the request or in the `helicone-user-id` header, see [User Metrics](/features/advanced-usage/user-metrics) for more details.
-- For rate limiting by a custom property, set the segment field to the desired property name in the policy `1000;w=60;s=[property_name]`, and include a corresponding header in the request, formatted as `helicone-property-{property_name}`.
+#### Examples
+
+The following are a list of example policies to use for `Helicone-RateLimit-Policy`: 
+
+<AccordionGroup>
+  <Accordion title="Rate Limiting Globally" icon="earth-americas">
+  - Quota: 10k requests
+  - Time window: 1 hour (3600 seconds)
+  - Segment: global (default)
+
+  **Header policy value:** `10000;w=3600`
+
+  <Info>Notice the segment parameter is ignored since global is the default.  </Info>
+
+  </Accordion>
+
+  <Accordion title="Rate Limiting by User" icon="user">
+    - Quota: 500k requests
+    - Time window: 1 day (86400 seconds)
+    - Segment: user
+
+    **Header policy value:** `500000;w=86400;s=user`
+
+    <Warning>Don't forget to add [user metrics](/features/advanced-sage/user-metrics)</Warning>
+
+  </Accordion>
+
+  <Accordion title="Rate Limiting by Custom Property" icon="tag">
+    - Quota: 300 requests
+    - Time window: 30 minutes (1800 seconds)
+    - Segment: organization (custom property)
+
+    **Header policy value:** `300;w=1800;s=organization`
+
+    <Warning>Don't forget to set the custom property for organization in the request, see [custom properties](/features/advanced-usage/custom-properties). </Warning>
+
+  </Accordion>
+</AccordionGroup>
+
+- **Globally:** leave the `segment` field empty. Your policy looks like `1000;w=60`. 
+- **By user:** set the segment field to `user`. The user ID must be included as a parameter in the request (i.e. `1000;w=60;s=user`)or in the `helicone-user-id` header, see [User Metrics](/features/advanced-usage/user-metrics) for more details.
+- **By a custom property:** set the segment field to the desired property name, formatted as `1000;w=60;s=[property_name]`. Then include a corresponding header in the request, formatted as `helicone-property-{property_name}`.
 
 <Info>
   {" "}
@@ -88,63 +138,13 @@ You can rate limit for all of your requests made with the API key, by user, or b
   field is seconds, so for example, use 60 * 60 * 24 = 86400 for a single day.{" "}
 </Info>
 
-### Examples
-
-The following are a list of example policies to use for `Helicone-RateLimit-Policy`
-
-<AccordionGroup>
-  <Accordion title="Global Rate Limiting">
-  - Quota: 10k requests
-  - Time window: 1 hour (3600 seconds)
-  - Segment: global (default)
-
-Header policy value: `10000;w=3600`
-
-  </Accordion>
-
-  <Accordion title="Per User Rate LImiting">
-    - Quota: 500k requests
-    - Time window: 1 day (86400 seconds)
-    - Segment: user
-
-    Header policy value: `500000;w=86400;s=user`
-
-    Don't forget to add [user metrics](/features/advanced-sage/user-metrics)
-
-  </Accordion>
-
-  <Accordion title="Custom Property Rate Limiting">
-    - Quota: 300 requests
-    - Time window: 30 minutes (1800 seconds)
-    - Segment: organization (custom property)
-
-    Header policy value: `300;w=1800;s=organization`
-
-    Don't forget to set the custom property for organization in the request, see [custom properties](/features/advanced-usage/custom-properties)
-
-  </Accordion>
-</AccordionGroup>
-
-### Latency Considerations
-
-Using rate limits adds a small amount of latency to your requests. This feature is deployed with Cloudflare's key-value store, which is a low-latency service that stores data in a small number of centralized data centers and caches that data in Cloudflare's data centers after access. The latency add-on is minimal compared to multi-second OpenAI requests.
-
-### Rate Limit Error
-
-If a request is rate-limited, a 429 rate limit error will be returned.
-
-### Upcoming Features
-
-Very soon, we will support rate limiting by tokens and by cost. Additionally, you will be able to see how close your requests, users, and properties are to hitting their rate limits in the web UI.
-
-### Returned Headers
+### Extracting Rate Limit Response Headers
 
 If rate limiting is active, the following headers will be returned:
 
 - `Helicone-RateLimit-Limit`: The quota for the number of requests allowed in the time window.
-- `Helicone-RateLimit-Remaining`: The remaining quota in the current window.
-- `Helicone-RateLimit-Remaining`: The remaining quota in the current window.
 - `Helicone-RateLimit-Policy`: The active rate limit policy.
+- `Helicone-RateLimit-Remaining`: The remaining quota in the current window.
 
 These headers are only returned if a rate limit policy is active.
 
@@ -153,3 +153,19 @@ These headers are only returned if a rate limit policy is active.
   Test out your rate limit policy in a local environment before deploying to production.
   Contact `help@helicone.ai` if you have any questions.{" "}
 </Info>
+
+## Latency Considerations
+
+Using rate limits adds a small amount of latency to your requests. This feature is deployed with [Cloudflare’s key-value data store](https://developers.cloudflare.com/kv/reference/how-kv-works/), which is a low-latency service that stores data in a small number of centralized data centers and caches that data in Cloudflare’s data centers after access. The latency add-on is minimal compared to multi-second OpenAI requests.
+
+
+## Rate Limit Error
+
+If a request is rate-limited, a 429 rate limit error will be returned.
+
+
+
+
+## Upcoming Features
+
+Very soon, we will support rate limiting by tokens and by cost. Additionally, you will be able to see how close your requests, users, and properties are to hitting their rate limits in the web UI.
