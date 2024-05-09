@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_properties_gin ON request USING GIN (properties);
