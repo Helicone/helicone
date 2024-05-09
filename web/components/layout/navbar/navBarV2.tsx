@@ -74,9 +74,13 @@ const NavBarV2 = (props: NavBarV2Props) => {
                 <button
                   onClick={() => {
                     supabaseClient.auth.refreshSession();
-                    supabaseClient.auth.signOut().then(() => {
-                      router.push("/");
-                    });
+                    supabaseClient.auth
+                      .signOut({
+                        scope: "global",
+                      })
+                      .then(() => {
+                        router.push("/");
+                      });
                   }}
                   className="bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 text-sm rounded-lg px-4 py-1.5 font-bold shadow-lg flex w-fit items-center gap-1"
                 >
@@ -199,9 +203,13 @@ const NavBarV2 = (props: NavBarV2Props) => {
                       <button
                         onClick={() => {
                           supabaseClient.auth.refreshSession();
-                          supabaseClient.auth.signOut().then(() => {
-                            router.push("/");
-                          });
+                          supabaseClient.auth
+                            .signOut({
+                              scope: "global",
+                            })
+                            .then(() => {
+                              router.push("/");
+                            });
                         }}
                         className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap flex w-full justify-center rounded-md px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                       >

@@ -11,7 +11,9 @@ export function redirectIfLoggedIn(
       data: { session },
     } = await supabase.auth.getSession();
     if (session?.user?.email === DEMO_EMAIL) {
-      supabase.auth.signOut();
+      supabase.auth.signOut({
+        scope: "global",
+      });
       return await getServerSideProps(ctx);
     }
 
