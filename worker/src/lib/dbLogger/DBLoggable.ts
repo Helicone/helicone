@@ -961,7 +961,7 @@ export class DBLoggable {
       log: {
         request: {
           id: this.request.requestId,
-          userId: authParams.userId ?? "",
+          userId: this.request.userId ?? "",
           promptId: requestHeaders.promptId ?? "",
           properties: this.request.properties,
           heliconeApiKeyId: authParams.heliconeApiKeyId, // If undefined, proxy key id must be present
