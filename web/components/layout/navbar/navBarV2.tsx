@@ -76,7 +76,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                     supabaseClient.auth.refreshSession();
                     supabaseClient.auth
                       .signOut({
-                        scope: "global",
+                        scope: "others",
                       })
                       .then(() => {
                         router.push("/");
@@ -205,7 +205,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                           supabaseClient.auth.refreshSession();
                           supabaseClient.auth
                             .signOut({
-                              scope: "global",
+                              scope: "others",
                             })
                             .then(() => {
                               router.push("/");

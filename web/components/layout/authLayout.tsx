@@ -360,7 +360,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                             onClick={async () => {
                               supabaseClient.auth
                                 .signOut({
-                                  scope: "global",
+                                  scope: "others",
                                 })
                                 .then(() => {
                                   router.push("/");
@@ -543,7 +543,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                             onClick={async () => {
                               supabaseClient.auth
                                 .signOut({
-                                  scope: "global",
+                                  scope: "others",
                                 })
                                 .then(() => {
                                   router.push("/");
@@ -596,7 +596,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       onClick={async () => {
                         supabaseClient.auth
                           .signOut({
-                            scope: "global",
+                            scope: "others",
                           })
                           .then(() => {
                             router.push("/");
