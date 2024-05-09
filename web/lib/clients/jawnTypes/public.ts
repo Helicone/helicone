@@ -66,9 +66,6 @@ export interface paths {
   "/v1/experiment/query": {
     post: operations["GetExperiments"];
   };
-  "/v1/experiment/{experimentId}/scores": {
-    post: operations["GetExperimentScores"];
-  };
 }
 
 export type webhooks = Record<string, never>;
@@ -549,12 +546,33 @@ Json: JsonObject;
       delayMs: number;
       model: string;
     };
+    RequestObj: {
+      id: string;
+      provider: string;
+    };
+    ExperimentScores: {
+      dataset: {
+        /** Format: double */
+        cost: number;
+        model: string;
+        /** Format: date-time */
+        dateCreated: string;
+      };
+      hypothesis: {
+        /** Format: double */
+        cost: number;
+        model: string;
+        /** Format: date-time */
+        dateCreated: string;
+      };
+    };
     Experiment: {
       id: string;
       organization: string;
       dataset: {
         rows: {
             inputRecord?: {
+              request: components["schemas"]["RequestObj"];
               response: components["schemas"]["ResponseObj"];
               inputs: components["schemas"]["Record_string.string_"];
               requestPath: string;
@@ -569,6 +587,7 @@ Json: JsonObject;
       createdAt: string;
       hypotheses: {
           runs: {
+              request: components["schemas"]["RequestObj"];
               response: components["schemas"]["ResponseObj"];
               resultRequestId: string;
               datasetRowId: string;
@@ -586,6 +605,7 @@ Json: JsonObject;
           promptVersionId: string;
           id: string;
         }[];
+      scores: components["schemas"]["ExperimentScores"] | null;
     };
     "ResultSuccess_Experiment-Array_": {
       data: components["schemas"]["Experiment"][];
@@ -978,21 +998,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Experiment-Array.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentScores: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
         };
       };
     };

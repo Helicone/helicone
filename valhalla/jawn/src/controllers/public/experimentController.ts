@@ -89,6 +89,7 @@ export class ExperimentController extends Controller {
       requestBody.filter,
       requestBody.include ?? {}
     );
+    console.log(JSON.stringify(result));
     // const result = await promptManager.getPrompts(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -98,13 +99,5 @@ export class ExperimentController extends Controller {
       this.setStatus(200); // set return status 201
       return result;
     }
-  }
-
-  @Post("/{experimentId}/scores")
-  public async getExperimentScores(
-    @Request() request: JawnAuthenticatedRequest,
-    @Path() experimentId: string
-  ): Promise<Result<HeliconeRequest[], string>> {
-    return err("Not implemented");
   }
 }
