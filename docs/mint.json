@@ -105,14 +105,14 @@
     {
       "group": "Resources",
       "pages": [
+        "getting-started/proxy-vs-async",
+        "helicone-headers/helicone-headers",
         "faq/how-encryption-works",
         "faq/how-we-calculate-cost",
-        "getting-started/proxy-vs-async",
         "faq/latency-affect",
         "getting-started/self-deploy",
-        "getting-started/self-deploy-cloud",
         "getting-started/self-deploy-docker",
-        "helicone-headers/helicone-headers",
+        "getting-started/self-deploy-cloud",
         "helicone-headers/predefining-request-id"
       ]
     },
