@@ -36,7 +36,10 @@
   "navigation": [
     {
       "group": "Welcome",
-      "pages": ["introduction"]
+      "pages": [
+        "introduction", 
+        "getting-started/quick-start"
+      ]
     },
     {
       "group": "Integrations",
@@ -52,6 +55,7 @@
         },
         "getting-started/integration-method/azure",
         "getting-started/integration-method/anthropic",
+        "getting-started/integration-method/gemini",
         "getting-started/integration-method/anyscale",
         "getting-started/integration-method/together",
         "getting-started/integration-method/openrouter",
@@ -66,52 +70,6 @@
         }
       ]
     },
-    {
-      "group": "Observability",
-      "pages": ["use-cases/getting-user-requests"]
-    },
-    {
-      "group": "Guides",
-      "pages": ["use-cases/experiments"]
-    },
-    {
-      "group": "CI/CD",
-      "pages": ["use-cases/github-actions"]
-    },
-    {
-      "group": "Custom Properties",
-      "pages": ["use-cases/segmentation", "use-cases/environment-tracking"]
-    },
-    {
-      "group": "Developer",
-      "pages": [
-        "use-cases/debugging",
-        "use-cases/etl",
-        "use-cases/data-autonomy"
-      ]
-    },
-    {
-      "group": "Getting Started",
-      "pages": ["getting-started/quick-start"]
-    },
-    {
-      "group": "Self Hosting",
-      "pages": [
-        "getting-started/self-deploy",
-        "getting-started/self-deploy-cloud",
-        "getting-started/self-deploy-docker"
-      ]
-    },
-    {
-      "group": "FAQ",
-      "pages": [
-        "getting-started/self-deploy",
-        "getting-started/self-deploy-cloud",
-        "getting-started/self-deploy-docker",
-        "getting-started/proxy-vs-async"
-      ]
-    },
-
     {
       "group": "Features",
       "pages": [
@@ -145,26 +103,41 @@
       ]
     },
     {
-      "group": "Helicone Headers",
+      "group": "Resources",
       "pages": [
-        "helicone-headers/intro",
+        "faq/how-encryption-works",
+        "faq/how-we-calculate-cost",
+        "getting-started/proxy-vs-async",
+        "faq/latency-affect",
+        "getting-started/self-deploy",
+        "getting-started/self-deploy-cloud",
+        "getting-started/self-deploy-docker",
+        "helicone-headers/helicone-headers",
         "helicone-headers/predefining-request-id"
       ]
     },
     {
-      "group": "Tools",
-      "pages": ["tools/mitm-proxy", "tools/export"]
+      "group": "Observability",
+      "pages": ["use-cases/getting-user-requests"]
     },
     {
-      "group": "GraphQL API",
-      "pages": ["graphql/getting-started", "graphql/python-example"]
+      "group": "Guides",
+      "pages": ["use-cases/experiments"]
     },
     {
-      "group": "FAQ",
+      "group": "CI/CD",
+      "pages": ["use-cases/github-actions"]
+    },
+    {
+      "group": "Custom Properties",
+      "pages": ["use-cases/segmentation", "use-cases/environment-tracking"]
+    },
+    {
+      "group": "Developer",
       "pages": [
-        "faq/how-encryption-works",
-        "faq/latency-affect",
-        "faq/how-we-calculate-cost"
+        "use-cases/debugging",
+        "use-cases/etl",
+        "use-cases/data-autonomy"
       ]
     },
     {
