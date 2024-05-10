@@ -41,6 +41,7 @@ import { useTheme } from "../shared/theme/themeContext";
 import { ThemedSwitch } from "../shared/themed/themedSwitch";
 import MetaData from "./public/authMetaData";
 import { Database } from "../../supabase/database.types";
+import { signOut } from "../shared/utils/utils";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
@@ -358,7 +359,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                               "text-left block text-gray-700 hover:bg-red-100 dark:text-gray-300 dark:hover:bg-red-900 rounded-md text-sm pl-3 py-2 w-full truncate"
                             )}
                             onClick={async () => {
-                              supabaseClient.auth.signOut().then(() => {
+                              signOut(supabaseClient).then(() => {
                                 router.push("/");
                               });
                             }}
@@ -537,7 +538,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                               "flex w-full px-4 py-2 text-sm text-gray-500 border-t border-gray-300"
                             )}
                             onClick={async () => {
-                              supabaseClient.auth.signOut().then(() => {
+                              signOut(supabaseClient).then(() => {
                                 router.push("/");
                               });
                             }}
@@ -586,7 +587,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     </div>
                     <button
                       onClick={async () => {
-                        supabaseClient.auth.signOut().then(() => {
+                        signOut(supabaseClient).then(() => {
                           router.push("/");
                         });
                       }}

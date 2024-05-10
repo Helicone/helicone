@@ -15,10 +15,42 @@ import {
   SortLeafRequest,
 } from "../services/lib/sorts/requests/sorts";
 import { ColumnType } from "../services/lib/filters/frontendFilterDefs";
-import { RequestWrapper } from "./templates/requests/useRequestsPage";
 import { SortLeafUsers } from "../services/lib/sorts/users/sorts";
 import { UserMetric } from "../lib/api/users/users";
+import { Json } from "../supabase/database.types";
 
+type RequestWrapper = {
+  requestCreatedAt: string;
+  id: string;
+  path: string;
+  customProperties: {
+    [key: string]: Json;
+  } | null;
+  feedback: {
+    [key: string]: Json;
+  } | null;
+  userId: string;
+  responseCreatedAt: string;
+  responseId: string;
+  keyName: string;
+  // these next columns need to be double-defined because of the way the table is built
+  error:
+    | {
+        [key: string]: Json;
+      }
+    | undefined;
+  latency: number;
+  totalTokens: number;
+  completionTokens: number;
+  promptTokens: number;
+  model: string;
+  requestText: string; // either the GPT3 prompt or the last message from the ChatGPT API
+  responseText: string; // either the GPT3 response or the last message from the ChatGPT API
+  requestBody: Json;
+  responseBody: Json;
+  status: number;
+  [key: string]: Json | undefined | number | null | string | boolean;
+};
 export interface Column {
   key: keyof RequestWrapper | keyof UserMetric;
   label: string;

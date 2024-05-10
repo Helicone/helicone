@@ -80,7 +80,7 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
             onChange(value);
           }}
           onSelect={async () => {
-            await onSearchHandler?.(query);
+            if (!selected) await onSearchHandler?.(query);
           }}
           enableClear={false}
         >

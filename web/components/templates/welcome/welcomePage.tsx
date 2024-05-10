@@ -15,6 +15,7 @@ import { IntegrationMethods, Providers } from "./steps/methodFork";
 import CreateOrg from "./steps/createOrg";
 import { useOrg } from "../../layout/organizationContext";
 import UserSettings from "./steps/userSettings";
+import { signOut } from "../../shared/utils/utils";
 
 interface WelcomePageProps {
   currentStep: number;
@@ -113,7 +114,7 @@ const WelcomePage = (props: WelcomePageProps) => {
         <div className="flex flex-row justify-between items-center w-full">
           <button
             onClick={() => {
-              supabaseClient.auth.signOut().then(() => {
+              signOut(supabaseClient).then(() => {
                 router.push("/");
               });
             }}

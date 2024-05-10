@@ -2,7 +2,6 @@ import { Completion } from "../../requests/completion";
 import AbstractRequestBuilder, {
   SpecificFields,
 } from "./abstractRequestBuilder";
-import { isArray } from "@apollo/client/utilities";
 
 class GPT3Builder extends AbstractRequestBuilder {
   protected buildSpecific(): SpecificFields {
@@ -14,7 +13,7 @@ class GPT3Builder extends AbstractRequestBuilder {
       // mistral support
       if (
         this.response.request_body.messages &&
-        isArray(this.response.request_body.messages)
+        Array.isArray(this.response.request_body.messages)
       ) {
         // start backwards in the array and find the role "user" and then render the "content"
         const message = this.response.request_body.messages;
