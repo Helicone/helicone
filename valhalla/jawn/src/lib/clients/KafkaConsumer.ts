@@ -263,7 +263,7 @@ export const consumeDlq = async () => {
       commitOffsetsIfNecessary,
     }) => {
       console.log(`Received batch with ${batch.messages.length} messages.`);
-      const maxMessages = 25;
+      const maxMessages = 5;
       const miniBatches = createMiniBatches(batch.messages, maxMessages);
 
       for (const miniBatch of miniBatches) {
