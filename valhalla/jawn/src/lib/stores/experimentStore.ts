@@ -4,6 +4,7 @@ import { FilterNode } from "../shared/filters/filterDefs";
 import { buildFilterPostgres } from "../shared/filters/filters";
 import { Result, err, ok, promiseResultMap, resultMap } from "../shared/result";
 import { BaseStore } from "./baseStore";
+import { costOfPrompt } from "../../packages/cost";
 
 export interface ResponseObj {
   body: any;
@@ -13,6 +14,12 @@ export interface ResponseObj {
   delayMs: number;
   model: string;
 }
+
+export interface RequestObj {
+  id: string;
+  provider: string;
+}
+
 export interface Experiment {
   id: string;
   organization: string;
@@ -26,6 +33,7 @@ export interface Experiment {
         requestPath: string;
         inputs: Record<string, string>;
         response: ResponseObj;
+        request: RequestObj;
       };
     }[];
   };
@@ -48,8 +56,25 @@ export interface Experiment {
       datasetRowId: string;
       resultRequestId: string;
       response: ResponseObj;
+      request: RequestObj;
     }[];
   }[];
+  scores: ExperimentScores | null;
+}
+
+export interface ExperimentScores {
+  dataset: {
+    dateCreated: Date;
+    model: string;
+    cost: number;
+    //customScores: Record<string, number>;
+  };
+  hypothesis: {
+    dateCreated: Date;
+    model: string;
+    cost: number;
+    //customScores: Record<string, number>;
+  };
 }
 
 export interface IncludeExperimentKeys {
@@ -78,6 +103,18 @@ function getExperimentsQuery(
     )`;
   };
 
+  const requestObjectString = (filter: string) => {
+    return `(
+      SELECT jsonb_build_object(
+        'id', re.id,
+        'provider', re.provider
+      )
+      FROM request re
+      WHERE ${filter}
+      LIMIT 1
+    )`;
+  };
+
   return `
         SELECT jsonb_build_object(
           'id', e.id,
@@ -99,6 +136,9 @@ function getExperimentsQuery(
                             ? `
                         'response', ${responseObjectString(
                           "response.request = pir.source_request"
+                        )},
+                        'request', ${requestObjectString(
+                          "re.id = pir.source_request"
                         )},
                         `
                             : ""
@@ -167,6 +207,9 @@ function getExperimentsQuery(
                                   'response', ${responseObjectString(
                                     "response.request = hr.result_request_id"
                                   )},
+                                  'request', ${requestObjectString(
+                                    "request.id = hr.result_request_id"
+                                  )},
                                   `
                                       : ""
                                   }
@@ -177,8 +220,10 @@ function getExperimentsQuery(
                           FROM experiment_v2_hypothesis_run hr
                           left join experiment_v2_hypothesis evh on evh.id = hr.experiment_hypothesis
                           left join experiment_v2 on experiment_v2.id = evh.experiment_v2
+                          left join request on request.id = hr.result_request_id
                           WHERE hr.experiment_hypothesis = h.id
                           AND experiment_v2.organization = e.organization
+                          AND request.id = hr.result_request_id
                       )
                   )
               )
@@ -215,7 +260,16 @@ async function enrichExperiment(
     }
   }
 
-  return experiment;
+  const experimentScores = getExperimentScores(experiment);
+
+  if (!experimentScores.error && experimentScores.data) {
+    return {
+      ...experiment,
+      scores: experimentScores.data,
+    };
+  } else {
+    return experiment;
+  }
 }
 
 export class ExperimentStore extends BaseStore {
@@ -328,3 +382,123 @@ export const ServerExperimentStore: {
     );
   },
 };
+
+function getExperimentScores(
+  experiment: Experiment
+): Result<ExperimentScores, string> {
+  const datasetScores = getExperimentDatasetScores(experiment.dataset);
+  const hypothesisScores = getExperimentHypothesisScores(
+    experiment.hypotheses[0]
+  );
+
+  if (datasetScores.error || !datasetScores.data) {
+    return err(datasetScores.error);
+  }
+
+  if (hypothesisScores.error || !hypothesisScores.data) {
+    return err(hypothesisScores.error);
+  }
+
+  return ok({
+    dataset: datasetScores.data,
+    hypothesis: hypothesisScores.data,
+  });
+}
+
+function getExperimentHypothesisScores(
+  hypothesis: Experiment["hypotheses"][0]
+): Result<ExperimentScores["hypothesis"], string> {
+  try {
+    const hypothesisCost = hypothesis.runs.reduce(
+      (acc, run) =>
+        acc +
+        modelCost({
+          model: hypothesis.model,
+          provider: run.request.provider,
+          sum_prompt_tokens: run.response.promptTokens,
+          sum_completion_tokens: run.response.completionTokens,
+        }),
+      0
+    );
+
+    return ok({
+      dateCreated: new Date(hypothesis.createdAt),
+      model: hypothesis.model,
+      cost: hypothesisCost,
+    });
+  } catch (error) {
+    console.error("Error calculating hypothesis cost", error);
+    return err("Error calculating hypothesis cost");
+  }
+}
+function getExperimentDatasetScores(
+  dataset: Experiment["dataset"]
+): Result<ExperimentScores["dataset"], string> {
+  try {
+    const validRows = dataset.rows.filter((row) => row?.inputRecord?.response);
+
+    const { totalCost, latest } = validRows.reduce<{
+      totalCost: number;
+      latest: {
+        createdAt: string;
+        model: string;
+      };
+    }>(
+      ({ totalCost, latest }, row) => {
+        const cost =
+          modelCost({
+            model: row.inputRecord!.response.model,
+            provider: row.inputRecord!.request.provider,
+            sum_prompt_tokens: row.inputRecord!.response.promptTokens,
+            sum_completion_tokens: row.inputRecord!.response.completionTokens,
+          }) ?? 0;
+
+        const isCurrentNewer =
+          new Date(row.inputRecord!.response.createdAt) >
+          new Date(latest.createdAt);
+
+        return {
+          totalCost: totalCost + cost,
+          latest: isCurrentNewer ? row.inputRecord!.response : latest,
+        };
+      },
+      {
+        totalCost: 0,
+        latest: {
+          createdAt: new Date(0).toISOString(),
+          model: "",
+        },
+      }
+    );
+
+    const averageCost = validRows.length > 0 ? totalCost / validRows.length : 0;
+
+    return ok({
+      dateCreated: new Date(latest.createdAt),
+      model: latest.model,
+      cost: averageCost,
+    });
+  } catch (error) {
+    console.error("Error calculating dataset cost", error);
+    return err("Error calculating dataset cost");
+  }
+}
+
+function modelCost(modelRow: {
+  model: string;
+  provider: string;
+  sum_prompt_tokens: number;
+  sum_completion_tokens: number;
+}): number {
+  const model = modelRow.model;
+  const promptTokens = modelRow.sum_prompt_tokens;
+  const completionTokens = modelRow.sum_completion_tokens;
+  return (
+    costOfPrompt({
+      model,
+      promptTokens,
+      completionTokens,
+      provider: modelRow.provider,
+    }) ?? 0
+  );
+}

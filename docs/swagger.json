@@ -1773,6 +1773,74 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"RequestObj": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"provider": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"provider"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ExperimentScores": {
+				"properties": {
+					"dataset": {
+						"properties": {
+							"cost": {
+								"type": "number",
+								"format": "double"
+							},
+							"model": {
+								"type": "string"
+							},
+							"dateCreated": {
+								"type": "string",
+								"format": "date-time"
+							}
+						},
+						"required": [
+							"cost",
+							"model",
+							"dateCreated"
+						],
+						"type": "object"
+					},
+					"hypothesis": {
+						"properties": {
+							"cost": {
+								"type": "number",
+								"format": "double"
+							},
+							"model": {
+								"type": "string"
+							},
+							"dateCreated": {
+								"type": "string",
+								"format": "date-time"
+							}
+						},
+						"required": [
+							"cost",
+							"model",
+							"dateCreated"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"dataset",
+					"hypothesis"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Experiment": {
 				"properties": {
 					"id": {
@@ -1788,6 +1856,9 @@
 									"properties": {
 										"inputRecord": {
 											"properties": {
+												"request": {
+													"$ref": "#/components/schemas/RequestObj"
+												},
 												"response": {
 													"$ref": "#/components/schemas/ResponseObj"
 												},
@@ -1802,6 +1873,7 @@
 												}
 											},
 											"required": [
+												"request",
 												"response",
 												"inputs",
 												"requestPath",
@@ -1844,6 +1916,9 @@
 								"runs": {
 									"items": {
 										"properties": {
+											"request": {
+												"$ref": "#/components/schemas/RequestObj"
+											},
 											"response": {
 												"$ref": "#/components/schemas/ResponseObj"
 											},
@@ -1855,6 +1930,7 @@
 											}
 										},
 										"required": [
+											"request",
 											"response",
 											"resultRequestId",
 											"datasetRowId"
@@ -1912,6 +1988,14 @@
 							"type": "object"
 						},
 						"type": "array"
+					},
+					"scores": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ExperimentScores"
+							}
+						],
+						"nullable": true
 					}
 				},
 				"required": [
@@ -1920,7 +2004,8 @@
 					"dataset",
 					"meta",
 					"createdAt",
-					"hypotheses"
+					"hypotheses",
+					"scores"
 				],
 				"type": "object",
 				"additionalProperties": false
