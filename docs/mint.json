@@ -99,9 +99,8 @@
       "group": "Resources",
       "pages": [
         "getting-started/proxy-vs-async",
-        "helicone-headers/header-directory",
-        "faq/how-encryption-works",
         "faq/how-we-calculate-cost",
+        "faq/how-encryption-works",
         "faq/latency-affect",
         "getting-started/self-deploy",
         "getting-started/self-deploy-docker",
