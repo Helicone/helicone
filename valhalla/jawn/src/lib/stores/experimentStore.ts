@@ -263,10 +263,13 @@ async function enrichExperiment(
   const experimentScores = getExperimentScores(experiment);
 
   if (!experimentScores.error && experimentScores.data) {
-    experiment.scores = experimentScores.data;
+    return {
+      ...experiment,
+      scores: experimentScores.data,
+    };
+  } else {
+    return experiment;
   }
-
-  return experiment;
 }
 
 export class ExperimentStore extends BaseStore {
@@ -383,89 +386,106 @@ export const ServerExperimentStore: {
 function getExperimentScores(
   experiment: Experiment
 ): Result<ExperimentScores, string> {
-  let totalDatasetCost = 0;
-  let avgDatasetCost = 0;
-  let totalHypothesisCost = 0;
-  let avgHypothesisCost = 0;
-  let datasetDateCreated = new Date();
-  let hypothesisDateCreated = new Date();
-  let datasetModel = "";
-  let hypothesisModel = "";
+  const datasetScores = getExperimentDatasetScores(experiment.dataset);
+  const hypothesisScores = getExperimentHypothesisScores(
+    experiment.hypotheses[0]
+  );
 
+  if (datasetScores.error || !datasetScores.data) {
+    return err(datasetScores.error);
+  }
+
+  if (hypothesisScores.error || !hypothesisScores.data) {
+    return err(hypothesisScores.error);
+  }
+
+  return ok({
+    dataset: datasetScores.data,
+    hypothesis: hypothesisScores.data,
+  });
+}
+
+function getExperimentHypothesisScores(
+  hypothesis: Experiment["hypotheses"][0]
+): Result<ExperimentScores["hypothesis"], string> {
   try {
-    for (const hypothesis of experiment.hypotheses) {
-      const hypothesisCost = hypothesis.runs.reduce(
-        (acc, run) =>
-          acc +
-          modelCost({
-            model: hypothesis.model,
-            provider: run.request.provider,
-            sum_prompt_tokens: run.response.promptTokens,
-            sum_completion_tokens: run.response.completionTokens,
-            sum_tokens:
-              run.response.completionTokens + run.response.promptTokens,
-          }),
-        0
-      );
+    const hypothesisCost = hypothesis.runs.reduce(
+      (acc, run) =>
+        acc +
+        modelCost({
+          model: hypothesis.model,
+          provider: run.request.provider,
+          sum_prompt_tokens: run.response.promptTokens,
+          sum_completion_tokens: run.response.completionTokens,
+          sum_tokens: run.response.completionTokens + run.response.promptTokens,
+        }),
+      0
+    );
 
-      totalHypothesisCost += hypothesisCost;
-
-      hypothesisDateCreated = new Date(hypothesis.createdAt);
-      hypothesisModel = hypothesis.model;
-    }
-    if (experiment.hypotheses.length > 0) {
-      avgHypothesisCost = totalHypothesisCost / experiment.hypotheses.length;
-    }
+    return ok({
+      dateCreated: new Date(hypothesis.createdAt),
+      model: hypothesis.model,
+      cost: hypothesisCost,
+    });
   } catch (error) {
     console.error("Error calculating hypothesis cost", error);
     return err("Error calculating hypothesis cost");
   }
-
+}
+function getExperimentDatasetScores(
+  dataset: Experiment["dataset"]
+): Result<ExperimentScores["dataset"], string> {
   try {
-    for (const row of experiment.dataset.rows) {
-      const initialRequest = row.inputRecord;
-      if (!initialRequest) {
-        continue;
+    const validRows = dataset.rows.filter((row) => row?.inputRecord?.response);
+
+    const { totalCost, latest } = validRows.reduce<{
+      totalCost: number;
+      latest: {
+        createdAt: string;
+        model: string;
+      };
+    }>(
+      ({ totalCost, latest }, row) => {
+        const cost =
+          modelCost({
+            model: row.inputRecord!.response.model,
+            provider: row.inputRecord!.request.provider,
+            sum_prompt_tokens: row.inputRecord!.response.promptTokens,
+            sum_completion_tokens: row.inputRecord!.response.completionTokens,
+            sum_tokens:
+              row.inputRecord!.response.completionTokens +
+              row.inputRecord!.response.promptTokens,
+          }) ?? 0;
+
+        const isCurrentNewer =
+          new Date(row.inputRecord!.response.createdAt) >
+          new Date(latest.createdAt);
+
+        return {
+          totalCost: totalCost + cost,
+          latest: isCurrentNewer ? row.inputRecord!.response : latest,
+        };
+      },
+      {
+        totalCost: 0,
+        latest: {
+          createdAt: new Date(0).toISOString(),
+          model: "",
+        },
       }
+    );
 
-      const requestCost =
-        modelCost({
-          model: hypothesisModel,
-          provider: initialRequest.request.provider,
-          sum_prompt_tokens: initialRequest.response.promptTokens,
-          sum_completion_tokens: initialRequest.response.completionTokens,
-          sum_tokens:
-            initialRequest.response.completionTokens +
-            initialRequest.response.promptTokens,
-        }) ?? 0;
+    const averageCost = validRows.length > 0 ? totalCost / validRows.length : 0;
 
-      totalDatasetCost += requestCost;
-
-      datasetDateCreated = new Date(initialRequest.response.createdAt);
-      datasetModel = initialRequest.response.model;
-    }
-    if (experiment.dataset.rows.length > 0) {
-      avgDatasetCost = totalDatasetCost / experiment.dataset.rows.length;
-    }
+    return ok({
+      dateCreated: new Date(latest.createdAt),
+      model: latest.model,
+      cost: averageCost,
+    });
   } catch (error) {
     console.error("Error calculating dataset cost", error);
     return err("Error calculating dataset cost");
   }
-
-  const scores: ExperimentScores = {
-    dataset: {
-      dateCreated: datasetDateCreated,
-      model: datasetModel,
-      cost: avgDatasetCost,
-    },
-    hypothesis: {
-      dateCreated: hypothesisDateCreated,
-      model: hypothesisModel,
-      cost: avgHypothesisCost,
-    },
-  };
-
-  return ok(scores);
 }
 
 function modelCost(modelRow: {

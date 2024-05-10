@@ -89,7 +89,6 @@ export class ExperimentController extends Controller {
       requestBody.filter,
       requestBody.include ?? {}
     );
-    console.log(JSON.stringify(result));
     // const result = await promptManager.getPrompts(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);
