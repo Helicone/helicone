@@ -120,17 +120,22 @@ export class RequestController extends Controller {
     return requestFeedback;
   }
 
-  @Put("/{requestId}/property")
+  @Put("/{requestTag}/property")
   public async putProperty(
     @Body()
     requestBody: { key: string; value: string },
     @Request() request: JawnAuthenticatedRequest,
-    @Path() requestId: string
+    @Path() requestTag: string
   ): Promise<Result<null, string>> {
+    if (!validateUUID(requestTag)) {
+      this.setStatus(400);
+      return err("Invalid request tag, must be a valid UUID.");
+    }
+
     const reqManager = new RequestManager(request.authParams);
 
     const requestFeedback = await reqManager.addPropertyToRequest(
-      requestId,
+      requestTag,
       requestBody.key,
       requestBody.value
     );

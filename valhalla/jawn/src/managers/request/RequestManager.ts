@@ -33,12 +33,12 @@ export class RequestManager extends BaseManager {
   }
 
   async addPropertyToRequest(
-    requestId: string,
+    requestTag: string,
     property: string,
     value: string
   ): Promise<Result<null, string>> {
     const res = await this.versionedRequestStore.addPropertyToRequest(
-      requestId,
+      requestTag,
       property,
       value
     );

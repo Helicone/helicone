@@ -38,12 +38,13 @@ export class VersionedRequestStore {
   // to include {property: value}
   // and bumps the version column
   private async putPropertyAndBumpVersion(
-    requestId: string,
+    requestTag: string,
     property: string,
     value: string
   ) {
     return await dbExecute<{
       id: string;
+      request_tag: string;
       version: number;
       provider: string;
       properties: Record<string, string>;
@@ -53,10 +54,11 @@ export class VersionedRequestStore {
       SET properties = properties || $1,
           version = version + 1
       WHERE helicone_org_id = $2
-      AND id = $3
-      RETURNING version, id, provider, properties
+      AND (request_tag = $3
+      OR id = $3)
+      RETURNING version, id, request_tag, provider, properties
       `,
-      [{ [property]: value }, this.orgId, requestId]
+      [{ [property]: value }, this.orgId, requestTag]
     );
   }
 
@@ -64,6 +66,7 @@ export class VersionedRequestStore {
   // We must include all of the primary keys in the delete statement and then insert the new row
   private async putPropertyIntoClickhouse(newVersion: {
     id: string;
+    request_tag: string;
     version: number;
     provider: string;
     properties: Record<string, string>;
@@ -73,12 +76,18 @@ export class VersionedRequestStore {
         `
       SELECT *
       FROM request_response_versioned
-      WHERE request_id = {val_0: UUID}
+      WHERE (request_tag = {val_0: UUID} 
+        OR request_id = {val_0: UUID})
       AND version = {val_1: UInt64}
       AND organization_id = {val_2: String}
       AND provider = {val_3: String}
     `,
-        [newVersion.id, newVersion.version - 1, this.orgId, newVersion.provider]
+        [
+          newVersion.request_tag,
+          newVersion.version - 1,
+          this.orgId,
+          newVersion.provider,
+        ]
       ),
       (x) => x[0]
     );
@@ -92,13 +101,14 @@ export class VersionedRequestStore {
           `
         SELECT *
         FROM request_response_versioned
-        WHERE request_id = {val_0: UUID}
+        WHERE (request_tag = {val_0: UUID}
+          OR request_id = {val_0: UUID})
         AND organization_id = {val_1: String}
         AND provider = {val_2: String}
         ORDER BY version DESC
         LIMIT 1
       `,
-          [newVersion.id, this.orgId, newVersion.provider]
+          [newVersion.request_tag, this.orgId, newVersion.provider]
         ),
         (x) => x[0]
       );
@@ -175,12 +185,12 @@ export class VersionedRequestStore {
   }
 
   async addPropertyToRequest(
-    requestId: string,
+    requestTag: string,
     property: string,
     value: string
   ): Promise<Result<null, string>> {
     const request = await this.putPropertyAndBumpVersion(
-      requestId,
+      requestTag,
       property,
       value
     );
