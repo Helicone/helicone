@@ -43,7 +43,7 @@ const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
 if (KAFKA_ENABLED) {
   consume();
-  consumeDlq();
+  // consumeDlq();
 }
 
 app.get("/healthcheck", (req, res) => {
