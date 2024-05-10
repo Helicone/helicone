@@ -1,5 +1,5 @@
 import { S3Client } from "../shared/db/s3Client";
-import { PromiseGenericResult, err, ok } from "../shared/result";
+import { PromiseGenericResult, Result, err, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
@@ -52,6 +52,25 @@ export class S3ReaderHandler extends AbstractLogHandler {
   }> {
     try {
       const contentResponse = await fetch(signedUrl);
+      if (!contentResponse.ok) {
+        if (contentResponse.status === 404) {
+          // Not found is unrecoverable, we will have no request/response to log, do not send to DLQ
+          console.error(`Content not found in S3: ${signedUrl}`);
+          return ok({
+            request: JSON.stringify({
+              error: "Content not found in S3",
+            }),
+            response: JSON.stringify({
+              error: "Content not found in S3",
+            }),
+          });
+        }
+
+        return err(
+          `Error fetching content from S3: ${contentResponse.statusText}`
+        );
+      }
+
       const text = await contentResponse.text();
       const { request, response } = JSON.parse(text);
       return ok({
