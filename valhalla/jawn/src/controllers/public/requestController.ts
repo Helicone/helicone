@@ -99,6 +99,11 @@ export class RequestController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() requestId: string
   ): Promise<Result<null, string>> {
+    if (requestId.length <= 0 && requestId.length > 36) {
+      this.setStatus(400);
+      return err("Invalid requestId format");
+    }
+
     const reqManager = new RequestManager(request.authParams);
 
     const requestFeedback = await reqManager.feedbackRequest(

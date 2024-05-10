@@ -1,6 +1,6 @@
 // src/users/usersService.ts
 import { RequestQueryParams } from "../../controllers/public/requestController";
-import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
+import { FREQUENT_PERCENT_LOGGING } from "../../lib/db/DBQueryTimer";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import { Result, err, ok, resultMap } from "../../lib/shared/result";
@@ -50,7 +50,7 @@ export class RequestManager extends BaseManager {
     return ok(null);
   }
 
-  private async waitForRequestAndResponse(
+  private async waitForRequestsAndResponses(
     userRequestId: string,
     organizationId: string
   ): Promise<
@@ -74,18 +74,23 @@ export class RequestManager extends BaseManager {
             .eq("helicone_org_id", organizationId),
           {
             queryName: "select_request_by_user_request_id",
-            percentLogging: FREQUENT_PRECENT_LOGGING,
+            percentLogging: FREQUENT_PERCENT_LOGGING,
           }
         );
 
-      if (requestsError || !requests || requests.length === 0) {
-        console.error(
-          "Error fetching request:",
-          requestsError?.message ?? `Request not found: ${userRequestId}`
-        );
+      // Return error immediately if there is an error fetching requests
+      if (requestsError) {
+        console.error("Error fetching requests:", requestsError?.message);
         return err(
-          requestsError?.message ?? `Request not found: ${userRequestId}`
+          requestsError?.message ?? `Error fetching request: ${userRequestId}`
         );
+      }
+
+      // If no requests are found, wait and retry
+      if (requests.length === 0) {
+        console.log(`Request not found, retrying...: ${userRequestId}`);
+        await this.sleep(i);
+        continue;
       }
 
       const { data: responses, error: responsesError } =
@@ -93,43 +98,55 @@ export class RequestManager extends BaseManager {
           supabaseServer.client
             .from("response")
             .select("*")
-            .in("request", requests.map((r) => r.id) ?? []),
+            .in(
+              "request",
+              requests.map((r) => r.id)
+            ),
           {
             queryName: "select_response_by_request",
-            percentLogging: FREQUENT_PRECENT_LOGGING,
+            percentLogging: FREQUENT_PERCENT_LOGGING,
           }
         );
 
-      if (responsesError || !responses || responses.length === 0) {
-        console.error(
-          "Error fetching responses:",
-          responsesError?.message ??
-            `No responses found for request: ${userRequestId}`
-        );
+      // Return error immediately if there is an error fetching responses
+      if (responsesError) {
+        console.error("Error fetching responses:", responsesError?.message);
         return err(
           responsesError?.message ??
-            `No responses found for request: ${userRequestId}`
+            `Error fetching response for request: ${userRequestId}`
         );
       }
 
-      if (requests && requests.length > 0) {
-        return ok({
-          requestIds: requests.map((r) => r.id),
-          responseIds: responses.map((r) => r.id),
-        });
+      // If no responses are found, wait and retry
+      if (responses.length === 0) {
+        console.log(
+          `No responses found, retrying... for request: ${userRequestId}`
+        );
+        await this.sleep(i);
+        continue;
       }
 
-      const sleepDuration = i === 0 ? 1000 : 5000;
-      await new Promise((resolve) => setTimeout(resolve, sleepDuration));
+      return ok({
+        requestIds: requests.map((r) => r.id),
+        responseIds: responses.map((r) => r.id),
+      });
     }
 
-    return { error: "Request not found.", data: null };
+    return err(
+      `Max retries exceeded retrieving request and response for userRequestId: ${userRequestId}`
+    );
   }
+
+  async sleep(retryIndex: number) {
+    const sleepDuration = retryIndex === 0 ? 1000 : 5000;
+    await new Promise((resolve) => setTimeout(resolve, sleepDuration));
+  }
+
   async feedbackRequest(
     userRequestId: string,
     feedback: boolean
   ): Promise<Result<null, string>> {
-    const requestResponses = await this.waitForRequestAndResponse(
+    const requestResponses = await this.waitForRequestsAndResponses(
       userRequestId,
       this.authParams.organizationId
     );
@@ -159,7 +176,7 @@ export class RequestManager extends BaseManager {
         .select("*"),
       {
         queryName: "upsert_feedback_by_response_ids",
-        percentLogging: FREQUENT_PRECENT_LOGGING,
+        percentLogging: FREQUENT_PERCENT_LOGGING,
       }
     );
 
