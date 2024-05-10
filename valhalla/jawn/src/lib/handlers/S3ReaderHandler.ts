@@ -32,6 +32,11 @@ export class S3ReaderHandler extends AbstractLogHandler {
       const content = await this.fetchContent(signedUrl.data);
 
       if (content.error || !content.data) {
+        if (content.error?.notFoundErr) {
+          // Not found is unrecoverable, we will have no request/response to log
+          // Do not process further, do not send to DLQ
+          return ok(`Content not found in S3: ${signedUrl.data}`);
+        }
         return err(`Error fetching content from S3: ${content.error}`);
       }
 
@@ -46,31 +51,33 @@ export class S3ReaderHandler extends AbstractLogHandler {
     }
   }
 
-  private async fetchContent(signedUrl: string): PromiseGenericResult<{
-    request: string;
-    response: string;
-  }> {
+  private async fetchContent(signedUrl: string): Promise<
+    Result<
+      {
+        request: string;
+        response: string;
+      },
+      {
+        notFoundErr?: string;
+        error?: string;
+      }
+    >
+  > {
     try {
       const contentResponse = await fetch(signedUrl);
       if (!contentResponse.ok) {
         if (contentResponse.status === 404) {
-          // Not found is unrecoverable, we will have no request/response to log, do not send to DLQ
           console.error(
             `Content not found in S3: ${signedUrl}, ${contentResponse.status}, ${contentResponse.statusText}`
           );
-          return ok({
-            request: JSON.stringify({
-              error: "Content not found in S3",
-            }),
-            response: JSON.stringify({
-              error: "Content not found in S3",
-            }),
+          return err({
+            notFoundErr: "Content not found in S3",
           });
         }
 
-        return err(
-          `Error fetching content from S3: ${contentResponse.statusText}, ${contentResponse.status}`
-        );
+        return err({
+          error: `Error fetching content from S3: ${contentResponse.statusText}, ${contentResponse.status}`,
+        });
       }
 
       const text = await contentResponse.text();
@@ -80,7 +87,9 @@ export class S3ReaderHandler extends AbstractLogHandler {
         response: response,
       });
     } catch (error: any) {
-      return err(`Error fetching content from S3: ${error}`);
+      return err({
+        error: `Error fetching content from S3: ${error}`,
+      });
     }
   }
 }
