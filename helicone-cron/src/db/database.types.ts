@@ -1798,10 +1798,10 @@ export type Database = {
           properties: Json | null
           provider: string
           request_ip: string | null
+          request_tag: string | null
           target_url: string | null
           threat: boolean | null
           user_id: string | null
-          user_request_id: string | null
           version: number
         }
         Insert: {
@@ -1823,10 +1823,10 @@ export type Database = {
           properties?: Json | null
           provider?: string
           request_ip?: string | null
+          request_tag?: string | null
           target_url?: string | null
           threat?: boolean | null
           user_id?: string | null
-          user_request_id?: string | null
           version?: number
         }
         Update: {
@@ -1848,10 +1848,10 @@ export type Database = {
           properties?: Json | null
           provider?: string
           request_ip?: string | null
+          request_tag?: string | null
           target_url?: string | null
           threat?: boolean | null
           user_id?: string | null
-          user_request_id?: string | null
           version?: number
         }
         Relationships: [

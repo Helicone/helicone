@@ -50,7 +50,7 @@ export interface DBLoggableProps {
   };
   request: {
     requestId: string;
-    userRequestId: string;
+    requestTag: string;
     userId?: string;
     heliconeProxyKeyId?: string;
     promptId?: string;
@@ -90,8 +90,8 @@ export function dbLoggableRequestFromProxyRequest(
 ): DBLoggableProps["request"] {
   return {
     requestId: proxyRequest.requestId,
-    userRequestId:
-      proxyRequest.requestWrapper.heliconeHeaders.userRequestId ??
+    requestTag:
+      proxyRequest.requestWrapper.heliconeHeaders.requestTag ??
       proxyRequest.requestId,
     heliconeProxyKeyId: proxyRequest.heliconeProxyKeyId,
     promptId: proxyRequest.requestWrapper.heliconeHeaders.promptId ?? undefined,
@@ -157,7 +157,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
   return new DBLoggable({
     request: {
       requestId: requestId,
-      userRequestId: providerRequestHeaders.userRequestId ?? requestId,
+      requestTag: providerRequestHeaders.requestTag ?? requestId,
       promptId: providerRequestHeaders.promptId ?? undefined,
       userId: providerRequestHeaders.userId ?? undefined,
       startTime: new Date(
@@ -967,7 +967,7 @@ export class DBLoggable {
       log: {
         request: {
           id: this.request.requestId,
-          userRequestId: this.request.userRequestId,
+          requestTag: this.request.requestTag,
           userId: this.request.userId ?? "",
           promptId: requestHeaders.promptId ?? "",
           properties: this.request.properties,
@@ -1236,7 +1236,7 @@ export async function logRequest(
     const createdAt = request.startTime ?? new Date();
     const requestData = {
       id: request.requestId,
-      user_request_id: request.userRequestId ?? null,
+      request_tag: request.requestTag ?? null,
       path: request.path,
       body: reqBody, // TODO: Remove in favor of S3 storage
       auth_hash: "",

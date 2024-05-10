@@ -1,7 +1,5 @@
 import { Provider } from "../../models/models";
 import { SetOnce } from "../../utils/setOnce";
-import { ClickhouseDB } from "../db/ClickhouseWrapper";
-import { Database } from "../db/database.types";
 import { AuthParams, OrgParams } from "../db/supabase";
 
 export class HandlerContext extends SetOnce {
@@ -32,7 +30,7 @@ export interface TemplateWithInputs {
 export type Log = {
   request: {
     id: string;
-    userRequestId: string;
+    requestTag: string;
     userId: string;
     promptId?: string;
     properties: Record<string, string>;

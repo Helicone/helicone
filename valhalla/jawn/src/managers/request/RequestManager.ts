@@ -51,89 +51,54 @@ export class RequestManager extends BaseManager {
   }
 
   private async waitForRequestsAndResponses(
-    userRequestId: string,
+    requestTag: string,
     organizationId: string
   ): Promise<
     Result<
       {
-        requestIds: string[];
-        responseIds: string[];
-      },
+        requestId: string;
+        responseId: string;
+      }[],
       string
     >
   > {
     const maxRetries = 3;
 
     for (let i = 0; i < maxRetries; i++) {
-      const { data: requests, error: requestsError } =
-        await this.queryTimer.withTiming(
-          supabaseServer.client
-            .from("request")
-            .select("*")
-            .eq("user_request_id", userRequestId)
-            .eq("helicone_org_id", organizationId),
-          {
-            queryName: "select_request_by_user_request_id",
-            percentLogging: FREQUENT_PERCENT_LOGGING,
-          }
-        );
+      const query = `select r.id as requestId, re.id as responseId
+      from request r
+      inner join response re on re.request = r.id
+      where (r.user_request_id = '$1'
+      OR r.id = '$1')
+      AND r.helicone_org_id = '$3'`;
+
+      const { data: reqResData, error: reqResError } =
+        await this.queryTimer.dbExecuteWithTiming<{
+          requestId: string;
+          responseId: string;
+        }>(query, [requestTag, organizationId], {
+          queryName: "select_request_response_by_user_request_id",
+          percentLogging: FREQUENT_PERCENT_LOGGING,
+        });
 
       // Return error immediately if there is an error fetching requests
-      if (requestsError) {
-        console.error("Error fetching requests:", requestsError?.message);
-        return err(
-          requestsError?.message ?? `Error fetching request: ${userRequestId}`
-        );
+      if (reqResError || !reqResData) {
+        console.error(`Error fetching requests: ${reqResError}`);
+        return err(reqResError ?? `Error fetching request: ${requestTag}`);
       }
 
       // If no requests are found, wait and retry
-      if (requests.length === 0) {
-        console.log(`Request not found, retrying...: ${userRequestId}`);
+      if (reqResData.length === 0) {
+        console.log(`Request not found, retrying...: ${requestTag}`);
         await this.sleep(i);
         continue;
       }
 
-      const { data: responses, error: responsesError } =
-        await this.queryTimer.withTiming(
-          supabaseServer.client
-            .from("response")
-            .select("*")
-            .in(
-              "request",
-              requests.map((r) => r.id)
-            ),
-          {
-            queryName: "select_response_by_request",
-            percentLogging: FREQUENT_PERCENT_LOGGING,
-          }
-        );
-
-      // Return error immediately if there is an error fetching responses
-      if (responsesError) {
-        console.error("Error fetching responses:", responsesError?.message);
-        return err(
-          responsesError?.message ??
-            `Error fetching response for request: ${userRequestId}`
-        );
-      }
-
-      // If no responses are found, wait and retry
-      if (responses.length === 0) {
-        console.log(
-          `No responses found, retrying... for request: ${userRequestId}`
-        );
-        await this.sleep(i);
-        continue;
-      }
-
-      return ok({
-        requestIds: requests.map((r) => r.id),
-        responseIds: responses.map((r) => r.id),
-      });
+      return ok(reqResData);
     }
 
     return err(
-      `Max retries exceeded retrieving request and response for userRequestId: ${userRequestId}`
+      `Max retries exceeded retrieving request and response for userRequestId: ${requestTag}`
     );
   }
 
@@ -143,25 +108,28 @@ export class RequestManager extends BaseManager {
   }
 
   async feedbackRequest(
-    userRequestId: string,
+    requestTag: string,
     feedback: boolean
   ): Promise<Result<null, string>> {
     const requestResponses = await this.waitForRequestsAndResponses(
-      userRequestId,
+      requestTag,
       this.authParams.organizationId
     );
 
-    if (
-      requestResponses.error ||
-      !requestResponses.data ||
-      requestResponses.data.responseIds.length === 0
-    ) {
+    if (requestResponses.error || !requestResponses.data) {
       return err(
         `Error fetching request and response: ${requestResponses.error}`
       );
     }
 
-    const responseIds = requestResponses.data.responseIds;
+    const responseIds = requestResponses.data.map(
+      (reqRes) => reqRes.responseId
+    );
+
+    if (responseIds.length === 0) {
+      return err(`No responses found for request: ${requestTag}`);
+    }
+
     const feedbackResult = await this.queryTimer.withTiming(
       supabaseServer.client
         .from("feedback")

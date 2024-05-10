@@ -169,7 +169,7 @@ export interface RateLimitLogV2 {
 
 export interface InsertRequestResponseVersioned {
   response_id: Nullable<string>;
-  user_request_id: Nullable<string>;
+  request_tag: Nullable<string>;
   response_created_at: Nullable<string>;
   latency: Nullable<number>;
   status: number;

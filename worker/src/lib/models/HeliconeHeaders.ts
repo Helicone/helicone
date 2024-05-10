@@ -34,7 +34,7 @@ export interface IHeliconeHeaders {
   targetBaseUrl: Nullable<string>;
   promptFormat: Nullable<string>;
   requestId: Nullable<string>;
-  userRequestId: Nullable<string>;
+  requestTag: Nullable<string>;
   promptId: Nullable<string>;
   promptName: Nullable<string>;
   userId: Nullable<string>;
@@ -72,7 +72,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   targetBaseUrl: Nullable<string>;
   promptFormat: Nullable<string>;
   requestId: Nullable<string>;
-  userRequestId: Nullable<string>;
+  requestTag: Nullable<string>;
   promptId: Nullable<string>;
   promptName: Nullable<string>;
   userId: Nullable<string>;
@@ -97,7 +97,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.targetBaseUrl = heliconeHeaders.targetBaseUrl;
     this.promptFormat = heliconeHeaders.promptFormat;
     this.requestId = heliconeHeaders.requestId;
-    this.userRequestId = heliconeHeaders.userRequestId;
+    this.requestTag = heliconeHeaders.requestTag;
     this.promptId = heliconeHeaders.promptId;
     this.promptName = heliconeHeaders.promptName;
     this.omitHeaders = heliconeHeaders.omitHeaders;
@@ -207,7 +207,10 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       retryHeaders: this.getRetryHeaders(),
       promptFormat: this.headers.get("Helicone-Prompt-Format") ?? null,
       requestId: requestId,
-      userRequestId: this.headers.get("Helicone-Request-Id") ?? requestId,
+      requestTag:
+        this.headers.get("Helicone-Request-Tag") ??
+        this.headers.get("Helicone-Request-Id") ??
+        requestId,
       promptId: this.headers.get("Helicone-Prompt-Id") ?? null,
       promptName: this.headers.get("Helicone-Prompt-Name") ?? null,
       userId: this.headers.get("Helicone-User-Id") ?? null,

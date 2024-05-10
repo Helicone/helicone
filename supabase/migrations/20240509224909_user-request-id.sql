@@ -1,3 +1,3 @@
 ALTER TABLE request
-ADD COLUMN user_request_id TEXT;
-CREATE INDEX idx_user_request_id ON request (user_request_id);
+ADD COLUMN request_tag UUID;
+CREATE INDEX idx_request_tag ON request (request_tag);

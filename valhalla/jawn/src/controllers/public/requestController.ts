@@ -21,6 +21,7 @@ import {
 import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { ScoreManager } from "../../managers/score/ScoreManager";
+import { validate as validateUUID } from "uuid";
 
 export type RequestFilterBranch = {
   left: RequestFilterNode;
@@ -92,22 +93,22 @@ export class RequestController extends Controller {
     return requests;
   }
 
-  @Post("/{userRequestId}/feedback")
+  @Post("/{requestTag}/feedback")
   public async feedbackRequest(
     @Body()
     requestBody: { rating: boolean },
     @Request() request: JawnAuthenticatedRequest,
-    @Path() userRequestId: string
+    @Path() requestTag: string
   ): Promise<Result<null, string>> {
-    if (userRequestId.length <= 0 && userRequestId.length > 36) {
+    if (!validateUUID(requestTag)) {
       this.setStatus(400);
-      return err("Invalid requestId format");
+      return err("Invalid request tag, must be a valid UUID.");
     }
 
     const reqManager = new RequestManager(request.authParams);
 
     const requestFeedback = await reqManager.feedbackRequest(
-      userRequestId,
+      requestTag,
       requestBody.rating
     );
     if (requestFeedback.error) {

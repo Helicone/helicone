@@ -6,7 +6,7 @@ import { err } from "../util/results";
 export type Log = {
   request: {
     id: string;
-    userRequestId: string;
+    requestTag: string;
     userId: string;
     promptId?: string;
     properties: Record<string, string>;

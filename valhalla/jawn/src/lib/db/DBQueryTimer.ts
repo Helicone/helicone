@@ -1,4 +1,6 @@
 import { PostgrestBuilder } from "@supabase/postgrest-js";
+import { Result } from "../shared/result";
+import { dbExecute } from "../shared/db/dbExecute";
 
 export const FREQUENT_PERCENT_LOGGING = 0.01;
 
@@ -18,6 +20,34 @@ export class DBQueryTimer {
 
   constructor(dataDogConfig: DataDogConfig) {
     this.dataDogConfig = dataDogConfig;
+  }
+
+  async dbExecuteWithTiming<T>(
+    query: string,
+    parameters: any[],
+    timingParams: {
+      queryName: string;
+      percentLogging?: number;
+    }
+  ): Promise<Result<T[], string>> {
+    const percentLogging =
+      timingParams.percentLogging ?? FREQUENT_PERCENT_LOGGING;
+    const timestamp = Math.floor(new Date().getTime() / 1000);
+    const start = performance.now();
+    const result = await dbExecute<T>(query, parameters);
+    const end = performance.now();
+
+    const randomNumber = Math.random();
+
+    if (this.dataDogConfig.enabled && randomNumber < percentLogging) {
+      this.logDistributionMetric(
+        timestamp,
+        end - start,
+        timingParams.queryName
+      ).then();
+    }
+
+    return result;
   }
 
   async withTiming<T>(
