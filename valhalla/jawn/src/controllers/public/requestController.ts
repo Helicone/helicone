@@ -92,14 +92,14 @@ export class RequestController extends Controller {
     return requests;
   }
 
-  @Post("/{requestId}/feedback")
+  @Post("/{userRequestId}/feedback")
   public async feedbackRequest(
     @Body()
     requestBody: { rating: boolean },
     @Request() request: JawnAuthenticatedRequest,
-    @Path() requestId: string
+    @Path() userRequestId: string
   ): Promise<Result<null, string>> {
-    if (requestId.length <= 0 && requestId.length > 36) {
+    if (userRequestId.length <= 0 && userRequestId.length > 36) {
       this.setStatus(400);
       return err("Invalid requestId format");
     }
@@ -107,7 +107,7 @@ export class RequestController extends Controller {
     const reqManager = new RequestManager(request.authParams);
 
     const requestFeedback = await reqManager.feedbackRequest(
-      requestId,
+      userRequestId,
       requestBody.rating
     );
     if (requestFeedback.error) {
