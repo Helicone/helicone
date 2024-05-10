@@ -417,7 +417,6 @@ function getExperimentHypothesisScores(
           provider: run.request.provider,
           sum_prompt_tokens: run.response.promptTokens,
           sum_completion_tokens: run.response.completionTokens,
-          sum_tokens: run.response.completionTokens + run.response.promptTokens,
         }),
       0
     );
@@ -452,9 +451,6 @@ function getExperimentDatasetScores(
             provider: row.inputRecord!.request.provider,
             sum_prompt_tokens: row.inputRecord!.response.promptTokens,
             sum_completion_tokens: row.inputRecord!.response.completionTokens,
-            sum_tokens:
-              row.inputRecord!.response.completionTokens +
-              row.inputRecord!.response.promptTokens,
           }) ?? 0;
 
         const isCurrentNewer =
@@ -493,7 +489,6 @@ function modelCost(modelRow: {
   provider: string;
   sum_prompt_tokens: number;
   sum_completion_tokens: number;
-  sum_tokens: number;
 }): number {
   const model = modelRow.model;
   const promptTokens = modelRow.sum_prompt_tokens;
