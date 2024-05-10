@@ -7,7 +7,7 @@ import { withTimeout } from "../util/helpers";
 import { Result, err, ok } from "../util/results";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
-import { RequestWrapper } from "../RequestWrapper";
+import { PromptSettings, RequestWrapper } from "../RequestWrapper";
 import { INTERNAL_ERRORS } from "../util/constants";
 import { AsyncLogModel } from "../models/AsyncLog";
 import { logInClickhouse } from "../db/ClickhouseStore";
@@ -52,7 +52,7 @@ export interface DBLoggableProps {
     requestId: string;
     userId?: string;
     heliconeProxyKeyId?: string;
-    promptId?: string;
+    promptSettings: PromptSettings;
     startTime: Date;
     bodyText?: string;
     path: string;
@@ -90,7 +90,8 @@ export function dbLoggableRequestFromProxyRequest(
   return {
     requestId: proxyRequest.requestId,
     heliconeProxyKeyId: proxyRequest.heliconeProxyKeyId,
-    promptId: proxyRequest.requestWrapper.heliconeHeaders.promptId ?? undefined,
+    promptSettings: proxyRequest.requestWrapper.promptSettings,
+    heliconeTemplate: proxyRequest.heliconePromptTemplate ?? undefined,
     userId: proxyRequest.userId,
     startTime: requestStartTime,
     bodyText: proxyRequest.bodyText ?? undefined,
@@ -103,7 +104,6 @@ export function dbLoggableRequestFromProxyRequest(
     nodeId: proxyRequest.nodeId,
     modelOverride:
       proxyRequest.requestWrapper.heliconeHeaders.modelOverride ?? undefined,
-    heliconeTemplate: proxyRequest.heliconePromptTemplate ?? undefined,
     threat: proxyRequest.threat ?? null,
     flaggedForModeration: proxyRequest.flaggedForModeration ?? null,
     request_ip: null,
@@ -152,7 +152,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
   return new DBLoggable({
     request: {
       requestId: providerRequestHeaders.requestId ?? crypto.randomUUID(),
-      promptId: providerRequestHeaders.promptId ?? undefined,
+      promptSettings: requestWrapper.promptSettings,
       userId: providerRequestHeaders.userId ?? undefined,
       startTime: new Date(
         asyncLogModel.timing.startTime.seconds * 1000 +
@@ -811,7 +811,10 @@ export class DBLoggable {
       };
     }
 
-    if (this.request.heliconeTemplate && this.request.promptId) {
+    if (
+      this.request.heliconeTemplate &&
+      this.request.promptSettings.promptMode === "production"
+    ) {
       const assets = requestResult.data.requestAssets;
 
       const inverseAssets: Map<string, string> = new Map();
@@ -833,14 +836,14 @@ export class DBLoggable {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const upsertResult2 = await db.queue.promptStore.upsertPromptV2(
         newTemplateWithInputs,
-        this.request.promptId,
+        this.request.promptSettings.promptId,
         authParams.organizationId,
         this.request.requestId
       );
 
       const upsertResult = await db.queue.upsertPrompt(
         newTemplateWithInputs,
-        this.request.promptId ?? "",
+        this.request.promptSettings.promptId,
         authParams.organizationId
       );
 
@@ -962,7 +965,10 @@ export class DBLoggable {
         request: {
           id: this.request.requestId,
           userId: this.request.userId ?? "",
-          promptId: requestHeaders.promptId ?? "",
+          promptId:
+            this.request.promptSettings.promptMode === "production"
+              ? this.request.promptSettings.promptId
+              : "",
           properties: this.request.properties,
           heliconeApiKeyId: authParams.heliconeApiKeyId, // If undefined, proxy key id must be present
           heliconeProxyKeyId: this.request.heliconeProxyKeyId ?? undefined,
@@ -1233,7 +1239,10 @@ export async function logRequest(
       body: reqBody, // TODO: Remove in favor of S3 storage
       auth_hash: "",
       user_id: request.userId ?? null,
-      prompt_id: request.promptId ?? null,
+      prompt_id:
+        request.promptSettings.promptMode === "production"
+          ? request.promptSettings.promptId
+          : null,
       properties: request.properties,
       formatted_prompt_id: null,
       prompt_values: null,
