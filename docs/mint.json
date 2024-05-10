@@ -84,7 +84,6 @@
         "features/advanced-usage/custom-rate-limits",
         "features/advanced-usage/vault",
         "features/advanced-usage/fine-tuning",
-        "features/streaming",
         "features/advanced-usage/moderations", 
         "features/advanced-usage/llm-security",
         "features/webhooks",
@@ -95,12 +94,8 @@
             "features/customer_portal/getting-started-proxy",
             "features/customer_portal/getting-started-async"
           ]
-        },
-        {
-          "group": "Jobs",
-          "pages": ["features/jobs/quick-start", "features/jobs/example"]
-          }
-        ]
+        }
+      ]
     },
     {
       "group": "Resources",

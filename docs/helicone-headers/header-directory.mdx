@@ -1,10 +1,7 @@
 ---
 title: "Header Directory"
-description: Leverage the power of headers in your proxy request with Helicone to unlock advanced features and capabilities.
+description: Every header you need to know to access Helicone features and unlock advanced observability capabilities. 
 ---
-
-# Utilizing Headers
-
 <CodeGroup>
 
 ```bash Curl
@@ -76,10 +73,26 @@ const model = new ChatOpenAI({
   },
 });
 ```
-
 </CodeGroup>
 
-# Supported Headers
+## Supported Headers
+
+<ParamField header="Helicone-Target-URL" type="string(url)" required>
+The URL to proxy the request to when using gateway.hconeai.com. 
+For example, https://api.openai.com/v1/engines/davinci/completions
+</ParamField>
+
+<ParamField header="Helicone-OpenAI-Api-Base" type="string(url)">
+The URL to proxy the request to when using oai.hconeai.com. 
+For example, https://[YOUR_AZURE_DOMAIN].openai.azure.com. 
+</ParamField>
+
+<ParamField header="Helicone-OpenAI-Api-Base" type="string(url)">
+The URL to proxy the request to when using oai.hconeai.com. 
+For example, https://[YOUR_AZURE_DOMAIN].openai.azure.com. 
+</ParamField>
+
+
 
 | Header Name              | Type           | Description                                                                                                                   | Example                                               |
 | ------------------------ | -------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
@@ -90,7 +103,7 @@ const model = new ChatOpenAI({
 | Helicone-Omit-Request    | boolean        | Whether to exclude the request from the response                                                                              | true                                                  |
 | Helicone-Model-Override  | string (model) | Overrides the model used to calculate costs and mapping. Useful for when the model does not exist in url, request or response | gpt-4-1106-preview                                    |
 
-# Feature Flags
+## Feature Flags
 
 | Header Name                  | Type    | Description                                                                                     | Example |
 | ---------------------------- | ------- | ----------------------------------------------------------------------------------------------- | ------- |
