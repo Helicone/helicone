@@ -72,7 +72,7 @@ const PromptCard = (props: PromptCardProps) => {
       <div className="flex items-center space-x-2">
         <DocumentTextIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
         <Link
-          className="text-2xl font-semibold text-black dark:text-white underline"
+          className="text-2xl font-semibold text-black dark:text-white truncate"
           href={"/prompts/" + prompt.id}
         >
           {promptInfo?.user_defined_id}
