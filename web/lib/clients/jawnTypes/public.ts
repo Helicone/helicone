@@ -15,7 +15,7 @@ export interface paths {
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
-  "/v1/request/{requestId}/feedback": {
+  "/v1/request/{userRequestId}/feedback": {
     post: operations["FeedbackRequest"];
   };
   "/v1/request/{requestId}/property": {
@@ -678,7 +678,7 @@ export interface operations {
   FeedbackRequest: {
     parameters: {
       path: {
-        requestId: string;
+        userRequestId: string;
       };
     };
     requestBody: {

@@ -2162,7 +2162,7 @@
 				}
 			}
 		},
-		"/v1/request/{requestId}/feedback": {
+		"/v1/request/{userRequestId}/feedback": {
 			"post": {
 				"operationId": "FeedbackRequest",
 				"responses": {
@@ -2188,7 +2188,7 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "requestId",
+						"name": "userRequestId",
 						"required": true,
 						"schema": {
 							"type": "string"
