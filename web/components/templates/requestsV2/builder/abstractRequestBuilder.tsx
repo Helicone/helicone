@@ -31,6 +31,7 @@ type CommonFields = {
   provider: Provider;
   temperature?: number;
   timeToFirstToken?: number | null;
+  scores?: Record<string, number> | null;
 };
 
 export type NormalizedRequest = CommonFields & {
@@ -93,6 +94,7 @@ abstract class AbstractRequestBuilder {
       provider: this.response.provider,
       temperature,
       timeToFirstToken: this.response.time_to_first_token,
+      scores: this.response.scores,
     };
   }
 
