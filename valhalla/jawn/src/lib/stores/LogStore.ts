@@ -185,7 +185,10 @@ export class LogStore {
       !existingPromptVersion ||
       (existingPromptVersion &&
         existingPromptVersion.created_at <= newPromptRecord.createdAt &&
-        !deepCompare(existingPromptVersion.helicone_template, heliconeTemplate))
+        !deepCompare(
+          existingPromptVersion.helicone_template,
+          heliconeTemplate.template
+        ))
     ) {
       // Create a new version if the template has changed
       let majorVersion = existingPromptVersion
@@ -199,7 +202,7 @@ export class LogStore {
           orgId,
           majorVersion,
           0,
-          heliconeTemplate,
+          heliconeTemplate.template,
           model,
           newPromptRecord.createdAt,
         ]
