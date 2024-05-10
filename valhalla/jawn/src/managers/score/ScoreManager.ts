@@ -38,7 +38,7 @@ export class ScoreManager extends BaseManager {
         return err(supabaseRequest.error);
       }
 
-      const request = await this.putScoresAndBumpVersion(requestId, scores);
+      const request = await this.bumpRequestVersion(requestId);
 
       if (request.error || !request.data) {
         return err(request.error);
@@ -189,10 +189,7 @@ export class ScoreManager extends BaseManager {
     return ok(rowContents.data);
   }
 
-  private async putScoresAndBumpVersion(
-    requestId: string,
-    scores: Record<string, number>
-  ) {
+  private async bumpRequestVersion(requestId: string) {
     return await dbExecute<{
       id: string;
       version: number;
