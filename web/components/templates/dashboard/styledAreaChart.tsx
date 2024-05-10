@@ -36,7 +36,7 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
     <Card>
       <div className="flex flex-col space-y-0.5">
         <p className="text-gray-500 text-sm">{title}</p>
-        {value && (
+        {value !== undefined && (
           <p className="text-black dark:text-white text-xl font-semibold">
             {value}
           </p>

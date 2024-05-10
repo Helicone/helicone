@@ -30,7 +30,7 @@ export default function ThemedTabs(props: ThemedTabsProps) {
                 clsx(
                   "w-full flex flex-row rounded-md px-2.5 py-1.5 text-sm font-medium leading-5",
                   selected
-                    ? "bg-white shadow text-gray-900"
+                    ? "bg-white shadow text-gray-900 dark:bg-black dark:text-gray-100"
                     : " hover:cursor-pointer text-gray-500"
                 )
               }
