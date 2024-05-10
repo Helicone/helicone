@@ -55,7 +55,9 @@ export class S3ReaderHandler extends AbstractLogHandler {
       if (!contentResponse.ok) {
         if (contentResponse.status === 404) {
           // Not found is unrecoverable, we will have no request/response to log, do not send to DLQ
-          console.error(`Content not found in S3: ${signedUrl}`);
+          console.error(
+            `Content not found in S3: ${signedUrl}, ${contentResponse.status}, ${contentResponse.statusText}`
+          );
           return ok({
             request: JSON.stringify({
               error: "Content not found in S3",
@@ -67,7 +69,7 @@ export class S3ReaderHandler extends AbstractLogHandler {
         }
 
         return err(
-          `Error fetching content from S3: ${contentResponse.statusText}`
+          `Error fetching content from S3: ${contentResponse.statusText}, ${contentResponse.status}`
         );
       }
 
