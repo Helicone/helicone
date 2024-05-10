@@ -38,7 +38,8 @@
       "group": "Welcome",
       "pages": [
         "introduction", 
-        "getting-started/quick-start"
+        "getting-started/quick-start",
+        "helicone-headers/All-Headers"
       ]
     },
     {
