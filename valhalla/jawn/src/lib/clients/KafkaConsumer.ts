@@ -50,7 +50,7 @@ if (KAFKA_ENABLED && KAFKA_BROKER && KAFKA_USERNAME && KAFKA_PASSWORD) {
 const consumer = kafka?.consumer({
   groupId: "jawn-consumer",
   minBytes: 1000, // 1 kB
-  maxBytes: 10_000_000, // 10 kB
+  maxBytes: 200_000, // 200 kB
 });
 
 export const consume = async () => {
@@ -90,7 +90,7 @@ export const consume = async () => {
       commitOffsetsIfNecessary,
     }) => {
       console.log(`Received batch with ${batch.messages.length} messages.`);
-      const maxMessages = 200;
+      const maxMessages = 100;
       const miniBatches = createMiniBatches(batch.messages, maxMessages);
 
       for (const miniBatch of miniBatches) {
@@ -114,10 +114,12 @@ export const consume = async () => {
           batch.partition,
           "request-response-logs-prod"
         );
+
         if (consumeResult.error) {
           console.error("Failed to consume batch", consumeResult.error);
           // TODO: Best way to handle this?
         }
+
         await heartbeat();
       }
 
@@ -261,7 +263,7 @@ export const consumeDlq = async () => {
       commitOffsetsIfNecessary,
     }) => {
       console.log(`Received batch with ${batch.messages.length} messages.`);
-      const maxMessages = 200;
+      const maxMessages = 100;
       const miniBatches = createMiniBatches(batch.messages, maxMessages);
 
       for (const miniBatch of miniBatches) {
