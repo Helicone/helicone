@@ -2,6 +2,7 @@ import { S3Client } from "../shared/db/s3Client";
 import { PromiseGenericResult, Result, err, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
+import * as Sentry from "@sentry/node";
 
 export class S3ReaderHandler extends AbstractLogHandler {
   private s3Client: S3Client;
@@ -70,6 +71,18 @@ export class S3ReaderHandler extends AbstractLogHandler {
           console.error(
             `Content not found in S3: ${signedUrl}, ${contentResponse.status}, ${contentResponse.statusText}`
           );
+
+          Sentry.captureException(new Error("Raw content not found in S3"), {
+            tags: {
+              type: "KafkaError",
+            },
+            extra: {
+              signedUrl: signedUrl,
+              status: contentResponse.status,
+              statusText: contentResponse.statusText,
+            },
+          });
+
           return err({
             notFoundErr: "Content not found in S3",
           });
