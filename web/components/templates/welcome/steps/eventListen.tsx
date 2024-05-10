@@ -8,17 +8,18 @@ import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import LoadingAnimation from "../../../shared/loadingAnimation";
 import * as PartyParrot from "../../../../public/lottie/PartyParrot.json";
 import dynamic from "next/dynamic";
+import HcButton from "../../../ui/hcButton";
 
 interface EventListenProps {
+  previousStep: () => void;
   nextStep: () => void;
 }
 
 const EventListen = (props: EventListenProps) => {
-  const { nextStep } = props;
+  const { previousStep, nextStep } = props;
 
-  const [loaded, setLoaded] = useState(false);
-  const [shouldFetch, setShouldFetch] = useState(true);
-  const [notification, setNotification] = useState("");
+  // const [shouldFetch, setShouldFetch] = useState(true);
+  const [notification, setNotification] = useState<string>();
   const [loading, setLoading] = useState(false);
 
   const nextStepHandler = async () => {
@@ -51,80 +52,81 @@ const EventListen = (props: EventListenProps) => {
     {
       refetchOnWindowFocus: false,
       refetchInterval: 3000,
-      enabled: shouldFetch,
+      enabled: true,
     }
   );
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoaded(true), 500); // delay of 500ms
-    return () => clearTimeout(timer); // this will clear Timeout
-    // when component unmount like in willComponentUnmount
-  }, []);
-
-  useEffect(() => {
-    if (isSuccess && data?.data === true) {
-      setShouldFetch(false);
-    }
-  }, [isSuccess, data]);
-
   return (
     <div
-      className={clsx(
-        `transition-all duration-700 ease-in-out ${
-          loaded ? "opacity-100" : "opacity-0"
-        }`,
-        "flex flex-col items-center w-full px-2"
-      )}
+      id="content"
+      className="w-full flex flex-col justify-between divide-y divide-gray-200"
     >
-      {data && data.data ? (
-        <>
-          <LoadingAnimation animation={PartyParrot} height={75} width={75} />
-          <p className="text-2xl md:text-5xl font-semibold text-center mt-4">
-            Successfully received an event
-          </p>
-          <p className="text-md md:text-lg text-gray-500 font-light mt-5 text-center">
-            You&apos;re all set to use Helicone! Click below to get started.
-          </p>
-          <button
-            onClick={nextStepHandler}
-            className="px-28 py-3 bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 dark:text-black font-medium text-white rounded-xl mt-8"
-          >
-            {loading && (
-              <ArrowPathIcon className="w-5 h-5 inline-block mr-2 animate-pulse" />
+      <div className="flex flex-col h-full flex-auto p-4">
+        {data && data.data ? (
+          <>
+            <LoadingAnimation animation={PartyParrot} height={75} width={75} />
+            <p className="text-lg md:text-xl font-semibold text-center mt-4">
+              Successfully received an event
+            </p>
+            <p className="text-md md:text-lg text-gray-500 font-light mt-5 text-center">
+              You&apos;re all set to use Helicone! Click below to get started.
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="text-lg md:text-xl font-semibold text-center">
+              Listening for Events
+            </p>
+            <p className="text-md md:text-lg text-gray-500 font-light mt-4 text-center">
+              Send your first event through Helicone to view your dashboard
+            </p>
+            {notification && (
+              <p className="text-md md:text-lg text-red-500 font-light mt-4 text-center">
+                {notification}
+              </p>
             )}
-            View Dashboard
-          </button>
-        </>
-      ) : (
-        <>
-          <p className="text-2xl md:text-5xl font-semibold text-center">
-            Listening for Events
-          </p>
-          <p className="text-md md:text-lg text-gray-500 font-light mt-5 text-center">
-            Send your first event through Helicone to view your dashboard
-          </p>
-          <div className="flex flex-col w-full">
-            <Lottie
-              options={{
-                loop: true,
-                autoplay: true,
-                animationData: Listening,
-                rendererSettings: {
-                  preserveAspectRatio: "xMidYMid slice",
-                },
-              }}
-              height={250}
-              width={250}
-              isStopped={false}
-              isPaused={false}
-              style={{
-                pointerEvents: "none",
-                background: "transparent",
-              }}
-            />
-          </div>
-        </>
-      )}
+            <div className="flex flex-col w-full">
+              <Lottie
+                options={{
+                  loop: true,
+                  autoplay: true,
+                  animationData: Listening,
+                  rendererSettings: {
+                    preserveAspectRatio: "xMidYMid slice",
+                  },
+                }}
+                height={250}
+                width={250}
+                isStopped={false}
+                isPaused={false}
+                style={{
+                  pointerEvents: "none",
+                  background: "transparent",
+                }}
+              />
+            </div>
+          </>
+        )}
+      </div>
+      <div className="flex items-center justify-between p-4">
+        <HcButton
+          variant={"secondary"}
+          size={"sm"}
+          title={"Back"}
+          onClick={previousStep}
+        />
+        <HcButton
+          variant={"primary"}
+          size={"sm"}
+          title={"Go to Dashboard"}
+          onClick={() => {
+            if (data && data.data) {
+              nextStepHandler();
+            }
+          }}
+          disabled={!isSuccess}
+        />
+      </div>
     </div>
   );
 };

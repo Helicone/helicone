@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { DiffHighlight } from "../welcome/diffHighlight";
+import { DiffHighlight } from "../../diffHighlight";
 import { Tab, TabGroup, TabList } from "@tremor/react";
+import { clsx } from "../../../../shared/clsx";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
@@ -39,7 +40,7 @@ const openai = new OpenAI({
 import OpenAI
 
 client = OpenAI(
-  api_key="your-api-key-here", 
+  api_key='<YOUR_API_KEY>', 
   base_url="${BASE_PATH}", 
   default_headers={ 
     "Helicone-Auth": f"Bearer ${key}",
@@ -51,7 +52,7 @@ client = OpenAI(
 openai.api_base = "${BASE_PATH}"
 
 llm = ChatOpenAI(
-  openai_api_key='<>',
+  openai_api_key='<YOUR_API_KEY>',
   headers={
     "Helicone-Auth": f"Bearer ${key}"
   },
@@ -95,41 +96,74 @@ const NAMES: {
   langchain_typescript: "LangChainJS",
 };
 
-interface CodeSnippetProps {
-  variant: "themed" | "simple";
+interface OpenAISnippetsProps {
   apiKey?: string;
 }
 
-export default function CodeSnippet(props: CodeSnippetProps) {
-  const { variant, apiKey = "<YOUR_API_KEY>" } = props;
+export default function OpenAISnippets(props: OpenAISnippetsProps) {
+  const { apiKey = "<YOUR_API_KEY>" } = props;
   const [lang, setLang] = useState<SupportedLanguages>("typescript");
 
   return (
     <div className="w-full flex flex-col">
-      <TabGroup
-        defaultIndex={1}
-        className="w-full flex items-center justify-center"
-      >
-        <TabList className="font-semibold" variant="solid">
-          {Object.entries(NAMES).map(([key, name], i) => (
-            <Tab
-              onClick={() => setLang(key as SupportedLanguages)}
-              key={`code_snip_tab_${i}`}
-              className="px-8 py-2"
-            >
-              {name}
-            </Tab>
-          ))}
-        </TabList>
-      </TabGroup>
+      <label className="font-semibold text-sm">
+        Select your integration method
+      </label>
+      <div className="flex flex-wrap gap-4 py-2 w-full">
+        <button
+          className={clsx(
+            lang === "typescript" ? "bg-sky-100" : "bg-white",
+            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+          )}
+          onClick={() => setLang("typescript")}
+        >
+          <h2 className="font-semibold">Node.js</h2>
+        </button>
+        <button
+          className={clsx(
+            lang === "python" ? "bg-sky-100" : "bg-white",
+            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+          )}
+          onClick={() => setLang("python")}
+        >
+          <h2 className="font-semibold">Python</h2>
+        </button>
+        <button
+          className={clsx(
+            lang === "langchain_python" ? "bg-sky-100" : "bg-white",
+            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+          )}
+          onClick={() => setLang("langchain_python")}
+        >
+          <h2 className="font-semibold">Langchain</h2>
+        </button>
+        <button
+          className={clsx(
+            lang === "langchain_typescript" ? "bg-sky-100" : "bg-white",
+            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+          )}
+          onClick={() => setLang("langchain_typescript")}
+        >
+          <h2 className="font-semibold">LangchainJS</h2>
+        </button>
+        <button
+          className={clsx(
+            lang === "curl" ? "bg-sky-100" : "bg-white",
+            "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+          )}
+          onClick={() => setLang("curl")}
+        >
+          <h2 className="font-semibold">cURL</h2>
+        </button>
+      </div>
 
       <DiffHighlight
         code={CODE_CONVERTS[lang](apiKey)}
         language="bash"
         newLines={DIFF_LINES[lang]}
         oldLines={[]}
+        minHeight={false}
       />
-      {/* </Tab.Group> */}
     </div>
   );
 }

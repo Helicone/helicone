@@ -2,6 +2,7 @@ import { GetServerSidePropsContext } from "next";
 import MetaData from "../components/layout/public/authMetaData";
 import WelcomePage from "../components/templates/welcome/welcomePage";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
+import WelcomePageV2 from "../components/templates/welcome/welcomePageV2";
 
 interface WelcomeProps {
   currentStep: number;
@@ -11,7 +12,8 @@ const Welcome = (props: WelcomeProps) => {
   const { currentStep } = props;
   return (
     <MetaData title="Welcome">
-      <WelcomePage currentStep={currentStep} />
+      {/* <WelcomePage currentStep={currentStep} /> */}
+      <WelcomePageV2 currentStep={currentStep} />
     </MetaData>
   );
 };
@@ -40,7 +42,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     props: {
       initialSession: session,
       user: session.user,
-      currentStep: step ? parseInt(step as string) : 0,
+      currentStep: step ? parseInt(step as string) : 1,
     },
   };
 };
