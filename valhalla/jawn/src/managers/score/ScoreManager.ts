@@ -10,9 +10,6 @@ import { AuthParams } from "../../lib/db/supabase";
 import { a } from "js-tiktoken/dist/core-c3ffd518";
 
 export class ScoreManager extends BaseManager {
-  constructor(private orgId: string, authParams: AuthParams) {
-    super(authParams);
-  }
   public async addScores(
     requestId: string,
     scores: Record<string, number>
@@ -130,7 +127,12 @@ export class ScoreManager extends BaseManager {
       AND organization_id = {val_2: String}
       AND provider = {val_3: String}
     `,
-        [newVersion.id, newVersion.version - 1, this.orgId, newVersion.provider]
+        [
+          newVersion.id,
+          newVersion.version - 1,
+          this.authParams.organizationId,
+          newVersion.provider,
+        ]
       ),
       (x) => x[0]
     );
@@ -150,7 +152,7 @@ export class ScoreManager extends BaseManager {
         ORDER BY version DESC
         LIMIT 1
       `,
-          [newVersion.id, this.orgId, newVersion.provider]
+          [newVersion.id, this.authParams.organizationId, newVersion.provider]
         ),
         (x) => x[0]
       );
@@ -168,7 +170,7 @@ export class ScoreManager extends BaseManager {
           sign: -1,
           version: rowContents.data.version,
           request_id: newVersion.id,
-          organization_id: this.orgId,
+          organization_id: this.authParams.organizationId,
           provider: newVersion.provider,
           model: rowContents.data.model,
           request_created_at: rowContents.data.request_created_at,
@@ -202,7 +204,7 @@ export class ScoreManager extends BaseManager {
           AND id = $2
           RETURNING version, id, provider
           `,
-      [this.orgId, requestId]
+      [this.authParams.organizationId, requestId]
     );
   }
 }

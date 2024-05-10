@@ -165,10 +165,7 @@ export class RequestController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() requestId: string
   ): Promise<Result<null, string>> {
-    const scoreManager = new ScoreManager(
-      request.authParams.organizationId,
-      request.authParams
-    );
+    const scoreManager = new ScoreManager(request.authParams);
 
     const result = await scoreManager.addScores(requestId, requestBody.scores);
     if (result.error || !result.data) {
