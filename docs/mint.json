@@ -37,9 +37,8 @@
     {
       "group": "Welcome",
       "pages": [
-        "introduction", 
         "getting-started/quick-start",
-        "helicone-headers/All-Headers"
+        "helicone-headers/header-directory"
       ]
     },
     {
@@ -75,6 +74,20 @@
       "group": "Features",
       "pages": [
         "features/prompts",
+        "features/advanced-usage/custom-properties",
+        "features/advanced-usage/caching",
+        "features/advanced-usage/omit-logs",
+        "features/advanced-usage/user-metrics",
+        "features/advanced-usage/feedback",
+        "getting-started/integration-method/gateway-fallbacks",
+        "features/advanced-usage/retries",
+        "features/advanced-usage/custom-rate-limits",
+        "features/advanced-usage/vault",
+        "features/advanced-usage/fine-tuning",
+        "features/streaming",
+        "features/advanced-usage/moderations", 
+        "features/advanced-usage/llm-security",
+        "features/webhooks",
         {
           "group": "Customer Portal",
           "pages": [
@@ -86,28 +99,14 @@
         {
           "group": "Jobs",
           "pages": ["features/jobs/quick-start", "features/jobs/example"]
-        },
-        "getting-started/integration-method/gateway-fallbacks",
-        "features/advanced-usage/custom-properties",
-        "features/advanced-usage/user-metrics",
-        "features/advanced-usage/feedback",
-        "features/advanced-usage/vault",
-        "features/advanced-usage/fine-tuning",
-        "features/advanced-usage/caching",
-        "features/advanced-usage/retries",
-        "features/advanced-usage/custom-rate-limits",
-        "features/advanced-usage/omit-logs",
-        "features/streaming",
-        "features/webhooks",
-        "features/advanced-usage/llm-security",
-        "features/advanced-usage/moderations"
-      ]
+          }
+        ]
     },
     {
       "group": "Resources",
       "pages": [
         "getting-started/proxy-vs-async",
-        "helicone-headers/helicone-headers",
+        "helicone-headers/header-directory",
         "faq/how-encryption-works",
         "faq/how-we-calculate-cost",
         "faq/latency-affect",
