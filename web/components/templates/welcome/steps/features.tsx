@@ -36,16 +36,24 @@ const Features = (props: FeaturesProps) => {
         <TabGroup>
           <TabList className="mt-4" variant="solid">
             <Tab className="flex flex-col text-left">
-              <p className="font-semibold text-lg">Custom Properties</p>
-              <p className="text-sm pt-1">Label and segment your requests</p>
+              <p className="font-semibold text-md xl:text-lg">
+                Custom Properties
+              </p>
+              <p className="text-xs xl:text-sm pt-1">
+                Label and segment your requests
+              </p>
             </Tab>
             <Tab className="flex flex-col text-left">
-              <p className="font-semibold text-lg">Prompt Templating</p>
-              <p className="text-sm pt-1">Version and visualize prompts</p>
+              <p className="font-semibold text-md xl:text-lg">
+                Prompt Templating
+              </p>
+              <p className="text-xs xl:text-sm pt-1">
+                Version and visualize prompts
+              </p>
             </Tab>
             <Tab className="flex flex-col text-left">
-              <p className="font-semibold text-lg">Caching</p>
-              <p className="text-sm pt-1">
+              <p className="font-semibold text-md xl:text-lg">Caching</p>
+              <p className="text-xs xl:text-sm pt-1">
                 Increase performance and save costs
               </p>
             </Tab>

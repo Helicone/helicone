@@ -1,5 +1,4 @@
 import { CheckCircleIcon } from "@heroicons/react/20/solid";
-import { useRouter } from "next/router";
 
 export default function StepList(props: {
   currentStep: number;

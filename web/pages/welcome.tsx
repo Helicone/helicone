@@ -1,6 +1,5 @@
 import { GetServerSidePropsContext } from "next";
 import MetaData from "../components/layout/public/authMetaData";
-import WelcomePage from "../components/templates/welcome/welcomePage";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import WelcomePageV2 from "../components/templates/welcome/welcomePageV2";
 

@@ -1,6 +1,5 @@
 import Image from "next/image";
 import StepList from "./steps/stepList";
-import HcButton from "../../ui/hcButton";
 import CreateOrg from "./steps/createOrg";
 import { useState } from "react";
 import { useRouter } from "next/router";
@@ -63,6 +62,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
       }}
     />,
     <EventListen
+      key={5}
       previousStep={function (): void {
         handleStepChange(4);
       }}
@@ -74,10 +74,10 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
 
   return (
     <div className="h-screen w-full bg-gray-50">
-      <div className="w-full max-w-6xl mx-auto h-full flex flex-col md:flex-row p-4 divide-x divide-gray-200">
+      <div className="w-full max-w-6xl mx-auto h-full flex flex-col lg:flex-row p-4 lg:divide-x divide-gray-200">
         <section
           id="steps"
-          className="w-full min-w-[22.5rem] max-w-[22.5rem] flex-1 flex flex-col py-8 px-4"
+          className="w-full min-w-[22.5rem] max-w-[22.5rem] lg:flex-1 flex flex-col py-8 px-4"
         >
           <Image
             src={"/assets/pricing/bouncing-cube.png"}
@@ -91,7 +91,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
           <p className="text-gray-500 text-sm">
             The LLM-observability platform for developers
           </p>
-          <div className="pt-8">
+          <div className="pt-8 hidden lg:flex">
             <StepList
               currentStep={currentStep}
               setStep={(step) => {
@@ -100,7 +100,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
             />
           </div>
         </section>
-        <div className="overflow-auto pt-16 flex flex-auto">
+        <div className="overflow-auto lg:pt-16 flex flex-auto">
           {stepArray[step - 1]}
         </div>
       </div>

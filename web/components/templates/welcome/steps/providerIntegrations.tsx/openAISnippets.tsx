@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { DiffHighlight } from "../../diffHighlight";
-import { Tab, TabGroup, TabList } from "@tremor/react";
 import { clsx } from "../../../../shared/clsx";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";

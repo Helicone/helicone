@@ -5,10 +5,9 @@ import {
   useUser,
 } from "@supabase/auth-helpers-react";
 import generateApiKey from "generate-api-key";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { hashAuth } from "../../../../lib/hashClient";
 import { Database } from "../../../../supabase/database.types";
-import { clsx } from "../../../shared/clsx";
 import { useOrg } from "../../../layout/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
 import HcButton from "../../../ui/hcButton";
@@ -87,7 +86,7 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
         className="w-full h-full flex flex-col justify-between divide-y divide-gray-200"
       >
         <div className="flex flex-col h-full flex-auto p-4">
-          <div className="flex flex-col space-y-8 w-full px-4">
+          <div className="flex flex-col space-y-8 w-full">
             <div className="flex flex-col space-y-2">
               <label
                 htmlFor="key-name"

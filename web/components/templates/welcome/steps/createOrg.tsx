@@ -1,8 +1,6 @@
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Database } from "../../../../supabase/database.types";
-import { clsx } from "../../../shared/clsx";
 import { useOrg } from "../../../layout/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
 import { PostgrestError } from "@supabase/supabase-js";
@@ -142,7 +140,7 @@ const CreateOrg = (props: CreateOrgProps) => {
         className="w-full flex flex-col justify-between divide-y divide-gray-200"
       >
         <div className="flex flex-col h-full flex-auto p-4">
-          <div className="flex flex-col space-y-8 w-full px-4">
+          <div className="flex flex-col space-y-8 w-full">
             <div className="flex flex-col space-y-2">
               <label
                 htmlFor="org-name"

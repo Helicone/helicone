@@ -1,10 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 const Lottie = dynamic(() => import("react-lottie"), { ssr: false });
 import { Result } from "../../../../lib/result";
-import { clsx } from "../../../shared/clsx";
 import * as Listening from "../../../../public/lottie/Listening.json";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import LoadingAnimation from "../../../shared/loadingAnimation";
 import * as PartyParrot from "../../../../public/lottie/PartyParrot.json";
 import dynamic from "next/dynamic";
