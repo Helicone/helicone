@@ -2,6 +2,7 @@
 title: "Header Directory"
 description: Every header you need to know to access Helicone features and unlock advanced observability capabilities. 
 ---
+
 <CodeGroup>
 
 ```bash Curl
@@ -76,15 +77,85 @@ const model = new ChatOpenAI({
 </CodeGroup>
 
 ## Supported Headers
+<ResponseField name="Helicone-Auth" type="string (HELICONE_API_KEY)" required>
+  This is the first header you will use, which authenticates you to send requests to the Helicone API. Here's the format: `"Helicone-Auth": "Bearer <HELICONE_API_KEY>"`. Remember to replace it with your actual Helicone API key.
+</ResponseField>
+<ResponseField name="Helicone-Target-URL" type="string (url)">
+  The URL to proxy the request to when using gateway.hconeai.com. For example, `https://api.openai.com/v1/engines/davinci/completions`.
+</ResponseField>
+<ResponseField name="Helicone-OpenAI-Api-Base" type="string (url)">
+  The URL to proxy the request to when using oai.hconeai.com. For example, `https://[YOUR_AZURE_DOMAIN].openai.azure.com`.
+</ResponseField>
+<ResponseField name="Helicone-Request-Id" type="string (uuid)">
+  The ID of the request, in this format: `123e4567-e89b-12d3-a456-426614174000` 
+</ResponseField>
+<ResponseField name="Helicone-Omit-Response" type="boolean">
+  Whether to exclude the response from the request. Set to `true` or  `false`.
+</ResponseField>
+<ResponseField name="Helicone-Omit-Request" type="boolean">
+  Whether to exclude the request from the response. Set to `true` or  `false`.
+</ResponseField>
+<ResponseField name="Helicone-Model-Override" type="string (model)">
+  Overrides the model used to calculate costs and mapping. Useful for when the model does not exist in URL, request or response. For example, `gpt-4-1106-preview`. 
+</ResponseField>
+<ResponseField name="Helicone-Prompt-Id" type="string">
+  Assigning an ID allows Helicone to associate your prompt with future versions of your prompt, and automatically manage versions on your behalf. For example, both `prompt_story` and `this is the first prompt` and okay. 
+</ResponseField>
+<ResponseField name="Helicone-Property-[Name]" type="string">
+  Custom Properties allows you to add any additional information to your requests, such as session, conversation, and app ID. For example, `Helicone-Property-Session: "24"`, `Helicone-Property-Conversation: "support_issue_2"`, or `Helicone-Property-App: "mobile"`. 
+</ResponseField>
+<ResponseField name="Helicone-Cache-Enabled" type="boolean">
+  Whether to cache your responses. Set to `true` or  `false`. You can customize the behavior of the cache feature by setting additional headers in your request.
+  | Parameter                         | Description                                       |
+  | --------------------------------- | ------------------------------------------------- |
+  | `Cache-control`                   | Configure cache limit in `seconds`.               |
+  | `Helicone-Cache-Bucket-Max-Size`  | Configure cache bucket size as a `number`.        |
+  | `Helicone-Cache-Seed`             | Generate predictable results and maintain separate cache states for each cache seed, type `string`. |
+</ResponseField>
+<ResponseField name="Helicone-User-Id" type="string">
+  Specify the user making the request to track and analyze user metrics, such as the number of requests, costs, and activity associated with that particular user. For example, `"Helicone-User-Id": alicebob@gmail.com"`. 
+</ResponseField>
+<ResponseField name="Helicone-Fallbacks" type="JSON string dump">
+  Utilize any provider through a single endpoint by setting fallbacks. See how it's used in [Gateway Fallbacks](https://docs.helicone.ai/getting-started/integration-method/gateway-fallbacks). 
+</ResponseField>
+<ResponseField name="Helicone-Retry-Enabled" type="boolean">
+  Retry requests to overcome rate limits and overloaded servers. Set to `true` or `false`.
+  You can customize the behavior of the retries feature by setting additional headers in your request.
+  | Parameter                    | Description                                       |
+  | ---------------------------- | ------------------------------------------------- |
+  | `helicone-retry-num`         | Number of retries                                 |
+  | `helicone-retry-factor`      | Exponential backoff factor                        |
+  | `helicone-retry-min-timeout` | Minimum timeout (in milliseconds) between retries |
+  | `helicone-retry-max-timeout` | Maximum timeout (in milliseconds) between retries |
 
-| Header Name              | Type           | Description                                                                                                                   | Example                                               |
-| ------------------------ | -------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Helicone-Target-URL      | string (url)   | The URL to proxy the request to when using gateway.hconeai.com                                                                | https://api.openai.com/v1/engines/davinci/completions |
-| Helicone-OpenAI-Api-Base | string (url)   | The URL to proxy the request to when using oai.hconeai.com                                                                    | https://[YOUR_AZURE_DOMAIN].openai.azure.com          |
-| Helicone-Request-Id      | string (uuid)  | The ID of the request                                                                                                         | 123e4567-e89b-12d3-a456-426614174000                  |
-| Helicone-Omit-Response   | boolean        | Whether to exclude the response from the request                                                                              | true                                                  |
-| Helicone-Omit-Request    | boolean        | Whether to exclude the request from the response                                                                              | true                                                  |
-| Helicone-Model-Override  | string (model) | Overrides the model used to calculate costs and mapping. Useful for when the model does not exist in url, request or response | gpt-4-1106-preview                                    |
+</ResponseField>
+<ResponseField name="Helicone-RateLimit-Policy" type="string">
+  Set up a rate limit policy. The header value should follow this format: `[quota];w=[time_window];u=[unit];s=[segment]`. For example, the policy `10;w=1000;u=cents;s=user` allows 10 cents of requests per 1000 seconds per user.
+</ResponseField>
+<ResponseField name="Helicone-Moderations-Enabled" type="boolean">
+  Activate OpenAI moderation to safeguard your chat completions. Set to `true` or `false`. 
+</ResponseField>
+<ResponseField name="Helicone-LLM-Security-Enabled" type="boolean">
+  Secure OpenAI chat completions against prompt injections. Set to `true` or `false`. 
+</ResponseField>
+
+
+
+### Response headers 
+
+| Headers                                   | Description                                       |
+| ----------------------------------------- | ------------------------------------------------- |
+| `Helicone-Cache`                          | Indicates whether the response was cached. Returns `HIT` or `MISS`. |
+| `Helicone-Cache-Bucket-Idx`               | Indicates the cache bucket index used as a `number`.                |
+| `Helicone-Fallback-Index`                 | Indicates fallback idex used as a `number`.                         |
+| `Helicone-RateLimit-Limit`                | Indicates the quota for the `number` of requests allowed in the time window.    |
+| `Helicone-RateLimit-Remaining`            | Indicates the remaining quota in the current window as a `number`.    |
+| `Helicone-RateLimit-Policy`               | Indicates the active rate limit policy.|
+
+
+
+
+
 
 ## Feature Flags
 
