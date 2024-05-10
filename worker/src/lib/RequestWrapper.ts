@@ -22,6 +22,10 @@ export type RequestHandlerType =
   | "logging"
   | "feedback";
 
+export type PromptSettings =
+  | { promptId: string; promptMode: "production" | "testing" }
+  | { promptId: undefined; promptMode: "testing" | "deactivated" };
+
 export class RequestWrapper {
   private authorization: string | undefined;
   url: URL;
@@ -31,6 +35,7 @@ export class RequestWrapper {
   heliconeProxyKeyId: string | undefined;
   baseURLOverride: string | null;
   cf: CfProperties | undefined;
+  promptSettings: PromptSettings;
 
   private cachedText: string | null = null;
   private bodyKeyOverride: object | null = null;
@@ -83,8 +88,51 @@ export class RequestWrapper {
     this.url = new URL(request.url);
     this.headers = this.mutatedAuthorizationHeaders(request);
     this.heliconeHeaders = new HeliconeHeaders(request.headers);
+    this.promptSettings = this.getPromptSettings();
+    this.injectPromptProperties();
     this.baseURLOverride = null;
     this.cf = request.cf;
+  }
+
+  private injectPromptProperties() {
+    const promptId = this.promptSettings.promptId;
+    if (promptId) {
+      this.heliconeHeaders.heliconeProperties[`Helicone-Prompt-Id`] = promptId;
+    }
+  }
+
+  private getPromptMode(
+    promptId?: string,
+    promptMode?: string
+  ): PromptSettings["promptMode"] {
+    const validPromptModes = ["production", "testing", "deactivated"];
+
+    if (promptMode && !validPromptModes.includes(promptMode)) {
+      throw new Error("Invalid prompt mode");
+    }
+
+    if (promptMode) {
+      return promptMode as PromptSettings["promptMode"];
+    }
+
+    if (!promptMode && promptId) {
+      return "production";
+    }
+
+    return "deactivated";
+  }
+
+  private getPromptSettings(): PromptSettings {
+    const promptId = this.heliconeHeaders.promptHeaders.promptId ?? undefined;
+    const promptMode = this.getPromptMode(
+      promptId,
+      this.heliconeHeaders.promptHeaders.promptMode ?? undefined
+    );
+
+    return {
+      promptId,
+      promptMode,
+    } as PromptSettings;
   }
 
   static async create(
@@ -163,6 +211,13 @@ export class RequestWrapper {
     return this.cachedText;
   }
 
+  shouldFormatPrompt(): boolean {
+    return (
+      this.promptSettings.promptMode === "production" ||
+      this.promptSettings.promptMode === "testing"
+    );
+  }
+
   async getText(): Promise<string> {
     let text = await this.getRawText();
 
@@ -177,7 +232,7 @@ export class RequestWrapper {
       } catch (e) {
         throw new Error("Could not stringify bodyKeyOverride");
       }
-    } else if (this.heliconeHeaders.promptId) {
+    } else if (this.shouldFormatPrompt()) {
       const { objectWithoutJSXTags } = parseJSXObject(JSON.parse(text));
 
       return JSON.stringify(objectWithoutJSXTags);
