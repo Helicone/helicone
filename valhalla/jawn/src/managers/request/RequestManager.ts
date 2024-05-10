@@ -93,7 +93,7 @@ export class RequestManager extends BaseManager {
           supabaseServer.client
             .from("response")
             .select("*")
-            .in("request_id", requests.map((r) => r.id) ?? []),
+            .in("request", requests.map((r) => r.id) ?? []),
           {
             queryName: "select_response_by_request",
             percentLogging: FREQUENT_PRECENT_LOGGING,
@@ -126,11 +126,11 @@ export class RequestManager extends BaseManager {
     return { error: "Request not found.", data: null };
   }
   async feedbackRequest(
-    requestId: string,
+    userRequestId: string,
     feedback: boolean
   ): Promise<Result<null, string>> {
     const requestResponses = await this.waitForRequestAndResponse(
-      requestId,
+      userRequestId,
       this.authParams.organizationId
     );
 

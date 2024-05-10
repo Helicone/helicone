@@ -91,7 +91,7 @@ export function dbLoggableRequestFromProxyRequest(
   return {
     requestId: proxyRequest.requestId,
     userRequestId:
-      proxyRequest.requestWrapper.heliconeHeaders.requestId ??
+      proxyRequest.requestWrapper.heliconeHeaders.userRequestId ??
       proxyRequest.requestId,
     heliconeProxyKeyId: proxyRequest.heliconeProxyKeyId,
     promptId: proxyRequest.requestWrapper.heliconeHeaders.promptId ?? undefined,
