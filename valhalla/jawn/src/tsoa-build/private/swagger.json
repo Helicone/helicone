@@ -616,6 +616,9 @@
 							"userId": {
 								"type": "string"
 							},
+							"userRequestId": {
+								"type": "string"
+							},
 							"id": {
 								"type": "string"
 							}
@@ -629,6 +632,7 @@
 							"targetUrl",
 							"properties",
 							"userId",
+							"userRequestId",
 							"id"
 						],
 						"type": "object"

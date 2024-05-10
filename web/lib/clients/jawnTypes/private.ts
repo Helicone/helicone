@@ -212,6 +212,7 @@ export interface components {
         properties: components["schemas"]["Record_string.string_"];
         promptId?: string;
         userId: string;
+        userRequestId: string;
         id: string;
       };
     };
