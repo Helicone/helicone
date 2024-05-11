@@ -33,7 +33,7 @@ export class S3Client {
     });
   }
 
-  async getRawRequestResponseBody(
+  async getRawRequestResponseBodySignedUrl(
     orgId: string,
     requestId: string
   ): Promise<Result<string, string>> {

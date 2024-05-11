@@ -36,7 +36,6 @@ export async function getAllSignedURLsFromInputs(
   sourceRequest: string,
   replaceAssetWithContent: boolean = false
 ) {
-  console.log("PREPARING ALL SIGNED URLS FROM INPUTS", inputs);
   const s3Client = new S3Client(
     process.env.S3_ACCESS_KEY ?? "",
     process.env.S3_SECRET_KEY ?? "",

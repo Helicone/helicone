@@ -5,6 +5,8 @@ import { buildFilterPostgres } from "../shared/filters/filters";
 import { Result, err, ok, promiseResultMap, resultMap } from "../shared/result";
 import { BaseStore } from "./baseStore";
 import { costOfPrompt } from "../../packages/cost";
+import { S3Client } from "../shared/db/s3Client";
+import { RequestResponseBodyStore } from "./request/RequestResponseBodyStore";
 
 export interface ResponseObj {
   body: any;
@@ -55,8 +57,8 @@ export interface Experiment {
     runs: {
       datasetRowId: string;
       resultRequestId: string;
-      response: ResponseObj;
-      request: RequestObj;
+      response?: ResponseObj;
+      request?: RequestObj;
     }[];
   }[];
   scores: ExperimentScores | null;
@@ -81,6 +83,7 @@ export interface IncludeExperimentKeys {
   inputs?: true;
   promptVersion?: true;
   responseBodies?: true;
+  score?: true;
 }
 
 function getExperimentsQuery(
@@ -91,7 +94,6 @@ function getExperimentsQuery(
   const responseObjectString = (filter: string) => {
     return `(
       SELECT jsonb_build_object(
-        'body', response.body,
         'createdAt', response.created_at,
         'completionTokens', response.completion_tokens,
         'promptTokens', response.prompt_tokens,
@@ -214,7 +216,7 @@ function getExperimentsQuery(
                                       : ""
                                   }
                                   'datasetRowId', hr.dataset_row,
-                                  'resultRequestId', hr.id
+                                  'resultRequestId', hr.result_request_id
                               )
                           )
                           FROM experiment_v2_hypothesis_run hr
@@ -248,6 +250,8 @@ async function enrichExperiment(
   experiment: Experiment,
   include: IncludeExperimentKeys
 ) {
+  const bodyStore = new RequestResponseBodyStore(experiment.organization);
+
   if (include.inputs) {
     for (const row of experiment.dataset.rows) {
       if (row.inputRecord) {
@@ -256,20 +260,34 @@ async function enrichExperiment(
           experiment.organization,
           row.inputRecord.requestId
         );
+        if (include.responseBodies) {
+          row.inputRecord.response.body = await (
+            await bodyStore.getRequestResponseBody(row.inputRecord.requestId)
+          ).data?.response;
+        }
       }
     }
   }
 
-  const experimentScores = getExperimentScores(experiment);
-
-  if (!experimentScores.error && experimentScores.data) {
-    return {
-      ...experiment,
-      scores: experimentScores.data,
-    };
-  } else {
-    return experiment;
+  if (include.responseBodies) {
+    for (const hypothesis of experiment.hypotheses) {
+      for (const run of hypothesis?.runs ?? []) {
+        if (run.response) {
+          run.response.body = await (
+            await bodyStore.getRequestResponseBody(run.resultRequestId)
+          ).data?.response;
+        }
+      }
+    }
   }
+
+  if (include.responseBodies) {
+    const experimentScores = getExperimentScores(experiment);
+    if (experimentScores.data) {
+      experiment.scores = experimentScores.data;
+    }
+  }
+  return experiment;
 }
 
 export class ExperimentStore extends BaseStore {
@@ -299,11 +317,10 @@ export class ExperimentStore extends BaseStore {
       return err(experiments.error);
     }
 
-    return ok(
-      await Promise.all(
-        experiments.data!.map((d) => enrichExperiment(d, include))
-      )
+    const experimentResults = await Promise.all(
+      experiments.data!.map((d) => enrichExperiment(d, include))
     );
+    return ok(experimentResults);
   }
 }
 
@@ -409,14 +426,14 @@ function getExperimentHypothesisScores(
   hypothesis: Experiment["hypotheses"][0]
 ): Result<ExperimentScores["hypothesis"], string> {
   try {
-    const hypothesisCost = hypothesis.runs.reduce(
+    const hypothesisCost = hypothesis.runs?.reduce(
       (acc, run) =>
         acc +
         modelCost({
           model: hypothesis.model,
-          provider: run.request.provider,
-          sum_prompt_tokens: run.response.promptTokens,
-          sum_completion_tokens: run.response.completionTokens,
+          provider: run.request!.provider,
+          sum_prompt_tokens: run.response!.promptTokens,
+          sum_completion_tokens: run.response!.completionTokens,
         }),
       0
     );
