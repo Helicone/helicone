@@ -18,7 +18,7 @@ export class S3ReaderHandler extends AbstractLogHandler {
         return err("Organization ID not found in org params");
       }
 
-      const signedUrl = await this.s3Client.getRawRequestResponseBody(
+      const signedUrl = await this.s3Client.getRawRequestResponseBodySignedUrl(
         context.orgParams.id,
         context.message.log.request.id
       );
