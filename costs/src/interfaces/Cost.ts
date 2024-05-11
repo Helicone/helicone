@@ -14,6 +14,7 @@ export interface ModelRow {
     prompt_token: number;
     completion_token: number;
   };
+  showInPlayground?: boolean;
   targetUrl?: string;
   dateRange?: {
     start: string;

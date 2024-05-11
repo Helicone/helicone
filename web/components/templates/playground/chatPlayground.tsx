@@ -70,7 +70,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         // Record the start time
         const startTime = new Date().getTime();
 
-        if (model.provider === "openai") {
+        if (model.provider === "OPENAI") {
           // Perform the OpenAI request
           const { data, error } = await fetchOpenAI(
             historyWithoutId as unknown as ChatCompletionCreateParams[],
