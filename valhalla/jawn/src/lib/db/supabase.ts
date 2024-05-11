@@ -209,6 +209,9 @@ export class SupabaseConnector {
     if (cachedResult) {
       return ok(cachedResult);
     }
+    if (authorization.token.includes("sk-helicone-proxy")) {
+      authorization._type = "bearerProxy";
+    }
 
     const result = await this.getAuthParams(authorization);
 

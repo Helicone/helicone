@@ -1930,8 +1930,6 @@
 											}
 										},
 										"required": [
-											"request",
-											"response",
 											"resultRequestId",
 											"datasetRowId"
 										],
@@ -2123,6 +2121,13 @@
 						"nullable": false
 					},
 					"responseBodies": {
+						"type": "boolean",
+						"enum": [
+							true
+						],
+						"nullable": false
+					},
+					"score": {
 						"type": "boolean",
 						"enum": [
 							true

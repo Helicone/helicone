@@ -587,8 +587,8 @@ Json: JsonObject;
       createdAt: string;
       hypotheses: {
           runs: {
-              request: components["schemas"]["RequestObj"];
-              response: components["schemas"]["ResponseObj"];
+              request?: components["schemas"]["RequestObj"];
+              response?: components["schemas"]["ResponseObj"];
               resultRequestId: string;
               datasetRowId: string;
             }[];
@@ -637,6 +637,8 @@ Json: JsonObject;
       promptVersion?: true;
       /** @enum {boolean} */
       responseBodies?: true;
+      /** @enum {boolean} */
+      score?: true;
     };
   };
   responses: {
