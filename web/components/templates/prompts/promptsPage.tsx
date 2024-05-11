@@ -52,7 +52,7 @@ const PromptsPage = (props: PromptsPageProps) => {
             <div className="flex flex-col w-full mt-16 justify-center items-center">
               <LoadingAnimation title="Loading Prompts..." />
             </div>
-          ) : filteredPrompts?.length === 0 ? (
+          ) : prompts?.length === 0 ? (
             <div className="flex flex-col w-full mt-16 justify-center items-center">
               <div className="flex flex-col">
                 <DocumentTextIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
