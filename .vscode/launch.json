@@ -13,7 +13,7 @@
       "request": "launch",
 
       "restart": true,
-      "runtimeExecutable": "nodemon",
+      "runtimeExecutable": "/opt/homebrew/bin/nodemon",
       "skipFiles": ["<node_internals>/**"],
       "type": "node"
     },

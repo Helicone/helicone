@@ -16,6 +16,7 @@ import {
 } from "../util/loggers/DBQueryTimer";
 import { TemplateWithInputs } from "../../api/lib/promptHelpers";
 import { PromptStore } from "./PromptStore";
+import { S3Client } from "../clients/S3Client";
 
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];
