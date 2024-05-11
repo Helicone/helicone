@@ -14,41 +14,20 @@ import { MultiSelect, MultiSelectItem } from "@tremor/react";
 import ThemedModal from "../../shared/themed/themedModal";
 import Image from "next/image";
 
+import {
+  ProviderName,
+  playgroundModels,
+} from "../../../packages/cost/providers/mappings";
 interface PlaygroundPageProps {
   request?: string;
 }
 
 export type PlaygroundModel = {
   name: string;
-  provider: "openai" | "anthropic";
+  provider: ProviderName;
 };
 
-export const PLAYGROUND_MODELS: PlaygroundModel[] = [
-  { name: "gpt-3.5-turbo", provider: "openai" },
-  { name: "gpt-3.5-turbo-0125", provider: "openai" },
-  { name: "gpt-3.5-turbo-0613", provider: "openai" },
-  { name: "gpt-3.5-turbo-16k", provider: "openai" },
-  { name: "gpt-3.5-turbo-1106", provider: "openai" },
-  { name: "gpt-4", provider: "openai" },
-  { name: "gpt-4-turbo", provider: "openai" },
-  { name: "gpt-4-0613", provider: "openai" },
-  { name: "gpt-4-32k", provider: "openai" },
-  { name: "gpt-4-1106-preview", provider: "openai" },
-  { name: "gpt-4-0125-preview", provider: "openai" },
-  { name: "gpt-4-vision-preview", provider: "openai" },
-  {
-    name: "claude-3-opus-20240229",
-    provider: "anthropic",
-  },
-  {
-    name: "claude-3-sonnet-20240229",
-    provider: "anthropic",
-  },
-  {
-    name: "claude-3-haiku-20240307",
-    provider: "anthropic",
-  },
-];
+export const PLAYGROUND_MODELS: PlaygroundModel[] = playgroundModels;
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { request } = props;

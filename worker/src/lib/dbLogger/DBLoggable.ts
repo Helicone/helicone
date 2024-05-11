@@ -660,7 +660,7 @@ export class DBLoggable {
       console.error("Error parsing orgIds", e);
     }
 
-    let percentLogKafka = 0;
+    let percentLogKafka = 1.01;
     if (PERCENT_LOG) {
       try {
         percentLogKafka = parseFloat(PERCENT_LOG);
