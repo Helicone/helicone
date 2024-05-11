@@ -2,6 +2,7 @@ import { expect, test } from "@jest/globals";
 
 import { clickhousePriceCalc } from "../src";
 import { costs as openaiCosts } from "../src/providers/openai";
+import { playgroundModels } from "../src/providers/mappings";
 
 test("check that there are no two models that are the same", () => {
   openaiCosts.forEach((cost) => {
@@ -29,6 +30,105 @@ test("check that there are no two models that are the same", () => {
 test("ensure less than 128KiB", () => {
   const query = clickhousePriceCalc("request_response_log");
   expect(query.length).toBeLessThan(128 * 1024);
+});
+
+test("cost calc snapshot test", () => {
+  expect(JSON.stringify(playgroundModels, undefined, 4)).toMatchInlineSnapshot(`
+"[
+    {
+        "name": "gpt-3.5-turbo",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-3.5-turbo-0301",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-3.5-turbo-1106",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-3.5-turbo-instruct",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-3.5-turbo-instruct-0914",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-4",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-4-0314",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-4-0613",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-4-32k",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-4-32k-0314",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-4-32k-0613",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-4-0125-preview",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-4-1106-preview",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-4-1106-vision-preview",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-3.5-turbo-0613",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-3.5-turbo-16k-0613",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-3.5-turbo-0125",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-4-turbo",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-4-turbo-2024-04-09",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-4-turbo-0125-preview",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "claude-3-opus-20240229",
+        "provider": "ANTHROPIC"
+    },
+    {
+        "name": "claude-3-sonnet-20240229",
+        "provider": "ANTHROPIC"
+    },
+    {
+        "name": "claude-3-haiku-20240307",
+        "provider": "ANTHROPIC"
+    }
+]"
+`);
 });
 
 /**
