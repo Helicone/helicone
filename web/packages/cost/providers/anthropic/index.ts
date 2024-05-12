@@ -67,6 +67,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.000015,
       completion_token: 0.000075,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -77,6 +78,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.000003,
       completion_token: 0.000015,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -87,5 +89,6 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00000025,
       completion_token: 0.00000125,
     },
+    showInPlayground: true,
   },
 ];

@@ -6,14 +6,14 @@ import {
   parseJSXObject,
 } from "../../api/lib/promptHelpers";
 import { approvedDomains } from "../../packages/cost/providers/mappings";
-import { Result, ok } from "../util/results";
-import { IHeliconeHeaders } from "./HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
 import { buildTargetUrl } from "../clients/ProviderClient";
+import { Result, ok } from "../util/results";
+import { IHeliconeHeaders } from "./HeliconeHeaders";
 
-import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
 import { CfProperties } from "@cloudflare/workers-types";
 import { RateLimitOptions } from "../clients/KVRateLimiterClient";
+import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
 
 export type RetryOptions = {
   retries: number; // number of times to retry the request
@@ -77,6 +77,15 @@ export class HeliconeProxyRequestMapper {
     this.tokenCalcUrl = env.VALHALLA_URL;
   }
 
+  private async getHeliconeTemplate() {
+    if (this.request.heliconeHeaders.promptHeaders.promptId) {
+      const { templateWithInputs } = parseJSXObject(
+        JSON.parse(await this.request.getRawText())
+      );
+      return templateWithInputs;
+    }
+    return null;
+  }
   async tryToProxyRequest(): Promise<Result<HeliconeProxyRequest, string>> {
     const startTime = new Date();
     const { data: api_base, error: api_base_error } = this.getApiBase();
@@ -84,21 +93,11 @@ export class HeliconeProxyRequestMapper {
       return { data: null, error: api_base_error };
     }
 
-    let heliconePromptTemplate: TemplateWithInputs | null = null;
-    if (this.request.heliconeHeaders.promptId) {
-      const { templateWithInputs } = parseJSXObject(
-        JSON.parse(await this.request.getRawText())
-      );
-      heliconePromptTemplate = templateWithInputs;
-
-      this.request.heliconeHeaders.heliconeProperties[`Helicone-Prompt-Id`] =
-        this.request.heliconeHeaders.promptId;
-    }
-
     const targetUrl = buildTargetUrl(this.request.url, api_base);
 
     return {
       data: {
+        heliconePromptTemplate: await this.getHeliconeTemplate(),
         rateLimitOptions: this.rateLimitOptions(),
         requestJson: await this.requestJson(),
         retryOptions: this.request.heliconeHeaders.retryHeaders,
@@ -119,7 +118,6 @@ export class HeliconeProxyRequestMapper {
           this.request.heliconeHeaders.requestId ?? crypto.randomUUID(),
         requestWrapper: this.request,
         nodeId: this.request.heliconeHeaders.nodeId ?? null,
-        heliconePromptTemplate,
         targetUrl,
         cf: this.request.cf ?? undefined,
       },

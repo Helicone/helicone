@@ -34,7 +34,10 @@ export interface IHeliconeHeaders {
   targetBaseUrl: Nullable<string>;
   promptFormat: Nullable<string>;
   requestId: Nullable<string>;
-  promptId: Nullable<string>;
+  promptHeaders: {
+    promptId: Nullable<string>;
+    promptMode: Nullable<string>;
+  };
   promptName: Nullable<string>;
   userId: Nullable<string>;
   omitHeaders: {
@@ -71,7 +74,10 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   targetBaseUrl: Nullable<string>;
   promptFormat: Nullable<string>;
   requestId: Nullable<string>;
-  promptId: Nullable<string>;
+  promptHeaders: {
+    promptId: Nullable<string>;
+    promptMode: Nullable<string>;
+  };
   promptName: Nullable<string>;
   userId: Nullable<string>;
   omitHeaders: { omitResponse: boolean; omitRequest: boolean };
@@ -95,11 +101,14 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.targetBaseUrl = heliconeHeaders.targetBaseUrl;
     this.promptFormat = heliconeHeaders.promptFormat;
     this.requestId = heliconeHeaders.requestId;
-    this.promptId = heliconeHeaders.promptId;
+    this.promptHeaders = {
+      promptId: heliconeHeaders.promptHeaders.promptId,
+      promptMode: heliconeHeaders.promptHeaders.promptMode,
+    };
     this.promptName = heliconeHeaders.promptName;
     this.omitHeaders = heliconeHeaders.omitHeaders;
     this.userId = heliconeHeaders.userId;
-    this.heliconeProperties = this.getHeliconeProperties();
+    this.heliconeProperties = this.getHeliconeProperties(heliconeHeaders);
     this.nodeId = heliconeHeaders.nodeId;
     this.fallBacks = this.getFallBacks();
     this.modelOverride = heliconeHeaders.modelOverride;
@@ -203,7 +212,10 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       retryHeaders: this.getRetryHeaders(),
       promptFormat: this.headers.get("Helicone-Prompt-Format") ?? null,
       requestId: this.headers.get("Helicone-Request-Id") ?? crypto.randomUUID(),
-      promptId: this.headers.get("Helicone-Prompt-Id") ?? null,
+      promptHeaders: {
+        promptId: this.headers.get("Helicone-Prompt-Id") ?? null,
+        promptMode: this.headers.get("Helicone-Prompt-Mode") ?? null,
+      },
       promptName: this.headers.get("Helicone-Prompt-Name") ?? null,
       userId: this.headers.get("Helicone-User-Id") ?? null,
       omitHeaders: {
@@ -255,9 +267,11 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     };
   }
 
-  private getHeliconeProperties(): Record<string, string> {
+  private getHeliconeProperties(
+    heliconeHeaders: IHeliconeHeaders
+  ): Record<string, string> {
     const propTag = "helicone-property-";
-    const heliconeHeaders = Object.fromEntries(
+    const heliconePropertyHeaders = Object.fromEntries(
       [...this.headers.entries()]
         .filter(
           ([key]) =>
@@ -268,9 +282,14 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     );
 
     if (this.headers.get("Helicone-Posthog-Key")) {
-      heliconeHeaders["Helicone-Sent-To-Posthog"] = "true";
+      heliconePropertyHeaders["Helicone-Sent-To-Posthog"] = "true";
     }
 
-    return heliconeHeaders;
+    if (heliconeHeaders.promptHeaders.promptId) {
+      heliconePropertyHeaders["Helicone-Prompt-Id"] =
+        heliconeHeaders.promptHeaders.promptId;
+    }
+
+    return heliconePropertyHeaders;
   }
 }

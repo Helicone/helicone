@@ -43,10 +43,6 @@ const LoadingAnimation = ({
         width={width}
         isStopped={false}
         isPaused={false}
-        style={{
-          pointerEvents: "none",
-          background: "transparent",
-        }}
       />
       {title && (
         <p className="font-medium text-lg text-gray-900 dark:text-gray-100">

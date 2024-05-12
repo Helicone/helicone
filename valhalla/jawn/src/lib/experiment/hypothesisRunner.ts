@@ -10,23 +10,6 @@ export async function runHypothesis(props: {
   hypothesisId: string;
 }): Promise<Result<string, string>> {
   const { url, headers, body, requestId, datasetRowId, hypothesisId } = props;
-  for (const key in headers) {
-    if (key.toLowerCase() !== "Authorization") {
-      console.log("header", key, headers[key]);
-    }
-  }
-
-  console.log("Example curl request (omitting Authorization header):");
-  console.log(`
-  curl -X POST \\
-    ${Object.entries(headers)
-      .filter(([key]) => key.toLowerCase() !== "authorization")
-      .map(([key, value]) => `-H '${key}: ${value}'`)
-      .join(" \\\n    ")} \\
-      
-    -d '${JSON.stringify(body)}' \\
-    ${url}
-  `);
   const response = await fetch(url, {
     method: "POST",
     headers: headers,

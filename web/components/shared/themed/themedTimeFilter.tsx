@@ -166,8 +166,8 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
                           </div>
                         </TabPanel>
                         <TabPanel>
-                          <div className="flex flex-col sm:flex-row gap-4 items-center">
-                            <div className="mt-1">
+                          <div className="flex flex-col sm:flex-row gap-4 items-center mt-4">
+                            <div className="">
                               <input
                                 type="number"
                                 name="relativeValue"

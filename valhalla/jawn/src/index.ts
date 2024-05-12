@@ -14,7 +14,7 @@ import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
 import { tokenRouter } from "./lib/routers/tokenRouter";
-import { consume } from "./lib/clients/KafkaConsumer";
+import { consume, consumeDlq } from "./lib/clients/KafkaConsumer";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -43,6 +43,7 @@ const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
 if (KAFKA_ENABLED) {
   consume();
+  // consumeDlq();
 }
 
 app.get("/healthcheck", (req, res) => {

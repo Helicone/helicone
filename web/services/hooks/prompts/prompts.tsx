@@ -2,6 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { JawnFilterNode } from "../../../lib/clients/jawn";
+import {
+  BackendMetricsCall,
+  useBackendMetricCall,
+} from "../useBackendFunction";
+import { Result, resultMap } from "../../../lib/result";
+import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 
 export const usePromptVersions = (promptId: string) => {
   const jawn = useJawnClient();
@@ -102,5 +108,35 @@ export const usePrompt = (id: string) => {
     refetch,
     isRefetching,
     prompt: data?.data?.data,
+  };
+};
+
+export const usePromptRequestsOverTime = (
+  params: BackendMetricsCall<any>["params"],
+  queryKey: string
+) => {
+  const promptUsageOverTime = useBackendMetricCall<
+    Result<RequestsOverTime[], string>
+  >({
+    params,
+    endpoint: "/api/metrics/requestOverTime",
+    key: queryKey,
+    postProcess: (data) => {
+      return resultMap(data, (d) =>
+        d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
+      );
+    },
+  });
+
+  const totalRequests = promptUsageOverTime.data?.data?.reduce(
+    (acc, curr) => acc + curr.count,
+    0
+  );
+
+  return {
+    data: promptUsageOverTime.data,
+    isLoading: promptUsageOverTime.isLoading,
+    refetch: promptUsageOverTime.refetch,
+    total: totalRequests,
   };
 };

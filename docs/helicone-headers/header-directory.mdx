@@ -77,6 +77,7 @@ const model = new ChatOpenAI({
 </CodeGroup>
 
 ## Supported Headers
+  
 <ResponseField name="Helicone-Auth" type="string (HELICONE_API_KEY)" required>
   This is the first header you will use, which authenticates you to send requests to the Helicone API. Here's the format: `"Helicone-Auth": "Bearer <HELICONE_API_KEY>"`. Remember to replace it with your actual Helicone API key.
 </ResponseField>
@@ -111,6 +112,7 @@ const model = new ChatOpenAI({
 
 
 ## Feature Flags
+  
 <ResponseField name="Helicone-Omit-Response" type="boolean">
   Whether to exclude the response from the request. Set to `true` or  `false`.
 </ResponseField>
