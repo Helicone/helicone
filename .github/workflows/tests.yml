@@ -206,7 +206,7 @@ jobs:
           S3_PROXY_URL: "http://localhost:8791"
         run: |
           yarn
-          yarn dev &
+          yarn dev > ~/test-logs/jawn.log &
       - name: Run integration tests
         working-directory: tests
         env:
