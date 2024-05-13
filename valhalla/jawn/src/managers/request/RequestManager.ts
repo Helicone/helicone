@@ -58,7 +58,7 @@ export class RequestManager extends BaseManager {
       {
         requestId: string;
         responseId: string;
-      }[],
+      },
       string
     >
   > {
@@ -68,37 +68,38 @@ export class RequestManager extends BaseManager {
       const query = `select r.id as requestId, re.id as responseId
       from request r
       inner join response re on re.request = r.id
-      where (r.user_request_id = '$1'
+      where (r.request_tag = '$1'
       OR r.id = '$1')
-      AND r.helicone_org_id = '$3'`;
+      AND r.helicone_org_id = '$3'
+      LIMIT 1;`;
 
       const { data: reqResData, error: reqResError } =
         await this.queryTimer.dbExecuteWithTiming<{
           requestId: string;
           responseId: string;
         }>(query, [requestTag, organizationId], {
-          queryName: "select_request_response_by_user_request_id",
+          queryName: "select_request_response_by_request_tag",
           percentLogging: FREQUENT_PERCENT_LOGGING,
         });
 
-      // Return error immediately if there is an error fetching requests
+      // Return error immediately if there is an error fetching request
       if (reqResError || !reqResData) {
-        console.error(`Error fetching requests: ${reqResError}`);
+        console.error(`Error fetching request: ${reqResError}`);
         return err(reqResError ?? `Error fetching request: ${requestTag}`);
       }
 
-      // If no requests are found, wait and retry
+      // If no request are found, wait and retry
       if (reqResData.length === 0) {
         console.log(`Request not found, retrying...: ${requestTag}`);
         await this.sleep(i);
         continue;
       }
 
-      return ok(reqResData);
+      return ok(reqResData[0]);
     }
 
     return err(
-      `Max retries exceeded retrieving request and response for userRequestId: ${requestTag}`
+      `Max retries exceeded retrieving request and response for requestTag: ${requestTag}`
     );
   }
 
@@ -122,28 +123,20 @@ export class RequestManager extends BaseManager {
       );
     }
 
-    const responseIds = requestResponses.data.map(
-      (reqRes) => reqRes.responseId
-    );
-
-    if (responseIds.length === 0) {
-      return err(`No responses found for request: ${requestTag}`);
-    }
-
     const feedbackResult = await this.queryTimer.withTiming(
       supabaseServer.client
         .from("feedback")
         .upsert(
-          responseIds.map((responseId) => ({
-            response_id: responseId,
+          {
+            response_id: requestResponses.data.responseId,
             rating: feedback,
             created_at: new Date().toISOString(),
-          })),
+          },
           { onConflict: "response_id" }
         )
         .select("*"),
       {
-        queryName: "upsert_feedback_by_response_ids",
+        queryName: "upsert_feedback_by_response_id",
         percentLogging: FREQUENT_PERCENT_LOGGING,
       }
     );

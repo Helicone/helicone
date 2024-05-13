@@ -93,6 +93,9 @@ export class RequestController extends Controller {
     return requests;
   }
 
+  /**
+   * @param requestTag Request tag or request id
+   */
   @Post("/{requestTag}/feedback")
   public async feedbackRequest(
     @Body()
@@ -120,6 +123,9 @@ export class RequestController extends Controller {
     return requestFeedback;
   }
 
+  /**
+   * @param requestTag Request tag or request id
+   */
   @Put("/{requestTag}/property")
   public async putProperty(
     @Body()

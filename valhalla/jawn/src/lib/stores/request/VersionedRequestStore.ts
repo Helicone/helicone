@@ -99,23 +99,18 @@ export class VersionedRequestStore {
     }
     if (!rowContents.data) {
       rowContents = resultMap(
+        // If user uses request_tag for multiple requests, we just get the latest version of all requests
+        // This would be a user error
         await clickhouseDb.dbQuery<InsertRequestResponseVersioned>(
           `
-          SELECT *
-          FROM request_response_versioned
-          WHERE request_id = (
-              SELECT request_id
-              FROM request_response_versioned
-              WHERE (request_tag = {val_0: UUID} OR request_id = {val_0: UUID})
-                AND organization_id = {val_1: String}
-                AND provider = {val_2: String}
-              ORDER BY created_at DESC
-              LIMIT 1
-          )
-          AND organization_id = {val_1: String}
-          AND provider = {val_2: String}
-          ORDER BY version DESC
-          LIMIT 1;
+        SELECT *
+        FROM request_response_versioned
+        WHERE (request_tag = {val_0: UUID}
+          OR request_id = {val_0: UUID})
+        AND organization_id = {val_1: String}
+        AND provider = {val_2: String}
+        ORDER BY version DESC
+        LIMIT 1
       `,
           [newVersion.request_tag, this.orgId, newVersion.provider]
         ),
