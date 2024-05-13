@@ -1,4 +1,5 @@
 import { Headers } from "@cloudflare/workers-types";
+import { validate as uuidValidate } from "uuid";
 
 type Nullable<T> = T | null;
 
@@ -202,6 +203,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   }
 
   private getHeliconeHeaders(): IHeliconeHeaders {
+    const heliconeRequestId = this.headers.get("Helicone-Request-Id");
     return {
       heliconeAuth: this.headers.get("helicone-auth") ?? null,
       heliconeAuthV2: this.getHeliconeAuthV2(),
@@ -211,7 +213,9 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       targetBaseUrl: this.headers.get("Helicone-Target-URL") ?? null,
       retryHeaders: this.getRetryHeaders(),
       promptFormat: this.headers.get("Helicone-Prompt-Format") ?? null,
-      requestId: this.headers.get("Helicone-Request-Id") ?? crypto.randomUUID(),
+      requestId: uuidValidate(heliconeRequestId ?? "")
+        ? heliconeRequestId
+        : crypto.randomUUID(),
       promptHeaders: {
         promptId: this.headers.get("Helicone-Prompt-Id") ?? null,
         promptMode: this.headers.get("Helicone-Prompt-Mode") ?? null,
