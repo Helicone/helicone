@@ -192,7 +192,7 @@ jobs:
         run: supabase start db,api
       - name: Install python dependencies
         run: |
-          pip install requests pytest psycopg2 python-dotenv helicone httpx
+          pip install requests pytest psycopg2 python-dotenv helicone httpx minio2
       - name: Run Jawn
         working-directory: valhalla/jawn
         env:
