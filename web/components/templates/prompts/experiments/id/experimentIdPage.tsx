@@ -127,6 +127,30 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
             <h1 className="font-semibold text-3xl text-black dark:text-white">
               {experiment?.id}
             </h1>
+            <Table className="h-full w-full  dark:border-gray-700  bg-white dark:bg-black p-4  border border-gray-300 rounded-lg">
+              <TableHead className="border-b border-gray-300 w-full">
+                <TableRow>
+                  <TableHeaderCell className="w-1/6">
+                    <p className="text-sm text-gray-500">Scores</p>
+                  </TableHeaderCell>
+                  <TableHeaderCell className="w-1/3 border-l border-gray-300">
+                    <p className="text-sm text-gray-500">
+                      Production with prompt
+                    </p>
+                  </TableHeaderCell>
+                  <TableHeaderCell className="w-1/3 border-l border-gray-300">
+                    <p className="text-sm text-gray-500">
+                      Experiment with prompt
+                    </p>
+                  </TableHeaderCell>
+                  <TableHeaderCell className="w-1/3 border-l border-gray-300">
+                    <p className="text-sm text-gray-500">Compare</p>
+                  </TableHeaderCell>
+                </TableRow>
+              </TableHead>
+
+              <TableBody></TableBody>
+            </Table>
             <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-black">
               <div className="w-full flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
                 <div className="flex items-center space-x-2">
