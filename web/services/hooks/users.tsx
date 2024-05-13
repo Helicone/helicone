@@ -163,6 +163,7 @@ const useUsers = (
             offset: (currentPage - 1) * currentPageSize,
             limit: currentPageSize,
             sort: sortLeaf,
+            timeZoneDifference: new Date().getTimezoneOffset(),
           }),
         }).then((res) => res.json() as Promise<Result<UserMetric[], string>>),
         fetch("/api/request_users/count", {
