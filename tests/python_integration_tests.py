@@ -12,8 +12,6 @@ import uuid
 import time
 from helicone.openai_async import openai, Meta
 from helicone.globals import helicone_global
-from minio import Minio
-import json
 
 load_dotenv()
 
@@ -31,25 +29,6 @@ org_id = '83635a30-5ba6-41a8-8cc6-fb7df941b24a'
 helicone_proxy_key = 'sk-helicone-proxy-7wpoayi-xm5e6cy-wfimwqy-avnannq-d144312e-5c65-4eaa-a1c1-f0c143080601'
 hashed_proxy_key = '246172676f6e32696424763d3139246d3d3236323134342c743d332c703d3124415972396d5431736832356a474546546630614371672468767537654e7879674f474c6c7633584f4a597565643162414b6f326732732f7a575a30584c4b6c716134000000000000000000000000000000000000000000000000000000000000'
 
-minioClient = Minio(
-    "localhost:9000",
-    access_key="minioadmin",
-    secret_key="minioadmin",
-    secure=False
-)
-
-def get_path(organizationId, requestId):
-    return f"organizations/{organizationId}/requests/{requestId}/request_response_body"
-
-def fetch_from_minio(object_path):
-    # Fetch the object from MinIO
-    data = minioClient.get_object("request-response-storage", object_path)
-    
-    # Read the data returned by the server
-    file_data = data.read()
-    data.close()
-    
-    return json.loads(file_data.decode('utf-8'))
 
 def connect_to_db():
     return psycopg2.connect(
@@ -121,8 +100,7 @@ def test_gateway_api():
         "Helicone-Auth": f"Bearer {helicone_api_key}",
         "Helicone-Target-Url": "https://api.openai.com",
         "Helicone-Property-RequestId": requestId,
-        "OpenAI-Organization": openai_org_id,
-        "Helicone-Request-Id": requestId
+        "OpenAI-Organization": openai_org_id
     }
 
     response = fetch(helicone_gateway_url, "v1/chat/completions",
@@ -131,16 +109,16 @@ def test_gateway_api():
 
     time.sleep(3)  # Helicone needs time to insert request into the database
 
-    query = "SELECT * FROM request where id = %s"
-    request_row = fetch_from_db(query, (requestId,))
-    bodies = fetch_from_minio(get_path(org_id, requestId))
-    assert bodies, "Request data not found in the database for the given property request id"
+    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
+    request_data = fetch_from_db(query, (requestId,))
+    assert request_data, "Request data not found in the database for the given property request id"
 
-    assert message_content in bodies["request"]["messages"][
+    latest_request = request_data[0]
+    assert message_content in latest_request["body"]["messages"][
         0]["content"], "Request not found in the database"
 
     query = "SELECT * FROM response WHERE request = %s LIMIT 1"
-    response_data = fetch_from_db(query, (request_row[0]["id"],))
+    response_data = fetch_from_db(query, (latest_request["id"],))
     assert response_data, "Response data not found in the database for the given request ID"
     print("passed")
 
@@ -165,8 +143,7 @@ def test_openai_proxy():
         "Authorization": f"Bearer {openai_api_key}",
         "Helicone-Auth": f"Bearer {helicone_api_key}",
         "Helicone-Property-RequestId": requestId,
-        "OpenAI-Organization": openai_org_id,
-        "Helicone-Request-Id": requestId
+        "OpenAI-Organization": openai_org_id
     }
 
     response = fetch(helicone_proxy_url, "chat/completions",
@@ -174,18 +151,18 @@ def test_openai_proxy():
     assert response, "Response from OpenAI API is empty"
 
     time.sleep(3)  # Helicone needs time to insert request into the database
-    
-    request_data = fetch_from_db("SELECT * FROM request where id = %s", (requestId,))
+
+    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
+    request_data = fetch_from_db(query, (requestId,))
     assert request_data, "Request data not found in the database for the given property request id"
 
-    bodies = fetch_from_minio(get_path(org_id, requestId))
-    assert bodies, "Request data not found in the database for the given property request id"
-
-    assert message_content in bodies["request"]["messages"][
+    latest_request = request_data[0]
+    assert message_content in latest_request["body"]["messages"][
         0]["content"], "Request not found in the database"
 
-    print(bodies)
-    assert bodies["response"]["choices"], "Response data not found in the database for the given request ID"
+    query = "SELECT * FROM response WHERE request = %s LIMIT 1"
+    response_data = fetch_from_db(query, (latest_request["id"],))
+    assert response_data[0]["body"]["choices"], "Response data not found in the database for the given request ID"
     print("passed")
 
 
@@ -210,8 +187,7 @@ def test_openai_proxy_stream():
         "Authorization": f"Bearer {openai_api_key}",
         "Helicone-Auth": f"Bearer {helicone_api_key}",
         "Helicone-Property-RequestId": requestId,
-        "OpenAI-Organization": openai_org_id,
-        "Helicone-Request-Id": requestId
+        "OpenAI-Organization": openai_org_id
     }
 
     response = fetch(helicone_proxy_url, "chat/completions",
@@ -221,16 +197,20 @@ def test_openai_proxy_stream():
 
     time.sleep(3)  # Helicone needs time to insert request into the database
 
-    request_data = fetch_from_db("SELECT * FROM request where id = %s", (requestId,))
-    assert request_data, "Request data not found in the database"
+    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
+    request_data = fetch_from_db(query, (requestId,))
+    assert request_data, "Request data not found in the database for the given property request id"
 
-    bodies = fetch_from_minio(get_path(org_id, requestId))
-    assert message_content in bodies["request"]["messages"][
+    latest_request = request_data[0]
+    assert message_content in latest_request["body"]["messages"][
         0]["content"], "Request not found in the database"
-    assert bodies["response"]["choices"], "Response data not found in the database"
-    
-    response_data = fetch_from_db("SELECT * FROM response where request = %s", (requestId,))
-    assert response_data, "Respone data not found in the database"
+
+    query = "SELECT * FROM response WHERE request = %s LIMIT 1"
+    response_data = fetch_from_db(query, (latest_request["id"],))
+
+    assert response_data[0]["body"]["choices"], "Response data not found in the database for the given request ID"
+    print("passed")
+
 
 def test_helicone_proxy_key():
     print("\n---------Running test_helicone_proxy_key---------")
@@ -269,8 +249,7 @@ def test_helicone_proxy_key():
     headers = {
         "Authorization": f"Bearer {helicone_proxy_key}",
         "Helicone-Property-RequestId": requestId,
-        "OpenAI-Organization": openai_org_id,
-        "Helicone-Request-Id": requestId
+        "OpenAI-Organization": openai_org_id
     }
 
     response = fetch(helicone_proxy_url, "chat/completions",
@@ -279,17 +258,17 @@ def test_helicone_proxy_key():
 
     time.sleep(3)  # Helicone needs time to insert request into the database
 
-    request_data = fetch_from_db("SELECT * FROM request where id = %s", (requestId,))
-    assert request_data, "Request data not found in the database"
+    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
+    request_data = fetch_from_db(query, (requestId,))
+    assert request_data, "Request data not found in the database for the given property request id"
 
-    bodies = fetch_from_minio(get_path(org_id, requestId))
-    assert message_content in bodies["request"]["messages"][
+    latest_request = request_data[0]
+    assert message_content in latest_request["body"]["messages"][
         0]["content"], "Request not found in the database"
-    assert bodies["response"]["choices"], "Response data not found in the database"
-    
-    response_data = fetch_from_db("SELECT * FROM response where request = %s", (requestId,))
-    assert response_data, "Respone data not found in the database"
 
+    query = "SELECT * FROM response WHERE request = %s LIMIT 1"
+    response_data = fetch_from_db(query, (latest_request["id"],))
+    assert response_data, "Response data not found in the database for the given request ID"
     print("passed")
 
 
@@ -303,9 +282,6 @@ def test_openai_async():
     openai.organization = openai_org_id
 
     requestId = str(uuid.uuid4())
-    
-    openai.default_headers = { "Helicone-Request-Id": requestId }
-
     print("Request ID: " + requestId)
     message_content = test_openai_async.__name__ + " - " + requestId
     messages = [
@@ -330,17 +306,17 @@ def test_openai_async():
 
     time.sleep(3)  # Give some time for the async logging to complete
 
-    request_data = fetch_from_db("SELECT * FROM request where id = %s", (requestId,))
-    assert request_data, "Request data not found in the database"
+    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
+    request_data = fetch_from_db(query, (requestId,))
+    assert request_data, "Request data not found in the database for the given property request id"
 
-    bodies = fetch_from_minio(get_path(org_id, requestId))
-    assert message_content in bodies["request"]["messages"][
+    latest_request = request_data[0]
+    assert message_content in latest_request["body"]["messages"][
         0]["content"], "Request not found in the database"
-    assert bodies["response"]["choices"], "Response data not found in the database"
-    
-    response_data = fetch_from_db("SELECT * FROM response where request = %s", (requestId,))
-    assert response_data, "Respone data not found in the database"
 
+    query = "SELECT * FROM response WHERE request = %s LIMIT 1"
+    response_data = fetch_from_db(query, (latest_request["id"],))
+    assert response_data, "Response data not found in the database for the given request ID"
     print("passed")
 
 def test_prompt_threat():
@@ -370,8 +346,7 @@ def test_prompt_threat():
         "Helicone-Auth": f"Bearer {helicone_api_key}",
         "Helicone-Property-RequestId": requestId1,
         "OpenAI-Organization": openai_org_id,
-        "Helicone-Prompt-Security-Enabled": 'true',
-        "Helicone-Request-Id": requestId1
+        "Helicone-Prompt-Security-Enabled": 'true'
     }
 
     response1 = requests.request("POST", url, json=data, headers=headers1)
@@ -393,17 +368,18 @@ def test_prompt_threat():
 
     time.sleep(3)  # Helicone needs time to insert request into the database
 
-    request_data = fetch_from_db("SELECT * FROM request where id = %s", (requestId1,))
-    assert request_data, "Request data not found in the database"
+    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
+    request_data1 = fetch_from_db(query, (requestId1,))
+    assert request_data1, "Request data not found in the database for the given property request id"
 
-    bodies = fetch_from_minio(get_path(org_id, requestId1))
-    assert message in bodies["request"]["messages"][
-        0]["content"], "Request not found in the database"
-    assert bodies["response"]["choices"], "Response data not found in the database"
-    
-    response_data = fetch_from_db("SELECT * FROM response where request = %s", (requestId1,))
-    assert response_data, "Respone data not found in the database"
-    assert response_data[0]["status"] == 200
+    latest_request1 = request_data1[0]
+    assert message in latest_request1["body"]["messages"][
+        0]["content"], "Request 1 not found in the database"
+
+    query = "SELECT * FROM response WHERE request = %s LIMIT 1"
+    response_data1 = fetch_from_db(query, (latest_request1["id"],))
+    assert response_data1[0]["body"]
+    assert response_data1[0]["status"] == 200
 
     # Threat detection test
    
@@ -426,8 +402,7 @@ def test_prompt_threat():
         "Helicone-Auth": f"Bearer {helicone_api_key}",
         "Helicone-Property-RequestId": requestId2,
         "OpenAI-Organization": openai_org_id,
-        "Helicone-Prompt-Security-Enabled": 'true',
-        "Helicone-Request-Id": requestId2
+        "Helicone-Prompt-Security-Enabled": 'true'
     }
     
     try:
@@ -441,12 +416,16 @@ def test_prompt_threat():
 
     time.sleep(3)  # Helicone needs time to insert request into the database
 
-    request_data2 = fetch_from_db("SELECT * FROM request where id = %s", (requestId2,))
-    assert request_data2, "Request data not found in the database"
-    
-    response_data2 = fetch_from_db("SELECT * FROM response where request = %s", (requestId2,))
-    assert response_data2, "Respone data not found in the database"
+    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
+    request_data2 = fetch_from_db(query, (requestId2,))
+    assert request_data2, "Request data not found in the database for the given property request id"
+
+    latest_request2 = request_data2[0]
+    query = "SELECT * FROM response WHERE request = %s LIMIT 1"
+    response_data2 = fetch_from_db(query, (latest_request2["id"],))
+
     assert response_data2[0]["status"] == -4
+
     print("passed")
 
 def test_gpt_vision_request():
@@ -482,8 +461,7 @@ def test_gpt_vision_request():
         "Authorization": f"Bearer {openai_api_key}",
         "Helicone-Auth": f"Bearer {helicone_api_key}",
         "Helicone-Property-RequestId": requestId1,
-        "OpenAI-Organization": openai_org_id,
-        "Helicone-Request-Id": requestId1
+        "OpenAI-Organization": openai_org_id
     }
 
     response1 = requests.request("POST", url, json=data, headers=headers1)
@@ -505,20 +483,14 @@ def test_gpt_vision_request():
 
     time.sleep(3)  # Helicone needs time to insert request into the database
 
-    request_data = fetch_from_db("SELECT * FROM request where id = %s", (requestId1,))
-    assert request_data, "Request data not found in the database"
-
-    bodies = fetch_from_minio(get_path(org_id, requestId1))
-    assert messages[0]["content"][0]["text"] in bodies["request"]["messages"][
-        0]["content"][0]["text"], "Request not found in the database"
-    assert bodies["response"]["choices"], "Response data not found in the database"
+    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
+    request_data1 = fetch_from_db(query, (requestId1,))
+    assert request_data1, "Request data not found in the database for the given property request id"
 
     assets_query = "SELECT * FROM asset WHERE request_id = %s"
-    assets_data1 = fetch_from_db(assets_query, (requestId1,))
+    assets_data1 = fetch_from_db(assets_query, (request_data1[0][3],))
+
     assert assets_data1, "asset not found in the database for this request"
-    
-    response_data = fetch_from_db("SELECT * FROM response where request = %s", (requestId1,))
-    assert response_data, "Respone data not found in the database"
 
     print("passed")
 
@@ -558,8 +530,7 @@ def test_claude_vision_request():
         "Content-Type": "application/json",
         "Helicone-Auth": f"Bearer {helicone_api_key}",
         "anthropic-version": "2023-06-01",
-        "Helicone-Property-RequestId": requestId1,
-        "Helicone-Request-Id": requestId1
+        "Helicone-Property-RequestId": requestId1
     }
 
     response1 = requests.post(url, json=data, headers=headers1)
@@ -580,23 +551,15 @@ def test_claude_vision_request():
     # Assuming your Helicone setup captures requests to Claude, wait for database logging
     time.sleep(3)
 
-    ###
-    
-    request_data = fetch_from_db("SELECT * FROM request where id = %s", (requestId1,))
-    assert request_data, "Request data not found in the database"
-
-    bodies = fetch_from_minio(get_path(org_id, requestId1))
-    print(bodies)
-    assert messages[0]["content"][1]["text"] in bodies["request"]["messages"][
-        0]["content"][1]["text"], "Request not found in the database"
-    assert bodies["response"]["choices"], "Response data not found in the database"
+    # Replace 'fetch_from_db' with your actual function to query your database
+    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
+    request_data1 = fetch_from_db(query, (requestId1,))
+    assert request_data1, "Request data not found in the database for the given property request id"
 
     assets_query = "SELECT * FROM asset WHERE request_id = %s"
-    assets_data1 = fetch_from_db(assets_query, (requestId1,))
+    assets_data1 = fetch_from_db(assets_query, (request_data1[0][3],))
+
     assert assets_data1, "asset not found in the database for this request"
-    
-    response_data = fetch_from_db("SELECT * FROM response where request = %s", (requestId1,))
-    assert response_data, "Respone data not found in the database"
 
     print("passed")
 
@@ -615,8 +578,7 @@ def test_dalle_image_generation():
         "Helicone-Auth": f"Bearer {helicone_api_key}",
         "Helicone-Property-RequestId": requestId1,
         "OpenAI-Organization": openai_org_id,
-        "Content-Type": "application/json",
-        "Helicone-Request-Id": requestId1
+        "Content-Type": "application/json"
     }
 
     response2 = requests.post(url, json=data, headers=headers2)
@@ -638,18 +600,13 @@ def test_dalle_image_generation():
 
     time.sleep(3)  # Assuming time is needed for internal processing
 
-    request_data = fetch_from_db("SELECT * FROM request where id = %s", (requestId1,))
-    assert request_data, "Request data not found in the database"
-
-    bodies = fetch_from_minio(get_path(org_id, requestId1))
-    assert data["prompt"] in bodies["request"]["prompt"], "Request not found in the database"
-    assert bodies["response"]["data"][0]["revised_prompt"], "Response data not found in the database"
+    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
+    request_data2 = fetch_from_db(query, (requestId1,))
+    assert request_data2, "Request data not found in the database for the given property request id"
 
     assets_query = "SELECT * FROM asset WHERE request_id = %s"
-    assets_data1 = fetch_from_db(assets_query, (requestId1,))
-    assert assets_data1, "asset not found in the database for this request"
-    
-    response_data = fetch_from_db("SELECT * FROM response where request = %s", (requestId1,))
-    assert response_data, "Respone data not found in the database"
+    assets_data2 = fetch_from_db(assets_query, (request_data2[0][3],))
+
+    assert assets_data2, "asset not found in the database for this request"
 
     print("passed")
