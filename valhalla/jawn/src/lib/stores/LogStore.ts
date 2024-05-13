@@ -56,6 +56,7 @@ const responseColumns = new pgp.helpers.ColumnSet(
     "body",
     "request",
     "created_at",
+    { name: "helicone_org_id", def: null },
     { name: "model", def: null },
     { name: "completion_tokens", def: null },
     { name: "delay_ms", def: null },
