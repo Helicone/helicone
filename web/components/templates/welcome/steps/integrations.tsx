@@ -32,11 +32,11 @@ const Integrations = (props: IntegrationsProps) => {
   };
 
   return (
-    <div
-      id="content"
-      className="w-full flex flex-col justify-between divide-y divide-gray-200 relative"
-    >
-      <div className="flex flex-col h-full flex-auto p-4 w-full">
+    <div id="content" className="w-full flex flex-col">
+      <div className="flex flex-col p-4 w-full">
+        <h2 className="text-2xl font-semibold pb-8">
+          Integrate your application
+        </h2>
         <label className="font-semibold text-sm">Select your provider</label>
         <div className="flex flex-wrap gap-4 pt-2 w-full">
           <button

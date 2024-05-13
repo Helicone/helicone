@@ -13,15 +13,11 @@ const Features = (props: FeaturesProps) => {
   const { apiKey = "{HELICONE_API_KEY}", previousStep, nextStep } = props;
 
   return (
-    <div
-      id="content"
-      className="w-full flex flex-col justify-between divide-y divide-gray-200"
-    >
-      <div className="flex flex-col h-full flex-auto p-4">
-        <h3 className="font-semibold">
-          Popular features our users love (nodejs examples)
-        </h3>
-        <p className="text-sm pt-1">
+    <div id="content" className="w-full flex flex-col">
+      <div className="flex flex-col p-4">
+        <h2 className="text-2xl font-semibold">Explore features and tooling</h2>
+
+        <p className="text-sm pt-1 pb-4">
           Learn more about our other features in our{" "}
           <Link
             className="underline text-blue-500"

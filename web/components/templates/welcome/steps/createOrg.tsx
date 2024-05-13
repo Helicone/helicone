@@ -135,12 +135,10 @@ const CreateOrg = (props: CreateOrgProps) => {
 
   return (
     <>
-      <div
-        id="content"
-        className="w-full flex flex-col justify-between divide-y divide-gray-200"
-      >
-        <div className="flex flex-col h-full flex-auto p-4">
+      <div id="content" className="w-full flex flex-col space-y-4">
+        <div className="flex flex-col p-4">
           <div className="flex flex-col space-y-8 w-full">
+            <h2 className="text-2xl font-semibold">Create your organization</h2>
             <div className="flex flex-col space-y-2">
               <label
                 htmlFor="org-name"
@@ -159,7 +157,7 @@ const CreateOrg = (props: CreateOrgProps) => {
                 />
               </div>
             </div>
-            <div className="flex flex-col space-y-2 pt-4">
+            <div className="flex flex-col space-y-2">
               <label
                 htmlFor="org-size"
                 className="block text-sm font-semibold leading-6"

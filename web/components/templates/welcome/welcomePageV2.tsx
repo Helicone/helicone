@@ -100,7 +100,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
             />
           </div>
         </section>
-        <div className="overflow-auto lg:pt-16 flex flex-auto">
+        <div className="overflow-auto lg:pt-32 flex flex-auto">
           {stepArray[step - 1]}
         </div>
       </div>
