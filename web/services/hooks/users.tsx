@@ -54,6 +54,7 @@ const useUserId = (userId: string) => {
             sort: {
               last_active: "desc",
             },
+            timeZoneDifference: new Date().getTimezoneOffset(),
           }),
         }).then((res) => res.json() as Promise<Result<UserMetric[], string>>),
         fetch("/api/metrics/requestOverTime", {
