@@ -119,10 +119,9 @@ def test_gateway_api():
     headers = {
         "Authorization": f"Bearer {openai_api_key}",
         "Helicone-Auth": f"Bearer {helicone_api_key}",
-        "Helicone-Target-Url": "https://api.openai.com",
-        "Helicone-Property-RequestId": requestId,
         "OpenAI-Organization": openai_org_id,
-        "Helicone-Request-Id": requestId
+        "Helicone-Request-Id": requestId,
+        "Helicone-Target-Url": "https://api.openai.com"
     }
 
     response = fetch(helicone_gateway_url, "v1/chat/completions",
@@ -164,7 +163,6 @@ def test_openai_proxy():
     headers = {
         "Authorization": f"Bearer {openai_api_key}",
         "Helicone-Auth": f"Bearer {helicone_api_key}",
-        "Helicone-Property-RequestId": requestId,
         "OpenAI-Organization": openai_org_id,
         "Helicone-Request-Id": requestId
     }
@@ -209,7 +207,6 @@ def test_openai_proxy_stream():
     headers = {
         "Authorization": f"Bearer {openai_api_key}",
         "Helicone-Auth": f"Bearer {helicone_api_key}",
-        "Helicone-Property-RequestId": requestId,
         "OpenAI-Organization": openai_org_id,
         "Helicone-Request-Id": requestId
     }
@@ -304,8 +301,6 @@ def test_openai_async():
 
     requestId = str(uuid.uuid4())
     
-    openai.default_headers = { "Helicone-Request-Id": requestId }
-
     print("Request ID: " + requestId)
     message_content = test_openai_async.__name__ + " - " + requestId
     messages = [
