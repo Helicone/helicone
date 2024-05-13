@@ -120,7 +120,8 @@ function addBaseRoutes(router: BaseRouter | BaseOpenAPIRouter): void {
 }
 
 export function buildRouter(
-  provider: Env["WORKER_TYPE"]
+  provider: Env["WORKER_TYPE"],
+  includeCors: boolean
 ): BaseRouter | BaseOpenAPIRouter {
   if (provider === "HELICONE_API") {
     const router = OpenAPIRouter<
@@ -134,6 +135,18 @@ export function buildRouter(
       IRequest,
       [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
     >();
+
+    if (includeCors) {
+      router.all("*", async (_, __, ___) => {
+        return new Response(null, {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+          },
+        });
+      });
+    }
     addBaseRoutes(router);
     return WORKER_MAP[provider](router);
   }
