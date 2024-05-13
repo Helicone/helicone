@@ -77,7 +77,7 @@ export const providers: {
   {
     pattern: azurePattern,
     provider: "AZURE",
-    costs: azureCosts,
+    costs: [...azureCosts, ...openaiCosts],
   },
   {
     pattern: localProxyPattern,
