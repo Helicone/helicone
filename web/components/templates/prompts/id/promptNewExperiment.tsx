@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   usePrompt,
   usePromptVersions,
@@ -103,6 +103,12 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
   const selectedDataset = datasets.find(
     (dataset) => dataset.id === selectedDatasetId
   );
+
+  useEffect(() => {
+    if (selectedPrompt?.model) {
+      setSelectedModel(selectedPrompt.model);
+    }
+  }, [selectedPrompt]);
 
   const renderStepArray = [
     <>
@@ -352,9 +358,11 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                     value={selectedModel}
                     onValueChange={(value) => setSelectedModel(value)}
                   >
-                    {PLAYGROUND_MODELS.map((model) => (
-                      <SelectItem key={model} value={model}>
-                        {model}
+                    {PLAYGROUND_MODELS.filter(
+                      (model) => model.provider === "OPENAI"
+                    ).map((model) => (
+                      <SelectItem key={model.name} value={model.name}>
+                        {model.name}
                       </SelectItem>
                     ))}
                   </Select>

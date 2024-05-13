@@ -1,58 +1,196 @@
 ---
-title: "Quick Start"
-description: "A quick start guide to get you up and running with Helicone in a few simple steps."
+title: "Introduction"
+description: "Helicone is the observability platform purpose-built for LLM developers."
 ---
+{/* 
+<Frame type="glass">
+  <img src="/images/helicone-og.webp"/>
+</Frame> */}
 
-## Step 1: Create a Helicone Account
+<Note>**Tip:** Open search with `control`/`command` + `k` to search docs. </Note>
 
-If you haven't already, create a Helicone account at [https://helicone.ai](https://helicone.ai). You can use your email or Google account to sign up.
 
-## Step 2: Generate a Helicone API key
+## Quick Start
 
-You are going to need a Helicone key to properly use our proxy. We never store your Large-Language Model API keys on our servers and we use the
-Helicone API key to properly identify your account and requests.
-
-<Note>
-  Generate a key by going through onboarding or by going to the keys page.
-</Note>
-
-## Step 3: Select your integration method and follow the instructions
-
-<CardGroup cols={2}>
-  <Card
-    title="OpenAI Proxy"
-    icon={
-      <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <title>OpenAI</title>
-        <path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z" />
-      </svg>
-    }
-    iconType="duotone"
-    href="/getting-started/integration-method/openai-proxy"
-  >
-    (Recommended)
+Integrate with Helicone and send your first events in seconds. 
+<CardGroup cols={3}>
+  <Card title="OpenAI" href="/getting-started/integration-method/openai-proxy">
+    Python, Node, cURL, Langchain
   </Card>
-  <Card
-    title="OpenAI"
-    icon={
-      <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <title>OpenAI</title>
-        <path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z" />
-      </svg>
-    }
-    iconType="duotone"
-    href="/getting-started/integration-method/openai"
-  ></Card>
-  <Card
-    title="Anthropic Proxy"
-    icon={
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="35 35 181 180">
-        <path d="M47.1 124.4l-30.1 76c0 .3 7.6.6 16.9.6h16.9l3.6-9.2 6-15.8 2.4-6.5 31.5-.3 31.5-.2 3 7.7 6.2 16 3.2 8.3h16.9c9.3 0 16.9-.2 16.9-.4s-8.5-21.7-18.9-47.8L123 77.2 111.8 49H94.5 77.2l-30.1 75.4zm57.3-10.4l9.6 25.2c0 .5-8.8.8-19.5.8s-19.5-.3-19.5-.8c0-.4 3.4-9.5 7.6-20.2l9.6-24.8c1.1-2.9 2.1-5.2 2.3-5s4.7 11.3 9.9 24.8zM140 50.2c0 .7 13.4 34.8 29.8 75.8l29.7 74.5 16.9.3c9.9.1 16.6-.1 16.4-.7-.1-.5-13.8-34.7-30.2-76l-30-75.1h-16.3c-12.4 0-16.3.3-16.3 1.2z" />
-      </svg>
-    }
-    iconType="duotone"
-    href="/getting-started/integration-method/anthropic"
-  >
-    (Recommended)
+  <Card title="Azure" href="/getting-started/integration-method/azure">
+    Python, Node, cURL, Langchain
+  </Card>
+  <Card title="Anthropic" href="/getting-started/integration-method/anthropic">
+    Python, Node, cURL, Langchain
+  </Card>
+  {/* <Card title="Gemini" href="/getting-started/integration-method/gemini">
+    Python, Node, cURL, Langchain
+  </Card> */}
+  <Card title="Anyscale" href="/getting-started/integration-method/anyscale">
+
+  </Card>
+  <Card title="Together AI" href="/getting-started/integration-method/together">
+
+  </Card>
+   <Card title="OpenRouter" href="/getting-started/integration-method/openrouter">
+
+  </Card>
+     <Card title="LiteLLM" href="/getting-started/integration-method/litellm">
+  </Card>
+  <Card title="Gateway" href="/getting-started/integration-method/gateway" icon="flag">
+    Don't see your provider above? Try Helicone's universal Gateway. 
   </Card>
 </CardGroup>
+
+## New to Helicone? 
+
+To help you get the most out of Helicone, we curated a list of actions that you can do next. Our users typically find themselves doing majority of the following, but you're welcome to explore the product on your own!
+
+<CardGroup cols={1}>
+  <Card title="Add a custom property" href="features/advanced-usage/custom-properties" icon="square-1">
+    Label your requests. We will walk you through how to segment, analyze, and visualize them.
+  </Card>
+  <Card title="Create your first prompt" href="/features/prompts" icon="square-2">
+    Version your prompt and inputs as they evolve. 
+  </Card>
+  <Card title="Cache responses" href="/helicone-headers/header-directory" icon="square-3">
+    Cache and watch how much time and cost you saved. 
+  </Card>
+</CardGroup>
+
+### Recommendations
+The following guides are optional, but we think you'll find them useful (and fun). 
+
+<CardGroup cols={2}>
+  <Card title="Run an experiment" href="use-cases/experiments" icon="star-christmas">
+    How much better can the output be, if you tweak your prompt or use a different model? The answer is in Experiments.  
+  </Card>
+  <Card title="Bring it to PostHog" href="getting-started/integration-method/posthog" icon="star-christmas">
+    Helicone has teamed up with PostHog to bring your LLM analytics closer to all your other dashboards.
+  </Card>
+</CardGroup>
+
+## Explore Features
+
+Discover features for monitoring and experimenting with your prompts. 
+<CardGroup cols={3}>
+  <Card
+    title="Prompts"
+    href="/features/prompts"
+    icon="square-terminal"
+  >
+    Effortlessly monitor prompt versions and inputs. 
+  </Card>
+  <Card
+    title="Custom Properties"
+    href="/features/advanced-usage/custom-properties"
+    icon="tag"
+  >
+    Label and segment your requests. 
+  </Card>
+  <Card 
+    title="Caching" 
+    href="/features/advanced-usage/caching"
+    icon="database"
+  >
+    Save cost and improve latency. 
+  </Card>
+  <Card 
+    title="Omit Logs" 
+    href="/features/advanced-usage/omit-logs"
+    icon="square-minus"
+  >
+    Remove request and responses. 
+  </Card>
+  <Card 
+    title="User Metrics" 
+    href="/features/advanced-usage/user-metrics"
+    icon="chart-user"
+  >
+    Get insights into your user's usage. 
+  </Card>
+  <Card 
+    title="Feedback" 
+    href="/features/advanced-usage/feedback"
+    icon="thumbs-up"
+  >
+    Provide user feedback on output. 
+  </Card>
+  <Card 
+    title="Gateway Fallback (Beta)" 
+    href="/getting-started/integration-method/gateway-fallbacks"
+    icon="diagram-next"
+  >
+    Utilize any provider through a single endpoint.
+  </Card>
+  <Card 
+    title="Retries" 
+    href="/features/advanced-usage/retries"
+    icon="repeat"
+  >
+    Smartly retry requests. 
+  </Card>
+  <Card
+    title="Rate Limiting"
+    href="/features/advanced-usage/custom-rate-limits"
+    icon="user-minus"
+  >
+    Easily rate-limit power users. 
+  </Card>
+  <Card 
+    title="Key Vault" 
+    href="/features/advanced-usage/vault"
+    icon="key"
+  >
+    Manage and distribute your provider API keys securely.
+  </Card>
+  <Card 
+    title="Moderation Integration" 
+    href="/features/advanced-usage/moderations"
+    icon="eye"
+  >
+    Integrate OpenAI moderation to safeguard your chat completions.
+  </Card>
+  <Card 
+    title="LLM Security" 
+    href="/features/advanced-usage/llm-security"
+    icon="shield-check"
+  >
+    Secure OpenAI chat completions against prompt injections.
+  </Card>
+    <Card 
+    title="Webhooks" 
+    href="/features/Webhooks"
+    icon="webhook"
+  >
+    Set up integrations tp subscribe Helicone events. 
+  </Card>
+  <Card 
+    title="Customer Portal" 
+    href="/features/customer_portal/intro"
+    icon="chart-tree-map"
+  >
+    Easily manage your customers and their usage.
+  </Card>
+
+
+</CardGroup>
+
+## Further Reading
+
+<CardGroup cols={3}>
+  <Card title="Proxy or Async?" href="/getting-started/proxy-vs-async">
+    Determine when you should use a proxy or async function in Helicone.
+  </Card>
+  <Card title="How We Calculate Costs" href="/faq/how-we-calculate-cost">
+    An explanation of our process for calculating cost per request. 
+  </Card>
+  <Card title="Understanding Helicone Headers" href="/helicone-headers/header-directory">
+    Every header you need to know to access Helicone features.
+  </Card>
+</CardGroup>
+
+## Questions? 
+<Check>Although we designed the docs to be as self-serving as possible, you are welcome to join our [Discord](https://discord.com/invite/HwUbV3Q8qz) or contact [help@helicone.ai](help@helicone.ai) with any questions or feedback you have. </Check>
+
+Interested in deploying Helicone on-prem? [Schedule a call](https://www.helicone.ai/contact) with us.  

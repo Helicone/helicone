@@ -2,6 +2,8 @@ import {
   BookOpenIcon,
   DocumentPlusIcon,
   DocumentTextIcon,
+  Square2StackIcon,
+  TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { Badge, Divider, TextInput } from "@tremor/react";
 import Link from "next/link";
@@ -14,8 +16,11 @@ import { SimpleTable } from "../../shared/table/simpleTable";
 import HcButton from "../../ui/hcButton";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import ThemedModal from "../../shared/themed/themedModal";
-import { useLocalStorage } from "../../../services/hooks/localStorage";
 import PromptDelete from "./promptDelete";
+import LoadingAnimation from "../../shared/loadingAnimation";
+import PromptUsageChart from "./promptUsageChart";
+import ThemedTabs from "../../shared/themed/themedTabs";
+import useSearchParams from "../../shared/utils/useSearchParams";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -26,13 +31,10 @@ const PromptsPage = (props: PromptsPageProps) => {
 
   const { prompts, isLoading, refetch } = usePrompts();
 
-  const [view, setView] = useLocalStorage<"Card" | "Table">(
-    "prompt-view",
-    "Table"
-  );
   const [searchName, setSearchName] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const filteredPrompts = prompts?.filter((prompt) =>
     prompt.user_defined_id.toLowerCase().includes(searchName.toLowerCase())
@@ -46,7 +48,11 @@ const PromptsPage = (props: PromptsPageProps) => {
         </div>
 
         <div className="flex flex-col space-y-4 w-full py-2">
-          {filteredPrompts?.length === 0 ? (
+          {isLoading ? (
+            <div className="flex flex-col w-full mt-16 justify-center items-center">
+              <LoadingAnimation title="Loading Prompts..." />
+            </div>
+          ) : prompts?.length === 0 ? (
             <div className="flex flex-col w-full mt-16 justify-center items-center">
               <div className="flex flex-col">
                 <DocumentTextIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
@@ -58,7 +64,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                 </p>
                 <div className="mt-4">
                   <Link
-                    href="https://docs.helicone.ai/features/prompts/intro"
+                    href="https://docs.helicone.ai/features/prompts"
                     className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   >
                     <BookOpenIcon className="h-4 w-4" />
@@ -127,24 +133,28 @@ const chatCompletion = await openai.chat.completions.create(
                     }}
                   />
                 </div>
-                {/* <ThemedTabs
-                  initialIndex={view === "Table" ? 0 : 1}
+                <ThemedTabs
                   options={[
                     {
+                      label: "table",
                       icon: TableCellsIcon,
-                      label: "Table",
                     },
                     {
-                      icon: Squares2X2Icon,
-                      label: "Card",
+                      label: "card",
+                      icon: Square2StackIcon,
                     },
                   ]}
                   onOptionSelect={function (option: string): void {
-                    setView(option as "Table" | "Card");
+                    if (option === "table") {
+                      searchParams.set("view", "table");
+                    } else {
+                      searchParams.set("view", "card");
+                    }
                   }}
-                /> */}
+                  initialIndex={searchParams.get("view") === "card" ? 1 : 0}
+                />
               </div>
-              {view === "Card" ? (
+              {searchParams.get("view") === "card" ? (
                 <ul className="w-full h-full grid grid-cols-2 xl:grid-cols-4 gap-4">
                   {filteredPrompts?.map((prompt, i) => (
                     <li key={i} className="col-span-1">
@@ -182,6 +192,13 @@ const chatCompletion = await openai.chat.completions.create(
                         <div className="text-gray-500">
                           {prompt.major_version}
                         </div>
+                      ),
+                    },
+                    {
+                      key: undefined,
+                      header: "Last 30 days",
+                      render: (prompt) => (
+                        <PromptUsageChart promptId={prompt.user_defined_id} />
                       ),
                     },
                     {

@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import SolutionsButton from "./solutionsButton";
 import DeveloperButton from "./developerButton";
+import { signOut } from "../../shared/utils/utils";
 
 interface NavBarV2Props {}
 
@@ -74,7 +75,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                 <button
                   onClick={() => {
                     supabaseClient.auth.refreshSession();
-                    supabaseClient.auth.signOut().then(() => {
+                    signOut(supabaseClient).then(() => {
                       router.push("/");
                     });
                   }}
@@ -199,7 +200,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                       <button
                         onClick={() => {
                           supabaseClient.auth.refreshSession();
-                          supabaseClient.auth.signOut().then(() => {
+                          signOut(supabaseClient).then(() => {
                             router.push("/");
                           });
                         }}

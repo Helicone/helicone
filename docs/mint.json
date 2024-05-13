@@ -36,7 +36,10 @@
   "navigation": [
     {
       "group": "Welcome",
-      "pages": ["introduction"]
+      "pages": [
+        "getting-started/quick-start",
+        "helicone-headers/header-directory"
+      ]
     },
     {
       "group": "Integrations",
@@ -67,6 +70,45 @@
       ]
     },
     {
+      "group": "Features",
+      "pages": [
+        "features/prompts",
+        "features/advanced-usage/custom-properties",
+        "features/advanced-usage/caching",
+        "features/advanced-usage/omit-logs",
+        "features/advanced-usage/user-metrics",
+        "features/advanced-usage/feedback",
+        "getting-started/integration-method/gateway-fallbacks",
+        "features/advanced-usage/retries",
+        "features/advanced-usage/custom-rate-limits",
+        "features/advanced-usage/vault",
+        "features/advanced-usage/moderations", 
+        "features/advanced-usage/llm-security",
+        "features/webhooks",
+        {
+          "group": "Customer Portal",
+          "pages": [
+            "features/customer_portal/intro",
+            "features/customer_portal/getting-started-proxy",
+            "features/customer_portal/getting-started-async"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "Resources",
+      "pages": [
+        "getting-started/proxy-vs-async",
+        "faq/how-we-calculate-cost",
+        "faq/how-encryption-works",
+        "faq/latency-affect",
+        "getting-started/self-deploy",
+        "getting-started/self-deploy-docker",
+        "getting-started/self-deploy-cloud",
+        "helicone-headers/predefining-request-id"
+      ]
+    },
+    {
       "group": "Observability",
       "pages": ["use-cases/getting-user-requests"]
     },
@@ -88,86 +130,6 @@
         "use-cases/debugging",
         "use-cases/etl",
         "use-cases/data-autonomy"
-      ]
-    },
-    {
-      "group": "Getting Started",
-      "pages": ["getting-started/quick-start"]
-    },
-    {
-      "group": "Self Hosting",
-      "pages": [
-        "getting-started/self-deploy",
-        "getting-started/self-deploy-cloud",
-        "getting-started/self-deploy-docker"
-      ]
-    },
-    {
-      "group": "FAQ",
-      "pages": [
-        "getting-started/self-deploy",
-        "getting-started/self-deploy-cloud",
-        "getting-started/self-deploy-docker",
-        "getting-started/proxy-vs-async"
-      ]
-    },
-
-    {
-      "group": "Features",
-      "pages": [
-        {
-          "group": "Prompts",
-          "pages": ["features/prompts/intro", "features/prompts/quick-start"]
-        },
-        {
-          "group": "Customer Portal",
-          "pages": [
-            "features/customer_portal/intro",
-            "features/customer_portal/getting-started-proxy",
-            "features/customer_portal/getting-started-async"
-          ]
-        },
-        {
-          "group": "Jobs",
-          "pages": ["features/jobs/quick-start", "features/jobs/example"]
-        },
-        "getting-started/integration-method/gateway-fallbacks",
-        "features/advanced-usage/custom-properties",
-        "features/advanced-usage/user-metrics",
-        "features/advanced-usage/feedback",
-        "features/advanced-usage/vault",
-        "features/advanced-usage/fine-tuning",
-        "features/advanced-usage/caching",
-        "features/advanced-usage/retries",
-        "features/advanced-usage/custom-rate-limits",
-        "features/advanced-usage/omit-logs",
-        "features/streaming",
-        "features/webhooks",
-        "features/advanced-usage/llm-security",
-        "features/advanced-usage/moderations"
-      ]
-    },
-    {
-      "group": "Helicone Headers",
-      "pages": [
-        "helicone-headers/intro",
-        "helicone-headers/predefining-request-id"
-      ]
-    },
-    {
-      "group": "Tools",
-      "pages": ["tools/mitm-proxy", "tools/export"]
-    },
-    {
-      "group": "GraphQL API",
-      "pages": ["graphql/getting-started", "graphql/python-example"]
-    },
-    {
-      "group": "FAQ",
-      "pages": [
-        "faq/how-encryption-works",
-        "faq/latency-affect",
-        "faq/how-we-calculate-cost"
       ]
     },
     {

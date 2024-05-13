@@ -546,6 +546,26 @@ Json: JsonObject;
       delayMs: number;
       model: string;
     };
+    RequestObj: {
+      id: string;
+      provider: string;
+    };
+    ExperimentScores: {
+      dataset: {
+        /** Format: double */
+        cost: number;
+        model: string;
+        /** Format: date-time */
+        dateCreated: string;
+      };
+      hypothesis: {
+        /** Format: double */
+        cost: number;
+        model: string;
+        /** Format: date-time */
+        dateCreated: string;
+      };
+    };
     Experiment: {
       id: string;
       organization: string;
@@ -553,6 +573,7 @@ Json: JsonObject;
         rows: {
             scores: components["schemas"]["Record_string.number_"];
             inputRecord?: {
+              request: components["schemas"]["RequestObj"];
               response: components["schemas"]["ResponseObj"];
               inputs: components["schemas"]["Record_string.string_"];
               requestPath: string;
@@ -567,8 +588,9 @@ Json: JsonObject;
       createdAt: string;
       hypotheses: {
           runs: {
+              request?: components["schemas"]["RequestObj"];
               scores: components["schemas"]["Record_string.number_"];
-              response: components["schemas"]["ResponseObj"];
+              response?: components["schemas"]["ResponseObj"];
               resultRequestId: string;
               datasetRowId: string;
             }[];
@@ -585,6 +607,7 @@ Json: JsonObject;
           promptVersionId: string;
           id: string;
         }[];
+      scores: components["schemas"]["ExperimentScores"] | null;
     };
     "ResultSuccess_Experiment-Array_": {
       data: components["schemas"]["Experiment"][];
@@ -616,6 +639,8 @@ Json: JsonObject;
       promptVersion?: true;
       /** @enum {boolean} */
       responseBodies?: true;
+      /** @enum {boolean} */
+      score?: true;
     };
   };
   responses: {

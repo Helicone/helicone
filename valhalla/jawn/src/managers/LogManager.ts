@@ -120,8 +120,8 @@ export class LogManager {
       })
     );
 
-    console.log(`Finished processing batch ${batchContext.batchId}`);
     // Inserts everything in transaction
+    console.log(`Upserting logs for batch ${batchContext.batchId}`);
     const upsertResult = await loggingHandler.handleResults();
 
     if (upsertResult.error) {
@@ -161,11 +161,14 @@ export class LogManager {
       }
 
       console.error(
-        `Error inserting logs: ${upsertResult.error} for batch ${batchContext.batchId}`
+        `Error inserting logs: ${JSON.stringify(
+          upsertResult.error
+        )} for batch ${batchContext.batchId}`
       );
     }
 
     // Insert rate limit entries after logs
+    console.log(`Inserting rate limits for batch ${batchContext.batchId}`);
     const { data: rateLimitInsId, error: rateLimitErr } =
       await rateLimitHandler.handleResults();
 
@@ -187,5 +190,7 @@ export class LogManager {
         `Error inserting rate limits: ${rateLimitErr} for batch ${batchContext.batchId}`
       );
     }
+
+    console.log(`Finished processing batch ${batchContext.batchId}`);
   }
 }

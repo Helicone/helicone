@@ -105,6 +105,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.0000015,
       completion_token: 0.000002,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -115,6 +116,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.0000015,
       completion_token: 0.000002,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -135,6 +137,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.000001,
       completion_token: 0.000002,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -145,6 +148,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.0000015,
       completion_token: 0.000002,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -155,6 +159,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.0000015,
       completion_token: 0.000002,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -165,6 +170,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00003,
       completion_token: 0.00006,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -175,6 +181,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00003,
       completion_token: 0.00006,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -185,6 +192,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00003,
       completion_token: 0.00006,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -195,6 +203,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00006,
       completion_token: 0.00012,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -205,6 +214,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00006,
       completion_token: 0.00012,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -215,6 +225,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00006,
       completion_token: 0.00012,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -225,6 +236,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00001,
       completion_token: 0.00003,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -235,6 +247,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00001,
       completion_token: 0.00003,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -245,6 +258,29 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00001,
       completion_token: 0.00003,
     },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-4o",
+    },
+    cost: {
+      prompt_token: 0.000015,
+      completion_token: 0.00003,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-4o-2024-05-13",
+    },
+    cost: {
+      prompt_token: 0.000015,
+      completion_token: 0.00003,
+    },
+    showInPlayground: true,
   },
   {
     model: {
@@ -255,6 +291,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.0000015,
       completion_token: 0.000002,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -275,6 +312,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.000003,
       completion_token: 0.000004,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -285,6 +323,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.0000005,
       completion_token: 0.0000015,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -295,6 +334,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00001,
       completion_token: 0.00003,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -305,6 +345,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00001,
       completion_token: 0.00003,
     },
+    showInPlayground: true,
   },
   {
     model: {
@@ -315,6 +356,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00001,
       completion_token: 0.00003,
     },
+    showInPlayground: true,
   },
   {
     model: {

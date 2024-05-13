@@ -238,7 +238,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                             <pre className="whitespace-pre-wrap text-sm w-full h-full text-black">
                               {
                                 (run.originResult.response?.body as any)
-                                  ?.choices?.[0].message.content
+                                  ?.choices?.[0]?.message?.content
                               }
                             </pre>
                           </div>

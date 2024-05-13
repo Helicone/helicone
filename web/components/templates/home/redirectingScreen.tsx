@@ -3,6 +3,7 @@ import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import Link from "next/link";
+import { signOut } from "../../shared/utils/utils";
 
 interface RedirectingScreenProps {}
 
@@ -45,7 +46,7 @@ const RedirectingScreen = (props: RedirectingScreenProps) => {
         </p>
         <button
           onClick={() => {
-            client.auth.signOut();
+            signOut(client);
           }}
           className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl mt-8"
         >
