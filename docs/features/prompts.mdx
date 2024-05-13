@@ -2,11 +2,20 @@
 title: "Prompts"
 description: "Effortlessly monitor prompt versions and inputs."
 ---
-<Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing).</Info>
 
-<Warning>**This feature is currently in beta.** While you're welcome to try it out, please know that our team is still working to refine it. Your feedback is valuable to help us improve! </Warning>
+<Info>
+  **Who can use this feature**: Anyone on any
+  [plan](https://www.helicone.ai/pricing).
+</Info>
+
+<Warning>
+  **This feature is currently in beta.** While you're welcome to try it out,
+  please know that our team is still working to refine it. Your feedback is
+  valuable to help us improve!{" "}
+</Warning>
 
 ## Introduction
+
 Helicone's prompt management provides a seamless way for users to track the prompts used in their generative AI applications. With Helicone, you can effortlessly monitor versions and inputs as they evolve.
 
 <Frame caption="Example: A Prompt Template designed for a rap battle between two people. ">
@@ -14,19 +23,25 @@ Helicone's prompt management provides a seamless way for users to track the prom
 </Frame>
 
 ### Why Prompts
-Requests are now matched to a `helicone-prompt-id`, allowing you to: 
-- version and track iterations to your prompt over time, without losing any previous versions. 
+
+Requests are now matched to a `helicone-prompt-id`, allowing you to:
+
+- version and track iterations to your prompt over time, without losing any previous versions.
 - maintain a dataset of inputs and outputs for each prompt version.
 
-
 ## Prerequisites
+
 To use Prompts, you must set up Helicone in proxy mode via [Gateway](https://docs.helicone.ai/getting-started/integration-method/gateway) or [custom package](https://docs.helicone.ai/getting-started/integration-method/openai-proxy).
 
-<Note>Not sure if proxy is for you? We created a guide to explain the difference between [Helicone Proxy vs Helicone Async integration](https://docs.helicone.ai/getting-started/proxy-vs-async).</Note>
-
+<Note>
+  Not sure if proxy is for you? We created a guide to explain the difference
+  between [Helicone Proxy vs Helicone Async
+  integration](https://docs.helicone.ai/getting-started/proxy-vs-async).
+</Note>
 
 ## How Prompt Template Works
-As you modify your prompt in code, Helicone automatically tracks the new version and maintains a record of the old prompt. Additionally, a dataset of input/output keys is preserved for each version. 
+
+As you modify your prompt in code, Helicone automatically tracks the new version and maintains a record of the old prompt. Additionally, a dataset of input/output keys is preserved for each version.
 
 <Accordion title="Get a Deep-Dive of Prompt Templates">
 
@@ -46,34 +61,38 @@ Compose a movie scene involving ${{ character }}, set in ${{ location }}
 
 Currently, we only support packages for TypeScript and JavaScript for easy integration. For other users, we are utilizing an adapted version of JSX to manage prompts and their input variables.
 
-1. When you send over a prompt with the following syntax, we are able to extract the children text between the JSX element `helicone-prompt-input`, then place it back into the prompt to be sent to your LLM. 
+1. When you send over a prompt with the following syntax, we are able to extract the children text between the JSX element `helicone-prompt-input`, then place it back into the prompt to be sent to your LLM.
+
 ```tsx
 <helicone-prompt-input key="my_input_key">
   Input to your LLM
 </helicone-prompt-input>
 ```
 
-Only the following will be sent to your LLM: 
+Only the following will be sent to your LLM:
+
 ```tsx
     Input to your LLM
 ```
 
 <Note>
-  It is crucial that each key has a unique identifier; otherwise, you will get the
-  same variable replacing in multiple places.
+  It is crucial that each key has a unique identifier; otherwise, you will get
+  the same variable replacing in multiple places.
 </Note>
 
 2. Then, all of the input variables are mapped to the key `my_input_key` as a dictionary in Helicone:
+
 ```json
 {
   "my_input_key": "Input to your LLM"
 }
 ```
+
 </Accordion>
 
 ## Example
 
-Let's say we have an app that generates a short story, where users are able to input their own `character`. For example, the prompt is “Write a story about a secret agent”, where the `character` is “a secret agent”. 
+Let's say we have an app that generates a short story, where users are able to input their own `character`. For example, the prompt is “Write a story about a secret agent”, where the `character` is “a secret agent”.
 
 <Tabs>
   <Tab title="Typescript / Javascript">
@@ -108,17 +127,17 @@ Let's say we have an app that generates a short story, where users are able to i
 
         Assigning an id allows us to associate your prompt with future versions of your prompt, and automatically manage versions on your behalf.
 
-        Depending on the package you are using, you will need to add a header. For more information on adding headers to packages, please see [Helicone Headers](/helicone-headers).
+        Depending on the package you are using, you will need to add a header. For more information on adding headers to packages, please see [Header Directory](/header-directory).
 
         ```tsx
         headers: {
           "Helicone-Prompt-Id": "prompt_story",
         },
         ```
-      </Step>      
+      </Step>
     </Steps>
 
-    #### Here's what your code would look like: 
+    #### Here's what your code would look like:
 
     ``` tsx
     // 1. Add this line
@@ -158,12 +177,12 @@ Let's say we have an app that generates a short story, where users are able to i
       </Step>
 
       <Step title="Add helicone-prompt-input tags">
-      Add `<helicone-prompt-input key="<INPUT_ID>">` before your input variable, and `</helicone-prompt-input>` after, where `INPUT_ID` is your key name. In this example, `key=”character”`: 
+      Add `<helicone-prompt-input key="<INPUT_ID>">` before your input variable, and `</helicone-prompt-input>` after, where `INPUT_ID` is your key name. In this example, `key=”character”`:
 
       ```tsx
       Write a story about <helicone-prompt-input key="character" >a secret agent</helicone-prompt-input>
-      ```    
-      <Check> Don't worry, Helicone will remove these tags for you before the prompt is sent to your LLM.</Check> 
+      ```
+      <Check> Don't worry, Helicone will remove these tags for you before the prompt is sent to your LLM.</Check>
       <Note>It is crucial that each key has a **unique identifier**; otherwise, the same variable will be replaced in multiple places. </Note>
 
       </Step>
@@ -182,12 +201,12 @@ Let's say we have an app that generates a short story, where users are able to i
       </Step>
 
       <Step title="Make a request">
-        You just created a prompt template! Helicone will now keep track of all of your inputs for you. Rest assure that all of the helicone-prompt-input tags will removed before your prompt is sent to your LLM. 
+        You just created a prompt template! Helicone will now keep track of all of your inputs for you. Rest assure that all of the helicone-prompt-input tags will removed before your prompt is sent to your LLM.
       </Step>
 
     </Steps>
 
-    #### Here's what your code would look like: 
+    #### Here's what your code would look like:
     ```python
     openai.ChatCompletion.create(
       model="[DEPLOYMENT]",
@@ -199,6 +218,19 @@ Let's say we have an app that generates a short story, where users are able to i
       }
     )
     ```
-    If you want more package support, please reach out to [engineering@helicone.ai](mailto:engineering@helicone.ai). 
+    If you want more package support, please reach out to [engineering@helicone.ai](mailto:engineering@helicone.ai).
+
   </Tab>
 </Tabs>
+
+## Local Testing
+
+Many times in development, you may want to test your prompt locally before deploying it to production and you don't want Helicone to track new prompt versions.
+
+To do this, you can set the `Helicone-Prompt-Mode` header to `testing` in your LLM request. This will prevent Helicone from tracking new prompt versions.
+
+```tsx
+headers: {
+  "Helicone-Prompt-Mode": "testing",
+},
+```

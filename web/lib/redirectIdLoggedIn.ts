@@ -1,3 +1,4 @@
+import { signOut } from "../components/shared/utils/utils";
 import { DEMO_EMAIL } from "./constants";
 import { SSRContext, SupabaseServerWrapper } from "./wrappers/supabase";
 
@@ -11,7 +12,7 @@ export function redirectIfLoggedIn(
       data: { session },
     } = await supabase.auth.getSession();
     if (session?.user?.email === DEMO_EMAIL) {
-      supabase.auth.signOut();
+      signOut(supabase);
       return await getServerSideProps(ctx);
     }
 

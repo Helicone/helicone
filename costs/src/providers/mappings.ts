@@ -155,6 +155,25 @@ export const providers: {
   },
 ];
 
+export const playgroundModels: {
+  name: string;
+  provider: ProviderName;
+}[] =
+  (providers
+    .map((provider) => {
+      return provider.costs
+        ?.filter((cost) => cost.showInPlayground)
+        .map((cost) => ({
+          name: cost.model.value,
+          provider: provider.provider,
+        }));
+    })
+    .flat()
+    .filter((model) => model !== undefined) as {
+    name: string;
+    provider: ProviderName;
+  }[]) ?? [];
+
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 export const defaultProvider = providers.find(
   (provider) => provider.provider === "OPENAI"

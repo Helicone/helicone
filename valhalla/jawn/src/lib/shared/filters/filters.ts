@@ -9,7 +9,10 @@ import {
   TablesAndViews,
 } from "./filterDefs";
 
-type KeyMapper<T> = (filter: T) => {
+type KeyMapper<T> = (
+  filter: T,
+  placeValueSafely: (val: string) => string
+) => {
   column?: string;
   operator: AllOperators;
   value: string;
@@ -31,48 +34,32 @@ const extractOperatorAndValueFromAnOperator = (
   throw new Error(`Invalid operator ${operator}`);
 };
 
-function easyKeyMappings<T extends keyof TablesAndViews>(keyMappings: {
-  [key in keyof TablesAndViews[T]]: string;
-}): (key: {
-  [key in keyof TablesAndViews[T]]: AnyOperator;
-}) => { column?: string; operator: AllOperators; value: string } {
-  return (key: {
-    [key in keyof TablesAndViews[T]]: AnyOperator;
-  }) => {
-    const column = Object.keys(key)[0] as keyof typeof keyMappings;
-    const columnFromMapping = keyMappings[column];
-    const { operator, value } = extractOperatorAndValueFromAnOperator(
-      key[column as keyof typeof keyMappings]
-    );
-
-    return {
-      column: columnFromMapping ? `${columnFromMapping}` : undefined,
-      operator: operator,
-      value: value,
-    };
-  };
-}
-
-function easyKeyMappingsWithTable<T extends keyof TablesAndViews>(
+function easyKeyMappings<T extends keyof TablesAndViews>(
   keyMappings: {
     [key in keyof TablesAndViews[T]]: string;
   },
-  table: T
-): (key: {
-  [key in keyof TablesAndViews[T]]: AnyOperator;
-}) => { column: string; operator: AllOperators; value: string } {
-  return (key: {
-    [key in keyof TablesAndViews[T]]: AnyOperator;
-  }) => {
-    const column = keyMappings[key as keyof typeof keyMappings];
+  table?: T
+): KeyMapper<TablesAndViews[T]> {
+  return (key, placeValueSafely) => {
+    const column = Object.keys(key)[0] as keyof typeof keyMappings;
+    const columnFromMapping = keyMappings[column];
     const { operator, value } = extractOperatorAndValueFromAnOperator(
-      key[column as keyof typeof keyMappings]
+      key[column as keyof typeof keyMappings] as AnyOperator
     );
 
+    let columnToUse = undefined;
+    if (columnFromMapping) {
+      if (table) {
+        columnToUse = `${table}.${columnFromMapping}`;
+      } else {
+        columnToUse = columnFromMapping;
+      }
+    }
+
     return {
-      column: `${table}.${column}`,
+      column: columnToUse,
       operator: operator,
-      value: value,
+      value: placeValueSafely(value),
     };
   };
 }
@@ -82,7 +69,7 @@ const NOT_IMPLEMENTED = () => {
 };
 
 const whereKeyMappings: KeyMappings = {
-  user_metrics: easyKeyMappingsWithTable(
+  user_metrics: easyKeyMappings(
     {
       user_id: "user_id",
       last_active: "last_active",
@@ -90,14 +77,14 @@ const whereKeyMappings: KeyMappings = {
     },
     "user_metrics"
   ),
-  user_api_keys: easyKeyMappingsWithTable(
+  user_api_keys: easyKeyMappings(
     {
       api_key_hash: "api_key_hash",
       api_key_name: "api_key_name",
     },
     "user_api_keys"
   ),
-  properties: (filter) => {
+  properties: (filter, placeValueSafely) => {
     const keys = Object.keys(filter);
     if (keys.length !== 1) {
       throw new Error("Invalid filter, only one key is allowed");
@@ -106,23 +93,22 @@ const whereKeyMappings: KeyMappings = {
     const { operator, value } = extractOperatorAndValueFromAnOperator(
       filter[key as keyof typeof filter]
     );
-    return {
-      column: `properties ->> '${key}'`,
-      operator: operator,
-      value: value,
-    };
-  },
-  values: (filter) => {
-    const key = Object.keys(filter)[0];
-    const { operator, value } = extractOperatorAndValueFromAnOperator(
-      filter.value
-    );
 
-    return {
-      column: `prompt_values ->> '${key}'`,
-      operator: operator,
-      value: value,
-    };
+    if (operator === "equals") {
+      return {
+        column: `properties`,
+        operator: "gin-contains",
+        value: `jsonb_build_object(${placeValueSafely(
+          key
+        )}::text, ${placeValueSafely(value)}::text)`,
+      };
+    } else {
+      return {
+        column: `properties ->> ${placeValueSafely(key)}`,
+        operator: operator,
+        value: placeValueSafely(value),
+      };
+    }
   },
   request: easyKeyMappings<"request">({
     prompt: `coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content')`,
@@ -192,14 +178,14 @@ const whereKeyMappings: KeyMappings = {
     job_id: "request_response_log.job_id",
     threat: "request_response_log.threat",
   }),
-  request_response_versioned: (filter) => {
+  request_response_versioned: (filter, placeValueSafely) => {
     if ("properties" in filter && filter.properties) {
       const key = Object.keys(filter.properties)[0];
       const { operator, value } = extractOperatorAndValueFromAnOperator(
         filter.properties[key as keyof typeof filter.properties]
       );
       return {
-        column: `properties['${key}']`,
+        column: `properties[${placeValueSafely(key)}]`,
         operator: operator,
         value: value,
       };
@@ -226,7 +212,7 @@ const whereKeyMappings: KeyMappings = {
       node_id: "request_response_versioned.node_id",
       job_id: "request_response_versioned.job_id",
       threat: "request_response_versioned.threat",
-    })(filter);
+    })(filter, placeValueSafely);
   },
   users_view: easyKeyMappings<"request_response_log">({
     status: "r.status",
@@ -248,55 +234,11 @@ const whereKeyMappings: KeyMappings = {
     organization_id: "rate_limit_log.organization_id",
     created_at: "rate_limit_log.created_at",
   }),
-  job: (filter) => {
-    if ("custom_properties" in filter && filter.custom_properties) {
-      const key = Object.keys(filter.custom_properties)[0];
-      const { operator, value } = extractOperatorAndValueFromAnOperator(
-        filter.custom_properties[key as keyof typeof filter.custom_properties]
-      );
-      return {
-        column: `custom_properties ->> '${key}'`,
-        operator: operator,
-        value: value,
-      };
-    }
-    return easyKeyMappings<"job">({
-      created_at: "job.created_at",
-      org_id: "job.org_id",
-      id: "job.id",
-      description: "job.description",
-      name: "job.name",
-      status: "job.status",
-      timeout_seconds: "job.timeout_seconds",
-      updated_at: "job.updated_at",
-    })(filter);
-  },
-  job_node: (filter) => {
-    if ("custom_properties" in filter && filter.custom_properties) {
-      const key = Object.keys(filter.custom_properties)[0];
 
-      const { operator, value } = extractOperatorAndValueFromAnOperator(
-        filter.custom_properties[key as keyof typeof filter.custom_properties]
-      );
-
-      return {
-        column: `custom_properties ->> '${key}'`,
-        operator: operator,
-        value: value,
-      };
-    }
-    return easyKeyMappings<"job_node">({
-      created_at: "job_node.created_at",
-      id: "job_node.id",
-      name: "job_node.name",
-      description: "job_node.description",
-      timeout_seconds: "job_node.timeout_seconds",
-      org_id: "job_node.org_id",
-      job_id: "job_node.job",
-      status: "job_node.status",
-      updated_at: "job_node.updated_at",
-    })(filter);
-  },
+  // Deprecated
+  values: NOT_IMPLEMENTED,
+  job: NOT_IMPLEMENTED,
+  job_node: NOT_IMPLEMENTED,
 };
 
 const havingKeyMappings: KeyMappings = {
@@ -319,21 +261,50 @@ const havingKeyMappings: KeyMappings = {
   properties: NOT_IMPLEMENTED,
   request: NOT_IMPLEMENTED,
   response: NOT_IMPLEMENTED,
-  values: NOT_IMPLEMENTED,
   properties_table: NOT_IMPLEMENTED,
   request_response_log: NOT_IMPLEMENTED,
   request_response_versioned: NOT_IMPLEMENTED,
   properties_v3: NOT_IMPLEMENTED,
   property_with_response_v1: NOT_IMPLEMENTED,
-  job: NOT_IMPLEMENTED,
-  job_node: NOT_IMPLEMENTED,
   feedback: NOT_IMPLEMENTED,
   cache_hits: NOT_IMPLEMENTED,
   rate_limit_log: NOT_IMPLEMENTED,
   prompt_v2: NOT_IMPLEMENTED,
   prompts_versions: NOT_IMPLEMENTED,
   experiment: NOT_IMPLEMENTED,
+
+  // Deprecated
+  values: NOT_IMPLEMENTED,
+  job: NOT_IMPLEMENTED,
+  job_node: NOT_IMPLEMENTED,
 };
+
+function operatorToSql(operator: AllOperators): string {
+  switch (operator) {
+    case "equals":
+      return "=";
+    case "not-equals":
+      return "!=";
+    case "like":
+      return "LIKE";
+    case "ilike":
+      return "ILIKE";
+    case "gte":
+      return ">=";
+    case "gt":
+      return ">";
+    case "lt":
+      return "<";
+    case "lte":
+      return "<=";
+    case "contains":
+      return "ILIKE";
+    case "not-contains":
+      return "NOT ILIKE";
+    case "gin-contains":
+      return "@>";
+  }
+}
 
 export function buildFilterLeaf(
   filter: FilterLeaf,
@@ -344,55 +315,38 @@ export function buildFilterLeaf(
   filters: string[];
   argsAcc: any[];
 } {
+  const placeValueSafely = (value: string) => {
+    argsAcc.push(value);
+    return argPlaceHolder(argsAcc.length - 1, value);
+  };
+
   const filters: string[] = [];
 
   for (const _tableKey in filter) {
     const tableKey = _tableKey as keyof typeof filter;
     const table = filter[tableKey];
     const mapper = keyMappings[tableKey] as KeyMapper<typeof table>;
-    const { column, operator: operatorKey, value } = mapper(table);
+    const {
+      column,
+      operator: operatorKey,
+      value,
+    } = mapper(table, placeValueSafely);
 
     if (!column) {
       continue;
     }
 
-    const sqlOperator =
-      operatorKey === "equals"
-        ? "="
-        : operatorKey === "like"
-        ? "LIKE"
-        : operatorKey === "ilike"
-        ? "ILIKE"
-        : operatorKey === "gte"
-        ? ">="
-        : operatorKey === "gt"
-        ? ">"
-        : operatorKey === "lt"
-        ? "<"
-        : operatorKey === "lte"
-        ? "<="
-        : operatorKey === "not-equals"
-        ? "!="
-        : operatorKey === "contains"
-        ? "ILIKE"
-        : operatorKey === "not-contains"
-        ? "NOT ILIKE"
-        : undefined;
+    const sqlOperator = operatorToSql(operatorKey);
 
     if (operatorKey === "not-equals" && value === "null") {
       filters.push(`${column} is not null`);
     } else if (operatorKey === "equals" && value === "null") {
       filters.push(`${column} is null`);
     } else {
-      filters.push(
-        `${column} ${sqlOperator} ${argPlaceHolder(argsAcc.length, value)}`
-      );
-      if (operatorKey === "contains") {
-        argsAcc.push(`%${value}%`);
-      } else if (operatorKey === "not-contains") {
-        argsAcc.push(`%${value}%`);
+      if (operatorKey === "contains" || operatorKey === "not-contains") {
+        filters.push(`${column} ${sqlOperator} %${value}%`);
       } else {
-        argsAcc.push(value);
+        filters.push(`${column} ${sqlOperator} ${value}`);
       }
     }
   }
@@ -591,30 +545,6 @@ export async function buildFilterWithAuthClickHouseRateLimits(
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
     rate_limit_log: {
       organization_id: {
-        equals: orgId,
-      },
-    },
-  }));
-}
-
-export async function buildFilterWithAuthJobsTable(
-  args: ExternalBuildFilterArgs & { org_id: string }
-): Promise<{ filter: string; argsAcc: any[] }> {
-  return buildFilterWithAuth(args, "postgres", (orgId) => ({
-    job: {
-      org_id: {
-        equals: orgId,
-      },
-    },
-  }));
-}
-
-export async function buildFilterWithAuthNodesTable(
-  args: ExternalBuildFilterArgs & { org_id: string }
-): Promise<{ filter: string; argsAcc: any[] }> {
-  return buildFilterWithAuth(args, "postgres", (orgId) => ({
-    job_node: {
-      org_id: {
         equals: orgId,
       },
     },

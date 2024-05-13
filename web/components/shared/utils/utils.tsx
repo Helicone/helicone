@@ -1,3 +1,6 @@
+import { SupabaseClient } from "@supabase/supabase-js";
+import { Database } from "../../../supabase/database.types";
+
 const monthNames = [
   "Jan",
   "Feb",
@@ -19,6 +22,13 @@ const getUSDateShort = (value: string) => {
   const day = date.getDate();
   return `${month} ${day}`;
 };
+
+export async function signOut(supabaseClient: SupabaseClient<Database>) {
+  await supabaseClient.auth.signOut({ scope: "global" });
+  await supabaseClient.auth.signOut({ scope: "others" });
+  await supabaseClient.auth.signOut({ scope: "local" });
+  return supabaseClient.auth.signOut();
+}
 
 const getUSDate = (date: Date) => {
   const options: Intl.DateTimeFormatOptions = {
