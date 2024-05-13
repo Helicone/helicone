@@ -548,6 +548,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "datasetName": {"dataType":"string","required":true},
             "requestIds": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "promptVersion": {"dataType":"string"},
         },
         "additionalProperties": false,
     },

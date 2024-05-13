@@ -287,7 +287,7 @@ const UserModal = (props: UserModalProps) => {
                 Last Active
               </p>
               <p className="text-gray-700 dark:text-gray-300 truncate">
-                {getUSDateFromString(user.last_active.toString())}
+                {getUSDateFromString(user.last_active.toLocaleDateString())}
               </p>
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">

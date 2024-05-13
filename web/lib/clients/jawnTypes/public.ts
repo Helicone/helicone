@@ -473,6 +473,7 @@ Json: JsonObject;
     NewDatasetParams: {
       datasetName: string;
       requestIds: string[];
+      promptVersion?: string;
     };
     /** @description Make all properties in T optional */
     Partial_PromptVersionsToOperators_: {

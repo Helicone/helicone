@@ -1478,6 +1478,9 @@
 							"type": "string"
 						},
 						"type": "array"
+					},
+					"promptVersion": {
+						"type": "string"
 					}
 				},
 				"required": [

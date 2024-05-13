@@ -21,6 +21,7 @@ type DatasetFilterNode =
 export interface NewDatasetParams {
   datasetName: string;
   requestIds: string[];
+  promptVersion?: string;
 }
 
 export interface DatasetResult {
