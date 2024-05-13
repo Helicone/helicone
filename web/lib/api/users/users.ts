@@ -1,5 +1,5 @@
 import { dbQueryClickhouse } from "../db/dbExecute";
-import { Result } from "../../result";
+import { Result, resultMap } from "../../result";
 import {
   buildFilterClickHouse,
   buildFilterWithAuthClickHouse,
@@ -27,7 +27,8 @@ export async function userMetrics(
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafUsers
+  sort: SortLeafUsers,
+  timeZoneDifference: number
 ): Promise<Result<UserMetric[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -49,8 +50,16 @@ export async function userMetrics(
 SELECT
   r.user_id as user_id,
   count(DISTINCT date_trunc('day', r.request_created_at)) as active_for,
-  min(r.request_created_at) as first_active,
-  max(r.request_created_at) as last_active,
+  toDateTime(min(r.request_created_at) ${
+    timeZoneDifference > 0
+      ? `- INTERVAL '${Math.abs(timeZoneDifference)} minute'`
+      : `+ INTERVAL '${timeZoneDifference} minute'`
+  }) as first_active,
+  toDateTime(max(r.request_created_at) ${
+    timeZoneDifference > 0
+      ? `- INTERVAL '${Math.abs(timeZoneDifference)} minute'`
+      : `+ INTERVAL '${timeZoneDifference} minute'`
+  }) as last_active,
   count(r.request_id)::Int32 as total_requests,
   count(r.request_id) / count(DISTINCT date_trunc('day', r.request_created_at)) as average_requests_per_day_active,
   (sum(r.prompt_tokens) + sum(r.completion_tokens)) / count(r.request_id) as average_tokens_per_request,
@@ -66,14 +75,19 @@ LIMIT ${limit}
 OFFSET ${offset}
   `;
 
-  const { data, error } = await dbQueryClickhouse<UserMetric>(
-    query,
-    havingFilter.argsAcc
+  return resultMap(
+    await dbQueryClickhouse<UserMetric>(query, havingFilter.argsAcc),
+    (data) => {
+      return data.map((d) => {
+        console.log(d.first_active);
+        return {
+          ...d,
+          first_active: new Date(d.first_active),
+          last_active: new Date(d.last_active),
+        };
+      });
+    }
   );
-  if (error !== null) {
-    return { data: null, error: error };
-  }
-  return { data: data, error: null };
 }
 
 export async function userMetricsCount(
