@@ -116,65 +116,35 @@ You can also update Custom Properties post-request submission by making a PUT re
     <Accordion title="Option 1: Pre-define the Request ID" defaultOpen>
       <CodeGroup>
       ```ts Node.js 
-      import { OpenAI } from "openai";
-      const uuid = randomUUID(); // define your Request ID
-      const configuration = {
-        apiKey: process.env.OPENAI_API_KEY,
-        basePath: "https://oai.hconeai.com/v1",
-        defaultHeaders: {
-          "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
-          "Helicone-Request-Id": uuid,
-        },
-      };
+        import { OpenAI } from "openai";
+        const uuid = randomUUID();
+        const configuration = {
+          apiKey: process.env.OPENAI_API_KEY,
+          basePath: "https://oai.hconeai.com/v1",
+          defaultHeaders: {
+            "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
+            "Helicone-Request-Id": uuid,
+          },
+        };
       ```
       ```python Python
-      import uuid
-      my_helicone_request_id = str(uuid.uuid4()) # define your Request ID
+        import uuid
+        my_helicone_request_id = str(uuid.uuid4())
 
-      client = OpenAI(
-        api_key="<your-api-key-here>", # Replace with your OpenAI API key
-        base_url="https://oai.hconeai.com/v1" # Set the API endpoint
-        default_headers= {
-          "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-          "Helicone-Request-Id": my_helicone_request_id
-        }
-      )
+        client = OpenAI(
+          api_key="<your-api-key-here>", # Replace with your OpenAI API key
+          base_url="https://oai.hconeai.com/v1" # Set the API endpoint
+          default_headers= {
+            "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+            "Helicone-Request-Id": my_helicone_request_id
+          }
+        )
       ```
       </CodeGroup>
       This approach allows you to control the request ID yourself, ensuring it meets your requirements or follows a specific format. Refer to [how to pre-define a Request ID](https://docs.helicone.ai/helicone-headers/predefining-request-id) for detailed documentation. 
     </Accordion>
     <Accordion title="Option 2: Get the Request ID From the Response Header" defaultOpen>
       Alternatively, you can retrieve your Request ID from the response header `helicone-id`. Depending on the client library, the method to extract the Request ID may be different.
-      <CodeGroup>
-      ```ts Node.js 
-      const { data, response } = await openai.chat.completions
-          .create({
-            model: "gpt-4o",
-            messages: [
-              {
-                role: "user",
-                content: "Write 5 random words",
-              },
-            ],
-          })
-          .withResponse(); // include this line
-
-        console.log(response.headers.get("helicone-id")); // get the request ID
-      ```
-      ```python Python
-      response = openai.ChatCompletion.create(
-          model="gpt-4o",
-          messages=[
-              {
-                  "role": "user",
-                  "content": "Write 5 random words",
-              },
-          ]
-      )
-
-      print(response['headers']['helicone-id'])
-      ```
-      </CodeGroup>
     </Accordion>
   </AccordionGroup>
   </Step>
