@@ -14,101 +14,177 @@ Custom Properties allow you to add any additional information to your requests, 
 - The `prompt chain` by adding a common value to group of requests
 - `Application` or `user` metadata making the request
 
+<Frame caption="Custom Properties appear as headers in the `Request` table. ">
+  <img src="/images/example-custom-properties.png" />
+</Frame>
+
+
 ### Why Custom Properties
 
-- **Get the total cost or latency** for a group of requests in a prompt chain
-- **Get the "unit economics"** of your application. For example, the average cost of a conversation.
-- **Slice and dice your requests** and metrics by any custom property for debugging.
-
+- Get the total cost or latency for a group of requests in a prompt chain
+- Get the "unit economics" of your application. For example, the average cost of a conversation.
+- Slice and dice your requests and metrics by any custom property.
 
 
 ## Quick Start
 
 ### Adding Custom Properties at Request Time
 
-Add Custom properties with header to your LLM requests. For each header,
-- The **Key** is `Helicone-Property-[Name]` where `Name` is your property name. 
-- The **Value** is a string value for the property in the request.
+Use headers to add Custom Properties to your LLM requests. 
 
-<CodeGroup>
+<Steps>
+  <Step title="Define the Header">
+    Name your header in the format `Helicone-Property-[Name]` where `Name` is the name of your custom property. 
+  </Step>
+  <Step title="Define the Value">
+    The value is a string that labels your request for this custom property. Here are some examples: 
 
-```bash Curl
-curl https://oai.hconeai.com/v1/completions \
-  -H 'Content-Type: application/json' \
-  -H 'Helicone-Auth: Bearer HELICONE_API_KEY' \
-  -H 'Helicone-Property-Session: "24"' \ # Example 1
-  -H 'Helicone-Property-Conversation: "support_issue_2"' \ # Example 2
-  -H 'Helicone-Property-App: "mobile"' # Example 3
-  -d ...
-```
+    <CodeGroup>
 
-```python Python
-openai.api_base = "https://oai.hconeai.com/v1"
-openai
+    ```bash Curl
+    curl https://oai.hconeai.com/v1/completions \
+      -H 'Content-Type: application/json' \
+      -H 'Helicone-Auth: Bearer HELICONE_API_KEY' \
+      -H 'Helicone-Property-Session: "24"' \ # Example 1
+      -H 'Helicone-Property-Conversation: "support_issue_2"' \ # Example 2
+      -H 'Helicone-Property-App: "mobile"' # Example 3
+      -d ...
+    ```
 
-openai.Completion.create(
-    model="text-davinci-003",
-    prompt="Say this is a test",
-    headers={
-        "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-        "Helicone-Property-Session": "24", # Example 1
-        "Helicone-Property-Conversation": "support_issue_2", # Example 2
-        "Helicone-Property-App": "mobile", # Example 3
-    }
-)
-```
+    ```python Python
+    openai.api_base = "https://oai.hconeai.com/v1"
+    openai
 
-```js Node.js
-import { OpenAI } from "openai";
-const configuration = {
-  apiKey: process.env.OPENAI_API_KEY,
-  basePath: "https://oai.hconeai.com/v1",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
-    "Helicone-Property-Session": "24", // Example 1
-    "Helicone-Property-Conversation": "support_issue_2", // Example 2
-    "Helicone-Property-App": "mobile", // Example 3
-  },
-};
-const openai = new OpenAI(configuration);
-```
+    openai.Completion.create(
+        model="text-davinci-003",
+        prompt="Say this is a test",
+        headers={
+            "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+            "Helicone-Property-Session": "24", # Example 1
+            "Helicone-Property-Conversation": "support_issue_2", # Example 2
+            "Helicone-Property-App": "mobile", # Example 3
+        }
+    )
+    ```
 
-```python Langchain (Python)
-llm = ChatOpenAI(
-    openai_api_key="<OPENAI_API_KEY>",
-    openai_api_base="https://oai.hconeai.com/v1",
-    default_headers={
-        "Helicone-Auth": "Bearer <HELICONE_API_KEY>"
-        "Helicone-Property-Type": "Course Outline"
-    }
-)
+    ```js Node.js
+    import { OpenAI } from "openai";
+    const configuration = {
+      apiKey: process.env.OPENAI_API_KEY,
+      basePath: "https://oai.hconeai.com/v1",
+      defaultHeaders: {
+        "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
+        "Helicone-Property-Session": "24", // Example 1
+        "Helicone-Property-Conversation": "support_issue_2", // Example 2
+        "Helicone-Property-App": "mobile", // Example 3
+      },
+    };
+    const openai = new OpenAI(configuration);
+    ```
 
-course = llm.predict("Generate a course outline about AI.")
+    ```python Langchain (Python)
+    llm = ChatOpenAI(
+        openai_api_key="<OPENAI_API_KEY>",
+        openai_api_base="https://oai.hconeai.com/v1",
+        default_headers={
+            "Helicone-Auth": "Bearer <HELICONE_API_KEY>"
+            "Helicone-Property-Type": "Course Outline"
+        }
+    )
 
-# Update helicone properties/headers for each request
-headers["Helicone-Property-Type"] = "Lesson"
-llm.model_kwargs["headers"] = headers
+    course = llm.predict("Generate a course outline about AI.")
 
-lesson = llm.predict("Generate a lesson for the AI course.")
-```
+    # Update helicone properties/headers for each request
+    headers["Helicone-Property-Type"] = "Lesson"
+    llm.model_kwargs["headers"] = headers
 
-</CodeGroup>
+    lesson = llm.predict("Generate a lesson for the AI course.")
+    ```
+    </CodeGroup>
+
+  </Step>
+</Steps>
+
 
 ### Updating Custom Properties After Request
 
-Helicone now allows you to update custom properties post-request submission by making a PUT request to a designated API endpoint.
+You can also update Custom Properties post-request submission by making a PUT request to a designated API endpoint. 
 
+<Steps>
+  <Step title="Obtain the Request ID">
+    <AccordionGroup>
+    <Accordion title="Option 1: Pre-define the Request ID">
+      ``` python
+        import uuid
 
-```bash Curl
-curl --request PUT \
-  --url 'https://api.hconeai.com/v1/request/{request-id}/property' \
-  --header 'Authorization: Bearer {your-helicone-api-key}' \
-  --header 'Content-Type: application/json' \
-  --data '{
-    "key": "{property-key}",
-    "value": "{new-property-value}"
-}'
-```
+        # Define request ID
+        my_helicone_request_id = str(uuid.uuid4())
+
+        # Request to LLM provider
+        ...
+            "Helicone-Request-Id": my_helicone_request_id
+        ...
+      ```
+      This approach allows you to control the request ID yourself, ensuring it meets your requirements or follows a specific format. Refer to [how to pre-define a Request ID](https://docs.helicone.ai/helicone-headers/predefining-request-id) for detailed documentation. 
+    </Accordion>
+    <Accordion title="Option 2: Get the Request ID From the Response Header">
+      Alternatively, you can retrieve your Request ID from the response header `helicone-id`. Depending on the client library, the method to extract the Request ID may be different.
+    </Accordion>
+  </AccordionGroup>
+  </Step>
+  <Step title="Make a PUT Request">
+    Specify the key and value of your Custom Property. 
+    <CodeGroup>
+
+    ```bash Curl
+    curl --request PUT \
+      --url 'https://api.hconeai.com/v1/request/{request-id}/property' \ 
+      --header 'Authorization: Bearer {your-helicone-api-key}' \
+      --header 'Content-Type: application/json' \
+      --data '{
+        "key": "{property-key}",
+        "value": "{new-property-value}"
+    }'
+    ```
+
+    ```python Python
+    import requests
+
+    url = "https://api.helicone.ai/v1/request/{request-id}/property"
+
+    payload = {
+        "key": "{property-key}"
+        "value": "{property-key}",
+    }
+    headers = {
+        "Authorization": "Bearer {your-helicone-api-key}",
+        "Content-Type": "application/json"
+    }
+
+    response = requests.request("PUT", url, json=payload, headers=headers)
+
+    print(response.text)
+    ```
+
+    ```js JavaScript
+    const options = {
+      method: 'PUT',
+      headers: {'Authorization': 'Bearer {your-helicone-api-key}', 'Content-Type': 'application/json'},
+      body: '{"key":"<string>", "value":"<string>"}'
+    };
+
+    fetch('https://api.helicone.ai/v1/request/{request-id}/property', options)
+      .then(response => response.json())
+      .then(response => console.log(response))
+      .catch(err => console.error(err));
+    ```
+
+    </CodeGroup>
+
+    <Info>For more details on making a PUT request, please visit [here](https://docs.helicone.ai/rest/request/put-v1request-property).</Info>
+
+  </Step>
+</Steps>
 
 
 ## Questions? 
