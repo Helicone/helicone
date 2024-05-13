@@ -1,19 +1,40 @@
 ---
-title: "Moderation Integration"
+title: "Moderations"
 description: "Integrate OpenAI moderation to safeguard your chat completions."
 ---
+<Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing) who uses OpenAI as their provider.</Info>
 
-## Enabling Moderation
 
-Add `Helicone-Moderations-Enabled: true` to your request headers to activate OpenAI moderation.
+## Introduction
 
-## Moderation Process and How It Works
+By integrating with OpenAI's moderation endpoint, Helicone helps you check whether the user message is potentially harmful. 
+
+### Why Moderations
+- Identifying harmful requests and take action, for example, by filtering it.
+- Ensuring any inappropriate or harmful content in user messages is flagged and prevented from being processed.
+- Maintaining the safety of the interactions with your application. 
+
+
+## Getting Started
+To enable moderation, simply add `Helicone-Moderations-Enabled: true` to your request headers to activate OpenAI moderation.
+<Note>The moderation call to the OpenAI endpoint will utilize your provided OpenAI API key.</Note>
+
+
+### How the Moderation Process Works
 
 1. **Activation:** When `Helicone-Moderations-Enabled` is true and the provider is OpenAI, the user's latest message is prepared for moderation before any chat completion request.
 2. **Moderation Check:** Our proxy sends the message to the OpenAI Moderation endpoint to assess its content.
 
-3. **Flag Evaluation:** If the moderation endpoint flags the message as inappropriate or harmful, an error response is generated:
+3. **Flag Evaluation:** If the moderation endpoint flags the message as inappropriate or harmful, an error response is generated. 
 
+
+### Error Repsonse 
+
+If the message is flagged, the response will have a 400 status code. It’s crucial to handle this response appropriately.
+
+If the message is not flagged, the proxy forwards it to the chat completion endpoint, and the process continues as normal.
+
+Here's an example of the error response when flagged: 
    ```json
    {
      "success": false,
@@ -25,16 +46,13 @@ Add `Helicone-Moderations-Enabled: true` to your request headers to activate Ope
    }
    ```
 
-If the message is flagged, the response will have a 400 status code. **It's crucial to handle this response appropriately.**
 
-If the message is not flagged, the proxy forwards it to the chat completion endpoint, and the process continues as normal.
 
-### Using Your API Key
-
-The moderation call to the OpenAI endpoint will utilize your provided OpenAI API key.
-
-## Future Enhancements
+## Coming Soon
 
 We're continually expanding our moderation features. Upcoming updates include:
-
 - Customizable moderation criteria
+
+## Questions? 
+
+<Tip>Questions or feedback? Reach out to us at [help@helicone.ai](help@helicone.ai). </Tip>
