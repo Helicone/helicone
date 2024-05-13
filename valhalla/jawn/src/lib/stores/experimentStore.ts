@@ -164,9 +164,7 @@ function getExperimentsQuery(
                       FROM score_value sv
                       JOIN score_attribute sa ON sa.id = sv.score_attribute
                       JOIN prompt_input_record pir ON pir.source_request = sv.request_id
-                      LEFT JOIN request re ON re.id = pir.source_request
                       WHERE pir.id = dsr.input_record
-                      AND re.helicone_org_id = e.organization
                       AND sa.organization = e.organization
                     )
                   )
