@@ -49,8 +49,8 @@ if (KAFKA_ENABLED && KAFKA_BROKER && KAFKA_USERNAME && KAFKA_PASSWORD) {
 // Average message is 1kB, so we can set minBytes to 1kB and maxBytes to 10kB
 const consumer = kafka?.consumer({
   groupId: "jawn-consumer",
-  minBytes: 1000, // 1 kB
-  maxBytes: 200_000, // 200 kB
+  minBytes: 100_000,
+  maxBytes: 10_000_000,
 });
 
 export const consume = async () => {
@@ -90,7 +90,7 @@ export const consume = async () => {
       commitOffsetsIfNecessary,
     }) => {
       console.log(`Received batch with ${batch.messages.length} messages.`);
-      const maxMessages = 100;
+      const maxMessages = 150;
       const miniBatches = createMiniBatches(batch.messages, maxMessages);
 
       for (const miniBatch of miniBatches) {
