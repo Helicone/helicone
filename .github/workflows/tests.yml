@@ -193,6 +193,11 @@ jobs:
       - name: Install python dependencies
         run: |
           pip install requests pytest psycopg2 python-dotenv helicone httpx
+      - name: Run Jawn
+        working-directory: valhalla/jawn
+        run: |
+          yarn
+          yarn dev &
       - name: Run integration tests
         working-directory: tests
         env:
