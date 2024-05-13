@@ -38,11 +38,16 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
       inputs: row.inputRecord?.inputs ?? {},
       originResult: {
         response: row.inputRecord?.response,
+        scores: row.scores,
       },
       testResult: {
         response: experiment?.hypotheses?.[0]?.runs?.find(
           (run) => run.datasetRowId === row.rowId
         )?.response,
+        scores:
+          experiment?.hypotheses?.[0]?.runs?.find(
+            (run) => run.datasetRowId === row.rowId
+          )?.scores ?? {},
       },
     };
   });
@@ -163,6 +168,9 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                     <TableHeaderCell className="w-1/3 border-l border-gray-300">
                       <p className="text-black text-lg">Experiment Output</p>
                     </TableHeaderCell>
+                    <TableHeaderCell className="w-1/3 border-l border-gray-300">
+                      <p className="text-black text-lg">Scores</p>
+                    </TableHeaderCell>
                   </TableRow>
                 </TableHead>
 
@@ -209,6 +217,25 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                               <ModelPill
                                 model={run.originResult.response?.model ?? ""}
                               />
+                            </div>
+                            <div className="w-full flex items-center gap-2">
+                              {run.originResult.scores &&
+                                Object.keys(run.originResult.scores).length >
+                                  0 && (
+                                  <>
+                                    Scores:{" "}
+                                    {Object.keys(run.originResult.scores).map(
+                                      (key) => (
+                                        <span
+                                          key={key}
+                                          className="bg-gray-50 text-gray-700 ring-gray-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
+                                        >
+                                          {key}: {run.originResult.scores[key]}
+                                        </span>
+                                      )
+                                    )}
+                                  </>
+                                )}
                             </div>
                             <pre className="whitespace-pre-wrap text-sm w-full h-full text-black">
                               {
@@ -264,6 +291,25 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                 <ModelPill
                                   model={run.testResult.response?.model ?? ""}
                                 />
+                              </div>
+                              <div className="w-full flex items-center gap-2">
+                                {run.testResult.scores &&
+                                  Object.keys(run.testResult.scores).length >
+                                    0 && (
+                                    <>
+                                      Scores:{" "}
+                                      {Object.keys(run.testResult.scores).map(
+                                        (key) => (
+                                          <span
+                                            key={key}
+                                            className="bg-gray-50 text-gray-700 ring-gray-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
+                                          >
+                                            {key}: {run.testResult?.scores[key]}
+                                          </span>
+                                        )
+                                      )}
+                                    </>
+                                  )}
                               </div>
                               <pre className="whitespace-pre-wrap text-sm overflow-auto h-full text-black">
                                 {
