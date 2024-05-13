@@ -106,6 +106,7 @@ export class KafkaProducer {
 
   async sendMessageHttp(msg: KafkaMessage) {
     try {
+      console.log(`URL: ${this.VALHALLA_URL}/v1/log/request`);
       const result = await fetch(`${this.VALHALLA_URL}/v1/log/request`, {
         method: "POST",
         headers: {
