@@ -341,6 +341,26 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     return [];
   }, [searchParams, filterMap]);
 
+  useEffect(() => {
+    if (advancedFilters.length !== 0 || !userId) {
+      return;
+    }
+
+    const userFilerMapIndex = filterMap.findIndex(
+      (filter) => filter.label === "User"
+    );
+
+    if (userFilerMapIndex !== -1) {
+      setAdvancedFilters([
+        {
+          filterMapIdx: userFilerMapIndex,
+          operatorIdx: 0,
+          value: userId,
+        },
+      ]);
+    }
+  }, [advancedFilters, filterMap, userId]);
+
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
     refetch();

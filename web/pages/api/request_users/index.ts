@@ -14,18 +14,20 @@ async function handler({
   res,
   userData: { orgId },
 }: HandlerWrapperOptions<Result<UserMetric[], string>>) {
-  const { filter, offset, limit, sort } = req.body as {
+  const { filter, offset, limit, sort, timeZoneDifference } = req.body as {
     filter: FilterNode;
     offset: number;
     limit: number;
     sort: SortLeafUsers;
+    timeZoneDifference: number;
   };
   const { error: metricsError, data: metrics } = await userMetrics(
     orgId,
     filter,
     offset,
     limit,
-    sort
+    sort,
+    timeZoneDifference
   );
   if (metricsError !== null) {
     res.status(500).json({ error: metricsError, data: null });
