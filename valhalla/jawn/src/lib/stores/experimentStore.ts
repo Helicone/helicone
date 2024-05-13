@@ -37,6 +37,7 @@ export interface Experiment {
         response: ResponseObj;
         request: RequestObj;
       };
+      scores: Record<string, number>;
     }[];
   };
   meta: any;
@@ -58,6 +59,7 @@ export interface Experiment {
       datasetRowId: string;
       resultRequestId: string;
       response?: ResponseObj;
+      scores: Record<string, number>;
       request?: RequestObj;
     }[];
   }[];
@@ -156,7 +158,15 @@ function getExperimentsQuery(
                     ),`
                         : ""
                     }
-                      'rowId', dsr.id
+                    'rowId', dsr.id,
+                    'scores', (
+                      SELECT jsonb_object_agg(sa.score_key, sv.int_value)
+                      FROM score_value sv
+                      JOIN score_attribute sa ON sa.id = sv.score_attribute
+                      JOIN prompt_input_record pir ON pir.source_request = sv.request_id
+                      WHERE pir.id = dsr.input_record
+                      AND sa.organization = e.organization
+                    )
                   )
               )
           ),
@@ -216,7 +226,14 @@ function getExperimentsQuery(
                                       : ""
                                   }
                                   'datasetRowId', hr.dataset_row,
-                                  'resultRequestId', hr.result_request_id
+                                  'resultRequestId', hr.result_request_id,
+                                  'scores', (
+                                    SELECT jsonb_object_agg(sa.score_key, sv.int_value)
+                                    FROM score_value sv
+                                    JOIN score_attribute sa ON sa.id = sv.score_attribute
+                                    WHERE sv.request_id = hr.result_request_id
+                                    AND sa.organization = e.organization
+                                  )
                               )
                           )
                           FROM experiment_v2_hypothesis_run hr
