@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 const Lottie = dynamic(() => import("react-lottie"), { ssr: false });
 import { Result } from "../../../../lib/result";
 import * as Listening from "../../../../public/lottie/Listening.json";
