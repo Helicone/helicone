@@ -16,14 +16,8 @@ interface EventListenProps {
 const EventListen = (props: EventListenProps) => {
   const { previousStep, nextStep } = props;
 
-  // const [shouldFetch, setShouldFetch] = useState(true);
-  const [notification, setNotification] = useState<string>();
-  const [loading, setLoading] = useState(false);
-
   const nextStepHandler = async () => {
-    setLoading(true);
     nextStep();
-    setLoading(false);
   };
 
   const { data, isSuccess } = useQuery<Result<boolean, string>, Error>(
@@ -39,9 +33,6 @@ const EventListen = (props: EventListenProps) => {
       const jsonData = await response.json();
 
       if (!response.ok) {
-        setNotification(
-          "An error occurred while fetching data and we couldn't complete your onboarding. Please contact help@helicone.ai and we'll get you onboarded right away!"
-        );
         return null;
       }
 
@@ -75,11 +66,7 @@ const EventListen = (props: EventListenProps) => {
             <p className="text-md md:text-lg text-gray-500 font-light mt-4 text-center">
               Send your first event through Helicone to view your dashboard
             </p>
-            {notification && (
-              <p className="text-md md:text-lg text-red-500 font-light mt-4 text-center">
-                {notification}
-              </p>
-            )}
+
             <div className="flex flex-col w-full">
               <Lottie
                 options={{
