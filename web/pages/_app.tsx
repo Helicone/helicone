@@ -17,6 +17,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { OrgContextProvider } from "../components/layout/organizationContext";
 import { ThemeContextProvider } from "../components/shared/theme/themeContext";
+import Script from "next/script";
 
 if (
   typeof window !== "undefined" &&
@@ -67,6 +68,16 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
         </QueryClientProvider>
       </SessionContextProvider>
       {trackingEnabled && <Analytics />}
+      {trackingEnabled && (
+        <Script
+          id="koala-snippet"
+          dangerouslySetInnerHTML={{
+            __html: `<script>
+            !function(t){if(window.ko)return;window.ko=[],["identify","track","removeListeners","open","on","off","qualify","ready"].forEach(function(t){ko[t]=function(){var n=[].slice.call(arguments);return n.unshift(t),ko.push(n),ko}});var n=document.createElement("script");n.async=!0,n.setAttribute("src","https://cdn.getkoala.com/v1/pk_3d24ae9e69e18decfcb68b9d7b668c4501b5/sdk.js"),(document.body || document.head).appendChild(n)}();
+            </script>`,
+          }}
+        />
+      )}
     </>
   );
 }
