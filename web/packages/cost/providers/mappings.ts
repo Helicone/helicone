@@ -77,7 +77,7 @@ export const providers: {
   {
     pattern: azurePattern,
     provider: "AZURE",
-    costs: azureCosts,
+    costs: [...azureCosts, ...openaiCosts],
   },
   {
     pattern: localProxyPattern,
@@ -169,7 +169,7 @@ export const playgroundModels: {
         }));
     })
     .flat()
-    .filter((model) => model !== undefined) as {
+    .filter((model) => model !== undefined && model.provider !== "AZURE") as {
     name: string;
     provider: ProviderName;
   }[]) ?? [];

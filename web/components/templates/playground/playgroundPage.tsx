@@ -148,7 +148,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                           <InformationCircleIcon className="h-5 w-5 text-gray-500" />
                         </button>
                       </div>
-
                       <MultiSelect
                         placeholder="Select your models..."
                         value={selectedModels?.map((model) => model.name) || []}
