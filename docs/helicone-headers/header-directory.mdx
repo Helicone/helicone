@@ -154,12 +154,13 @@ const model = new ChatOpenAI({
 
 ## Response headers 
 
-| Headers                                   | Description                                       |
-| ----------------------------------------- | ------------------------------------------------- |
-| `Helicone-Cache`                          | Indicates whether the response was cached. Returns `HIT` or `MISS`. |
-| `Helicone-Cache-Bucket-Idx`               | Indicates the cache bucket index used as a `number`.                |
-| `Helicone-Fallback-Index`                 | Indicates fallback idex used as a `number`.                         |
+| Headers                                   | Description                                                                     |
+| ----------------------------------------- | ------------------------------------------------------------------------------- |
+| `Helicone-Id`                             | Indicates the ID of the request.                                                !
+| `Helicone-Cache`                          | Indicates whether the response was cached. Returns `HIT` or `MISS`.             |
+| `Helicone-Cache-Bucket-Idx`               | Indicates the cache bucket index used as a `number`.                            |
+| `Helicone-Fallback-Index`                 | Indicates fallback idex used as a `number`.                                     |
 | `Helicone-RateLimit-Limit`                | Indicates the quota for the `number` of requests allowed in the time window.    |
-| `Helicone-RateLimit-Remaining`            | Indicates the remaining quota in the current window as a `number`.    |
+| `Helicone-RateLimit-Remaining`            | Indicates the remaining quota in the current window as a `number`.              |
 | `Helicone-RateLimit-Policy`               | Indicates the active rate limit policy.|
 
