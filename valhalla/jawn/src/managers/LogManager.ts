@@ -64,16 +64,41 @@ export class LogManager {
       .setNext(loggingHandler)
       .setNext(posthogHandler);
 
-    await Promise.all(
-      logMessages.map(async (logMessage) => {
-        const handlerContext = new HandlerContext(logMessage);
-        const result = await authHandler.handle(handlerContext);
+    logMessages.map(async (logMessage) => {
+      const handlerContext = new HandlerContext(logMessage);
+      const result = await authHandler.handle(handlerContext);
 
-        if (result.error) {
-          Sentry.captureException(new Error(result.error), {
+      if (result.error) {
+        Sentry.captureException(new Error(result.error), {
+          tags: {
+            type: "HandlerError",
+            topic: "request-response-logs-prod",
+          },
+          extra: {
+            requestId: logMessage.log.request.id,
+            responseId: logMessage.log.response.id,
+            orgId: handlerContext.orgParams?.id ?? "",
+            batchId: batchContext.batchId,
+            partition: batchContext.partition,
+            offset: batchContext.lastOffset,
+            messageCount: batchContext.messageCount,
+          },
+        });
+        console.error(
+          `Error processing request ${logMessage.log.request.id} for batch ${batchContext.batchId}: ${result.error}`
+        );
+
+        const kafkaProducer = new KafkaProducer();
+        const res = await kafkaProducer.sendMessages(
+          [logMessage],
+          "request-response-logs-prod-dlq"
+        );
+
+        if (res.error) {
+          Sentry.captureException(new Error(res.error), {
             tags: {
-              type: "HandlerError",
-              topic: "request-response-logs-prod",
+              type: "KafkaError",
+              topic: "request-response-logs-prod-dlq",
             },
             extra: {
               requestId: logMessage.log.request.id,
@@ -85,40 +110,13 @@ export class LogManager {
               messageCount: batchContext.messageCount,
             },
           });
+
           console.error(
-            `Error processing request ${logMessage.log.request.id} for batch ${batchContext.batchId}: ${result.error}`
+            `Error sending message to DLQ: ${res.error} for request ${logMessage.log.request.id} in batch ${batchContext.batchId}`
           );
-
-          const kafkaProducer = new KafkaProducer();
-          const res = await kafkaProducer.sendMessages(
-            [logMessage],
-            "request-response-logs-prod-dlq"
-          );
-
-          if (res.error) {
-            Sentry.captureException(new Error(res.error), {
-              tags: {
-                type: "KafkaError",
-                topic: "request-response-logs-prod-dlq",
-              },
-              extra: {
-                requestId: logMessage.log.request.id,
-                responseId: logMessage.log.response.id,
-                orgId: handlerContext.orgParams?.id ?? "",
-                batchId: batchContext.batchId,
-                partition: batchContext.partition,
-                offset: batchContext.lastOffset,
-                messageCount: batchContext.messageCount,
-              },
-            });
-
-            console.error(
-              `Error sending message to DLQ: ${res.error} for request ${logMessage.log.request.id} in batch ${batchContext.batchId}`
-            );
-          }
         }
-      })
-    );
+      }
+    });
 
     // Inserts everything in transaction
     console.log(`Upserting logs for batch ${batchContext.batchId}`);

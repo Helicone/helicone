@@ -15,6 +15,9 @@ const db = pgp({
           ca: process.env.SUPABASE_SSL_CERT_CONTENTS?.split("\\n").join("\n"),
         }
       : undefined,
+  max: 20,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 2000,
 });
 
 process.on("exit", () => {
@@ -83,6 +86,12 @@ export class LogStore {
   constructor() {}
 
   async insertLogBatch(payload: BatchPayload): PromiseGenericResult<string> {
+    console.log(`
+    STORE - Expired Pool Count: ${db.$pool.expiredCount}
+    STORE - Waiting Pool Count: ${db.$pool.waitingCount}
+    STORE - Total Pool Count: ${db.$pool.totalCount}
+    STORE - Idle Pool Count: ${db.$pool.idleCount}
+    `);
     try {
       await db.tx(async (t: pgPromise.ITask<{}>) => {
         // Insert into the 'request' table

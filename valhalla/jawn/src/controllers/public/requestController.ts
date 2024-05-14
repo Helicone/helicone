@@ -21,6 +21,7 @@ import {
 import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { ScoreManager } from "../../managers/score/ScoreManager";
+import { validate as validateUUID } from "uuid";
 
 export type RequestFilterBranch = {
   left: RequestFilterNode;
