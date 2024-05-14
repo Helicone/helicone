@@ -1,11 +1,3 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeaderCell,
-  TableRow,
-} from "@tremor/react";
 import ModelPill from "../../requestsV2/modelPill";
 import { clsx } from "../../../shared/clsx";
 import { SimpleTable } from "../../../shared/table/simpleTable";
