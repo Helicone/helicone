@@ -3,6 +3,17 @@ title: "Python"
 description: "Learn how to integrate OpenAI with Helicone using Python"
 ---
 
+<Info>
+<b>Recomendation: Model Override</b>
+
+When using Azure, the model displays differently than expected at times. We have implemented logic to parse out the model, but to guarantee your model is consistent, we highly recommend using model override:
+
+<code>Helicone-Model-Override: [MODEL_NAME]</code>
+<br />
+<br />
+<a href="/helicone-headers/header-directory"> Click here to learn more about model override</a>
+</Info>
+
 ## Proxy Integration (recommended)
 
 <Steps>
@@ -17,14 +28,20 @@ export HELICONE_API_KEY=<your API key>
 
   </Step>
   <Step title="Modify the base path and add a Helicone-Auth header">
+    <Note>It is mandatory to include the `apik-key` in both locations.</Note>
 <CodeGroup>
 
 ```Python OpenAI v1+
 client = OpenAI(
-  api_key="your-api-key-here",  # Replace with your OpenAI API key
-  base_url="https://oai.hconeai.com/v1",  # Set the API endpoint
-  default_headers= {  # Optionally set default headers or set per request (see below)
-    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+  api_key="[AZURE_OPENAI_API_KEY]",
+  base_url="https://oai.hconeai.com/openai/deployments/[DEPLOYMENT]",
+  default_headers={
+      "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
+      "Helicone-Auth": "Bearer [HELICONE_API_KEY]",
+      "api-key": "[AZURE_OPENAI_API_KEY]",
+  },
+  default_query={
+    "api-version": "[API_VERSION]"
   }
 )
 ```
@@ -32,14 +49,20 @@ client = OpenAI(
 ```Python OpenAI v1
 import openai
 
-openai.api_base = "https://oai.hconeai.com/v1"
-openai.Completion.create(
-  # ...other parameters
+openai.api_base = "https://oai.hconeai.com"
+openai.api_key = "[AZURE_OPENAI_API_KEY]"
+openai.api_version = "[API_VERSION]"
+openai.api_type = "azure"
+
+# Create the completion request
+openai.ChatCompletion.create(
+  model="[DEPLOYMENT]",
+  messages=[{"role": "User", "content": "Say hi!"}],
   headers={
-    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+    "Helicone-Auth": "Bearer [HELICONE_API_KEY]",
+    "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
   }
 )
-
 ```
 
 </CodeGroup>
@@ -74,18 +97,25 @@ from helicone.openai_proxy import openai # replace `import openai` with this lin
 ```
 
   </Step>
-  <Step title="That's it! You're ready to start logging with Helicone. Here's an example of using Helicone along with our advanced features as parameters">
+  <Step title="Configure your azure domain and you are ready to send your azure requests to Helicone.">
 
 ```Python
-import OpenAI from "openai";
+from helicone.openai_proxy import openai
 
-const openai = new OpenAI({
-    apiKey: request.env.OPENAI_API_KEY,
-    baseURL: "https://oai.hconeai.com/v1",
-    defaultHeaders: {
-        "Helicone-Auth": `Bearer ${request.env.HELICONE_API_KEY}`,
-    },
-});
+openai.api_type = "azure"
+openai.api_base = "https://[YOUR_AZURE_DOMAIN].openai.azure.com"
+openai.api_version = "2023-03-15-preview"
+openai.api_key = YOUR_AZURE_API_KEY
+
+response = openai.ChatCompletion.create(
+  engine = 'gpt-35-turbo',
+  messages = [{
+    'role': 'user',
+    'content': "Hello World!"
+  }],
+  max_tokens=15,
+)
+
 
 ```
 
