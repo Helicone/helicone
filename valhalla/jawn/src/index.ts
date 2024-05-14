@@ -4,6 +4,7 @@ require("dotenv").config({
 
 import express, { NextFunction } from "express";
 import swaggerUi from "swagger-ui-express";
+import { Worker } from "worker_threads";
 
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authMiddleware } from "./middleware/auth";
@@ -44,6 +45,10 @@ const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
 if (KAFKA_ENABLED) {
   consume();
   // consumeDlq();
+}
+if (KAFKA_ENABLED) {
+  const worker = new Worker("./src/workers/kafkaConsumer.js");
+  worker.postMessage("start");
 }
 
 app.get("/healthcheck", (req, res) => {
