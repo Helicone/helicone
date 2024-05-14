@@ -169,7 +169,7 @@ export const playgroundModels: {
         }));
     })
     .flat()
-    .filter((model) => model !== undefined && model.provider !== "AZURE") as {
+    .filter((model) => model !== undefined) as {
     name: string;
     provider: ProviderName;
   }[]) ?? [];
