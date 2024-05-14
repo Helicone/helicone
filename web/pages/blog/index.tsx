@@ -17,6 +17,22 @@ export type BlogStructure = {
 
 const blogContent: BlogStructure[] = [
   {
+    title: "Switch over to gpt-4o safely and easily",
+    description:
+      "Learn how to use Helicone's experiments features to regression test, compare and switch models.",
+    badgeText: "Product",
+    date: "May 14, 2024",
+    href: "/blog/switch-models-safely",
+    imageUrl: "assets/blog/datadog/title.webp",
+    authors: [
+      {
+        name: "Scott Nguyen",
+        imageUrl: "/assets/blog/scottnguyen-headshot.webp",
+      },
+    ],
+    time: "5 minute read",
+  },
+  {
     title: "A Guide for Datadog Users Building with LLM's",
     description:
       "Datadog has long been a favourite among developers for monitoring and observability. But recently, LLM developers have been exploring new options. Why? We have some answers.",

@@ -46,10 +46,10 @@ const BlogPage = (props: BlogPageProps) => {
                       <span className="text-gray-400 text-sm">{blog.time}</span>
                     </div>
 
-                    <h2 className="font-semibold text-3xl pt-2">
+                    <h2 className="font-semibold text-2xl pt-2">
                       {blog.title}
                     </h2>
-                    <p className="text-gray-500 text-md">{blog.description}</p>
+                    <p className="text-gray-500 text-sm">{blog.description}</p>
                     <div className="flex flex-row justify-between gap-4 items-center py-4">
                       <div
                         className={clsx("flex items-center space-x-3 bottom-0")}
