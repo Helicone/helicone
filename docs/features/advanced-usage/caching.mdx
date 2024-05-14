@@ -2,6 +2,9 @@
 title: "Cache"
 description: "Reduce latency and save costs by caching on the edge"
 ---
+
+import QuestionsSection from '/snippets/questions-section.mdx';
+
 <Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing). However, the maximum number of caches you can store within a bucket is `20`. If you need to store more, you will need to upgrade to an enterprise plan.</Info>
 
 ## Introduction
@@ -232,3 +235,5 @@ cache_hit = chat_completion_raw.http_response.headers.get(
 print(cache_hit) # will print "HIT" or "MISS"
 
 ```
+
+<QuestionsSection />

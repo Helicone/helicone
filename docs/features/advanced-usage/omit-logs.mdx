@@ -3,6 +3,8 @@ title: "Omit Logs"
 description: "Omit response and requests"
 ---
 
+import QuestionsSection from '/snippets/questions-section.mdx';
+
 In some cases you may not want to have Helicone store or log your request body or response body.
 
 You can easily omit these by adding the `Helicone-Omit-Request` or `Helicone-Omit-Response` header and setting it to `"true"`.
@@ -50,3 +52,5 @@ const openai = new OpenAIApi(configuration);
 ```
 
 </CodeGroup>
+
+<QuestionsSection />
