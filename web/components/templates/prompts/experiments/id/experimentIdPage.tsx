@@ -168,9 +168,6 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                     <TableHeaderCell className="w-1/3 border-l border-gray-300">
                       <p className="text-black text-lg">Experiment Output</p>
                     </TableHeaderCell>
-                    <TableHeaderCell className="w-1/3 border-l border-gray-300">
-                      <p className="text-black text-lg">Scores</p>
-                    </TableHeaderCell>
                   </TableRow>
                 </TableHead>
 
