@@ -40,7 +40,7 @@ const BlogPage = (props: BlogPageProps) => {
                   <div className="w-full md:w-[36rem] h-full rounded-lg flex flex-col space-y-4 text-left order-2 md:order-1">
                     <div className="flex items-center gap-2">
                       <span className="bg-blue-50 text-blue-700 ring-blue-200 w-max items-center rounded-lg px-2 py-1 -my-1 text-sm font-medium ring-1 ring-inset">
-                        /{blog.badgeText.toLowerCase()}
+                        / {blog.badgeText.toLowerCase()}
                       </span>
                       <span className="text-gray-400 text-sm">-</span>
                       <span className="text-gray-400 text-sm">{blog.time}</span>
@@ -107,11 +107,10 @@ const BlogPage = (props: BlogPageProps) => {
                     <div className="flex items-center gap-2">
                       <span
                         className={clsx(
-                          blog.badgeColor,
-                          "w-max items-center rounded-lg px-2 py-1 -my-1 text-sm font-medium ring-1 ring-inset"
+                          "bg-sky-50 text-sky-700 ring-sky-600/10 w-max items-center rounded-lg px-2 py-1 -my-1 text-sm font-medium ring-1 ring-inset"
                         )}
                       >
-                        /{blog.badgeText.toLowerCase()}
+                        / {blog.badgeText.toLowerCase()}
                       </span>
                       <span className="text-gray-400 text-sm">-</span>
                       <span className="text-gray-400 text-sm">{blog.time}</span>
