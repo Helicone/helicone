@@ -54,8 +54,6 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
     ? Object.keys(runs?.[0]?.inputs).map((key) => key)
     : [];
 
-  const formatDate = (date: string) => new Date(date).toLocaleString();
-
   const calculateChange = (datasetCost: number, hypothesisCost: number) => {
     const change = hypothesisCost - datasetCost;
     const percentageChange = +((change / datasetCost) * 100).toFixed(2);
@@ -67,7 +65,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
 
   const getScoreValue = (score: Scores, field: string) => {
     if (field === "dateCreated") {
-      return formatDate(score.dateCreated);
+      return renderScoreValue(score.dateCreated);
     }
     if (field === "cost") {
       return `$${score.cost.toFixed(4)}`;
@@ -201,9 +199,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
     if (typeof value === "string" && !isNaN(Date.parse(value))) {
       return new Date(value).toLocaleDateString();
     }
-    if (typeof value === "number") {
-      return value.toFixed(4);
-    }
+
     return value;
   };
 
@@ -241,12 +237,12 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
           </TableCell>
           <TableCell className="h-full border-l border-gray-300">
             <p className="text-black text-sm">
-              {renderScoreValue(datasetValue)}
+              {getScoreValue(scores.dataset, field)}
             </p>
           </TableCell>
           <TableCell className="h-full border-l border-gray-300">
             <p className="text-black text-sm">
-              {renderScoreValue(hypothesisValue)}
+              {getScoreValue(scores.hypothesis, field)}
             </p>
           </TableCell>
           <TableCell className="h-full border-l border-gray-300">
@@ -295,10 +291,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                   </TableHeaderCell>
                   <TableHeaderCell className="w-1/3 border-l border-gray-300">
                     <p className="text-sm text-gray-500">
-                      {`Production with prompt ${
-                        experiment?.hypotheses?.[0]?.parentPromptVersion
-                          ?.template ?? ""
-                      }`}
+                      Production with prompt
                     </p>
                   </TableHeaderCell>
                   <TableHeaderCell className="w-1/3 border-l border-gray-300">
