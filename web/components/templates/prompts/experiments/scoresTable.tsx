@@ -20,7 +20,7 @@ type ExperimentScores = {
   };
 };
 
-type ScoresProps = {
+export type ScoresProps = {
   scores: ExperimentScores;
 };
 const ScoresTable = ({ scores }: ScoresProps) => {

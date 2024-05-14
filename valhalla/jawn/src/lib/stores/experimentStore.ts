@@ -62,7 +62,7 @@ export interface Experiment {
   scores: ExperimentScores | null;
 }
 
-type ScoreValue = string | number;
+type ScoreValue = string | number | Date;
 
 export interface ExperimentScores {
   dataset: {
@@ -419,7 +419,7 @@ function getExperimentHypothesisScores(
 
     return ok({
       scores: {
-        dateCreated: new Date(hypothesis.createdAt).toISOString(),
+        dateCreated: new Date(hypothesis.createdAt),
         model: hypothesis.model,
         cost: hypothesisCost,
       },
@@ -473,7 +473,7 @@ function getExperimentDatasetScores(
 
     return ok({
       scores: {
-        dateCreated: new Date(latest.createdAt).toISOString(),
+        dateCreated: new Date(latest.createdAt),
         model: latest.model,
         cost: averageCost,
       },

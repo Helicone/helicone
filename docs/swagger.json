@@ -1797,6 +1797,10 @@
 					{
 						"type": "number",
 						"format": "double"
+					},
+					{
+						"type": "string",
+						"format": "date-time"
 					}
 				]
 			},

@@ -128,7 +128,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
             <h1 className="font-semibold text-3xl text-black dark:text-white">
               {experiment?.id}
             </h1>
-            <ScoresTable scores={experiment?.scores} />
+            {experiment?.scores && <ScoresTable scores={experiment?.scores} />}
             <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-black">
               <div className="w-full flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
                 <div className="flex items-center space-x-2">
