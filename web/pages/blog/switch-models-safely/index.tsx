@@ -40,7 +40,7 @@ export default function Home({
       description={
         "A step by step guide to switch to gpt-4o safely with Helicone"
       }
-      ogImageUrl={"assets/blog/experiments/gpt-4o.png"}
+      ogImageUrl={"/assets/blog/experiments/gpt-4o.png"}
     >
       <div className="w-full bg-[#f8feff] h-full antialiased relative">
         <NavBarV2 />
