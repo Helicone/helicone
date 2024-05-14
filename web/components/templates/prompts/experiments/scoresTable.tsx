@@ -24,15 +24,6 @@ export type ScoresProps = {
   scores: ExperimentScores;
 };
 const ScoresTable = ({ scores }: ScoresProps) => {
-  const calculateChange = (datasetCost: number, hypothesisCost: number) => {
-    const change = hypothesisCost - datasetCost;
-    const percentageChange = +((change / datasetCost) * 100).toFixed(2);
-    return {
-      change: +change.toFixed(4),
-      percentageChange,
-    };
-  };
-
   const getScoreValue = (score: ScoreValue, field: string) => {
     if (field === "dateCreated" && typeof score === "string") {
       return renderScoreValue(score);
@@ -161,7 +152,7 @@ const ScoresTable = ({ scores }: ScoresProps) => {
           </TableCell>
           <TableCell className="h-full border-l border-gray-300">
             <p className="text-black text-sm">
-              {getScoreValue(scores.dataset.scores[field], field)}
+              {getScoreValue(scores.hypothesis.scores[field], field)}
             </p>
           </TableCell>
           <TableCell className="h-full border-l border-gray-300">
