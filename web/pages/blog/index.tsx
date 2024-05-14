@@ -17,13 +17,13 @@ export type BlogStructure = {
 
 const blogContent: BlogStructure[] = [
   {
-    title: "Switch over to gpt-4o safely and easily",
+    title: "A step by step guide to switch to gpt-4o safely with Helicone",
     description:
       "Learn how to use Helicone's experiments features to regression test, compare and switch models.",
     badgeText: "Product",
     date: "May 14, 2024",
     href: "/blog/switch-models-safely",
-    imageUrl: "assets/blog/datadog/title.webp",
+    imageUrl: "assets/blog/experiments/gpt-4o.png",
     authors: [
       {
         name: "Scott Nguyen",
