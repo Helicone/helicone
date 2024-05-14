@@ -144,13 +144,15 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
         return (
           <span
             className={clsx(
-              scores.dataset.dateCreated === scores.hypothesis.dateCreated
+              scores.dataset.scores.dateCreated ===
+                scores.hypothesis.scores.dateCreated
                 ? "bg-gray-50 text-gray-700 ring-gray-200"
                 : "bg-gray-50 text-gray-700 ring-gray-200",
               "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
             )}
           >
-            {scores.dataset.dateCreated === scores.hypothesis.dateCreated
+            {scores.dataset.scores.dateCreated ===
+            scores.hypothesis.scores.dateCreated
               ? "same"
               : "changed"}
           </span>
@@ -176,13 +178,13 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
         return (
           <span
             className={clsx(
-              scores.dataset.model === scores.hypothesis.model
+              scores.dataset.scores.model === scores.hypothesis.scores.model
                 ? "bg-gray-50 text-gray-700 ring-gray-200"
                 : "bg-gray-50 text-gray-700 ring-gray-200",
               "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
             )}
           >
-            {scores.dataset.model === scores.hypothesis.model
+            {scores.dataset.scores.model === scores.hypothesis.scores.model
               ? "same"
               : "changed"}
           </span>
@@ -204,12 +206,12 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
   };
 
   const renderTableRows = (scores: Scores) => {
-    if (!experiment?.scores) {
+    if (!experiment?.scores || !experiment?.scores.dataset.scores) {
       return null;
     }
 
     const experimentScoresAttributes = [
-      ...Object.keys(experiment.scores.dataset).filter(
+      ...Object.keys(experiment.scores.dataset.scores).filter(
         (key) => key !== "customScores"
       ),
     ];
@@ -231,12 +233,12 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
           </TableCell>
           <TableCell className="h-full border-l border-gray-300">
             <p className="text-black text-sm">
-              {getScoreValue(scores.dataset, field)}
+              {getScoreValue(scores.dataset.scores, field)}
             </p>
           </TableCell>
           <TableCell className="h-full border-l border-gray-300">
             <p className="text-black text-sm">
-              {getScoreValue(scores.hypothesis, field)}
+              {getScoreValue(scores.hypothesis.scores, field)}
             </p>
           </TableCell>
           <TableCell className="h-full border-l border-gray-300">
@@ -244,7 +246,10 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
               field,
               scores,
               field === "cost" &&
-                calculateChange(scores.dataset.cost, scores.hypothesis.cost)
+                calculateChange(
+                  scores.dataset.scores.cost,
+                  scores.hypothesis.scores.cost
+                )
             )}
           </TableCell>
         </TableRow>

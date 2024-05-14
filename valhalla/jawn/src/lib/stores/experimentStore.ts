@@ -64,16 +64,10 @@ export interface Experiment {
 
 export interface ExperimentScores {
   dataset: {
-    dateCreated: Date;
-    model: string;
-    cost: number;
-    //customScores: Record<string, number>;
+    scores: Record<string, any>;
   };
   hypothesis: {
-    dateCreated: Date;
-    model: string;
-    cost: number;
-    //customScores: Record<string, number>;
+    scores: Record<string, any>;
   };
 }
 
@@ -422,9 +416,11 @@ function getExperimentHypothesisScores(
     );
 
     return ok({
-      dateCreated: new Date(hypothesis.createdAt),
-      model: hypothesis.model,
-      cost: hypothesisCost,
+      scores: {
+        dateCreated: new Date(hypothesis.createdAt),
+        model: hypothesis.model,
+        cost: hypothesisCost,
+      },
     });
   } catch (error) {
     console.error("Error calculating hypothesis cost", error);
@@ -474,9 +470,11 @@ function getExperimentDatasetScores(
     const averageCost = validRows.length > 0 ? totalCost / validRows.length : 0;
 
     return ok({
-      dateCreated: new Date(latest.createdAt),
-      model: latest.model,
-      cost: averageCost,
+      scores: {
+        dateCreated: new Date(latest.createdAt),
+        model: latest.model,
+        cost: averageCost,
+      },
     });
   } catch (error) {
     console.error("Error calculating dataset cost", error);

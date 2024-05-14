@@ -550,20 +550,16 @@ Json: JsonObject;
       id: string;
       provider: string;
     };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.any_": {
+      [key: string]: unknown;
+    };
     ExperimentScores: {
       dataset: {
-        /** Format: double */
-        cost: number;
-        model: string;
-        /** Format: date-time */
-        dateCreated: string;
+        scores: components["schemas"]["Record_string.any_"];
       };
       hypothesis: {
-        /** Format: double */
-        cost: number;
-        model: string;
-        /** Format: date-time */
-        dateCreated: string;
+        scores: components["schemas"]["Record_string.any_"];
       };
     };
     Experiment: {
