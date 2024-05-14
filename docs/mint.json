@@ -84,7 +84,6 @@
         "features/advanced-usage/vault",
         "features/advanced-usage/moderations", 
         "features/advanced-usage/llm-security",
-        "features/webhooks",
         {
           "group": "Customer Portal",
           "pages": [
