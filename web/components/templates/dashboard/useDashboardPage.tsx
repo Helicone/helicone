@@ -1,6 +1,6 @@
 import { UseQueryResult } from "@tanstack/react-query";
 import { OverTimeRequestQueryParams } from "../../../lib/api/metrics/timeDataHandlerWrapper";
-import { Result, resultMap } from "../../../lib/result";
+import { Result, ok, resultMap } from "../../../lib/result";
 import {
   RequestsOverTime,
   TimeIncrement,
@@ -87,7 +87,11 @@ export const useDashboardPage = ({
     DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]
   ).concat(propertyFilters);
 
-  const { isLoading: isModelsLoading, models } = useModels(timeFilter, 5);
+  const { isLoading: isModelsLoading, models } = useModels(timeFilter, 1000);
+  const topModels =
+    models?.data
+      ?.sort((a, b) => (a.total_requests > b.total_requests ? -1 : 1))
+      .slice(0, 5) ?? [];
 
   // replace the model filter inside of the filterMap with the text suggestion model
   const modelFilterIdx = filterMap.findIndex(
@@ -97,7 +101,7 @@ export const useDashboardPage = ({
     filterMap[modelFilterIdx] = {
       label: "Model",
       operators: textWithSuggestions(
-        models?.data
+        topModels
           ?.filter((model) => model.model)
           .map((model) => ({
             key: model.model,
@@ -281,7 +285,7 @@ export const useDashboardPage = ({
       Object.values(overTimeData).forEach((x) => x.remove());
       Object.values(metrics).forEach((x) => x.remove());
     },
-    models,
+    models: ok(topModels),
     isModelsLoading,
   };
 };
