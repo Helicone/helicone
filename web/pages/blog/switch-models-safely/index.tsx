@@ -17,7 +17,7 @@ export const getServerSideProps: GetServerSideProps<{
     process.cwd(),
     "pages",
     "blog",
-    "langsmith", // <<<<---- UPDATE THIS LINE TO MATCH THE FOLDER NAME
+    "switch-models-safely", // <<<<---- UPDATE THIS LINE TO MATCH THE FOLDER NAME
     "src.mdx"
   );
 
@@ -35,16 +35,17 @@ export default function Home({
   mdxSource,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
+    // <<<<---- Update the description and ogImageUrl
     <PublicMetaData
       description={
-        "A LangSmith Alternative that Takes LLM Observability to the Next Level"
+        "A step by step guide to switch to gpt-4o safely with Helicone"
       }
-      ogImageUrl={"/assets/blog/langsmith-vs-helicone/cover-image.webp"}
+      ogImageUrl={"/assets/blog/experiments/gpt-4o.png"}
     >
       <div className="w-full bg-[#f8feff] h-full antialiased relative">
         <NavBarV2 />
-        <div className="flex items-start w-full mx-auto max-w-5xl py-24 relative">
-          <div className="w-56 h-full flex flex-col space-y-2 sticky top-32">
+        <div className="flex flex-col md:flex-row items-start w-full mx-auto max-w-5xl py-16 px-4 md:py-24 relative">
+          <div className="w-56 h-full flex flex-col space-y-2 md:sticky top-16 md:top-32">
             <Link href="/blog" className="flex items-center gap-1">
               <ChevronLeftIcon className="w-4 h-4" />
               <span className="text-sm font-bold">back</span>
@@ -63,7 +64,7 @@ export default function Home({
             </h3>
           </div>
           <article className="prose w-full h-full">
-            <h1 className="text-bold text-sky-500">
+            <h1 className="text-bold text-sky-500 mt-16 md:mt-0">
               {String(mdxSource.frontmatter.title)}
             </h1>
             <MDXComponent {...mdxSource} />
