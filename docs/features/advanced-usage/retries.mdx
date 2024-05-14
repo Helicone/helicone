@@ -11,8 +11,7 @@ Retrying requests is a common best practice when dealing with overloaded servers
 
 For more information on error codes, see the [OpenAI API error codes documentation](https://platform.openai.com/docs/guides/error-codes/api-errors).
 
-
-<Accordion title="Learn about exponential backoff">
+<Accordion title="Learn About Exponential Backoff">
   To effectively deal with retries, we use a strategy called **exponential backoff**. Exponential backoff involves increasing the wait time between retries exponentially, which helps to spread out the request load and gives the server a chance to recover. This is done by multiplying the wait time by a factor (default is 2) for each subsequent retry.
 </Accordion>
 

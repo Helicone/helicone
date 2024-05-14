@@ -1,20 +1,13 @@
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Database } from "../../../../supabase/database.types";
-import { clsx } from "../../../shared/clsx";
 import { useOrg } from "../../../layout/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
 import { PostgrestError } from "@supabase/supabase-js";
+import HcButton from "../../../ui/hcButton";
+import { Select, SelectItem, TextInput } from "@tremor/react";
 
-export const COMPANY_SIZES = [
-  "Select company size",
-  "Just me",
-  "2-5",
-  "5-25",
-  "25-100",
-  "100+",
-];
+export const COMPANY_SIZES = ["Just me", "2-5", "5-25", "25-100", "100+"];
 
 interface CreateOrgProps {
   nextStep: () => void;
@@ -24,39 +17,40 @@ const CreateOrg = (props: CreateOrgProps) => {
   const { nextStep } = props;
 
   const user = useUser();
-  const [loaded, setLoaded] = useState(false);
-  const [referralType, setReferralType] = useState<string>("");
+  const orgContext = useOrg();
+
+  const [referralType, setReferralType] = useState<string>(
+    orgContext?.currentOrg?.referral ?? ""
+  );
+  const [orgName, setOrgName] = useState<string>(
+    orgContext?.currentOrg?.name ?? ""
+  );
+  const [orgSize, setOrgSize] = useState<string>(
+    orgContext?.currentOrg?.size ?? ""
+  );
+  const [referralCode, setReferralCode] = useState<string>("");
   const supabaseClient = useSupabaseClient<Database>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useNotification();
-  const orgContext = useOrg();
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoaded(true), 500); // delay of 500ms
-    return () => clearTimeout(timer); // this will clear Timeout
-    // when component unmount like in willComponentUnmount
-  }, []);
-
-  const handleOrgCreate = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
+  const handleOrgCreate = async () => {
     if (!user) return;
 
     setIsLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const orgName = formData.get("org-name") as string;
-    const orgSize = formData.get("org-size") as string;
-    const orgReferral = formData.get("org-referral") as string;
-    const referralCode = formData.get("referral-code") as string;
+    if (orgName === "") {
+      setNotification("Please enter a company name.", "info");
+      setIsLoading(false);
+      return;
+    }
 
-    if (orgSize === "Select company size") {
+    if (orgSize === "") {
       setNotification("Please select a company size.", "info");
       setIsLoading(false);
       return;
     }
 
-    if (orgReferral === "Select referral source") {
+    if (referralType === "") {
       setNotification("Please select a referral source.", "info");
       setIsLoading(false);
       return;
@@ -82,7 +76,7 @@ const CreateOrg = (props: CreateOrgProps) => {
         body: JSON.stringify({
           name: orgName,
           size: orgSize,
-          referral: orgReferral,
+          referral: referralType,
           owner: user.id,
           is_personal: true,
           tier: "free",
@@ -100,7 +94,7 @@ const CreateOrg = (props: CreateOrgProps) => {
         .update({
           name: orgName,
           size: orgSize,
-          referral: orgReferral,
+          referral: referralType,
         })
         .eq("id", orgContext?.currentOrg?.id ?? "");
       checkError(error);
@@ -132,6 +126,7 @@ const CreateOrg = (props: CreateOrgProps) => {
           }
         });
     } else {
+      setNotification("Successfully created organization.", "success");
       setIsLoading(false);
       orgContext?.refetchOrgs();
       nextStep();
@@ -139,132 +134,116 @@ const CreateOrg = (props: CreateOrgProps) => {
   };
 
   return (
-    <div
-      className={clsx(
-        `transition-all duration-700 ease-in-out ${
-          loaded ? "opacity-100" : "opacity-0"
-        }`,
-        "flex flex-col items-center w-full px-2 space-y-8 max-w-lg"
-      )}
-    >
-      <div className="flex flex-col items-center text-center space-y-4">
-        <p className="text-lg md:text-3xl font-semibold">
-          Create a new organization
-        </p>
-        <p className="text-md md:text-lg text-gray-500 font-light">
-          Join thousands of developers and organizations using Helicone today to
-          monitor their applications.
-        </p>
-      </div>
-      <form
-        className="flex flex-col space-y-8 w-full px-4"
-        onSubmit={handleOrgCreate}
-      >
-        <div className="flex flex-col space-y-2">
-          <label
-            htmlFor="org-name"
-            className="block text-md font-semibold leading-6"
-          >
-            Organization Name
-          </label>
-          <div className="">
-            <input
-              type="text"
-              name="org-name"
-              id="org-name"
-              required
-              className={clsx(
-                "bg-white dark:bg-black block w-full rounded-md border-0 px-4 py-4 text-md shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
-              )}
-              placeholder={orgContext?.currentOrg?.name}
-            />
-          </div>
-        </div>
-        <div className="flex flex-col space-y-2 pt-4">
-          <label
-            htmlFor="org-size"
-            className="block text-md font-semibold leading-6"
-          >
-            How large is your company?
-          </label>
-          <div className="">
-            <select
-              id="org-size"
-              name="org-size"
-              className={clsx(
-                "bg-white dark:bg-black block w-full rounded-md border-0 px-4 py-2 text-sm shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
-              )}
-              required
-            >
-              {COMPANY_SIZES.map((o) => (
-                <option key={o}>{o}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="flex flex-col space-y-2">
-          <label
-            htmlFor="org-referral"
-            className="block text-md font-semibold leading-6"
-          >
-            How did you hear about us?
-          </label>
-          <div className="">
-            <select
-              id="org-referral"
-              name="org-referral"
-              className={clsx(
-                "bg-white dark:bg-black block w-full rounded-md border-0 px-4 py-2 text-sm shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
-              )}
-              required
-              onChange={(e) => setReferralType(e.target.value)}
-            >
-              {[
-                "Select referral source",
-                "Friend (referral)",
-                "Google",
-                "Twitter",
-                "LinkedIn",
-                "Microsoft for Startups",
-                "Other",
-              ].map((o) => (
-                <option key={o}>{o}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        {referralType === "Friend (referral)" && (
-          <div className="flex flex-col space-y-2">
-            <label
-              htmlFor="referral-code"
-              className="block text-md font-semibold leading-6"
-            >
-              Referral Code (optional)
-            </label>
-            <div className="">
-              <input
-                id="referral-code"
-                name="referral-code"
-                placeholder={"Referral code"}
-                className={clsx(
-                  "bg-white dark:bg-black block w-full rounded-md border-0 px-4 py-2 text-sm shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
-                )}
-              />
+    <>
+      <div id="content" className="w-full flex flex-col space-y-4">
+        <div className="flex flex-col p-4">
+          <div className="flex flex-col space-y-8 w-full">
+            <h2 className="text-2xl font-semibold">Create your organization</h2>
+            <div className="flex flex-col space-y-2">
+              <label
+                htmlFor="org-name"
+                className="block text-sm font-semibold leading-6"
+              >
+                What is your company name?
+              </label>
+              <div>
+                <TextInput
+                  name="org-name"
+                  id="org-name"
+                  required
+                  placeholder={orgContext?.currentOrg?.name}
+                  value={orgName}
+                  onValueChange={(value) => setOrgName(value)}
+                />
+              </div>
             </div>
+            <div className="flex flex-col space-y-2">
+              <label
+                htmlFor="org-size"
+                className="block text-sm font-semibold leading-6"
+              >
+                How large is your company?
+              </label>
+              <div>
+                <Select
+                  id="org-size"
+                  name="org-size"
+                  required
+                  placeholder="Select company size"
+                  value={orgSize}
+                  onValueChange={(value) => setOrgSize(value)}
+                >
+                  {COMPANY_SIZES.map((o) => (
+                    <SelectItem key={o} value={o}>
+                      {o}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </div>
+            </div>
+            <div className="flex flex-col space-y-2">
+              <label
+                htmlFor="org-referral"
+                className="block text-sm font-semibold leading-6"
+              >
+                How did you hear about us?
+              </label>
+              <div className="">
+                <Select
+                  id="org-referral"
+                  name="org-referral"
+                  required
+                  placeholder="Select referral source"
+                  value={referralType}
+                  onValueChange={(value) => setReferralType(value)}
+                >
+                  {[
+                    "Friend (referral)",
+                    "Google",
+                    "Twitter",
+                    "LinkedIn",
+                    "Microsoft for Startups",
+                    "Other",
+                  ].map((o) => (
+                    <SelectItem key={o} value={o}>
+                      {o}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </div>
+            </div>
+            {referralType === "Friend (referral)" && (
+              <div className="flex flex-col space-y-2">
+                <label
+                  htmlFor="referral-code"
+                  className="block text-md font-semibold leading-6"
+                >
+                  Referral Code (optional)
+                </label>
+                <div className="">
+                  <TextInput
+                    id="referral-code"
+                    name="referral-code"
+                    placeholder={"Referral code"}
+                    value={referralCode}
+                    onValueChange={(value) => setReferralCode(value)}
+                  />
+                </div>
+              </div>
+            )}
           </div>
-        )}
-
-        <button
-          type="submit"
-          className="px-28 py-3 bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 dark:text-black font-medium text-white rounded-xl mt-8"
-        >
-          {isLoading && (
-            <ArrowPathIcon className="animate-spin h-5 w-5 mr-2 inline" />
-          )}
-          {orgContext?.currentOrg ? "Create Organization" : "Next"}
-        </button>
-      </form>
-    </div>
+        </div>
+        <div className="flex items-center justify-between p-4">
+          <HcButton variant={"secondary"} size={"sm"} title={"Back"} />
+          <HcButton
+            variant={"primary"}
+            size={"sm"}
+            title={"Next"}
+            onClick={handleOrgCreate}
+          />
+        </div>
+      </div>
+    </>
   );
 };
 
