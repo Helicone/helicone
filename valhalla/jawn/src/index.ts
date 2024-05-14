@@ -47,7 +47,7 @@ if (KAFKA_ENABLED) {
   // consumeDlq();
 }
 if (KAFKA_ENABLED) {
-  const worker = new Worker("./src/workers/kafkaConsumer.js");
+  const worker = new Worker(`${__dirname}/workers/kafkaConsumer.js`);
   worker.postMessage("start");
 }
 
