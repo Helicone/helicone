@@ -48,7 +48,7 @@ if (KAFKA_ENABLED && KAFKA_BROKER && KAFKA_USERNAME && KAFKA_PASSWORD) {
 
 const AVG_MESSAGE_SIZE = 2_000; // 2kB
 const ESTIMATED_MINI_BATCH_SIZE = 5; // 5 messages
-const MESSAGES_PER_MINI_BATCH = 500; // 150 messages
+const MESSAGES_PER_MINI_BATCH = 300;
 
 // Average message is 1kB, so we can set minBytes to 1kB and maxBytes to 10kB
 const consumer = kafka?.consumer({
