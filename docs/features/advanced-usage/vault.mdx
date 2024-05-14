@@ -14,7 +14,6 @@ Vault is designed to securely store provider API keys (from OpenAI and future pr
   <img src="/images/vault/example-key-vault.png" />
 </Frame>
 
-
 ### Why Key Vault
 
 - **Simplified Key Management**: Send just one key to Helicone, eliminating the need to manage both a Helicone auth and an OpenAI key.
@@ -35,6 +34,9 @@ Vault is designed to securely store provider API keys (from OpenAI and future pr
 
 <Note>Currently, Helicone helps you store OpenAI Provider Key. In the future, we plan to expand to include other providers. </Note>
 
+<Accordion title="How we encrypt your Provider Key securely?">
+  At Helicone, we use transparent column encryption with the `XChaCha20 cryptographic algorithm` and `nonce support` to securely encrypt all keys at rest, ensuring an extra layer of protection.
+</Accordion>
 
 ### Step 2: Generate Proxy Keys for Your Team  
 1. On the same `Vault` page, click on `Create Proxy Key`. 
