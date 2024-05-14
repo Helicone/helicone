@@ -90,8 +90,8 @@ export const useDashboardPage = ({
   const userFilters = filterUIToFilterLeafs(filterMap, uiFilters);
   const { isLoading: isModelsLoading, models } = useModels(
     timeFilter,
-    userFilters,
-    1000
+    1000,
+    userFilters
   );
   const topModels =
     models?.data

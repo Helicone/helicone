@@ -6,8 +6,8 @@ import { FilterLeaf, filterListToTree } from "../lib/filters/filterDefs";
 
 const useModels = (
   timeFilter: TimeFilter,
-  userFilters: FilterLeaf[],
-  limit: number
+  limit: number,
+  userFilters?: FilterLeaf[]
 ) => {
   const { data: models, isLoading } = useQuery({
     queryKey: ["modelMetrics", timeFilter, userFilters],
@@ -18,7 +18,7 @@ const useModels = (
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          filter: filterListToTree(userFilters, "and"),
+          filter: userFilters ? filterListToTree(userFilters, "and") : "all",
           offset: 0,
           limit,
           timeFilter,
