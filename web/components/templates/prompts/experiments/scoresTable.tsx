@@ -8,6 +8,7 @@ import {
 } from "@tremor/react";
 import ModelPill from "../../requestsV2/modelPill";
 import { clsx } from "../../../shared/clsx";
+import { SimpleTable } from "../../../shared/table/simpleTable";
 
 type ScoreValue = string | number;
 
@@ -24,6 +25,14 @@ export type ScoresProps = {
   scores: ExperimentScores;
 };
 const ScoresTable = ({ scores }: ScoresProps) => {
+  const calculateChange = (datasetCost: number, hypothesisCost: number) => {
+    const change = hypothesisCost - datasetCost;
+    const percentageChange = ((change / datasetCost) * 100).toFixed(2);
+    return {
+      change: parseFloat(change.toFixed(4)),
+      percentageChange,
+    };
+  };
   const getScoreValue = (score: ScoreValue, field: string) => {
     if (field === "dateCreated" && typeof score === "string") {
       return renderScoreValue(score);
@@ -34,7 +43,7 @@ const ScoresTable = ({ scores }: ScoresProps) => {
     if (field === "model" && typeof score === "string") {
       return <ModelPill model={score} />;
     }
-    return (score as any)[field];
+    return score;
   };
 
   const getScoreAttribute = (key: string) => {
@@ -86,7 +95,9 @@ const ScoresTable = ({ scores }: ScoresProps) => {
               "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
             )}
           >
-            {`${changeInfo.change} (${changeInfo.percentageChange}%)`}
+            {`${changeInfo.change > 0 && "+"}${changeInfo.change} (${
+              changeInfo.percentageChange
+            }%)`}
           </span>
         );
       case "model":
@@ -119,78 +130,75 @@ const ScoresTable = ({ scores }: ScoresProps) => {
 
     return value;
   };
-  const renderTableRows = (scores: ExperimentScores) => {
+
+  const getTableData = (scores: ExperimentScores) => {
     if (!scores || !scores.dataset.scores) {
-      return null;
+      return [];
     }
 
-    const experimentScoresAttributes = [
-      ...Object.keys(scores.dataset.scores).filter(
-        (key) => key !== "customScores"
-      ),
-    ];
+    const experimentScoresAttributes = Object.keys(
+      scores.dataset.scores
+    ).filter((key) => key !== "customScores");
 
     return experimentScoresAttributes.map((field) => {
-      const calculateChange = (datasetCost: number, hypothesisCost: number) => {
-        const change = hypothesisCost - datasetCost;
-        const percentageChange = ((change / datasetCost) * 100).toFixed(2);
-        return {
-          change: parseFloat(change.toFixed(4)),
-          percentageChange,
-        };
-      };
-
-      return (
-        <TableRow key={field} className="w-full">
-          <TableCell className="h-full items-start border-r border-gray-300 max-w-xs">
-            <p className="text-black text-sm">{getScoreAttribute(field)}</p>
-          </TableCell>
-          <TableCell className="h-full border-l border-gray-300">
-            <p className="text-black text-sm">
-              {getScoreValue(scores.dataset.scores[field], field)}
-            </p>
-          </TableCell>
-          <TableCell className="h-full border-l border-gray-300">
-            <p className="text-black text-sm">
-              {getScoreValue(scores.hypothesis.scores[field], field)}
-            </p>
-          </TableCell>
-          <TableCell className="h-full border-l border-gray-300">
-            {renderComparisonCell(
+      const comparisonCell =
+        field === "cost"
+          ? renderComparisonCell(
               field,
               scores,
-              field === "cost" &&
-                calculateChange(
-                  scores.dataset.scores.cost as number,
-                  scores.hypothesis.scores.cost as number
-                )
-            )}
-          </TableCell>
-        </TableRow>
-      );
+              calculateChange(
+                scores.dataset.scores.cost as number,
+                scores.hypothesis.scores.cost as number
+              )
+            )
+          : renderComparisonCell(field, scores, null);
+
+      return {
+        score_key: getScoreAttribute(field),
+        dataset: getScoreValue(scores.dataset.scores[field], field),
+        hypothesis: getScoreValue(scores.hypothesis.scores[field], field),
+        compare: comparisonCell,
+      };
     });
   };
   return (
-    <Table className="h-full w-full dark:border-gray-700 bg-white dark:bg-black p-4 border border-gray-300 rounded-lg">
-      <TableHead className="border-b border-gray-300 w-full">
-        <TableRow>
-          <TableHeaderCell className="w-1/6">
-            <p className="text-sm text-gray-500">Scores</p>
-          </TableHeaderCell>
-          <TableHeaderCell className="w-1/3 border-l border-gray-300">
-            <p className="text-sm text-gray-500">Production with prompt</p>
-          </TableHeaderCell>
-          <TableHeaderCell className="w-1/3 border-l border-gray-300">
-            <p className="text-sm text-gray-500">Experiment with prompt</p>
-          </TableHeaderCell>
-          <TableHeaderCell className="w-1/3 border-l border-gray-300">
-            <p className="text-sm text-gray-500">Compare</p>
-          </TableHeaderCell>
-        </TableRow>
-      </TableHead>
-
-      <TableBody>{scores && renderTableRows(scores)}</TableBody>
-    </Table>
+    <>
+      <SimpleTable
+        data={getTableData(scores) || []}
+        columns={[
+          {
+            key: "score_key",
+            header: "Scores",
+            render: (score) => (
+              <div className="text-gray-500 dark:text-white font-semibold  flex items-center">
+                {score.score_key}
+              </div>
+            ),
+          },
+          {
+            key: "dataset",
+            header: "Production with prompt",
+            render: (score) => (
+              <div className="text-black">{score.dataset}</div>
+            ),
+          },
+          {
+            key: "hypothesis",
+            header: "Experiment with prompt",
+            render: (score) => (
+              <div className="text-black">{score.hypothesis}</div>
+            ),
+          },
+          {
+            key: "compare",
+            header: "Compare",
+            render: (score) => (
+              <div className="text-black">{score.compare}</div>
+            ),
+          },
+        ]}
+      />
+    </>
   );
 };
 
