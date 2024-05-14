@@ -55,7 +55,10 @@ const consumer = kafka?.consumer({
   groupId: "jawn-consumer",
   minBytes: 100_000,
   maxBytes:
-    AVG_MESSAGE_SIZE * MESSAGES_PER_MINI_BATCH * ESTIMATED_MINI_BATCH_SIZE,
+    AVG_MESSAGE_SIZE *
+    MESSAGES_PER_MINI_BATCH *
+    ESTIMATED_MINI_BATCH_SIZE *
+    1.1, // 10% buffer
 });
 
 export const consume = async () => {
