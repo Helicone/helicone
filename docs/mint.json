@@ -58,8 +58,7 @@
           "pages": [
             "integrations/azure/node",
             "integrations/azure/python",
-            "integrations/azure/langchain",
-            "integrations/azure/async"
+            "integrations/azure/langchain"
           ]
         },
         "getting-started/integration-method/azure",
