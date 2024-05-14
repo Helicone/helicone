@@ -151,7 +151,10 @@ export default {
         return handleError(requestWrapper.error);
       }
       env = modifyEnvBasedOnPath(env, requestWrapper.data);
-      const router = buildRouter(env.WORKER_TYPE);
+      const router = buildRouter(
+        env.WORKER_TYPE,
+        request.url.includes("browser")
+      );
       return router
         .handle(request, requestWrapper.data, env, ctx)
         .catch(handleError);
