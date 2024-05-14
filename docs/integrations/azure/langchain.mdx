@@ -1,6 +1,6 @@
 ---
 title: "Langchain"
-description: "Learn how to integrate OpenAI with Helicone using Langchain."
+description: "Learn how to integrate Azure-OpenAI with Helicone using Langchain."
 ---
 
 <Steps>
@@ -10,47 +10,49 @@ description: "Learn how to integrate OpenAI with Helicone using Langchain."
   </Step>
   <Step title="Set HELICONE_API_KEY as an environment variable">
 ```typescript
-export HELICONE_API_KEY=<your API key>
+HELICONE_API_KEY=<your API key>
 ```
   </Step>
   <Step title="Modify the API base and add the `Helicone-Auth` header">
 <CodeGroup>
 
 ```typescript example.ts
-const llm = new OpenAI({
-  modelName: "gpt-3.5-turbo",
+const model = new ChatOpenAI({
+  azureOpenAIApiKey: "[AZURE_OPENAI_API_KEY]",
+  azureOpenAIApiDeploymentName: "openai/deployments/gpt-35-turbo",
+  azureOpenAIApiVersion: "2023-03-15-preview",
+  azureOpenAIBasePath: "https://oai.hconeai.com",
   configuration: {
-    basePath: "https://oai.hconeai.com/v1",
-    defaultHeaders: {
-      "Helicone-Auth": `Bearer HELICONE_API_KEY`,
+    organization: "[organization]",
+    baseOptions: {
+      headers: {
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+        "Helicone-OpenAI-Api-Base":
+          "https://[YOUR_AZURE_DOMAIN].openai.azure.com",
+      },
     },
   },
 });
 ```
 
 ```python example.py
-# Option 1
-openai.api_base = "https://oai.hconeai.com/v1"
-llm = ChatOpenAI(
-    openai_api_key='<>',
-    model_kwargs={
-      "extra_headers":{
-        "Helicone-Auth": f"Bearer {HELICONE_API_KEY}"
-      }
-    }
-)
+from langchain.chat_models import AzureChatOpenAI
 
-# Option 2
-llm = ChatOpenAI(
-    openai_api_key='<>',
-    model_kwargs={
-      "extra_headers":{
-        "Helicone-Auth": f"Bearer {HELICONE_API_KEY}"
-      }
-    },
-    openai_api_base="https://oai.hconeai.com/v1",
-)
+helicone_headers = {
+  "Helicone-Auth": f"Bearer {helicone_api_key}",
+  "Helicone-OpenAI-Api-Base": "https://<model_name>.openai.azure.com/"
+}
 
+self.model = AzureChatOpenAI(
+  openai_api_base="https://oai.hconeai.com",
+  deployment_name="gpt-35-turbo",
+  openai_api_key=<AZURE_OPENAI_API_KEY>,
+  openai_api_version="2023-05-15",
+  openai_api_type="azure",
+  max_retries=max_retries,
+  headers=helicone_headers,
+  **kwargs,
+)
 ```
 
 </CodeGroup>
