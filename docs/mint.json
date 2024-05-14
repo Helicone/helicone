@@ -53,6 +53,15 @@
             "integrations/openai/async"
           ]
         },
+        {
+          "group": "Azure OpenAI",
+          "pages": [
+            "integrations/azure/node",
+            "integrations/azure/python",
+            "integrations/azure/langchain",
+            "integrations/azure/async"
+          ]
+        },
         "getting-started/integration-method/azure",
         "getting-started/integration-method/anthropic",
         "getting-started/integration-method/anyscale",
@@ -82,7 +91,7 @@
         "features/advanced-usage/retries",
         "features/advanced-usage/custom-rate-limits",
         "features/advanced-usage/vault",
-        "features/advanced-usage/moderations", 
+        "features/advanced-usage/moderations",
         "features/advanced-usage/llm-security",
         "features/webhooks",
         {
