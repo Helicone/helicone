@@ -87,7 +87,12 @@ export const useDashboardPage = ({
     DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]
   ).concat(propertyFilters);
 
-  const { isLoading: isModelsLoading, models } = useModels(timeFilter, 1000);
+  const userFilters = filterUIToFilterLeafs(filterMap, uiFilters);
+  const { isLoading: isModelsLoading, models } = useModels(
+    timeFilter,
+    userFilters,
+    1000
+  );
   const topModels =
     models?.data
       ?.sort((a, b) => (a.total_requests > b.total_requests ? -1 : 1))
@@ -113,8 +118,6 @@ export const useDashboardPage = ({
       column: "model",
     };
   }
-
-  const userFilters = filterUIToFilterLeafs(filterMap, uiFilters);
 
   const params: BackendMetricsCall<any>["params"] = {
     timeFilter,
