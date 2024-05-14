@@ -1,19 +1,79 @@
 ---
-title: "Moderation Integration"
+title: "Moderations"
 description: "Integrate OpenAI moderation to safeguard your chat completions."
 ---
+<Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing) who uses OpenAI as their provider.</Info>
 
-## Enabling Moderation
 
-Add `Helicone-Moderations-Enabled: true` to your request headers to activate OpenAI moderation.
+## Introduction
 
-## Moderation Process and How It Works
+By integrating with OpenAI's moderation endpoint, Helicone helps you check whether the user message is potentially harmful. 
 
-1. **Activation:** When `Helicone-Moderations-Enabled` is true and the provider is OpenAI, the user's latest message is prepared for moderation before any chat completion request.
-2. **Moderation Check:** Our proxy sends the message to the OpenAI Moderation endpoint to assess its content.
+### Why Moderations
+- Identifying harmful requests and take action, for example, by filtering it.
+- Ensuring any inappropriate or harmful content in user messages is flagged and prevented from being processed.
+- Maintaining the safety of the interactions with your application. 
 
-3. **Flag Evaluation:** If the moderation endpoint flags the message as inappropriate or harmful, an error response is generated:
 
+## Getting Started
+To enable moderation, set `Helicone-Moderations-Enabled` to `true`.
+
+<CodeGroup>
+```bash Curl
+curl https://oai.hconeai.com/v1/completions \
+  -H 'Content-Type: application/json' \
+  -H 'Helicone-Auth: Bearer YOUR_API_KEY' \
+  -H 'Helicone-Moderations-Enabled: true' \ # Add this header and set to true
+  -d '{
+    "model": "text-davinci-003",
+    "prompt": "How do I enable moderations?",
+}'
+```
+
+```python Python
+openai.api_base = "https://oai.hconeai.com/v1"
+
+openai.Completion.create(
+    model="text-davinci-003",
+    prompt="How do I enable moderations?",
+    headers={
+      "Helicone-Moderations-Enabled": "true", # Add this header and set to true
+    }
+)
+```
+
+```js Node
+import { Configuration, OpenAIApi } from "openai";
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+  basePath: "https://oai.hconeai.com/v1",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
+    "Helicone-Moderations-Enabled": "true", // Add this header and set to true
+  },
+});
+const openai = new OpenAIApi(configuration);
+```
+
+</CodeGroup>
+
+<Note>The moderation call to the OpenAI endpoint will utilize your provided OpenAI API key.</Note>
+
+<Accordion title="A Deep-Dive of the Moderation Process">
+  1. **Activation:** When `Helicone-Moderations-Enabled` is true and the provider is OpenAI, the user's latest message is prepared for moderation before any chat completion request.
+  2. **Moderation Check:** Our proxy sends the message to the OpenAI Moderation endpoint to assess its content.
+  3. **Flag Evaluation:** If the moderation endpoint flags the message as inappropriate or harmful, an error response is generated. 
+
+</Accordion>
+
+
+### Error Repsonse 
+
+If the message is flagged, the response will have a `400 status code`. **It's crucial to handle this response appropriately.**
+
+If the message is not flagged, the proxy forwards it to the chat completion endpoint, and the process continues as normal.
+
+Here's an example of the error response when flagged: 
    ```json
    {
      "success": false,
@@ -25,16 +85,13 @@ Add `Helicone-Moderations-Enabled: true` to your request headers to activate Ope
    }
    ```
 
-If the message is flagged, the response will have a 400 status code. **It's crucial to handle this response appropriately.**
 
-If the message is not flagged, the proxy forwards it to the chat completion endpoint, and the process continues as normal.
 
-### Using Your API Key
-
-The moderation call to the OpenAI endpoint will utilize your provided OpenAI API key.
-
-## Future Enhancements
+## Coming Soon
 
 We're continually expanding our moderation features. Upcoming updates include:
-
 - Customizable moderation criteria
+
+## Questions? 
+
+<Tip>Questions or feedback? Reach out to us at [help@helicone.ai](help@helicone.ai). </Tip>
