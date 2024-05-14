@@ -62,12 +62,14 @@ export interface Experiment {
   scores: ExperimentScores | null;
 }
 
+type ScoreValue = string | number;
+
 export interface ExperimentScores {
   dataset: {
-    scores: Record<string, any>;
+    scores: Record<string, ScoreValue>;
   };
   hypothesis: {
-    scores: Record<string, any>;
+    scores: Record<string, ScoreValue>;
   };
 }
 
@@ -417,7 +419,7 @@ function getExperimentHypothesisScores(
 
     return ok({
       scores: {
-        dateCreated: new Date(hypothesis.createdAt),
+        dateCreated: new Date(hypothesis.createdAt).toISOString(),
         model: hypothesis.model,
         cost: hypothesisCost,
       },
@@ -471,7 +473,7 @@ function getExperimentDatasetScores(
 
     return ok({
       scores: {
-        dateCreated: new Date(latest.createdAt),
+        dateCreated: new Date(latest.createdAt).toISOString(),
         model: latest.model,
         cost: averageCost,
       },

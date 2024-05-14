@@ -16,13 +16,12 @@ import ModelPill from "../../../requestsV2/modelPill";
 import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
 import { usePrompt } from "../../../../../services/hooks/prompts/prompts";
 import ArrayDiffViewer from "../../id/arrayDiffViewer";
+import ScoresTable from "../scoresTable";
 
 interface PromptIdPageProps {
   id: string;
   promptId: string;
 }
-
-type Scores = { [key: string]: any };
 
 const ExperimentIdPage = (props: PromptIdPageProps) => {
   const { id, promptId } = props;
@@ -53,41 +52,6 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
   const keys = runs?.[0]?.inputs
     ? Object.keys(runs?.[0]?.inputs).map((key) => key)
     : [];
-
-  const calculateChange = (datasetCost: number, hypothesisCost: number) => {
-    const change = hypothesisCost - datasetCost;
-    const percentageChange = +((change / datasetCost) * 100).toFixed(2);
-    return {
-      change: +change.toFixed(4),
-      percentageChange,
-    };
-  };
-
-  const getScoreValue = (score: Scores, field: string) => {
-    if (field === "dateCreated") {
-      return renderScoreValue(score.dateCreated);
-    }
-    if (field === "cost") {
-      return `$${score.cost.toFixed(4)}`;
-    }
-    if (field === "model") {
-      return <ModelPill model={score.model} />;
-    }
-    return (score as any)[field];
-  };
-
-  const getScoreAttribute = (key: string) => {
-    switch (key) {
-      case "cost":
-        return "Cost";
-      case "model":
-        return "Model";
-      case "dateCreated":
-        return "Date Created";
-      default:
-        return key;
-    }
-  };
 
   const renderPrettyInputs = (inputs: Record<string, string>) => {
     const TEXT_LIMIT = 80;
@@ -134,129 +98,6 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
     );
   };
 
-  const renderComparisonCell = (
-    field: string,
-    scores: Scores,
-    changeInfo: any
-  ) => {
-    switch (field) {
-      case "dateCreated":
-        return (
-          <span
-            className={clsx(
-              scores.dataset.scores.dateCreated ===
-                scores.hypothesis.scores.dateCreated
-                ? "bg-gray-50 text-gray-700 ring-gray-200"
-                : "bg-gray-50 text-gray-700 ring-gray-200",
-              "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
-            )}
-          >
-            {scores.dataset.scores.dateCreated ===
-            scores.hypothesis.scores.dateCreated
-              ? "same"
-              : "changed"}
-          </span>
-        );
-      case "cost":
-        const changeClass =
-          changeInfo.change < 0
-            ? "bg-green-50 text-green-700 ring-green-200"
-            : changeInfo.change > 0
-            ? "bg-red-50 text-red-700 ring-red-200"
-            : "bg-gray-50 text-gray-700 ring-gray-200";
-        return (
-          <span
-            className={clsx(
-              changeClass,
-              "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
-            )}
-          >
-            {`${changeInfo.change} (${changeInfo.percentageChange}%)`}
-          </span>
-        );
-      case "model":
-        return (
-          <span
-            className={clsx(
-              scores.dataset.scores.model === scores.hypothesis.scores.model
-                ? "bg-gray-50 text-gray-700 ring-gray-200"
-                : "bg-gray-50 text-gray-700 ring-gray-200",
-              "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
-            )}
-          >
-            {scores.dataset.scores.model === scores.hypothesis.scores.model
-              ? "same"
-              : "changed"}
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
-
-  const renderScoreValue = (value: any) => {
-    if (value instanceof Date) {
-      return value.toLocaleDateString();
-    }
-    if (typeof value === "string" && !isNaN(Date.parse(value))) {
-      return new Date(value).toLocaleDateString();
-    }
-
-    return value;
-  };
-
-  const renderTableRows = (scores: Scores) => {
-    if (!experiment?.scores || !experiment?.scores.dataset.scores) {
-      return null;
-    }
-
-    const experimentScoresAttributes = [
-      ...Object.keys(experiment.scores.dataset.scores).filter(
-        (key) => key !== "customScores"
-      ),
-    ];
-
-    return experimentScoresAttributes.map((field) => {
-      const calculateChange = (datasetCost: number, hypothesisCost: number) => {
-        const change = hypothesisCost - datasetCost;
-        const percentageChange = ((change / datasetCost) * 100).toFixed(2);
-        return {
-          change: parseFloat(change.toFixed(4)),
-          percentageChange,
-        };
-      };
-
-      return (
-        <TableRow key={field} className="w-full">
-          <TableCell className="h-full items-start border-r border-gray-300 max-w-xs">
-            <p className="text-black text-sm">{getScoreAttribute(field)}</p>
-          </TableCell>
-          <TableCell className="h-full border-l border-gray-300">
-            <p className="text-black text-sm">
-              {getScoreValue(scores.dataset.scores, field)}
-            </p>
-          </TableCell>
-          <TableCell className="h-full border-l border-gray-300">
-            <p className="text-black text-sm">
-              {getScoreValue(scores.hypothesis.scores, field)}
-            </p>
-          </TableCell>
-          <TableCell className="h-full border-l border-gray-300">
-            {renderComparisonCell(
-              field,
-              scores,
-              field === "cost" &&
-                calculateChange(
-                  scores.dataset.scores.cost,
-                  scores.hypothesis.scores.cost
-                )
-            )}
-          </TableCell>
-        </TableRow>
-      );
-    });
-  };
-
   return (
     <>
       <div className="flex flex-col w-full space-y-4">
@@ -287,32 +128,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
             <h1 className="font-semibold text-3xl text-black dark:text-white">
               {experiment?.id}
             </h1>
-            <Table className="h-full w-full dark:border-gray-700 bg-white dark:bg-black p-4 border border-gray-300 rounded-lg">
-              <TableHead className="border-b border-gray-300 w-full">
-                <TableRow>
-                  <TableHeaderCell className="w-1/6">
-                    <p className="text-sm text-gray-500">Scores</p>
-                  </TableHeaderCell>
-                  <TableHeaderCell className="w-1/3 border-l border-gray-300">
-                    <p className="text-sm text-gray-500">
-                      Production with prompt
-                    </p>
-                  </TableHeaderCell>
-                  <TableHeaderCell className="w-1/3 border-l border-gray-300">
-                    <p className="text-sm text-gray-500">
-                      Experiment with prompt
-                    </p>
-                  </TableHeaderCell>
-                  <TableHeaderCell className="w-1/3 border-l border-gray-300">
-                    <p className="text-sm text-gray-500">Compare</p>
-                  </TableHeaderCell>
-                </TableRow>
-              </TableHead>
-
-              <TableBody>
-                {experiment?.scores && renderTableRows(experiment.scores)}
-              </TableBody>
-            </Table>
+            <ScoresTable scores={experiment?.scores} />
             <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-black">
               <div className="w-full flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
                 <div className="flex items-center space-x-2">

@@ -550,16 +550,17 @@ Json: JsonObject;
       id: string;
       provider: string;
     };
+    ScoreValue: string | number;
     /** @description Construct a type with a set of properties K of type T */
-    "Record_string.any_": {
-      [key: string]: unknown;
+    "Record_string.ScoreValue_": {
+      [key: string]: components["schemas"]["ScoreValue"];
     };
     ExperimentScores: {
       dataset: {
-        scores: components["schemas"]["Record_string.any_"];
+        scores: components["schemas"]["Record_string.ScoreValue_"];
       };
       hypothesis: {
-        scores: components["schemas"]["Record_string.any_"];
+        scores: components["schemas"]["Record_string.ScoreValue_"];
       };
     };
     Experiment: {

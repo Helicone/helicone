@@ -675,16 +675,21 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Record_string.any_": {
+    "ScoreValue": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"any"},"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"double"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Record_string.ScoreValue_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"ScoreValue"},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ExperimentScores": {
         "dataType": "refObject",
         "properties": {
-            "dataset": {"dataType":"nestedObjectLiteral","nestedProperties":{"scores":{"ref":"Record_string.any_","required":true}},"required":true},
-            "hypothesis": {"dataType":"nestedObjectLiteral","nestedProperties":{"scores":{"ref":"Record_string.any_","required":true}},"required":true},
+            "dataset": {"dataType":"nestedObjectLiteral","nestedProperties":{"scores":{"ref":"Record_string.ScoreValue_","required":true}},"required":true},
+            "hypothesis": {"dataType":"nestedObjectLiteral","nestedProperties":{"scores":{"ref":"Record_string.ScoreValue_","required":true}},"required":true},
         },
         "additionalProperties": false,
     },

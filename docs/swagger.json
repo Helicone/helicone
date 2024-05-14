@@ -1789,9 +1789,22 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Record_string.any_": {
+			"ScoreValue": {
+				"anyOf": [
+					{
+						"type": "string"
+					},
+					{
+						"type": "number",
+						"format": "double"
+					}
+				]
+			},
+			"Record_string.ScoreValue_": {
 				"properties": {},
-				"additionalProperties": {},
+				"additionalProperties": {
+					"$ref": "#/components/schemas/ScoreValue"
+				},
 				"type": "object",
 				"description": "Construct a type with a set of properties K of type T"
 			},
@@ -1800,7 +1813,7 @@
 					"dataset": {
 						"properties": {
 							"scores": {
-								"$ref": "#/components/schemas/Record_string.any_"
+								"$ref": "#/components/schemas/Record_string.ScoreValue_"
 							}
 						},
 						"required": [
@@ -1811,7 +1824,7 @@
 					"hypothesis": {
 						"properties": {
 							"scores": {
-								"$ref": "#/components/schemas/Record_string.any_"
+								"$ref": "#/components/schemas/Record_string.ScoreValue_"
 							}
 						},
 						"required": [
