@@ -1,34 +1,24 @@
 ---
 title: "Retries"
-description: "Intelligently retry requests to overcome rate limits and overloaded servers."
+description: "Intelligently retry requests to overcome rate limits and overloaded servers"
 ---
 
-<Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing). </Info>
+Retrying requests is a common best practice when dealing with overloaded servers or hitting rate limits. These issues typically manifest as HTTP status codes 429 (Too Many Requests) and 500 (Internal Server Error). For more information on error codes, see the [OpenAI API error codes documentation](https://platform.openai.com/docs/guides/error-codes/api-errors).
 
-## Introduction
+### Exponential Backoff
 
-Retrying requests is a common best practice when dealing with overloaded servers or hitting rate limits. These issues typically manifest as HTTP status codes `429` (Too Many Requests) and `500` (Internal Server Error). 
+To effectively deal with retries, we use a strategy called exponential backoff. Exponential backoff involves increasing the wait time between retries exponentially, which helps to spread out the request load and gives the server a chance to recover. This is done by multiplying the wait time by a factor (default is 2) for each subsequent retry.
 
-For more information on error codes, see the [OpenAI API error codes documentation](https://platform.openai.com/docs/guides/error-codes/api-errors).
+### Quick Start
 
-<Accordion title="Learn About Exponential Backoff">
-  To effectively deal with retries, we use a strategy called **exponential backoff**. Exponential backoff involves increasing the wait time between retries exponentially, which helps to spread out the request load and gives the server a chance to recover. This is done by multiplying the wait time by a factor (default is 2) for each subsequent retry.
-</Accordion>
-
-### Why Retries
-- Overcoming rate limits and server overload. 
-- Reducing the load on the server, increasing the likelihood of request success on subsequent attempts.
-
-## Quick Start
-
-To get started, set `Helicone-Retry-Enabled` to `true`. 
+To get started, set `Helicone-Retry-Enabled` to `true`
 
 <CodeGroup>
 ```bash Curl
 curl https://oai.hconeai.com/v1/completions \
   -H 'Content-Type: application/json' \
   -H 'Helicone-Auth: Bearer YOUR_API_KEY' \
-  -H 'Helicone-Retry-Enabled: true' \ # Add this header and set to true
+  -H 'Helicone-Retry-Enabled: true' \
   -d '{
     "model": "text-davinci-003",
     "prompt": "How do I enable retries?",
@@ -42,7 +32,7 @@ openai.Completion.create(
     model="text-davinci-003",
     prompt="How do I enable retries?",
     headers={
-      "Helicone-Retry-Enabled": "true", # Add this header and set to true
+      "Helicone-Retry-Enabled": "true",
     }
 )
 ```
@@ -54,7 +44,7 @@ const configuration = new Configuration({
   basePath: "https://oai.hconeai.com/v1",
   defaultHeaders: {
     "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
-    "Helicone-Retry-Enabled": "true", // Add this header and set to true
+    "Helicone-Retry-Enabled": "true",
   },
 });
 const openai = new OpenAIApi(configuration);
@@ -62,7 +52,7 @@ const openai = new OpenAIApi(configuration);
 
 </CodeGroup>
 
-### Retries Parameters
+### Advanced Usage
 
 You can customize the behavior of the retries feature by setting additional headers in your request.
 
@@ -77,9 +67,3 @@ You can customize the behavior of the retries feature by setting additional head
   {" "}
   Header values have to be strings, for example `"helicone-retry-num": "3"`{" "}
 </Info>
-
-
-## Questions? 
-
-<Tip>Questions or feedback? Reach out to us at [help@helicone.ai](help@helicone.ai). </Tip>
-
