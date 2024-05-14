@@ -1,0 +1,61 @@
+---
+title: "Langchain"
+description: "Learn how to integrate Azure-OpenAI with Helicone using Langchain."
+---
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into www.helicone.ai or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Set HELICONE_API_KEY as an environment variable">
+```typescript
+HELICONE_API_KEY=<your API key>
+```
+  </Step>
+  <Step title="Modify the API base and add the `Helicone-Auth` header">
+<CodeGroup>
+
+```typescript example.ts
+const model = new ChatOpenAI({
+  azureOpenAIApiKey: "[AZURE_OPENAI_API_KEY]",
+  azureOpenAIApiDeploymentName: "openai/deployments/gpt-35-turbo",
+  azureOpenAIApiVersion: "2023-03-15-preview",
+  azureOpenAIBasePath: "https://oai.hconeai.com",
+  configuration: {
+    organization: "[organization]",
+    baseOptions: {
+      headers: {
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+        "Helicone-OpenAI-Api-Base":
+          "https://[YOUR_AZURE_DOMAIN].openai.azure.com",
+      },
+    },
+  },
+});
+```
+
+```python example.py
+from langchain.chat_models import AzureChatOpenAI
+
+helicone_headers = {
+  "Helicone-Auth": f"Bearer {helicone_api_key}",
+  "Helicone-OpenAI-Api-Base": "https://<model_name>.openai.azure.com/"
+}
+
+self.model = AzureChatOpenAI(
+  openai_api_base="https://oai.hconeai.com",
+  deployment_name="gpt-35-turbo",
+  openai_api_key=<AZURE_OPENAI_API_KEY>,
+  openai_api_version="2023-05-15",
+  openai_api_type="azure",
+  max_retries=max_retries,
+  headers=helicone_headers,
+  **kwargs,
+)
+```
+
+</CodeGroup>
+
+  </Step>
+</Steps>
