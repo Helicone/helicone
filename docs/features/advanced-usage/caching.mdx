@@ -88,12 +88,13 @@ const openai = new OpenAIApi(configuration);
 
 ### Cache Parameters
 
-| Parameter                            | Description                                       |
+| Parameter                                   | Description                                           |
 | ------------------------------------------- | ----------------------------------------------------- |
-| `Helicone-Cache-Enabled`  (required)        | This will enable storing and loading from your cache.  |
-| `Cache-Control` (optional)                  | Allow you to configure cache limit based on the [Cloudflare Cache Directive](https://developers.cloudflare.com/cache/about/cache-control#cache-control-directives). Currently only max-age is supported, but we will be adding more configuration options soon. |
-| `Helicone-Cache-Bucket-Max-Size` (optional) | Allows you to choose how large you want your Cache Bucket size to be.|
-| `Helicone-Cache-Seed` (optional) | Allows you to generate for predictable results and maintain separate cache states for each cache seed. | 
+| `Helicone-Cache-Enabled`  (required)        | Set to `true` to enable storing and loading from your cache.  |
+| `Cache-Control` (optional)                  | Configure cache limit as a `string` based on the [Cloudflare Cache Directive](https://developers.cloudflare.com/cache/about/cache-control#cache-control-directives). Currently we only support `max-age`, but we will be adding more configuration options soon. I.e. 1 hour is `max-age=3600`.|
+| `Helicone-Cache-Bucket-Max-Size` (optional) | Configure your Cache Bucket size, represented as a `string`. |
+| `Helicone-Cache-Seed` (optional) | A `string` that defines a separate cache state to generate predictable results, i.e. `user-123`. |
+
 
 ### Changing Cache Limit
 The default cache limit is 7 days. To change the limit, add the `Cache-Control` header to your request. 
