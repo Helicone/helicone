@@ -46,11 +46,16 @@ if (KAFKA_ENABLED && KAFKA_BROKER && KAFKA_USERNAME && KAFKA_PASSWORD) {
   }
 }
 
+const AVG_MESSAGE_SIZE = 2_000; // 2kB
+const ESTIMATED_MINI_BATCH_SIZE = 5; // 5 messages
+const MESSAGES_PER_MINI_BATCH = 500; // 150 messages
+
 // Average message is 1kB, so we can set minBytes to 1kB and maxBytes to 10kB
 const consumer = kafka?.consumer({
   groupId: "jawn-consumer",
   minBytes: 100_000,
-  maxBytes: 10_000_000,
+  maxBytes:
+    AVG_MESSAGE_SIZE * MESSAGES_PER_MINI_BATCH * ESTIMATED_MINI_BATCH_SIZE,
 });
 
 export const consume = async () => {
@@ -90,8 +95,11 @@ export const consume = async () => {
       commitOffsetsIfNecessary,
     }) => {
       console.log(`Received batch with ${batch.messages.length} messages.`);
-      const maxMessages = 150;
-      const miniBatches = createMiniBatches(batch.messages, maxMessages);
+
+      const miniBatches = createMiniBatches(
+        batch.messages,
+        MESSAGES_PER_MINI_BATCH
+      );
 
       for (const miniBatch of miniBatches) {
         const firstOffset = miniBatch[0].offset;
