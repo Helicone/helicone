@@ -1,47 +1,84 @@
 ---
 title: "User Metrics"
-description: "Get user metrics like number of requests, costs, and activity"
+description: "Get user metrics like number of requests, costs, and activities."
 ---
+<Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing).</Info>
 
-![](/images/users.png)
+## Introduction
 
-There are two ways to add user inputs to requests.
+Monitor and analyze how users interact with your LLMs. 
 
-### OpenAI API
+<Frame caption="See user metrics such as the number of requests, costs, and activities.">
+  <img src="/images/user-metrics/example-user-metric.png" />
+</Frame>
 
-The OpenAI API has an [optional `user` parameter](https://platform.openai.com/docs/api-reference/completions/create#completions/create-user). By using this option, [OpenAI can also help](https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids) monitor and detect abuse of your end-users.
 
-<CodeGroup>
+### Why User Metrics 
+- Get detailed insights into the number of requests, costs, and activities of selected users.
+- Optimize resources based on usage patterns. 
 
-```bash Curl
-curl https://oai.hconeai.com/v1/completions \
-  -H 'Content-Type: application/json' \
-  -H 'Helicone-Auth: Bearer YOUR_API_KEY' \
-  -H 'Helicone-User-Id: "alicebob@gmail.com"'
-```
 
-```python Python
-openai.api_base = "https://oai.hconeai.com/v1"
+## Quick Start
 
-openai.Completion.create(
-    model="text-davinci-003",
-    prompt="How do I log users?",
-    headers={
-        "Helicone-User-Id": "alicebob@gmail.com"
-    }
-)
-```
+### Step 1: Add User ID
+There are two ways to specify users in your requests: 
 
-```js Node.js
-import { Configuration, OpenAIApi } from "openai";
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-  basePath: "https://oai.hconeai.com/v1",
-  defaultHeaders: {
-      Helicone-User-Id: "alicebob@gmail.com",
-  },
-});
-const openai = new OpenAIApi(configuration);
-```
+<AccordionGroup>
+  <Accordion title="Option 1: Using OpenAI API">
+    The OpenAI API has an optional [`user` parameter](https://platform.openai.com/docs/api-reference/chat/create#chat-create-user), where you can specify an end-user to help OpenAI to monitor and detect abuse. Learn more [here](https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids). 
+  </Accordion>
+  <Accordion title="Option 2: Sending the User ID via Helicone">
+    Alternatively, you can send a prompt with the header `Helicone-User-Id` to include the user ID. The value must be a _string_, for example, use an `email` or the `user ID`. 
+      <CodeGroup>
 
-</CodeGroup>
+      ```bash Curl
+      curl https://oai.hconeai.com/v1/completions \
+        -H 'Content-Type: application/json' \
+        -H 'Helicone-Auth: Bearer YOUR_API_KEY' \
+        -H 'Helicone-User-Id: "alicebob@gmail.com"' # Add this header
+      ```
+
+      ```python Python
+      openai.api_base = "https://oai.hconeai.com/v1"
+
+      openai.Completion.create(
+          model="text-davinci-003",
+          prompt="How do I log users?",
+          headers={
+              "Helicone-User-Id": "alicebob@gmail.com" # Add this header
+          }
+      )
+      ```
+
+      ```js Node.js
+      import { Configuration, OpenAIApi } from "openai";
+      const configuration = new Configuration({
+        apiKey: process.env.OPENAI_API_KEY,
+        basePath: "https://oai.hconeai.com/v1",
+        defaultHeaders: {
+            Helicone-User-Id: "alicebob@gmail.com", // Add this header
+        },
+      });
+      const openai = new OpenAIApi(configuration);
+      ```
+
+      </CodeGroup>
+
+  </Accordion>
+</AccordionGroup>
+
+
+
+
+### Step 2: View Detailed Metrics 
+
+Once set up correctly, you will be able to see detailed user metrics under the `Users` tab.  
+
+<Frame caption="See overview, usage and detailed logs for a specific user.">
+  <img src="/images/user-metrics/example-user-metric-dashboard.png" />
+</Frame>
+
+
+## Questions? 
+
+<Tip>Questions or feedback? Reach out to us at [help@helicone.ai](help@helicone.ai). </Tip>
