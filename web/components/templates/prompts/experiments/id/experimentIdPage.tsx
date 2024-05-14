@@ -157,9 +157,9 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
         );
       case "cost":
         const changeClass =
-          changeInfo.change > 0
+          changeInfo.change < 0
             ? "bg-green-50 text-green-700 ring-green-200"
-            : changeInfo.change < 0
+            : changeInfo.change > 0
             ? "bg-red-50 text-red-700 ring-red-200"
             : "bg-gray-50 text-gray-700 ring-gray-200";
         return (
@@ -215,20 +215,14 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
     ];
 
     return experimentScoresAttributes.map((field) => {
-      const datasetValue = getScoreValue(scores.dataset, field);
-      const hypothesisValue = getScoreValue(scores.hypothesis, field);
-
-      let changeInfo: { change: number; percentageChange: number } = {
-        change: 0,
-        percentageChange: 0,
+      const calculateChange = (datasetCost: number, hypothesisCost: number) => {
+        const change = hypothesisCost - datasetCost;
+        const percentageChange = ((change / datasetCost) * 100).toFixed(2);
+        return {
+          change: parseFloat(change.toFixed(4)),
+          percentageChange,
+        };
       };
-
-      if (field === "cost") {
-        changeInfo = calculateChange(
-          scores.dataset.cost,
-          scores.hypothesis.cost
-        );
-      }
 
       return (
         <TableRow key={field} className="w-full">
@@ -246,7 +240,12 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
             </p>
           </TableCell>
           <TableCell className="h-full border-l border-gray-300">
-            {renderComparisonCell(field, scores, changeInfo)}
+            {renderComparisonCell(
+              field,
+              scores,
+              field === "cost" &&
+                calculateChange(scores.dataset.cost, scores.hypothesis.cost)
+            )}
           </TableCell>
         </TableRow>
       );
