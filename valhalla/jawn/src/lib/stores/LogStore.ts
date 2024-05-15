@@ -43,6 +43,7 @@ const requestColumns = new pgp.helpers.ColumnSet(
     { name: "target_url", def: null },
     { name: "threat", def: null },
     { name: "user_id", def: null },
+    { name: "country_code", def: null },
   ],
   { table: "request" }
 );
@@ -56,6 +57,7 @@ const responseColumns = new pgp.helpers.ColumnSet(
     "body",
     "request",
     "created_at",
+    { name: "helicone_org_id", def: null },
     { name: "model", def: null },
     { name: "completion_tokens", def: null },
     { name: "delay_ms", def: null },

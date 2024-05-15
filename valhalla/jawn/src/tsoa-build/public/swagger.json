@@ -370,6 +370,15 @@
 				"type": "object",
 				"description": "Construct a type with a set of properties K of type T"
 			},
+			"Record_string.number_": {
+				"properties": {},
+				"additionalProperties": {
+					"type": "number",
+					"format": "double"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
 			"HeliconeRequest": {
 				"properties": {
 					"response_id": {
@@ -473,6 +482,10 @@
 						"type": "string",
 						"nullable": true
 					},
+					"prompt_id": {
+						"type": "string",
+						"nullable": true
+					},
 					"feedback_created_at": {
 						"type": "string",
 						"nullable": true
@@ -516,6 +529,14 @@
 						],
 						"nullable": true
 					},
+					"scores": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.number_"
+							}
+						],
+						"nullable": true
+					},
 					"costUSD": {
 						"type": "number",
 						"format": "double",
@@ -547,10 +568,12 @@
 					"completion_tokens",
 					"provider",
 					"node_id",
+					"prompt_id",
 					"llmSchema",
 					"country_code",
 					"asset_ids",
-					"asset_urls"
+					"asset_urls",
+					"scores"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -717,6 +740,9 @@
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
 					"path": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"prompt_id": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					}
 				},
@@ -989,15 +1015,6 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
-			},
-			"Record_string.number_": {
-				"properties": {},
-				"additionalProperties": {
-					"type": "number",
-					"format": "double"
-				},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
 			},
 			"ScoreRequest": {
 				"properties": {
@@ -1857,6 +1874,9 @@
 							"rows": {
 								"items": {
 									"properties": {
+										"scores": {
+											"$ref": "#/components/schemas/Record_string.number_"
+										},
 										"inputRecord": {
 											"properties": {
 												"request": {
@@ -1889,6 +1909,7 @@
 										}
 									},
 									"required": [
+										"scores",
 										"rowId"
 									],
 									"type": "object"
@@ -1922,6 +1943,9 @@
 											"request": {
 												"$ref": "#/components/schemas/RequestObj"
 											},
+											"scores": {
+												"$ref": "#/components/schemas/Record_string.number_"
+											},
 											"response": {
 												"$ref": "#/components/schemas/ResponseObj"
 											},
@@ -1933,8 +1957,7 @@
 											}
 										},
 										"required": [
-											"request",
-											"response",
+											"scores",
 											"resultRequestId",
 											"datasetRowId"
 										],
@@ -2126,6 +2149,13 @@
 						"nullable": false
 					},
 					"responseBodies": {
+						"type": "boolean",
+						"enum": [
+							true
+						],
+						"nullable": false
+					},
+					"score": {
 						"type": "boolean",
 						"enum": [
 							true
@@ -2992,6 +3022,9 @@
 	"servers": [
 		{
 			"url": "https://api.helicone.ai/"
+		},
+		{
+			"url": "http://localhost:8585/"
 		}
 	]
 }

@@ -1,13 +1,34 @@
 ---
 title: "Omit Logs"
-description: "Omit response and requests"
+description: "Omit responses and requests. "
 ---
 
-In some cases you may not want to have Helicone store or log your request body or response body.
+<Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing). </Info>
 
-You can easily omit these by adding the `Helicone-Omit-Request` or `Helicone-Omit-Response` header and setting it to `"true"`.
 
-### Getting Started
+## Introduction
+
+The "Omit Logs" feature is designed for users who may not want to have Helicone store or log their request body or response body. This can be particularly useful for those concerned with privacy, data sensitivity, or simply wanting to keep their data footprint minimal. 
+
+<Frame caption="Omit requests, responses or both in your logs. ">
+  <img src="/images/omit-logs/example-omit-logs.png" />
+</Frame>
+
+
+### Why Omit Logs
+
+- **Privacy Concerns**: Your logs may contain sensitive information such as personally identifiable information (PII) or proprietary data. Omitting certain logs can help maintain privacy and security.
+- **Focus on Key Metrics**: Omitting requests and responses allows you to focus on capturing key metrics and making it easier to discern the most relevant information related to your LLM application.
+- **Regulatory Compliance**: In certain industries or regions, there may be regulations or compliance requirements regarding the logging and storage of data. Omitting certain logs may be necessary to ensure compliance with these regulations.
+
+<Check>All responses and requests are only stored in memory and never in long-term storage. </Check>
+
+
+## Getting Started
+
+To omit logging requests, set `Helicone-Omit-Request` to `true`.
+
+To omit logging responses, set `Helicone-Omit-Response` to `true`.
 
 <CodeGroup>
 
@@ -15,8 +36,8 @@ You can easily omit these by adding the `Helicone-Omit-Request` or `Helicone-Omi
 curl https://oai.hconeai.com/v1/completions \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer YOUR_API_KEY' \
-  -H 'Helicone-Omit-Request: true' \
-  -H 'Helicone-Omit-Response: true' \
+  -H 'Helicone-Omit-Request: true' \ # Add this header and set to true 
+  -H 'Helicone-Omit-Response: true' \ # Add this header and set to true 
  -d '{
     "model": "text-davinci-003",
     "prompt": "How do I enable custom rate limit policies?",
@@ -30,8 +51,8 @@ openai.Completion.create(
     model="text-davinci-003",
     prompt="How do I enable retries?",
     headers={
-        "Helicone-Omit-Request": "true",
-         "Helicone-Omit-Response": "true",
+        "Helicone-Omit-Request": "true", # Add this header and set to true 
+         "Helicone-Omit-Response": "true", # Add this header and set to true 
     }
 )
 ```
@@ -42,11 +63,25 @@ const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
   basePath: "https://oai.hconeai.com/v1",
   defaultHeaders: {
-    "Helicone-Omit-Request": "true",
-    "Helicone-Omit-Response": "true",
+    "Helicone-Omit-Request": "true", // Add this header and set to true 
+    "Helicone-Omit-Response": "true", // Add this header and set to true 
   },
 });
 const openai = new OpenAIApi(configuration);
 ```
 
 </CodeGroup>
+
+
+### Request View
+
+You can still see the key metrics for each request, without the request or response contents. 
+
+<Frame caption="Focus on capturing key metrics and ignore the noise of the request and response. ">
+  <img src="/images/omit-logs/example-omit-logs-key-metrics.png" />
+</Frame>
+
+
+## Questions
+
+<Tip>Questions or feedback? Reach out to us at [help@helicone.ai](help@helicone.ai). </Tip>

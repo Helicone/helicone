@@ -204,8 +204,8 @@ function AdvancedFilterInput({
           onChange={(e) => onChange(e.target.value)}
           className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-black shadow-sm text-black dark:text-white focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
         >
-          <option value="1">Positive</option>
-          <option value="0">Negative</option>
+          <option value="true">Positive</option>
+          <option value="false">Negative</option>
         </select>
       );
   }
@@ -246,7 +246,7 @@ function AdvancedFilterRow({
                 {
                   filterMapIdx: selected,
                   operatorIdx: 0,
-                  value: "1",
+                  value: "true",
                 },
               ]);
             } else {

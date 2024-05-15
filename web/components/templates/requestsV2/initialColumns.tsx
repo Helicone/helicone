@@ -184,6 +184,15 @@ export const getInitialColumns: (
     },
   },
   {
+    id: "promptId",
+    accessorKey: "promptId",
+    header: "Prompt ID",
+    cell: (info) => {
+      const promptId = info.getValue() as string;
+      return <span>{promptId}</span>;
+    },
+  },
+  {
     id: "country",
     accessorKey: "countryCode",
     header: "Country",

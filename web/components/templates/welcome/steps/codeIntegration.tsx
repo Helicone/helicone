@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { clsx } from "../../../shared/clsx";
-import CodeSnippet from "../../home/codeSnippet";
+import CodeSnippet from "./providerIntegrations.tsx/openAISnippets";
 import Link from "next/link";
 
 interface CodeIntegrationProps {
@@ -60,10 +60,7 @@ const CodeIntegration = (props: CodeIntegrationProps) => {
         </p>
       </div>
       <div className="flex w-full md:w-[650px] mt-8">
-        <CodeSnippet
-          variant="simple"
-          apiKey={apiKey === "" ? "<YOUR_API_KEY>" : apiKey}
-        />
+        <CodeSnippet apiKey={apiKey === "" ? "<YOUR_API_KEY>" : apiKey} />
       </div>
       <button
         onClick={() => {

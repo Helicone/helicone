@@ -26,7 +26,6 @@ import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { TimeFilter } from "../dashboard/dashboardPage";
-import { CreateDataSetModal } from "../fine-tune/dataSetModal";
 import getNormalizedRequest from "./builder/requestBuilder";
 import RequestCard from "./requestCard";
 import {
@@ -180,7 +179,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     return range;
   };
 
-  const [fineTuneModalOpen, setFineTuneModalOpen] = useState<boolean>(false);
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
   const [timeRange, setTimeRange] = useState<TimeFilter>(getTimeRange());
 
@@ -221,8 +219,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached,
     isLive
   );
-
-  // set the initial selected data on component load
 
   useEffect(() => {
     console.log("HELLO");
@@ -340,6 +336,26 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
     return [];
   }, [searchParams, filterMap]);
+
+  useEffect(() => {
+    if (advancedFilters.length !== 0 || !userId) {
+      return;
+    }
+
+    const userFilerMapIndex = filterMap.findIndex(
+      (filter) => filter.label === "User"
+    );
+
+    if (userFilerMapIndex !== -1) {
+      setAdvancedFilters([
+        {
+          filterMapIdx: userFilerMapIndex,
+          operatorIdx: 0,
+          value: userId,
+        },
+      ]);
+    }
+  }, [advancedFilters, filterMap, userId]);
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
@@ -483,6 +499,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           }
         />
       )}
+
       <div className="flex flex-col space-y-4">
         <ThemedTableV5
           defaultData={requests || []}
@@ -509,13 +526,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   layoutPage: "requests",
                 }
               : undefined
-          }
-          onDataSet={
-            userId
-              ? undefined
-              : () => {
-                  setFineTuneModalOpen(true);
-                }
           }
           exportData={requests.map((request) => {
             const flattenedRequest: any = {};
@@ -597,13 +607,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             searchParams.set("requestId", requests[selectedDataIndex + 1].id);
           }
         }}
-      />
-      <CreateDataSetModal
-        filter={builtFilter}
-        setOpen={setFineTuneModalOpen}
-        open={fineTuneModalOpen}
-        uiFilter={advancedFilters}
-        filterMap={filterMap}
       />
     </div>
   );
