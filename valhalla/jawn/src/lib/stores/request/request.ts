@@ -68,6 +68,7 @@ export interface HeliconeRequest {
   completion_tokens: number | null;
   provider: Provider;
   node_id: string | null;
+  prompt_id: string | null;
   feedback_created_at?: string | null;
   feedback_id?: string | null;
   feedback_rating?: boolean | null;
@@ -145,6 +146,7 @@ export async function getRequests(
     (response.prompt_tokens + response.completion_tokens) as total_tokens,
     response.completion_tokens as completion_tokens,
     response.prompt_tokens as prompt_tokens,
+    request.prompt_id as prompt_id,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
     feedback.rating AS feedback_rating,
@@ -234,6 +236,7 @@ export async function getRequestsCached(
     (response.prompt_tokens + response.completion_tokens) as total_tokens,
     response.completion_tokens as completion_tokens,
     response.prompt_tokens as prompt_tokens,
+    request.prompt_id as prompt_id,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
     feedback.rating AS feedback_rating,
