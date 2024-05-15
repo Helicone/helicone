@@ -220,8 +220,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isLive
   );
 
-  // set the initial selected data on component load
-
   useEffect(() => {
     console.log("HELLO");
     if (initialRequestId && selectedData === undefined) {
