@@ -17,7 +17,7 @@ const db = pgp({
       : undefined,
   max: 20,
   idleTimeoutMillis: 10000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 10000,
 });
 
 process.on("exit", () => {
