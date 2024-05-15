@@ -48,7 +48,7 @@ const requestColumns = new pgp.helpers.ColumnSet(
   { table: "request" }
 );
 const onConflictRequest =
-  " ON CONFLICT (id) DO UPDATE SET " +
+  " ON CONFLICT (id, helicone_org_id) DO UPDATE SET " +
   requestColumns.assignColumns({ from: "EXCLUDED", skip: "id" });
 
 const responseColumns = new pgp.helpers.ColumnSet(
@@ -57,6 +57,7 @@ const responseColumns = new pgp.helpers.ColumnSet(
     "body",
     "request",
     "created_at",
+    { name: "helicone_org_id", def: null },
     { name: "model", def: null },
     { name: "completion_tokens", def: null },
     { name: "delay_ms", def: null },
@@ -69,7 +70,7 @@ const responseColumns = new pgp.helpers.ColumnSet(
 );
 
 const onConflictResponse =
-  " ON CONFLICT (id) DO UPDATE SET " +
+  " ON CONFLICT (request, helicone_org_id) DO UPDATE SET " +
   responseColumns.assignColumns({ from: "EXCLUDED", skip: "id" });
 
 const assetColumns = new pgp.helpers.ColumnSet(
