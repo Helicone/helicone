@@ -1,24 +1,34 @@
 ---
 title: "Retries"
-description: "Intelligently retry requests to overcome rate limits and overloaded servers"
+description: "Intelligently retry requests to overcome rate limits and overloaded servers."
 ---
 
-Retrying requests is a common best practice when dealing with overloaded servers or hitting rate limits. These issues typically manifest as HTTP status codes 429 (Too Many Requests) and 500 (Internal Server Error). For more information on error codes, see the [OpenAI API error codes documentation](https://platform.openai.com/docs/guides/error-codes/api-errors).
+<Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing). </Info>
 
-### Exponential Backoff
+## Introduction
 
-To effectively deal with retries, we use a strategy called exponential backoff. Exponential backoff involves increasing the wait time between retries exponentially, which helps to spread out the request load and gives the server a chance to recover. This is done by multiplying the wait time by a factor (default is 2) for each subsequent retry.
+Retrying requests is a common best practice when dealing with overloaded servers or hitting rate limits. These issues typically manifest as HTTP status codes `429` (Too Many Requests) and `500` (Internal Server Error). 
 
-### Quick Start
+For more information on error codes, see the [OpenAI API error codes documentation](https://platform.openai.com/docs/guides/error-codes/api-errors).
 
-To get started, set `Helicone-Retry-Enabled` to `true`
+<Accordion title="Learn About Exponential Backoff">
+  To effectively deal with retries, we use a strategy called **exponential backoff**. Exponential backoff involves increasing the wait time between retries exponentially, which helps to spread out the request load and gives the server a chance to recover. This is done by multiplying the wait time by a factor (default is 2) for each subsequent retry.
+</Accordion>
+
+### Why Retries
+- Overcoming rate limits and server overload. 
+- Reducing the load on the server, increasing the likelihood of request success on subsequent attempts.
+
+## Quick Start
+
+To get started, set `Helicone-Retry-Enabled` to `true`. 
 
 <CodeGroup>
 ```bash Curl
 curl https://oai.hconeai.com/v1/completions \
   -H 'Content-Type: application/json' \
   -H 'Helicone-Auth: Bearer YOUR_API_KEY' \
-  -H 'Helicone-Retry-Enabled: true' \
+  -H 'Helicone-Retry-Enabled: true' \ # Add this header and set to true
   -d '{
     "model": "text-davinci-003",
     "prompt": "How do I enable retries?",
@@ -32,7 +42,7 @@ openai.Completion.create(
     model="text-davinci-003",
     prompt="How do I enable retries?",
     headers={
-      "Helicone-Retry-Enabled": "true",
+      "Helicone-Retry-Enabled": "true", # Add this header and set to true
     }
 )
 ```
@@ -44,7 +54,7 @@ const configuration = new Configuration({
   basePath: "https://oai.hconeai.com/v1",
   defaultHeaders: {
     "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
-    "Helicone-Retry-Enabled": "true",
+    "Helicone-Retry-Enabled": "true", // Add this header and set to true
   },
 });
 const openai = new OpenAIApi(configuration);
@@ -52,18 +62,25 @@ const openai = new OpenAIApi(configuration);
 
 </CodeGroup>
 
-### Advanced Usage
+<Check>When a retry happens, the request will be logged in Helicone. </Check>
+
+### Retries Parameters
 
 You can customize the behavior of the retries feature by setting additional headers in your request.
 
-| Parameter                    | Description                                       |
-| ---------------------------- | ------------------------------------------------- |
-| `helicone-retry-num`         | Number of retries                                 |
-| `helicone-retry-factor`      | Exponential backoff factor                        |
+| Parameter                    | Description                                       | 
+| ---------------------------- | ------------------------------------------------- | 
+| `helicone-retry-num`         | Number of retries                                 | 
+| `helicone-retry-factor`      | The exponential backoff factor used to increaase the wait time between subsequent retries. The default is usually `2`. | 
 | `helicone-retry-min-timeout` | Minimum timeout (in milliseconds) between retries |
 | `helicone-retry-max-timeout` | Maximum timeout (in milliseconds) between retries |
 
 <Info>
-  {" "}
-  Header values have to be strings, for example `"helicone-retry-num": "3"`{" "}
+  Header values have to be strings, for example `"helicone-retry-num": "3"`
 </Info>
+
+
+## Questions? 
+
+<Tip>Questions or feedback? Reach out to us at [help@helicone.ai](help@helicone.ai). </Tip>
+

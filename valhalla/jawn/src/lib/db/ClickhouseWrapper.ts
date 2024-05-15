@@ -189,6 +189,7 @@ export interface InsertRequestResponseVersioned {
   sign: 1;
   version: number;
   properties: Record<string, string>;
+  scores: Record<string, number>;
 }
 export type RequestResponseVersioned =
   | InsertRequestResponseVersioned

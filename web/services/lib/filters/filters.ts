@@ -235,7 +235,42 @@ const havingKeyMappings: KeyMappings = {
   response: NOT_IMPLEMENTED,
   properties_table: NOT_IMPLEMENTED,
   request_response_log: NOT_IMPLEMENTED,
-  request_response_versioned: NOT_IMPLEMENTED,
+  request_response_versioned: (filter, placeValueSafely) => {
+    if ("properties" in filter && filter.properties) {
+      const key = Object.keys(filter.properties)[0];
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.properties[key as keyof typeof filter.properties]
+      );
+      return {
+        column: `properties[${placeValueSafely(key)}]`,
+        operator: operator,
+        value: placeValueSafely(value),
+      };
+    }
+    if ("search_properties" in filter && filter.search_properties) {
+      const key = Object.keys(filter.search_properties)[0];
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.search_properties[key as keyof typeof filter.search_properties]
+      );
+      return {
+        column: `key`,
+        operator: operator,
+        value: placeValueSafely(value),
+      };
+    }
+    return easyKeyMappings<"request_response_versioned">({
+      latency: "request_response_versioned.latency",
+      status: "request_response_versioned.status",
+      request_created_at: "request_response_versioned.request_created_at",
+      response_created_at: "request_response_versioned.response_created_at",
+      model: "request_response_versioned.model",
+      user_id: "request_response_versioned.user_id",
+      organization_id: "request_response_versioned.organization_id",
+      node_id: "request_response_versioned.node_id",
+      job_id: "request_response_versioned.job_id",
+      threat: "request_response_versioned.threat",
+    })(filter, placeValueSafely);
+  },
   properties_v3: NOT_IMPLEMENTED,
   property_with_response_v1: NOT_IMPLEMENTED,
   feedback: NOT_IMPLEMENTED,

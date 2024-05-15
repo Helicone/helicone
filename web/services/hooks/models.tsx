@@ -2,10 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 import { TimeFilter } from "../../components/templates/dashboard/dashboardPage";
 import { Result } from "../../lib/result";
 import { ModelMetric } from "../../lib/api/models/models";
+import { FilterLeaf, filterListToTree } from "../lib/filters/filterDefs";
 
-const useModels = (timeFilter: TimeFilter, limit: number) => {
+const useModels = (
+  timeFilter: TimeFilter,
+  limit: number,
+  userFilters?: FilterLeaf[]
+) => {
   const { data: models, isLoading } = useQuery({
-    queryKey: ["modelMetrics", timeFilter],
+    queryKey: ["modelMetrics", timeFilter, userFilters],
     queryFn: async (query) => {
       return await fetch("/api/models", {
         method: "POST",
@@ -13,7 +18,7 @@ const useModels = (timeFilter: TimeFilter, limit: number) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          filter: "all",
+          filter: userFilters ? filterListToTree(userFilters, "and") : "all",
           offset: 0,
           limit,
           timeFilter,

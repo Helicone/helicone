@@ -1936,6 +1936,7 @@ export type Database = {
           created_at: string
           delay_ms: number | null
           feedback: Json | null
+          helicone_org_id: string | null
           id: string
           model: string | null
           prompt_tokens: number | null
@@ -1949,6 +1950,7 @@ export type Database = {
           created_at?: string
           delay_ms?: number | null
           feedback?: Json | null
+          helicone_org_id?: string | null
           id?: string
           model?: string | null
           prompt_tokens?: number | null
@@ -1962,6 +1964,7 @@ export type Database = {
           created_at?: string
           delay_ms?: number | null
           feedback?: Json | null
+          helicone_org_id?: string | null
           id?: string
           model?: string | null
           prompt_tokens?: number | null

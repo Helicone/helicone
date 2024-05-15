@@ -354,6 +354,7 @@ export class LoggingHandler extends AbstractLogHandler {
         provider: request.provider ?? null,
         country_code: request.countryCode ?? null,
         properties: context.processedLog.request.properties ?? {},
+        scores: {},
         sign: 1,
         version: 1,
       };
@@ -366,10 +367,12 @@ export class LoggingHandler extends AbstractLogHandler {
   ): Database["public"]["Tables"]["response"]["Insert"] {
     const response = context.message.log.response;
     const processedResponse = context.processedLog.response;
+    const orgParams = context.orgParams;
 
     const responseInsert: Database["public"]["Tables"]["response"]["Insert"] = {
       id: response.id,
       request: context.message.log.request.id,
+      helicone_org_id: orgParams?.id ?? null,
       body: "{}",
       status: response.status,
       model: processedResponse.model,
