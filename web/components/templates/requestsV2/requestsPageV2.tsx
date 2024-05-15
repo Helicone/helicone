@@ -180,7 +180,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     return range;
   };
 
-  const [fineTuneModalOpen, setFineTuneModalOpen] = useState<boolean>(false);
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
   const [timeRange, setTimeRange] = useState<TimeFilter>(getTimeRange());
 
@@ -530,13 +529,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 }
               : undefined
           }
-          onDataSet={
-            userId
-              ? undefined
-              : () => {
-                  setFineTuneModalOpen(true);
-                }
-          }
           exportData={requests.map((request) => {
             const flattenedRequest: any = {};
             Object.entries(request).forEach(([key, value]) => {
@@ -617,13 +609,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             searchParams.set("requestId", requests[selectedDataIndex + 1].id);
           }
         }}
-      />
-      <CreateDataSetModal
-        filter={builtFilter}
-        setOpen={setFineTuneModalOpen}
-        open={fineTuneModalOpen}
-        uiFilter={advancedFilters}
-        filterMap={filterMap}
       />
     </div>
   );
