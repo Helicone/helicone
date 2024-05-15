@@ -953,9 +953,8 @@ export class DBLoggable {
     }
 
     const endTime = this.timing.endTime ?? responseEndTime;
-    const requestId = this.getValidUUID(this.request.requestId);
     const kafkaMessage: KafkaMessage = {
-      id: requestId,
+      id: this.request.requestId,
       authorization: requestHeaders.heliconeAuthV2.token,
       heliconeMeta: {
         modelOverride: requestHeaders.modelOverride ?? undefined,
@@ -964,7 +963,7 @@ export class DBLoggable {
       },
       log: {
         request: {
-          id: requestId,
+          id: this.request.requestId,
           userId: this.request.userId ?? "",
           promptId:
             this.request.promptSettings.promptMode === "production"
@@ -998,15 +997,6 @@ export class DBLoggable {
     await db.kafkaProducer.sendMessage(kafkaMessage);
 
     return ok(null);
-  }
-
-  getValidUUID(uuid: string | undefined): string {
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (uuid && uuidRegex.test(uuid)) {
-      return uuid;
-    }
-    return crypto.randomUUID();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

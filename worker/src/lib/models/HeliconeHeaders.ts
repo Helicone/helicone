@@ -202,6 +202,9 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   }
 
   private getHeliconeHeaders(): IHeliconeHeaders {
+    const requestId = this.getValidUUID(
+      this.headers.get("Helicone-Request-Id")
+    );
     return {
       heliconeAuth: this.headers.get("helicone-auth") ?? null,
       heliconeAuthV2: this.getHeliconeAuthV2(),
@@ -211,7 +214,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       targetBaseUrl: this.headers.get("Helicone-Target-URL") ?? null,
       retryHeaders: this.getRetryHeaders(),
       promptFormat: this.headers.get("Helicone-Prompt-Format") ?? null,
-      requestId: this.headers.get("Helicone-Request-Id") ?? crypto.randomUUID(),
+      requestId: requestId,
       promptHeaders: {
         promptId: this.headers.get("Helicone-Prompt-Id") ?? null,
         promptMode: this.headers.get("Helicone-Prompt-Mode") ?? null,
@@ -291,5 +294,14 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     }
 
     return heliconePropertyHeaders;
+  }
+
+  getValidUUID(uuid: string | undefined | null): string {
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (uuid && uuidRegex.test(uuid)) {
+      return uuid;
+    }
+    return crypto.randomUUID();
   }
 }
