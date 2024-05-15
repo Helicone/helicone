@@ -4,7 +4,7 @@ import { PromiseGenericResult, err, ok } from "../shared/result";
 import { Database } from "./database.types";
 import { hashAuth } from "./hash";
 import { HeliconeAuth } from "../requestWrapper";
-import { Result } from "../shared/result";
+import { redisClient } from "../clients/redisClient";
 
 // SINGLETON
 class SupabaseAuthCache extends InMemoryCache {
@@ -203,45 +203,67 @@ export class SupabaseConnector {
     authorization: HeliconeAuth,
     organizationId?: string
   ): AuthResult {
-    const cachedResult = this.authCache.get<AuthParams>(
-      await hashAuth(JSON.stringify(authorization) + organizationId)
+    const cacheKey = await hashAuth(
+      JSON.stringify(authorization) + organizationId
     );
+
+    const cachedResult = await redisClient?.get(cacheKey);
+
     if (cachedResult) {
-      return ok(cachedResult);
+      try {
+        const parsedResult: AuthParams = JSON.parse(cachedResult);
+        return ok(parsedResult);
+      } catch (e) {
+        console.error("Failed to parse cached result:", e);
+      }
     }
+
     if (authorization.token.includes("sk-helicone-proxy")) {
       authorization._type = "bearerProxy";
     }
 
     const result = await this.getAuthParams(authorization);
 
-    if (result.error) {
+    if (result.error || !result.data) {
       return err(result.error);
     }
-    const { organizationId: orgId } = result.data!;
+
+    const { organizationId: orgId, userId, heliconeApiKeyId } = result.data;
 
     if (!orgId) {
       return err("No organization ID");
     }
 
-    this.authCache.set(
-      await hashAuth(JSON.stringify(authorization) + organizationId),
-      { organizationId: orgId }
+    const authParamsResult: AuthParams = {
+      organizationId: orgId,
+      userId,
+      heliconeApiKeyId,
+    };
+
+    await redisClient?.set(
+      cacheKey,
+      JSON.stringify(authParamsResult),
+      "EX",
+      900 // 900 seconds = 15 minutes
     );
+
     return ok({
       organizationId: orgId,
     });
   }
 
-  async getOrganization(authParams: AuthParams): OrgResult {
-    const cachedResult = this.orgCache.get<{
-      tier: string;
-      id: string;
-      percentLog: number;
-    }>(authParams.organizationId);
+  async getOrganization(authParams: AuthParams): Promise<OrgResult> {
+    const cacheKey = `org:${authParams.organizationId}`;
+
+    const cachedResult = await redisClient?.get(cacheKey);
 
     if (cachedResult) {
-      return ok(cachedResult);
+      try {
+        const parsedResult: OrgParams = JSON.parse(cachedResult);
+        return ok(parsedResult);
+      } catch (e) {
+        console.error("Failed to parse cached result:", e);
+      }
     }
 
     const { data, error } = await this.client
@@ -251,14 +273,18 @@ export class SupabaseConnector {
       .single();
 
     if (error || !data) {
-      return err(error.message);
+      return err(error?.message || "Unknown error");
     }
 
-    return ok({
+    const orgResult: OrgParams = {
       tier: data.tier ?? "free",
       id: data.id ?? "",
       percentLog: data.percent_to_log ?? 100_000,
-    });
+    };
+
+    await redisClient?.set(cacheKey, JSON.stringify(orgResult), "EX", 900); // 900 seconds = 15 minutes
+
+    return ok(orgResult);
   }
 }
 
