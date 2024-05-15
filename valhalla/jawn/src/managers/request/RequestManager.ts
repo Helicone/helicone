@@ -37,6 +37,14 @@ export class RequestManager extends BaseManager {
     property: string,
     value: string
   ): Promise<Result<null, string>> {
+    const requestResponse = await this.waitForRequestAndResponse(
+      requestId,
+      this.authParams.organizationId
+    );
+    if (requestResponse.error) {
+      return err("Request not found");
+    }
+
     const res = await this.versionedRequestStore.addPropertyToRequest(
       requestId,
       property,
@@ -64,30 +72,14 @@ export class RequestManager extends BaseManager {
   > {
     const maxRetries = 3;
 
+    let sleepDuration = 30_000; // 30 seconds
     for (let i = 0; i < maxRetries; i++) {
-      const { data: request, error: requestError } =
-        await this.queryTimer.withTiming(
-          supabaseServer.client
-            .from("request")
-            .select("*")
-            .eq("id", heliconeId)
-            .eq("helicone_org_id", organizationId),
-          {
-            queryName: "select_request_by_id",
-            percentLogging: FREQUENT_PRECENT_LOGGING,
-          }
-        );
-
-      if (requestError) {
-        console.error("Error fetching request:", requestError.message);
-        return err(requestError.message);
-      }
-
       const { data: response, error: responseError } =
         await this.queryTimer.withTiming(
           supabaseServer.client
             .from("response")
             .select("*")
+            .eq("helicone_org_id", organizationId)
             .eq("request", heliconeId),
           {
             queryName: "select_response_by_request",
@@ -100,12 +92,15 @@ export class RequestManager extends BaseManager {
         return err(responseError.message);
       }
 
-      if (request && request.length > 0) {
-        return ok({ requestId: request[0].id, responseId: response[0].id });
+      if (response && response.length > 0) {
+        return ok({
+          requestId: response[0].request,
+          responseId: response[0].id,
+        });
       }
 
-      const sleepDuration = i === 0 ? 1000 : 5000;
       await new Promise((resolve) => setTimeout(resolve, sleepDuration));
+      sleepDuration *= 2.5; // 30s, 75s, 187.5s
     }
 
     return { error: "Request not found.", data: null };
