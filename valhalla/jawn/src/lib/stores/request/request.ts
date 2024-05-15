@@ -76,6 +76,7 @@ export interface HeliconeRequest {
   country_code: string | null;
   asset_ids: string[] | null;
   asset_urls: Record<string, string> | null;
+  scores: Record<string, number> | null;
   costUSD?: number | null;
 }
 
@@ -152,7 +153,13 @@ export async function getRequests(
     SELECT ARRAY_AGG(asset.id)
     FROM asset
     WHERE asset.request_id = request.id
-    ) AS asset_ids
+    ) AS asset_ids,
+    (
+      SELECT jsonb_object_agg(sa.score_key, sv.int_value)
+      FROM score_value sv
+      JOIN score_attribute sa ON sv.score_attribute = sa.id
+      WHERE sv.request_id = request.id
+    ) AS scores
   FROM request
     left join response on request.id = response.request
     left join feedback on response.id = feedback.response_id
