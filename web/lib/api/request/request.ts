@@ -46,6 +46,7 @@ export interface HeliconeRequest {
   completion_tokens: number | null;
   provider: Provider;
   node_id: string | null;
+  prompt_id: string;
   feedback_created_at?: string | null;
   feedback_id?: string | null;
   feedback_rating?: boolean | null;
@@ -105,6 +106,7 @@ export async function getRequests(
     response.completion_tokens as completion_tokens,
     response.prompt_tokens as prompt_tokens,
     job_node_request.node_id as node_id,
+    request.prompt_id as prompt_id,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
     feedback.rating AS feedback_rating,

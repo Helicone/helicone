@@ -482,6 +482,10 @@
 						"type": "string",
 						"nullable": true
 					},
+					"prompt_id": {
+						"type": "string",
+						"nullable": true
+					},
 					"feedback_created_at": {
 						"type": "string",
 						"nullable": true
@@ -564,6 +568,7 @@
 					"completion_tokens",
 					"provider",
 					"node_id",
+					"prompt_id",
 					"llmSchema",
 					"country_code",
 					"asset_ids",
@@ -735,6 +740,9 @@
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
 					"path": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"prompt_id": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					}
 				},
