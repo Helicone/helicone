@@ -208,7 +208,8 @@ export const REQUEST_TABLE_FILTERS: [
   SingleFilterDef<"response">,
   SingleFilterDef<"response">,
   SingleFilterDef<"request">,
-  SingleFilterDef<"feedback">
+  SingleFilterDef<"feedback">,
+  SingleFilterDef<"request">
 ] = [
   {
     label: "Request",
@@ -319,6 +320,13 @@ export const REQUEST_TABLE_FILTERS: [
     table: "feedback",
     column: "rating",
     category: "feedback",
+  },
+  {
+    label: "Prompt Id",
+    operators: textOperators,
+    table: "request",
+    column: "prompt_id",
+    category: "request",
   },
 ];
 
