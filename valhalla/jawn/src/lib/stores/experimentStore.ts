@@ -456,6 +456,7 @@ function getExperimentHypothesisScores(
         dateCreated: new Date(hypothesis.createdAt),
         model: hypothesis.model,
         cost: hypothesisCost,
+        ...getCustomScores(hypothesis.runs.map((run) => run.scores)),
       },
     });
   } catch (error) {
@@ -510,12 +511,38 @@ function getExperimentDatasetScores(
         dateCreated: new Date(latest.createdAt),
         model: latest.model,
         cost: averageCost,
+        ...getCustomScores(validRows.map((row) => row.scores)),
       },
     });
   } catch (error) {
     console.error("Error calculating dataset cost", error);
     return err("Error calculating dataset cost");
   }
+}
+
+function getCustomScores(
+  scores: Record<string, number>[]
+): Record<string, number> {
+  const scoresValues = scores.reduce((acc, record) => {
+    console.log("record", record);
+    for (const key in record) {
+      if (record.hasOwnProperty(key)) {
+        if (!acc[key]) {
+          acc[key] = { sum: 0, count: 0 };
+        }
+        acc[key].sum += record[key];
+        acc[key].count += 1;
+      }
+    }
+    return acc;
+  }, {} as Record<string, { sum: number; count: number }>);
+
+  return Object.fromEntries(
+    Object.entries(scoresValues).map(([key, { sum, count }]) => [
+      key,
+      sum / count,
+    ])
+  );
 }
 
 function modelCost(modelRow: {

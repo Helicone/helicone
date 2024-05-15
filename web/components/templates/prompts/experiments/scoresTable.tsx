@@ -17,14 +17,21 @@ export type ScoresProps = {
   scores: ExperimentScores;
 };
 const ScoresTable = ({ scores }: ScoresProps) => {
-  const calculateChange = (datasetCost: number, hypothesisCost: number) => {
-    const change = hypothesisCost - datasetCost;
-    const percentageChange = ((change / datasetCost) * 100).toFixed(2);
+  const calculateChange = (datasetScore: number, hypothesisScore: number) => {
+    const change = hypothesisScore - datasetScore;
+    const percentageChange = (() => {
+      if (datasetScore === 0) {
+        return hypothesisScore !== 0 ? 100 : 0;
+      }
+      return (change / Math.abs(datasetScore)) * 100;
+    })();
+
     return {
       change: parseFloat(change.toFixed(4)),
-      percentageChange,
+      percentageChange: parseFloat(percentageChange.toFixed(2)),
     };
   };
+
   const getScoreValue = (score: ScoreValue, field: string) => {
     if (field === "dateCreated" && typeof score === "string") {
       return renderScoreValue(score);
@@ -108,7 +115,18 @@ const ScoresTable = ({ scores }: ScoresProps) => {
           </span>
         );
       default:
-        return null;
+        return (
+          <span
+            className={clsx(
+              "bg-gray-50 text-gray-700 ring-gray-200",
+              "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
+            )}
+          >
+            {`${changeInfo.change > 0 ? "+" : ""}${changeInfo.change} (${
+              changeInfo.percentageChange
+            }%)`}
+          </span>
+        );
     }
   };
 
@@ -134,13 +152,13 @@ const ScoresTable = ({ scores }: ScoresProps) => {
 
     return experimentScoresAttributes.map((field) => {
       const comparisonCell =
-        field === "cost"
+        field !== "model" && field !== "dateCreated"
           ? renderComparisonCell(
               field,
               scores,
               calculateChange(
-                scores.dataset.scores.cost as number,
-                scores.hypothesis.scores.cost as number
+                scores.dataset.scores[field] as number,
+                scores.hypothesis.scores[field] as number
               )
             )
           : renderComparisonCell(field, scores, null);
