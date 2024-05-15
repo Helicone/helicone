@@ -218,6 +218,7 @@ export class SupabaseConnector {
     if (cachedResultRedis) {
       try {
         const parsedResult: AuthParams = JSON.parse(cachedResultRedis);
+        this.authCache.set(cacheKey, parsedResult);
         return ok(parsedResult);
       } catch (e) {
         console.error("Failed to parse cached result:", e);
@@ -252,7 +253,7 @@ export class SupabaseConnector {
       cacheKey,
       JSON.stringify(authParamsResult),
       "EX",
-      900 // 900 seconds = 15 minutes
+      3600 // 1 hour
     );
 
     return ok({
@@ -274,6 +275,7 @@ export class SupabaseConnector {
     if (cachedResult) {
       try {
         const parsedResult: OrgParams = JSON.parse(cachedResult);
+        this.orgCache.set(cacheKey, parsedResult);
         return ok(parsedResult);
       } catch (e) {
         console.error("Failed to parse cached result:", e);
@@ -298,7 +300,7 @@ export class SupabaseConnector {
 
     this.orgCache.set(cacheKey, orgResult);
 
-    await redisClient?.set(cacheKey, JSON.stringify(orgResult), "EX", 900); // 900 seconds = 15 minutes
+    await redisClient?.set(cacheKey, JSON.stringify(orgResult), "EX", 3600); // 1 hour
 
     return ok(orgResult);
   }
