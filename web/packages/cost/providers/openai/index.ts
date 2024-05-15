@@ -277,8 +277,8 @@ export const costs: ModelRow[] = [
       value: "gpt-4o-2024-05-13",
     },
     cost: {
-      prompt_token: 0.000015,
-      completion_token: 0.00003,
+      prompt_token: 0.000005,
+      completion_token: 0.000015,
     },
     showInPlayground: true,
   },
