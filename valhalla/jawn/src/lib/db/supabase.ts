@@ -207,11 +207,17 @@ export class SupabaseConnector {
       JSON.stringify(authorization) + organizationId
     );
 
-    const cachedResult = await redisClient?.get(cacheKey);
+    const cacheResultMem = this.authCache.get<AuthParams>(cacheKey);
 
-    if (cachedResult) {
+    if (cacheResultMem) {
+      return ok(cacheResultMem);
+    }
+
+    const cachedResultRedis = await redisClient?.get(cacheKey);
+
+    if (cachedResultRedis) {
       try {
-        const parsedResult: AuthParams = JSON.parse(cachedResult);
+        const parsedResult: AuthParams = JSON.parse(cachedResultRedis);
         return ok(parsedResult);
       } catch (e) {
         console.error("Failed to parse cached result:", e);
@@ -240,6 +246,8 @@ export class SupabaseConnector {
       heliconeApiKeyId,
     };
 
+    this.authCache.set(cacheKey, authParamsResult);
+
     await redisClient?.set(
       cacheKey,
       JSON.stringify(authParamsResult),
@@ -254,6 +262,12 @@ export class SupabaseConnector {
 
   async getOrganization(authParams: AuthParams): Promise<OrgResult> {
     const cacheKey = `org:${authParams.organizationId}`;
+
+    const cacheResultMem = this.orgCache.get<OrgParams>(cacheKey);
+
+    if (cacheResultMem) {
+      return ok(cacheResultMem);
+    }
 
     const cachedResult = await redisClient?.get(cacheKey);
 
@@ -281,6 +295,8 @@ export class SupabaseConnector {
       id: data.id ?? "",
       percentLog: data.percent_to_log ?? 100_000,
     };
+
+    this.orgCache.set(cacheKey, orgResult);
 
     await redisClient?.set(cacheKey, JSON.stringify(orgResult), "EX", 900); // 900 seconds = 15 minutes
 
