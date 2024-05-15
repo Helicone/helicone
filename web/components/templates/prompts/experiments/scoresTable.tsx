@@ -155,12 +155,17 @@ const ScoresTable = ({ scores }: ScoresProps) => {
   };
   return (
     <>
+      <div className="flex items-center space-x-4">
+        <h1 className="font-semibold text-2xl text-black dark:text-white">
+          Overview
+        </h1>
+      </div>
       <SimpleTable
         data={getTableData(scores) || []}
         columns={[
           {
             key: "score_key",
-            header: "Scores",
+            header: "",
             render: (score) => (
               <div className="text-gray-500 dark:text-white font-semibold  flex items-center">
                 {score.score_key}
@@ -169,14 +174,14 @@ const ScoresTable = ({ scores }: ScoresProps) => {
           },
           {
             key: "dataset",
-            header: "Production with prompt",
+            header: "Original prompt",
             render: (score) => (
               <div className="text-black">{score.dataset}</div>
             ),
           },
           {
             key: "hypothesis",
-            header: "Experiment with prompt",
+            header: "Experiment prompt",
             render: (score) => (
               <div className="text-black">{score.hypothesis}</div>
             ),
