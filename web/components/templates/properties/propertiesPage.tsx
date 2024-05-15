@@ -1,21 +1,16 @@
 import { useState } from "react";
 
 import AuthHeader from "../../shared/authHeader";
-import { useGetProperties } from "../../../services/hooks/properties";
+
 import { PlusIcon, TagIcon } from "@heroicons/react/24/outline";
-import { clsx } from "../../shared/clsx";
-import React from "react";
 import Link from "next/link";
-import PropertyPanel from "./propertyPanel";
+import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
+import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
+import PropertyPanel from "./propertyPanel";
 
 const PropertiesPage = (props: {}) => {
-  const {
-    properties,
-    isLoading: isPropertiesLoading,
-    refetch,
-    searchPropertyFilters,
-  } = useGetProperties();
+  const { properties, isLoading: isPropertiesLoading } = useGetPropertiesV2();
 
   const [selectedProperty, setSelectedProperty] = useState<string>("");
 
