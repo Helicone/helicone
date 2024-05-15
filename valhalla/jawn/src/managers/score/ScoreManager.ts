@@ -40,6 +40,10 @@ export class ScoreManager extends BaseManager {
         return err(request.error);
       }
 
+      if (request.data.length === 0) {
+        return err(`Request not found: ${requestId}`);
+      }
+
       const requestInClickhouse = await this.scoreStore.putScoresIntoClickhouse(
         {
           ...request.data[0],
