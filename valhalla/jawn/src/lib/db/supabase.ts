@@ -247,8 +247,6 @@ export class SupabaseConnector {
       900 // 900 seconds = 15 minutes
     );
 
-    await redisClient?.set(cacheKey, JSON.stringify(result.data), "EX", 900); // 900 seconds = 15 minutes
-
     return ok({
       organizationId: orgId,
     });
