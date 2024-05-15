@@ -20,16 +20,20 @@ export class S3BodyUploadHandler extends AbstractLogHandler {
         return err("Org Id not found");
       }
 
+      console.log(`About to get signed URL for request body: ${requestId}`);
       const key = this.s3Client.getRequestResponseKey(requestId, orgId);
       const request = await this.s3Client.store(
         key,
         context.processedLog.request.body
       );
 
+      console.log(`Got signed URL for request body: ${key}`);
+
       if (request.error) {
         return err(`Failed to store request body: ${request.error}`);
       }
 
+      console.log(`About to store response body to S3: ${key}`);
       const response = await this.s3Client.store(
         key,
         context.processedLog.response.body
