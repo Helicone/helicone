@@ -64,7 +64,6 @@ export class LogManager {
       .setNext(loggingHandler)
       .setNext(posthogHandler);
 
-    console.log(`About to process request: ${logMessages[0].log.request.id}`);
     await Promise.all(
       logMessages.map(async (logMessage) => {
         const handlerContext = new HandlerContext(logMessage);

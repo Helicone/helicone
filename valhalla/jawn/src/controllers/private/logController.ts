@@ -16,6 +16,9 @@ export class LogController extends Controller {
     logMessage: Message,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<void> {
+    console.log(
+      `Received log message for request: ${logMessage.log.request.id}`
+    );
     const logManager = new LogManager();
     await logManager.processLogEntry(logMessage);
 

@@ -167,7 +167,7 @@ jobs:
       - name: Start Anthropic proxy worker
         run: |
           cd worker
-          npx wrangler dev --port 8790 --var WORKER_TYPE:ANTHROPIC_PROXY PROMPTARMOR_API_KEY:${{ secrets.PROMPTARMOR_API_KEY }} VALHALLA_URL:http://localhost:8585 > ~/test-logs/proxy.log &
+          npx wrangler dev --port 8790 --var WORKER_TYPE:ANTHROPIC_PROXY VALHALLA_URL:http://localhost:8585 PROMPTARMOR_API_KEY:${{ secrets.PROMPTARMOR_API_KEY }} > ~/test-logs/proxy.log &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start async worker
@@ -179,7 +179,7 @@ jobs:
       - name: Start gateway worker
         run: |
           cd worker
-          npx wrangler dev --port 8789 --var WORKER_TYPE:GATEWAY_API PROMPTARMOR_API_KEY:${{ secrets.PROMPTARMOR_API_KEY }} VALHALLA_URL:http://localhost:8585 > ~/test-logs/gateway.log &
+          npx wrangler dev --port 8789 --var WORKER_TYPE:GATEWAY_API VALHALLA_URL:http://localhost:8585 PROMPTARMOR_API_KEY:${{ secrets.PROMPTARMOR_API_KEY }} > ~/test-logs/gateway.log &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start Minio S3
