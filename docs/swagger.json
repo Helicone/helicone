@@ -370,6 +370,15 @@
 				"type": "object",
 				"description": "Construct a type with a set of properties K of type T"
 			},
+			"Record_string.number_": {
+				"properties": {},
+				"additionalProperties": {
+					"type": "number",
+					"format": "double"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
 			"HeliconeRequest": {
 				"properties": {
 					"response_id": {
@@ -520,6 +529,14 @@
 						],
 						"nullable": true
 					},
+					"scores": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.number_"
+							}
+						],
+						"nullable": true
+					},
 					"costUSD": {
 						"type": "number",
 						"format": "double",
@@ -555,7 +572,8 @@
 					"llmSchema",
 					"country_code",
 					"asset_ids",
-					"asset_urls"
+					"asset_urls",
+					"scores"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -997,15 +1015,6 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
-			},
-			"Record_string.number_": {
-				"properties": {},
-				"additionalProperties": {
-					"type": "number",
-					"format": "double"
-				},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
 			},
 			"ScoreRequest": {
 				"properties": {
