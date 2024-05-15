@@ -1,6 +1,20 @@
-import { Client } from "pg";
 import { Result } from "../result";
+import { Pool } from "pg";
 import { clickhouseDb } from "../../db/ClickhouseWrapper";
+
+const pool = new Pool({
+  connectionString: process.env.SUPABASE_DATABASE_URL,
+  ssl:
+    process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development"
+      ? {
+          rejectUnauthorized: true,
+          ca: process.env.SUPABASE_SSL_CERT_CONTENTS?.split("\\n").join("\n"),
+        }
+      : undefined,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+});
 
 export function paramsToValues(params: (number | string | boolean | Date)[]) {
   return params
@@ -53,38 +67,22 @@ export async function dbExecute<T>(
   query: string,
   parameters: any[]
 ): Promise<Result<T[], string>> {
-  const ssl =
-    process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development"
-      ? {
-          rejectUnauthorized: true,
-          ca: process.env.SUPABASE_SSL_CERT_CONTENTS!.split("\\n").join("\n"),
-        }
-      : undefined;
-
   if (!process.env.SUPABASE_DATABASE_URL) {
     console.error("SUPABASE_DATABASE_URL not set");
     return { data: null, error: "DATABASE_URL not set" };
   }
 
-  const client = new Client({
-    connectionString: process.env.SUPABASE_DATABASE_URL,
-    ssl,
-    statement_timeout: 10000,
-  });
-
   try {
-    // Let's print out the time it takes to execute the query
-    await client.connect();
-
-    const result = await client.query(query, parameters);
-
-    await client.end();
-
-    return { data: result.rows, error: null };
+    const client = await pool.connect();
+    try {
+      const result = await client.query(query, parameters);
+      return { data: result.rows, error: null };
+    } finally {
+      client.release();
+    }
   } catch (err) {
     console.error("Error executing query: ", query, parameters);
     console.error(err);
-    await client.end();
     return { data: null, error: JSON.stringify(err) };
   }
 }

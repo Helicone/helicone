@@ -1,6 +1,6 @@
 // src/users/usersService.ts
 import { RequestQueryParams } from "../../controllers/public/requestController";
-import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
+import { FREQUENT_PERCENT_LOGGING } from "../../lib/db/DBQueryTimer";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import { Result, err, ok, resultMap } from "../../lib/shared/result";
@@ -74,7 +74,7 @@ export class RequestManager extends BaseManager {
             .eq("helicone_org_id", organizationId),
           {
             queryName: "select_request_by_id",
-            percentLogging: FREQUENT_PRECENT_LOGGING,
+            percentLogging: FREQUENT_PERCENT_LOGGING,
           }
         );
 
@@ -91,7 +91,7 @@ export class RequestManager extends BaseManager {
             .eq("request", heliconeId),
           {
             queryName: "select_response_by_request",
-            percentLogging: FREQUENT_PRECENT_LOGGING,
+            percentLogging: FREQUENT_PERCENT_LOGGING,
           }
         );
 
@@ -138,7 +138,7 @@ export class RequestManager extends BaseManager {
         .single(),
       {
         queryName: "upsert_feedback_by_response_id",
-        percentLogging: FREQUENT_PRECENT_LOGGING,
+        percentLogging: FREQUENT_PERCENT_LOGGING,
       }
     );
 

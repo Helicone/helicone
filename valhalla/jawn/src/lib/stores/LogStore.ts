@@ -15,6 +15,9 @@ const db = pgp({
           ca: process.env.SUPABASE_SSL_CERT_CONTENTS?.split("\\n").join("\n"),
         }
       : undefined,
+  max: 20,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 2000,
 });
 
 process.on("exit", () => {
