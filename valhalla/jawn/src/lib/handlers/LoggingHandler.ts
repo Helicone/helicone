@@ -142,13 +142,13 @@ export class LoggingHandler extends AbstractLogHandler {
         })
       );
 
-      console.log(`S3 upload response: ${JSON.stringify(uploadRes)}`);
-
       if (uploadRes.error) {
         return err(
           `Failed to store request body for request ID ${s3Record.requestId}: ${uploadRes.error}`
         );
       }
+
+      console.log(`S3 uploaded`);
 
       // Optionally upload assets if they exist
       if (s3Record.assets && s3Record.assets.size > 0) {
