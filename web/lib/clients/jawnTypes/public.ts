@@ -206,6 +206,7 @@ Json: JsonObject;
       completion_tokens: number | null;
       provider: components["schemas"]["Provider"];
       node_id: string | null;
+      prompt_id: string | null;
       feedback_created_at?: string | null;
       feedback_id?: string | null;
       feedback_rating?: boolean | null;

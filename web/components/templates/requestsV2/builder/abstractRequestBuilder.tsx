@@ -29,6 +29,7 @@ type CommonFields = {
     rating: boolean | null;
   };
   provider: Provider;
+  promptId: string | null;
   temperature?: number;
   timeToFirstToken?: number | null;
 };
@@ -85,6 +86,7 @@ abstract class AbstractRequestBuilder {
         statusType: this.getStatusType(),
         code: this.response.response_status,
       },
+      promptId: this.response.prompt_id,
       feedback: {
         createdAt: this.response.feedback_created_at ?? null,
         id: this.response.feedback_id ?? null,

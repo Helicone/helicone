@@ -502,6 +502,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           }
         />
       )}
+
       <div className="flex flex-col space-y-4">
         <ThemedTableV5
           defaultData={requests || []}
