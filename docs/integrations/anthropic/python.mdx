@@ -1,0 +1,44 @@
+---
+title: "Python"
+description: "Learn how to integrate Anthropic with Helicone using Python"
+---
+
+## Proxy Integration
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into www.helicone.ai or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Set HELICONE_API_KEY as an environment variable">
+```Python
+export HELICONE_API_KEY=<your API key>
+```
+
+  </Step>
+  <Step title="Modify the base path and add a Helicone-Auth header">
+<CodeGroup>
+
+```Python example.py
+import anthropic
+
+client = anthropic.Anthropic(
+  api_key=os.environ.get("ANTHROPIC_API_KEY"),
+  base_url="https://anthropic.hconeai.com/v1"
+  defaultHeaders={
+    "Helicone-Auth": os.environ.get("HELICONE_API_KEY"),
+  },
+)
+
+client.messages.create(
+  model="claude-3-opus-20240229",
+  max_tokens=1024,
+  messages=[
+    {"role": "user", "content": "Hello, world"}
+  ]
+)
+```
+
+</CodeGroup>
+  </Step>
+</Steps>
