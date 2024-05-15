@@ -70,6 +70,7 @@ export class KafkaProducer {
 
   async sendMessage(msg: KafkaMessage) {
     if (!this.kafka) {
+      console.log(`Calling JAWN for request ${msg.log.request.id}`);
       await this.sendMessageHttp(msg);
       return;
     }
