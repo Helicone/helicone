@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useGetProperties } from "../../../services/hooks/properties";
+
 import { useGetRequests } from "../../../services/hooks/requests";
 import {
   filterListToTree,
@@ -17,6 +17,7 @@ import getNormalizedRequest from "./builder/requestBuilder";
 import { useModels } from "../../../services/hooks/models";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
 import { TimeFilter } from "../dashboard/dashboardPage";
+import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 
 const useRequestsPageV2 = (
   currentPage: number,
@@ -37,7 +38,7 @@ const useRequestsPageV2 = (
     isLoading: isPropertiesLoading,
     propertyFilters,
     searchPropertyFilters,
-  } = useGetProperties();
+  } = useGetPropertiesV2();
 
   const { models, isLoading: isModelsLoading } = useModels(timeFilter, 50);
 
