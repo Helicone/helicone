@@ -61,6 +61,14 @@
             "integrations/azure/langchain"
           ]
         },
+        {
+          "group": "Anthropic",
+          "pages": [
+            "integrations/anthropic/node",
+            "integrations/anthropic/python",
+            "integrations/anthropic/langchain"
+          ]
+        },
         "getting-started/integration-method/anthropic",
         "getting-started/integration-method/anyscale",
         "getting-started/integration-method/together",

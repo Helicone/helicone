@@ -1,0 +1,49 @@
+---
+title: "Langchain"
+description: "Learn how to integrate Anthropic with Helicone using Langchain."
+---
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into www.helicone.ai or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Set HELICONE_API_KEY as an environment variable">
+```typescript
+export HELICONE_API_KEY=<your API key>
+```
+  </Step>
+  <Step title="Modify the API base and add the `Helicone-Auth` header">
+<CodeGroup>
+
+```typescript example.ts
+const llm = new ChatAnthropic({
+  modelName: "claude-2",
+  anthropicApiKey: "ANTHROPIC_API_KEY",
+  clientOptions: {
+    baseURL: "https://anthropic.hconeai.com/",
+    defaultHeaders: {
+      "Helicone-Auth": `Bearer HELICONE_API_KEY`,
+    },
+  },
+});
+```
+
+```python example.py
+anthropic = ChatAnthropic(
+  temperature=0.9,
+  model="claude-2",
+  anthropic_api_url="https://anthropic.hconeai.com/",
+  anthropic_api_key="ANTHROPIC_API_KEY",
+  model_kwargs={
+    "extra_headers":{
+      "Helicone-Auth": f"Bearer {HELICONE_API_KEY}"
+    }
+  }
+)
+```
+
+</CodeGroup>
+
+  </Step>
+</Steps>
