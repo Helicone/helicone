@@ -358,7 +358,26 @@ const RequestRow = (props: {
           })}
         </div>
       </div>
-
+      {request.scores && (
+        <div className="flex flex-col">
+          <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
+            Scores{" "}
+          </div>
+          <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
+            {Object.entries(request?.scores).map(([key, value]) => (
+              <li
+                className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
+                key={key}
+              >
+                <p className="font-semibold text-gray-900 dark:text-gray-100">
+                  {key}
+                </p>
+                <p className="text-gray-700 dark:text-gray-300">{value}</p>
+              </li>
+            ))}
+          </div>
+        </div>
+      )}
       {displayPreview && (
         <div className="flex flex-col space-y-8">
           <div className="flex w-full justify-end">

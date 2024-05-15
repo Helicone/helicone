@@ -121,6 +121,7 @@ const whereKeyMappings: KeyMappings = {
     model: "request.model",
     modelOverride: "request.model_override",
     path: "request.path",
+    prompt_id: "request.prompt_id",
   }),
 
   prompt_v2: easyKeyMappings<"prompt_v2">({

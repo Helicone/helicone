@@ -62,20 +62,21 @@ const openai = new OpenAIApi(configuration);
 
 </CodeGroup>
 
+<Check>When a retry happens, the request will be logged in Helicone. </Check>
+
 ### Retries Parameters
 
 You can customize the behavior of the retries feature by setting additional headers in your request.
 
-| Parameter                    | Description                                       |
-| ---------------------------- | ------------------------------------------------- |
-| `helicone-retry-num`         | Number of retries                                 |
-| `helicone-retry-factor`      | Exponential backoff factor                        |
+| Parameter                    | Description                                       | 
+| ---------------------------- | ------------------------------------------------- | 
+| `helicone-retry-num`         | Number of retries                                 | 
+| `helicone-retry-factor`      | The exponential backoff factor used to increaase the wait time between subsequent retries. The default is usually `2`. | 
 | `helicone-retry-min-timeout` | Minimum timeout (in milliseconds) between retries |
 | `helicone-retry-max-timeout` | Maximum timeout (in milliseconds) between retries |
 
 <Info>
-  {" "}
-  Header values have to be strings, for example `"helicone-retry-num": "3"`{" "}
+  Header values have to be strings, for example `"helicone-retry-num": "3"`
 </Info>
 
 
