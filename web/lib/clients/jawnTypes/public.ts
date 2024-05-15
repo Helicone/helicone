@@ -169,6 +169,10 @@ Json: JsonObject;
     "Record_string.string_": {
       [key: string]: string;
     };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.number_": {
+      [key: string]: number;
+    };
     HeliconeRequest: {
       /** @example Happy */
       response_id: string;
@@ -214,6 +218,7 @@ Json: JsonObject;
       country_code: string | null;
       asset_ids: string[] | null;
       asset_urls: components["schemas"]["Record_string.string_"] | null;
+      scores: components["schemas"]["Record_string.number_"] | null;
       /** Format: double */
       costUSD?: number | null;
     };
@@ -356,10 +361,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_HeliconeRequestAsset.string_": components["schemas"]["ResultSuccess_HeliconeRequestAsset_"] | components["schemas"]["ResultError_string_"];
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.number_": {
-      [key: string]: number;
-    };
     ScoreRequest: {
       scores: components["schemas"]["Record_string.number_"];
     };
