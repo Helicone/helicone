@@ -26,7 +26,6 @@ import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { TimeFilter } from "../dashboard/dashboardPage";
-import { CreateDataSetModal } from "../fine-tune/dataSetModal";
 import getNormalizedRequest from "./builder/requestBuilder";
 import RequestCard from "./requestCard";
 import {
