@@ -548,6 +548,7 @@ def test_claude_vision_request():
             ]
         }
     ]
+
     data = {
         "model": "claude-3-opus-20240229",
         "messages": messages,
@@ -589,7 +590,7 @@ def test_claude_vision_request():
     print("Bodies: (claude_vision): ", bodies)  # Add this line to debug
     assert messages[0]["content"][1]["text"] in bodies["request"]["messages"][
         0]["content"][1]["text"], "Request not found in the database"
-    print("Response choices:", bodies["response"].get("choices"))  # Add this line to debug
+    print("Response choices:", bodies["response"].get("content"))  # Add this line to debug
     assert bodies["response"]["choices"], "Response data not found in the database"
 
     assets_query = "SELECT * FROM asset WHERE request_id = %s"
