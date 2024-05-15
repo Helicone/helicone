@@ -52,6 +52,7 @@ export type RequestTableToOperators = {
   modelOverride: SingleKey<TextOperators>;
   path: SingleKey<TextOperators>;
   country_code: SingleKey<TextOperators>;
+  prompt_id: SingleKey<TextOperators>;
 };
 
 export type FilterLeafRequest = SingleKey<RequestTableToOperators>;
