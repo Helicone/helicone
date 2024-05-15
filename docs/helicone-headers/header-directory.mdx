@@ -125,22 +125,24 @@ The URL to proxy the request to when using _gateway.hconeai.com_. For example, `
     | Parameter                         | Description                                       | 
     | --------------------------------- | ------------------------------------------------- |
     | `Cache-control`                   | Specify the cache limit as a `string` in _seconds_, i.e. `max-age=3600` is 1 hour. |
-    | `Helicone-Cache-Bucket-Max-Size`  | The size of cache bucket represented as a `string`.        |
-    | `Helicone-Cache-Seed`             | A `string` that defines a separate cache state to generate predictable results, i.e. `user-123`. |
+    | `Helicone-Cache-Bucket-Max-Size`  | The size of cache bucket represented as a `number`.        |
+    | `Helicone-Cache-Seed`             | Define a separate cache state as a `string` to generate predictable results, i.e. `user-123`. |
+
+    <Info>Header values have to be strings. For example, `"Helicone-Cache-Bucket-Max-Size": "10"`. </Info>
   </Accordion>
 </ResponseField>
 <ResponseField name="Helicone-Retry-Enabled" type="boolean">
   Retry requests to overcome rate limits and overloaded servers. Set to `true` or `false`.
   You can customize the behavior of the retries feature by setting additional headers in your request.
   <Accordion title="Additional headers" defaultOpen>
-    | Parameter                    | Descriptionretru                                       |
-    | ---------------------------- | ------------------------------------------------- |
-    | `helicone-retry-num`         | Number of retries                                 |
-    | `helicone-retry-factor`      | Exponential backoff factor                        |
-    | `helicone-retry-min-timeout` | Minimum timeout (in milliseconds) between retries |
-    | `helicone-retry-max-timeout` | Maximum timeout (in milliseconds) between retries |
+    | Parameter                    | Descriptionretru                                                  |
+    | ---------------------------- | ----------------------------------------------------------------- |
+    | `helicone-retry-num`         | Number of retries as a `number`.                                  |
+    | `helicone-retry-factor`      | Exponential backoff factor as a `number`.                         |
+    | `helicone-retry-min-timeout` | Minimum timeout (in milliseconds) between retries as a `number`.  |
+    | `helicone-retry-max-timeout` | Maximum timeout (in milliseconds) between retries as a `number`.  |
 
-    <Note> The type for all retry parameters is a number represented as a `string`.</Note> 
+    <Info>Header values have to be strings. For example, `"helicone-retry-num": "3"`. </Info>
   </Accordion>
 </ResponseField>
 <ResponseField name="Helicone-Moderations-Enabled" type="boolean">
