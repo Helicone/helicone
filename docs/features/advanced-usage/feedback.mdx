@@ -96,14 +96,22 @@ provide_feedback(request_id, True)
 
 ### Option 2: Logging Feedback using Fetch
 
+Without Helicone's Node package, you can still log feedback using the Fetch API. For detailed documentation, refer to: 
+
+<Card
+  title="Fetch API for Feedback"
+  href="https://docs.helicone.ai/rest/request/post-v1request-feedback"
+  icon="link"
+>
+  Not using Helicone's Node Package? We got you, too. 
+</Card>
+
 <Note>
 In some packages or scenarios, you may not be able to retrieve headers to get the `helicone-id`. However, you can still log feedback by supplying a UUID as the `helicone-id`.
-
-For more information, refer to the [Feedback API docs](https://docs.helicone.ai/rest/request/post-v1request-feedback).
-
 </Note>
 
-If you're not using our package, you can still log feedback using the Fetch API. Here's a simple example:
+
+Here's a simple example:
 
 ```js
 import OpenAI from "openai";
