@@ -524,7 +524,6 @@ function getCustomScores(
   scores: Record<string, number>[]
 ): Record<string, number> {
   const scoresValues = scores.reduce((acc, record) => {
-    console.log("record", record);
     for (const key in record) {
       if (record.hasOwnProperty(key)) {
         if (!acc[key]) {
