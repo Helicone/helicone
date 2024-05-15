@@ -61,7 +61,6 @@ export async function modelMetrics(
     having: true,
     argsAcc: builtFilter.argsAcc,
   });
-  console.log("limit", limit, "offset", offset);
   const query = `
 SELECT
 request_response_versioned.model as model,
