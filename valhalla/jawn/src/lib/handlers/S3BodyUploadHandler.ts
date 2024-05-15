@@ -35,6 +35,12 @@ export class S3BodyUploadHandler extends AbstractLogHandler {
         context.processedLog.response.body
       );
 
+      console.log(
+        `Storing raw request, response data to S3: ${JSON.stringify(
+          response
+        )}. Url: ${key}`
+      );
+
       if (response.error) {
         return err(`Failed to store response body: ${response.error}`);
       }

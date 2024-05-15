@@ -66,6 +66,9 @@ export class S3ReaderHandler extends AbstractLogHandler {
   > {
     try {
       const contentResponse = await fetch(signedUrl);
+
+      console.log(`Content response: ${contentResponse.status}`);
+
       if (!contentResponse.ok) {
         if (contentResponse.status === 404) {
           console.error(

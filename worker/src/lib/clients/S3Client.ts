@@ -77,6 +77,10 @@ export class S3Client {
 
       const response = await fetch(signedRequest.url, signedRequest);
 
+      console.log(
+        `Storing raw request, response data to S3: ${response.status}. Url: ${url}`
+      );
+
       if (!response.ok) {
         return {
           data: null,

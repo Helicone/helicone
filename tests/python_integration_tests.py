@@ -44,6 +44,8 @@ def fetch_from_minio(object_path):
         secure=False
     )
     # Fetch the object from MinIO
+    print("Fetching object from MinIO with path:", object_path)  # Add this line to debug
+
     data = minioClient.get_object("request-response-storage", object_path)
     
     # Read the data returned by the server
@@ -69,6 +71,7 @@ def fetch_from_db(query, params=None):
     results = cur.fetchall()
     cur.close()
     conn.close()
+    print("Fetched results from DB:", results)
     return results
 
 
@@ -134,6 +137,7 @@ def test_gateway_api():
     query = "SELECT * FROM request where id = %s"
     request_row = fetch_from_db(query, (requestId,))
     bodies = fetch_from_minio(get_path(org_id, requestId))
+    print("Bodies (test_gateway_api): ", bodies)
     assert bodies, "Request data not found in the database for the given property request id"
 
     assert message_content in bodies["request"]["messages"][
@@ -582,9 +586,10 @@ def test_claude_vision_request():
     assert request_data, "Request data not found in the database"
 
     bodies = fetch_from_minio(get_path(org_id, requestId1))
-    print(bodies)
+    print("Bodies: (claude_vision): ", bodies)  # Add this line to debug
     assert messages[0]["content"][1]["text"] in bodies["request"]["messages"][
         0]["content"][1]["text"], "Request not found in the database"
+    print("Response choices:", bodies["response"].get("choices"))  # Add this line to debug
     assert bodies["response"]["choices"], "Response data not found in the database"
 
     assets_query = "SELECT * FROM asset WHERE request_id = %s"
