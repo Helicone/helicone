@@ -83,7 +83,7 @@ export class RequestManager extends BaseManager {
         SELECT 
           request.id as request,
           response.id as response
-        FROM request left join response on request.id = response.request
+        FROM request inner join response on request.id = response.request
         WHERE request.helicone_org_id = $1
         AND request.id = $2
         `,
