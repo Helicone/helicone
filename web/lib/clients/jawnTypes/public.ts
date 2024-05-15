@@ -278,6 +278,7 @@ Json: JsonObject;
       model?: components["schemas"]["Partial_TextOperators_"];
       modelOverride?: components["schemas"]["Partial_TextOperators_"];
       path?: components["schemas"]["Partial_TextOperators_"];
+      prompt_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_ResponseTableToOperators_: {
