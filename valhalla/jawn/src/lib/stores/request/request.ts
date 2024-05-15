@@ -68,6 +68,7 @@ export interface HeliconeRequest {
   completion_tokens: number | null;
   provider: Provider;
   node_id: string | null;
+  prompt_id: string | null;
   feedback_created_at?: string | null;
   feedback_id?: string | null;
   feedback_rating?: boolean | null;
@@ -76,6 +77,7 @@ export interface HeliconeRequest {
   country_code: string | null;
   asset_ids: string[] | null;
   asset_urls: Record<string, string> | null;
+  scores: Record<string, number> | null;
   costUSD?: number | null;
 }
 
@@ -145,6 +147,7 @@ export async function getRequests(
     (response.prompt_tokens + response.completion_tokens) as total_tokens,
     response.completion_tokens as completion_tokens,
     response.prompt_tokens as prompt_tokens,
+    request.prompt_id as prompt_id,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
     feedback.rating AS feedback_rating,
@@ -152,7 +155,13 @@ export async function getRequests(
     SELECT ARRAY_AGG(asset.id)
     FROM asset
     WHERE asset.request_id = request.id
-    ) AS asset_ids
+    ) AS asset_ids,
+    (
+      SELECT jsonb_object_agg(sa.score_key, sv.int_value)
+      FROM score_value sv
+      JOIN score_attribute sa ON sv.score_attribute = sa.id
+      WHERE sv.request_id = request.id
+    ) AS scores
   FROM request
     left join response on request.id = response.request
     left join feedback on response.id = feedback.response_id
@@ -234,6 +243,7 @@ export async function getRequestsCached(
     (response.prompt_tokens + response.completion_tokens) as total_tokens,
     response.completion_tokens as completion_tokens,
     response.prompt_tokens as prompt_tokens,
+    request.prompt_id as prompt_id,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
     feedback.rating AS feedback_rating,

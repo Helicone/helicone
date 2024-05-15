@@ -1,58 +1,61 @@
-import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { err, Result } from "../../lib/shared/result";
+import { err, ok, Result } from "../../lib/shared/result";
 import { BaseManager } from "../BaseManager";
+import { AuthParams } from "../../lib/db/supabase";
+import { ScoreStore } from "../../lib/stores/ScoreStore";
 
 export class ScoreManager extends BaseManager {
+  private scoreStore: ScoreStore;
+  constructor(authParams: AuthParams) {
+    super(authParams);
+    this.scoreStore = new ScoreStore(authParams.organizationId);
+  }
   public async addScores(
     requestId: string,
     scores: Record<string, number>
   ): Promise<Result<string, string>> {
-    try {
-      const organizationId = this.authParams.organizationId;
-      const scoreKeys = Object.keys(scores);
-      const scoreValues = Object.values(scores);
+    const res = await this.addScoresToRequest(requestId, scores);
+    if (res.error || !res.data) {
+      return err(`Error adding scores: ${res.error}`);
+    }
+    return ok(res.data);
+  }
 
-      const { data: requestData, error: requestError } = await dbExecute(
-        `SELECT id FROM request WHERE id = $1 AND helicone_org_id = $2`,
-        [requestId, organizationId]
+  private async addScoresToRequest(
+    requestId: string,
+    scores: Record<string, number>
+  ): Promise<Result<string, string>> {
+    try {
+      const supabaseRequest = await this.scoreStore.putScoresIntoSupabase(
+        requestId,
+        scores
       );
 
-      if (!requestData || requestError) {
-        return err(`${requestId} not found in organization ${organizationId}`);
+      if (supabaseRequest.error || !supabaseRequest.data) {
+        return err(supabaseRequest.error);
       }
 
-      const organizationIds = Array(scoreKeys.length).fill(organizationId);
+      const request = await this.scoreStore.bumpRequestVersion(requestId);
 
-      const query = `
-        WITH upserted_attributes AS (
-            INSERT INTO score_attribute (score_key, organization)
-            SELECT unnest($1::text[]), unnest($2::uuid[])
-            ON CONFLICT (score_key, organization) DO UPDATE SET
-                score_key = EXCLUDED.score_key
-            RETURNING id
-        ),
-        inserted_values AS (
-            INSERT INTO score_value (score_attribute, request_id, int_value)
-            SELECT id, $3, unnest($4::bigint[])
-            FROM upserted_attributes
-            ON CONFLICT (score_attribute, request_id) DO NOTHING
-            RETURNING *
-        )
-        SELECT * FROM inserted_values;
-    `;
-
-      const { data, error } = await dbExecute(query, [
-        scoreKeys,
-        organizationIds,
-        requestId,
-        scoreValues,
-      ]);
-
-      if (!data || error) {
-        return err(`Error adding scores: ${error}`);
+      if (request.error || !request.data) {
+        return err(request.error);
       }
 
-      return { data: "Scores added successfully", error: null };
+      if (request.data.length === 0) {
+        return err(`Request not found: ${requestId}`);
+      }
+
+      const requestInClickhouse = await this.scoreStore.putScoresIntoClickhouse(
+        {
+          ...request.data[0],
+          scores: scores,
+        }
+      );
+
+      if (requestInClickhouse.error || !requestInClickhouse.data) {
+        return requestInClickhouse;
+      }
+
+      return { data: "Scores added to Clickhouse successfully", error: null };
     } catch (error: any) {
       return err(error.message);
     }

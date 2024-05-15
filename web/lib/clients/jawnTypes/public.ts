@@ -169,6 +169,10 @@ Json: JsonObject;
     "Record_string.string_": {
       [key: string]: string;
     };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.number_": {
+      [key: string]: number;
+    };
     HeliconeRequest: {
       /** @example Happy */
       response_id: string;
@@ -206,6 +210,7 @@ Json: JsonObject;
       completion_tokens: number | null;
       provider: components["schemas"]["Provider"];
       node_id: string | null;
+      prompt_id: string | null;
       feedback_created_at?: string | null;
       feedback_id?: string | null;
       feedback_rating?: boolean | null;
@@ -214,6 +219,7 @@ Json: JsonObject;
       country_code: string | null;
       asset_ids: string[] | null;
       asset_urls: components["schemas"]["Record_string.string_"] | null;
+      scores: components["schemas"]["Record_string.number_"] | null;
       /** Format: double */
       costUSD?: number | null;
     };
@@ -277,6 +283,7 @@ Json: JsonObject;
       model?: components["schemas"]["Partial_TextOperators_"];
       modelOverride?: components["schemas"]["Partial_TextOperators_"];
       path?: components["schemas"]["Partial_TextOperators_"];
+      prompt_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_ResponseTableToOperators_: {
@@ -356,10 +363,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_HeliconeRequestAsset.string_": components["schemas"]["ResultSuccess_HeliconeRequestAsset_"] | components["schemas"]["ResultError_string_"];
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.number_": {
-      [key: string]: number;
-    };
     ScoreRequest: {
       scores: components["schemas"]["Record_string.number_"];
     };
