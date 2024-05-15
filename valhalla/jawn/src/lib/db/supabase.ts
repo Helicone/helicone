@@ -4,7 +4,7 @@ import { PromiseGenericResult, err, ok } from "../shared/result";
 import { Database } from "./database.types";
 import { hashAuth } from "./hash";
 import { HeliconeAuth } from "../requestWrapper";
-import { Result } from "../shared/result";
+import { redisClient } from "../clients/redisClient";
 
 // SINGLETON
 class SupabaseAuthCache extends InMemoryCache {
@@ -203,12 +203,16 @@ export class SupabaseConnector {
     authorization: HeliconeAuth,
     organizationId?: string
   ): AuthResult {
-    const cachedResult = this.authCache.get<AuthParams>(
-      await hashAuth(JSON.stringify(authorization) + organizationId)
+    const cacheKey = await hashAuth(
+      JSON.stringify(authorization) + organizationId
     );
+
+    const cachedResult = await redisClient?.get(cacheKey);
+
     if (cachedResult) {
-      return ok(cachedResult);
+      return ok(JSON.parse(cachedResult));
     }
+
     if (authorization.token.includes("sk-helicone-proxy")) {
       authorization._type = "bearerProxy";
     }
@@ -224,10 +228,8 @@ export class SupabaseConnector {
       return err("No organization ID");
     }
 
-    this.authCache.set(
-      await hashAuth(JSON.stringify(authorization) + organizationId),
-      { organizationId: orgId }
-    );
+    await redisClient?.set(cacheKey, JSON.stringify(result.data));
+
     return ok({
       organizationId: orgId,
     });
