@@ -7,6 +7,8 @@ import GenerateAPIKey from "./steps/generateAPIKey";
 import Integrations from "./steps/integrations";
 import Features from "./steps/features";
 import EventListen from "./steps/eventListen";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useOrg } from "../../layout/organizationContext";
 
 interface WelcomePageV2Props {
   currentStep: number;
@@ -18,6 +20,8 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
   const [step, setStep] = useState<number>(currentStep);
   const [apiKey, setApiKey] = useState<string>("");
   const router = useRouter();
+  const supabaseClient = useSupabaseClient();
+  const orgContext = useOrg();
 
   const handleStepChange = (step: number) => {
     router.replace(`/welcome?step=${step}`);
@@ -79,6 +83,33 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
           id="steps"
           className="w-full min-w-[22.5rem] max-w-[22.5rem] lg:flex-1 flex flex-col py-8 px-4"
         >
+          <div className="flex items-center justify-between pb-8 text-gray-500">
+            <button
+              className="text-xs underline"
+              onClick={() => {
+                supabaseClient.auth.signOut().then(() => {
+                  router.push("/");
+                });
+              }}
+            >
+              Log Out
+            </button>
+            <button
+              className="text-xs underline"
+              onClick={async () => {
+                await supabaseClient
+                  .from("organization")
+                  .update({
+                    has_onboarded: true,
+                  })
+                  .eq("id", orgContext?.currentOrg?.id);
+
+                router.push("/dashboard");
+              }}
+            >
+              Skip Onboarding
+            </button>
+          </div>
           <Image
             src={"/assets/pricing/bouncing-cube.png"}
             alt={""}
