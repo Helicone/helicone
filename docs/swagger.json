@@ -3002,6 +3002,9 @@
 	"servers": [
 		{
 			"url": "https://api.helicone.ai/"
+		},
+		{
+			"url": "http://localhost:8585/"
 		}
 	]
 }
