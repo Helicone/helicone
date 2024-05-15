@@ -2,6 +2,7 @@
 import { RequestQueryParams } from "../../controllers/public/requestController";
 import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import { Result, err, ok, resultMap } from "../../lib/shared/result";
 import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequestStore";
@@ -74,28 +75,30 @@ export class RequestManager extends BaseManager {
 
     let sleepDuration = 30_000; // 30 seconds
     for (let i = 0; i < maxRetries; i++) {
-      const { data: response, error: responseError } =
-        await this.queryTimer.withTiming(
-          supabaseServer.client
-            .from("response")
-            .select("*")
-            .eq("helicone_org_id", organizationId)
-            .eq("request", heliconeId),
-          {
-            queryName: "select_response_by_request",
-            percentLogging: FREQUENT_PRECENT_LOGGING,
-          }
-        );
+      const { data: response, error: responseError } = await dbExecute<{
+        request: string;
+        response: string;
+      }>(
+        `
+        SELECT 
+          request,
+          response
+        FROM request left join response on request.id = response.request
+        WHERE request.helicone_org_id = $1
+        AND request.id = $2
+        `,
+        [organizationId, heliconeId]
+      );
 
       if (responseError) {
-        console.error("Error fetching response:", responseError.message);
-        return err(responseError.message);
+        console.error("Error fetching response:", responseError);
+        return err(responseError);
       }
 
       if (response && response.length > 0) {
         return ok({
           requestId: response[0].request,
-          responseId: response[0].id,
+          responseId: response[0].response,
         });
       }
 
