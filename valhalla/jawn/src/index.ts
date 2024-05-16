@@ -15,6 +15,7 @@ import { initSentry } from "./utils/injectSentry";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
 import { tokenRouter } from "./lib/routers/tokenRouter";
 import { consume, consumeDlq } from "./lib/clients/KafkaConsumer";
+import { ValidateError } from "tsoa";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -134,6 +135,24 @@ app.use((req, res, next) => {
 app.use(unAuthenticatedRouter);
 
 app.use(v1APIRouter);
+
+const errorHandler = (
+  err: unknown,
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (err instanceof ValidateError) {
+    console.error(`Caught Validation Error for ${req.url}:`, err.fields);
+  } else if (err instanceof Error) {
+    console.error(`Unexpected error: ${err.message} for ${req.url}`);
+  } else {
+    next();
+  }
+};
+
+// Register the error handler middleware
+app.use(errorHandler);
 
 function setRouteTimeout(
   req: express.Request,
