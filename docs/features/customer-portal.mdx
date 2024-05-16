@@ -1,0 +1,104 @@
+---
+title: "Customer Portal"
+description: "Easily manage your customers and their usage. "
+---
+
+import QuestionsSection from '/snippets/questions-section.mdx';
+
+<Info>**Who can use this feature**: Anyone on the Enterprise [plan](https://www.helicone.ai/pricing). Users on the Free and Growth plan can [contact us](https://www.helicone.ai/features/customer-portal) for pricing. </Info>
+
+
+## Introduction 
+
+Do you have a product that charges customers based on LLM usage? 
+
+Whether you are hosting your own model or using one of the top model providers, you and your team can easily manage your customers and their usage with Helicone's Customer Portal. 
+
+<Accordion title="Get a deep dive of how Customer Portal works">
+
+  Helicone's Customer Portal is a proxy that sits between your model and your customers.
+
+  <Frame>
+    <img src="/images/customer-portal/example-customer-portal-explained.png" />
+  </Frame>
+  
+  - Your customer uses your provider key (that Helicone securely encrypted) to access your LLM application. 
+  - Helicone logs all requests and extracts the data in order to bring customer insights to you. 
+  - Getting access to your customer's usage allows you to set up billing accordingly.  
+
+</Accordion>
+
+<Note>
+  **Proxy is not required for this feature.** If you prefer not to use a proxy, reach out to us at [engineering@helicone.ai](mailto:engineering@helicone.ai). 
+</Note>
+
+<Frame caption="Access built-in customer usage dashboard, billing system and usage tracking by customers.">
+  <img src="/images/customer-portal/example-customer-portal.png" />
+</Frame>
+
+
+### Feature Highlight
+- Easily share your Helicone dashboards and analytics with your customers. 
+- Access built-in customer usage dashboard, billing system and usage tracking by customers.
+- Quick and easy set-up in minutes. 
+
+As an example, you can use Customer Portal to share full access to your model with university students, share your provider key securely and rate limit them by setting cost and request constraints. 
+
+## Getting Access
+
+Anyone on the Enterprise plan have access to Customer Portal. Users on the Free and Growth plan can [contact us](https://www.helicone.ai/features/customer-portal) for pricing. 
+
+<Card title="Get Access to Customer Portal" href="https://www.helicone.ai/features/customer-portal" icon="message">
+  Contact us for pricing. 
+</Card>
+
+
+## Quick Start
+
+### Step 1: Adding your customers
+Go to `Customer Portal` from your left nav, and click `Add Customer`. Set a rate limit for your customer, then add a provider key. 
+
+<Check>Don't worry, your customers will create their own proxy key that maps to your provider key, and will not be able to see the exact key. </Check>
+  
+<Frame>
+  <img src="/images/customer-portal/example-customer-portal-add-customers.png"/>
+</Frame>
+
+
+### Step 2: Your customer will generate proxy keys
+Once your customer [creates a Helicone account](https://www.helicone.ai/signup), they will see their usage on the Helicone dashboard. 
+
+Next, they can go to the `Developer` tab and click `Generate New Key`. 
+<Frame>
+  <img src="/images/customer-portal/example-customer-portal-generate-proxy-key.png" />
+</Frame>
+
+
+### Step 3: Your customer will use the proxy key
+Your customers will paste their proxy key in the code to start logging their requests in Helicone. 
+
+<Frame>
+  <img src="/images/customer-portal/example-customer-portal-use-proxy-key.png" />
+</Frame>
+
+
+### Step 4: View your customer's usage  
+Once your customer starts logging their requests in Helicone, you can view their usage on your Helicone Customer Portal dashboard. 
+
+<Frame>
+  <img src="/images/customer-portal/example-customer-portal-view-usage.png" />
+</Frame>
+
+
+## Guides 
+
+<CardGroup cols={2}>
+  <Card title="Resell a Model" href="/use-cases/resell-a-model" icon="circle-dollar-to-slot">
+    Sell a fine-tuned model to certain customers.
+  </Card>
+  <Card title="Bill by Usage" href="/use-cases/bill-by-usage" icon="chart-bar">
+    Coming soon. 
+  </Card>
+</CardGroup>
+
+<QuestionsSection />

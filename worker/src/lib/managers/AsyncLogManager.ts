@@ -13,6 +13,16 @@ import { S3Client } from "../clients/S3Client";
 import { RequestResponseManager } from "./RequestResponseManager";
 import { KafkaProducer } from "../clients/KafkaProducer";
 
+function mergeHeaders(x: Headers, y: Headers) {
+  const merged = new Headers();
+  for (const [key, value] of x.entries()) {
+    merged.set(key, value);
+  }
+  for (const [key, value] of y.entries()) {
+    merged.set(key, value);
+  }
+  return merged;
+}
 export async function logAsync(
   requestWrapper: RequestWrapper,
   env: Env,
@@ -37,9 +47,9 @@ export async function logAsync(
 
   const requestHeaders = new Headers(asyncLogModel.providerRequest.meta);
   const responseHeaders = new Headers(asyncLogModel.providerResponse.headers);
-  const heliconeHeaders = new HeliconeHeaders(requestHeaders);
-  heliconeHeaders.heliconeAuthV2 =
-    requestWrapper.heliconeHeaders.heliconeAuthV2;
+  const heliconeHeaders = new HeliconeHeaders(
+    mergeHeaders(requestHeaders, requestWrapper.headers)
+  );
 
   const loggable = await dbLoggableRequestFromAsyncLogModel({
     requestWrapper,

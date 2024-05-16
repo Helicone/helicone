@@ -13,13 +13,6 @@ description: "Helicone is the observability platform purpose-built for LLM devel
 ## Quick Start
 
 Integrate with Helicone and send your first events in seconds. 
-
-<CardGroup cols={1}>
-  <Card title="Gateway" href="/getting-started/integration-method/gateway" icon="flag">
-    The optimal method to integrate with Helicone is through our Gateway. 
-  </Card>
-</CardGroup>
-
 <CardGroup cols={3}>
   <Card title="OpenAI" href="/getting-started/integration-method/openai-proxy">
     Python, Node, cURL, Langchain
@@ -44,13 +37,15 @@ Integrate with Helicone and send your first events in seconds.
   </Card>
      <Card title="LiteLLM" href="/getting-started/integration-method/litellm">
   </Card>
+  <Card title="Gateway" href="/getting-started/integration-method/gateway" icon="flag">
+    Don't see your provider above? Try Helicone's universal Gateway. 
+  </Card>
 </CardGroup>
+
 
 ## New to Helicone? 
 
 To help you get the most out of Helicone, we curated a list of actions that you can do next. Our users typically find themselves doing majority of the following, but you're welcome to explore the product on your own!
-
-
 
 <CardGroup cols={1}>
   <Card title="Add a custom property" href="features/advanced-usage/custom-properties" icon="square-1">
@@ -81,7 +76,7 @@ The following guides are optional, but we think you'll find them useful (and fun
 Discover features for monitoring and experimenting with your prompts. 
 <CardGroup cols={3}>
   <Card
-    title="Prompts"
+    title="Prompts (Beta)"
     href="/features/prompts"
     icon="square-terminal"
   >
@@ -164,13 +159,13 @@ Discover features for monitoring and experimenting with your prompts.
   >
     Secure OpenAI chat completions against prompt injections.
   </Card>
-    <Card 
+  {/* <Card 
     title="Webhooks" 
     href="/features/Webhooks"
     icon="webhook"
   >
     Set up integrations tp subscribe Helicone events. 
-  </Card>
+  </Card> */}
   <Card 
     title="Customer Portal" 
     href="/features/customer_portal/intro"
@@ -179,9 +174,7 @@ Discover features for monitoring and experimenting with your prompts.
     Easily manage your customers and their usage.
   </Card>
 
-
 </CardGroup>
-
 
 ## Further Reading
 
@@ -196,7 +189,6 @@ Discover features for monitoring and experimenting with your prompts.
     Every header you need to know to access Helicone features.
   </Card>
 </CardGroup>
-
 
 ## Questions? 
 <Check>Although we designed the docs to be as self-serving as possible, you are welcome to join our [Discord](https://discord.com/invite/HwUbV3Q8qz) or contact [help@helicone.ai](help@helicone.ai) with any questions or feedback you have. </Check>

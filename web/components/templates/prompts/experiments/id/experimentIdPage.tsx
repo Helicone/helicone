@@ -16,6 +16,7 @@ import ModelPill from "../../../requestsV2/modelPill";
 import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
 import { usePrompt } from "../../../../../services/hooks/prompts/prompts";
 import ArrayDiffViewer from "../../id/arrayDiffViewer";
+import ScoresTable from "../scoresTable";
 
 interface PromptIdPageProps {
   id: string;
@@ -38,11 +39,16 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
       inputs: row.inputRecord?.inputs ?? {},
       originResult: {
         response: row.inputRecord?.response,
+        scores: row.scores,
       },
       testResult: {
         response: experiment?.hypotheses?.[0]?.runs?.find(
           (run) => run.datasetRowId === row.rowId
         )?.response,
+        scores:
+          experiment?.hypotheses?.[0]?.runs?.find(
+            (run) => run.datasetRowId === row.rowId
+          )?.scores ?? {},
       },
     };
   });
@@ -127,6 +133,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
             <h1 className="font-semibold text-3xl text-black dark:text-white">
               {experiment?.id}
             </h1>
+            {experiment?.scores && <ScoresTable scores={experiment?.scores} />}
             <div className="h-full w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-black">
               <div className="w-full flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700 rounded-t-lg">
                 <div className="flex items-center space-x-2">
@@ -210,6 +217,25 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                 model={run.originResult.response?.model ?? ""}
                               />
                             </div>
+                            <div className="w-full flex items-center gap-2">
+                              {run.originResult.scores &&
+                                Object.keys(run.originResult.scores).length >
+                                  0 && (
+                                  <>
+                                    Scores:{" "}
+                                    {Object.keys(run.originResult.scores).map(
+                                      (key) => (
+                                        <span
+                                          key={key}
+                                          className="bg-gray-50 text-gray-700 ring-gray-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
+                                        >
+                                          {key}: {run.originResult.scores[key]}
+                                        </span>
+                                      )
+                                    )}
+                                  </>
+                                )}
+                            </div>
                             <pre className="whitespace-pre-wrap text-sm w-full h-full text-black">
                               {
                                 (run.originResult.response?.body as any)
@@ -264,6 +290,25 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                 <ModelPill
                                   model={run.testResult.response?.model ?? ""}
                                 />
+                              </div>
+                              <div className="w-full flex items-center gap-2">
+                                {run.testResult.scores &&
+                                  Object.keys(run.testResult.scores).length >
+                                    0 && (
+                                    <>
+                                      Scores:{" "}
+                                      {Object.keys(run.testResult.scores).map(
+                                        (key) => (
+                                          <span
+                                            key={key}
+                                            className="bg-gray-50 text-gray-700 ring-gray-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
+                                          >
+                                            {key}: {run.testResult?.scores[key]}
+                                          </span>
+                                        )
+                                      )}
+                                    </>
+                                  )}
                               </div>
                               <pre className="whitespace-pre-wrap text-sm overflow-auto h-full text-black">
                                 {

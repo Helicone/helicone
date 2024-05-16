@@ -9,6 +9,7 @@ import {
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
   SingleFilterDef,
+  getPropertyFiltersV2,
 } from "../lib/filters/frontendFilterDefs";
 import { UIFilterRow } from "../../components/shared/themed/themedAdvancedFilters";
 import { useGetPropertiesV2 } from "./propertiesV2";
@@ -28,7 +29,7 @@ const useQuantiles = (data: {
     isLoading: isPropertiesLoading,
     propertyFilters,
     searchPropertyFilters,
-  } = useGetPropertiesV2();
+  } = useGetPropertiesV2(getPropertyFiltersV2);
 
   const {
     data: quantiles,

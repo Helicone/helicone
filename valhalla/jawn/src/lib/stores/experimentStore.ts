@@ -37,6 +37,7 @@ export interface Experiment {
         response: ResponseObj;
         request: RequestObj;
       };
+      scores: Record<string, number>;
     }[];
   };
   meta: any;
@@ -58,24 +59,21 @@ export interface Experiment {
       datasetRowId: string;
       resultRequestId: string;
       response?: ResponseObj;
+      scores: Record<string, number>;
       request?: RequestObj;
     }[];
   }[];
   scores: ExperimentScores | null;
 }
 
+type ScoreValue = string | number | Date;
+
 export interface ExperimentScores {
   dataset: {
-    dateCreated: Date;
-    model: string;
-    cost: number;
-    //customScores: Record<string, number>;
+    scores: Record<string, ScoreValue>;
   };
   hypothesis: {
-    dateCreated: Date;
-    model: string;
-    cost: number;
-    //customScores: Record<string, number>;
+    scores: Record<string, ScoreValue>;
   };
 }
 
@@ -156,7 +154,15 @@ function getExperimentsQuery(
                     ),`
                         : ""
                     }
-                      'rowId', dsr.id
+                    'rowId', dsr.id,
+                    'scores', (
+                      SELECT jsonb_object_agg(sa.score_key, sv.int_value)
+                      FROM score_value sv
+                      JOIN score_attribute sa ON sa.id = sv.score_attribute
+                      JOIN prompt_input_record pir ON pir.source_request = sv.request_id
+                      WHERE pir.id = dsr.input_record
+                      AND sa.organization = e.organization
+                    )
                   )
               )
           ),
@@ -216,7 +222,14 @@ function getExperimentsQuery(
                                       : ""
                                   }
                                   'datasetRowId', hr.dataset_row,
-                                  'resultRequestId', hr.result_request_id
+                                  'resultRequestId', hr.result_request_id,
+                                  'scores', (
+                                    SELECT jsonb_object_agg(sa.score_key, sv.int_value)
+                                    FROM score_value sv
+                                    JOIN score_attribute sa ON sa.id = sv.score_attribute
+                                    WHERE sv.request_id = hr.result_request_id
+                                    AND sa.organization = e.organization
+                                  )
                               )
                           )
                           FROM experiment_v2_hypothesis_run hr
@@ -439,9 +452,12 @@ function getExperimentHypothesisScores(
     );
 
     return ok({
-      dateCreated: new Date(hypothesis.createdAt),
-      model: hypothesis.model,
-      cost: hypothesisCost,
+      scores: {
+        dateCreated: new Date(hypothesis.createdAt),
+        model: hypothesis.model,
+        cost: hypothesisCost,
+        ...getCustomScores(hypothesis.runs.map((run) => run.scores)),
+      },
     });
   } catch (error) {
     console.error("Error calculating hypothesis cost", error);
@@ -491,14 +507,41 @@ function getExperimentDatasetScores(
     const averageCost = validRows.length > 0 ? totalCost / validRows.length : 0;
 
     return ok({
-      dateCreated: new Date(latest.createdAt),
-      model: latest.model,
-      cost: averageCost,
+      scores: {
+        dateCreated: new Date(latest.createdAt),
+        model: latest.model,
+        cost: averageCost,
+        ...getCustomScores(validRows.map((row) => row.scores)),
+      },
     });
   } catch (error) {
     console.error("Error calculating dataset cost", error);
     return err("Error calculating dataset cost");
   }
+}
+
+function getCustomScores(
+  scores: Record<string, number>[]
+): Record<string, number> {
+  const scoresValues = scores.reduce((acc, record) => {
+    for (const key in record) {
+      if (record.hasOwnProperty(key)) {
+        if (!acc[key]) {
+          acc[key] = { sum: 0, count: 0 };
+        }
+        acc[key].sum += record[key];
+        acc[key].count += 1;
+      }
+    }
+    return acc;
+  }, {} as Record<string, { sum: number; count: number }>);
+
+  return Object.fromEntries(
+    Object.entries(scoresValues).map(([key, { sum, count }]) => [
+      key,
+      sum / count,
+    ])
+  );
 }
 
 function modelCost(modelRow: {

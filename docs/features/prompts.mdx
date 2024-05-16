@@ -3,6 +3,8 @@ title: "Prompts"
 description: "Effortlessly monitor prompt versions and inputs."
 ---
 
+import QuestionsSection from '/snippets/questions-section.mdx';
+
 <Info>
   **Who can use this feature**: Anyone on any
   [plan](https://www.helicone.ai/pricing).
@@ -29,9 +31,12 @@ Requests are now matched to a `helicone-prompt-id`, allowing you to:
 - version and track iterations to your prompt over time, without losing any previous versions.
 - maintain a dataset of inputs and outputs for each prompt version.
 
-## Prerequisites
 
-To use Prompts, you must set up Helicone in proxy mode via [Gateway](https://docs.helicone.ai/getting-started/integration-method/gateway) or [custom package](https://docs.helicone.ai/getting-started/integration-method/openai-proxy).
+## Quick Start
+
+### Prerequisites
+
+To use Prompts, you must set up Helicone in proxy mode. Please ensure you use one of the methods in our [Starter Guide](https://docs.helicone.ai/getting-started/quick-start#quick-start).
 
 <Note>
   Not sure if proxy is for you? We created a guide to explain the difference
@@ -39,11 +44,11 @@ To use Prompts, you must set up Helicone in proxy mode via [Gateway](https://doc
   integration](https://docs.helicone.ai/getting-started/proxy-vs-async).
 </Note>
 
-## How Prompt Template Works
 
+### How Prompt Templates Work
 As you modify your prompt in code, Helicone automatically tracks the new version and maintains a record of the old prompt. Additionally, a dataset of input/output keys is preserved for each version.
 
-<Accordion title="Get a Deep-Dive of Prompt Templates">
+<Accordion title="Get a deep dive of the feature">
 
 ### For Typescript / Javascript users:
 
@@ -63,17 +68,17 @@ Currently, we only support packages for TypeScript and JavaScript for easy integ
 
 1. When you send over a prompt with the following syntax, we are able to extract the children text between the JSX element `helicone-prompt-input`, then place it back into the prompt to be sent to your LLM.
 
-```tsx
-<helicone-prompt-input key="my_input_key">
-  Input to your LLM
-</helicone-prompt-input>
-```
-
-Only the following will be sent to your LLM:
-
-```tsx
+  ```tsx
+  <helicone-prompt-input key="my_input_key">
     Input to your LLM
-```
+  </helicone-prompt-input>
+  ```
+
+  Only the following will be sent to your LLM:
+
+  ```tsx
+      Input to your LLM
+  ```
 
 <Note>
   It is crucial that each key has a unique identifier; otherwise, you will get
@@ -90,7 +95,7 @@ Only the following will be sent to your LLM:
 
 </Accordion>
 
-## Example
+### Example
 
 Let's say we have an app that generates a short story, where users are able to input their own `character`. For example, the prompt is “Write a story about a secret agent”, where the `character` is “a secret agent”.
 
@@ -113,7 +118,7 @@ Let's say we have an app that generates a short story, where users are able to i
       content: hprompt`Write a story about ${{ character }}`,
       ```
 
-        <Accordion title="Change Input Name">
+        <Accordion title="Change input name">
           If you want to rename your input or have a custom input, you can change the key-value pair in the passed dictionary to the string formatter function. Like this:
 
           ```tsx
@@ -127,7 +132,7 @@ Let's say we have an app that generates a short story, where users are able to i
 
         Assigning an id allows us to associate your prompt with future versions of your prompt, and automatically manage versions on your behalf.
 
-        Depending on the package you are using, you will need to add a header. For more information on adding headers to packages, please see [Header Directory](/header-directory).
+        Depending on the package you are using, you will need to add a header. For more information on adding headers to packages, please see [Header Directory](/helicone-headers/header-directory).
 
         ```tsx
         headers: {
@@ -234,3 +239,4 @@ headers: {
   "Helicone-Prompt-Mode": "testing",
 },
 ```
+<QuestionsSection />
