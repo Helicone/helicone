@@ -8,9 +8,11 @@ import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import PropertyPanel from "./propertyPanel";
+import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
 
 const PropertiesPage = (props: {}) => {
-  const { properties, isLoading: isPropertiesLoading } = useGetPropertiesV2();
+  const { properties, isLoading: isPropertiesLoading } =
+    useGetPropertiesV2(getPropertyFiltersV2);
 
   const [selectedProperty, setSelectedProperty] = useState<string>("");
 
