@@ -74,8 +74,8 @@ const ScoresTable = ({ scores }: ScoresProps) => {
               "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
             )}
           >
-            {scores.dataset.scores.dateCreated ===
-            scores.hypothesis.scores.dateCreated
+            {scores.dataset.scores.dateCreated.toLocaleString() ===
+            scores.hypothesis.scores.dateCreated.toLocaleString()
               ? "same"
               : "changed"}
           </span>
@@ -94,7 +94,7 @@ const ScoresTable = ({ scores }: ScoresProps) => {
               "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
             )}
           >
-            {`${changeInfo.change > 0 && "+"}${changeInfo.change} (${
+            {`${changeInfo.change > 0 ? "+" : ""}${changeInfo.change} (${
               changeInfo.percentageChange
             }%)`}
           </span>
