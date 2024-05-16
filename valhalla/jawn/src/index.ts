@@ -4,7 +4,6 @@ require("dotenv").config({
 
 import express, { NextFunction } from "express";
 import swaggerUi from "swagger-ui-express";
-
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authMiddleware } from "./middleware/auth";
 import { RegisterRoutes as registerPrivateTSOARoutes } from "./tsoa-build/private/routes";
@@ -15,7 +14,6 @@ import { initSentry } from "./utils/injectSentry";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
 import { tokenRouter } from "./lib/routers/tokenRouter";
 import { consume, consumeDlq } from "./lib/clients/KafkaConsumer";
-import { ValidateError } from "tsoa";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
