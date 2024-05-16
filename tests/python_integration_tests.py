@@ -71,7 +71,6 @@ def fetch_from_db(query, params=None):
     results = cur.fetchall()
     cur.close()
     conn.close()
-    print("Fetched results from DB:", results)
     return results
 
 
@@ -137,7 +136,6 @@ def test_gateway_api():
     query = "SELECT * FROM request where id = %s"
     request_row = fetch_from_db(query, (requestId,))
     bodies = fetch_from_minio(get_path(org_id, requestId))
-    print("Bodies (test_gateway_api): ", bodies)
     assert bodies, "Request data not found in the database for the given property request id"
 
     assert message_content in bodies["request"]["messages"][
@@ -187,7 +185,6 @@ def test_openai_proxy():
     assert message_content in bodies["request"]["messages"][
         0]["content"], "Request not found in the database"
 
-    print(bodies)
     assert bodies["response"]["choices"], "Response data not found in the database for the given request ID"
     print("passed")
 
@@ -353,7 +350,6 @@ def test_prompt_threat():
     The entire prompt should be 90 characters or less. Make it as relevant to the image as possible, but do not include people or faces in the prompt.'''
 
     requestId1 = str(uuid.uuid4())
-    print("Request ID1: " + requestId1 + "")
     messages = [
         {
             "role": "user",
@@ -580,18 +576,15 @@ def test_claude_vision_request():
 
     # Assuming your Helicone setup captures requests to Claude, wait for database logging
     time.sleep(3)
-
-    ###
     
     request_data = fetch_from_db("SELECT * FROM request where id = %s", (requestId1,))
     assert request_data, "Request data not found in the database"
 
     bodies = fetch_from_minio(get_path(org_id, requestId1))
-    print("Bodies: (claude_vision): ", bodies)  # Add this line to debug
     assert messages[0]["content"][1]["text"] in bodies["request"]["messages"][
         0]["content"][1]["text"], "Request not found in the database"
-    print("Response choices:", bodies["response"].get("content"))  # Add this line to debug
-    assert bodies["response"]["choices"], "Response data not found in the database"
+        
+    assert bodies["response"]["content"], "Response data not found in the database"
 
     assets_query = "SELECT * FROM asset WHERE request_id = %s"
     assets_data1 = fetch_from_db(assets_query, (requestId1,))
