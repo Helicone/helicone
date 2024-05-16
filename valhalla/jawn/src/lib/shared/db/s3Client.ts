@@ -159,8 +159,6 @@ export class S3Client {
 
       const response = await this.awsClient.send(command);
 
-      console.log(`S3 Upload Response ${JSON.stringify(response)}`);
-
       if (!response || response.$metadata.httpStatusCode !== 200) {
         return err(
           `Failed to store data: ${response.$metadata.httpStatusCode}`

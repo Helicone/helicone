@@ -918,11 +918,6 @@ export class DBLoggable {
     S3_ENABLED: Env["S3_ENABLED"],
     requestHeaders?: HeliconeHeaders
   ) {
-    console.log(`Organization ID: ${authParams.organizationId}`);
-    console.log(
-      `HeliconeAuthV2: ${JSON.stringify(requestHeaders?.heliconeAuthV2)}`
-    );
-
     if (
       !authParams?.organizationId ||
       // Must be helicone api key or proxy key

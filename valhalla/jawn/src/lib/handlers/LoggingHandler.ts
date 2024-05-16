@@ -132,7 +132,6 @@ export class LoggingHandler extends AbstractLogHandler {
         s3Record.organizationId
       );
 
-      console.log(`About to upload request response to S3: ${key}`);
       // Upload request and response body
       const uploadRes = await this.s3Client.store(
         key,
@@ -147,8 +146,6 @@ export class LoggingHandler extends AbstractLogHandler {
           `Failed to store request body for request ID ${s3Record.requestId}: ${uploadRes.error}`
         );
       }
-
-      console.log(`S3 uploaded`);
 
       // Optionally upload assets if they exist
       if (s3Record.assets && s3Record.assets.size > 0) {

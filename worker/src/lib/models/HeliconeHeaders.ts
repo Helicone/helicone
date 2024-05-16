@@ -202,10 +202,6 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   }
 
   private getHeliconeHeaders(): IHeliconeHeaders {
-    console.log(
-      `this.getHeliconeAuthV2()`,
-      JSON.stringify(this.getHeliconeAuthV2())
-    );
     return {
       heliconeAuth: this.headers.get("helicone-auth") ?? null,
       heliconeAuthV2: this.getHeliconeAuthV2(),
