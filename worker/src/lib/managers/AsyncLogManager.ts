@@ -39,6 +39,8 @@ export async function logAsync(
   const requestHeaders = new Headers(asyncLogModel.providerRequest.meta);
   const responseHeaders = new Headers(asyncLogModel.providerResponse.headers);
   const heliconeHeaders = new HeliconeHeaders(requestHeaders);
+  heliconeHeaders.heliconeAuthV2 =
+    requestWrapper.heliconeHeaders.heliconeAuthV2;
 
   const loggable = await dbLoggableRequestFromAsyncLogModel({
     requestWrapper,
