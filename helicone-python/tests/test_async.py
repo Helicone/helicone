@@ -6,6 +6,7 @@ import psycopg2
 import requests
 from dotenv import load_dotenv
 from psycopg2.extras import DictCursor
+import json
 
 from helicone.globals import helicone_global
 from helicone.globals.helicone import helicone_global
@@ -89,8 +90,7 @@ def test_openai_async():
 
     time.sleep(3)  # Give some time for the async logging to complete
 
-    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
-    request_data = fetch_from_db(query, (requestId,))
+    request_data = fetch_from_db("SELECT * FROM public.request WHERE properties @> %s", (json.dumps({"requestid": requestId}),))
     assert request_data, "Request data not found in the database for the given property request id"
 
     latest_request = request_data[0]
