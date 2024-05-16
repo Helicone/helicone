@@ -6,6 +6,8 @@ import psycopg2
 import requests
 from dotenv import load_dotenv
 from psycopg2.extras import DictCursor
+import json
+from minio import Minio
 
 from helicone.globals import helicone_global
 from helicone.globals.helicone import helicone_global
@@ -17,6 +19,7 @@ helicone_global.fail_on_error = True
 helicone_global.base_url = "http://127.0.0.1:8788"
 helicone_global.api_key = "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
 helicone_global.proxy_url = "http://127.0.0.1:8787/v1"
+org_id = '83635a30-5ba6-41a8-8cc6-fb7df941b24a'
 
 
 def connect_to_db():
@@ -37,6 +40,27 @@ def fetch_from_db(query, params=None):
     cur.close()
     conn.close()
     return results
+
+def get_path(organizationId, requestId):
+    return f"organizations/{organizationId}/requests/{requestId}/request_response_body"
+
+def fetch_from_minio(object_path):
+    minioClient = Minio(
+        "localhost:9000",
+        access_key="minioadmin",
+        secret_key="minioadmin",
+        secure=False
+    )
+    # Fetch the object from MinIO
+    print("Fetching object from MinIO with path:", object_path)  # Add this line to debug
+
+    data = minioClient.get_object("request-response-storage", object_path)
+    
+    # Read the data returned by the server
+    file_data = data.read()
+    data.close()
+    
+    return json.loads(file_data.decode('utf-8'))
 
 
 def insert_into_db(query, params):
@@ -89,15 +113,15 @@ def test_openai_async():
 
     time.sleep(3)  # Give some time for the async logging to complete
 
-    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
-    request_data = fetch_from_db(query, (requestId,))
+    request_data = fetch_from_db("SELECT * FROM public.request WHERE properties @> %s", (json.dumps({"requestid": requestId}),))
     assert request_data, "Request data not found in the database for the given property request id"
 
-    latest_request = request_data[0]
-    assert message_content in latest_request["body"]["messages"][
-        0]["content"], "Request not found in the database"
+    bodies = fetch_from_minio(get_path(org_id, request_data[0]["id"]))
+    assert bodies, "Request data not found in the database for the given property request id"
+    assert message_content in bodies["request"]["messages"][0]["content"], "Request not found in the database"
+    assert bodies["response"]["choices"], "Response data not found in the database for the given request ID"
 
     query = "SELECT * FROM response WHERE request = %s LIMIT 1"
-    response_data = fetch_from_db(query, (latest_request["id"],))
+    response_data = fetch_from_db(query, (request_data[0]["id"],))
     assert response_data, "Response data not found in the database for the given request ID"
     print("passed")
