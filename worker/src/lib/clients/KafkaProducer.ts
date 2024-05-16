@@ -69,7 +69,9 @@ export class KafkaProducer {
   }
 
   async sendMessage(msg: KafkaMessage) {
+    console.log(`Sending message, Does kafka exist: ${this.kafka !== null}`);
     if (!this.kafka) {
+      console.log(`Sending message via HTTP: ${JSON.stringify(msg)}`);
       await this.sendMessageHttp(msg);
       return;
     }

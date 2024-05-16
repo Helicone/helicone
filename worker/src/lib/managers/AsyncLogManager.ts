@@ -19,6 +19,7 @@ export async function logAsync(
   ctx: ExecutionContext,
   provider: Provider
 ): Promise<Response> {
+  console.log(requestWrapper.heliconeHeaders.requestId);
   const asyncLogModel = await requestWrapper.getJson<AsyncLogModel>();
   // if payload is larger than 10MB, return 400
   const MAX_PAYLOAD_SIZE = 10 * 1024 * 1024;

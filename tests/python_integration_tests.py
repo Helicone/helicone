@@ -300,6 +300,7 @@ def test_openai_async():
     helicone_global.base_url = helicone_async_url
     openai.api_key = openai_api_key
     openai.organization = openai_org_id
+    
 
     requestId = str(uuid.uuid4())
     
@@ -312,6 +313,7 @@ def test_openai_async():
         }
     ]
 
+    print(requestId)
     # Using the helicone package for async logging
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -327,15 +329,17 @@ def test_openai_async():
 
     time.sleep(3)  # Give some time for the async logging to complete
 
-    request_data = fetch_from_db("SELECT * FROM request where id = %s", (requestId,))
+    request_data = fetch_from_db("SELECT * FROM public.request WHERE properties @> %s", (json.dumps({"requestid": requestId}),))
     assert request_data, "Request data not found in the database"
 
-    bodies = fetch_from_minio(get_path(org_id, requestId))
+    requestIdActual = request_data[0]["id"]
+
+    bodies = fetch_from_minio(get_path(org_id, requestIdActual))
     assert message_content in bodies["request"]["messages"][
         0]["content"], "Request not found in the database"
     assert bodies["response"]["choices"], "Response data not found in the database"
     
-    response_data = fetch_from_db("SELECT * FROM response where request = %s", (requestId,))
+    response_data = fetch_from_db("SELECT * FROM response where request = %s", (requestIdActual,))
     assert response_data, "Respone data not found in the database"
 
     print("passed")
