@@ -1806,47 +1806,50 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ScoreValue": {
+				"anyOf": [
+					{
+						"type": "string"
+					},
+					{
+						"type": "number",
+						"format": "double"
+					},
+					{
+						"type": "string",
+						"format": "date-time"
+					}
+				]
+			},
+			"Record_string.ScoreValue_": {
+				"properties": {},
+				"additionalProperties": {
+					"$ref": "#/components/schemas/ScoreValue"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
 			"ExperimentScores": {
 				"properties": {
 					"dataset": {
 						"properties": {
-							"cost": {
-								"type": "number",
-								"format": "double"
-							},
-							"model": {
-								"type": "string"
-							},
-							"dateCreated": {
-								"type": "string",
-								"format": "date-time"
+							"scores": {
+								"$ref": "#/components/schemas/Record_string.ScoreValue_"
 							}
 						},
 						"required": [
-							"cost",
-							"model",
-							"dateCreated"
+							"scores"
 						],
 						"type": "object"
 					},
 					"hypothesis": {
 						"properties": {
-							"cost": {
-								"type": "number",
-								"format": "double"
-							},
-							"model": {
-								"type": "string"
-							},
-							"dateCreated": {
-								"type": "string",
-								"format": "date-time"
+							"scores": {
+								"$ref": "#/components/schemas/Record_string.ScoreValue_"
 							}
 						},
 						"required": [
-							"cost",
-							"model",
-							"dateCreated"
+							"scores"
 						],
 						"type": "object"
 					}
