@@ -136,24 +136,6 @@ app.use(unAuthenticatedRouter);
 
 app.use(v1APIRouter);
 
-const errorHandler = (
-  err: unknown,
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
-  if (err instanceof ValidateError) {
-    console.error(`Caught Validation Error for ${req.url}:`, err.fields);
-  } else if (err instanceof Error) {
-    console.error(`Unexpected error: ${err.message} for ${req.url}`);
-  } else {
-    next();
-  }
-};
-
-// Register the error handler middleware
-app.use(errorHandler);
-
 function setRouteTimeout(
   req: express.Request,
   res: express.Response,
