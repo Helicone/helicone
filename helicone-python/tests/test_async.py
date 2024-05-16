@@ -116,7 +116,7 @@ def test_openai_async():
     request_data = fetch_from_db("SELECT * FROM public.request WHERE properties @> %s", (json.dumps({"requestid": requestId}),))
     assert request_data, "Request data not found in the database for the given property request id"
 
-    bodies = fetch_from_minio(get_path(org_id, requestId))
+    bodies = fetch_from_minio(get_path(org_id, request_data[0]["id"]))
     assert bodies, "Request data not found in the database for the given property request id"
     assert message_content in bodies["request"]["messages"][0]["content"], "Request not found in the database"
     assert bodies["response"]["choices"], "Response data not found in the database for the given request ID"
