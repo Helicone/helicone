@@ -5,7 +5,6 @@ require("dotenv").config({
 import express, { NextFunction } from "express";
 import swaggerUi from "swagger-ui-express";
 import { Worker } from "worker_threads";
-
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authMiddleware } from "./middleware/auth";
 import { RegisterRoutes as registerPrivateTSOARoutes } from "./tsoa-build/private/routes";
