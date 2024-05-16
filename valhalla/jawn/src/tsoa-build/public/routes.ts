@@ -548,7 +548,7 @@ const models: TsoaRoute.Models = {
     "DatasetMetadata": {
         "dataType": "refObject",
         "properties": {
-            "promptVersionId": {"dataType":"string"},
+            "promptId": {"dataType":"string"},
             "inputRecordsIds": {"dataType":"array","array":{"dataType":"string"}},
         },
         "additionalProperties": false,
@@ -605,8 +605,8 @@ const models: TsoaRoute.Models = {
         "properties": {
             "id": {"dataType":"string","required":true},
             "name": {"dataType":"string","required":true},
-            "request_ids": {"dataType":"array","array":{"dataType":"string"},"required":true},
             "created_at": {"dataType":"string","required":true},
+            "meta": {"ref":"DatasetMetadata"},
         },
         "additionalProperties": false,
     },
@@ -1243,7 +1243,7 @@ export function RegisterRoutes(app: Router) {
 
             function ExperimentDatasetController_getDatasets(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{}},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"promptId":{"dataType":"string"}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 

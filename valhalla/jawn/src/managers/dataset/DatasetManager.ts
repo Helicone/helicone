@@ -1,5 +1,6 @@
 // src/users/usersService.ts
 import {
+  DatasetMetadata,
   DatasetResult,
   NewDatasetParams,
   RandomDatasetParams,
@@ -19,28 +20,32 @@ import { buildFilterPostgres } from "../../lib/shared/filters/filters";
 import { resultMap } from "../../lib/shared/result";
 import { User } from "../../models/user";
 import { BaseManager } from "../BaseManager";
+import { Json } from "../../lib/db/database.types";
 
 // A post request should not contain an id.
 export type UserCreationParams = Pick<User, "email" | "name" | "phoneNumbers">;
 
 export class DatasetManager extends BaseManager {
-  async getDatasets(): Promise<Result<DatasetResult[], string>> {
+  async getDatasets(
+    promptId?: string
+  ): Promise<Result<DatasetResult[], string>> {
     const result = dbExecute<{
       id: string;
       name: string;
-      request_ids: string[];
       created_at: string;
+      meta: DatasetMetadata;
     }>(
       `
     SELECT 
       id,
       name,
-      created_at
+      created_at,
+      meta
     FROM experiment_dataset_v2
-    WHERE organization = $1
+    WHERE organization = $1 ${promptId ? "AND meta->>'promptId' = $2" : ""}
     LIMIT 100
     `,
-      [this.authParams.organizationId]
+      [this.authParams.organizationId].concat(promptId ? [promptId] : [])
     );
     return result;
   }
@@ -51,7 +56,7 @@ export class DatasetManager extends BaseManager {
       .insert({
         name: params.datasetName,
         organization: this.authParams.organizationId,
-        meta: JSON.stringify(params.meta ?? null),
+        meta: (params.meta ?? null) as Json,
       })
       .select("*")
       .single();

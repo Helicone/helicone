@@ -1487,7 +1487,7 @@
 			},
 			"DatasetMetadata": {
 				"properties": {
-					"promptVersionId": {
+					"promptId": {
 						"type": "string"
 					},
 					"inputRecordsIds": {
@@ -1626,20 +1626,16 @@
 					"name": {
 						"type": "string"
 					},
-					"request_ids": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
 					"created_at": {
 						"type": "string"
+					},
+					"meta": {
+						"$ref": "#/components/schemas/DatasetMetadata"
 					}
 				},
 				"required": [
 					"id",
 					"name",
-					"request_ids",
 					"created_at"
 				],
 				"type": "object",
@@ -2854,7 +2850,11 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {},
+								"properties": {
+									"promptId": {
+										"type": "string"
+									}
+								},
 								"type": "object"
 							}
 						}
