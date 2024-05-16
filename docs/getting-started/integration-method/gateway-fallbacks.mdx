@@ -2,6 +2,9 @@
 title: "Gateway Fallbacks"
 description: "A unified gateway to utilize any provider through a single endpoint."
 ---
+
+import QuestionsSection from '/snippets/questions-section.mdx';
+
 <Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing).</Info>
 
 <Warning>**This feature is currently in beta.** While you're welcome to try it out, please know that our team is still working to refine it. Your feedback is valuable to help us improve! </Warning>
@@ -41,6 +44,7 @@ export type HeliconeFallback = {
   bodyKeyOverride?: object;
 };
 ```
+
 
 ### Extracting Fallbacks Response Header
 
@@ -116,7 +120,4 @@ You can also use unapproved domains as fallbacks. However, to protect our commun
 - 1 request per second
 
 
-
-## Questions? 
-
-<Tip>Questions or feedback? Reach out to us at [help@helicone.ai](help@helicone.ai). </Tip>
+<QuestionsSection />
