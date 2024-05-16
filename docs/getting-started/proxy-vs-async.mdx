@@ -37,12 +37,6 @@ All you need to do is replace your call to the LLM with a call to the proxy. The
 </Frame>
 
 
-### When to use Proxy
-- When you need a quick and easy setup.
-- If you require Gateway features like custom rate limiting, caching, and retries.
-- When you want to use tools that can be instrumented directly into the proxy.
-
-
 **Example**
 
 Instead of calling the OpenAI API with `api.openai.com`, you will change the URL to a Helicone dedicated domain `oai.hconeai.com`. 
@@ -98,6 +92,13 @@ Helicone Async allows for a more flexible workflow where the actual logging of t
 <Frame caption="Async: flow of data. ">
   <img src="/images/example-async.png" />
 </Frame>
+
+## Summary
+
+### When to Use Proxy
+- When you need a quick and easy setup.
+- If you require Gateway features like custom rate limiting, caching, and retries.
+- When you want to use tools that can be instrumented directly into the proxy.
 
 ### When to Use Async
 
