@@ -61,6 +61,7 @@ export class PostHogHandler extends AbstractLogHandler {
       requestBodySize: request.bodySize ?? 0,
       responseBodySize: response.bodySize ?? 0,
       delayMs: response.delayMs ?? 0,
+      heliconeBackLink: `https://www.helicone.ai/requests?requestId=${request.id}`,
     };
 
     return posthogLog;
