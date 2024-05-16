@@ -28,70 +28,76 @@ There are two ways to interface with Helicone - Proxy and Async. We will help yo
 
 ## Proxy
 
-**Simple integration** is the #1 reason Helicone users choose Proxy over Async. 
+The primary reason Helicone users choose to integrate with Helicone using Proxy is its **simple integration**.
 
-All you need to do is replace your call to the LLM with a call to the proxy. The proxy will then forward the request to the LLM and return the response to the user. Since the proxy sits on the edge and is the gatekeeper of the requests, you are able to access a suite of Gateway tools like `Caching`, `Backoff` and `Rate Limits` when you choose Proxy.
+It's as easy as changing the base URL to point to Helicone, and we'll forward the request to the LLM and return the response to you. 
 
 <Frame caption="Proxy: flow of data. ">
   <img src="/images/example-proxy.png" />
 </Frame>
 
+Since the proxy sits on the edge and is the gatekeeper of the requests, you get access to a suite of Gateway tools such as caching, rate limiting, API key management, threat detection, moderations and more. 
 
-**Example**
 
-Instead of calling the OpenAI API with `api.openai.com`, you will change the URL to a Helicone dedicated domain `oai.hconeai.com`. 
+<Accordion title="Here's a simple example">
 
-You can also use the general Gateway URL `gateway.hconeai.com` if Helicone doesn't have a dedicated domain for the provider yet.  
+    Instead of calling the OpenAI API with `api.openai.com`, you will change the URL to a Helicone dedicated domain `oai.hconeai.com`. 
 
-<CodeGroup>
-    
-```python Dedicated domain example
-import openai
+    You can also use the general Gateway URL `gateway.hconeai.com` if Helicone doesn't have a dedicated domain for the provider yet.  
 
-# Set the API base URL to Helicone's proxy
-openai.api_base = "https://oai.hconeai.com/v1"
+    <CodeGroup>
+        
+    ```python Dedicated domain example
+    import openai
 
-# Generate a chat completion request
-response = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo",
-    messages=[{"role": "user", "content": "Say hi!"}],
-    headers={
-        "Helicone-Auth": "Bearer [HELICONE_API_KEY]"  # Your Helicone API key
-    }
-)
+    # Set the API base URL to Helicone's proxy
+    openai.api_base = "https://oai.hconeai.com/v1"
 
-print(response)
-```
+    # Generate a chat completion request
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": "Say hi!"}],
+        headers={
+            "Helicone-Auth": "Bearer [HELICONE_API_KEY]"  # Your Helicone API key
+        }
+    )
 
-```python Other (Gateway example)
-import openai
+    print(response)
+    ```
 
-openai.api_base = "https://gateway.hconeai.com"  # Set the API base URL to Helicone Gateway
-response = openai.ChatCompletion.create(
-    model="[DEPLOYMENT]",
-    messages=[{"role": "user", "content": "Say hi!"}],
-    headers={
-        "Helicone-Auth": "Bearer [HELICONE_API_KEY]",  # Your Helicone API key
-        "Helicone-Target-Url": "https://api.lemonfox.ai",  # The target API URL
-        "Helicone-Target-Provider": "LemonFox",  # The provider name
-    }
-)
-print(response)
-```
-</CodeGroup>
+    ```python Other (Gateway example)
+    import openai
 
-<Note>For a detailed documentation, check out [Gateway Integration](https://docs.helicone.ai/getting-started/integration-method/gateway). </Note>
+    openai.api_base = "https://gateway.hconeai.com"  # Set the API base URL to Helicone Gateway
+    response = openai.ChatCompletion.create(
+        model="[DEPLOYMENT]",
+        messages=[{"role": "user", "content": "Say hi!"}],
+        headers={
+            "Helicone-Auth": "Bearer [HELICONE_API_KEY]",  # Your Helicone API key
+            "Helicone-Target-Url": "https://api.lemonfox.ai",  # The target API URL
+            "Helicone-Target-Provider": "LemonFox",  # The provider name
+        }
+    )
+    print(response)
+    ```
+    </CodeGroup>
+
+    <Note>For a detailed documentation, check out [Gateway Integration](https://docs.helicone.ai/getting-started/integration-method/gateway). </Note>
+
+</Accordion>
+
 
 
 ## Async
 
 Helicone Async allows for a more flexible workflow where the actual logging of the event is **not on the critical path**. This gives some users more confidence that if we are going down or if there is a network issue that it will not affect their application. 
 
-<Warning>The downside is that we are not able to instrument the same suite of tools as we can with the proxy.</Warning>
-
 <Frame caption="Async: flow of data. ">
   <img src="/images/example-async.png" />
 </Frame>
+
+<Warning>The downside is that we cannot offer the same suite of tools as we can with the proxy.</Warning>
+
 
 ## Summary
 
@@ -104,6 +110,10 @@ Helicone Async allows for a more flexible workflow where the actual logging of t
 
 - If you prefer the logging of events to be off the critical path, ensuring that network issues do not affect your application.
 - When you need zero propagation delay.
+
+<Card title="Integrate with Helicone" href="/getting-started/quick-start#quick-start" icon="flag">
+    Choose your LLM provider and get started with Helicone. 
+</Card>
 
 
 <QuestionsSection />
