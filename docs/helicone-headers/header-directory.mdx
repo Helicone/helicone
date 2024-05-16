@@ -121,24 +121,28 @@ The URL to proxy the request to when using _gateway.hconeai.com_. For example, `
 </ResponseField>
 <ResponseField name="Helicone-Cache-Enabled" type="boolean">
   Whether to cache your responses. Set to `true` or  `false`. You can customize the behavior of the cache feature by setting additional headers in your request.
-  <Accordion title="Additional headers">
-    | Parameter                         | Description                                       |
+  <Accordion title="Additional headers" defaultOpen>
+    | Parameter                         | Description                                       | 
     | --------------------------------- | ------------------------------------------------- |
-    | `Cache-control`                   | Configure cache limit in `seconds`.               |
-    | `Helicone-Cache-Bucket-Max-Size`  | Configure cache bucket size as a `number`.        |
-    | `Helicone-Cache-Seed`             | Generate predictable results and maintain separate cache states for each cache seed, type `string`. |
+    | `Cache-control`                   | Specify the cache limit as a `string` in _seconds_, i.e. `max-age=3600` is 1 hour. |
+    | `Helicone-Cache-Bucket-Max-Size`  | The size of cache bucket represented as a `number`.        |
+    | `Helicone-Cache-Seed`             | Define a separate cache state as a `string` to generate predictable results, i.e. `user-123`. |
+
+    <Info>Header values have to be strings. For example, `"Helicone-Cache-Bucket-Max-Size": "10"`. </Info>
   </Accordion>
 </ResponseField>
 <ResponseField name="Helicone-Retry-Enabled" type="boolean">
   Retry requests to overcome rate limits and overloaded servers. Set to `true` or `false`.
   You can customize the behavior of the retries feature by setting additional headers in your request.
-  <Accordion title="Additional headers">
-    | Parameter                    | Description                                       |
-    | ---------------------------- | ------------------------------------------------- |
-    | `helicone-retry-num`         | Number of retries                                 |
-    | `helicone-retry-factor`      | Exponential backoff factor                        |
-    | `helicone-retry-min-timeout` | Minimum timeout (in milliseconds) between retries |
-    | `helicone-retry-max-timeout` | Maximum timeout (in milliseconds) between retries |
+  <Accordion title="Additional headers" defaultOpen>
+    | Parameter                    | Descriptionretru                                                  |
+    | ---------------------------- | ----------------------------------------------------------------- |
+    | `helicone-retry-num`         | Number of retries as a `number`.                                  |
+    | `helicone-retry-factor`      | Exponential backoff factor as a `number`.                         |
+    | `helicone-retry-min-timeout` | Minimum timeout (in milliseconds) between retries as a `number`.  |
+    | `helicone-retry-max-timeout` | Maximum timeout (in milliseconds) between retries as a `number`.  |
+
+    <Info>Header values have to be strings. For example, `"helicone-retry-num": "3"`. </Info>
   </Accordion>
 </ResponseField>
 <ResponseField name="Helicone-Moderations-Enabled" type="boolean">
