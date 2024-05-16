@@ -2,6 +2,9 @@
 title: "Cache"
 description: "Reduce latency and save costs by caching on the edge"
 ---
+
+import QuestionsSection from '/snippets/questions-section.mdx';
+
 <Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing). However, the maximum number of caches you can store within a bucket is `20`. If you need to store more, you will need to upgrade to an enterprise plan.</Info>
 
 ## Introduction
@@ -20,7 +23,7 @@ Helicone uses [Cloudflare Workers](https://www.cloudflare.com/network/) to tempo
 - Save money while testing your app by making fewer calls to model providers such as OpenAI.
 - Determine the most common requests with your application and visualize on a dashboard.
 
-## How Caching Works
+## Quick Start
 To get started, set `Helicone-Cache-Enabled` to true in the headers, or use the Python or NPM packages to turn it on via parameters.
 
 <CodeGroup>
@@ -85,12 +88,14 @@ const openai = new OpenAIApi(configuration);
 
 ### Cache Parameters
 
-| Parameter                            | Description                                       |
+| Parameter                                   | Description                                           |
 | ------------------------------------------- | ----------------------------------------------------- |
-| `Helicone-Cache-Enabled`  (required)        | This will enable storing and loading from your cache.  |
-| `Cache-Control` (optional)                  | Allow you to configure cache limit based on the [Cloudflare Cache Directive](https://developers.cloudflare.com/cache/about/cache-control#cache-control-directives). Currently only max-age is supported, but we will be adding more configuration options soon. |
-| `Helicone-Cache-Bucket-Max-Size` (optional) | Allows you to choose how large you want your Cache Bucket size to be.|
-| `Helicone-Cache-Seed` (optional) | Allows you to generate for predictable results and maintain separate cache states for each cache seed. | 
+| `Helicone-Cache-Enabled`  (required)        | Set to `true` to enable storing and loading from your cache.  |
+| `Cache-Control` (optional)                  | Configure cache limit as a `string` based on the [Cloudflare Cache Directive](https://developers.cloudflare.com/cache/about/cache-control#cache-control-directives). Currently we only support `max-age`, but we will be adding more configuration options soon. I.e. 1 hour is `max-age=3600`.|
+| `Helicone-Cache-Bucket-Max-Size` (optional) | Configure your Cache Bucket size as a `number`. |
+| `Helicone-Cache-Seed` (optional) | Define a separate cache state as a `string` to generate predictable results, i.e. `user-123`.|
+
+<Info>Header values have to be strings. For example, `"Helicone-Cache-Bucket-Max-Size": "10"`. </Info>
 
 ### Changing Cache Limit
 The default cache limit is 7 days. To change the limit, add the `Cache-Control` header to your request. 
@@ -232,3 +237,5 @@ cache_hit = chat_completion_raw.http_response.headers.get(
 print(cache_hit) # will print "HIT" or "MISS"
 
 ```
+
+<QuestionsSection />

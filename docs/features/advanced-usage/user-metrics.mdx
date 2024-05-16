@@ -2,7 +2,11 @@
 title: "User Metrics"
 description: "Get user metrics like number of requests, costs, and activities."
 ---
+
 <Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing).</Info>
+
+import QuestionsSection from '/snippets/questions-section.mdx';
+
 
 ## Introduction
 
@@ -30,7 +34,6 @@ There are two ways to specify users in your requests:
   <Accordion title="Option 2: Sending the User ID via Helicone">
     Alternatively, you can send a prompt with the header `Helicone-User-Id` to include the user ID. The value must be a _string_, for example, use an `email` or the `user ID`. 
       <CodeGroup>
-
       ```bash Curl
       curl https://oai.hconeai.com/v1/completions \
         -H 'Content-Type: application/json' \
@@ -79,6 +82,5 @@ Once set up correctly, you will be able to see detailed user metrics under the `
 </Frame>
 
 
-## Questions? 
+<QuestionsSection />
 
-<Tip>Questions or feedback? Reach out to us at [help@helicone.ai](help@helicone.ai). </Tip>

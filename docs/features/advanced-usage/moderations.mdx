@@ -2,6 +2,9 @@
 title: "Moderations"
 description: "Integrate OpenAI moderation to safeguard your chat completions."
 ---
+
+import QuestionsSection from '/snippets/questions-section.mdx';
+
 <Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing) who uses OpenAI as their provider.</Info>
 
 
@@ -9,13 +12,16 @@ description: "Integrate OpenAI moderation to safeguard your chat completions."
 
 By integrating with OpenAI's moderation endpoint, Helicone helps you check whether the user message is potentially harmful. 
 
+
 ### Why Moderations
+
 - Identifying harmful requests and take action, for example, by filtering it.
 - Ensuring any inappropriate or harmful content in user messages is flagged and prevented from being processed.
 - Maintaining the safety of the interactions with your application. 
 
 
 ## Getting Started
+
 To enable moderation, set `Helicone-Moderations-Enabled` to `true`.
 
 <CodeGroup>
@@ -86,12 +92,9 @@ Here's an example of the error response when flagged:
    ```
 
 
-
 ## Coming Soon
 
 We're continually expanding our moderation features. Upcoming updates include:
 - Customizable moderation criteria
 
-## Questions? 
-
-<Tip>Questions or feedback? Reach out to us at [help@helicone.ai](help@helicone.ai). </Tip>
+<QuestionsSection />
