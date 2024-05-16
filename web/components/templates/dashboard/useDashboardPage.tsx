@@ -95,9 +95,9 @@ export const useDashboardPage = ({
     userFilters
   );
   const topModels =
-    models?.data
-      ?.sort((a, b) => (a.total_requests > b.total_requests ? -1 : 1))
-      .slice(0, 5) ?? [];
+    models?.data?.sort((a, b) =>
+      a.total_requests > b.total_requests ? -1 : 1
+    ) ?? [];
 
   const { isLoading: isAllModelsLoading, models: allModels } = useModels(
     timeFilter,
@@ -105,10 +105,10 @@ export const useDashboardPage = ({
     []
   );
 
-  const allModelsData =
-    allModels?.data
-      ?.sort((a, b) => (a.total_requests > b.total_requests ? -1 : 1))
-      .slice(0, 5) ?? [];
+  const allModelsData = allModels?.data;
+  allModels?.data?.sort((a, b) =>
+    a.total_requests > b.total_requests ? -1 : 1
+  ) ?? [];
 
   // replace the model filter inside of the filterMap with the text suggestion model
   const modelFilterIdx = filterMap.findIndex(
