@@ -1,6 +1,5 @@
 {
   "name": "Helicone",
-
   "logo": {
     "light": "/logo/light.png",
     "dark": "/logo/dark.svg"
@@ -98,15 +97,7 @@
         "features/advanced-usage/vault",
         "features/advanced-usage/moderations",
         "features/advanced-usage/llm-security",
-        "features/webhooks",
-        {
-          "group": "Customer Portal",
-          "pages": [
-            "features/customer_portal/intro",
-            "features/customer_portal/getting-started-proxy",
-            "features/customer_portal/getting-started-async"
-          ]
-        }
+        "features/customer-portal"
       ]
     },
     {
@@ -128,7 +119,11 @@
     },
     {
       "group": "Guides",
-      "pages": ["use-cases/experiments"]
+      "pages": [
+        "use-cases/experiments",
+        "use-cases/resell-a-model",
+        "use-cases/bill-by-usage"
+      ]
     },
     {
       "group": "CI/CD",
@@ -191,7 +186,6 @@
       "url": "https://github.com/Helicone/helicone"
     }
   ],
-
   "footerSocials": {
     "twitter": "https://twitter.com/helicone_ai",
     "linkedin": "https://www.linkedin.com/company/helicone/about/",

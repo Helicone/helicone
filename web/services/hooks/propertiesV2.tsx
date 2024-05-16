@@ -4,13 +4,21 @@ import { Property } from "../../lib/api/properties/properties";
 import { ok, Result } from "../../lib/result";
 import {
   getPropertyFiltersV2,
+  InputParam,
   SingleFilterDef,
 } from "../lib/filters/frontendFilterDefs";
 import { getPropertiesV2 } from "../lib/propertiesV2";
 import { getPropertyParamsV2 } from "../lib/propertyParamsV2";
 import { useDebounce } from "./debounce";
 
-const useGetPropertiesV2 = () => {
+function useGetPropertiesV2<
+  T extends "properties" | "request_response_versioned"
+>(
+  getPropertyFilters: (
+    properties: string[],
+    inputParams: InputParam[]
+  ) => SingleFilterDef<T>[]
+) {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["propertiesV2"],
     queryFn: async () => {
@@ -31,9 +39,9 @@ const useGetPropertiesV2 = () => {
       // sort by property alphabetically
       .sort() ?? [];
 
-  const [propertyFilters, setPropertyFilters] = useState<
-    SingleFilterDef<"request_response_versioned">[]
-  >(getPropertyFiltersV2(allProperties, []));
+  const [propertyFilters, setPropertyFilters] = useState<SingleFilterDef<T>[]>(
+    getPropertyFilters(allProperties, [])
+  );
 
   const [propertySearch, setPropertySearch] = useState({
     property: "",
@@ -42,7 +50,7 @@ const useGetPropertiesV2 = () => {
   const debouncedPropertySearch = useDebounce(propertySearch, 300);
 
   useEffect(() => {
-    setPropertyFilters(getPropertyFiltersV2(allProperties, []));
+    setPropertyFilters(getPropertyFilters(allProperties, []));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
 
@@ -54,7 +62,7 @@ const useGetPropertiesV2 = () => {
         console.error(values.error);
         return;
       }
-      const propertyFilters = getPropertyFiltersV2(
+      const propertyFilters = getPropertyFilters(
         allProperties,
         values.data?.map((v: any) => ({
           param: v.property_param,
@@ -87,6 +95,6 @@ const useGetPropertiesV2 = () => {
     searchPropertyFilters,
     refetch,
   };
-};
+}
 
 export { useGetPropertiesV2 };

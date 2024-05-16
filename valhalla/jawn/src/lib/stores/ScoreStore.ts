@@ -17,7 +17,7 @@ export class ScoreStore extends BaseStore {
   ) {
     try {
       const scoreKeys = Object.keys(scores);
-      const scoreValues = Object.values(scores);
+      const scoreValues = Object.values(scores).map((val) => BigInt(val));
 
       const { data: requestData, error: requestError } = await dbExecute(
         `SELECT id FROM request WHERE id = $1 AND helicone_org_id = $2`,
@@ -32,27 +32,38 @@ export class ScoreStore extends BaseStore {
 
       const organizationIds = Array(scoreKeys.length).fill(this.organizationId);
 
-      const query = `
+      const upsertQuery = `
         WITH upserted_attributes AS (
             INSERT INTO score_attribute (score_key, organization)
             SELECT unnest($1::text[]), unnest($2::uuid[])
             ON CONFLICT (score_key, organization) DO UPDATE SET
                 score_key = EXCLUDED.score_key
-            RETURNING id
-        ),
-        inserted_values AS (
-            INSERT INTO score_value (score_attribute, request_id, int_value)
-            SELECT id, $3, unnest($4::bigint[])
-            FROM upserted_attributes
-            ON CONFLICT (score_attribute, request_id) DO NOTHING
-            RETURNING *
+            RETURNING id, score_key
         )
-        SELECT * FROM inserted_values;
-    `;
+        SELECT id, score_key
+        FROM upserted_attributes;
+      `;
 
-      const { data, error } = await dbExecute(query, [
-        scoreKeys,
-        organizationIds,
+      const { data: upsertedAttributes, error: upsertError } = await dbExecute(
+        upsertQuery,
+        [scoreKeys, organizationIds]
+      );
+
+      if (!upsertedAttributes || upsertError) {
+        return err(`Error upserting attributes: ${upsertError}`);
+      }
+
+      const attributeIds = upsertedAttributes.map((attr: any) => attr.id);
+
+      const insertValuesQuery = `
+        INSERT INTO score_value (score_attribute, request_id, int_value)
+        SELECT unnest($1::uuid[]), $2, unnest($3::bigint[])
+        ON CONFLICT (score_attribute, request_id) DO NOTHING
+        RETURNING *;
+      `;
+
+      const { data, error } = await dbExecute(insertValuesQuery, [
+        attributeIds,
         requestId,
         scoreValues,
       ]);

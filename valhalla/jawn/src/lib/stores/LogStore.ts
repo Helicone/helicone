@@ -70,7 +70,7 @@ const responseColumns = new pgp.helpers.ColumnSet(
 );
 
 const onConflictResponse =
-  " ON CONFLICT (id) DO UPDATE SET " +
+  " ON CONFLICT (request, helicone_org_id) DO UPDATE SET " +
   responseColumns.assignColumns({ from: "EXCLUDED", skip: "id" });
 
 const assetColumns = new pgp.helpers.ColumnSet(
