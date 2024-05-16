@@ -18,10 +18,15 @@ type DatasetFilterNode =
   | DatasetFilterBranch
   | "all";
 
+export interface DatasetMetadata {
+  promptVersionId?: string;
+  inputRecordsIds?: string[];
+}
+
 export interface NewDatasetParams {
   datasetName: string;
   requestIds: string[];
-  promptVersion?: string;
+  meta?: DatasetMetadata;
 }
 
 export interface DatasetResult {

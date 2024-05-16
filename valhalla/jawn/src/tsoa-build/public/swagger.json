@@ -1485,6 +1485,21 @@
 					}
 				]
 			},
+			"DatasetMetadata": {
+				"properties": {
+					"promptVersionId": {
+						"type": "string"
+					},
+					"inputRecordsIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"NewDatasetParams": {
 				"properties": {
 					"datasetName": {
@@ -1496,8 +1511,8 @@
 						},
 						"type": "array"
 					},
-					"promptVersion": {
-						"type": "string"
+					"meta": {
+						"$ref": "#/components/schemas/DatasetMetadata"
 					}
 				},
 				"required": [

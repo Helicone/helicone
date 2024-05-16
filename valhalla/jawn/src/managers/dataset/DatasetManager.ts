@@ -51,6 +51,7 @@ export class DatasetManager extends BaseManager {
       .insert({
         name: params.datasetName,
         organization: this.authParams.organizationId,
+        meta: JSON.stringify(params.meta ?? null),
       })
       .select("*")
       .single();

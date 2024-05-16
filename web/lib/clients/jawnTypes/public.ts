@@ -473,10 +473,14 @@ Json: JsonObject;
       error: null;
     };
     "Result__datasetId-string_.string_": components["schemas"]["ResultSuccess__datasetId-string__"] | components["schemas"]["ResultError_string_"];
+    DatasetMetadata: {
+      promptVersionId?: string;
+      inputRecordsIds?: string[];
+    };
     NewDatasetParams: {
       datasetName: string;
       requestIds: string[];
-      promptVersion?: string;
+      meta?: components["schemas"]["DatasetMetadata"];
     };
     /** @description Make all properties in T optional */
     Partial_PromptVersionsToOperators_: {
