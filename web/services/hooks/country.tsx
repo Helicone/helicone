@@ -2,23 +2,30 @@ import { useQuery } from "@tanstack/react-query";
 import { TimeFilter } from "../../components/templates/dashboard/dashboardPage";
 import { Result } from "../../lib/result";
 import { CountryData } from "../lib/country";
+import { FilterLeaf, filterListToTree } from "../lib/filters/filterDefs";
 
-const useCountries = (timeFilter: TimeFilter, limit: number) => {
+const useCountries = (
+  timeFilter: TimeFilter,
+  limit: number,
+  userFilters: FilterLeaf[]
+) => {
   const {
     data: countries,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["countries", timeFilter, limit],
+    queryKey: ["countries", timeFilter, limit, userFilters],
     queryFn: async (query) => {
-      const [, timeFilter, limit] = query.queryKey;
+      const [, timeFilter, limit, userFilters] = query.queryKey;
       return await fetch("/api/country", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          filter: "all",
+          filter: userFilters
+            ? filterListToTree(userFilters as FilterLeaf[], "and")
+            : "all",
           offset: 0,
           limit,
           timeFilter,
