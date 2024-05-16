@@ -206,6 +206,13 @@ jobs:
         run: |
           yarn
           yarn dev > ~/test-logs/jawn.log &
+      - name: Wait for Jawn
+        run: |
+          echo "Waiting for Jawn to be ready..."
+          while ! curl -s http://localhost:8585/healthcheck; do
+            echo "Waiting for Jawn to be ready..."
+            sleep 5
+          done
       - name: Run integration tests
         working-directory: tests
         env:
