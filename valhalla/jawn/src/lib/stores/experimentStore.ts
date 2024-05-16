@@ -66,18 +66,14 @@ export interface Experiment {
   scores: ExperimentScores | null;
 }
 
+type ScoreValue = string | number | Date;
+
 export interface ExperimentScores {
   dataset: {
-    dateCreated: Date;
-    model: string;
-    cost: number;
-    //customScores: Record<string, number>;
+    scores: Record<string, ScoreValue>;
   };
   hypothesis: {
-    dateCreated: Date;
-    model: string;
-    cost: number;
-    //customScores: Record<string, number>;
+    scores: Record<string, ScoreValue>;
   };
 }
 
@@ -456,9 +452,12 @@ function getExperimentHypothesisScores(
     );
 
     return ok({
-      dateCreated: new Date(hypothesis.createdAt),
-      model: hypothesis.model,
-      cost: hypothesisCost,
+      scores: {
+        dateCreated: new Date(hypothesis.createdAt),
+        model: hypothesis.model,
+        cost: hypothesisCost,
+        ...getCustomScores(hypothesis.runs.map((run) => run.scores)),
+      },
     });
   } catch (error) {
     console.error("Error calculating hypothesis cost", error);
@@ -508,14 +507,41 @@ function getExperimentDatasetScores(
     const averageCost = validRows.length > 0 ? totalCost / validRows.length : 0;
 
     return ok({
-      dateCreated: new Date(latest.createdAt),
-      model: latest.model,
-      cost: averageCost,
+      scores: {
+        dateCreated: new Date(latest.createdAt),
+        model: latest.model,
+        cost: averageCost,
+        ...getCustomScores(validRows.map((row) => row.scores)),
+      },
     });
   } catch (error) {
     console.error("Error calculating dataset cost", error);
     return err("Error calculating dataset cost");
   }
+}
+
+function getCustomScores(
+  scores: Record<string, number>[]
+): Record<string, number> {
+  const scoresValues = scores.reduce((acc, record) => {
+    for (const key in record) {
+      if (record.hasOwnProperty(key)) {
+        if (!acc[key]) {
+          acc[key] = { sum: 0, count: 0 };
+        }
+        acc[key].sum += record[key];
+        acc[key].count += 1;
+      }
+    }
+    return acc;
+  }, {} as Record<string, { sum: number; count: number }>);
+
+  return Object.fromEntries(
+    Object.entries(scoresValues).map(([key, { sum, count }]) => [
+      key,
+      sum / count,
+    ])
+  );
 }
 
 function modelCost(modelRow: {
