@@ -7,6 +7,7 @@ import {
   filterUIToFilterLeafs,
 } from "../../../services/lib/filters/filterDefs";
 import {
+  getPropertyFilters,
   REQUEST_TABLE_FILTERS,
   SingleFilterDef,
   textWithSuggestions,
@@ -38,7 +39,7 @@ const useRequestsPageV2 = (
     isLoading: isPropertiesLoading,
     propertyFilters,
     searchPropertyFilters,
-  } = useGetPropertiesV2();
+  } = useGetPropertiesV2(getPropertyFilters);
 
   const { models, isLoading: isModelsLoading } = useModels(timeFilter, 50);
 
