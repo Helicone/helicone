@@ -93,12 +93,16 @@
           "pages": [
               "getting-started/proxy-vs-async",
               "faq/how-we-calculate-cost",
-              "faq/how-encryption-works",
               "faq/latency-affect",
-              "getting-started/self-deploy",
-              "getting-started/self-deploy-docker",
-              "getting-started/self-deploy-cloud",
-              "helicone-headers/predefining-request-id"
+              "helicone-headers/predefining-request-id",
+              {
+                "group": "Open-source",
+                "pages": [
+                    "getting-started/self-deploy",
+                    "getting-started/self-deploy-docker",
+                    "getting-started/self-deploy-cloud"
+                ]
+            }
           ]
       },
       {
