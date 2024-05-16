@@ -28,6 +28,7 @@ import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import {
   REQUEST_TABLE_FILTERS,
   SingleFilterDef,
+  getPropertyFiltersV2,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ExportButton from "../../shared/themed/table/exportButton";
@@ -79,7 +80,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
     isLoading: isPropertiesLoading,
     propertyFilters,
     searchPropertyFilters,
-  } = useGetPropertiesV2();
+  } = useGetPropertiesV2(getPropertyFiltersV2);
 
   const filterMap = (REQUEST_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
     propertyFilters

@@ -21,6 +21,7 @@ import {
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
   SingleFilterDef,
+  getPropertyFiltersV2,
   textWithSuggestions,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
@@ -81,7 +82,7 @@ export const useDashboardPage = ({
     isLoading: isPropertiesLoading,
     propertyFilters,
     searchPropertyFilters,
-  } = useGetPropertiesV2();
+  } = useGetPropertiesV2(getPropertyFiltersV2);
 
   const filterMap = (
     DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]
