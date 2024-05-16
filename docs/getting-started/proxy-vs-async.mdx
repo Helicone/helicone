@@ -1,39 +1,108 @@
 ---
-title: "Proxy vs Async"
-description: "Determine when you should use a proxy or async function in Helicone."
+title: "Proxy vs. Async"
+description: "Decide whether to intergrate with Helicone using a Proxy or Async."
 ---
 
-## Background
+import QuestionsSection from '/snippets/questions-section.mdx';
 
-There are two different ways to interface with Helicone. Proxy and Async. Both have their own advantages and disadvantages. This page will help you determine which one is right for you.
+## Quick Compare
+
+There are two ways to interface with Helicone - Proxy and Async. We will help you decide which one is right for you, and the pros and cons with each option. 
 
 |                                                                    | Proxy | Async |
 | ------------------------------------------------------------------ | ----- | ----- |
-| Easy setup                                                         | ✅    | ❌    |
-| [Custom rate limiting](features/advanced-usage/custom-rate-limits) | ✅    | ❌    |
+| **Easy setup**                                                     | ✅    | ❌    |
+| [Prompts](/features/prompts/)                                      | ✅    | ✅    |
+| [Prompts Auto Formatting (easier)](/features/prompts)              | ✅    | ❌    |
+| [Custom Properties](/features/advanced-usage/custom-properties)    | ✅    | ✅    |
 | [Bucket Cache](/features/advanced-usage/caching)                   | ✅    | ❌    |
+| [User Metrics](/features/advanced-usage/user-metrics)              | ✅    | ✅    |
 | [Retries](/features/advanced-usage/retries)                        | ✅    | ❌    |
+| [Custom rate limiting](/features/advanced-usage/custom-rate-limits) | ✅    | ❌    |
+| Open-source                                                        | ✅    | ✅    |
 | Not on critical path                                               | ❌    | ✅    |
 | 0 Propagation Delay                                                | ❌    | ✅    |
-| Open source                                                        | ✅    | ✅    |
-| [Custom Properties](/features/advanced-usage/custom-properties)    | ✅    | ✅    |
-| [User Metrics](/features/advanced-usage/user-metrics)              | ✅    | ✅    |
 | Negligible Logging Delay                                           | ✅    | ✅    |
 | Streaming Support                                                  | ✅    | ✅    |
-| [Prompts](/features/prompts/)                                      | ✅    | ✅    |
-| [Prompts Auto Formatting (easier)](/features/prompts)  | ✅    | ❌    |
+
 
 ## Proxy
 
-Helicone Proxy allows it's user to easily integrate, as users only have to replace their call to the LLM with a call to the proxy.
-The proxy will then forward the request to the LLM and return the response to the user. Since the proxy sits on the edge and is the gate
-keeper of the requests we are able to instrument a suite of tools like Caching, Backoff and Rate limits directly into the proxy.
+**Simple integration** is the #1 reason Helicone users choose Proxy over Async. 
 
-<Frame>![](/images/getting-started/proxy-diagram.png)</Frame>
+All you need to do is replace your call to the LLM with a call to the proxy. The proxy will then forward the request to the LLM and return the response to the user. Since the proxy sits on the edge and is the gatekeeper of the requests, you are able to access a suite of Gateway tools like `Caching`, `Backoff` and `Rate Limits` when you choose Proxy.
+
+<Frame caption="Proxy: flow of data. ">
+  <img src="/images/example-proxy.png" />
+</Frame>
+
+
+### When to use Proxy
+- When you need a quick and easy setup.
+- If you require Gateway features like custom rate limiting, caching, and retries.
+- When you want to use tools that can be instrumented directly into the proxy.
+
+
+**Example**
+
+Instead of calling the OpenAI API with `api.openai.com`, you will change the URL to a Helicone dedicated domain `oai.hconeai.com`. 
+
+You can also use the general Gateway URL `gateway.hconeai.com` if Helicone doesn't have a dedicated domain for the provider yet.  
+
+<CodeGroup>
+    
+```python Dedicated domain example
+import openai
+
+# Set the API base URL to Helicone's proxy
+openai.api_base = "https://oai.hconeai.com/v1"
+
+# Generate a chat completion request
+response = openai.ChatCompletion.create(
+    model="gpt-3.5-turbo",
+    messages=[{"role": "user", "content": "Say hi!"}],
+    headers={
+        "Helicone-Auth": "Bearer [HELICONE_API_KEY]"  # Your Helicone API key
+    }
+)
+
+print(response)
+```
+
+```python Other (Gateway example)
+import openai
+
+openai.api_base = "https://gateway.hconeai.com"  # Set the API base URL to Helicone Gateway
+response = openai.ChatCompletion.create(
+    model="[DEPLOYMENT]",
+    messages=[{"role": "user", "content": "Say hi!"}],
+    headers={
+        "Helicone-Auth": "Bearer [HELICONE_API_KEY]",  # Your Helicone API key
+        "Helicone-Target-Url": "https://api.lemonfox.ai",  # The target API URL
+        "Helicone-Target-Provider": "LemonFox",  # The provider name
+    }
+)
+print(response)
+```
+</CodeGroup>
+
+<Note>For a detailed documentation, check out [Gateway Integration](https://docs.helicone.ai/getting-started/integration-method/gateway). </Note>
+
 
 ## Async
 
-Helicone Async allows for a more flexible workflow where the actual logging of the event is not on the critical path. This gives some users more confidence that if we are going down
-or if there is a network issue that it will not affect their application. The downside is that we are not able to instrument the same suite of tools as we can with the proxy.
+Helicone Async allows for a more flexible workflow where the actual logging of the event is **not on the critical path**. This gives some users more confidence that if we are going down or if there is a network issue that it will not affect their application. 
 
-<Frame>![](/images/getting-started/async-diagram.png)</Frame>
+<Warning>The downside is that we are not able to instrument the same suite of tools as we can with the proxy.</Warning>
+
+<Frame caption="Async: flow of data. ">
+  <img src="/images/example-async.png" />
+</Frame>
+
+### When to Use Async
+
+- If you prefer the logging of events to be off the critical path, ensuring that network issues do not affect your application.
+- When you need zero propagation delay.
+
+
+<QuestionsSection />
