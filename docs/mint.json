@@ -1,194 +1,195 @@
 {
   "name": "Helicone",
   "logo": {
-      "light": "/logo/light.png",
-      "dark": "/logo/dark.svg"
+    "light": "/logo/light.png",
+    "dark": "/logo/dark.svg"
   },
   "favicon": "/favicon.png",
   "colors": {
-      "primary": "#0CA5E9",
-      "light": "#0CA5E9",
-      "dark": "#0CA5E9"
+    "primary": "#0CA5E9",
+    "light": "#0CA5E9",
+    "dark": "#0CA5E9"
   },
   "modeToggle": {
-      "default": "light"
+    "default": "light"
   },
   "topbarCtaButton": {
-      "name": "Sign In",
-      "url": "https://www.helicone.ai/#:~:text=Discord-,Sign,-In"
+    "name": "Sign In",
+    "url": "https://www.helicone.ai/#:~:text=Discord-,Sign,-In"
   },
   "tabs": [
-      {
-          "name": "Use Cases",
-          "url": "use-cases"
-      },
-      {
-          "name": "API",
-          "url": "rest"
-      }
+    {
+      "name": "Use Cases",
+      "url": "use-cases"
+    },
+    {
+      "name": "API",
+      "url": "rest"
+    }
   ],
   "feedback": {
-      "suggestEdit": true,
-      "raiseIssue": true
+    "suggestEdit": true,
+    "raiseIssue": true
   },
-  "openapi": [
-      "/swagger.json"
-  ],
+  "openapi": ["/swagger.json"],
   "navigation": [
-      {
-          "group": "Welcome",
+    {
+      "group": "Welcome",
+      "pages": [
+        "getting-started/quick-start",
+        "helicone-headers/header-directory"
+      ]
+    },
+    {
+      "group": "Integrations",
+      "pages": [
+        {
+          "group": "OpenAI",
           "pages": [
-              "getting-started/quick-start",
-              "helicone-headers/header-directory"
+            "integrations/openai/node",
+            "integrations/openai/python",
+            "integrations/openai/langchain",
+            "integrations/openai/async"
           ]
-      },
-      {
-          "group": "Integrations",
+        },
+        {
+          "group": "Azure OpenAI",
           "pages": [
-              {
-                  "group": "OpenAI",
-                  "pages": [
-                      "integrations/openai/node",
-                      "integrations/openai/python",
-                      "integrations/openai/langchain",
-                      "integrations/openai/async"
-                  ]
-              },
-              "getting-started/integration-method/azure",
-              "getting-started/integration-method/anthropic",
-              "getting-started/integration-method/anyscale",
-              "getting-started/integration-method/together",
-              "getting-started/integration-method/openrouter",
-              "getting-started/integration-method/litellm",
-              "getting-started/integration-method/posthog",
-              {
-                  "group": "Other",
-                  "pages": [
-                      "getting-started/integration-method/gateway",
-                      "getting-started/integration-method/custom"
-                  ]
-              }
+            "integrations/azure/node",
+            "integrations/azure/python",
+            "integrations/azure/langchain"
           ]
-      },
-      {
-          "group": "Features",
+        },
+        {
+          "group": "Anthropic",
           "pages": [
-              "features/prompts",
-              "features/advanced-usage/custom-properties",
-              "features/advanced-usage/caching",
-              "features/advanced-usage/omit-logs",
-              "features/advanced-usage/user-metrics",
-              "features/advanced-usage/feedback",
-              "getting-started/integration-method/gateway-fallbacks",
-              "features/advanced-usage/retries",
-              "features/advanced-usage/custom-rate-limits",
-              "features/advanced-usage/vault",
-              "features/advanced-usage/moderations",
-              "features/advanced-usage/llm-security",
-              "features/customer-portal"
+            "integrations/anthropic/node",
+            "integrations/anthropic/python",
+            "integrations/anthropic/langchain"
           ]
-      },
-      {
-          "group": "Resources",
+        },
+        "getting-started/integration-method/anyscale",
+        "getting-started/integration-method/together",
+        "getting-started/integration-method/openrouter",
+        "getting-started/integration-method/litellm",
+        "getting-started/integration-method/posthog",
+        {
+          "group": "Other",
           "pages": [
-              "getting-started/proxy-vs-async",
-              "faq/how-we-calculate-cost",
-              "faq/how-encryption-works",
-              "faq/latency-affect",
-              "getting-started/self-deploy",
-              "getting-started/self-deploy-docker",
-              "getting-started/self-deploy-cloud",
-              "helicone-headers/predefining-request-id"
+            "getting-started/integration-method/gateway",
+            "getting-started/integration-method/custom"
           ]
-      },
-      {
-          "group": "Observability",
-          "pages": [
-              "use-cases/getting-user-requests"
-          ]
-      },
-      {
-          "group": "Guides",
-          "pages": [
-              "use-cases/experiments", 
-              "use-cases/resell-a-model",
-              "use-cases/bill-by-usage"
-          ]
-      },
-      {
-          "group": "CI/CD",
-          "pages": [
-              "use-cases/github-actions"
-          ]
-      },
-      {
-          "group": "Custom Properties",
-          "pages": [
-              "use-cases/segmentation",
-              "use-cases/environment-tracking"
-          ]
-      },
-      {
-          "group": "Developer",
-          "pages": [
-              "use-cases/debugging",
-              "use-cases/etl",
-              "use-cases/data-autonomy"
-          ]
-      },
-      {
-          "group": "User",
-          "pages": [
-              "rest/user/post-v1userquery"
-          ]
-      },
-      {
-          "group": "Request",
-          "pages": [
-              "rest/request/post-v1requestquery",
-              "rest/request/post-v1request-feedback",
-              "rest/request/put-v1request-property"
-          ]
-      },
-      {
-          "group": "Prompt",
-          "pages": [
-              "rest/prompt/post-v1promptquery",
-              "rest/prompt/post-v1prompt-query",
-              "rest/prompt/post-v1promptversion-subversion",
-              "rest/prompt/post-v1prompt-versionsquery"
-          ]
-      },
-      {
-          "group": "Dataset",
-          "pages": [
-              "rest/dataset/post-v1experimentdataset",
-              "rest/dataset/post-v1experimentdatasetrandom",
-              "rest/dataset/post-v1experimentdataset-query",
-              "rest/dataset/post-v1experimentdataset-mutate"
-          ]
-      },
-      {
-          "group": "Experiment",
-          "pages": [
-              "rest/experiment/post-v1experiment"
-          ]
-      }
+        }
+      ]
+    },
+    {
+      "group": "Features",
+      "pages": [
+        "features/prompts",
+        "features/advanced-usage/custom-properties",
+        "features/advanced-usage/caching",
+        "features/advanced-usage/omit-logs",
+        "features/advanced-usage/user-metrics",
+        "features/advanced-usage/feedback",
+        "getting-started/integration-method/gateway-fallbacks",
+        "features/advanced-usage/retries",
+        "features/advanced-usage/custom-rate-limits",
+        "features/advanced-usage/vault",
+        "features/advanced-usage/moderations",
+        "features/advanced-usage/llm-security",
+        "features/customer-portal"
+      ]
+    },
+    {
+      "group": "Resources",
+      "pages": [
+        "getting-started/proxy-vs-async",
+        "faq/how-we-calculate-cost",
+        "faq/how-encryption-works",
+        "faq/latency-affect",
+        "getting-started/self-deploy",
+        "getting-started/self-deploy-docker",
+        "getting-started/self-deploy-cloud",
+        "helicone-headers/predefining-request-id"
+      ]
+    },
+    {
+      "group": "Observability",
+      "pages": ["use-cases/getting-user-requests"]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "use-cases/experiments",
+        "use-cases/resell-a-model",
+        "use-cases/bill-by-usage"
+      ]
+    },
+    {
+      "group": "CI/CD",
+      "pages": ["use-cases/github-actions"]
+    },
+    {
+      "group": "Custom Properties",
+      "pages": ["use-cases/segmentation", "use-cases/environment-tracking"]
+    },
+    {
+      "group": "Developer",
+      "pages": [
+        "use-cases/debugging",
+        "use-cases/etl",
+        "use-cases/data-autonomy"
+      ]
+    },
+    {
+      "group": "User",
+      "pages": ["rest/user/post-v1userquery"]
+    },
+    {
+      "group": "Request",
+      "pages": [
+        "rest/request/post-v1requestquery",
+        "rest/request/post-v1request-feedback",
+        "rest/request/put-v1request-property"
+      ]
+    },
+    {
+      "group": "Prompt",
+      "pages": [
+        "rest/prompt/post-v1promptquery",
+        "rest/prompt/post-v1prompt-query",
+        "rest/prompt/post-v1promptversion-subversion",
+        "rest/prompt/post-v1prompt-versionsquery"
+      ]
+    },
+    {
+      "group": "Dataset",
+      "pages": [
+        "rest/dataset/post-v1experimentdataset",
+        "rest/dataset/post-v1experimentdatasetrandom",
+        "rest/dataset/post-v1experimentdataset-query",
+        "rest/dataset/post-v1experimentdataset-mutate"
+      ]
+    },
+    {
+      "group": "Experiment",
+      "pages": ["rest/experiment/post-v1experiment"]
+    }
   ],
   "topbarLinks": [
-      {
-          "name": "Discord",
-          "url": "https://discord.com/invite/zsSTcH2qhG"
-      },
-      {
-          "name": "Github",
-          "url": "https://github.com/Helicone/helicone"
-      }
+    {
+      "name": "Discord",
+      "url": "https://discord.com/invite/zsSTcH2qhG"
+    },
+    {
+      "name": "Github",
+      "url": "https://github.com/Helicone/helicone"
+    }
   ],
   "footerSocials": {
-      "twitter": "https://twitter.com/helicone_ai",
-      "linkedin": "https://www.linkedin.com/company/helicone/about/",
-      "github": "https://github.com/Helicone/helicone",
-      "discord": "https://discord.com/invite/zsSTcH2qhG"
+    "twitter": "https://twitter.com/helicone_ai",
+    "linkedin": "https://www.linkedin.com/company/helicone/about/",
+    "github": "https://github.com/Helicone/helicone",
+    "discord": "https://discord.com/invite/zsSTcH2qhG"
   }
 }
