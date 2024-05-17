@@ -4,6 +4,15 @@ import Anthropic from "@anthropic-ai/sdk";
 import { DEMO_EMAIL } from "../../../../lib/constants";
 import { Result } from "../../../../lib/result";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
+import {
+  ImageBlockParam,
+  TextBlockParam,
+} from "@anthropic-ai/sdk/resources/messages";
+
+export interface ChatParams {
+  content: string | Array<TextBlockParam | ImageBlockParam>;
+  role: "user" | "assistant" | "system";
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,7 +21,7 @@ export default async function handler(
   const client = new SupabaseServerWrapper({ req, res }).getClient();
   const user = await client.auth.getUser();
   const { messages, requestId, temperature, model, maxTokens } = req.body as {
-    messages: Anthropic.Messages.Message[];
+    messages: ChatParams[];
     requestId: string;
     temperature: number;
     model: string;
@@ -48,6 +57,23 @@ export default async function handler(
   }
 
   try {
+    // filter the messages with role `system`. This is to prevent the user from sending messages with role `system`
+    // add the first message with role `system` into the `create` method
+    const systemMessage = messages.find((message) => {
+      return message.role === "system";
+    })?.content as string | undefined;
+
+    const cleanMessages = (): Anthropic.Messages.MessageParam[] => {
+      if (systemMessage) {
+        const filteredMessages = messages.filter((message) => {
+          return message.role !== "system";
+        });
+        return filteredMessages as Anthropic.Messages.MessageParam[];
+      } else {
+        return messages as Anthropic.Messages.MessageParam[];
+      }
+    };
+
     const completion = await anthropic.messages.create({
       model: "claude-3-opus-20240229",
       max_tokens: maxTokens,
@@ -55,7 +81,8 @@ export default async function handler(
       metadata: {
         user_id: user.data.user.id,
       },
-      messages: messages,
+      system: systemMessage || undefined,
+      messages: cleanMessages(),
     });
     res.status(200).json({ error: null, data: completion });
     return;
