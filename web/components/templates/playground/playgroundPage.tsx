@@ -27,7 +27,9 @@ export type PlaygroundModel = {
   provider: ProviderName;
 };
 
-export const PLAYGROUND_MODELS: PlaygroundModel[] = playgroundModels;
+export const PLAYGROUND_MODELS: PlaygroundModel[] = playgroundModels
+  .filter((model) => model.provider !== "AZURE")
+  .sort((a, b) => a.name.localeCompare(b.name));
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { request } = props;
