@@ -15,6 +15,7 @@ import {
 import { Disclosure } from "@headlessui/react";
 import RequestLogTable, { HELICONE_LOG_PRICING } from "./requestLogTable";
 import FeatureTable from "./featureTable";
+import HcButton from "../../ui/hcButton";
 
 const Slider = ({
   min,
@@ -97,6 +98,10 @@ const Slider = ({
     </div>
   );
 };
+
+const TIERS: {
+  name: 
+}[] = []
 
 export default function Example() {
   const [requestLogs, setRequestLogs] = useState(100_000);
@@ -217,9 +222,41 @@ export default function Example() {
               <ChevronRightIcon className="w-5 h-5 inline text-white" />
             </Link>
           </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-16">
+            {/* map over an array of 3 */}
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div className="w-full h-full border border-gray-300 rounded-xl flex flex-col space-y-4 p-8">
+                <h2 className="text-sm font-semibold">Free</h2>
+                <div className="flex items-baseline space-x-1">
+                  <p className="text-3xl font-semibold">$0</p>
+                  <p className="text-sm text-gray-500">/month</p>
+                </div>
+                <HcButton
+                  variant={index === 1 ? "primary" : "secondary"}
+                  size={"sm"}
+                  title={"Get started for free"}
+                />
+                <ul className="text-gray-700">
+                  <li className="flex items-center gap-4 py-2">
+                    <CheckCircleIcon className="h-6 w-6 text-sky-500" />
+                    <span>Unlimited requests</span>
+                  </li>
+                  <li className="flex items-center gap-4 py-2">
+                    <CheckCircleIcon className="h-6 w-6 text-sky-500" />
+                    <span>Unlimited requests</span>
+                  </li>
+                  <li className="flex items-center gap-4 py-2">
+                    <CheckCircleIcon className="h-6 w-6 text-sky-500" />
+                    <span>Unlimited requests</span>
+                  </li>
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
-        <FeatureTable />
-        <div
+
+        {/* <FeatureTable /> */}
+        {/* <div
           id="pricing"
           className="flex flex-col max-w-6xl mx-auto p-4 gap-2 pt-36"
         >
@@ -312,83 +349,7 @@ export default function Example() {
               {renderLogCost()}
             </div>
           </div>
-          {/* <div className="grid grid-cols-8 py-2 gap-4 sm:gap-8 border-b-2 border-gray-300">
-            <div className="col-span-6 md:col-span-2 order-1 flex items-start">
-              <div className="flex items-center">
-                <DocumentTextIcon className="h-6 w-6 text-sky-600" />
-                <span className="ml-2 font-semibold text-black text-lg tracking-wide w-full">
-                  Prompt Templates
-                </span>
-              </div>
-            </div>
-            <div className="col-span-8 sm:col-span-4 order-3 sm:order-2">
-              <div className="w-full flex flex-col space-y-4">
-                <div className="flex flex-col space-y-4">
-                  <div className="flex flex-col space-y-1">
-                    <div className="flex items-end gap-1">
-                      <p className="font-semibold text-2xl">
-                        {new Intl.NumberFormat("us", {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
-                        })
-                          .format(promptCount)
-                          .toString()}
-                      </p>
-                      <span className="text-xs text-gray-500 pb-1">
-                        {" "}
-                        prompts / month
-                      </span>
-                    </div>
 
-                    <div className="italic text-xs">
-                      First 3 prompts are free!
-                    </div>
-                  </div>
-                  <Slider
-                    min={0}
-                    max={100}
-                    exponent={1}
-                    color="green"
-                    onChange={handlePromptCountChange}
-                    labels={{
-                      0: "0",
-                      25: "25",
-                      50: "50",
-                      75: "75",
-                      100: "100+",
-                    }}
-                  />
-                  <Disclosure as="div">
-                    {({ open }) => (
-                      <>
-                        <Disclosure.Button className="py-2 w-full mt-4">
-                          <div className="flex w-full justify-end">
-                            <div className="flex text-xs items-center italic text-gray-500">
-                              How do we calculate this?
-                              <ChevronRightIcon
-                                className={clsx(
-                                  open ? "rotate-90" : "rotate-0",
-                                  "h-3 w-3 ml-2 transition duration-200 ease-in-out"
-                                )}
-                              />
-                            </div>
-                          </div>
-                        </Disclosure.Button>
-                        <Disclosure.Panel as="dd">
-                          <p className="text-right text-sm pb-4">
-                            We charge $5 per prompt after the first 3 prompts.
-                          </p>
-                        </Disclosure.Panel>
-                      </>
-                    )}
-                  </Disclosure>
-                </div>
-              </div>
-            </div>
-            <div className="col-span-2 order-2 sm:order-3 md:col-span-2 flex justify-end font-bold text-xl">
-              {renderPromptCost()}
-            </div>
-          </div> */}
           <div className="w-full justify-end flex items-center">
             <p className="text-xl font-bold">
               {new Intl.NumberFormat("us", {
@@ -490,96 +451,9 @@ export default function Example() {
                 defaultPlaceholder="I am interested in the Helicone startup program..."
               />
             </div>
-          </div>
-          {/* <div className="border border-gray-300 rounded-lg shadow-lg p-6 sm:p-12">
-            <div className="flex flex-col md:flex-row gap-4 justify-between w-full py-4">
-              <div className="flex flex-col w-full">
-                <section className="font-semibold text-3xl sm:text-4xl">
-                  Helicone for{" "}
-                  <span className="md:border border-sky-600 border-dashed text-sky-600 md:py-1 md:px-2">
-                    startups
-                  </span>
-                </section>
-                <p className="mt-4 text-sm sm:text-lg text-gray-700">
-                  If your startup is under two years old and has raised less
-                  than $5m, consider our startup program.
-                </p>
-                <p className="mt-8 text-sm sm:text-md font-semibold text-gray-700">
-                  Benefits
-                </p>
-                <div className="flex flex-col gap-4 w-full text-sm sm:text-md mt-4">
-                  <div className="flex items-center gap-4 col-span-1">
-                    <CheckCircleIcon
-                      className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600"
-                      aria-hidden="true"
-                    />
-                    Discount on Pro plan
-                  </div>
-                  <div className="flex items-center gap-4 col-span-1">
-                    <CheckCircleIcon
-                      className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600"
-                      aria-hidden="true"
-                    />
-                    Customer Success Channel
-                  </div>
-                  <div className="flex items-center gap-4 col-span-1">
-                    <CheckCircleIcon
-                      className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600"
-                      aria-hidden="true"
-                    />
-                    Helicone Merch
-                  </div>
-                  <div className="flex items-center gap-4 col-span-1">
-                    <CheckCircleIcon
-                      className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600"
-                      aria-hidden="true"
-                    />
-                    Startup Spotlight
-                  </div>
-                  <figure className="mt-8 sm:mt-8 border-l border-gray-200 pl-4 pr-4 sm:pl-8 sm:pr-16 text-gray-600">
-                    <blockquote className="text-xs sm:text-base leading-7">
-                      <p>
-                        &quot;It makes everything from tracking usage, to
-                        debugging, even getting data exports for fine-tuning
-                        100x easier. If you&apos;re serious about building with
-                        LLMs, I am begging you to use Helicone.&quot;
-                      </p>
-                    </blockquote>
-                    <figcaption className="mt-6 flex gap-x-4 text-xs sm:text-sm leading-6 items-center">
-                      <img
-                        src="/assets/pricing/daksh.png"
-                        alt=""
-                        className="h-8 w-8 flex-none rounded-full"
-                      />
-                      <div>
-                        <span className="font-semibold text-gray-900">
-                          Daksh Gupta
-                        </span>{" "}
-                        – Founder of{" "}
-                        <Link
-                          href={"https://app.getonboardai.com/"}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline"
-                        >
-                          Onboard AI
-                        </Link>
-                      </div>
-                    </figcaption>
-                  </figure>
-                </div>
-              </div>
-
-              <div className="w-full -mt-8">
-                <ContactForm
-                  contactTag={"startups"}
-                  buttonText={"Contact Us"}
-                  defaultPlaceholder="I am interested in the Helicone startup program..."
-                />
-              </div>
-            </div>
           </div> */}
-        </div>
+        {/* </div> */}
+        {/* </div> */}
       </div>
       <Footer />
     </div>
