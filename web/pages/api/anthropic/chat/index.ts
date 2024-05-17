@@ -6,7 +6,6 @@ import { Result } from "../../../../lib/result";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 import {
   ImageBlockParam,
-  MessageParam,
   TextBlockParam,
 } from "@anthropic-ai/sdk/resources/messages";
 
