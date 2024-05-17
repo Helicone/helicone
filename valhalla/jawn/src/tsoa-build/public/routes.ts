@@ -545,11 +545,21 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__datasetId-string__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "DatasetMetadata": {
+        "dataType": "refObject",
+        "properties": {
+            "promptId": {"dataType":"string"},
+            "inputRecordsIds": {"dataType":"array","array":{"dataType":"string"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "NewDatasetParams": {
         "dataType": "refObject",
         "properties": {
             "datasetName": {"dataType":"string","required":true},
             "requestIds": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "meta": {"ref":"DatasetMetadata"},
         },
         "additionalProperties": false,
     },
@@ -595,8 +605,8 @@ const models: TsoaRoute.Models = {
         "properties": {
             "id": {"dataType":"string","required":true},
             "name": {"dataType":"string","required":true},
-            "request_ids": {"dataType":"array","array":{"dataType":"string"},"required":true},
             "created_at": {"dataType":"string","required":true},
+            "meta": {"ref":"DatasetMetadata"},
         },
         "additionalProperties": false,
     },
@@ -1233,7 +1243,7 @@ export function RegisterRoutes(app: Router) {
 
             function ExperimentDatasetController_getDatasets(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{}},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"promptId":{"dataType":"string"}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 

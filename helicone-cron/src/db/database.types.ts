@@ -250,18 +250,21 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          meta: Json | null
           name: string | null
           organization: string
         }
         Insert: {
           created_at?: string | null
           id?: string
+          meta?: Json | null
           name?: string | null
           organization: string
         }
         Update: {
           created_at?: string | null
           id?: string
+          meta?: Json | null
           name?: string | null
           organization?: string
         }
