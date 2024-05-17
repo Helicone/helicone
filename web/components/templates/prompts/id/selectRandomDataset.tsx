@@ -19,6 +19,9 @@ interface SelectRandomDatasetProps {
     created_at: string;
   }[];
   onSuccess?: (dataSetId: string | undefined) => void;
+  meta?: {
+    promptVersionId?: string;
+  };
 }
 
 const RANDOM_SAMPLE_SIZE = 10;
@@ -123,6 +126,9 @@ const SelectRandomDataset = (props: SelectRandomDatasetProps) => {
                   datasetName: `EXP-DATASET-${new Date().getTime()}`,
                   requestIds:
                     selectedRequests?.map((r) => r.source_request) ?? [],
+                  meta: {
+                    promptId: props.meta?.promptVersionId,
+                  },
                 },
               });
               if (dataset.data?.error !== null) {

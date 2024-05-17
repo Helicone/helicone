@@ -274,8 +274,8 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                     `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
                                   )}
                                 >
-                                  {run.testResult.response?.completionTokens}{" "}
-                                  input tokens
+                                  {run.testResult.response?.promptTokens} input
+                                  tokens
                                 </span>
 
                                 <span
@@ -284,8 +284,8 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                     `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
                                   )}
                                 >
-                                  {run.testResult.response?.promptTokens} prompt
-                                  tokens
+                                  {run.testResult.response?.completionTokens}{" "}
+                                  output tokens
                                 </span>
                                 <ModelPill
                                   model={run.testResult.response?.model ?? ""}
