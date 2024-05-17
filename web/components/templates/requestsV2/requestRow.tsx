@@ -19,6 +19,7 @@ import {
 } from "@heroicons/react/24/solid";
 import {
   addRequestLabel,
+  addRequestScore,
   updateRequestFeedback,
 } from "../../../services/lib/requests";
 import useNotification from "../../shared/notification/useNotification";
@@ -57,12 +58,16 @@ const RequestRow = (props: {
   const org = useOrg();
 
   const [isAddingLabel, setIsAddingLabel] = useState(false);
+  const [isScoresAddingLabel, setIsScoresAddingLabel] = useState(false);
+  const [isScoresAdding, setIsScoresAdding] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [currentProperties, setCurrentProperties] = useState<
     {
       [key: string]: string;
     }[]
   >();
+
+  const [currentScores, setCurrentScores] = useState<Record<string, number>>();
 
   const router = useRouter();
   const { setNotification } = useNotification();
@@ -85,7 +90,9 @@ const RequestRow = (props: {
     });
 
     setCurrentProperties(currentProperties);
-  }, [properties, request.customProperties]);
+    const currentScores: Record<string, number> = request.scores || {};
+    setCurrentScores(currentScores);
+  }, [properties, request.customProperties, request.scores]);
 
   const updateFeedbackHandler = async (requestId: string, rating: boolean) => {
     updateRequestFeedback(requestId, rating)
@@ -147,6 +154,57 @@ const RequestRow = (props: {
       console.error(err);
       setNotification(`Error adding label: ${err}`, "error");
       setIsAdding(false);
+      return;
+    }
+  };
+
+  const onAddScoreHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsScoresAdding(true);
+
+    const formData = new FormData(e.currentTarget);
+    const key = formData.get("key") as string;
+    const value = formData.get("value") as any as number;
+
+    if (currentScores && currentScores[key]) {
+      setNotification("Score already exists", "error");
+      setIsScoresAdding(false);
+      return;
+    }
+
+    if (!key || !value || org?.currentOrg?.id === undefined) {
+      setNotification("Error adding score", "error");
+      setIsScoresAdding(false);
+      return;
+    }
+    try {
+      const res = await addRequestScore(
+        request.id,
+        org?.currentOrg?.id,
+        key,
+        value
+      );
+
+      if (res?.status === 201) {
+        setNotification("Score added", "success");
+        setCurrentScores(
+          currentScores
+            ? {
+                ...currentScores,
+                [key]: value,
+              }
+            : { [key]: value }
+        );
+
+        setIsScoresAdding(false);
+      } else {
+        setNotification("Error adding score", "error");
+        setIsScoresAdding(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setNotification(`Error adding score: ${err}`, "error");
+      setIsScoresAdding(false);
       return;
     }
   };
@@ -358,13 +416,85 @@ const RequestRow = (props: {
           })}
         </div>
       </div>
-      {request.scores && (
-        <div className="flex flex-col">
-          <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
-            Scores{" "}
-          </div>
-          <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
-            {Object.entries(request?.scores).map(([key, value]) => (
+
+      <div className="flex flex-col">
+        <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
+          Scores{" "}
+          <Tooltip title="Add a new score" placement="top">
+            <button
+              onClick={() => {
+                setIsScoresAddingLabel(!isScoresAddingLabel);
+              }}
+              className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
+            >
+              {isScoresAddingLabel ? (
+                <MinusIcon className="h-3 w-3 text-gray-500" />
+              ) : (
+                <PlusIcon className="h-3 w-3 text-gray-500" />
+              )}
+            </button>
+          </Tooltip>
+        </div>
+        {isScoresAddingLabel && (
+          <form
+            onSubmit={onAddScoreHandler}
+            className="flex flex-row items-end space-x-2 py-4 mb-4 border-b border-gray-300 dark:border-gray-700"
+          >
+            <div className="flex flex-col space-y-1">
+              <label
+                htmlFor="key"
+                className="block text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100"
+              >
+                Key
+              </label>
+              <div className="">
+                <input
+                  type="text"
+                  name="key"
+                  id="key"
+                  required
+                  className={clsx(
+                    "bg-white dark:bg-black block w-full rounded-md px-2 py-1 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                  )}
+                  placeholder={"Key"}
+                />
+              </div>
+            </div>
+            <div className="flex flex-col space-y-1">
+              <label
+                htmlFor="value"
+                className="block text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100"
+              >
+                Value
+              </label>
+              <div className="">
+                <input
+                  type="number"
+                  name="value"
+                  id="value"
+                  required
+                  className={clsx(
+                    "bg-white dark:bg-black block w-full rounded-md px-2 py-1 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                  )}
+                  placeholder={"Value"}
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="h-fit flex flex-row rounded-md bg-black dark:bg-white px-4 py-2 text-xs font-semibold border border-black dark:border-white hover:bg-gray-900 dark:hover:bg-gray-100 text-gray-50 dark:text-gray-900 shadow-sm hover:text-gray-300 dark:hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+            >
+              {isAdding && (
+                <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+              )}
+              Add
+            </button>
+          </form>
+        )}
+
+        <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
+          {currentScores &&
+            Object.entries(currentScores).map(([key, value]) => (
               <li
                 className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
                 key={key}
@@ -375,9 +505,9 @@ const RequestRow = (props: {
                 <p className="text-gray-700 dark:text-gray-300">{value}</p>
               </li>
             ))}
-          </div>
         </div>
-      )}
+      </div>
+
       {displayPreview && (
         <div className="flex flex-col space-y-8">
           <div className="flex w-full justify-end">
