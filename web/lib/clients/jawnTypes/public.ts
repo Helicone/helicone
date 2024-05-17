@@ -473,9 +473,14 @@ Json: JsonObject;
       error: null;
     };
     "Result__datasetId-string_.string_": components["schemas"]["ResultSuccess__datasetId-string__"] | components["schemas"]["ResultError_string_"];
+    DatasetMetadata: {
+      promptId?: string;
+      inputRecordsIds?: string[];
+    };
     NewDatasetParams: {
       datasetName: string;
       requestIds: string[];
+      meta?: components["schemas"]["DatasetMetadata"];
     };
     /** @description Make all properties in T optional */
     Partial_PromptVersionsToOperators_: {
@@ -508,8 +513,8 @@ Json: JsonObject;
     DatasetResult: {
       id: string;
       name: string;
-      request_ids: string[];
       created_at: string;
+      meta?: components["schemas"]["DatasetMetadata"];
     };
     "ResultSuccess_DatasetResult-Array_": {
       data: components["schemas"]["DatasetResult"][];
@@ -928,7 +933,9 @@ export interface operations {
   GetDatasets: {
     requestBody: {
       content: {
-        "application/json": Record<string, never>;
+        "application/json": {
+          promptId?: string;
+        };
       };
     };
     responses: {

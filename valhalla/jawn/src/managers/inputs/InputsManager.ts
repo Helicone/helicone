@@ -16,6 +16,7 @@ import { resultMap } from "../../lib/shared/result";
 import { User } from "../../models/user";
 import { BaseManager } from "../BaseManager";
 import { S3Client } from "../../lib/shared/db/s3Client";
+import { RequestResponseBodyStore } from "../../lib/stores/request/RequestResponseBodyStore";
 
 async function fetchImageAsBase64(url: string): Promise<string> {
   try {
@@ -113,12 +114,18 @@ export class InputsManager extends BaseManager {
       `,
       [this.authParams.organizationId, promptVersion, limit]
     );
+    const bodyStore = new RequestResponseBodyStore(
+      this.authParams.organizationId
+    );
 
     return promiseResultMap(result, async (data) => {
       return Promise.all(
         data.map(async (record) => {
           return {
             ...record,
+            response_body:
+              (await bodyStore.getRequestResponseBody(record.source_request))
+                .data?.response ?? {},
             inputs: await getAllSignedURLsFromInputs(
               record.inputs,
               this.authParams.organizationId,
