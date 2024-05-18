@@ -26,6 +26,13 @@ def get_new_tag(image, version_tag):
     return tag
 
 
+def get_latest_tag(image):
+    response = requests.get(
+        f"https://hub.docker.com/v2/repositories/{image}/tags/?page_size=1")
+    latest_tag = response.json()['results'][0]['name']
+    return latest_tag
+
+
 def build_and_push_image(image, context, tag, test_mode):
     dockerfile_name = os.path.basename(image).replace('-', '_')
     dockerfile_path = f"dockerfiles/dockerfile_{dockerfile_name}"
@@ -50,7 +57,14 @@ def preview_tags(docker_image_context, version_tag):
         print(f"Image: {image}, New Tag: {tag}, Latest Tag: latest")
 
 
-def main(test_mode, dont_prune, preview):
+def print_latest_tags(docker_image_context):
+    for dic in docker_image_context:
+        image = dic["image"]
+        latest_tag = get_latest_tag(image)
+        print(f"Image: {image}, Latest Tag: {latest_tag}")
+
+
+def main(test_mode, dont_prune, preview, latest):
     date = datetime.datetime.now().strftime("%Y.%m.%d")
     version_tag = f"v{date}"
 
@@ -65,6 +79,10 @@ def main(test_mode, dont_prune, preview):
 
     if preview:
         preview_tags(docker_image_context, version_tag)
+        return
+
+    if latest:
+        print_latest_tags(docker_image_context)
         return
 
     if not dont_prune:
@@ -87,7 +105,10 @@ if __name__ == "__main__":
                         help="Do not prune all images before building and pushing")
     parser.add_argument("-p", "--preview", action="store_true",
                         help="Preview the new tags that would be created")
+    parser.add_argument("-l", "--latest", action="store_true",
+                        help="Print the latest tag for each image")
 
     args = parser.parse_args()
 
-    main(test_mode=args.test, dont_prune=args.dont_prune, preview=args.preview)
+    main(test_mode=args.test, dont_prune=args.dont_prune,
+         preview=args.preview, latest=args.latest)
