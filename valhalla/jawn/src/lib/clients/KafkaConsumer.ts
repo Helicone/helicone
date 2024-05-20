@@ -53,6 +53,7 @@ const MESSAGES_PER_MINI_BATCH = 300;
 // Average message is 1kB, so we can set minBytes to 1kB and maxBytes to 10kB
 const consumer = kafka?.consumer({
   groupId: "jawn-consumer",
+  heartbeatInterval: 15000,
   minBytes: 100_000,
   maxBytes:
     AVG_MESSAGE_SIZE *
