@@ -24,6 +24,8 @@ import {
 } from "../../../services/lib/requests";
 import useNotification from "../../shared/notification/useNotification";
 import { useOrg } from "../../layout/organizationContext";
+import HcButton from "../../ui/hcButton";
+import { TextInput } from "@tremor/react";
 
 function getPathName(url: string) {
   try {
@@ -355,13 +357,13 @@ const RequestRow = (props: {
                 Key
               </label>
               <div className="">
-                <input
+                <TextInput
                   type="text"
                   name="key"
                   id="key"
                   required
                   className={clsx(
-                    "bg-white dark:bg-black block w-full rounded-md px-2 py-1 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                    "bg-white dark:bg-black block w-full rounded-md px-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
                   )}
                   placeholder={"Key"}
                 />
@@ -375,27 +377,29 @@ const RequestRow = (props: {
                 Value
               </label>
               <div className="">
-                <input
+                <TextInput
                   type="text"
                   name="value"
                   id="value"
                   required
                   className={clsx(
-                    "bg-white dark:bg-black block w-full rounded-md px-2 py-1 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                    "bg-white dark:bg-black block w-full rounded-md px-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
                   )}
                   placeholder={"Value"}
                 />
               </div>
             </div>
-            <button
-              type="submit"
-              className="h-fit flex flex-row rounded-md bg-black dark:bg-white px-4 py-2 text-xs font-semibold border border-black dark:border-white hover:bg-gray-900 dark:hover:bg-gray-100 text-gray-50 dark:text-gray-900 shadow-sm hover:text-gray-300 dark:hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+            <HcButton
+              size="sm"
+              title="Add"
+              variant="primary"
+              className="h-fit flex flex-row rounded-md bg-black dark:bg-white px-4 text-xs font-semibold border border-black dark:border-white hover:bg-gray-900 dark:hover:bg-gray-100 text-gray-50 dark:text-gray-900 shadow-sm hover:text-gray-300 dark:hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
             >
               {isAdding && (
                 <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
               )}
               Add
-            </button>
+            </HcButton>
           </form>
         )}
         <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
@@ -448,13 +452,13 @@ const RequestRow = (props: {
                 Key
               </label>
               <div className="">
-                <input
+                <TextInput
                   type="text"
                   name="key"
                   id="key"
                   required
                   className={clsx(
-                    "bg-white dark:bg-black block w-full rounded-md px-2 py-1 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                    "bg-white dark:bg-black block w-full rounded-md px-2  text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
                   )}
                   placeholder={"Key"}
                 />
@@ -468,27 +472,31 @@ const RequestRow = (props: {
                 Value
               </label>
               <div className="">
-                <input
+                <TextInput
+                  //@ts-ignore
                   type="number"
                   name="value"
                   id="value"
                   required
                   className={clsx(
-                    "bg-white dark:bg-black block w-full rounded-md px-2 py-1 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                    "bg-white dark:bg-black block w-full rounded-md px-2  text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
                   )}
                   placeholder={"Value"}
                 />
               </div>
             </div>
-            <button
+            <HcButton
+              size="sm"
+              title="Add"
+              variant="primary"
               type="submit"
-              className="h-fit flex flex-row rounded-md bg-black dark:bg-white px-4 py-2 text-xs font-semibold border border-black dark:border-white hover:bg-gray-900 dark:hover:bg-gray-100 text-gray-50 dark:text-gray-900 shadow-sm hover:text-gray-300 dark:hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+              className="h-fit flex flex-row rounded-md bg-black dark:bg-white px-4 text-xs font-semibold border border-black dark:border-white hover:bg-gray-900 dark:hover:bg-gray-100 text-gray-50 dark:text-gray-900 shadow-sm hover:text-gray-300 dark:hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
             >
               {isAdding && (
                 <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
               )}
               Add
-            </button>
+            </HcButton>
           </form>
         )}
 
