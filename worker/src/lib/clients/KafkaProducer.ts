@@ -1,7 +1,11 @@
 import { TemplateWithInputs } from "../../api/lib/promptHelpers";
 import { Env, Provider } from "../..";
-import { Kafka } from "@upstash/kafka";
+import { Kafka, Producer } from "@upstash/kafka";
 import { err } from "../util/results";
+import {
+  AESEncryptionManager,
+  newAESEncryptionManager,
+} from "./encryptionManager";
 
 export type Log = {
   request: {
@@ -37,19 +41,45 @@ export type HeliconeMeta = {
   omitResponseLog: boolean;
 };
 
+export type DecryptedPayload = {
+  authorization: string;
+  posthogApiKey?: string;
+};
 export type KafkaMessage = {
   id: string;
-  authorization: string;
+  decryptedPayload: DecryptedPayload;
   heliconeMeta: HeliconeMeta;
   log: Log;
 };
+
+export type EncryptedKafkaMessage = Omit<KafkaMessage, "decryptedPayload"> & {
+  encryptedPayload: string;
+};
+
+async function encryptKafkaMessage(
+  msg: KafkaMessage,
+  encryptionManager: AESEncryptionManager
+): Promise<EncryptedKafkaMessage> {
+  const encryptedPayload = await encryptionManager.encrypt(
+    JSON.stringify(msg.decryptedPayload)
+  );
+  return {
+    ...msg,
+    encryptedPayload,
+  };
+}
 
 export class KafkaProducer {
   private kafka: Kafka | null = null;
   private VALHALLA_URL: string | undefined = undefined;
 
+  encryptionManagerKey: string;
+
+  private _encryptionManager: AESEncryptionManager | null = null;
+
   constructor(env: Env) {
     this.VALHALLA_URL = env.VALHALLA_URL;
+    this.encryptionManagerKey = env.JAWN_AES_KEY;
 
     if (
       !env.UPSTASH_KAFKA_URL ||
@@ -68,13 +98,36 @@ export class KafkaProducer {
     });
   }
 
+  async getEncryptionManager() {
+    if (this._encryptionManager) {
+      return this._encryptionManager;
+    }
+    this._encryptionManager = await newAESEncryptionManager(
+      this.encryptionManagerKey
+    );
+    return this._encryptionManager;
+  }
+
+  private async sendEncryptedMessage(msg: EncryptedKafkaMessage) {
+    if (!this.kafka) {
+      throw new Error("Kafka is not initialized");
+    }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const p = this.kafka.producer();
+    const message = JSON.stringify({
+      value: JSON.stringify(msg),
+    });
+
+    return await p.produce("request-response-logs-prod", message, {
+      key: msg.log.request.id,
+    });
+  }
+
   async sendMessage(msg: KafkaMessage) {
     if (!this.kafka) {
       await this.sendMessageHttp(msg);
       return;
     }
-
-    const p = this.kafka.producer();
 
     let attempts = 0;
     const maxAttempts = 3;
@@ -82,14 +135,14 @@ export class KafkaProducer {
 
     while (attempts < maxAttempts) {
       try {
-        const message = JSON.stringify({
-          value: JSON.stringify(msg),
-        });
+        const encryptedKafkaMessage = await encryptKafkaMessage(
+          msg,
+          await this.getEncryptionManager()
+        );
 
-        const res = await p.produce("request-response-logs-prod", message, {
-          key: msg.log.request.id,
-        });
+        const res = await this.sendEncryptedMessage(encryptedKafkaMessage);
         console.log(`Produced message, response: ${JSON.stringify(res)}`);
+
         return res;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
@@ -110,11 +163,11 @@ export class KafkaProducer {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `${msg.authorization}`,
+          Authorization: `${msg.decryptedPayload.authorization}`,
         },
         body: JSON.stringify({
           log: msg.log,
-          authorization: msg.authorization,
+          authorization: msg.decryptedPayload.authorization,
           heliconeMeta: msg.heliconeMeta,
         }),
       });

@@ -14,6 +14,7 @@ import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
+import { newKey } from "./managers/encryptionManager";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -21,6 +22,8 @@ export const ENVIRONMENT: "production" | "development" = (process.env
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
 }
+newKey().then((key) => console.log(key));
+
 const allowedOriginsEnv = {
   production: [
     /^https?:\/\/(www\.)?helicone\.ai$/,
