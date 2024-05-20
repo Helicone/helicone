@@ -4,17 +4,16 @@ require("dotenv").config({
 
 import express, { NextFunction } from "express";
 import swaggerUi from "swagger-ui-express";
-import { Worker } from "worker_threads";
+import { tokenRouter } from "./lib/routers/tokenRouter";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authMiddleware } from "./middleware/auth";
+import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
 import { RegisterRoutes as registerPrivateTSOARoutes } from "./tsoa-build/private/routes";
 import { RegisterRoutes as registerPublicTSOARoutes } from "./tsoa-build/public/routes";
 import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
-import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
-import { tokenRouter } from "./lib/routers/tokenRouter";
-import { consume, consumeDlq } from "./lib/clients/KafkaConsumer";
+import { startConsumers } from "./workers/consumerInterface";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -41,13 +40,12 @@ const app = express();
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
+
 if (KAFKA_ENABLED) {
-  consume();
-  consumeDlq();
-}
-if (KAFKA_ENABLED) {
-  const worker = new Worker(`${__dirname}/workers/kafkaConsumer.js`);
-  worker.postMessage("start");
+  startConsumers({
+    dlqCount: 1,
+    normalCount: 1,
+  });
 }
 
 app.get("/healthcheck", (req, res) => {
