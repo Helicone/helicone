@@ -282,15 +282,15 @@ export class LogStore {
     >();
 
     entries.forEach((entry) => {
-      if (!entry.id) {
+      if (!entry.request) {
         return;
       }
 
-      const existingEntry = entryMap.get(entry.id);
+      const existingEntry = entryMap.get(entry.request);
 
       // No existing entry, add it
       if (!existingEntry || !existingEntry.created_at) {
-        entryMap.set(entry.id, entry);
+        entryMap.set(entry.request, entry);
         return;
       }
 
@@ -298,7 +298,7 @@ export class LogStore {
         entry.created_at &&
         new Date(entry.created_at) < new Date(existingEntry.created_at)
       ) {
-        entryMap.set(entry.id, entry);
+        entryMap.set(entry.request, entry);
       }
     });
 
