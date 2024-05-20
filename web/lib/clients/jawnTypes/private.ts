@@ -169,6 +169,8 @@ export interface components {
     };
     "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
     HeliconeMeta: {
+      posthogHost?: string;
+      posthogApiKey?: string;
       webhookEnabled: boolean;
       omitResponseLog: boolean;
       omitRequestLog: boolean;
