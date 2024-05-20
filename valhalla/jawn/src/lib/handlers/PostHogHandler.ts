@@ -64,7 +64,6 @@ export class PostHogHandler extends AbstractLogHandler {
             topic: "request-response-logs-prod",
           },
         });
-        console.error(`Error sending Posthog event: ${error}`);
       }
     });
 
