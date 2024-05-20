@@ -8,6 +8,7 @@ export const getChat = (
   chat: Message[];
   isChat: boolean;
 } => {
+  console.log("singleRequest", requests[0]);
   let isChat = false;
   if (!requests || requests.length < 1) {
     return {
@@ -16,7 +17,27 @@ export const getChat = (
     };
   }
 
-  const sourceChat = JSON.parse(JSON.stringify(requests[0].requestBody));
+  const singleRequest = requests[0];
+
+  const getSourceChat = () => {
+    if (singleRequest.provider === "ANTHROPIC") {
+      const requestBody = JSON.parse(JSON.stringify(singleRequest.requestBody));
+      if (requestBody && requestBody.system && requestBody.messages) {
+        const systemMessage = {
+          role: "system",
+          content: requestBody.system,
+        };
+        requestBody.messages.unshift(systemMessage);
+        return JSON.parse(JSON.stringify(requestBody));
+      } else {
+        return JSON.parse(JSON.stringify(singleRequest.requestBody));
+      }
+    } else {
+      return JSON.parse(JSON.stringify(singleRequest.requestBody));
+    }
+  };
+
+  const sourceChat = getSourceChat();
 
   const sourceResponse = JSON.parse(JSON.stringify(requests[0].responseBody));
 
@@ -28,6 +49,19 @@ export const getChat = (
   }
 
   const sourcePrompt = [...sourceChat.messages];
+
+  if (
+    singleRequest.provider === "ANTHROPIC" &&
+    sourceResponse &&
+    sourceResponse.content &&
+    sourceResponse.content[0] &&
+    sourceResponse.content[0].text
+  ) {
+    sourcePrompt.push({
+      role: "assistant",
+      content: sourceResponse.content[0].text,
+    });
+  }
 
   if (
     sourceResponse &&

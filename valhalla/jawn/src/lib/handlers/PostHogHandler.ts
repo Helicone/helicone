@@ -1,9 +1,9 @@
 import { costOfPrompt } from "../../packages/cost";
-import { PostHogEvent, PosthogApiClient } from "../clients/postHogApiClient";
 import {
   HeliconeRequestResponseToPosthog,
-  postHogClient,
-} from "../clients/postHogClient";
+  PostHogEvent,
+  PosthogUserClient,
+} from "../clients/PosthogUserClient";
 import { PromiseGenericResult, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
@@ -37,6 +37,7 @@ export class PostHogHandler extends AbstractLogHandler {
 
     this.posthogEvents.push({
       apiKey: context.message.heliconeMeta.posthogApiKey,
+      host: context.message.heliconeMeta.posthogHost,
       log: posthogLog,
     });
 
@@ -45,14 +46,20 @@ export class PostHogHandler extends AbstractLogHandler {
 
   public async handleResults(): PromiseGenericResult<string> {
     for (const log of this.posthogEvents) {
-      const posthogClient = new PosthogApiClient();
+      try {
+        const posthogClient = new PosthogUserClient(log.apiKey);
 
-      postHogClient?.capture({
-        distinctId: crypto.randomUUID(),
-        event: "helicone_request_response",
-        properties: log,
-      });
+        await posthogClient?.captureEvent(
+          "helicone_request_response",
+          log,
+          crypto.randomUUID()
+        );
+      } catch (error: any) {
+        console.error(`Error sending Posthog event: ${error}`);
+      }
     }
+
+    return ok("Posthog events sent");
   }
 
   mapPostHogLog(context: HandlerContext): HeliconeRequestResponseToPosthog {
