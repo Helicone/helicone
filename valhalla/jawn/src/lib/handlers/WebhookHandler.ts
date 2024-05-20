@@ -68,12 +68,13 @@ export class WebhookHandler extends AbstractLogHandler {
 
   async handleResults(): PromiseGenericResult<string> {
     const results = await Promise.all(
-      this.webhookPayloads.map((webhookPayload) =>
-        this.sendToWebhook(
-          webhookPayload.payload,
-          webhookPayload.webhook,
-          webhookPayload.orgId
-        )
+      this.webhookPayloads.map(
+        async (webhookPayload) =>
+          await this.sendToWebhook(
+            webhookPayload.payload,
+            webhookPayload.webhook,
+            webhookPayload.orgId
+          )
       )
     );
 
