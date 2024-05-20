@@ -250,15 +250,15 @@ END
 )
 WHEN (request_response_log.provider = 'AZURE') THEN (
   CASE
-  WHEN (request_response_log.model = 'gpt-4-turbo-preview') THEN 10000 * request_response_log.prompt_tokens + 300000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'gpt-45-turbo') THEN 10000 * request_response_log.prompt_tokens + 300000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'gpt4-turbo-preview') THEN 10000 * request_response_log.prompt_tokens + 300000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'gpt-4-preview-1106') THEN 10000 * request_response_log.prompt_tokens + 300000 * request_response_log.completion_tokens
+  WHEN (request_response_log.model = 'gpt-4-turbo-preview') THEN 10000 * request_response_log.prompt_tokens + 30000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt-45-turbo') THEN 10000 * request_response_log.prompt_tokens + 30000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt4-turbo-preview') THEN 10000 * request_response_log.prompt_tokens + 30000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt-4-preview-1106') THEN 10000 * request_response_log.prompt_tokens + 30000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-35-turbo-1106') THEN 1500 * request_response_log.prompt_tokens + 2000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt35') THEN 1500 * request_response_log.prompt_tokens + 2000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-35-turbo-0613') THEN 1500 * request_response_log.prompt_tokens + 2000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-35-16k') THEN 3000 * request_response_log.prompt_tokens + 4000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'gpt-4-vision') THEN 10000 * request_response_log.prompt_tokens + 300000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt-4-vision') THEN 10000 * request_response_log.prompt_tokens + 30000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'ada') THEN 400 * request_response_log.prompt_tokens + 400 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'text-ada-001') THEN 400 * request_response_log.prompt_tokens + 400 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'babbage') THEN 500 * request_response_log.prompt_tokens + 500 * request_response_log.completion_tokens
