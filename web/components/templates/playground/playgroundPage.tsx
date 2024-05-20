@@ -298,6 +298,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-gray-500">
             This request is not a chat completion request. We do not currently
             support non-chat completion requests in playground
+            {JSON.stringify(chat, null, 2)}
+            <div className="whitespace-pre-wrap text-black overflow-auto">
+              {JSON.stringify(singleRequest, null, 4)}
+            </div>
           </div>
         ) : (
           <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-gray-500">
