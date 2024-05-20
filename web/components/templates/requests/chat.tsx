@@ -549,7 +549,6 @@ export const Chat = (props: ChatProps) => {
               {!(
                 model === "gpt-4-vision-preview" ||
                 model === "gpt-4-1106-vision-preview" ||
-                /^claude/.test(model) ||
                 requestId === ""
               ) && (
                 <button
