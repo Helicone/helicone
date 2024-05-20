@@ -282,7 +282,7 @@ export const consumeDlq = async () => {
       console.log(
         `DLQ: Received batch with ${batch.messages.length} messages.`
       );
-      const maxMessages = 20;
+      const maxMessages = 1;
       const miniBatches = createMiniBatches(batch.messages, maxMessages);
 
       for (const miniBatch of miniBatches) {
