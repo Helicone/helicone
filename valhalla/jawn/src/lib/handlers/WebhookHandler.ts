@@ -4,6 +4,7 @@ import { FeatureFlagStore } from "../stores/FeatureFlagStore";
 import { WebhookStore } from "../stores/WebhookStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
+import * as Sentry from "@sentry/node";
 
 type WebhookPayload = {
   payload: {
@@ -86,6 +87,13 @@ export class WebhookHandler extends AbstractLogHandler {
       results.forEach((result) => {
         if (result.error) {
           console.error(`Error sending to webhooks`, result.error);
+
+          Sentry.captureException(new Error(JSON.stringify(result.error)), {
+            tags: {
+              type: "WebhookError",
+              topic: "request-response-logs-prod",
+            },
+          });
         }
       });
     } catch (error) {
