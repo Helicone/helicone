@@ -107,6 +107,15 @@ const Admin = (props: AdminProps) => {
                   ),
                 },
                 {
+                  key: "updated_at",
+                  header: "Last Updated",
+                  render: (row) => (
+                    <div className="">
+                      {getUSDate(new Date(row.updated_at))}
+                    </div>
+                  ),
+                },
+                {
                   key: "active",
                   header: "Active",
                   render: (row) => (

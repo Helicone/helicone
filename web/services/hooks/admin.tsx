@@ -82,6 +82,7 @@ const useUpdateAlertBanner = (onSuccess?: () => void) => {
         .from("alert_banners")
         .update({
           active: req.active,
+          updated_at: new Date(),
         })
         .match({ id: req.id });
 
