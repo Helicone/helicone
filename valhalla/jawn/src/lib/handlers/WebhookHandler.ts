@@ -91,20 +91,11 @@ export class WebhookHandler extends AbstractLogHandler {
               webhook: webhookPayload.webhook,
             },
           });
-          return err(
-            `Error sending to webhook for org ${webhookPayload.orgId}, webhook: ${webhookPayload.webhook}, ${error.message}`
-          );
         }
       })
     );
 
-    const errors = results
-      .filter((result) => result.error)
-      .map((result) => result.error);
-
-    return errors.length > 0
-      ? err("Some webhooks failed to send")
-      : ok("Successfully sent all webhooks");
+    return ok(`Successfully sent to webhooks`);
   }
 
   async sendToWebhook(
