@@ -960,6 +960,8 @@ export class DBLoggable {
         modelOverride: requestHeaders.modelOverride ?? undefined,
         omitRequestLog: requestHeaders.omitHeaders.omitRequest,
         omitResponseLog: requestHeaders.omitHeaders.omitResponse,
+        posthogApiKey: requestHeaders.posthogKey ?? undefined,
+        posthogHost: requestHeaders.posthogHost ?? undefined,
       },
       log: {
         request: {
