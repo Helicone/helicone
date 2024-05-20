@@ -35,6 +35,8 @@ export type HeliconeMeta = {
   modelOverride?: string;
   omitRequestLog: boolean;
   omitResponseLog: boolean;
+  posthogApiKey?: string;
+  posthogHost?: string;
 };
 
 export type KafkaMessage = {

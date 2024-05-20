@@ -191,6 +191,10 @@ export class LogManager {
       );
     }
 
+    console.log(`Sending posthog events for batch ${batchContext.batchId}`);
+    await posthogHandler.handleResults();
+    // Do not fail the batch if posthog events fail
+
     console.log(`Finished processing batch ${batchContext.batchId}`);
   }
 }
