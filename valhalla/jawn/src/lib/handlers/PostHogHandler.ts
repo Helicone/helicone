@@ -1,4 +1,3 @@
-import { posthog } from "posthog-js";
 import { costOfPrompt } from "../../packages/cost";
 import {
   HeliconeRequestResponseToPosthog,
