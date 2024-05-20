@@ -1,16 +1,10 @@
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import {
-  Bars3Icon,
-  CalendarIcon,
-  ChartPieIcon,
-  DocumentDuplicateIcon,
-  FolderIcon,
-  HomeIcon,
-  UsersIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { Bars3Icon, HomeIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
+import { useRouter } from "next/router";
+import { useOrg } from "../organizationContext";
+import MetaData from "../public/authMetaData";
 
 const navigation = [
   { name: "Dashboard", href: "#", icon: HomeIcon, current: true },
@@ -24,17 +18,15 @@ const teams = [
 export default function AdminLayout(props: { children: React.ReactNode }) {
   const { children } = props;
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const router = useRouter();
+  const org = useOrg();
+  const { pathname } = router;
+  const currentPage =
+    pathname.split("/")[1].charAt(0).toUpperCase() +
+    pathname.split("/")[1].substring(1);
 
   return (
-    <>
-      {/*
-        This example requires updating your template:
-
-        ```
-        <html class="h-full bg-white">
-        <body class="h-full">
-        ```
-      */}
+    <MetaData title={`${currentPage} ${"- " + (org?.currentOrg?.name || "")}`}>
       <div className="text-white">
         <Transition.Root show={sidebarOpen} as={Fragment}>
           <Dialog className="relative z-50 lg:hidden" onClose={setSidebarOpen}>
@@ -236,6 +228,6 @@ export default function AdminLayout(props: { children: React.ReactNode }) {
           <div className="px-4 sm:px-6 lg:px-8">{children}</div>
         </main>
       </div>
-    </>
+    </MetaData>
   );
 }

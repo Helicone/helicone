@@ -1,16 +1,11 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 import { ReactElement, useState } from "react";
 import { withAuthSSR } from "../../lib/api/handlerWrappers";
-import AuthHeader from "../../components/shared/authHeader";
 import AdminLayout from "../../components/layout/admin/adminLayout";
 import { SimpleTable } from "../../components/shared/table/simpleTable";
 import HcButton from "../../components/ui/hcButton";
 import { ThemedSwitch } from "../../components/shared/themed/themedSwitch";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { supabaseServer } from "../../lib/supabaseServer";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { getUSDate } from "../../components/shared/utils/utils";
-import { title } from "process";
 import { TextInput } from "@tremor/react";
 import useNotification from "../../components/shared/notification/useNotification";
 import {
@@ -73,6 +68,10 @@ const Admin = (props: AdminProps) => {
                 variant={"primary"}
                 size={"xs"}
                 onClick={async () => {
+                  if (!title || !message) {
+                    setNotification("Title and message are required", "error");
+                    return;
+                  }
                   createBanner({ title, message });
                 }}
                 loading={isCreatingBanner}

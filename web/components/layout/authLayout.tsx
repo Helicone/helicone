@@ -3,7 +3,6 @@ import Image from "next/image";
 
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
-  ArrowTopRightOnSquareIcon,
   Bars3BottomLeftIcon,
   BeakerIcon,
   BellIcon,
@@ -28,7 +27,6 @@ import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, useState } from "react";
-import { DEMO_EMAIL } from "../../lib/constants";
 import { clsx } from "../shared/clsx";
 import ThemedDropdown from "../shared/themed/themedDropdown";
 import OrgContext, { useOrg } from "./organizationContext";
