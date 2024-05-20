@@ -91,6 +91,7 @@
         "features/advanced-usage/omit-logs",
         "features/advanced-usage/user-metrics",
         "features/advanced-usage/feedback",
+        "features/advanced-usage/scores",
         "getting-started/integration-method/gateway-fallbacks",
         "features/advanced-usage/retries",
         "features/advanced-usage/custom-rate-limits",
@@ -106,14 +107,14 @@
         "getting-started/proxy-vs-async",
         "faq/how-we-calculate-cost",
         "faq/latency-affect",
-        "helicone-headers/predefining-request-id", 
+        "helicone-headers/predefining-request-id",
         {
-            "group": "Deployment",
-            "pages": [
-                "getting-started/self-deploy",
-                "getting-started/self-deploy-docker",
-                "getting-started/self-deploy-cloud"
-            ]
+          "group": "Deployment",
+          "pages": [
+            "getting-started/self-deploy",
+            "getting-started/self-deploy-docker",
+            "getting-started/self-deploy-cloud"
+          ]
         }
       ]
     },
