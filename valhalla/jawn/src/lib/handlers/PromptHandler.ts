@@ -51,11 +51,7 @@ export class PromptHandler extends AbstractLogHandler {
   }
 
   private escapeUnicode(str: string): string {
-    return str.replace(/[^\0-~]/g, (ch) => {
-      const code = ch.charCodeAt(0).toString(16).toUpperCase();
-      const pad = "0000";
-      return "\\u" + pad.substring(code.length) + code;
-    });
+    return str.replace(/\u0000/g, "");
   }
 
   private sanitizeTemplate(template: any): any {
