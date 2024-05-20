@@ -18,7 +18,7 @@ export class PostHogHandler extends AbstractLogHandler {
 
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
     if (!context.message.heliconeMeta.posthogApiKey) {
-      return ok("Posthog API key not found");
+      return await super.handle(context);
     }
 
     const usage = context.usage;
