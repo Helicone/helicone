@@ -2,7 +2,7 @@ import { consolidateTextFields } from "../../../utils/streamParser";
 import { PromiseGenericResult, err, ok } from "../result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 
-const NON_DATA_LINES = [
+export const NON_DATA_LINES = [
   "event: content_block_delta",
   "event: content_block_stop",
   "event: message_delta",
@@ -10,6 +10,7 @@ const NON_DATA_LINES = [
   "event: message_start",
   "event: content_block_start",
   "event: ping",
+  "event: completion",
 ];
 
 export class OpenAIStreamProcessor implements IBodyProcessor {
@@ -25,7 +26,7 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
       try {
         return JSON.parse(line.replace("data:", ""));
       } catch (e) {
-        console.log("Error parsing line", line);
+        console.log("Error parsing line OpenAI", line);
         return err(`Error parsing line`);
       }
     });
