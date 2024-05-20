@@ -89,6 +89,19 @@ const booleanOperators: Operator<keyof BooleanOperators>[] = [
   },
 ];
 
+const booleanToTextOperators: Operator<string>[] = [
+  {
+    value: "equals",
+    label: "equals",
+    type: "text",
+  },
+  {
+    value: "not-equals",
+    label: "not equals",
+    type: "text",
+  },
+];
+
 const timestampOperators: Operator<keyof TimestampOperators>[] = [
   {
     value: "gte",
@@ -202,6 +215,7 @@ export const DASHBOARD_PAGE_TABLE_FILTERS: [
 ];
 export const REQUEST_TABLE_FILTERS: [
   SingleFilterDef<"request">,
+  SingleFilterDef<"request">,
   SingleFilterDef<"response">,
   SingleFilterDef<"response">,
   SingleFilterDef<"request">,
@@ -218,7 +232,13 @@ export const REQUEST_TABLE_FILTERS: [
     column: "prompt",
     category: "request",
   },
-
+  {
+    label: "Request-Id",
+    operators: booleanToTextOperators,
+    table: "request",
+    column: "id",
+    category: "request",
+  },
   {
     label: "Response",
     operators: textOperators,
