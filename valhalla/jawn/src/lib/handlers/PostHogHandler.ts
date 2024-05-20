@@ -14,6 +14,7 @@ export class PostHogHandler extends AbstractLogHandler {
   }
 
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
+    console.log("PostHogHandler");
     const usage = context.usage;
 
     const cost = this.modelCost({
@@ -28,11 +29,11 @@ export class PostHogHandler extends AbstractLogHandler {
 
     const posthogLog = this.mapPostHogLog(context);
 
-    postHogClient?.capture({
-      distinctId: crypto.randomUUID(),
-      event: "helicone_request_response",
-      properties: posthogLog,
-    });
+    // postHogClient?.capture({
+    //   distinctId: crypto.randomUUID(),
+    //   event: "helicone_request_response",
+    //   properties: posthogLog,
+    // });
 
     return await super.handle(context);
   }
