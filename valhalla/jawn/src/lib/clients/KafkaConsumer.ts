@@ -279,7 +279,9 @@ export const consumeDlq = async () => {
       heartbeat,
       commitOffsetsIfNecessary,
     }) => {
-      console.log(`Received batch with ${batch.messages.length} messages.`);
+      console.log(
+        `DLQ: Received batch with ${batch.messages.length} messages.`
+      );
       const maxMessages = 300;
       const miniBatches = createMiniBatches(batch.messages, maxMessages);
 
@@ -292,7 +294,7 @@ export const consumeDlq = async () => {
 
         const mappedMessages = mapDlqKafkaMessageToMessage(miniBatch);
         if (mappedMessages.error || !mappedMessages.data) {
-          console.error("Failed to map messages", mappedMessages.error);
+          console.error("DLQ: Failed to map messages", mappedMessages.error);
           return;
         }
 
@@ -305,7 +307,7 @@ export const consumeDlq = async () => {
           "request-response-logs-prod-dlq"
         );
         if (consumeResult.error) {
-          console.error("Failed to consume batch", consumeResult.error);
+          console.error("DLQ: Failed to consume batch", consumeResult.error);
           // TODO: Best way to handle this?
         }
 
