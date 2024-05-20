@@ -72,7 +72,7 @@ export class WebhookHandler extends AbstractLogHandler {
       return ok("No webhooks to send");
     }
 
-    const results = await Promise.all(
+    await Promise.all(
       this.webhookPayloads.map(async (webhookPayload) => {
         try {
           return await this.sendToWebhook(
