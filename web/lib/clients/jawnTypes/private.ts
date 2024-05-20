@@ -171,6 +171,7 @@ export interface components {
     HeliconeMeta: {
       posthogHost?: string;
       posthogApiKey?: string;
+      webhookEnabled: boolean;
       omitResponseLog: boolean;
       omitRequestLog: boolean;
       modelOverride?: string;
