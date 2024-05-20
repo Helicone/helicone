@@ -74,14 +74,17 @@ export class WebhookHandler extends AbstractLogHandler {
 
     try {
       const results = await Promise.all(
-        this.webhookPayloads.map(
-          async (webhookPayload) =>
-            await this.sendToWebhook(
+        this.webhookPayloads.map(async (webhookPayload) => {
+          try {
+            return await this.sendToWebhook(
               webhookPayload.payload,
               webhookPayload.webhook,
               webhookPayload.orgId
-            )
-        )
+            );
+          } catch (error: any) {
+            return err(`Error sending to webhook, ${error.message}`);
+          }
+        })
       );
 
       results.forEach((result) => {
@@ -115,7 +118,7 @@ export class WebhookHandler extends AbstractLogHandler {
     },
     webhook: Database["public"]["Tables"]["webhooks"]["Row"],
     orgId: string
-  ): PromiseGenericResult<undefined> {
+  ): PromiseGenericResult<string> {
     // Check FF
     const webhookFF = await this.featureFlagStore.getFeatureFlagByOrgId(
       "webhook_beta",
@@ -163,6 +166,6 @@ export class WebhookHandler extends AbstractLogHandler {
       }
     }
 
-    return ok(undefined);
+    return ok(`Successfully sent to webhook ${webhook.destination}`);
   }
 }
