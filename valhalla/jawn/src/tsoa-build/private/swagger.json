@@ -480,6 +480,9 @@
 			},
 			"HeliconeMeta": {
 				"properties": {
+					"webhookEnabled": {
+						"type": "boolean"
+					},
 					"omitResponseLog": {
 						"type": "boolean"
 					},
@@ -491,6 +494,7 @@
 					}
 				},
 				"required": [
+					"webhookEnabled",
 					"omitResponseLog",
 					"omitRequestLog"
 				],

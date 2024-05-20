@@ -67,6 +67,10 @@ export class WebhookHandler extends AbstractLogHandler {
   }
 
   async handleResults(): PromiseGenericResult<string> {
+    if (this.webhookPayloads.length === 0) {
+      return ok("No webhooks to send");
+    }
+
     const results = await Promise.all(
       this.webhookPayloads.map(
         async (webhookPayload) =>
