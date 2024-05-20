@@ -11,6 +11,7 @@ export const NON_DATA_LINES = [
   "event: content_block_start",
   "event: ping",
   "event: completion",
+  "event: error",
 ];
 
 export class OpenAIStreamProcessor implements IBodyProcessor {
