@@ -4,10 +4,26 @@ import { FeatureFlagStore } from "../stores/FeatureFlagStore";
 import { WebhookStore } from "../stores/WebhookStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
+import * as Sentry from "@sentry/node";
+
+type WebhookPayload = {
+  payload: {
+    request: {
+      id: string;
+      body: string;
+    };
+    response: {
+      body: string;
+    };
+  };
+  webhook: Database["public"]["Tables"]["webhooks"]["Row"];
+  orgId: string;
+};
 
 export class WebhookHandler extends AbstractLogHandler {
   private webhookStore: WebhookStore;
   private featureFlagStore: FeatureFlagStore;
+  private webhookPayloads: WebhookPayload[] = [];
 
   constructor(webhookStore: WebhookStore, featureFlagStore: FeatureFlagStore) {
     super();
@@ -16,6 +32,10 @@ export class WebhookHandler extends AbstractLogHandler {
   }
 
   async handle(context: HandlerContext): PromiseGenericResult<string> {
+    if (!context.message.heliconeMeta.webhookEnabled) {
+      return await super.handle(context);
+    }
+
     const orgId = context.orgParams?.id;
 
     if (!orgId) {
@@ -29,8 +49,8 @@ export class WebhookHandler extends AbstractLogHandler {
     }
 
     for (const webhook of webhooks.data ?? []) {
-      const res = await this.sendToWebhook(
-        {
+      this.webhookPayloads.push({
+        payload: {
           request: {
             id: context.message.log.request.id,
             body: context.processedLog.request.body,
@@ -39,16 +59,43 @@ export class WebhookHandler extends AbstractLogHandler {
             body: context.processedLog.response.body,
           },
         },
-        webhook,
-        orgId
-      );
-
-      if (res.error) {
-        return err(res.error);
-      }
+        webhook: webhook,
+        orgId,
+      });
     }
 
     return await super.handle(context);
+  }
+
+  async handleResults(): PromiseGenericResult<string> {
+    if (this.webhookPayloads.length === 0) {
+      return ok("No webhooks to send");
+    }
+
+    await Promise.all(
+      this.webhookPayloads.map(async (webhookPayload) => {
+        try {
+          return await this.sendToWebhook(
+            webhookPayload.payload,
+            webhookPayload.webhook,
+            webhookPayload.orgId
+          );
+        } catch (error: any) {
+          Sentry.captureException(error, {
+            tags: {
+              type: "WebhookError",
+              topic: "request-response-logs-prod",
+            },
+            extra: {
+              orgId: webhookPayload.orgId,
+              webhook: webhookPayload.webhook,
+            },
+          });
+        }
+      })
+    );
+
+    return ok(`Successfully sent to webhooks`);
   }
 
   async sendToWebhook(
@@ -63,7 +110,7 @@ export class WebhookHandler extends AbstractLogHandler {
     },
     webhook: Database["public"]["Tables"]["webhooks"]["Row"],
     orgId: string
-  ): PromiseGenericResult<undefined> {
+  ): PromiseGenericResult<string> {
     // Check FF
     const webhookFF = await this.featureFlagStore.getFeatureFlagByOrgId(
       "webhook_beta",
@@ -111,6 +158,6 @@ export class WebhookHandler extends AbstractLogHandler {
       }
     }
 
-    return ok(undefined);
+    return ok(`Successfully sent to webhook`);
   }
 }

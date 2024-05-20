@@ -51,6 +51,7 @@ export interface IHeliconeHeaders {
   moderationsEnabled: boolean;
   posthogKey: Nullable<string>;
   posthogHost: Nullable<string>;
+  webhookEnabled: boolean;
 }
 
 export class HeliconeHeaders implements IHeliconeHeaders {
@@ -88,6 +89,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   moderationsEnabled: boolean;
   posthogKey: Nullable<string>;
   posthogHost: Nullable<string>;
+  webhookEnabled: boolean;
 
   constructor(private headers: Headers) {
     const heliconeHeaders = this.getHeliconeHeaders();
@@ -116,6 +118,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.moderationsEnabled = heliconeHeaders.moderationsEnabled;
     this.posthogKey = heliconeHeaders.posthogKey;
     this.posthogHost = heliconeHeaders.posthogHost;
+    this.webhookEnabled = heliconeHeaders.webhookEnabled;
   }
 
   private getFallBacks(): Nullable<HeliconeFallback[]> {
@@ -238,6 +241,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
           : false,
       posthogKey: this.headers.get("Helicone-Posthog-Key") ?? null,
       posthogHost: this.headers.get("Helicone-Posthog-Host") ?? null,
+      webhookEnabled:
+        this.headers.get("Helicone-Webhook-Enabled") == "true" ? true : false,
     };
   }
 
