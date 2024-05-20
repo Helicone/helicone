@@ -158,6 +158,6 @@ export class WebhookHandler extends AbstractLogHandler {
       }
     }
 
-    return ok(`Successfully sent to webhook ${webhook.destination}`);
+    return ok(`Successfully sent to webhook`);
   }
 }
