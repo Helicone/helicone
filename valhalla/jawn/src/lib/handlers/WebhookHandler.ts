@@ -72,38 +72,41 @@ export class WebhookHandler extends AbstractLogHandler {
       return ok("No webhooks to send");
     }
 
-    try {
-      const results = await Promise.all(
-        this.webhookPayloads.map(async (webhookPayload) => {
-          try {
-            return await this.sendToWebhook(
-              webhookPayload.payload,
-              webhookPayload.webhook,
-              webhookPayload.orgId
-            );
-          } catch (error: any) {
-            return err(`Error sending to webhook, ${error.message}`);
-          }
-        })
-      );
-
-      results.forEach((result) => {
-        if (result.error) {
-          console.error(`Error sending to webhooks`, result.error);
-
-          Sentry.captureException(new Error(JSON.stringify(result.error)), {
-            tags: {
-              type: "WebhookError",
-              topic: "request-response-logs-prod",
-            },
-          });
+    const results = await Promise.all(
+      this.webhookPayloads.map(async (webhookPayload) => {
+        try {
+          return await this.sendToWebhook(
+            webhookPayload.payload,
+            webhookPayload.webhook,
+            webhookPayload.orgId
+          );
+        } catch (error: any) {
+          return err(
+            `Error sending to webhook for org ${webhookPayload.orgId}, webhook: ${webhookPayload.webhook}, ${error.message}`
+          );
         }
+      })
+    );
+
+    const errors = results
+      .filter((result) => result.error)
+      .map((result) => result.error);
+
+    if (errors.length > 0) {
+      Sentry.captureException(new Error("Webhook sending errors"), {
+        tags: {
+          type: "WebhookError",
+          topic: "request-response-logs-prod",
+        },
+        extra: {
+          errors,
+        },
       });
-    } catch (error) {
-      console.error("Error sending to webhooks", error);
     }
 
-    return ok("Successfully sent to webhooks");
+    return errors.length > 0
+      ? err("Some webhooks failed to send")
+      : ok("Successfully sent all webhooks");
   }
 
   async sendToWebhook(
