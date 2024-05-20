@@ -41,7 +41,8 @@ import { useTheme } from "../shared/theme/themeContext";
 import { ThemedSwitch } from "../shared/themed/themedSwitch";
 import MetaData from "./public/authMetaData";
 import { Database } from "../../supabase/database.types";
-import { signOut } from "../shared/utils/utils";
+import { getUSDate, signOut } from "../shared/utils/utils";
+import { useAlertBanners } from "../../services/hooks/admin";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
@@ -143,6 +144,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const currentPage =
     pathname.split("/")[1].charAt(0).toUpperCase() +
     pathname.split("/")[1].substring(1);
+
+  const { alertBanners, isAlertBannersLoading, refetch } = useAlertBanners();
+
+  const banner = alertBanners?.data?.find((x) => x.active);
 
   return (
     <MetaData title={`${currentPage} ${"- " + (org?.currentOrg?.name || "")}`}>
@@ -554,51 +559,30 @@ const AuthLayout = (props: AuthLayoutProps) => {
             </div>
           </div>
           <main className="flex-1">
+            {banner && (
+              <div className="p-2">
+                <div className="w-full bg-sky-500 rounded-lg p-2 text-white flex items-center justify-center gap-2">
+                  <span className="text-sky-100 text-xs font-normal">
+                    {getUSDate(new Date(banner.created_at))}
+                  </span>
+                  <p className="text-sky-100 font-normal">|</p>
+                  <p className="text-sm font-semibold"> {banner.title}</p>
+                  <svg
+                    viewBox="0 0 2 2"
+                    className="inline h-0.5 w-0.5 fill-current"
+                    aria-hidden="true"
+                  >
+                    <circle cx={1} cy={1} r={1} />
+                  </svg>
+                  <p className="text-sm text-gray-100">{banner.message}</p>
+                </div>
+              </div>
+            )}
             <div
               className={clsx(
                 "mx-auto px-4 sm:px-8 bg-gray-100 dark:bg-[#17191d] h-full min-h-screen"
               )}
             >
-              {/* Replace with your content */}
-              {user?.email === DEMO_EMAIL && (
-                <div className="pointer-events-none flex sm:justify-center mt-4">
-                  <div className="w-full pointer-events-auto flex items-center justify-between gap-x-6 bg-red-500 shadow-md py-2.5 px-6 rounded-xl sm:py-3 sm:pr-3.5 sm:pl-4">
-                    <div className="text-sm leading-6 text-white items-center">
-                      <strong className="font-semibold">
-                        Currently viewing DEMO
-                      </strong>
-                      <svg
-                        viewBox="0 0 2 2"
-                        className="mx-2 inline h-0.5 w-0.5 fill-current"
-                        aria-hidden="true"
-                      >
-                        <circle cx={1} cy={1} r={1} />
-                      </svg>
-                      Data from{" "}
-                      <Link
-                        href="https://demoapp.valyrai.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline"
-                      >
-                        <p className="inline font-semibold">AI App Ideas</p>
-                        <ArrowTopRightOnSquareIcon className="h-4 w-4 mb-1 ml-1 inline" />
-                      </Link>
-                    </div>
-                    <button
-                      onClick={async () => {
-                        signOut(supabaseClient).then(() => {
-                          router.push("/");
-                        });
-                      }}
-                      type="button"
-                      className="-m-1.5 flex-none px-3 py-1.5 text-sm bg-white hover:bg-gray-100 text-gray-900 rounded-lg"
-                    >
-                      Exit Demo
-                    </button>
-                  </div>
-                </div>
-              )}
               <OrgContext.Provider value={org}>
                 <div
                   className="py-4 sm:py-8 mx-auto w-full max-w-[100rem]"

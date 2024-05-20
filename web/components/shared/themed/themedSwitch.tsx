@@ -52,7 +52,7 @@ export const ThemedSwitch = ({
             )}
             aria-hidden="true"
           >
-            <OnIcon className="h-3 w-3 text-gray-400" />
+            <OffIcon className="h-3 w-3 text-gray-400" />
           </span>
           <span
             className={clsx(
@@ -63,7 +63,7 @@ export const ThemedSwitch = ({
             )}
             aria-hidden="true"
           >
-            <OffIcon className="h-3 w-3 text-emerald-500" />
+            <OnIcon className="h-3 w-3 text-emerald-500" />
           </span>
         </span>
       </Switch>
