@@ -1,19 +1,26 @@
 import { costOfPrompt } from "../../packages/cost";
+import { PostHogEvent, PosthogApiClient } from "../clients/postHogApiClient";
 import {
   HeliconeRequestResponseToPosthog,
   postHogClient,
 } from "../clients/postHogClient";
-import { PromiseGenericResult } from "../shared/result";
+import { PromiseGenericResult, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 import crypto from "crypto";
 
 export class PostHogHandler extends AbstractLogHandler {
+  private posthogEvents: PostHogEvent[] = [];
+
   constructor() {
     super();
   }
 
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
+    if (!context.message.heliconeMeta.posthogApiKey) {
+      return ok("Posthog API key not found");
+    }
+
     const usage = context.usage;
 
     const cost = this.modelCost({
@@ -28,13 +35,24 @@ export class PostHogHandler extends AbstractLogHandler {
 
     const posthogLog = this.mapPostHogLog(context);
 
-    postHogClient?.capture({
-      distinctId: crypto.randomUUID(),
-      event: "helicone_request_response",
-      properties: posthogLog,
+    this.posthogEvents.push({
+      apiKey: context.message.heliconeMeta.posthogApiKey,
+      log: posthogLog,
     });
 
     return await super.handle(context);
+  }
+
+  public async handleResults(): PromiseGenericResult<string> {
+    for (const log of this.posthogEvents) {
+      const posthogClient = new PosthogApiClient();
+
+      postHogClient?.capture({
+        distinctId: crypto.randomUUID(),
+        event: "helicone_request_response",
+        properties: log,
+      });
+    }
   }
 
   mapPostHogLog(context: HandlerContext): HeliconeRequestResponseToPosthog {
