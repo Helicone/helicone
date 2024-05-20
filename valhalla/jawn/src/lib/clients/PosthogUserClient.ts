@@ -3,15 +3,11 @@
 import { PostHog } from "posthog-node";
 
 export class PosthogUserClient {
-  private readonly apiKey: string;
-  private readonly posthogHost: string;
   private readonly posthogClient: PostHog;
 
   constructor(apiKey: string, posthogHost: string | null = null) {
-    this.apiKey = apiKey;
-    this.posthogHost = posthogHost ?? "https://app.posthog.com";
-    this.posthogClient = new PostHog(this.apiKey, {
-      host: this.posthogHost,
+    this.posthogClient = new PostHog(apiKey, {
+      host: posthogHost ?? "https://app.posthog.com",
     });
   }
 
