@@ -960,6 +960,7 @@ export class DBLoggable {
         modelOverride: requestHeaders.modelOverride ?? undefined,
         omitRequestLog: requestHeaders.omitHeaders.omitRequest,
         omitResponseLog: requestHeaders.omitHeaders.omitResponse,
+        webhookEnabled: requestHeaders.webhookEnabled,
       },
       log: {
         request: {

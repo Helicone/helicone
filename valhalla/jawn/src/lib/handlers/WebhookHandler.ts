@@ -16,6 +16,11 @@ export class WebhookHandler extends AbstractLogHandler {
   }
 
   async handle(context: HandlerContext): PromiseGenericResult<string> {
+    // If the webhook is not enabled, continue processing the log
+    if (!context.message.heliconeMeta.webhookEnabled) {
+      return await super.handle(context);
+    }
+
     const orgId = context.orgParams?.id;
 
     if (!orgId) {

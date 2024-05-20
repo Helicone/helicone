@@ -91,6 +91,7 @@ export type HeliconeMeta = {
   modelOverride?: string;
   omitRequestLog: boolean;
   omitResponseLog: boolean;
+  webhookEnabled: boolean;
 };
 
 export type Message = {
