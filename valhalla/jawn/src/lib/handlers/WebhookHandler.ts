@@ -71,22 +71,26 @@ export class WebhookHandler extends AbstractLogHandler {
       return ok("No webhooks to send");
     }
 
-    const results = await Promise.all(
-      this.webhookPayloads.map(
-        async (webhookPayload) =>
-          await this.sendToWebhook(
-            webhookPayload.payload,
-            webhookPayload.webhook,
-            webhookPayload.orgId
-          )
-      )
-    );
+    try {
+      const results = await Promise.all(
+        this.webhookPayloads.map(
+          async (webhookPayload) =>
+            await this.sendToWebhook(
+              webhookPayload.payload,
+              webhookPayload.webhook,
+              webhookPayload.orgId
+            )
+        )
+      );
 
-    results.forEach((result) => {
-      if (result.error) {
-        console.error(`Error sending to webhooks`, result.error);
-      }
-    });
+      results.forEach((result) => {
+        if (result.error) {
+          console.error(`Error sending to webhooks`, result.error);
+        }
+      });
+    } catch (error) {
+      console.error("Error sending to webhooks", error);
+    }
 
     return ok("Successfully sent to webhooks");
   }
