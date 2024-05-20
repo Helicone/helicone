@@ -11,11 +11,11 @@ export class PosthogUserClient {
     });
   }
 
-  public async captureEvent(
+  public captureEvent(
     event: string,
     properties: Record<string, any>,
     distinctId: string = crypto.randomUUID()
-  ): Promise<void> {
+  ): void {
     this.posthogClient.capture({
       distinctId: distinctId,
       event: event,
@@ -27,7 +27,7 @@ export class PosthogUserClient {
 export type PostHogEvent = {
   apiKey: string;
   host?: string;
-  log: HeliconeRequestResponseToPosthog;
+  properties: HeliconeRequestResponseToPosthog;
 };
 
 export type HeliconeRequestResponseToPosthog = {
