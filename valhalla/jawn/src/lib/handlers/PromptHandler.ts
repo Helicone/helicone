@@ -62,6 +62,9 @@ export class PromptHandler extends AbstractLogHandler {
     if (typeof template === "string") {
       return this.escapeUnicode(template);
     }
+    if (Array.isArray(template)) {
+      return template.map((item) => this.sanitizeTemplate(item));
+    }
     if (typeof template === "object" && template !== null) {
       const sanitizedTemplate: { [key: string]: any } = {};
       for (const key in template) {
