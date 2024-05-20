@@ -51,4 +51,5 @@ export type HeliconeRequestResponseToPosthog = {
   responseBodySize: number;
   delayMs: number;
   heliconeBackLink: string;
+  customProperties: Record<string, string>;
 };

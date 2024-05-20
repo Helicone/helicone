@@ -89,6 +89,18 @@ export class PostHogHandler extends AbstractLogHandler {
       responseBodySize: response.bodySize ?? 0,
       delayMs: response.delayMs ?? 0,
       heliconeBackLink: `https://www.helicone.ai/requests?requestId=${request.id}`,
+      customProperties: Object.entries(request.properties).reduce(
+        (acc, [key, value]) => {
+          if (key.toLowerCase() === "Helicone-Sent-To-Posthog".toLowerCase()) {
+            return acc;
+          }
+
+          acc[key] = value;
+
+          return acc;
+        },
+        {} as Record<string, string>
+      ),
     };
 
     return posthogLog;
