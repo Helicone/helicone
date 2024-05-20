@@ -34,6 +34,7 @@ export class WebhookHandler extends AbstractLogHandler {
     if (!context.message.heliconeMeta.webhookEnabled) {
       return await super.handle(context);
     }
+
     const orgId = context.orgParams?.id;
 
     if (!orgId) {
