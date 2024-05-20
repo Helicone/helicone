@@ -2,6 +2,7 @@ import { calculateModel } from "../../../utils/modelMapper";
 import { consolidateTextFields } from "../../../utils/streamParser";
 import { PromiseGenericResult, ok } from "../result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
+import { NON_DATA_LINES } from "./openAIStreamProcessor";
 
 export class AnthropicStreamBodyProcessor implements IBodyProcessor {
   public async parse(
@@ -18,11 +19,12 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
     const lines = responseBody
       .split("\n")
       .filter((line) => line !== "")
+      .filter((line) => !NON_DATA_LINES.includes(line))
       .map((line) => {
         try {
           return JSON.parse(line.replace("data:", ""));
         } catch (e) {
-          console.error("Error parsing line", line);
+          console.error("Error parsing line Anthropic", line);
           return {};
         }
       })

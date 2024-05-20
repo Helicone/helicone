@@ -1,3 +1,4 @@
+import { PostHog } from "posthog-node";
 import { costOfPrompt } from "../../packages/cost";
 import {
   HeliconeRequestResponseToPosthog,
@@ -14,7 +15,7 @@ export class PostHogHandler extends AbstractLogHandler {
   }
 
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
-    console.log("PostHogHandler");
+    // console.log("PostHogHandler");
     const usage = context.usage;
 
     const cost = this.modelCost({
@@ -28,6 +29,12 @@ export class PostHogHandler extends AbstractLogHandler {
     context.usage.cost = cost;
 
     const posthogLog = this.mapPostHogLog(context);
+
+    // const postHogClient = new PostHog(
+
+    //   , {
+    //   host: "https://app.posthog.com",
+    // });
 
     // postHogClient?.capture({
     //   distinctId: crypto.randomUUID(),
