@@ -234,8 +234,13 @@ function mapMessageDates(message: Message): Message {
 
 const dlqConsumer = kafka?.consumer({
   groupId: "jawn-consumer-local-01",
-  minBytes: 1000, // 1 kB
-  maxBytes: 10_000, // 10 kB
+  heartbeatInterval: 15000,
+  minBytes: 100_000,
+  maxBytes:
+    AVG_MESSAGE_SIZE *
+    MESSAGES_PER_MINI_BATCH *
+    ESTIMATED_MINI_BATCH_COUNT *
+    1.1, // 10% buffer
 });
 
 export const consumeDlq = async () => {
@@ -275,7 +280,7 @@ export const consumeDlq = async () => {
       commitOffsetsIfNecessary,
     }) => {
       console.log(`Received batch with ${batch.messages.length} messages.`);
-      const maxMessages = 5;
+      const maxMessages = 300;
       const miniBatches = createMiniBatches(batch.messages, maxMessages);
 
       for (const miniBatch of miniBatches) {
