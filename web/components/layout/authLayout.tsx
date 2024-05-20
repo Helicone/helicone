@@ -561,7 +561,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
               <div className="p-2">
                 <div className="w-full bg-sky-500 rounded-lg p-2 text-white flex items-center justify-center gap-2">
                   <span className="text-sky-100 text-xs font-normal">
-                    {getUSDate(new Date(banner.created_at))}
+                    {getUSDate(new Date(banner.updated_at))}
                   </span>
                   <p className="text-sky-100 font-normal">|</p>
                   <p className="text-sm font-semibold"> {banner.title}</p>
