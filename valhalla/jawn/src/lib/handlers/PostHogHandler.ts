@@ -39,6 +39,7 @@ export class PostHogHandler extends AbstractLogHandler {
       apiKey: context.message.heliconeMeta.posthogApiKey,
       host: context.message.heliconeMeta.posthogHost,
       properties: posthogProperties,
+      createdAt: context.message.log.request.requestCreatedAt,
     });
 
     return await super.handle(context);
@@ -52,6 +53,7 @@ export class PostHogHandler extends AbstractLogHandler {
         posthogClient.captureEvent(
           "helicone_request_response",
           event.properties,
+          event.createdAt,
           crypto.randomUUID()
         );
       } catch (error: any) {

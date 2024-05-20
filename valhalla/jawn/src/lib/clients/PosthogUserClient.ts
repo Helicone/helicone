@@ -14,12 +14,14 @@ export class PosthogUserClient {
   public captureEvent(
     event: string,
     properties: Record<string, any>,
+    timestamp: Date,
     distinctId: string = crypto.randomUUID()
   ): void {
     this.posthogClient.capture({
       distinctId: distinctId,
       event: event,
       properties: properties,
+      timestamp: timestamp,
     });
   }
 }
@@ -28,6 +30,7 @@ export type PostHogEvent = {
   apiKey: string;
   host?: string;
   properties: HeliconeRequestResponseToPosthog;
+  createdAt: Date;
 };
 
 export type HeliconeRequestResponseToPosthog = {
