@@ -5,9 +5,24 @@ import { WebhookStore } from "../stores/WebhookStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
+type WebhookPayload = {
+  payload: {
+    request: {
+      id: string;
+      body: string;
+    };
+    response: {
+      body: string;
+    };
+  };
+  webhook: Database["public"]["Tables"]["webhooks"]["Row"];
+  orgId: string;
+};
+
 export class WebhookHandler extends AbstractLogHandler {
   private webhookStore: WebhookStore;
   private featureFlagStore: FeatureFlagStore;
+  private webhookPayloads: WebhookPayload[] = [];
 
   constructor(webhookStore: WebhookStore, featureFlagStore: FeatureFlagStore) {
     super();
@@ -16,11 +31,9 @@ export class WebhookHandler extends AbstractLogHandler {
   }
 
   async handle(context: HandlerContext): PromiseGenericResult<string> {
-    // If the webhook is not enabled, continue processing the log
     if (!context.message.heliconeMeta.webhookEnabled) {
       return await super.handle(context);
     }
-
     const orgId = context.orgParams?.id;
 
     if (!orgId) {
@@ -34,8 +47,8 @@ export class WebhookHandler extends AbstractLogHandler {
     }
 
     for (const webhook of webhooks.data ?? []) {
-      const res = await this.sendToWebhook(
-        {
+      this.webhookPayloads.push({
+        payload: {
           request: {
             id: context.message.log.request.id,
             body: context.processedLog.request.body,
@@ -44,16 +57,32 @@ export class WebhookHandler extends AbstractLogHandler {
             body: context.processedLog.response.body,
           },
         },
-        webhook,
-        orgId
-      );
-
-      if (res.error) {
-        return err(res.error);
-      }
+        webhook: webhook,
+        orgId,
+      });
     }
 
     return await super.handle(context);
+  }
+
+  async handleResults(): PromiseGenericResult<string> {
+    const results = await Promise.all(
+      this.webhookPayloads.map((webhookPayload) =>
+        this.sendToWebhook(
+          webhookPayload.payload,
+          webhookPayload.webhook,
+          webhookPayload.orgId
+        )
+      )
+    );
+
+    results.forEach((result) => {
+      if (result.error) {
+        console.error(`Error sending to webhooks`, result.error);
+      }
+    });
+
+    return ok("Successfully sent to webhooks");
   }
 
   async sendToWebhook(

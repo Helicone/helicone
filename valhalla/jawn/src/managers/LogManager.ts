@@ -200,6 +200,9 @@ export class LogManager {
       );
     }
 
+    console.log(`Sending webhooks`);
+    await webhookHandler.handleResults();
+
     console.log(`Finished processing batch ${batchContext.batchId}`);
   }
 }
