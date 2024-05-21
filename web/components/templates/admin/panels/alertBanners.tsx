@@ -1,5 +1,4 @@
 import { TextInput } from "@tremor/react";
-import { title } from "process";
 import { SimpleTable } from "../../../shared/table/simpleTable";
 import { ThemedSwitch } from "../../../shared/themed/themedSwitch";
 import { getUSDate } from "../../../shared/utils/utils";

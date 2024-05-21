@@ -1,21 +1,8 @@
 import { User } from "@supabase/auth-helpers-nextjs";
-import { ReactElement, useState } from "react";
+import { ReactElement } from "react";
 import { withAuthSSR } from "../../lib/api/handlerWrappers";
 import AdminLayout from "../../components/layout/admin/adminLayout";
-import { SimpleTable } from "../../components/shared/table/simpleTable";
-import HcButton from "../../components/ui/hcButton";
-import { ThemedSwitch } from "../../components/shared/themed/themedSwitch";
-import { getUSDate } from "../../components/shared/utils/utils";
-import { TextInput } from "@tremor/react";
-import useNotification from "../../components/shared/notification/useNotification";
-import {
-  useAlertBanners,
-  useCreateAlertBanner,
-  useUpdateAlertBanner,
-} from "../../services/hooks/admin";
 import AdminPage from "../../components/templates/admin/adminPage";
-import { getJawnClient } from "../../lib/clients/jawn";
-import { headers } from "next/headers";
 import { supabaseServer } from "../../lib/supabaseServer";
 
 interface AdminProps {
