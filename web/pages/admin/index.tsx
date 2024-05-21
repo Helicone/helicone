@@ -14,6 +14,9 @@ import {
   useUpdateAlertBanner,
 } from "../../services/hooks/admin";
 import AdminPage from "../../components/templates/admin/adminPage";
+import { getJawnClient } from "../../lib/clients/jawn";
+import { headers } from "next/headers";
+import { supabaseServer } from "../../lib/supabaseServer";
 
 interface AdminProps {
   user: User;
@@ -36,15 +39,22 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     userData: { user },
   } = options;
 
-  if (
-    ![
-      "scott@helicone.ai",
-      "justin@helicone.ai",
-      "cole@helicone.ai",
-      "stefan@helicone.ai",
-      "test@helicone.ai",
-    ].includes(user?.email || "")
-  ) {
+  // const { data } = await jawn.GET("/v1/admin/admins/query");
+
+  const { data, error } = await supabaseServer.from("admins").select("*");
+
+  const admins = data?.map((admin) => admin.user_id || "") || [];
+
+  if (error) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  if (!admins.includes(user?.id || "")) {
     return {
       redirect: {
         destination: "/",
