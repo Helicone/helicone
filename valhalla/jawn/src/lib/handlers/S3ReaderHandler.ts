@@ -30,7 +30,7 @@ export class S3ReaderHandler extends AbstractLogHandler {
         );
       }
 
-      const content = await this.fetchContent(signedUrl.data);
+      const content = await this.s3Client.fetchContent(signedUrl.data);
 
       if (content.error || !content.data) {
         if (content.error?.notFoundErr) {

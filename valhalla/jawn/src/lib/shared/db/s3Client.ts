@@ -1,3 +1,4 @@
+import retry from "async-retry";
 import {
   S3Client as AwsS3Client,
   GetObjectCommand,
@@ -6,6 +7,13 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { PromiseGenericResult, Result, err, ok } from "../result";
 import { compressData } from "../../../utils/helpers";
+import Bottleneck from "bottleneck";
+import * as Sentry from "@sentry/node";
+
+const limiter = new Bottleneck({
+  maxConcurrent: 100,
+  minTime: 10,
+});
 
 export type RequestResponseBody = {
   request?: any;
@@ -31,6 +39,71 @@ export class S3Client {
       endpoint: endpoint ? endpoint : undefined,
       forcePathStyle: true,
     });
+  }
+
+  async fetchContent(signedUrl: string): Promise<
+    Result<
+      {
+        request: string;
+        response: string;
+      },
+      {
+        notFoundErr?: string;
+        error?: string;
+      }
+    >
+  > {
+    try {
+      const contentResponse = await retry(
+        async () => {
+          return limiter.schedule(() => fetch(signedUrl));
+        },
+        {
+          retries: 3,
+          factor: 2,
+          minTimeout: 500,
+          maxTimeout: 3000,
+        }
+      );
+
+      if (!contentResponse.ok) {
+        if (contentResponse.status === 404) {
+          console.error(
+            `Content not found in S3: ${signedUrl}, ${contentResponse.status}, ${contentResponse.statusText}`
+          );
+
+          Sentry.captureException(new Error("Raw content not found in S3"), {
+            tags: {
+              type: "KafkaError",
+            },
+            extra: {
+              signedUrl: signedUrl,
+              status: contentResponse.status,
+              statusText: contentResponse.statusText,
+            },
+          });
+
+          return err({
+            notFoundErr: "Content not found in S3",
+          });
+        }
+
+        return err({
+          error: `Error fetching content from S3: ${contentResponse.statusText}, ${contentResponse.status}`,
+        });
+      }
+
+      const text = await contentResponse.text();
+      const { request, response } = JSON.parse(text);
+      return ok({
+        request: request,
+        response: response,
+      });
+    } catch (error: any) {
+      return err({
+        error: `Error fetching content from S3: ${JSON.stringify(error)}`,
+      });
+    }
   }
 
   async getRawRequestResponseBodySignedUrl(
@@ -110,66 +183,70 @@ export class S3Client {
     key: string,
     body: ArrayBuffer | Buffer,
     contentType: string
-  ): PromiseGenericResult<string> {
-    const command = new PutObjectCommand({
-      Bucket: this.bucketName,
-      Key: key,
-      Body: new Uint8Array(body),
-      ContentType: contentType,
-    });
+  ): Promise<Result<string, string>> {
+    return await limiter.schedule(async () => {
+      const command = new PutObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+        Body: new Uint8Array(body),
+        ContentType: contentType,
+      });
 
-    try {
-      const response = await this.awsClient.send(command);
+      try {
+        const response = await this.awsClient.send(command);
 
-      if (!response || response.$metadata.httpStatusCode !== 200) {
-        return err(
-          `Failed to store data: ${response.$metadata.httpStatusCode}`
-        );
+        if (!response || response.$metadata.httpStatusCode !== 200) {
+          return err(
+            `Failed to store data: ${response.$metadata.httpStatusCode}`
+          );
+        }
+
+        return ok(`Success`);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        return err(`Failed to store image in S3: ${error?.message}`);
       }
-
-      return ok(`Success`);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      return err(`Failed to store image in S3: ${error?.message}`);
-    }
+    });
   }
 
   async store(key: string, value: string): Promise<Result<string, string>> {
-    try {
-      const compressedValue = await compressData(value);
+    return await limiter.schedule(async () => {
+      try {
+        const compressedValue = await compressData(value);
 
-      let command: PutObjectCommand;
-      if (!compressedValue.data || compressedValue.error) {
-        // If compression fails, use the original value
-        command = new PutObjectCommand({
-          Bucket: this.bucketName,
-          Key: key,
-          Body: value,
-          ContentType: "application/json",
-        });
-      } else {
-        command = new PutObjectCommand({
-          Bucket: this.bucketName,
-          Key: key,
-          Body: compressedValue.data,
-          ContentEncoding: "gzip",
-          ContentType: "application/json",
-        });
+        let command: PutObjectCommand;
+        if (!compressedValue.data || compressedValue.error) {
+          // If compression fails, use the original value
+          command = new PutObjectCommand({
+            Bucket: this.bucketName,
+            Key: key,
+            Body: value,
+            ContentType: "application/json",
+          });
+        } else {
+          command = new PutObjectCommand({
+            Bucket: this.bucketName,
+            Key: key,
+            Body: compressedValue.data,
+            ContentEncoding: "gzip",
+            ContentType: "application/json",
+          });
+        }
+
+        const response = await this.awsClient.send(command);
+
+        if (!response || response.$metadata.httpStatusCode !== 200) {
+          return err(
+            `Failed to store data: ${response.$metadata.httpStatusCode}`
+          );
+        }
+
+        return ok(`Success`);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        return { data: null, error: error?.message };
       }
-
-      const response = await this.awsClient.send(command);
-
-      if (!response || response.$metadata.httpStatusCode !== 200) {
-        return err(
-          `Failed to store data: ${response.$metadata.httpStatusCode}`
-        );
-      }
-
-      return ok(`Success`);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      return { data: null, error: error?.message };
-    }
+    });
   }
 
   getRawRequestResponseKey = (requestId: string, orgId: string) => {
