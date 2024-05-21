@@ -45,6 +45,12 @@ export interface paths {
   "/v1/fine-tune/{jobId}/stats": {
     get: operations["FineTuneJobStats"];
   };
+  "/v1/admin/admins/query": {
+    get: operations["GetAdmins"];
+  };
+  "/v1/admin/orgs/query": {
+    post: operations["FindAllOrgs"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -475,6 +481,38 @@ export interface operations {
           } | {
             events: unknown;
             job: unknown;
+          };
+        };
+      };
+    };
+  };
+  GetAdmins: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": string[];
+        };
+      };
+    };
+  };
+  FindAllOrgs: {
+    requestBody: {
+      content: {
+        "application/json": {
+          orgName: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            orgs: {
+                id: string;
+                name: string;
+              }[];
           };
         };
       };
