@@ -14,6 +14,10 @@ import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
+import {
+  DLQ_WORKER_COUNT,
+  NORMAL_WORKER_COUNT,
+} from "./lib/clients/kafkaConsumers/constant";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -43,8 +47,8 @@ const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
 
 if (KAFKA_ENABLED) {
   startConsumers({
-    dlqCount: 0,
-    normalCount: 1,
+    dlqCount: DLQ_WORKER_COUNT,
+    normalCount: NORMAL_WORKER_COUNT,
   });
 }
 
