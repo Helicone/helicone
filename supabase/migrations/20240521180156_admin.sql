@@ -36,113 +36,12 @@ alter table "public"."admins" add constraint "admins_user_id_fkey" FOREIGN KEY (
 
 alter table "public"."admins" validate constraint "admins_user_id_fkey";
 
-grant delete on table "public"."admins" to "anon";
-
-grant insert on table "public"."admins" to "anon";
-
-grant references on table "public"."admins" to "anon";
-
-grant select on table "public"."admins" to "anon";
-
-grant trigger on table "public"."admins" to "anon";
-
-grant truncate on table "public"."admins" to "anon";
-
-grant update on table "public"."admins" to "anon";
-
-grant delete on table "public"."admins" to "authenticated";
-
-grant insert on table "public"."admins" to "authenticated";
-
-grant references on table "public"."admins" to "authenticated";
-
-grant select on table "public"."admins" to "authenticated";
-
-grant trigger on table "public"."admins" to "authenticated";
-
-grant truncate on table "public"."admins" to "authenticated";
-
-grant update on table "public"."admins" to "authenticated";
-
-grant delete on table "public"."admins" to "service_role";
-
-grant insert on table "public"."admins" to "service_role";
-
-grant references on table "public"."admins" to "service_role";
-
-grant select on table "public"."admins" to "service_role";
-
-grant trigger on table "public"."admins" to "service_role";
-
-grant truncate on table "public"."admins" to "service_role";
-
-grant update on table "public"."admins" to "service_role";
-
-grant delete on table "public"."alert_banners" to "anon";
-
-grant insert on table "public"."alert_banners" to "anon";
-
-grant references on table "public"."alert_banners" to "anon";
-
-grant select on table "public"."alert_banners" to "anon";
-
-grant trigger on table "public"."alert_banners" to "anon";
-
-grant truncate on table "public"."alert_banners" to "anon";
-
-grant update on table "public"."alert_banners" to "anon";
-
-grant delete on table "public"."alert_banners" to "authenticated";
-
-grant insert on table "public"."alert_banners" to "authenticated";
-
-grant references on table "public"."alert_banners" to "authenticated";
-
-grant select on table "public"."alert_banners" to "authenticated";
-
-grant trigger on table "public"."alert_banners" to "authenticated";
-
-grant truncate on table "public"."alert_banners" to "authenticated";
-
-grant update on table "public"."alert_banners" to "authenticated";
-
-grant delete on table "public"."alert_banners" to "service_role";
-
-grant insert on table "public"."alert_banners" to "service_role";
-
-grant references on table "public"."alert_banners" to "service_role";
-
-grant select on table "public"."alert_banners" to "service_role";
-
-grant trigger on table "public"."alert_banners" to "service_role";
-
-grant truncate on table "public"."alert_banners" to "service_role";
-
-grant update on table "public"."alert_banners" to "service_role";
-
-create policy "Enable insert for authenticated users only"
-on "public"."alert_banners"
-as permissive
-for insert
-to authenticated
-with check (true);
-
-
 create policy "Enable read access for all users"
 on "public"."alert_banners"
 as permissive
 for select
 to public
 using (true);
-
-
-create policy "Enable update access for all users"
-on "public"."alert_banners"
-as permissive
-for update
-to public
-using (true)
-with check (true);
 
 
 
