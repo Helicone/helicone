@@ -10,6 +10,8 @@ import { compressData } from "../../../utils/helpers";
 import Bottleneck from "bottleneck";
 import * as Sentry from "@sentry/node";
 
+// Maximum HTTP requests per second: 10,000 requests
+// Maximum HTTP requests per minute: 600,000 requests
 const limiter = new Bottleneck({
   maxConcurrent: 100,
   minTime: 10,
