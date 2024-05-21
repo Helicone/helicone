@@ -1,16 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
-
-import { useJawnClient } from "../../../lib/clients/jawnHook";
+import { useOrg } from "../../../components/layout/organizationContext";
+import { getJawnClient } from "../../../lib/clients/jawn";
 
 const useExperiments = (
   req: { page: number; pageSize: number },
   promptId: string
 ) => {
-  const jawn = useJawnClient();
+  const org = useOrg();
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["experiments", jawn],
+    queryKey: [
+      "experiments",
+      org?.currentOrg?.id,
+      promptId,
+      req.page,
+      req.pageSize,
+    ],
     queryFn: async (query) => {
-      const jawn = query.queryKey[1] as ReturnType<typeof useJawnClient>;
+      const orgId = query.queryKey[1] as string;
+      const promptId = query.queryKey[2] as string;
+      const page = query.queryKey[3] as number;
+      const pageSize = query.queryKey[4] as number;
+      const jawn = getJawnClient(orgId);
 
       return jawn.POST("/v1/experiment/query", {
         body: {
@@ -63,11 +73,13 @@ const useExperiments = (
 };
 
 const useExperiment = (id: string) => {
-  const jawn = useJawnClient();
+  const org = useOrg();
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["experiment", id],
+    queryKey: ["experiment", id, org?.currentOrg?.id],
     queryFn: async (query) => {
       const id = query.queryKey[1];
+      const orgId = query.queryKey[2] as string;
+      const jawn = getJawnClient(orgId);
       return jawn.POST("/v1/experiment/query", {
         body: {
           filter: {
