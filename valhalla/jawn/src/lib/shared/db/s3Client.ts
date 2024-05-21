@@ -62,8 +62,8 @@ export class S3Client {
         {
           retries: 3,
           factor: 2,
-          minTimeout: 500,
-          maxTimeout: 3000,
+          minTimeout: 350,
+          maxTimeout: 1050,
         }
       );
 
