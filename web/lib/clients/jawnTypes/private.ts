@@ -45,6 +45,19 @@ export interface paths {
   "/v1/fine-tune/{jobId}/stats": {
     get: operations["FineTuneJobStats"];
   };
+  "/v1/admin/admins/query": {
+    get: operations["GetAdmins"];
+  };
+  "/v1/admin/orgs/query": {
+    post: operations["FindAllOrgs"];
+  };
+  "/v1/admin/admins/org/query": {
+    post: operations["AddAdminsToOrg"];
+  };
+  "/v1/admin/alert_banners": {
+    post: operations["CreateAlertBanner"];
+    patch: operations["UpdateAlertBanner"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -480,6 +493,93 @@ export interface operations {
             job: unknown;
           };
         };
+      };
+    };
+  };
+  GetAdmins: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": ({
+              user_id: string | null;
+              user_email: string | null;
+              /** Format: double */
+              id: number;
+              created_at: string;
+            })[];
+        };
+      };
+    };
+  };
+  FindAllOrgs: {
+    requestBody: {
+      content: {
+        "application/json": {
+          orgName: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            orgs: {
+                id: string;
+                name: string;
+              }[];
+          };
+        };
+      };
+    };
+  };
+  AddAdminsToOrg: {
+    requestBody: {
+      content: {
+        "application/json": {
+          adminIds: string[];
+          orgId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  CreateAlertBanner: {
+    requestBody: {
+      content: {
+        "application/json": {
+          message: string;
+          title: string;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  UpdateAlertBanner: {
+    requestBody: {
+      content: {
+        "application/json": {
+          active: boolean;
+          /** Format: double */
+          id: number;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
       };
     };
   };
