@@ -36,6 +36,7 @@ import {
 } from "../clients/PosthogClient";
 import { costOfPrompt } from "../../packages/cost";
 import { KafkaMessage, KafkaProducer } from "../clients/KafkaProducer";
+import { newAESEncryptionManager } from "../clients/encryptionManager";
 
 export interface DBLoggableProps {
   response: {
@@ -953,6 +954,9 @@ export class DBLoggable {
     }
 
     const endTime = this.timing.endTime ?? responseEndTime;
+    const encryptionManager = await newAESEncryptionManager(
+      db.kafkaProducer.encryptionManagerKey
+    );
     const kafkaMessage: KafkaMessage = {
       id: this.request.requestId,
       authorization: requestHeaders.heliconeAuthV2.token,

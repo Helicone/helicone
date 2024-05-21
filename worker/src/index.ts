@@ -61,6 +61,7 @@ export interface Env {
   UPSTASH_KAFKA_PASSWORD: string;
   ORG_IDS?: string;
   PERCENT_LOG_KAFKA?: string;
+  JAWN_AES_KEY: string;
 }
 
 export async function hash(key: string): Promise<string> {
