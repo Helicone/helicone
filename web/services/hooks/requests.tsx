@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
+import { useOrg } from "../../components/layout/organizationContext";
 import { HeliconeRequest } from "../../lib/api/request/request";
-import { useJawnClient } from "../../lib/clients/jawnHook";
+import { getJawnClient } from "../../lib/clients/jawn";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
-import { SortLeafRequest } from "../lib/sorts/requests/sorts";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
+import { SortLeafRequest } from "../lib/sorts/requests/sorts";
 
 const useGetRequests = (
   currentPage: number,
@@ -14,7 +15,7 @@ const useGetRequests = (
   isCached: boolean = false,
   isLive: boolean = false
 ) => {
-  const jawn = useJawnClient();
+  const org = useOrg();
   return {
     requests: useQuery({
       queryKey: [
@@ -24,6 +25,7 @@ const useGetRequests = (
         advancedFilter,
         sortLeaf,
         isCached,
+        org?.currentOrg?.id,
       ],
       queryFn: async (query) => {
         const currentPage = query.queryKey[1] as number;
@@ -31,6 +33,8 @@ const useGetRequests = (
         const advancedFilter = query.queryKey[3];
         const sortLeaf = query.queryKey[4];
         const isCached = query.queryKey[5];
+        const orgId = query.queryKey[6] as string;
+        const jawn = getJawnClient(orgId);
         const response = await jawn.POST("/v1/request/query", {
           body: {
             filter: advancedFilter as any,
