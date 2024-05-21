@@ -1,14 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { useJawnClient } from "../../../lib/clients/jawnHook";
+import { useOrg } from "../../../components/layout/organizationContext";
+import { getJawnClient } from "../../../lib/clients/jawn";
 
 const useGetDataSets = (promptId?: string) => {
-  const jawn = useJawnClient();
+  const org = useOrg();
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["datasets", jawn],
+    queryKey: ["datasets", org?.currentOrg?.id],
     queryFn: async (query) => {
-      const jawn = query.queryKey[1] as ReturnType<typeof useJawnClient>;
-
+      const orgId = query.queryKey[1] as string;
+      const jawn = getJawnClient(orgId);
       return jawn.POST("/v1/experiment/dataset/query", {
         body: {
           promptId: promptId,
