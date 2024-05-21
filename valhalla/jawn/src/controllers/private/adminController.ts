@@ -64,6 +64,8 @@ export class AdminController extends Controller {
             id: org.id,
           })) ?? [],
       };
+    } else {
+      throw new Error("Unauthorized");
     }
     return {
       orgs: [],
