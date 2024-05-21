@@ -5,5 +5,5 @@ export const MESSAGES_PER_MINI_BATCH = 300;
 // DLQ
 export const DLQ_MESSAGES_PER_MINI_BATCH = 1; // 1
 
-export const DLQ_WORKER_COUNT = 0;
-export const NORMAL_WORKER_COUNT = 2;
+export const DLQ_WORKER_COUNT = 1;
+export const NORMAL_WORKER_COUNT = 3;
