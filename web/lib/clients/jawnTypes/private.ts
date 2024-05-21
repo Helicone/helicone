@@ -54,6 +54,10 @@ export interface paths {
   "/v1/admin/admins/org/query": {
     post: operations["AddAdminsToOrg"];
   };
+  "/v1/admin/alert_banners": {
+    post: operations["CreateAlertBanner"];
+    patch: operations["UpdateAlertBanner"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -533,6 +537,39 @@ export interface operations {
         "application/json": {
           adminIds: string[];
           orgId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  CreateAlertBanner: {
+    requestBody: {
+      content: {
+        "application/json": {
+          message: string;
+          title: string;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  UpdateAlertBanner: {
+    requestBody: {
+      content: {
+        "application/json": {
+          active: boolean;
+          /** Format: double */
+          id: number;
         };
       };
     };
