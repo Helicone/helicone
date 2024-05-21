@@ -89,20 +89,30 @@ export class AdminController extends Controller {
 
     const { orgId, adminIds } = body;
 
-    const { data, error } = await supabaseServer.client
-      .from("organization_member")
-      .insert(
-        adminIds.map((adminId) => ({
-          organization: orgId,
-          member: adminId,
-          org_role: "admin",
-        }))
-      );
+    const { data: admins, error: adminsError } = await supabaseServer.client
+      .from("admins")
+      .select("*");
 
-    if (error) {
-      throw new Error(error.message);
+    if (
+      admins?.map((admin) => admin.user_id).includes(request.authParams.userId)
+    ) {
+      const { data, error } = await supabaseServer.client
+        .from("organization_member")
+        .insert(
+          adminIds.map((adminId) => ({
+            organization: orgId,
+            member: adminId,
+            org_role: "admin",
+          }))
+        );
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return;
+    } else {
+      throw new Error("Unauthorized");
     }
-
-    return;
   }
 }
