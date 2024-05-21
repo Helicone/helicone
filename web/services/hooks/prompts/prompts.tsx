@@ -1,23 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
-
-import { useJawnClient } from "../../../lib/clients/jawnHook";
-import { JawnFilterNode } from "../../../lib/clients/jawn";
+import { useOrg } from "../../../components/layout/organizationContext";
+import { JawnFilterNode, getJawnClient } from "../../../lib/clients/jawn";
+import { Result, resultMap } from "../../../lib/result";
+import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 import {
   BackendMetricsCall,
   useBackendMetricCall,
 } from "../useBackendFunction";
-import { Result, resultMap } from "../../../lib/result";
-import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 
 export const usePromptVersions = (promptId: string) => {
-  const jawn = useJawnClient();
+  const org = useOrg();
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["prompts", jawn, promptId],
+    queryKey: ["prompts", org?.currentOrg?.id, promptId],
     queryFn: async (query) => {
-      const jawn = query.queryKey[1] as ReturnType<typeof useJawnClient>;
+      const orgId = query.queryKey[1] as string;
       const promptId = query.queryKey[2] as string;
 
+      const jawn = getJawnClient(orgId);
       return jawn.POST("/v1/prompt/{promptId}/versions/query", {
         params: {
           path: {
@@ -39,13 +39,14 @@ export const usePromptVersions = (promptId: string) => {
 };
 
 export const usePrompts = (promptId?: string) => {
-  const jawn = useJawnClient();
+  const org = useOrg();
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["prompts", jawn, promptId],
+    queryKey: ["prompts", org?.currentOrg?.id, promptId],
     queryFn: async (query) => {
-      const jawn = query.queryKey[1] as ReturnType<typeof useJawnClient>;
+      const orgId = query.queryKey[1] as string;
       const promptId = query.queryKey[2] as string;
+      const jawn = getJawnClient(orgId);
 
       let filterNode: JawnFilterNode = "all";
 
@@ -77,13 +78,14 @@ export const usePrompts = (promptId?: string) => {
 };
 
 export const usePrompt = (id: string) => {
-  const jawn = useJawnClient();
+  const org = useOrg();
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["prompt", jawn, id],
+    queryKey: ["prompt", org?.currentOrg?.id, id],
     queryFn: async (query) => {
-      const jawn = query.queryKey[1] as ReturnType<typeof useJawnClient>; // code smelly
+      const orgId = query.queryKey[1] as string;
       const id = query.queryKey[2] as string;
+      const jawn = getJawnClient(orgId);
 
       return jawn.POST("/v1/prompt/{promptId}/query", {
         params: {

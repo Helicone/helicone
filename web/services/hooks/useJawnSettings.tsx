@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-
-import { useJawnClient } from "../../lib/clients/jawnHook";
+import { useOrg } from "../../components/layout/organizationContext";
+import { getJawnClient } from "../../lib/clients/jawn";
 
 const useJawnSettings = () => {
-  const jawn = useJawnClient();
+  const org = useOrg();
   return useQuery({
-    queryKey: ["jawn_settings", jawn],
+    queryKey: ["jawn_settings", org?.currentOrg?.id],
     queryFn: async (query) => {
-      const jawn = query.queryKey[1] as ReturnType<typeof useJawnClient>;
+      const orgId = query.queryKey[1] as string;
+      const jawn = getJawnClient(orgId);
 
       return jawn.GET("/v1/settings/query");
     },
