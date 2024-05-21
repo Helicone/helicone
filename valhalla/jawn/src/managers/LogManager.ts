@@ -6,7 +6,6 @@ import { LoggingHandler } from "../lib/handlers/LoggingHandler";
 import { ResponseBodyHandler } from "../lib/handlers/ResponseBodyHandler";
 import { HandlerContext, Message } from "../lib/handlers/HandlerContext";
 import { LogStore } from "../lib/stores/LogStore";
-import { ClickhouseClientWrapper } from "../lib/db/ClickhouseWrapper";
 import { PromptHandler } from "../lib/handlers/PromptHandler";
 import { PostHogHandler } from "../lib/handlers/PostHogHandler";
 import { S3Client } from "../lib/shared/db/s3Client";
@@ -14,6 +13,10 @@ import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
 import * as Sentry from "@sentry/node";
 import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestStore";
 import { KafkaProducer } from "../lib/clients/KafkaProducer";
+import { WebhookHandler } from "../lib/handlers/WebhookHandler";
+import { WebhookStore } from "../lib/stores/WebhookStore";
+import { FeatureFlagStore } from "../lib/stores/FeatureFlagStore";
+import { supabaseServer } from "../lib/db/supabase";
 
 export class LogManager {
   public async processLogEntry(logMessage: Message): Promise<void> {
@@ -55,6 +58,11 @@ export class LogManager {
     // Store in S3 after logging to DB
     const posthogHandler = new PostHogHandler();
 
+    const webhookHandler = new WebhookHandler(
+      new WebhookStore(supabaseServer.client),
+      new FeatureFlagStore(supabaseServer.client)
+    );
+
     authHandler
       .setNext(rateLimitHandler)
       .setNext(s3Reader)
@@ -62,7 +70,8 @@ export class LogManager {
       .setNext(responseBodyHandler)
       .setNext(promptHandler)
       .setNext(loggingHandler)
-      .setNext(posthogHandler);
+      .setNext(posthogHandler)
+      .setNext(webhookHandler);
 
     await Promise.all(
       logMessages.map(async (logMessage) => {
@@ -190,6 +199,14 @@ export class LogManager {
         `Error inserting rate limits: ${rateLimitErr} for batch ${batchContext.batchId}`
       );
     }
+
+    console.log(`Sending posthog events for batch ${batchContext.batchId}`);
+    await posthogHandler.handleResults();
+    // Do not fail the batch if posthog events fail
+
+    console.log(`Sending webhooks for batch ${batchContext.batchId}`);
+    await webhookHandler.handleResults();
+    // If webhooks fail, don't fail the batch
 
     console.log(`Finished processing batch ${batchContext.batchId}`);
   }

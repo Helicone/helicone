@@ -480,6 +480,15 @@
 			},
 			"HeliconeMeta": {
 				"properties": {
+					"posthogHost": {
+						"type": "string"
+					},
+					"posthogApiKey": {
+						"type": "string"
+					},
+					"webhookEnabled": {
+						"type": "boolean"
+					},
 					"omitResponseLog": {
 						"type": "boolean"
 					},
@@ -491,6 +500,7 @@
 					}
 				},
 				"required": [
+					"webhookEnabled",
 					"omitResponseLog",
 					"omitRequestLog"
 				],
