@@ -12,8 +12,11 @@ import QuestionsSection from "/snippets/questions-section.mdx";
 
 ## Introduction
 
-Helicone's prompt management provides a seamless way for users to track the prompts used in their generative AI applications. With Helicone, you can effortlessly monitor versions and inputs as they evolve.
+Helicone's scores API allows you to score your requests and experiments. You can use this feature to evaluate the performance of your prompts and compare the scores of different experiments and datasets.
 
+<Frame caption="Example: Experiment scores. ">
+  <img src="/images/scores/example-experiment-scores.png" />
+</Frame>
 ### Why Scores
 
 Scoring request allows you:
@@ -24,214 +27,63 @@ Scoring request allows you:
 ## Quick Start
 
 ### Option 1: Using the Request Page
+
 You can add scores to your requests directly from the request page:
+
 <Frame caption="Example: Adding scores on the request page. ">
   <img src="/images/scores/example-scores-request-page.png" />
 </Frame>
 
-### Option 2: Setting up your own Scoring Webhook  
+### Option 2: Setting up your own Scoring Webhook
+
 You can set up your own scoring webhook to score your requests. Here's an example of how you can do this with Cloudflare Workers:
 
-<Frame caption="Example: Adding scores on the request page. ">
-  <img src="/images/scores/example-scores-request-page.png" />
-</Frame>
-
-
-
-### How Prompt Templates Work
-
-As you modify your prompt in code, Helicone automatically tracks the new version and maintains a record of the old prompt. Additionally, a dataset of input/output keys is preserved for each version.
-
-<Accordion title="Get a deep dive of the feature">
-
-### For Typescript / Javascript users:
-
-By prefixing your prompt with `hprompt` and enclosing your input variables in an additional `{}`, it allows Helicone to easily detect your prompt and inputs. We designed for minimum code change to keep it as easy as possible to use Prompts.
-
-```tsx
-const location = "space";
-const character = "two brothers";
-const promptInput = hprompt`
-Compose a movie scene involving ${{ character }}, set in ${{ location }}
-`;
-```
-
-### For other users:
-
-Currently, we only support packages for TypeScript and JavaScript for easy integration. For other users, we are utilizing an adapted version of JSX to manage prompts and their input variables.
-
-1. When you send over a prompt with the following syntax, we are able to extract the children text between the JSX element `helicone-prompt-input`, then place it back into the prompt to be sent to your LLM.
-
-```tsx
-<helicone-prompt-input key="my_input_key">
-  Input to your LLM
-</helicone-prompt-input>
-```
-
-Only the following will be sent to your LLM:
-
-```tsx
-    Input to your LLM
-```
-
-<Note>
-  It is crucial that each key has a unique identifier; otherwise, you will get
-  the same variable replacing in multiple places.
-</Note>
-
-2. Then, all of the input variables are mapped to the key `my_input_key` as a dictionary in Helicone:
-
-```json
-{
-  "my_input_key": "Input to your LLM"
-}
-```
-
-</Accordion>
-
-### Example
-
-Let's say we have an app that generates a short story, where users are able to input their own `character`. For example, the prompt is “Write a story about a secret agent”, where the `character` is “a secret agent”.
-
 <Tabs>
-  <Tab title="Typescript / Javascript">
+  <Tab title="Example">
     <Steps>
-      <Step title="Import hprompt">
-      ```tsx
-      import { hprompt } from "@helicone/helicone";
-      ```
+    <Step>
+    First, deploy Cloudflare Worker template by clicking the button above. [![Deploy with Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Helicone/helicone/tree/main/examples/worker-helicone-scores)
+    </Step>
+      <Step title="Create a Webhook">
+     Create a webhook to be able receive request and response data [create a webhook](/features/webhooks) with your Scoring Worker URL.
       </Step>
 
-      <Step title="Add `hprompt` and identify input variables">
-      Using the backtick string formatter in JavaScript, add `hprompt` in front of your backtick to automatically format your text so that Helicone can determine where your variables are.
-
-      Next, nest your inputted variable so that it is within another bracket `{}`, this is essentially
-      making it so that we can determine the `input key` for Helicone.
+      <Step title="Customize your scoring logic">
+      You can can customize the scoring logic in the `index.js` file in your Scoring Worker.
 
       ```tsx
-      content: hprompt`Write a story about ${{ character }}`,
+      // You can customize the scoring function below and add more scores as needed.
+      function calculateScore(data: HeliconeRequest): Record<string, number> {
+        if (data.response_body) {
+          return {
+            vocabulary_diversity: calculateVocabularyDiversity(data.response_body),
+            // Add more scores here
+          };
+        }
+
+        return {};
+      }
       ```
 
-        <Accordion title="Change input name">
-          If you want to rename your input or have a custom input, you can change the key-value pair in the passed dictionary to the string formatter function. Like this:
 
-          ```tsx
-          content: hprompt`Write a story about ${{ "my_magical_input": character  }}`,
-          ```
-        </Accordion>
-      </Step>
-
-      <Step title="Assign an id to your prompt">
-        Assign a `Helicone-Prompt-Id` header to your LLM request.
-
-        Assigning an id allows us to associate your prompt with future versions of your prompt, and automatically manage versions on your behalf.
-
-        Depending on the package you are using, you will need to add a header. For more information on adding headers to packages, please see [Header Directory](/helicone-headers/header-directory).
-
-        ```tsx
-        headers: {
-          "Helicone-Prompt-Id": "prompt_story",
-        },
-        ```
       </Step>
     </Steps>
-
-    #### Here's what your code would look like:
-
-    ``` tsx
-    // 1. Add this line
-    import { hprompt } from "@helicone/helicone";
-
-    const chatCompletion = await openai.chat.completions.create(
-      {
-        messages: [
-          {
-            role: "user",
-            // 2: Add hprompt to any string, and nest any variable in additional brackets `{}`
-            content: hprompt`Write a story about ${{ character }}`,
-          },
-        ],
-        model: "gpt-3.5-turbo",
-      },
-      {
-        // 3. Add Prompt Id Header
-        headers: {
-          "Helicone-Prompt-Id": "prompt_story",
-        },
-      }
-    );
-    ```
-
-  </Tab>
-  
-  <Tab title="Packageless (cURL)">
-      Currently, we only support packages for TypeScript and JavaScript for easy integration. For other users, we recommend manually implementing input variables as follow:
-    <Steps>
-      <Step title="Identify the input variable, and create a key name.">
-      Given the below string, let's say `a secret agent` is our inputted variable. Let's name our key `character`.
-
-      ```tsx
-      Write a story about a secret agent
-      ```
-      </Step>
-
-      <Step title="Add helicone-prompt-input tags">
-      Add `<helicone-prompt-input key="<INPUT_ID>">` before your input variable, and `</helicone-prompt-input>` after, where `INPUT_ID` is your key name. In this example, `key=”character”`:
-
-      ```tsx
-      Write a story about <helicone-prompt-input key="character" >a secret agent</helicone-prompt-input>
-      ```
-      <Check> Don't worry, Helicone will remove these tags for you before the prompt is sent to your LLM.</Check>
-      <Note>It is crucial that each key has a **unique identifier**; otherwise, the same variable will be replaced in multiple places. </Note>
-
-      </Step>
-
-      <Step title="Tag your prompt">
-
-        In order to securely ensure that we know when and how to parse and categorize your prompt, please append the following header to your LLM request.
-
-        ```tsx
-        Helicone-Prompt-Id: you_prompt_id
-        ```
-        <Note>
-        The id must not include any spaces or special characters. Underscores and dashes are acceptable.
-        </Note>
-
-      </Step>
-
-      <Step title="Make a request">
-        You just created a prompt template! Helicone will now keep track of all of your inputs for you. Rest assure that all of the helicone-prompt-input tags will removed before your prompt is sent to your LLM.
-      </Step>
-
-    </Steps>
-
-    #### Here's what your code would look like:
-    ```python
-    openai.ChatCompletion.create(
-      model="[DEPLOYMENT]",
-      # Manually add starting and ending tags with before and after variables
-      messages=[{"role": "User", "content": f'Write a story about <helicone-prompt-input key="character" >{character} </helicone-prompt-input>'}],
-      headers={
-        # Add Prompt Id header
-        "Helicone-Prompt-Id": "[my_prompt_id]",
-      }
-    )
-    ```
-    If you want more package support, please reach out to [engineering@helicone.ai](mailto:engineering@helicone.ai).
 
   </Tab>
 </Tabs>
 
 ## Local Testing
 
-Many times in development, you may want to test your prompt locally before deploying it to production and you don't want Helicone to track new prompt versions.
+If you want to test your scoring logic locally you'll need to use wrangler secrets to add appropriate value for `HELICONE_AUTH`.
 
-To do this, you can set the `Helicone-Prompt-Mode` header to `testing` in your LLM request. This will prevent Helicone from tracking new prompt versions.
+```sh
+$ wrangler secret put HELICONE_AUTH
+```
 
-```tsx
-headers: {
-  "Helicone-Prompt-Mode": "testing",
-},
+And run Scoring Webhook locally:
+
+```sh
+$ wrangler deploy
 ```
 
 <QuestionsSection />
