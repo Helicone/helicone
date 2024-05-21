@@ -3,7 +3,7 @@ require("dotenv").config({
 });
 
 import { hprompt } from "@helicone/helicone";
-import { OpenAI } from "openai/index.mjs";
+import { OpenAI } from "openai";
 
 async function main() {
   const openai = new OpenAI({
@@ -35,6 +35,7 @@ async function main() {
   const models = ["gpt-3.5-turbo", "gpt-4-turbo", "gpt-4o"];
 
   const environments = ["production", "development", "preview"];
+  console.log("Running main function");
 
   const chatCompletion = await openai.chat.completions.create(
     {
