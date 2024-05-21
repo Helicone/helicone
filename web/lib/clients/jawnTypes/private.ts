@@ -51,6 +51,9 @@ export interface paths {
   "/v1/admin/orgs/query": {
     post: operations["FindAllOrgs"];
   };
+  "/v1/admin/admins/org/query": {
+    post: operations["AddAdminsToOrg"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -491,7 +494,13 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": string[];
+          "application/json": ({
+              user_id: string | null;
+              user_email: string | null;
+              /** Format: double */
+              id: number;
+              created_at: string;
+            })[];
         };
       };
     };
@@ -515,6 +524,22 @@ export interface operations {
               }[];
           };
         };
+      };
+    };
+  };
+  AddAdminsToOrg: {
+    requestBody: {
+      content: {
+        "application/json": {
+          adminIds: string[];
+          orgId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
       };
     };
   };

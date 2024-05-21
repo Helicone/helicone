@@ -1326,7 +1326,30 @@
 							"application/json": {
 								"schema": {
 									"items": {
-										"type": "string"
+										"properties": {
+											"user_id": {
+												"type": "string",
+												"nullable": true
+											},
+											"user_email": {
+												"type": "string",
+												"nullable": true
+											},
+											"id": {
+												"type": "number",
+												"format": "double"
+											},
+											"created_at": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"user_id",
+											"user_email",
+											"id",
+											"created_at"
+										],
+										"type": "object"
 									},
 									"type": "array"
 								}
@@ -1404,6 +1427,50 @@
 								},
 								"required": [
 									"orgName"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/admins/org/query": {
+			"post": {
+				"operationId": "AddAdminsToOrg",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"adminIds": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"orgId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"adminIds",
+									"orgId"
 								],
 								"type": "object"
 							}

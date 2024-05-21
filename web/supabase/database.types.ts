@@ -13,16 +13,19 @@ export interface Database {
         Row: {
           created_at: string
           id: number
+          user_email: string | null
           user_id: string | null
         }
         Insert: {
           created_at?: string
           id?: number
+          user_email?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string
           id?: number
+          user_email?: string | null
           user_id?: string | null
         }
         Relationships: [

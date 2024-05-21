@@ -18,14 +18,19 @@ import { supabaseServer } from "../../lib/db/supabase";
 @Security("api_key")
 export class AdminController extends Controller {
   @Get("/admins/query")
-  public async getAdmins(
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<string[]> {
+  public async getAdmins(@Request() request: JawnAuthenticatedRequest): Promise<
+    {
+      created_at: string;
+      id: number;
+      user_email: string | null;
+      user_id: string | null;
+    }[]
+  > {
     const { data, error } = await supabaseServer.client
       .from("admins")
       .select("*");
 
-    return data?.map((admin) => admin.user_id || "") ?? [];
+    return data ?? [];
   }
 
   @Post("/orgs/query")
@@ -67,8 +72,37 @@ export class AdminController extends Controller {
     } else {
       throw new Error("Unauthorized");
     }
-    return {
-      orgs: [],
-    };
+  }
+
+  @Post("/admins/org/query")
+  public async addAdminsToOrg(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      orgId: string;
+      adminIds: string[];
+    }
+  ): Promise<void> {
+    if (!request.authParams.userId) {
+      return;
+    }
+
+    const { orgId, adminIds } = body;
+
+    const { data, error } = await supabaseServer.client
+      .from("organization_member")
+      .insert(
+        adminIds.map((adminId) => ({
+          organization: orgId,
+          member: adminId,
+          org_role: "admin",
+        }))
+      );
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return;
   }
 }
