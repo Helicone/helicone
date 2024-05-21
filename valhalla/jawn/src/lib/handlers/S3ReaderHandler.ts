@@ -101,7 +101,7 @@ export class S3ReaderHandler extends AbstractLogHandler {
       });
     } catch (error: any) {
       return err({
-        error: `Error fetching content from S3: ${error}`,
+        error: `Error fetching content from S3: ${JSON.stringify(error)}`,
       });
     }
   }
