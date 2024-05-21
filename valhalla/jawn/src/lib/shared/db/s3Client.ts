@@ -14,7 +14,6 @@ import * as Sentry from "@sentry/node";
 // Maximum HTTP requests per minute: 600,000 requests
 const limiter = new Bottleneck({
   maxConcurrent: 100,
-  minTime: 10,
 });
 
 export type RequestResponseBody = {
