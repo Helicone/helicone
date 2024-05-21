@@ -43,7 +43,7 @@ const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
 
 if (KAFKA_ENABLED) {
   startConsumers({
-    dlqCount: 1,
+    dlqCount: 0,
     normalCount: 1,
   });
 }
