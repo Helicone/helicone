@@ -1,8 +1,7 @@
 import { S3Client } from "../shared/db/s3Client";
-import { PromiseGenericResult, Result, err, ok } from "../shared/result";
+import { PromiseGenericResult, err, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
-import * as Sentry from "@sentry/node";
 
 export class S3ReaderHandler extends AbstractLogHandler {
   private s3Client: S3Client;
