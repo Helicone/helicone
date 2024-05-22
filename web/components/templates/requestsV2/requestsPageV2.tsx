@@ -35,8 +35,10 @@ import {
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
 import { placeAssetIdValues } from "../../../services/lib/requestTraverseHelper";
-import { getModelFromPath } from "./builder/mappers/geminiMapper";
-import { mapGeminiPro } from "../../../lib/api/graphql/helpers/mappers";
+import {
+  getModelFromPath,
+  mapGeminiProJawn,
+} from "./builder/mappers/geminiMapper";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -280,7 +282,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   request.provider === "GOOGLE" &&
                   model.toLowerCase().includes("gemini")
                 ) {
-                  request.llmSchema = mapGeminiPro(
+                  request.llmSchema = mapGeminiProJawn(
                     result.data[0] as HeliconeRequest,
                     model
                   );
