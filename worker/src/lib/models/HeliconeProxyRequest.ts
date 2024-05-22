@@ -95,11 +95,16 @@ export class HeliconeProxyRequestMapper {
 
     const targetUrl = buildTargetUrl(this.request.url, api_base);
 
+    const requestJson = await this.requestJson();
+    const queryParams = new URLSearchParams(targetUrl.search);
+    const isStream =
+      requestJson.stream === true || queryParams.get("alt") === "sse";
+
     return {
       data: {
         heliconePromptTemplate: await this.getHeliconeTemplate(),
         rateLimitOptions: this.rateLimitOptions(),
-        requestJson: await this.requestJson(),
+        requestJson: requestJson,
         retryOptions: this.request.heliconeHeaders.retryHeaders,
         provider: this.provider,
         tokenCalcUrl: this.tokenCalcUrl,
@@ -110,7 +115,7 @@ export class HeliconeProxyRequestMapper {
         userId: await this.request.getUserId(),
         heliconeErrors: this.heliconeErrors,
         api_base,
-        isStream: (await this.requestJson()).stream === true,
+        isStream: isStream,
         bodyText: await this.getBody(),
         startTime,
         url: this.request.url,
