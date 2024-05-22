@@ -163,7 +163,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         responseBody: responseBody,
         requestBody: requestBody ?? "{}",
         tokenCounter: async (text: string) =>
-          await getTokenCount(text, provider),
+          await getTokenCount(text, context.processedLog.request.model, provider),
         requestModel: context.processedLog.request.model,
         modelOverride: context.message.heliconeMeta.modelOverride,
       });
