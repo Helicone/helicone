@@ -33,6 +33,7 @@ const allowedOriginsEnv = {
     /^https?:\/\/(www\.)?helicone-git-valhalla-use-jawn-to-read-helicone\.vercel\.app$/,
     /^http:\/\/localhost:3000$/,
     /^http:\/\/localhost:3001$/,
+    /^https?:\/\/(www\.)?eu\.helicone\.ai$/, // Added eu.helicone.ai
   ],
   development: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
   preview: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
