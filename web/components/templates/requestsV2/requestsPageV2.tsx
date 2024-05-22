@@ -35,6 +35,8 @@ import {
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
 import { placeAssetIdValues } from "../../../services/lib/requestTraverseHelper";
+import { getModelFromPath } from "./builder/mappers/geminiMapper";
+import { mapGeminiPro } from "../../../lib/api/graphql/helpers/mappers";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -261,8 +263,37 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   content = placeAssetIdValues(request.asset_urls, content);
                 }
 
+                /*
+                const model =
+        heliconeRequest.model_override ||
+        heliconeRequest.response_model ||
+        heliconeRequest.request_model ||
+        heliconeRequest.response_body?.model ||
+        heliconeRequest.request_body?.model ||
+        heliconeRequest.response_body?.body?.model || // anthropic
+        getModelFromPath(heliconeRequest.request_path) ||
+        "";
+                */
+
                 request.request_body = content.request;
                 request.response_body = content.response;
+
+                const model =
+                  request.model_override ||
+                  request.response_model ||
+                  request.request_model ||
+                  getModelFromPath(request.request_path) ||
+                  "";
+
+                if (
+                  request.provider === "GOOGLE" &&
+                  model.toLowerCase().includes("gemini")
+                ) {
+                  request.llmSchema = mapGeminiPro(
+                    request as HeliconeRequest,
+                    model
+                  );
+                }
               }
             } catch (error) {
               console.log(`Error fetching content: ${error}`);

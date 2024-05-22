@@ -12,6 +12,7 @@ import { AnthropicBodyProcessor } from "../shared/bodyProcessors/anthropicBodyPr
 import { AnthropicStreamBodyProcessor } from "../shared/bodyProcessors/anthropicStreamBodyProcessor";
 import { GenericBodyProcessor } from "../shared/bodyProcessors/genericBodyProcessor";
 import { GoogleBodyProcessor } from "../shared/bodyProcessors/googleBodyProcessor";
+import { GoogleStreamBodyProcessor } from "../shared/bodyProcessors/googleStreamBodyProcessor";
 import { OpenAIStreamProcessor } from "../shared/bodyProcessors/openAIStreamProcessor";
 import { ImageModelParsingResponse } from "../shared/imageParsers/core/parsingResponse";
 import { getResponseImageModelParser } from "../shared/imageParsers/parserMapper";
@@ -138,7 +139,10 @@ export class ResponseBodyHandler extends AbstractLogHandler {
   ): PromiseGenericResult<ParseOutput> {
     const log = context.message.log;
     const isStream =
-      log.request.isStream || context.processedLog.request.body?.stream;
+      log.request.isStream ||
+      context.processedLog.request.body?.stream ||
+      log.request.path.includes("streamGenerateContent");
+
     const provider = log.request.provider;
 
     let responseBody = context.rawLog.rawResponseBody;
@@ -190,12 +194,15 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     provider: string,
     responseBody: any
   ): IBodyProcessor {
+    console.log(`Provider: ${provider}, isStream: ${isStream}`);
     if (!isStream && provider === "ANTHROPIC" && responseBody) {
       return new AnthropicBodyProcessor();
     } else if (!isStream && provider === "GOOGLE") {
       return new GoogleBodyProcessor();
     } else if (isStream && provider === "ANTHROPIC") {
       return new AnthropicStreamBodyProcessor();
+    } else if (isStream && provider === "GOOGLE") {
+      return new GoogleStreamBodyProcessor();
     } else if (isStream) {
       return new OpenAIStreamProcessor();
     } else {
