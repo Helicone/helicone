@@ -68,6 +68,18 @@
             "integrations/anthropic/langchain"
           ]
         },
+        {
+          "group": "Gemini",
+          "pages": [
+            {
+              "group": "Vertex",
+              "pages": [
+                "integrations/gemini/vertex/node",
+                "integrations/gemini/vertex/curl"
+              ]
+            }
+          ]
+        },
         "getting-started/integration-method/anyscale",
         "getting-started/integration-method/together",
         "getting-started/integration-method/openrouter",
@@ -106,14 +118,14 @@
         "getting-started/proxy-vs-async",
         "faq/how-we-calculate-cost",
         "faq/latency-affect",
-        "helicone-headers/predefining-request-id", 
+        "helicone-headers/predefining-request-id",
         {
-            "group": "Deployment",
-            "pages": [
-                "getting-started/self-deploy",
-                "getting-started/self-deploy-docker",
-                "getting-started/self-deploy-cloud"
-            ]
+          "group": "Deployment",
+          "pages": [
+            "getting-started/self-deploy",
+            "getting-started/self-deploy-docker",
+            "getting-started/self-deploy-cloud"
+          ]
         }
       ]
     },
