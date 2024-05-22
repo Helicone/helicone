@@ -46,22 +46,25 @@ const PortalIdPage = (props: PortalIdPageProps) => {
   const orgContext = useOrg();
   const router = useRouter();
   const startOfMonthFormatted = formatISO(
-    new Date(new Date().setDate(new Date().getDate() - 30)),
+    new Date(new Date().setDate(new Date().getDate() - 28)),
     {
       representation: "date",
     }
   );
 
-  const endOfMonthFormatted = formatISO(new Date(), {
-    representation: "date",
-  });
+  const tomorrow = new Date(
+    formatISO(new Date(), {
+      representation: "date",
+    })
+  );
+  tomorrow.setDate(tomorrow.getDate() + 2);
 
   const timeFilter: {
     start: Date;
     end: Date;
   } = {
     start: new Date(startOfMonthFormatted),
-    end: new Date(endOfMonthFormatted),
+    end: tomorrow,
   };
 
   const {
