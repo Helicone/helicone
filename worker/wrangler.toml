@@ -51,6 +51,7 @@ routes = [
 	{ pattern = "together.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "gateway.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "2yfv.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "eu.oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
 
 durable_objects.bindings = [
@@ -85,6 +86,7 @@ name = "helicone-worker-prod-staging"
 routes = [
 	{ pattern = "oai_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "browser.oai_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "eu.oai.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "api_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	# openrouter_staging.hconeai.com was failing to deploy
