@@ -1,4 +1,4 @@
-import { consolidateTextFields } from "../../../utils/streamParser";
+import { consolidateGoogleTextFields } from "../../../utils/streamParser";
 import { PromiseGenericResult, err, ok } from "../result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 
@@ -29,7 +29,7 @@ export class GoogleStreamBodyProcessor implements IBodyProcessor {
       const usage = getUsage(data);
       return ok({
         processedBody: {
-          ...consolidateTextFields(data),
+          ...consolidateGoogleTextFields(data),
           streamed_data: data,
         },
         usage: {

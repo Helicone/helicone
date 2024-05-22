@@ -33,7 +33,7 @@ export function mapGeminiPro(
         ? content.parts
         : [content.parts];
 
-      const textParts = partsArray.filter((part: any) => part.text);
+      const textParts = partsArray?.filter((part: any) => part.text);
 
       return textParts.map((part: any) => ({
         role: content.role ?? "user",
@@ -41,25 +41,33 @@ export function mapGeminiPro(
       }));
     })
     .flat();
+
   const responseBody =
     Array.isArray(request.response_body) && request.response_body.length > 0
       ? request.response_body[0]
       : request.response_body;
 
   const firstCandidate = responseBody?.candidates?.find((candidate: any) => {
+    if (!candidate?.content) {
+      console.log("No content found in candidate", candidate);
+      return false;
+    }
+
     const contents = Array.isArray(candidate.content)
       ? candidate.content
       : [candidate.content];
+
     return contents.some((content: any) =>
       Array.isArray(content.parts)
         ? content.parts.some((part: any) => part.text || part.functionCall)
-        : content.parts.text
+        : content.parts?.text || content.parts?.functionCall
     );
   });
 
   const firstContent = Array.isArray(firstCandidate?.content)
     ? firstCandidate.content.find((content: any) => content.parts)
     : firstCandidate?.content;
+
   const firstPart = Array.isArray(firstContent?.parts)
     ? firstContent.parts.find((part: any) => part.text || part.functionCall)
     : firstContent?.parts;

@@ -1,10 +1,10 @@
-import { LlmSchema } from "../../models/requestResponseModel";
+import { components } from "../../../clients/jawnTypes/public";
 import { HeliconeRequest } from "../../request/request";
 
 export function mapGeminiPro(
   request: HeliconeRequest,
   model: string
-): LlmSchema {
+): components["schemas"]["LlmSchema"] {
   const requestBody = request.request_body;
   const generateConfig = requestBody?.generation_config;
   const messages = Array.isArray(requestBody.contents)
@@ -16,7 +16,7 @@ export function mapGeminiPro(
         ? content.parts
         : [content.parts];
 
-      const textParts = partsArray.filter((part: any) => part.text);
+      const textParts = partsArray?.filter((part: any) => part.text);
 
       return textParts.map((part: any) => ({
         role: content.role ?? "user",
@@ -24,25 +24,34 @@ export function mapGeminiPro(
       }));
     })
     .flat();
+
   const responseBody =
     Array.isArray(request.response_body) && request.response_body.length > 0
       ? request.response_body[0]
       : request.response_body;
 
   const firstCandidate = responseBody?.candidates?.find((candidate: any) => {
+    if (!candidate?.content) {
+      console.log("No content found in candidate", candidate);
+      return false;
+    }
+
     const contents = Array.isArray(candidate.content)
       ? candidate.content
       : [candidate.content];
+
+    // Updated to handle undefined properties
     return contents.some((content: any) =>
       Array.isArray(content.parts)
         ? content.parts.some((part: any) => part.text || part.functionCall)
-        : content.parts.text
+        : content.parts?.text || content.parts?.functionCall
     );
   });
 
   const firstContent = Array.isArray(firstCandidate?.content)
     ? firstCandidate.content.find((content: any) => content.parts)
     : firstCandidate?.content;
+
   const firstPart = Array.isArray(firstContent?.parts)
     ? firstContent.parts.find((part: any) => part.text || part.functionCall)
     : firstContent?.parts;
@@ -60,7 +69,7 @@ export function mapGeminiPro(
       }
     : null;
 
-  const schema: LlmSchema = {
+  const schema: components["schemas"]["LlmSchema"] = {
     request: {
       llm_type: "chat",
       model: model,
