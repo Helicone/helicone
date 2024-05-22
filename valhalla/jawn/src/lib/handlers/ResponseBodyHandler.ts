@@ -139,9 +139,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
   ): PromiseGenericResult<ParseOutput> {
     const log = context.message.log;
     const isStream =
-      log.request.isStream ||
-      context.processedLog.request.body?.stream ||
-      log.request.path.includes("streamGenerateContent");
+      log.request.isStream || context.processedLog.request.body?.stream;
 
     const provider = log.request.provider;
 
