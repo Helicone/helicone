@@ -103,6 +103,7 @@
         "features/advanced-usage/omit-logs",
         "features/advanced-usage/user-metrics",
         "features/advanced-usage/feedback",
+        "features/advanced-usage/scores",
         "getting-started/integration-method/gateway-fallbacks",
         "features/advanced-usage/retries",
         "features/advanced-usage/custom-rate-limits",
@@ -166,6 +167,7 @@
       "pages": [
         "rest/request/post-v1requestquery",
         "rest/request/post-v1request-feedback",
+        "rest/request/post-v1request-score",
         "rest/request/put-v1request-property"
       ]
     },
