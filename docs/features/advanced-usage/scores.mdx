@@ -12,7 +12,7 @@ import QuestionsSection from "/snippets/questions-section.mdx";
 
 ## Introduction
 
-Helicone's scores API allows you to score your requests and experiments. You can use this feature to evaluate the performance of your prompts and compare the scores of different experiments and datasets.
+Helicone's scores API allows you to score your requests and experiments. You can use this feature to evaluate the performance of your prompts and compare different experiments and datasets.
 
 <Frame caption="Example: Experiment scores. ">
   <img src="/images/scores/example-experiment-scores.png" />
@@ -22,13 +22,13 @@ Helicone's scores API allows you to score your requests and experiments. You can
 Scoring request allows you:
 
 - Evaluate the performance of your prompts.
-- Compare the scores of different experimetns and datasets.
+- Compare the scores of different experiments and datasets.
 
 ## Quick Start
 
 ### Option 1: Using the Request Page
 
-You can add scores to your requests directly from the request page:
+You can add scores to your `requests` directly from the request page:
 
 <Frame caption="Example: Adding scores on the request page. ">
   <img src="/images/scores/example-scores-request-page.png" />
@@ -41,7 +41,7 @@ You can set up your own scoring webhook to score your requests. Here's an exampl
 <Tabs>
   <Tab title="Example">
     <Steps>
-    <Step>
+    <Step title="Deploy Worker">
     First, deploy Cloudflare Worker template by clicking the button above. [![Deploy with Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Helicone/helicone/tree/main/examples/worker-helicone-scores)
     </Step>
       <Step title="Create a Webhook">
