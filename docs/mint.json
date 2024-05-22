@@ -70,7 +70,15 @@
         },
         {
           "group": "Gemini",
-          "pages": ["integrations/gemini/vertexsdk"]
+          "pages": [
+            {
+              "group": "Vertex",
+              "pages": [
+                "integrations/gemini/vertex/node",
+                "integrations/gemini/vertex/curl"
+              ]
+            }
+          ]
         },
         "getting-started/integration-method/anyscale",
         "getting-started/integration-method/together",
