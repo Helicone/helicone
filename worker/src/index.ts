@@ -13,7 +13,18 @@ const FALLBACK_QUEUE = "fallback-queue";
 
 export type Provider = ProviderName | "CUSTOM";
 
-export interface Env {
+export interface EU_Env {
+  EU_CLICKHOUSE_HOST: string;
+  EU_CLICKHOUSE_USER: string;
+  EU_CLICKHOUSE_PASSWORD: string;
+  EU_S3_BUCKET_NAME: string;
+  EU_SUPABASE_SERVICE_ROLE_KEY: string;
+  EU_SUPABASE_URL: string;
+  EU_UPSTASH_KAFKA_PASSWORD: string;
+  EU_UPSTASH_KAFKA_URL: string;
+  EU_UPSTASH_KAFKA_USERNAME: string;
+}
+export interface BASE_Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
   SUPABASE_URL: string;
   TOKENIZER_COUNT_API: string;
@@ -62,6 +73,7 @@ export interface Env {
   ORG_IDS?: string;
   PERCENT_LOG_KAFKA?: string;
 }
+export type Env = BASE_Env & EU_Env;
 
 export async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -80,12 +92,26 @@ export async function hash(key: string): Promise<string> {
 
 // If the url starts with oai.*.<>.com then we know WORKER_TYPE is OPENAI_PROXY
 function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
-  if (env.WORKER_TYPE) {
-    return env;
-  }
   const url = new URL(request.getUrl());
   const host = url.host;
   const hostParts = host.split(".");
+  if (host.startsWith("eu.")) {
+    env = {
+      ...env,
+      CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
+      CLICKHOUSE_USER: env.EU_CLICKHOUSE_USER,
+      CLICKHOUSE_PASSWORD: env.EU_CLICKHOUSE_PASSWORD,
+      SUPABASE_SERVICE_ROLE_KEY: env.EU_SUPABASE_SERVICE_ROLE_KEY,
+      SUPABASE_URL: env.EU_SUPABASE_URL,
+      UPSTASH_KAFKA_PASSWORD: env.EU_UPSTASH_KAFKA_PASSWORD,
+      UPSTASH_KAFKA_URL: env.EU_UPSTASH_KAFKA_URL,
+      UPSTASH_KAFKA_USERNAME: env.EU_UPSTASH_KAFKA_USERNAME,
+    };
+  }
+
+  if (env.WORKER_TYPE) {
+    return env;
+  }
 
   if (host.includes("hconeai") && hostParts.length >= 3) {
     // hconeai.com requests
@@ -94,7 +120,7 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         ...env,
         WORKER_TYPE: "GATEWAY_API",
       };
-    } else if (hostParts[0].includes("oai")) {
+    } else if (hostParts[0].includes("oai") || hostParts[1].includes("oai")) {
       return {
         ...env,
         WORKER_TYPE: "OPENAI_PROXY",
