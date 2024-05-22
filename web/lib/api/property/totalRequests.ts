@@ -2,7 +2,7 @@ import {
   FilterNode,
   timeFilterToFilterNode,
 } from "../../../services/lib/filters/filterDefs";
-import { buildFilterWithAuthClickHousePropResponse } from "../../../services/lib/filters/filters";
+import { buildFilterWithAuthClickHousePropertiesV2 } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
@@ -15,10 +15,10 @@ export async function getTotalRequests(
   org_id: string
 ): Promise<Result<number, string>> {
   const { filter: filterString, argsAcc } =
-    await buildFilterWithAuthClickHousePropResponse({
+    await buildFilterWithAuthClickHousePropertiesV2({
       org_id,
       filter: {
-        left: timeFilterToFilterNode(timeFilter, "property_with_response_v1"),
+        left: timeFilterToFilterNode(timeFilter, "request_response_versioned"),
         right: filter,
         operator: "and",
       },
@@ -28,7 +28,8 @@ export async function getTotalRequests(
 
   WITH total_count AS (
     SELECT count(*) as count
-    FROM property_with_response_v1
+    FROM request_response_versioned
+    ARRAY JOIN mapKeys(properties) AS key
     WHERE (
       (${filterString})
     )
