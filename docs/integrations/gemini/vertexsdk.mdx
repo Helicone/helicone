@@ -1,0 +1,69 @@
+---
+title: "Node.js"
+description: "Learn how to integrate Gemini with Helicone using Node.js."
+---
+
+## Proxy Integration
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into www.helicone.ai or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Set HELICONE_API_KEY as an environment variable">
+    ```javascript
+    HELICONE_API_KEY=<your API key>
+    ```
+  </Step>
+  <Step title="Install necessary packages">
+    Ensure you have the necessary packages installed in your Node.js project:
+    ```bash
+    npm install @google-cloud/vertexai
+    ```
+  </Step>
+  <Step title="Import VertexAI and configure the client">
+    ```javascript
+    import { VertexAI } from "@google-cloud/vertexai";
+
+    const vertex_ai = new VertexAI({
+      project: [PROJECT_NAME],
+      location: [LOCATION],
+      apiEndpoint: "gateway.hconeai.com",
+    });
+    ```
+
+  </Step>
+  <Step title="Set up custom headers">
+    ```javascript
+    const customHeaders = new Headers({
+      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Helicone-Target-URL": `https://${LOCATION}-aiplatform.googleapis.com`,
+    });
+    ```
+  </Step>
+  <Step title="Define request options">
+    ```javascript
+    const requestOptions = {
+      customHeaders: customHeaders,
+    } as RequestOptions;
+    ```
+  </Step>
+  <Step title="Get the generative model">
+    ```javascript
+    const generativeModel = vertex_ai.preview.getGenerativeModel(
+      {
+        model: "gemini-1.0-pro"
+      },
+      requestOptions // Pass request options
+    );
+    ```
+  </Step>
+  <Step title="Generate content">
+    ```javascript
+    const result = await generativeModel.generateContent({
+      contents: [{ role: "user", parts: [{ text: "How are you doing today?" }] }],
+    });
+    console.log(result);
+    ```
+  </Step>
+</Steps>
