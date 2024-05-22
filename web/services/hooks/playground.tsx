@@ -7,8 +7,8 @@ export const getChat = (
 ): {
   chat: Message[];
   isChat: boolean;
+  tools?: any;
 } => {
-  console.log("singleRequest", requests[0]);
   let isChat = false;
   if (!requests || requests.length < 1) {
     return {
@@ -84,6 +84,7 @@ export const getChat = (
   return {
     chat: sourcePrompt,
     isChat,
+    tools: sourceChat.tools || undefined,
   };
 };
 
@@ -104,7 +105,7 @@ export const usePlaygroundPage = (requestId: string) => {
     false
   );
 
-  const { chat, isChat } = getChat(requests.requests);
+  const { chat, isChat, tools } = getChat(requests.requests);
 
   return {
     isLoading: requests.isDataLoading,
@@ -113,5 +114,6 @@ export const usePlaygroundPage = (requestId: string) => {
     refetch: requests.refetch,
     hasData: requests.requests && requests.requests.length > 0,
     isChat,
+    tools,
   };
 };

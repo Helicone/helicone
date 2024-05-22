@@ -252,8 +252,9 @@ const ChatRow = (props: ChatRowProps) => {
     return keyName ? keyName[1] : "";
   };
 
-  const getContent = (content: string | any[] | null, minimize: boolean) => {
+  const getContent = (message: Message, minimize: boolean) => {
     // check if the content is an array and it has an image type or image_url type
+    const content = message.content;
 
     if (Array.isArray(content)) {
       const textMessage = content.find((element) => element.type === "text");
@@ -333,6 +334,29 @@ const ChatRow = (props: ChatRowProps) => {
               )}
             </div>
           )}
+        </div>
+      );
+    } else if (message.tool_calls) {
+      const tools = message.tool_calls;
+      const functionTools = tools.filter((tool) => tool.type === "function");
+      return (
+        <div className="flex flex-col space-y-2">
+          {message.content !== null && message.content !== "" && (
+            <code className="text-xs whitespace-pre-wrap font-semibold">
+              {message.content}
+            </code>
+          )}
+          {functionTools.map((tool, index) => {
+            const toolFunc = tool.function;
+            return (
+              <pre
+                key={index}
+                className="text-xs whitespace-pre-wrap rounded-lg overflow-auto"
+              >
+                {`${toolFunc.name}(${toolFunc.arguments})`}
+              </pre>
+            );
+          })}
         </div>
       );
     } else {
@@ -457,7 +481,7 @@ const ChatRow = (props: ChatRowProps) => {
                   }}
                 />
               ) : (
-                <>{getContent(currentMessage.content as string, minimize)}</>
+                <>{getContent(currentMessage, minimize)}</>
               )}
             </div>
           </div>

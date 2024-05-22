@@ -23,6 +23,7 @@ interface ChatPlaygroundProps {
   models: PlaygroundModel[];
   temperature: number;
   maxTokens: number;
+  tools?: any;
   onSubmit?: (history: Message[]) => void;
   submitText?: string;
   customNavBar?: {
@@ -37,6 +38,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     models,
     temperature,
     maxTokens,
+    tools,
     onSubmit,
     submitText = "Submit",
     customNavBar,
@@ -57,27 +59,35 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     const responses = await Promise.all(
       models.map(async (model) => {
         // Filter and map the history as before
-        const historyWithoutId = history
-          .filter(
-            (message) =>
-              message.model === model.name || message.model === undefined
-          )
-          .map((message) => ({
-            content: message.content,
-            role: message.role,
-          }));
+        const cleanMessages = (history: Message[]) => {
+          return history
+            .filter(
+              (message) =>
+                message.model === model.name ||
+                message.model === undefined ||
+                message.tool_calls
+            )
+            .map((message) => ({
+              content: message.content ?? "",
+              role: message.role,
+            }));
+        };
+
+        const historyWithoutId = cleanMessages(history);
 
         // Record the start time
         const startTime = new Date().getTime();
 
         if (model.provider === "OPENAI") {
           // Perform the OpenAI request
-          const { data, error } = await fetchOpenAI(
-            historyWithoutId as unknown as ChatCompletionCreateParams[],
+          const { data, error } = await fetchOpenAI({
+            messages:
+              historyWithoutId as unknown as ChatCompletionCreateParams[],
             temperature,
-            model.name,
-            maxTokens
-          );
+            model: model.name,
+            maxTokens,
+            tools,
+          });
 
           // Record the end time and calculate latency
           const endTime = new Date().getTime();
@@ -111,10 +121,18 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
       }
 
       const getContent = (data: any) => {
-        if (data.choices && data.choices[0].message?.content) {
-          return data.choices[0].message.content;
+        // return JSON.stringify(data.choices[0].message.tool_calls, null, 2);
+        if (data.choices[0].message.tool_calls) {
+          const message = data.choices[0].message;
+          const tools = message.tool_calls;
+          const functionTools = tools.filter(
+            (tool: any) => tool.type === "function"
+          );
+          return JSON.stringify(functionTools, null, 4);
+        } else if (data.choices && data.choices[0].message?.content) {
+          return data.choices[0].message.content + 123;
         } else if (data.content && data.content[0].text) {
-          return data.content[0].text;
+          return data.content[0].text + 456;
         } else {
           return `${model} failed to fetch response. Please try again`;
         }
@@ -411,7 +429,6 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           <div className="flex space-x-4 w-full justify-end">
             <button
               onClick={() => {
-                //  reset the chat to the original chat
                 const originalCopy = chat.map((message, index) => {
                   return { ...message, id: crypto.randomUUID() };
                 });
