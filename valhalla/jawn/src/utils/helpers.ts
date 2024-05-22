@@ -1,4 +1,3 @@
-import { string } from "zod";
 import { PromiseGenericResult, ok, err } from "../lib/shared/result";
 import {
   getTokenCountAnthropic,
@@ -25,7 +24,7 @@ export async function getTokenCount(
 ): Promise<number> {
   if (!inputText) return 0;
   
-  if (provider === "OPENAI" || model?.includes("openai")) {
+  if (provider === "OPENAI" || (provider == "OPENROUTER" && model?.includes("openai"))) {
     return await getTokenCountGPT3(inputText);
   } else if (provider === "ANTHROPIC") {
     return await getTokenCountAnthropic(inputText);
