@@ -19,11 +19,12 @@ export function tryParse(text: string, errorMsg?: string): any {
 
 export async function getTokenCount(
   inputText: string,
+  model: string | undefined,
   provider: Provider
 ): Promise<number> {
   if (!inputText) return 0;
-
-  if (provider === "OPENAI") {
+  
+  if (provider === "OPENAI" || (provider == "OPENROUTER" && model?.includes("openai"))) {
     return await getTokenCountGPT3(inputText);
   } else if (provider === "ANTHROPIC") {
     return await getTokenCountAnthropic(inputText);
