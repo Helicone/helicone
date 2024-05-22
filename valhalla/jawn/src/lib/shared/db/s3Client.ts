@@ -10,10 +10,22 @@ import { compressData } from "../../../utils/helpers";
 import Bottleneck from "bottleneck";
 import * as Sentry from "@sentry/node";
 
-// Maximum HTTP requests per second: 10,000 requests
-// Maximum HTTP requests per minute: 600,000 requests
-const limiter = new Bottleneck({
-  maxConcurrent: 100,
+// Stay within S3 limits
+
+const getLimiter = new Bottleneck({
+  maxConcurrent: 5500,
+  reservoir: 5500,
+  reservoirRefreshAmount: 5500,
+  reservoirRefreshInterval: 1000,
+  minTime: 0,
+});
+
+const putLimiter = new Bottleneck({
+  maxConcurrent: 3500,
+  reservoir: 3500,
+  reservoirRefreshAmount: 3500,
+  reservoirRefreshInterval: 1000,
+  minTime: 0,
 });
 
 export type RequestResponseBody = {
@@ -57,7 +69,7 @@ export class S3Client {
     try {
       const contentResponse = await retry(
         async () => {
-          return limiter.schedule(() => fetch(signedUrl));
+          return getLimiter.schedule(() => fetch(signedUrl));
         },
         {
           retries: 3,
@@ -185,7 +197,7 @@ export class S3Client {
     body: ArrayBuffer | Buffer,
     contentType: string
   ): Promise<Result<string, string>> {
-    return await limiter.schedule(async () => {
+    return await putLimiter.schedule(async () => {
       const command = new PutObjectCommand({
         Bucket: this.bucketName,
         Key: key,
@@ -211,7 +223,7 @@ export class S3Client {
   }
 
   async store(key: string, value: string): Promise<Result<string, string>> {
-    return await limiter.schedule(async () => {
+    return await putLimiter.schedule(async () => {
       try {
         const compressedValue = await compressData(value);
 
