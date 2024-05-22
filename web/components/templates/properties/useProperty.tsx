@@ -23,9 +23,11 @@ export const usePropertyCard = (props: PropertyPageData) => {
     timeFilter,
     userFilters: [
       {
-        property_with_response_v1: {
-          property_key: {
-            equals: property,
+        request_response_versioned: {
+          search_properties: {
+            [property]: {
+              equals: property,
+            },
           },
         },
       },
