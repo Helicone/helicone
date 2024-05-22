@@ -163,7 +163,6 @@ export async function getTotalCostRaw(
       argsAcc: [],
     });
 
-  console.log("filterString", filterString);
   const query = `
   WITH total_cost AS (
     SELECT ${clickhousePriceCalc("request_response_versioned")} as cost
