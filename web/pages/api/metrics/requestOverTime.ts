@@ -6,6 +6,7 @@ import {
 } from "../../../lib/api/handlerWrappers";
 import { getTotalRequestsOverTime } from "../../../lib/api/metrics/getRequestOverTime";
 import { Result } from "../../../lib/result";
+import { supabaseServer } from "../../../lib/supabaseServer";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
@@ -15,7 +16,7 @@ async function handler(
   const {
     req,
     res,
-    userData: { orgId },
+    userData: { orgId, userId },
   } = options;
   const {
     timeFilter,
@@ -24,6 +25,19 @@ async function handler(
     timeZoneDifference,
     organizationId,
   } = options.req.body as MetricsBackendBody;
+
+  if (organizationId) {
+    await supabaseServer
+      .from("organization_member")
+      .select("*")
+      .eq("organization_id", organizationId)
+      .eq("member_id", userId)
+      .then((org_res) => {
+        if (org_res.data?.length === 0) {
+          res.status(403).json({ error: "Unauthorized", data: null });
+        }
+      });
+  }
 
   res.status(200).json(
     await getTotalRequestsOverTime({
