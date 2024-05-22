@@ -192,7 +192,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     provider: string,
     responseBody: any
   ): IBodyProcessor {
-    console.log(`Provider: ${provider}, isStream: ${isStream}`);
     if (!isStream && provider === "ANTHROPIC" && responseBody) {
       return new AnthropicBodyProcessor();
     } else if (!isStream && provider === "GOOGLE") {
