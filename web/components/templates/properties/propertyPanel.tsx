@@ -281,7 +281,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                               pathname: "/requests",
                               query: {
                                 t: "3m",
-                                filters: JSON.stringify(currentAdvancedFilters),
+                                filters: currentAdvancedFilters,
                               },
                             });
                           }}
