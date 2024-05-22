@@ -1,7 +1,6 @@
 import { useState } from "react";
 import ThemedModal from "../../shared/themed/themedModal";
 import MarkdownEditor from "../../shared/markdownEditor";
-import ReactJson from "react-json-view";
 import HcButton from "../../ui/hcButton";
 import { TrashIcon } from "@heroicons/react/24/outline";
 

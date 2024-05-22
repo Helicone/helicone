@@ -10,12 +10,7 @@ import {
   CodeBracketSquareIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import {
-  MultiSelect,
-  MultiSelectItem,
-  NumberInput,
-  TextInput,
-} from "@tremor/react";
+import { MultiSelect, MultiSelectItem, TextInput } from "@tremor/react";
 import ThemedModal from "../../shared/themed/themedModal";
 import Image from "next/image";
 
