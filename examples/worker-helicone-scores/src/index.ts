@@ -23,8 +23,6 @@ export default {
 		if (request.method === 'POST') {
 			const data = (await request.json()) as HeliconeRequest;
 
-			console.log(`Received data: ${JSON.stringify(data)}`);
-
 			// Execute the scoring function
 			const scores = calculateScore(data);
 
@@ -32,14 +30,12 @@ export default {
 			const requestId = data.request_id;
 
 			// Post the scores to the scoring API.
-			// Is it ok if we hardcode the scoring API URL here?
 			const result = await postScore(
 				`https://jawn.helicone.ai/v1/request/${requestId}/score`,
 				scores,
 				env
 			);
 
-			console.log(`Posted score data: ${JSON.stringify(result)}`);
 			return new Response(JSON.stringify(result), {
 				headers: {
 					'Content-Type': 'application/json',
