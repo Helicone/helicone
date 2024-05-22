@@ -97,6 +97,7 @@ export class HeliconeProxyRequestMapper {
 
     const requestJson = await this.requestJson();
     const queryParams = new URLSearchParams(targetUrl.search);
+    // alt = sse is how Gemini determines if a request is a stream
     const isStream =
       requestJson.stream === true || queryParams.get("alt") === "sse";
 
