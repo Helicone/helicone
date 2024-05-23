@@ -43,48 +43,75 @@ export function mapGeminiPro(
     })
     .flat();
 
-  const responseBody =
-    Array.isArray(request.response_body) && request.response_body.length > 0
-      ? request.response_body[0]
-      : request.response_body;
+  const responseBody = Array.isArray(request.response_body)
+    ? request.response_body
+    : [request.response_body];
 
-  const firstCandidate = responseBody?.candidates?.find((candidate: any) => {
-    if (!candidate?.content) {
-      console.log("No content found in candidate", candidate);
-      return false;
-    }
+  const combinedContent = responseBody
+    .map((response: any) =>
+      response.candidates
+        ?.map((candidate: any) => {
+          const contents = Array.isArray(candidate.content)
+            ? candidate.content
+            : [candidate.content];
 
-    const contents = Array.isArray(candidate.content)
-      ? candidate.content
-      : [candidate.content];
+          return contents
+            .map((content: any) => {
+              const partsArray = Array.isArray(content?.parts)
+                ? content.parts
+                : [content?.parts];
 
-    return contents.some((content: any) =>
-      Array.isArray(content.parts)
-        ? content.parts.some((part: any) => part.text || part.functionCall)
-        : content.parts?.text
-    );
-  });
+              return partsArray
+                .map((part: any) => part?.text || "")
+                .filter((text: string) => text)
+                .join(" ");
+            })
+            .join(" ");
+        })
+        .join(" ")
+    )
+    .join(" ");
 
-  const firstContent = Array.isArray(firstCandidate?.content)
-    ? firstCandidate.content.find((content: any) => content.parts)
-    : firstCandidate?.content;
+  const functionCall = responseBody
+    .map((response: any) =>
+      response.candidates
+        ?.map((candidate: any) => {
+          const contents = Array.isArray(candidate.content)
+            ? candidate.content
+            : [candidate.content];
 
-  const firstPart = Array.isArray(firstContent?.parts)
-    ? firstContent.parts.find((part: any) => part.text || part.functionCall)
-    : firstContent?.parts;
+          return contents
+            .map((content: any) => {
+              const partsArray = Array.isArray(content?.parts)
+                ? content.parts
+                : [content?.parts];
 
-  const responseMessages = firstPart
-    ? {
-        role: firstContent.role ?? "user",
-        content: firstPart.text,
-        function_call: firstPart.functionCall
-          ? {
-              name: firstPart.functionCall?.name,
-              arguments: firstPart.functionCall?.args,
-            }
-          : undefined,
-      }
-    : null;
+              return partsArray.find((part: any) => part?.functionCall)
+                ?.functionCall;
+            })
+            .find((funcCall: any) => funcCall);
+        })
+        .find((funcCall: any) => funcCall)
+    )
+    .find((funcCall: any) => funcCall);
+
+  const firstContent = responseBody[0]?.candidates?.[0]?.content;
+
+  const responseMessages =
+    combinedContent || functionCall
+      ? {
+          role: firstContent?.role ?? "model",
+          content: (combinedContent as any) || undefined,
+          function_call: functionCall
+            ? {
+                name: functionCall.name,
+                arguments: JSON.stringify(functionCall.args) as any,
+              }
+            : undefined,
+        }
+      : null;
+
+  const error = responseBody.find((item: any) => item?.error)?.error;
 
   const schema: LlmSchema = {
     request: {
@@ -107,10 +134,10 @@ export function mapGeminiPro(
     },
     response: {
       message: responseMessages,
-      error: responseBody?.error
+      error: error
         ? {
-            message: responseBody?.error?.message,
-            code: responseBody?.error?.code,
+            message: error?.message,
+            code: error?.code,
           }
         : null,
       model: model,
@@ -144,49 +171,75 @@ export function mapGeminiProJawn(
     })
     .flat();
 
-  const responseBody =
-    Array.isArray(request.response_body) && request.response_body.length > 0
-      ? request.response_body[0]
-      : request.response_body;
+  const responseBody = Array.isArray(request.response_body)
+    ? request.response_body
+    : [request.response_body];
 
-  const firstCandidate = responseBody?.candidates?.find((candidate: any) => {
-    if (!candidate?.content) {
-      console.log("No content found in candidate", candidate);
-      return false;
-    }
+  const combinedContent = responseBody
+    .map((response: any) =>
+      response.candidates
+        ?.map((candidate: any) => {
+          const contents = Array.isArray(candidate.content)
+            ? candidate.content
+            : [candidate.content];
 
-    const contents = Array.isArray(candidate.content)
-      ? candidate.content
-      : [candidate.content];
+          return contents
+            .map((content: any) => {
+              const partsArray = Array.isArray(content?.parts)
+                ? content.parts
+                : [content?.parts];
 
-    // Updated to handle undefined properties
-    return contents.some((content: any) =>
-      Array.isArray(content.parts)
-        ? content.parts.some((part: any) => part.text || part.functionCall)
-        : content.parts?.text
-    );
-  });
+              return partsArray
+                .map((part: any) => part?.text || "")
+                .filter((text: string) => text)
+                .join(" ");
+            })
+            .join(" ");
+        })
+        .join(" ")
+    )
+    .join(" ");
 
-  const firstContent = Array.isArray(firstCandidate?.content)
-    ? firstCandidate.content.find((content: any) => content.parts)
-    : firstCandidate?.content;
+  const functionCall = responseBody
+    .map((response: any) =>
+      response.candidates
+        ?.map((candidate: any) => {
+          const contents = Array.isArray(candidate.content)
+            ? candidate.content
+            : [candidate.content];
 
-  const firstPart = Array.isArray(firstContent?.parts)
-    ? firstContent.parts.find((part: any) => part.text || part.functionCall)
-    : firstContent?.parts;
+          return contents
+            .map((content: any) => {
+              const partsArray = Array.isArray(content?.parts)
+                ? content.parts
+                : [content?.parts];
 
-  const responseMessages = firstPart
-    ? {
-        role: firstContent.role ?? "user",
-        content: firstPart.text,
-        function_call: firstPart.functionCall
-          ? {
-              name: firstPart.functionCall?.name,
-              arguments: firstPart.functionCall?.args,
-            }
-          : undefined,
-      }
-    : null;
+              return partsArray.find((part: any) => part?.functionCall)
+                ?.functionCall;
+            })
+            .find((funcCall: any) => funcCall);
+        })
+        .find((funcCall: any) => funcCall)
+    )
+    .find((funcCall: any) => funcCall);
+
+  const firstContent = responseBody[0]?.candidates?.[0]?.content;
+
+  const responseMessages =
+    combinedContent || functionCall
+      ? {
+          role: firstContent?.role ?? "model",
+          content: (combinedContent as any) || undefined,
+          function_call: functionCall
+            ? {
+                name: functionCall.name,
+                arguments: JSON.stringify(functionCall.args) as any,
+              }
+            : undefined,
+        }
+      : null;
+
+  const error = responseBody.find((item: any) => item?.error)?.error;
 
   const schema: components["schemas"]["LlmSchema"] = {
     request: {
@@ -209,10 +262,10 @@ export function mapGeminiProJawn(
     },
     response: {
       message: responseMessages,
-      error: responseBody?.error
+      error: error
         ? {
-            message: responseBody?.error?.message,
-            code: responseBody?.error?.code,
+            message: error?.message,
+            code: error?.code,
           }
         : null,
       model: model,
