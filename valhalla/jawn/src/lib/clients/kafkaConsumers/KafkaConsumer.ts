@@ -11,7 +11,9 @@ import {
 import { Topics } from "../KafkaProducer";
 import { generateKafkaConsumer } from "./client";
 import {
+  DLQ_ESTIMATED_MINI_BATCH_COUNT,
   DLQ_MESSAGES_PER_MINI_BATCH,
+  ESTIMATED_MINI_BATCH_COUNT,
   MESSAGES_PER_MINI_BATCH,
 } from "./constant";
 
@@ -23,7 +25,8 @@ const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
 export const consume = async () => {
   const consumer = generateKafkaConsumer(
     "jawn-consumer",
-    MESSAGES_PER_MINI_BATCH
+    MESSAGES_PER_MINI_BATCH,
+    ESTIMATED_MINI_BATCH_COUNT
   );
   if (KAFKA_ENABLED && !consumer) {
     console.error("Failed to create Kafka consumer");
@@ -143,7 +146,8 @@ function mapMessageDates(message: Message): Message {
 export const consumeDlq = async () => {
   const dlqConsumer = generateKafkaConsumer(
     "jawn-consumer-local-01",
-    DLQ_MESSAGES_PER_MINI_BATCH
+    DLQ_MESSAGES_PER_MINI_BATCH,
+    DLQ_ESTIMATED_MINI_BATCH_COUNT
   );
   if (KAFKA_ENABLED && !dlqConsumer) {
     console.error("Failed to create Kafka dlq consumer");
