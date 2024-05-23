@@ -1,14 +1,16 @@
+import { ToolCall } from "openai/resources/beta/threads/runs/steps";
 import { Message } from "../../components/templates/requests/chat";
 import { NormalizedRequest } from "../../components/templates/requestsV2/builder/abstractRequestBuilder";
 import useRequestsPageV2 from "../../components/templates/requestsV2/useRequestsPageV2";
+import { ChatCompletion, ChatCompletionTool } from "openai/resources";
 
 export const getChat = (
   requests: NormalizedRequest[]
 ): {
   chat: Message[];
   isChat: boolean;
+  tools?: ChatCompletionTool[];
 } => {
-  console.log("singleRequest", requests[0]);
   let isChat = false;
   if (!requests || requests.length < 1) {
     return {
@@ -81,9 +83,18 @@ export const getChat = (
     isChat = true;
   }
 
+  const enforceToolType = (tools: any[]) => {
+    try {
+      return tools.map((tool) => tool as ChatCompletionTool);
+    } catch (e) {
+      return undefined;
+    }
+  };
+
   return {
     chat: sourcePrompt,
     isChat,
+    tools: enforceToolType(sourceChat.tools),
   };
 };
 
@@ -104,7 +115,7 @@ export const usePlaygroundPage = (requestId: string) => {
     false
   );
 
-  const { chat, isChat } = getChat(requests.requests);
+  const { chat, isChat, tools } = getChat(requests.requests);
 
   return {
     isLoading: requests.isDataLoading,
@@ -113,5 +124,6 @@ export const usePlaygroundPage = (requestId: string) => {
     refetch: requests.refetch,
     hasData: requests.requests && requests.requests.length > 0,
     isChat,
+    tools,
   };
 };
