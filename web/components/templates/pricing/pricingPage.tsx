@@ -478,11 +478,7 @@ export default function Example() {
                   </h3>
                   <p className="text-gray-700 text-sm">
                     For most startups under two years old and non-profits, we
-                    offer 50% off for the first year.{" "}
-                    <Link href="/contact" className="text-blue-500 underline">
-                      Get in touch
-                    </Link>{" "}
-                    to learn more.
+                    offer 50% off for the first year.
                   </p>
                 </div>
               </li>{" "}
@@ -513,6 +509,16 @@ export default function Example() {
                 </div>
               </li>{" "}
             </ul>
+            <div className="flex items-center justify-center">
+              <HcButton
+                variant="secondary"
+                size="md"
+                title="Get in touch"
+                onClick={() => {
+                  router.push("/contact");
+                }}
+              />
+            </div>
           </div>
         </div>
 
