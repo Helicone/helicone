@@ -22,6 +22,7 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
       .filter((line) => !line.includes("OPENROUTER PROCESSING"))
       .filter((line) => line !== "")
       .filter((line) => !NON_DATA_LINES.includes(line));
+
     const data = lines.map((line, i) => {
       if (i === lines.length - 1) return {};
       try {

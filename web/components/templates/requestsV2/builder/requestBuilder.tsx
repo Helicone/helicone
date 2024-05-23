@@ -16,6 +16,7 @@ import { DalleBuilder } from "./dalleBuilder";
 
 export type BuilderType =
   | "ChatBuilder"
+  | "GeminiBuilder"
   | "CompletionBuilder"
   | "ChatGPTBuilder"
   | "GPT3Builder"
@@ -35,6 +36,11 @@ export const getBuilderType = (
   if (provider === "OPENROUTER") {
     return "ChatGPTBuilder";
   }
+
+  if (model === "gemini-pro" || model === "gemini-pro-vision") {
+    return "GeminiBuilder";
+  }
+
   if (llmType === "chat") {
     return "ChatBuilder";
   }
@@ -114,6 +120,7 @@ const builders: {
   ) => AbstractRequestBuilder;
 } = {
   ChatBuilder: ChatBuilder,
+  GeminiBuilder: ChatBuilder,
   CompletionBuilder: CompletionBuilder,
   ChatGPTBuilder: ChatGPTBuilder,
   GPT3Builder: GPT3Builder,
