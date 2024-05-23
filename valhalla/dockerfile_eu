@@ -17,7 +17,6 @@ WORKDIR /usr/src/app/jawn
 RUN yarn install
 RUN yarn build
 
-ENV S3_REGION=eu-west-1
 ENV DLQ_WORKER_COUNT=0
 ENV NORMAL_WORKER_COUNT=1
 
