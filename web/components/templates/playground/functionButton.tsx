@@ -3,10 +3,10 @@ import ThemedModal from "../../shared/themed/themedModal";
 import MarkdownEditor from "../../shared/markdownEditor";
 import HcButton from "../../ui/hcButton";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import { ChatCompletionMessageToolCall } from "openai/resources";
+import { ChatCompletionTool } from "openai/resources";
 
 interface FunctionButtonProps {
-  tool: ChatCompletionMessageToolCall;
+  tool: ChatCompletionTool;
   onSave: (functionText: string) => void;
   onDelete: (name: string) => void;
 }

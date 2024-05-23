@@ -1,6 +1,7 @@
 import {
   ChatCompletion,
   ChatCompletionCreateParams,
+  ChatCompletionTool,
 } from "openai/resources/chat";
 import { Result } from "../../../lib/result";
 
@@ -9,7 +10,7 @@ interface OpenAIReq {
   temperature: number;
   model: string;
   maxTokens: number;
-  tools?: any[];
+  tools?: ChatCompletionTool[];
   requestId?: string;
 }
 

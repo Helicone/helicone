@@ -4,6 +4,7 @@ import OpenAI from "openai";
 import {
   ChatCompletion,
   ChatCompletionMessageParam,
+  ChatCompletionTool,
 } from "openai/resources/chat";
 import { DEMO_EMAIL } from "../../../../lib/constants";
 import { Result } from "../../../../lib/result";
@@ -22,7 +23,7 @@ export default async function handler(
       temperature: number;
       model: string;
       maxTokens: number;
-      tools: any[];
+      tools: ChatCompletionTool[];
     };
 
   if (!temperature || !model) {

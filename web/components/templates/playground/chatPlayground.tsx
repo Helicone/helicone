@@ -7,7 +7,10 @@ import { useState } from "react";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 
-import { ChatCompletionCreateParams } from "openai/resources/chat";
+import {
+  ChatCompletionCreateParams,
+  ChatCompletionTool,
+} from "openai/resources/chat";
 import { fetchOpenAI } from "../../../services/lib/providers/openAI";
 import { Message } from "../requests/chat";
 import ModelPill from "../requestsV2/modelPill";
@@ -23,7 +26,7 @@ interface ChatPlaygroundProps {
   models: PlaygroundModel[];
   temperature: number;
   maxTokens: number;
-  tools?: any;
+  tools?: ChatCompletionTool[];
   onSubmit?: (history: Message[]) => void;
   submitText?: string;
   customNavBar?: {
