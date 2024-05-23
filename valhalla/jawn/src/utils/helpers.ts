@@ -26,7 +26,7 @@ export async function getTokenCount(
   
   if (provider === "OPENAI" || (provider == "OPENROUTER" && model?.includes("openai"))) {
     return await getTokenCountGPT3(inputText);
-  } else if (provider === "ANTHROPIC") {
+  } else if (provider === "ANTHROPIC" || (provider == "OPENROUTER" && model?.includes("anthropic"))) {
     return await getTokenCountAnthropic(inputText);
   } else {
     return 0;
