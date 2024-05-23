@@ -3,3 +3,4 @@ repos:
     rev: v4.1.0
     hooks:
       - id: no-commit-to-branch
+      - id: trailing-whitespace
