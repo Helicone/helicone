@@ -96,7 +96,7 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
   const url = new URL(request.getUrl());
   const host = url.host;
   const hostParts = host.split(".");
-  if (host.startsWith("eu.")) {
+  if (hostParts.includes("eu")) {
     env = {
       ...env,
       CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
@@ -123,7 +123,7 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         ...env,
         WORKER_TYPE: "GATEWAY_API",
       };
-    } else if (hostParts[0].includes("oai") || hostParts[1].includes("oai")) {
+    } else if (hostParts[0].includes("oai")) {
       return {
         ...env,
         WORKER_TYPE: "OPENAI_PROXY",
