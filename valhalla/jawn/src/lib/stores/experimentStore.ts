@@ -1,11 +1,10 @@
 import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
+import { costOfPrompt } from "../../packages/cost";
 import { dbExecute } from "../shared/db/dbExecute";
 import { FilterNode } from "../shared/filters/filterDefs";
 import { buildFilterPostgres } from "../shared/filters/filters";
 import { Result, err, ok, promiseResultMap, resultMap } from "../shared/result";
 import { BaseStore } from "./baseStore";
-import { costOfPrompt } from "../../packages/cost";
-import { S3Client } from "../shared/db/s3Client";
 import { RequestResponseBodyStore } from "./request/RequestResponseBodyStore";
 
 export interface ResponseObj {

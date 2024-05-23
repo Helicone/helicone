@@ -34,14 +34,14 @@ export type RequestResponseBody = {
 };
 
 export class S3Client {
-  private region = "us-west-2";
   private awsClient: AwsS3Client;
 
   constructor(
     accessKey: string,
     secretKey: string,
     endpoint: string,
-    private bucketName: string
+    private bucketName: string,
+    private region: "us-west-2" | "eu-west-1"
   ) {
     this.awsClient = new AwsS3Client({
       credentials: {
