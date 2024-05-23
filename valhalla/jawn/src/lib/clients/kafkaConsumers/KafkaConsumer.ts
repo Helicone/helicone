@@ -253,7 +253,7 @@ async function consumeMiniBatch(
   topic: Topics
 ): PromiseGenericResult<string> {
   console.log(
-    `Received mini batch with ${messages.length} messages. Mini batch ID: ${miniBatchId}`
+    `Received mini batch with ${messages.length} messages. Mini batch ID: ${miniBatchId}. Topic: ${topic}`
   );
 
   const logManager = new LogManager();
