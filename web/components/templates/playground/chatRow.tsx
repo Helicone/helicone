@@ -479,6 +479,7 @@ const ChatRow = (props: ChatRowProps) => {
                     setCurrentMessage(newMessages);
                     callback(text, role, file);
                   }}
+                  language="markdown"
                 />
               ) : (
                 <>{getContent(currentMessage, minimize)}</>

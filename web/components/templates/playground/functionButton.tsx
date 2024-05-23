@@ -55,7 +55,11 @@ const FunctionButton = (props: FunctionButtonProps) => {
         <div className="w-[600px] h-full flex flex-col space-y-4">
           <h3 className="text-xl font-semibold">Function Details</h3>
 
-          <MarkdownEditor text={functionText} setText={setFunctionText} />
+          <MarkdownEditor
+            text={functionText}
+            setText={setFunctionText}
+            language="json"
+          />
           <div className="flex w-full justify-end items-center gap-2">
             {!isValidJson(functionText) && (
               <p className="text-red-500 text-sm">Invalid JSON</p>

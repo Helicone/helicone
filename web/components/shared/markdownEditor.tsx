@@ -11,11 +11,25 @@ import "prismjs/components/prism-json";
 interface MarkdownEditorProps {
   text: string;
   setText: (text: string) => void;
+  language: "json" | "markdown";
   disabled?: boolean;
 }
 
 const MarkdownEditor = (props: MarkdownEditorProps) => {
-  const { text, setText, disabled = false } = props;
+  const { text, setText, language, disabled = false } = props;
+
+  const languageMap = {
+    json: {
+      lang: languages.json,
+      ref: "json",
+    },
+    markdown: {
+      lang: languages.markdown,
+      ref: "markdown",
+    },
+  };
+
+  const { lang, ref } = languageMap[language];
 
   return (
     <Editor
@@ -24,8 +38,7 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
       highlight={(code) => {
         if (!code) return "";
         if (typeof code !== "string") return "";
-        return highlight(code, languages.json, "json");
-        // return highlight(code, languages.markdown, "markdown");
+        return highlight(code, lang, ref);
       }}
       padding={16}
       className="text-sm text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded-lg whitespace-pre-wrap"
