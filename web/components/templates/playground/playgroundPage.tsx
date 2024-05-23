@@ -52,12 +52,12 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     useState<ChatCompletionMessageToolCall[]>();
 
   useEffect(() => {
-    if (currentTools === undefined) {
-      if (tools !== undefined) {
-        setCurrentTools(tools);
-      }
+    if (tools !== undefined) {
+      setCurrentTools(tools);
+    } else {
+      setCurrentTools([]);
     }
-  }, [tools]);
+  }, [tools, requestId]);
 
   const singleRequest = data.length > 0 ? data[0] : null;
   const singleModel = PLAYGROUND_MODELS.find(
