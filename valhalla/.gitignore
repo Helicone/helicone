@@ -4,3 +4,5 @@
 node_modules
 **/node_modules
 
+dockerfile
+dockerfile_eu
