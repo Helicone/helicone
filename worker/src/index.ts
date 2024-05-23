@@ -23,6 +23,7 @@ export interface EU_Env {
   EU_UPSTASH_KAFKA_PASSWORD: string;
   EU_UPSTASH_KAFKA_URL: string;
   EU_UPSTASH_KAFKA_USERNAME: string;
+  EU_SECURE_CACHE: KVNamespace;
 }
 export interface BASE_Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -108,6 +109,7 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
       UPSTASH_KAFKA_URL: env.EU_UPSTASH_KAFKA_URL,
       UPSTASH_KAFKA_USERNAME: env.EU_UPSTASH_KAFKA_USERNAME,
       S3_BUCKET_NAME: env.EU_S3_BUCKET_NAME,
+      SECURE_CACHE: env.EU_SECURE_CACHE,
       S3_REGION: "eu-west-1",
     };
   }
