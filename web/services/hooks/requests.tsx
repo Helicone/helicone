@@ -6,6 +6,10 @@ import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+import {
+  getModelFromPath,
+  mapGeminiPro,
+} from "../../components/templates/requestsV2/builder/mappers/geminiMapper";
 
 const useGetRequests = (
   currentPage: number,
@@ -63,6 +67,26 @@ const useGetRequests = (
 
                   request.request_body = content.request;
                   request.response_body = content.response;
+
+                  const model =
+                    request.model_override ||
+                    request.response_model ||
+                    request.request_model ||
+                    content.response?.model ||
+                    content.request?.model ||
+                    content.response?.body?.model || // anthropic
+                    getModelFromPath(request.request_path) ||
+                    "";
+
+                  if (
+                    request.provider === "GOOGLE" &&
+                    model.toLowerCase().includes("gemini")
+                  ) {
+                    request.llmSchema = mapGeminiPro(
+                      request as HeliconeRequest,
+                      model
+                    );
+                  }
                 }
               } catch (error) {
                 console.log(`Error fetching content: ${error}`);
