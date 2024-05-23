@@ -46,7 +46,8 @@ export function getKafka() {
 
 export function generateKafkaConsumer(
   groupId: "jawn-consumer-local-01" | "jawn-consumer",
-  miniBatchSize: number
+  miniBatchSize: number,
+  estimated_mini_batch_count: number
 ) {
   const kafka = getKafka();
   const consumer = kafka?.consumer({
@@ -54,7 +55,7 @@ export function generateKafkaConsumer(
     heartbeatInterval: 15000,
     minBytes: 100_000,
     maxBytes:
-      miniBatchSize * ESTIMATED_MINI_BATCH_COUNT * AVG_MESSAGE_SIZE * 1.1, // 10% buffer
+      miniBatchSize * estimated_mini_batch_count * AVG_MESSAGE_SIZE * 1.1, // 10% buffer
   });
 
   // DISCONNECT CONSUMER
