@@ -42,7 +42,13 @@ const NavBarV2 = (props: NavBarV2Props) => {
           </div>
           <div className="hidden md:flex gap-x-1 lg:gap-x-2 items-center text-sm">
             <SolutionsButton />
-            <DeveloperButton />
+
+            <Link
+              href="https://docs.helicone.ai/"
+              className="flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-gray-700"
+            >
+              Docs
+            </Link>
             <Link
               href="/pricing"
               className="flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-gray-700"
