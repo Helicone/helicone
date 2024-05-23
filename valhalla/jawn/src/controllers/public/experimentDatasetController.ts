@@ -18,16 +18,22 @@ type DatasetFilterNode =
   | DatasetFilterBranch
   | "all";
 
+export interface DatasetMetadata {
+  promptId?: string;
+  inputRecordsIds?: string[];
+}
+
 export interface NewDatasetParams {
   datasetName: string;
   requestIds: string[];
+  meta?: DatasetMetadata;
 }
 
 export interface DatasetResult {
   id: string;
   name: string;
-  request_ids: string[];
   created_at: string;
+  meta?: DatasetMetadata;
 }
 
 export interface RandomDatasetParams {
@@ -99,11 +105,13 @@ export class ExperimentDatasetController extends Controller {
   @Post("/query")
   public async getDatasets(
     @Body()
-    requestBody: {},
+    requestBody: {
+      promptId?: string;
+    },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<DatasetResult[], string>> {
     const datasetManager = new DatasetManager(request.authParams);
-    const result = await datasetManager.getDatasets();
+    const result = await datasetManager.getDatasets(requestBody.promptId);
     if (result.error || !result.data) {
       this.setStatus(500);
     } else {

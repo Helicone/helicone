@@ -1,10 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
+import { useOrg } from "../../components/layout/organizationContext";
 import { HeliconeRequest } from "../../lib/api/request/request";
-import { useJawnClient } from "../../lib/clients/jawnHook";
+import { getJawnClient } from "../../lib/clients/jawn";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
-import { SortLeafRequest } from "../lib/sorts/requests/sorts";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
+import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+import {
+  getModelFromPath,
+  mapGeminiPro,
+} from "../../components/templates/requestsV2/builder/mappers/geminiMapper";
 
 const useGetRequests = (
   currentPage: number,
@@ -14,7 +19,7 @@ const useGetRequests = (
   isCached: boolean = false,
   isLive: boolean = false
 ) => {
-  const jawn = useJawnClient();
+  const org = useOrg();
   return {
     requests: useQuery({
       queryKey: [
@@ -24,6 +29,7 @@ const useGetRequests = (
         advancedFilter,
         sortLeaf,
         isCached,
+        org?.currentOrg?.id,
       ],
       queryFn: async (query) => {
         const currentPage = query.queryKey[1] as number;
@@ -31,6 +37,8 @@ const useGetRequests = (
         const advancedFilter = query.queryKey[3];
         const sortLeaf = query.queryKey[4];
         const isCached = query.queryKey[5];
+        const orgId = query.queryKey[6] as string;
+        const jawn = getJawnClient(orgId);
         const response = await jawn.POST("/v1/request/query", {
           body: {
             filter: advancedFilter as any,
@@ -59,6 +67,26 @@ const useGetRequests = (
 
                   request.request_body = content.request;
                   request.response_body = content.response;
+
+                  const model =
+                    request.model_override ||
+                    request.response_model ||
+                    request.request_model ||
+                    content.response?.model ||
+                    content.request?.model ||
+                    content.response?.body?.model || // anthropic
+                    getModelFromPath(request.request_path) ||
+                    "";
+
+                  if (
+                    request.provider === "GOOGLE" &&
+                    model.toLowerCase().includes("gemini")
+                  ) {
+                    request.llmSchema = mapGeminiPro(
+                      request as HeliconeRequest,
+                      model
+                    );
+                  }
                 }
               } catch (error) {
                 console.log(`Error fetching content: ${error}`);

@@ -44,13 +44,19 @@ crons = ["* * * * *", "0 * * * *"]
 name = "helicone-worker-prod"
 routes = [
 	{ pattern = "oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "browser.oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "api.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "openrouter.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "together.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "gateway.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "2yfv.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+
+	{ pattern = "oai.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "anthropic.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "api.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "openrouter.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "together.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "gateway.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
 
 durable_objects.bindings = [
@@ -64,6 +70,7 @@ kv_namespaces = [
 	{ binding = "UTILITY_KV", id = "8b5d1650741d4f999e858f788387e3fa", preview_id = "a0ecbc9180784f7096e7ca1932b5676a" },
 	{ binding = "REQUEST_AND_RESPONSE_QUEUE_KV", id = "cf75f1c978d14eaeabc4483662688ab4", preview_id = "cf75f1c978d14eaeabc4483662688ab4" },
 	{ binding = "SECURE_CACHE", id = "43d1ce4eaa9c4be9ae88a97ea8ed88ef", preview_id = "23d7b3cb44254e0eb0b824a310abe155" },
+	{ binding = "EU_SECURE_CACHE", id = "39c1d7b64db749e39adeba19c698e6a1" },
 ]
 
 [env.production.triggers]
@@ -83,16 +90,19 @@ DATADOG_ENABLED = "true"
 [env.production_staging]
 name = "helicone-worker-prod-staging"
 routes = [
-	{ pattern = "oai_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "browser.oai_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "anthropic_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "api_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	# openrouter_staging.hconeai.com was failing to deploy
-	{ pattern = "openrouterstaging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "together_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "gateway_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "2yfv_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "2yfv_staging2.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "oai.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "anthropic.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "api.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "openrouter.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "together.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "gateway.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+
+	{ pattern = "oai.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "anthropic.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "api.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "openrouter.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "together.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "gateway.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
 
 kv_namespaces = [
@@ -102,6 +112,7 @@ kv_namespaces = [
 	{ binding = "UTILITY_KV", id = "8b5d1650741d4f999e858f788387e3fa", preview_id = "a0ecbc9180784f7096e7ca1932b5676a" },
 	{ binding = "REQUEST_AND_RESPONSE_QUEUE_KV", id = "cf75f1c978d14eaeabc4483662688ab4", preview_id = "cf75f1c978d14eaeabc4483662688ab4" },
 	{ binding = "SECURE_CACHE", id = "23d7b3cb44254e0eb0b824a310abe155" },
+	{ binding = "EU_SECURE_CACHE", id = "a0243398352c4ea996e5bf4008938285" },
 ]
 
 durable_objects.bindings = [

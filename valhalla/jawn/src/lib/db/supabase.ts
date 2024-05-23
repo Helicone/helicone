@@ -122,11 +122,13 @@ export class SupabaseConnector {
     if (member.data.length !== 0) {
       return ok({
         organizationId: member.data[0].organization,
+        userId: data.user.id,
       });
     }
     if (owner.data.length !== 0) {
       return ok({
         organizationId: owner.data[0].id,
+        userId: data.user.id,
       });
     }
 

@@ -98,7 +98,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
     datasets: datasets,
     isLoading: isDataSetsLoading,
     refetch: refetchDataSets,
-  } = useGetDataSets();
+  } = useGetDataSets(id);
 
   const selectedDataset = datasets.find(
     (dataset) => dataset.id === selectedDatasetId
@@ -212,6 +212,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                           }
                           setText={() => {}}
                           disabled={true}
+                          language="markdown"
                         />
                         {template.length > 200 && (
                           <Tooltip title="Expand">
@@ -263,6 +264,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
             text={selectedVersionTemplate}
             setText={() => {}}
             disabled={true}
+            language="markdown"
           />
         </div>
       </ThemedModal>
@@ -448,6 +450,9 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
         open={openConfirmModal}
         setOpen={setOpenConfirmModal}
         requestIds={requestIds}
+        meta={{
+          promptVersionId: prompt?.id,
+        }}
         onSuccess={(datasetId) => {
           setSelectedDatasetId(datasetId);
 

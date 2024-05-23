@@ -1,8 +1,7 @@
 import { S3Client } from "../shared/db/s3Client";
-import { PromiseGenericResult, Result, err, ok } from "../shared/result";
+import { PromiseGenericResult, err, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
-import * as Sentry from "@sentry/node";
 
 export class S3ReaderHandler extends AbstractLogHandler {
   private s3Client: S3Client;
@@ -30,7 +29,7 @@ export class S3ReaderHandler extends AbstractLogHandler {
         );
       }
 
-      const content = await this.fetchContent(signedUrl.data);
+      const content = await this.s3Client.fetchContent(signedUrl.data);
 
       if (content.error || !content.data) {
         if (content.error?.notFoundErr) {
@@ -38,7 +37,9 @@ export class S3ReaderHandler extends AbstractLogHandler {
           // Do not process further, do not send to DLQ
           return ok(`Content not found in S3: ${signedUrl.data}`);
         }
-        return err(`Error fetching content from S3: ${content.error}`);
+        return err(
+          `Error fetching content from S3: ${JSON.stringify(content.error)}`
+        );
       }
 
       context.rawLog.rawRequestBody = content.data.request;
@@ -49,60 +50,6 @@ export class S3ReaderHandler extends AbstractLogHandler {
       return err(
         `Error fetching content from S3: ${error}, Context: ${this.constructor.name}`
       );
-    }
-  }
-
-  private async fetchContent(signedUrl: string): Promise<
-    Result<
-      {
-        request: string;
-        response: string;
-      },
-      {
-        notFoundErr?: string;
-        error?: string;
-      }
-    >
-  > {
-    try {
-      const contentResponse = await fetch(signedUrl);
-      if (!contentResponse.ok) {
-        if (contentResponse.status === 404) {
-          console.error(
-            `Content not found in S3: ${signedUrl}, ${contentResponse.status}, ${contentResponse.statusText}`
-          );
-
-          Sentry.captureException(new Error("Raw content not found in S3"), {
-            tags: {
-              type: "KafkaError",
-            },
-            extra: {
-              signedUrl: signedUrl,
-              status: contentResponse.status,
-              statusText: contentResponse.statusText,
-            },
-          });
-
-          return err({
-            notFoundErr: "Content not found in S3",
-          });
-        }
-
-        return err({
-          error: `Error fetching content from S3: ${contentResponse.statusText}, ${contentResponse.status}`,
-        });
-      }
-
-      const text = await contentResponse.text();
-      const { request, response } = JSON.parse(text);
-      return ok({
-        request: request,
-        response: response,
-      });
-    } catch (error: any) {
-      return err({
-        error: `Error fetching content from S3: ${error}`,
-      });
     }
   }
 }

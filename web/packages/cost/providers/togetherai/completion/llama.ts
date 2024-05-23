@@ -42,6 +42,28 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "meta-llama/Meta-Llama-3-70B",
+    },
+    cost: {
+      prompt_token: 0.0000009,
+      completion_token: 0.0000009,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/Llama-3-8b-hf",
+    },
+    cost: {
+      prompt_token: 0.0000002,
+      completion_token: 0.0000002,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
       value: "togethercomputer/LLaMA-2-7B-32K",
     },
     cost: {

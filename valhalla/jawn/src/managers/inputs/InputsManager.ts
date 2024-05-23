@@ -16,6 +16,7 @@ import { resultMap } from "../../lib/shared/result";
 import { User } from "../../models/user";
 import { BaseManager } from "../BaseManager";
 import { S3Client } from "../../lib/shared/db/s3Client";
+import { RequestResponseBodyStore } from "../../lib/stores/request/RequestResponseBodyStore";
 
 async function fetchImageAsBase64(url: string): Promise<string> {
   try {
@@ -40,7 +41,8 @@ export async function getAllSignedURLsFromInputs(
     process.env.S3_ACCESS_KEY ?? "",
     process.env.S3_SECRET_KEY ?? "",
     process.env.S3_ENDPOINT ?? "",
-    process.env.S3_BUCKET_NAME ?? ""
+    process.env.S3_BUCKET_NAME ?? "",
+    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
   );
 
   const result = await Promise.all(
@@ -113,12 +115,18 @@ export class InputsManager extends BaseManager {
       `,
       [this.authParams.organizationId, promptVersion, limit]
     );
+    const bodyStore = new RequestResponseBodyStore(
+      this.authParams.organizationId
+    );
 
     return promiseResultMap(result, async (data) => {
       return Promise.all(
         data.map(async (record) => {
           return {
             ...record,
+            response_body:
+              (await bodyStore.getRequestResponseBody(record.source_request))
+                .data?.response ?? {},
             inputs: await getAllSignedURLsFromInputs(
               record.inputs,
               this.authParams.organizationId,

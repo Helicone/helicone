@@ -4,18 +4,20 @@ require("dotenv").config({
 
 import express, { NextFunction } from "express";
 import swaggerUi from "swagger-ui-express";
-import { Worker } from "worker_threads";
-
+import { tokenRouter } from "./lib/routers/tokenRouter";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authMiddleware } from "./middleware/auth";
+import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
 import { RegisterRoutes as registerPrivateTSOARoutes } from "./tsoa-build/private/routes";
 import { RegisterRoutes as registerPublicTSOARoutes } from "./tsoa-build/public/routes";
 import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
-import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
-import { tokenRouter } from "./lib/routers/tokenRouter";
-import { consume, consumeDlq } from "./lib/clients/KafkaConsumer";
+import { startConsumers } from "./workers/consumerInterface";
+import {
+  DLQ_WORKER_COUNT,
+  NORMAL_WORKER_COUNT,
+} from "./lib/clients/kafkaConsumers/constant";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -31,6 +33,8 @@ const allowedOriginsEnv = {
     /^https?:\/\/(www\.)?helicone-git-valhalla-use-jawn-to-read-helicone\.vercel\.app$/,
     /^http:\/\/localhost:3000$/,
     /^http:\/\/localhost:3001$/,
+    /^https?:\/\/(www\.)?eu\.helicone\.ai$/, // Added eu.helicone.ai
+    /^https?:\/\/(www\.)?us\.helicone\.ai$/,
   ],
   development: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
   preview: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
@@ -42,13 +46,12 @@ const app = express();
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
+
 if (KAFKA_ENABLED) {
-  consume();
-  // consumeDlq();
-}
-if (KAFKA_ENABLED) {
-  const worker = new Worker(`${__dirname}/workers/kafkaConsumer.js`);
-  worker.postMessage("start");
+  startConsumers({
+    dlqCount: DLQ_WORKER_COUNT,
+    normalCount: NORMAL_WORKER_COUNT,
+  });
 }
 
 app.get("/healthcheck", (req, res) => {
@@ -81,7 +84,10 @@ app.options("*", (req, res) => {
   } else {
     res.setHeader("Access-Control-Allow-Origin", "");
   }
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, DELETE, OPTIONS, PATCH"
+  );
   res.setHeader(
     "Access-Control-Allow-Headers",
     "Content-Type, Authorization, Helicone-Authorization"
@@ -127,7 +133,7 @@ app.use((req, res, next) => {
   } else {
     res.setHeader("Access-Control-Allow-Origin", "");
   }
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PATCH");
   res.setHeader(
     "Access-Control-Allow-Headers",
     "Content-Type, Authorization, Helicone-Authorization"

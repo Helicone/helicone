@@ -1,12 +1,15 @@
+import { ToolCall } from "openai/resources/beta/threads/runs/steps";
 import { Message } from "../../components/templates/requests/chat";
 import { NormalizedRequest } from "../../components/templates/requestsV2/builder/abstractRequestBuilder";
 import useRequestsPageV2 from "../../components/templates/requestsV2/useRequestsPageV2";
+import { ChatCompletion, ChatCompletionTool } from "openai/resources";
 
 export const getChat = (
   requests: NormalizedRequest[]
 ): {
   chat: Message[];
   isChat: boolean;
+  tools?: ChatCompletionTool[];
 } => {
   let isChat = false;
   if (!requests || requests.length < 1) {
@@ -16,7 +19,27 @@ export const getChat = (
     };
   }
 
-  const sourceChat = JSON.parse(JSON.stringify(requests[0].requestBody));
+  const singleRequest = requests[0];
+
+  const getSourceChat = () => {
+    if (singleRequest.provider === "ANTHROPIC") {
+      const requestBody = JSON.parse(JSON.stringify(singleRequest.requestBody));
+      if (requestBody && requestBody.system && requestBody.messages) {
+        const systemMessage = {
+          role: "system",
+          content: requestBody.system,
+        };
+        requestBody.messages.unshift(systemMessage);
+        return JSON.parse(JSON.stringify(requestBody));
+      } else {
+        return JSON.parse(JSON.stringify(singleRequest.requestBody));
+      }
+    } else {
+      return JSON.parse(JSON.stringify(singleRequest.requestBody));
+    }
+  };
+
+  const sourceChat = getSourceChat();
 
   const sourceResponse = JSON.parse(JSON.stringify(requests[0].responseBody));
 
@@ -28,6 +51,19 @@ export const getChat = (
   }
 
   const sourcePrompt = [...sourceChat.messages];
+
+  if (
+    singleRequest.provider === "ANTHROPIC" &&
+    sourceResponse &&
+    sourceResponse.content &&
+    sourceResponse.content[0] &&
+    sourceResponse.content[0].text
+  ) {
+    sourcePrompt.push({
+      role: "assistant",
+      content: sourceResponse.content[0].text,
+    });
+  }
 
   if (
     sourceResponse &&
@@ -47,9 +83,18 @@ export const getChat = (
     isChat = true;
   }
 
+  const enforceToolType = (tools: any[]) => {
+    try {
+      return tools.map((tool) => tool as ChatCompletionTool);
+    } catch (e) {
+      return undefined;
+    }
+  };
+
   return {
     chat: sourcePrompt,
     isChat,
+    tools: enforceToolType(sourceChat.tools),
   };
 };
 
@@ -70,7 +115,7 @@ export const usePlaygroundPage = (requestId: string) => {
     false
   );
 
-  const { chat, isChat } = getChat(requests.requests);
+  const { chat, isChat, tools } = getChat(requests.requests);
 
   return {
     isLoading: requests.isDataLoading,
@@ -79,5 +124,6 @@ export const usePlaygroundPage = (requestId: string) => {
     refetch: requests.refetch,
     hasData: requests.requests && requests.requests.length > 0,
     isChat,
+    tools,
   };
 };

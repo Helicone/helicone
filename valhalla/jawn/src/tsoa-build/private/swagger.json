@@ -480,6 +480,15 @@
 			},
 			"HeliconeMeta": {
 				"properties": {
+					"posthogHost": {
+						"type": "string"
+					},
+					"posthogApiKey": {
+						"type": "string"
+					},
+					"webhookEnabled": {
+						"type": "boolean"
+					},
 					"omitResponseLog": {
 						"type": "boolean"
 					},
@@ -491,6 +500,7 @@
 					}
 				},
 				"required": [
+					"webhookEnabled",
 					"omitResponseLog",
 					"omitRequestLog"
 				],
@@ -1314,6 +1324,250 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/admin/admins/query": {
+			"get": {
+				"operationId": "GetAdmins",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"properties": {
+											"user_id": {
+												"type": "string",
+												"nullable": true
+											},
+											"user_email": {
+												"type": "string",
+												"nullable": true
+											},
+											"id": {
+												"type": "number",
+												"format": "double"
+											},
+											"created_at": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"user_id",
+											"user_email",
+											"id",
+											"created_at"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/admin/orgs/query": {
+			"post": {
+				"operationId": "FindAllOrgs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"orgs": {
+											"items": {
+												"properties": {
+													"id": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"id",
+													"name"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"orgs"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"orgName": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"orgName"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/admins/org/query": {
+			"post": {
+				"operationId": "AddAdminsToOrg",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"adminIds": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"orgId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"adminIds",
+									"orgId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/alert_banners": {
+			"post": {
+				"operationId": "CreateAlertBanner",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"message": {
+										"type": "string"
+									},
+									"title": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"message",
+									"title"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"operationId": "UpdateAlertBanner",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"active": {
+										"type": "boolean"
+									},
+									"id": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"required": [
+									"active",
+									"id"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		}
 	},

@@ -12,7 +12,7 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.00001,
-      completion_token: 0.0003,
+      completion_token: 0.00003,
     },
   },
   {
@@ -22,7 +22,7 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.00001,
-      completion_token: 0.0003,
+      completion_token: 0.00003,
     },
   },
   {
@@ -32,7 +32,7 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.00001,
-      completion_token: 0.0003,
+      completion_token: 0.00003,
     },
   },
   {
@@ -42,7 +42,7 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.00001,
-      completion_token: 0.0003,
+      completion_token: 0.00003,
     },
   },
   {
@@ -92,7 +92,7 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.00001,
-      completion_token: 0.0003,
+      completion_token: 0.00003,
     },
   },
 ];

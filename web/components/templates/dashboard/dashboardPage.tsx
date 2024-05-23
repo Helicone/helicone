@@ -53,6 +53,7 @@ import { useOrganizationLayout } from "../../../services/hooks/organization_layo
 import CountryPanel from "./panels/countryPanel";
 import useNotification from "../../shared/notification/useNotification";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
+import { filterUIToFilterLeafs } from "../../../services/lib/filters/filterDefs";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -706,7 +707,13 @@ const DashboardPage = (props: DashboardPageProps) => {
                 </StyledAreaChart>
               </div>
               <div key="countries">
-                <CountryPanel timeFilter={timeFilter} />
+                <CountryPanel
+                  timeFilter={timeFilter}
+                  userFilters={filterUIToFilterLeafs(
+                    filterMap,
+                    advancedFilters
+                  )}
+                />
               </div>
               <div key="latency">
                 <StyledAreaChart
