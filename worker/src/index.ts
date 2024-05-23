@@ -110,8 +110,6 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
       S3_BUCKET_NAME: env.EU_S3_BUCKET_NAME,
       S3_REGION: "eu-west-1",
     };
-
-    console.log("Using EU env");
   }
 
   if (env.WORKER_TYPE) {
