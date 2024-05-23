@@ -7,14 +7,17 @@ FROM --platform=linux/amd64 node:20
 # Set the working directory inside the container
 WORKDIR /usr/src/app
 
-COPY . .
+WORKDIR /usr/src/app/jawn
+
+COPY jawn/package.json jawn/yarn.lock ./
+
+RUN yarn install
+
+COPY ./jawn .
 
 #yarn workspace jawn serve
 ENV PORT=8585
 
-WORKDIR /usr/src/app/jawn
-
-RUN yarn install
 RUN yarn build
 
 ENV DLQ_WORKER_COUNT=0
