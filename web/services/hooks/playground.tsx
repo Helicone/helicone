@@ -1,13 +1,18 @@
+import { ToolCall } from "openai/resources/beta/threads/runs/steps";
 import { Message } from "../../components/templates/requests/chat";
 import { NormalizedRequest } from "../../components/templates/requestsV2/builder/abstractRequestBuilder";
 import useRequestsPageV2 from "../../components/templates/requestsV2/useRequestsPageV2";
+import {
+  ChatCompletion,
+  ChatCompletionMessageToolCall,
+} from "openai/resources";
 
 export const getChat = (
   requests: NormalizedRequest[]
 ): {
   chat: Message[];
   isChat: boolean;
-  tools?: any;
+  tools?: ChatCompletionMessageToolCall[];
 } => {
   let isChat = false;
   if (!requests || requests.length < 1) {
@@ -81,10 +86,18 @@ export const getChat = (
     isChat = true;
   }
 
+  const enforceToolType = (tools: any[]) => {
+    try {
+      return tools.map((tool) => tool as ChatCompletionMessageToolCall);
+    } catch (e) {
+      return undefined;
+    }
+  };
+
   return {
     chat: sourcePrompt,
     isChat,
-    tools: sourceChat.tools || undefined,
+    tools: enforceToolType(sourceChat.tools),
   };
 };
 

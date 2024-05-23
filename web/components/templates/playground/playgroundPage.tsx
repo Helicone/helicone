@@ -21,6 +21,7 @@ import {
 import FunctionButton from "./functionButton";
 import HcButton from "../../ui/hcButton";
 import { PlusIcon } from "@heroicons/react/20/solid";
+import { ChatCompletionMessageToolCall } from "openai/resources";
 interface PlaygroundPageProps {
   request?: string;
 }
@@ -47,7 +48,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     debouncedRequestId || ""
   );
 
-  const [currentTools, setCurrentTools] = useState<any>();
+  const [currentTools, setCurrentTools] =
+    useState<ChatCompletionMessageToolCall[]>();
 
   useEffect(() => {
     if (currentTools === undefined) {
@@ -368,32 +370,36 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               />
             </div>
             <ul className="flex flex-col space-y-2">
-              {currentTools?.map((tool: any, index: number) => (
-                <FunctionButton
-                  key={index}
-                  tool={tool}
-                  onSave={(functionText: string) => {
-                    // parse the function text and update the current tools
-                    try {
-                      // update the current tools
-                      const newTools = JSON.parse(JSON.stringify(currentTools));
-                      newTools[index].function = JSON.parse(functionText);
+              {currentTools?.map(
+                (tool: ChatCompletionMessageToolCall, index: number) => (
+                  <FunctionButton
+                    key={index}
+                    tool={tool}
+                    onSave={(functionText: string) => {
+                      // parse the function text and update the current tools
+                      try {
+                        // update the current tools
+                        const newTools = JSON.parse(
+                          JSON.stringify(currentTools)
+                        );
+                        newTools[index].function = JSON.parse(functionText);
+                        setCurrentTools(newTools);
+                        setNotification("Function updated", "success");
+                      } catch (e) {
+                        console.error(e);
+                        setNotification("Failed to update function", "error");
+                      }
+                    }}
+                    onDelete={(name: string) => {
+                      // delete the function from the current tools
+                      const newTools = currentTools.filter(
+                        (tool: any) => tool.function.name !== name
+                      );
                       setCurrentTools(newTools);
-                      setNotification("Function updated", "success");
-                    } catch (e) {
-                      console.error(e);
-                      setNotification("Failed to update function", "error");
-                    }
-                  }}
-                  onDelete={(name: string) => {
-                    // delete the function from the current tools
-                    const newTools = currentTools.filter(
-                      (tool: any) => tool.function.name !== name
-                    );
-                    setCurrentTools(newTools);
-                  }}
-                />
-              ))}
+                    }}
+                  />
+                )
+              )}
             </ul>
           </div>
         </div>

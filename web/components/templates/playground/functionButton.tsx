@@ -3,12 +3,12 @@ import ThemedModal from "../../shared/themed/themedModal";
 import MarkdownEditor from "../../shared/markdownEditor";
 import HcButton from "../../ui/hcButton";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { ChatCompletionMessageToolCall } from "openai/resources";
 
 interface FunctionButtonProps {
-  tool: any;
+  tool: ChatCompletionMessageToolCall;
   onSave: (functionText: string) => void;
   onDelete: (name: string) => void;
-  //   setTool: (tool: any) => void;
 }
 
 const FunctionButton = (props: FunctionButtonProps) => {
@@ -18,14 +18,6 @@ const FunctionButton = (props: FunctionButtonProps) => {
   const [functionText, setFunctionText] = useState(
     JSON.stringify(tool.function, null, 2)
   );
-
-  const getName = (tool: any) => {
-    try {
-      return tool.function.name;
-    } catch (e) {
-      return "n/a";
-    }
-  };
 
   const isValidJson = (jsonString: string) => {
     try {
@@ -51,10 +43,10 @@ const FunctionButton = (props: FunctionButtonProps) => {
             }}
             className="text-black dark:text-white font-semibold truncate w-40"
           >
-            {getName(tool)}
+            {tool.function.name || "n/a"}
           </p>
         </button>
-        <button onClick={() => onDelete(getName(tool))} className="">
+        <button onClick={() => onDelete(tool.function.name || "")} className="">
           <TrashIcon className="h-4 w-4 text-red-500" />
         </button>
       </div>
