@@ -96,10 +96,13 @@ export class HeliconeProxyRequestMapper {
     const targetUrl = buildTargetUrl(this.request.url, api_base);
 
     const requestJson = await this.requestJson();
-    const queryParams = new URLSearchParams(targetUrl.search);
-    // alt = sse is how Gemini determines if a request is a stream
-    const isStream =
-      requestJson.stream === true || queryParams.get("alt") === "sse";
+    let isStream = requestJson.stream === true;
+
+    if (this.provider === "GOOGLE") {
+      const queryParams = new URLSearchParams(targetUrl.search);
+      // alt = sse is how Gemini determines if a request is a stream
+      isStream = isStream || queryParams.get("alt") === "sse";
+    }
 
     return {
       data: {
