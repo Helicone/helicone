@@ -7,7 +7,6 @@ import Image from "next/image";
 import { useState } from "react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import SolutionsButton from "./solutionsButton";
-import DeveloperButton from "./developerButton";
 import { signOut } from "../../shared/utils/utils";
 
 interface NavBarV2Props {}

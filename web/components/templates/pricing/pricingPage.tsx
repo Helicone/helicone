@@ -3,7 +3,6 @@ import {
   AcademicCapIcon,
   CheckCircleIcon,
   ChevronDownIcon,
-  ChevronUpDownIcon,
   ChevronUpIcon,
   CodeBracketIcon,
   XCircleIcon,
@@ -12,16 +11,10 @@ import { clsx } from "../../shared/clsx";
 import NavBarV2 from "../../layout/navbar/navBarV2";
 import Footer from "../../layout/footer";
 import Link from "next/link";
-import ContactForm from "../../shared/contactForm";
 import Image from "next/image";
 
-import {
-  ChevronRightIcon,
-  HomeModernIcon,
-  TableCellsIcon,
-} from "@heroicons/react/24/solid";
-import { Disclosure } from "@headlessui/react";
-import RequestLogTable, { HELICONE_LOG_PRICING } from "./requestLogTable";
+import { HomeModernIcon } from "@heroicons/react/24/solid";
+import { HELICONE_LOG_PRICING } from "./requestLogTable";
 import FeatureTable from "./featureTable";
 import HcButton from "../../ui/hcButton";
 import { useRouter } from "next/router";
@@ -275,7 +268,10 @@ export default function Example() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-16">
             {/* map over an array of 3 */}
             {TIERS.map((tier, index) => (
-              <div className="w-full h-full border border-gray-300 rounded-xl flex flex-col space-y-4 p-8 bg-white">
+              <div
+                key={tier.name}
+                className="w-full h-full border border-gray-300 rounded-xl flex flex-col space-y-4 p-8 bg-white"
+              >
                 <h2 className="text-sm font-semibold">{tier.name}</h2>
                 <div className="flex items-baseline space-x-1">
                   {tier.name === "Free" && (
@@ -344,7 +340,10 @@ export default function Example() {
 
                 <ul className="text-gray-500 text-sm">
                   {tier.features.map((feature) => (
-                    <li className="flex items-center gap-4 py-2">
+                    <li
+                      className="flex items-center gap-4 py-2"
+                      key={feature.name}
+                    >
                       {feature.included === true ? (
                         <CheckCircleIcon className="h-5 w-5 text-sky-500" />
                       ) : (
