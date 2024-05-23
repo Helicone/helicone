@@ -3,20 +3,20 @@ import { Result } from "../util/results";
 import { compress } from "../util/helpers";
 
 export class S3Client {
-  private region = "us-west-2";
   private awsClient: AwsClient;
 
   constructor(
     accessKey: string,
     secretKey: string,
     private endpoint: string,
-    private bucketName: string
+    private bucketName: string,
+    private region: "us-west-2" | "eu-west-1"
   ) {
     this.awsClient = new AwsClient({
       accessKeyId: accessKey,
       secretAccessKey: secretKey,
       service: "s3",
-      region: this.region,
+      region,
     });
   }
 
@@ -80,7 +80,7 @@ export class S3Client {
       if (!response.ok) {
         return {
           data: null,
-          error: `Failed to store data: ${response.statusText}`,
+          error: `Failed to store data: ${response.statusText}, ${response.url}, ${signedRequest.url}`,
         };
       }
 
