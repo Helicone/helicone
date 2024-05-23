@@ -74,8 +74,8 @@
             {
               "group": "API",
               "pages": [
-                "integrations/gemini/generativeai/node",
-                "integrations/gemini/generativeai/curl"
+                "integrations/gemini/api/node",
+                "integrations/gemini/api/curl"
               ]
             },
             {
