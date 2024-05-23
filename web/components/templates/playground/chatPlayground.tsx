@@ -121,7 +121,6 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
       }
 
       const getContent = (data: any) => {
-        // return JSON.stringify(data.choices[0].message.tool_calls, null, 2);
         if (data.choices[0].message.tool_calls) {
           const message = data.choices[0].message;
           const tools = message.tool_calls;
@@ -130,9 +129,9 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           );
           return JSON.stringify(functionTools, null, 4);
         } else if (data.choices && data.choices[0].message?.content) {
-          return data.choices[0].message.content + 123;
+          return data.choices[0].message.content;
         } else if (data.content && data.content[0].text) {
-          return data.content[0].text + 456;
+          return data.content[0].text;
         } else {
           return `${model} failed to fetch response. Please try again`;
         }
