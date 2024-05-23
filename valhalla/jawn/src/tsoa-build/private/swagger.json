@@ -754,6 +754,49 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"KafkaDLQSettings": {
+				"properties": {
+					"miniBatchSize": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"miniBatchSize"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"KafkaLogSettings": {
+				"properties": {
+					"miniBatchSize": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"miniBatchSize"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Setting": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/KafkaDLQSettings"
+					},
+					{
+						"$ref": "#/components/schemas/KafkaLogSettings"
+					}
+				]
+			},
+			"SettingName": {
+				"type": "string",
+				"enum": [
+					"kafka:dlq",
+					"kafka:log"
+				]
 			}
 		},
 		"securitySchemes": {
@@ -1376,6 +1419,82 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/v1/admin/settings/{name}": {
+			"get": {
+				"operationId": "GetSetting",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Setting"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "name",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/SettingName"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/settings": {
+			"post": {
+				"operationId": "UpdateSetting",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"settings": {
+										"$ref": "#/components/schemas/Setting"
+									},
+									"name": {
+										"$ref": "#/components/schemas/SettingName"
+									}
+								},
+								"required": [
+									"settings",
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/admin/orgs/query": {

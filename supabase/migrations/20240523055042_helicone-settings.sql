@@ -10,3 +10,4 @@ INSERT INTO public.helicone_settings (name, settings)
 VALUES ('kafka:dlq', '{"miniBatchSize": 1}');
 INSERT INTO public.helicone_settings (name, settings)
 VALUES ('kafka:log', '{"miniBatchSize": 300}');
+ALTER TABLE public.helicone_settings ENABLE ROW LEVEL SECURITY;

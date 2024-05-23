@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Patch,
+  Path,
   Post,
   Request,
   Route,
@@ -13,6 +14,12 @@ import {
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { IS_ON_PREM } from "../../lib/experiment/run";
 import { supabaseServer } from "../../lib/db/supabase";
+import {
+  KafkaDLQSettings,
+  KafkaLogSettings,
+  Setting,
+  SettingName,
+} from "../../utils/settings";
 
 const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
@@ -51,6 +58,55 @@ export class AdminController extends Controller {
       .select("*");
 
     return data ?? [];
+  }
+
+  @Get("/settings/{name}")
+  public async getSetting(
+    @Path() name: SettingName,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Setting> {
+    authCheckThrow(request.authParams.userId);
+
+    const { data, error } = await supabaseServer.client
+      .from("helicone_settings")
+      .select("*")
+      .eq("name", name);
+
+    if (error || data.length === 0) {
+      throw new Error(error?.message ?? "No settings found");
+    }
+    const settings = data[0].settings;
+
+    if (typeof settings === "string") {
+      return JSON.parse(settings) as Setting;
+    } else {
+      throw new Error("Settings must be a string");
+    }
+  }
+
+  @Post("/settings")
+  public async updateSetting(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      name: SettingName;
+      settings: Setting;
+    }
+  ): Promise<void> {
+    authCheckThrow(request.authParams.userId);
+
+    const { error } = await supabaseServer.client
+      .from("helicone_settings")
+      .update({
+        settings: JSON.stringify(body.settings),
+      })
+      .eq("name", body.name);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return;
   }
 
   @Post("/orgs/query")
