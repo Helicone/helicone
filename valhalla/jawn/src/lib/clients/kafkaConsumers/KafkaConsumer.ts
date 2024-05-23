@@ -74,30 +74,31 @@ export const consume = async () => {
         const firstOffset = miniBatch[0].offset;
         const lastOffset = miniBatch[miniBatch.length - 1].offset;
         const miniBatchId = `${batch.partition}-${firstOffset}-${lastOffset}`;
+        try {
+          const mappedMessages = mapKafkaMessageToMessage(miniBatch);
+          if (mappedMessages.error || !mappedMessages.data) {
+            console.error("Failed to map messages", mappedMessages.error);
+            return;
+          }
 
-        resolveOffset(lastOffset);
+          const consumeResult = await consumeMiniBatch(
+            mappedMessages.data,
+            firstOffset,
+            lastOffset,
+            miniBatchId,
+            batch.partition,
+            "request-response-logs-prod"
+          );
 
-        const mappedMessages = mapKafkaMessageToMessage(miniBatch);
-        if (mappedMessages.error || !mappedMessages.data) {
-          console.error("Failed to map messages", mappedMessages.error);
-          return;
+          if (consumeResult.error) {
+            console.error("Failed to consume batch", consumeResult.error);
+          }
+        } catch (error) {
+          console.error("Failed to consume batch", error);
+        } finally {
+          resolveOffset(lastOffset);
+          await heartbeat();
         }
-
-        const consumeResult = await consumeMiniBatch(
-          mappedMessages.data,
-          firstOffset,
-          lastOffset,
-          miniBatchId,
-          batch.partition,
-          "request-response-logs-prod"
-        );
-
-        if (consumeResult.error) {
-          console.error("Failed to consume batch", consumeResult.error);
-          // TODO: Best way to handle this?
-        }
-
-        await heartbeat();
       }
 
       await commitOffsetsIfNecessary();
@@ -195,28 +196,30 @@ export const consumeDlq = async () => {
         const lastOffset = miniBatch[miniBatch.length - 1].offset;
         const miniBatchId = `${batch.partition}-${firstOffset}-${lastOffset}`;
 
-        resolveOffset(lastOffset);
+        try {
+          const mappedMessages = mapDlqKafkaMessageToMessage(miniBatch);
+          if (mappedMessages.error || !mappedMessages.data) {
+            console.error("DLQ: Failed to map messages", mappedMessages.error);
+            return;
+          }
 
-        const mappedMessages = mapDlqKafkaMessageToMessage(miniBatch);
-        if (mappedMessages.error || !mappedMessages.data) {
-          console.error("DLQ: Failed to map messages", mappedMessages.error);
-          return;
+          const consumeResult = await consumeMiniBatch(
+            mappedMessages.data,
+            firstOffset,
+            lastOffset,
+            miniBatchId,
+            batch.partition,
+            "request-response-logs-prod-dlq"
+          );
+          if (consumeResult.error) {
+            console.error("DLQ: Failed to consume batch", consumeResult.error);
+          }
+        } catch (error) {
+          console.error("DLQ: Failed to consume batch", error);
+        } finally {
+          resolveOffset(lastOffset);
+          await heartbeat();
         }
-
-        const consumeResult = await consumeMiniBatch(
-          mappedMessages.data,
-          firstOffset,
-          lastOffset,
-          miniBatchId,
-          batch.partition,
-          "request-response-logs-prod-dlq"
-        );
-        if (consumeResult.error) {
-          console.error("DLQ: Failed to consume batch", consumeResult.error);
-          // TODO: Best way to handle this?
-        }
-
-        await heartbeat();
       }
 
       await commitOffsetsIfNecessary();
