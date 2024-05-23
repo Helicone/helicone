@@ -51,12 +51,12 @@ routes = [
 	{ pattern = "gateway.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "2yfv.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 
-	{ pattern = "eu.oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "eu.anthropic.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "eu.api.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "eu.openrouter.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "eu.together.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "eu.gateway.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "oai.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "anthropic.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "api.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "openrouter.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "together.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "gateway.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
 
 durable_objects.bindings = [
@@ -96,12 +96,12 @@ routes = [
 	{ pattern = "together.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "gateway.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 
-	{ pattern = "eu.oai.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "eu.anthropic.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "eu.api.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "eu.openrouter.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "eu.together.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	{ pattern = "eu.gateway.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "oai.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "anthropic.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "api.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "openrouter.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "together.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "gateway.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
 
 kv_namespaces = [
