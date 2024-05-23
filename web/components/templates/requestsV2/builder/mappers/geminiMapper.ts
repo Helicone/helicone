@@ -64,13 +64,13 @@ export function mapGeminiPro(
               return partsArray
                 .map((part: any) => part?.text || "")
                 .filter((text: string) => text)
-                .join(" ");
+                .join("");
             })
-            .join(" ");
+            .join("");
         })
-        .join(" ")
+        .join("")
     )
-    .join(" ");
+    .join("");
 
   const functionCall = responseBody
     .map((response: any) =>
@@ -192,13 +192,13 @@ export function mapGeminiProJawn(
               return partsArray
                 .map((part: any) => part?.text || "")
                 .filter((text: string) => text)
-                .join(" ");
+                .join("");
             })
-            .join(" ");
+            .join("");
         })
-        .join(" ")
+        .join("")
     )
-    .join(" ");
+    .join("");
 
   const functionCall = responseBody
     .map((response: any) =>
