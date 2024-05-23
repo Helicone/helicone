@@ -51,6 +51,15 @@ routes = [
 	{ pattern = "gateway.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "2yfv.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 
+	{ pattern = "oai.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "anthropic.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "api.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "openrouter.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "together.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "gateway.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "2yfv.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+
+
 	{ pattern = "oai.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "api.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
