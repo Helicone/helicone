@@ -37,7 +37,9 @@ export class S3ReaderHandler extends AbstractLogHandler {
           // Do not process further, do not send to DLQ
           return ok(`Content not found in S3: ${signedUrl.data}`);
         }
-        return err(`Error fetching content from S3: ${content.error}`);
+        return err(
+          `Error fetching content from S3: ${JSON.stringify(content.error)}`
+        );
       }
 
       context.rawLog.rawRequestBody = content.data.request;

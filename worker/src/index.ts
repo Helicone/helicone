@@ -66,6 +66,7 @@ export interface BASE_Env {
   S3_SECRET_KEY: string;
   S3_ENDPOINT: string;
   S3_BUCKET_NAME: string;
+  S3_REGION?: "us-west-2" | "eu-west-1";
   UPSTASH_KAFKA_URL: string;
   UPSTASH_KAFKA_USERNAME: string;
   UPSTASH_KAFKA_API_KEY: string;
@@ -106,6 +107,8 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
       UPSTASH_KAFKA_PASSWORD: env.EU_UPSTASH_KAFKA_PASSWORD,
       UPSTASH_KAFKA_URL: env.EU_UPSTASH_KAFKA_URL,
       UPSTASH_KAFKA_USERNAME: env.EU_UPSTASH_KAFKA_USERNAME,
+      S3_BUCKET_NAME: env.EU_S3_BUCKET_NAME,
+      S3_REGION: "eu-west-1",
     };
   }
 

@@ -92,7 +92,8 @@ export async function logAsync(
           env.S3_ACCESS_KEY ?? "",
           env.S3_SECRET_KEY ?? "",
           env.S3_ENDPOINT ?? "",
-          env.S3_BUCKET_NAME ?? ""
+          env.S3_BUCKET_NAME ?? "",
+          env.S3_REGION ?? "us-west-2"
         ),
         createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
       ),
