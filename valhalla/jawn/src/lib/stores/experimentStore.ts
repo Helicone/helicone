@@ -439,23 +439,38 @@ function getExperimentHypothesisScores(
   hypothesis: Experiment["hypotheses"][0]
 ): Result<ExperimentScores["hypothesis"], string> {
   try {
-    const hypothesisCost = hypothesis.runs?.reduce(
-      (acc, run) =>
-        acc +
-        modelCost({
-          model: hypothesis.model,
-          provider: run.request!.provider,
-          sum_prompt_tokens: run.response!.promptTokens,
-          sum_completion_tokens: run.response!.completionTokens,
-        }),
-      0
+    const validRuns =
+      hypothesis.runs?.filter((run) => run.request && run.response) ?? [];
+
+    const { totalCost, totalLatency } = validRuns.reduce<{
+      totalCost: number;
+      totalLatency: number;
+    }>(
+      (acc, run) => {
+        const cost =
+          modelCost({
+            model: hypothesis.model,
+            provider: run.request!.provider,
+            sum_prompt_tokens: run.response!.promptTokens,
+            sum_completion_tokens: run.response!.completionTokens,
+          }) ?? 0;
+
+        return {
+          totalCost: acc.totalCost + cost,
+          totalLatency: acc.totalLatency + run.response!.delayMs,
+        };
+      },
+      { totalCost: 0, totalLatency: 0 }
     );
+
+    console.log("hypothesisLatency", totalLatency, validRuns.length);
 
     return ok({
       scores: {
         dateCreated: new Date(hypothesis.createdAt),
         model: hypothesis.model,
-        cost: hypothesisCost,
+        cost: validRuns.length > 0 ? totalCost / validRuns.length : 0,
+        latency: validRuns.length > 0 ? totalLatency / validRuns.length : 0,
         ...getCustomScores(hypothesis.runs.map((run) => run.scores)),
       },
     });
@@ -470,14 +485,15 @@ function getExperimentDatasetScores(
   try {
     const validRows = dataset.rows.filter((row) => row?.inputRecord?.response);
 
-    const { totalCost, latest } = validRows.reduce<{
+    const { totalCost, totalLatency, latest } = validRows.reduce<{
       totalCost: number;
+      totalLatency: number;
       latest: {
         createdAt: string;
         model: string;
       };
     }>(
-      ({ totalCost, latest }, row) => {
+      ({ totalCost, totalLatency, latest }, row) => {
         const cost =
           modelCost({
             model: row.inputRecord!.response.model,
@@ -492,11 +508,13 @@ function getExperimentDatasetScores(
 
         return {
           totalCost: totalCost + cost,
+          totalLatency: totalLatency + row.inputRecord!.response.delayMs,
           latest: isCurrentNewer ? row.inputRecord!.response : latest,
         };
       },
       {
         totalCost: 0,
+        totalLatency: 0,
         latest: {
           createdAt: new Date(0).toISOString(),
           model: "",
@@ -504,13 +522,14 @@ function getExperimentDatasetScores(
       }
     );
 
-    const averageCost = validRows.length > 0 ? totalCost / validRows.length : 0;
+    console.log("experimentLatency", totalLatency, validRows.length);
 
     return ok({
       scores: {
         dateCreated: new Date(latest.createdAt),
         model: latest.model,
-        cost: averageCost,
+        cost: validRows.length > 0 ? totalCost / validRows.length : 0,
+        latency: validRows.length > 0 ? totalLatency / validRows.length : 0,
         ...getCustomScores(validRows.map((row) => row.scores)),
       },
     });
