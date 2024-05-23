@@ -1,5 +1,13 @@
 import { Fragment, useState } from "react";
-import { CheckCircleIcon } from "@heroicons/react/20/solid";
+import {
+  AcademicCapIcon,
+  CheckCircleIcon,
+  ChevronDownIcon,
+  ChevronUpDownIcon,
+  ChevronUpIcon,
+  CodeBracketIcon,
+  XCircleIcon,
+} from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
 import NavBarV2 from "../../layout/navbar/navBarV2";
 import Footer from "../../layout/footer";
@@ -78,7 +86,7 @@ const Slider = ({
                 toExponentialValue(sliderValue) >= Number(key)
                   ? "font-bold text-black"
                   : "text-gray-500",
-                "absolute text-md"
+                "absolute text-xs"
               )}
               onClick={() => {
                 setSliderValue(toLinearValue(Number(key)));
@@ -100,12 +108,55 @@ const Slider = ({
 };
 
 const TIERS: {
-  name: 
-}[] = []
+  name: string;
+  ctaCopy: string;
+  features: {
+    name: string;
+    included: boolean | string;
+  }[];
+}[] = [
+  {
+    name: "Free",
+    ctaCopy: "Start building for free",
+    features: [
+      { name: "Observability and Analytics", included: true },
+      { name: "Core Tooling", included: true },
+      { name: "Prompt Templates", included: true },
+      { name: "Limited Prompt Experiments", included: true },
+      { name: "SOC-2 Compliance", included: false },
+      { name: "On-Prem Deployment", included: false },
+    ],
+  },
+  {
+    name: "Growth",
+    ctaCopy: "Get started for free",
+    features: [
+      { name: "Observability and Analytics", included: true },
+      { name: "Feature-Rich Tooling", included: true },
+      { name: "Prompt Templates", included: true },
+      { name: "Prompt Experiments", included: true },
+      { name: "SOC-2 Compliance", included: false },
+      { name: "On-Prem Deployment", included: false },
+    ],
+  },
+  {
+    name: "Enterprise",
+    ctaCopy: "Get in touch",
+    features: [
+      { name: "Observability and Analytics", included: true },
+      { name: "Feature-Rich Tooling", included: true },
+      { name: "Prompt Templates", included: true },
+      { name: "Prompt Experiments", included: true },
+      { name: "SOC-2 Compliance", included: true },
+      { name: "On-Prem Deployment", included: true },
+    ],
+  },
+];
 
 export default function Example() {
-  const [requestLogs, setRequestLogs] = useState(100_000);
+  const [requestLogs, setRequestLogs] = useState(0);
   const [promptCount, setPromptCount] = useState(0);
+  const [showPlans, setShowPlans] = useState(false);
 
   const handleRequestLogChange = (newValue: any) => {
     setRequestLogs(newValue);
@@ -135,7 +186,7 @@ export default function Example() {
 
   const renderLogCost = () => {
     if (requestLogs <= 100_000) {
-      return "Free";
+      return "$0.00";
     }
     if (requestLogs >= 50_000_000) {
       return "Contact us for pricing";
@@ -214,48 +265,256 @@ export default function Example() {
             >
               Get a demo
             </Link>
-            <Link
+            {/* <Link
               href="/signup"
               className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 text-white border-[3px] border-sky-700 rounded-lg pl-4 pr-2 py-2 text-sm font-bold shadow-lg flex w-fit items-center gap-1"
             >
               Start Building
               <ChevronRightIcon className="w-5 h-5 inline text-white" />
-            </Link>
+            </Link> */}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-16">
             {/* map over an array of 3 */}
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div className="w-full h-full border border-gray-300 rounded-xl flex flex-col space-y-4 p-8">
-                <h2 className="text-sm font-semibold">Free</h2>
+            {TIERS.map((tier, index) => (
+              <div className="w-full h-full border border-gray-300 rounded-xl flex flex-col space-y-4 p-8 bg-white">
+                <h2 className="text-sm font-semibold">{tier.name}</h2>
                 <div className="flex items-baseline space-x-1">
-                  <p className="text-3xl font-semibold">$0</p>
-                  <p className="text-sm text-gray-500">/month</p>
+                  {tier.name === "Free" && (
+                    <>
+                      <p className="text-3xl font-semibold">$0.00</p>
+                      <p className="text-sm text-gray-500">/month</p>
+                    </>
+                  )}
+                  {tier.name === "Growth" && (
+                    <>
+                      <p className="text-3xl font-semibold">
+                        {renderLogCost()}
+                      </p>
+                      <p className="text-sm text-gray-500">/month</p>
+                    </>
+                  )}
+                  {tier.name === "Enterprise" && (
+                    <>
+                      <p className="text-3xl font-semibold">Get in touch</p>
+                    </>
+                  )}
                 </div>
+                {tier.name === "Free" && (
+                  <div className="h-32 border-t border-b border-gray-100 flex items-center w-full justify-center">
+                    <p className="text-center font-medium text-gray-500 px-4">
+                      Free for up to 100k requests per month
+                    </p>
+                  </div>
+                )}
+                {tier.name === "Growth" && (
+                  <div className="h-32 border-t border-b border-gray-100 flex items-center w-full">
+                    <div className="py-4 w-full">
+                      <p className="text-xs text-black font-semibold">
+                        {new Intl.NumberFormat("us", {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0,
+                        }).format(requestLogs)}
+                        <span className="text-gray-500 font-normal">
+                          {" "}
+                          requests / month
+                        </span>
+                      </p>
+                      <Slider
+                        min={0}
+                        max={10_000_000}
+                        exponent={3} // Adjust the exponent as needed for the scale you want
+                        onChange={handleRequestLogChange}
+                        labels={{
+                          0: "0",
+                          100_000: "100k",
+                          1_000_000: "1m",
+                          3_500_000: "3.5m",
+                          10_000_000: "10m",
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+                {tier.name === "Enterprise" && (
+                  <div className="h-32 border-t border-b border-gray-100 flex items-center w-full justify-center">
+                    <p className="text-center font-medium text-gray-500 px-4">
+                      Contact us for a tailored plan for your business
+                    </p>
+                  </div>
+                )}
+
+                <ul className="text-gray-500 text-sm">
+                  {tier.features.map((feature) => (
+                    <li className="flex items-center gap-4 py-2">
+                      {feature.included === true ? (
+                        <CheckCircleIcon className="h-5 w-5 text-sky-500" />
+                      ) : (
+                        <XCircleIcon className="h-5 w-5 text-gray-300" />
+                      )}
+                      <span className="">
+                        {feature.name}{" "}
+                        {typeof feature.included === "string" &&
+                          `(${feature.included})`}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
                 <HcButton
                   variant={index === 1 ? "primary" : "secondary"}
                   size={"sm"}
-                  title={"Get started for free"}
+                  title={tier.ctaCopy}
                 />
-                <ul className="text-gray-700">
-                  <li className="flex items-center gap-4 py-2">
-                    <CheckCircleIcon className="h-6 w-6 text-sky-500" />
-                    <span>Unlimited requests</span>
-                  </li>
-                  <li className="flex items-center gap-4 py-2">
-                    <CheckCircleIcon className="h-6 w-6 text-sky-500" />
-                    <span>Unlimited requests</span>
-                  </li>
-                  <li className="flex items-center gap-4 py-2">
-                    <CheckCircleIcon className="h-6 w-6 text-sky-500" />
-                    <span>Unlimited requests</span>
-                  </li>
-                </ul>
               </div>
             ))}
           </div>
+          <div className="flex flex-col max-w-6xl mx-auto space-y-8 py-4">
+            <HcButton
+              variant="light"
+              size="lg"
+              title="Compare Plans"
+              icon={!showPlans ? ChevronDownIcon : ChevronUpIcon}
+              onClick={() => {
+                setShowPlans(!showPlans);
+              }}
+            />
+            {showPlans && <FeatureTable />}
+          </div>
+          <div className="flex flex-col max-w-6xl mx-auto space-y-8 py-16 w-full">
+            <h2 className="text-lg sm:text-2xl font-bold tracking-tight max-w-4xl pt-8">
+              Available <span className=" text-sky-500">discounts</span>
+            </h2>
+            <ul className="grid grid-cols-4 gap-8">
+              <li className="flex items-start gap-4 col-span-1 w-full">
+                <div>
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="mr-1 ml-2"
+                  >
+                    <g clipPath="url(#clip0_24_57)">
+                      <rect
+                        width="24"
+                        height="24"
+                        rx="5.4"
+                        fill="#FF5100"
+                      ></rect>
+                      <rect
+                        x="0.5"
+                        y="0.5"
+                        width="23"
+                        height="23"
+                        rx="4.9"
+                        stroke="#FF844B"
+                      ></rect>
+                      <path
+                        d="M7.54102 7.31818H9.28604L11.9458 11.9467H12.0552L14.715 7.31818H16.46L12.7662 13.5028V17.5H11.2349V13.5028L7.54102 7.31818Z"
+                        fill="white"
+                      ></path>
+                    </g>
+                    <rect
+                      x="0.5"
+                      y="0.5"
+                      width="23"
+                      height="23"
+                      rx="4.9"
+                      stroke="#FF5100"
+                      strokeOpacity="0.1"
+                    ></rect>
+                    <rect
+                      x="0.5"
+                      y="0.5"
+                      width="23"
+                      height="23"
+                      rx="4.9"
+                      stroke="url(#paint0_radial_24_57)"
+                    ></rect>
+                    <defs>
+                      <radialGradient
+                        id="paint0_radial_24_57"
+                        cx="0"
+                        cy="0"
+                        r="1"
+                        gradientUnits="userSpaceOnUse"
+                        gradientTransform="translate(7.35) rotate(58.475) scale(34.1384)"
+                      >
+                        <stop stopColor="white" stopOpacity="0.56"></stop>
+                        <stop
+                          offset="0.28125"
+                          stopColor="white"
+                          stopOpacity="0"
+                        ></stop>
+                      </radialGradient>
+                      <clipPath id="clip0_24_57">
+                        <rect
+                          width="24"
+                          height="24"
+                          rx="5.4"
+                          fill="white"
+                        ></rect>
+                      </clipPath>
+                    </defs>
+                  </svg>
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <h3 className="text-black font-semibold">YC Companies</h3>
+                  <p className="text-gray-700 text-sm">
+                    For companies in the current batch, we offer a $10,000
+                    credit for the first year.
+                  </p>
+                </div>
+              </li>
+              <li className="flex items-start gap-4 col-span-1 w-full">
+                <div>
+                  <HomeModernIcon className="h-6 w-6 text-purple-500" />
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <h3 className="text-black font-semibold">
+                    Startups / Non-Profits
+                  </h3>
+                  <p className="text-gray-700 text-sm">
+                    For most startups under two years old and non-profits, we
+                    offer 50% off for the first year.{" "}
+                    <Link href="/contact" className="text-blue-500 underline">
+                      Get in touch
+                    </Link>{" "}
+                    to learn more.
+                  </p>
+                </div>
+              </li>{" "}
+              <li className="flex items-start gap-4 col-span-1 w-full">
+                <div>
+                  <CodeBracketIcon className="h-6 w-6 text-green-500" />
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <h3 className="text-black font-semibold">
+                    Open-Source Companies
+                  </h3>
+                  <p className="text-gray-700 text-sm">
+                    For fellow open-source companies, we offer a $5,000 credit
+                    for the first year.
+                  </p>
+                </div>
+              </li>{" "}
+              <li className="flex items-start gap-4 col-span-1 w-full">
+                <div>
+                  <AcademicCapIcon className="h-6 w-6 text-black" />
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <h3 className="text-black font-semibold">Students</h3>
+                  <p className="text-gray-700 text-sm">
+                    For most students and educators, we provide Helicone free of
+                    charge.
+                  </p>
+                </div>
+              </li>{" "}
+            </ul>
+          </div>
         </div>
 
-        {/* <FeatureTable /> */}
         {/* <div
           id="pricing"
           className="flex flex-col max-w-6xl mx-auto p-4 gap-2 pt-36"
