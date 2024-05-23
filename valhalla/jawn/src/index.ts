@@ -34,6 +34,7 @@ const allowedOriginsEnv = {
     /^http:\/\/localhost:3000$/,
     /^http:\/\/localhost:3001$/,
     /^https?:\/\/(www\.)?eu\.helicone\.ai$/, // Added eu.helicone.ai
+    /^https?:\/\/(www\.)?us\.helicone\.ai$/,
   ],
   development: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
   preview: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],

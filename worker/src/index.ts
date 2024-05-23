@@ -23,6 +23,7 @@ export interface EU_Env {
   EU_UPSTASH_KAFKA_PASSWORD: string;
   EU_UPSTASH_KAFKA_URL: string;
   EU_UPSTASH_KAFKA_USERNAME: string;
+  EU_SECURE_CACHE: KVNamespace;
 }
 export interface BASE_Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -96,7 +97,7 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
   const url = new URL(request.getUrl());
   const host = url.host;
   const hostParts = host.split(".");
-  if (host.startsWith("eu.")) {
+  if (hostParts.includes("eu")) {
     env = {
       ...env,
       CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
@@ -108,6 +109,7 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
       UPSTASH_KAFKA_URL: env.EU_UPSTASH_KAFKA_URL,
       UPSTASH_KAFKA_USERNAME: env.EU_UPSTASH_KAFKA_USERNAME,
       S3_BUCKET_NAME: env.EU_S3_BUCKET_NAME,
+      SECURE_CACHE: env.EU_SECURE_CACHE,
       S3_REGION: "eu-west-1",
     };
   }
@@ -123,7 +125,7 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         ...env,
         WORKER_TYPE: "GATEWAY_API",
       };
-    } else if (hostParts[0].includes("oai") || hostParts[1].includes("oai")) {
+    } else if (hostParts[0].includes("oai")) {
       return {
         ...env,
         WORKER_TYPE: "OPENAI_PROXY",

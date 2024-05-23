@@ -97,3 +97,63 @@ export function recursivelyConsolidate(body: any, delta: any): any {
   });
   return body;
 }
+
+export function consolidateGoogleTextFields(responseBody: any[]): any {
+  try {
+    const consolidated = responseBody.reduce((acc, cur) => {
+      if (!cur) {
+        return acc;
+      } else if (!acc.candidates) {
+        return cur;
+      } else {
+        if (cur.candidates) {
+          acc.candidates = acc.candidates.map((c: any, i: number) => {
+            if (!cur.candidates[i]) {
+              return c;
+            } else if (c.content && cur.candidates[i].content) {
+              c.content.parts = c.content.parts.map((part: any, j: number) => {
+                if (cur.candidates[i].content.parts[j]) {
+                  part.text = part.text
+                    ? part.text +
+                      (cur.candidates[i].content.parts[j].text ?? "")
+                    : cur.candidates[i].content.parts[j].text;
+                }
+                return part;
+              });
+              return c;
+            } else {
+              return c;
+            }
+          });
+        } else if (cur.candidates) {
+          // Handle the case where acc has no candidates but cur has
+          acc.candidates = cur.candidates;
+        }
+
+        if (cur.usageMetadata && acc.usageMetadata) {
+          acc.usageMetadata.promptTokenCount = Math.max(
+            acc.usageMetadata.promptTokenCount,
+            cur.usageMetadata.promptTokenCount
+          );
+          acc.usageMetadata.candidatesTokenCount = Math.max(
+            acc.usageMetadata.candidatesTokenCount,
+            cur.usageMetadata.candidatesTokenCount
+          );
+          acc.usageMetadata.totalTokenCount = Math.max(
+            acc.usageMetadata.totalTokenCount,
+            cur.usageMetadata.totalTokenCount
+          );
+        } else if (cur.usageMetadata) {
+          // Handle the case where acc has no usageMetadata but cur has
+          acc.usageMetadata = cur.usageMetadata;
+        }
+        return acc;
+      }
+    }, {});
+
+    return consolidated;
+  } catch (e) {
+    console.error("Error consolidating text fields", e);
+    return responseBody[0];
+  }
+}

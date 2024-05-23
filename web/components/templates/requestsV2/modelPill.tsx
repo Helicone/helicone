@@ -13,6 +13,8 @@ const ModelPill = (props: ModelPillProps) => {
   let modelMapping = {
     ChatBuilder:
       "bg-purple-50 text-purple-700 ring-purple-200 dark:bg-purple-900 dark:text-purple-300 dark:ring-purple-800",
+    GeminiBuilder:
+      "bg-teal-50 text-teal-700 ring-teal-200 dark:bg-teal-900 dark:text-teal-300 dark:ring-teal-800",
     CompletionBuilder:
       "bg-green-50 text-green-700 ring-green-200 dark:bg-green-900 dark:text-green-300 dark:ring-green-800",
     ChatGPTBuilder:

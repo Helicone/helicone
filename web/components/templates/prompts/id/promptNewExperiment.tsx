@@ -212,6 +212,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
                           }
                           setText={() => {}}
                           disabled={true}
+                          language="markdown"
                         />
                         {template.length > 200 && (
                           <Tooltip title="Expand">
@@ -263,6 +264,7 @@ const PromptNewExperimentPage = (props: PromptIdPageProps) => {
             text={selectedVersionTemplate}
             setText={() => {}}
             disabled={true}
+            language="markdown"
           />
         </div>
       </ThemedModal>
