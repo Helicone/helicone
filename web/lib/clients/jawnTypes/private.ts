@@ -45,6 +45,9 @@ export interface paths {
   "/v1/fine-tune/{jobId}/stats": {
     get: operations["FineTuneJobStats"];
   };
+  "/v1/admin/orgs/top": {
+    get: operations["GetTopOrgs"];
+  };
   "/v1/admin/admins/query": {
     get: operations["GetAdmins"];
   };
@@ -505,6 +508,36 @@ export interface operations {
             events: unknown;
             job: unknown;
           };
+        };
+      };
+    };
+  };
+  GetTopOrgs: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+              /** Format: double */
+              ct: number;
+              organization_id: string;
+              members: {
+                  last_active: string;
+                  role: string;
+                  email: string;
+                  id: string;
+                }[];
+              owner_last_login: string;
+              owner_email: string;
+              tier: string;
+              id: string;
+              overTime: {
+                  organization_id: string;
+                  dt: string;
+                  /** Format: double */
+                  count: number;
+                }[];
+            }[];
         };
       };
     };
