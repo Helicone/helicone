@@ -388,100 +388,28 @@ export default function Example() {
             <ul className="grid grid-cols-1 lg:grid-cols-4 gap-8">
               <li className="flex items-start gap-4 col-span-1 w-full">
                 <div>
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className=""
-                  >
-                    <g clipPath="url(#clip0_24_57)">
-                      <rect
-                        width="24"
-                        height="24"
-                        rx="5.4"
-                        fill="#FF5100"
-                      ></rect>
-                      <rect
-                        x="0.5"
-                        y="0.5"
-                        width="23"
-                        height="23"
-                        rx="4.9"
-                        stroke="#FF844B"
-                      ></rect>
-                      <path
-                        d="M7.54102 7.31818H9.28604L11.9458 11.9467H12.0552L14.715 7.31818H16.46L12.7662 13.5028V17.5H11.2349V13.5028L7.54102 7.31818Z"
-                        fill="white"
-                      ></path>
-                    </g>
-                    <rect
-                      x="0.5"
-                      y="0.5"
-                      width="23"
-                      height="23"
-                      rx="4.9"
-                      stroke="#FF5100"
-                      strokeOpacity="0.1"
-                    ></rect>
-                    <rect
-                      x="0.5"
-                      y="0.5"
-                      width="23"
-                      height="23"
-                      rx="4.9"
-                      stroke="url(#paint0_radial_24_57)"
-                    ></rect>
-                    <defs>
-                      <radialGradient
-                        id="paint0_radial_24_57"
-                        cx="0"
-                        cy="0"
-                        r="1"
-                        gradientUnits="userSpaceOnUse"
-                        gradientTransform="translate(7.35) rotate(58.475) scale(34.1384)"
-                      >
-                        <stop stopColor="white" stopOpacity="0.56"></stop>
-                        <stop
-                          offset="0.28125"
-                          stopColor="white"
-                          stopOpacity="0"
-                        ></stop>
-                      </radialGradient>
-                      <clipPath id="clip0_24_57">
-                        <rect
-                          width="24"
-                          height="24"
-                          rx="5.4"
-                          fill="white"
-                        ></rect>
-                      </clipPath>
-                    </defs>
-                  </svg>
-                </div>
-                <div className="flex flex-col space-y-1">
-                  <h3 className="text-black font-semibold">YC Companies</h3>
-                  <p className="text-gray-700 text-sm">
-                    For companies in the current batch, we offer a $10,000
-                    credit for the first year.
-                  </p>
-                </div>
-              </li>
-              <li className="flex items-start gap-4 col-span-1 w-full">
-                <div>
                   <HomeModernIcon className="h-6 w-6 text-purple-500" />
                 </div>
                 <div className="flex flex-col space-y-1">
-                  <h3 className="text-black font-semibold">
-                    Startups / Non-Profits
-                  </h3>
+                  <h3 className="text-black font-semibold">Startups</h3>
                   <p className="text-gray-700 text-sm">
                     For most startups under two years old and non-profits, we
                     offer 50% off for the first year.
                   </p>
                 </div>
               </li>{" "}
+              <li className="flex items-start gap-4 col-span-1 w-full">
+                <div>
+                  <HomeModernIcon className="h-6 w-6 text-purple-500" />
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <h3 className="text-black font-semibold">Non-Profits</h3>
+                  <p className="text-gray-700 text-sm">
+                    For most non-profits, we offer large discounts depending on
+                    organization size.
+                  </p>
+                </div>
+              </li>
               <li className="flex items-start gap-4 col-span-1 w-full">
                 <div>
                   <CodeBracketIcon className="h-6 w-6 text-green-500" />
