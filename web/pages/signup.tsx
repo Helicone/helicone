@@ -104,8 +104,11 @@ export default SignUp;
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  // if the base path contains localhost, do nothing
-  if (context.req.headers.host?.includes("localhost")) {
+  // if the base path contains localhost or vercel, do nothing
+  if (
+    context.req.headers.host?.includes("localhost") ||
+    context.req.headers.host?.includes("vercel")
+  ) {
     return {
       props: {},
     };

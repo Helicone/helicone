@@ -113,8 +113,11 @@ export const getServerSideProps = async (
     }
   }
 
-  // if the base path contains localhost, do nothing
-  if (context.req.headers.host?.includes("localhost")) {
+  // if the base path contains localhost or contains vercel, do nothing
+  if (
+    context.req.headers.host?.includes("localhost") ||
+    context.req.headers.host?.includes("vercel")
+  ) {
     return {
       props: {},
     };
