@@ -1,10 +1,14 @@
 FROM node:18.18.0
 
-COPY . /app/web
+COPY ./package.json /app/web/package.json
+COPY ./yarn.lock /app/web/yarn.lock
 
 WORKDIR /app/web
 
 RUN yarn
+
+
+COPY . /app/web
 
 RUN rm .env.* || true
 
