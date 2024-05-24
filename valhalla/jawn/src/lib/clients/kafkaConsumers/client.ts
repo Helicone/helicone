@@ -45,17 +45,14 @@ export function getKafka() {
 }
 
 export function generateKafkaConsumer(
-  groupId: "jawn-consumer-local-01" | "jawn-consumer",
-  miniBatchSize: number,
-  estimated_mini_batch_count: number
+  groupId: "jawn-consumer-local-01" | "jawn-consumer"
 ) {
   const kafka = getKafka();
   const consumer = kafka?.consumer({
     groupId,
     heartbeatInterval: 15000,
     minBytes: 100_000,
-    maxBytes:
-      miniBatchSize * estimated_mini_batch_count * AVG_MESSAGE_SIZE * 1.1, // 10% buffer
+    maxBytes: 2_000_000,
   });
 
   // DISCONNECT CONSUMER

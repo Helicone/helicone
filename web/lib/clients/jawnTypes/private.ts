@@ -48,6 +48,12 @@ export interface paths {
   "/v1/admin/admins/query": {
     get: operations["GetAdmins"];
   };
+  "/v1/admin/settings/{name}": {
+    get: operations["GetSetting"];
+  };
+  "/v1/admin/settings": {
+    post: operations["UpdateSetting"];
+  };
   "/v1/admin/orgs/query": {
     post: operations["FindAllOrgs"];
   };
@@ -256,6 +262,13 @@ export interface components {
     FineTuneBody: {
       providerKeyId: string;
     };
+    KafkaSettings: {
+      /** Format: double */
+      miniBatchSize: number;
+    };
+    Setting: components["schemas"]["KafkaSettings"];
+    /** @enum {string} */
+    SettingName: "kafka:dlq" | "kafka:log" | "kafka:dlq:eu" | "kafka:log:eu";
   };
   responses: {
   };
@@ -509,6 +522,37 @@ export interface operations {
               created_at: string;
             })[];
         };
+      };
+    };
+  };
+  GetSetting: {
+    parameters: {
+      path: {
+        name: components["schemas"]["SettingName"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Setting"];
+        };
+      };
+    };
+  };
+  UpdateSetting: {
+    requestBody: {
+      content: {
+        "application/json": {
+          settings: components["schemas"]["Setting"];
+          name: components["schemas"]["SettingName"];
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
       };
     };
   };
