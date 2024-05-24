@@ -14,6 +14,8 @@ import {
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { supabaseServer } from "../../lib/db/supabase";
 import { Setting, SettingName } from "../../utils/settings";
+import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 
 const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
@@ -38,6 +40,114 @@ const authCheckThrow = async (userId: string | undefined) => {
 @Tags("Admin")
 @Security("api_key")
 export class AdminController extends Controller {
+  @Get("/orgs/top")
+  public async getTopOrgs(@Request() request: JawnAuthenticatedRequest) {
+    console.log("getTopOrgs");
+    await authCheckThrow(request.authParams.userId);
+
+    // Step 1: Fetch top organizations
+    const orgs = await clickhouseDb.dbQuery<{
+      organization_id: string;
+      ct: number;
+    }>(
+      `
+    SELECT
+      organization_id,
+      count(*) as ct
+    FROM request_response_versioned
+    WHERE request_response_versioned.request_created_at > now() - INTERVAL '30 day'
+    GROUP BY organization_id
+    ORDER BY ct DESC
+    LIMIT 100
+    `,
+      []
+    );
+
+    // Step 2: Fetch organization details including members
+    const orgData = await dbExecute<{
+      id: string;
+      tier: string;
+      owner_email: string;
+      owner_last_login: string;
+      members: {
+        id: string;
+        email: string;
+        role: string;
+        last_active: string;
+      }[];
+    }>(
+      `
+    SELECT
+      organization.id AS id,
+      organization.tier AS tier,
+      auth.users.email AS owner_email,
+      auth.users.last_sign_in_at AS owner_last_login,
+      json_agg(
+          json_build_object(
+              'id', organization_member.member,
+              'email', member_user.email,
+              'role', organization_member.org_role,
+              'last_active', member_user.last_sign_in_at
+          )
+      ) AS members
+    FROM organization
+    LEFT JOIN auth.users ON organization.owner = auth.users.id
+    LEFT JOIN organization_member ON organization.id = organization_member.organization
+    LEFT JOIN auth.users AS member_user ON organization_member.member = member_user.id
+    WHERE organization.id IN (
+      ${orgs.data?.map((org) => `'${org.organization_id}'`).join(",")}
+    )
+    GROUP BY
+      organization.id,
+      organization.tier,
+      auth.users.email,
+      auth.users.last_sign_in_at;
+    `,
+      []
+    );
+
+    // Step 3: Fetch organization data over time
+    const orgsOverTime = await clickhouseDb.dbQuery<{
+      count: number;
+      dt: string;
+      organization_id: string;
+    }>(
+      `
+      select
+        count(*) as count,
+        date_trunc('hour', request_created_at) AS dt,
+        request_response_versioned.organization_id as organization_id
+      from request_response_versioned
+      where request_response_versioned.organization_id in (
+        ${orgs.data?.map((org) => `'${org.organization_id}'`).join(",")}
+      )
+      and request_response_versioned.request_created_at > now() - INTERVAL '30 day'
+      group by dt, organization_id
+      order by organization_id, dt ASC
+      WITH FILL FROM toStartOfHour(now() - INTERVAL '30 day') TO toStartOfHour(now()) + 1 STEP INTERVAL 1 HOUR
+    `,
+      []
+    );
+
+    // Step 4: Merge all data into one massive object
+    const mergedData = orgs.data!.map((org) => {
+      const orgDetail = orgData.data!.find(
+        (od) => od?.id! === org.organization_id
+      );
+      const orgOverTime = orgsOverTime.data!.filter(
+        (ot) => ot!.organization_id! === org.organization_id
+      );
+
+      return {
+        ...org,
+        ...orgDetail,
+        overTime: orgOverTime,
+      };
+    });
+
+    return mergedData;
+  }
+
   @Get("/admins/query")
   public async getAdmins(@Request() request: JawnAuthenticatedRequest): Promise<
     {
@@ -59,7 +169,7 @@ export class AdminController extends Controller {
     @Path() name: SettingName,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Setting> {
-    authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams.userId);
 
     const { data, error } = await supabaseServer.client
       .from("helicone_settings")
@@ -83,7 +193,7 @@ export class AdminController extends Controller {
       settings: Setting;
     }
   ): Promise<void> {
-    authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams.userId);
 
     const { error } = await supabaseServer.client
       .from("helicone_settings")
@@ -112,7 +222,7 @@ export class AdminController extends Controller {
       id: string;
     }[];
   }> {
-    authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams.userId);
 
     const { data, error } = await supabaseServer.client
       .from("organization")
@@ -136,9 +246,8 @@ export class AdminController extends Controller {
       adminIds: string[];
     }
   ): Promise<void> {
+    await authCheckThrow(request.authParams.userId);
     const { orgId, adminIds } = body;
-
-    authCheckThrow(request.authParams.userId);
 
     const { data, error } = await supabaseServer.client
       .from("organization_member")
@@ -166,7 +275,7 @@ export class AdminController extends Controller {
       message: string;
     }
   ): Promise<void> {
-    authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams.userId);
 
     const { data, error } = await supabaseServer.client
       .from("alert_banners")
@@ -190,7 +299,7 @@ export class AdminController extends Controller {
       active: boolean;
     }
   ): Promise<void> {
-    authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams.userId);
 
     const { data, error } = await supabaseServer.client
       .from("alert_banners")
