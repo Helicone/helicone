@@ -30,8 +30,8 @@ export type RequestFilterBranch = {
 
 type RequestFilterNode =
   | FilterLeafSubset<
-      "feedback" | "request" | "response" | "properties" | "values"
-    >
+    "feedback" | "request" | "response" | "properties" | "values"
+  >
   | RequestFilterBranch
   | "all";
 
@@ -166,7 +166,7 @@ export class RequestController extends Controller {
     const result = await scoreManager.addScores(requestId, requestBody.scores);
     if (result.error || !result.data) {
       this.setStatus(500);
-      return err("Not implemented");
+      return err("Error adding scores to request.");
     } else {
       this.setStatus(201);
       return ok(null);
