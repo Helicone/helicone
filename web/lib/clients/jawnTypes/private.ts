@@ -54,8 +54,8 @@ export interface paths {
   "/v1/admin/settings/{name}": {
     get: operations["GetSetting"];
   };
-  "/v1/admin/azure/test": {
-    get: operations["AzureTest"];
+  "/v1/admin/azure/run-test": {
+    post: operations["AzureTest"];
   };
   "/v1/admin/settings": {
     post: operations["UpdateSetting"];
@@ -281,6 +281,14 @@ export interface components {
     Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"];
     /** @enum {string} */
     SettingName: "kafka:dlq" | "kafka:log" | "kafka:dlq:eu" | "kafka:log:eu" | "azure:experiment";
+    /**
+     * @description The URL interface represents an object providing static methods used for creating object URLs.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)
+     * `URL` class is a global reference for `require('url').URL`
+     * https://nodejs.org/api/url.html#the-whatwg-url-api
+     */
+    "url.URL": string;
   };
   responses: {
   };
@@ -583,10 +591,28 @@ export interface operations {
     };
   };
   AzureTest: {
+    requestBody: {
+      content: {
+        "application/json": {
+          requestBody: unknown;
+        };
+      };
+    };
     responses: {
-      /** @description No content */
-      204: {
-        content: never;
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            fetchParams: {
+              body: string;
+              headers: {
+                [key: string]: string;
+              };
+              url: components["schemas"]["url.URL"];
+            };
+            resultText: string;
+          };
+        };
       };
     };
   };

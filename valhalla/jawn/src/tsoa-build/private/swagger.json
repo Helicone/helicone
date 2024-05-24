@@ -812,6 +812,10 @@
 					"azure:experiment"
 				],
 				"nullable": false
+			},
+			"url.URL": {
+				"type": "string",
+				"description": "The URL interface represents an object providing static methods used for creating object URLs.\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)\n`URL` class is a global reference for `require('url').URL`\nhttps://nodejs.org/api/url.html#the-whatwg-url-api"
 			}
 		},
 		"securitySchemes": {
@@ -1580,12 +1584,51 @@
 				]
 			}
 		},
-		"/v1/admin/azure/test": {
-			"get": {
+		"/v1/admin/azure/run-test": {
+			"post": {
 				"operationId": "AzureTest",
 				"responses": {
-					"204": {
-						"description": "No content"
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"fetchParams": {
+											"properties": {
+												"body": {
+													"type": "string"
+												},
+												"headers": {
+													"properties": {},
+													"additionalProperties": {
+														"type": "string"
+													},
+													"type": "object"
+												},
+												"url": {
+													"$ref": "#/components/schemas/url.URL"
+												}
+											},
+											"required": [
+												"body",
+												"headers",
+												"url"
+											],
+											"type": "object"
+										},
+										"resultText": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"fetchParams",
+										"resultText"
+									],
+									"type": "object"
+								}
+							}
+						}
 					}
 				},
 				"tags": [
@@ -1596,7 +1639,23 @@
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"requestBody": {}
+								},
+								"required": [
+									"requestBody"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/admin/settings": {
