@@ -20,17 +20,13 @@ import {
 } from "../../lib/stores/request/request";
 import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
-import { ScoreManager } from "../../managers/score/ScoreManager";
+import { ScoreManager, ScoreRequest } from "../../managers/score/ScoreManager";
 
 export type RequestFilterBranch = {
   left: RequestFilterNode;
   operator: "or" | "and";
   right: RequestFilterNode;
 };
-
-export interface ScoreRequest {
-  scores: Record<string, number>;
-}
 
 type RequestFilterNode =
   | FilterLeafSubset<
