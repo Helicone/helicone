@@ -288,14 +288,25 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AzureExperiment": {
+        "dataType": "refObject",
+        "properties": {
+            "azureBaseUri": {"dataType":"string","required":true},
+            "azureApiVersion": {"dataType":"string","required":true},
+            "azureDeploymentName": {"dataType":"string","required":true},
+            "azureApiKey": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Setting": {
         "dataType": "refAlias",
-        "type": {"ref":"KafkaSettings","validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"KafkaSettings"},{"ref":"AzureExperiment"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "SettingName": {
         "dataType": "refAlias",
-        "type": {"dataType":"enum","enums":["kafka:dlq","kafka:log","kafka:dlq:eu","kafka:log:eu"],"validators":{}},
+        "type": {"dataType":"enum","enums":["kafka:dlq","kafka:log","kafka:dlq:eu","kafka:log:eu","azure:experiment"],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
@@ -779,6 +790,37 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getSetting',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/v1/admin/azure/test',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.azureTest)),
+
+            async function AdminController_azureTest(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new AdminController();
+
+              await templateService.apiHandler({
+                methodName: 'azureTest',
                 controller,
                 response,
                 next,

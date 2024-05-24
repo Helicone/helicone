@@ -54,6 +54,9 @@ export interface paths {
   "/v1/admin/settings/{name}": {
     get: operations["GetSetting"];
   };
+  "/v1/admin/azure/test": {
+    get: operations["AzureTest"];
+  };
   "/v1/admin/settings": {
     post: operations["UpdateSetting"];
   };
@@ -269,9 +272,15 @@ export interface components {
       /** Format: double */
       miniBatchSize: number;
     };
-    Setting: components["schemas"]["KafkaSettings"];
+    AzureExperiment: {
+      azureBaseUri: string;
+      azureApiVersion: string;
+      azureDeploymentName: string;
+      azureApiKey: string;
+    };
+    Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"];
     /** @enum {string} */
-    SettingName: "kafka:dlq" | "kafka:log" | "kafka:dlq:eu" | "kafka:log:eu";
+    SettingName: "kafka:dlq" | "kafka:log" | "kafka:dlq:eu" | "kafka:log:eu" | "azure:experiment";
   };
   responses: {
   };
@@ -570,6 +579,14 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Setting"];
         };
+      };
+    };
+  };
+  AzureTest: {
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
       };
     };
   };

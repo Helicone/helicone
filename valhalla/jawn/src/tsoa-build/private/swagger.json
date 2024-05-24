@@ -768,8 +768,39 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"AzureExperiment": {
+				"properties": {
+					"azureBaseUri": {
+						"type": "string"
+					},
+					"azureApiVersion": {
+						"type": "string"
+					},
+					"azureDeploymentName": {
+						"type": "string"
+					},
+					"azureApiKey": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"azureBaseUri",
+					"azureApiVersion",
+					"azureDeploymentName",
+					"azureApiKey"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Setting": {
-				"$ref": "#/components/schemas/KafkaSettings"
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/KafkaSettings"
+					},
+					{
+						"$ref": "#/components/schemas/AzureExperiment"
+					}
+				]
 			},
 			"SettingName": {
 				"type": "string",
@@ -777,7 +808,8 @@
 					"kafka:dlq",
 					"kafka:log",
 					"kafka:dlq:eu",
-					"kafka:log:eu"
+					"kafka:log:eu",
+					"azure:experiment"
 				],
 				"nullable": false
 			}
@@ -1546,6 +1578,25 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/admin/azure/test": {
+			"get": {
+				"operationId": "AzureTest",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/v1/admin/settings": {

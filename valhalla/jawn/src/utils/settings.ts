@@ -7,16 +7,24 @@ export interface KafkaSettings {
   miniBatchSize: number;
 }
 
+export interface AzureExperiment {
+  azureBaseUri: string;
+  azureApiVersion: string;
+  azureDeploymentName: string;
+  azureApiKey: string;
+}
+
 export interface SettingsType {
   "kafka:dlq": KafkaSettings;
   "kafka:log": KafkaSettings;
   "kafka:dlq:eu": KafkaSettings;
   "kafka:log:eu": KafkaSettings;
+  "azure:experiment": AzureExperiment;
 }
 
 export type SettingName = keyof SettingsType;
 
-export type Setting = KafkaSettings;
+export type Setting = KafkaSettings | AzureExperiment;
 
 class SettingsCache extends InMemoryCache {
   private static instance: SettingsCache;

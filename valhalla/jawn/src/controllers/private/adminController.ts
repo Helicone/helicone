@@ -184,6 +184,15 @@ export class AdminController extends Controller {
     return JSON.parse(JSON.stringify(settings)) as Setting;
   }
 
+  @Get("/azure/test")
+  public async azureTest(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<void> {
+    await authCheckThrow(request.authParams.userId);
+
+    return;
+  }
+
   @Post("/settings")
   public async updateSetting(
     @Request() request: JawnAuthenticatedRequest,
@@ -195,15 +204,31 @@ export class AdminController extends Controller {
   ): Promise<void> {
     await authCheckThrow(request.authParams.userId);
 
-    const { error } = await supabaseServer.client
+    const { data: currentSettings } = await supabaseServer.client
       .from("helicone_settings")
-      .update({
-        settings: JSON.parse(JSON.stringify(body.settings)),
-      })
+      .select("*")
       .eq("name", body.name);
 
-    if (error) {
-      throw new Error(error.message);
+    if (currentSettings!.length === 0) {
+      const { error } = await supabaseServer.client
+        .from("helicone_settings")
+        .insert({
+          name: body.name,
+          settings: JSON.parse(JSON.stringify(body.settings)),
+        });
+      if (error) {
+        throw new Error(error.message);
+      }
+    } else {
+      const { error } = await supabaseServer.client
+        .from("helicone_settings")
+        .update({
+          settings: JSON.parse(JSON.stringify(body.settings)),
+        })
+        .eq("name", body.name);
+      if (error) {
+        throw new Error(error.message);
+      }
     }
 
     return;
