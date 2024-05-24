@@ -1,7 +1,7 @@
 import { SettingsManager } from "../../../utils/settings";
-import { Experiment } from "../../stores/experimentStore";
 import { placeInputValues } from "../helpers";
 import { PreparedRequest, PreparedRequestArgs } from "./PreparedRequest";
+
 const settingsManager = new SettingsManager();
 export async function prepareRequestAzure(
   apiKey?: string,

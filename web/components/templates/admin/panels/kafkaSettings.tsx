@@ -29,7 +29,7 @@ const KafkaSettings = () => {
     isLoading: isLoadingSetting,
     refetch: refetchSetting,
   } = useGetSetting(selectedSetting, () => {
-    if (setting) {
+    if (setting && "miniBatchSize" in setting) {
       setMiniBatchSize(setting.miniBatchSize);
     }
   });
@@ -42,7 +42,7 @@ const KafkaSettings = () => {
 
   // Effect to update miniBatchSize when setting changes
   useEffect(() => {
-    if (setting) {
+    if (setting && "miniBatchSize" in setting) {
       setMiniBatchSize(setting.miniBatchSize);
     }
   }, [setting]);

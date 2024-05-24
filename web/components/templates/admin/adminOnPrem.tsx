@@ -1,12 +1,6 @@
-import { use, useEffect, useState } from "react";
-import { useJawnClient } from "../../../lib/clients/jawnHook";
-import AlertBanners from "./panels/alertBanners";
-import KafkaSettings from "./panels/kafkaSettings";
-import OrgMember from "./panels/orgMember";
-import TopOrgs from "./panels/topOrgs";
 import { useQuery } from "@tanstack/react-query";
-import { components } from "../../../lib/clients/jawnTypes/private";
-import { useUpdateSetting } from "../../../services/hooks/admin";
+import { useEffect, useState } from "react";
+import { useJawnClient } from "../../../lib/clients/jawnHook";
 import useNotification from "../../shared/notification/useNotification";
 
 interface AdminOnPremPageProps {}
