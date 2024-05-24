@@ -288,20 +288,9 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "SettingsType": {
-        "dataType": "refObject",
-        "properties": {
-            "kafka:dlq": {"ref":"KafkaSettings","required":true},
-            "kafka:log": {"ref":"KafkaSettings","required":true},
-            "kafka:dlq:eu": {"ref":"KafkaSettings","required":true},
-            "kafka:log:eu": {"ref":"KafkaSettings","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Setting": {
         "dataType": "refAlias",
-        "type": {"ref":"SettingsType","validators":{}},
+        "type": {"ref":"KafkaSettings","validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "SettingName": {

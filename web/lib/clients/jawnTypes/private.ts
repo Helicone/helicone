@@ -266,13 +266,7 @@ export interface components {
       /** Format: double */
       miniBatchSize: number;
     };
-    SettingsType: {
-      "kafka:dlq": components["schemas"]["KafkaSettings"];
-      "kafka:log": components["schemas"]["KafkaSettings"];
-      "kafka:dlq:eu": components["schemas"]["KafkaSettings"];
-      "kafka:log:eu": components["schemas"]["KafkaSettings"];
-    };
-    Setting: components["schemas"]["SettingsType"];
+    Setting: components["schemas"]["KafkaSettings"];
     /** @enum {string} */
     SettingName: "kafka:dlq" | "kafka:log" | "kafka:dlq:eu" | "kafka:log:eu";
   };

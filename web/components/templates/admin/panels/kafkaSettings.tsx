@@ -84,13 +84,15 @@ const KafkaSettings = () => {
               variant={"primary"}
               size={"xs"}
               onClick={() => {
-                if (!miniBatchSize) {
+                if (miniBatchSize != 0 && !miniBatchSize) {
                   setNotification("Mini Batch Size is required", "error");
                   return;
                 }
                 updateSetting({
                   name: selectedSetting,
-                  settings: { miniBatchSize },
+                  settings: {
+                    miniBatchSize,
+                  } as components["schemas"]["Setting"],
                 });
               }}
               loading={isUpdatingSetting || isLoadingSetting}

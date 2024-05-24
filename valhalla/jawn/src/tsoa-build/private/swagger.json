@@ -768,32 +768,8 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"SettingsType": {
-				"properties": {
-					"kafka:dlq": {
-						"$ref": "#/components/schemas/KafkaSettings"
-					},
-					"kafka:log": {
-						"$ref": "#/components/schemas/KafkaSettings"
-					},
-					"kafka:dlq:eu": {
-						"$ref": "#/components/schemas/KafkaSettings"
-					},
-					"kafka:log:eu": {
-						"$ref": "#/components/schemas/KafkaSettings"
-					}
-				},
-				"required": [
-					"kafka:dlq",
-					"kafka:log",
-					"kafka:dlq:eu",
-					"kafka:log:eu"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"Setting": {
-				"$ref": "#/components/schemas/SettingsType"
+				"$ref": "#/components/schemas/KafkaSettings"
 			},
 			"SettingName": {
 				"type": "string",

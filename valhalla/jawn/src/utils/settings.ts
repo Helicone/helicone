@@ -16,7 +16,7 @@ export interface SettingsType {
 
 export type SettingName = keyof SettingsType;
 
-export type Setting = SettingsType;
+export type Setting = KafkaSettings;
 
 class SettingsCache extends InMemoryCache {
   private static instance: SettingsCache;

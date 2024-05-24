@@ -143,7 +143,7 @@ const useGetSetting = (
     isLoading,
     refetch,
     isRefetching,
-    setting: data,
+    setting: data as components["schemas"]["Setting"],
   };
 };
 
