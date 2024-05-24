@@ -20,7 +20,7 @@ export type Setting = SettingsType[SettingName];
 
 class SettingsCache extends InMemoryCache {
   private static instance: SettingsCache;
-  private API_KEY_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  private API_KEY_CACHE_TTL = 60 * 1000; // 1 minute
   constructor() {
     super(1_000);
   }
