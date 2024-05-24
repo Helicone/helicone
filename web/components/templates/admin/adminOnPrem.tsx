@@ -39,7 +39,7 @@ const AdminOnPremPage = (props: AdminOnPremPageProps) => {
   const { setNotification } = useNotification();
 
   useEffect(() => {
-    const nothingSet = Object.values(settings).some((v) => v === "");
+    const nothingSet = Object.values(settings).every((v) => v === "");
     if (currentAzureSettings.data && nothingSet) {
       const settings = currentAzureSettings.data.data;
       if (settings && "azureBaseUri" in settings) {
