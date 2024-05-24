@@ -781,6 +781,32 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"KafkaDLQEUSettings": {
+				"properties": {
+					"miniBatchSize": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"miniBatchSize"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"KafkaLogEUSettings": {
+				"properties": {
+					"miniBatchSize": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"miniBatchSize"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Setting": {
 				"anyOf": [
 					{
@@ -788,6 +814,12 @@
 					},
 					{
 						"$ref": "#/components/schemas/KafkaLogSettings"
+					},
+					{
+						"$ref": "#/components/schemas/KafkaDLQEUSettings"
+					},
+					{
+						"$ref": "#/components/schemas/KafkaLogEUSettings"
 					}
 				]
 			},
@@ -795,8 +827,11 @@
 				"type": "string",
 				"enum": [
 					"kafka:dlq",
-					"kafka:log"
-				]
+					"kafka:log",
+					"kafka:dlq:eu",
+					"kafka:log:eu"
+				],
+				"nullable": false
 			}
 		},
 		"securitySchemes": {

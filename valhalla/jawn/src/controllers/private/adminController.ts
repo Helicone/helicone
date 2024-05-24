@@ -12,14 +12,8 @@ import {
   Tags,
 } from "tsoa";
 import { JawnAuthenticatedRequest } from "../../types/request";
-import { IS_ON_PREM } from "../../lib/experiment/run";
 import { supabaseServer } from "../../lib/db/supabase";
-import {
-  KafkaDLQSettings,
-  KafkaLogSettings,
-  Setting,
-  SettingName,
-} from "../../utils/settings";
+import { Setting, SettingName } from "../../utils/settings";
 
 const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
@@ -77,11 +71,7 @@ export class AdminController extends Controller {
     }
     const settings = data[0].settings;
 
-    if (typeof settings === "string") {
-      return JSON.parse(settings) as Setting;
-    } else {
-      throw new Error("Settings must be a string");
-    }
+    return JSON.parse(JSON.stringify(settings)) as Setting;
   }
 
   @Post("/settings")
@@ -98,7 +88,7 @@ export class AdminController extends Controller {
     const { error } = await supabaseServer.client
       .from("helicone_settings")
       .update({
-        settings: JSON.stringify(body.settings),
+        settings: JSON.parse(JSON.stringify(body.settings)),
       })
       .eq("name", body.name);
 

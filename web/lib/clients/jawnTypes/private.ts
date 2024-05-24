@@ -270,9 +270,17 @@ export interface components {
       /** Format: double */
       miniBatchSize: number;
     };
-    Setting: components["schemas"]["KafkaDLQSettings"] | components["schemas"]["KafkaLogSettings"];
+    KafkaDLQEUSettings: {
+      /** Format: double */
+      miniBatchSize: number;
+    };
+    KafkaLogEUSettings: {
+      /** Format: double */
+      miniBatchSize: number;
+    };
+    Setting: components["schemas"]["KafkaDLQSettings"] | components["schemas"]["KafkaLogSettings"] | components["schemas"]["KafkaDLQEUSettings"] | components["schemas"]["KafkaLogEUSettings"];
     /** @enum {string} */
-    SettingName: "kafka:dlq" | "kafka:log";
+    SettingName: "kafka:dlq" | "kafka:log" | "kafka:dlq:eu" | "kafka:log:eu";
   };
   responses: {
   };

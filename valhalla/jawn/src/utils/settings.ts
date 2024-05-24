@@ -3,21 +3,20 @@ import { InMemoryCache } from "../lib/memoryCache/staticMemCache";
 import { Database } from "../lib/db/database.types";
 import { supabaseServer } from "../lib/db/supabase";
 
-export type SettingName = "kafka:dlq" | "kafka:log";
-export type Setting = KafkaDLQSettings | KafkaLogSettings;
-
-export interface KafkaDLQSettings {
-  miniBatchSize: number;
-}
-
-export interface KafkaLogSettings {
+export interface KafkaSettings {
   miniBatchSize: number;
 }
 
 export interface SettingsType {
-  "kafka:dlq": KafkaDLQSettings;
-  "kafka:log": KafkaLogSettings;
+  "kafka:dlq": KafkaSettings;
+  "kafka:log": KafkaSettings;
+  "kafka:dlq:eu": KafkaSettings;
+  "kafka:log:eu": KafkaSettings;
 }
+
+export type SettingName = keyof SettingsType;
+
+export type Setting = SettingsType[SettingName];
 
 class SettingsCache extends InMemoryCache {
   private static instance: SettingsCache;

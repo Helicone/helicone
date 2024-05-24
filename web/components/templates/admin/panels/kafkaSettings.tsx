@@ -2,13 +2,18 @@ import { TextInput } from "@tremor/react";
 import HcButton from "../../../ui/hcButton";
 import { useState, useEffect } from "react";
 import useNotification from "../../../shared/notification/useNotification";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getJawnClient } from "../../../../lib/clients/jawn";
 import {
   useGetSetting,
   useUpdateSetting,
 } from "../../../../services/hooks/admin";
 import { components } from "../../../../lib/clients/jawnTypes/private";
+
+const settingNames: Array<components["schemas"]["SettingName"]> = [
+  "kafka:dlq",
+  "kafka:log",
+  "kafka:dlq:eu",
+  "kafka:log:eu",
+];
 
 const KafkaSettings = () => {
   const { setNotification } = useNotification();
@@ -56,10 +61,13 @@ const KafkaSettings = () => {
                   e.target.value as components["schemas"]["SettingName"]
                 )
               }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-black" // Added text-black to ensure text color is visible
             >
-              <option value="kafka:dlq">Kafka DLQ</option>
-              <option value="kafka:log">Kafka Log</option>
+              {settingNames.map((key) => (
+                <option key={key} value={key}>
+                  {key}
+                </option>
+              ))}
             </select>
           </div>
         </div>
