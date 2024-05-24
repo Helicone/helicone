@@ -81,7 +81,7 @@ export class RequestManager extends BaseManager {
         response: string;
       }>(
         `
-        SELECT 
+        SELECT
           request.id as request,
           response.id as response
         FROM request inner join response on request.id = response.request
@@ -160,23 +160,27 @@ export class RequestManager extends BaseManager {
         created_at: "desc",
       },
       isCached,
+      isPartOfExperiment,
+      isScored,
     } = params;
 
     const requests = isCached
       ? await getRequestsCached(
-          this.authParams.organizationId,
-          filter,
-          offset,
-          limit,
-          sort
-        )
+        this.authParams.organizationId,
+        filter,
+        offset,
+        limit,
+        sort
+      )
       : await getRequests(
-          this.authParams.organizationId,
-          filter,
-          offset,
-          limit,
-          sort
-        );
+        this.authParams.organizationId,
+        filter,
+        offset,
+        limit,
+        sort,
+        isPartOfExperiment,
+        isScored
+      );
 
     return resultMap(requests, (req) => {
       return req.map((r) => {

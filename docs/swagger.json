@@ -932,6 +932,12 @@
 					},
 					"includeInputs": {
 						"type": "boolean"
+					},
+					"isPartOfExperiment": {
+						"type": "boolean"
+					},
+					"isScored": {
+						"type": "boolean"
 					}
 				},
 				"required": [
@@ -2254,7 +2260,9 @@
 											"offset": 0,
 											"sort": {
 												"created_at": "desc"
-											}
+											},
+											"isScored": false,
+											"isPartOfExperiment": false
 										}
 									}
 								}

@@ -346,6 +346,8 @@ Json: JsonObject;
       sort?: components["schemas"]["SortLeafRequest"];
       isCached?: boolean;
       includeInputs?: boolean;
+      isPartOfExperiment?: boolean;
+      isScored?: boolean;
     };
     ResultSuccess_null_: {
       /** @enum {number|null} */
