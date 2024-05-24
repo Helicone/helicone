@@ -20,7 +20,7 @@ import {
 } from "../../lib/stores/request/request";
 import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
-import { ScoreManager } from "../../managers/score/ScoreManager";
+import { ScoreManager, ScoreRequest } from "../../managers/score/ScoreManager";
 
 export type RequestFilterBranch = {
   left: RequestFilterNode;
@@ -28,14 +28,10 @@ export type RequestFilterBranch = {
   right: RequestFilterNode;
 };
 
-export interface ScoreRequest {
-  scores: Record<string, number>;
-}
-
 type RequestFilterNode =
   | FilterLeafSubset<
-      "feedback" | "request" | "response" | "properties" | "values"
-    >
+    "feedback" | "request" | "response" | "properties" | "values"
+  >
   | RequestFilterBranch
   | "all";
 
@@ -170,7 +166,7 @@ export class RequestController extends Controller {
     const result = await scoreManager.addScores(requestId, requestBody.scores);
     if (result.error || !result.data) {
       this.setStatus(500);
-      return err("Not implemented");
+      return err("Error adding scores to request.");
     } else {
       this.setStatus(201);
       return ok(null);

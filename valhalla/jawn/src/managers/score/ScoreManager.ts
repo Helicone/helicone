@@ -1,7 +1,13 @@
 import { err, ok, Result } from "../../lib/shared/result";
 import { BaseManager } from "../BaseManager";
 import { AuthParams } from "../../lib/db/supabase";
-import { ScoreStore } from "../../lib/stores/ScoreStore";
+import { Score, ScoreStore } from "../../lib/stores/ScoreStore";
+
+type Scores = Record<string, number | boolean>;
+
+export interface ScoreRequest {
+  scores: Scores;
+}
 
 export class ScoreManager extends BaseManager {
   private scoreStore: ScoreStore;
@@ -11,7 +17,7 @@ export class ScoreManager extends BaseManager {
   }
   public async addScores(
     requestId: string,
-    scores: Record<string, number>
+    scores: Scores
   ): Promise<Result<string, string>> {
     const res = await this.addScoresToRequest(requestId, scores);
     if (res.error || !res.data) {
@@ -22,12 +28,13 @@ export class ScoreManager extends BaseManager {
 
   private async addScoresToRequest(
     requestId: string,
-    scores: Record<string, number>
+    scores: Scores
   ): Promise<Result<string, string>> {
     try {
+      const mappedScores = this.mapScores(scores);
       const supabaseRequest = await this.scoreStore.putScoresIntoSupabase(
         requestId,
-        scores
+        mappedScores
       );
 
       if (supabaseRequest.error || !supabaseRequest.data) {
@@ -47,7 +54,7 @@ export class ScoreManager extends BaseManager {
       const requestInClickhouse = await this.scoreStore.putScoresIntoClickhouse(
         {
           ...request.data[0],
-          scores: scores,
+          scores: mappedScores,
         }
       );
 
@@ -59,5 +66,15 @@ export class ScoreManager extends BaseManager {
     } catch (error: any) {
       return err(error.message);
     }
+  }
+
+  private mapScores(scores: Scores): Score[] {
+    return Object.entries(scores).map(([key, value]) => {
+      return {
+        score_attribute_key: key,
+        score_attribute_type: typeof value === "boolean" ? "boolean" : "number",
+        score_attribute_value: typeof value === "boolean" ? (value ? 1 : 0) : value,
+      };
+    });
   }
 }
