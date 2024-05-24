@@ -1352,6 +1352,115 @@
 				]
 			}
 		},
+		"/v1/admin/orgs/top": {
+			"get": {
+				"operationId": "GetTopOrgs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"properties": {
+											"ct": {
+												"type": "number",
+												"format": "double"
+											},
+											"organization_id": {
+												"type": "string"
+											},
+											"members": {
+												"items": {
+													"properties": {
+														"last_active": {
+															"type": "string"
+														},
+														"role": {
+															"type": "string"
+														},
+														"email": {
+															"type": "string"
+														},
+														"id": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"last_active",
+														"role",
+														"email",
+														"id"
+													],
+													"type": "object"
+												},
+												"type": "array"
+											},
+											"owner_last_login": {
+												"type": "string"
+											},
+											"owner_email": {
+												"type": "string"
+											},
+											"tier": {
+												"type": "string"
+											},
+											"id": {
+												"type": "string"
+											},
+											"overTime": {
+												"items": {
+													"properties": {
+														"organization_id": {
+															"type": "string"
+														},
+														"dt": {
+															"type": "string"
+														},
+														"count": {
+															"type": "number",
+															"format": "double"
+														}
+													},
+													"required": [
+														"organization_id",
+														"dt",
+														"count"
+													],
+													"type": "object"
+												},
+												"type": "array"
+											}
+										},
+										"required": [
+											"ct",
+											"organization_id",
+											"members",
+											"owner_last_login",
+											"owner_email",
+											"tier",
+											"id",
+											"overTime"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/admin/admins/query": {
 			"get": {
 				"operationId": "GetAdmins",
