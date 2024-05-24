@@ -365,8 +365,13 @@ Json: JsonObject;
       error: null;
     };
     "Result_HeliconeRequestAsset.string_": components["schemas"]["ResultSuccess_HeliconeRequestAsset_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.number-or-boolean_": {
+      [key: string]: number | boolean;
+    };
+    Scores: components["schemas"]["Record_string.number-or-boolean_"];
     ScoreRequest: {
-      scores: components["schemas"]["Record_string.number_"];
+      scores: components["schemas"]["Scores"];
     };
     PromptsResult: {
       id: string;
