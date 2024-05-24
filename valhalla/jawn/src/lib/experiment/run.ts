@@ -24,15 +24,15 @@ export const IS_ON_PREM =
     ? true
     : false;
 
-function prepareRequest(
+async function prepareRequest(
   args: PreparedRequestArgs,
   onPremConfig: {
     deployment: "AZURE" | "OPENAI";
   }
-): PreparedRequest {
+): Promise<PreparedRequest> {
   if (IS_ON_PREM) {
     if (onPremConfig.deployment === "AZURE") {
-      return prepareRequestAzureOnPremFull(args);
+      return await prepareRequestAzureOnPremFull(args);
     } else {
       return prepareRequestOpenAIOnPremFull(args);
     }
@@ -69,7 +69,7 @@ export async function run(
           );
         }
 
-        const preparedRequest = prepareRequest(
+        const preparedRequest = await prepareRequest(
           {
             hypothesis,
             secretKey,

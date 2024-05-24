@@ -16,6 +16,7 @@ import { supabaseServer } from "../../lib/db/supabase";
 import { Setting, SettingName } from "../../utils/settings";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { prepareRequestAzure } from "../../lib/experiment/requestPrep/azure";
 
 const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
@@ -184,6 +185,35 @@ export class AdminController extends Controller {
     return JSON.parse(JSON.stringify(settings)) as Setting;
   }
 
+  @Post("/azure/run-test")
+  public async azureTest(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      requestBody: any;
+    }
+  ) {
+    await authCheckThrow(request.authParams.userId);
+
+    const azureFetch = await prepareRequestAzure();
+
+    const azureResult = await fetch(azureFetch.url, {
+      method: "POST",
+      headers: azureFetch.headers,
+      body: JSON.stringify(body.requestBody),
+    });
+    const resultText = await azureResult.text();
+
+    return {
+      resultText: resultText,
+      fetchParams: {
+        url: azureFetch.url,
+        headers: azureFetch.headers,
+        body: JSON.stringify(body.requestBody),
+      },
+    };
+  }
+
   @Post("/settings")
   public async updateSetting(
     @Request() request: JawnAuthenticatedRequest,
@@ -195,15 +225,31 @@ export class AdminController extends Controller {
   ): Promise<void> {
     await authCheckThrow(request.authParams.userId);
 
-    const { error } = await supabaseServer.client
+    const { data: currentSettings } = await supabaseServer.client
       .from("helicone_settings")
-      .update({
-        settings: JSON.parse(JSON.stringify(body.settings)),
-      })
+      .select("*")
       .eq("name", body.name);
 
-    if (error) {
-      throw new Error(error.message);
+    if (currentSettings!.length === 0) {
+      const { error } = await supabaseServer.client
+        .from("helicone_settings")
+        .insert({
+          name: body.name,
+          settings: JSON.parse(JSON.stringify(body.settings)),
+        });
+      if (error) {
+        throw new Error(error.message);
+      }
+    } else {
+      const { error } = await supabaseServer.client
+        .from("helicone_settings")
+        .update({
+          settings: JSON.parse(JSON.stringify(body.settings)),
+        })
+        .eq("name", body.name);
+      if (error) {
+        throw new Error(error.message);
+      }
     }
 
     return;
