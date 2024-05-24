@@ -78,6 +78,7 @@ export default async function handler(
       metadata: {
         orgId: orgId, // Assuming `orgId` is the variable containing the organization's ID
         tier: "pro",
+        region: process.env.REGION || "us",
       },
       allow_promotion_codes: true,
     });

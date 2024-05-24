@@ -31,6 +31,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const subscriptionId = subscription.id;
       const subscriptionItemId = subscription?.items.data[0].id;
       const orgId = subscription.metadata?.orgId;
+      const region = subscription.metadata?.region;
+
+      if (region !== process.env.REGION) {
+        return res.status(200).send("Region mismatch");
+      }
 
       const { data, error } = await supabaseServer
         .from("organization")
@@ -45,6 +50,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const checkoutCompleted = event.data.object as Stripe.Checkout.Session;
       const orgId = checkoutCompleted.metadata?.orgId;
       const tier = checkoutCompleted.metadata?.tier;
+      const region = checkoutCompleted.metadata?.region;
+
+      if (region !== process.env.REGION) {
+        return res.status(200).send("Region mismatch");
+      }
 
       const { data, error } = await supabaseServer
         .from("organization")
@@ -56,6 +66,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         .eq("id", orgId || "");
     } else if (event.type === "customer.subscription.updated") {
       const subscriptionUpdated = event.data.object as Stripe.Subscription;
+      const region = subscriptionUpdated.metadata?.region;
+
+      if (region !== process.env.REGION) {
+        return res.status(200).send("Region mismatch");
+      }
 
       const isSubscriptionActive = subscriptionUpdated.status === "active";
       let growthPlanItem = null;
@@ -104,6 +119,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     } else if (event.type === "customer.subscription.deleted") {
       // Subscription has been deleted, either due to non-payment or being manually canceled.
       const subscriptionDeleted = event.data.object as Stripe.Subscription;
+      const region = subscriptionDeleted.metadata?.region;
+
+      if (region !== process.env.REGION) {
+        return res.status(200).send("Region mismatch");
+      }
 
       await supabaseServer
         .from("organization")

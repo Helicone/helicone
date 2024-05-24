@@ -78,6 +78,7 @@ export default async function handler(
         metadata: {
           orgId: orgId,
           tier: "growth",
+          region: process.env.REGION || "us",
         },
       },
       allow_promotion_codes: true,
