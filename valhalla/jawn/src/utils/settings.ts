@@ -16,7 +16,7 @@ export interface SettingsType {
 
 export type SettingName = keyof SettingsType;
 
-export type Setting = SettingsType[SettingName];
+export type Setting = SettingsType;
 
 class SettingsCache extends InMemoryCache {
   private static instance: SettingsCache;

@@ -280,7 +280,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "KafkaDLQSettings": {
+    "KafkaSettings": {
         "dataType": "refObject",
         "properties": {
             "miniBatchSize": {"dataType":"double","required":true},
@@ -288,33 +288,20 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "KafkaLogSettings": {
+    "SettingsType": {
         "dataType": "refObject",
         "properties": {
-            "miniBatchSize": {"dataType":"double","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "KafkaDLQEUSettings": {
-        "dataType": "refObject",
-        "properties": {
-            "miniBatchSize": {"dataType":"double","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "KafkaLogEUSettings": {
-        "dataType": "refObject",
-        "properties": {
-            "miniBatchSize": {"dataType":"double","required":true},
+            "kafka:dlq": {"ref":"KafkaSettings","required":true},
+            "kafka:log": {"ref":"KafkaSettings","required":true},
+            "kafka:dlq:eu": {"ref":"KafkaSettings","required":true},
+            "kafka:log:eu": {"ref":"KafkaSettings","required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Setting": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"KafkaDLQSettings"},{"ref":"KafkaLogSettings"},{"ref":"KafkaDLQEUSettings"},{"ref":"KafkaLogEUSettings"}],"validators":{}},
+        "type": {"ref":"SettingsType","validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "SettingName": {

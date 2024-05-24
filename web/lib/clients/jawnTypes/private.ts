@@ -262,23 +262,17 @@ export interface components {
     FineTuneBody: {
       providerKeyId: string;
     };
-    KafkaDLQSettings: {
+    KafkaSettings: {
       /** Format: double */
       miniBatchSize: number;
     };
-    KafkaLogSettings: {
-      /** Format: double */
-      miniBatchSize: number;
+    SettingsType: {
+      "kafka:dlq": components["schemas"]["KafkaSettings"];
+      "kafka:log": components["schemas"]["KafkaSettings"];
+      "kafka:dlq:eu": components["schemas"]["KafkaSettings"];
+      "kafka:log:eu": components["schemas"]["KafkaSettings"];
     };
-    KafkaDLQEUSettings: {
-      /** Format: double */
-      miniBatchSize: number;
-    };
-    KafkaLogEUSettings: {
-      /** Format: double */
-      miniBatchSize: number;
-    };
-    Setting: components["schemas"]["KafkaDLQSettings"] | components["schemas"]["KafkaLogSettings"] | components["schemas"]["KafkaDLQEUSettings"] | components["schemas"]["KafkaLogEUSettings"];
+    Setting: components["schemas"]["SettingsType"];
     /** @enum {string} */
     SettingName: "kafka:dlq" | "kafka:log" | "kafka:dlq:eu" | "kafka:log:eu";
   };

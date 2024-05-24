@@ -755,7 +755,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"KafkaDLQSettings": {
+			"KafkaSettings": {
 				"properties": {
 					"miniBatchSize": {
 						"type": "number",
@@ -768,60 +768,32 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"KafkaLogSettings": {
+			"SettingsType": {
 				"properties": {
-					"miniBatchSize": {
-						"type": "number",
-						"format": "double"
+					"kafka:dlq": {
+						"$ref": "#/components/schemas/KafkaSettings"
+					},
+					"kafka:log": {
+						"$ref": "#/components/schemas/KafkaSettings"
+					},
+					"kafka:dlq:eu": {
+						"$ref": "#/components/schemas/KafkaSettings"
+					},
+					"kafka:log:eu": {
+						"$ref": "#/components/schemas/KafkaSettings"
 					}
 				},
 				"required": [
-					"miniBatchSize"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"KafkaDLQEUSettings": {
-				"properties": {
-					"miniBatchSize": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"miniBatchSize"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"KafkaLogEUSettings": {
-				"properties": {
-					"miniBatchSize": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"miniBatchSize"
+					"kafka:dlq",
+					"kafka:log",
+					"kafka:dlq:eu",
+					"kafka:log:eu"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
 			"Setting": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/KafkaDLQSettings"
-					},
-					{
-						"$ref": "#/components/schemas/KafkaLogSettings"
-					},
-					{
-						"$ref": "#/components/schemas/KafkaDLQEUSettings"
-					},
-					{
-						"$ref": "#/components/schemas/KafkaLogEUSettings"
-					}
-				]
+				"$ref": "#/components/schemas/SettingsType"
 			},
 			"SettingName": {
 				"type": "string",
