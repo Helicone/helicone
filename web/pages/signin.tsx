@@ -112,8 +112,30 @@ export const getServerSideProps = async (
       };
     }
   }
+
+  // if the base path contains localhost, do nothing
+  if (context.req.headers.host?.includes("localhost")) {
+    return {
+      props: {},
+    };
+  }
+
+  // if the base path contains us or eu in the basepath, do nothing
+  if (
+    context.req.headers.host?.includes("us") ||
+    context.req.headers.host?.includes("eu")
+  ) {
+    return {
+      props: {},
+    };
+  }
+
+  // default to the https://us.helicone.ai/signin if no other conditions are met
   return {
-    props: {},
+    redirect: {
+      destination: "https://us.helicone.ai/signin",
+      permanent: true,
+    },
   };
 };
 
