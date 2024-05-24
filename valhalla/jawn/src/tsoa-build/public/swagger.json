@@ -2295,7 +2295,9 @@
 								"offset": 0,
 								"sort": {
 									"created_at": "desc"
-								}
+								},
+								"isScored": false,
+								"isPartOfExperiment": false
 							}
 						}
 					}

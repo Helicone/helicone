@@ -694,7 +694,9 @@ export interface operations {
          *   "offset": 0,
          *   "sort": {
          *     "created_at": "desc"
-         *   }
+         *   },
+         *   "isScored": false,
+         *   "isPartOfExperiment": false
          * }
          */
         "application/json": components["schemas"]["RequestQueryParams"];
