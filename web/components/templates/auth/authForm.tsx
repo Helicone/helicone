@@ -56,9 +56,9 @@ const AuthForm = (props: AuthFormProps) => {
 
   const handleRouting = (regionEvent: "us" | "eu") => {
     // check if the current path contains `localhost`. if it does, don't do anything
-    const basePath = router.basePath;
+    const basePath = window.location.href;
 
-    if (basePath.includes("localhost") || basePath === "") {
+    if (basePath.includes("localhost")) {
       return;
     }
 
