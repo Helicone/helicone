@@ -11,9 +11,7 @@ import {
 import { Topics } from "../KafkaProducer";
 import { generateKafkaConsumer } from "./client";
 import {
-  DLQ_ESTIMATED_MINI_BATCH_COUNT,
   DLQ_MESSAGES_PER_MINI_BATCH,
-  ESTIMATED_MINI_BATCH_COUNT,
   MESSAGES_PER_MINI_BATCH,
 } from "./constant";
 import { SettingsManager } from "../../../utils/settings";
