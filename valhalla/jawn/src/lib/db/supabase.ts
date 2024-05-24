@@ -258,9 +258,7 @@ export class SupabaseConnector {
       3600 // 1 hour
     );
 
-    return ok({
-      organizationId: orgId,
-    });
+    return ok(authParamsResult);
   }
 
   async getOrganization(authParams: AuthParams): Promise<OrgResult> {
