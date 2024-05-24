@@ -5,7 +5,6 @@ WORKDIR /worker
 RUN apt-get update && apt-get install -y clang libc++-dev libc++abi-dev
 
 COPY ./package.json /worker/package.json
-COPY ./yarn.lock /worker/yarn.lock
 
 WORKDIR /worker
 RUN yarn
