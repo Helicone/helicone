@@ -480,6 +480,15 @@
 			},
 			"HeliconeMeta": {
 				"properties": {
+					"posthogHost": {
+						"type": "string"
+					},
+					"posthogApiKey": {
+						"type": "string"
+					},
+					"webhookEnabled": {
+						"type": "boolean"
+					},
 					"omitResponseLog": {
 						"type": "boolean"
 					},
@@ -491,6 +500,7 @@
 					}
 				},
 				"required": [
+					"webhookEnabled",
 					"omitResponseLog",
 					"omitRequestLog"
 				],
@@ -744,6 +754,68 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"KafkaSettings": {
+				"properties": {
+					"miniBatchSize": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"miniBatchSize"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"AzureExperiment": {
+				"properties": {
+					"azureBaseUri": {
+						"type": "string"
+					},
+					"azureApiVersion": {
+						"type": "string"
+					},
+					"azureDeploymentName": {
+						"type": "string"
+					},
+					"azureApiKey": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"azureBaseUri",
+					"azureApiVersion",
+					"azureDeploymentName",
+					"azureApiKey"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Setting": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/KafkaSettings"
+					},
+					{
+						"$ref": "#/components/schemas/AzureExperiment"
+					}
+				]
+			},
+			"SettingName": {
+				"type": "string",
+				"enum": [
+					"kafka:dlq",
+					"kafka:log",
+					"kafka:dlq:eu",
+					"kafka:log:eu",
+					"azure:experiment"
+				],
+				"nullable": false
+			},
+			"url.URL": {
+				"type": "string",
+				"description": "The URL interface represents an object providing static methods used for creating object URLs.\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)\n`URL` class is a global reference for `require('url').URL`\nhttps://nodejs.org/api/url.html#the-whatwg-url-api"
 			}
 		},
 		"securitySchemes": {
@@ -1314,6 +1386,509 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/admin/orgs/top": {
+			"get": {
+				"operationId": "GetTopOrgs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"properties": {
+											"ct": {
+												"type": "number",
+												"format": "double"
+											},
+											"organization_id": {
+												"type": "string"
+											},
+											"members": {
+												"items": {
+													"properties": {
+														"last_active": {
+															"type": "string"
+														},
+														"role": {
+															"type": "string"
+														},
+														"email": {
+															"type": "string"
+														},
+														"id": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"last_active",
+														"role",
+														"email",
+														"id"
+													],
+													"type": "object"
+												},
+												"type": "array"
+											},
+											"owner_last_login": {
+												"type": "string"
+											},
+											"owner_email": {
+												"type": "string"
+											},
+											"tier": {
+												"type": "string"
+											},
+											"id": {
+												"type": "string"
+											},
+											"overTime": {
+												"items": {
+													"properties": {
+														"organization_id": {
+															"type": "string"
+														},
+														"dt": {
+															"type": "string"
+														},
+														"count": {
+															"type": "number",
+															"format": "double"
+														}
+													},
+													"required": [
+														"organization_id",
+														"dt",
+														"count"
+													],
+													"type": "object"
+												},
+												"type": "array"
+											}
+										},
+										"required": [
+											"ct",
+											"organization_id",
+											"members",
+											"owner_last_login",
+											"owner_email",
+											"tier",
+											"id",
+											"overTime"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/admin/admins/query": {
+			"get": {
+				"operationId": "GetAdmins",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"properties": {
+											"user_id": {
+												"type": "string",
+												"nullable": true
+											},
+											"user_email": {
+												"type": "string",
+												"nullable": true
+											},
+											"id": {
+												"type": "number",
+												"format": "double"
+											},
+											"created_at": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"user_id",
+											"user_email",
+											"id",
+											"created_at"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/admin/settings/{name}": {
+			"get": {
+				"operationId": "GetSetting",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Setting"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "name",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/SettingName"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/azure/run-test": {
+			"post": {
+				"operationId": "AzureTest",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"fetchParams": {
+											"properties": {
+												"body": {
+													"type": "string"
+												},
+												"headers": {
+													"properties": {},
+													"additionalProperties": {
+														"type": "string"
+													},
+													"type": "object"
+												},
+												"url": {
+													"$ref": "#/components/schemas/url.URL"
+												}
+											},
+											"required": [
+												"body",
+												"headers",
+												"url"
+											],
+											"type": "object"
+										},
+										"resultText": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"fetchParams",
+										"resultText"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"requestBody": {}
+								},
+								"required": [
+									"requestBody"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/settings": {
+			"post": {
+				"operationId": "UpdateSetting",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"settings": {
+										"$ref": "#/components/schemas/Setting"
+									},
+									"name": {
+										"$ref": "#/components/schemas/SettingName"
+									}
+								},
+								"required": [
+									"settings",
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/orgs/query": {
+			"post": {
+				"operationId": "FindAllOrgs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"orgs": {
+											"items": {
+												"properties": {
+													"id": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"id",
+													"name"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"orgs"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"orgName": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"orgName"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/admins/org/query": {
+			"post": {
+				"operationId": "AddAdminsToOrg",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"adminIds": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"orgId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"adminIds",
+									"orgId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/alert_banners": {
+			"post": {
+				"operationId": "CreateAlertBanner",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"message": {
+										"type": "string"
+									},
+									"title": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"message",
+									"title"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"operationId": "UpdateAlertBanner",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"active": {
+										"type": "boolean"
+									},
+									"id": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"required": [
+									"active",
+									"id"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		}
 	},

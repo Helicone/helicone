@@ -17,10 +17,13 @@ export class LogController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<void> {
     const logManager = new LogManager();
-    await logManager.processLogEntry(logMessage);
-
-    // If there is a failure, not much we can do here
-    this.setStatus(200);
+    try {
+      await logManager.processLogEntry(logMessage);
+      this.setStatus(200);
+    } catch (error: any) {
+      console.error(`Error processing log entry: ${error.message}`);
+      this.setStatus(500);
+    }
     return;
   }
 }

@@ -9,6 +9,35 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admins: {
+        Row: {
+          created_at: string
+          id: number
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alert: {
         Row: {
           created_at: string | null
@@ -64,6 +93,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      alert_banners: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: number
+          message: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: number
+          message?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: number
+          message?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       alert_history: {
         Row: {
@@ -250,18 +306,21 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          meta: Json | null
           name: string | null
           organization: string
         }
         Insert: {
           created_at?: string | null
           id?: string
+          meta?: Json | null
           name?: string | null
           organization: string
         }
         Update: {
           created_at?: string | null
           id?: string
+          meta?: Json | null
           name?: string | null
           organization?: string
         }
@@ -915,6 +974,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      helicone_settings: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          settings: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          settings: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          settings?: Json
+        }
+        Relationships: []
       }
       job: {
         Row: {

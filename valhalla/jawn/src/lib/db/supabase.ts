@@ -122,11 +122,13 @@ export class SupabaseConnector {
     if (member.data.length !== 0) {
       return ok({
         organizationId: member.data[0].organization,
+        userId: data.user.id,
       });
     }
     if (owner.data.length !== 0) {
       return ok({
         organizationId: owner.data[0].id,
+        userId: data.user.id,
       });
     }
 
@@ -256,9 +258,7 @@ export class SupabaseConnector {
       3600 // 1 hour
     );
 
-    return ok({
-      organizationId: orgId,
-    });
+    return ok(authParamsResult);
   }
 
   async getOrganization(authParams: AuthParams): Promise<OrgResult> {

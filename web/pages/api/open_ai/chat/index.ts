@@ -4,6 +4,7 @@ import OpenAI from "openai";
 import {
   ChatCompletion,
   ChatCompletionMessageParam,
+  ChatCompletionTool,
 } from "openai/resources/chat";
 import { DEMO_EMAIL } from "../../../../lib/constants";
 import { Result } from "../../../../lib/result";
@@ -15,13 +16,15 @@ export default async function handler(
 ) {
   const client = new SupabaseServerWrapper({ req, res }).getClient();
   const user = await client.auth.getUser();
-  const { messages, requestId, temperature, model, maxTokens } = req.body as {
-    messages: ChatCompletionMessageParam[];
-    requestId: string;
-    temperature: number;
-    model: string;
-    maxTokens: number;
-  };
+  const { messages, requestId, temperature, model, maxTokens, tools } =
+    req.body as {
+      messages: ChatCompletionMessageParam[];
+      requestId: string;
+      temperature: number;
+      model: string;
+      maxTokens: number;
+      tools: ChatCompletionTool[];
+    };
 
   if (!temperature || !model) {
     res.status(400).json({
@@ -59,6 +62,7 @@ export default async function handler(
       user: user.data.user.email,
       temperature: temperature,
       max_tokens: maxTokens,
+      tools: tools,
     });
     res.status(200).json({ error: null, data: completion });
     return;

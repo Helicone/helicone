@@ -45,6 +45,7 @@ const SignUp = () => {
               "error"
             );
             console.error(error);
+            return;
           }
 
           setShowEmailConfirmation(true);

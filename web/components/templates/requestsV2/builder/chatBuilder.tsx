@@ -6,7 +6,7 @@ class ChatBuilder extends AbstractRequestBuilder {
   protected buildSpecific(): SpecificFields {
     const responseBody = this.response.llmSchema?.response ?? null;
     const requestBody = this.response.llmSchema?.request ?? null;
-    const hasNoContent = responseBody?.message?.content === null;
+    const hasNoContent = !responseBody?.message?.content;
 
     const getRequestText = () => {
       // Check if there are any messages

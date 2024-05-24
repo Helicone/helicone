@@ -68,6 +68,25 @@
             "integrations/anthropic/langchain"
           ]
         },
+        {
+          "group": "Gemini",
+          "pages": [
+            {
+              "group": "API",
+              "pages": [
+                "integrations/gemini/api/node",
+                "integrations/gemini/api/curl"
+              ]
+            },
+            {
+              "group": "Vertex AI (Enterprise)",
+              "pages": [
+                "integrations/gemini/vertex/node",
+                "integrations/gemini/vertex/curl"
+              ]
+            }
+          ]
+        },
         "getting-started/integration-method/anyscale",
         "getting-started/integration-method/together",
         "getting-started/integration-method/openrouter",
@@ -91,6 +110,7 @@
         "features/advanced-usage/omit-logs",
         "features/advanced-usage/user-metrics",
         "features/advanced-usage/feedback",
+        "features/advanced-usage/scores",
         "getting-started/integration-method/gateway-fallbacks",
         "features/advanced-usage/retries",
         "features/advanced-usage/custom-rate-limits",
@@ -106,14 +126,14 @@
         "getting-started/proxy-vs-async",
         "faq/how-we-calculate-cost",
         "faq/latency-affect",
-        "helicone-headers/predefining-request-id", 
+        "helicone-headers/predefining-request-id",
         {
-            "group": "Deployment",
-            "pages": [
-                "getting-started/self-deploy",
-                "getting-started/self-deploy-docker",
-                "getting-started/self-deploy-cloud"
-            ]
+          "group": "Deployment",
+          "pages": [
+            "getting-started/self-deploy",
+            "getting-started/self-deploy-docker",
+            "getting-started/self-deploy-cloud"
+          ]
         }
       ]
     },
@@ -154,6 +174,7 @@
       "pages": [
         "rest/request/post-v1requestquery",
         "rest/request/post-v1request-feedback",
+        "rest/request/post-v1request-score",
         "rest/request/put-v1request-property"
       ]
     },

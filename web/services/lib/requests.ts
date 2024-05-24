@@ -39,3 +39,26 @@ export const addRequestLabel = async (
     })
   ).response;
 };
+
+export const addRequestScore = async (
+  requestId: string,
+  orgId: string,
+  key: string,
+  value: number
+) => {
+  const jawn = getJawnClient(orgId);
+  return (
+    await jawn.POST("/v1/request/{requestId}/score", {
+      body: {
+        scores: {
+          [key]: value,
+        },
+      },
+      params: {
+        path: {
+          requestId,
+        },
+      },
+    })
+  ).response;
+};

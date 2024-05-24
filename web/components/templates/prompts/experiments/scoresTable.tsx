@@ -32,6 +32,14 @@ const ScoresTable = ({ scores }: ScoresProps) => {
     };
   };
 
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      year: "numeric",
+    });
+  };
+
   const getScoreValue = (score: ScoreValue, field: string) => {
     if (field === "dateCreated" && typeof score === "string") {
       return renderScoreValue(score);
@@ -74,8 +82,8 @@ const ScoresTable = ({ scores }: ScoresProps) => {
               "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
             )}
           >
-            {scores.dataset.scores.dateCreated ===
-            scores.hypothesis.scores.dateCreated
+            {formatDate(scores.dataset.scores.dateCreated as string) ===
+            formatDate(scores.hypothesis.scores.dateCreated as string)
               ? "same"
               : "changed"}
           </span>
@@ -94,7 +102,7 @@ const ScoresTable = ({ scores }: ScoresProps) => {
               "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
             )}
           >
-            {`${changeInfo.change > 0 && "+"}${changeInfo.change} (${
+            {`${changeInfo.change > 0 ? "+" : ""}${changeInfo.change} (${
               changeInfo.percentageChange
             }%)`}
           </span>

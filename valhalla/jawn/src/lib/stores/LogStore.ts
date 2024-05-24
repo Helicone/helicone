@@ -48,7 +48,7 @@ const requestColumns = new pgp.helpers.ColumnSet(
   { table: "request" }
 );
 const onConflictRequest =
-  " ON CONFLICT (id) DO UPDATE SET " +
+  " ON CONFLICT (id, helicone_org_id) DO UPDATE SET " +
   requestColumns.assignColumns({ from: "EXCLUDED", skip: "id" });
 
 const responseColumns = new pgp.helpers.ColumnSet(
@@ -92,10 +92,15 @@ export class LogStore {
             payload.requests
           );
 
-          const insertRequest =
-            pgp.helpers.insert(filteredRequests, requestColumns) +
-            onConflictRequest;
-          await t.none(insertRequest);
+          try {
+            const insertRequest =
+              pgp.helpers.insert(filteredRequests, requestColumns) +
+              onConflictRequest;
+            await t.none(insertRequest);
+          } catch (error) {
+            console.error("Error inserting request", error);
+            throw error;
+          }
         }
 
         // Insert into the 'response' table with conflict resolution
@@ -104,10 +109,15 @@ export class LogStore {
             payload.responses
           );
 
-          const insertResponse =
-            pgp.helpers.insert(filteredResponses, responseColumns) +
-            onConflictResponse;
-          await t.none(insertResponse);
+          try {
+            const insertResponse =
+              pgp.helpers.insert(filteredResponses, responseColumns) +
+              onConflictResponse;
+            await t.none(insertResponse);
+          } catch (error) {
+            console.error("Error inserting response", error);
+            throw error;
+          }
         }
 
         if (payload.assets && payload.assets.length > 0) {
@@ -137,7 +147,7 @@ export class LogStore {
 
       return ok("Successfully inserted log batch");
     } catch (error: any) {
-      return err("Failed to insert log batch: " + error.message);
+      return err("Failed to insert log batch: " + error);
     }
   }
 
@@ -160,12 +170,17 @@ export class LogStore {
       [orgId, promptId]
     );
     if (!existingPrompt) {
-      existingPrompt = await t.one<{
-        id: string;
-      }>(
-        `INSERT INTO prompt_v2 (user_defined_id, organization, created_at) VALUES ($1, $2, $3) RETURNING id`,
-        [promptId, orgId, newPromptRecord.createdAt]
-      );
+      try {
+        existingPrompt = await t.one<{
+          id: string;
+        }>(
+          `INSERT INTO prompt_v2 (user_defined_id, organization, created_at) VALUES ($1, $2, $3) RETURNING id`,
+          [promptId, orgId, newPromptRecord.createdAt]
+        );
+      } catch (error) {
+        console.error("Error inserting prompt", error);
+        throw error;
+      }
     }
 
     // Check the latest version and decide whether to update
@@ -196,46 +211,61 @@ export class LogStore {
       let majorVersion = existingPromptVersion
         ? existingPromptVersion.major_version + 1
         : 0;
-      const newVersionResult = await t.one(
-        `INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at)
+      try {
+        const newVersionResult = await t.one(
+          `INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at)
          VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-        [
-          existingPrompt.id,
-          orgId,
-          majorVersion,
-          0,
-          heliconeTemplate.template,
-          model,
-          newPromptRecord.createdAt,
-        ]
-      );
-      versionId = newVersionResult.id;
+          [
+            existingPrompt.id,
+            orgId,
+            majorVersion,
+            0,
+            heliconeTemplate.template,
+            model,
+            newPromptRecord.createdAt,
+          ]
+        );
+        versionId = newVersionResult.id;
+      } catch (error) {
+        console.error("Error inserting prompt version", error);
+        throw error;
+      }
     }
 
     // Insert or update prompt input keys if there's a new version or no existing version
     if (versionId && Object.keys(heliconeTemplate.inputs).length > 0) {
-      await t.none(
-        `INSERT INTO prompt_input_keys (key, prompt_version, created_at)
+      try {
+        await t.none(
+          `INSERT INTO prompt_input_keys (key, prompt_version, created_at)
          SELECT unnest($1::text[]), $2, $3
          ON CONFLICT (key, prompt_version) DO NOTHING`,
-        [
-          `{${Object.keys(heliconeTemplate.inputs).join(",")}}`,
-          versionId,
-          newPromptRecord.createdAt.toISOString(),
-        ]
-      );
+          [
+            `{${Object.keys(heliconeTemplate.inputs).join(",")}}`,
+            versionId,
+            newPromptRecord.createdAt.toISOString(),
+          ]
+        );
+      } catch (error) {
+        console.error("Error inserting prompt input keys", error);
+        throw error;
+      }
 
-      // Record the inputs and source request
-      await t.none(
-        `INSERT INTO prompt_input_record (inputs, source_request, prompt_version, created_at)
+      try {
+        // Record the inputs and source request
+        await t.none(
+          `INSERT INTO prompt_input_record (inputs, source_request, prompt_version, created_at)
          VALUES ($1, $2, $3, $4)`,
-        [
-          JSON.stringify(heliconeTemplate.inputs),
-          requestId,
-          versionId,
-          newPromptRecord.createdAt.toISOString(),
-        ]
-      );
+          [
+            JSON.stringify(heliconeTemplate.inputs),
+            requestId,
+            versionId,
+            newPromptRecord.createdAt.toISOString(),
+          ]
+        );
+      } catch (error) {
+        console.error("Error inserting prompt input record", error);
+        throw error;
+      }
     }
 
     return ok("Prompt processed successfully");
@@ -282,15 +312,15 @@ export class LogStore {
     >();
 
     entries.forEach((entry) => {
-      if (!entry.id) {
+      if (!entry.request) {
         return;
       }
 
-      const existingEntry = entryMap.get(entry.id);
+      const existingEntry = entryMap.get(entry.request);
 
       // No existing entry, add it
       if (!existingEntry || !existingEntry.created_at) {
-        entryMap.set(entry.id, entry);
+        entryMap.set(entry.request, entry);
         return;
       }
 
@@ -298,7 +328,7 @@ export class LogStore {
         entry.created_at &&
         new Date(entry.created_at) < new Date(existingEntry.created_at)
       ) {
-        entryMap.set(entry.id, entry);
+        entryMap.set(entry.request, entry);
       }
     });
 

@@ -1,17 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-
-import { useJawnClient } from "../../../lib/clients/jawnHook";
-import { JawnFilterNode } from "../../../lib/clients/jawn";
+import { useOrg } from "../../../components/layout/organizationContext";
+import { getJawnClient } from "../../../lib/clients/jawn";
 
 export const useInputs = (promptVersionId?: string) => {
-  const jawn = useJawnClient();
-
+  const org = useOrg();
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["prompts", jawn, promptVersionId],
+    queryKey: ["prompts", org?.currentOrg?.id, promptVersionId],
     queryFn: async (query) => {
-      const jawn = query.queryKey[1] as ReturnType<typeof useJawnClient>;
       const promptVersionId = query.queryKey[2] as string | undefined;
       if (!promptVersionId) return;
+      const orgId = query.queryKey[1] as string;
+      const jawn = getJawnClient(orgId);
 
       return jawn.POST("/v1/prompt/version/{promptVersionId}/inputs/query", {
         params: {
