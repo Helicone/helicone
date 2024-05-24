@@ -6,6 +6,12 @@ import { dbExecute } from "../shared/db/dbExecute";
 import { err, resultMap, ok, Result } from "../shared/result";
 import { BaseStore } from "./baseStore";
 
+export type Score = {
+  score_attribute_key: string;
+  score_attribute_type: string;
+  score_attribute_value: number;
+}
+
 export class ScoreStore extends BaseStore {
   constructor(organizationId: string) {
     super(organizationId);
@@ -13,11 +19,12 @@ export class ScoreStore extends BaseStore {
 
   public async putScoresIntoSupabase(
     requestId: string,
-    scores: Record<string, number>
+    scores: Score[]
   ) {
     try {
-      const scoreKeys = Object.keys(scores);
-      const scoreValues = Object.values(scores).map((val) => BigInt(val));
+      const scoreKeys = scores.map((score) => score.score_attribute_key);
+      const scoreTypes = scores.map((score) => score.score_attribute_type);
+      const scoreValues = scores.map((score) => score.score_attribute_value);
 
       const { data: requestData, error: requestError } = await dbExecute(
         `SELECT id FROM request WHERE id = $1 AND helicone_org_id = $2`,
@@ -34,19 +41,20 @@ export class ScoreStore extends BaseStore {
 
       const upsertQuery = `
         WITH upserted_attributes AS (
-            INSERT INTO score_attribute (score_key, organization)
-            SELECT unnest($1::text[]), unnest($2::uuid[])
+            INSERT INTO score_attribute (score_key, value_type, organization)
+            SELECT unnest($1::text[]), unnest($2::text[]), unnest($3::uuid[])
             ON CONFLICT (score_key, organization) DO UPDATE SET
-                score_key = EXCLUDED.score_key
+                score_key = EXCLUDED.score_key,
+                value_type = EXCLUDED.value_type
             RETURNING id, score_key
         )
         SELECT id, score_key
         FROM upserted_attributes;
       `;
-
+      
       const { data: upsertedAttributes, error: upsertError } = await dbExecute(
         upsertQuery,
-        [scoreKeys, organizationIds]
+        [scoreKeys, scoreTypes, organizationIds]
       );
 
       if (!upsertedAttributes || upsertError) {
@@ -82,7 +90,7 @@ export class ScoreStore extends BaseStore {
     id: string;
     version: number;
     provider: string;
-    scores: Record<string, number>;
+    scores: Score[];
   }): Promise<Result<InsertRequestResponseVersioned, string>> {
     let rowContents = resultMap(
       await clickhouseDb.dbQuery<InsertRequestResponseVersioned>(
@@ -147,7 +155,10 @@ export class ScoreStore extends BaseStore {
           ...rowContents.data,
           sign: 1,
           version: newVersion.version,
-          scores: newVersion.scores,
+          scores: newVersion.scores.reduce((acc, score) => {
+            acc[score.score_attribute_key] = score.score_attribute_value;
+            return acc;
+          }, {} as Record<string, number>),
         },
       ]
     );

@@ -1016,10 +1016,29 @@
 					}
 				]
 			},
+			"Record_string.number-or-boolean_": {
+				"properties": {},
+				"additionalProperties": {
+					"anyOf": [
+						{
+							"type": "number",
+							"format": "double"
+						},
+						{
+							"type": "boolean"
+						}
+					]
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"Scores": {
+				"$ref": "#/components/schemas/Record_string.number-or-boolean_"
+			},
 			"ScoreRequest": {
 				"properties": {
 					"scores": {
-						"$ref": "#/components/schemas/Record_string.number_"
+						"$ref": "#/components/schemas/Scores"
 					}
 				},
 				"required": [
