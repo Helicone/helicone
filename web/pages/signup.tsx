@@ -7,6 +7,7 @@ import ThemedModal from "../components/shared/themed/themedModal";
 import AuthForm from "../components/templates/auth/authForm";
 import { DEMO_EMAIL } from "../lib/constants";
 import PublicMetaData from "../components/layout/public/publicMetaData";
+import { GetServerSidePropsContext } from "next";
 
 const SignUp = () => {
   const supabase = useSupabaseClient();
@@ -99,3 +100,35 @@ const SignUp = () => {
 };
 
 export default SignUp;
+
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  // if the base path contains localhost or vercel, do nothing
+  if (
+    context.req.headers.host?.includes("localhost") ||
+    context.req.headers.host?.includes("vercel")
+  ) {
+    return {
+      props: {},
+    };
+  }
+
+  // if the base path contains us or eu in the basepath, do nothing
+  if (
+    context.req.headers.host?.includes("us") ||
+    context.req.headers.host?.includes("eu")
+  ) {
+    return {
+      props: {},
+    };
+  }
+
+  // default to the https://us.helicone.ai/signin if no other conditions are met
+  return {
+    redirect: {
+      destination: "https://us.helicone.ai/signin",
+      permanent: true,
+    },
+  };
+};
