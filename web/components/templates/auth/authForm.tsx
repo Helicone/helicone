@@ -3,11 +3,9 @@ import { BsGoogle, BsGithub } from "react-icons/bs";
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { CustomerPortalContent } from "../../../pages/signin";
 import { useRouter } from "next/router";
 import HcButton from "../../ui/hcButton";
-import ThemedTabs from "../../shared/themed/themedTabs";
 import { Select, SelectItem, TextInput } from "@tremor/react";
 
 interface AuthFormProps {
