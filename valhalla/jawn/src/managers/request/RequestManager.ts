@@ -170,7 +170,9 @@ export class RequestManager extends BaseManager {
           filter,
           offset,
           limit,
-          sort
+          sort,
+          isPartOfExperiment,
+          isScored
         )
       : await getRequests(
           this.authParams.organizationId,
