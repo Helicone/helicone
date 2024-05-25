@@ -166,21 +166,21 @@ export class RequestManager extends BaseManager {
 
     const requests = isCached
       ? await getRequestsCached(
-        this.authParams.organizationId,
-        filter,
-        offset,
-        limit,
-        sort
-      )
+          this.authParams.organizationId,
+          filter,
+          offset,
+          limit,
+          sort
+        )
       : await getRequests(
-        this.authParams.organizationId,
-        filter,
-        offset,
-        limit,
-        sort,
-        isPartOfExperiment,
-        isScored
-      );
+          this.authParams.organizationId,
+          filter,
+          offset,
+          limit,
+          sort,
+          isPartOfExperiment,
+          isScored
+        );
 
     return resultMap(requests, (req) => {
       return req.map((r) => {
