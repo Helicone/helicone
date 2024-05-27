@@ -43,6 +43,16 @@ crons = ["* * * * *", "0 * * * *"]
 [env.production]
 name = "helicone-worker-prod"
 routes = [
+
+	{ pattern = "oai.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "oai.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "anthropic.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "api.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "openrouter.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "together.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "gateway.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+
+
 	{ pattern = "oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "api.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
@@ -90,6 +100,11 @@ DATADOG_ENABLED = "true"
 [env.production_staging]
 name = "helicone-worker-prod-staging"
 routes = [
+	{ pattern = "oai.staging.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+
+
+	{ pattern = "oai.staging.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+
 	{ pattern = "oai.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "api.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
