@@ -118,7 +118,10 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
     return env;
   }
 
-  if (host.includes("hconeai") && hostParts.length >= 3) {
+  if (
+    (host.includes("hconeai") || host.includes("helicone.ai")) &&
+    hostParts.length >= 3
+  ) {
     // hconeai.com requests
     if (hostParts[0].includes("gateway")) {
       return {
