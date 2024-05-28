@@ -22,6 +22,7 @@ import Link from "next/link";
 import { clsx } from "../../../shared/clsx";
 import UpgradeProModal from "../../../shared/upgradeProModal";
 import RenderOrgPlan from "./renderOrgPlan";
+import { Result } from "../../../../lib/result";
 
 interface OrgPlanPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -44,6 +45,8 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
 
   const [open, setOpen] = useState(false);
 
+  const [ estimatedCost, setEstCost] = useState(0);
+
   const {
     count,
     isLoading: isCountLoading,
@@ -56,6 +59,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
 
   useEffect(() => {
     refetch();
+    getStripeUsageForGrowth();
   }, [currentMonth, refetch]);
 
   const capitalizeHelper = (str: string) => {
@@ -84,6 +88,31 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
     const date = new Date(dateString);
     return date.toLocaleString("default", { month: "long" });
   };
+
+  type TStripeUsage = {
+    currentPeriodStart: number,
+    currentPeriodEnd: number,
+    numOfUnits: number,
+    pricePerUnit: number,
+  }
+
+  async function getStripeUsageForGrowth() {
+    if (org.tier != "growth") return;
+
+    const r = await fetch("/api/subscription/get_usage_and_costs", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const stripeUsage = (await r.json()) as Result<TStripeUsage, string>;
+    if (stripeUsage.error) {
+      console.log(stripeUsage.error);
+      return;
+    }
+
+    setEstCost(stripeUsage.data!.numOfUnits * stripeUsage.data!.pricePerUnit);
+  }
 
   const renderInfo = () => {
     if (org.tier === "free") {
@@ -124,6 +153,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
       );
     }
   };
+
 
   return (
     <>
@@ -180,6 +210,19 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
                 {isCountLoading
                   ? "Loading..."
                   : Number(count?.data || 0).toLocaleString()}
+              </dd>
+            </div>
+          )}
+
+          {org.tier === "growth" && (
+            <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
+              <dt className="text-sm font-medium leading-6 text-gray-700 dark:text-gray-300">
+                Estimated Costs
+              </dt>
+              <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900 dark:text-gray-100">
+                {isCountLoading
+                  ? "Loading..."
+                  : Number(estimatedCost || 0).toLocaleString()}
               </dd>
             </div>
           )}
