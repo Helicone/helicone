@@ -217,7 +217,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
 
           {org.tier === "growth" && (
             <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
-              <dt className="text-sm font-medium leading-6 text-gray-700 dark:text-gray-300">
+              <dt className="text-sm flex flex-row font-medium leading-6 text-gray-700 dark:text-gray-300">
                 Estimated Costs
                 <div className="flex flex-row items-baseline text-gray-500 w-fit gap-1">
                   <button
