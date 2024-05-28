@@ -565,17 +565,20 @@ Json: JsonObject;
       id: string;
       provider: string;
     };
-    ScoreValue: string | number;
+    Score: {
+      valueType: string;
+      value: number | string;
+    };
     /** @description Construct a type with a set of properties K of type T */
-    "Record_string.ScoreValue_": {
-      [key: string]: components["schemas"]["ScoreValue"];
+    "Record_string.Score_": {
+      [key: string]: components["schemas"]["Score"];
     };
     ExperimentScores: {
       dataset: {
-        scores: components["schemas"]["Record_string.ScoreValue_"];
+        scores: components["schemas"]["Record_string.Score_"];
       };
       hypothesis: {
-        scores: components["schemas"]["Record_string.ScoreValue_"];
+        scores: components["schemas"]["Record_string.Score_"];
       };
     };
     Experiment: {
@@ -583,7 +586,7 @@ Json: JsonObject;
       organization: string;
       dataset: {
         rows: {
-            scores: components["schemas"]["Record_string.number_"];
+            scores: components["schemas"]["Record_string.Score_"];
             inputRecord?: {
               request: components["schemas"]["RequestObj"];
               response: components["schemas"]["ResponseObj"];
@@ -601,7 +604,7 @@ Json: JsonObject;
       hypotheses: {
           runs: {
               request?: components["schemas"]["RequestObj"];
-              scores: components["schemas"]["Record_string.number_"];
+              scores: components["schemas"]["Record_string.Score_"];
               response?: components["schemas"]["ResponseObj"];
               resultRequestId: string;
               datasetRowId: string;

@@ -1845,25 +1845,38 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ScoreValue": {
-				"anyOf": [
-					{
+			"Score": {
+				"properties": {
+					"valueType": {
 						"type": "string"
 					},
-					{
-						"type": "number",
-						"format": "double"
-					},
-					{
-						"type": "string",
-						"format": "date-time"
+					"value": {
+						"anyOf": [
+							{
+								"type": "number",
+								"format": "double"
+							},
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "string"
+							}
+						]
 					}
-				]
+				},
+				"required": [
+					"valueType",
+					"value"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
-			"Record_string.ScoreValue_": {
+			"Record_string.Score_": {
 				"properties": {},
 				"additionalProperties": {
-					"$ref": "#/components/schemas/ScoreValue"
+					"$ref": "#/components/schemas/Score"
 				},
 				"type": "object",
 				"description": "Construct a type with a set of properties K of type T"
@@ -1873,7 +1886,7 @@
 					"dataset": {
 						"properties": {
 							"scores": {
-								"$ref": "#/components/schemas/Record_string.ScoreValue_"
+								"$ref": "#/components/schemas/Record_string.Score_"
 							}
 						},
 						"required": [
@@ -1884,7 +1897,7 @@
 					"hypothesis": {
 						"properties": {
 							"scores": {
-								"$ref": "#/components/schemas/Record_string.ScoreValue_"
+								"$ref": "#/components/schemas/Record_string.Score_"
 							}
 						},
 						"required": [
@@ -1914,7 +1927,7 @@
 								"items": {
 									"properties": {
 										"scores": {
-											"$ref": "#/components/schemas/Record_string.number_"
+											"$ref": "#/components/schemas/Record_string.Score_"
 										},
 										"inputRecord": {
 											"properties": {
@@ -1983,7 +1996,7 @@
 												"$ref": "#/components/schemas/RequestObj"
 											},
 											"scores": {
-												"$ref": "#/components/schemas/Record_string.number_"
+												"$ref": "#/components/schemas/Record_string.Score_"
 											},
 											"response": {
 												"$ref": "#/components/schemas/ResponseObj"

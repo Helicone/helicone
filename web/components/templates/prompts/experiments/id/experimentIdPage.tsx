@@ -229,7 +229,8 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                           key={key}
                                           className="bg-gray-50 text-gray-700 ring-gray-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
                                         >
-                                          {key}: {run.originResult.scores[key]}
+                                          {key}:{" "}
+                                          {run.originResult.scores[key].value}
                                         </span>
                                       )
                                     )}
@@ -303,7 +304,8 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                             key={key}
                                             className="bg-gray-50 text-gray-700 ring-gray-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
                                           >
-                                            {key}: {run.testResult?.scores[key]}
+                                            {key}:{" "}
+                                            {run.testResult?.scores[key].value}
                                           </span>
                                         )
                                       )}

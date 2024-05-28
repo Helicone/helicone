@@ -2,14 +2,17 @@ import ModelPill from "../../requestsV2/modelPill";
 import { clsx } from "../../../shared/clsx";
 import { SimpleTable } from "../../../shared/table/simpleTable";
 
-type ScoreValue = string | number;
+type Score = {
+  valueType: string;
+  value: number | string;
+};
 
 type ExperimentScores = {
   dataset: {
-    scores: Record<string, ScoreValue>;
+    scores: Record<string, Score>;
   };
   hypothesis: {
-    scores: Record<string, ScoreValue>;
+    scores: Record<string, Score>;
   };
 };
 
@@ -40,20 +43,32 @@ const ScoresTable = ({ scores }: ScoresProps) => {
     });
   };
 
-  const getScoreValue = (score: ScoreValue, field: string) => {
-    if (field === "dateCreated" && typeof score === "string") {
-      return renderScoreValue(score);
+  const getScoreValue = (score: Score, field: string) => {
+    if (field === "dateCreated" && score.valueType === "string") {
+      return renderScoreValue(score.value);
     }
-    if (field === "cost" && typeof score === "number") {
-      return `$${score.toFixed(4)}`;
+    if (
+      field === "cost" &&
+      score.valueType === "number" &&
+      typeof score.value === "number"
+    ) {
+      return `$${score.value.toFixed(4)}`;
     }
-    if (field === "latency" && typeof score === "number") {
-      return `${(+score / 1000).toFixed(2)}s`;
+    if (
+      field === "latency" &&
+      score.valueType === "number" &&
+      typeof score.value === "number"
+    ) {
+      return `${(+score.value / 1000).toFixed(2)}s`;
     }
-    if (field === "model" && typeof score === "string") {
-      return <ModelPill model={score} />;
+    if (
+      field === "model" &&
+      score.valueType === "string" &&
+      typeof score.value === "string"
+    ) {
+      return <ModelPill model={score.value} />;
     }
-    return score;
+    return score.value;
   };
 
   const getScoreAttribute = (key: string) => {
@@ -87,8 +102,8 @@ const ScoresTable = ({ scores }: ScoresProps) => {
               "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
             )}
           >
-            {formatDate(scores.dataset.scores.dateCreated as string) ===
-            formatDate(scores.hypothesis.scores.dateCreated as string)
+            {formatDate(scores.dataset.scores.dateCreated.value as string) ===
+            formatDate(scores.hypothesis.scores.dateCreated.value as string)
               ? "same"
               : "changed"}
           </span>
@@ -189,8 +204,8 @@ const ScoresTable = ({ scores }: ScoresProps) => {
               field,
               scores,
               calculateChange(
-                scores.dataset.scores[field] as number,
-                scores.hypothesis.scores[field] as number
+                scores.dataset.scores[field].value as number,
+                scores.hypothesis.scores[field].value as number
               )
             )
           : renderComparisonCell(field, scores, null);
