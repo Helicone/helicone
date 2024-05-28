@@ -92,8 +92,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
   type TStripeUsage = {
     currentPeriodStart: number;
     currentPeriodEnd: number;
-    numOfUnits: number;
-    pricePerUnit: number;
+    totalCost: number;
   };
 
   async function getStripeUsageForGrowth() {
@@ -111,8 +110,9 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
       return;
     }
 
-    setEstCost(stripeUsage.data!.numOfUnits * stripeUsage.data!.pricePerUnit);
-    setCurrentMonth(new Date(stripeUsage.data!.currentPeriodStart * 1000));
+    console.log(stripeUsage.data);
+
+    setEstCost(stripeUsage.data!.totalCost);
   }
 
   const renderInfo = () => {

@@ -6,6 +6,9 @@ import {
 import { Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { Tier } from "../organization/tier";
+import { dbQueryClickhouse } from "../../../lib/api/db/dbExecute";
+import { getRequestCountClickhouse } from "../../../lib/api/request/request";
+import { handleLogCostCalculation } from "../../../utlis/LogCostCalculation";
 
 async function handler({
   res,
@@ -59,22 +62,51 @@ async function handler({
     subItemRes.json(),
   ]);
 
-  if (subscriptionItem.price.billing_scheme != "per_unit") {
+  // if (data.tier == "growth") {
+  //   return res.status(200).json({
+  //     data: {
+  //       currentPeriodStart: subscriptionData.current_period_start,
+  //       currentPeriodEnd: subscriptionData.current_period_end,
+  //       totalCost:
+  //         subscriptionItem.quantity * subscriptionItem.price.unit_amount,
+  //     },
+  //     error: null,
+  //   });
+  if (data.tier == "growth") {
+    console.log(
+      "Dates:",
+      new Date(subscriptionData.current_period_start * 1000),
+      new Date(subscriptionData.current_period_end * 1000)
+    );
+    const requestCount = await getRequestCountClickhouse(orgId, {
+      left: {
+        request_response_versioned: {
+          request_created_at: {
+            gte: new Date(subscriptionData.current_period_start * 1000),
+          },
+        },
+      },
+      right: {
+        request_response_versioned: {
+          request_created_at: {
+            lt: new Date(subscriptionData.current_period_end * 1000),
+          },
+        },
+      },
+      operator: "and",
+    });
+
+    console.log("Calc cost:", requestCount?.data);
+    const tieredCostCalculation = handleLogCostCalculation(requestCount?.data);
     return res.status(200).json({
-      data: null,
-      error: "Item is not billed per unit",
+      data: {
+        currentPeriodStart: subscriptionData.current_period_start,
+        currentPeriodEnd: subscriptionData.current_period_end,
+        totalCost: tieredCostCalculation,
+      },
+      error: null,
     });
   }
-
-  return res.status(200).json({
-    data: {
-      currentPeriodStart: subscriptionData.current_period_start,
-      currentPeriodEnd: subscriptionData.current_period_end,
-      numOfUnits: subscriptionItem.quantity,
-      pricePerUnit: subscriptionItem.price.unit_amount,
-    },
-    error: null,
-  });
 }
 
 export default withAuth(handler);
