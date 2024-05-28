@@ -381,8 +381,6 @@ export class LogStore {
     try {
       await db.tx(async (t: pgPromise.ITask<{}>) => {
         try {
-          console.log("requestBody", requestResponseData[0].requestBody);
-          console.log("responseBody", requestResponseData[0].responseBody);
           const searchRecords = requestResponseData.map((request) => {
             return {
               request_id: request.requestId,
