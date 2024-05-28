@@ -240,7 +240,6 @@ export async function proxyForwarder(
       status: 500,
     });
   }
-  console.log(`Data: ${JSON.stringify(data)}`);
   const { loggable, response } = data;
 
   if (cacheSettings.shouldSaveToCache && response.status === 200) {

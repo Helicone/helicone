@@ -180,8 +180,6 @@ export class RequestWrapper {
     const tokenType = this.heliconeHeaders.heliconeAuthV2._type;
     const token = this.heliconeHeaders.heliconeAuthV2.token;
 
-    console.log(`TokenType: ${tokenType}`);
-    console.log(`Token: ${token}`);
     if (tokenType === "jwt") {
       return ok({
         _type: "jwt",

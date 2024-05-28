@@ -73,7 +73,6 @@ export class KafkaProducer {
 
   async sendMessage(msg: KafkaMessage) {
     if (!this.kafka) {
-      console.log(`Calling valhalla with ${JSON.stringify(msg)}`);
       await this.sendMessageHttp(msg);
       return;
     }
