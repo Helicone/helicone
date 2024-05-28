@@ -7,7 +7,10 @@ WORKDIR /app/web
 
 RUN yarn
 
+# Exclude yarn.lock from the copy command to avoid unnecessary rebuilds
 COPY . /app/web
+COPY ./yarn.lock /app/web/yarn.lock
+
 
 RUN rm .env.* || true
 
