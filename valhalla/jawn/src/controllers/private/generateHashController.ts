@@ -38,7 +38,7 @@ export class GenerateHashController extends Controller {
           user_id: userId,
           api_key_name: keyName,
           organization_id: request.authParams.organizationId,
-          permissions: requestBody.permissions,
+          key_permissions: requestBody.permissions,
         });
 
       if (insertRes.error) {

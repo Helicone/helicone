@@ -34,7 +34,7 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
   const [loaded, setLoaded] = useState(false);
 
   async function generateAPIKey() {
-    const apiKey = `sk-${generateApiKey({
+    const apiKey = `sk-helicone-${generateApiKey({
       method: "base32",
       dashes: true,
     }).toString()}`.toLowerCase();
