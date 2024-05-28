@@ -112,6 +112,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
     }
 
     setEstCost(stripeUsage.data!.numOfUnits * stripeUsage.data!.pricePerUnit);
+    setCurrentMonth(new Date(stripeUsage.data!.currentPeriodStart * 1000));
   }
 
   const renderInfo = () => {
