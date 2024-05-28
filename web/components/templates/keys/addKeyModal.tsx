@@ -117,7 +117,7 @@ const AddKeyModal = (props: AddKeyModalProps) => {
                     id="key-read"
                     value="r"
                     className="mr-1 rounded-sm"
-                    defaultChecked={false}
+                    defaultChecked={true}
                   />
                   Read
                 </label>
