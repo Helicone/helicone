@@ -58,6 +58,22 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
     ? Object.keys(runs?.[0]?.inputs).map((key) => key)
     : [];
 
+  const renderScoreValue = (score: {
+    value: string | number;
+    valueType: string;
+  }) => {
+    if (score.valueType === "boolean") {
+      return score.value === 1 ? "true" : "false";
+    }
+    if (score.valueType === "string") {
+      return score.value;
+    }
+    if (score.valueType === "number") {
+      return (score.value as number).toFixed(4);
+    }
+    return score.value;
+  };
+
   const renderPrettyInputs = (inputs: Record<string, string>) => {
     const TEXT_LIMIT = 80;
 
@@ -230,7 +246,9 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                           className="bg-gray-50 text-gray-700 ring-gray-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
                                         >
                                           {key}:{" "}
-                                          {run.originResult.scores[key].value}
+                                          {renderScoreValue(
+                                            run.originResult.scores[key]
+                                          )}
                                         </span>
                                       )
                                     )}
@@ -305,7 +323,9 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                             className="bg-gray-50 text-gray-700 ring-gray-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
                                           >
                                             {key}:{" "}
-                                            {run.testResult?.scores[key].value}
+                                            {renderScoreValue(
+                                              run.testResult?.scores[key]
+                                            )}
                                           </span>
                                         )
                                       )}

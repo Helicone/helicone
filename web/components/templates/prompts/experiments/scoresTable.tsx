@@ -61,6 +61,9 @@ const ScoresTable = ({ scores }: ScoresProps) => {
     ) {
       return `${(+score.value / 1000).toFixed(2)}s`;
     }
+    if (score.valueType === "boolean") {
+      return score.value === 1 ? "True" : "False";
+    }
     if (
       field === "model" &&
       score.valueType === "string" &&
@@ -162,7 +165,16 @@ const ScoresTable = ({ scores }: ScoresProps) => {
           </span>
         );
       default:
-        return (
+        return scores.dataset.scores[field].valueType === "boolean" ? (
+          <span
+            className={clsx(
+              "bg-gray-50 text-gray-700 ring-gray-200",
+              "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
+            )}
+          >
+            {`${changeInfo.change > 0.5 ? "True" : "False"}`}
+          </span>
+        ) : (
           <span
             className={clsx(
               "bg-gray-50 text-gray-700 ring-gray-200",
@@ -193,9 +205,7 @@ const ScoresTable = ({ scores }: ScoresProps) => {
       return [];
     }
 
-    const experimentScoresAttributes = Object.keys(
-      scores.dataset.scores
-    ).filter((key) => key !== "customScores");
+    const experimentScoresAttributes = Object.keys(scores.dataset.scores);
 
     return experimentScoresAttributes.map((field) => {
       const comparisonCell =
