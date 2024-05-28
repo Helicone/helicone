@@ -10,6 +10,96 @@ function getClient(apiKey: string, baseURL: string) {
   });
 }
 
+type RequestResponse =
+  publicPaths["/v1/request/query"]["post"]["responses"]["200"]["content"]["application/json"];
+
+type RequestRequest =
+  publicPaths["/v1/request/query"]["post"]["requestBody"]["content"]["application/json"];
+
+type ScoreRequest =
+  publicPaths["/v1/request/{requestId}/score"]["post"]["requestBody"]["content"]["application/json"];
+
+type NotNull<T> = T extends null ? never : T;
+type ScoreRequestFunction = (
+  request: NotNull<RequestResponse["data"]>[number],
+  requestBody: any
+) => Promise<ScoreRequest>;
+class ScoringListener {
+  private listenerActive = true;
+  constructor(private client: ReturnType<typeof getClient>) {}
+
+  async start(
+    scoreFunction: ScoreRequestFunction,
+    options?: {
+      filter?: RequestRequest["filter"];
+      isScored?: RequestRequest["isScored"];
+      isPartOfExperiment?: RequestRequest["isPartOfExperiment"];
+    }
+  ) {
+    while (this.listenerActive) {
+      const responsesToScore = await this.client.POST("/v1/request/query", {
+        body: {
+          filter: options?.filter ?? "all",
+          isCached: false,
+          limit: 10,
+          offset: 0,
+          sort: {
+            created_at: "desc",
+          },
+          isScored: options?.isScored ?? false,
+          isPartOfExperiment: options?.isPartOfExperiment ?? false,
+        },
+      });
+
+      for (const response of responsesToScore.data?.data ?? []) {
+        console.log("Scoring...", response.request_id);
+        let requestAndResponseBody;
+        try {
+          requestAndResponseBody = await fetch(response.signed_body_url).then(
+            (res) => res.json()
+          );
+        } catch (e) {
+          console.log("Failed to fetch request body");
+          this.stop();
+          return;
+        }
+
+        const score = await scoreFunction(response, requestAndResponseBody);
+        const scoredResult = await this.client.POST(
+          `/v1/request/{requestId}/score`,
+          {
+            params: {
+              path: {
+                requestId: response.request_id,
+              },
+            },
+            body: score,
+          }
+        );
+
+        if (scoredResult.response.ok) {
+          console.log("Successfully scored", response.request_id);
+        } else {
+          console.log(
+            "Failed to score",
+            response.request_id,
+            scoredResult.response.status,
+            await scoredResult.response.text()
+          );
+        }
+      }
+
+      //sleep for 5 seconds
+      console.log("Sleeping for 5 seconds");
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+  }
+
+  stop() {
+    this.listenerActive = false;
+  }
+}
+
 export class HeliconeAPIClient {
   public rawClient: ReturnType<typeof getClient>;
   constructor(
@@ -22,5 +112,9 @@ export class HeliconeAPIClient {
       this.config.baseURL = "https://api.helicone.ai";
     }
     this.rawClient = getClient(this.config.apiKey, this.config.baseURL);
+  }
+
+  scoringWorker() {
+    return new ScoringListener(this.rawClient);
   }
 }
