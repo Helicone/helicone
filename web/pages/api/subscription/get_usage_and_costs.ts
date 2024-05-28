@@ -44,7 +44,7 @@ async function handler({
       }
     ),
     fetch(
-      `https://api.stripe.com/v1/subscription_items/${data.stripe_subscription_id}`,
+      `https://api.stripe.com/v1/subscription_items/${data.stripe_subscription_item_id}`,
       {
         method: "GET",
         headers: {
@@ -58,17 +58,20 @@ async function handler({
     subDataRes.json(),
     subItemRes.json(),
   ]);
-  console.log(
-    subscriptionItem.price.billing_scheme,
-    subscriptionItem.price.unit_amount,
-    subscriptionItem.quantity
-  );
+
+  if (subscriptionItem.price.billing_scheme != "per_unit") {
+    return res.status(200).json({
+      data: null,
+      error: "Item is not billed per unit",
+    });
+  }
+
   return res.status(200).json({
     data: {
       currentPeriodStart: subscriptionData.current_period_start,
       currentPeriodEnd: subscriptionData.current_period_end,
-      usageAmount: subscriptionItem.quantity,
-      totalCost: subscriptionItem.price.unit_amount * subscriptionItem.quantity,
+      numOfUnits: subscriptionItem.quantity,
+      pricePerUnit: subscriptionItem.price.unit_amount,
     },
     error: null,
   });
