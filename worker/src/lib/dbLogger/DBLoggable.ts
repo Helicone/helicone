@@ -647,8 +647,6 @@ export class DBLoggable {
     >
   > {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
-    console.log(`AuthParams: ${JSON.stringify(authParams)}`);
-    console.log(`Error: ${JSON.stringify(error)}`);
     if (error || !authParams?.organizationId) {
       return err(`Auth failed! ${error}` ?? "Helicone organization not found");
     }
