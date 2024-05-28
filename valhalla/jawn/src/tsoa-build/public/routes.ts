@@ -308,6 +308,8 @@ const models: TsoaRoute.Models = {
             "sort": {"ref":"SortLeafRequest"},
             "isCached": {"dataType":"boolean"},
             "includeInputs": {"dataType":"boolean"},
+            "isPartOfExperiment": {"dataType":"boolean"},
+            "isScored": {"dataType":"boolean"},
         },
         "additionalProperties": false,
     },
