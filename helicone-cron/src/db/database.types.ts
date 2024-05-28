@@ -36,6 +36,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "admins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       alert: {
@@ -880,6 +887,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "helicone_api_keys_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       helicone_proxy_key_limits: {
@@ -1219,6 +1233,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "layout_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       org_rate_limit_tracker: {
@@ -1352,6 +1373,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "organization_owner_fkey"
+            columns: ["owner"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "organization_reseller_id_fkey"
             columns: ["reseller_id"]
             isOneToOne: false
@@ -1412,6 +1440,13 @@ export type Database = {
           organization?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "organization_member_member_fkey"
+            columns: ["member"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "organization_member_member_fkey"
             columns: ["member"]
@@ -1752,6 +1787,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "properties_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       provider_keys: {
@@ -1848,6 +1890,20 @@ export type Database = {
           {
             foreignKeyName: "referrals_referred_user_id_fkey"
             columns: ["referred_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referred_user_id_fkey"
+            columns: ["referred_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_user_id_fkey"
+            columns: ["referrer_user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -1961,6 +2017,13 @@ export type Database = {
             columns: ["helicone_proxy_key_id"]
             isOneToOne: false
             referencedRelation: "helicone_proxy_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_helicone_user_fkey"
+            columns: ["helicone_user"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
@@ -2203,6 +2266,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_api_keys_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_feedback: {
@@ -2260,6 +2330,13 @@ export type Database = {
           user?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_settings_user_fkey"
+            columns: ["user"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_settings_user_fkey"
             columns: ["user"]
@@ -2408,6 +2485,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      users: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string | null
+          last_sign_in_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          last_sign_in_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          last_sign_in_at?: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {
