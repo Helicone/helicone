@@ -40,7 +40,7 @@ export type Database = {
             foreignKeyName: "admins_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
         ]
@@ -891,7 +891,7 @@ export type Database = {
             foreignKeyName: "helicone_api_keys_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
         ]
@@ -1237,7 +1237,7 @@ export type Database = {
             foreignKeyName: "layout_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
         ]
@@ -1376,7 +1376,7 @@ export type Database = {
             foreignKeyName: "organization_owner_fkey"
             columns: ["owner"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
           {
@@ -1451,7 +1451,7 @@ export type Database = {
             foreignKeyName: "organization_member_member_fkey"
             columns: ["member"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
           {
@@ -1791,7 +1791,7 @@ export type Database = {
             foreignKeyName: "properties_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
         ]
@@ -1898,7 +1898,7 @@ export type Database = {
             foreignKeyName: "referrals_referred_user_id_fkey"
             columns: ["referred_user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
           {
@@ -1912,7 +1912,7 @@ export type Database = {
             foreignKeyName: "referrals_referrer_user_id_fkey"
             columns: ["referrer_user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
         ]
@@ -2030,7 +2030,7 @@ export type Database = {
             foreignKeyName: "request_helicone_user_fkey"
             columns: ["helicone_user"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
         ]
@@ -2270,7 +2270,7 @@ export type Database = {
             foreignKeyName: "user_api_keys_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
         ]
@@ -2341,7 +2341,7 @@ export type Database = {
             foreignKeyName: "user_settings_user_fkey"
             columns: ["user"]
             isOneToOne: true
-            referencedRelation: "users"
+            referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
         ]
@@ -2486,7 +2486,7 @@ export type Database = {
           },
         ]
       }
-      users: {
+      users_view: {
         Row: {
           created_at: string | null
           email: string | null
