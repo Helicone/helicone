@@ -12,7 +12,6 @@ RUN mv /app/web/yarn.lock /app/web/yarn.lock.bak
 COPY . /app/web
 RUN mv /app/web/yarn.lock.bak /app/web/yarn.lock
 
-
 RUN rm .env.* || true
 
 EXPOSE 3000
