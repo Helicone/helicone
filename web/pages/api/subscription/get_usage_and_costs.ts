@@ -72,12 +72,8 @@ async function handler({
   //     },
   //     error: null,
   //   });
+
   if (data.tier == "growth") {
-    console.log(
-      "Dates:",
-      new Date(subscriptionData.current_period_start * 1000),
-      new Date(subscriptionData.current_period_end * 1000)
-    );
     const requestCount = await getRequestCountClickhouse(orgId, {
       left: {
         request_response_versioned: {
@@ -96,7 +92,6 @@ async function handler({
       operator: "and",
     });
 
-    console.log("Calc cost:", requestCount?.data);
     const tieredCostCalculation = handleLogCostCalculation(requestCount?.data);
     return res.status(200).json({
       data: {
