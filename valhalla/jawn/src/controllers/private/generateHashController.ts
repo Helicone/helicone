@@ -8,6 +8,7 @@ export interface GenerateHashQueryParams {
   apiKey: string;
   userId: string;
   keyName: string;
+  permissions: "r" | "rw";
 }
 
 @Route("v1/key")
@@ -37,6 +38,7 @@ export class GenerateHashController extends Controller {
           user_id: userId,
           api_key_name: keyName,
           organization_id: request.authParams.organizationId,
+          permissions: requestBody.permissions,
         });
 
       if (insertRes.error) {

@@ -843,6 +843,7 @@ export type Database = {
           api_key_name: string
           created_at: string
           id: number
+          key_permissions: string | null
           organization_id: string
           soft_delete: boolean
           user_id: string
@@ -852,6 +853,7 @@ export type Database = {
           api_key_name: string
           created_at?: string
           id?: number
+          key_permissions?: string | null
           organization_id: string
           soft_delete?: boolean
           user_id: string
@@ -861,6 +863,7 @@ export type Database = {
           api_key_name?: string
           created_at?: string
           id?: number
+          key_permissions?: string | null
           organization_id?: string
           soft_delete?: boolean
           user_id?: string
@@ -1267,6 +1270,7 @@ export type Database = {
           owner: string
           percent_to_log: number | null
           referral: string | null
+          request_limit: number | null
           reseller_id: string | null
           size: string | null
           soft_delete: boolean
@@ -1292,6 +1296,7 @@ export type Database = {
           owner: string
           percent_to_log?: number | null
           referral?: string | null
+          request_limit?: number | null
           reseller_id?: string | null
           size?: string | null
           soft_delete?: boolean
@@ -1317,6 +1322,7 @@ export type Database = {
           owner?: string
           percent_to_log?: number | null
           referral?: string | null
+          request_limit?: number | null
           reseller_id?: string | null
           size?: string | null
           soft_delete?: boolean
@@ -2105,18 +2111,21 @@ export type Database = {
           id: string
           organization: string
           score_key: string
+          value_type: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           organization: string
           score_key: string
+          value_type?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
           organization?: string
           score_key?: string
+          value_type?: string | null
         }
         Relationships: [
           {

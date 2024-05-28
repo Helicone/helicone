@@ -252,6 +252,8 @@ export interface components {
       apiKey: string;
       userId: string;
       keyName: string;
+      /** @enum {string} */
+      permissions: "r" | "rw";
     };
     FineTuneResult: {
       error: string;

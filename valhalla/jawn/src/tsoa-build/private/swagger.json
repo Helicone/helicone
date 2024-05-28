@@ -679,12 +679,20 @@
 					},
 					"keyName": {
 						"type": "string"
+					},
+					"permissions": {
+						"type": "string",
+						"enum": [
+							"r",
+							"rw"
+						]
 					}
 				},
 				"required": [
 					"apiKey",
 					"userId",
-					"keyName"
+					"keyName",
+					"permissions"
 				],
 				"type": "object",
 				"additionalProperties": false
