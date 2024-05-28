@@ -47,6 +47,9 @@ const ScoresTable = ({ scores }: ScoresProps) => {
     if (field === "cost" && typeof score === "number") {
       return `$${score.toFixed(4)}`;
     }
+    if (field === "latency" && typeof score === "number") {
+      return `${(+score / 1000).toFixed(2)}s`;
+    }
     if (field === "model" && typeof score === "string") {
       return <ModelPill model={score} />;
     }
@@ -61,6 +64,8 @@ const ScoresTable = ({ scores }: ScoresProps) => {
         return "Model";
       case "dateCreated":
         return "Date Created";
+      case "latency":
+        return "Latency";
       default:
         return key;
     }
@@ -105,6 +110,25 @@ const ScoresTable = ({ scores }: ScoresProps) => {
             {`${changeInfo.change > 0 ? "+" : ""}${changeInfo.change} (${
               changeInfo.percentageChange
             }%)`}
+          </span>
+        );
+      case "latency":
+        const changeLatencyClass =
+          changeInfo.change < 0
+            ? "bg-green-50 text-green-700 ring-green-200"
+            : changeInfo.change > 0
+            ? "bg-red-50 text-red-700 ring-red-200"
+            : "bg-gray-50 text-gray-700 ring-gray-200";
+        return (
+          <span
+            className={clsx(
+              changeLatencyClass,
+              "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
+            )}
+          >
+            {`${changeInfo.change > 0 ? "+" : ""}${(
+              changeInfo.change / 1000
+            ).toFixed(2)} (${changeInfo.percentageChange}%)`}
           </span>
         );
       case "model":
