@@ -48,33 +48,31 @@ export class RequestWrapper {
     const HELICONE_KEY_ID = "sk-helicone-";
     const headers = new Headers(request.headers);
     const authorization = request.headers.get("Authorization");
+
     if (
       !authorization ||
       !authorization.includes(",") ||
       !authorization.includes(HELICONE_KEY_ID)
     ) {
-      // If helicone auth not in either header, retrieve from path
       if (!headers.has("helicone-auth")) {
         try {
           const url = new URL(request.url);
           const urlPath = url.pathname;
           const pathParts = urlPath.split("/");
-          const apiKeyIndex = pathParts.findIndex(
-            (part) => part === "helicone"
+          const apiKeyIndex = pathParts.findIndex((part) =>
+            part.startsWith("sk-helicone")
           );
 
-          if (apiKeyIndex > 1) {
-            const potentialApiKey = pathParts[apiKeyIndex - 1];
-            if (potentialApiKey.startsWith(HELICONE_KEY_ID)) {
-              headers.set("helicone-auth", `Bearer ${potentialApiKey}`);
-              pathParts.splice(apiKeyIndex - 1, 2);
-              this.url.pathname = pathParts.join("/");
-            }
+          if (apiKeyIndex > -1 && apiKeyIndex < pathParts.length) {
+            const potentialApiKey = pathParts[apiKeyIndex];
+            headers.set("helicone-auth", `Bearer ${potentialApiKey}`);
+            pathParts.splice(apiKeyIndex, 1);
+            this.url.pathname = pathParts.join("/");
           }
 
           return headers;
-        } catch (error: any) {
-          console.error(`Failed retrieving api key from path: ${error}`);
+        } catch (error) {
+          console.error(`Failed retrieving API key from path: ${error}`);
           return request.headers;
         }
       }
