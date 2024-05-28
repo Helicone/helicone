@@ -80,6 +80,42 @@ const assetColumns = new pgp.helpers.ColumnSet(
 
 const onConflictAsset = " ON CONFLICT (id, request_id) DO NOTHING";
 
+const requestResponseSearchColumns = new pgp.helpers.ColumnSet(
+  [
+    "request_id",
+    { name: "request_body_vector", mod: "^" },
+    { name: "response_body_vector", mod: "^" },
+  ],
+  { table: "request_response_search" }
+);
+
+const onConflictRequestResponseSearch =
+  " ON CONFLICT (request_id) DO UPDATE SET " +
+  requestResponseSearchColumns.assignColumns({
+    from: "EXCLUDED",
+    skip: "request_id",
+  });
+
+interface Message {
+  role: string;
+  content: string;
+}
+
+interface RequestBody {
+  messages: Message[];
+}
+
+interface Choice {
+  message: {
+    role: string;
+    content: string;
+  };
+}
+
+interface ResponseBody {
+  choices: Choice[];
+}
+
 export class LogStore {
   constructor() {}
 
@@ -333,5 +369,99 @@ export class LogStore {
     });
 
     return Array.from(entryMap.values());
+  }
+
+  async insertRequestResponseSearch(
+    requestResponseData: {
+      requestId: string;
+      requestBody: string;
+      responseBody: string;
+    }[]
+  ): PromiseGenericResult<string> {
+    try {
+      await db.tx(async (t: pgPromise.ITask<{}>) => {
+        try {
+          console.log("requestBody", requestResponseData[0].requestBody);
+          console.log("responseBody", requestResponseData[0].responseBody);
+          const searchRecords = requestResponseData.map((request) => {
+            return {
+              request_id: request.requestId,
+              request_body_vector: `to_tsvector('simple', ${pgp.as.text(
+                this.pullRequestBodyMessage(request.requestBody)
+              )})`,
+              response_body_vector: `to_tsvector('simple', ${pgp.as.text(
+                this.pullResponseBodyMessage(request.responseBody)
+              )})`,
+            };
+          });
+          const insertRequestResponseSearch =
+            pgp.helpers.insert(searchRecords, requestResponseSearchColumns) +
+            onConflictRequestResponseSearch;
+          await t.none(insertRequestResponseSearch);
+        } catch (error) {
+          console.error("Error inserting request response search", error);
+          throw error;
+        }
+      });
+
+      return ok("Successfully insegrted request response search");
+    } catch (error: any) {
+      return err("Failed to insert request response search: " + error);
+    }
+  }
+
+  private pullRequestBodyMessage(requestBody: any): string {
+    try {
+      const messagesArray = requestBody.messages;
+
+      if (!Array.isArray(messagesArray)) {
+        throw new Error(
+          "Invalid request body format: messages array is missing or not an array"
+        );
+      }
+
+      const allMessages = messagesArray
+        .filter((message) => {
+          return message.role === "user";
+        })
+        .map((message) => {
+          if (typeof message === "object" && message !== null) {
+            return message["content"] || "";
+          }
+          return "";
+        })
+        .join(" ");
+
+      return allMessages.trim();
+    } catch (error) {
+      console.error("Error pulling request body messages:", error);
+      return "";
+    }
+  }
+
+  private pullResponseBodyMessage(responseBody: any): string {
+    try {
+      const choicesArray = responseBody.choices;
+
+      if (!Array.isArray(choicesArray)) {
+        throw new Error(
+          "Invalid response body format: choices array is missing or not an array"
+        );
+      }
+
+      const allMessages = choicesArray
+        .filter((choice) => {
+          return choice.message.role === "assistant";
+        })
+        .map((choice) => {
+          return choice.message.content || "";
+        })
+        .join(" ");
+
+      return allMessages.trim();
+    } catch (error) {
+      console.error("Error pulling response body messages:", error);
+      return "";
+    }
   }
 }

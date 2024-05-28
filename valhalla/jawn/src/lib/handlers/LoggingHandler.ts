@@ -114,6 +114,20 @@ export class LoggingHandler extends AbstractLogHandler {
       });
     }
 
+    const searchTableResult = await this.logStore.insertRequestResponseSearch(
+      this.batchPayload.s3Records.map((s3Record) => ({
+        requestId: s3Record.requestId,
+        requestBody: s3Record.requestBody,
+        responseBody: s3Record.responseBody,
+      }))
+    );
+
+    if (searchTableResult.error) {
+      return err({
+        pgError: `Error inserting logs to Postgres search table: ${searchTableResult.error}`,
+      });
+    }
+
     const chResult = await this.logToClickhouse();
 
     if (chResult.error) {
