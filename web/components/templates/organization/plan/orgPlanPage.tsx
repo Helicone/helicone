@@ -45,7 +45,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
 
   const [open, setOpen] = useState(false);
 
-  const [ estimatedCost, setEstCost] = useState(0);
+  const [estimatedCost, setEstCost] = useState(0);
 
   const {
     count,
@@ -90,11 +90,11 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
   };
 
   type TStripeUsage = {
-    currentPeriodStart: number,
-    currentPeriodEnd: number,
-    numOfUnits: number,
-    pricePerUnit: number,
-  }
+    currentPeriodStart: number;
+    currentPeriodEnd: number;
+    numOfUnits: number;
+    pricePerUnit: number;
+  };
 
   async function getStripeUsageForGrowth() {
     if (org.tier != "growth") return;
@@ -154,7 +154,6 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
       );
     }
   };
-
 
   return (
     <>
