@@ -81,19 +81,39 @@ export interface HeliconeRequest {
   costUSD?: number | null;
 }
 
+function addJoinQueries(joinQuery: string, filter: FilterNode): string {
+  if (
+    JSON.stringify(filter).includes("prompts_versions") ||
+    JSON.stringify(filter).includes("prompt_input_record")
+  ) {
+    joinQuery = `left join prompt_input_record on request.id = prompt_input_record.source_request
+    left join prompts_versions on prompts_versions.id = prompt_input_record.prompt_version`;
+  }
+
+  if (
+    JSON.stringify(filter).includes("experiment_v2_hypothesis_run") ||
+    JSON.stringify(filter).includes("score_value")
+  ) {
+    joinQuery += `
+    left join experiment_v2_hypothesis_run ON request.id = experiment_v2_hypothesis_run.result_request_id
+    left join score_value ON request.id = score_value.request_id`;
+  }
+
+  return joinQuery;
+}
+
 export async function getRequests(
   orgId: string,
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRequest,
-  isPartOfExperiment?: boolean,
-  isScored?: boolean
+  sort: SortLeafRequest
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
 
+  const joinQuery = addJoinQueries("", filter);
   if (offset > 10_000 || offset < 0) {
     return err("unsupport offset value");
   }
@@ -108,80 +128,63 @@ export async function getRequests(
   });
   const sortSQL = buildRequestSort(sort);
 
-  let joinQuery = "";
-
-  if (
-    JSON.stringify(filter).includes("prompts_versions") ||
-    JSON.stringify(filter).includes("prompt_input_record")
-  ) {
-    joinQuery = `left join prompt_input_record on request.id = prompt_input_record.source_request
-    left join prompts_versions on prompts_versions.id = prompt_input_record.prompt_version`;
-  }
-
   const query = `
-    WITH filtered_requests AS (
-      SELECT request.*
-      FROM request
-      ${isScored ? "JOIN score_value sv ON request.id = sv.request_id" : ""}
-      WHERE ${builtFilter.filter}
-      ${isScored ? "AND sv.request_id IS NOT NULL" : ""}
-    )
-    SELECT response.id AS response_id,
-           response.created_at as response_created_at,
-           CASE
-               WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} THEN '{"helicone_message": "request body too large"}'::jsonb
-               WHEN request.path LIKE '%embeddings%' THEN '{"helicone_message": "embeddings response omitted"}'::jsonb
-               ELSE response.body::jsonb
-           END AS response_body,
-           response.status AS response_status,
-           request.id AS request_id,
-           request.created_at as request_created_at,
-           CASE
-               WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE} THEN '{"helicone_message": "request body too large"}'::jsonb
-               ELSE request.body::jsonb
-           END AS request_body,
-           request.country_code as country_code,
-           request.path AS request_path,
-           request.user_id AS request_user_id,
-           request.properties AS request_properties,
-           request.provider as provider,
-           request.model as request_model,
-           request.model_override as model_override,
-           response.model as response_model,
-           response.feedback as request_feedback,
-           request.helicone_user as helicone_user,
-           response.delay_ms as delay_ms,
-           response.time_to_first_token as time_to_first_token,
-           (response.prompt_tokens + response.completion_tokens) as total_tokens,
-           response.completion_tokens as completion_tokens,
-           response.prompt_tokens as prompt_tokens,
-           request.prompt_id as prompt_id,
-           feedback.created_at AS feedback_created_at,
-           feedback.id AS feedback_id,
-           feedback.rating AS feedback_rating,
-           (
-               SELECT ARRAY_AGG(asset.id)
-               FROM asset
-               WHERE asset.request_id = request.id
-           ) AS asset_ids,
-           (
-               SELECT jsonb_object_agg(sa.score_key, sv.int_value)
-               FROM score_value sv
-               JOIN score_attribute sa ON sv.score_attribute = sa.id
-               WHERE sv.request_id = request.id
-           ) AS scores
-    FROM filtered_requests request
-    LEFT JOIN response ON request.id = response.request
-    LEFT JOIN feedback ON response.id = feedback.response_id
-    ${
-      isPartOfExperiment
-        ? "LEFT JOIN experiment_v2_hypothesis_run ON request.id = experiment_v2_hypothesis_run.result_request_id"
-        : ""
-    }
+  SELECT response.id AS response_id,
+    response.created_at as response_created_at,
+    CASE
+      WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} THEN '{"helicone_message": "request body too large"}'::jsonb
+      WHEN request.path LIKE '%embeddings%' THEN '{"helicone_message": "embeddings response omitted"}'::jsonb
+      ELSE response.body::jsonb
+    END AS response_body,
+    response.status AS response_status,
+    request.id AS request_id,
+    request.created_at as request_created_at,
+    CASE
+      WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE}
+      THEN '{"helicone_message": "request body too large"}'::jsonb
+      ELSE request.body::jsonb
+    END AS request_body,
+    request.country_code as country_code,
+    request.path AS request_path,
+    request.user_id AS request_user_id,
+    request.properties AS request_properties,
+    request.provider as provider,
+    request.model as request_model,
+    request.model_override as model_override,
+    response.model as response_model,
+    response.feedback as request_feedback,
+    request.helicone_user as helicone_user,
+    response.delay_ms as delay_ms,
+    response.time_to_first_token as time_to_first_token,
+    (response.prompt_tokens + response.completion_tokens) as total_tokens,
+    response.completion_tokens as completion_tokens,
+    response.prompt_tokens as prompt_tokens,
+    request.prompt_id as prompt_id,
+    feedback.created_at AS feedback_created_at,
+    feedback.id AS feedback_id,
+    feedback.rating AS feedback_rating,
+    (
+    SELECT ARRAY_AGG(asset.id)
+    FROM asset
+    WHERE asset.request_id = request.id
+    ) AS asset_ids,
+    (
+      SELECT jsonb_object_agg(sa.score_key, sv.int_value)
+      FROM score_value sv
+      JOIN score_attribute sa ON sv.score_attribute = sa.id
+      WHERE sv.request_id = request.id
+    ) AS scores
+  FROM request
+    left join response on request.id = response.request
+    left join feedback on response.id = feedback.response_id
     ${joinQuery}
-    ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
-    LIMIT ${limit}
-    OFFSET ${offset};
+  WHERE (
+    (${builtFilter.filter})
+  )
+  ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
+  LIMIT ${limit}
+  OFFSET ${offset}
+
 `;
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
 
@@ -226,64 +229,55 @@ export async function getRequestsCached(
   });
   const sortSQL = buildRequestSort(sort);
   const query = `
-  WITH filtered_requests AS (
-    SELECT request.*
-    FROM cache_hits
-    INNER JOIN request ON cache_hits.request_id = request.id
-    ${isScored ? "INNER JOIN score_value sv ON request.id = sv.request_id" : ""}
-    ${
-      isPartOfExperiment
-        ? "LEFT JOIN experiment_v2_hypothesis_run ON request.id = experiment_v2_hypothesis_run.result_request_id"
-        : ""
-    }
-    WHERE ${builtFilter.filter}
-    ${isScored ? "AND sv.request_id IS NOT NULL" : ""}
-  )
   SELECT response.id AS response_id,
-         cache_hits.created_at as response_created_at,
-         CASE 
-             WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} THEN '{"helicone_message": "request body too large"}'::jsonb
-             WHEN request.path LIKE '%embeddings%' THEN '{"helicone_message": "embeddings response omitted"}'::jsonb
-             ELSE response.body::jsonb
-         END AS response_body,
-         request.country_code as country_code,
-         response.status AS response_status,
-         request.id AS request_id,
-         cache_hits.created_at as request_created_at,
-         CASE 
-             WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE}
-             THEN '{"helicone_message": "request body too large"}'::jsonb
-             ELSE request.body::jsonb
-         END AS request_body,
-         request.path AS request_path,
-         request.user_id AS request_user_id,
-         request.properties AS request_properties,
-         request.provider as provider,
-         request.model as request_model,
-         request.model_override as model_override,
-         response.model as response_model,
-         response.feedback as request_feedback,
-         request.helicone_user as helicone_user,
-         response.delay_ms as delay_ms,
-         response.time_to_first_token as time_to_first_token,
-         (response.prompt_tokens + response.completion_tokens) as total_tokens,
-         response.completion_tokens as completion_tokens,
-         response.prompt_tokens as prompt_tokens,
-         request.prompt_id as prompt_id,
-         feedback.created_at AS feedback_created_at,
-         feedback.id AS feedback_id,
-         feedback.rating AS feedback_rating,
-         (
-             SELECT ARRAY_AGG(asset.id)
-             FROM asset
-             WHERE asset.request_id = request.id
-         ) AS asset_ids
-  FROM filtered_requests request
-  INNER JOIN response ON request.id = response.request
-  LEFT JOIN feedback ON response.id = feedback.response_id
+    cache_hits.created_at as response_created_at,
+    CASE
+      WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} THEN '{"helicone_message": "request body too large"}'::jsonb
+      WHEN request.path LIKE '%embeddings%' THEN '{"helicone_message": "embeddings response omitted"}'::jsonb
+      ELSE response.body::jsonb
+    END AS response_body,
+    request.country_code as country_code,
+    response.status AS response_status,
+    request.id AS request_id,
+    cache_hits.created_at as request_created_at,
+    CASE
+      WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE}
+      THEN '{"helicone_message": "request body too large"}'::jsonb
+      ELSE request.body::jsonb
+    END AS request_body,
+    request.path AS request_path,
+    request.user_id AS request_user_id,
+    request.properties AS request_properties,
+    request.provider as provider,
+    request.model as request_model,
+    request.model_override as model_override,
+    response.model as response_model,
+    response.feedback as request_feedback,
+    request.helicone_user as helicone_user,
+    response.delay_ms as delay_ms,
+    response.time_to_first_token as time_to_first_token,
+    (response.prompt_tokens + response.completion_tokens) as total_tokens,
+    response.completion_tokens as completion_tokens,
+    response.prompt_tokens as prompt_tokens,
+    request.prompt_id as prompt_id,
+    feedback.created_at AS feedback_created_at,
+    feedback.id AS feedback_id,
+    feedback.rating AS feedback_rating,
+    (
+    SELECT ARRAY_AGG(asset.id)
+    FROM asset
+    WHERE asset.request_id = request.id
+    ) AS asset_ids
+  FROM cache_hits
+    inner join request on cache_hits.request_id = request.id
+    inner join response on request.id = response.request
+    left join feedback on response.id = feedback.response_id
+  WHERE (
+    (${builtFilter.filter})
+  )
   ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
   LIMIT ${limit}
-  OFFSET ${offset};
+  OFFSET ${offset}
 `;
 
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
