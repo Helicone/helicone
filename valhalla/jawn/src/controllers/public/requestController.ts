@@ -42,6 +42,8 @@ export interface RequestQueryParams {
   sort?: SortLeafRequest;
   isCached?: boolean;
   includeInputs?: boolean;
+  isPartOfExperiment?: boolean;
+  isScored?: boolean;
 }
 
 @Route("v1/request")
@@ -58,7 +60,9 @@ export class RequestController extends Controller {
    *  "offset": 0,
    *  "sort": {
    *    "created_at": "desc"
-   *  }
+   *  },
+   *  "isScored": false,
+   *  "isPartOfExperiment": false
    * }
    * @param request
    * @returns
@@ -72,6 +76,8 @@ export class RequestController extends Controller {
     sort: {
       created_at: "desc",
     },
+    isScored: false,
+    isPartOfExperiment: false,
   })
   public async getRequests(
     @Body()
