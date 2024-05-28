@@ -53,6 +53,7 @@ const AddKeyModal = (props: AddKeyModalProps) => {
           apiKey,
           userId: user?.id!,
           keyName: keyName.value,
+          permissions: "rw", // TODO: Update this based on user input
         },
       })
       .then((res) => {
