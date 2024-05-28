@@ -240,6 +240,7 @@ export async function proxyForwarder(
       status: 500,
     });
   }
+  console.log(`Data: ${JSON.stringify(data)}`);
   const { loggable, response } = data;
 
   if (cacheSettings.shouldSaveToCache && response.status === 200) {
@@ -278,6 +279,7 @@ export async function proxyForwarder(
   }
 
   async function log(loggable: DBLoggable) {
+    console.log(`About to log bro`);
     const { data: auth, error: authError } = await request.auth();
     if (authError !== null) {
       console.error("Error getting auth", authError);
@@ -339,7 +341,12 @@ export async function proxyForwarder(
     }
   }
 
-  if (request?.heliconeHeaders?.heliconeAuth || request.heliconeProxyKeyId) {
+  console.log(`Idk: ${request?.heliconeHeaders?.heliconeAuth}`);
+  if (
+    request?.heliconeHeaders?.heliconeAuth ||
+    request.heliconeProxyKeyId ||
+    request?.heliconeHeaders.heliconeAuthV2
+  ) {
     ctx.waitUntil(log(loggable));
   }
 

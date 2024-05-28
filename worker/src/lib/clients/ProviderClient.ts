@@ -62,6 +62,8 @@ export async function callProvider(props: CallProps): Promise<Response> {
 }
 
 export function buildTargetUrl(originalUrl: URL, apiBase: string): URL {
+  console.log(`Original URL: ${originalUrl}`);
+  console.log(`ApiBase: ${apiBase}`);
   const apiBaseUrl = new URL(apiBase.replace(/\/$/, ""));
 
   return new URL(

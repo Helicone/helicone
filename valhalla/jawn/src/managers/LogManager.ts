@@ -77,6 +77,7 @@ export class LogManager {
     await Promise.all(
       logMessages.map(async (logMessage) => {
         const handlerContext = new HandlerContext(logMessage);
+        console.log(`handler context: ${JSON.stringify(handlerContext)}`);
         const result = await authHandler.handle(handlerContext);
 
         if (result.error) {

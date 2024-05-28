@@ -46,19 +46,35 @@ export class RequestWrapper {
   */
   private mutatedAuthorizationHeaders(request: Request): Headers {
     const HELICONE_KEY_ID = "sk-helicone-";
-
+    const headers = new Headers(request.headers);
     const authorization = request.headers.get("Authorization");
-    if (!authorization) {
-      return request.headers;
-    }
     if (
+      !authorization ||
       !authorization.includes(",") ||
       !authorization.includes(HELICONE_KEY_ID)
     ) {
+      // If helicone auth not in either header, retrieve from path
+      if (!headers.has("helicone-auth")) {
+        const urlPath = new URL(request.url).pathname;
+        const pathParts = urlPath.split("/");
+        const apiKeyIndex = pathParts.findIndex((part) => part === "helicone");
+
+        if (apiKeyIndex > 1) {
+          const potentialApiKey = pathParts[apiKeyIndex - 1];
+          if (potentialApiKey.startsWith(HELICONE_KEY_ID)) {
+            headers.set("helicone-auth", `Bearer ${potentialApiKey}`);
+            pathParts.splice(apiKeyIndex - 1, 2);
+            this.url.pathname = pathParts.join("/");
+            console.log(`New Header: ${headers.get(`helicone-auth`)}`);
+            console.log(`New URL: ${this.url}`);
+          }
+        }
+
+        return headers;
+      }
+
       return request.headers;
     }
-
-    const headers = new Headers(request.headers);
 
     if (headers.has("helicone-auth")) {
       throw new Error(
