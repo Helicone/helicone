@@ -275,6 +275,19 @@ type ExperimentToOperators = {
 
 export type FilterLeafExperiment = SingleKey<ExperimentToOperators>;
 
+type ScoreValueToOperator = {
+  request_id: SingleKey<TextOperators>;
+};
+
+export type FilterLeafScoreValue = SingleKey<ScoreValueToOperator>;
+
+type ExperimentHypothesisRunToOperator = {
+  result_request_id: SingleKey<TextOperators>;
+};
+
+export type ExperimentHypothesisRunScoreValue =
+  SingleKey<ExperimentHypothesisRunToOperator>;
+
 export type TablesAndViews = {
   user_metrics: FilterLeafUserMetrics;
   user_api_keys: FilterLeafUserApiKeys;
@@ -285,6 +298,8 @@ export type TablesAndViews = {
   prompt_v2: FilterLeafPrompt;
   prompts_versions: FilterLeafPromptVersions;
   experiment: FilterLeafExperiment;
+  experiment_hypothesis_run: ExperimentHypothesisRunScoreValue;
+  score_value: FilterLeafScoreValue;
 
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;

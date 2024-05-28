@@ -346,6 +346,8 @@ Json: JsonObject;
       sort?: components["schemas"]["SortLeafRequest"];
       isCached?: boolean;
       includeInputs?: boolean;
+      isPartOfExperiment?: boolean;
+      isScored?: boolean;
     };
     ResultSuccess_null_: {
       /** @enum {number|null} */
@@ -697,7 +699,9 @@ export interface operations {
          *   "offset": 0,
          *   "sort": {
          *     "created_at": "desc"
-         *   }
+         *   },
+         *   "isScored": false,
+         *   "isPartOfExperiment": false
          * }
          */
         "application/json": components["schemas"]["RequestQueryParams"];
