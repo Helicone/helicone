@@ -255,7 +255,7 @@ const models: TsoaRoute.Models = {
             "apiKey": {"dataType":"string","required":true},
             "userId": {"dataType":"string","required":true},
             "keyName": {"dataType":"string","required":true},
-            "permissions": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["r"]},{"dataType":"enum","enums":["rw"]}],"required":true},
+            "permissions": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["w"]},{"dataType":"enum","enums":["rw"]}],"required":true},
         },
         "additionalProperties": false,
     },

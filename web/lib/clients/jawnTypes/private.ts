@@ -253,7 +253,7 @@ export interface components {
       userId: string;
       keyName: string;
       /** @enum {string} */
-      permissions: "r" | "rw";
+      permissions: "w" | "rw";
     };
     FineTuneResult: {
       error: string;

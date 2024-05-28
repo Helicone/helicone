@@ -683,7 +683,7 @@
 					"permissions": {
 						"type": "string",
 						"enum": [
-							"r",
+							"w",
 							"rw"
 						]
 					}

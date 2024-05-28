@@ -8,7 +8,7 @@ export interface GenerateHashQueryParams {
   apiKey: string;
   userId: string;
   keyName: string;
-  permissions: "r" | "rw";
+  permissions: "w" | "rw";
 }
 
 @Route("v1/key")
