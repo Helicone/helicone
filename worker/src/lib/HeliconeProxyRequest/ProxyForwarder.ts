@@ -279,7 +279,6 @@ export async function proxyForwarder(
   }
 
   async function log(loggable: DBLoggable) {
-    console.log(`About to log bro`);
     const { data: auth, error: authError } = await request.auth();
     if (authError !== null) {
       console.error("Error getting auth", authError);
@@ -341,11 +340,10 @@ export async function proxyForwarder(
     }
   }
 
-  console.log(`Idk: ${request?.heliconeHeaders?.heliconeAuth}`);
   if (
     request?.heliconeHeaders?.heliconeAuth ||
-    request.heliconeProxyKeyId ||
-    request?.heliconeHeaders.heliconeAuthV2
+    request?.heliconeHeaders.heliconeAuthV2 ||
+    request.heliconeProxyKeyId
   ) {
     ctx.waitUntil(log(loggable));
   }

@@ -103,7 +103,7 @@ export class RequestWrapper {
   private constructor(private request: Request, private env: Env) {
     this.url = new URL(request.url);
     this.headers = this.mutatedAuthorizationHeaders(request);
-    this.heliconeHeaders = new HeliconeHeaders(request.headers);
+    this.heliconeHeaders = new HeliconeHeaders(this.headers);
     this.promptSettings = this.getPromptSettings();
     this.injectPromptProperties();
     this.baseURLOverride = null;
@@ -180,6 +180,8 @@ export class RequestWrapper {
     const tokenType = this.heliconeHeaders.heliconeAuthV2._type;
     const token = this.heliconeHeaders.heliconeAuthV2.token;
 
+    console.log(`TokenType: ${tokenType}`);
+    console.log(`Token: ${token}`);
     if (tokenType === "jwt") {
       return ok({
         _type: "jwt",
