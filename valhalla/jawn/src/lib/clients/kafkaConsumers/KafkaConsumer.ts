@@ -11,23 +11,19 @@ import {
 import { Topics } from "../KafkaProducer";
 import { generateKafkaConsumer } from "./client";
 import {
-  DLQ_ESTIMATED_MINI_BATCH_COUNT,
   DLQ_MESSAGES_PER_MINI_BATCH,
-  ESTIMATED_MINI_BATCH_COUNT,
   MESSAGES_PER_MINI_BATCH,
 } from "./constant";
+import { SettingsManager } from "../../../utils/settings";
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
+const settingsManager = new SettingsManager();
 
 // Average message is 1kB, so we can set minBytes to 1kB and maxBytes to 10kB
 
 export const consume = async () => {
-  const consumer = generateKafkaConsumer(
-    "jawn-consumer",
-    MESSAGES_PER_MINI_BATCH,
-    ESTIMATED_MINI_BATCH_COUNT
-  );
+  const consumer = generateKafkaConsumer("jawn-consumer");
   if (KAFKA_ENABLED && !consumer) {
     console.error("Failed to create Kafka consumer");
     return;
@@ -64,44 +60,51 @@ export const consume = async () => {
       commitOffsetsIfNecessary,
     }) => {
       console.log(`Received batch with ${batch.messages.length} messages.`);
+      const messagesPerMiniBatchSetting = await settingsManager.getSetting(
+        "kafka:log"
+      );
 
       const miniBatches = createMiniBatches(
         batch.messages,
-        MESSAGES_PER_MINI_BATCH
+        messagesPerMiniBatchSetting?.miniBatchSize ?? MESSAGES_PER_MINI_BATCH
       );
 
-      for (const miniBatch of miniBatches) {
-        const firstOffset = miniBatch[0].offset;
-        const lastOffset = miniBatch[miniBatch.length - 1].offset;
-        const miniBatchId = `${batch.partition}-${firstOffset}-${lastOffset}`;
-        try {
-          const mappedMessages = mapKafkaMessageToMessage(miniBatch);
-          if (mappedMessages.error || !mappedMessages.data) {
-            console.error("Failed to map messages", mappedMessages.error);
-            return;
-          }
+      try {
+        for (const miniBatch of miniBatches) {
+          const firstOffset = miniBatch[0].offset;
+          const lastOffset = miniBatch[miniBatch.length - 1].offset;
+          const miniBatchId = `${batch.partition}-${firstOffset}-${lastOffset}`;
+          try {
+            const mappedMessages = mapKafkaMessageToMessage(miniBatch);
+            if (mappedMessages.error || !mappedMessages.data) {
+              console.error("Failed to map messages", mappedMessages.error);
+              return;
+            }
 
-          const consumeResult = await consumeMiniBatch(
-            mappedMessages.data,
-            firstOffset,
-            lastOffset,
-            miniBatchId,
-            batch.partition,
-            "request-response-logs-prod"
-          );
+            const consumeResult = await consumeMiniBatch(
+              mappedMessages.data,
+              firstOffset,
+              lastOffset,
+              miniBatchId,
+              batch.partition,
+              "request-response-logs-prod"
+            );
 
-          if (consumeResult.error) {
-            console.error("Failed to consume batch", consumeResult.error);
+            if (consumeResult.error) {
+              console.error("Failed to consume batch", consumeResult.error);
+            }
+          } catch (error) {
+            console.error("Failed to consume batch", error);
+          } finally {
+            resolveOffset(lastOffset);
+            await heartbeat();
           }
-        } catch (error) {
-          console.error("Failed to consume batch", error);
-        } finally {
-          resolveOffset(lastOffset);
-          await heartbeat();
         }
+      } catch (error) {
+        console.error("Failed to consume batch", error);
+      } finally {
+        await commitOffsetsIfNecessary();
       }
-
-      await commitOffsetsIfNecessary();
     },
   });
 };
@@ -145,11 +148,7 @@ function mapMessageDates(message: Message): Message {
 }
 
 export const consumeDlq = async () => {
-  const dlqConsumer = generateKafkaConsumer(
-    "jawn-consumer-local-01",
-    DLQ_MESSAGES_PER_MINI_BATCH,
-    DLQ_ESTIMATED_MINI_BATCH_COUNT
-  );
+  const dlqConsumer = generateKafkaConsumer("jawn-consumer-local-01");
   if (KAFKA_ENABLED && !dlqConsumer) {
     console.error("Failed to create Kafka dlq consumer");
     return;
@@ -188,41 +187,59 @@ export const consumeDlq = async () => {
       console.log(
         `DLQ: Received batch with ${batch.messages.length} messages.`
       );
-      const maxMessages = 1;
-      const miniBatches = createMiniBatches(batch.messages, maxMessages);
 
-      for (const miniBatch of miniBatches) {
-        const firstOffset = miniBatch[0].offset;
-        const lastOffset = miniBatch[miniBatch.length - 1].offset;
-        const miniBatchId = `${batch.partition}-${firstOffset}-${lastOffset}`;
+      const messagesPerMiniBatchSetting = await settingsManager.getSetting(
+        "kafka:dlq"
+      );
 
-        try {
-          const mappedMessages = mapDlqKafkaMessageToMessage(miniBatch);
-          if (mappedMessages.error || !mappedMessages.data) {
-            console.error("DLQ: Failed to map messages", mappedMessages.error);
-            return;
+      const miniBatches = createMiniBatches(
+        batch.messages,
+        messagesPerMiniBatchSetting?.miniBatchSize ??
+          DLQ_MESSAGES_PER_MINI_BATCH
+      );
+
+      try {
+        for (const miniBatch of miniBatches) {
+          const firstOffset = miniBatch[0].offset;
+          const lastOffset = miniBatch[miniBatch.length - 1].offset;
+          const miniBatchId = `${batch.partition}-${firstOffset}-${lastOffset}`;
+
+          try {
+            const mappedMessages = mapDlqKafkaMessageToMessage(miniBatch);
+            if (mappedMessages.error || !mappedMessages.data) {
+              console.error(
+                "DLQ: Failed to map messages",
+                mappedMessages.error
+              );
+              return;
+            }
+
+            const consumeResult = await consumeMiniBatch(
+              mappedMessages.data,
+              firstOffset,
+              lastOffset,
+              miniBatchId,
+              batch.partition,
+              "request-response-logs-prod-dlq"
+            );
+            if (consumeResult.error) {
+              console.error(
+                "DLQ: Failed to consume batch",
+                consumeResult.error
+              );
+            }
+          } catch (error) {
+            console.error("DLQ: Failed to consume batch", error);
+          } finally {
+            resolveOffset(lastOffset);
+            await heartbeat();
           }
-
-          const consumeResult = await consumeMiniBatch(
-            mappedMessages.data,
-            firstOffset,
-            lastOffset,
-            miniBatchId,
-            batch.partition,
-            "request-response-logs-prod-dlq"
-          );
-          if (consumeResult.error) {
-            console.error("DLQ: Failed to consume batch", consumeResult.error);
-          }
-        } catch (error) {
-          console.error("DLQ: Failed to consume batch", error);
-        } finally {
-          resolveOffset(lastOffset);
-          await heartbeat();
         }
+      } catch (error) {
+        console.error("DLQ: Failed to consume batch", error);
+      } finally {
+        await commitOffsetsIfNecessary();
       }
-
-      await commitOffsetsIfNecessary();
     },
   });
 };

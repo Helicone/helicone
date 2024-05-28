@@ -45,8 +45,20 @@ export interface paths {
   "/v1/fine-tune/{jobId}/stats": {
     get: operations["FineTuneJobStats"];
   };
+  "/v1/admin/orgs/top": {
+    get: operations["GetTopOrgs"];
+  };
   "/v1/admin/admins/query": {
     get: operations["GetAdmins"];
+  };
+  "/v1/admin/settings/{name}": {
+    get: operations["GetSetting"];
+  };
+  "/v1/admin/azure/run-test": {
+    post: operations["AzureTest"];
+  };
+  "/v1/admin/settings": {
+    post: operations["UpdateSetting"];
   };
   "/v1/admin/orgs/query": {
     post: operations["FindAllOrgs"];
@@ -256,6 +268,27 @@ export interface components {
     FineTuneBody: {
       providerKeyId: string;
     };
+    KafkaSettings: {
+      /** Format: double */
+      miniBatchSize: number;
+    };
+    AzureExperiment: {
+      azureBaseUri: string;
+      azureApiVersion: string;
+      azureDeploymentName: string;
+      azureApiKey: string;
+    };
+    Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"];
+    /** @enum {string} */
+    SettingName: "kafka:dlq" | "kafka:log" | "kafka:dlq:eu" | "kafka:log:eu" | "azure:experiment";
+    /**
+     * @description The URL interface represents an object providing static methods used for creating object URLs.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)
+     * `URL` class is a global reference for `require('url').URL`
+     * https://nodejs.org/api/url.html#the-whatwg-url-api
+     */
+    "url.URL": string;
   };
   responses: {
   };
@@ -496,6 +529,36 @@ export interface operations {
       };
     };
   };
+  GetTopOrgs: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+              /** Format: double */
+              ct: number;
+              organization_id: string;
+              members: {
+                  last_active: string;
+                  role: string;
+                  email: string;
+                  id: string;
+                }[];
+              owner_last_login: string;
+              owner_email: string;
+              tier: string;
+              id: string;
+              overTime: {
+                  organization_id: string;
+                  dt: string;
+                  /** Format: double */
+                  count: number;
+                }[];
+            }[];
+        };
+      };
+    };
+  };
   GetAdmins: {
     responses: {
       /** @description Ok */
@@ -509,6 +572,63 @@ export interface operations {
               created_at: string;
             })[];
         };
+      };
+    };
+  };
+  GetSetting: {
+    parameters: {
+      path: {
+        name: components["schemas"]["SettingName"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Setting"];
+        };
+      };
+    };
+  };
+  AzureTest: {
+    requestBody: {
+      content: {
+        "application/json": {
+          requestBody: unknown;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            fetchParams: {
+              body: string;
+              headers: {
+                [key: string]: string;
+              };
+              url: components["schemas"]["url.URL"];
+            };
+            resultText: string;
+          };
+        };
+      };
+    };
+  };
+  UpdateSetting: {
+    requestBody: {
+      content: {
+        "application/json": {
+          settings: components["schemas"]["Setting"];
+          name: components["schemas"]["SettingName"];
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
       };
     };
   };

@@ -1,0 +1,1 @@
+alter table "public"."score_attribute" add column "value_type" text null;
