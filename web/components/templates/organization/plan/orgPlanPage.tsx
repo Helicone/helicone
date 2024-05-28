@@ -5,7 +5,7 @@ import {
   CloudArrowUpIcon,
   CreditCardIcon,
   LightBulbIcon,
-  InformationCircleIcon
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import {
   addMonths,
@@ -220,10 +220,19 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
               <dt className="text-sm font-medium leading-6 text-gray-700 dark:text-gray-300">
                 Estimated Costs
                 <div className="flex flex-row items-baseline text-gray-500 w-fit gap-1">
-                  <button type="button" onClick={() => setIsNoteVisible(prev => !prev)}>
+                  <button
+                    type="button"
+                    onClick={() => setIsNoteVisible((prev) => !prev)}
+                  >
                     <InformationCircleIcon className="h-3 w-3 text-gray-500 sm:inline" />
                   </button>
-                  <p className={`text-xs font-light ${isNoteVisible ? "opacity-100": "opacity-0"} transition-all ease-in-out duration-100`}>In current billing cycle</p>
+                  <p
+                    className={`text-xs font-light ${
+                      isNoteVisible ? "opacity-100" : "opacity-0"
+                    } transition-all ease-in-out duration-100`}
+                  >
+                    In current billing cycle
+                  </p>
                 </div>
               </dt>
               <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900 dark:text-gray-100">

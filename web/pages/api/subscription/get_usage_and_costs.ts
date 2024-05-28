@@ -6,7 +6,6 @@ import {
 import { Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { Tier } from "../organization/tier";
-import { dbQueryClickhouse } from "../../../lib/api/db/dbExecute";
 import { getRequestCountClickhouse } from "../../../lib/api/request/request";
 import { handleLogCostCalculation } from "../../../utlis/LogCostCalculation";
 
@@ -92,7 +91,9 @@ async function handler({
       operator: "and",
     });
 
-    const tieredCostCalculation = handleLogCostCalculation(requestCount?.data);
+    const tieredCostCalculation = handleLogCostCalculation(
+      requestCount?.data || 0
+    );
     return res.status(200).json({
       data: {
         currentPeriodStart: subscriptionData.current_period_start,
