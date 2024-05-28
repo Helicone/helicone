@@ -11,3 +11,5 @@ export * from "./core/HeliconeOpenAIApi";
 export * from "./core/HeliconePromptFormat";
 
 export * from "./proxy_logger/HeliconeProxyOpenAI";
+
+export * from "./api/client";
