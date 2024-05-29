@@ -83,8 +83,8 @@ const onConflictAsset = " ON CONFLICT (id, request_id) DO NOTHING";
 const requestResponseSearchColumns = new pgp.helpers.ColumnSet(
   [
     "request_id",
-    { name: "request_body_vector", mod: "^" },
-    { name: "response_body_vector", mod: "^" },
+    { name: "request_body_vector", cast: "tsvector" },
+    { name: "response_body_vector", cast: "tsvector" },
   ],
   { table: "request_response_search" }
 );
@@ -380,26 +380,34 @@ export class LogStore {
   ): PromiseGenericResult<string> {
     try {
       await db.tx(async (t: pgPromise.ITask<{}>) => {
-        try {
-          const searchRecords = requestResponseData.map((request) => {
-            return {
-              request_id: request.requestId,
-              request_body_vector: `to_tsvector('simple', ${pgp.as.text(
-                this.pullRequestBodyMessage(request.requestBody)
-              )})`,
-              response_body_vector: `to_tsvector('simple', ${pgp.as.text(
-                this.pullResponseBodyMessage(request.responseBody)
-              )})`,
-            };
-          });
-          const insertRequestResponseSearch =
-            pgp.helpers.insert(searchRecords, requestResponseSearchColumns) +
-            onConflictRequestResponseSearch;
-          await t.none(insertRequestResponseSearch);
-        } catch (error) {
-          console.error("Error inserting request response search", error);
-          throw error;
-        }
+        const searchRecords = requestResponseData.map((request) => {
+          return {
+            request_id: request.requestId,
+            request_body_vector: this.pullRequestBodyMessage(
+              request.requestBody
+            ),
+            response_body_vector: this.pullResponseBodyMessage(
+              request.responseBody
+            ),
+          };
+        });
+
+        const queries = searchRecords.map((record) => {
+          return t.none(
+            `INSERT INTO request_response_search (request_id, request_body_vector, response_body_vector)
+             VALUES ($1, to_tsvector('simple', $2), to_tsvector('simple', $3))
+             ON CONFLICT (request_id) DO UPDATE SET
+             request_body_vector = EXCLUDED.request_body_vector,
+             response_body_vector = EXCLUDED.response_body_vector`,
+            [
+              record.request_id,
+              record.request_body_vector,
+              record.response_body_vector,
+            ]
+          );
+        });
+
+        await t.batch(queries);
       });
 
       return ok("Successfully insegrted request response search");
