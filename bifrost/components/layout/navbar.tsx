@@ -6,8 +6,6 @@ interface NavBarProps {}
 const NavBar = (props: NavBarProps) => {
   const {} = props;
 
-  // const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   return (
     <div className="bg-inherit top-0 sticky z-30 border-b border-gray-200 px-4">
       <nav
