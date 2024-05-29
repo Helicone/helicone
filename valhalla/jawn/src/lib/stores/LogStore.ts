@@ -96,25 +96,6 @@ const onConflictRequestResponseSearch =
     skip: "request_id",
   });
 
-interface Message {
-  role: string;
-  content: string;
-}
-
-interface RequestBody {
-  messages: Message[];
-}
-
-interface Choice {
-  message: {
-    role: string;
-    content: string;
-  };
-}
-
-interface ResponseBody {
-  choices: Choice[];
-}
 
 export class LogStore {
   constructor() {}
