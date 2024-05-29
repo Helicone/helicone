@@ -1,11 +1,10 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
+import { BarChart } from "@tremor/react";
+import dateFormat from "dateformat";
+import { useEffect, useState } from "react";
 import { getJawnClient } from "../../../../lib/clients/jawn";
 import useNotification from "../../../shared/notification/useNotification";
-import { BarChart } from "@tremor/react";
-import { useEffect, useState } from "react";
-import moment from "moment";
-import dateFormat from "dateformat";
 
 interface TopOrgsProps {}
 
