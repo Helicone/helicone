@@ -97,9 +97,9 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
   };
 
   type TStripeUsage = {
-    currentPeriodStart: number;
-    currentPeriodEnd: number;
-    totalCost: number;
+    currentPeriodStart: number | string;
+    currentPeriodEnd: number | string;
+    totalCost: number | string;
   };
 
   async function getStripeUsageForGrowth() {
@@ -117,20 +117,23 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
       return;
     }
 
-    setEstCost(stripeUsage.data!.totalCost);
+    setEstCost(Number(stripeUsage.data!.totalCost));
     setBillingCycle(
-      new Date(stripeUsage.data!.currentPeriodStart * 1000)
+      new Date(Number(stripeUsage.data!.currentPeriodStart) * 1000)
         .toDateString()
         .slice(4) +
         " - " +
-        new Date(stripeUsage.data!.currentPeriodEnd * 1000)
+        new Date(Number(stripeUsage.data!.currentPeriodEnd) * 1000)
           .toDateString()
           .slice(4)
     );
     console.log(billingCycle);
     console.log(
-      new Date(stripeUsage.data!.currentPeriodStart * 1000).toDateString()
+      new Date(
+        Number(stripeUsage.data!.currentPeriodStart) * 1000
+      ).toDateString()
     );
+    console.log(stripeUsage.data!.currentPeriodStart);
   }
 
   const renderInfo = () => {
