@@ -255,7 +255,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
               <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900 dark:text-gray-100">
                 {isCountLoading
                   ? "Loading..."
-                  : Number(estimatedCost || 0).toLocaleString()}
+                  : "$ " + Number(estimatedCost || 0).toLocaleString()}
               </dd>
             </div>
           )}
