@@ -96,7 +96,6 @@ const onConflictRequestResponseSearch =
     skip: "request_id",
   });
 
-
 export class LogStore {
   constructor() {}
 
@@ -361,22 +360,31 @@ export class LogStore {
   ): PromiseGenericResult<string> {
     try {
       await db.tx(async (t: pgPromise.ITask<{}>) => {
-        const searchRecords = requestResponseData.map((request) => {
-          return {
-            request_id: request.requestId,
-            request_body_vector: this.pullRequestBodyMessage(
-              request.requestBody
-            ),
-            response_body_vector: this.pullResponseBodyMessage(
-              request.responseBody
-            ),
-          };
-        });
+        const uniqueRequestIds = new Set();
+        const searchRecords = requestResponseData
+          .filter((request) => {
+            if (uniqueRequestIds.has(request.requestId)) {
+              return false;
+            }
+            uniqueRequestIds.add(request.requestId);
+            return true;
+          })
+          .map((request) => {
+            return {
+              request_id: request.requestId,
+              request_body_vector: this.pullRequestBodyMessage(
+                request.requestBody
+              ),
+              response_body_vector: this.pullResponseBodyMessage(
+                request.responseBody
+              ),
+            };
+          });
 
         const queries = searchRecords.map((record) => {
           return t.none(
             `INSERT INTO request_response_search (request_id, request_body_vector, response_body_vector)
-             VALUES ($1, to_tsvector('simple', $2), to_tsvector('simple', $3))
+             VALUES ($1, to_tsvector('helicone_search_config', $2), to_tsvector('helicone_search_config', $3))
              ON CONFLICT (request_id) DO UPDATE SET
              request_body_vector = EXCLUDED.request_body_vector,
              response_body_vector = EXCLUDED.response_body_vector`,
