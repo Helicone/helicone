@@ -60,17 +60,19 @@ export const consume = async () => {
       commitOffsetsIfNecessary,
     }) => {
       console.log(`Received batch with ${batch.messages.length} messages.`);
-      const messagesPerMiniBatchSetting = await settingsManager.getSetting(
-        "kafka:log"
-      );
-
-      const miniBatches = createMiniBatches(
-        batch.messages,
-        messagesPerMiniBatchSetting?.miniBatchSize ?? MESSAGES_PER_MINI_BATCH
-      );
 
       try {
-        for (const miniBatch of miniBatches) {
+        for (let i = 0; i < batch.messages.length; i++) {
+          const messagesPerMiniBatchSetting = await settingsManager.getSetting(
+            "kafka:log"
+          );
+
+          const miniBatchSize =
+            messagesPerMiniBatchSetting?.miniBatchSize ??
+            MESSAGES_PER_MINI_BATCH;
+
+          const miniBatch = batch.messages.slice(i, miniBatchSize);
+
           const firstOffset = miniBatch[0].offset;
           const lastOffset = miniBatch[miniBatch.length - 1].offset;
           const miniBatchId = `${batch.partition}-${firstOffset}-${lastOffset}`;
