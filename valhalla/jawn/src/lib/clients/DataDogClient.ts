@@ -54,3 +54,9 @@ class DataDogClient {
     }
   }
 }
+
+export const dataDogClient = new DataDogClient({
+  enabled: true,
+  apiKey: process.env.DATADOG_API_KEY ?? "",
+  endpoint: process.env.DATADOG_ENDPOINT ?? "",
+});
