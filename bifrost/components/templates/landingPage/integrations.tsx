@@ -328,7 +328,7 @@ client.messages.create(
 
   return (
     <div className="flex flex-col mx-auto max-w-5xl w-full">
-      <ul className="grid grid-cols-8 gap-4 px-16 pt-12 pb-4">
+      <ul className="grid grid-cols-4 md:grid-cols-8 gap-8 md:gap-4 px-4 md:px-16 pt-12 pb-4">
         {PROVIDERS.map((provider, index) => (
           <li key={index}>
             <button
@@ -358,12 +358,13 @@ client.messages.create(
           </li>
         ))}
       </ul>
-      <div className="border rounded-2xl flex flex-col divide-y divide-gray-700 mx-8 mt-4">
+      <div className="border rounded-2xl hidden md:flex flex-col divide-y divide-gray-700 mx-8 mt-4">
         <div className="flex items-center justify-between py-2 px-8 bg-gray-900 rounded-t-2xl">
           <ul className="flex items-center space-x-0">
             {Object.keys(selectedProvider?.integrations || {}).map(
               (integration) => (
                 <li
+                  key={integration}
                   className={`text-gray-300 cursor-pointer text-sm px-4 py-2 ${
                     currentIntegration === integration
                       ? "border border-gray-500 rounded-lg bg-gray-700"
