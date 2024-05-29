@@ -78,6 +78,15 @@ export const consume = async () => {
           const firstOffset = miniBatch?.[0]?.offset;
           const lastOffset = miniBatch?.[miniBatch.length - 1]?.offset;
           const miniBatchId = `${batch.partition}-${firstOffset}-${lastOffset}`;
+          console.log(
+            `Processing mini batch with ${
+              miniBatch.length
+            } messages. Mini batch ID: ${miniBatchId}. Handling ${i}-${
+              i + miniBatchSize
+            } of ${batch.messages.length} messages.`
+          );
+
+          i += miniBatchSize;
           try {
             const mappedMessages = mapKafkaMessageToMessage(miniBatch);
             if (mappedMessages.error || !mappedMessages.data) {
@@ -103,7 +112,6 @@ export const consume = async () => {
             resolveOffset(lastOffset);
             await heartbeat();
           }
-          i += miniBatchSize;
         }
       } catch (error) {
         console.error("Failed to consume batch", error);
