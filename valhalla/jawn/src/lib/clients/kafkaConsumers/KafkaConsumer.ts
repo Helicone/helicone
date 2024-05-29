@@ -111,6 +111,7 @@ export const consume = async () => {
           } finally {
             resolveOffset(lastOffset);
             await heartbeat();
+            await commitOffsetsIfNecessary();
           }
         }
       } catch (error) {
@@ -246,6 +247,7 @@ export const consumeDlq = async () => {
           } finally {
             resolveOffset(lastOffset);
             await heartbeat();
+            await commitOffsetsIfNecessary();
           }
         }
       } catch (error) {
