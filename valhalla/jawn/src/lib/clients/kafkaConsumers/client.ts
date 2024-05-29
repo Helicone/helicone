@@ -52,7 +52,7 @@ export function generateKafkaConsumer(
     groupId,
     heartbeatInterval: 15000,
     minBytes: 100_000,
-    maxBytes: 2_000_000,
+    maxBytes: 5_000_000, // 5MB ~ 2500 messages
   });
 
   // DISCONNECT CONSUMER
