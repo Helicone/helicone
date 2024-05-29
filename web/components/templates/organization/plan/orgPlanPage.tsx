@@ -133,7 +133,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
         Number(stripeUsage.data!.currentPeriodStart) * 1000
       ).toDateString()
     );
-    console.log(stripeUsage.data!.currentPeriodStart);
+    console.log(stripeUsage.data);
   }
 
   const renderInfo = () => {
