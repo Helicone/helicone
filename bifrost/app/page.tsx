@@ -44,14 +44,98 @@ export default function Home() {
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-between text-black">
         <header className="text-center flex flex-col space-y-4 py-32 max-w-6xl mx-auto">
-          <p>Backed by YCombinator</p>
-          <h1 className="text-4xl md:text-5xl font-bold">
+          <Link
+            href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex space-x-6 font-light text-gray-600 items-center w-full justify-center"
+          >
+            Backed by{" "}
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="mr-1 ml-2"
+            >
+              <g clipPath="url(#clip0_24_57)">
+                <rect width="24" height="24" rx="5.4" fill="#FF5100"></rect>
+                <rect
+                  x="0.5"
+                  y="0.5"
+                  width="23"
+                  height="23"
+                  rx="4.9"
+                  stroke="#FF844B"
+                ></rect>
+                <path
+                  d="M7.54102 7.31818H9.28604L11.9458 11.9467H12.0552L14.715 7.31818H16.46L12.7662 13.5028V17.5H11.2349V13.5028L7.54102 7.31818Z"
+                  fill="white"
+                ></path>
+              </g>
+              <rect
+                x="0.5"
+                y="0.5"
+                width="23"
+                height="23"
+                rx="4.9"
+                stroke="#FF5100"
+                strokeOpacity="0.1"
+              ></rect>
+              <rect
+                x="0.5"
+                y="0.5"
+                width="23"
+                height="23"
+                rx="4.9"
+                stroke="url(#paint0_radial_24_57)"
+              ></rect>
+              <defs>
+                <radialGradient
+                  id="paint0_radial_24_57"
+                  cx="0"
+                  cy="0"
+                  r="1"
+                  gradientUnits="userSpaceOnUse"
+                  gradientTransform="translate(7.35) rotate(58.475) scale(34.1384)"
+                >
+                  <stop stopColor="white" stopOpacity="0.56"></stop>
+                  <stop
+                    offset="0.28125"
+                    stopColor="white"
+                    stopOpacity="0"
+                  ></stop>
+                </radialGradient>
+                <clipPath id="clip0_24_57">
+                  <rect width="24" height="24" rx="5.4" fill="white"></rect>
+                </clipPath>
+              </defs>
+            </svg>{" "}
+            Combinator
+          </Link>
+          <h1 className="text-4xl md:text-5xl font-bold pt-4">
             LLM-Observability for{" "}
             <span className="text-sky-500">Developers</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-600">
             The open-source platform for logging, monitoring, and debugging.
           </p>
+          <div className="flex items-center gap-4 pt-4 w-full justify-center">
+            <Link
+              href="/contact"
+              className="bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 rounded-lg px-6 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
+            >
+              Get a demo
+            </Link>
+            <Link
+              href="/signup"
+              className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 text-white border-[3px] border-sky-700 rounded-lg pl-6 pr-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
+            >
+              Start Building
+              <ChevronRightIcon className="w-5 h-5 inline text-white" />
+            </Link>
+          </div>
           <ul className="flex flex-col md:flex-row gap-4 md:gap-16 md:justify-center px-4 pt-16 text-sm">
             <li className="flex items-center space-x-2">
               <CheckCircleIcon className="h-6 w-6 text-sky-500" />
@@ -70,6 +154,7 @@ export default function Home() {
               </span>
             </li>
           </ul>
+
           <div className="pt-8 md:pt-0">
             <Image
               src={"/static/dashboard.png"}
