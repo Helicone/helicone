@@ -172,7 +172,10 @@ const ScoresTable = ({ scores }: ScoresProps) => {
               "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
             )}
           >
-            {`${changeInfo.change > 0.5 ? "True" : "False"}`}
+            {scores.dataset.scores[field].value ===
+            scores.hypothesis.scores[field].value
+              ? "same"
+              : "changed"}
           </span>
         ) : (
           <span
@@ -208,23 +211,29 @@ const ScoresTable = ({ scores }: ScoresProps) => {
     const experimentScoresAttributes = Object.keys(scores.dataset.scores);
 
     return experimentScoresAttributes.map((field) => {
+      const datasetScore = scores.dataset.scores[field];
+      const hypothesisScore = scores.hypothesis.scores[field];
       const comparisonCell =
         field !== "model" && field !== "dateCreated"
-          ? renderComparisonCell(
-              field,
-              scores,
-              calculateChange(
-                scores.dataset.scores[field].value as number,
-                scores.hypothesis.scores[field].value as number
+          ? hypothesisScore
+            ? renderComparisonCell(
+                field,
+                scores,
+                calculateChange(
+                  datasetScore.value as number,
+                  hypothesisScore.value as number
+                )
               )
-            )
+            : "N/A"
           : renderComparisonCell(field, scores, null);
 
       return {
         score_key: getScoreAttribute(field),
-        dataset: getScoreValue(scores.dataset.scores[field], field),
-        hypothesis: getScoreValue(scores.hypothesis.scores[field], field),
-        compare: comparisonCell,
+        dataset: getScoreValue(datasetScore, field),
+        hypothesis: hypothesisScore
+          ? getScoreValue(hypothesisScore, field)
+          : "N/A",
+        compare: hypothesisScore ? comparisonCell : "N/A",
       };
     });
   };
