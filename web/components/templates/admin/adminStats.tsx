@@ -1,6 +1,3 @@
-import AlertBanners from "./panels/alertBanners";
-import KafkaSettings from "./panels/kafkaSettings";
-import OrgMember from "./panels/orgMember";
 import TopOrgs from "./panels/topOrgs";
 
 interface AdminStatsProps {}
