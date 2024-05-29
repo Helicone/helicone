@@ -15,10 +15,22 @@ export abstract class AbstractLogHandler implements LogHandler {
   }
 
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
-    if (this.nextHandler) {
-      return this.nextHandler.handle(context);
-    }
+    const start = performance.now();
 
-    return ok("Chain complete.");
+    const result = this.nextHandler
+      ? await this.nextHandler.handle(context)
+      : ok("Chain complete.");
+
+    const end = performance.now();
+    const executionTimeMs = end - start;
+
+    // Log to DataDog
+    await this.dataDogClient.logDistributionMetric(
+      Date.now(),
+      executionTimeMs,
+      this.constructor.name
+    );
+
+    return result;
   }
 }
