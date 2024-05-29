@@ -41,8 +41,16 @@ const authCheckThrow = async (userId: string | undefined) => {
 @Tags("Admin")
 @Security("api_key")
 export class AdminController extends Controller {
-  @Get("/orgs/top")
-  public async getTopOrgs(@Request() request: JawnAuthenticatedRequest) {
+  @Post("/orgs/top")
+  public async getTopOrgs(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      startDate: string;
+      endDate: string;
+      tier: "all" | "pro" | "free" | "growth" | "enterprise";
+    }
+  ) {
     console.log("getTopOrgs");
     await authCheckThrow(request.authParams.userId);
 
@@ -56,10 +64,11 @@ export class AdminController extends Controller {
       organization_id,
       count(*) as ct
     FROM request_response_versioned
-    WHERE request_response_versioned.request_created_at > now() - INTERVAL '30 day'
+    WHERE 
+      request_response_versioned.request_created_at > toDateTime('${body.startDate}')
+      and request_response_versioned.request_created_at < toDateTime('${body.endDate}')
     GROUP BY organization_id
     ORDER BY ct DESC
-    LIMIT 100
     `,
       []
     );
@@ -81,8 +90,8 @@ export class AdminController extends Controller {
     SELECT
       organization.id AS id,
       organization.tier AS tier,
-      auth.users.email AS owner_email,
-      auth.users.last_sign_in_at AS owner_last_login,
+      users_view.email AS owner_email,
+      users_view.last_sign_in_at AS owner_last_login,
       json_agg(
           json_build_object(
               'id', organization_member.member,
@@ -92,21 +101,42 @@ export class AdminController extends Controller {
           )
       ) AS members
     FROM organization
-    LEFT JOIN auth.users ON organization.owner = auth.users.id
+    LEFT JOIN users_view ON organization.owner = users_view.id
     LEFT JOIN organization_member ON organization.id = organization_member.organization
-    LEFT JOIN auth.users AS member_user ON organization_member.member = member_user.id
-    WHERE organization.id IN (
-      ${orgs.data?.map((org) => `'${org.organization_id}'`).join(",")}
+    LEFT JOIN users_view AS member_user ON organization_member.member = member_user.id
+    WHERE (
+      true 
+      ${body.tier !== "all" ? `AND organization.tier = '${body.tier}'` : ""}
     )
     GROUP BY
       organization.id,
       organization.tier,
-      auth.users.email,
-      auth.users.last_sign_in_at;
+      users_view.email,
+      users_view.last_sign_in_at;
     `,
       []
     );
+    if (!orgs.data) {
+      return [];
+    }
 
+    orgs.data = orgs.data?.filter((org) =>
+      orgData.data?.find((od) => od.id === org.organization_id)
+    );
+
+    let timeGrain = "minute";
+    if (
+      new Date(body.endDate).getTime() - new Date(body.startDate).getTime() >
+      12 * 60 * 60 * 1000
+    ) {
+      timeGrain = "hour";
+    }
+    if (
+      new Date(body.endDate).getTime() - new Date(body.startDate).getTime() >
+      30 * 24 * 60 * 60 * 1000
+    ) {
+      timeGrain = "day";
+    }
     // Step 3: Fetch organization data over time
     const orgsOverTime = await clickhouseDb.dbQuery<{
       count: number;
@@ -116,16 +146,27 @@ export class AdminController extends Controller {
       `
       select
         count(*) as count,
-        date_trunc('hour', request_created_at) AS dt,
+        date_trunc('${timeGrain}', request_created_at) AS dt,
         request_response_versioned.organization_id as organization_id
       from request_response_versioned
       where request_response_versioned.organization_id in (
-        ${orgs.data?.map((org) => `'${org.organization_id}'`).join(",")}
+        ${orgs.data
+          ?.map((org) => `'${org.organization_id}'`)
+          .slice(0, 30)
+          .join(",")}
       )
-      and request_response_versioned.request_created_at > now() - INTERVAL '30 day'
+      and request_response_versioned.request_created_at > toDateTime('${
+        body.startDate
+      }')
+      and request_response_versioned.request_created_at < toDateTime('${
+        body.endDate
+      }')
       group by dt, organization_id
       order by organization_id, dt ASC
-      WITH FILL FROM toStartOfHour(now() - INTERVAL '30 day') TO toStartOfHour(now()) + 1 STEP INTERVAL 1 HOUR
+      -- WITH FILL FROM toStartOfHour(now() - INTERVAL '30 day') TO toStartOfHour(now()) + 1 STEP INTERVAL 1 HOUR
+      WITH FILL FROM toDateTime('${body.startDate}') TO toDateTime('${
+        body.endDate
+      }') STEP INTERVAL 1 ${timeGrain}
     `,
       []
     );

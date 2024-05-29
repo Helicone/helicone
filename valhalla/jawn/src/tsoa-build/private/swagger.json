@@ -1389,7 +1389,7 @@
 			}
 		},
 		"/v1/admin/orgs/top": {
-			"get": {
+			"post": {
 				"operationId": "GetTopOrgs",
 				"responses": {
 					"200": {
@@ -1494,7 +1494,40 @@
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"tier": {
+										"type": "string",
+										"enum": [
+											"all",
+											"pro",
+											"free",
+											"growth",
+											"enterprise"
+										]
+									},
+									"endDate": {
+										"type": "string"
+									},
+									"startDate": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"tier",
+									"endDate",
+									"startDate"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/admin/admins/query": {
