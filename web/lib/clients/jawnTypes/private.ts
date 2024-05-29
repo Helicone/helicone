@@ -46,7 +46,7 @@ export interface paths {
     get: operations["FineTuneJobStats"];
   };
   "/v1/admin/orgs/top": {
-    get: operations["GetTopOrgs"];
+    post: operations["GetTopOrgs"];
   };
   "/v1/admin/admins/query": {
     get: operations["GetAdmins"];
@@ -530,6 +530,16 @@ export interface operations {
     };
   };
   GetTopOrgs: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          tier: "all" | "pro" | "free" | "growth" | "enterprise";
+          endDate: string;
+          startDate: string;
+        };
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
