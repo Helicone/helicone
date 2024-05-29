@@ -1,4 +1,3 @@
-import { Fragment, useState } from "react";
 import {
   AcademicCapIcon,
   CheckCircleIcon,
@@ -7,17 +6,18 @@ import {
   CodeBracketIcon,
   XCircleIcon,
 } from "@heroicons/react/20/solid";
-import { clsx } from "../../shared/clsx";
-import NavBarV2 from "../../layout/navbar/navBarV2";
-import Footer from "../../layout/footer";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import Footer from "../../layout/footer";
+import NavBarV2 from "../../layout/navbar/navBarV2";
+import { clsx } from "../../shared/clsx";
 
 import { HomeModernIcon } from "@heroicons/react/24/solid";
-import { HELICONE_LOG_PRICING } from "./requestLogTable";
-import FeatureTable from "./featureTable";
-import HcButton from "../../ui/hcButton";
 import { useRouter } from "next/router";
+import { handleLogCostCalculation } from "../../../utlis/LogCostCalculation";
+import HcButton from "../../ui/hcButton";
+import FeatureTable from "./featureTable";
 
 const Slider = ({
   min,
@@ -159,28 +159,6 @@ export default function Example() {
 
   const handleRequestLogChange = (newValue: any) => {
     setRequestLogs(newValue);
-  };
-
-  const handleLogCostCalculation = (currentLogValue: number) => {
-    // calculate the estimated cost for the `currentValue` using tax brackets
-    const calculateCost = (currentValue: number) => {
-      let cost = 0;
-      let remainingValue = currentValue;
-      for (const pricing of HELICONE_LOG_PRICING) {
-        const logCount = Math.min(
-          pricing.upper - pricing.lower,
-          remainingValue
-        );
-        cost += logCount * pricing.rate;
-        remainingValue -= logCount;
-        if (remainingValue <= 0) {
-          break;
-        }
-      }
-      return cost;
-    };
-
-    return calculateCost(currentLogValue);
   };
 
   const renderLogCost = () => {
