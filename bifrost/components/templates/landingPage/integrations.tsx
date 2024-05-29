@@ -2,6 +2,7 @@
 
 import { DiffHighlight } from "@/components/shared/diffHighlight";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
+import Image from "next/image";
 import { useState } from "react";
 import { text } from "stream/consumers";
 
@@ -91,7 +92,16 @@ client = OpenAI(
     },
     {
       name: "Azure",
-      logo: <div>hi</div>,
+      logo: (
+        <div className="p-3">
+          <Image
+            src={"/static/azure.png"}
+            alt={"Azure"}
+            width={2048}
+            height={2048}
+          />
+        </div>
+      ),
       integrations: {
         "node.js": {
           language: "tsx",
