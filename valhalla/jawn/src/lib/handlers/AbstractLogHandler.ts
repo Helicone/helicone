@@ -31,7 +31,7 @@ export abstract class AbstractLogHandler implements LogHandler {
       dataDogClient.logDistributionMetric(
         Date.now(),
         executionTimeMs,
-        this.constructor.name
+        `${this.constructor.name}.handle`
       )
     ).catch((error) => {
       console.error("Failed to log to DataDog", error);

@@ -17,6 +17,7 @@ import { WebhookHandler } from "../lib/handlers/WebhookHandler";
 import { WebhookStore } from "../lib/stores/WebhookStore";
 import { FeatureFlagStore } from "../lib/stores/FeatureFlagStore";
 import { supabaseServer } from "../lib/db/supabase";
+import { dataDogClient } from "../lib/clients/DataDogClient";
 
 export class LogManager {
   public async processLogEntry(logMessage: Message): Promise<void> {
@@ -179,8 +180,21 @@ export class LogManager {
 
     // Insert rate limit entries after logs
     console.log(`Inserting rate limits for batch ${batchContext.batchId}`);
+    const start = performance.now();
     const { data: rateLimitInsId, error: rateLimitErr } =
       await rateLimitHandler.handleResults();
+    const end = performance.now();
+    const executionTimeMs = end - start;
+
+    Promise.resolve(
+      dataDogClient.logDistributionMetric(
+        Date.now(),
+        executionTimeMs,
+        `RateLimitHandler.handleResults`
+      )
+    ).catch((error) => {
+      console.error("Failed to log to DataDog", error);
+    });
 
     if (rateLimitErr || !rateLimitInsId) {
       Sentry.captureException(rateLimitErr, {

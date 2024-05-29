@@ -10,7 +10,8 @@ class DataDogClient {
   public async logDistributionMetric(
     timestamp: number,
     executionTimeMs: number,
-    handlerName: string
+    handlerName: string,
+    batchSize?: number
   ): Promise<Response> {
     if (!this.config.enabled) {
       return new Response("DataDog logging is disabled", {
@@ -26,9 +27,17 @@ class DataDogClient {
             points: [[timestamp, [executionTimeMs]]],
             host: "kafka_consumer_service",
             tags: ["handler_name:" + handlerName],
+            batch_size: batchSize,
           },
         ],
       };
+
+      if (batchSize) {
+        distribution.series[0].points = distribution.series[0].points.slice(
+          0,
+          batchSize
+        );
+      }
 
       const requestInit = {
         method: "POST",
