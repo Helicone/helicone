@@ -48,7 +48,15 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
 
   const [estimatedCost, setEstCost] = useState(0);
 
-  const [billingCycle, setBillingCycle] = useState("");
+  const [billingCycle, setBillingCycle] = useState(
+    new Date()
+      .toDateString()
+      .slice(4) +
+      " - " +
+      new Date()
+        .toDateString()
+        .slice(4)
+  );
 
   const {
     count,
@@ -213,7 +221,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
           </div>
           {org.tier === "free" && (
             <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
-              <dt className="text-sm flex flex-row gap-1 font-medium leading-6 text-gray-700 dark:text-gray-300">
+              <dt className="text-sm flex flex-row gap-1 items-center font-medium leading-6 text-gray-700 dark:text-gray-300">
                 Requests
               </dt>
               <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900 dark:text-gray-100">
@@ -226,9 +234,9 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
 
           {org.tier === "growth" && (
             <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
-              <dt className="text-sm flex flex-row gap-1 font-medium leading-6 text-gray-700 dark:text-gray-300">
+              <dt className="text-sm flex flex-row gap-1 items-center font-medium leading-6 text-gray-700 dark:text-gray-300">
                 Estimated Costs
-                <div className="flex flex-row items-baseline text-gray-500 w-fit gap-1">
+                <div className="flex flex-row items-center text-gray-500 w-fit gap-1">
                   <InformationCircleIcon className="h-3 w-3 text-gray-500 sm:inline" />
                   <p className="text-xs font-light">
                     Billing cycle: {billingCycle}
