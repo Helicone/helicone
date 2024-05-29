@@ -116,8 +116,13 @@ def main():
     os.system(
         f"npx openapi-typescript {current_dir}/src/tsoa-build/private/swagger.json -o {current_dir}/../../web/lib/clients/jawnTypes/private.ts")
 
+    os.system(
+        f"npx openapi-typescript {current_dir}/src/tsoa-build/public/swagger.json -o {current_dir}/../../helicone-node/api/generatedTypes/public.ts")
+
     fixJsonType(f"{current_dir}/../../web/lib/clients/jawnTypes/public.ts")
     fixJsonType(f"{current_dir}/../../web/lib/clients/jawnTypes/private.ts")
+    fixJsonType(
+        f"{current_dir}/../../helicone-node/api/generatedTypes/public.ts")
 
 
 if __name__ == "__main__":

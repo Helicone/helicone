@@ -1,30 +1,42 @@
-import { Experiment } from "../../stores/experimentStore";
+import { SettingsManager } from "../../../utils/settings";
 import { placeInputValues } from "../helpers";
 import { PreparedRequest, PreparedRequestArgs } from "./PreparedRequest";
 
-function prepareRequestAzure(
-  requestPath: string,
-  apiKey: string,
-  requestId: string
-): {
+const settingsManager = new SettingsManager();
+export async function prepareRequestAzure(
+  apiKey?: string,
+  requestId?: string
+): Promise<{
   url: URL;
   headers: { [key: string]: string };
-} {
-  const azureAPIKey = process.env.AZURE_API_KEY ?? "";
-  const apiVersion = process.env.AZURE_API_VERSION;
-  const azureDeploymentName = process.env.AZURE_DEPLOYMENT_NAME;
-  const azureBaseUrl = process.env.AZURE_BASE_URL ?? "";
+}> {
+  const azureSettings = await settingsManager.getSetting("azure:experiment");
+  const azureAPIKey = azureSettings?.azureApiKey ?? "";
+  const apiVersion = azureSettings?.azureApiVersion ?? "";
+  const azureDeploymentName = azureSettings?.azureDeploymentName ?? "";
+  const azureBaseUrl = azureSettings?.azureBaseUri ?? "";
   const heliconeWorkerUrl = process.env.HELICONE_WORKER_URL ?? "";
 
   let headers: { [key: string]: string } = {
     "Content-Type": "application/json",
-    "Helicone-Request-Id": requestId,
-    "Helicone-Auth": `Bearer ${apiKey}`,
     "Helicone-OpenAI-API-Base": azureBaseUrl,
     "api-key": azureAPIKey,
     Accept: "application/json",
     "Accept-Encoding": "",
   };
+
+  if (apiKey) {
+    headers = {
+      ...headers,
+      "Helicone-Auth": `Bearer ${apiKey}`,
+    };
+  }
+  if (requestId) {
+    headers = {
+      ...headers,
+      "Helicone-Request-Id": requestId,
+    };
+  }
 
   const fetchUrl = `${heliconeWorkerUrl}/openai/deployments/${azureDeploymentName}/chat/completions?api-version=${apiVersion}`;
 
@@ -34,19 +46,18 @@ function prepareRequestAzure(
   };
 }
 
-export function prepareRequestAzureFull({
+export async function prepareRequestAzureFull({
   hypothesis,
   secretKey: apiKey,
   datasetRow,
   requestId,
-}: PreparedRequestArgs): PreparedRequest {
+}: PreparedRequestArgs): Promise<PreparedRequest> {
   const newRequestBody = placeInputValues(
     datasetRow.inputRecord?.inputs ?? {},
     hypothesis.promptVersion?.template ?? {}
   );
 
-  const { url: fetchUrl, headers } = prepareRequestAzure(
-    datasetRow.inputRecord!.requestPath,
+  const { url: fetchUrl, headers } = await prepareRequestAzure(
     apiKey,
     requestId
   );

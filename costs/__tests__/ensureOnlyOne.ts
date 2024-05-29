@@ -296,6 +296,7 @@ WHEN (request_response_log.model = 'text-embedding-ada-002') THEN 100 * request_
 WHEN (request_response_log.model = 'text-embedding-ada') THEN 100 * request_response_log.prompt_tokens + 0 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'text-embedding-ada-002-v2') THEN 100 * request_response_log.prompt_tokens + 0 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'text-embedding-3-small') THEN 20 * request_response_log.prompt_tokens + 0 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'text-embedding-3-large') THEN 130 * request_response_log.prompt_tokens + 0 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-4-vision-preview') THEN 10000 * request_response_log.prompt_tokens + 30000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-35-turbo-16k-0613') THEN 3000 * request_response_log.prompt_tokens + 4000 * request_response_log.completion_tokens
   ELSE 0
@@ -398,6 +399,9 @@ WHEN (request_response_log.provider = 'GOOGLE') THEN (
   CASE
   WHEN (request_response_log.model ILIKE '%gemini-pro%') THEN 125 * request_response_log.prompt_tokens + 375 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gemini-1.0-pro-vision-001') THEN 125 * request_response_log.prompt_tokens + 375 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gemini-1.0-pro') THEN 125 * request_response_log.prompt_tokens + 375 * request_response_log.completion_tokens
+WHEN (request_response_log.model ILIKE '%gemini-1.5-flash%') THEN 350 * request_response_log.prompt_tokens + 1050 * request_response_log.completion_tokens
+WHEN (request_response_log.model ILIKE '%gemini-1.5-pro%') THEN 3500 * request_response_log.prompt_tokens + 10500 * request_response_log.completion_tokens
   ELSE 0
 END
 )
@@ -613,6 +617,7 @@ WHEN (request_response_log.model = 'text-embedding-ada-002') THEN 100 * request_
 WHEN (request_response_log.model = 'text-embedding-ada') THEN 100 * request_response_log.prompt_tokens + 0 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'text-embedding-ada-002-v2') THEN 100 * request_response_log.prompt_tokens + 0 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'text-embedding-3-small') THEN 20 * request_response_log.prompt_tokens + 0 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'text-embedding-3-large') THEN 130 * request_response_log.prompt_tokens + 0 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-4-vision-preview') THEN 10000 * request_response_log.prompt_tokens + 30000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-35-turbo-16k-0613') THEN 3000 * request_response_log.prompt_tokens + 4000 * request_response_log.completion_tokens
 WHEN (request_response_log.model LIKE 'ft:gpt-3.5-turbo-%') THEN 3000 * request_response_log.prompt_tokens + 6000 * request_response_log.completion_tokens

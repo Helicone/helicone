@@ -37,7 +37,7 @@ export const getBuilderType = (
     return "ChatGPTBuilder";
   }
 
-  if (model === "gemini-pro" || model === "gemini-pro-vision") {
+  if (model.toLowerCase().includes("gemini")) {
     return "GeminiBuilder";
   }
 

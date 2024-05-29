@@ -1,5 +1,7 @@
 import AlertBanners from "./panels/alertBanners";
+import KafkaSettings from "./panels/kafkaSettings";
 import OrgMember from "./panels/orgMember";
+import TopOrgs from "./panels/topOrgs";
 
 interface AdminPageProps {}
 
@@ -15,6 +17,12 @@ const AdminPage = (props: AdminPageProps) => {
         </li>
         <li className="w-full h-full rounded-lg flex flex-col bg-gray-500 p-4 space-y-4">
           <OrgMember />
+        </li>
+        <li className="w-full h-full rounded-lg flex flex-col bg-gray-500 p-4 space-y-4">
+          <KafkaSettings />
+        </li>
+        <li className="w-full h-full rounded-lg flex flex-col bg-gray-500 p-4 space-y-4">
+          <TopOrgs />
         </li>
       </ul>
     </div>

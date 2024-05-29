@@ -72,7 +72,14 @@
           "group": "Gemini",
           "pages": [
             {
-              "group": "Vertex",
+              "group": "API",
+              "pages": [
+                "integrations/gemini/api/node",
+                "integrations/gemini/api/curl"
+              ]
+            },
+            {
+              "group": "Vertex AI (Enterprise)",
               "pages": [
                 "integrations/gemini/vertex/node",
                 "integrations/gemini/vertex/curl"

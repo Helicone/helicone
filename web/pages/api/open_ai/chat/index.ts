@@ -62,7 +62,7 @@ export default async function handler(
       user: user.data.user.email,
       temperature: temperature,
       max_tokens: maxTokens,
-      tools: tools,
+      tools: tools.length > 0 ? tools : undefined,
     });
     res.status(200).json({ error: null, data: completion });
     return;

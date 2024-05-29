@@ -55,12 +55,19 @@ function easyKeyMappings<T extends keyof TablesAndViews>(
         columnToUse = columnFromMapping;
       }
     }
-
-    return {
-      column: columnToUse,
-      operator: operator,
-      value: placeValueSafely(value),
-    };
+    if (value === "null") {
+      return {
+        column: columnToUse,
+        operator: operator,
+        value: value,
+      };
+    } else {
+      return {
+        column: columnToUse,
+        operator: operator,
+        value: placeValueSafely(value),
+      };
+    }
   };
 }
 
@@ -235,6 +242,12 @@ const whereKeyMappings: KeyMappings = {
     organization_id: "rate_limit_log.organization_id",
     created_at: "rate_limit_log.created_at",
   }),
+  score_value: easyKeyMappings<"score_value">({
+    request_id: "score_value.request_id",
+  }),
+  experiment_hypothesis_run: easyKeyMappings<"experiment_hypothesis_run">({
+    result_request_id: "experiment_v2_hypothesis_run.result_request_id",
+  }),
 
   // Deprecated
   values: NOT_IMPLEMENTED,
@@ -258,6 +271,8 @@ const havingKeyMappings: KeyMappings = {
     total_prompt_token: "total_prompt_token",
     cost: "cost",
   }),
+  score_value: NOT_IMPLEMENTED,
+  experiment_hypothesis_run: NOT_IMPLEMENTED,
   user_api_keys: NOT_IMPLEMENTED,
   properties: NOT_IMPLEMENTED,
   request: NOT_IMPLEMENTED,

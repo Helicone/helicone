@@ -20,17 +20,13 @@ import {
 } from "../../lib/stores/request/request";
 import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
-import { ScoreManager } from "../../managers/score/ScoreManager";
+import { ScoreManager, ScoreRequest } from "../../managers/score/ScoreManager";
 
 export type RequestFilterBranch = {
   left: RequestFilterNode;
   operator: "or" | "and";
   right: RequestFilterNode;
 };
-
-export interface ScoreRequest {
-  scores: Record<string, number>;
-}
 
 type RequestFilterNode =
   | FilterLeafSubset<
@@ -46,6 +42,8 @@ export interface RequestQueryParams {
   sort?: SortLeafRequest;
   isCached?: boolean;
   includeInputs?: boolean;
+  isPartOfExperiment?: boolean;
+  isScored?: boolean;
 }
 
 @Route("v1/request")
@@ -62,7 +60,9 @@ export class RequestController extends Controller {
    *  "offset": 0,
    *  "sort": {
    *    "created_at": "desc"
-   *  }
+   *  },
+   *  "isScored": false,
+   *  "isPartOfExperiment": false
    * }
    * @param request
    * @returns
@@ -76,6 +76,8 @@ export class RequestController extends Controller {
     sort: {
       created_at: "desc",
     },
+    isScored: false,
+    isPartOfExperiment: false,
   })
   public async getRequests(
     @Body()
@@ -106,7 +108,6 @@ export class RequestController extends Controller {
       requestBody.rating
     );
     if (requestFeedback.error) {
-      console.log(requestFeedback.error);
       this.setStatus(500);
     } else {
       this.setStatus(200); // set return status 201
@@ -170,7 +171,7 @@ export class RequestController extends Controller {
     const result = await scoreManager.addScores(requestId, requestBody.scores);
     if (result.error || !result.data) {
       this.setStatus(500);
-      return err("Not implemented");
+      return err("Error adding scores to request.");
     } else {
       this.setStatus(201);
       return ok(null);
