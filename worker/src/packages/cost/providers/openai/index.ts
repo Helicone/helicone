@@ -401,6 +401,16 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "text-embedding-3-large",
+    },
+    cost: {
+      prompt_token: 0.00000013,
+      completion_token: 0.0,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "gpt-4-vision-preview",
     },
     cost: {
