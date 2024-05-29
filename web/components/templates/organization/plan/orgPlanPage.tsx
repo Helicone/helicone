@@ -24,6 +24,7 @@ import { clsx } from "../../../shared/clsx";
 import UpgradeProModal from "../../../shared/upgradeProModal";
 import RenderOrgPlan from "./renderOrgPlan";
 import { Result } from "../../../../lib/result";
+import { useQuery } from "@tanstack/react-query";
 
 interface OrgPlanPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -46,14 +47,6 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
 
   const [open, setOpen] = useState(false);
 
-  const [estimatedCost, setEstCost] = useState(0);
-
-  const [billingCycle, setBillingCycle] = useState(
-    new Date().toDateString().slice(4) +
-      " - " +
-      new Date().toDateString().slice(4)
-  );
-
   const {
     count,
     isLoading: isCountLoading,
@@ -64,10 +57,37 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
     org.id
   );
 
+  const stripeUsageCurrentMonth = useQuery({
+    queryKey: ["stripe_usage"],
+    queryFn: async () => {
+      const r = await fetch("/api/subscription/get_usage_and_costs", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const stripeUsage = (await r.json()) as Result<TStripeUsage, string>;
+      if (stripeUsage.error || !stripeUsage.data) {
+        console.log(stripeUsage.error);
+        return;
+      }
+      return {
+        ...stripeUsage.data,
+        billingCycle:
+          new Date(+stripeUsage.data?.currentPeriodStart * 1000)
+            .toDateString()
+            .slice(4) +
+          " - " +
+          new Date(+stripeUsage.data?.currentPeriodEnd * 1000)
+            .toDateString()
+            .slice(4),
+      };
+    },
+  });
+
   useEffect(() => {
     refetch();
-    getStripeUsageForGrowth();
-  }, [currentMonth, refetch]);
+  }, [refetch]);
 
   const capitalizeHelper = (str: string) => {
     const words = str.split("_");
@@ -101,40 +121,6 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
     currentPeriodEnd: number | string;
     totalCost: number | string;
   };
-
-  async function getStripeUsageForGrowth() {
-    if (org.tier != "growth") return;
-
-    const r = await fetch("/api/subscription/get_usage_and_costs", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const stripeUsage = (await r.json()) as Result<TStripeUsage, string>;
-    if (stripeUsage.error) {
-      console.log(stripeUsage.error);
-      return;
-    }
-
-    setEstCost(Number(stripeUsage.data!.totalCost));
-    setBillingCycle(
-      new Date(Number(stripeUsage.data!.currentPeriodStart) * 1000)
-        .toDateString()
-        .slice(4) +
-        " - " +
-        new Date(Number(stripeUsage.data!.currentPeriodEnd) * 1000)
-          .toDateString()
-          .slice(4)
-    );
-    console.log(billingCycle);
-    console.log(
-      new Date(
-        Number(stripeUsage.data!.currentPeriodStart) * 1000
-      ).toDateString()
-    );
-    console.log(stripeUsage.data);
-  }
 
   const renderInfo = () => {
     if (org.tier === "free") {
@@ -229,7 +215,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
                 <div className="flex flex-row items-center text-gray-500 w-fit gap-1">
                   <InformationCircleIcon className="h-3 w-3 text-gray-500 sm:inline" />
                   <p className="text-xs font-light">
-                    Billing cycle: {billingCycle}
+                    Billing cycle: {stripeUsageCurrentMonth.data?.billingCycle}
                   </p>
                 </div>
               </dt>
@@ -248,14 +234,17 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
                 <div className="flex flex-row items-center text-gray-500 w-fit gap-1">
                   <InformationCircleIcon className="h-3 w-3 text-gray-500 sm:inline" />
                   <p className="text-xs font-light">
-                    Billing cycle: {billingCycle}
+                    Billing cycle: {stripeUsageCurrentMonth.data?.billingCycle}
                   </p>
                 </div>
               </dt>
               <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900 dark:text-gray-100">
                 {isCountLoading
                   ? "Loading..."
-                  : "$ " + Number(estimatedCost || 0).toLocaleString()}
+                  : "$ " +
+                    Number(
+                      stripeUsageCurrentMonth.data?.totalCost || 0
+                    ).toLocaleString()}
               </dd>
             </div>
           )}
