@@ -21,15 +21,6 @@ export class AuthenticationHandler extends AbstractLogHandler {
       context.authParams = authResult.data;
       context.orgParams = orgResult.data;
 
-      if (context.orgParams.id === "aedd6a3a-53d2-4c5b-a054-82cc3c170324") {
-        const kafkaProducer = new KafkaProducer();
-        const res = await kafkaProducer.sendMessages(
-          [context.message],
-          "request-response-logs-prod-dlq"
-        );
-        return ok("");
-      }
-
       return await super.handle(context);
     } catch (error) {
       return err(
