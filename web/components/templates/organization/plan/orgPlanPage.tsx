@@ -54,10 +54,6 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
     org.id
   );
 
-  useEffect(() => {
-    refetch();
-  }, [currentMonth, refetch]);
-
   const capitalizeHelper = (str: string) => {
     const words = str.split("_");
     const capitalizedWords = words.map(
@@ -74,10 +70,12 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
 
   const nextMonth = () => {
     setCurrentMonth((prevMonth) => startOfMonth(addMonths(prevMonth, 1)));
+    refetch();
   };
 
   const prevMonth = () => {
     setCurrentMonth((prevMonth) => startOfMonth(subMonths(prevMonth, 1)));
+    refetch();
   };
 
   const getMonthName = (dateString: string) => {
