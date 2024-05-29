@@ -131,12 +131,39 @@ export class LogManager {
       })
     );
 
-    // Inserts everything in transaction
-    console.log(`Upserting logs for batch ${batchContext.batchId}`);
-    const upsertResult = await loggingHandler.handleResults();
+    await this.logRateLimits(rateLimitHandler, batchContext);
+    await this.logHandlerResults(loggingHandler, batchContext, logMessages);
+    await this.logPosthogEvents(posthogHandler, batchContext);
+    await this.logWebhooks(webhookHandler, batchContext);
+    console.log(`Finished processing batch ${batchContext.batchId}`);
+  }
 
-    if (upsertResult.error) {
-      Sentry.captureException(new Error(JSON.stringify(upsertResult.error)), {
+  private async logHandlerResults(
+    handler: LoggingHandler,
+    batchContext: {
+      batchId: string;
+      partition: number;
+      lastOffset: string;
+      messageCount: number;
+    },
+    logMessages: Message[]
+  ): Promise<void> {
+    console.log(`Upserting logs for batch ${batchContext.batchId}`);
+    const start = performance.now();
+    const result = await handler.handleResults();
+    const end = performance.now();
+    const executionTimeMs = end - start;
+
+    dataDogClient.logHandleResults({
+      executionTimeMs,
+      handlerName: handler.constructor.name,
+      methodName: "handleResults",
+      messageCount: batchContext.messageCount,
+      message: "Logs",
+    });
+
+    if (result.error) {
+      Sentry.captureException(new Error(JSON.stringify(result.error)), {
         tags: {
           type: "UpsertError",
           topic: "request-response-logs-prod",
@@ -149,15 +176,20 @@ export class LogManager {
         },
       });
 
-      // Send to DLQ
+      console.error(
+        `Error inserting logs: ${JSON.stringify(result.error)} for batch ${
+          batchContext.batchId
+        }`
+      );
+
       const kafkaProducer = new KafkaProducer();
-      const result = await kafkaProducer.sendMessages(
+      const kafkaResult = await kafkaProducer.sendMessages(
         logMessages,
         "request-response-logs-prod-dlq"
       );
 
-      if (result.error) {
-        Sentry.captureException(new Error(result.error), {
+      if (kafkaResult.error) {
+        Sentry.captureException(new Error(kafkaResult.error), {
           tags: {
             type: "KafkaError",
             topic: "request-response-logs-prod-dlq",
@@ -170,30 +202,31 @@ export class LogManager {
           },
         });
       }
-
-      console.error(
-        `Error inserting logs: ${JSON.stringify(
-          upsertResult.error
-        )} for batch ${batchContext.batchId}`
-      );
     }
+  }
 
-    // Insert rate limit entries after logs
+  private async logRateLimits(
+    handler: RateLimitHandler,
+    batchContext: {
+      batchId: string;
+      partition: number;
+      lastOffset: string;
+      messageCount: number;
+    }
+  ): Promise<void> {
     console.log(`Inserting rate limits for batch ${batchContext.batchId}`);
     const start = performance.now();
     const { data: rateLimitInsId, error: rateLimitErr } =
-      await rateLimitHandler.handleResults();
+      await handler.handleResults();
     const end = performance.now();
     const executionTimeMs = end - start;
 
-    Promise.resolve(
-      dataDogClient.logDistributionMetric(
-        Date.now(),
-        executionTimeMs,
-        `RateLimitHandler.handleResults`
-      )
-    ).catch((error) => {
-      console.error("Failed to log to DataDog", error);
+    dataDogClient.logHandleResults({
+      executionTimeMs,
+      handlerName: handler.constructor.name,
+      methodName: "handleResults",
+      messageCount: batchContext.messageCount,
+      message: "Rate limits",
     });
 
     if (rateLimitErr || !rateLimitInsId) {
@@ -214,15 +247,51 @@ export class LogManager {
         `Error inserting rate limits: ${rateLimitErr} for batch ${batchContext.batchId}`
       );
     }
+  }
 
-    console.log(`Sending posthog events for batch ${batchContext.batchId}`);
-    await posthogHandler.handleResults();
-    // Do not fail the batch if posthog events fail
+  private async logPosthogEvents(
+    handler: PostHogHandler,
+    batchContext: {
+      batchId: string;
+      partition: number;
+      lastOffset: string;
+      messageCount: number;
+    }
+  ): Promise<void> {
+    const start = performance.now();
+    await handler.handleResults();
+    const end = performance.now();
+    const executionTimeMs = end - start;
 
-    console.log(`Sending webhooks for batch ${batchContext.batchId}`);
-    await webhookHandler.handleResults();
-    // If webhooks fail, don't fail the batch
+    dataDogClient.logHandleResults({
+      executionTimeMs,
+      handlerName: handler.constructor.name,
+      methodName: "handleResults",
+      messageCount: batchContext.messageCount,
+      message: "Posthog events",
+    });
+  }
 
-    console.log(`Finished processing batch ${batchContext.batchId}`);
+  private async logWebhooks(
+    handler: WebhookHandler,
+    batchContext: {
+      batchId: string;
+      partition: number;
+      lastOffset: string;
+      messageCount: number;
+    }
+  ): Promise<void> {
+    const start = performance.now();
+    await handler.handleResults();
+    const end = performance.now();
+    const executionTimeMs = end - start;
+
+    dataDogClient.logHandleResults({
+      executionTimeMs,
+      handlerName: handler.constructor.name,
+      methodName: "handleResults",
+      messageCount: batchContext.messageCount,
+      message: "Webhooks",
+    });
   }
 }
