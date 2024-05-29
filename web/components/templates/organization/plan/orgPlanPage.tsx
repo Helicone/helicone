@@ -127,6 +127,10 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
           .toDateString()
           .slice(4)
     );
+    console.log(billingCycle);
+    console.log(
+      new Date(stripeUsage.data!.currentPeriodStart * 1000).toDateString()
+    );
   }
 
   const renderInfo = () => {
