@@ -50,7 +50,8 @@ export function generateKafkaConsumer(
   const kafka = getKafka();
   const consumer = kafka?.consumer({
     groupId,
-    heartbeatInterval: 15000, // 3 minutes
+    heartbeatInterval: 15000,
+    sessionTimeout: 3 * 60 * 1000, // 3 minutes
     minBytes: 100_000,
     maxBytes: 5_000_000, // 5MB ~ 2500 messages
   });
