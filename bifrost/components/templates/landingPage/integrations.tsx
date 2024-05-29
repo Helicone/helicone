@@ -3,6 +3,7 @@
 import { DiffHighlight } from "@/components/shared/diffHighlight";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { text } from "stream/consumers";
 
@@ -22,6 +23,7 @@ const Integrations = (props: IntegrationsProps) => {
         code: string;
       }
     >;
+    href?: string;
   }[] = [
     {
       name: "OpenAI",
@@ -48,7 +50,7 @@ const openai = new OpenAI({
   apiKey: request.env.OPENAI_API_KEY,
   baseURL: "https://oai.hconeai.com/v1",
   defaultHeaders: {
-    "Helicone-Auth": Bearer {{HELICONE_API_KEY}},
+    "Helicone-Auth": Bearer <HELICONE_API_KEY>,
   },
 });`,
         },
@@ -60,20 +62,20 @@ client = OpenAI(
   api_key="your-api-key-here", 
   base_url="https://oai.hconeai.com/v1",  
   default_headers= {  
-    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+    "Helicone-Auth": Bearer <HELICONE_API_KEY>,
   }
 )`,
         },
         langchain: {
           language: "python",
           code: `llm = ChatOpenAI(
+  openai_api_base="https://oai.hconeai.com/v1"
   openai_api_key='<>',
   model_kwargs={
     "extra_headers":{
-      "Helicone-Auth": f"Bearer {HELICONE_API_KEY}"
+      "Helicone-Auth": Bearer <HELICONE_API_KEY>
     }
   },
-  openai_api_base="https://oai.hconeai.com/v1",
 )`,
         },
         langchainJS: {
@@ -83,7 +85,7 @@ client = OpenAI(
   configuration: {
     basePath: "https://oai.hconeai.com/v1",
     defaultHeaders: {
-      "Helicone-Auth": "Bearer {HELICONE_API_KEY}",
+      "Helicone-Auth": Bearer <HELICONE_API_KEY>,
     },
   },
 });`,
@@ -110,7 +112,7 @@ client = OpenAI(
 const openai = new OpenAI({
   baseURL: "https://oai.hconeai.com/openai/deployments/[DEPLOYMENT_NAME]",
   defaultHeaders: {
-    "Helicone-Auth": "Bearer ${process.env.HELICONE_API_KEY}",
+    "Helicone-Auth": Bearer <HELICONE_API_KEY>,
     "Helicone-OpenAI-API-Base": "https://[AZURE_DOMAIN].openai.azure.com",
     "api-key": "[AZURE_API_KEY]",
   },
@@ -128,7 +130,7 @@ client = OpenAI(
   base_url="https://oai.hconeai.com/openai/deployments/[DEPLOYMENT]",
   default_headers={
     "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
-    "Helicone-Auth": "Bearer [HELICONE_API_KEY]",
+    "Helicone-Auth": Bearer <HELICONE_API_KEY>,
     "api-key": "[AZURE_OPENAI_API_KEY]",
   },
   default_query={
@@ -141,12 +143,12 @@ client = OpenAI(
           code: `from langchain.chat_models import AzureChatOpenAI
 
 helicone_headers = {
-  "Helicone-Auth": f"Bearer {helicone_api_key}",
+  "Helicone-Auth": Bearer <HELICONE_API_KEY>,
   "Helicone-OpenAI-Api-Base": "https://<model_name>.openai.azure.com/"
 }
 
 self.model = AzureChatOpenAI(
-  openai_api_base="https://oai.hconeai.com",
+  openai_api_base="https://oai.hconeai.com"
   deployment_name="gpt-35-turbo",
   openai_api_key=<AZURE_OPENAI_API_KEY>,
   openai_api_version="2023-05-15",
@@ -167,7 +169,7 @@ self.model = AzureChatOpenAI(
     organization: "[organization]",
     baseOptions: {
       headers: {
-        "Helicone-Auth": "Bearer ${process.env.HELICONE_API_KEY}",
+        "Helicone-Auth": Bearer <HELICONE_API_KEY>,
         "Helicone-OpenAI-Api-Base":
           "https://[YOUR_AZURE_DOMAIN].openai.azure.com",
       },
@@ -179,23 +181,138 @@ self.model = AzureChatOpenAI(
     },
     {
       name: "Anthropic",
-      logo: <div>hi</div>,
+      logo: (
+        <div className="p-3">
+          <Image
+            src={"/static/anthropic.png"}
+            alt={"Anthropic"}
+            width={2048}
+            height={2048}
+          />
+        </div>
+      ),
       integrations: {
         "node.js": {
           language: "tsx",
-          code: `import OpenAI from "openai`,
+          code: `import Anthropic from "@anthropic-ai/sdk";
+
+const anthropic = new Anthropic({
+  baseURL: "https://anthropic.hconeai.com/",
+  apiKey: process.env.ANTHROPIC_API_KEY,
+  defaultHeaders: {
+    "Helicone-Auth": <HELICONE_API_KEY>,
+  },
+});
+
+await anthropic.messages.create({
+  model: "claude-3-opus-20240229",
+  max_tokens: 1024,
+  messages: [{ role: "user", content: "Hello, world" }],
+});
+`,
+        },
+        python: {
+          language: "python",
+          code: `import anthropic
+
+client = anthropic.Anthropic(
+  api_key=os.environ.get("ANTHROPIC_API_KEY"),
+  base_url="https://anthropic.hconeai.com/v1"
+  defaultHeaders={
+    "Helicone-Auth": <HELICONE_API_KEY>,
+  },
+)
+
+client.messages.create(
+  model="claude-3-opus-20240229",
+  max_tokens=1024,
+  messages=[
+    {"role": "user", "content": "Hello, world"}
+  ]
+)
+`,
+        },
+        langchain: {
+          language: "python",
+          code: `const llm = new ChatAnthropic({
+  modelName: "claude-2",
+  anthropicApiKey: "ANTHROPIC_API_KEY",
+  clientOptions: {
+    baseURL: "https://anthropic.hconeai.com/",
+    defaultHeaders: {
+      "Helicone-Auth": Bearer <HELICONE_API_KEY>,
+    },
+  },
+});
+`,
         },
       },
     },
     {
       name: "Gemini",
-      logo: <div>hi</div>,
-      integrations: {
-        "node.js": {
-          language: "tsx",
-          code: `import OpenAI from "openai`,
-        },
-      },
+      logo: (
+        <div className="p-3">
+          <Image
+            src={"/static/gemini.webp"}
+            alt={"Gemini"}
+            width={2048}
+            height={2048}
+          />
+        </div>
+      ),
+      integrations: {},
+      href: "https://docs.helicone.ai/integrations/gemini/api/curl",
+    },
+    {
+      name: "Anyscale",
+      logo: (
+        <div className="p-3">
+          <Image
+            src={"/static/anyscale.png"}
+            alt={"Anyscale"}
+            width={2048}
+            height={2048}
+          />
+        </div>
+      ),
+      integrations: {},
+      href: "https://docs.helicone.ai/getting-started/integration-method/anyscale",
+    },
+    {
+      name: "TogetherAI",
+      logo: (
+        <div className="p-3">
+          <Image
+            src={"/static/together.jpeg"}
+            alt={"TogetherAI"}
+            width={2048}
+            height={2048}
+          />
+        </div>
+      ),
+      integrations: {},
+      href: "https://docs.helicone.ai/getting-started/integration-method/together",
+    },
+    {
+      name: "Open Router",
+      logo: (
+        <div className="p-3">
+          <Image
+            src={"/static/openrouter.jpeg"}
+            alt={"Open Router"}
+            width={2048}
+            height={2048}
+          />
+        </div>
+      ),
+      integrations: {},
+      href: "https://docs.helicone.ai/getting-started/integration-method/openrouter",
+    },
+    {
+      name: "LiteLLM",
+      logo: <div className="">🚅</div>,
+      integrations: {},
+      href: "https://docs.helicone.ai/getting-started/integration-method/litellm",
     },
   ];
 
@@ -210,25 +327,38 @@ self.model = AzureChatOpenAI(
   const currentCodeBlock = selectedProvider?.integrations[currentIntegration];
 
   return (
-    <div className="flex flex-col mx-auto max-w-4xl w-full">
-      <ul className="grid grid-cols-8 gap-4 px-8 pt-12 pb-4">
+    <div className="flex flex-col mx-auto max-w-5xl w-full">
+      <ul className="grid grid-cols-8 gap-4 px-16 pt-12 pb-4">
         {PROVIDERS.map((provider, index) => (
           <li key={index}>
             <button
-              onClick={() => setCurrentProvider(provider.name)}
+              onClick={() => {
+                if (provider.href) {
+                  // open up a new tab
+                  window.open(provider.href, "_blank");
+                  return;
+                }
+                setCurrentProvider(provider.name);
+              }}
               className="flex flex-col items-center space-y-2"
             >
               <div className="col-span-1 rounded-lg border border-gray-300 bg-white h-16 w-16 flex items-center justify-center">
                 {provider.logo}
               </div>
-              <span className="text-gray-600 text-sm font-semibold">
+              <span
+                className={`text-sm ${
+                  currentProvider === provider.name
+                    ? "font-bold text-black"
+                    : "text-gray-500"
+                }`}
+              >
                 {provider.name}
               </span>
             </button>
           </li>
         ))}
       </ul>
-      <div className="border rounded-2xl flex flex-col divide-y divide-gray-700 mx-8">
+      <div className="border rounded-2xl flex flex-col divide-y divide-gray-700 mx-8 mt-4">
         <div className="flex items-center justify-between py-2 px-8 bg-gray-900 rounded-t-2xl">
           <ul className="flex items-center space-x-0">
             {Object.keys(selectedProvider?.integrations || {}).map(
