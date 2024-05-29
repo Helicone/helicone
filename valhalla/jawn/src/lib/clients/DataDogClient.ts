@@ -10,7 +10,7 @@ class DataDogClient {
   public async logDistributionMetric(
     timestamp: number,
     executionTimeMs: number,
-    queryName: string
+    handlerName: string
   ): Promise<Response> {
     if (!this.config.enabled) {
       return new Response("DataDog logging is disabled", {
@@ -25,7 +25,7 @@ class DataDogClient {
             metric: "handler.execution_time",
             points: [[timestamp, [executionTimeMs]]],
             host: "kafka_consumer_service",
-            tags: ["handler_name:" + queryName],
+            tags: ["handler_name:" + handlerName],
           },
         ],
       };
