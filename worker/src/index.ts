@@ -74,6 +74,9 @@ export interface BASE_Env {
   UPSTASH_KAFKA_PASSWORD: string;
   ORG_IDS?: string;
   PERCENT_LOG_KAFKA?: string;
+  FREE_RATE_LIMITER: any;
+  PRO_RATE_LIMITER: any;
+  ENTERPRISE_RATE_LIMITER: any;
 }
 export type Env = BASE_Env & EU_Env;
 
