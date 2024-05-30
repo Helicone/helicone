@@ -644,35 +644,42 @@ export class DBLoggable {
       return err(`Auth failed! ${error}` ?? "Helicone organization not found");
     }
 
-    const org = await db.dbWrapper.getOrganization();
-    if (org.error !== null) {
-      return err(org.error);
-    }
+    try {
+      const org = await db.dbWrapper.getOrganization();
+      if (org.error !== null) {
+        return err(org.error);
+      }
 
-    const tier = org.data?.tier;
+      const tier = org.data?.tier;
 
-    // Rate limiting in worker to leverage Cloudflare's rate limiting feature
-    // & to prevent large backlog in Kafka
-    const isRateLimited = await this.isRateLimited(db.rateLimiters, {
-      id: org.data.id,
-      tier: tier,
-    });
-
-    if (isRateLimited.error) {
-      console.error(`Error checking rate limit: ${isRateLimited.error}`);
-    }
-
-    if (!isRateLimited.error && isRateLimited.data) {
-      const rateLimit: ClickhouseDB["Tables"]["rate_limit_log_v2"] = {
-        request_id: this.request.requestId,
-        organization_id: org.data.id,
+      // Rate limiting in worker to leverage Cloudflare's rate limiting feature
+      // & to prevent large backlog in Kafka
+      const isRateLimited = await this.isRateLimited(db.rateLimiters, {
+        id: org.data.id,
         tier: tier,
-        rate_limit_created_at: formatTimeStringDateTime(
-          new Date().toISOString()
-        ),
-      };
-      await db.clickhouse.dbInsertClickhouse("rate_limit_log_v2", [rateLimit]);
-      return ok(undefined);
+      });
+
+      if (isRateLimited.error) {
+        console.error(`Error checking rate limit: ${isRateLimited.error}`);
+      }
+
+      if (!isRateLimited.error && isRateLimited.data) {
+        const rateLimit: ClickhouseDB["Tables"]["rate_limit_log_v2"] = {
+          request_id: this.request.requestId,
+          organization_id: org.data.id,
+          tier: tier,
+          rate_limit_created_at: formatTimeStringDateTime(
+            new Date().toISOString()
+          ),
+        };
+        await db.clickhouse.dbInsertClickhouse("rate_limit_log_v2", [
+          rateLimit,
+        ]);
+        return ok(undefined);
+      }
+    } catch (e) {
+      // If any of this fails, we just log to Kafka
+      console.error(`Error checking rate limit: ${e}`);
     }
 
     await this.useKafka(db, authParams, S3_ENABLED, requestHeaders);
