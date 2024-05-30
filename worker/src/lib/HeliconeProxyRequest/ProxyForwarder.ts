@@ -79,8 +79,7 @@ export async function proxyForwarder(
   }
 
   const { data: cacheSettings, error: cacheError } = getCacheSettings(
-    proxyRequest.requestWrapper.getHeaders(),
-    proxyRequest.isStream
+    proxyRequest.requestWrapper.getHeaders()
   );
 
   if (cacheError !== null) {

@@ -40,8 +40,6 @@ export async function saveToCache(
   cacheKv: KVNamespace,
   cacheSeed: string | null
 ): Promise<void> {
-  console.log("Saving to cache");
-
   const expirationTtl = cacheControl.includes("max-age=")
     ? parseInt(cacheControl.split("max-age=")[1])
     : 0;
@@ -143,10 +141,8 @@ export async function getCachedResponse(
     cacheSeed
   );
   if (freeIndexes.length > 0) {
-    console.log("Bucket not full, no cache hit");
     return null;
   } else {
-    console.log("Cache hit");
     const cacheIdx = Math.floor(Math.random() * requestCaches.length);
     const randomCache = requestCaches[cacheIdx];
     const cachedResponseHeaders = new Headers(randomCache.headers);
@@ -156,18 +152,8 @@ export async function getCachedResponse(
       cacheIdx.toString()
     );
 
-
-    if (!request.isStream) {
-      console.log("Returning non stream cache.");
-      return new Response(randomCache.body.join(""), {
-        headers: cachedResponseHeaders,
-      });
-    }
-
-    console.log("Streaming cache.");
     const cachedStream = new ReadableStream({
       start(controller) {
-
         let index = 0;
         const encoder = new TextEncoder();
 
@@ -176,7 +162,7 @@ export async function getCachedResponse(
             const chunk = encoder.encode(randomCache.body[index]);
             controller.enqueue(chunk);
             index++;
-            setTimeout(pushChunk, 100);
+            setTimeout(pushChunk, 10);
           } else {
             controller.close();
           }
@@ -187,7 +173,7 @@ export async function getCachedResponse(
 
       cancel() {
         console.log("Stream canceled");
-      }
+      },
     });
 
     return new Response(cachedStream, {

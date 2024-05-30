@@ -104,7 +104,7 @@ export async function handleProxyRequest(
             endTime: new Date(
               (await interceptor?.waitForStream())?.endTimeUnix ??
                 new Date().getTime()
-            )
+            ),
           }),
           responseHeaders: new Headers(response.headers),
           status: async () => {
