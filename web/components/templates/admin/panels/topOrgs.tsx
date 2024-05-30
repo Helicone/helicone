@@ -1,10 +1,11 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
-import { BarChart } from "@tremor/react";
+import { BarChart, TextInput } from "@tremor/react";
 import dateFormat from "dateformat";
 import { useEffect, useState } from "react";
 import { getJawnClient } from "../../../../lib/clients/jawn";
 import useNotification from "../../../shared/notification/useNotification";
+import HcButton from "../../../ui/hcButton";
 
 interface TopOrgsProps {}
 
@@ -36,8 +37,19 @@ const TopOrgs = (props: TopOrgsProps) => {
     "all" | "free" | "pro" | "enterprise" | "growth"
   >("all");
 
+  const [orgName, setOrgName] = useState("");
+  const [emailContains, setEmailContains] = useState("");
+
+  const [searchQuery, setSearchQuery] = useState<{
+    orgToSearch: string;
+    emailContains: string;
+  }>({
+    orgToSearch: "",
+    emailContains: "",
+  });
+
   const { data, isLoading } = useQuery({
-    queryKey: ["top_orgs", timeRange, tier],
+    queryKey: ["top_orgs", timeRange, tier, searchQuery],
     queryFn: async (query) => {
       const timeRange = query.queryKey[1] as { startDate: Date; endDate: Date };
       const tier = query.queryKey[2] as
@@ -46,7 +58,10 @@ const TopOrgs = (props: TopOrgsProps) => {
         | "pro"
         | "enterprise"
         | "growth";
-
+      const searchQuery = query.queryKey[3] as {
+        orgToSearch: string;
+        emailContains: string;
+      };
       if (!timeRange) return;
       const jawn = getJawnClient();
 
@@ -55,6 +70,13 @@ const TopOrgs = (props: TopOrgsProps) => {
           startDate: dateFormat(timeRange.startDate, "yyyy-mm-dd HH:MM:ss"),
           endDate: dateFormat(timeRange.endDate, "yyyy-mm-dd HH:MM:ss"),
           tier: tier,
+
+          orgsNameContains: searchQuery.orgToSearch
+            ? [searchQuery.orgToSearch]
+            : undefined,
+          emailContains: searchQuery.emailContains
+            ? [searchQuery.emailContains]
+            : undefined,
         },
       });
     },
@@ -65,6 +87,42 @@ const TopOrgs = (props: TopOrgsProps) => {
 
   return (
     <>
+      <h1 className="text-4xl font-semibold text-gray-200 mb-4 border-t-2 pt-2">
+        Top Organizations
+      </h1>
+      <div className="flex flex-col space-y-2">
+        <p className="text-sm">Organization Lookup by Name</p>
+        <div className="grid grid-cols-5 gap-4">
+          <div className="col-span-2">
+            <TextInput
+              placeholder="Organization Name"
+              value={orgName}
+              onValueChange={setOrgName}
+            />
+          </div>
+          <div className="col-span-2">
+            <TextInput
+              placeholder="email search"
+              value={emailContains}
+              onValueChange={setEmailContains}
+            />
+          </div>
+          <div className="col-span-1">
+            <HcButton
+              variant={"primary"}
+              size={"xs"}
+              onClick={async () => {
+                setSearchQuery({
+                  emailContains: emailContains,
+                  orgToSearch: orgName,
+                });
+              }}
+              loading={isLoading}
+              title={"Search"}
+            />
+          </div>
+        </div>
+      </div>
       <div className="text-black">
         <input
           type="datetime-local"
@@ -164,15 +222,32 @@ const TopOrgs = (props: TopOrgsProps) => {
       </div>
       <h2>Top Organizations</h2>
       <div className="grid grid-cols-8">
+        <div className="col-span-2">Org Id (click to copy)</div>
+        <div className="col-span-2">Name</div>
+        <div className="col-span-2">email</div>
+        <div className="col-span-1">Tier</div>
+        <div className="col-span-1">Count</div>
+      </div>
+      <div className="grid grid-cols-8">
         {data?.data?.map((org, i) => (
           <>
             {/* Row 1 */}
-            <div className="col-span-1">{org.organization_id}</div>
-            <div className="col-span-3">
+            <div className="col-span-2 pl-2">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(org.organization_id);
+                }}
+              >
+                {org.organization_id}
+              </button>
+            </div>
+            <div className="col-span-2">{org.name}</div>
+            <div className="col-span-2">{org.owner_email}</div>
+            <div className="col-span-1">
               {formatBigNumberWithCommas(org.ct)}
             </div>
-            <div className="col-span-2">{org.owner_email}</div>
-            <div className="col-span-2">{org.tier}</div>
+
+            <div className="col-span-1">{org.tier}</div>
             {/* Row 2 */}
             <div className="col-span-8">
               <BarChart
