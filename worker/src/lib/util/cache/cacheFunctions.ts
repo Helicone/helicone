@@ -41,7 +41,6 @@ export async function saveToCache(
   cacheSeed: string | null
 ): Promise<void> {
   console.log("Saving to cache");
-  console.log("Response body: ", responseBody);
 
   const expirationTtl = cacheControl.includes("max-age=")
     ? parseInt(cacheControl.split("max-age=")[1])
@@ -147,6 +146,7 @@ export async function getCachedResponse(
     console.log("Bucket not full, no cache hit");
     return null;
   } else {
+    console.log("Cache hit");
     const cacheIdx = Math.floor(Math.random() * requestCaches.length);
     const randomCache = requestCaches[cacheIdx];
     const cachedResponseHeaders = new Headers(randomCache.headers);
@@ -155,7 +155,42 @@ export async function getCachedResponse(
       "Helicone-Cache-Bucket-Idx",
       cacheIdx.toString()
     );
-    return new Response(randomCache.body, {
+
+
+    if (!request.isStream) {
+      console.log("Returning non stream cache.");
+      return new Response(randomCache.body.join(""), {
+        headers: cachedResponseHeaders,
+      });
+    }
+
+    console.log("Streaming cache.");
+    const cachedStream = new ReadableStream({
+      start(controller) {
+
+        let index = 0;
+        const encoder = new TextEncoder();
+
+        function pushChunk() {
+          if (index < randomCache.body.length) {
+            const chunk = encoder.encode(randomCache.body[index]);
+            controller.enqueue(chunk);
+            index++;
+            setTimeout(pushChunk, 100);
+          } else {
+            controller.close();
+          }
+        }
+
+        pushChunk();
+      },
+
+      cancel() {
+        console.log("Stream canceled");
+      }
+    });
+
+    return new Response(cachedStream, {
       headers: cachedResponseHeaders,
     });
   }
@@ -172,14 +207,15 @@ async function getMaxCachedResponses(
       const requestCache = await kvKeyFromRequest(request, idx, cacheSeed);
       return cacheKv.get<{
         headers: Record<string, string>;
-        body: string;
+        body: string[];
       }>(requestCache, { type: "json" });
     })
   );
+
   return {
     requests: previouslyCachedReqs.filter((r) => r !== null) as {
       headers: Record<string, string>;
-      body: string;
+      body: string[];
     }[],
     freeIndexes: previouslyCachedReqs
       .map((_r, idx) => idx)
