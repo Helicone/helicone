@@ -17,7 +17,7 @@ import {
 } from "date-fns";
 import { Database } from "../../../../supabase/database.types";
 import useNotification from "../../../shared/notification/useNotification";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useGetRequestCountClickhouse } from "../../../../services/hooks/requests";
 import Link from "next/link";
 import { clsx } from "../../../shared/clsx";
@@ -85,10 +85,6 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
     },
   });
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
-
   const capitalizeHelper = (str: string) => {
     const words = str.split("_");
     const capitalizedWords = words.map(
@@ -105,10 +101,12 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
 
   const nextMonth = () => {
     setCurrentMonth((prevMonth) => startOfMonth(addMonths(prevMonth, 1)));
+    refetch();
   };
 
   const prevMonth = () => {
     setCurrentMonth((prevMonth) => startOfMonth(subMonths(prevMonth, 1)));
+    refetch();
   };
 
   const getMonthName = (dateString: string) => {
