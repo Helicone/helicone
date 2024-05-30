@@ -809,6 +809,7 @@
 					"kafka:log",
 					"kafka:dlq:eu",
 					"kafka:log:eu",
+					"kafka:orgs-to-dlq",
 					"azure:experiment"
 				],
 				"nullable": false
@@ -1389,7 +1390,7 @@
 			}
 		},
 		"/v1/admin/orgs/top": {
-			"get": {
+			"post": {
 				"operationId": "GetTopOrgs",
 				"responses": {
 					"200": {
@@ -1432,6 +1433,9 @@
 												},
 												"type": "array"
 											},
+											"name": {
+												"type": "string"
+											},
 											"owner_last_login": {
 												"type": "string"
 											},
@@ -1472,6 +1476,7 @@
 											"ct",
 											"organization_id",
 											"members",
+											"name",
 											"owner_last_login",
 											"owner_email",
 											"tier",
@@ -1494,7 +1499,58 @@
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"emailContains": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"orgsNameContains": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"orgsId": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"tier": {
+										"type": "string",
+										"enum": [
+											"all",
+											"pro",
+											"free",
+											"growth",
+											"enterprise"
+										]
+									},
+									"endDate": {
+										"type": "string"
+									},
+									"startDate": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"tier",
+									"endDate",
+									"startDate"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/admin/admins/query": {
