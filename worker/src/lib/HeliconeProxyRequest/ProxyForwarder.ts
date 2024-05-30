@@ -1,10 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
 import { DBWrapper } from "../db/DBWrapper";
-import {
-  checkRateLimit,
-  updateRateLimitCounter,
-} from "../clients/KVRateLimiterClient";
+import { checkRateLimit } from "../clients/KVRateLimiterClient";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
 import {

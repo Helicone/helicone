@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Headers } from "@cloudflare/workers-types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
