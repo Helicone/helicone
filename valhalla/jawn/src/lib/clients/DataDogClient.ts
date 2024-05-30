@@ -1,4 +1,6 @@
 import { PromiseGenericResult, err, ok } from "../shared/result";
+import { gzip } from "zlib";
+import { promisify } from "util";
 
 interface DataDogConfig {
   enabled: boolean;
@@ -7,6 +9,8 @@ interface DataDogConfig {
 }
 
 class DataDogClient {
+  gzipAsync = promisify(gzip);
+
   constructor(private config: DataDogConfig) {}
 
   public async logHandleResults(metrics: {
@@ -105,6 +109,7 @@ class DataDogClient {
       const logEntry = {
         ddsource: "handler_performance",
         ddtags: `handler:${handlerName},method:${methodName}`,
+        hostname: "kafka_consumer_service",
         message: message,
         timestamp: new Date(timestamp * 1000).toISOString(),
         handler_name: handlerName,
@@ -113,17 +118,20 @@ class DataDogClient {
         batch_size: batchSize,
       };
 
+      const compressedBody = await this.gzipAsync(JSON.stringify(logEntry));
+
       const requestInit = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Content-Encoding": "gzip",
           "DD-API-KEY": this.config.apiKey,
         },
-        body: JSON.stringify(logEntry),
+        body: compressedBody,
       };
 
       const response = await fetch(
-        `${this.config.endpoint}/v2/logs`,
+        `https://http-intake.logs.us5.datadoghq.com/api/v2/logs`,
         requestInit
       );
 
