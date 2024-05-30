@@ -1,6 +1,6 @@
-import Enterprise from "@/components/templates/landingPage/enterprise";
-import Integrations from "@/components/templates/landingPage/integrations";
-import Platform from "@/components/templates/landingPage/platform";
+import Enterprise from "@/components/templates/landing/enterprise";
+import Integrations from "@/components/templates/landing/integrations";
+import Platform from "@/components/templates/landing/platform";
 import {
   CheckCircleIcon,
   ChevronRightIcon,

@@ -24,12 +24,18 @@ const NavBar = (props: NavBarProps) => {
             />
           </Link>
         </div>
-        <div className="flex gap-x-1 lg:gap-x-2 items-center text-sm col-span-8 md:col-span-6 order-3 md:order-2">
+        <div className="flex gap-x-1 lg:gap-x-2 items-center text-sm col-span-8 md:col-span-6 order-3 md:order-2 justify-center">
+          {/* <Link
+            href="/about"
+            className="flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-gray-700"
+          >
+            About
+          </Link> */}
           <Link
             href="https://docs.helicone.ai/"
             className="flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-gray-700"
           >
-            Docs
+            Documentation
           </Link>
           <Link
             href="/pricing"
@@ -37,14 +43,13 @@ const NavBar = (props: NavBarProps) => {
           >
             Pricing
           </Link>
-          {/* TODO: Add this back in */}
-          {/* <Link
+          <Link
             href="/blog"
             rel="noopener noreferrer"
             className="flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-gray-700"
           >
             Blog
-          </Link> */}
+          </Link>
           <Link
             href="/contact"
             className="flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-gray-700"
