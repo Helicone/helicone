@@ -17,7 +17,7 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 
-export const faqs = [
+const faqs = [
   {
     question: "Is there a latency impact to my requests with Helicone's Proxy?",
     answer:
