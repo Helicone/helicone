@@ -479,8 +479,6 @@ export class LoggingHandler extends AbstractLogHandler {
                 .map((part) => {
                   if (part.type === "text") {
                     return part.text;
-                  } else if (part.type === "image_url") {
-                    return "";
                   }
                   return "";
                 })
