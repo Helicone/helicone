@@ -62,7 +62,9 @@ export const consume = async () => {
       console.log(`Received batch with ${batch.messages.length} messages.`);
 
       try {
-        for (let i = 0; i < batch.messages.length; i++) {
+        let i = 0;
+
+        while (i < batch.messages.length) {
           const messagesPerMiniBatchSetting = await settingsManager.getSetting(
             "kafka:log"
           );
@@ -71,11 +73,20 @@ export const consume = async () => {
             messagesPerMiniBatchSetting?.miniBatchSize ??
             MESSAGES_PER_MINI_BATCH;
 
-          const miniBatch = batch.messages.slice(i, miniBatchSize);
+          const miniBatch = batch.messages.slice(i, miniBatchSize + i);
 
-          const firstOffset = miniBatch[0].offset;
-          const lastOffset = miniBatch[miniBatch.length - 1].offset;
+          const firstOffset = miniBatch?.[0]?.offset;
+          const lastOffset = miniBatch?.[miniBatch.length - 1]?.offset;
           const miniBatchId = `${batch.partition}-${firstOffset}-${lastOffset}`;
+          console.log(
+            `Processing mini batch with ${
+              miniBatch.length
+            } messages. Mini batch ID: ${miniBatchId}. Handling ${i}-${
+              i + miniBatchSize
+            } of ${batch.messages.length} messages.`
+          );
+
+          i += miniBatchSize;
           try {
             const mappedMessages = mapKafkaMessageToMessage(miniBatch);
             if (mappedMessages.error || !mappedMessages.data) {
@@ -100,6 +111,7 @@ export const consume = async () => {
           } finally {
             resolveOffset(lastOffset);
             await heartbeat();
+            await commitOffsetsIfNecessary();
           }
         }
       } catch (error) {
@@ -235,6 +247,7 @@ export const consumeDlq = async () => {
           } finally {
             resolveOffset(lastOffset);
             await heartbeat();
+            await commitOffsetsIfNecessary();
           }
         }
       } catch (error) {
