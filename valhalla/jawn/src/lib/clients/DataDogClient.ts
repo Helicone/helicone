@@ -20,6 +20,12 @@ class DataDogClient {
     messageCount: number;
     message: string;
   }): PromiseGenericResult<string> {
+    const shouldLog = Math.floor(Math.random() * 10) === 0;
+
+    if (!shouldLog) {
+      return ok("Skipped logging to DataDog");
+    }
+
     try {
       const logPromises = [
         this.logDistributionMetric(
