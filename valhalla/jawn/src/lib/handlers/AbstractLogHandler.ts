@@ -33,9 +33,7 @@ export abstract class AbstractLogHandler implements LogHandler {
         executionTimeMs,
         `${this.constructor.name}.handle`
       )
-    ).catch((error) => {
-      console.error("Failed to log to DataDog", error);
-    });
+    ).catch();
 
     return result;
   }

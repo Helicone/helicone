@@ -1,3 +1,5 @@
+import { PromiseGenericResult, err, ok } from "../shared/result";
+
 interface DataDogConfig {
   enabled: boolean;
   apiKey: string;
@@ -13,7 +15,7 @@ class DataDogClient {
     methodName: string;
     messageCount: number;
     message: string;
-  }): Promise<void> {
+  }): PromiseGenericResult<string> {
     try {
       const logPromises = [
         this.logDistributionMetric(
@@ -38,8 +40,10 @@ class DataDogClient {
           }
         });
       });
+
+      return ok("Logged to DataDog");
     } catch (error) {
-      console.error("Failed to initiate logging to DataDog", error);
+      return err(`Failed to log to DataDog: ${error}`);
     }
   }
 
@@ -47,11 +51,9 @@ class DataDogClient {
     timestamp: number,
     executionTimeMs: number,
     handlerName: string
-  ): Promise<Response> {
+  ): PromiseGenericResult<Response> {
     if (!this.config.enabled) {
-      return new Response("DataDog logging is disabled", {
-        status: 200,
-      });
+      return err(`DataDog logging is disabled`);
     }
 
     try {
@@ -81,12 +83,9 @@ class DataDogClient {
         requestInit
       );
 
-      return response;
+      return ok(response);
     } catch (e) {
-      console.error("Error logging distribution metric", e);
-      return new Response("Error logging distribution metric", {
-        status: 500,
-      });
+      return err(`Error logging distribution metric: ${e}`);
     }
   }
 
@@ -97,11 +96,9 @@ class DataDogClient {
     methodName: string,
     executionTimeMs: number,
     batchSize: number
-  ): Promise<Response> {
+  ): PromiseGenericResult<Response> {
     if (!this.config.enabled) {
-      return new Response("DataDog logging is disabled", {
-        status: 200,
-      });
+      return err(`DataDog logging is disabled`);
     }
 
     try {
@@ -130,12 +127,10 @@ class DataDogClient {
         requestInit
       );
 
-      return response;
+      return ok(response);
     } catch (e) {
       console.error("Error logging execution time", e);
-      return new Response("Error logging execution time", {
-        status: 500,
-      });
+      return err(`Error logging execution time: ${e}`);
     }
   }
 }
