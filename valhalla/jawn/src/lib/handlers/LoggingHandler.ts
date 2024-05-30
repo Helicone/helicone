@@ -15,6 +15,14 @@ type S3Record = {
   assets: Map<string, string>;
 };
 
+export type SearchRecord = {
+  requestId: string;
+  organizationId: string;
+  requestBody: string;
+  responseBody: string;
+  model: string;
+};
+
 export type BatchPayload = {
   responses: Database["public"]["Tables"]["response"]["Insert"][];
   requests: Database["public"]["Tables"]["request"]["Insert"][];
@@ -22,6 +30,7 @@ export type BatchPayload = {
   assets: Database["public"]["Tables"]["asset"]["Insert"][];
   s3Records: S3Record[];
   requestResponseVersionedCH: ClickhouseDB["Tables"]["request_response_versioned"][];
+  searchRecords: SearchRecord[];
 };
 
 export class LoggingHandler extends AbstractLogHandler {
@@ -46,6 +55,7 @@ export class LoggingHandler extends AbstractLogHandler {
       assets: [],
       s3Records: [],
       requestResponseVersionedCH: [],
+      searchRecords: [],
     };
   }
 
@@ -56,6 +66,7 @@ export class LoggingHandler extends AbstractLogHandler {
       const responseMapped = this.mapResponse(context);
       const assetsMapped = this.mapAssets(context);
       const s3RecordMapped = this.mapS3Records(context);
+      const searchRecordsMapped = this.mapSearchRecords(context);
       const promptMapped =
         context.message.log.request.promptId &&
         context.processedLog.request.heliconeTemplate
@@ -67,6 +78,7 @@ export class LoggingHandler extends AbstractLogHandler {
       this.batchPayload.requests.push(requestMapped);
       this.batchPayload.responses.push(responseMapped);
       this.batchPayload.assets.push(...assetsMapped);
+      this.batchPayload.searchRecords.push(...searchRecordsMapped);
 
       if (s3RecordMapped) {
         this.batchPayload.s3Records.push(s3RecordMapped);
@@ -115,14 +127,12 @@ export class LoggingHandler extends AbstractLogHandler {
     }
 
     const searchTableResult = await this.logStore.insertRequestResponseSearch(
-      this.batchPayload.s3Records.map((s3Record) => ({
-        requestId: s3Record.requestId,
-        requestBody: s3Record.requestBody,
-        responseBody: s3Record.responseBody,
-        model:
-          this.batchPayload.requests.find(
-            (req) => req.id === s3Record.requestId
-          )?.model ?? "",
+      this.batchPayload.searchRecords.map((searchRecord) => ({
+        requestId: searchRecord.requestId,
+        requestBody: searchRecord.requestBody,
+        responseBody: searchRecord.responseBody,
+        model: searchRecord.model,
+        organizationId: searchRecord.organizationId,
       }))
     );
 
@@ -294,6 +304,25 @@ export class LoggingHandler extends AbstractLogHandler {
     };
 
     return s3Record;
+  }
+
+  mapSearchRecords(context: HandlerContext): SearchRecord[] {
+    const request = context.message.log.request;
+    const orgParams = context.orgParams;
+
+    if (!orgParams?.id) {
+      return [];
+    }
+
+    const searchRecord: SearchRecord = {
+      requestId: request.id,
+      organizationId: orgParams.id,
+      requestBody: context.processedLog.request.body,
+      responseBody: context.processedLog.response.body,
+      model: context.processedLog.model ?? "",
+    };
+
+    return [searchRecord];
   }
 
   mapAssets(

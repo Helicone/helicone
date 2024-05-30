@@ -2077,21 +2077,42 @@ export type Database = {
       }
       request_response_search: {
         Row: {
+          id: string
+          organization_id: string
           request_body_vector: unknown | null
           request_id: string
           response_body_vector: unknown | null
         }
         Insert: {
+          id?: string
+          organization_id: string
           request_body_vector?: unknown | null
           request_id: string
           response_body_vector?: unknown | null
         }
         Update: {
+          id?: string
+          organization_id?: string
           request_body_vector?: unknown | null
           request_id?: string
           response_body_vector?: unknown | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "request_response_search_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_response_search_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       response: {
         Row: {

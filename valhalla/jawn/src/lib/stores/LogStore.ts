@@ -1,4 +1,4 @@
-import { BatchPayload } from "../handlers/LoggingHandler";
+import { BatchPayload, SearchRecord } from "../handlers/LoggingHandler";
 import { deepCompare } from "../../utils/helpers";
 import pgPromise from "pg-promise";
 import { PromptRecord } from "../handlers/HandlerContext";
@@ -352,17 +352,12 @@ export class LogStore {
   }
 
   async insertRequestResponseSearch(
-    requestResponseData: {
-      requestId: string;
-      requestBody: string;
-      responseBody: string;
-      model: string;
-    }[]
+    entries: SearchRecord[]
   ): PromiseGenericResult<string> {
     try {
       await db.tx(async (t: pgPromise.ITask<{}>) => {
         const uniqueRequestIds = new Set();
-        const searchRecords = requestResponseData
+        const searchRecords = entries
           .filter((request) => {
             if (!this.vectorizeModel(request.model)) {
               return false;
@@ -374,7 +369,6 @@ export class LogStore {
             return true;
           })
           .map((request) => {
-            console.log("model", request.model);
             return {
               request_id: request.requestId,
               request_body_vector: this.pullRequestBodyMessage(
@@ -383,20 +377,22 @@ export class LogStore {
               response_body_vector: this.pullResponseBodyMessage(
                 request.responseBody
               ),
+              organization_id: request.organizationId,
             };
           });
 
         const queries = searchRecords.map((record) => {
           return t.none(
-            `INSERT INTO request_response_search (request_id, request_body_vector, response_body_vector)
-             VALUES ($1, to_tsvector('helicone_search_config', $2), to_tsvector('helicone_search_config', $3))
-             ON CONFLICT (request_id) DO UPDATE SET
+            `INSERT INTO request_response_search (request_id, request_body_vector, response_body_vector, organization_id)
+             VALUES ($1, to_tsvector('helicone_search_config', $2), to_tsvector('helicone_search_config', $3), $4)
+             ON CONFLICT (request_id, organization_id) DO UPDATE SET
              request_body_vector = EXCLUDED.request_body_vector,
              response_body_vector = EXCLUDED.response_body_vector`,
             [
               record.request_id,
               record.request_body_vector,
               record.response_body_vector,
+              record.organization_id,
             ]
           );
         });
