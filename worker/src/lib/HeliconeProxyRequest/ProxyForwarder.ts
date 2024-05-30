@@ -313,11 +313,6 @@ export async function proxyForwarder(
           createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
         ),
         kafkaProducer: new KafkaProducer(env),
-        rateLimiters: {
-          FREE_RATE_LIMITER: env.FREE_RATE_LIMITER,
-          PRO_RATE_LIMITER: env.PRO_RATE_LIMITER,
-          ENTERPRISE_RATE_LIMITER: env.ENTERPRISE_RATE_LIMITER,
-        },
       },
       env.S3_ENABLED ?? "true",
       proxyRequest?.requestWrapper.heliconeHeaders
