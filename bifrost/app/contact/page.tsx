@@ -12,7 +12,7 @@ const bullets = [
 
 const Contact = () => {
   return (
-    <div className="w-full bg-gray-50 h-full antialiased text-black">
+    <div className="w-full h-full antialiased text-black">
       <div className="h-full">
         <div className="flex flex-col mx-auto w-full gap-8 max-w-5xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
           <div className="flex flex-col w-2/3">

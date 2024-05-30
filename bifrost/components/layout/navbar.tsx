@@ -37,13 +37,14 @@ const NavBar = (props: NavBarProps) => {
           >
             Pricing
           </Link>
-          <Link
+          {/* TODO: Add this back in */}
+          {/* <Link
             href="/blog"
             rel="noopener noreferrer"
             className="flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-gray-700"
           >
             Blog
-          </Link>
+          </Link> */}
           <Link
             href="/contact"
             className="flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-gray-700"
