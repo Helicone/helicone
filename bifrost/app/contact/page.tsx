@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CheckCircleIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
-import Calendar from "@/components/templates/contactPage/calendar";
+import Calendar from "@/components/templates/contact/calendar";
 
 const bullets = [
   "Request a demo",
