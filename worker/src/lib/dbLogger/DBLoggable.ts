@@ -368,7 +368,7 @@ export class DBLoggable {
       : null;
     const status = await this.response.status();
     const parsedResponse = await this.parseResponse(
-      responseBody.join(),
+      responseBody.join(""),
       status
     );
     const isStream = this.request.isStream;
@@ -380,7 +380,7 @@ export class DBLoggable {
       this.provider === "GOOGLE" &&
       parsedResponse.error === null
     ) {
-      const body = this.tryJsonParse(responseBody.join());
+      const body = this.tryJsonParse(responseBody.join(""));
       const model = body?.model ?? body?.body?.model ?? undefined;
 
       return {
@@ -946,7 +946,7 @@ export class DBLoggable {
         organizationId: authParams.organizationId,
         requestId: this.request.requestId,
         requestBody: this.request.bodyText ?? "{}",
-        responseBody: rawResponseBody.join(),
+        responseBody: rawResponseBody.join(""),
       });
 
       if (s3Result.error) {
