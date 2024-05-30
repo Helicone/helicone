@@ -680,46 +680,6 @@ export class DBLoggable {
     return ok(undefined);
   }
 
-  // async isRateLimited(
-  //   rateLimiters: {
-  //     FREE_RATE_LIMITER: any;
-  //     PRO_RATE_LIMITER: any;
-  //     ENTERPRISE_RATE_LIMITER: any;
-  //   },
-  //   orgDetails: {
-  //     id: string;
-  //     tier: string;
-  //   }
-  // ): Promise<Result<boolean, string>> {
-  //   try {
-  //     const tier = orgDetails.tier.toUpperCase() as
-  //       | "FREE"
-  //       | "PRO"
-  //       | "GROWTH"
-  //       | "ENTERPRISE";
-
-  //     if (tier === "FREE") {
-  //       const { success } = await rateLimiters.FREE_RATE_LIMITER.limit({
-  //         key: orgDetails.id,
-  //       });
-  //       return ok(!success);
-  //     } else if (tier === "PRO" || tier === "GROWTH") {
-  //       const { success } = await rateLimiters.PRO_RATE_LIMITER.limit({
-  //         key: orgDetails.id,
-  //       });
-  //       return ok(!success);
-  //     } else if (tier === "ENTERPRISE") {
-  //       const { success } = await rateLimiters.ENTERPRISE_RATE_LIMITER.limit({
-  //         key: orgDetails.id,
-  //       });
-  //       return ok(!success);
-  //     }
-  //     return ok(false);
-  //   } catch (e) {
-  //     return err(`Error rate limiting: ${e}`);
-  //   }
-  // }
-
   async useKafka(
     db: {
       supabase: SupabaseClient<Database>; // TODO : Deprecate
