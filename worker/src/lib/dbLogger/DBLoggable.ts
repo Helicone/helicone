@@ -10,7 +10,7 @@ import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 import { PromptSettings, RequestWrapper } from "../RequestWrapper";
 import { INTERNAL_ERRORS } from "../util/constants";
 import { AsyncLogModel } from "../models/AsyncLog";
-import { logInClickhouse } from "../db/ClickhouseStore";
+import { formatTimeStringDateTime } from "../db/ClickhouseStore";
 import { RequestResponseStore } from "../db/RequestResponseStore";
 import {
   anthropicAIStream,
@@ -18,7 +18,7 @@ import {
 } from "./streamParsers/anthropicStreamParser";
 import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { getTokenCount } from "../clients/TokenCounterClient";
-import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
+import { ClickhouseClientWrapper, ClickhouseDB } from "../db/ClickhouseWrapper";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
 import {
   isRequestImageModel,
@@ -30,10 +30,6 @@ import {
 } from "./imageParsers/parserMapper";
 import { TemplateWithInputs } from "../../api/lib/promptHelpers";
 import { ImageModelParsingResponse } from "./imageParsers/core/parsingResponse";
-import {
-  HeliconeRequestResponseToPosthog,
-  PosthogClient,
-} from "../clients/PosthogClient";
 import { costOfPrompt } from "../../packages/cost";
 import { KafkaMessage, KafkaProducer } from "../clients/KafkaProducer";
 
@@ -654,6 +650,8 @@ export class DBLoggable {
 
     const tier = org.data?.tier;
 
+    // Rate limiting in worker to leverage Cloudflare's rate limiting feature
+    // & to prevent large backlog in Kafka
     const isRateLimited = await this.isRateLimited(db.rateLimiters, {
       id: org.data.id,
       tier: tier,
@@ -664,14 +662,16 @@ export class DBLoggable {
     }
 
     if (!isRateLimited.error && isRateLimited.data) {
-      await db.clickhouse.dbInsertClickhouse("rate_limit_log_v2", [
-        {
-          request_id: this.request.requestId,
-          organization_id: org.data.id,
-          rate_limit_created_at: new Date().toISOString(),
-        },
-      ]);
-      return err("Rate limited");
+      const rateLimit: ClickhouseDB["Tables"]["rate_limit_log_v2"] = {
+        request_id: this.request.requestId,
+        organization_id: org.data.id,
+        tier: tier,
+        rate_limit_created_at: formatTimeStringDateTime(
+          new Date().toISOString()
+        ),
+      };
+      await db.clickhouse.dbInsertClickhouse("rate_limit_log_v2", [rateLimit]);
+      return ok(undefined);
     }
 
     await this.useKafka(db, authParams, S3_ENABLED, requestHeaders);

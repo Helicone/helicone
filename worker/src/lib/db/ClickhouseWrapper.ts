@@ -196,6 +196,7 @@ export interface RateLimitLogV2 {
   request_id: string;
   organization_id: string;
   rate_limit_created_at: string;
+  tier: Nullable<string>;
 }
 
 export interface RequestResponseVersioned {
