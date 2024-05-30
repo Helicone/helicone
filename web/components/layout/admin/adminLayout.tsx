@@ -16,7 +16,7 @@ const navigation = [
   { name: "Dashboard", href: "/admin", icon: HomeIcon, current: false },
   { name: "On Prem", href: "/admin/on-prem", icon: TicketIcon, current: false },
   {
-    name: "Stats",
+    name: "All Orgs",
     href: "/admin/stats",
     icon: ChartBarIcon,
 
