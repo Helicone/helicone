@@ -280,7 +280,7 @@ export interface components {
     };
     Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"];
     /** @enum {string} */
-    SettingName: "kafka:dlq" | "kafka:log" | "kafka:dlq:eu" | "kafka:log:eu" | "azure:experiment";
+    SettingName: "kafka:dlq" | "kafka:log" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment";
     /**
      * @description The URL interface represents an object providing static methods used for creating object URLs.
      *
@@ -533,6 +533,9 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          emailContains?: string[];
+          orgsNameContains?: string[];
+          orgsId?: string[];
           /** @enum {string} */
           tier: "all" | "pro" | "free" | "growth" | "enterprise";
           endDate: string;
@@ -554,6 +557,7 @@ export interface operations {
                   email: string;
                   id: string;
                 }[];
+              name: string;
               owner_last_login: string;
               owner_email: string;
               tier: string;
