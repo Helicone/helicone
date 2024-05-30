@@ -143,10 +143,7 @@ export class LogStore {
             await this.processPrompt(promptRecord, t);
           }
         }
-      });
-
-      try {
-        await db.tx(async (t: pgPromise.ITask<{}>) => {
+        try {
           const queries = payload.searchRecords.map((record) => {
             return t.none(
               `INSERT INTO request_response_search (request_id, request_body_vector, response_body_vector, organization_id)
@@ -164,12 +161,11 @@ export class LogStore {
           });
 
           await t.batch(queries);
-        });
-
-        return ok("Successfully insegrted request response search");
-      } catch (error: any) {
-        return err("Failed to insert request response search: " + error);
-      }
+        } catch (error: any) {
+          console.error("Error inserting search records", error);
+          throw error;
+        }
+      });
 
       return ok("Successfully inserted log batch");
     } catch (error: any) {
