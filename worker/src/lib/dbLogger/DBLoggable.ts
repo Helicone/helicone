@@ -19,7 +19,7 @@ import {
 } from "./streamParsers/anthropicStreamParser";
 import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { getTokenCount } from "../clients/TokenCounterClient";
-import { ClickhouseClientWrapper, ClickhouseDB } from "../db/ClickhouseWrapper";
+import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
 import {
   isRequestImageModel,
