@@ -809,6 +809,7 @@
 					"kafka:log",
 					"kafka:dlq:eu",
 					"kafka:log:eu",
+					"kafka:orgs-to-dlq",
 					"azure:experiment"
 				],
 				"nullable": false
@@ -1432,6 +1433,9 @@
 												},
 												"type": "array"
 											},
+											"name": {
+												"type": "string"
+											},
 											"owner_last_login": {
 												"type": "string"
 											},
@@ -1472,6 +1476,7 @@
 											"ct",
 											"organization_id",
 											"members",
+											"name",
 											"owner_last_login",
 											"owner_email",
 											"tier",
@@ -1501,6 +1506,24 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"emailContains": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"orgsNameContains": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"orgsId": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
 									"tier": {
 										"type": "string",
 										"enum": [

@@ -146,7 +146,6 @@ VAULT_ENABLED = "true"
 [env.production_staging.triggers]
 crons = []
 
-
 [[migrations]]
 tag = "v1"
 new_classes = ["AtomicRateLimiter"]
