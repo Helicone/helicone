@@ -630,11 +630,6 @@ export class DBLoggable {
       queue: RequestResponseStore;
       requestResponseManager: RequestResponseManager;
       kafkaProducer: KafkaProducer;
-      rateLimiters: {
-        FREE_RATE_LIMITER: any;
-        PRO_RATE_LIMITER: any;
-        ENTERPRISE_RATE_LIMITER: any;
-      };
     },
     S3_ENABLED: Env["S3_ENABLED"],
     requestHeaders?: HeliconeHeaders
@@ -644,88 +639,88 @@ export class DBLoggable {
       return err(`Auth failed! ${error}` ?? "Helicone organization not found");
     }
 
-    try {
-      const org = await db.dbWrapper.getOrganization();
-      if (org.error !== null) {
-        return err(org.error);
-      }
+    // try {
+    //   const org = await db.dbWrapper.getOrganization();
+    //   if (org.error !== null) {
+    //     return err(org.error);
+    //   }
 
-      const tier = org.data?.tier;
+    //   const tier = org.data?.tier;
 
-      // Rate limiting in worker to leverage Cloudflare's rate limiting feature
-      // & to prevent large backlog in Kafka
-      const isRateLimited = await this.isRateLimited(db.rateLimiters, {
-        id: org.data.id,
-        tier: tier,
-      });
+    //   // Rate limiting in worker to leverage Cloudflare's rate limiting feature
+    //   // & to prevent large backlog in Kafka
+    //   const isRateLimited = await this.isRateLimited(db.rateLimiters, {
+    //     id: org.data.id,
+    //     tier: tier,
+    //   });
 
-      if (isRateLimited.error) {
-        console.error(`Error checking rate limit: ${isRateLimited.error}`);
-      }
+    //   if (isRateLimited.error) {
+    //     console.error(`Error checking rate limit: ${isRateLimited.error}`);
+    //   }
 
-      if (!isRateLimited.error && isRateLimited.data) {
-        const rateLimit: ClickhouseDB["Tables"]["rate_limit_log_v2"] = {
-          request_id: this.request.requestId,
-          organization_id: org.data.id,
-          tier: tier,
-          rate_limit_created_at: formatTimeStringDateTime(
-            new Date().toISOString()
-          ),
-        };
-        await db.clickhouse.dbInsertClickhouse("rate_limit_log_v2", [
-          rateLimit,
-        ]);
-        return ok(undefined);
-      }
-    } catch (e) {
-      // If any of this fails, we just log to Kafka
-      console.error(`Error checking rate limit: ${e}`);
-    }
+    //   if (!isRateLimited.error && isRateLimited.data) {
+    //     const rateLimit: ClickhouseDB["Tables"]["rate_limit_log_v2"] = {
+    //       request_id: this.request.requestId,
+    //       organization_id: org.data.id,
+    //       tier: tier,
+    //       rate_limit_created_at: formatTimeStringDateTime(
+    //         new Date().toISOString()
+    //       ),
+    //     };
+    //     await db.clickhouse.dbInsertClickhouse("rate_limit_log_v2", [
+    //       rateLimit,
+    //     ]);
+    //     return ok(undefined);
+    //   }
+    // } catch (e) {
+    //   // If any of this fails, we just log to Kafka
+    //   console.error(`Error checking rate limit: ${e}`);
+    // }
 
     await this.useKafka(db, authParams, S3_ENABLED, requestHeaders);
 
     return ok(undefined);
   }
 
-  async isRateLimited(
-    rateLimiters: {
-      FREE_RATE_LIMITER: any;
-      PRO_RATE_LIMITER: any;
-      ENTERPRISE_RATE_LIMITER: any;
-    },
-    orgDetails: {
-      id: string;
-      tier: string;
-    }
-  ): Promise<Result<boolean, string>> {
-    try {
-      const tier = orgDetails.tier.toUpperCase() as
-        | "FREE"
-        | "PRO"
-        | "GROWTH"
-        | "ENTERPRISE";
+  // async isRateLimited(
+  //   rateLimiters: {
+  //     FREE_RATE_LIMITER: any;
+  //     PRO_RATE_LIMITER: any;
+  //     ENTERPRISE_RATE_LIMITER: any;
+  //   },
+  //   orgDetails: {
+  //     id: string;
+  //     tier: string;
+  //   }
+  // ): Promise<Result<boolean, string>> {
+  //   try {
+  //     const tier = orgDetails.tier.toUpperCase() as
+  //       | "FREE"
+  //       | "PRO"
+  //       | "GROWTH"
+  //       | "ENTERPRISE";
 
-      if (tier === "FREE") {
-        const { success } = await rateLimiters.FREE_RATE_LIMITER.limit({
-          key: orgDetails.id,
-        });
-        return ok(!success);
-      } else if (tier === "PRO" || tier === "GROWTH") {
-        const { success } = await rateLimiters.PRO_RATE_LIMITER.limit({
-          key: orgDetails.id,
-        });
-        return ok(!success);
-      } else if (tier === "ENTERPRISE") {
-        const { success } = await rateLimiters.ENTERPRISE_RATE_LIMITER.limit({
-          key: orgDetails.id,
-        });
-        return ok(!success);
-      }
-      return ok(false);
-    } catch (e) {
-      return err(`Error rate limiting: ${e}`);
-    }
-  }
+  //     if (tier === "FREE") {
+  //       const { success } = await rateLimiters.FREE_RATE_LIMITER.limit({
+  //         key: orgDetails.id,
+  //       });
+  //       return ok(!success);
+  //     } else if (tier === "PRO" || tier === "GROWTH") {
+  //       const { success } = await rateLimiters.PRO_RATE_LIMITER.limit({
+  //         key: orgDetails.id,
+  //       });
+  //       return ok(!success);
+  //     } else if (tier === "ENTERPRISE") {
+  //       const { success } = await rateLimiters.ENTERPRISE_RATE_LIMITER.limit({
+  //         key: orgDetails.id,
+  //       });
+  //       return ok(!success);
+  //     }
+  //     return ok(false);
+  //   } catch (e) {
+  //     return err(`Error rate limiting: ${e}`);
+  //   }
+  // }
 
   async useKafka(
     db: {
