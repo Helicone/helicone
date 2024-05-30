@@ -49,6 +49,9 @@ export class AdminController extends Controller {
       startDate: string;
       endDate: string;
       tier: "all" | "pro" | "free" | "growth" | "enterprise";
+      orgsId?: string[];
+      orgsNameContains?: string[];
+      emailContains?: string[];
     }
   ) {
     console.log("getTopOrgs");
@@ -73,12 +76,25 @@ export class AdminController extends Controller {
       []
     );
 
+    if (!orgs.data) {
+      return [];
+    }
+
+    if (body.orgsId) {
+      orgs.data = orgs.data.filter((org) =>
+        body.orgsId?.includes(org.organization_id)
+      );
+    }
+    if (!orgs.data) {
+      return [];
+    }
     // Step 2: Fetch organization details including members
     const orgData = await dbExecute<{
       id: string;
       tier: string;
       owner_email: string;
       owner_last_login: string;
+      name: string;
       members: {
         id: string;
         email: string;
@@ -88,6 +104,7 @@ export class AdminController extends Controller {
     }>(
       `
     SELECT
+      organization.name AS name,
       organization.id AS id,
       organization.tier AS tier,
       users_view.email AS owner_email,
@@ -116,13 +133,32 @@ export class AdminController extends Controller {
     `,
       []
     );
-    if (!orgs.data) {
-      return [];
-    }
 
     orgs.data = orgs.data?.filter((org) =>
       orgData.data?.find((od) => od.id === org.organization_id)
     );
+
+    if (body.orgsNameContains) {
+      orgs.data = orgs.data?.filter((org) =>
+        body.orgsNameContains?.some((name) =>
+          orgData.data
+            ?.find((od) => od.id === org.organization_id)
+            ?.name.toLowerCase()
+            .includes(name.toLowerCase())
+        )
+      );
+    }
+
+    if (body.emailContains) {
+      orgs.data = orgs.data?.filter((org) =>
+        body.emailContains?.some((email) =>
+          orgData.data
+            ?.find((od) => od.id === org.organization_id)
+            ?.owner_email.toLowerCase()
+            .includes(email.toLowerCase())
+        )
+      );
+    }
 
     let timeGrain = "minute";
     if (
@@ -136,6 +172,10 @@ export class AdminController extends Controller {
       30 * 24 * 60 * 60 * 1000
     ) {
       timeGrain = "day";
+    }
+
+    if (!orgs.data || orgs.data.length === 0) {
+      return [];
     }
     // Step 3: Fetch organization data over time
     const orgsOverTime = await clickhouseDb.dbQuery<{
