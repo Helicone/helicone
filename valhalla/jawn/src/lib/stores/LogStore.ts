@@ -356,6 +356,7 @@ export class LogStore {
       requestId: string;
       requestBody: string;
       responseBody: string;
+      model: string;
     }[]
   ): PromiseGenericResult<string> {
     try {
@@ -363,6 +364,9 @@ export class LogStore {
         const uniqueRequestIds = new Set();
         const searchRecords = requestResponseData
           .filter((request) => {
+            if (!this.vectorizeModel(request.model)) {
+              return false;
+            }
             if (uniqueRequestIds.has(request.requestId)) {
               return false;
             }
@@ -370,6 +374,7 @@ export class LogStore {
             return true;
           })
           .map((request) => {
+            console.log("model", request.model);
             return {
               request_id: request.requestId,
               request_body_vector: this.pullRequestBodyMessage(
@@ -459,4 +464,9 @@ export class LogStore {
       return "";
     }
   }
+
+  private vectorizeModel = (model: string): boolean => {
+    const nonVectorizedModels: Set<string> = new Set(["dall-e-2", "dall-e-3"]);
+    return !nonVectorizedModels.has(model);
+  };
 }

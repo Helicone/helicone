@@ -119,6 +119,10 @@ export class LoggingHandler extends AbstractLogHandler {
         requestId: s3Record.requestId,
         requestBody: s3Record.requestBody,
         responseBody: s3Record.responseBody,
+        model:
+          this.batchPayload.requests.find(
+            (req) => req.id === s3Record.requestId
+          )?.model ?? "",
       }))
     );
 
