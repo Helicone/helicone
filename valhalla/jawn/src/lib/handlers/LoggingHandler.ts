@@ -307,10 +307,10 @@ export class LoggingHandler extends AbstractLogHandler {
       {
         request_id: request.id,
         organization_id: orgParams.id,
-        request_body_vector: this.pullRequestBodyMessage(
+        request_body_vector: this.extractRequestBodyMessage(
           context.processedLog.request.body
         ),
-        response_body_vector: this.pullResponseBodyMessage(
+        response_body_vector: this.extractResponseBodyMessage(
           context.processedLog.response.body
         ),
       };
@@ -459,9 +459,9 @@ export class LoggingHandler extends AbstractLogHandler {
     return requestInsert;
   }
 
-  private pullRequestBodyMessage(requestBody: any): string {
+  private extractRequestBodyMessage(requestBody: any): string {
     try {
-      const messagesArray = requestBody.messages;
+      const messagesArray = requestBody?.messages;
 
       if (!Array.isArray(messagesArray)) {
         return "";
@@ -469,11 +469,25 @@ export class LoggingHandler extends AbstractLogHandler {
 
       const allMessages = messagesArray
         .filter((message) => {
-          return message.role === "user";
+          return message?.role === "user";
         })
         .map((message) => {
           if (typeof message === "object" && message !== null) {
-            return message["content"] || "";
+            const content = message["content"];
+            if (Array.isArray(content)) {
+              return content
+                .map((part) => {
+                  if (part.type === "text") {
+                    return part.text;
+                  } else if (part.type === "image_url") {
+                    return "";
+                  }
+                  return "";
+                })
+                .join(" ");
+            } else if (typeof content === "string") {
+              return content;
+            }
           }
           return "";
         })
@@ -486,20 +500,17 @@ export class LoggingHandler extends AbstractLogHandler {
     }
   }
 
-  private pullResponseBodyMessage(responseBody: any): string {
+  private extractResponseBodyMessage(responseBody: any): string {
     try {
-      const choicesArray = responseBody.choices;
+      const choicesArray = responseBody?.choices;
 
       if (!Array.isArray(choicesArray)) {
         return "";
       }
 
       const allMessages = choicesArray
-        .filter((choice) => {
-          return choice.message.role === "assistant";
-        })
         .map((choice) => {
-          return choice.message.content || "";
+          return choice?.message?.content || "";
         })
         .join(" ");
 
