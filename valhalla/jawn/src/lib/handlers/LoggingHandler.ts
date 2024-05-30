@@ -15,7 +15,7 @@ type S3Record = {
   assets: Map<string, string>;
 };
 
-export type SearchRecord = {
+type SearchRecord = {
   requestId: string;
   organizationId: string;
   requestBody: string;
@@ -30,7 +30,7 @@ export type BatchPayload = {
   assets: Database["public"]["Tables"]["asset"]["Insert"][];
   s3Records: S3Record[];
   requestResponseVersionedCH: ClickhouseDB["Tables"]["request_response_versioned"][];
-  searchRecords: SearchRecord[];
+  searchRecords: Database["public"]["Tables"]["request_response_search"]["Insert"][];
 };
 
 export class LoggingHandler extends AbstractLogHandler {
@@ -123,22 +123,6 @@ export class LoggingHandler extends AbstractLogHandler {
     if (s3Result.error) {
       return err({
         s3Error: `Error inserting logs to S3: ${s3Result.error}`,
-      });
-    }
-
-    const searchTableResult = await this.logStore.insertRequestResponseSearch(
-      this.batchPayload.searchRecords.map((searchRecord) => ({
-        requestId: searchRecord.requestId,
-        requestBody: searchRecord.requestBody,
-        responseBody: searchRecord.responseBody,
-        model: searchRecord.model,
-        organizationId: searchRecord.organizationId,
-      }))
-    );
-
-    if (searchTableResult.error) {
-      return err({
-        pgError: `Error inserting logs to Postgres search table: ${searchTableResult.error}`,
       });
     }
 
@@ -306,21 +290,30 @@ export class LoggingHandler extends AbstractLogHandler {
     return s3Record;
   }
 
-  mapSearchRecords(context: HandlerContext): SearchRecord[] {
+  mapSearchRecords(
+    context: HandlerContext
+  ): Database["public"]["Tables"]["request_response_search"]["Insert"][] {
     const request = context.message.log.request;
     const orgParams = context.orgParams;
 
-    if (!orgParams?.id) {
+    if (
+      !orgParams?.id ||
+      !this.vectorizeModel(context.processedLog.model ?? "")
+    ) {
       return [];
     }
 
-    const searchRecord: SearchRecord = {
-      requestId: request.id,
-      organizationId: orgParams.id,
-      requestBody: context.processedLog.request.body,
-      responseBody: context.processedLog.response.body,
-      model: context.processedLog.model ?? "",
-    };
+    const searchRecord: Database["public"]["Tables"]["request_response_search"]["Insert"] =
+      {
+        request_id: request.id,
+        organization_id: orgParams.id,
+        request_body_vector: this.pullRequestBodyMessage(
+          context.processedLog.request.body
+        ),
+        response_body_vector: this.pullResponseBodyMessage(
+          context.processedLog.response.body
+        ),
+      };
 
     return [searchRecord];
   }
@@ -465,4 +458,63 @@ export class LoggingHandler extends AbstractLogHandler {
 
     return requestInsert;
   }
+
+  private pullRequestBodyMessage(requestBody: any): string {
+    try {
+      const messagesArray = requestBody.messages;
+
+      if (!Array.isArray(messagesArray)) {
+        return "";
+      }
+
+      const allMessages = messagesArray
+        .filter((message) => {
+          return message.role === "user";
+        })
+        .map((message) => {
+          if (typeof message === "object" && message !== null) {
+            return message["content"] || "";
+          }
+          return "";
+        })
+        .join(" ");
+
+      return allMessages.trim();
+    } catch (error) {
+      console.error("Error pulling request body messages:", error);
+      return "";
+    }
+  }
+
+  private pullResponseBodyMessage(responseBody: any): string {
+    try {
+      const choicesArray = responseBody.choices;
+
+      if (!Array.isArray(choicesArray)) {
+        return "";
+      }
+
+      const allMessages = choicesArray
+        .filter((choice) => {
+          return choice.message.role === "assistant";
+        })
+        .map((choice) => {
+          return choice.message.content || "";
+        })
+        .join(" ");
+
+      return allMessages.trim();
+    } catch (error) {
+      console.error("Error pulling response body messages:", error);
+      return "";
+    }
+  }
+
+  private vectorizeModel = (model: string): boolean => {
+    if (!model) {
+      return false;
+    }
+    const nonVectorizedModels: Set<string> = new Set(["dall-e-2", "dall-e-3"]);
+    return !nonVectorizedModels.has(model);
+  };
 }

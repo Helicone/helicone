@@ -1,4 +1,4 @@
-import { BatchPayload, SearchRecord } from "../handlers/LoggingHandler";
+import { BatchPayload } from "../handlers/LoggingHandler";
 import { deepCompare } from "../../utils/helpers";
 import pgPromise from "pg-promise";
 import { PromptRecord } from "../handlers/HandlerContext";
@@ -80,22 +80,6 @@ const assetColumns = new pgp.helpers.ColumnSet(
 
 const onConflictAsset = " ON CONFLICT (id, request_id) DO NOTHING";
 
-const requestResponseSearchColumns = new pgp.helpers.ColumnSet(
-  [
-    "request_id",
-    { name: "request_body_vector", cast: "tsvector" },
-    { name: "response_body_vector", cast: "tsvector" },
-  ],
-  { table: "request_response_search" }
-);
-
-const onConflictRequestResponseSearch =
-  " ON CONFLICT (request_id) DO UPDATE SET " +
-  requestResponseSearchColumns.assignColumns({
-    from: "EXCLUDED",
-    skip: "request_id",
-  });
-
 export class LogStore {
   constructor() {}
 
@@ -160,6 +144,32 @@ export class LogStore {
           }
         }
       });
+
+      try {
+        await db.tx(async (t: pgPromise.ITask<{}>) => {
+          const queries = payload.searchRecords.map((record) => {
+            return t.none(
+              `INSERT INTO request_response_search (request_id, request_body_vector, response_body_vector, organization_id)
+             VALUES ($1, to_tsvector('helicone_search_config', $2), to_tsvector('helicone_search_config', $3), $4)
+             ON CONFLICT (request_id, organization_id) DO UPDATE SET
+             request_body_vector = EXCLUDED.request_body_vector,
+             response_body_vector = EXCLUDED.response_body_vector`,
+              [
+                record.request_id,
+                record.request_body_vector,
+                record.response_body_vector,
+                record.organization_id,
+              ]
+            );
+          });
+
+          await t.batch(queries);
+        });
+
+        return ok("Successfully insegrted request response search");
+      } catch (error: any) {
+        return err("Failed to insert request response search: " + error);
+      }
 
       return ok("Successfully inserted log batch");
     } catch (error: any) {
@@ -350,119 +360,4 @@ export class LogStore {
 
     return Array.from(entryMap.values());
   }
-
-  async insertRequestResponseSearch(
-    entries: SearchRecord[]
-  ): PromiseGenericResult<string> {
-    try {
-      await db.tx(async (t: pgPromise.ITask<{}>) => {
-        const uniqueRequestIds = new Set();
-        const searchRecords = entries
-          .filter((request) => {
-            if (!this.vectorizeModel(request.model)) {
-              return false;
-            }
-            if (uniqueRequestIds.has(request.requestId)) {
-              return false;
-            }
-            uniqueRequestIds.add(request.requestId);
-            return true;
-          })
-          .map((request) => {
-            return {
-              request_id: request.requestId,
-              request_body_vector: this.pullRequestBodyMessage(
-                request.requestBody
-              ),
-              response_body_vector: this.pullResponseBodyMessage(
-                request.responseBody
-              ),
-              organization_id: request.organizationId,
-            };
-          });
-
-        const queries = searchRecords.map((record) => {
-          return t.none(
-            `INSERT INTO request_response_search (request_id, request_body_vector, response_body_vector, organization_id)
-             VALUES ($1, to_tsvector('helicone_search_config', $2), to_tsvector('helicone_search_config', $3), $4)
-             ON CONFLICT (request_id, organization_id) DO UPDATE SET
-             request_body_vector = EXCLUDED.request_body_vector,
-             response_body_vector = EXCLUDED.response_body_vector`,
-            [
-              record.request_id,
-              record.request_body_vector,
-              record.response_body_vector,
-              record.organization_id,
-            ]
-          );
-        });
-
-        await t.batch(queries);
-      });
-
-      return ok("Successfully insegrted request response search");
-    } catch (error: any) {
-      return err("Failed to insert request response search: " + error);
-    }
-  }
-
-  private pullRequestBodyMessage(requestBody: any): string {
-    try {
-      const messagesArray = requestBody.messages;
-
-      if (!Array.isArray(messagesArray)) {
-        throw new Error(
-          "Invalid request body format: messages array is missing or not an array"
-        );
-      }
-
-      const allMessages = messagesArray
-        .filter((message) => {
-          return message.role === "user";
-        })
-        .map((message) => {
-          if (typeof message === "object" && message !== null) {
-            return message["content"] || "";
-          }
-          return "";
-        })
-        .join(" ");
-
-      return allMessages.trim();
-    } catch (error) {
-      console.error("Error pulling request body messages:", error);
-      return "";
-    }
-  }
-
-  private pullResponseBodyMessage(responseBody: any): string {
-    try {
-      const choicesArray = responseBody.choices;
-
-      if (!Array.isArray(choicesArray)) {
-        throw new Error(
-          "Invalid response body format: choices array is missing or not an array"
-        );
-      }
-
-      const allMessages = choicesArray
-        .filter((choice) => {
-          return choice.message.role === "assistant";
-        })
-        .map((choice) => {
-          return choice.message.content || "";
-        })
-        .join(" ");
-
-      return allMessages.trim();
-    } catch (error) {
-      console.error("Error pulling response body messages:", error);
-      return "";
-    }
-  }
-
-  private vectorizeModel = (model: string): boolean => {
-    const nonVectorizedModels: Set<string> = new Set(["dall-e-2", "dall-e-3"]);
-    return !nonVectorizedModels.has(model);
-  };
 }
