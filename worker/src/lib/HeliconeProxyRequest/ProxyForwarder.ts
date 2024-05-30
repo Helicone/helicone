@@ -1,10 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
 import { DBWrapper } from "../db/DBWrapper";
-import {
-  checkRateLimit,
-  updateRateLimitCounter,
-} from "../clients/KVRateLimiterClient";
+import { checkRateLimit } from "../clients/KVRateLimiterClient";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
 import {
@@ -315,27 +313,18 @@ export async function proxyForwarder(
           createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
         ),
         kafkaProducer: new KafkaProducer(env),
+        rateLimiters: {
+          FREE_RATE_LIMITER: env.FREE_RATE_LIMITER,
+          PRO_RATE_LIMITER: env.PRO_RATE_LIMITER,
+          ENTERPRISE_RATE_LIMITER: env.ENTERPRISE_RATE_LIMITER,
+        },
       },
       env.S3_ENABLED ?? "true",
-      env.ORG_IDS ?? "",
-      env.PERCENT_LOG_KAFKA ?? "",
       proxyRequest?.requestWrapper.heliconeHeaders
     );
 
     if (res.error !== null) {
       console.error("Error logging", res.error);
-    }
-
-    if (proxyRequest && proxyRequest.rateLimitOptions) {
-      await updateRateLimitCounter({
-        providerAuthHash: proxyRequest.providerAuthHash,
-        heliconeProperties:
-          proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
-        rateLimitKV: env.RATE_LIMIT_KV,
-        rateLimitOptions: proxyRequest.rateLimitOptions,
-        userId: proxyRequest.userId,
-        cost: res.data?.cost ?? 0,
-      });
     }
   }
 

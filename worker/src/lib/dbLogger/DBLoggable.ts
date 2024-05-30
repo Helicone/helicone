@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Headers } from "@cloudflare/workers-types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
@@ -10,7 +11,7 @@ import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 import { PromptSettings, RequestWrapper } from "../RequestWrapper";
 import { INTERNAL_ERRORS } from "../util/constants";
 import { AsyncLogModel } from "../models/AsyncLog";
-import { logInClickhouse } from "../db/ClickhouseStore";
+import { formatTimeStringDateTime } from "../db/ClickhouseStore";
 import { RequestResponseStore } from "../db/RequestResponseStore";
 import {
   anthropicAIStream,
@@ -18,7 +19,7 @@ import {
 } from "./streamParsers/anthropicStreamParser";
 import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { getTokenCount } from "../clients/TokenCounterClient";
-import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
+import { ClickhouseClientWrapper, ClickhouseDB } from "../db/ClickhouseWrapper";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
 import {
   isRequestImageModel,
@@ -30,10 +31,6 @@ import {
 } from "./imageParsers/parserMapper";
 import { TemplateWithInputs } from "../../api/lib/promptHelpers";
 import { ImageModelParsingResponse } from "./imageParsers/core/parsingResponse";
-import {
-  HeliconeRequestResponseToPosthog,
-  PosthogClient,
-} from "../clients/PosthogClient";
 import { costOfPrompt } from "../../packages/cost";
 import { KafkaMessage, KafkaProducer } from "../clients/KafkaProducer";
 
@@ -633,276 +630,101 @@ export class DBLoggable {
       queue: RequestResponseStore;
       requestResponseManager: RequestResponseManager;
       kafkaProducer: KafkaProducer;
+      rateLimiters: {
+        FREE_RATE_LIMITER: any;
+        PRO_RATE_LIMITER: any;
+        ENTERPRISE_RATE_LIMITER: any;
+      };
     },
     S3_ENABLED: Env["S3_ENABLED"],
-    ORG_IDS: string,
-    PERCENT_LOG: string,
     requestHeaders?: HeliconeHeaders
-  ): Promise<
-    Result<
-      {
-        cost: number;
-      } | null,
-      string
-    >
-  > {
+  ): Promise<Result<undefined, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
       return err(`Auth failed! ${error}` ?? "Helicone organization not found");
     }
 
-    let orgIds: string[] = [];
     try {
-      if (ORG_IDS) {
-        orgIds = ORG_IDS.split(",").filter((id) => id.length > 0);
-      }
-    } catch (e) {
-      console.error("Error parsing orgIds", e);
-    }
-
-    let percentLogKafka = 1.01;
-    if (PERCENT_LOG) {
-      try {
-        percentLogKafka = parseFloat(PERCENT_LOG);
-      } catch (e) {
-        console.error("Error parsing percentLogKafka", e);
-      }
-    }
-    // Kafka processing
-    if (
-      // authParams.organizationId === "83635a30-5ba6-41a8-8cc6-fb7df941b24a" ||
-      orgIds.includes(authParams.organizationId) ||
-      authParams.organizationId === "01699b51-e07b-4d49-8cda-0c7557f5b6b1" ||
-      authParams.organizationId === "dad350b5-4afe-4fd5-b910-ba74c0ad2f0f" ||
-      Math.random() < percentLogKafka
-    ) {
-      await this.useKafka(db, authParams, S3_ENABLED, requestHeaders);
-
-      return ok(null);
-    }
-
-    const rateLimiter = await db.dbWrapper.getRateLimiter();
-    if (rateLimiter.error !== null) {
-      return rateLimiter;
-    }
-
-    const org = await db.dbWrapper.getOrganization();
-
-    if (org.error !== null) {
-      return err(org.error);
-    }
-    const tier = org.data?.tier;
-
-    if (org.data.percentLog !== 100_000) {
-      const random = Math.random() * 100_000;
-      console.log(
-        `NOT LOGGING FOR ORG ID: ${authParams.organizationId} ${random} ${org.data.percentLog}`
-      );
-      if (random > org.data.percentLog) {
-        return ok(null);
-      }
-    }
-
-    const rateLimit = await rateLimiter.data.checkRateLimit(tier);
-
-    if (rateLimit.error) {
-      console.error(`Error checking rate limit: ${rateLimit.error}`);
-    }
-
-    if (!rateLimit.error && rateLimit.data?.isRateLimited) {
-      await db.clickhouse.dbInsertClickhouse("rate_limit_log", [
-        {
-          organization_id: authParams.organizationId,
-        },
-      ]);
-      return err("Rate limited");
-    }
-
-    const requestResult = await logRequest(
-      this.request,
-      this.response.responseId,
-      db.supabase,
-      db.queue,
-      authParams
-    );
-
-    // If no data or error, return
-    if (!requestResult.data || requestResult.error) {
-      return requestResult;
-    }
-    const responseResult = await this.readAndLogResponse(
-      db.queue,
-      requestResult.data.request.model
-    );
-    const model =
-      requestResult?.data?.request?.model_override ??
-      responseResult?.data?.response?.model ??
-      requestResult?.data?.request?.model ??
-      "not-found";
-
-    let assets: Map<string, string> = new Map();
-
-    if (requestResult?.data?.requestAssets) {
-      assets = new Map([...assets, ...requestResult.data.requestAssets]);
-    }
-
-    if (responseResult?.data?.responseAssets) {
-      assets = new Map([...assets, ...responseResult.data.responseAssets]);
-    }
-
-    let s3Result: Result<string, string>;
-    // If no data or error, return
-    if (!responseResult.data || responseResult.error) {
-      // Log the error in S3
-      if (S3_ENABLED === "true") {
-        s3Result = await db.requestResponseManager.storeRequestResponseData({
-          organizationId: authParams.organizationId,
-          requestId: this.request.requestId,
-          requestBody: requestResult.data.body,
-          responseBody: JSON.stringify({
-            helicone_error: "error getting response, " + responseResult.error,
-            helicone_repsonse_body_as_string: (
-              await this.response.getResponseBody()
-            ).body,
-          }),
-          model: model,
-          assets: assets,
-        });
+      const org = await db.dbWrapper.getOrganization();
+      if (org.error !== null) {
+        return err(org.error);
       }
 
-      return responseResult;
-    }
+      const tier = org.data?.tier;
 
-    if (S3_ENABLED === "true") {
-      s3Result = await db.requestResponseManager.storeRequestResponseData({
-        organizationId: authParams.organizationId,
-        requestId: this.request.requestId,
-        requestBody: requestResult.data.body,
-        responseBody: responseResult.data.body,
-        model: model,
-        assets: assets,
+      // Rate limiting in worker to leverage Cloudflare's rate limiting feature
+      // & to prevent large backlog in Kafka
+      const isRateLimited = await this.isRateLimited(db.rateLimiters, {
+        id: org.data.id,
+        tier: tier,
       });
 
-      if (s3Result.error) {
-        console.error("Error storing request response", s3Result.error);
-        // Continue logging to clickhouse
+      if (isRateLimited.error) {
+        console.error(`Error checking rate limit: ${isRateLimited.error}`);
       }
-    }
 
-    await logInClickhouse(
-      requestResult.data.request,
-      responseResult.data.response,
-      requestResult.data.properties,
-      requestResult.data.node,
-      db.clickhouse
-    );
-
-    // TODO We should probably move the webhook stuff out of dbLogger
-    const { error: webhookError } = await this.sendToWebhooks(db.supabase, {
-      request: requestResult.data,
-      response: responseResult.data.response,
-    });
-
-    if (webhookError !== null) {
-      console.error("Error sending to webhooks", webhookError);
-      return {
-        data: null,
-        error: webhookError,
-      };
-    }
-
-    if (
-      this.request.heliconeTemplate &&
-      this.request.promptSettings.promptMode === "production"
-    ) {
-      const assets = requestResult.data.requestAssets;
-
-      const inverseAssets: Map<string, string> = new Map();
-      assets.forEach((value, key) => inverseAssets.set(value, key));
-
-      const inputs = Object.entries(
-        this.request.heliconeTemplate.inputs
-      ).reduce<{ [key: string]: string }>((acc, [key, value]) => {
-        const assetId = inverseAssets.get(value);
-        acc[key] = assetId ? `<helicone-asset-id key="${assetId}"/>` : value;
-        return acc;
-      }, {});
-
-      const newTemplateWithInputs: TemplateWithInputs = {
-        template: this.request.heliconeTemplate.template,
-        inputs: inputs,
-      };
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const upsertResult2 = await db.queue.promptStore.upsertPromptV2(
-        newTemplateWithInputs,
-        this.request.promptSettings.promptId,
-        authParams.organizationId,
-        this.request.requestId
-      );
-
-      const upsertResult = await db.queue.upsertPrompt(
-        newTemplateWithInputs,
-        this.request.promptSettings.promptId,
-        authParams.organizationId
-      );
-
-      if (upsertResult.error || !upsertResult.data) {
-        console.error("Error upserting prompt", upsertResult.error);
-        return err(JSON.stringify(upsertResult.error));
+      if (!isRateLimited.error && isRateLimited.data) {
+        const rateLimit: ClickhouseDB["Tables"]["rate_limit_log_v2"] = {
+          request_id: this.request.requestId,
+          organization_id: org.data.id,
+          tier: tier,
+          rate_limit_created_at: formatTimeStringDateTime(
+            new Date().toISOString()
+          ),
+        };
+        await db.clickhouse.dbInsertClickhouse("rate_limit_log_v2", [
+          rateLimit,
+        ]);
+        return ok(undefined);
       }
+    } catch (e) {
+      // If any of this fails, we just log to Kafka
+      console.error(`Error checking rate limit: ${e}`);
     }
 
-    const cost =
-      this.modelCost({
-        model: model ?? null,
-        sum_completion_tokens:
-          responseResult.data.response.completion_tokens ?? 0,
-        sum_prompt_tokens: responseResult.data.response.completion_tokens ?? 0,
-        sum_tokens:
-          (responseResult.data.response.completion_tokens ?? 0) +
-          (responseResult.data.response.prompt_tokens ?? 0),
-        provider: requestResult.data.request.provider ?? "",
-      }) ?? 0;
+    await this.useKafka(db, authParams, S3_ENABLED, requestHeaders);
 
-    if (requestHeaders?.posthogKey) {
-      const posthogClient = new PosthogClient(
-        requestHeaders.posthogKey,
-        requestHeaders.posthogHost
-      );
-      const reqBody = JSON.parse(this.request.bodyText ?? "{}") ?? null;
-      const heliconeRequestResponse: HeliconeRequestResponseToPosthog = {
-        model: model ?? "",
-        temperature: reqBody.temperature ?? 0.0,
-        n: reqBody.n ?? 0,
-        promptId: requestResult.data.request.prompt_id ?? "",
-        timeToFirstToken: responseResult.data.response.time_to_first_token ?? 0,
-        cost: cost,
-        provider: requestResult.data.request.provider ?? "",
-        path: requestResult.data.request.path ?? "",
-        completetionTokens: responseResult.data.response.completion_tokens ?? 0,
-        promptTokens: responseResult.data.response.prompt_tokens ?? 0,
-        totalTokens:
-          (responseResult.data.response.completion_tokens ?? 0) +
-          (responseResult.data.response.prompt_tokens ?? 0),
-        userId: requestResult.data.request.user_id ?? "",
-        countryCode: requestResult.data.request.country_code ?? "",
-        requestBodySize:
-          requestResult.data.request.body?.toString().length ?? 0,
-        responseBodySize:
-          responseResult.data.response.body?.toString().length ?? 0,
-        delayMs: responseResult.data.response.delay_ms ?? 0,
-      };
+    return ok(undefined);
+  }
 
-      await posthogClient.captureEvent(
-        "helicone_request_response",
-        heliconeRequestResponse
-      );
+  async isRateLimited(
+    rateLimiters: {
+      FREE_RATE_LIMITER: any;
+      PRO_RATE_LIMITER: any;
+      ENTERPRISE_RATE_LIMITER: any;
+    },
+    orgDetails: {
+      id: string;
+      tier: string;
     }
+  ): Promise<Result<boolean, string>> {
+    try {
+      const tier = orgDetails.tier.toUpperCase() as
+        | "FREE"
+        | "PRO"
+        | "GROWTH"
+        | "ENTERPRISE";
 
-    return ok({
-      cost,
-    });
+      if (tier === "FREE") {
+        const { success } = await rateLimiters.FREE_RATE_LIMITER.limit({
+          key: orgDetails.id,
+        });
+        return ok(!success);
+      } else if (tier === "PRO" || tier === "GROWTH") {
+        const { success } = await rateLimiters.PRO_RATE_LIMITER.limit({
+          key: orgDetails.id,
+        });
+        return ok(!success);
+      } else if (tier === "ENTERPRISE") {
+        const { success } = await rateLimiters.ENTERPRISE_RATE_LIMITER.limit({
+          key: orgDetails.id,
+        });
+        return ok(!success);
+      }
+      return ok(false);
+    } catch (e) {
+      return err(`Error rate limiting: ${e}`);
+    }
   }
 
   async useKafka(
