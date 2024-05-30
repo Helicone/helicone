@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/components/layout/navbar";
-import Head from "next/head";
 import Footer from "@/components/layout/footer";
+import "@mintlify/mdx/dist/styles.css";
 
 const inter = Inter({ subsets: ["latin"] });
 

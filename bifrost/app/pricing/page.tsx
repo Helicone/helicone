@@ -17,8 +17,8 @@ import { useRouter } from "next/navigation";
 import { clsx } from "@/components/shared/utils";
 import RequestLogTable, {
   HELICONE_LOG_PRICING,
-} from "@/components/templates/pricingPage/requestLogTable";
-import FeatureTable from "@/components/templates/pricingPage/featureTable";
+} from "@/components/templates/pricing/requestLogTable";
+import FeatureTable from "@/components/templates/pricing/featureTable";
 
 const Slider = ({
   min,
