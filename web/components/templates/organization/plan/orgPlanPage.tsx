@@ -17,7 +17,7 @@ import {
 } from "date-fns";
 import { Database } from "../../../../supabase/database.types";
 import useNotification from "../../../shared/notification/useNotification";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useGetRequestCountClickhouse } from "../../../../services/hooks/requests";
 import Link from "next/link";
 import { clsx } from "../../../shared/clsx";
