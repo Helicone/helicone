@@ -127,6 +127,7 @@
         "faq/how-we-calculate-cost",
         "faq/latency-affect",
         "helicone-headers/predefining-request-id",
+        "faq/secret-vs-public-key",
         {
           "group": "Deployment",
           "pages": [
