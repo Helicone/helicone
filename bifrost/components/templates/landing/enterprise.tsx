@@ -64,8 +64,8 @@ const ENTERPRISE_TABS: {
         Schedule a Demo
       </Link>
     ),
-    src: "/static/enterprise/experiment-graphic.png",
-    graphic: "/static/enterprise/experiments-example.png",
+    src: "/static/enterprise/experiment-graphic.webp",
+    graphic: "/static/enterprise/experiments-example.webp",
     new: false,
   },
   {
@@ -95,8 +95,8 @@ const ENTERPRISE_TABS: {
         Schedule a Demo
       </Link>
     ),
-    src: "/static/enterprise/portal-graphic.png",
-    graphic: "/static/enterprise/portal-example.png",
+    src: "/static/enterprise/portal-graphic.webp",
+    graphic: "/static/enterprise/portal-example.webp",
     new: false,
   },
   {
@@ -120,31 +120,31 @@ const ENTERPRISE_TABS: {
     ],
     cta: (
       <Link
-        href="/signup"
+        href="https://us.helicone.ai/signup"
         className="bg-violet-500 hover:bg-violet-600 ease-in-out duration-500 text-white border-2 border-violet-700 rounded-lg px-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
       >
         Get Started
       </Link>
     ),
-    src: "/static/enterprise/finetune-graphic.png",
-    graphic: "/static/enterprise/finetune-example.png",
+    src: "/static/enterprise/finetune-graphic.webp",
+    graphic: "/static/enterprise/finetune-example.webp",
     new: false,
   },
   {
     id: "evaluations",
     name: "Evaluations",
     description: "Analyze model performance to make informed decisions.",
-    src: "/static/enterprise/eval-graphic.png",
+    src: "/static/enterprise/eval-graphic.webp",
     bullets: [],
     cta: (
       <Link
-        href="/signup"
+        href="https://us.helicone.ai/signup"
         className="bg-violet-500 hover:bg-violet-600 ease-in-out duration-500 text-white border-2 border-violet-700 rounded-lg px-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
       >
         Get Started
       </Link>
     ),
-    graphic: "/static/enterprise/experiments-example.png",
+    graphic: "/static/enterprise/experiments-example.webp",
     new: true,
   },
 ];
@@ -172,7 +172,7 @@ const Enterprise = (props: EnterpriseProps) => {
         </div>
         <div className="w-full h-full hidden lg:flex items-center justify-center py-12">
           <Image
-            src={"/static/enterprise/enterprise-graphic.png"}
+            src={"/static/enterprise/enterprise-graphic.webp"}
             alt={"enterprise-graphic"}
             width={550}
             height={550}
@@ -248,7 +248,8 @@ const Enterprise = (props: EnterpriseProps) => {
             <div className="flex items-center space-x-4">
               <Image
                 src={
-                  currentTab?.src || "/static/enterprise/enterprise-graphic.png"
+                  currentTab?.src ||
+                  "/static/enterprise/enterprise-graphic.webp"
                 }
                 alt={currentTab?.name || "enterprise-graphic"}
                 width={25}
@@ -272,7 +273,7 @@ const Enterprise = (props: EnterpriseProps) => {
             <Image
               src={
                 currentTab?.graphic ||
-                "/static/enterprise/experiments-example.png"
+                "/static/enterprise/experiments-example.webp"
               }
               alt={"123"}
               width={500}
@@ -294,7 +295,7 @@ const Enterprise = (props: EnterpriseProps) => {
                   <div className="flex items-center space-x-4">
                     <Image
                       src={
-                        tab?.src || "/static/enterprise/enterprise-graphic.png"
+                        tab?.src || "/static/enterprise/enterprise-graphic.webp"
                       }
                       alt={tab?.name || "enterprise-graphic"}
                       width={20}
@@ -323,7 +324,7 @@ const Enterprise = (props: EnterpriseProps) => {
                   <Image
                     src={
                       currentTab?.graphic ||
-                      "/static/enterprise/experiments-example.png"
+                      "/static/enterprise/experiments-example.webp"
                     }
                     alt={"123"}
                     width={700}

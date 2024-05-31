@@ -73,7 +73,7 @@ const AuthForm = (props: AuthFormProps) => {
       <div className="h-screen flex flex-1 flex-col sm:flex-row justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24 relative">
         <div className="flex flex-col w-full space-y-4 h-full justify-center items-center max-w-lg">
           <div className="w-full flex justify-between items-center">
-            <Link href="/" className="-ml-6 flex">
+            <Link href="https://www.helicone.ai/" className="-ml-6 flex">
               <span className="sr-only">Helicone</span>
               <Image
                 src={"/static/logo.svg"}
