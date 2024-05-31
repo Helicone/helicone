@@ -332,10 +332,8 @@ export default function Example() {
                   ))}
                 </ul>
 
-                <button
-                  onClick={() => {
-                    // router.push(tier.href);
-                  }}
+                <Link
+                  href={tier.href}
                   className={clsx(
                     tier.name === "Growth"
                       ? "bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
@@ -343,16 +341,7 @@ export default function Example() {
                   )}
                 >
                   {tier.ctaCopy}
-                </button>
-
-                {/* <HcButton
-                  variant={index === 1 ? "primary" : "secondary"}
-                  size={"sm"}
-                  title={tier.ctaCopy}
-                  onClick={() => {
-                    router.push(tier.href);
-                  }}
-                /> */}
+                </Link>
               </div>
             ))}
           </div>
@@ -373,7 +362,13 @@ export default function Example() {
 
             {showPlans && (
               <>
-                <RequestLogTable />
+                <div className="flex flex-col space-y-2">
+                  <p className="text-xs text-gray-700 font-semibold">
+                    Request Log Table Rates
+                  </p>
+                  <RequestLogTable />
+                </div>
+
                 <FeatureTable />
               </>
             )}
@@ -435,23 +430,12 @@ export default function Example() {
               </li>{" "}
             </ul>
             <div className="flex items-center justify-center">
-              <button
-                onClick={() => {
-                  setShowPlans(!showPlans);
-                }}
+              <Link
+                href="/contact"
                 className="bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 rounded-lg px-4 py-2 text-sm font-bold shadow-lg flex w-fit items-center gap-1"
               >
                 Get in touch
-              </button>
-
-              {/* <HcButton
-                variant="secondary"
-                size="md"
-                title="Get in touch"
-                onClick={() => {
-                  router.push("/contact");
-                }}
-              /> */}
+              </Link>
             </div>
           </div>
         </div>
