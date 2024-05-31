@@ -1,6 +1,5 @@
 import * as Sentry from "@sentry/node";
 import { Kafka, logLevel } from "kafkajs";
-import { AVG_MESSAGE_SIZE, ESTIMATED_MINI_BATCH_COUNT } from "./constant";
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
@@ -52,7 +51,6 @@ export function generateKafkaConsumer(
     groupId,
     heartbeatInterval: 3000,
     sessionTimeout: 3 * 60 * 1000, // 3 minutes
-    minBytes: 100_000,
     maxBytes: 5_000_000, // 5MB ~ 2500 messages
   });
 
