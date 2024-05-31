@@ -33,8 +33,8 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
   const [name, setName] = useState<string>("");
   const [loaded, setLoaded] = useState(false);
 
-  async function generateAPIKey() {
-    const apiKey = `sk-helicone-${generateApiKey({
+  async function generatePublicApiKey() {
+    const apiKey = `pk-helicone-${generateApiKey({
       method: "base32",
       dashes: true,
     }).toString()}`.toLowerCase();
@@ -46,7 +46,7 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
     user: User,
     keyName: string
   ): Promise<string> {
-    const apiKey = await generateAPIKey();
+    const apiKey = await generatePublicApiKey();
 
     if (!user || org?.currentOrg?.id === undefined) {
       setNotification("Invalid user", "error");

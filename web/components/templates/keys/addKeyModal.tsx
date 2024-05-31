@@ -42,7 +42,10 @@ const AddKeyModal = (props: AddKeyModalProps) => {
       return;
     }
 
-    const apiKey = `sk-helicone${
+    const permission = keyPermissions.checked ? "rw" : "w";
+    const apiKeyPrefix = permission === "rw" ? "sk" : "pk";
+
+    const apiKey = `${apiKeyPrefix}-helicone${
       org?.currentOrg?.organization_type === "customer" ? "-cp" : ""
     }-${generateApiKey({
       method: "base32",
@@ -57,7 +60,7 @@ const AddKeyModal = (props: AddKeyModalProps) => {
           apiKey,
           userId: user?.id!,
           keyName: keyName.value,
-          permissions: keyPermissions.checked ? "rw" : "w",
+          permissions: permission,
         },
       })
       .then((res) => {

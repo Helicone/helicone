@@ -227,7 +227,10 @@ export class SupabaseConnector {
       }
     }
 
-    if (authorization.token.includes("sk-helicone-proxy")) {
+    if (
+      authorization.token.includes("sk-helicone-proxy") ||
+      authorization.token.includes("pk-helicone-proxy")
+    ) {
       authorization._type = "bearerProxy";
     }
 
