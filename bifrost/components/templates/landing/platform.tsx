@@ -15,6 +15,7 @@ import {
   TableCellsIcon,
 } from "@heroicons/react/24/solid";
 import { useState } from "react";
+import Image from "next/image";
 
 const features = [
   {
@@ -61,21 +62,21 @@ const tabs = [
     name: "Monitoring and Analytics",
     description: "Monitor performance and analyze data in real-time",
     icon: ChartPieIcon,
-    src: "/static/platform/dashboard.png",
+    src: "/static/platform/dashboard.webp",
   },
   {
     key: "logs",
     name: "Request Logs",
     description: "View and search logs for your requests",
     icon: TableCellsIcon,
-    src: "/static/platform/request.png",
+    src: "/static/platform/request.webp",
   },
   {
     key: "templates",
     name: "Prompt Templates",
     description: "Create and manage templates for your requests",
     icon: DocumentTextIcon,
-    src: "/static/platform/prompt.png",
+    src: "/static/platform/prompt.webp",
   },
 ];
 
@@ -121,11 +122,8 @@ export default function Platform() {
       </div>
       <div className="relative overflow-hidden pt-2">
         <div className="mx-auto max-w-8xl px-6 lg:px-8">
-          <img
-            src={
-              tabs.find((tab) => tab.key === activeTab)?.src ||
-              "/assets/home/dashboard.png"
-            }
+          <Image
+            src={tabs.find((tab) => tab.key === activeTab)?.src ?? ""}
             alt="App screenshot"
             className="mb-[-7%] rounded-xl shadow-2xl ring-1 ring-gray-900/10"
             width={2432}
