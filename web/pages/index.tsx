@@ -24,16 +24,10 @@ export default Home;
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  if (isCustomerDomain(context.req.headers.host ?? "")) {
-    return {
-      redirect: {
-        destination: "/signin",
-        permanent: false,
-      },
-    };
-  }
-
   return {
-    props: {},
+    redirect: {
+      destination: "/signin",
+      permanent: false,
+    },
   };
 };
