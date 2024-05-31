@@ -202,7 +202,7 @@ export default function Example() {
         <div className="flex flex-col max-w-6xl mx-auto p-4 pb-24 pt-8 sm:pb-32 lg:flex">
           <span className="block sm:hidden">
             <Image
-              src={"/static/pricing/bouncing-cube.png"}
+              src={"/static/pricing/bouncing-cube.webp"}
               alt={""}
               width={100}
               height={50}
@@ -210,7 +210,7 @@ export default function Example() {
           </span>
           <span className="hidden sm:block">
             <Image
-              src={"/static/pricing/bouncing-cube.png"}
+              src={"/static/pricing/bouncing-cube.webp"}
               alt={""}
               width={200}
               height={100}
