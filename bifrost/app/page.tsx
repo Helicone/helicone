@@ -105,7 +105,7 @@ export default function Home() {
               Get a demo
             </Link>
             <Link
-              href="/signup"
+              href="https://us.helicone.ai/signup"
               className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 text-white border-[3px] border-sky-700 rounded-lg pl-6 pr-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
             >
               Start Building

@@ -122,7 +122,7 @@ const TIERS: {
       { name: "SOC-2 Compliance", included: false },
       { name: "On-Prem Deployment", included: false },
     ],
-    href: "/signup",
+    href: "https://us.helicone.ai/signup",
   },
   {
     name: "Growth",
@@ -135,7 +135,7 @@ const TIERS: {
       { name: "SOC-2 Compliance", included: false },
       { name: "On-Prem Deployment", included: false },
     ],
-    href: "/signup",
+    href: "https://us.helicone.ai/signup",
   },
   {
     name: "Enterprise",
@@ -222,13 +222,9 @@ export default function Example() {
           </h1>
           <p className="mt-4 w-full text-md sm:text-lg leading-7 text-gray-700 max-w-xl">
             Only pay for what you use. We offer{" "}
-            <Link
-              className="underline underline-offset-4 decoration-sky-300"
-              // navigate to the pricing section
-              href="#pricing"
-            >
+            <span className="underline underline-offset-4 decoration-sky-300">
               usage-based pricing
-            </Link>{" "}
+            </span>{" "}
             that scales with your business when you need it.
           </p>
           <div className="flex items-center gap-4 pt-4">
@@ -335,6 +331,7 @@ export default function Example() {
                 <Link
                   href={tier.href}
                   className={clsx(
+                    "w-full flex items-center justify-center gap-2",
                     tier.name === "Growth"
                       ? "bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                       : "bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 rounded-lg px-4 py-2 text-sm font-bold shadow-lg flex w-full justify-center text-center items-center gap-1"

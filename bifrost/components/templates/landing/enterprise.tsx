@@ -120,7 +120,7 @@ const ENTERPRISE_TABS: {
     ],
     cta: (
       <Link
-        href="/signup"
+        href="https://us.helicone.ai/signup"
         className="bg-violet-500 hover:bg-violet-600 ease-in-out duration-500 text-white border-2 border-violet-700 rounded-lg px-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
       >
         Get Started
@@ -138,7 +138,7 @@ const ENTERPRISE_TABS: {
     bullets: [],
     cta: (
       <Link
-        href="/signup"
+        href="https://us.helicone.ai/signup"
         className="bg-violet-500 hover:bg-violet-600 ease-in-out duration-500 text-white border-2 border-violet-700 rounded-lg px-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
       >
         Get Started
