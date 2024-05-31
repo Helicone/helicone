@@ -1,6 +1,12 @@
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { Bars3Icon, HomeIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  Bars3Icon,
+  HomeIcon,
+  XMarkIcon,
+  ChartBarIcon,
+  TicketIcon,
+} from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import { useRouter } from "next/router";
 import { useOrg } from "../organizationContext";
@@ -8,7 +14,14 @@ import MetaData from "../public/authMetaData";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: HomeIcon, current: false },
-  { name: "On Prem", href: "/admin/on-prem", icon: HomeIcon, current: false },
+  { name: "On Prem", href: "/admin/on-prem", icon: TicketIcon, current: false },
+  {
+    name: "All Orgs",
+    href: "/admin/stats",
+    icon: ChartBarIcon,
+
+    current: false,
+  },
 ];
 const teams = [
   { id: 1, name: "Heroicons", href: "#", initial: "H", current: false },

@@ -41,10 +41,69 @@ const authCheckThrow = async (userId: string | undefined) => {
 @Tags("Admin")
 @Security("api_key")
 export class AdminController extends Controller {
-  @Get("/orgs/top")
-  public async getTopOrgs(@Request() request: JawnAuthenticatedRequest) {
+  @Post("/orgs/top")
+  public async getTopOrgs(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      startDate: string;
+      endDate: string;
+      tier: "all" | "pro" | "free" | "growth" | "enterprise";
+      orgsId?: string[];
+      orgsNameContains?: string[];
+      emailContains?: string[];
+    }
+  ) {
     console.log("getTopOrgs");
     await authCheckThrow(request.authParams.userId);
+    const orgData = await dbExecute<{
+      id: string;
+      tier: string;
+      owner_email: string;
+      owner_last_login: string;
+      name: string;
+      members: {
+        id: string;
+        email: string;
+        role: string;
+        last_active: string;
+      }[];
+    }>(
+      `
+    SELECT
+      organization.name AS name,
+      organization.id AS id,
+      organization.tier AS tier,
+      users_view.email AS owner_email,
+      users_view.last_sign_in_at AS owner_last_login,
+      json_agg(
+          json_build_object(
+              'id', organization_member.member,
+              'email', member_user.email,
+              'role', organization_member.org_role,
+              'last_active', member_user.last_sign_in_at
+          )
+      ) AS members
+    FROM organization
+    LEFT JOIN users_view ON organization.owner = users_view.id
+    LEFT JOIN organization_member ON organization.id = organization_member.organization
+    LEFT JOIN users_view AS member_user ON organization_member.member = member_user.id
+    WHERE (
+      true 
+      ${body.tier !== "all" ? `AND organization.tier = '${body.tier}'` : ""}
+    )
+    GROUP BY
+      organization.id,
+      organization.tier,
+      users_view.email,
+      users_view.last_sign_in_at;
+    `,
+      []
+    );
+
+    if (!orgData.data) {
+      return [];
+    }
 
     // Step 1: Fetch top organizations
     const orgs = await clickhouseDb.dbQuery<{
@@ -56,57 +115,82 @@ export class AdminController extends Controller {
       organization_id,
       count(*) as ct
     FROM request_response_versioned
-    WHERE request_response_versioned.request_created_at > now() - INTERVAL '30 day'
+    WHERE 
+      request_response_versioned.request_created_at > toDateTime('${
+        body.startDate
+      }')
+      and request_response_versioned.request_created_at < toDateTime('${
+        body.endDate
+      }')
+    AND organization_id in (
+      ${orgData.data
+        ?.map((org) => `'${org.id}'`)
+        .slice(0, 30)
+        .join(",")}
+    )
     GROUP BY organization_id
     ORDER BY ct DESC
-    LIMIT 100
     `,
       []
     );
 
+    if (!orgs.data) {
+      return [];
+    }
+
+    if (body.orgsId) {
+      orgs.data = orgs.data.filter((org) =>
+        body.orgsId?.includes(org.organization_id)
+      );
+    }
+    if (!orgs.data) {
+      return [];
+    }
     // Step 2: Fetch organization details including members
-    const orgData = await dbExecute<{
-      id: string;
-      tier: string;
-      owner_email: string;
-      owner_last_login: string;
-      members: {
-        id: string;
-        email: string;
-        role: string;
-        last_active: string;
-      }[];
-    }>(
-      `
-    SELECT
-      organization.id AS id,
-      organization.tier AS tier,
-      auth.users.email AS owner_email,
-      auth.users.last_sign_in_at AS owner_last_login,
-      json_agg(
-          json_build_object(
-              'id', organization_member.member,
-              'email', member_user.email,
-              'role', organization_member.org_role,
-              'last_active', member_user.last_sign_in_at
-          )
-      ) AS members
-    FROM organization
-    LEFT JOIN auth.users ON organization.owner = auth.users.id
-    LEFT JOIN organization_member ON organization.id = organization_member.organization
-    LEFT JOIN auth.users AS member_user ON organization_member.member = member_user.id
-    WHERE organization.id IN (
-      ${orgs.data?.map((org) => `'${org.organization_id}'`).join(",")}
-    )
-    GROUP BY
-      organization.id,
-      organization.tier,
-      auth.users.email,
-      auth.users.last_sign_in_at;
-    `,
-      []
+
+    orgs.data = orgs.data?.filter((org) =>
+      orgData.data?.find((od) => od.id === org.organization_id)
     );
 
+    if (body.orgsNameContains) {
+      orgs.data = orgs.data?.filter((org) =>
+        body.orgsNameContains?.some((name) =>
+          orgData.data
+            ?.find((od) => od.id === org.organization_id)
+            ?.name.toLowerCase()
+            .includes(name.toLowerCase())
+        )
+      );
+    }
+
+    if (body.emailContains) {
+      orgs.data = orgs.data?.filter((org) =>
+        body.emailContains?.some((email) =>
+          orgData.data
+            ?.find((od) => od.id === org.organization_id)
+            ?.owner_email.toLowerCase()
+            .includes(email.toLowerCase())
+        )
+      );
+    }
+
+    let timeGrain = "minute";
+    if (
+      new Date(body.endDate).getTime() - new Date(body.startDate).getTime() >
+      12 * 60 * 60 * 1000
+    ) {
+      timeGrain = "hour";
+    }
+    if (
+      new Date(body.endDate).getTime() - new Date(body.startDate).getTime() >
+      30 * 24 * 60 * 60 * 1000
+    ) {
+      timeGrain = "day";
+    }
+
+    if (!orgs.data || orgs.data.length === 0) {
+      return [];
+    }
     // Step 3: Fetch organization data over time
     const orgsOverTime = await clickhouseDb.dbQuery<{
       count: number;
@@ -116,16 +200,27 @@ export class AdminController extends Controller {
       `
       select
         count(*) as count,
-        date_trunc('hour', request_created_at) AS dt,
+        date_trunc('${timeGrain}', request_created_at) AS dt,
         request_response_versioned.organization_id as organization_id
       from request_response_versioned
       where request_response_versioned.organization_id in (
-        ${orgs.data?.map((org) => `'${org.organization_id}'`).join(",")}
+        ${orgs.data
+          ?.map((org) => `'${org.organization_id}'`)
+          .slice(0, 30)
+          .join(",")}
       )
-      and request_response_versioned.request_created_at > now() - INTERVAL '30 day'
+      and request_response_versioned.request_created_at > toDateTime('${
+        body.startDate
+      }')
+      and request_response_versioned.request_created_at < toDateTime('${
+        body.endDate
+      }')
       group by dt, organization_id
       order by organization_id, dt ASC
-      WITH FILL FROM toStartOfHour(now() - INTERVAL '30 day') TO toStartOfHour(now()) + 1 STEP INTERVAL 1 HOUR
+      -- WITH FILL FROM toStartOfHour(now() - INTERVAL '30 day') TO toStartOfHour(now()) + 1 STEP INTERVAL 1 HOUR
+      WITH FILL FROM toDateTime('${body.startDate}') TO toDateTime('${
+        body.endDate
+      }') STEP INTERVAL 1 ${timeGrain}
     `,
       []
     );

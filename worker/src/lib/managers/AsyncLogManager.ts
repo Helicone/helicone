@@ -100,8 +100,6 @@ export async function logAsync(
       kafkaProducer: new KafkaProducer(env),
     },
     env.S3_ENABLED ?? "true",
-    env.ORG_IDS ?? "",
-    env.PERCENT_LOG_KAFKA ?? "",
     heliconeHeaders
   );
 
