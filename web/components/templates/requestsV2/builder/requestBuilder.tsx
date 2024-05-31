@@ -88,7 +88,7 @@ export const getBuilderType = (
     return "ChatGPTBuilder";
   }
 
-  if (/^meta-llama\/Meta.*/i.test(model)) {
+  if (/^meta-llama\/.*/i.test(model)) {
     return "ChatGPTBuilder"; // for now
   }
 
