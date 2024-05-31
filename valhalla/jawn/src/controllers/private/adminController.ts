@@ -56,39 +56,6 @@ export class AdminController extends Controller {
   ) {
     console.log("getTopOrgs");
     await authCheckThrow(request.authParams.userId);
-
-    // Step 1: Fetch top organizations
-    const orgs = await clickhouseDb.dbQuery<{
-      organization_id: string;
-      ct: number;
-    }>(
-      `
-    SELECT
-      organization_id,
-      count(*) as ct
-    FROM request_response_versioned
-    WHERE 
-      request_response_versioned.request_created_at > toDateTime('${body.startDate}')
-      and request_response_versioned.request_created_at < toDateTime('${body.endDate}')
-    GROUP BY organization_id
-    ORDER BY ct DESC
-    `,
-      []
-    );
-
-    if (!orgs.data) {
-      return [];
-    }
-
-    if (body.orgsId) {
-      orgs.data = orgs.data.filter((org) =>
-        body.orgsId?.includes(org.organization_id)
-      );
-    }
-    if (!orgs.data) {
-      return [];
-    }
-    // Step 2: Fetch organization details including members
     const orgData = await dbExecute<{
       id: string;
       tier: string;
@@ -133,6 +100,53 @@ export class AdminController extends Controller {
     `,
       []
     );
+
+    if (!orgData.data) {
+      return [];
+    }
+
+    // Step 1: Fetch top organizations
+    const orgs = await clickhouseDb.dbQuery<{
+      organization_id: string;
+      ct: number;
+    }>(
+      `
+    SELECT
+      organization_id,
+      count(*) as ct
+    FROM request_response_versioned
+    WHERE 
+      request_response_versioned.request_created_at > toDateTime('${
+        body.startDate
+      }')
+      and request_response_versioned.request_created_at < toDateTime('${
+        body.endDate
+      }')
+    AND organization_id in (
+      ${orgData.data
+        ?.map((org) => `'${org.id}'`)
+        .slice(0, 30)
+        .join(",")}
+    )
+    GROUP BY organization_id
+    ORDER BY ct DESC
+    `,
+      []
+    );
+
+    if (!orgs.data) {
+      return [];
+    }
+
+    if (body.orgsId) {
+      orgs.data = orgs.data.filter((org) =>
+        body.orgsId?.includes(org.organization_id)
+      );
+    }
+    if (!orgs.data) {
+      return [];
+    }
+    // Step 2: Fetch organization details including members
 
     orgs.data = orgs.data?.filter((org) =>
       orgData.data?.find((od) => od.id === org.organization_id)
