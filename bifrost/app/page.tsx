@@ -1,11 +1,6 @@
-import Enterprise from "@/components/templates/landingPage/enterprise";
-import Integrations from "@/components/templates/landingPage/integrations";
-import Platform from "@/components/templates/landingPage/platform";
-import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-} from "@headlessui/react";
+import Enterprise from "@/components/templates/landing/enterprise";
+import Integrations from "@/components/templates/landing/integrations";
+import Platform from "@/components/templates/landing/platform";
 import {
   CheckCircleIcon,
   ChevronRightIcon,
@@ -16,25 +11,6 @@ import {
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-
-const faqs = [
-  {
-    question: "Is there a latency impact to my requests with Helicone's Proxy?",
-    answer:
-      "Helicone leverages Cloudflare’s global network of servers as proxies for efficient web traffic routing. Cloudflare workers maintain extremely low latency through their worldwide distribution. This results in a fast and reliable proxy for your LLM requests with less than a fraction of a millisecond of latency impact.",
-  },
-  {
-    question: "Do you offer a self-hosted or manage-hosted solution?",
-    answer:
-      "Our recommended solution is to use our cloud service, but we do offer a dedicated manage-hosted solution for enterprise customers. Please contact us at sales@helicone.ai for more information.",
-  },
-  {
-    question: "I do not want to use the proxy, can I still use Helicone?",
-    answer:
-      "Yes, you can use Helicone without the proxy. We have packages for Python and Node.js that you can use to send data to Helicone. Visit our documentation page to learn more.",
-  },
-  // More questions...
-];
 
 export default function Home() {
   return (
@@ -129,7 +105,7 @@ export default function Home() {
               Get a demo
             </Link>
             <Link
-              href="/signup"
+              href="https://us.helicone.ai/signup"
               className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 text-white border-[3px] border-sky-700 rounded-lg pl-6 pr-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
             >
               Start Building
@@ -157,10 +133,11 @@ export default function Home() {
 
           <div className="pt-8 md:pt-0">
             <Image
-              src={"/static/dashboard.png"}
+              src={"/static/dashboard.webp"}
               alt={"Helicone Dashboard"}
               width={4733}
               height={2365}
+              priority
             />
           </div>
         </header>
@@ -198,7 +175,7 @@ export default function Home() {
           <ul className="flex flex-wrap md:flex-row items-center w-full justify-center gap-10 md:gap-32 px-0 md:px-8 pt-16">
             <li className="w-32">
               <Image
-                src={"/static/filevine.png"}
+                src={"/static/filevine.webp"}
                 alt={"Filevine"}
                 width={300}
                 height={77}
@@ -222,7 +199,7 @@ export default function Home() {
             </li>
             <li className="w-32">
               <Image
-                src={"/static/greptile.png"}
+                src={"/static/greptile.webp"}
                 alt={"Greptile"}
                 width={300}
                 height={77}
