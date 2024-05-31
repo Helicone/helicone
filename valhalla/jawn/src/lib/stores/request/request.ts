@@ -99,6 +99,10 @@ function addJoinQueries(joinQuery: string, filter: FilterNode): string {
     left join score_value ON request.id = score_value.request_id`;
   }
 
+  if (JSON.stringify(filter).includes("request_response_search")) {
+    joinQuery += `
+    left join request_response_search on request.id = request_response_search.request_id`;
+  }
   return joinQuery;
 }
 

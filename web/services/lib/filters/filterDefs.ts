@@ -16,6 +16,7 @@ export type TextOperators = Record<
   "not-equals" | "equals" | "like" | "ilike" | "contains" | "not-contains",
   string
 >;
+export type VectorOperators = Record<"contains", string>;
 
 export type NumberOperators = Record<
   "not-equals" | "equals" | "gte" | "lte" | "lt" | "gt",
@@ -33,7 +34,8 @@ export type AnyOperator =
   | SingleKey<NumberOperators>
   | SingleKey<TimestampOperators>
   | SingleKey<TimestampOperatorsTyped>
-  | SingleKey<BooleanOperators>;
+  | SingleKey<BooleanOperators>
+  | SingleKey<VectorOperators>;
 export type SingleKey<T> = {
   [K in keyof T]: Partial<{
     [P in keyof T]: P extends K ? T[P] : never;
@@ -199,6 +201,14 @@ type PropertyWithResponseV1ToOperators = {
 export type FilterLeafPropertyWithResponseV1 =
   SingleKey<PropertyWithResponseV1ToOperators>;
 
+type RequestResponseSearchToOperators = {
+  request_body_vector: SingleKey<VectorOperators>;
+  response_body_vector: SingleKey<VectorOperators>;
+};
+
+export type FilterLeafRequestResponseSearch =
+  SingleKey<RequestResponseSearchToOperators>;
+
 type UserViewToOperators = {
   user_id: SingleKey<TextOperators>;
   active_for: SingleKey<NumberOperators>;
@@ -254,6 +264,7 @@ export type TablesAndViews = {
   request: FilterLeafRequest;
   feedback: FilterLeafFeedback;
   properties_table: FilterLeafPropertiesTable;
+  request_response_search: FilterLeafRequestResponseSearch;
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
   request_response_versioned: FilterLeafRequestResponseVersioned;

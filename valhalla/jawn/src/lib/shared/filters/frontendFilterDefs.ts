@@ -146,9 +146,9 @@ export const DASHBOARD_PAGE_TABLE_FILTERS: [
   },
 ];
 export const REQUEST_TABLE_FILTERS: [
-  SingleFilterDef<"request">,
+  SingleFilterDef<"request_response_search">,
   SingleFilterDef<"response">,
-  SingleFilterDef<"response">,
+  SingleFilterDef<"request_response_search">,
   SingleFilterDef<"request">,
   SingleFilterDef<"response">,
   SingleFilterDef<"response">,
@@ -158,8 +158,8 @@ export const REQUEST_TABLE_FILTERS: [
   {
     label: "Request",
     operators: textOperators,
-    table: "request",
-    column: "prompt",
+    table: "request_response_search",
+    column: "request_body_vector",
     category: "request",
   },
   {
@@ -172,8 +172,8 @@ export const REQUEST_TABLE_FILTERS: [
   {
     label: "Total Tokens",
     operators: numberOperators,
-    table: "response",
-    column: "body_tokens",
+    table: "request_response_search",
+    column: "response_body_vectorized",
     category: "request",
   },
   {

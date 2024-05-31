@@ -186,6 +186,23 @@ const whereKeyMappings: KeyMappings = {
       threat: "request_response_versioned.threat",
     })(filter, placeValueSafely);
   },
+  request_response_search: (filter, placeValueSafely) => {
+    const keys = Object.keys(filter);
+    if (keys.length !== 1) {
+      throw new Error("Invalid filter, only one key is allowed");
+    }
+    const key = keys[0];
+    const { operator, value } = extractOperatorAndValueFromAnOperator(
+      filter[key as keyof typeof filter]!
+    );
+    return {
+      column: `@@ plainto_tsquery('helicone_search_config','${placeValueSafely(
+        key
+      )}')`,
+      operator: operator,
+      value: placeValueSafely(value),
+    };
+  },
   users_view: easyKeyMappings<"request_response_log">({
     status: "r.status",
     user_id: "r.user_id",
@@ -271,6 +288,7 @@ const havingKeyMappings: KeyMappings = {
       threat: "request_response_versioned.threat",
     })(filter, placeValueSafely);
   },
+  request_response_search: NOT_IMPLEMENTED,
   properties_v3: NOT_IMPLEMENTED,
   property_with_response_v1: NOT_IMPLEMENTED,
   feedback: NOT_IMPLEMENTED,
