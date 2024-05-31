@@ -97,7 +97,7 @@ client = OpenAI(
       logo: (
         <div className="p-3">
           <Image
-            src={"/static/azure.png"}
+            src={"/static/azure.webp"}
             alt={"Azure"}
             width={2048}
             height={2048}
@@ -184,7 +184,7 @@ self.model = AzureChatOpenAI(
       logo: (
         <div className="p-3">
           <Image
-            src={"/static/anthropic.png"}
+            src={"/static/anthropic.webp"}
             alt={"Anthropic"}
             width={2048}
             height={2048}
@@ -268,7 +268,7 @@ client.messages.create(
       logo: (
         <div className="p-3">
           <Image
-            src={"/static/anyscale.png"}
+            src={"/static/anyscale.webp"}
             alt={"Anyscale"}
             width={2048}
             height={2048}
@@ -283,7 +283,7 @@ client.messages.create(
       logo: (
         <div className="p-3">
           <Image
-            src={"/static/together.jpeg"}
+            src={"/static/together.webp"}
             alt={"TogetherAI"}
             width={2048}
             height={2048}
@@ -298,7 +298,7 @@ client.messages.create(
       logo: (
         <div className="p-3">
           <Image
-            src={"/static/openrouter.jpeg"}
+            src={"/static/openrouter.webp"}
             alt={"Open Router"}
             width={2048}
             height={2048}

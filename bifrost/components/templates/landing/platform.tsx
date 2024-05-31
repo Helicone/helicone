@@ -15,6 +15,7 @@ import {
   TableCellsIcon,
 } from "@heroicons/react/24/solid";
 import { useState } from "react";
+import Image from "next/image";
 
 const features = [
   {
@@ -121,7 +122,7 @@ export default function Platform() {
       </div>
       <div className="relative overflow-hidden pt-2">
         <div className="mx-auto max-w-8xl px-6 lg:px-8">
-          <img
+          <Image
             src={
               tabs.find((tab) => tab.key === activeTab)?.src ||
               "/assets/home/dashboard.png"

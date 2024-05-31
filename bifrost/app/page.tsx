@@ -174,7 +174,7 @@ export default function Home() {
           <ul className="flex flex-wrap md:flex-row items-center w-full justify-center gap-10 md:gap-32 px-0 md:px-8 pt-16">
             <li className="w-32">
               <Image
-                src={"/static/filevine.png"}
+                src={"/static/filevine.webp"}
                 alt={"Filevine"}
                 width={300}
                 height={77}
@@ -198,7 +198,7 @@ export default function Home() {
             </li>
             <li className="w-32">
               <Image
-                src={"/static/greptile.png"}
+                src={"/static/greptile.webp"}
                 alt={"Greptile"}
                 width={300}
                 height={77}
