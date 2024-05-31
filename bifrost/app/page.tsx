@@ -133,10 +133,11 @@ export default function Home() {
 
           <div className="pt-8 md:pt-0">
             <Image
-              src={"/static/dashboard.png"}
+              src={"/static/dashboard.webp"}
               alt={"Helicone Dashboard"}
               width={4733}
               height={2365}
+              priority
             />
           </div>
         </header>
