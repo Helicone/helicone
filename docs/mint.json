@@ -92,9 +92,9 @@
         {
           "group": "Groq",
           "pages": [
-            "integrations/openai/curl",
-            "integrations/openai/javascript",
-            "integrations/openai/python"
+            "integrations/groq/curl",
+            "integrations/groq/javascript",
+            "integrations/groq/python"
           ]
         },
         "getting-started/integration-method/openrouter",
