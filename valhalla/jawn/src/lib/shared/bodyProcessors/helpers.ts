@@ -1,6 +1,6 @@
 import { ParseInput, ParseOutput } from "./IBodyProcessor";
 
-export function isJson(parseInput: ParseInput): boolean {
+export function isParseInputJson(parseInput: ParseInput): boolean {
   const { responseBody } = parseInput;
   try {
     JSON.parse(responseBody);

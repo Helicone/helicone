@@ -1,7 +1,7 @@
 import { consolidateTextFields } from "../../../utils/streamParser";
 import { PromiseGenericResult, err, ok } from "../result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
-import { isJson } from "./helpers";
+import { isParseInputJson } from "./helpers";
 
 export const NON_DATA_LINES = [
   "event: content_block_delta",
@@ -17,7 +17,7 @@ export const NON_DATA_LINES = [
 
 export class OpenAIStreamProcessor implements IBodyProcessor {
   async parse(parseInput: ParseInput): PromiseGenericResult<ParseOutput> {
-    if (isJson(parseInput)) {
+    if (isParseInputJson(parseInput)) {
       return ok({
         processedBody: JSON.parse(parseInput.responseBody),
       });
