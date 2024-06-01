@@ -89,9 +89,18 @@
         },
         "getting-started/integration-method/anyscale",
         "getting-started/integration-method/together",
+        {
+          "group": "Groq",
+          "pages": [
+            "integrations/openai/curl",
+            "integrations/openai/javascript",
+            "integrations/openai/python"
+          ]
+        },
         "getting-started/integration-method/openrouter",
         "getting-started/integration-method/litellm",
         "getting-started/integration-method/posthog",
+
         {
           "group": "Other",
           "pages": [
