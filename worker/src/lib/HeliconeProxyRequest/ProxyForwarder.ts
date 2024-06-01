@@ -96,24 +96,28 @@ export async function proxyForwarder(
       if (orgError !== null || !orgData?.organizationId) {
         console.error("Error getting org", orgError);
       } else {
-        const cachedResponse = await getCachedResponse(
-          proxyRequest,
-          cacheSettings.bucketSettings,
-          env.CACHE_KV,
-          cacheSettings.cacheSeed
-        );
-        if (cachedResponse) {
-          ctx.waitUntil(
-            recordCacheHit(
-              cachedResponse.headers,
-              env,
-              new ClickhouseClientWrapper(env),
-              orgData.organizationId,
-              provider,
-              (request.cf?.country as string) ?? null
-            )
+        try {
+          const cachedResponse = await getCachedResponse(
+            proxyRequest,
+            cacheSettings.bucketSettings,
+            env.CACHE_KV,
+            cacheSettings.cacheSeed
           );
-          return cachedResponse;
+          if (cachedResponse) {
+            ctx.waitUntil(
+              recordCacheHit(
+                cachedResponse.headers,
+                env,
+                new ClickhouseClientWrapper(env),
+                orgData.organizationId,
+                provider,
+                (request.cf?.country as string) ?? null
+              )
+            );
+            return cachedResponse;
+          }
+        } catch (error) {
+          console.error("Error getting cached response", error);
         }
       }
     }
