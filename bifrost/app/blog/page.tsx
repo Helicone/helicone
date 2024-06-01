@@ -19,6 +19,22 @@ export type BlogStructure = {
 
 const blogContent: BlogStructure[] = [
   {
+    title: "Helicone vs. Weights and Biases",
+    description:
+      "Training modern LLMs is generally less complex than traditional ML models. Here's how to have all the essential tools specifically designed for language model observability without the clutter.",
+    badgeText: "compare",
+    date: "May 31, 2024",
+    href: "/blog/weights-and-biases",
+    imageUrl: "/static/blog/weights-and-biases.png",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/static/blog/linalam-headshot.webp",
+      },
+    ],
+    time: "5 minute read",
+  },
+  {
     title: "Insider Scoop: Our Founding Engineer's Take on PostHog",
     description:
       "No BS, no affiliations, just genuine opinions from the founding engineer at Helicone.",
