@@ -39,6 +39,21 @@ export interface paths {
   "/v1/dataset/{datasetId}/fine-tune": {
     post: operations["DatasetFineTune"];
   };
+  "/v1/experiment/dataset": {
+    post: operations["AddDataset"];
+  };
+  "/v1/experiment/dataset/random": {
+    post: operations["AddRandomDataset"];
+  };
+  "/v1/experiment/dataset/query": {
+    post: operations["GetDatasets"];
+  };
+  "/v1/experiment/dataset/{datasetId}/query": {
+    post: operations["GetDataset"];
+  };
+  "/v1/experiment/dataset/{datasetId}/mutate": {
+    post: operations["MutateDataset"];
+  };
   "/v1/fine-tune": {
     post: operations["FineTune"];
   };
@@ -265,9 +280,148 @@ export interface components {
     FineTuneBodyParams: {
       providerKeyId: string;
     };
+    "ResultSuccess__datasetId-string__": {
+      data: {
+        datasetId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__datasetId-string_.string_": components["schemas"]["ResultSuccess__datasetId-string__"] | components["schemas"]["ResultError_string_"];
+    DatasetMetadata: {
+      promptId?: string;
+      inputRecordsIds?: string[];
+    };
+    NewDatasetParams: {
+      datasetName: string;
+      requestIds: string[];
+      meta?: components["schemas"]["DatasetMetadata"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_TimestampOperators_: {
+      gte?: string;
+      lte?: string;
+      lt?: string;
+      gt?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_RequestTableToOperators_: {
+      prompt?: components["schemas"]["Partial_TextOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperators_"];
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      auth_hash?: components["schemas"]["Partial_TextOperators_"];
+      org_id?: components["schemas"]["Partial_TextOperators_"];
+      id?: components["schemas"]["Partial_TextOperators_"];
+      node_id?: components["schemas"]["Partial_TextOperators_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      modelOverride?: components["schemas"]["Partial_TextOperators_"];
+      path?: components["schemas"]["Partial_TextOperators_"];
+      prompt_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_NumberOperators_: {
+      /** Format: double */
+      "not-equals"?: number;
+      /** Format: double */
+      equals?: number;
+      /** Format: double */
+      gte?: number;
+      /** Format: double */
+      lte?: number;
+      /** Format: double */
+      lt?: number;
+      /** Format: double */
+      gt?: number;
+    };
+    /** @description Make all properties in T optional */
+    Partial_PromptVersionsToOperators_: {
+      minor_version?: components["schemas"]["Partial_NumberOperators_"];
+      major_version?: components["schemas"]["Partial_NumberOperators_"];
+      id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.request-or-prompts_versions_": {
+      request?: components["schemas"]["Partial_RequestTableToOperators_"];
+      prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
+    };
+    "FilterLeafSubset_request-or-prompts_versions_": components["schemas"]["Pick_FilterLeaf.request-or-prompts_versions_"];
+    DatasetFilterNode: components["schemas"]["FilterLeafSubset_request-or-prompts_versions_"] | components["schemas"]["DatasetFilterBranch"] | "all";
+    DatasetFilterBranch: {
+      right: components["schemas"]["DatasetFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["DatasetFilterNode"];
+    };
+    RandomDatasetParams: {
+      datasetName: string;
+      filter: components["schemas"]["DatasetFilterNode"];
+      /** Format: double */
+      offset?: number;
+      /** Format: double */
+      limit?: number;
+    };
+    DatasetResult: {
+      id: string;
+      name: string;
+      created_at: string;
+      meta?: components["schemas"]["DatasetMetadata"];
+    };
+    "ResultSuccess_DatasetResult-Array_": {
+      data: components["schemas"]["DatasetResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_DatasetResult-Array.string_": components["schemas"]["ResultSuccess_DatasetResult-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess___-Array_": {
+      data: Record<string, never>[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result___-Array.string_": components["schemas"]["ResultSuccess___-Array_"] | components["schemas"]["ResultError_string_"];
+    NewFineTuneJob: {
+      fineTuneJobId: string;
+    };
+    ResultSuccess_NewFineTuneJob_: {
+      data: components["schemas"]["NewFineTuneJob"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_NewFineTuneJob.string_": components["schemas"]["ResultSuccess_NewFineTuneJob_"] | components["schemas"]["ResultError_string_"];
     FineTuneBody: {
       providerKeyId: string;
+      datasetId?: string;
     };
+    IFineTuningJob: {
+      id: string;
+      model: string;
+      status: string;
+      created_at: string;
+      updated_at: string;
+      baseModel: string;
+      errorMessage: string;
+      datasetId?: string;
+    };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.any_": {
+      [key: string]: unknown;
+    };
+    IFineTuningJobEvent: {
+      id: string;
+      type: string;
+      created_at: string;
+      data: components["schemas"]["Record_string.any_"];
+    };
+    FineTuneJobStats: {
+      job: components["schemas"]["IFineTuningJob"];
+      events: components["schemas"]["IFineTuningJobEvent"][];
+    };
+    ResultSuccess_FineTuneJobStats_: {
+      data: components["schemas"]["FineTuneJobStats"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_FineTuneJobStats.string_": components["schemas"]["ResultSuccess_FineTuneJobStats_"] | components["schemas"]["ResultError_string_"];
     KafkaSettings: {
       /** Format: double */
       miniBatchSize: number;
@@ -486,6 +640,86 @@ export interface operations {
       };
     };
   };
+  AddDataset: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NewDatasetParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
+        };
+      };
+    };
+  };
+  AddRandomDataset: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RandomDatasetParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
+        };
+      };
+    };
+  };
+  GetDatasets: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_DatasetResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetDataset: {
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result___-Array.string_"];
+        };
+      };
+    };
+  };
+  MutateDataset: {
+    requestBody: {
+      content: {
+        "application/json": {
+          removeRequests: string[];
+          addRequests: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result___-Array.string_"];
+        };
+      };
+    };
+  };
   FineTune: {
     requestBody: {
       content: {
@@ -496,15 +730,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": {
-            error: string;
-          } | {
-            data: {
-              url: string;
-              fineTuneJob: string;
-            };
-            success: boolean;
-          };
+          "application/json": components["schemas"]["Result_NewFineTuneJob.string_"];
         };
       };
     };
@@ -519,12 +745,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": {
-            error: string;
-          } | {
-            events: unknown;
-            job: unknown;
-          };
+          "application/json": components["schemas"]["Result_FineTuneJobStats.string_"];
         };
       };
     };

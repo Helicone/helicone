@@ -2,12 +2,12 @@ import {
   FineTuningJob,
   FineTuningJobEventsPage,
 } from "openai/resources/fine-tuning/jobs";
-import { OpenAIClient } from "../lib/clients/OpenAIClient";
-import { HeliconeRequest } from "../lib/stores/request/request";
-import { Result, err, ok } from "../lib/shared/result";
+import { OpenAIClient } from "../../lib/clients/OpenAIClient";
+import { HeliconeRequest } from "../../lib/stores/request/request";
+import { Result, err, ok } from "../../lib/shared/result";
 import crypto from "crypto";
 import fs from "fs";
-import { chatCompletionMessage } from "./types";
+import { chatCompletionMessage } from "../types";
 import { ChatCompletionMessageParam } from "openai/resources";
 import { ChatCompletionCreateParamsBase } from "openai/resources/chat/completions";
 import OpenAI from "openai";

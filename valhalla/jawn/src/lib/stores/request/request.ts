@@ -99,7 +99,32 @@ function addJoinQueries(joinQuery: string, filter: FilterNode): string {
     left join score_value ON request.id = score_value.request_id`;
   }
 
+  if (JSON.stringify(filter).includes("experiment_dataset_v2_row")) {
+    joinQuery += `
+    left join prompt_input_record on request.id = prompt_input_record.source_request
+    left join experiment_dataset_v2_row on prompt_input_record.id = experiment_dataset_v2_row.input_record`;
+  }
+
   return joinQuery;
+}
+
+export async function fetchBodies(
+  requests: HeliconeRequest[]
+): Promise<HeliconeRequest[]> {
+  const getAllBodies = requests.map(async (request) => {
+    if (!request.signed_body_url) {
+      throw new Error("No signed body url");
+    }
+    const bodies = await (await fetch(request.signed_body_url)).json();
+
+    return {
+      ...request,
+      request_body: bodies.request_body,
+      response_body: bodies.response_body,
+    };
+  });
+
+  return Promise.all(getAllBodies);
 }
 
 export async function getRequests(

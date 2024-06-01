@@ -50,6 +50,25 @@ export class DatasetManager extends BaseManager {
     return result;
   }
 
+  private async ensureInputRecordsExist(
+    requestIds: string[]
+  ): Promise<Result<null, string>> {
+    const res = await dbExecute(
+      `
+    INSERT INTO prompt_input_record (source_request, inputs, prompt_version)
+    SELECT id, '{}'::jsonb, null
+    FROM request
+    WHERE id = ANY($1)
+    ON CONFLICT DO NOTHING
+    `,
+      [requestIds]
+    );
+    if (res.error) {
+      return err(res.error);
+    }
+    return ok(null);
+  }
+
   async addDataset(params: NewDatasetParams): Promise<Result<string, string>> {
     const dataset = await supabaseServer.client
       .from("experiment_dataset_v2")
@@ -63,6 +82,14 @@ export class DatasetManager extends BaseManager {
 
     if (dataset.error) {
       return err(dataset.error.message);
+    }
+
+    const ensureInputRecords = await this.ensureInputRecordsExist(
+      params.requestIds
+    );
+
+    if (ensureInputRecords.error) {
+      return err(ensureInputRecords.error);
     }
 
     const res = await dbExecute(
