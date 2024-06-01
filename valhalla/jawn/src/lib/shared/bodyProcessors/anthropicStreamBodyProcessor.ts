@@ -2,12 +2,19 @@ import { calculateModel } from "../../../utils/modelMapper";
 import { consolidateTextFields } from "../../../utils/streamParser";
 import { PromiseGenericResult, ok } from "../result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
+import { isJson } from "./helpers";
 import { NON_DATA_LINES } from "./openAIStreamProcessor";
 
 export class AnthropicStreamBodyProcessor implements IBodyProcessor {
   public async parse(
     parseInput: ParseInput
   ): PromiseGenericResult<ParseOutput> {
+    if (isJson(parseInput)) {
+      return ok({
+        processedBody: JSON.parse(parseInput.responseBody),
+      });
+    }
+
     const {
       responseBody,
       requestBody,

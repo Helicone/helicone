@@ -1,6 +1,7 @@
 import { consolidateTextFields } from "../../../utils/streamParser";
 import { PromiseGenericResult, err, ok } from "../result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
+import { isJson } from "./helpers";
 
 export const NON_DATA_LINES = [
   "event: content_block_delta",
@@ -16,6 +17,12 @@ export const NON_DATA_LINES = [
 
 export class OpenAIStreamProcessor implements IBodyProcessor {
   async parse(parseInput: ParseInput): PromiseGenericResult<ParseOutput> {
+    if (isJson(parseInput)) {
+      return ok({
+        processedBody: JSON.parse(parseInput.responseBody),
+      });
+    }
+
     const { responseBody, requestBody, tokenCounter } = parseInput;
     const lines = responseBody
       .split("\n")
@@ -29,7 +36,7 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
         return JSON.parse(line.replace("data:", ""));
       } catch (e) {
         console.log("Error parsing line OpenAI", line);
-        return err(`Error parsing line`);
+        return err({ msg: `Error parsing line`, line });
       }
     });
 
