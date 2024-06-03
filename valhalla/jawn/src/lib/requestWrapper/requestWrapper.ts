@@ -84,7 +84,10 @@ export class RequestWrapper {
   }
 
   private constructor(private request: Request) {
-    this.url = new URL(request.url);
+    const protocol = request.protocol;
+    const host = request.get("host");
+    const fullUrl = `${protocol}://${host}${request.originalUrl}`;
+    this.url = new URL(fullUrl);
     this.headers = this.mutatedAuthorizationHeaders(request);
     this.heliconeHeaders = new HeliconeHeaders(this.headers);
     this.promptSettings = this.getPromptSettings();

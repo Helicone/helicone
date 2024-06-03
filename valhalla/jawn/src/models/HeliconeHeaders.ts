@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 type Nullable<T> = T | null;
 
 export type HeliconeFallbackCode = number | { from: number; to: number };
