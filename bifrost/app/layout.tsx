@@ -5,6 +5,7 @@ import NavBar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import "@mintlify/mdx/dist/styles.css";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -42,6 +43,7 @@ export default function RootLayout({
           {children}
           <Footer />
           <Analytics />
+          <SpeedInsights />
         </div>
       </body>
     </html>
