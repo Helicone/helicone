@@ -35,6 +35,22 @@ const blogContent: BlogStructure[] = [
     time: "5 minute read",
   },
   {
+    title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot",
+    description:
+      "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
+    badgeText: "team's pick",
+    date: "May 30, 2024",
+    href: "/blog/cole-github-copilot",
+    imageUrl: "/static/blog/cole-copilot.png",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/static/blog/linalam-headshot.webp",
+      },
+    ],
+    time: "4 minute read",
+  },
+  {
     title: "Insider Scoop: Our Founding Engineer's Take on PostHog",
     description:
       "No BS, no affiliations, just genuine opinions from the founding engineer at Helicone.",
