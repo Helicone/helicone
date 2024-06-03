@@ -11,7 +11,8 @@ export type AllOperators =
   | "gt"
   | "not-equals"
   | "contains"
-  | "not-contains";
+  | "not-contains"
+  | "vector-contains";
 export type TextOperators = Record<
   "not-equals" | "equals" | "like" | "ilike" | "contains" | "not-contains",
   string

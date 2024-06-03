@@ -195,11 +195,10 @@ const whereKeyMappings: KeyMappings = {
     const { operator, value } = extractOperatorAndValueFromAnOperator(
       filter[key as keyof typeof filter]!
     );
+
     return {
-      column: `@@ plainto_tsquery('helicone_search_config','${placeValueSafely(
-        key
-      )}')`,
-      operator: operator,
+      column: `request_response_search.${key}`,
+      operator: "vector-contains",
       value: placeValueSafely(value),
     };
   },
@@ -323,6 +322,8 @@ function operatorToSql(operator: AllOperators): string {
       return "ILIKE";
     case "not-contains":
       return "NOT ILIKE";
+    case "vector-contains":
+      return "@@";
   }
 }
 

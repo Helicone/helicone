@@ -223,18 +223,14 @@ const whereKeyMappings: KeyMappings = {
     })(filter, placeValueSafely);
   },
   request_response_search: (filter, placeValueSafely) => {
-    console.log("filter", filter);
     const keys = Object.keys(filter);
     if (keys.length !== 1) {
       throw new Error("Invalid filter, only one key is allowed");
     }
     const key = keys[0];
-    console.log("key", key);
     const { operator, value } = extractOperatorAndValueFromAnOperator(
       filter[key as keyof typeof filter]!
     );
-    console.log("operator", operator);
-    console.log("value", value);
 
     return {
       column: `request_response_search.${key}`,

@@ -313,7 +313,7 @@ export type TablesAndViews = {
   score_value: FilterLeafScoreValue;
   request_response_search: FilterLeafRequestResponseSearch;
 
-  // CLICKHOUSE TABLESonst havingKeyMappings: KeyMappings
+  // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
   request_response_versioned: FilterLeafRequestResponseVersioned;
   users_view: FilterLeafUserView;
