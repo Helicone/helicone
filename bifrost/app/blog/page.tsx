@@ -19,20 +19,20 @@ export type BlogStructure = {
 
 const blogContent: BlogStructure[] = [
   {
-    title: "Helicone vs. Weights and Biases",
+    title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot",
     description:
-      "Training modern LLMs is generally less complex than traditional ML models. Here's how to have all the essential tools specifically designed for language model observability without the clutter.",
-    badgeText: "compare",
-    date: "May 31, 2024",
-    href: "/blog/weights-and-biases",
-    imageUrl: "/static/blog/weights-and-biases.png",
+      "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
+    badgeText: "team's pick",
+    date: "May 30, 2024",
+    href: "/blog/cole-github-copilot",
+    imageUrl: "/static/blog/cole-copilot.png",
     authors: [
       {
         name: "Lina Lam",
         imageUrl: "/static/blog/linalam-headshot.webp",
       },
     ],
-    time: "5 minute read",
+    time: "4 minute read",
   },
   {
     title: "Insider Scoop: Our Founding Engineer's Take on PostHog",
