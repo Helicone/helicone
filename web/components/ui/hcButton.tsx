@@ -20,13 +20,7 @@ const HcButton: React.FC<HcButtonProps> = (props) => {
 
   // Passing all other props using {...rest} to Button component
   return (
-    <Button
-      variant={variant}
-      size={size}
-      icon={icon}
-      {...rest}
-      className="h-fit"
-    >
+    <Button variant={variant} size={size} icon={icon} {...rest}>
       {title}
     </Button>
   );

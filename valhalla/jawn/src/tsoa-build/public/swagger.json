@@ -932,6 +932,12 @@
 					},
 					"includeInputs": {
 						"type": "boolean"
+					},
+					"isPartOfExperiment": {
+						"type": "boolean"
+					},
+					"isScored": {
+						"type": "boolean"
 					}
 				},
 				"required": [
@@ -1016,10 +1022,29 @@
 					}
 				]
 			},
+			"Record_string.number-or-boolean_": {
+				"properties": {},
+				"additionalProperties": {
+					"anyOf": [
+						{
+							"type": "number",
+							"format": "double"
+						},
+						{
+							"type": "boolean"
+						}
+					]
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"Scores": {
+				"$ref": "#/components/schemas/Record_string.number-or-boolean_"
+			},
 			"ScoreRequest": {
 				"properties": {
 					"scores": {
-						"$ref": "#/components/schemas/Record_string.number_"
+						"$ref": "#/components/schemas/Scores"
 					}
 				},
 				"required": [
@@ -1485,6 +1510,21 @@
 					}
 				]
 			},
+			"DatasetMetadata": {
+				"properties": {
+					"promptId": {
+						"type": "string"
+					},
+					"inputRecordsIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"NewDatasetParams": {
 				"properties": {
 					"datasetName": {
@@ -1495,6 +1535,9 @@
 							"type": "string"
 						},
 						"type": "array"
+					},
+					"meta": {
+						"$ref": "#/components/schemas/DatasetMetadata"
 					}
 				},
 				"required": [
@@ -1608,20 +1651,16 @@
 					"name": {
 						"type": "string"
 					},
-					"request_ids": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
 					"created_at": {
 						"type": "string"
+					},
+					"meta": {
+						"$ref": "#/components/schemas/DatasetMetadata"
 					}
 				},
 				"required": [
 					"id",
 					"name",
-					"request_ids",
 					"created_at"
 				],
 				"type": "object",
@@ -2240,7 +2279,9 @@
 											"offset": 0,
 											"sort": {
 												"created_at": "desc"
-											}
+											},
+											"isScored": false,
+											"isPartOfExperiment": false
 										}
 									}
 								}
@@ -2273,7 +2314,9 @@
 								"offset": 0,
 								"sort": {
 									"created_at": "desc"
-								}
+								},
+								"isScored": false,
+								"isPartOfExperiment": false
 							}
 						}
 					}
@@ -2836,7 +2879,11 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {},
+								"properties": {
+									"promptId": {
+										"type": "string"
+									}
+								},
 								"type": "object"
 							}
 						}

@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admins: {
+        Row: {
+          created_at: string
+          id: number
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alert: {
         Row: {
           created_at: string | null
@@ -64,6 +100,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      alert_banners: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: number
+          message: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: number
+          message?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: number
+          message?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       alert_history: {
         Row: {
@@ -250,18 +313,21 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          meta: Json | null
           name: string | null
           organization: string
         }
         Insert: {
           created_at?: string | null
           id?: string
+          meta?: Json | null
           name?: string | null
           organization: string
         }
         Update: {
           created_at?: string | null
           id?: string
+          meta?: Json | null
           name?: string | null
           organization?: string
         }
@@ -821,6 +887,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "helicone_api_keys_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       helicone_proxy_key_limits: {
@@ -915,6 +988,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      helicone_settings: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          settings: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          settings: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          settings?: Json
+        }
+        Relationships: []
       }
       job: {
         Row: {
@@ -1139,6 +1233,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "layout_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       org_rate_limit_tracker: {
@@ -1187,6 +1288,7 @@ export type Database = {
           owner: string
           percent_to_log: number | null
           referral: string | null
+          request_limit: number | null
           reseller_id: string | null
           size: string | null
           soft_delete: boolean
@@ -1212,6 +1314,7 @@ export type Database = {
           owner: string
           percent_to_log?: number | null
           referral?: string | null
+          request_limit?: number | null
           reseller_id?: string | null
           size?: string | null
           soft_delete?: boolean
@@ -1237,6 +1340,7 @@ export type Database = {
           owner?: string
           percent_to_log?: number | null
           referral?: string | null
+          request_limit?: number | null
           reseller_id?: string | null
           size?: string | null
           soft_delete?: boolean
@@ -1266,6 +1370,13 @@ export type Database = {
             columns: ["owner"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_owner_fkey"
+            columns: ["owner"]
+            isOneToOne: false
+            referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
           {
@@ -1334,6 +1445,13 @@ export type Database = {
             columns: ["member"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_member_member_fkey"
+            columns: ["member"]
+            isOneToOne: false
+            referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
           {
@@ -1669,6 +1787,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "properties_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       provider_keys: {
@@ -1770,10 +1895,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "referrals_referred_user_id_fkey"
+            columns: ["referred_user_id"]
+            isOneToOne: false
+            referencedRelation: "users_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "referrals_referrer_user_id_fkey"
             columns: ["referrer_user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_user_id_fkey"
+            columns: ["referrer_user_id"]
+            isOneToOne: false
+            referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
         ]
@@ -1887,6 +2026,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "request_helicone_user_fkey"
+            columns: ["helicone_user"]
+            isOneToOne: false
+            referencedRelation: "users_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       request_job_task: {
@@ -1925,6 +2071,48 @@ export type Database = {
             columns: ["task_id"]
             isOneToOne: false
             referencedRelation: "job_node"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      request_response_search: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          request_body_vector: unknown | null
+          request_id: string
+          response_body_vector: unknown | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          request_body_vector?: unknown | null
+          request_id: string
+          response_body_vector?: unknown | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          request_body_vector?: unknown | null
+          request_id?: string
+          response_body_vector?: unknown | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_response_search_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_response_search_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request"
             referencedColumns: ["id"]
           },
         ]
@@ -2025,18 +2213,21 @@ export type Database = {
           id: string
           organization: string
           score_key: string
+          value_type: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           organization: string
           score_key: string
+          value_type?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
           organization?: string
           score_key?: string
+          value_type?: string | null
         }
         Relationships: [
           {
@@ -2117,6 +2308,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_api_keys_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_feedback: {
@@ -2179,6 +2377,13 @@ export type Database = {
             columns: ["user"]
             isOneToOne: true
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_settings_user_fkey"
+            columns: ["user"]
+            isOneToOne: true
+            referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
         ]
@@ -2322,6 +2527,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      users_view: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string | null
+          last_sign_in_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          last_sign_in_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          last_sign_in_at?: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {
@@ -2518,101 +2744,6 @@ export type Database = {
           },
         ]
       }
-      s3_multipart_uploads: {
-        Row: {
-          bucket_id: string
-          created_at: string
-          id: string
-          in_progress_size: number
-          key: string
-          owner_id: string | null
-          upload_signature: string
-          version: string
-        }
-        Insert: {
-          bucket_id: string
-          created_at?: string
-          id: string
-          in_progress_size?: number
-          key: string
-          owner_id?: string | null
-          upload_signature: string
-          version: string
-        }
-        Update: {
-          bucket_id?: string
-          created_at?: string
-          id?: string
-          in_progress_size?: number
-          key?: string
-          owner_id?: string | null
-          upload_signature?: string
-          version?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "s3_multipart_uploads_bucket_id_fkey"
-            columns: ["bucket_id"]
-            isOneToOne: false
-            referencedRelation: "buckets"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      s3_multipart_uploads_parts: {
-        Row: {
-          bucket_id: string
-          created_at: string
-          etag: string
-          id: string
-          key: string
-          owner_id: string | null
-          part_number: number
-          size: number
-          upload_id: string
-          version: string
-        }
-        Insert: {
-          bucket_id: string
-          created_at?: string
-          etag: string
-          id?: string
-          key: string
-          owner_id?: string | null
-          part_number: number
-          size?: number
-          upload_id: string
-          version: string
-        }
-        Update: {
-          bucket_id?: string
-          created_at?: string
-          etag?: string
-          id?: string
-          key?: string
-          owner_id?: string | null
-          part_number?: number
-          size?: number
-          upload_id?: string
-          version?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "s3_multipart_uploads_parts_bucket_id_fkey"
-            columns: ["bucket_id"]
-            isOneToOne: false
-            referencedRelation: "buckets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "s3_multipart_uploads_parts_upload_id_fkey"
-            columns: ["upload_id"]
-            isOneToOne: false
-            referencedRelation: "s3_multipart_uploads"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never
@@ -2650,37 +2781,6 @@ export type Database = {
         Returns: {
           size: number
           bucket_id: string
-        }[]
-      }
-      list_multipart_uploads_with_delimiter: {
-        Args: {
-          bucket_id: string
-          prefix_param: string
-          delimiter_param: string
-          max_keys?: number
-          next_key_token?: string
-          next_upload_token?: string
-        }
-        Returns: {
-          key: string
-          id: string
-          created_at: string
-        }[]
-      }
-      list_objects_with_delimiter: {
-        Args: {
-          bucket_id: string
-          prefix_param: string
-          delimiter_param: string
-          max_keys?: number
-          start_after?: string
-          next_token?: string
-        }
-        Returns: {
-          name: string
-          id: string
-          metadata: Json
-          updated_at: string
         }[]
       }
       search: {

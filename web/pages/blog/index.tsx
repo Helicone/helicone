@@ -17,6 +17,22 @@ export type BlogStructure = {
 
 const blogContent: BlogStructure[] = [
   {
+    title: "Insider Scoop: Our Founding Engineer's Take on PostHog",
+    description:
+      "No BS, no affiliations, just genuine opinions from the founding engineer at Helicone.",
+    badgeText: "team's pick",
+    date: "May 23, 2024",
+    href: "/blog/stefan-posthog",
+    imageUrl: "/assets/blog/stefan-posthog/posthog-cover.png",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/assets/blog/linalam-headshot.webp",
+      },
+    ],
+    time: "3 minute read",
+  },
+  {
     title: "A step by step guide to switch to gpt-4o safely with Helicone",
     description:
       "Learn how to use Helicone's experiments features to regression test, compare and switch models.",

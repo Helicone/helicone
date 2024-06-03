@@ -2,12 +2,16 @@ import {
   ArrowPathIcon,
   PaperAirplaneIcon,
   PlusIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 
-import { ChatCompletionCreateParams } from "openai/resources/chat";
+import {
+  ChatCompletionCreateParams,
+  ChatCompletionTool,
+} from "openai/resources/chat";
 import { fetchOpenAI } from "../../../services/lib/providers/openAI";
 import { Message } from "../requests/chat";
 import ModelPill from "../requestsV2/modelPill";
@@ -16,6 +20,7 @@ import RoleButton from "./new/roleButton";
 import HcButton from "../../ui/hcButton";
 import { PlaygroundModel } from "./playgroundPage";
 import { fetchAnthropic } from "../../../services/lib/providers/anthropic";
+import { Tooltip } from "@mui/material";
 
 interface ChatPlaygroundProps {
   requestId: string;
@@ -23,6 +28,7 @@ interface ChatPlaygroundProps {
   models: PlaygroundModel[];
   temperature: number;
   maxTokens: number;
+  tools?: ChatCompletionTool[];
   onSubmit?: (history: Message[]) => void;
   submitText?: string;
   customNavBar?: {
@@ -37,6 +43,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     models,
     temperature,
     maxTokens,
+    tools,
     onSubmit,
     submitText = "Submit",
     customNavBar,
@@ -57,27 +64,35 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     const responses = await Promise.all(
       models.map(async (model) => {
         // Filter and map the history as before
-        const historyWithoutId = history
-          .filter(
-            (message) =>
-              message.model === model.name || message.model === undefined
-          )
-          .map((message) => ({
-            content: message.content,
-            role: message.role,
-          }));
+        const cleanMessages = (history: Message[]) => {
+          return history
+            .filter(
+              (message) =>
+                message.model === model.name ||
+                message.model === undefined ||
+                message.tool_calls
+            )
+            .map((message) => ({
+              content: message.content ?? "",
+              role: message.role,
+            }));
+        };
+
+        const historyWithoutId = cleanMessages(history);
 
         // Record the start time
         const startTime = new Date().getTime();
 
         if (model.provider === "OPENAI") {
           // Perform the OpenAI request
-          const { data, error } = await fetchOpenAI(
-            historyWithoutId as unknown as ChatCompletionCreateParams[],
+          const { data, error } = await fetchOpenAI({
+            messages:
+              historyWithoutId as unknown as ChatCompletionCreateParams[],
             temperature,
-            model.name,
-            maxTokens
-          );
+            model: model.name,
+            maxTokens,
+            tools,
+          });
 
           // Record the end time and calculate latency
           const endTime = new Date().getTime();
@@ -111,7 +126,14 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
       }
 
       const getContent = (data: any) => {
-        if (data.choices && data.choices[0].message?.content) {
+        if (data.choices[0].message.tool_calls) {
+          const message = data.choices[0].message;
+          const tools = message.tool_calls;
+          const functionTools = tools.filter(
+            (tool: any) => tool.type === "function"
+          );
+          return JSON.stringify(functionTools, null, 4);
+        } else if (data.choices && data.choices[0].message?.content) {
           return data.choices[0].message.content;
         } else if (data.content && data.content[0].text) {
           return data.content[0].text;
@@ -168,7 +190,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                 "flex flex-col w-full h-full relative space-y-4 bg-white border-gray-300 dark:border-gray-700"
               )}
             >
-              <div className="flex w-full justify-between px-8 pt-4 rounded-t-lg">
+              <div className="w-full flex justify-between px-8 pt-4">
                 <RoleButton
                   role={"assistant"}
                   onRoleChange={function (
@@ -176,6 +198,22 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                   ): void {}}
                   disabled={true}
                 />
+                <Tooltip title="Delete Row" placement="top">
+                  <button
+                    onClick={() => {
+                      // delete all of model messages
+                      // deleteRowHandler(modelMessage[0].id);
+                      setCurrentChat((prevChat) => {
+                        return prevChat.filter(
+                          (message) => message.model === undefined
+                        );
+                      });
+                    }}
+                    className="text-red-500 font-semibold"
+                  >
+                    <TrashIcon className="h-5 w-5" />
+                  </button>
+                </Tooltip>
               </div>
               <div className="w-full px-8 pb-4">
                 <div className="w-full h-full flex flex-row justify-between space-x-4 divide-x divide-gray-300 dark:divide-gray-700">
@@ -294,13 +332,32 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             key={currentChat.length - 1}
             className="flex flex-col px-8 py-4 space-y-8 bg-white dark:bg-black border-t border-gray-300 dark:border-gray-700"
           >
-            <RoleButton
-              role={"assistant"}
-              onRoleChange={function (
-                role: "function" | "assistant" | "user" | "system"
-              ): void {}}
-              disabled={true}
-            />
+            <div className="w-full flex justify-between">
+              <RoleButton
+                role={"assistant"}
+                onRoleChange={function (
+                  role: "function" | "assistant" | "user" | "system"
+                ): void {}}
+                disabled={true}
+              />
+              <Tooltip title="Delete Row" placement="top">
+                <button
+                  onClick={() => {
+                    // delete all of model messages
+                    // deleteRowHandler(modelMessage[0].id);
+                    setCurrentChat((prevChat) => {
+                      return prevChat.filter(
+                        (message) => message.model === undefined
+                      );
+                    });
+                  }}
+                  className="text-red-500 font-semibold"
+                >
+                  <TrashIcon className="h-5 w-5" />
+                </button>
+              </Tooltip>
+            </div>
+
             <div
               className={clsx(
                 modelMessage.length > 3
@@ -411,7 +468,6 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           <div className="flex space-x-4 w-full justify-end">
             <button
               onClick={() => {
-                //  reset the chat to the original chat
                 const originalCopy = chat.map((message, index) => {
                   return { ...message, id: crypto.randomUUID() };
                 });

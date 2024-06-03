@@ -158,6 +158,19 @@ jobs:
           mkdir -p ~/test-logs
           cd worker
           npm install
+      - name: Run Jawn
+        working-directory: valhalla/jawn
+        env:
+          SUPABASE_CREDS: '{"url": "http://localhost:54321", "service_role_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"}'
+          SUPABASE_DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres"
+          VERCEL_ENV: "development"
+          S3_ENDPOINT: "http://localhost:9000"
+          S3_ACCESS_KEY: "minioadmin"
+          S3_SECRET_KEY: "minioadmin"
+          S3_BUCKET_NAME: "request-response-storage"
+        run: |
+          yarn
+          yarn dev > ~/test-logs/jawn.log &
       - name: Start proxy worker
         run: |
           cd worker
@@ -192,7 +205,14 @@ jobs:
         run: supabase start db,api
       - name: Install python dependencies
         run: |
-          pip install requests pytest psycopg2 python-dotenv helicone httpx
+          pip install requests pytest psycopg2 python-dotenv helicone httpx minio
+      - name: Wait for Jawn
+        run: |
+          echo "Waiting for Jawn to be ready..."
+          while ! curl -s http://localhost:8585/healthcheck; do
+            echo "Waiting for Jawn to be ready..."
+            sleep 5
+          done
       - name: Run integration tests
         working-directory: tests
         env:

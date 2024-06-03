@@ -13,6 +13,8 @@ export function getRequestImageModelParser(
     case "gpt-4-turbo-2024-04-09":
     case "gpt-4-vision-preview":
     case "gpt-4-1106-vision-preview":
+    case "gpt-4o-2024-05-13":
+    case "gpt-4o":
       return new GptVisionImageParser(modelName, requestId);
     case "claude-3-opus-20240229":
     case "claude-3-sonnet-20240229":

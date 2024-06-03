@@ -13,22 +13,3 @@ if (ph_project_api_key) {
 process.on("exit", () => {
   postHogClient?.shutdown(); // new
 });
-
-export type HeliconeRequestResponseToPosthog = {
-  model: string;
-  temperature: number;
-  n: number;
-  promptId: string;
-  timeToFirstToken: number;
-  cost: number;
-  provider: string;
-  path: string;
-  completetionTokens: number;
-  promptTokens: number;
-  totalTokens: number;
-  userId: string;
-  countryCode: string;
-  requestBodySize: number;
-  responseBodySize: number;
-  delayMs: number;
-};

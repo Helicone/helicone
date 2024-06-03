@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
 import { InMemoryRateLimiter } from "./lib/clients/InMemoryRateLimiter";
@@ -13,7 +14,19 @@ const FALLBACK_QUEUE = "fallback-queue";
 
 export type Provider = ProviderName | "CUSTOM";
 
-export interface Env {
+export interface EU_Env {
+  EU_CLICKHOUSE_HOST: string;
+  EU_CLICKHOUSE_USER: string;
+  EU_CLICKHOUSE_PASSWORD: string;
+  EU_S3_BUCKET_NAME: string;
+  EU_SUPABASE_SERVICE_ROLE_KEY: string;
+  EU_SUPABASE_URL: string;
+  EU_UPSTASH_KAFKA_PASSWORD: string;
+  EU_UPSTASH_KAFKA_URL: string;
+  EU_UPSTASH_KAFKA_USERNAME: string;
+  EU_SECURE_CACHE: KVNamespace;
+}
+export interface BASE_Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
   SUPABASE_URL: string;
   TOKENIZER_COUNT_API: string;
@@ -55,6 +68,7 @@ export interface Env {
   S3_SECRET_KEY: string;
   S3_ENDPOINT: string;
   S3_BUCKET_NAME: string;
+  S3_REGION?: "us-west-2" | "eu-west-1";
   UPSTASH_KAFKA_URL: string;
   UPSTASH_KAFKA_USERNAME: string;
   UPSTASH_KAFKA_API_KEY: string;
@@ -62,6 +76,7 @@ export interface Env {
   ORG_IDS?: string;
   PERCENT_LOG_KAFKA?: string;
 }
+export type Env = BASE_Env & EU_Env;
 
 export async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -80,14 +95,34 @@ export async function hash(key: string): Promise<string> {
 
 // If the url starts with oai.*.<>.com then we know WORKER_TYPE is OPENAI_PROXY
 function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
-  if (env.WORKER_TYPE) {
-    return env;
-  }
   const url = new URL(request.getUrl());
   const host = url.host;
   const hostParts = host.split(".");
+  if (hostParts.includes("eu")) {
+    env = {
+      ...env,
+      CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
+      CLICKHOUSE_USER: env.EU_CLICKHOUSE_USER,
+      CLICKHOUSE_PASSWORD: env.EU_CLICKHOUSE_PASSWORD,
+      SUPABASE_SERVICE_ROLE_KEY: env.EU_SUPABASE_SERVICE_ROLE_KEY,
+      SUPABASE_URL: env.EU_SUPABASE_URL,
+      UPSTASH_KAFKA_PASSWORD: env.EU_UPSTASH_KAFKA_PASSWORD,
+      UPSTASH_KAFKA_URL: env.EU_UPSTASH_KAFKA_URL,
+      UPSTASH_KAFKA_USERNAME: env.EU_UPSTASH_KAFKA_USERNAME,
+      S3_BUCKET_NAME: env.EU_S3_BUCKET_NAME,
+      SECURE_CACHE: env.EU_SECURE_CACHE,
+      S3_REGION: "eu-west-1",
+    };
+  }
 
-  if (host.includes("hconeai") && hostParts.length >= 3) {
+  if (env.WORKER_TYPE) {
+    return env;
+  }
+
+  if (
+    (host.includes("hconeai") || host.includes("helicone.ai")) &&
+    hostParts.length >= 3
+  ) {
     // hconeai.com requests
     if (hostParts[0].includes("gateway")) {
       return {
@@ -120,6 +155,12 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         ...env,
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://openrouter.ai",
+      };
+    } else if (hostParts[0].includes("groq")) {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://api.groq.com",
       };
     }
   }

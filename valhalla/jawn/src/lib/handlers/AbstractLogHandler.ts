@@ -1,3 +1,4 @@
+import { dataDogClient } from "../clients/DataDogClient";
 import { PromiseGenericResult, ok } from "../shared/result";
 import { HandlerContext } from "./HandlerContext";
 
@@ -15,10 +16,25 @@ export abstract class AbstractLogHandler implements LogHandler {
   }
 
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
-    if (this.nextHandler) {
-      return this.nextHandler.handle(context);
+    const start = performance.now();
+
+    if (!this.nextHandler) {
+      return ok("Chain complete.");
     }
 
-    return ok("Chain complete.");
+    const result = await this.nextHandler.handle(context);
+
+    const end = performance.now();
+    const executionTimeMs = end - start;
+
+    Promise.resolve(
+      dataDogClient.logDistributionMetric(
+        Date.now(),
+        executionTimeMs,
+        `${this.constructor.name}.handle`
+      )
+    ).catch();
+
+    return result;
   }
 }

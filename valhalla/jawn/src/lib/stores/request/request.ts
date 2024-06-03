@@ -81,6 +81,27 @@ export interface HeliconeRequest {
   costUSD?: number | null;
 }
 
+function addJoinQueries(joinQuery: string, filter: FilterNode): string {
+  if (
+    JSON.stringify(filter).includes("prompts_versions") ||
+    JSON.stringify(filter).includes("prompt_input_record")
+  ) {
+    joinQuery = `left join prompt_input_record on request.id = prompt_input_record.source_request
+    left join prompts_versions on prompts_versions.id = prompt_input_record.prompt_version`;
+  }
+
+  if (
+    JSON.stringify(filter).includes("experiment_v2_hypothesis_run") ||
+    JSON.stringify(filter).includes("score_value")
+  ) {
+    joinQuery += `
+    left join experiment_v2_hypothesis_run ON request.id = experiment_v2_hypothesis_run.result_request_id
+    left join score_value ON request.id = score_value.request_id`;
+  }
+
+  return joinQuery;
+}
+
 export async function getRequests(
   orgId: string,
   filter: FilterNode,
@@ -92,6 +113,7 @@ export async function getRequests(
     return { data: null, error: "Invalid offset or limit" };
   }
 
+  const joinQuery = addJoinQueries("", filter);
   if (offset > 10_000 || offset < 0) {
     return err("unsupport offset value");
   }
@@ -106,20 +128,10 @@ export async function getRequests(
   });
   const sortSQL = buildRequestSort(sort);
 
-  let joinQuery = "";
-
-  if (
-    JSON.stringify(filter).includes("prompts_versions") ||
-    JSON.stringify(filter).includes("prompt_input_record")
-  ) {
-    joinQuery = `left join prompt_input_record on request.id = prompt_input_record.source_request
-    left join prompts_versions on prompts_versions.id = prompt_input_record.prompt_version`;
-  }
-
   const query = `
   SELECT response.id AS response_id,
     response.created_at as response_created_at,
-    CASE 
+    CASE
       WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} THEN '{"helicone_message": "request body too large"}'::jsonb
       WHEN request.path LIKE '%embeddings%' THEN '{"helicone_message": "embeddings response omitted"}'::jsonb
       ELSE response.body::jsonb
@@ -127,7 +139,7 @@ export async function getRequests(
     response.status AS response_status,
     request.id AS request_id,
     request.created_at as request_created_at,
-    CASE 
+    CASE
       WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE}
       THEN '{"helicone_message": "request body too large"}'::jsonb
       ELSE request.body::jsonb
@@ -172,6 +184,7 @@ export async function getRequests(
   ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
   LIMIT ${limit}
   OFFSET ${offset}
+
 `;
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
 
@@ -179,7 +192,8 @@ export async function getRequests(
     process.env.S3_ACCESS_KEY ?? "",
     process.env.S3_SECRET_KEY ?? "",
     process.env.S3_ENDPOINT ?? "",
-    process.env.S3_BUCKET_NAME ?? ""
+    process.env.S3_BUCKET_NAME ?? "",
+    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
   );
   const results = await mapLLMCalls(requests.data, s3Client, orgId);
   return resultMap(results, (data) => {
@@ -192,7 +206,9 @@ export async function getRequestsCached(
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRequest
+  sort: SortLeafRequest,
+  isPartOfExperiment?: boolean,
+  isScored?: boolean
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -215,7 +231,7 @@ export async function getRequestsCached(
   const query = `
   SELECT response.id AS response_id,
     cache_hits.created_at as response_created_at,
-    CASE 
+    CASE
       WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} THEN '{"helicone_message": "request body too large"}'::jsonb
       WHEN request.path LIKE '%embeddings%' THEN '{"helicone_message": "embeddings response omitted"}'::jsonb
       ELSE response.body::jsonb
@@ -224,7 +240,7 @@ export async function getRequestsCached(
     response.status AS response_status,
     request.id AS request_id,
     cache_hits.created_at as request_created_at,
-    CASE 
+    CASE
       WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE}
       THEN '{"helicone_message": "request body too large"}'::jsonb
       ELSE request.body::jsonb
@@ -269,7 +285,8 @@ export async function getRequestsCached(
     process.env.S3_ACCESS_KEY ?? "",
     process.env.S3_SECRET_KEY ?? "",
     process.env.S3_ENDPOINT ?? "",
-    process.env.S3_BUCKET_NAME ?? ""
+    process.env.S3_BUCKET_NAME ?? "",
+    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
   );
   const results = await mapLLMCalls(requests.data, s3Client, orgId);
 

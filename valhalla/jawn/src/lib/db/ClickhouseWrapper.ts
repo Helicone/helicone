@@ -215,7 +215,9 @@ const { CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_HOST } = JSON.parse(
 };
 
 export const clickhouseDb = new ClickhouseClientWrapper({
-  CLICKHOUSE_HOST: CLICKHOUSE_HOST ?? "http://localhost:18123",
-  CLICKHOUSE_USER: CLICKHOUSE_USER ?? "default",
-  CLICKHOUSE_PASSWORD: CLICKHOUSE_PASSWORD ?? "",
+  CLICKHOUSE_HOST:
+    CLICKHOUSE_HOST ?? process.env.CLICKHOUSE_HOST ?? "http://localhost:18123",
+  CLICKHOUSE_USER: CLICKHOUSE_USER ?? process.env.CLICKHOUSE_USER ?? "default",
+  CLICKHOUSE_PASSWORD:
+    CLICKHOUSE_PASSWORD ?? process.env.CLICKHOUSE_PASSWORD ?? "",
 });

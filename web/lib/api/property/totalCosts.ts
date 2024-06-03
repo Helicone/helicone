@@ -4,7 +4,10 @@ import {
   filterListToTree,
   timeFilterToFilterNode,
 } from "../../../services/lib/filters/filterDefs";
-import { buildFilterWithAuthClickHousePropResponse } from "../../../services/lib/filters/filters";
+import {
+  buildFilterWithAuthClickHousePropertiesV2,
+  buildFilterWithAuthClickHousePropResponse,
+} from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 import { convertTextOperators } from "../graphql/query/helper";
@@ -154,15 +157,17 @@ export async function getTotalCostRaw(
   org_id: string
 ): Promise<Result<number, string>> {
   const { filter: filterString, argsAcc } =
-    await buildFilterWithAuthClickHousePropResponse({
+    await buildFilterWithAuthClickHousePropertiesV2({
       org_id,
       filter: filter,
       argsAcc: [],
     });
+
   const query = `
   WITH total_cost AS (
-    SELECT ${clickhousePriceCalc("property_with_response_v1")} as cost
-    FROM property_with_response_v1
+    SELECT ${clickhousePriceCalc("request_response_versioned")} as cost
+    FROM request_response_versioned
+    ARRAY JOIN mapKeys(properties) AS key
     WHERE (
       (${filterString})
     )
@@ -186,7 +191,7 @@ export async function getTotalCost(
 ): Promise<Result<number, string>> {
   return getTotalCostRaw(
     {
-      left: timeFilterToFilterNode(timeFilter, "property_with_response_v1"),
+      left: timeFilterToFilterNode(timeFilter, "request_response_versioned"),
       right: filter,
       operator: "and",
     },

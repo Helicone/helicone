@@ -10,20 +10,23 @@ import { COUTNRY_CODE_DIRECTORY } from "../../requestsV2/countryCodeDirectory";
 import { CountryData } from "../../../../services/lib/country";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { useState } from "react";
+import { FilterLeaf } from "../../../../services/lib/filters/filterDefs";
 
 interface CountryPanelProps {
   timeFilter: TimeFilter;
+  userFilters: FilterLeaf[];
 }
 
 const CountryPanel = (props: CountryPanelProps) => {
-  const { timeFilter } = props;
+  const { timeFilter, userFilters } = props;
 
   const [open, setOpen] = useState(false);
   const [limit, setLimit] = useState(5);
 
   const { isLoading: isCountriesLoading, countries } = useCountries(
     timeFilter,
-    limit
+    limit,
+    userFilters
   );
 
   const countryMapper = (country: CountryData, index: number) => {

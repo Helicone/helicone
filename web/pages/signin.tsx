@@ -89,6 +89,12 @@ const SignIn = ({
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
+  if (process.env.NEXT_PUBLIC_IS_ON_PREM === "true") {
+    return {
+      props: {},
+    };
+  }
+
   if (isCustomerDomain(context.req.headers.host ?? "")) {
     const org = await supabaseServer
       .from("organization")
@@ -112,8 +118,33 @@ export const getServerSideProps = async (
       };
     }
   }
+
+  // if the base path contains localhost or contains vercel, do nothing
+  if (
+    context.req.headers.host?.includes("localhost") ||
+    context.req.headers.host?.includes("vercel")
+  ) {
+    return {
+      props: {},
+    };
+  }
+
+  // if the base path contains us or eu in the basepath, do nothing
+  if (
+    context.req.headers.host?.includes("us") ||
+    context.req.headers.host?.includes("eu")
+  ) {
+    return {
+      props: {},
+    };
+  }
+
+  // default to the https://us.helicone.ai/signin if no other conditions are met
   return {
-    props: {},
+    redirect: {
+      destination: "https://us.helicone.ai/signin",
+      permanent: true,
+    },
   };
 };
 

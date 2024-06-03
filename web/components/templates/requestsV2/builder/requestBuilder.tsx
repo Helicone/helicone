@@ -16,6 +16,7 @@ import { DalleBuilder } from "./dalleBuilder";
 
 export type BuilderType =
   | "ChatBuilder"
+  | "GeminiBuilder"
   | "CompletionBuilder"
   | "ChatGPTBuilder"
   | "GPT3Builder"
@@ -35,6 +36,11 @@ export const getBuilderType = (
   if (provider === "OPENROUTER") {
     return "ChatGPTBuilder";
   }
+
+  if (model.toLowerCase().includes("gemini")) {
+    return "GeminiBuilder";
+  }
+
   if (llmType === "chat") {
     return "ChatBuilder";
   }
@@ -82,9 +88,7 @@ export const getBuilderType = (
     return "ChatGPTBuilder";
   }
 
-  if (
-    /^meta-llama\/Llama-2-13b-chat-hf:transcript_summarizer:64cB1r3/.test(model)
-  ) {
+  if (/^meta-llama\/.*/i.test(model)) {
     return "ChatGPTBuilder"; // for now
   }
 
@@ -114,6 +118,7 @@ const builders: {
   ) => AbstractRequestBuilder;
 } = {
   ChatBuilder: ChatBuilder,
+  GeminiBuilder: ChatBuilder,
   CompletionBuilder: CompletionBuilder,
   ChatGPTBuilder: ChatGPTBuilder,
   GPT3Builder: GPT3Builder,

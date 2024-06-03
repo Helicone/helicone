@@ -5,6 +5,11 @@ export function formatTimeString(timeString: string): string {
   return new Date(timeString).toISOString().replace("Z", "");
 }
 
+export function formatTimeStringDateTime(timeString: string): string {
+  const date = new Date(timeString);
+  return date.toISOString().split(".")[0].replace("T", " ");
+}
+
 function buildPropertyWithResponseInserts(
   request: Database["public"]["Tables"]["request"]["Row"],
   response: Database["public"]["Tables"]["response"]["Insert"],

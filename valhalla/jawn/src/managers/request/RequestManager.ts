@@ -4,6 +4,7 @@ import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { S3Client } from "../../lib/shared/db/s3Client";
+import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { Result, err, ok, resultMap } from "../../lib/shared/result";
 import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequestStore";
 import {
@@ -29,7 +30,8 @@ export class RequestManager extends BaseManager {
       process.env.S3_ACCESS_KEY ?? "",
       process.env.S3_SECRET_KEY ?? "",
       process.env.S3_ENDPOINT ?? "",
-      process.env.S3_BUCKET_NAME ?? ""
+      process.env.S3_BUCKET_NAME ?? "",
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
     );
   }
 
@@ -80,7 +82,7 @@ export class RequestManager extends BaseManager {
         response: string;
       }>(
         `
-        SELECT 
+        SELECT
           request.id as request,
           response.id as response
         FROM request inner join response on request.id = response.request
@@ -148,6 +150,65 @@ export class RequestManager extends BaseManager {
     return ok(null);
   }
 
+  private addScoreFilter(isScored: boolean, filter: FilterNode): FilterNode {
+    if (isScored) {
+      return {
+        left: filter,
+        operator: "and",
+        right: {
+          score_value: {
+            request_id: {
+              "not-equals": "null",
+            },
+          },
+        },
+      };
+    } else {
+      return {
+        left: filter,
+        operator: "and",
+        right: {
+          score_value: {
+            request_id: {
+              equals: "null",
+            },
+          },
+        },
+      };
+    }
+  }
+
+  private addPartOfExperimentFilter(
+    isPartOfExperiment: boolean,
+    filter: FilterNode
+  ): FilterNode {
+    if (isPartOfExperiment) {
+      return {
+        left: filter,
+        operator: "and",
+        right: {
+          experiment_hypothesis_run: {
+            result_request_id: {
+              "not-equals": "null",
+            },
+          },
+        },
+      };
+    } else {
+      return {
+        left: filter,
+        operator: "and",
+        right: {
+          experiment_hypothesis_run: {
+            result_request_id: {
+              equals: "null",
+            },
+          },
+        },
+      };
+    }
+  }
+
   async getRequests(
     params: RequestQueryParams
   ): Promise<Result<HeliconeRequest[], string>> {
@@ -159,7 +220,19 @@ export class RequestManager extends BaseManager {
         created_at: "desc",
       },
       isCached,
+      isPartOfExperiment,
+      isScored,
     } = params;
+
+    let newFilter = filter;
+
+    if (isScored !== undefined) {
+      newFilter = this.addScoreFilter(isScored, newFilter);
+    }
+
+    if (isPartOfExperiment !== undefined) {
+      newFilter = this.addPartOfExperimentFilter(isPartOfExperiment, newFilter);
+    }
 
     const requests = isCached
       ? await getRequestsCached(
@@ -167,11 +240,13 @@ export class RequestManager extends BaseManager {
           filter,
           offset,
           limit,
-          sort
+          sort,
+          isPartOfExperiment,
+          isScored
         )
       : await getRequests(
           this.authParams.organizationId,
-          filter,
+          newFilter,
           offset,
           limit,
           sort

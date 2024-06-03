@@ -1,21 +1,42 @@
 import { consolidateTextFields } from "../../../utils/streamParser";
 import { PromiseGenericResult, err, ok } from "../result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
+import { isParseInputJson } from "./helpers";
+
+export const NON_DATA_LINES = [
+  "event: content_block_delta",
+  "event: content_block_stop",
+  "event: message_delta",
+  "event: message_stop",
+  "event: message_start",
+  "event: content_block_start",
+  "event: ping",
+  "event: completion",
+  "event: error",
+];
 
 export class OpenAIStreamProcessor implements IBodyProcessor {
   async parse(parseInput: ParseInput): PromiseGenericResult<ParseOutput> {
+    if (isParseInputJson(parseInput)) {
+      return ok({
+        processedBody: JSON.parse(parseInput.responseBody),
+      });
+    }
+
     const { responseBody, requestBody, tokenCounter } = parseInput;
     const lines = responseBody
       .split("\n")
       .filter((line) => !line.includes("OPENROUTER PROCESSING"))
-      .filter((line) => line !== "");
+      .filter((line) => line !== "")
+      .filter((line) => !NON_DATA_LINES.includes(line));
+
     const data = lines.map((line, i) => {
       if (i === lines.length - 1) return {};
       try {
         return JSON.parse(line.replace("data:", ""));
       } catch (e) {
-        console.log("Error parsing line", line);
-        return err(`Error parsing line`);
+        console.log("Error parsing line OpenAI", line);
+        return err({ msg: `Error parsing line`, line });
       }
     });
 
