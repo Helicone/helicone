@@ -89,6 +89,12 @@ const SignIn = ({
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
+  if (process.env.NEXT_PUBLIC_IS_ON_PREM === "true") {
+    return {
+      props: {},
+    };
+  }
+
   if (isCustomerDomain(context.req.headers.host ?? "")) {
     const org = await supabaseServer
       .from("organization")

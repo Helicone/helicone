@@ -1,3 +1,4 @@
+import { KafkaProducer } from "../clients/KafkaProducer";
 import { AuthParams, OrgParams, supabaseServer } from "../db/supabase";
 import { HeliconeAuth } from "../requestWrapper";
 import { PromiseGenericResult, err, ok } from "../shared/result";

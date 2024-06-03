@@ -46,24 +46,26 @@
         {
           "group": "OpenAI",
           "pages": [
-            "integrations/openai/node",
+            "integrations/openai/javascript",
             "integrations/openai/python",
             "integrations/openai/langchain",
-            "integrations/openai/async"
+            "integrations/openai/async",
+            "integrations/openai/curl"
           ]
         },
         {
           "group": "Azure OpenAI",
           "pages": [
-            "integrations/azure/node",
+            "integrations/azure/javascript",
             "integrations/azure/python",
-            "integrations/azure/langchain"
+            "integrations/azure/langchain",
+            "integrations/azure/curl"
           ]
         },
         {
           "group": "Anthropic",
           "pages": [
-            "integrations/anthropic/node",
+            "integrations/anthropic/javascript",
             "integrations/anthropic/python",
             "integrations/anthropic/langchain"
           ]
@@ -74,14 +76,14 @@
             {
               "group": "API",
               "pages": [
-                "integrations/gemini/api/node",
+                "integrations/gemini/api/javascript",
                 "integrations/gemini/api/curl"
               ]
             },
             {
               "group": "Vertex AI (Enterprise)",
               "pages": [
-                "integrations/gemini/vertex/node",
+                "integrations/gemini/vertex/javascript",
                 "integrations/gemini/vertex/curl"
               ]
             }
@@ -89,9 +91,18 @@
         },
         "getting-started/integration-method/anyscale",
         "getting-started/integration-method/together",
+        {
+          "group": "Groq",
+          "pages": [
+            "integrations/groq/javascript",
+            "integrations/groq/python",
+            "integrations/groq/curl"
+          ]
+        },
         "getting-started/integration-method/openrouter",
         "getting-started/integration-method/litellm",
         "getting-started/integration-method/posthog",
+
         {
           "group": "Other",
           "pages": [
