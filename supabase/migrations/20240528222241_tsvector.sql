@@ -1,4 +1,4 @@
-CREATE TABLE request_response_search (
+CREATE TABLE public.request_response_search (
     id uuid not null default gen_random_uuid(),
     request_id uuid not null,
     organization_id uuid not null,
@@ -6,6 +6,11 @@ CREATE TABLE request_response_search (
     response_body_vector tsvector,
     created_at timestamp with time zone not null default now()
 );
+
+ALTER TABLE IF EXISTS public.request_response_search
+    ENABLE ROW LEVEL SECURITY;
+
+revoke all on public.request_response_search from anon, authenticated;
 
 CREATE UNIQUE INDEX request_response_search_unique ON public.request_response_search USING BTREE (request_id, organization_id);
 
