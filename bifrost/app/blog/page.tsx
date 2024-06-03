@@ -83,7 +83,7 @@ const blogContent: BlogStructure[] = [
     time: "5 minute read",
   },
   {
-    title: "A Guide for Datadog Users Building with LLM's",
+    title: "A Guide for Datadog Users Building with LLMs",
     description:
       "Datadog has long been a favourite among developers for monitoring and observability. But recently, LLM developers have been exploring new options. Why? We have some answers.",
     badgeText: "Compare",
