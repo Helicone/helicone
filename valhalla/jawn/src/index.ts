@@ -18,6 +18,8 @@ import {
   DLQ_WORKER_COUNT,
   NORMAL_WORKER_COUNT,
 } from "./lib/clients/kafkaConsumers/constant";
+import { proxyRouter } from "./controllers/public/proxyController";
+import multer from "multer";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -42,7 +44,10 @@ const allowedOriginsEnv = {
 
 const allowedOrigins = allowedOriginsEnv[ENVIRONMENT];
 
+const upload = multer();
 const app = express();
+
+// app.use(upload.any());
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
@@ -106,6 +111,7 @@ unAuthenticatedRouter.use(
 );
 
 unAuthenticatedRouter.use(tokenRouter);
+unAuthenticatedRouter.use(proxyRouter);
 
 unAuthenticatedRouter.use("/download/swagger.json", (req, res) => {
   res.json(publicSwaggerDoc as any);
