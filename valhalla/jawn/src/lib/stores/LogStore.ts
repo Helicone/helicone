@@ -144,23 +144,27 @@ export class LogStore {
           }
         }
         try {
-          const queries = payload.searchRecords.map((record) => {
-            return t.none(
-              `INSERT INTO request_response_search (request_id, request_body_vector, response_body_vector, organization_id)
-             VALUES ($1, to_tsvector('helicone_search_config', $2), to_tsvector('helicone_search_config', $3), $4)
-             ON CONFLICT (request_id, organization_id) DO UPDATE SET
-             request_body_vector = EXCLUDED.request_body_vector,
-             response_body_vector = EXCLUDED.response_body_vector`,
-              [
-                record.request_id,
-                record.request_body_vector,
-                record.response_body_vector,
-                record.organization_id,
-              ]
-            );
-          });
-
-          await t.batch(queries);
+          const searchValues = payload.searchRecords
+            .map(
+              (record) =>
+                `(${pgp.as.text(record.request_id)},
+               to_tsvector('helicone_search_config', ${pgp.as.text(
+                 record.request_body_vector
+               )}),
+               to_tsvector('helicone_search_config', ${pgp.as.text(
+                 record.response_body_vector
+               )}),
+               ${pgp.as.text(record.organization_id)})`
+            )
+            .join(", ");
+          const insertSearchQuery = `
+            INSERT INTO request_response_search (request_id, request_body_vector, response_body_vector, organization_id)
+            VALUES ${searchValues}
+            ON CONFLICT (request_id, organization_id) DO UPDATE SET
+              request_body_vector = EXCLUDED.request_body_vector,
+              response_body_vector = EXCLUDED.response_body_vector
+          `;
+          await t.none(insertSearchQuery);
         } catch (error: any) {
           console.error("Error inserting search records", error);
         }
