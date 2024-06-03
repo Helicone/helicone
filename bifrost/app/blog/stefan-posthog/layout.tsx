@@ -14,17 +14,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
-    title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot 🔥",
+    title: "Insider Scoop: Our Founding Engineer's Take on PostHog 🦔🔥",
     url: "https://www.helicone.ai/blog",
-    description: "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
-    images: "/static/blog/cole-copilot.png",
+    description: "No BS, no affiliations. Just genuine opinions from Stefan, our founding engineer.",
+    images: "/static/blog/stefan-posthog/posthog-cover.png",
     locale: "en_US",
   },
   twitter: {
-    title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot 🔥",
-    description: "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
+    title: "Insider Scoop: Our Founding Engineer's Take on PostHog 🦔🔥",
+    description: "No BS, no affiliations. Just genuine opinions from Stefan, our founding engineer.",
     card: "summary_large_image",
-    images: "/static/blog/cole-copilot.png",
+    images: "/static/blog/stefan-posthog/posthog-cover.png",
   },
 };
 

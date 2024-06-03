@@ -14,17 +14,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
-    title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot 🔥",
+    title: "A Guide for Datadog Users Building with LLMs",
     url: "https://www.helicone.ai/blog",
-    description: "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
-    images: "/static/blog/cole-copilot.png",
+    description: "Datadog has long been a favourite among developers for its monitoring and observability capabilities. But recently, LLM developers have been exploring new options. Why? We have some answers.",
+    images: "/static/blog/datadog/title.webp",
     locale: "en_US",
   },
   twitter: {
-    title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot 🔥",
-    description: "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
+    title: "A Guide for Datadog Users Building with LLMs",
+    description: "Datadog has long been a favourite among developers for its monitoring and observability capabilities. But recently, LLM developers have been exploring new options. Why? We have some answers.",
     card: "summary_large_image",
-    images: "/static/blog/cole-copilot.png",
+    images: "/static/blog/datadog/title.webp",
   },
 };
 

@@ -14,17 +14,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
-    title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot 🔥",
+    title: "A LangSmith Alternative that Takes LLM Observability to the Next Level",
     url: "https://www.helicone.ai/blog",
-    description: "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
-    images: "/static/blog/cole-copilot.png",
+    description: "Both Helicone and LangSmith are capable, powerful DevOps platform used by enterprises and developers building LLM applications. But which is better?",
+    images: "/static/blog/langsmith-vs-helicone/cover-image.webp",
     locale: "en_US",
   },
   twitter: {
-    title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot 🔥",
-    description: "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
+    title: "A LangSmith Alternative that Takes LLM Observability to the Next Level",
+    description: "Both Helicone and LangSmith are capable, powerful DevOps platform used by enterprises and developers building LLM applications. But which is better?",
     card: "summary_large_image",
-    images: "/static/blog/cole-copilot.png",
+    images: "/static/blog/langsmith-vs-helicone/cover-image.webp",
   },
 };
 
