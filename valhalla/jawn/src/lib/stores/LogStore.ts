@@ -80,6 +80,20 @@ const assetColumns = new pgp.helpers.ColumnSet(
 
 const onConflictAsset = " ON CONFLICT (id, request_id) DO NOTHING";
 
+const requestResponseSearchColumns = new pgp.helpers.ColumnSet(
+  [
+    "request_id",
+    { name: "request_body_vector", mod: ":raw" },
+    { name: "response_body_vector", mod: ":raw" },
+    "organization_id",
+  ],
+  { table: "request_response_search" }
+);
+
+const onConflictRequestResponseSearch = `ON CONFLICT (request_id, organization_id) DO UPDATE SET
+request_body_vector = EXCLUDED.request_body_vector,
+response_body_vector = EXCLUDED.response_body_vector`;
+
 export class LogStore {
   constructor() {}
 
@@ -143,27 +157,23 @@ export class LogStore {
             await this.processPrompt(promptRecord, t);
           }
         }
+
         try {
-          const searchValues = payload.searchRecords
-            .map(
-              (record) =>
-                `(${pgp.as.text(record.request_id)},
-               to_tsvector('helicone_search_config', ${pgp.as.text(
-                 record.request_body_vector
-               )}),
-               to_tsvector('helicone_search_config', ${pgp.as.text(
-                 record.response_body_vector
-               )}),
-               ${pgp.as.text(record.organization_id)})`
-            )
-            .join(", ");
-          const insertSearchQuery = `
-            INSERT INTO request_response_search (request_id, request_body_vector, response_body_vector, organization_id)
-            VALUES ${searchValues}
-            ON CONFLICT (request_id, organization_id) DO UPDATE SET
-              request_body_vector = EXCLUDED.request_body_vector,
-              response_body_vector = EXCLUDED.response_body_vector
-          `;
+          const searchRecords = payload.searchRecords.map((record) => ({
+            request_id: record.request_id,
+            request_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
+              record.request_body_vector
+            )})`,
+            response_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
+              record.response_body_vector
+            )})`,
+            organization_id: record.organization_id,
+          }));
+
+          const insertSearchQuery =
+            pgp.helpers.insert(searchRecords, requestResponseSearchColumns) +
+            onConflictRequestResponseSearch;
+
           await t.none(insertSearchQuery);
         } catch (error: any) {
           console.error("Error inserting search records", error);
@@ -215,7 +225,7 @@ export class LogStore {
       helicone_template: any;
       created_at: Date;
     }>(
-      `SELECT id, major_version, helicone_template, created_at FROM prompts_versions 
+      `SELECT id, major_version, helicone_template, created_at FROM prompts_versions
        WHERE organization = $1 AND prompt_v2 = $2 ORDER BY major_version DESC LIMIT 1`,
       [orgId, existingPrompt.id]
     );
