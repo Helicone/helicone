@@ -106,7 +106,7 @@ const Blog = () => {
     <div className="w-full bg-[#f8feff] h-full antialiased relative text-black">
       <div className="relative w-full flex flex-col space-y-4 mx-auto max-w-5xl h-full py-16 items-center text-center px-2 sm:px-2 lg:px-0">
         <Image
-          src={"/static/pricing/bouncing-cube.png"}
+          src={"/static/pricing/bouncing-cube.webp"}
           alt={"bouncing-cube"}
           width={200}
           height={100}
