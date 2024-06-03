@@ -104,6 +104,12 @@ export default SignUp;
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
+  if (process.env.NEXT_PUBLIC_IS_ON_PREM === "true") {
+    return {
+      props: {},
+    };
+  }
+
   // if the base path contains localhost or vercel, do nothing
   if (
     context.req.headers.host?.includes("localhost") ||

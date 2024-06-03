@@ -1,10 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
 import { DBWrapper } from "../db/DBWrapper";
-import {
-  checkRateLimit,
-  updateRateLimitCounter,
-} from "../clients/KVRateLimiterClient";
+import { checkRateLimit } from "../clients/KVRateLimiterClient";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
 import {
@@ -98,24 +96,28 @@ export async function proxyForwarder(
       if (orgError !== null || !orgData?.organizationId) {
         console.error("Error getting org", orgError);
       } else {
-        const cachedResponse = await getCachedResponse(
-          proxyRequest,
-          cacheSettings.bucketSettings,
-          env.CACHE_KV,
-          cacheSettings.cacheSeed
-        );
-        if (cachedResponse) {
-          ctx.waitUntil(
-            recordCacheHit(
-              cachedResponse.headers,
-              env,
-              new ClickhouseClientWrapper(env),
-              orgData.organizationId,
-              provider,
-              (request.cf?.country as string) ?? null
-            )
+        try {
+          const cachedResponse = await getCachedResponse(
+            proxyRequest,
+            cacheSettings.bucketSettings,
+            env.CACHE_KV,
+            cacheSettings.cacheSeed
           );
-          return cachedResponse;
+          if (cachedResponse) {
+            ctx.waitUntil(
+              recordCacheHit(
+                cachedResponse.headers,
+                env,
+                new ClickhouseClientWrapper(env),
+                orgData.organizationId,
+                provider,
+                (request.cf?.country as string) ?? null
+              )
+            );
+            return cachedResponse;
+          }
+        } catch (error) {
+          console.error("Error getting cached response", error);
         }
       }
     }
@@ -317,25 +319,11 @@ export async function proxyForwarder(
         kafkaProducer: new KafkaProducer(env),
       },
       env.S3_ENABLED ?? "true",
-      env.ORG_IDS ?? "",
-      env.PERCENT_LOG_KAFKA ?? "",
       proxyRequest?.requestWrapper.heliconeHeaders
     );
 
     if (res.error !== null) {
       console.error("Error logging", res.error);
-    }
-
-    if (proxyRequest && proxyRequest.rateLimitOptions) {
-      await updateRateLimitCounter({
-        providerAuthHash: proxyRequest.providerAuthHash,
-        heliconeProperties:
-          proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
-        rateLimitKV: env.RATE_LIMIT_KV,
-        rateLimitOptions: proxyRequest.rateLimitOptions,
-        userId: proxyRequest.userId,
-        cost: res.data?.cost ?? 0,
-      });
     }
   }
 

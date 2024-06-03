@@ -14,11 +14,15 @@ export interface AzureExperiment {
   azureApiKey: string;
 }
 
+export interface OrgsToDLQ {
+  orgs?: string[];
+}
 export interface SettingsType {
   "kafka:dlq": KafkaSettings;
   "kafka:log": KafkaSettings;
   "kafka:dlq:eu": KafkaSettings;
   "kafka:log:eu": KafkaSettings;
+  "kafka:orgs-to-dlq": OrgsToDLQ;
   "azure:experiment": AzureExperiment;
 }
 

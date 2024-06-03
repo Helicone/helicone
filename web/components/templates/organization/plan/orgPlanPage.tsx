@@ -5,6 +5,7 @@ import {
   CloudArrowUpIcon,
   CreditCardIcon,
   LightBulbIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import {
   addMonths,
@@ -16,12 +17,14 @@ import {
 } from "date-fns";
 import { Database } from "../../../../supabase/database.types";
 import useNotification from "../../../shared/notification/useNotification";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useGetRequestCountClickhouse } from "../../../../services/hooks/requests";
 import Link from "next/link";
 import { clsx } from "../../../shared/clsx";
 import UpgradeProModal from "../../../shared/upgradeProModal";
 import RenderOrgPlan from "./renderOrgPlan";
+import { Result } from "../../../../lib/result";
+import { useQuery } from "@tanstack/react-query";
 
 interface OrgPlanPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -54,9 +57,33 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
     org.id
   );
 
-  useEffect(() => {
-    refetch();
-  }, [currentMonth, refetch]);
+  const stripeUsageCurrentMonth = useQuery({
+    queryKey: ["stripe_usage"],
+    queryFn: async () => {
+      const r = await fetch("/api/subscription/get_usage_and_costs", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const stripeUsage = (await r.json()) as Result<TStripeUsage, string>;
+      if (stripeUsage.error || !stripeUsage.data) {
+        console.log(stripeUsage.error);
+        return;
+      }
+      return {
+        ...stripeUsage.data,
+        billingCycle:
+          new Date(+stripeUsage.data?.currentPeriodStart * 1000)
+            .toDateString()
+            .slice(4) +
+          " - " +
+          new Date(+stripeUsage.data?.currentPeriodEnd * 1000)
+            .toDateString()
+            .slice(4),
+      };
+    },
+  });
 
   const capitalizeHelper = (str: string) => {
     const words = str.split("_");
@@ -74,15 +101,23 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
 
   const nextMonth = () => {
     setCurrentMonth((prevMonth) => startOfMonth(addMonths(prevMonth, 1)));
+    refetch();
   };
 
   const prevMonth = () => {
     setCurrentMonth((prevMonth) => startOfMonth(subMonths(prevMonth, 1)));
+    refetch();
   };
 
   const getMonthName = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString("default", { month: "long" });
+  };
+
+  type TStripeUsage = {
+    currentPeriodStart: number | string;
+    currentPeriodEnd: number | string;
+    totalCost: number | string;
   };
 
   const renderInfo = () => {
@@ -173,13 +208,41 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
           </div>
           {org.tier === "free" && (
             <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
-              <dt className="text-sm font-medium leading-6 text-gray-700 dark:text-gray-300">
+              <dt className="text-sm flex flex-row gap-1 items-center font-medium leading-6 text-gray-700 dark:text-gray-300">
                 Requests
+                <div className="flex flex-row items-center text-gray-500 w-fit gap-1">
+                  <InformationCircleIcon className="h-3 w-3 text-gray-500 sm:inline" />
+                  <p className="text-xs font-light">
+                    Billing cycle: {stripeUsageCurrentMonth.data?.billingCycle}
+                  </p>
+                </div>
               </dt>
               <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900 dark:text-gray-100">
                 {isCountLoading
                   ? "Loading..."
                   : Number(count?.data || 0).toLocaleString()}
+              </dd>
+            </div>
+          )}
+
+          {org.tier === "growth" && (
+            <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
+              <dt className="text-sm flex flex-row gap-1 items-center font-medium leading-6 text-gray-700 dark:text-gray-300">
+                Estimated Costs
+                <div className="flex flex-row items-center text-gray-500 w-fit gap-1">
+                  <InformationCircleIcon className="h-3 w-3 text-gray-500 sm:inline" />
+                  <p className="text-xs font-light">
+                    Billing cycle: {stripeUsageCurrentMonth.data?.billingCycle}
+                  </p>
+                </div>
+              </dt>
+              <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900 dark:text-gray-100">
+                {isCountLoading
+                  ? "Loading..."
+                  : "$ " +
+                    Number(
+                      stripeUsageCurrentMonth.data?.totalCost || 0
+                    ).toLocaleString()}
               </dd>
             </div>
           )}

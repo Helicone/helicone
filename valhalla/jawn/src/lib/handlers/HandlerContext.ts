@@ -1,7 +1,5 @@
 import { Provider } from "../../models/models";
 import { SetOnce } from "../../utils/setOnce";
-import { ClickhouseDB } from "../db/ClickhouseWrapper";
-import { Database } from "../db/database.types";
 import { AuthParams, OrgParams } from "../db/supabase";
 
 export class HandlerContext extends SetOnce {

@@ -1,9 +1,16 @@
 import { consolidateGoogleTextFields } from "../../../utils/streamParser";
 import { PromiseGenericResult, err, ok } from "../result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
+import { isParseInputJson } from "./helpers";
 
 export class GoogleStreamBodyProcessor implements IBodyProcessor {
   async parse(parseInput: ParseInput): PromiseGenericResult<ParseOutput> {
+    if (isParseInputJson(parseInput)) {
+      return ok({
+        processedBody: JSON.parse(parseInput.responseBody),
+      });
+    }
+
     const { responseBody } = parseInput;
 
     const lines = responseBody

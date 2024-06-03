@@ -50,6 +50,7 @@ routes = [
 	{ pattern = "api.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "openrouter.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "together.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "groq.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "gateway.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 
 
@@ -58,6 +59,7 @@ routes = [
 	{ pattern = "api.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "openrouter.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "together.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "groq.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "gateway.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "2yfv.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 
@@ -111,6 +113,7 @@ routes = [
 	{ pattern = "openrouter.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "together.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "gateway.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "groq.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 
 	{ pattern = "oai.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
@@ -145,7 +148,6 @@ VAULT_ENABLED = "true"
 
 [env.production_staging.triggers]
 crons = []
-
 
 [[migrations]]
 tag = "v1"
