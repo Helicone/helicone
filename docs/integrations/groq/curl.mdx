@@ -1,6 +1,6 @@
 ---
-title: "Curl"
-description: "Learn how to integrate Groq with Helicone using Curl."
+title: "cURL"
+description: "Learn how to integrate Groq with Helicone using cURL."
 ---
 
 <Note>
@@ -25,7 +25,7 @@ HELICONE_API_KEY=<your API key>
   <Step title="Modify the base path and add a Helicone-Auth header">
 <CodeGroup>
 
-```Curl CLI example
+```cURL CLI example
 curl -X POST "https://groq.staging.hconeai.com/openai/v1/chat/completions" \
      -H "Authorization: Bearer $GROQ_API_KEY" \
      -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
