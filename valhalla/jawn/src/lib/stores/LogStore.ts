@@ -163,7 +163,6 @@ export class LogStore {
           await t.batch(queries);
         } catch (error: any) {
           console.error("Error inserting search records", error);
-          throw error;
         }
       });
 
