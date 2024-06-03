@@ -3,7 +3,8 @@ CREATE TABLE request_response_search (
     request_id uuid not null,
     organization_id uuid not null,
     request_body_vector tsvector,
-    response_body_vector tsvector
+    response_body_vector tsvector,
+    created_at timestamp with time zone not null default now()
 );
 
 CREATE UNIQUE INDEX request_response_search_unique ON public.request_response_search USING BTREE (request_id, organization_id);

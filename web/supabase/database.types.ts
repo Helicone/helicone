@@ -2077,6 +2077,7 @@ export type Database = {
       }
       request_response_search: {
         Row: {
+          created_at: string
           id: string
           organization_id: string
           request_body_vector: unknown | null
@@ -2084,6 +2085,7 @@ export type Database = {
           response_body_vector: unknown | null
         }
         Insert: {
+          created_at?: string
           id?: string
           organization_id: string
           request_body_vector?: unknown | null
@@ -2091,6 +2093,7 @@ export type Database = {
           response_body_vector?: unknown | null
         }
         Update: {
+          created_at?: string
           id?: string
           organization_id?: string
           request_body_vector?: unknown | null
