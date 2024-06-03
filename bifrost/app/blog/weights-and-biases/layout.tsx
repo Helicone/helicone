@@ -10,21 +10,21 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Helicone / LLM-Observability for Developers",
   description: "The open-source platform for logging, monitoring, and debugging.",
-  icons: "https://www.helicone.ai/static/logo.png",
+  icons: "https://www.helicone.ai/static/logo.png", 
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
-    title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot 🔥",
-    url: "https://www.helicone.ai/blog/cole-github-copilot",
-    description: "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
-    images: "https://www.helicone.ai/static/blog/cole-copilot.png",
+    title: "Helicone vs. Weights and Biases", 
+    url: "https://www.helicone.ai/blog/weights-and-biases",
+    description: "Training modern LLMs is generally less complex than traditional ML models. Here's how to have all the essential tools specifically designed for language model observability without the clutter.", 
+    images: "https://www.helicone.ai/static/blog/weights-and-biases.png", 
     locale: "en_US",
   },
   twitter: {
-    title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot 🔥",
-    description: "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
+    title: "Helicone vs. Weights and Biases",
+    description: "Training modern LLMs is generally less complex than traditional ML models. Here's how to have all the essential tools specifically designed for language model observability without the clutter.",
     card: "summary_large_image",
-    images: "https://www.helicone.ai/static/blog/cole-copilot.png",
+    images: "https://www.helicone.ai/static/blog/weights-and-biases.png",
   },
 };
 

@@ -10,21 +10,21 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Helicone / LLM-Observability for Developers",
   description: "The open-source platform for logging, monitoring, and debugging.",
-  icons: "https://www.helicone.ai/static/logo.png",
+  icons: "https://www.helicone.ai/static/logo.png", 
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
-    title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot 🔥",
-    url: "https://www.helicone.ai/blog/cole-github-copilot",
-    description: "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
-    images: "https://www.helicone.ai/static/blog/cole-copilot.png",
+    title: "A step by step guide to switch to gpt-4o safely with Helicone", 
+    url: "https://www.helicone.ai/blog/switch-models-safely",
+    description: "Learn how to use Helicone's experiments features to regression test, compare and switch models.",
+    images: "https://www.helicone.ai/static/blog/experiments/gpt-4o.png",
     locale: "en_US",
   },
   twitter: {
-    title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot 🔥",
-    description: "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
+    title: "A step by step guide to switch to gpt-4o safely with Helicone", 
+    description: "Learn how to use Helicone's experiments features to regression test, compare and switch models.", 
     card: "summary_large_image",
-    images: "https://www.helicone.ai/static/blog/cole-copilot.png",
+    images: "https://www.helicone.ai/static/blog/experiments/gpt-4o.png", 
   },
 };
 
