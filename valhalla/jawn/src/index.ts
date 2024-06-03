@@ -103,6 +103,19 @@ app.options("*", (req, res) => {
 
 const v1APIRouter = express.Router();
 const unAuthenticatedRouter = express.Router();
+const unAuthProxyRouter = express.Router();
+
+unAuthProxyRouter.use(
+  "/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(publicSwaggerDoc as any)
+);
+
+unAuthProxyRouter.use(proxyRouter);
+
+unAuthProxyRouter.use("/download/swagger.json", (req, res) => {
+  res.json(publicSwaggerDoc as any);
+});
 
 unAuthenticatedRouter.use(
   "/docs",
@@ -111,7 +124,6 @@ unAuthenticatedRouter.use(
 );
 
 unAuthenticatedRouter.use(tokenRouter);
-unAuthenticatedRouter.use(proxyRouter);
 
 unAuthenticatedRouter.use("/download/swagger.json", (req, res) => {
   res.json(publicSwaggerDoc as any);
@@ -149,7 +161,7 @@ app.use((req, res, next) => {
 });
 
 app.use(unAuthenticatedRouter);
-
+app.use(unAuthProxyRouter);
 app.use(v1APIRouter);
 
 function setRouteTimeout(
