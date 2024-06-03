@@ -1,13 +1,23 @@
 ---
-title: "Retrieve user-specific requests"
-description: "Get all of the requests made by a user. "
+title: "Get user requests"
+description: "Get user-specific requests using the Request API. "
 ---
 
-Retrieving user-specific requests can be done by building a request through the [Request API](/rest/request/post-v1requestquery). You can filter user requests by specifying different criteria.
+import QuestionsSection from '/snippets/questions-section.mdx';
+
+
+The [Request API](/rest/request/post-v1requestquery) allows you to build a request, where you can specify filtering criteria to retrieve all requests made by a user.
 
 <Frame>
  <img src="/images/use-cases/example-user-request.png" />
 </Frame>
+
+## Use Cases
+
+- Monitor your user's usage pattern and behavior. 
+- Access user-specific requests to pinpoint the errors and bebug more efficiently. 
+- Track requests and costs per user to facilitate better cost control.
+- Detect unusual or potentially harmful user behaviors.
 
 
 ## Retrieving Requests by User ID  
@@ -65,10 +75,4 @@ curl --request POST \
 }'
 ```
 
-
-## Use Cases
-
-- Monitor how users interact with your application, and get insights into usage patterns and behaviors. 
-- Access user-specific requests to pinpoint the errors and resolve issues more efficiently. 
-- Track the number of requests and associated costs per user to facilitate better cost control.
-- Detect any unusual or potentially harmful behaviors to maintain the integrity of your application.
+<QuestionsSection />
