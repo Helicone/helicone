@@ -37,8 +37,6 @@ type RequestFilterNode =
       | "values"
       | "request_response_search"
     >
-      "feedback" | "request" | "response" | "properties" | "values"
-    >
   | RequestFilterBranch
   | "all";
 
