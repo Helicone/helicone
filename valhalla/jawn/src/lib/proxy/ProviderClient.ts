@@ -27,7 +27,10 @@ export function callPropsFromProxyRequest(
 function removeHeliconeHeaders(request: Headers): Headers {
   const newHeaders = new Headers();
   for (const [key, value] of request.entries()) {
-    if (!key.toLowerCase().startsWith("helicone-")) {
+    if (
+      !key.toLowerCase().startsWith("helicone-") &&
+      key.toLowerCase() !== "content-length"
+    ) {
       newHeaders.set(key, value);
     }
   }
@@ -40,7 +43,8 @@ export async function callProvider(props: CallProps): Promise<Response> {
 
   const targetUrl = buildTargetUrl(originalUrl, apiBase);
 
-  const baseInit = { method, headers: removeHeliconeHeaders(headers) };
+  const finalHeaders = removeHeliconeHeaders(headers);
+  const baseInit = { method, headers: finalHeaders };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
 
   let response;
@@ -53,6 +57,9 @@ export async function callProvider(props: CallProps): Promise<Response> {
       signal,
     });
   } else {
+    console.log(`Type of body: ${typeof body}`);
+    console.log(`Fetching ${targetUrl.href}`);
+    console.log(`Init: ${JSON.stringify(init)}`);
     response = await fetch(targetUrl.href, init);
   }
   return response;
@@ -60,10 +67,12 @@ export async function callProvider(props: CallProps): Promise<Response> {
 
 export function buildTargetUrl(originalUrl: URL, apiBase: string): URL {
   const apiBaseUrl = new URL(apiBase.replace(/\/$/, ""));
-
-  return new URL(
-    `${apiBaseUrl.origin}${originalUrl.pathname}${originalUrl.search}`
+  const pathname = originalUrl.pathname.replace(
+    /^\/v1\/gateway(\/[^\/]+)?/,
+    ""
   );
+
+  return new URL(`${apiBaseUrl.origin}${pathname}${originalUrl.search}`);
 }
 
 export async function callProviderWithRetry(

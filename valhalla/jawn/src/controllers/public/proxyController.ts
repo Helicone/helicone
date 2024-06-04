@@ -16,8 +16,7 @@ const handleAnthropicProxy = async (
   requestWrapper: RequestWrapper,
   res: Response
 ) => {
-  await proxyForwarder(requestWrapper, "ANTHROPIC");
-  res.status(200).json({ message: "Anthropic Proxy" });
+  return await proxyForwarder(requestWrapper, "ANTHROPIC", res);
 };
 
 const handleOpenAIProxy = async (
@@ -35,8 +34,7 @@ const handleOpenAIProxy = async (
     });
   }
 
-  await proxyForwarder(requestWrapper, "OPENAI");
-  res.status(200).json({ message: "OpenAI Proxy" });
+  return await proxyForwarder(requestWrapper, "OPENAI", res);
 };
 
 const handleGatewayAPIRouter = (
@@ -56,30 +54,9 @@ const ROUTER_MAP: {
   ANTHROPIC: handleAnthropicProxy,
 };
 
-// Just for gateway
-proxyRouter.post("/v1/gateway", async (req: Request, res: Response) => {
-  throw new Error("Not implemented");
-  //   const { data: requestWrapper, error: requestWrapperErr } =
-  //     await RequestWrapper.create(req);
-  //   if (requestWrapperErr || !requestWrapper) {
-  //     return res.status(500).json({ message: "Error creating request wrapper" });
-  //   }
-
-  //   const routerFunction = ROUTER_MAP["GATEWAY"];
-
-  //   if (routerFunction) {
-  //     routerFunction(
-  //       { data: requestWrapper, error: requestWrapperErr }.data,
-  //       res
-  //     );
-  //   } else {
-  //     res.status(400).json({ message: "Invalid provider" });
-  //   }
-});
-
 // For specific providers
 proxyRouter.post(
-  "/v1/gateway/:provider",
+  "/v1/gateway/:provider/*",
   async (req: Request, res: Response) => {
     const { provider } = req.params;
 
@@ -103,3 +80,24 @@ proxyRouter.post(
     }
   }
 );
+
+// Just for gateway
+proxyRouter.post("/v1/gateway/*", async (req: Request, res: Response) => {
+  throw new Error("Not implemented");
+  //   const { data: requestWrapper, error: requestWrapperErr } =
+  //     await RequestWrapper.create(req);
+  //   if (requestWrapperErr || !requestWrapper) {
+  //     return res.status(500).json({ message: "Error creating request wrapper" });
+  //   }
+
+  //   const routerFunction = ROUTER_MAP["GATEWAY"];
+
+  //   if (routerFunction) {
+  //     routerFunction(
+  //       { data: requestWrapper, error: requestWrapperErr }.data,
+  //       res
+  //     );
+  //   } else {
+  //     res.status(400).json({ message: "Invalid provider" });
+  //   }
+});

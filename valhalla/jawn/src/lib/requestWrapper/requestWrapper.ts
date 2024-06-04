@@ -11,7 +11,7 @@ import { Result, err, map, mapPostgrestErr, ok } from "../shared/result";
 import { supabaseServer } from "../db/supabase";
 import { getAndStoreInCache } from "../memoryCache/staticMemCache";
 import { usageLimitManager } from "../../managers/UsageLimitManager";
-import { Request, Response } from "express";
+import { Request } from "express";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -207,7 +207,7 @@ export class RequestWrapper {
     if (this.cachedText) {
       return this.cachedText;
     }
-    this.cachedText = this.request.body as string;
+    this.cachedText = JSON.stringify(this.request.body);
     return this.cachedText;
   }
 
@@ -237,15 +237,17 @@ export class RequestWrapper {
 
       return JSON.stringify(objectWithoutJSXTags);
     }
+
     return text;
   }
 
   async getJson<T>(): Promise<T> {
     try {
-      return JSON.parse(await this.getText());
+      const text = await this.getText();
+      return JSON.parse(text);
     } catch (e) {
       console.error("RequestWrapper.getJson", e, await this.getText());
-      return {} as T;
+      throw new Error("Failed to parse JSON");
     }
   }
 

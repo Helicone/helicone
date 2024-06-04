@@ -1,16 +1,17 @@
 import { RateLimitOptions, RateLimitResponse } from "./RateLimiter";
+import { Response as ExpressResponse } from "express";
 
 export interface BuildParams {
-  body: BodyInit | null;
+  body: any; // Express allows various types for body (string, object, buffer, etc.)
   status: number;
   inheritFrom?: Response;
 }
 
 export class ResponseBuilder {
-  private headers: Headers = new Headers();
+  private headers: { [key: string]: string } = {};
 
   setHeader(key: string, value: string): ResponseBuilder {
-    this.headers.set(key, value);
+    this.headers[key] = value;
     return this;
   }
 
@@ -35,37 +36,45 @@ export class ResponseBuilder {
     });
   }
 
-  build(params: BuildParams): Response {
+  build(params: BuildParams, res: ExpressResponse): ExpressResponse {
     const { body, inheritFrom: _inheritFrom } = params;
     let { status } = params;
-    const inheritFrom = _inheritFrom ?? new Response();
 
-    const headers = new Headers(inheritFrom.headers);
-    this.headers.forEach((value, key) => {
-      headers.set(key, value);
-    });
+    if (_inheritFrom) {
+      _inheritFrom.headers.forEach((value, key) => {
+        this.headers[key] = value;
+      });
+    }
+
     if (status < 200 || status >= 600) {
       console.log("Invalid status code:", status);
       status = 500;
     }
 
-    const res = new Response(body, {
-      ...inheritFrom,
-      headers,
-      status,
+    res.status(status);
+    Object.entries(this.headers).forEach(([key, value]) => {
+      res.setHeader(key, value);
     });
 
-    return res;
+    if (typeof body === "string") {
+      return res.send(body);
+    } else {
+      return res.json(body);
+    }
   }
 
-  buildRateLimitedResponse(): Response {
+  buildRateLimitedResponse(res: ExpressResponse): ExpressResponse {
     this.setHeader("content-type", "application/json;charset=UTF-8");
 
-    return this.build({
-      body: JSON.stringify({
-        message: "Rate limit reached. Please wait before making more requests.",
-      }),
-      status: 429,
-    });
+    return this.build(
+      {
+        body: {
+          message:
+            "Rate limit reached. Please wait before making more requests.",
+        },
+        status: 429,
+      },
+      res
+    );
   }
 }

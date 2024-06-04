@@ -7,6 +7,7 @@ import {
   callProviderWithRetry,
 } from "./ProviderClient";
 import { CompletedChunk, ReadableInterceptor } from "./ReadableInterceptor";
+import crypto from "crypto";
 
 export type ProxyResult = {
   loggable: DBLoggable;
