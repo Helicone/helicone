@@ -68,6 +68,18 @@ const AuthForm = (props: AuthFormProps) => {
     }
   };
 
+  const checkPath = () => {
+    const basePath = router.asPath;
+    if (basePath.includes("us")) {
+      return "us";
+    }
+    if (basePath.includes("eu")) {
+      return "eu";
+    } else {
+      return "us";
+    }
+  };
+
   return (
     <div className="w-full bg-[#f8feff] h-full antialiased relative">
       <div className="h-screen flex flex-1 flex-col sm:flex-row justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24 relative">
@@ -126,7 +138,7 @@ const AuthForm = (props: AuthFormProps) => {
                         Data region
                       </span>
                     </label>
-                    <Select value={"us"}>
+                    <Select defaultValue={checkPath()}>
                       <SelectItem
                         value="us"
                         onClick={() => {
