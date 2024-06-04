@@ -45,13 +45,14 @@ name = "helicone-worker-prod"
 routes = [
 	{ pattern = "oai.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "anthropic.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "groq.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "openrouter.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "together.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "gateway.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 
-
 	{ pattern = "oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "groq.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "api.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "openrouter.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "together.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
