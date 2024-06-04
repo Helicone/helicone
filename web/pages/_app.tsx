@@ -26,7 +26,7 @@ if (
   !process.env.NEXT_PUBLIC_DISABLE_POSTHOG
 ) {
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
-    api_host: "https://www.helicone.ai/ingest",
+    api_host: "https://us.helicone.ai/ingest",
   });
 }
 
