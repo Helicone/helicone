@@ -145,7 +145,7 @@ const AuthForm = (props: AuthFormProps) => {
                           handleRouting("us");
                         }}
                       >
-                        United States
+                        🇺🇸 United States
                       </SelectItem>
                       <SelectItem
                         value="eu"
@@ -153,7 +153,7 @@ const AuthForm = (props: AuthFormProps) => {
                           handleRouting("eu");
                         }}
                       >
-                        European Union
+                        🇪🇺 European Union
                       </SelectItem>
                     </Select>
                   </div>
