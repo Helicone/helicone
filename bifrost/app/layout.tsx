@@ -6,12 +6,19 @@ import Footer from "@/components/layout/footer";
 import "@mintlify/mdx/dist/styles.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { PHProvider } from "./providers";
+import dynamic from "next/dynamic";
+
+const PostHogPageView = dynamic(() => import("./PostHogPageView"), {
+  ssr: false,
+});
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Helicone / LLM-Observability for Developers",
-  description: "The open-source platform for logging, monitoring, and debugging.",
+  description:
+    "The open-source platform for logging, monitoring, and debugging.",
   icons: "https://www.helicone.ai/static/logo.png",
   openGraph: {
     type: "website",
@@ -37,15 +44,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <div className="bg-[#f8feff] flex flex-col">
-          <NavBar />
-          {children}
-          <Footer />
+      <PHProvider>
+        <body>
+          <div className={`bg-[#f8feff] flex flex-col ${inter.className}`}>
+            <NavBar />
+            {children}
+            <Footer />
+          </div>
+          <PostHogPageView />
           <Analytics />
           <SpeedInsights />
-        </div>
-      </body>
+        </body>
+      </PHProvider>
     </html>
   );
 }
