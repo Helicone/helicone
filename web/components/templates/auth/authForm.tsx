@@ -69,15 +69,20 @@ const AuthForm = (props: AuthFormProps) => {
   };
 
   const checkPath = () => {
-    const basePath = router.asPath;
+    // check if the base path has `us` or `eu` in it
+    // if the window does not exist (for example, during SSR), return `us`
+    if (typeof window === "undefined") {
+      return "us";
+    }
+
+    const basePath = window.location.href;
     if (basePath.includes("us")) {
       return "us";
     }
     if (basePath.includes("eu")) {
       return "eu";
-    } else {
-      return "us";
     }
+    return "us";
   };
 
   return (
@@ -138,6 +143,7 @@ const AuthForm = (props: AuthFormProps) => {
                         Data region
                       </span>
                     </label>
+
                     <Select defaultValue={checkPath()}>
                       <SelectItem
                         value="us"
