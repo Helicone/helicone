@@ -15,9 +15,6 @@ import Link from "next/link";
 export default function Home() {
   return (
     <>
-      <Head>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
       <main className="flex min-h-screen flex-col items-center justify-between text-black">
         <header className="text-center flex flex-col space-y-4 py-32 max-w-6xl mx-auto">
           <Link

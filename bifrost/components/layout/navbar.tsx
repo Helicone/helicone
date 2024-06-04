@@ -21,6 +21,7 @@ const NavBar = (props: NavBarProps) => {
               height={150}
               width={150}
               priority={true}
+              className="w-auto h-auto"
             />
           </Link>
         </div>
