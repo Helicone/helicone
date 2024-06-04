@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import { RequestWrapper } from "../../lib/requestWrapper/requestWrapper";
+import { proxyForwarder } from "../../lib/proxy/ProxyForwarder";
 
 export const proxyRouter = express.Router();
 proxyRouter.use(express.json());
@@ -11,11 +12,11 @@ export interface ProxyRequestBody {
   body: string;
 }
 
-const handleAnthropicProxy = (
+const handleAnthropicProxy = async (
   requestWrapper: RequestWrapper,
   res: Response
 ) => {
-  // Handle Anthropic Proxy
+  await proxyForwarder(requestWrapper, "ANTHROPIC");
   res.status(200).json({ message: "Anthropic Proxy" });
 };
 
@@ -33,6 +34,8 @@ const handleOpenAIProxy = async (
       body: requestWrapper.getBody(),
     });
   }
+
+  await proxyForwarder(requestWrapper, "OPENAI");
   res.status(200).json({ message: "OpenAI Proxy" });
 };
 
@@ -40,8 +43,9 @@ const handleGatewayAPIRouter = (
   requestWrapper: RequestWrapper,
   res: Response
 ) => {
+  res.status(501).json({ message: "Not implemented" });
   // Handle Gateway API Router
-  res.status(200).json({ message: "Gateway API Router" });
+  //   res.status(200).json({ message: "Gateway API Router" });
 };
 
 const ROUTER_MAP: {
@@ -52,23 +56,50 @@ const ROUTER_MAP: {
   ANTHROPIC: handleAnthropicProxy,
 };
 
-proxyRouter.post("/v1/proxy/:provider", async (req: Request, res: Response) => {
-  const { provider } = req.params;
+// Just for gateway
+proxyRouter.post("/v1/gateway", async (req: Request, res: Response) => {
+  throw new Error("Not implemented");
+  //   const { data: requestWrapper, error: requestWrapperErr } =
+  //     await RequestWrapper.create(req);
+  //   if (requestWrapperErr || !requestWrapper) {
+  //     return res.status(500).json({ message: "Error creating request wrapper" });
+  //   }
 
-  const { data: requestWrapper, error: requestWrapperErr } =
-    await RequestWrapper.create(req);
-  if (requestWrapperErr || !requestWrapper) {
-    return res.status(500).json({ message: "Error creating request wrapper" });
-  }
+  //   const routerFunction = ROUTER_MAP["GATEWAY"];
 
-  const routerFunction = ROUTER_MAP[provider.toUpperCase()];
-
-  if (routerFunction) {
-    routerFunction(
-      { data: requestWrapper, error: requestWrapperErr }.data,
-      res
-    );
-  } else {
-    res.status(400).json({ message: "Invalid provider" });
-  }
+  //   if (routerFunction) {
+  //     routerFunction(
+  //       { data: requestWrapper, error: requestWrapperErr }.data,
+  //       res
+  //     );
+  //   } else {
+  //     res.status(400).json({ message: "Invalid provider" });
+  //   }
 });
+
+// For specific providers
+proxyRouter.post(
+  "/v1/gateway/:provider",
+  async (req: Request, res: Response) => {
+    const { provider } = req.params;
+
+    const { data: requestWrapper, error: requestWrapperErr } =
+      await RequestWrapper.create(req);
+    if (requestWrapperErr || !requestWrapper) {
+      return res
+        .status(500)
+        .json({ message: "Error creating request wrapper" });
+    }
+
+    const routerFunction = ROUTER_MAP[provider.toUpperCase()];
+
+    if (routerFunction) {
+      routerFunction(
+        { data: requestWrapper, error: requestWrapperErr }.data,
+        res
+      );
+    } else {
+      res.status(400).json({ message: "Invalid provider" });
+    }
+  }
+);

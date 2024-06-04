@@ -1,8 +1,14 @@
 import { Provider } from "../../models/models";
+import { KafkaProducer } from "../clients/KafkaProducer";
+import { supabaseServer } from "../db/supabase";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
+import { S3Client } from "../shared/db/s3Client";
+import { DBLoggable } from "./DBLoggable";
 import { HeliconeProxyRequestMapper } from "./HeliconeProxyRequest";
+import { handleProxyRequest } from "./ProxyRequestHandler";
 import { checkRateLimit } from "./RateLimiter";
 import { ResponseBuilder } from "./ResponseBuilder";
+import { S3Manager } from "./S3Manager";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -37,58 +43,11 @@ export async function proxyForwarder(
       rateLimitCheckResult,
       proxyRequest.rateLimitOptions
     );
+
     if (rateLimitCheckResult.status === "rate_limited") {
       return responseBuilder.buildRateLimitedResponse();
     }
   }
-
-  // TODO: ADD CACHING
-  //   const { data: cacheSettings, error: cacheError } = getCacheSettings(
-  //     proxyRequest.requestWrapper.getHeaders(),
-  //     proxyRequest.isStream
-  //   );
-
-  //   if (cacheError !== null) {
-  //     return responseBuilder.build({
-  //       body: cacheError,
-  //       status: 500,
-  //     });
-  //   }
-
-  //   if (cacheSettings.shouldReadFromCache) {
-  //     const { data: auth, error: authError } = await request.auth();
-  //     if (authError == null) {
-  //       const db = new DBWrapper(env, auth);
-  //       const { data: orgData, error: orgError } = await db.getAuthParams();
-  //       if (orgError !== null || !orgData?.organizationId) {
-  //         console.error("Error getting org", orgError);
-  //       } else {
-  //         try {
-  //           const cachedResponse = await getCachedResponse(
-  //             proxyRequest,
-  //             cacheSettings.bucketSettings,
-  //             env.CACHE_KV,
-  //             cacheSettings.cacheSeed
-  //           );
-  //           if (cachedResponse) {
-  //             ctx.waitUntil(
-  //               recordCacheHit(
-  //                 cachedResponse.headers,
-  //                 env,
-  //                 new ClickhouseClientWrapper(env),
-  //                 orgData.organizationId,
-  //                 provider,
-  //                 (request.cf?.country as string) ?? null
-  //               )
-  //             );
-  //             return cachedResponse;
-  //           }
-  //         } catch (error) {
-  //           console.error("Error getting cached response", error);
-  //         }
-  //       }
-  //     }
-  //   }
 
   const { data, error } = await handleProxyRequest(proxyRequest);
   if (error !== null) {
@@ -99,40 +58,9 @@ export async function proxyForwarder(
   }
   const { loggable, response } = data;
 
-  if (cacheSettings.shouldSaveToCache && response.status === 200) {
-    const { data: auth, error: authError } = await request.auth();
-    if (authError == null) {
-      const db = new DBWrapper(env, auth);
-      const { data: orgData, error: orgError } = await db.getAuthParams();
-      if (orgError !== null || !orgData?.organizationId) {
-        console.error("Error getting org", orgError);
-      } else {
-        ctx.waitUntil(
-          loggable
-            .waitForResponse()
-            .then((responseBody) =>
-              saveToCache(
-                proxyRequest,
-                response,
-                responseBody.body,
-                cacheSettings.cacheControl,
-                cacheSettings.bucketSettings,
-                env.CACHE_KV,
-                cacheSettings.cacheSeed ?? null
-              )
-            )
-        );
-      }
-    }
-  }
-
   response.headers.forEach((value, key) => {
     responseBuilder.setHeader(key, value);
   });
-
-  if (cacheSettings.shouldReadFromCache) {
-    responseBuilder.setHeader("Helicone-Cache", "MISS");
-  }
 
   async function log(loggable: DBLoggable) {
     const { data: auth, error: authError } = await request.auth();
@@ -140,40 +68,38 @@ export async function proxyForwarder(
       console.error("Error getting auth", authError);
       return;
     }
-    const supabase = createClient(
-      env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY
-    );
+
+    const { data: authParams, error: authParamsError } =
+      await supabaseServer.authenticate(auth);
+
+    if (authParamsError || !authParams) {
+      console.error("Error getting auth params", authParamsError);
+      return;
+    }
+
+    const { data: orgParams, error: orgParamsError } =
+      await supabaseServer.getOrganization(authParams);
+
+    if (orgParamsError || !orgParams) {
+      console.error("Error getting organization", orgParamsError);
+      return;
+    }
+
     const res = await loggable.log(
       {
-        clickhouse: new ClickhouseClientWrapper(env),
-        supabase: supabase,
-        dbWrapper: new DBWrapper(env, auth),
-        queue: new RequestResponseStore(
-          createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-          new DBQueryTimer(ctx, {
-            enabled: (env.DATADOG_ENABLED ?? "false") === "true",
-            apiKey: env.DATADOG_API_KEY,
-            endpoint: env.DATADOG_ENDPOINT,
-          }),
-          new Valhalla(env.VALHALLA_URL, auth),
-          new ClickhouseClientWrapper(env),
-          env.FALLBACK_QUEUE,
-          env.REQUEST_AND_RESPONSE_QUEUE_KV
-        ),
-        requestResponseManager: new RequestResponseManager(
+        s3Manager: new S3Manager(
           new S3Client(
-            env.S3_ACCESS_KEY ?? "",
-            env.S3_SECRET_KEY ?? "",
-            env.S3_ENDPOINT ?? "",
-            env.S3_BUCKET_NAME ?? "",
-            env.S3_REGION ?? "us-west-2"
-          ),
-          createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
+            process.env.S3_ACCESS_KEY ?? "",
+            process.env.S3_SECRET_KEY ?? "",
+            process.env.S3_ENDPOINT ?? "",
+            process.env.S3_BUCKET_NAME ?? "",
+            (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+          )
         ),
-        kafkaProducer: new KafkaProducer(env),
+        kafkaProducer: new KafkaProducer(),
       },
-      env.S3_ENABLED ?? "true",
+      authParams,
+      orgParams,
       proxyRequest?.requestWrapper.heliconeHeaders
     );
 
@@ -182,37 +108,11 @@ export async function proxyForwarder(
     }
   }
 
-  if (request?.heliconeHeaders?.heliconeAuth || request.heliconeProxyKeyId) {
-    ctx.waitUntil(log(loggable));
-  }
+  void log(loggable);
 
   return responseBuilder.build({
     body: response.body,
     inheritFrom: response,
     status: response.status,
   });
-
-  function parseLatestMessage(
-    proxyRequest: HeliconeProxyRequest
-  ): Result<LatestMessage, string> {
-    try {
-      return {
-        error: null,
-        data: JSON.parse(
-          proxyRequest.bodyText ?? ""
-        ).messages.pop() as LatestMessage,
-      };
-    } catch (error) {
-      console.error("Error parsing latest message:", error);
-      return {
-        error: "Failed to parse the latest message.",
-        data: null,
-      };
-    }
-  }
 }
-
-type LatestMessage = {
-  role?: string;
-  content?: string;
-};

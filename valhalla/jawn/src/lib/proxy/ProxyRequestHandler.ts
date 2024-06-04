@@ -1,3 +1,13 @@
+import { Result } from "../shared/result";
+import { DBLoggable, dbLoggableRequestFromProxyRequest } from "./DBLoggable";
+import { HeliconeProxyRequest } from "./HeliconeProxyRequest";
+import {
+  callPropsFromProxyRequest,
+  callProvider,
+  callProviderWithRetry,
+} from "./ProviderClient";
+import { CompletedChunk, ReadableInterceptor } from "./ReadableInterceptor";
+
 export type ProxyResult = {
   loggable: DBLoggable;
   response: Response;
@@ -125,47 +135,4 @@ export async function handleProxyRequest(
     },
     error: null,
   };
-}
-
-export async function handleThreatProxyRequest(
-  proxyRequest: HeliconeProxyRequest,
-  requestStartTime: Date
-): Promise<Result<ProxyResult, string>> {
-  const responseHeaders = new Headers();
-  responseHeaders.set("Helicone-Status", "failed");
-  responseHeaders.set("Helicone-Id", proxyRequest.requestId);
-  const threatProxyResponse = {
-    data: {
-      loggable: new DBLoggable({
-        request: dbLoggableRequestFromProxyRequest(
-          proxyRequest,
-          requestStartTime
-        ),
-        response: {
-          responseId: crypto.randomUUID(),
-          getResponseBody: async () => ({
-            body: "{}",
-            endTime: new Date(new Date().getTime()),
-          }),
-          responseHeaders: responseHeaders,
-          status: async () => -4,
-          omitLog:
-            proxyRequest.requestWrapper.heliconeHeaders.omitHeaders
-              .omitResponse,
-        },
-        timing: {
-          startTime: proxyRequest.startTime,
-          timeToFirstToken: async () => null,
-        },
-        tokenCalcUrl: proxyRequest.tokenCalcUrl,
-      }),
-      response: new Response("{}", {
-        status: 500,
-        headers: responseHeaders,
-      }),
-    },
-    error: null,
-  };
-
-  return threatProxyResponse;
 }

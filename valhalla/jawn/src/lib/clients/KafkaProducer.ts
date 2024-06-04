@@ -1,6 +1,7 @@
 import { Kafka } from "@upstash/kafka";
 import { Message } from "../handlers/HandlerContext";
 import { PromiseGenericResult, err, ok } from "../shared/result";
+import { LogManager } from "../../managers/LogManager";
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
@@ -35,7 +36,13 @@ export class KafkaProducer {
     topic: Topics
   ): PromiseGenericResult<string> {
     if (!this.kafka) {
-      console.log("Kafka is not initialized");
+      const logManager = new LogManager();
+      await logManager.processLogEntries(msgs, {
+        batchId: "",
+        partition: 0,
+        lastOffset: "",
+        messageCount: 1,
+      });
       return ok("Kafka is not initialized");
     }
 
