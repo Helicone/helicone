@@ -74,10 +74,6 @@ export const consume = async () => {
             MESSAGES_PER_MINI_BATCH;
 
           if (miniBatchSize <= 0) {
-            console.error(
-              "Failed to get messages per mini batch setting",
-              messagesPerMiniBatchSetting
-            );
             return;
           }
 
@@ -218,10 +214,6 @@ export const consumeDlq = async () => {
         messagesPerMiniBatchSetting?.miniBatchSize ??
         DLQ_MESSAGES_PER_MINI_BATCH;
       if (miniBatchSize <= 0) {
-        console.error(
-          "DLQ: Failed to get messages per mini batch setting",
-          messagesPerMiniBatchSetting
-        );
         return;
       }
 
