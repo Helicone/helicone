@@ -8,6 +8,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { PHProvider } from "./providers";
 import dynamic from "next/dynamic";
+import Script from "next/script";
 
 const PostHogPageView = dynamic(() => import("./PostHogPageView"), {
   ssr: false,
@@ -54,6 +55,12 @@ export default function RootLayout({
           <PostHogPageView />
           <Analytics />
           <SpeedInsights />
+          <Script
+            id="koala-snippet"
+            dangerouslySetInnerHTML={{
+              __html: `!function(t){if(window.ko)return;window.ko=[],["identify","track","removeListeners","open","on","off","qualify","ready"].forEach(function(t){ko[t]=function(){var n=[].slice.call(arguments);return n.unshift(t),ko.push(n),ko}});var n=document.createElement("script");n.async=!0,n.setAttribute("src","https://cdn.getkoala.com/v1/pk_3d24ae9e69e18decfcb68b9d7b668c4501b5/sdk.js"),(document.body || document.head).appendChild(n)}();`,
+            }}
+          />
         </body>
       </PHProvider>
     </html>
