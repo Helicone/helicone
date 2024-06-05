@@ -807,7 +807,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(UserController)),
             ...(fetchMiddlewares<RequestHandler>(UserController.prototype.getUsers)),
 
-            function UserController_getUsers(request: ExRequest, response: ExResponse, next: any) {
+            async function UserController_getUsers(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"ref":"UserQueryParams"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -821,7 +821,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new UserController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'getUsers',
                 controller,
                 response,
@@ -839,7 +839,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(RequestController)),
             ...(fetchMiddlewares<RequestHandler>(RequestController.prototype.getRequests)),
 
-            function RequestController_getRequests(request: ExRequest, response: ExResponse, next: any) {
+            async function RequestController_getRequests(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"ref":"RequestQueryParams"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -853,7 +853,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new RequestController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'getRequests',
                 controller,
                 response,
@@ -871,7 +871,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(RequestController)),
             ...(fetchMiddlewares<RequestHandler>(RequestController.prototype.feedbackRequest)),
 
-            function RequestController_feedbackRequest(request: ExRequest, response: ExResponse, next: any) {
+            async function RequestController_feedbackRequest(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"rating":{"dataType":"boolean","required":true}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -886,7 +886,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new RequestController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'feedbackRequest',
                 controller,
                 response,
@@ -904,7 +904,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(RequestController)),
             ...(fetchMiddlewares<RequestHandler>(RequestController.prototype.putProperty)),
 
-            function RequestController_putProperty(request: ExRequest, response: ExResponse, next: any) {
+            async function RequestController_putProperty(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"value":{"dataType":"string","required":true},"key":{"dataType":"string","required":true}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -919,7 +919,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new RequestController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'putProperty',
                 controller,
                 response,
@@ -937,7 +937,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(RequestController)),
             ...(fetchMiddlewares<RequestHandler>(RequestController.prototype.getRequestAssetById)),
 
-            function RequestController_getRequestAssetById(request: ExRequest, response: ExResponse, next: any) {
+            async function RequestController_getRequestAssetById(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
                     requestId: {"in":"path","name":"requestId","required":true,"dataType":"string"},
@@ -952,7 +952,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new RequestController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'getRequestAssetById',
                 controller,
                 response,
@@ -970,7 +970,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(RequestController)),
             ...(fetchMiddlewares<RequestHandler>(RequestController.prototype.addScores)),
 
-            function RequestController_addScores(request: ExRequest, response: ExResponse, next: any) {
+            async function RequestController_addScores(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"ref":"ScoreRequest"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -985,7 +985,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new RequestController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'addScores',
                 controller,
                 response,
@@ -1003,7 +1003,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(PromptController)),
             ...(fetchMiddlewares<RequestHandler>(PromptController.prototype.getPrompts)),
 
-            function PromptController_getPrompts(request: ExRequest, response: ExResponse, next: any) {
+            async function PromptController_getPrompts(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"ref":"PromptsQueryParams"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -1017,7 +1017,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new PromptController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'getPrompts',
                 controller,
                 response,
@@ -1035,7 +1035,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(PromptController)),
             ...(fetchMiddlewares<RequestHandler>(PromptController.prototype.getPrompt)),
 
-            function PromptController_getPrompt(request: ExRequest, response: ExResponse, next: any) {
+            async function PromptController_getPrompt(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"ref":"PromptQueryParams"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -1050,7 +1050,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new PromptController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'getPrompt',
                 controller,
                 response,
@@ -1068,7 +1068,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(PromptController)),
             ...(fetchMiddlewares<RequestHandler>(PromptController.prototype.deletePrompt)),
 
-            function PromptController_deletePrompt(request: ExRequest, response: ExResponse, next: any) {
+            async function PromptController_deletePrompt(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
                     promptId: {"in":"path","name":"promptId","required":true,"dataType":"string"},
@@ -1082,7 +1082,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new PromptController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'deletePrompt',
                 controller,
                 response,
@@ -1100,7 +1100,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(PromptController)),
             ...(fetchMiddlewares<RequestHandler>(PromptController.prototype.createSubversion)),
 
-            function PromptController_createSubversion(request: ExRequest, response: ExResponse, next: any) {
+            async function PromptController_createSubversion(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"ref":"PromptCreateSubversionParams"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -1115,7 +1115,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new PromptController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'createSubversion',
                 controller,
                 response,
@@ -1133,7 +1133,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(PromptController)),
             ...(fetchMiddlewares<RequestHandler>(PromptController.prototype.getInputs)),
 
-            function PromptController_getInputs(request: ExRequest, response: ExResponse, next: any) {
+            async function PromptController_getInputs(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"random":{"dataType":"boolean"},"limit":{"dataType":"double","required":true}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -1148,7 +1148,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new PromptController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'getInputs',
                 controller,
                 response,
@@ -1166,7 +1166,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(PromptController)),
             ...(fetchMiddlewares<RequestHandler>(PromptController.prototype.getPromptVersions)),
 
-            function PromptController_getPromptVersions(request: ExRequest, response: ExResponse, next: any) {
+            async function PromptController_getPromptVersions(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -1181,7 +1181,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new PromptController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'getPromptVersions',
                 controller,
                 response,
@@ -1199,7 +1199,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(ExperimentDatasetController)),
             ...(fetchMiddlewares<RequestHandler>(ExperimentDatasetController.prototype.addDataset)),
 
-            function ExperimentDatasetController_addDataset(request: ExRequest, response: ExResponse, next: any) {
+            async function ExperimentDatasetController_addDataset(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"ref":"NewDatasetParams"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -1213,7 +1213,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new ExperimentDatasetController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'addDataset',
                 controller,
                 response,
@@ -1231,7 +1231,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(ExperimentDatasetController)),
             ...(fetchMiddlewares<RequestHandler>(ExperimentDatasetController.prototype.addRandomDataset)),
 
-            function ExperimentDatasetController_addRandomDataset(request: ExRequest, response: ExResponse, next: any) {
+            async function ExperimentDatasetController_addRandomDataset(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"ref":"RandomDatasetParams"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -1245,7 +1245,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new ExperimentDatasetController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'addRandomDataset',
                 controller,
                 response,
@@ -1263,7 +1263,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(ExperimentDatasetController)),
             ...(fetchMiddlewares<RequestHandler>(ExperimentDatasetController.prototype.getDatasets)),
 
-            function ExperimentDatasetController_getDatasets(request: ExRequest, response: ExResponse, next: any) {
+            async function ExperimentDatasetController_getDatasets(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"promptId":{"dataType":"string"}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -1277,7 +1277,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new ExperimentDatasetController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'getDatasets',
                 controller,
                 response,
@@ -1295,7 +1295,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(ExperimentDatasetController)),
             ...(fetchMiddlewares<RequestHandler>(ExperimentDatasetController.prototype.getDataset)),
 
-            function ExperimentDatasetController_getDataset(request: ExRequest, response: ExResponse, next: any) {
+            async function ExperimentDatasetController_getDataset(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -1309,7 +1309,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new ExperimentDatasetController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'getDataset',
                 controller,
                 response,
@@ -1327,7 +1327,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(ExperimentDatasetController)),
             ...(fetchMiddlewares<RequestHandler>(ExperimentDatasetController.prototype.mutateDataset)),
 
-            function ExperimentDatasetController_mutateDataset(request: ExRequest, response: ExResponse, next: any) {
+            async function ExperimentDatasetController_mutateDataset(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"removeRequests":{"dataType":"array","array":{"dataType":"string"},"required":true},"addRequests":{"dataType":"array","array":{"dataType":"string"},"required":true}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -1341,7 +1341,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new ExperimentDatasetController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'mutateDataset',
                 controller,
                 response,
@@ -1359,7 +1359,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(ExperimentController)),
             ...(fetchMiddlewares<RequestHandler>(ExperimentController.prototype.createNewExperiment)),
 
-            function ExperimentController_createNewExperiment(request: ExRequest, response: ExResponse, next: any) {
+            async function ExperimentController_createNewExperiment(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"ref":"NewExperimentParams"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -1373,7 +1373,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new ExperimentController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'createNewExperiment',
                 controller,
                 response,
@@ -1391,7 +1391,7 @@ export function RegisterRoutes(app: Router) {
             ...(fetchMiddlewares<RequestHandler>(ExperimentController)),
             ...(fetchMiddlewares<RequestHandler>(ExperimentController.prototype.getExperiments)),
 
-            function ExperimentController_getExperiments(request: ExRequest, response: ExResponse, next: any) {
+            async function ExperimentController_getExperiments(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"include":{"ref":"IncludeExperimentKeys"},"filter":{"ref":"ExperimentFilterNode","required":true}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -1405,7 +1405,7 @@ export function RegisterRoutes(app: Router) {
 
                 const controller = new ExperimentController();
 
-              templateService.apiHandler({
+              await templateService.apiHandler({
                 methodName: 'getExperiments',
                 controller,
                 response,

@@ -20,7 +20,8 @@ export const authMiddleware = async (
     if (
       authParams.error ||
       !authParams.data?.organizationId ||
-      !authParams.data?.keyPermissions?.includes("r")
+      (authParams.data.keyPermissions &&
+        !authParams.data?.keyPermissions?.includes("r"))
     ) {
       console.log("authParams.error", authParams.error);
       res.status(401).json({

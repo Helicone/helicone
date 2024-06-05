@@ -669,6 +669,13 @@
 				],
 				"type": "object"
 			},
+			"KeyPermissions": {
+				"type": "string",
+				"enum": [
+					"w",
+					"rw"
+				]
+			},
 			"GenerateHashQueryParams": {
 				"properties": {
 					"apiKey": {
@@ -681,11 +688,7 @@
 						"type": "string"
 					},
 					"permissions": {
-						"type": "string",
-						"enum": [
-							"w",
-							"rw"
-						]
+						"$ref": "#/components/schemas/KeyPermissions"
 					}
 				},
 				"required": [
