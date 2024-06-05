@@ -44,6 +44,10 @@ export interface IHeliconeHeaders {
     omitResponse: boolean;
     omitRequest: boolean;
   };
+  sessionHeaders: {
+    sessionId: Nullable<string>;
+    path: Nullable<string>;
+  };
   nodeId: Nullable<string>;
   fallBacks: Nullable<HeliconeFallback[]>;
   modelOverride: Nullable<string>;
@@ -82,6 +86,10 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   promptName: Nullable<string>;
   userId: Nullable<string>;
   omitHeaders: { omitResponse: boolean; omitRequest: boolean };
+  sessionHeaders: {
+    sessionId: Nullable<string>;
+    path: Nullable<string>;
+  };
   nodeId: Nullable<string>;
   fallBacks: Nullable<HeliconeFallback[]>;
   modelOverride: Nullable<string>;
@@ -109,6 +117,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     };
     this.promptName = heliconeHeaders.promptName;
     this.omitHeaders = heliconeHeaders.omitHeaders;
+    this.sessionHeaders = heliconeHeaders.sessionHeaders;
     this.userId = heliconeHeaders.userId;
     this.heliconeProperties = this.getHeliconeProperties(heliconeHeaders);
     this.nodeId = heliconeHeaders.nodeId;
@@ -227,6 +236,10 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       omitHeaders: {
         omitResponse: this.headers.get("Helicone-Omit-Response") === "true",
         omitRequest: this.headers.get("Helicone-Omit-Request") === "true",
+      },
+      sessionHeaders: {
+        sessionId: this.headers.get("Helicone-Session-Id") ?? null,
+        path: this.headers.get("Helicone-Session-Path") ?? null,
       },
       nodeId: this.headers.get("Helicone-Node-Id") ?? null,
       fallBacks: this.getFallBacks(),
