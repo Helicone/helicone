@@ -107,10 +107,12 @@ export class LogStore {
           );
 
           try {
-            const insertRequest =
-              pgp.helpers.insert(filteredRequests, requestColumns) +
-              onConflictRequest;
-            await t.none(insertRequest);
+            if (filteredRequests && filteredRequests.length > 0) {
+              const insertRequest =
+                pgp.helpers.insert(filteredRequests, requestColumns) +
+                onConflictRequest;
+              await t.none(insertRequest);
+            }
           } catch (error) {
             console.error("Error inserting request", error);
             throw error;
@@ -124,10 +126,12 @@ export class LogStore {
           );
 
           try {
-            const insertResponse =
-              pgp.helpers.insert(filteredResponses, responseColumns) +
-              onConflictResponse;
-            await t.none(insertResponse);
+            if (filteredResponses && filteredResponses.length > 0) {
+              const insertResponse =
+                pgp.helpers.insert(filteredResponses, responseColumns) +
+                onConflictResponse;
+              await t.none(insertResponse);
+            }
           } catch (error) {
             console.error("Error inserting response", error);
             throw error;
@@ -184,6 +188,7 @@ export class LogStore {
           }
         } catch (error: any) {
           console.error("Error inserting search records", error);
+          throw error;
         }
       });
 
