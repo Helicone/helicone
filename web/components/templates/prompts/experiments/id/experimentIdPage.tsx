@@ -17,6 +17,7 @@ import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
 import { usePrompt } from "../../../../../services/hooks/prompts/prompts";
 import ArrayDiffViewer from "../../id/arrayDiffViewer";
 import ScoresTable from "../scoresTable";
+import { formatNumber } from "../../../users/initialColumns";
 
 interface PromptIdPageProps {
   id: string;
@@ -69,7 +70,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
       return score.value;
     }
     if (score.valueType === "number") {
-      return (score.value as number).toFixed(4);
+      return formatNumber(score.value as number);
     }
     return score.value;
   };
