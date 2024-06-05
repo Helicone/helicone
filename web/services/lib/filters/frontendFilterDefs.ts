@@ -58,6 +58,14 @@ const textOperators: Operator<keyof TextOperators>[] = [
   },
 ];
 
+const VectorOperators: Operator<keyof TextOperators>[] = [
+  {
+    value: "contains",
+    label: "contains",
+    type: "text",
+  },
+];
+
 const numberOperators: Operator<keyof NumberOperators>[] = [
   {
     value: "equals",
@@ -214,9 +222,9 @@ export const DASHBOARD_PAGE_TABLE_FILTERS: [
   },
 ];
 export const REQUEST_TABLE_FILTERS: [
+  SingleFilterDef<"request_response_search">,
   SingleFilterDef<"request">,
-  SingleFilterDef<"request">,
-  SingleFilterDef<"response">,
+  SingleFilterDef<"request_response_search">,
   SingleFilterDef<"response">,
   SingleFilterDef<"request">,
   SingleFilterDef<"response">,
@@ -227,9 +235,9 @@ export const REQUEST_TABLE_FILTERS: [
 ] = [
   {
     label: "Request",
-    operators: textOperators,
-    table: "request",
-    column: "prompt",
+    operators: VectorOperators,
+    table: "request_response_search",
+    column: "request_body_vector",
     category: "request",
   },
   {
@@ -241,9 +249,9 @@ export const REQUEST_TABLE_FILTERS: [
   },
   {
     label: "Response",
-    operators: textOperators,
-    table: "response",
-    column: "body_completion",
+    operators: VectorOperators,
+    table: "request_response_search",
+    column: "response_body_vector",
     category: "request",
   },
   {
