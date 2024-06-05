@@ -159,16 +159,21 @@ export class LogStore {
         }
 
         try {
-          const searchRecords = payload.searchRecords.map((record) => ({
-            request_id: record.request_id,
-            request_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
-              record.request_body_vector
-            )})`,
-            response_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
-              record.response_body_vector
-            )})`,
-            organization_id: record.organization_id,
-          }));
+          const searchRecords = payload.searchRecords
+            .filter(
+              (record) =>
+                record.request_body_vector || record.response_body_vector
+            )
+            .map((record) => ({
+              request_id: record.request_id,
+              request_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
+                record.request_body_vector
+              )})`,
+              response_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
+                record.response_body_vector
+              )})`,
+              organization_id: record.organization_id,
+            }));
 
           const insertSearchQuery =
             pgp.helpers.insert(searchRecords, requestResponseSearchColumns) +
