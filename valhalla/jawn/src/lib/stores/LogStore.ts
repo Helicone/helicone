@@ -218,14 +218,33 @@ export class LogStore {
       }
     }
 
+    function extractVersion(
+      versionString: string
+    ): { majorVersion: number; minorVersion: number } | undefined {
+      const versionPattern = /^(\d+)\.(\d+)$/;
+      const match = versionString.match(versionPattern);
+
+      if (match) {
+        const majorVersion = parseInt(match[1], 10);
+        const minorVersion = parseInt(match[2], 10);
+        return {
+          majorVersion: majorVersion,
+          minorVersion: minorVersion,
+        };
+      } else {
+        return undefined;
+      }
+    }
+
     // Check the latest version and decide whether to update
     const existingPromptVersion = await t.oneOrNone<{
       id: string;
       major_version: number;
+      minor_version: number;
       helicone_template: any;
       created_at: Date;
     }>(
-      `SELECT id, major_version, helicone_template, created_at FROM prompts_versions
+      `SELECT id, major_version, minor_version, helicone_template, created_at FROM prompts_versions
        WHERE organization = $1 AND prompt_v2 = $2 ORDER BY major_version DESC LIMIT 1`,
       [orgId, existingPrompt.id]
     );
@@ -236,16 +255,34 @@ export class LogStore {
     if (
       !existingPromptVersion ||
       (existingPromptVersion &&
-        existingPromptVersion.created_at <= newPromptRecord.createdAt &&
-        !deepCompare(
-          existingPromptVersion.helicone_template,
-          heliconeTemplate.template
-        ))
+        existingPromptVersion.created_at <= newPromptRecord.createdAt)
     ) {
       // Create a new version if the template has changed
-      let majorVersion = existingPromptVersion
+
+      const dc = deepCompare(
+        existingPromptVersion!.helicone_template,
+        heliconeTemplate.template
+      );
+
+      console.log("Deep compare", dc);
+
+      const passedPromptVersion = extractVersion(newPromptRecord.promptVersion);
+
+      console.log("Passed prompt version", passedPromptVersion);
+
+      console.log("existingPromptVersion", existingPromptVersion);
+
+      let majorVersion = passedPromptVersion
+        ? passedPromptVersion.majorVersion
+        : existingPromptVersion
         ? existingPromptVersion.major_version + 1
         : 0;
+
+      const minorVersion = passedPromptVersion
+        ? existingPromptVersion!.minor_version + 1
+        : 0;
+
+      console.log("minorVersion", minorVersion);
       try {
         const newVersionResult = await t.one(
           `INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at)
@@ -254,7 +291,7 @@ export class LogStore {
             existingPrompt.id,
             orgId,
             majorVersion,
-            0,
+            minorVersion,
             heliconeTemplate.template,
             model,
             newPromptRecord.createdAt,

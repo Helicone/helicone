@@ -620,6 +620,9 @@
 							"properties": {
 								"$ref": "#/components/schemas/Record_string.string_"
 							},
+							"promptVersion": {
+								"type": "string"
+							},
 							"promptId": {
 								"type": "string"
 							},
