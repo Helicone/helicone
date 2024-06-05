@@ -3,12 +3,13 @@ import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
 import { hashAuth } from "../../lib/db/hash";
 import { supabaseServer } from "../../lib/routers/withAuth";
 import { JawnAuthenticatedRequest } from "../../types/request";
+import { KeyPermissions } from "../../models/models";
 
 export interface GenerateHashQueryParams {
   apiKey: string;
   userId: string;
   keyName: string;
-  permissions: "w" | "rw";
+  permissions: KeyPermissions;
 }
 
 @Route("v1/key")

@@ -5,6 +5,7 @@ import { Database } from "./database.types";
 import { hashAuth } from "./hash";
 import { HeliconeAuth } from "../requestWrapper";
 import { redisClient } from "../clients/redisClient";
+import { KeyPermissions } from "../../models/models";
 
 // SINGLETON
 class SupabaseAuthCache extends InMemoryCache {
@@ -49,6 +50,7 @@ export interface AuthParams {
   organizationId: string;
   userId?: string;
   heliconeApiKeyId?: number;
+  keyPermissions?: KeyPermissions;
 }
 type AuthResult = PromiseGenericResult<AuthParams>;
 
@@ -150,6 +152,7 @@ export class SupabaseConnector {
       organizationId: apiKey.data[0].organization_id,
       userId: apiKey.data[0].user_id,
       heliconeApiKeyId: apiKey.data[0].id,
+      keyPermissions: apiKey.data[0].key_permissions as KeyPermissions,
     });
   }
 
