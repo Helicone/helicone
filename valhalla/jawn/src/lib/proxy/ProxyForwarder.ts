@@ -52,7 +52,7 @@ export async function proxyForwarder(
     }
   }
 
-  const { data, error } = await handleProxyRequest(proxyRequest);
+  const { data, error } = await handleProxyRequest(proxyRequest, res);
   if (error !== null) {
     return responseBuilder.build(
       {
@@ -64,20 +64,18 @@ export async function proxyForwarder(
   }
   const { loggable, response } = data;
 
-  response.headers.forEach((value, key) => {
-    responseBuilder.setHeader(key, value);
-  });
-
   void log(loggable, request, proxyRequest);
 
-  return responseBuilder.build(
-    {
-      body: response.body,
-      inheritFrom: response,
-      status: response.status,
-    },
-    res
-  );
+  // const response2 = responseBuilder.build(
+  //   {
+  //     body: response.body,
+  //     inheritFrom: response,
+  //     status: response.status,
+  //   },
+  //   res
+  // );
+
+  return response;
 }
 
 async function log(

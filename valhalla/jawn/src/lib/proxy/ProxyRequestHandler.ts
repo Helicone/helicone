@@ -8,10 +8,11 @@ import {
 } from "./ProviderClient";
 import { CompletedChunk, ReadableInterceptor } from "./ReadableInterceptor";
 import crypto from "crypto";
+import { Response as ExpressResponse } from "express";
 
 export type ProxyResult = {
   loggable: DBLoggable;
-  response: Response;
+  response: ExpressResponse;
 };
 
 function getStatus(
@@ -32,7 +33,8 @@ function getStatus(
 }
 
 export async function handleProxyRequest(
-  proxyRequest: HeliconeProxyRequest
+  proxyRequest: HeliconeProxyRequest,
+  expressRes: ExpressResponse
 ): Promise<Result<ProxyResult, string>> {
   const { retryOptions } = proxyRequest;
 
@@ -43,7 +45,7 @@ export async function handleProxyRequest(
     : callProvider(callProps));
 
   const interceptor = response.body
-    ? new ReadableInterceptor(response.body, proxyRequest.isStream)
+    ? new ReadableInterceptor(response.body, expressRes, proxyRequest.isStream)
     : null;
   let body = interceptor ? interceptor.stream : null;
 
@@ -83,6 +85,19 @@ export async function handleProxyRequest(
     if (status === 100) {
       status = 200;
     }
+  }
+
+  responseHeaders.forEach((value, key) => {
+    expressRes.setHeader(key, value);
+  });
+
+  expressRes.status(status);
+
+  if (interceptor) {
+    console.log("Interceptor created, starting stream");
+  } else {
+    console.log("No interceptor created, ending response");
+    expressRes.end();
   }
 
   return {
@@ -128,11 +143,13 @@ export async function handleProxyRequest(
         },
         tokenCalcUrl: proxyRequest.tokenCalcUrl,
       }),
-      response: new Response(body, {
-        ...response,
-        headers: responseHeaders,
-        status: status,
-      }),
+      // response: new Response(body, {
+      //   ...response,
+      //   headers: responseHeaders,
+      //   status: status,
+      // }),
+      // How to do the above, but it has to be an express response???
+      response: expressRes,
     },
     error: null,
   };

@@ -1,5 +1,6 @@
 import { RateLimitOptions, RateLimitResponse } from "./RateLimiter";
 import { Response as ExpressResponse } from "express";
+import { Readable } from "stream";
 
 export interface BuildParams {
   body: any; // Express allows various types for body (string, object, buffer, etc.)
@@ -53,10 +54,13 @@ export class ResponseBuilder {
 
     res.status(status);
     Object.entries(this.headers).forEach(([key, value]) => {
+      console.log(`Setting header ${key} to ${value}`);
       res.setHeader(key, value);
     });
 
-    if (typeof body === "string") {
+    if (body instanceof ReadableStream) {
+      return res;
+    } else if (typeof body === "string") {
       return res.send(body);
     } else {
       return res.json(body);
@@ -76,5 +80,20 @@ export class ResponseBuilder {
       },
       res
     );
+  }
+
+  readableStreamToNodeStream(readableStream: ReadableStream) {
+    const reader = readableStream.getReader();
+    const nodeStream = new Readable({
+      async read() {
+        const { done, value } = await reader.read();
+        if (done) {
+          this.push(null);
+        } else {
+          this.push(Buffer.from(value));
+        }
+      },
+    });
+    return nodeStream;
   }
 }

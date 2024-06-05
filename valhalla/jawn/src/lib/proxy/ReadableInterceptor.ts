@@ -1,4 +1,5 @@
 import { EventEmitter } from "events";
+import { Response as ExpressResponse } from "express";
 
 export interface CompletedChunk {
   body: string;
@@ -17,6 +18,7 @@ export class ReadableInterceptor {
 
   constructor(
     stream: ReadableStream,
+    private expressRes: ExpressResponse,
     private isStream: boolean,
     private chunkEventName = "done",
     private chunkTimeoutMs = 30 * 60 * 1000 // Default to 30 minutes
@@ -39,41 +41,49 @@ export class ReadableInterceptor {
         endTimeUnix: new Date().getTime(),
         firstChunkTimeUnix: this.firstChunkTimeUnix,
       } as CompletedChunk);
+      this.expressRes.end();
     };
 
     const onChunk = (chunk: Uint8Array) => {
+      console.log("Received chunk of size:", chunk.length);
       if (this.isStream && this.firstChunkTimeUnix === null) {
         this.firstChunkTimeUnix = Date.now();
       }
 
       this.responseBody += this.decoder.decode(chunk, { stream: true });
+      this.expressRes.write(chunk);
     };
 
     const reader = stream.getReader();
+    const expressRes = this.expressRes;
 
     const readable = new ReadableStream({
       async pull(controller) {
         try {
           const { done, value } = await reader.read();
           if (done) {
+            console.log("Stream is done");
             controller.close();
             onDone("done");
             return;
           }
 
           if (value) {
+            console.log("Enqueuing chunk of size:", value.length);
             controller.enqueue(value);
             onChunk(value);
           }
         } catch (error) {
           console.error("An error occurred while reading the stream:", error);
           controller.error(error);
+          expressRes.end();
         }
       },
 
       cancel(reason) {
         console.error("Stream was canceled:", reason);
         stream.cancel(reason);
+        expressRes.end();
         onDone("cancel");
       },
     });

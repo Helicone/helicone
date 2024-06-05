@@ -16,7 +16,7 @@ const handleAnthropicProxy = async (
   requestWrapper: RequestWrapper,
   res: Response
 ) => {
-  return await proxyForwarder(requestWrapper, "ANTHROPIC", res);
+  await proxyForwarder(requestWrapper, "ANTHROPIC", res);
 };
 
 const handleOpenAIProxy = async (
@@ -27,17 +27,17 @@ const handleOpenAIProxy = async (
     const new_url = new URL(
       `https://api.openai.com${requestWrapper.url.pathname}`
     );
-    return await fetch(new_url.href, {
+    await fetch(new_url.href, {
       method: requestWrapper.getMethod(),
       headers: requestWrapper.getHeaders(),
       body: requestWrapper.getBody(),
     });
   }
 
-  return await proxyForwarder(requestWrapper, "OPENAI", res);
+  await proxyForwarder(requestWrapper, "OPENAI", res);
 };
 
-const handleGatewayAPIRouter = (
+const handleGatewayAPIRouter = async (
   requestWrapper: RequestWrapper,
   res: Response
 ) => {
@@ -47,7 +47,10 @@ const handleGatewayAPIRouter = (
 };
 
 const ROUTER_MAP: {
-  [key: string]: (requestWrapper: RequestWrapper, res: Response) => void;
+  [key: string]: (
+    requestWrapper: RequestWrapper,
+    res: Response
+  ) => Promise<void>;
 } = {
   OAI: handleOpenAIProxy,
   GATEWAY: handleGatewayAPIRouter,
@@ -71,7 +74,7 @@ proxyRouter.post(
     const routerFunction = ROUTER_MAP[provider.toUpperCase()];
 
     if (routerFunction) {
-      routerFunction(
+      await routerFunction(
         { data: requestWrapper, error: requestWrapperErr }.data,
         res
       );
