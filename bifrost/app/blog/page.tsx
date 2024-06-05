@@ -19,6 +19,38 @@ export type BlogStructure = {
 
 const blogContent: BlogStructure[] = [
   {
+    title: "Helicone vs. Weights and Biases",
+    description:
+      "Training modern LLMs is generally less complex than traditional ML models. Here's how to have all the essential tools specifically designed for language model observability without the clutter.",
+    badgeText: "compare",
+    date: "May 31, 2024",
+    href: "/blog/weights-and-biases",
+    imageUrl: "/static/blog/weights-and-biases.png",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/static/blog/linalam-headshot.webp",
+      },
+    ],
+    time: "5 minute read",
+  },
+  {
+    title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot",
+    description:
+      "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
+    badgeText: "team's pick",
+    date: "May 30, 2024",
+    href: "/blog/cole-github-copilot",
+    imageUrl: "/static/blog/cole-copilot.png",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/static/blog/linalam-headshot.webp",
+      },
+    ],
+    time: "4 minute read",
+  },
+  {
     title: "Insider Scoop: Our Founding Engineer's Take on PostHog",
     description:
       "No BS, no affiliations, just genuine opinions from the founding engineer at Helicone.",
@@ -51,7 +83,7 @@ const blogContent: BlogStructure[] = [
     time: "5 minute read",
   },
   {
-    title: "A Guide for Datadog Users Building with LLM's",
+    title: "A Guide for Datadog Users Building with LLMs",
     description:
       "Datadog has long been a favourite among developers for monitoring and observability. But recently, LLM developers have been exploring new options. Why? We have some answers.",
     badgeText: "Compare",
@@ -90,7 +122,7 @@ const Blog = () => {
     <div className="w-full bg-[#f8feff] h-full antialiased relative text-black">
       <div className="relative w-full flex flex-col space-y-4 mx-auto max-w-5xl h-full py-16 items-center text-center px-2 sm:px-2 lg:px-0">
         <Image
-          src={"/static/pricing/bouncing-cube.png"}
+          src={"/static/pricing/bouncing-cube.webp"}
           alt={"bouncing-cube"}
           width={200}
           height={100}

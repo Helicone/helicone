@@ -30,7 +30,12 @@ export type RequestFilterBranch = {
 
 type RequestFilterNode =
   | FilterLeafSubset<
-      "feedback" | "request" | "response" | "properties" | "values"
+      | "feedback"
+      | "request"
+      | "response"
+      | "properties"
+      | "values"
+      | "request_response_search"
     >
   | RequestFilterBranch
   | "all";

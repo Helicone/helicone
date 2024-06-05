@@ -37,7 +37,7 @@ export const getBuilderType = (
     return "ChatGPTBuilder";
   }
 
-  if (model.toLowerCase().includes("gemini")) {
+  if (model && model.toLowerCase().includes("gemini")) {
     return "GeminiBuilder";
   }
 
@@ -88,9 +88,7 @@ export const getBuilderType = (
     return "ChatGPTBuilder";
   }
 
-  if (
-    /^meta-llama\/Llama-2-13b-chat-hf:transcript_summarizer:64cB1r3/.test(model)
-  ) {
+  if (/^meta-llama\/.*/i.test(model)) {
     return "ChatGPTBuilder"; // for now
   }
 
