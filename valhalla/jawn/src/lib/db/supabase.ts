@@ -243,7 +243,12 @@ export class SupabaseConnector {
       return err(result.error);
     }
 
-    const { organizationId: orgId, userId, heliconeApiKeyId } = result.data;
+    const {
+      organizationId: orgId,
+      userId,
+      heliconeApiKeyId,
+      keyPermissions,
+    } = result.data;
 
     if (!orgId) {
       return err("No organization ID");
@@ -253,6 +258,7 @@ export class SupabaseConnector {
       organizationId: orgId,
       userId,
       heliconeApiKeyId,
+      keyPermissions,
     };
 
     this.authCache.set(cacheKey, authParamsResult);

@@ -23,7 +23,6 @@ export const authMiddleware = async (
       (authParams.data.keyPermissions &&
         !authParams.data?.keyPermissions?.includes("r"))
     ) {
-      console.log("authParams.error", authParams.error);
       res.status(401).json({
         error: authParams.error,
         trace: "isAuthenticated.error",
