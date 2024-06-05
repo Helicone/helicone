@@ -175,15 +175,13 @@ export class LogStore {
               organization_id: record.organization_id,
             }));
 
-          if (searchRecords.length === 0) {
-            return;
+          if (searchRecords && searchRecords.length > 0) {
+            const insertSearchQuery =
+              pgp.helpers.insert(searchRecords, requestResponseSearchColumns) +
+              onConflictRequestResponseSearch;
+
+            await t.none(insertSearchQuery);
           }
-
-          const insertSearchQuery =
-            pgp.helpers.insert(searchRecords, requestResponseSearchColumns) +
-            onConflictRequestResponseSearch;
-
-          await t.none(insertSearchQuery);
         } catch (error: any) {
           console.error("Error inserting search records", error);
         }
