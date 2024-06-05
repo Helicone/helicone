@@ -17,12 +17,15 @@ export type AllOperators =
   | "not-equals"
   | "contains"
   | "not-contains"
-  | "gin-contains";
+  | "gin-contains"
+  | "vector-contains";
 
 export type TextOperators = Record<
   "not-equals" | "equals" | "like" | "ilike" | "contains" | "not-contains",
   string
 >;
+
+export type VectorOperators = Record<"contains", string>;
 
 export type NumberOperators = Record<
   "not-equals" | "equals" | "gte" | "lte" | "lt" | "gt",
@@ -204,6 +207,14 @@ type PropertyWithResponseV1ToOperators = {
 export type FilterLeafPropertyWithResponseV1 =
   SingleKey<PropertyWithResponseV1ToOperators>;
 
+type RequestResponseSearchToOperators = {
+  request_body_vector: SingleKey<VectorOperators>;
+  response_body_vector: SingleKey<VectorOperators>;
+};
+
+export type FilterLeafRequestResponseSearch =
+  SingleKey<RequestResponseSearchToOperators>;
+
 type UserViewToOperators = {
   user_id: SingleKey<TextOperators>;
   active_for: SingleKey<NumberOperators>;
@@ -300,6 +311,7 @@ export type TablesAndViews = {
   experiment: FilterLeafExperiment;
   experiment_hypothesis_run: ExperimentHypothesisRunScoreValue;
   score_value: FilterLeafScoreValue;
+  request_response_search: FilterLeafRequestResponseSearch;
 
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
