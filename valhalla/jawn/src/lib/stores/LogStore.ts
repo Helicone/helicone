@@ -175,6 +175,10 @@ export class LogStore {
               organization_id: record.organization_id,
             }));
 
+          if (searchRecords.length === 0) {
+            return;
+          }
+
           const insertSearchQuery =
             pgp.helpers.insert(searchRecords, requestResponseSearchColumns) +
             onConflictRequestResponseSearch;
