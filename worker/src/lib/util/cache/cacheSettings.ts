@@ -10,7 +10,7 @@ export interface CacheSettings {
   shouldReadFromCache: boolean;
   cacheControl: string;
   bucketSettings: {
-    maxSize: number;
+    bucketSize: number;
   };
   cacheSeed: string | null;
 }
@@ -63,25 +63,8 @@ function getCacheState(headers: Headers): CacheHeaders {
 }
 
 export function getCacheSettings(
-  headers: Headers,
-  isStream: boolean
+  headers: Headers
 ): Result<CacheSettings, string> {
-  // streams cannot be cached
-  if (isStream) {
-    return {
-      data: {
-        shouldReadFromCache: false,
-        shouldSaveToCache: false,
-        cacheControl: "no-cache",
-        bucketSettings: {
-          maxSize: 1,
-        },
-        cacheSeed: null,
-      },
-      error: null,
-    };
-  }
-
   try {
     const cacheHeaders = getCacheState(headers);
 
@@ -105,7 +88,7 @@ export function getCacheSettings(
         shouldSaveToCache,
         cacheControl,
         bucketSettings: {
-          maxSize: cacheHeaders.cacheBucketMaxSize,
+          bucketSize: cacheHeaders.cacheBucketMaxSize,
         },
         cacheSeed: cacheHeaders.cacheSeed,
       },
