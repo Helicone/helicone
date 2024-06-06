@@ -61,8 +61,9 @@ export class RequestWrapper {
           const url = new URL(request.url);
           const urlPath = url.pathname;
           const pathParts = urlPath.split("/");
-          const apiKeyIndex = pathParts.findIndex((part) =>
-            part.startsWith("sk-helicone")
+          const apiKeyIndex = pathParts.findIndex(
+            (part) =>
+              part.startsWith("sk-helicone") || part.startsWith("pk-helicone")
           );
 
           if (apiKeyIndex > -1 && apiKeyIndex < pathParts.length) {
