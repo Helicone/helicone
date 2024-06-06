@@ -521,7 +521,7 @@ export class LoggingHandler extends AbstractLogHandler {
 
   private ensureMaxVectorLength = (
     text: string,
-    maxBytes: number = 1 * 1024 * 1024
+    maxBytes: number = 1 * 1024 * 1024 - 1
   ): string => {
     const buffer = Buffer.from(text, "utf-8");
     if (buffer.length > maxBytes) {
