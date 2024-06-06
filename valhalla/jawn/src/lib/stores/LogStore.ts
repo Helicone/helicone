@@ -163,7 +163,6 @@ export class LogStore {
         }
 
         try {
-          const maxBytes = 1048000; // Slightly less than 1 MB to ensure it's safely under the limit
           const searchRecords = payload.searchRecords
             .filter(
               (record) =>
@@ -171,12 +170,12 @@ export class LogStore {
             )
             .map((record) => ({
               request_id: record.request_id,
-              request_body_vector: `to_tsvector('helicone_search_config', LEFT(${pgp.as.text(
+              request_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
                 record.request_body_vector
-              )}, ${maxBytes}))`,
-              response_body_vector: `to_tsvector('helicone_search_config', LEFT(${pgp.as.text(
+              )})`,
+              response_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
                 record.response_body_vector
-              )}, ${maxBytes}))`,
+              )})`,
               organization_id: record.organization_id,
             }));
 
