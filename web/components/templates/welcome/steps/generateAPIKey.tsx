@@ -12,6 +12,8 @@ import { useOrg } from "../../../layout/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
 import HcButton from "../../../ui/hcButton";
 import { TextInput } from "@tremor/react";
+import { Tooltip } from "@mui/material";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 
 interface GenerateAPIKeyProps {
   apiKey: string;
@@ -33,8 +35,8 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
   const [name, setName] = useState<string>("");
   const [loaded, setLoaded] = useState(false);
 
-  async function generateAPIKey() {
-    const apiKey = `sk-${generateApiKey({
+  async function generatePublicApiKey() {
+    const apiKey = `pk-helicone-${generateApiKey({
       method: "base32",
       dashes: true,
     }).toString()}`.toLowerCase();
@@ -46,7 +48,7 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
     user: User,
     keyName: string
   ): Promise<string> {
-    const apiKey = await generateAPIKey();
+    const apiKey = await generatePublicApiKey();
 
     if (!user || org?.currentOrg?.id === undefined) {
       setNotification("Invalid user", "error");
@@ -117,7 +119,26 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
                   htmlFor="generated-key"
                   className="block text-md font-semibold leading-6"
                 >
-                  Your Generated Helicone API Key
+                  Your Generated Helicone API Key&nbsp;
+                  <Tooltip
+                    title={
+                      <span>
+                        Public vs Secret Keys:{" "}
+                        <a
+                          href="https://docs.helicone.ai/faq/secret-vs-public-key"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-600"
+                        >
+                          Learn more
+                        </a>
+                      </span>
+                    }
+                    placement="top"
+                    arrow
+                  >
+                    <InformationCircleIcon className="h-4 w-4 text-gray-500 inline" />
+                  </Tooltip>
                 </label>
                 <div className="flex items-center gap-4">
                   <TextInput

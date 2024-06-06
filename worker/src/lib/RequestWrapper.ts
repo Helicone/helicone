@@ -46,6 +46,7 @@ export class RequestWrapper {
   */
   private mutatedAuthorizationHeaders(request: Request): Headers {
     const HELICONE_KEY_ID = "sk-helicone-";
+    const HELICONE_PUBLIC_KEY_ID = "pk-helicone-";
 
     const authorization = request.headers.get("Authorization");
     if (!authorization) {
@@ -53,7 +54,8 @@ export class RequestWrapper {
     }
     if (
       !authorization.includes(",") ||
-      !authorization.includes(HELICONE_KEY_ID)
+      !authorization.includes(HELICONE_KEY_ID) ||
+      !authorization.includes(HELICONE_PUBLIC_KEY_ID)
     ) {
       return request.headers;
     }
@@ -68,11 +70,11 @@ export class RequestWrapper {
 
     const authorizationKeys = authorization.split(",").map((x) => x.trim());
 
-    const heliconeAuth = authorizationKeys.find((x) =>
-      x.includes(HELICONE_KEY_ID)
+    const heliconeAuth = authorizationKeys.find(
+      (x) => x.includes(HELICONE_KEY_ID) || x.includes(HELICONE_PUBLIC_KEY_ID)
     );
     const providerAuth = authorizationKeys.find(
-      (x) => !x.includes(HELICONE_KEY_ID)
+      (x) => !x.includes(HELICONE_KEY_ID) || !x.includes(HELICONE_PUBLIC_KEY_ID)
     );
 
     if (providerAuth) {
@@ -300,12 +302,18 @@ export class RequestWrapper {
       /^sk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
     const apiKeyPatternV3 =
       /^sk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
+    const publicApiKeyPatternV4 =
+      /^pk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
+    const apiKeyPatternV5 =
+      /^pk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
 
     if (
       !(
         apiKeyPattern.test(apiKey) ||
         apiKeyPatternV2.test(apiKey) ||
-        apiKeyPatternV3.test(apiKey)
+        apiKeyPatternV3.test(apiKey) ||
+        publicApiKeyPatternV4.test(apiKey) ||
+        apiKeyPatternV5.test(apiKey)
       )
     ) {
       return err("API Key is not well formed");
@@ -342,7 +350,10 @@ export class RequestWrapper {
       undefined;
 
     // If using proxy key, get the real key from vault
-    if (authKey?.startsWith("Bearer sk-helicone-cp")) {
+    if (
+      authKey?.startsWith("Bearer sk-helicone-cp") ||
+      authKey?.startsWith("Bearer pk-helicone-cp")
+    ) {
       const { data, error } = await this.getProviderKeyFromCustomerPortalKey(
         authKey,
         env
@@ -364,7 +375,8 @@ export class RequestWrapper {
       this.heliconeHeaders.heliconeAuth = authKey;
     } else if (
       this.env.VAULT_ENABLED &&
-      authKey?.startsWith("Bearer sk-helicone-proxy")
+      (authKey?.startsWith("Bearer sk-helicone-proxy") ||
+        authKey?.startsWith("Bearer pk-helicone-proxy"))
     ) {
       const { data, error } = await this.getProviderKeyFromProxy(authKey, env);
 

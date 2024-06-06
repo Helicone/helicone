@@ -33,12 +33,19 @@ const AddKeyModal = (props: AddKeyModalProps) => {
       "key-name"
     ) as HTMLInputElement;
 
+    const keyPermissions = event.currentTarget.elements.namedItem(
+      "key-read"
+    ) as HTMLInputElement;
+
     if (!keyName || keyName.value === "") {
       setNotification("Please enter in a key name", "error");
       return;
     }
 
-    const apiKey = `sk-helicone${
+    const permission = keyPermissions.checked ? "rw" : "w";
+    const apiKeyPrefix = permission === "rw" ? "sk" : "pk";
+
+    const apiKey = `${apiKeyPrefix}-helicone${
       org?.currentOrg?.organization_type === "customer" ? "-cp" : ""
     }-${generateApiKey({
       method: "base32",
@@ -53,6 +60,7 @@ const AddKeyModal = (props: AddKeyModalProps) => {
           apiKey,
           userId: user?.id!,
           keyName: keyName.value,
+          permissions: permission,
         },
       })
       .then((res) => {
@@ -98,6 +106,46 @@ const AddKeyModal = (props: AddKeyModalProps) => {
               placeholder="Key Name"
             />
           </div>
+          <div className="w-full space-y-1.5 text-sm">
+            <label htmlFor="key-permissions" className="text-gray-500">
+              Permissions
+            </label>
+
+            <ul className="flex items-center gap-4 text-sm font-semibold">
+              <li>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="key-read"
+                    id="key-read"
+                    value="r"
+                    className="mr-1 rounded-sm"
+                    defaultChecked={true}
+                  />
+                  Read
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="key-write"
+                    id="key-write"
+                    value="w"
+                    className="mr-1 rounded-sm"
+                    disabled
+                    defaultChecked={true}
+                    style={{
+                      // dark gray
+                      backgroundColor: "gray",
+                    }}
+                  />
+                  Write
+                </label>
+              </li>
+            </ul>
+          </div>
+
           <div className="flex justify-end gap-2">
             <button
               onClick={() => setOpen(false)}
