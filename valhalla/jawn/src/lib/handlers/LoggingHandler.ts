@@ -519,17 +519,28 @@ export class LoggingHandler extends AbstractLogHandler {
     }
   }
 
-  private ensureMaxVectorLength = (
-    text: string,
-    maxBytes: number = 1 * 1024 * 1024 - 1
-  ): string => {
-    const buffer = Buffer.from(text, "utf-8");
-    if (buffer.length > maxBytes) {
-      const uint8Array = new Uint8Array(buffer);
-      const slicedArray = uint8Array.slice(0, maxBytes);
-      return Buffer.from(slicedArray).toString("utf-8");
+  private ensureMaxVectorLength = (text: string): string => {
+    const maxBytes = 848000; // ~300k less than 1MB for buffer
+    text = text.replace(/[^\x00-\x7F]/g, "");
+    text = text.trim();
+
+    let buffer = Buffer.from(text, "utf-8");
+
+    if (buffer.length <= maxBytes) {
+      return text;
     }
-    return text;
+
+    let truncatedBuffer = Buffer.alloc(maxBytes);
+    buffer.copy(truncatedBuffer, 0, 0, maxBytes);
+
+    let endIndex = maxBytes;
+    while (endIndex > 0 && truncatedBuffer[endIndex - 1] >> 6 === 2) {
+      endIndex--;
+    }
+
+    const truncatedText = truncatedBuffer.toString("utf-8", 0, endIndex);
+
+    return truncatedText;
   };
 
   private vectorizeModel = (model: string): boolean => {
