@@ -6,10 +6,8 @@ import {
   TabPanel,
   TabPanels,
 } from "@tremor/react";
-import AuthHeader from "../../../shared/authHeader";
 import { useUserId } from "../../../../services/hooks/users";
 import LoadingAnimation from "../../../shared/loadingAnimation";
-import { getUSDate } from "../../../shared/utils/utils";
 import { formatNumber } from "../initialColumns";
 import StyledAreaChart from "../../dashboard/styledAreaChart";
 import RequestsPageV2 from "../../requestsV2/requestsPageV2";
