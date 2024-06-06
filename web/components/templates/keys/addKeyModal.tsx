@@ -9,6 +9,7 @@ import { getJawnClient } from "../../../lib/clients/jawn";
 import { OrgContextValue } from "../../layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
+import { generateAPIKeyHelper } from "../../../utlis/generateAPIKeyHelper";
 
 interface AddKeyModalProps {
   open: boolean;
@@ -43,36 +44,26 @@ const AddKeyModal = (props: AddKeyModalProps) => {
     }
 
     const permission = keyPermissions.checked ? "rw" : "w";
-    const apiKeyPrefix = permission === "rw" ? "sk" : "pk";
 
-    const apiKey = `${apiKeyPrefix}-helicone${
-      org?.currentOrg?.organization_type === "customer" ? "-cp" : ""
-    }-${generateApiKey({
-      method: "base32",
-      dashes: true,
-    }).toString()}`.toLowerCase();
-    setReturnedKey(apiKey);
+    const { res, apiKey } = generateAPIKeyHelper(
+      permission,
+      org?.currentOrg?.organization_type!,
+      user?.id!,
+      keyName.value,
+      window.location.hostname.includes("eu.")
+    );
 
-    const jawn = getJawnClient();
-    const resp = jawn
-      .POST("/v1/key/generateHash", {
-        body: {
-          apiKey,
-          userId: user?.id!,
-          keyName: keyName.value,
-          permissions: permission,
-        },
-      })
-      .then((res) => {
-        if (res.response.ok) {
-          setNotification("Successfully created API key", "success");
-          setIsLoading(false);
-          onSuccess();
-        } else {
-          setNotification("Failed to create API key", "error");
-          setIsLoading(false);
-        }
-      });
+    const resp = res.then((res) => {
+      if (res.response.ok) {
+        setReturnedKey(apiKey);
+        setNotification("Successfully created API key", "success");
+        setIsLoading(false);
+        onSuccess();
+      } else {
+        setNotification("Failed to create API key", "error");
+        setIsLoading(false);
+      }
+    });
   };
 
   useEffect(() => {
