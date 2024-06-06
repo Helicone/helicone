@@ -225,7 +225,7 @@ export class RequestWrapper {
     const host = url.host;
     const hostParts = host.split(".");
     const auth = this.heliconeHeaders.heliconeAuthV2?.token;
-    return !!hostParts.includes("eu") || !!auth?.includes("-eu");
+    return !!hostParts.includes("eu") || !!auth?.includes("helicone-eu");
   }
 
   async getText(): Promise<string> {
