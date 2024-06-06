@@ -107,10 +107,12 @@ export class LogStore {
           );
 
           try {
-            const insertRequest =
-              pgp.helpers.insert(filteredRequests, requestColumns) +
-              onConflictRequest;
-            await t.none(insertRequest);
+            if (filteredRequests && filteredRequests.length > 0) {
+              const insertRequest =
+                pgp.helpers.insert(filteredRequests, requestColumns) +
+                onConflictRequest;
+              await t.none(insertRequest);
+            }
           } catch (error) {
             console.error("Error inserting request", error);
             throw error;
@@ -124,10 +126,12 @@ export class LogStore {
           );
 
           try {
-            const insertResponse =
-              pgp.helpers.insert(filteredResponses, responseColumns) +
-              onConflictResponse;
-            await t.none(insertResponse);
+            if (filteredResponses && filteredResponses.length > 0) {
+              const insertResponse =
+                pgp.helpers.insert(filteredResponses, responseColumns) +
+                onConflictResponse;
+              await t.none(insertResponse);
+            }
           } catch (error) {
             console.error("Error inserting response", error);
             throw error;
@@ -159,24 +163,32 @@ export class LogStore {
         }
 
         try {
-          const searchRecords = payload.searchRecords.map((record) => ({
-            request_id: record.request_id,
-            request_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
-              record.request_body_vector
-            )})`,
-            response_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
-              record.response_body_vector
-            )})`,
-            organization_id: record.organization_id,
-          }));
+          const searchRecords = payload.searchRecords
+            .filter(
+              (record) =>
+                record.request_body_vector || record.response_body_vector
+            )
+            .map((record) => ({
+              request_id: record.request_id,
+              request_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
+                record.request_body_vector
+              )})`,
+              response_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
+                record.response_body_vector
+              )})`,
+              organization_id: record.organization_id,
+            }));
 
-          const insertSearchQuery =
-            pgp.helpers.insert(searchRecords, requestResponseSearchColumns) +
-            onConflictRequestResponseSearch;
+          if (searchRecords && searchRecords.length > 0) {
+            const insertSearchQuery =
+              pgp.helpers.insert(searchRecords, requestResponseSearchColumns) +
+              onConflictRequestResponseSearch;
 
-          await t.none(insertSearchQuery);
+            await t.none(insertSearchQuery);
+          }
         } catch (error: any) {
           console.error("Error inserting search records", error);
+          throw error;
         }
       });
 
