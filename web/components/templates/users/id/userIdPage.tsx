@@ -19,6 +19,7 @@ import {
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
+import HcBreadcrumb from "../../../ui/hcBreadcrumb";
 
 interface UserIdPageProps {
   userId: string;
@@ -50,18 +51,34 @@ const UserIdPage = (props: UserIdPageProps) => {
 
   return (
     <>
-      <AuthHeader
-        title={userId}
-        breadcrumb={{
-          href: "/users",
-          title: "Users",
-        }}
-      />
+      <div className="flex flex-col items-start space-y-4 w-full">
+        <HcBreadcrumb
+          pages={[
+            {
+              href: "/users",
+              name: "Users",
+            },
+            {
+              href: `/users/${userId}`,
+              name: userId,
+            },
+            // {},
+          ]}
+        />
+        <div className="flex justify-between w-full">
+          <div className="flex gap-4 items-end">
+            <h1 className="font-semibold text-4xl text-black dark:text-white">
+              {userId}
+            </h1>
+          </div>
+        </div>
+      </div>
+
       <>
         {isLoading ? (
           <LoadingAnimation />
         ) : (
-          <div className="grid grid-cols-10 gap-8 w-full">
+          <div className="grid grid-cols-10 gap-8 w-full pt-8">
             <div className="flex flex-col items-start space-y-4 w-full col-span-12 md:col-span-3 pt-2">
               <div className="flex flex-col space-y-2 divide-y divide-gray-200 dark:divide-gray-800 w-full text-black dark:text-white">
                 <p className="font-semibold text-md">Overview</p>
@@ -92,13 +109,13 @@ const UserIdPage = (props: UserIdPageProps) => {
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">First Active</p>
                     <p className="text-sm text-gray-500">
-                      {getUSDate(new Date(user.first_active))}
+                      {new Date(user.first_active).toLocaleString()}
                     </p>
                   </div>
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">Last Active</p>
                     <p className="text-sm text-gray-500">
-                      {getUSDate(new Date(user.last_active))}
+                      {new Date(user.last_active).toLocaleString()}
                     </p>
                   </div>
                   <div className="flex flex-col items-start space-y-1">
@@ -106,7 +123,7 @@ const UserIdPage = (props: UserIdPageProps) => {
                       Average Requests per day
                     </p>
                     <p className="text-sm text-gray-500">
-                      {user.average_requests_per_day_active}
+                      {formatNumber(user.average_requests_per_day_active)}
                     </p>
                   </div>{" "}
                   <div className="flex flex-col items-start space-y-1">
@@ -114,7 +131,7 @@ const UserIdPage = (props: UserIdPageProps) => {
                       Average Tokens per request
                     </p>
                     <p className="text-sm text-gray-500">
-                      {user.average_tokens_per_request}
+                      {formatNumber(user.average_tokens_per_request)}
                     </p>
                   </div>{" "}
                 </div>
