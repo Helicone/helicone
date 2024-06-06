@@ -3,13 +3,11 @@ import {
   ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 import { User } from "@supabase/auth-helpers-react";
-import generateApiKey from "generate-api-key";
 import { FormEvent, useEffect, useState } from "react";
-import { getJawnClient } from "../../../lib/clients/jawn";
+import { generateAPIKeyHelper } from "../../../utlis/generateAPIKeyHelper";
 import { OrgContextValue } from "../../layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
-import { generateAPIKeyHelper } from "../../../utlis/generateAPIKeyHelper";
 
 interface AddKeyModalProps {
   open: boolean;
