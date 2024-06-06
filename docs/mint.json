@@ -151,7 +151,10 @@
     },
     {
       "group": "Observability",
-      "pages": ["use-cases/getting-user-requests"]
+      "pages": [
+        "use-cases/getting-user-requests", 
+        "use-cases/segmentation"
+      ]
     },
     {
       "group": "Guides",
@@ -164,10 +167,6 @@
     {
       "group": "CI/CD",
       "pages": ["use-cases/github-actions"]
-    },
-    {
-      "group": "Custom Properties",
-      "pages": ["use-cases/segmentation", "use-cases/environment-tracking"]
     },
     {
       "group": "Developer",
