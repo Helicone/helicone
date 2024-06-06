@@ -319,8 +319,6 @@ export class ExperimentStore extends BaseStore {
       include
     );
 
-    console.log("experimentQuery", experimentQuery);
-
     const experiments = resultMap(
       await dbExecute<{
         jsonb_build_object: Experiment;
