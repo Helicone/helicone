@@ -315,8 +315,6 @@ export class LoggingHandler extends AbstractLogHandler {
         ),
       };
 
-    console.log("Search Record:", searchRecord);
-
     return [searchRecord];
   }
 
