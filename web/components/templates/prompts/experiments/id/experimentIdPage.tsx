@@ -135,6 +135,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                 </div>
               </div>
               <div className="p-4 whitespace-pre-wrap">
+                {JSON.stringify(experiment?.hypotheses?.[0], null, 4)}
                 <ArrayDiffViewer
                   origin={
                     (

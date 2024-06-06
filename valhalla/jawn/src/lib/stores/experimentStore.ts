@@ -197,7 +197,8 @@ function getExperimentsQuery(
                         AND pv_parent.helicone_template is not null
                         AND pv_parent.organization = e.organization
                         AND pv_current.organization = e.organization
-                        AND pv_parent.major_version = 0
+                        AND pv_parent.minor_version = 0
+                        and pv_parent.major_version = pv_current.major_version
                         limit 1
                       ),`
                           : ""
@@ -317,6 +318,8 @@ export class ExperimentStore extends BaseStore {
       30,
       include
     );
+
+    console.log("experimentQuery", experimentQuery);
 
     const experiments = resultMap(
       await dbExecute<{
