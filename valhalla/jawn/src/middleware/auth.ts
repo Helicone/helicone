@@ -17,8 +17,12 @@ export const authMiddleware = async (
       return;
     }
     const authParams = await supabaseServer.authenticate(authorization.data!);
-    if (authParams.error || !authParams.data?.organizationId) {
-      console.log("authParams.error", authParams.error);
+    if (
+      authParams.error ||
+      !authParams.data?.organizationId ||
+      (authParams.data.keyPermissions &&
+        !authParams.data?.keyPermissions?.includes("r"))
+    ) {
       res.status(401).json({
         error: authParams.error,
         trace: "isAuthenticated.error",
