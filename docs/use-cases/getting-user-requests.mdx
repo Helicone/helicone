@@ -1,5 +1,5 @@
 ---
-title: "Getting user requests"
+title: "Getting User Requests"
 description: "Get user-specific requests using the Request API. "
 ---
 
@@ -28,7 +28,7 @@ Here's an example to get all the requests where `user_id` is `abc@email.com`.
 curl --request POST \
   --url https://api.helicone.ai/v1/request/query \
   --header 'Content-Type: application/json' \
-  --header 'authorization: Bearer sk-helicone-6hu2kbq-yoiuiry-qtc2hsa-rtif2pi' \
+  --header 'authorization: Bearer sk-<your-helicone-api-key>' \
   --data '{
   "filter": {
     "request": {
@@ -53,7 +53,7 @@ You can structure your query to add any number of filters.
 curl --request POST \
   --url https://api.helicone.ai/v1/request/query \
   --header 'Content-Type: application/json' \
-  --header 'authorization: Bearer sk-helicone-6hu2kbq-yoiuiry-qtc2hsa-rtif2pi' \
+  --header 'authorization: Bearer sk-<your-helicone-api-key>' \
   --data '{
   "filter": {
     "operator": "and",
