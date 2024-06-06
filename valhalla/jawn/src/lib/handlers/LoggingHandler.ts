@@ -491,7 +491,7 @@ export class LoggingHandler extends AbstractLogHandler {
         })
         .join(" ");
 
-      return this.cleanBody(this.ensureMaxVectorLength(allMessages.trim()));
+      return this.ensureMaxVectorLength(this.cleanBody(allMessages.trim()));
     } catch (error) {
       console.error("Error pulling request body messages:", error);
       return "";
@@ -512,7 +512,7 @@ export class LoggingHandler extends AbstractLogHandler {
         })
         .join(" ");
 
-      return this.cleanBody(this.ensureMaxVectorLength(allMessages.trim()));
+      return this.ensureMaxVectorLength(this.cleanBody(allMessages.trim()));
     } catch (error) {
       console.error("Error pulling response body messages:", error);
       return "";
