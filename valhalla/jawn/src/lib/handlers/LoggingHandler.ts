@@ -543,9 +543,9 @@ export class LoggingHandler extends AbstractLogHandler {
     return truncatedText;
   };
 
-  private cleanBody = (body: string): string => {
-    return body.replace(/\0.*$/g, "");
-  };
+  cleanBody(body: string): string {
+    return body.replace(/\u0000/g, "");
+  }
 
   private vectorizeModel = (model: string): boolean => {
     if (!model) {
