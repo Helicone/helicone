@@ -14,6 +14,7 @@ import HcButton from "../../../ui/hcButton";
 import { TextInput } from "@tremor/react";
 import { Tooltip } from "@mui/material";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import { generateAPIKeyHelper } from "../../../../utlis/generateAPIKeyHelper";
 
 interface GenerateAPIKeyProps {
   apiKey: string;
@@ -43,42 +44,24 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
     return apiKey;
   }
 
-  async function generateAndEnsureOnlyOneApiKey(
-    supabaseClient: SupabaseClient<Database>,
-    user: User,
-    keyName: string
-  ): Promise<string> {
-    const apiKey = await generatePublicApiKey();
-
-    if (!user || org?.currentOrg?.id === undefined) {
-      setNotification("Invalid user", "error");
-      console.error("Invalid user");
-      return apiKey;
-    }
-
-    const res = await supabaseClient.from("helicone_api_keys").insert({
-      api_key_hash: await hashAuth(apiKey),
-      user_id: user.id,
-      api_key_name: keyName,
-      organization_id: org.currentOrg?.id,
-    });
-
-    if (res.error) {
-      setNotification("Failed to generate API key", "error");
-      console.error(res.error);
-    }
-
-    return apiKey;
-  }
-
   const onGenerateKeyHandler = async () => {
     if (!user) return;
-    const key = await generateAndEnsureOnlyOneApiKey(
-      supabaseClient,
-      user,
-      name
+    const { res: promiseRes, apiKey } = generateAPIKeyHelper(
+      "w",
+      org?.currentOrg?.organization_type ?? "",
+      user?.id ?? "",
+      name,
+      window.location.hostname.includes("eu.")
     );
-    setApiKey(key);
+
+    const res = await promiseRes;
+
+    if (!res.response.ok) {
+      setNotification("Failed to generate API key", "error");
+      console.error(await res.response.text());
+    }
+
+    setApiKey(apiKey);
   };
 
   return (
