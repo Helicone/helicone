@@ -1,20 +1,13 @@
-import {
-  SupabaseClient,
-  User,
-  useSupabaseClient,
-  useUser,
-} from "@supabase/auth-helpers-react";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import { Tooltip } from "@mui/material";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { TextInput } from "@tremor/react";
 import generateApiKey from "generate-api-key";
 import { useState } from "react";
-import { hashAuth } from "../../../../lib/hashClient";
-import { Database } from "../../../../supabase/database.types";
+import { generateAPIKeyHelper } from "../../../../utlis/generateAPIKeyHelper";
 import { useOrg } from "../../../layout/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
 import HcButton from "../../../ui/hcButton";
-import { TextInput } from "@tremor/react";
-import { Tooltip } from "@mui/material";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import { generateAPIKeyHelper } from "../../../../utlis/generateAPIKeyHelper";
 
 interface GenerateAPIKeyProps {
   apiKey: string;

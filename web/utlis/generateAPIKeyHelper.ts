@@ -23,7 +23,7 @@ export function generateAPIKeyHelper(
       body: {
         apiKey,
         userId: userId,
-        keyName: keyName.value,
+        keyName: keyName,
         permissions: permission,
       },
     }),
