@@ -141,25 +141,18 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                 </div>
               </div>
               <div className="p-4 whitespace-pre-wrap">
-                {JSON.stringify(experiment?.hypotheses?.[0], null, 4)}
-                <br />
-                {JSON.stringify(
-                  experiment?.hypotheses?.[0]?.promptVersion?.template as any,
-                  null,
-                  4
-                )}
                 <ArrayDiffViewer
                   origin={
                     (
                       experiment?.hypotheses?.[0]?.parentPromptVersion
                         ?.template as any
-                    )?.messages ?? []
+                    )?.messages ?? null
                   }
                   target={
                     (
                       experiment?.hypotheses?.[0]?.promptVersion
                         ?.template as any
-                    )?.messages ?? []
+                    )?.messages ?? null
                   }
                 />
               </div>
