@@ -19,6 +19,12 @@ interface KeyPageProps {
   hideTabs?: boolean;
 }
 
+const keyPermissions = new Map([
+  ["r", "Read"],
+  ["w", "Write"],
+  ["rw", "Read/Write"],
+]);
+
 const KeyPage = (props: KeyPageProps) => {
   const user = useUser();
   const org = useOrg();
@@ -89,7 +95,8 @@ const KeyPage = (props: KeyPageProps) => {
               ),
               permissions: (
                 <p className="text-gray-500">
-                  {key.key_permissions === "r" ? "Read" : "Read/Write"}
+                  {keyPermissions.get(key.key_permissions ?? "rw") ??
+                    "Read/Write"}
                 </p>
               ),
             };
