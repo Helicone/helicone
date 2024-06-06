@@ -46,13 +46,15 @@ export class RequestWrapper {
   */
   private mutatedAuthorizationHeaders(request: Request): Headers {
     const HELICONE_KEY_ID = "sk-helicone-";
+    const HELICONE_PUBLIC_KEY_ID = "pk-helicone-";
     const headers = new Headers(request.headers);
     const authorization = request.headers.get("Authorization");
 
     if (
       !authorization ||
       !authorization.includes(",") ||
-      !authorization.includes(HELICONE_KEY_ID)
+      !authorization.includes(HELICONE_KEY_ID) ||
+      !authorization.includes(HELICONE_PUBLIC_KEY_ID)
     ) {
       if (!headers.has("helicone-auth")) {
         try {
@@ -88,11 +90,11 @@ export class RequestWrapper {
 
     const authorizationKeys = authorization.split(",").map((x) => x.trim());
 
-    const heliconeAuth = authorizationKeys.find((x) =>
-      x.includes(HELICONE_KEY_ID)
+    const heliconeAuth = authorizationKeys.find(
+      (x) => x.includes(HELICONE_KEY_ID) || x.includes(HELICONE_PUBLIC_KEY_ID)
     );
     const providerAuth = authorizationKeys.find(
-      (x) => !x.includes(HELICONE_KEY_ID)
+      (x) => !x.includes(HELICONE_KEY_ID) || !x.includes(HELICONE_PUBLIC_KEY_ID)
     );
 
     if (providerAuth) {
