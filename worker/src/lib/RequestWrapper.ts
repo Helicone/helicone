@@ -220,6 +220,14 @@ export class RequestWrapper {
     );
   }
 
+  isEU(): boolean {
+    const url = new URL(this.getUrl());
+    const host = url.host;
+    const hostParts = host.split(".");
+    const auth = this.heliconeHeaders.heliconeAuthV2?.token;
+    return !!hostParts.includes("eu") || !!auth?.includes("-eu");
+  }
+
   async getText(): Promise<string> {
     let text = await this.getRawText();
 

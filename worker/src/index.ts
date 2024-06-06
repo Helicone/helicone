@@ -98,7 +98,7 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
   const url = new URL(request.getUrl());
   const host = url.host;
   const hostParts = host.split(".");
-  if (hostParts.includes("eu")) {
+  if (request.isEU()) {
     env = {
       ...env,
       CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
