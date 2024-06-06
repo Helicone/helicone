@@ -140,19 +140,26 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                   <p className="text-sm text-gray-500">Diff Viewer</p>
                 </div>
               </div>
-              <div className="p-4">
+              <div className="p-4 whitespace-pre-wrap">
+                {JSON.stringify(experiment?.hypotheses?.[0], null, 4)}
+                <br />
+                {JSON.stringify(
+                  experiment?.hypotheses?.[0]?.promptVersion?.template as any,
+                  null,
+                  4
+                )}
                 <ArrayDiffViewer
                   origin={
                     (
                       experiment?.hypotheses?.[0]?.parentPromptVersion
                         ?.template as any
-                    ).messages
+                    )?.messages ?? []
                   }
                   target={
                     (
                       experiment?.hypotheses?.[0]?.promptVersion
                         ?.template as any
-                    ).messages
+                    )?.messages ?? []
                   }
                 />
               </div>
