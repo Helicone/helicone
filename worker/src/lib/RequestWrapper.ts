@@ -304,26 +304,24 @@ export class RequestWrapper {
     }
 
     const apiKey = heliconeAuth.replace("Bearer ", "").trim();
-    const apiKeyPattern =
-      /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
-    const apiKeyPatternV2 =
-      /^sk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
-    const apiKeyPatternV3 =
-      /^sk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
-    const publicApiKeyPatternV4 =
-      /^pk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
-    const apiKeyPatternV5 =
-      /^pk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
+    const apiKeyPatterns = [
+      /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^sk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^sk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^pk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^pk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^pk-helicone-eu-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^pk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^pk-helicone-eu-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^sk-helicone-eu-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^sk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^sk-helicone-eu-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+    ];
 
-    if (
-      !(
-        apiKeyPattern.test(apiKey) ||
-        apiKeyPatternV2.test(apiKey) ||
-        apiKeyPatternV3.test(apiKey) ||
-        publicApiKeyPatternV4.test(apiKey) ||
-        apiKeyPatternV5.test(apiKey)
-      )
-    ) {
+    // We can probably do something like this... but i am scared lol
+    // const apiKeyPattern = /^(sk|pk)(-helicone)?(-(cp|eu|eu-cp))?-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
+
+    if (!apiKeyPatterns.some((pattern) => pattern.test(apiKey))) {
       return err("API Key is not well formed");
     }
     return ok(null);
