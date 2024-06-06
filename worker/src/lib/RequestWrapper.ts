@@ -47,20 +47,41 @@ export class RequestWrapper {
   private mutatedAuthorizationHeaders(request: Request): Headers {
     const HELICONE_KEY_ID = "sk-helicone-";
     const HELICONE_PUBLIC_KEY_ID = "pk-helicone-";
-
+    const headers = new Headers(request.headers);
     const authorization = request.headers.get("Authorization");
-    if (!authorization) {
-      return request.headers;
-    }
+
     if (
+      !authorization ||
       !authorization.includes(",") ||
       !authorization.includes(HELICONE_KEY_ID) ||
       !authorization.includes(HELICONE_PUBLIC_KEY_ID)
     ) {
+      if (!headers.has("helicone-auth")) {
+        try {
+          const url = new URL(request.url);
+          const urlPath = url.pathname;
+          const pathParts = urlPath.split("/");
+          const apiKeyIndex = pathParts.findIndex(
+            (part) =>
+              part.startsWith("sk-helicone") || part.startsWith("pk-helicone")
+          );
+
+          if (apiKeyIndex > -1 && apiKeyIndex < pathParts.length) {
+            const potentialApiKey = pathParts[apiKeyIndex];
+            headers.set("helicone-auth", `Bearer ${potentialApiKey}`);
+            pathParts.splice(apiKeyIndex, 1);
+            this.url.pathname = pathParts.join("/");
+          }
+
+          return headers;
+        } catch (error) {
+          console.error(`Failed retrieving API key from path: ${error}`);
+          return request.headers;
+        }
+      }
+
       return request.headers;
     }
-
-    const headers = new Headers(request.headers);
 
     if (headers.has("helicone-auth")) {
       throw new Error(
@@ -89,7 +110,7 @@ export class RequestWrapper {
   private constructor(private request: Request, private env: Env) {
     this.url = new URL(request.url);
     this.headers = this.mutatedAuthorizationHeaders(request);
-    this.heliconeHeaders = new HeliconeHeaders(request.headers);
+    this.heliconeHeaders = new HeliconeHeaders(this.headers);
     this.promptSettings = this.getPromptSettings();
     this.injectPromptProperties();
     this.baseURLOverride = null;

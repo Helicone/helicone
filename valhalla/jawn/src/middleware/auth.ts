@@ -21,7 +21,8 @@ export const authMiddleware = async (
       authParams.error ||
       !authParams.data?.organizationId ||
       (authParams.data.keyPermissions &&
-        !authParams.data?.keyPermissions?.includes("r"))
+        !authParams.data?.keyPermissions?.includes("r") &&
+        req.path !== "/v1/log/request") // For local testing
     ) {
       res.status(401).json({
         error: authParams.error,

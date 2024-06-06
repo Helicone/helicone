@@ -327,7 +327,11 @@ export async function proxyForwarder(
     }
   }
 
-  if (request?.heliconeHeaders?.heliconeAuth || request.heliconeProxyKeyId) {
+  if (
+    request?.heliconeHeaders?.heliconeAuth ||
+    request?.heliconeHeaders.heliconeAuthV2 ||
+    request.heliconeProxyKeyId
+  ) {
     ctx.waitUntil(log(loggable));
   }
 
