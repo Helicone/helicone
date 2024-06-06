@@ -34,13 +34,12 @@ export async function kvKeyFromRequest(
 export async function saveToCache(
   request: HeliconeProxyRequest,
   response: Response,
-  responseBody: string,
+  responseBody: string[],
   cacheControl: string,
-  settings: { maxSize: number },
+  settings: { bucketSize: number },
   cacheKv: KVNamespace,
   cacheSeed: string | null
 ): Promise<void> {
-  console.log("Saving to cache");
   const expirationTtl = cacheControl.includes("max-age=")
     ? parseInt(cacheControl.split("max-age=")[1])
     : 0;
@@ -131,7 +130,7 @@ export async function recordCacheHit(
 }
 export async function getCachedResponse(
   request: HeliconeProxyRequest,
-  settings: { maxSize: number },
+  settings: { bucketSize: number },
   cacheKv: KVNamespace,
   cacheSeed: string | null
 ): Promise<Response | null> {
@@ -142,7 +141,6 @@ export async function getCachedResponse(
     cacheSeed
   );
   if (freeIndexes.length > 0) {
-    console.log("Max cache size reached, not caching");
     return null;
   } else {
     const cacheIdx = Math.floor(Math.random() * requestCaches.length);
@@ -153,7 +151,32 @@ export async function getCachedResponse(
       "Helicone-Cache-Bucket-Idx",
       cacheIdx.toString()
     );
-    return new Response(randomCache.body, {
+
+    const cachedStream = new ReadableStream({
+      start(controller) {
+        let index = 0;
+        const encoder = new TextEncoder();
+
+        function pushChunk() {
+          if (index < randomCache.body.length) {
+            const chunk = encoder.encode(randomCache.body[index]);
+            controller.enqueue(chunk);
+            index++;
+            setTimeout(pushChunk, 10);
+          } else {
+            controller.close();
+          }
+        }
+
+        pushChunk();
+      },
+
+      cancel() {
+        console.log("Stream canceled");
+      },
+    });
+
+    return new Response(cachedStream, {
       headers: cachedResponseHeaders,
     });
   }
@@ -161,26 +184,27 @@ export async function getCachedResponse(
 
 async function getMaxCachedResponses(
   request: HeliconeProxyRequest,
-  { maxSize }: { maxSize: number },
+  { bucketSize: bucketSize }: { bucketSize: number },
   cacheKv: KVNamespace,
   cacheSeed: string | null
 ) {
-  const requests = await Promise.all(
-    Array.from(Array(maxSize).keys()).map(async (idx) => {
+  const previouslyCachedReqs = await Promise.all(
+    Array.from(Array(bucketSize).keys()).map(async (idx) => {
       const requestCache = await kvKeyFromRequest(request, idx, cacheSeed);
       return cacheKv.get<{
         headers: Record<string, string>;
-        body: string;
+        body: string[];
       }>(requestCache, { type: "json" });
     })
   );
+
   return {
-    requests: requests.filter((r) => r !== null) as {
+    requests: previouslyCachedReqs.filter((r) => r !== null) as {
       headers: Record<string, string>;
-      body: string;
+      body: string[];
     }[],
-    freeIndexes: requests
-      .map((r, idx) => idx)
-      .filter((idx) => requests[idx] === null),
+    freeIndexes: previouslyCachedReqs
+      .map((_r, idx) => idx)
+      .filter((idx) => previouslyCachedReqs[idx] === null),
   };
 }
