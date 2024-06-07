@@ -143,12 +143,6 @@ export async function handleProxyRequest(
         },
         tokenCalcUrl: proxyRequest.tokenCalcUrl,
       }),
-      // response: new Response(body, {
-      //   ...response,
-      //   headers: responseHeaders,
-      //   status: status,
-      // }),
-      // How to do the above, but it has to be an express response???
       response: expressRes,
     },
     error: null,
