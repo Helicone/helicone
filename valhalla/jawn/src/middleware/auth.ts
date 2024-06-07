@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { RequestWrapper } from "../lib/requestWrapper";
 import { supabaseServer } from "../lib/routers/withAuth";
+import { authCheckThrow } from "../controllers/private/adminController";
 
 export const authMiddleware = async (
   req: Request,
@@ -32,6 +33,10 @@ export const authMiddleware = async (
     }
 
     (req as any).authParams = authParams.data;
+
+    if (req.path.startsWith("/admin")) {
+      await authCheckThrow(authParams.data.userId);
+    }
     next();
   } catch (error) {
     res.status(400).send("Invalid token.");
