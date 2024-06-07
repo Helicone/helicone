@@ -50,6 +50,13 @@ routes = [
 	{ pattern = "together.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "gateway.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 
+	{ pattern = "oai.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "anthropic.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "groq.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "openrouter.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "together.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "gateway.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+
 	{ pattern = "oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "groq.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
@@ -61,6 +68,7 @@ routes = [
 
 	{ pattern = "oai.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "groq.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "api.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "openrouter.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "together.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
@@ -70,6 +78,7 @@ routes = [
 
 	{ pattern = "oai.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "groq.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "api.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "openrouter.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "together.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
