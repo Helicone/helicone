@@ -163,21 +163,18 @@ export class LogStore {
         }
 
         try {
-          const searchRecords = payload.searchRecords
-            .filter(
-              (record) =>
-                record.request_body_vector || record.response_body_vector
-            )
-            .map((record) => ({
-              request_id: record.request_id,
-              request_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
-                record.request_body_vector
-              )})`,
-              response_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
-                record.response_body_vector
-              )})`,
-              organization_id: record.organization_id,
-            }));
+          const searchRecords = this.filterDuplicateSearchRecords(
+            payload.searchRecords
+          ).map((record) => ({
+            request_id: record.request_id,
+            request_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
+              record.request_body_vector
+            )})`,
+            response_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
+              record.response_body_vector
+            )})`,
+            organization_id: record.organization_id,
+          }));
 
           if (searchRecords && searchRecords.length > 0) {
             const insertSearchQuery =
@@ -376,6 +373,42 @@ export class LogStore {
         new Date(entry.created_at) < new Date(existingEntry.created_at)
       ) {
         entryMap.set(entry.request, entry);
+      }
+    });
+
+    return Array.from(entryMap.values());
+  }
+
+  filterDuplicateSearchRecords(
+    entries: Database["public"]["Tables"]["request_response_search"]["Insert"][]
+  ) {
+    const entryMap = new Map<
+      string,
+      Database["public"]["Tables"]["request_response_search"]["Insert"]
+    >();
+
+    entries.forEach((entry) => {
+      if (!entry.request_id) {
+        return;
+      }
+
+      const existingEntry = entryMap.get(entry.request_id);
+
+      // No existing entry, add it
+      if (!existingEntry || !existingEntry.created_at) {
+        entryMap.set(entry.request_id, entry);
+        return;
+      }
+
+      const newEntryIsMoreRecent =
+        entry.created_at &&
+        new Date(entry.created_at) < new Date(existingEntry.created_at);
+      const newEntryHasVectors =
+        (entry.request_body_vector && !existingEntry.request_body_vector) ||
+        (entry.response_body_vector && !existingEntry.response_body_vector);
+
+      if (newEntryIsMoreRecent || newEntryHasVectors) {
+        entryMap.set(entry.request_id, entry);
       }
     });
 
