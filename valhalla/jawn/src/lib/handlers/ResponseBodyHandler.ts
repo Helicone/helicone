@@ -53,6 +53,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
 
       // Set processed response body
       context.processedLog.response.assets = responseBodyAssets;
+      console.log("Request assets", context.processedLog.request.assets);
       context.processedLog.assets = new Map([
         ...(context.processedLog.request.assets ?? []),
         ...(context.processedLog.response.assets ?? []),
@@ -165,7 +166,11 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         responseBody: responseBody,
         requestBody: requestBody ?? "{}",
         tokenCounter: async (text: string) =>
-          await getTokenCount(text, context.processedLog.request.model, provider),
+          await getTokenCount(
+            text,
+            context.processedLog.request.model,
+            provider
+          ),
         requestModel: context.processedLog.request.model,
         modelOverride: context.message.heliconeMeta.modelOverride,
       });

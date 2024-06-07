@@ -414,7 +414,7 @@ export class LogStore {
 
     entries.forEach((entry) => {
       if (!entry.request) {
-        return;
+        return;``
       }
 
       const existingEntry = entryMap.get(entry.request);

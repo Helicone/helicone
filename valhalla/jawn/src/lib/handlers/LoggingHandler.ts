@@ -118,6 +118,8 @@ export class LoggingHandler extends AbstractLogHandler {
       });
     }
 
+    console.log("s3RecordsFinal", this.batchPayload.s3Records);
+
     const s3Result = await this.uploadToS3();
 
     if (s3Result.error) {

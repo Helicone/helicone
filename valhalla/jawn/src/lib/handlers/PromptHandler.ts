@@ -19,6 +19,7 @@ export class PromptHandler extends AbstractLogHandler {
         console.error(`Error sanitizing helicone template`);
         heliconeTemplate = context.message.log.request.heliconeTemplate;
       }
+      console.log("assetsFound", assets);
 
       // If assets are present, replace the inputs with the asset ids
       if (assets) {
@@ -26,6 +27,8 @@ export class PromptHandler extends AbstractLogHandler {
         for (const [key, value] of Object.entries(assets)) {
           inverseAssets.set(value, key);
         }
+
+        console.log("inverseAssets", inverseAssets);
 
         const inputs = Object.entries(heliconeTemplate.inputs).reduce<{
           [key: string]: string;
