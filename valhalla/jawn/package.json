@@ -35,7 +35,6 @@
     "lodash": "^4.17.21",
     "lodash.merge": "^4.6.2",
     "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.1",
     "openai": "^4.24.7",
     "pg": "^8.11.3",
     "pg-promise": "^11.6.0",

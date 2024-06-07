@@ -18,6 +18,7 @@ import {
   DLQ_WORKER_COUNT,
   NORMAL_WORKER_COUNT,
 } from "./lib/clients/kafkaConsumers/constant";
+import { proxyRouter } from "./controllers/public/proxyController";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -98,6 +99,21 @@ app.options("*", (req, res) => {
 
 const v1APIRouter = express.Router();
 const unAuthenticatedRouter = express.Router();
+const v1ProxyRouter = express.Router();
+
+v1ProxyRouter.use(
+  "/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(publicSwaggerDoc as any)
+);
+
+v1ProxyRouter.use(proxyRouter);
+
+v1ProxyRouter.use("/download/swagger.json", (req, res) => {
+  res.json(publicSwaggerDoc as any);
+});
+
+v1ProxyRouter.use(authMiddleware);
 
 unAuthenticatedRouter.use(
   "/docs",
@@ -143,6 +159,7 @@ app.use((req, res, next) => {
 });
 
 app.use(unAuthenticatedRouter);
+app.use(v1ProxyRouter);
 app.use(v1APIRouter);
 
 function setRouteTimeout(
