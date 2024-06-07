@@ -106,6 +106,10 @@ export function AdvancedFilters({
   );
 }
 
+function removeUnicodeCharacters(str: string) {
+  return str.replace(/[^\x00-\x7F]/g, "");
+}
+
 function AdvancedFilterInput({
   type,
   value,
@@ -128,7 +132,7 @@ function AdvancedFilterInput({
         <TextInput
           className=""
           onChange={(e) => {
-            onChange(e.target.value);
+            onChange(removeUnicodeCharacters(e.target.value));
           }}
           placeholder={"text..."}
           value={value}
