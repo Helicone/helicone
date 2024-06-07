@@ -400,12 +400,14 @@ export class LogStore {
         return;
       }
 
-      if (
-        (entry.created_at &&
-          new Date(entry.created_at) < new Date(existingEntry.created_at)) ||
-        !existingEntry.request_body_vector ||
-        !existingEntry.response_body_vector
-      ) {
+      const newEntryIsMoreRecent =
+        entry.created_at &&
+        new Date(entry.created_at) < new Date(existingEntry.created_at);
+      const newEntryHasVectors =
+        (entry.request_body_vector && !existingEntry.request_body_vector) ||
+        (entry.response_body_vector && !existingEntry.response_body_vector);
+
+      if (newEntryIsMoreRecent || newEntryHasVectors) {
         entryMap.set(entry.request_id, entry);
       }
     });
