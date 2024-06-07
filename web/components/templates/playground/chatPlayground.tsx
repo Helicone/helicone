@@ -2,6 +2,7 @@ import {
   ArrowPathIcon,
   PaperAirplaneIcon,
   PlusIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { clsx } from "../../shared/clsx";
@@ -19,6 +20,7 @@ import RoleButton from "./new/roleButton";
 import HcButton from "../../ui/hcButton";
 import { PlaygroundModel } from "./playgroundPage";
 import { fetchAnthropic } from "../../../services/lib/providers/anthropic";
+import { Tooltip } from "@mui/material";
 
 interface ChatPlaygroundProps {
   requestId: string;
@@ -188,7 +190,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                 "flex flex-col w-full h-full relative space-y-4 bg-white border-gray-300 dark:border-gray-700"
               )}
             >
-              <div className="flex w-full justify-between px-8 pt-4 rounded-t-lg">
+              <div className="w-full flex justify-between px-8 pt-4">
                 <RoleButton
                   role={"assistant"}
                   onRoleChange={function (
@@ -196,6 +198,22 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                   ): void {}}
                   disabled={true}
                 />
+                <Tooltip title="Delete Row" placement="top">
+                  <button
+                    onClick={() => {
+                      // delete all of model messages
+                      // deleteRowHandler(modelMessage[0].id);
+                      setCurrentChat((prevChat) => {
+                        return prevChat.filter(
+                          (message) => message.model === undefined
+                        );
+                      });
+                    }}
+                    className="text-red-500 font-semibold"
+                  >
+                    <TrashIcon className="h-5 w-5" />
+                  </button>
+                </Tooltip>
               </div>
               <div className="w-full px-8 pb-4">
                 <div className="w-full h-full flex flex-row justify-between space-x-4 divide-x divide-gray-300 dark:divide-gray-700">
@@ -314,13 +332,32 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             key={currentChat.length - 1}
             className="flex flex-col px-8 py-4 space-y-8 bg-white dark:bg-black border-t border-gray-300 dark:border-gray-700"
           >
-            <RoleButton
-              role={"assistant"}
-              onRoleChange={function (
-                role: "function" | "assistant" | "user" | "system"
-              ): void {}}
-              disabled={true}
-            />
+            <div className="w-full flex justify-between">
+              <RoleButton
+                role={"assistant"}
+                onRoleChange={function (
+                  role: "function" | "assistant" | "user" | "system"
+                ): void {}}
+                disabled={true}
+              />
+              <Tooltip title="Delete Row" placement="top">
+                <button
+                  onClick={() => {
+                    // delete all of model messages
+                    // deleteRowHandler(modelMessage[0].id);
+                    setCurrentChat((prevChat) => {
+                      return prevChat.filter(
+                        (message) => message.model === undefined
+                      );
+                    });
+                  }}
+                  className="text-red-500 font-semibold"
+                >
+                  <TrashIcon className="h-5 w-5" />
+                </button>
+              </Tooltip>
+            </div>
+
             <div
               className={clsx(
                 modelMessage.length > 3

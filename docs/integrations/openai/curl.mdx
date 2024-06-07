@@ -1,0 +1,37 @@
+---
+title: "cURL"
+description: "Learn how to integrate OpenAI with Helicone using cURL."
+---
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into www.helicone.ai or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Modify the API base and add the `Helicone-Auth` header">
+
+    <Note>
+    Please ensure to replace API keys with your own. 
+    </Note>
+
+    ```bash
+    curl --request POST \
+        --url https://oai.hconeai.com/v1/chat/completions \
+        --header 'Authorization: Bearer <<YOUR_OPENAI_API_KEY>>' \
+        --header 'Content-Type: application/json' \
+        --header 'Helicone-Auth: Bearer <<YOUR_HELICONE_API_KEY>>' \
+        --data '{
+            "model": "gpt-3.5-turbo",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "Say Hello!"
+                }
+            ],
+            "temperature": 1,
+            "max_tokens": 10
+    }'
+    ```
+    </Step>
+
+</Steps>

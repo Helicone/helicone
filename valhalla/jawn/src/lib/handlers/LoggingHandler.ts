@@ -15,6 +15,14 @@ type S3Record = {
   assets: Map<string, string>;
 };
 
+type SearchRecord = {
+  requestId: string;
+  organizationId: string;
+  requestBody: string;
+  responseBody: string;
+  model: string;
+};
+
 export type BatchPayload = {
   responses: Database["public"]["Tables"]["response"]["Insert"][];
   requests: Database["public"]["Tables"]["request"]["Insert"][];
@@ -22,6 +30,7 @@ export type BatchPayload = {
   assets: Database["public"]["Tables"]["asset"]["Insert"][];
   s3Records: S3Record[];
   requestResponseVersionedCH: ClickhouseDB["Tables"]["request_response_versioned"][];
+  searchRecords: Database["public"]["Tables"]["request_response_search"]["Insert"][];
 };
 
 export class LoggingHandler extends AbstractLogHandler {
@@ -46,6 +55,7 @@ export class LoggingHandler extends AbstractLogHandler {
       assets: [],
       s3Records: [],
       requestResponseVersionedCH: [],
+      searchRecords: [],
     };
   }
 
@@ -56,6 +66,7 @@ export class LoggingHandler extends AbstractLogHandler {
       const responseMapped = this.mapResponse(context);
       const assetsMapped = this.mapAssets(context);
       const s3RecordMapped = this.mapS3Records(context);
+      const searchRecordsMapped = this.mapSearchRecords(context);
       const promptMapped =
         context.message.log.request.promptId &&
         context.processedLog.request.heliconeTemplate
@@ -67,6 +78,7 @@ export class LoggingHandler extends AbstractLogHandler {
       this.batchPayload.requests.push(requestMapped);
       this.batchPayload.responses.push(responseMapped);
       this.batchPayload.assets.push(...assetsMapped);
+      this.batchPayload.searchRecords.push(...searchRecordsMapped);
 
       if (s3RecordMapped) {
         this.batchPayload.s3Records.push(s3RecordMapped);
@@ -278,6 +290,34 @@ export class LoggingHandler extends AbstractLogHandler {
     return s3Record;
   }
 
+  mapSearchRecords(
+    context: HandlerContext
+  ): Database["public"]["Tables"]["request_response_search"]["Insert"][] {
+    const request = context.message.log.request;
+    const orgParams = context.orgParams;
+
+    if (
+      !orgParams?.id ||
+      !this.vectorizeModel(context.processedLog.model ?? "")
+    ) {
+      return [];
+    }
+
+    const searchRecord: Database["public"]["Tables"]["request_response_search"]["Insert"] =
+      {
+        request_id: request.id,
+        organization_id: orgParams.id,
+        request_body_vector: this.extractRequestBodyMessage(
+          context.processedLog.request.body
+        ),
+        response_body_vector: this.extractResponseBodyMessage(
+          context.processedLog.response.body
+        ),
+      };
+
+    return [searchRecord];
+  }
+
   mapAssets(
     context: HandlerContext
   ): Database["public"]["Tables"]["asset"]["Insert"][] {
@@ -418,4 +458,100 @@ export class LoggingHandler extends AbstractLogHandler {
 
     return requestInsert;
   }
+
+  private extractRequestBodyMessage(requestBody: any): string {
+    try {
+      const messagesArray = requestBody?.messages;
+
+      if (!Array.isArray(messagesArray)) {
+        return "";
+      }
+
+      const allMessages = messagesArray
+        .filter((message) => {
+          return message?.role === "user";
+        })
+        .map((message) => {
+          if (typeof message === "object" && message !== null) {
+            const content = message["content"];
+            if (Array.isArray(content)) {
+              return content
+                .map((part) => {
+                  if (part.type === "text") {
+                    return part.text;
+                  }
+                  return "";
+                })
+                .join(" ");
+            } else if (typeof content === "string") {
+              return content;
+            }
+          }
+          return "";
+        })
+        .join(" ");
+
+      return this.ensureMaxVectorLength(this.cleanBody(allMessages.trim()));
+    } catch (error) {
+      console.error("Error pulling request body messages:", error);
+      return "";
+    }
+  }
+
+  private extractResponseBodyMessage(responseBody: any): string {
+    try {
+      const choicesArray = responseBody?.choices;
+
+      if (!Array.isArray(choicesArray)) {
+        return "";
+      }
+
+      const allMessages = choicesArray
+        .map((choice) => {
+          return choice?.message?.content || "";
+        })
+        .join(" ");
+
+      return this.ensureMaxVectorLength(this.cleanBody(allMessages.trim()));
+    } catch (error) {
+      console.error("Error pulling response body messages:", error);
+      return "";
+    }
+  }
+
+  private ensureMaxVectorLength = (text: string): string => {
+    const maxBytes = 848000; // ~300k less than 1MB for buffer
+    text = text.replace(/[^\x00-\x7F]/g, "");
+    text = text.trim();
+
+    let buffer = Buffer.from(text, "utf-8");
+
+    if (buffer.length <= maxBytes) {
+      return text;
+    }
+
+    let truncatedBuffer = Buffer.alloc(maxBytes);
+    buffer.copy(truncatedBuffer, 0, 0, maxBytes);
+
+    let endIndex = maxBytes;
+    while (endIndex > 0 && truncatedBuffer[endIndex - 1] >> 6 === 2) {
+      endIndex--;
+    }
+
+    const truncatedText = truncatedBuffer.toString("utf-8", 0, endIndex);
+
+    return truncatedText;
+  };
+
+  cleanBody(body: string): string {
+    return body.replace(/\u0000/g, "");
+  }
+
+  private vectorizeModel = (model: string): boolean => {
+    if (!model) {
+      return false;
+    }
+    const nonVectorizedModels: Set<string> = new Set(["dall-e-2", "dall-e-3"]);
+    return !nonVectorizedModels.has(model);
+  };
 }

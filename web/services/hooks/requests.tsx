@@ -142,8 +142,12 @@ const useGetRequestCountClickhouse = (
   orgId?: string
 ) => {
   const { data, isLoading, refetch } = useQuery({
-    queryKey: [`org-count`, orgId],
+    queryKey: [`org-count`, orgId, startDateISO, endDateISO],
     queryFn: async (query) => {
+      const organizationId = query.queryKey[1];
+      const startDate = query.queryKey[2];
+      const endDate = query.queryKey[3];
+
       const data = await fetch(`/api/request/ch/count`, {
         method: "POST",
         body: JSON.stringify({
@@ -151,7 +155,7 @@ const useGetRequestCountClickhouse = (
             left: {
               request_response_versioned: {
                 request_created_at: {
-                  gte: startDateISO,
+                  gte: startDate,
                 },
               },
             },
@@ -159,12 +163,12 @@ const useGetRequestCountClickhouse = (
             right: {
               request_response_versioned: {
                 request_created_at: {
-                  lte: endDateISO,
+                  lte: endDate,
                 },
               },
             },
           },
-          organization_id: query.queryKey[1],
+          organization_id: organizationId,
         }),
         headers: {
           "Content-Type": "application/json",

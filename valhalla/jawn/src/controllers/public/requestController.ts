@@ -30,8 +30,13 @@ export type RequestFilterBranch = {
 
 type RequestFilterNode =
   | FilterLeafSubset<
-    "feedback" | "request" | "response" | "properties" | "values"
-  >
+      | "feedback"
+      | "request"
+      | "response"
+      | "properties"
+      | "values"
+      | "request_response_search"
+    >
   | RequestFilterBranch
   | "all";
 
@@ -108,7 +113,6 @@ export class RequestController extends Controller {
       requestBody.rating
     );
     if (requestFeedback.error) {
-      console.log(requestFeedback.error);
       this.setStatus(500);
     } else {
       this.setStatus(200); // set return status 201

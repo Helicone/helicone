@@ -68,12 +68,29 @@ const AuthForm = (props: AuthFormProps) => {
     }
   };
 
+  const checkPath = () => {
+    // check if the base path has `us` or `eu` in it
+    // if the window does not exist (for example, during SSR), return `us`
+    if (typeof window === "undefined") {
+      return "us";
+    }
+
+    const basePath = window.location.href;
+    if (basePath.includes("us")) {
+      return "us";
+    }
+    if (basePath.includes("eu")) {
+      return "eu";
+    }
+    return "us";
+  };
+
   return (
     <div className="w-full bg-[#f8feff] h-full antialiased relative">
       <div className="h-screen flex flex-1 flex-col sm:flex-row justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24 relative">
         <div className="flex flex-col w-full space-y-4 h-full justify-center items-center max-w-lg">
           <div className="w-full flex justify-between items-center">
-            <Link href="/" className="-ml-6 flex">
+            <Link href="https://www.helicone.ai/" className="-ml-6 flex">
               <span className="sr-only">Helicone</span>
               <Image
                 src={"/static/logo.svg"}
@@ -126,14 +143,15 @@ const AuthForm = (props: AuthFormProps) => {
                         Data region
                       </span>
                     </label>
-                    <Select value={"us"}>
+
+                    <Select defaultValue={checkPath()}>
                       <SelectItem
                         value="us"
                         onClick={() => {
                           handleRouting("us");
                         }}
                       >
-                        United States
+                        🇺🇸 United States
                       </SelectItem>
                       <SelectItem
                         value="eu"
@@ -141,7 +159,7 @@ const AuthForm = (props: AuthFormProps) => {
                           handleRouting("eu");
                         }}
                       >
-                        European Union
+                        🇪🇺 European Union
                       </SelectItem>
                     </Select>
                   </div>

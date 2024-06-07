@@ -1,3 +1,4 @@
+import { KafkaProducer } from "../clients/KafkaProducer";
 import { AuthParams, OrgParams, supabaseServer } from "../db/supabase";
 import { HeliconeAuth } from "../requestWrapper";
 import { PromiseGenericResult, err, ok } from "../shared/result";
@@ -32,7 +33,10 @@ export class AuthenticationHandler extends AbstractLogHandler {
     context: HandlerContext
   ): PromiseGenericResult<AuthParams> {
     let heliconeAuth: HeliconeAuth;
-    if (context.message.authorization.startsWith("Bearer sk-helicone-proxy")) {
+    if (
+      context.message.authorization.startsWith("Bearer sk-helicone-proxy") ||
+      context.message.authorization.startsWith("Bearer pk-helicone-proxy")
+    ) {
       heliconeAuth = {
         _type: "bearerProxy",
         token: context.message.authorization,
