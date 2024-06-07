@@ -38,10 +38,6 @@ export type HeliconeMeta = {
   webhookEnabled: boolean;
   posthogApiKey?: string;
   posthogHost?: string;
-  sessionContext?: {
-    sessionId: string;
-    sessionPath: string;
-  };
 };
 
 export type KafkaMessage = {

@@ -311,6 +311,16 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         heliconeHeaders.promptHeaders.promptId;
     }
 
+    if (heliconeHeaders.sessionHeaders.sessionId) {
+      heliconePropertyHeaders["Helicone-Session-Id"] =
+        heliconeHeaders.sessionHeaders.sessionId;
+    }
+
+    if (heliconeHeaders.sessionHeaders.path) {
+      heliconePropertyHeaders["Helicone-Session-Path"] =
+        heliconeHeaders.sessionHeaders.path;
+    }
+
     return heliconePropertyHeaders;
   }
 
