@@ -274,11 +274,13 @@ export class LogStore {
       ) {
         // Update existing record with same major and minor version
         try {
-          // const newHeliconeTemplate =
-          //   JSON.stringify(heliconeTemplate.template).length >
-          //   JSON.stringify(existingPromptVersion.helicone_template).length
-          //     ? heliconeTemplate
-          //     : existingPromptVersion.helicone_template;
+          const newHeliconeTemplate =
+            JSON.stringify(heliconeTemplate.template).length >
+            JSON.stringify(existingPromptVersion.helicone_template).length
+              ? heliconeTemplate.template
+              : existingPromptVersion.helicone_template;
+
+          console.log("newHeliconeTemplate", newHeliconeTemplate);
           console.log("Updating prompt version");
           const updateQuery = `
         UPDATE prompts_versions
@@ -287,7 +289,7 @@ export class LogStore {
         WHERE prompt_v2 = $2 AND organization = $3 AND major_version = $4 AND minor_version = $5`;
 
           const updateResult = await t.result(updateQuery, [
-            heliconeTemplate.template,
+            newHeliconeTemplate,
             existingPrompt.id,
             orgId,
             passedPromptVersion.majorVersion,
