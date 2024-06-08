@@ -13,6 +13,7 @@ import { costs as openRouterCosts } from "./openrouter";
 import { ModelRow } from "../interfaces/Cost";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
+const hyperbolicPattern = /^https:\/\/api\.hyperbolic\.xyz/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
 const azurePattern =
   /^(https?:\/\/)?([^.]*\.)?(openai\.azure\.com|azure-api\.net)(\/.*)?$/;
@@ -57,7 +58,8 @@ export type ProviderName =
   | "WISDOMINANUTSHELL"
   | "GROQ"
   | "COHERE"
-  | "MISTRAL";
+  | "MISTRAL"
+  | "HYPERBOLIC";
 
 export const providers: {
   pattern: RegExp;
@@ -152,6 +154,10 @@ export const providers: {
     pattern: mistral,
     provider: "MISTRAL",
     costs: mistralCosts,
+  },
+  {
+    pattern: hyperbolicPattern,
+    provider: "HYPERBOLIC",
   },
 ];
 
