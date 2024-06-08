@@ -81,6 +81,7 @@
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "18.2.0",
+    "react-google-charts": "^4.0.1",
     "react-grid-layout": "^1.4.2",
     "react-icons": "^4.7.1",
     "react-json-pretty": "^2.2.0",

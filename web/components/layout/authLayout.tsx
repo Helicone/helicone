@@ -22,6 +22,7 @@ import {
   UserCircleIcon,
   UsersIcon,
   XMarkIcon,
+  ClipboardIcon,
 } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
@@ -135,6 +136,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/settings",
       icon: Cog6ToothIcon,
       current: pathname.includes("/settings"),
+    },
+    {
+      name: "Sessions",
+      href: "/sessions",
+      icon: ClipboardIcon,
+      current: pathname.includes("/sessions"),
     },
   ];
 

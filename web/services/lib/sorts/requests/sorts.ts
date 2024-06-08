@@ -24,6 +24,15 @@ export interface SortLeafRequest {
   };
 }
 
+export interface SortLeafSession {
+  created_at?: SortDirection;
+  total_requests?: SortDirection;
+  path?: SortDirection;
+  properties?: {
+    [key: string]: SortDirection;
+  };
+}
+
 function assertValidSortDirection(direction: SortDirection) {
   if (!isValidSortDirection(direction)) {
     throw new Error(`Invalid sort direction: ${direction}`);
