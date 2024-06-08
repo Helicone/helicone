@@ -19,6 +19,22 @@ export type BlogStructure = {
 
 const blogContent: BlogStructure[] = [
   {
+    title: "How to Understand Your Users Better and Deliver a Top-Tier Experience with Custom Properties",
+    description:
+      "In today's digital landscape, every interaction, click, and engagement offers valuable insights into your users' preferences. But how do you harness this data to effectively grow your business? We may have the answer. ",
+    badgeText: "feature",
+    date: "June 7, 2024",
+    href: "/blog/custom-properties",
+    imageUrl: "/static/blog/custom-properties/cover.png",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/static/blog/linalam-headshot.webp",
+      },
+    ],
+    time: "5 minute read",
+  },
+  {
     title: "Helicone vs. Weights and Biases",
     description:
       "Training modern LLMs is generally less complex than traditional ML models. Here's how to have all the essential tools specifically designed for language model observability without the clutter.",
