@@ -16,17 +16,17 @@ export default function Home() {
   return (
     <>
       <main className="flex min-h-screen flex-col items-center justify-between text-black">
-        <header className="text-center flex flex-col space-y-4 py-32 max-w-6xl mx-auto">
+        <header className="text-center flex flex-col space-y-4 py-10 md:py-32 max-w-6xl mx-auto">
           <Link
             href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex space-x-6 font-light text-gray-600 items-center w-full justify-center"
+            className="text-sm inline-flex space-x-6 font-light text-gray-600 items-center w-full justify-center"
           >
             Backed by{" "}
             <svg
-              width="24"
-              height="24"
+              width="20"
+              height="20"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -87,7 +87,7 @@ export default function Home() {
             </svg>{" "}
             Combinator
           </Link>
-          <h1 className="text-4xl md:text-5xl font-bold pt-4">
+          <h1 className="text-4xl md:text-5xl font-bold md:pt-4 px-2">
             LLM-Observability for{" "}
             <span className="text-sky-500">Developers</span>
           </h1>
