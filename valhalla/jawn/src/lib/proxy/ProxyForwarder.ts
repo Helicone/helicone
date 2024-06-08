@@ -12,26 +12,27 @@ import { handleProxyRequest } from "./ProxyRequestHandler";
 import { checkRateLimit } from "./RateLimiter";
 import { ResponseBuilder } from "./ResponseBuilder";
 import { S3Manager } from "./S3Manager";
-import { Response } from "express";
+import { Response } from "node-fetch";
 
 export async function proxyForwarder(
   request: RequestWrapper,
-  provider: Provider,
-  res: Response
+  provider: Provider
 ): Promise<Response> {
   const { data: proxyRequest, error: proxyRequestError } =
     await new HeliconeProxyRequestMapper(request, provider).tryToProxyRequest();
 
   if (proxyRequestError !== null) {
-    return res.status(500).json(proxyRequestError);
+    return new Response(proxyRequestError, {
+      status: 500,
+    });
   }
   const responseBuilder = new ResponseBuilder();
 
   if (proxyRequest.rateLimitOptions) {
     if (!proxyRequest.providerAuthHash) {
-      return res
-        .status(401)
-        .json({ message: "Authorization header required for rate limiting" });
+      return new Response("Authorization header required for rate limiting", {
+        status: 401,
+      });
     }
 
     const rateLimitCheckResult = await checkRateLimit({
@@ -48,32 +49,24 @@ export async function proxyForwarder(
     );
 
     if (rateLimitCheckResult.status === "rate_limited") {
-      return responseBuilder.buildRateLimitedResponse(res);
+      return responseBuilder.buildRateLimitedResponse();
     }
   }
 
-  const { data, error } = await handleProxyRequest(proxyRequest, res);
+  const { data, error } = await handleProxyRequest(proxyRequest);
   if (error !== null) {
-    return responseBuilder.build(
-      {
-        body: error,
-        status: 500,
-      },
-      res
-    );
+    return responseBuilder.build({
+      body: error,
+      status: 500,
+    });
   }
   const { loggable, response } = data;
 
-  void log(loggable, request, proxyRequest);
-
-  // const response2 = responseBuilder.build(
-  //   {
-  //     body: response.body,
-  //     inheritFrom: response,
-  //     status: response.status,
-  //   },
-  //   res
-  // );
+  try {
+    void log(loggable, request, proxyRequest);
+  } catch (e) {
+    console.error("Error logging", e);
+  }
 
   return response;
 }

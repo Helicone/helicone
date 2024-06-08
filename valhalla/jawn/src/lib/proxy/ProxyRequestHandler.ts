@@ -8,11 +8,11 @@ import {
 } from "./ProviderClient";
 import { CompletedChunk, ReadableInterceptor } from "./ReadableInterceptor";
 import crypto from "crypto";
-import { Response as ExpressResponse } from "express";
+import { Headers, Response } from "node-fetch";
 
 export type ProxyResult = {
   loggable: DBLoggable;
-  response: ExpressResponse;
+  response: Response;
 };
 
 function getStatus(
@@ -33,8 +33,7 @@ function getStatus(
 }
 
 export async function handleProxyRequest(
-  proxyRequest: HeliconeProxyRequest,
-  expressRes: ExpressResponse
+  proxyRequest: HeliconeProxyRequest
 ): Promise<Result<ProxyResult, string>> {
   const { retryOptions } = proxyRequest;
 
@@ -45,34 +44,9 @@ export async function handleProxyRequest(
     : callProvider(callProps));
 
   const interceptor = response.body
-    ? new ReadableInterceptor(response.body, expressRes, proxyRequest.isStream)
+    ? new ReadableInterceptor(response.body as any, proxyRequest.isStream)
     : null;
   let body = interceptor ? interceptor.stream : null;
-
-  if (
-    proxyRequest.requestWrapper.heliconeHeaders.featureFlags.streamForceFormat
-  ) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let buffer: any = null;
-    const transformer = new TransformStream({
-      transform(chunk, controller) {
-        if (chunk.length < 50) {
-          buffer = chunk;
-        } else {
-          if (buffer) {
-            const mergedArray = new Uint8Array(buffer.length + chunk.length);
-            mergedArray.set(buffer);
-            mergedArray.set(chunk, buffer.length);
-            controller.enqueue(mergedArray);
-          } else {
-            controller.enqueue(chunk);
-          }
-          buffer = null;
-        }
-      },
-    });
-    body = body?.pipeThrough(transformer) ?? null;
-  }
 
   const responseHeaders = new Headers(response.headers);
   responseHeaders.set("Helicone-Status", "success");
@@ -87,17 +61,10 @@ export async function handleProxyRequest(
     }
   }
 
-  responseHeaders.forEach((value, key) => {
-    expressRes.setHeader(key, value);
-  });
-
-  expressRes.status(status);
-
   if (interceptor) {
     console.log("Interceptor created, starting stream");
   } else {
     console.log("No interceptor created, ending response");
-    expressRes.end();
   }
 
   return {
@@ -143,7 +110,11 @@ export async function handleProxyRequest(
         },
         tokenCalcUrl: proxyRequest.tokenCalcUrl,
       }),
-      response: expressRes,
+      response: new Response(body ?? "", {
+        ...response,
+        headers: responseHeaders,
+        status: status,
+      }),
     },
     error: null,
   };

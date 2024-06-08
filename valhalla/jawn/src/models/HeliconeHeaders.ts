@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { Headers } from "node-fetch";
 
 type Nullable<T> = T | null;
 

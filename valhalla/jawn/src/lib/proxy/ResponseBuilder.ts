@@ -1,6 +1,7 @@
 import { RateLimitOptions, RateLimitResponse } from "./RateLimiter";
-import { Response as ExpressResponse } from "express";
+
 import { Readable } from "stream";
+import { Response, Headers } from "node-fetch";
 
 export interface BuildParams {
   body: any; // Express allows various types for body (string, object, buffer, etc.)
@@ -37,49 +38,38 @@ export class ResponseBuilder {
     });
   }
 
-  build(params: BuildParams, res: ExpressResponse): ExpressResponse {
+  build(params: BuildParams): Response {
     const { body, inheritFrom: _inheritFrom } = params;
     let { status } = params;
+    const inheritFrom = _inheritFrom ?? new Response();
 
-    if (_inheritFrom) {
-      _inheritFrom.headers.forEach((value, key) => {
-        this.headers[key] = value;
-      });
-    }
-
+    const headers = new Headers();
+    inheritFrom.headers.forEach((value, key) => {
+      headers.set(key, value);
+    });
     if (status < 200 || status >= 600) {
       console.log("Invalid status code:", status);
       status = 500;
     }
 
-    res.status(status);
-    Object.entries(this.headers).forEach(([key, value]) => {
-      console.log(`Setting header ${key} to ${value}`);
-      res.setHeader(key, value);
+    const res = new Response(body, {
+      ...inheritFrom,
+      headers,
+      status,
     });
 
-    if (body instanceof ReadableStream) {
-      return res;
-    } else if (typeof body === "string") {
-      return res.send(body);
-    } else {
-      return res.json(body);
-    }
+    return res;
   }
 
-  buildRateLimitedResponse(res: ExpressResponse): ExpressResponse {
+  buildRateLimitedResponse(): Response {
     this.setHeader("content-type", "application/json;charset=UTF-8");
 
-    return this.build(
-      {
-        body: {
-          message:
-            "Rate limit reached. Please wait before making more requests.",
-        },
-        status: 429,
+    return this.build({
+      body: {
+        message: "Rate limit reached. Please wait before making more requests.",
       },
-      res
-    );
+      status: 429,
+    });
   }
 
   readableStreamToNodeStream(readableStream: ReadableStream) {

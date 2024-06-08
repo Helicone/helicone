@@ -12,6 +12,8 @@ import { supabaseServer } from "../db/supabase";
 import { getAndStoreInCache } from "../memoryCache/staticMemCache";
 import { usageLimitManager } from "../../managers/UsageLimitManager";
 import { Request } from "express";
+import { Headers } from "node-fetch";
+import { Readable as ReadableStream } from "stream";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -265,7 +267,7 @@ export class RequestWrapper {
     return ok(files);
   }
 
-  getBody(): ReadableStream<Uint8Array> | null {
+  getBody(): ReadableStream {
     return this.request.body;
   }
 

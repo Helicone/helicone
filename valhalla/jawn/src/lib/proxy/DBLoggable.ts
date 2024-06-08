@@ -8,6 +8,7 @@ import { KafkaProducer } from "../clients/KafkaProducer";
 import { AuthParams, OrgParams } from "../db/supabase";
 import { S3Manager } from "./S3Manager";
 import { Message } from "../handlers/HandlerContext";
+import { Headers } from "node-fetch";
 
 export interface DBLoggableProps {
   response: {

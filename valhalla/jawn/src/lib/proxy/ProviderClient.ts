@@ -1,6 +1,7 @@
 import retry from "async-retry";
 import { HeliconeProxyRequest, RetryOptions } from "./HeliconeProxyRequest";
-
+import fetch from "node-fetch";
+import { Headers, Response } from "node-fetch";
 export interface CallProps {
   headers: Headers;
   method: string;
@@ -37,7 +38,7 @@ function removeHeliconeHeaders(request: Headers): Headers {
   return newHeaders;
 }
 
-export async function callProvider(props: CallProps): Promise<Response> {
+export async function callProvider(props: CallProps) {
   const { headers, method, apiBase, body, increaseTimeout, originalUrl } =
     props;
 
@@ -45,24 +46,14 @@ export async function callProvider(props: CallProps): Promise<Response> {
 
   const finalHeaders = removeHeliconeHeaders(headers);
   const baseInit = { method, headers: finalHeaders };
-  const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
+  const init =
+    method === "GET" ? { ...baseInit } : { ...baseInit, body: body ?? "" };
+  init.headers.delete("host");
 
-  let response;
-  if (increaseTimeout) {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    setTimeout(() => controller.abort(), 1000 * 60 * 30);
-    response = await fetch(targetUrl.href, {
-      ...init,
-      signal,
-    });
-  } else {
-    console.log(`Type of body: ${typeof body}`);
-    console.log(`Fetching ${targetUrl.href}`);
-    console.log(`Init: ${JSON.stringify(init)}`);
-    response = await fetch(targetUrl.href, init);
-  }
-  return response;
+  console.log(`Type of body: ${typeof body}`);
+  console.log(`Fetching ${targetUrl.href}`);
+  console.log(`Init: ${JSON.stringify(init)}`);
+  return await fetch(targetUrl.href, init);
 }
 
 export function buildTargetUrl(originalUrl: URL, apiBase: string): URL {
