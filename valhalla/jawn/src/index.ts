@@ -143,7 +143,6 @@ app.use((req, res, next) => {
 });
 
 app.use(unAuthenticatedRouter);
-
 app.use(v1APIRouter);
 
 function setRouteTimeout(

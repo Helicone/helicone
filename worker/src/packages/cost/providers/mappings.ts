@@ -62,6 +62,8 @@ export const providersNames = [
 
 export type ProviderName = (typeof providersNames)[number];
 
+export type ModelNames = (typeof modelNames)[number];
+
 export const providers: {
   pattern: RegExp;
   provider: ProviderName;
@@ -185,3 +187,5 @@ export const defaultProvider = providers.find(
 export const allCosts = providers.flatMap((provider) => provider.costs ?? []);
 
 export const approvedDomains = providers.map((provider) => provider.pattern);
+
+export const modelNames = allCosts.map((cost) => cost.model.value);

@@ -66,6 +66,9 @@ export interface paths {
   "/v1/experiment/query": {
     post: operations["GetExperiments"];
   };
+  "/v1/public/dataisbeautiful": {
+    post: operations["CreateNewExperiment"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -664,6 +667,27 @@ Json: JsonObject;
       /** @enum {boolean} */
       score?: true;
     };
+    ModelBreakdown: {
+      /** Format: double */
+      percent: number;
+      model: string;
+    };
+    "ResultSuccess_ModelBreakdown-Array_": {
+      data: components["schemas"]["ModelBreakdown"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelBreakdown-Array.string_": components["schemas"]["ResultSuccess_ModelBreakdown-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    TimeSpan: "1m" | "3m" | "6m" | "all";
+    ModelNames: string;
+    /** @enum {string} */
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL";
+    DataIsBeautifulRequestBody: {
+      provider: components["schemas"]["ProviderName"] | null;
+      model: components["schemas"]["ModelNames"] | null;
+      timespan: components["schemas"]["TimeSpan"];
+    };
   };
   responses: {
   };
@@ -1002,14 +1026,14 @@ export interface operations {
   CreateNewExperiment: {
     requestBody: {
       content: {
-        "application/json": components["schemas"]["NewExperimentParams"];
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
       };
     };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+          "application/json": components["schemas"]["Result_ModelBreakdown-Array.string_"];
         };
       };
     };
