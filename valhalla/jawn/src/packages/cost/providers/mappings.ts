@@ -38,26 +38,29 @@ const cohere = /^https:\/\/api\.cohere\.ai/;
 // api.mistral.ai
 const mistral = /^https:\/\/api\.mistral\.ai/;
 
-export type ProviderName =
-  | "OPENAI"
-  | "ANTHROPIC"
-  | "AZURE"
-  | "LOCAL"
-  | "HELICONE"
-  | "AMDBARTEK"
-  | "ANYSCALE"
-  | "CLOUDFLARE"
-  | "2YFV"
-  | "TOGETHER"
-  | "LEMONFOX"
-  | "FIREWORKS"
-  | "PERPLEXITY"
-  | "GOOGLE"
-  | "OPENROUTER"
-  | "WISDOMINANUTSHELL"
-  | "GROQ"
-  | "COHERE"
-  | "MISTRAL";
+export const providersNames = [
+  "OPENAI",
+  "ANTHROPIC",
+  "AZURE",
+  "LOCAL",
+  "HELICONE",
+  "AMDBARTEK",
+  "ANYSCALE",
+  "CLOUDFLARE",
+  "2YFV",
+  "TOGETHER",
+  "LEMONFOX",
+  "FIREWORKS",
+  "PERPLEXITY",
+  "GOOGLE",
+  "OPENROUTER",
+  "WISDOMINANUTSHELL",
+  "GROQ",
+  "COHERE",
+  "MISTRAL",
+] as const;
+
+export type ProviderName = (typeof providersNames)[number];
 
 export const providers: {
   pattern: RegExp;
