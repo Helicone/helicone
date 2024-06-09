@@ -293,15 +293,6 @@ Json: JsonObject;
       status?: components["schemas"]["Partial_NumberOperators_"];
       model?: components["schemas"]["Partial_TextOperators_"];
     };
-    /** @description Make all properties in T optional */
-    Partial_VectorOperators_: {
-      contains?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_RequestResponseSearchToOperators_: {
-      request_body_vector?: components["schemas"]["Partial_VectorOperators_"];
-      response_body_vector?: components["schemas"]["Partial_VectorOperators_"];
-    };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search_": {
       feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
@@ -313,7 +304,7 @@ Json: JsonObject;
       values?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
-      request_response_search?: components["schemas"]["Partial_RequestResponseSearchToOperators_"];
+      request_response_search: unknown;
     };
     "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search_"];
     RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search_"] | components["schemas"]["RequestFilterBranch"] | "all";

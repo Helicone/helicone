@@ -264,6 +264,9 @@ const whereKeyMappings: KeyMappings = {
   experiment_hypothesis_run: easyKeyMappings<"experiment_hypothesis_run">({
     result_request_id: "experiment_v2_hypothesis_run.result_request_id",
   }),
+  experiment_dataset_v2_row: easyKeyMappings<"experiment_dataset_v2_row">({
+    dataset_id: "experiment_dataset_v2_row.dataset_id",
+  }),
 
   // Deprecated
   values: NOT_IMPLEMENTED,
@@ -305,6 +308,7 @@ const havingKeyMappings: KeyMappings = {
   prompt_v2: NOT_IMPLEMENTED,
   prompts_versions: NOT_IMPLEMENTED,
   experiment: NOT_IMPLEMENTED,
+  experiment_dataset_v2_row: NOT_IMPLEMENTED,
 
   // Deprecated
   values: NOT_IMPLEMENTED,

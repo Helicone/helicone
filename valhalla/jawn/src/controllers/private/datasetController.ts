@@ -13,7 +13,7 @@ import {
 import { supabaseServer } from "../../lib/routers/withAuth";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { getRequests } from "../../lib/stores/request/request";
-import { FineTuningManager } from "../../managers/FineTuningManager";
+import { FineTuningManager } from "../../managers/finetuning/FineTuningManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { postHogClient } from "../../lib/clients/postHogClient";
 

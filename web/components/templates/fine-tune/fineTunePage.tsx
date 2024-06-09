@@ -132,20 +132,72 @@ const FineTuningPage = (props: FineTuningPageProps) => {
         <AuthHeader title={"Fine-Tune"} />
 
         <div className="flex flex-col">
-          <div className="flex flex-row justify-between items-center mb-4">
-            <div />
+          <div className="flex flex-row justify-center items-center mb-4">
             <div className="flex flex-row space-x-2 items-center">
               <button
                 onClick={() => {
                   setFineTuneOpen(true);
                 }}
-                className="items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="items-center justify-center rounded-lg bg-white dark:bg-black px-2.5 py-1.5 gap-2 text-sm flex font-medium text-black dark:text-white shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white min-w-[20em] flex-col min-h-[20em]"
               >
-                <PlusIcon className="h-4 w-4" />
-                Create New
+                <div>
+                  <SparklesIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+                </div>
+                <h2 className="text-black dark:text-white font-semibold text-lg">
+                  Manual
+                </h2>
+
+                <p className="text-gray-500 dark:text-gray-300">
+                  Export a json-l
+                </p>
+              </button>
+
+              <button
+                onClick={() => {
+                  setFineTuneOpen(true);
+                }}
+                className="items-center justify-center rounded-lg bg-white dark:bg-black px-2.5 py-1.5 gap-2 text-sm flex font-medium text-black dark:text-white shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white min-w-[20em] flex-col min-h-[20em]"
+              >
+                <div
+                  className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg"
+                  style={{ display: "flex", justifyContent: "center" }}
+                >
+                  ICON HERE
+                </div>
+                <h2 className="text-black dark:text-white font-semibold text-lg">
+                  OpenPipe
+                </h2>
+
+                <p className="text-gray-500 dark:text-gray-300">
+                  open source models
+                </p>
+              </button>
+
+              <button
+                onClick={() => {
+                  setFineTuneOpen(true);
+                }}
+                className="items-center justify-center rounded-lg bg-white dark:bg-black px-2.5 py-1.5 gap-2 text-sm flex font-medium text-black dark:text-white shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white min-w-[20em] flex-col min-h-[20em]"
+              >
+                <div
+                  className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg"
+                  style={{ display: "flex", justifyContent: "center" }}
+                >
+                  ICON HERE
+                </div>
+                <h2 className="text-black dark:text-white font-semibold text-lg">
+                  OpenAI
+                </h2>
+
+                <p className="text-gray-500 dark:text-gray-300">
+                  gpt-3.5 or gpt4 fine tuning
+                </p>
               </button>
             </div>
           </div>
+          <h1 className="text-2xl font-semibold text-black dark:text-white">
+            Existing Fine-Tune Jobs
+          </h1>
           <div className="flex flex-col w-full space-y-4">
             {isJobsLoading || isDatasetsLoading ? (
               <LoadingAnimation title="Loading Data..." />

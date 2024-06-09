@@ -299,6 +299,13 @@ type ExperimentHypothesisRunToOperator = {
 export type ExperimentHypothesisRunScoreValue =
   SingleKey<ExperimentHypothesisRunToOperator>;
 
+export type ExperimentDatasetV2RowToOperators = {
+  dataset_id: SingleKey<TextOperators>;
+};
+
+export type FilterLeafExperimentDatasetV2Row =
+  SingleKey<ExperimentDatasetV2RowToOperators>;
+
 export type TablesAndViews = {
   user_metrics: FilterLeafUserMetrics;
   user_api_keys: FilterLeafUserApiKeys;
@@ -311,6 +318,7 @@ export type TablesAndViews = {
   experiment: FilterLeafExperiment;
   experiment_hypothesis_run: ExperimentHypothesisRunScoreValue;
   score_value: FilterLeafScoreValue;
+  experiment_dataset_v2_row: FilterLeafExperimentDatasetV2Row;
   request_response_search: FilterLeafRequestResponseSearch;
 
   // CLICKHOUSE TABLES
