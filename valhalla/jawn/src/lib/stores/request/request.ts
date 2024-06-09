@@ -186,8 +186,6 @@ export async function getRequests(
   OFFSET ${offset}
 
 `;
-  console.log("query", query);
-  console.log("args", builtFilter.argsAcc);
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
 
   const s3Client = new S3Client(

@@ -521,8 +521,6 @@ function getExperimentDatasetScores(
       }
     );
 
-    console.log("experimentLatency", totalLatency, validRows.length);
-
     return ok({
       scores: {
         dateCreated: new Date(latest.createdAt),
