@@ -3,9 +3,8 @@ import {
   ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 import { User } from "@supabase/auth-helpers-react";
-import generateApiKey from "generate-api-key";
 import { FormEvent, useEffect, useState } from "react";
-import { getJawnClient } from "../../../lib/clients/jawn";
+import { generateAPIKeyHelper } from "../../../utlis/generateAPIKeyHelper";
 import { OrgContextValue } from "../../layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
@@ -33,38 +32,36 @@ const AddKeyModal = (props: AddKeyModalProps) => {
       "key-name"
     ) as HTMLInputElement;
 
+    const keyPermissions = event.currentTarget.elements.namedItem(
+      "key-read"
+    ) as HTMLInputElement;
+
     if (!keyName || keyName.value === "") {
       setNotification("Please enter in a key name", "error");
       return;
     }
 
-    const apiKey = `sk-helicone${
-      org?.currentOrg?.organization_type === "customer" ? "-cp" : ""
-    }-${generateApiKey({
-      method: "base32",
-      dashes: true,
-    }).toString()}`.toLowerCase();
-    setReturnedKey(apiKey);
+    const permission = keyPermissions.checked ? "rw" : "w";
 
-    const jawn = getJawnClient();
-    const resp = jawn
-      .POST("/v1/key/generateHash", {
-        body: {
-          apiKey,
-          userId: user?.id!,
-          keyName: keyName.value,
-        },
-      })
-      .then((res) => {
-        if (res.response.ok) {
-          setNotification("Successfully created API key", "success");
-          setIsLoading(false);
-          onSuccess();
-        } else {
-          setNotification("Failed to create API key", "error");
-          setIsLoading(false);
-        }
-      });
+    const { res, apiKey } = generateAPIKeyHelper(
+      permission,
+      org?.currentOrg?.organization_type!,
+      user?.id!,
+      keyName.value,
+      window.location.hostname.includes("eu.")
+    );
+
+    const resp = res.then((res) => {
+      if (res.response.ok) {
+        setReturnedKey(apiKey);
+        setNotification("Successfully created API key", "success");
+        setIsLoading(false);
+        onSuccess();
+      } else {
+        setNotification("Failed to create API key", "error");
+        setIsLoading(false);
+      }
+    });
   };
 
   useEffect(() => {
@@ -98,6 +95,46 @@ const AddKeyModal = (props: AddKeyModalProps) => {
               placeholder="Key Name"
             />
           </div>
+          <div className="w-full space-y-1.5 text-sm">
+            <label htmlFor="key-permissions" className="text-gray-500">
+              Permissions
+            </label>
+
+            <ul className="flex items-center gap-4 text-sm font-semibold">
+              <li>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="key-read"
+                    id="key-read"
+                    value="r"
+                    className="mr-1 rounded-sm"
+                    defaultChecked={true}
+                  />
+                  Read
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="key-write"
+                    id="key-write"
+                    value="w"
+                    className="mr-1 rounded-sm"
+                    disabled
+                    defaultChecked={true}
+                    style={{
+                      // dark gray
+                      backgroundColor: "gray",
+                    }}
+                  />
+                  Write
+                </label>
+              </li>
+            </ul>
+          </div>
+
           <div className="flex justify-end gap-2">
             <button
               onClick={() => setOpen(false)}

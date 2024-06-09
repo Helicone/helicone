@@ -46,24 +46,26 @@
         {
           "group": "OpenAI",
           "pages": [
-            "integrations/openai/node",
+            "integrations/openai/javascript",
             "integrations/openai/python",
             "integrations/openai/langchain",
-            "integrations/openai/async"
+            "integrations/openai/async",
+            "integrations/openai/curl"
           ]
         },
         {
           "group": "Azure OpenAI",
           "pages": [
-            "integrations/azure/node",
+            "integrations/azure/javascript",
             "integrations/azure/python",
-            "integrations/azure/langchain"
+            "integrations/azure/langchain",
+            "integrations/azure/curl"
           ]
         },
         {
           "group": "Anthropic",
           "pages": [
-            "integrations/anthropic/node",
+            "integrations/anthropic/javascript",
             "integrations/anthropic/python",
             "integrations/anthropic/langchain"
           ]
@@ -74,14 +76,14 @@
             {
               "group": "API",
               "pages": [
-                "integrations/gemini/api/node",
+                "integrations/gemini/api/javascript",
                 "integrations/gemini/api/curl"
               ]
             },
             {
               "group": "Vertex AI (Enterprise)",
               "pages": [
-                "integrations/gemini/vertex/node",
+                "integrations/gemini/vertex/javascript",
                 "integrations/gemini/vertex/curl"
               ]
             }
@@ -92,9 +94,9 @@
         {
           "group": "Groq",
           "pages": [
-            "integrations/groq/curl",
             "integrations/groq/javascript",
-            "integrations/groq/python"
+            "integrations/groq/python",
+            "integrations/groq/curl"
           ]
         },
         "getting-started/integration-method/openrouter",
@@ -136,6 +138,7 @@
         "faq/how-we-calculate-cost",
         "faq/latency-affect",
         "helicone-headers/predefining-request-id",
+        "faq/secret-vs-public-key",
         {
           "group": "Deployment",
           "pages": [
@@ -148,7 +151,10 @@
     },
     {
       "group": "Observability",
-      "pages": ["use-cases/getting-user-requests"]
+      "pages": [
+        "use-cases/getting-user-requests", 
+        "use-cases/segmentation"
+      ]
     },
     {
       "group": "Guides",
@@ -161,10 +167,6 @@
     {
       "group": "CI/CD",
       "pages": ["use-cases/github-actions"]
-    },
-    {
-      "group": "Custom Properties",
-      "pages": ["use-cases/segmentation", "use-cases/environment-tracking"]
     },
     {
       "group": "Developer",

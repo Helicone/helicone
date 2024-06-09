@@ -2,7 +2,7 @@
 title: "Introduction"
 description: "Helicone is the observability platform purpose-built for LLM developers."
 ---
-{/* 
+{/*
 <Frame type="glass">
   <img src="/images/helicone-og.webp"/>
 </Frame> */}
@@ -12,163 +12,167 @@ description: "Helicone is the observability platform purpose-built for LLM devel
 
 ## Quick Start
 
-Integrate with Helicone and send your first events in seconds. 
+Integrate with Helicone and send your first events in seconds.
 <CardGroup cols={3}>
-  <Card title="OpenAI" href="/integrations/openai">
-    Node, Python, Langchain, Async logging
+  <Card title="OpenAI" href="/integrations/openai/javascript">
+    Javascript, Python, Langchain, Async logging, cURL
   </Card>
-  <Card title="Azure" href="/integrations/azure">
-    Node, Python, Langchain 
+  <Card title="Azure" href="/integrations/azure/javascript">
+    Javascript, Python, Langchain, cURL
   </Card>
-  <Card title="Anthropic" href="/integrations/anthropic">
-    Node, Python, Langchain
+  <Card title="Anthropic" href="/integrations/anthropic/javascript">
+    Javascript, Python, Langchain
   </Card>
-  <Card title="Gemini" href="/integrations/gemini">
-    Node, cURL
+  <Card title="Gemini" href="/integrations/gemini/api/javascript">
+    Javascript, cURL
   </Card>
   <Card title="Anyscale" href="/getting-started/integration-method/anyscale">
-    
+
   </Card>
   <Card title="Together AI" href="/getting-started/integration-method/together">
 
   </Card>
-   <Card title="OpenRouter" href="/getting-started/integration-method/openrouter">
+  <Card title="Groq" href="/integrations/groq/javascript">
+      Javascript, Python, cURL
+  </Card>
+  <Card title="OpenRouter" href="/getting-started/integration-method/openrouter">
 
   </Card>
-     <Card title="LiteLLM" href="/getting-started/integration-method/litellm">
+  <Card title="LiteLLM" href="/getting-started/integration-method/litellm">
+
   </Card>
   <Card title="Gateway" href="/getting-started/integration-method/gateway" icon="flag">
-    Don't see your provider above? Try Helicone's universal Gateway. 
+    Don't see your provider above? Try Helicone's universal Gateway.
   </Card>
 </CardGroup>
 
 
-## New to Helicone? 
+## New to Helicone?
 
 To help you get the most out of Helicone, we curated a list of actions that you can do next. Our users typically find themselves doing majority of the following, but you're welcome to explore the product on your own!
 
 <CardGroup cols={1}>
-  <Card title="Add a custom property" href="features/advanced-usage/custom-properties" icon="square-1">
+  <Card title="Add a custom property" href="/features/advanced-usage/custom-properties" icon="square-1">
     Label your requests. We will walk you through how to segment, analyze, and visualize them.
   </Card>
   <Card title="Create your first prompt" href="/features/prompts" icon="square-2">
-    Version your prompt and inputs as they evolve. 
+    Version your prompt and inputs as they evolve.
   </Card>
-  <Card title="Cache responses" href="/helicone-headers/header-directory" icon="square-3">
-    Cache and watch how much time and cost you saved. 
+  <Card title="Cache responses" href="/features/advanced-usage/caching" icon="square-3">
+    Cache and watch how much time and cost you saved.
   </Card>
 </CardGroup>
 
 ### Recommendations
-The following guides are optional, but we think you'll find them useful (and fun). 
+The following guides are optional, but we think you'll find them useful (and fun).
 
 <CardGroup cols={2}>
-  <Card title="Run an experiment" href="use-cases/experiments" icon="star-christmas">
-    How much better can the output be, if you tweak your prompt or use a different model? The answer is in Experiments.  
+  <Card title="Run an experiment" href="/use-cases/experiments" icon="star-christmas">
+    How much better can the output be, if you tweak your prompt or use a different model? The answer is in Experiments.
   </Card>
-  <Card title="Bring it to PostHog" href="getting-started/integration-method/posthog" icon="star-christmas">
+  <Card title="Bring it to PostHog" href="/getting-started/integration-method/posthog" icon="star-christmas">
     Helicone has teamed up with PostHog to bring your LLM analytics closer to all your other dashboards.
   </Card>
 </CardGroup>
 
 ## Explore Features
 
-Discover features for monitoring and experimenting with your prompts. 
+Discover features for monitoring and experimenting with your prompts.
 <CardGroup cols={3}>
   <Card
     title="Prompts (Beta)"
     href="/features/prompts"
     icon="square-terminal"
   >
-    Effortlessly monitor prompt versions and inputs. 
+    Effortlessly monitor prompt versions and inputs.
   </Card>
   <Card
     title="Custom Properties"
     href="/features/advanced-usage/custom-properties"
     icon="tag"
   >
-    Label and segment your requests. 
+    Label and segment your requests.
   </Card>
-  <Card 
-    title="Caching" 
+  <Card
+    title="Caching"
     href="/features/advanced-usage/caching"
     icon="database"
   >
-    Save cost and improve latency. 
+    Save cost and improve latency.
   </Card>
-  <Card 
-    title="Omit Logs" 
+  <Card
+    title="Omit Logs"
     href="/features/advanced-usage/omit-logs"
     icon="square-minus"
   >
-    Remove request and responses. 
+    Remove request and responses.
   </Card>
-  <Card 
-    title="User Metrics" 
+  <Card
+    title="User Metrics"
     href="/features/advanced-usage/user-metrics"
     icon="chart-user"
   >
-    Get insights into your user's usage. 
+    Get insights into your user's usage.
   </Card>
-  <Card 
-    title="Feedback" 
+  <Card
+    title="Feedback"
     href="/features/advanced-usage/feedback"
     icon="thumbs-up"
   >
-    Provide user feedback on output. 
+    Provide user feedback on output.
   </Card>
-  <Card 
-    title="Gateway Fallback (Beta)" 
+  <Card
+    title="Gateway Fallback (Beta)"
     href="/getting-started/integration-method/gateway-fallbacks"
     icon="diagram-next"
   >
     Utilize any provider through a single endpoint.
   </Card>
-  <Card 
-    title="Retries" 
+  <Card
+    title="Retries"
     href="/features/advanced-usage/retries"
     icon="repeat"
   >
-    Smartly retry requests. 
+    Smartly retry requests.
   </Card>
   <Card
     title="Rate Limiting"
     href="/features/advanced-usage/custom-rate-limits"
     icon="user-minus"
   >
-    Easily rate-limit power users. 
+    Easily rate-limit power users.
   </Card>
-  <Card 
-    title="Key Vault" 
+  <Card
+    title="Key Vault"
     href="/features/advanced-usage/vault"
     icon="key"
   >
     Manage and distribute your provider API keys securely.
   </Card>
-  <Card 
-    title="Moderation Integration" 
+  <Card
+    title="Moderation Integration"
     href="/features/advanced-usage/moderations"
     icon="eye"
   >
     Integrate OpenAI moderation to safeguard your chat completions.
   </Card>
-  <Card 
-    title="LLM Security" 
+  <Card
+    title="LLM Security"
     href="/features/advanced-usage/llm-security"
     icon="shield-check"
   >
     Secure OpenAI chat completions against prompt injections.
   </Card>
-  {/* <Card 
-    title="Webhooks" 
+  {/* <Card
+    title="Webhooks"
     href="/features/Webhooks"
     icon="webhook"
   >
-    Set up integrations tp subscribe Helicone events. 
+    Set up integrations tp subscribe Helicone events.
   </Card> */}
-  <Card 
-    title="Customer Portal" 
-    href="/features/customer_portal/intro"
+  <Card
+    title="Customer Portal"
+    href="/features/customer-portal"
     icon="chart-tree-map"
   >
     Easily manage your customers and their usage.
@@ -183,14 +187,14 @@ Discover features for monitoring and experimenting with your prompts.
     Determine when you should use a proxy or async function in Helicone.
   </Card>
   <Card title="How We Calculate Costs" href="/faq/how-we-calculate-cost">
-    An explanation of our process for calculating cost per request. 
+    An explanation of our process for calculating cost per request.
   </Card>
   <Card title="Understanding Helicone Headers" href="/helicone-headers/header-directory">
     Every header you need to know to access Helicone features.
   </Card>
 </CardGroup>
 
-## Questions? 
+## Questions?
 <Check>Although we designed the docs to be as self-serving as possible, you are welcome to join our [Discord](https://discord.com/invite/HwUbV3Q8qz) or contact [help@helicone.ai](help@helicone.ai) with any questions or feedback you have. </Check>
 
-Interested in deploying Helicone on-prem? [Schedule a call](https://www.helicone.ai/contact) with us.  
+Interested in deploying Helicone on-prem? [Schedule a call](https://www.helicone.ai/contact) with us.

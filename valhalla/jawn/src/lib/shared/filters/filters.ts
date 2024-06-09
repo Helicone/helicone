@@ -222,6 +222,22 @@ const whereKeyMappings: KeyMappings = {
       threat: "request_response_versioned.threat",
     })(filter, placeValueSafely);
   },
+  request_response_search: (filter, placeValueSafely) => {
+    const keys = Object.keys(filter);
+    if (keys.length !== 1) {
+      throw new Error("Invalid filter, only one key is allowed");
+    }
+    const key = keys[0];
+    const { operator, value } = extractOperatorAndValueFromAnOperator(
+      filter[key as keyof typeof filter]!
+    );
+
+    return {
+      column: `request_response_search.${key}`,
+      operator: "vector-contains",
+      value: placeValueSafely(value),
+    };
+  },
   users_view: easyKeyMappings<"request_response_log">({
     status: "r.status",
     user_id: "r.user_id",
@@ -274,6 +290,7 @@ const havingKeyMappings: KeyMappings = {
     total_prompt_token: "total_prompt_token",
     cost: "cost",
   }),
+  request_response_search: NOT_IMPLEMENTED,
   score_value: NOT_IMPLEMENTED,
   experiment_hypothesis_run: NOT_IMPLEMENTED,
   user_api_keys: NOT_IMPLEMENTED,
@@ -323,6 +340,8 @@ function operatorToSql(operator: AllOperators): string {
       return "NOT ILIKE";
     case "gin-contains":
       return "@>";
+    case "vector-contains":
+      return "@@";
   }
 }
 
@@ -365,6 +384,10 @@ export function buildFilterLeaf(
     } else {
       if (operatorKey === "contains" || operatorKey === "not-contains") {
         filters.push(`${column} ${sqlOperator} %${value}%`);
+      } else if (operatorKey === "vector-contains") {
+        filters.push(
+          `${column} ${sqlOperator} plainto_tsquery('helicone_search_config', ${value}::text)`
+        );
       } else {
         filters.push(`${column} ${sqlOperator} ${value}`);
       }

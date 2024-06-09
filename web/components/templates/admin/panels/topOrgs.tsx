@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { getJawnClient } from "../../../../lib/clients/jawn";
 import useNotification from "../../../shared/notification/useNotification";
 import HcButton from "../../../ui/hcButton";
+import { handleLogCostCalculation } from "../../../../utlis/LogCostCalculation";
 
 interface TopOrgsProps {}
 
@@ -220,13 +221,20 @@ const TopOrgs = (props: TopOrgsProps) => {
         {timeRange?.startDate.toLocaleString()} -
         {timeRange?.endDate.toLocaleString()}
       </div>
+      <div>
+        Estimated total MRR:
+        {data?.data
+          ?.map((org, i) => handleLogCostCalculation(org.ct))
+          .reduce((acc, curr) => acc + curr, 0)}
+      </div>
       <h2>Top Organizations</h2>
-      <div className="grid grid-cols-8">
+      <div className="grid grid-cols-9">
         <div className="col-span-2">Org Id (click to copy)</div>
         <div className="col-span-2">Name</div>
         <div className="col-span-2">email</div>
         <div className="col-span-1">Tier</div>
         <div className="col-span-1">Count</div>
+        <div className="col-span-1">Estimated spend</div>
       </div>
       <div className="grid grid-cols-8">
         {data?.data?.map((org, i) => (
@@ -248,8 +256,9 @@ const TopOrgs = (props: TopOrgsProps) => {
             </div>
 
             <div className="col-span-1">{org.tier}</div>
+            <div className="col-span-1">{handleLogCostCalculation(org.ct)}</div>
             {/* Row 2 */}
-            <div className="col-span-8">
+            <div className="col-span-9">
               <BarChart
                 data={org.overTime.map((ot) => ({
                   dt: ot.dt,

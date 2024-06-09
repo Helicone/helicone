@@ -850,6 +850,7 @@ export type Database = {
           api_key_name: string
           created_at: string
           id: number
+          key_permissions: string | null
           organization_id: string
           soft_delete: boolean
           user_id: string
@@ -859,6 +860,7 @@ export type Database = {
           api_key_name: string
           created_at?: string
           id?: number
+          key_permissions?: string | null
           organization_id: string
           soft_delete?: boolean
           user_id: string
@@ -868,6 +870,7 @@ export type Database = {
           api_key_name?: string
           created_at?: string
           id?: number
+          key_permissions?: string | null
           organization_id?: string
           soft_delete?: boolean
           user_id?: string
@@ -2071,6 +2074,48 @@ export type Database = {
             columns: ["task_id"]
             isOneToOne: false
             referencedRelation: "job_node"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      request_response_search: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          request_body_vector: unknown | null
+          request_id: string
+          response_body_vector: unknown | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          request_body_vector?: unknown | null
+          request_id: string
+          response_body_vector?: unknown | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          request_body_vector?: unknown | null
+          request_id?: string
+          response_body_vector?: unknown | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_response_search_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_response_search_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request"
             referencedColumns: ["id"]
           },
         ]

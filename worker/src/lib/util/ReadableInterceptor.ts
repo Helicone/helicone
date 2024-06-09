@@ -1,7 +1,7 @@
 import { EventEmitter } from "events";
 
-export interface CompletedChunk {
-  body: string;
+export interface CompletedStream {
+  body: string[];
   reason: "cancel" | "done" | "timeout";
   endTimeUnix: number;
   firstChunkTimeUnix: number | null;
@@ -9,8 +9,8 @@ export interface CompletedChunk {
 
 export class ReadableInterceptor {
   private chunkEmitter = new EventEmitter();
-  private cachedChunk: CompletedChunk | null = null;
-  private responseBody = "";
+  private cachedChunk: CompletedStream | null = null;
+  private responseBody: string[] = [];
   private decoder = new TextDecoder("utf-8");
   private firstChunkTimeUnix: number | null = null;
   stream: ReadableStream;
@@ -38,7 +38,7 @@ export class ReadableInterceptor {
         reason,
         endTimeUnix: new Date().getTime(),
         firstChunkTimeUnix: this.firstChunkTimeUnix,
-      } as CompletedChunk);
+      } as CompletedStream);
     };
 
     const onChunk = (chunk: Uint8Array) => {
@@ -46,7 +46,7 @@ export class ReadableInterceptor {
         this.firstChunkTimeUnix = Date.now();
       }
 
-      this.responseBody += this.decoder.decode(chunk, { stream: true });
+      this.responseBody.push(this.decoder.decode(chunk, { stream: true }));
     };
 
     const reader = stream.getReader();
@@ -81,11 +81,11 @@ export class ReadableInterceptor {
     return readable;
   }
 
-  async waitForChunk(): Promise<CompletedChunk> {
+  async waitForStream(): Promise<CompletedStream> {
     const startTime = Date.now();
 
     while (!this.cachedChunk) {
-      // Check if the waiting duration has exceeded chunkTimeoutMs
+      // Check if the waiting duration has exceeded streamTimeoutMs
       if (Date.now() - startTime >= this.chunkTimeoutMs) {
         throw new Error("Waiting for chunk timed out");
       }
@@ -97,8 +97,14 @@ export class ReadableInterceptor {
     return this.cachedChunk;
   }
 
-  private once(eventName: string): Promise<CompletedChunk> {
+  private once(eventName: string): Promise<CompletedStream> {
     return new Promise((resolve, _reject) => {
+      const listener = (value: CompletedStream) => {
+        clearTimeout(timeoutId);
+        this.chunkEmitter.removeListener(eventName, listener);
+        resolve(value);
+      };
+
       const timeoutId = setTimeout(() => {
         this.chunkEmitter.removeListener(eventName, listener);
         resolve({
@@ -108,12 +114,6 @@ export class ReadableInterceptor {
           firstChunkTimeUnix: this.firstChunkTimeUnix,
         });
       }, this.chunkTimeoutMs);
-
-      const listener = (value: CompletedChunk) => {
-        clearTimeout(timeoutId);
-        this.chunkEmitter.removeListener(eventName, listener);
-        resolve(value);
-      };
 
       this.chunkEmitter.addListener(eventName, listener);
     });

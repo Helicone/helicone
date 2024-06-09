@@ -263,10 +263,13 @@ export interface components {
       heliconeMeta: components["schemas"]["HeliconeMeta"];
       authorization: string;
     };
+    /** @enum {string} */
+    KeyPermissions: "w" | "rw";
     GenerateHashQueryParams: {
       apiKey: string;
       userId: string;
       keyName: string;
+      permissions: components["schemas"]["KeyPermissions"];
     };
     FineTuneResult: {
       error: string;

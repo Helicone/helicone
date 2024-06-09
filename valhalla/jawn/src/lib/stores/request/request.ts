@@ -105,6 +105,10 @@ function addJoinQueries(joinQuery: string, filter: FilterNode): string {
     left join experiment_dataset_v2_row on prompt_input_record.id = experiment_dataset_v2_row.input_record`;
   }
 
+  if (JSON.stringify(filter).includes("request_response_search")) {
+    joinQuery += `
+    left join request_response_search on request.id = request_response_search.request_id`;
+  }
   return joinQuery;
 }
 
@@ -156,19 +160,11 @@ export async function getRequests(
   const query = `
   SELECT response.id AS response_id,
     response.created_at as response_created_at,
-    CASE
-      WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} THEN '{"helicone_message": "request body too large"}'::jsonb
-      WHEN request.path LIKE '%embeddings%' THEN '{"helicone_message": "embeddings response omitted"}'::jsonb
-      ELSE response.body::jsonb
-    END AS response_body,
+    '{"helicone_message": "Response body no longer supported. To retrieve response body, please contact engineering@helicone.ai"}'::jsonb AS response_body,
     response.status AS response_status,
     request.id AS request_id,
     request.created_at as request_created_at,
-    CASE
-      WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE}
-      THEN '{"helicone_message": "request body too large"}'::jsonb
-      ELSE request.body::jsonb
-    END AS request_body,
+    '{"helicone_message": "Request body no longer supported. To retrieve request body, please contact engineering@helicone.ai"}'::jsonb AS request_body,
     request.country_code as country_code,
     request.path AS request_path,
     request.user_id AS request_user_id,
@@ -256,20 +252,12 @@ export async function getRequestsCached(
   const query = `
   SELECT response.id AS response_id,
     cache_hits.created_at as response_created_at,
-    CASE
-      WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} THEN '{"helicone_message": "request body too large"}'::jsonb
-      WHEN request.path LIKE '%embeddings%' THEN '{"helicone_message": "embeddings response omitted"}'::jsonb
-      ELSE response.body::jsonb
-    END AS response_body,
+    '{"helicone_message": "Response body no longer supported. To retrieve response body, please contact engineering@helicone.ai"}'::jsonb AS response_body,
     request.country_code as country_code,
     response.status AS response_status,
     request.id AS request_id,
     cache_hits.created_at as request_created_at,
-    CASE
-      WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE}
-      THEN '{"helicone_message": "request body too large"}'::jsonb
-      ELSE request.body::jsonb
-    END AS request_body,
+    '{"helicone_message": "Request body no longer supported. To retrieve request body, please contact engineering@helicone.ai"}'::jsonb AS request_body,
     request.path AS request_path,
     request.user_id AS request_user_id,
     request.properties AS request_properties,
