@@ -53,13 +53,11 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
     };
   });
 
-  // get the keys from the first run
-  const keys = runs?.[0]?.inputs
-    ? Object.keys(runs?.[0]?.inputs).map((key) => key)
-    : [];
-
-  const renderPrettyInputs = (inputs: Record<string, string>) => {
+  const renderPrettyInputs = (inputs: Record<string, string>, run: number) => {
     const TEXT_LIMIT = 80;
+    const keys = runs?.[run]?.inputs
+      ? Object.keys(runs?.[run]?.inputs).map((key) => key)
+      : [];
 
     return (
       <div className="flex flex-col space-y-1">
@@ -178,7 +176,7 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                     return (
                       <TableRow key={i} className="w-full">
                         <TableCell className="h-full items-start border-r border-gray-300 max-w-xs">
-                          {renderPrettyInputs(run.inputs)}
+                          {renderPrettyInputs(run.inputs, i)}
                         </TableCell>
                         <TableCell className="inline-flex h-full">
                           <div className="flex flex-col h-full w-full space-y-4">
