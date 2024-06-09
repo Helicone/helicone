@@ -259,13 +259,7 @@ export class LogStore {
     ) {
       // Create a new version if the template has changed
 
-      console.log("template", heliconeTemplate.template);
-
       const passedPromptVersion = extractVersion(newPromptRecord.promptVersion);
-
-      console.log("Passed prompt version", passedPromptVersion);
-
-      console.log("existingPromptVersion", existingPromptVersion);
 
       if (
         passedPromptVersion &&
@@ -280,8 +274,6 @@ export class LogStore {
               ? heliconeTemplate.template
               : existingPromptVersion.helicone_template;
 
-          console.log("newHeliconeTemplate", newHeliconeTemplate);
-          console.log("Updating prompt version");
           const updateQuery = `
         UPDATE prompts_versions
         SET 
@@ -302,14 +294,21 @@ export class LogStore {
           console.error("Error updating prompt version", error);
           throw error;
         }
-      } else {
+      } else if (
+        !existingPromptVersion ||
+        (existingPromptVersion &&
+          existingPromptVersion.created_at <= newPromptRecord.createdAt &&
+          !deepCompare(
+            existingPromptVersion.helicone_template,
+            heliconeTemplate.template
+          ))
+      ) {
         // Insert new record
         let majorVersion = existingPromptVersion
           ? existingPromptVersion.major_version + 1
           : 0;
 
         try {
-          console.log("Inserting prompt version");
           const insertQuery = `
         INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -414,7 +413,7 @@ export class LogStore {
 
     entries.forEach((entry) => {
       if (!entry.request) {
-        return;``
+        return;
       }
 
       const existingEntry = entryMap.get(entry.request);

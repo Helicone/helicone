@@ -53,7 +53,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
 
       // Set processed response body
       context.processedLog.response.assets = responseBodyAssets;
-      console.log("Request assets", context.processedLog.request.assets);
       context.processedLog.assets = new Map([
         ...(context.processedLog.request.assets ?? []),
         ...(context.processedLog.response.assets ?? []),
