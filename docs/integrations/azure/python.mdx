@@ -34,7 +34,7 @@ export HELICONE_API_KEY=<your API key>
 ```Python OpenAI v1+
 client = OpenAI(
   api_key="[AZURE_OPENAI_API_KEY]",
-  base_url="https://oai.hconeai.com/openai/deployments/[DEPLOYMENT]",
+  base_url="https://oai.helicone.ai/openai/deployments/[DEPLOYMENT]",
   default_headers={
       "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
       "Helicone-Auth": "Bearer [HELICONE_API_KEY]",
@@ -49,7 +49,7 @@ client = OpenAI(
 ```Python OpenAI v1
 import openai
 
-openai.api_base = "https://oai.hconeai.com"
+openai.api_base = "https://oai.helicone.ai"
 openai.api_key = "[AZURE_OPENAI_API_KEY]"
 openai.api_version = "[API_VERSION]"
 openai.api_type = "azure"

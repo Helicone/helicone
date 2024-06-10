@@ -40,7 +40,7 @@ export class HeliconeAsyncOpenAI extends OpenAI {
     const heliconeMeta: IHeliconeMeta = {
       ...providedHeliconeMeta,
       apiKey: providedHeliconeMeta.apiKey || Core.readEnv("HELICONE_API_KEY"),
-      baseUrl: providedHeliconeMeta.baseUrl ?? "https://api.hconeai.com",
+      baseUrl: providedHeliconeMeta.baseUrl ?? "https://api.helicone.ai",
     };
 
     options.heliconeMeta = heliconeMeta;

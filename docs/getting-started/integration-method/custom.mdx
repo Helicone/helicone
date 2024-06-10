@@ -29,7 +29,7 @@ const heliconeApiKey = process.env.HELICONE_API_KEY;
 const config: IHeliconeAsyncClientOptions = {
   heliconeMeta: {
     apiKey: heliconeApiKey,
-    baseUrl: "https://api.hconeai.com/custom/v1/logs",
+    baseUrl: "https://api.helicone.ai/custom/v1/logs",
   },
 };
 
@@ -77,14 +77,14 @@ A typical request will have the following structure:
 
 ```
 
-POST https://api.hconeai.com/custom/v1/log
+POST https://api.helicone.ai/custom/v1/log
 
 ```
 
 ### Headers
 
-| Name          | Value            |
-| ------------- | ---------------- |
+| Name          | Value              |
+| ------------- | ------------------ |
 | Authorization | Bearer `{API_KEY}` |
 
 Replace `{API_KEY}` with your actual API Key.
@@ -134,7 +134,7 @@ export type Timing = {
 Here's an example using curl:
 
 ```sh
-curl -X POST https://api.hconeai.com/custom/v1/log \
+curl -X POST https://api.helicone.ai/custom/v1/log \
 -H 'Authorization: Bearer your_api_key' \
 -H 'Content-Type: application/json' \
 -d '{

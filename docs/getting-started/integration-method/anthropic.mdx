@@ -9,7 +9,7 @@ title: "Anthropic"
     import anthropic
     client = anthropic.Client(
         api_key="<Anthropic API Key>",
-        base_url="https://anthropic.hconeai.com/v1"
+        base_url="https://anthropic.helicone.ai/v1"
     )
     res = client._request_as_json(
         "post",
@@ -33,7 +33,7 @@ title: "Anthropic"
     Change the api base and add a Helicone-Auth header
     ```typescript
   const anthropic = new Anthropic({
-    baseURL: "https://anthropic.hconeai.com/",
+    baseURL: "https://anthropic.helicone.ai/",
     apiKey: "my api key",
     defaultHeaders: {
       "Helicone-Auth": "Bearer <HELICONE_API_KEY>",
@@ -56,7 +56,7 @@ max_tokens_to_sample: 300,
 
 - POST https://api.anthropic.com
 
-* POST https://anthropic.hconeai.com
+* POST https://anthropic.helicone.ai
 
 ```
 
@@ -75,7 +75,7 @@ Example cURL command
 ```
 
 curl --request POST \
- --url https://anthropic.hconeai.com/v1/complete \
+ --url https://anthropic.helicone.ai/v1/complete \
  --header 'Content-Type: application/json' \
  --header 'Helicone-Auth: Bearer <<HELICONE_API_KEY>> \
  --header 'x-api-key: <<ANTHROPIC_API_KEY>> \
@@ -100,7 +100,7 @@ curl --request POST \
     anthropic = ChatAnthropic(
       temperature=0.9,
       model="claude-2",
-      anthropic_api_url="https://anthropic.hconeai.com/",
+      anthropic_api_url="https://anthropic.helicone.ai/",
       anthropic_api_key="ANTHROPIC_API_KEY",
       model_kwargs={
           "extra_headers":{
@@ -116,7 +116,7 @@ curl --request POST \
       modelName: "claude-2",
       anthropicApiKey: "ANTHROPIC_API_KEY",
       clientOptions: {
-        baseURL: "https://anthropic.hconeai.com/",
+        baseURL: "https://anthropic.helicone.ai/",
         defaultHeaders: {
           "Helicone-Auth": `Bearer HELICONE_API_KEY`,
         }

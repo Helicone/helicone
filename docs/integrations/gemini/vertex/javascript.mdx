@@ -28,7 +28,7 @@ description: "Integrate Gemini Vertex AI with Helicone using Javascript"
     ```javascript
     const fetch = require('node-fetch');
 
-    const url = 'https://gateway.hconeai.com/v1/projects/your-project-id/locations/your-location/publishers/google/models/model-name:streamGenerateContent';
+    const url = 'https://gateway.helicone.ai/v1/projects/your-project-id/locations/your-location/publishers/google/models/model-name:streamGenerateContent';
 
     const headers = {
       'Authorization': `Bearer ${process.env.GCLOUD_API_KEY}`,
@@ -81,7 +81,7 @@ description: "Integrate Gemini Vertex AI with Helicone using Javascript"
     const vertex_ai = new VertexAI({
       project: "your-project-id",
       location: "your-location",
-      apiEndpoint: "gateway.hconeai.com",
+      apiEndpoint: "gateway.helicone.ai",
     });
     ```
 
