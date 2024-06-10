@@ -75,6 +75,9 @@ export interface paths {
   "/v1/public/dataisbeautiful/provider/percentage": {
     post: operations["GetProviderPercentage"];
   };
+  "/v1/public/dataisbeautiful/model/percentage/overtime": {
+    post: operations["GetModelPercentageOverTime"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -695,6 +698,26 @@ Json: JsonObject;
       models?: components["schemas"]["ModelName"][];
       timespan: components["schemas"]["TimeSpan"];
     };
+    ProviderBreakdown: {
+      /** Format: double */
+      percent: number;
+      provider: string;
+    };
+    "ResultSuccess_ProviderBreakdown-Array_": {
+      data: components["schemas"]["ProviderBreakdown"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ProviderBreakdown-Array.string_": components["schemas"]["ResultSuccess_ProviderBreakdown-Array_"] | components["schemas"]["ResultError_string_"];
+    ModelBreakdownOverTime: {
+      date: string;
+    } & components["schemas"]["ModelBreakdown"];
+    "ResultSuccess_ModelBreakdownOverTime-Array_": {
+      data: components["schemas"]["ModelBreakdownOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelBreakdownOverTime-Array.string_": components["schemas"]["ResultSuccess_ModelBreakdownOverTime-Array_"] | components["schemas"]["ResultError_string_"];
   };
   responses: {
   };
@@ -1103,7 +1126,22 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_ModelBreakdown-Array.string_"];
+          "application/json": components["schemas"]["Result_ProviderBreakdown-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModelPercentageOverTime: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelBreakdownOverTime-Array.string_"];
         };
       };
     };

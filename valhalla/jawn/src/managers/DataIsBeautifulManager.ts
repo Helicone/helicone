@@ -1,8 +1,10 @@
 import {
   DataIsBeautifulRequestBody,
   ModelBreakdown,
+  ModelBreakdownOverTime,
   ModelElement,
   ModelName,
+  ProviderBreakdown,
   ProviderName,
   modelNames,
 } from "../controllers/public/dataIsBeautifulController";
@@ -13,7 +15,7 @@ import { clickhousePriceCalc } from "../packages/cost";
 export class DataIsBeautifulManager {
   async getProviderPercentage(
     filters: DataIsBeautifulRequestBody
-  ): Promise<Result<ModelBreakdown[], string>> {
+  ): Promise<Result<ProviderBreakdown[], string>> {
     const timeCondition = this.getTimeCondition(filters.timespan);
 
     const query = `
@@ -40,7 +42,7 @@ export class DataIsBeautifulManager {
     ORDER BY percent DESC;
     `;
 
-    const result = await clickhouseDb.dbQuery<ModelBreakdown>(query, []);
+    const result = await clickhouseDb.dbQuery<ProviderBreakdown>(query, []);
 
     if (result.error) {
       return result;
@@ -112,6 +114,92 @@ export class DataIsBeautifulManager {
 
     return ok(result.data ?? []);
   }
+  async getModelPercentageOverTime(
+    filters: DataIsBeautifulRequestBody
+  ): Promise<Result<ModelBreakdownOverTime[], string>> {
+    const timeCondition = this.getTimeCondition(filters.timespan);
+    const filteredModels = this.filterModelNames(
+      filters.models,
+      filters.provider
+    );
+    const { whereCondition, caseStatements } =
+      this.buildCaseStatementsAndWhereCondition(filteredModels);
+    const providerCondition = this.getProviderCondition(
+      filters.provider ? [filters.provider] : undefined
+    );
+
+    const query = `
+  SELECT
+    formatDateTime(request_created_at, '%Y-%m-%d') AS day,
+     ${
+       caseStatements
+         ? `
+      CASE
+        ${caseStatements}
+        ELSE 'Other'
+      END AS matched_model`
+         : "model AS matched_model"
+     },
+     COUNT(*) AS count
+  FROM request_response_versioned
+  WHERE status = '200'
+    ${timeCondition}
+    ${providerCondition}
+    ${whereCondition ? `AND ${whereCondition}` : ""}
+  GROUP BY day, matched_model
+  ORDER BY day, matched_model
+    `;
+
+    const result = await clickhouseDb.dbQuery<{
+      day: string;
+      matched_model: string;
+      count: number;
+    }>(query, []);
+    console.log("result", JSON.stringify(result));
+
+    if (result.error) {
+      return result;
+    }
+
+    const modelCounts = result.data ?? [];
+    // console.log("modelCounts", JSON.stringify(modelCounts));
+
+    const modelAsPercentage = modelCounts
+      .map((modelCount) => {
+        const totalForDay = modelCounts
+          .filter((model) => model.day === modelCount.day)
+          .reduce((acc, model) => acc + +model.count, 0);
+
+        const percent = (modelCount.count * 100) / totalForDay;
+        if (percent < 0.5) {
+          return {
+            date: modelCount.day,
+            matched_model: "Other",
+            percent: percent,
+          };
+        }
+        return {
+          date: modelCount.day,
+          matched_model: modelCount.matched_model,
+          percent,
+        };
+      })
+      // group all others with the same date
+      .reduce((acc, model) => {
+        const existing = acc.find(
+          (m) =>
+            m.date === model.date && m.matched_model === model.matched_model
+        );
+        if (existing) {
+          existing.percent += model.percent;
+        } else {
+          acc.push(model);
+        }
+        return acc;
+      }, [] as ModelBreakdownOverTime[]);
+
+    return ok(modelAsPercentage);
+  }
 
   async getModelPercentage(
     filters: DataIsBeautifulRequestBody
@@ -168,11 +256,11 @@ export class DataIsBeautifulManager {
   getTimeCondition(timeSpan: string): string {
     switch (timeSpan) {
       case "1m":
-        return "AND request_created_at >= now() - interval 1 month";
+        return "AND request_created_at >= now() - interval 1 month AND request_created_at < now()";
       case "3m":
-        return "AND request_created_at >= now() - interval 3 month";
+        return "AND request_created_at >= now() - interval 3 month AND request_created_at < now()";
       case "6m":
-        return "AND request_created_at >= now() - interval 6 month";
+        return "AND request_created_at >= now() - interval 6 month AND request_created_at < now()";
       case "all":
       default:
         return "";

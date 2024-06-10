@@ -25,12 +25,60 @@ interface PieChartData {
 
 interface HomeProps {}
 
+function transformData(
+  data: { date: string; matched_model: string; percent: number }[]
+) {
+  const result: { [key: string]: any }[] = [];
+  const models = new Set<string>();
+
+  data.forEach((item) => {
+    models.add(item.matched_model);
+    let dateEntry = result.find((entry) => entry.date === item.date);
+    if (!dateEntry) {
+      dateEntry = { date: item.date };
+      result.push(dateEntry);
+    }
+    dateEntry[item.matched_model] = item.percent;
+  });
+
+  return { transformedData: result, models: Array.from(models) };
+}
+
+function addOther<T>(
+  data: T[],
+  key: keyof T,
+  limit: number,
+  other: (accumulatedValue: number) => T
+) {
+  const sorted = [...data].sort((a, b) => (b[key] as any) + (a[key] as any));
+  console.log(sorted);
+  // return sorted;
+  const selectedData = sorted.slice(0, limit);
+  console.log(selectedData);
+  const accumulatedValue = selectedData.reduce(
+    (acc, d) => acc + (d[key] as number),
+    0
+  );
+  console.log(accumulatedValue, other(accumulatedValue));
+  return [...sorted.slice(0, limit), other(accumulatedValue)];
+  // return sorted;
+}
+
 const Home = (props: HomeProps) => {
   const {} = props;
   const { isLoading, data } = useQuery({
     queryKey: ["issues"],
     queryFn: async () => {
       const jawn = getJawnClient();
+
+      const modelUsageOverTime = await jawn.POST(
+        "/v1/public/dataisbeautiful/model/percentage/overtime",
+        {
+          body: {
+            timespan: "1m",
+          },
+        }
+      );
       const modelPercentage = await jawn.POST(
         "/v1/public/dataisbeautiful/model/percentage",
         {
@@ -40,8 +88,39 @@ const Home = (props: HomeProps) => {
         }
       );
 
+      const providerPercentage = await jawn.POST(
+        "/v1/public/dataisbeautiful/provider/percentage",
+        {
+          body: {
+            timespan: "1m",
+          },
+        }
+      );
+
+      const modelPercentageRows = addOther(
+        modelPercentage.data?.data ?? [],
+        "percent",
+        4,
+        (accumulatedValue) => ({
+          matched_model: "other",
+          percent: 100 - accumulatedValue,
+        })
+      );
+
+      const providerPercentageRows = addOther(
+        providerPercentage.data?.data ?? [],
+        "percent",
+        4,
+        (accumulatedValue) => ({
+          provider: "other",
+          percent: 100 - accumulatedValue,
+        })
+      );
+
       return {
-        modelPercentage: modelPercentage.data?.data ?? [],
+        modelPercentage: modelPercentageRows,
+        providerPercentage: providerPercentageRows,
+        modelUsageOverTime: modelUsageOverTime.data?.data ?? [],
       };
     },
   });
@@ -82,7 +161,16 @@ const Home = (props: HomeProps) => {
       name: "Top Models",
     },
     { data: exampleTopModels, name: "Top Models by Cost" },
-    { data: exampleTopModels, name: "Top Providers" },
+    {
+      data:
+        data?.providerPercentage?.map((d) => {
+          return {
+            name: d.provider,
+            value: d.percent,
+          };
+        }) ?? [],
+      name: "Top Providers",
+    },
   ];
 
   const scatterData = [
@@ -243,7 +331,7 @@ const Home = (props: HomeProps) => {
                     colors={colors}
                     onValueChange={(v) => console.log(v)}
                     className="min-w-[10em] min-h-[10em] "
-                    valueFormatter={(v) => `${v}%`}
+                    valueFormatter={(v) => `${v === 0 ? "0" : v.toFixed(2)}%`}
                   />
 
                   <Legend
@@ -257,14 +345,15 @@ const Home = (props: HomeProps) => {
               <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 py-3">
                 <h2>Top Models Over time</h2>
                 <AreaChart
-                  data={[
-                    { x: "2024-06-10", "gpt-4": 10, "gpt-3.5": 1 },
-                    { x: "2024-06-11", "gpt-4": 20, "gpt-3.5": 2 },
-                    { x: "2024-06-12", "gpt-4": 30, "gpt-3.5": 3 },
-                    { x: "2024-06-13", "gpt-4": 40, "gpt-3.5": 4 },
-                  ]}
-                  index="x"
-                  categories={["y", "gpt-4", "gpt-3.5"]}
+                  data={
+                    transformData(data?.modelUsageOverTime ?? [])
+                      .transformedData
+                  }
+                  index="date"
+                  categories={
+                    transformData(data?.modelUsageOverTime ?? []).models
+                  }
+                  valueFormatter={(v) => `${v === 0 ? "0" : v.toFixed(2)}%`}
                 />
               </div>
               <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 p-3">
