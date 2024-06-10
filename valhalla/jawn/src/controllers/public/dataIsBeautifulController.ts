@@ -95,6 +95,11 @@ export type ModelBreakdownOverTime = {
   date: string;
 } & ModelBreakdown;
 
+export type ModelCost = {
+  matched_model: string;
+  cost: number;
+};
+
 export type ProviderBreakdown = {
   provider: string;
   percent: number;
@@ -127,7 +132,7 @@ export class DataIsBeautifulRouter extends Controller {
     @Body()
     requestBody: DataIsBeautifulRequestBody,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<ModelBreakdown[], string>> {
+  ): Promise<Result<ModelCost[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
     const result = await dataIsBeautifulManager.getModelCost(requestBody);

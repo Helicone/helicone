@@ -98,6 +98,15 @@ const Home = (props: HomeProps) => {
         }
       );
 
+      const modelCost = await jawn.POST(
+        "/v1/public/dataisbeautiful/model/cost",
+        {
+          body: {
+            timespan: "1m",
+          },
+        }
+      );
+
       const modelPercentageRows = addOther(
         modelPercentage.data?.data ?? [],
         "percent",
@@ -122,16 +131,10 @@ const Home = (props: HomeProps) => {
         modelPercentage: modelPercentageRows,
         providerPercentage: providerPercentageRows,
         modelUsageOverTime: modelUsageOverTime.data?.data ?? [],
+        modelCost: modelCost.data?.data ?? [],
       };
     },
   });
-
-  const exampleTopModels: PieChartData[] = [
-    { name: "gpt-3", value: 10 },
-    { name: "gpt-4", value: 20 },
-    { name: "gpt-5", value: 30 },
-    { name: "gpt-6", value: 40 },
-  ];
 
   const colors = [
     "blue",
@@ -161,7 +164,16 @@ const Home = (props: HomeProps) => {
         }) ?? [],
       name: "Top Models",
     },
-    { data: exampleTopModels, name: "Top Models by Cost" },
+    {
+      data:
+        data?.modelCost?.map((d) => {
+          return {
+            name: d.matched_model,
+            value: d.cost,
+          };
+        }) ?? [],
+      name: "Top Models by Cost",
+    },
     {
       data:
         data?.providerPercentage?.map((d) => {

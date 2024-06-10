@@ -698,6 +698,17 @@ Json: JsonObject;
       models?: components["schemas"]["ModelName"][];
       timespan: components["schemas"]["TimeSpan"];
     };
+    ModelCost: {
+      /** Format: double */
+      cost: number;
+      matched_model: string;
+    };
+    "ResultSuccess_ModelCost-Array_": {
+      data: components["schemas"]["ModelCost"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelCost-Array.string_": components["schemas"]["ResultSuccess_ModelCost-Array_"] | components["schemas"]["ResultError_string_"];
     ProviderBreakdown: {
       /** Format: double */
       percent: number;
@@ -1111,7 +1122,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_ModelBreakdown-Array.string_"];
+          "application/json": components["schemas"]["Result_ModelCost-Array.string_"];
         };
       };
     };

@@ -2334,6 +2334,55 @@
 				],
 				"type": "object"
 			},
+			"ModelCost": {
+				"properties": {
+					"cost": {
+						"type": "number",
+						"format": "double"
+					},
+					"matched_model": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"cost",
+					"matched_model"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_ModelCost-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ModelCost"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ModelCost-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ModelCost-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ProviderBreakdown": {
 				"properties": {
 					"percent": {
@@ -3339,7 +3388,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_ModelBreakdown-Array.string_"
+									"$ref": "#/components/schemas/Result_ModelCost-Array.string_"
 								}
 							}
 						}

@@ -2,6 +2,7 @@ import {
   DataIsBeautifulRequestBody,
   ModelBreakdown,
   ModelBreakdownOverTime,
+  ModelCost,
   ModelElement,
   ModelName,
   ProviderBreakdown,
@@ -53,7 +54,7 @@ export class DataIsBeautifulManager {
 
   async getModelCost(
     filters: DataIsBeautifulRequestBody
-  ): Promise<Result<ModelBreakdown[], string>> {
+  ): Promise<Result<ModelCost[], string>> {
     const timeCondition = this.getTimeCondition(filters.timespan);
     const filteredModels = this.filterModelNames(
       filters.models,
@@ -69,51 +70,48 @@ export class DataIsBeautifulManager {
     const costCalculation = clickhousePriceCalc("request_response_versioned");
 
     const query = `
-  WITH total_cost AS (
-    SELECT SUM(${costCalculation}) AS total
-    FROM request_response_versioned
-    WHERE status = '200'
-      ${timeCondition}
-      ${providerCondition}
-  ),
-  model_costs AS (
+  WITH
+    request_data AS (
+      SELECT
+        ${
+          caseStatements
+            ? `
+          CASE
+            ${caseStatements}
+            ELSE 'Other'
+          END`
+            : "model"
+        } AS matched_model,
+        ${costCalculation} AS cost,
+        model
+      FROM request_response_versioned rrv
+      WHERE status = '200'
+        ${timeCondition}
+        ${providerCondition}
+        ${whereCondition ? `AND ${whereCondition}` : ""}
+      GROUP BY model
+    )
     SELECT
-      ${
-        caseStatements
-          ? `
-      CASE
-        ${caseStatements}
-        ELSE 'Other'
-      END AS matched_model`
-          : "model AS matched_model"
-      },
-      model,
-      (${costCalculation}) AS cost
-    FROM request_response_versioned
-    WHERE status = '200'
-      ${timeCondition}
-      ${providerCondition}
-      ${whereCondition ? `AND ${whereCondition}` : ""}
-    GROUP BY model
-  )
-  SELECT
-    matched_model,
-    model,
-    SUM(cost) AS cost,
-    SUM(cost) * 100.0 / (SELECT total FROM total_cost) AS percent
-  FROM model_costs
-  GROUP BY matched_model, model
-  ORDER BY cost DESC;
-`;
+      matched_model,
+      SUM(cost) AS cost
+    FROM request_data
+    GROUP BY matched_model
+    ORDER BY matched_model
+  `;
 
-    const result = await clickhouseDb.dbQuery<ModelBreakdown>(query, []);
+    const result = await clickhouseDb.dbQuery<ModelCost>(query, []);
 
     if (result.error) {
       return err(result.error);
     }
 
-    return ok(result.data ?? []);
+    const filteredResults = result.data?.filter(
+      (modelCost) => modelCost.cost && modelCost.cost > 0
+    );
+
+    return ok(filteredResults ?? []);
   }
+
   async getModelPercentageOverTime(
     filters: DataIsBeautifulRequestBody
   ): Promise<Result<ModelBreakdownOverTime[], string>> {
