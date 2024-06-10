@@ -9,7 +9,7 @@ const CODE_CONVERTS = {
 import Anthropic from '@anthropic-ai/sdk';
 
 const anthropic = new Anthropic({
-  baseURL: "https://anthropic.hconeai.com/",
+  baseURL: "https://anthropic.helicone.ai/",
   apiKey: 'my_api_key', // defaults to process.env["ANTHROPIC_API_KEY"]
   defaultHeaders: {
     "Helicone-Auth": "Bearer ${key}",
@@ -31,7 +31,7 @@ import anthropic
 client = anthropic.Anthropic(
   # defaults to os.environ.get("ANTHROPIC_API_KEY")
   api_key="my_api_key",
-  base_url="https://anthropic.hconeai.com/",
+  base_url="https://anthropic.helicone.ai/",
   default_headers={
     "Helicone-Auth": "Bearer ${key}",
   }
@@ -52,7 +52,7 @@ print(message.content)
 anthropic = ChatAnthropic(
   temperature=0.9,
   model="claude-3-opus-20240229",
-  anthropic_api_url="https://anthropic.hconeai.com/",
+  anthropic_api_url="https://anthropic.helicone.ai/",
   anthropic_api_key="ANTHROPIC_API_KEY",
   model_kwargs={
     "extra_headers":{
@@ -68,7 +68,7 @@ const llm = new ChatAnthropic({
   modelName: "claude-3-opus-20240229",
   anthropicApiKey: "ANTHROPIC_API_KEY",
   clientOptions: {
-    baseURL: "https://anthropic.hconeai.com/",
+    baseURL: "https://anthropic.helicone.ai/",
     defaultHeaders: {
       "Helicone-Auth": "Bearer ${key}",
     }

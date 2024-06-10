@@ -24,7 +24,7 @@ When using Azure, the model may sometimes display differently than expected. We 
   ```python
     client = OpenAI(
       api_key="[AZURE_OPENAI_API_KEY]",
-      base_url="https://oai.hconeai.com/openai/deployments/[DEPLOYMENT]",
+      base_url="https://oai.helicone.ai/openai/deployments/[DEPLOYMENT]",
       default_headers={
           "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
           "Helicone-Auth": "Bearer [HELICONE_API_KEY]",
@@ -44,7 +44,7 @@ When using Azure, the model may sometimes display differently than expected. We 
 ```python
 import openai
 
-openai.api_base = "https://oai.hconeai.com"
+openai.api_base = "https://oai.helicone.ai"
 openai.api_key = "[AZURE_OPENAI_API_KEY]"
 openai.api_version = "[API_VERSION]"
 openai.api_type = "azure"
@@ -72,7 +72,7 @@ openai.ChatCompletion.create(
   <Accordion title="OpenAI v4+">
     ```typescript
     const openai = new OpenAI({
-      baseURL: "https://oai.hconeai.com/openai/deployments/[DEPLOYMENTNAME]",
+      baseURL: "https://oai.helicone.ai/openai/deployments/[DEPLOYMENTNAME]",
       defaultHeaders: {
         "Helicone-Auth": `Bearer [HELICONE_API_KEY]`,
         "Helicone-OpenAI-API-Base": "https://[AZURE_DOMAIN].openai.azure.com",
@@ -89,7 +89,7 @@ openai.ChatCompletion.create(
 
     const configuration = new Configuration({
       apiKey: "[AZURE_OPENAI_API_KEY]",
-      basePath: "https://oai.hconeai.com/openai/deployments/[DEPLOYMENT]",
+      basePath: "https://oai.helicone.ai/openai/deployments/[DEPLOYMENT]",
       baseOptions: {
         headers: {
           "Helicone-Auth": `Bearer [HELICONE_API_KEY]`,
@@ -138,7 +138,7 @@ const model = new ChatOpenAI({
   azureOpenAIApiKey: "[AZURE_OPENAI_API_KEY]",
   azureOpenAIApiDeploymentName: "openai/deployments/gpt-35-turbo",
   azureOpenAIApiVersion: "2023-03-15-preview",
-  azureOpenAIBasePath: "https://oai.hconeai.com",
+  azureOpenAIBasePath: "https://oai.helicone.ai",
   configuration: {
     organization: "[organization]",
     baseOptions: {
@@ -164,7 +164,7 @@ helicone_headers = {
         "https://<model_name>.openai.azure.com/"
 }
 self.model = AzureChatOpenAI(
-openai_api_base="https://oai.hconeai.com",
+openai_api_base="https://oai.helicone.ai",
 deployment_name="gpt-35-turbo",
 openai_api_key=<AZURE_OPENAI_API_KEY>,
 openai_api_version="2023-05-15",
@@ -179,7 +179,7 @@ headers=helicone_headers,
 <Tab title="cURL">
   ```bash
     curl --request POST \
-    --url https://oai.hconeai.com/openai/deployments/DEPLOYMENTNAME/chat/completions?api-version=[API_VERSION] \
+    --url https://oai.helicone.ai/openai/deployments/DEPLOYMENTNAME/chat/completions?api-version=[API_VERSION] \
     --header 'Helicone-Auth: Bearer [HELICONE_KEY]' \
     --header 'Helicone-OpenAI-Api-Base: https://[AZUREDOMAIN].openai.azure.com' \
     --header 'api-key: [AZURE_API_KEY]' \
