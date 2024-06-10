@@ -98,8 +98,8 @@ export type ModelBreakdown = {
 @Tags("DataIsBeautiful")
 @Security("api_key")
 export class DataIsBeautifulRouter extends Controller {
-  @Post("/")
-  public async createNewExperiment(
+  @Post("/model/percentage")
+  public async getModelPercentage(
     @Body()
     requestBody: DataIsBeautifulRequestBody,
     @Request() request: JawnAuthenticatedRequest
