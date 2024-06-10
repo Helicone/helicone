@@ -48,7 +48,7 @@ class HeliconeGlobal:
     @property
     def base_url(self) -> Optional[str]:
         if (self._base_url is None):
-            return "https://api.hconeai.com"
+            return "https://api.helicone.ai"
         return self._base_url
 
     @base_url.setter

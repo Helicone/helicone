@@ -27,7 +27,7 @@ export function DiffHighlight(props: DiffHighlightProps) {
                 {line.map((token, key) => {
                   if (
                     token.content.includes("https://oai.helicone.ai") ||
-                    token.content.includes("https://anthropic.hconeai.com")
+                    token.content.includes("https://anthropic.helicone.ai")
                   ) {
                     return (
                       <span

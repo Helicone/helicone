@@ -41,7 +41,7 @@ Since the proxy sits on the edge and is the gatekeeper of the requests, you get 
 
     Instead of calling the OpenAI API with `api.openai.com`, you will change the URL to a Helicone dedicated domain `oai.helicone.ai`.
 
-    You can also use the general Gateway URL `gateway.hconeai.com` if Helicone doesn't have a dedicated domain for the provider yet.
+    You can also use the general Gateway URL `gateway.helicone.ai` if Helicone doesn't have a dedicated domain for the provider yet.
 
     <CodeGroup>
 
@@ -66,7 +66,7 @@ Since the proxy sits on the edge and is the gatekeeper of the requests, you get 
     ```python Other (Gateway example)
     import openai
 
-    openai.api_base = "https://gateway.hconeai.com"  # Set the API base URL to Helicone Gateway
+    openai.api_base = "https://gateway.helicone.ai"  # Set the API base URL to Helicone Gateway
     response = openai.ChatCompletion.create(
         model="[DEPLOYMENT]",
         messages=[{"role": "user", "content": "Say hi!"}],

@@ -197,7 +197,7 @@ self.model = AzureChatOpenAI(
           code: `import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic({
-  baseURL: "https://anthropic.hconeai.com/",
+  baseURL: "https://anthropic.helicone.ai/",
   apiKey: process.env.ANTHROPIC_API_KEY,
   defaultHeaders: {
     "Helicone-Auth": <HELICONE_API_KEY>,
@@ -217,7 +217,7 @@ await anthropic.messages.create({
 
 client = anthropic.Anthropic(
   api_key=os.environ.get("ANTHROPIC_API_KEY"),
-  base_url="https://anthropic.hconeai.com/v1"
+  base_url="https://anthropic.helicone.ai/v1"
   defaultHeaders={
     "Helicone-Auth": <HELICONE_API_KEY>,
   },
@@ -238,7 +238,7 @@ client.messages.create(
   modelName: "claude-2",
   anthropicApiKey: "ANTHROPIC_API_KEY",
   clientOptions: {
-    baseURL: "https://anthropic.hconeai.com/",
+    baseURL: "https://anthropic.helicone.ai/",
     defaultHeaders: {
       "Helicone-Auth": Bearer <HELICONE_API_KEY>,
     },

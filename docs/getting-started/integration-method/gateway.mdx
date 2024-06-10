@@ -9,17 +9,17 @@ The Gateway serves as a unified entry point for all traffic, regardless of your 
 
 ## Simple Integration
 
-This is achieved by allowing you to determine the destination of your request by specifying the provider in the URL path. For instance, if you wish to send a request to LemonFox, you would send a request to `https://gateway.hconeai.com` instead of `https://api.lemonfox.ai`, but you would specify the provider and the endpoint in the URL path within the headers of your request.
+This is achieved by allowing you to determine the destination of your request by specifying the provider in the URL path. For instance, if you wish to send a request to LemonFox, you would send a request to `https://gateway.helicone.ai` instead of `https://api.lemonfox.ai`, but you would specify the provider and the endpoint in the URL path within the headers of your request.
 
 ## Ex 1
 
-`api.groq.com/openai/v1"` -> `gateway.hconeai.com/openai/v1`
+`api.groq.com/openai/v1"` -> `gateway.helicone.ai/openai/v1`
 
 - Header: `Helicone-Target-Url: https://api.groq.com`
 
 ## Ex 2
 
-`api.lemonfox.ai/v1` -> `gateway.hconeai.com/v1`
+`api.lemonfox.ai/v1` -> `gateway.helicone.ai/v1`
 
 - Header: `Helicone-Target-Url: https://api.lemonfox.ai`
 
@@ -30,7 +30,7 @@ This is achieved by allowing you to determine the destination of your request by
     ```python
     import openai
 
-    openai.api_base = "https://gateway.hconeai.com"
+    openai.api_base = "https://gateway.helicone.ai"
 
     # Create the completion request
 
@@ -54,7 +54,7 @@ This is achieved by allowing you to determine the destination of your request by
     <Accordion title="OpenAI v4+">
       ```typescript
       const openai = new OpenAI({
-        baseURL: "https://gateway.hconeai.com",
+        baseURL: "https://gateway.helicone.ai",
         defaultHeaders: {
           "Helicone-Auth": `Bearer [HELICONE_API_KEY]`,
           "Helicone-Target-Url": "https://api.lemonfox.ai",
@@ -69,7 +69,7 @@ This is achieved by allowing you to determine the destination of your request by
 
       const configuration = new Configuration({
         apiKey: "[AZURE_OPENAI_API_KEY]",
-        basePath: "https://gateway.hconeai.com/",
+        basePath: "https://gateway.helicone.ai/",
         baseOptions: {
           headers: {
             "Helicone-Auth": `Bearer [HELICONE_API_KEY]`,
@@ -98,7 +98,7 @@ This is achieved by allowing you to determine the destination of your request by
       const vertex_ai = new VertexAI({
         project: project,
         location: location,
-        apiEndpoint: "gateway.hconeai.com",
+        apiEndpoint: "gateway.helicone.ai",
       });
 
       const customHeaders = new Headers({
@@ -127,7 +127,7 @@ This is achieved by allowing you to determine the destination of your request by
 ```python
 from helicone.openai_proxy import openai
 
-openai.api_base = "https://gateway.hconeai.com"
+openai.api_base = "https://gateway.helicone.ai"
 
 response = openai.ChatCompletion.create(
   engine = 'gpt-35-turbo',
@@ -146,7 +146,7 @@ response = openai.ChatCompletion.create(
 
 ```javascript
 const model = new ChatOpenAI({
-  azureOpenAIBasePath: "https://gateway.hconeai.com",
+  azureOpenAIBasePath: "https://gateway.helicone.ai",
   configuration: {
     organization: "[organization]",
     defaultHeaders: {
@@ -171,7 +171,7 @@ llm = ChatOpenAI(
         "Helicone-Target-Url": "https://api.lemonfox.ai",
         "Helicone-Target-Provider": "LemonFox",
     },
-    openai_api_base="https://gateway.hconeai.com/v1",
+    openai_api_base="https://gateway.helicone.ai/v1",
 )
 ```
 
@@ -179,7 +179,7 @@ llm = ChatOpenAI(
   <Tab title="cURL">
   ```bash
     curl --request POST \
-    --url https://gateway.hconeai.com/v1/chat/completetions \
+    --url https://gateway.helicone.ai/v1/chat/completetions \
     --header 'Helicone-Auth: Bearer [HELICONE_KEY]' \
     --header 'Helicone-Target-Url: https://api.lemonfox.ai' \
     --header 'Helicone-Target-Provider: LemonFox' \
@@ -221,11 +221,11 @@ curl --request POST \
 '
 ```
 
-Simply change `gateway.ai.cloudflare.com` to `gateway.hconeai.com` and add the following headers
+Simply change `gateway.ai.cloudflare.com` to `gateway.helicone.ai` and add the following headers
 
 ```bash
 curl --request POST \
-  --url https://gateway.hconeai.com/v1/[ACCOUNT-ID]/[GATEWAY-ID]/openai/chat/completions \
+  --url https://gateway.helicone.ai/v1/[ACCOUNT-ID]/[GATEWAY-ID]/openai/chat/completions \
   --header 'Helicone-Auth: Bearer <Helicone_Auth>' \
   --header 'Helicone-Target-Url: https://gateway.ai.cloudflare.com' \
   --header 'Authorization: Bearer <API_KEY>' \
@@ -247,7 +247,7 @@ curl --request POST \
 <Accordion title="TogetherAI example">
 ```bash
 curl --request POST \
-  --url https://gateway.hconeai.com/v1/chat/completions \
+  --url https://gateway.helicone.ai/v1/chat/completions \
   --header 'Authorization: Bearer <TOGETHERAI_API_KEY>' \
   --header 'Content-Type: application/json' \
   --header 'Helicone-Auth: Bearer <HELICONE_API_KEY>' \
@@ -271,7 +271,7 @@ Gemini Pro
 
 ```bash
 curl --request POST \
-  --url https://gateway.hconeai.com/v1/projects/<PROJECT_ID>/locations/<LOCATION>/publishers/google/models/gemini-pro:streamGenerateContent \
+  --url https://gateway.helicone.ai/v1/projects/<PROJECT_ID>/locations/<LOCATION>/publishers/google/models/gemini-pro:streamGenerateContent \
   --header 'Authorization: Bearer <GEMINI_API_KEY>' \
   --header 'Content-Type: application/json' \
   --header 'Helicone-Auth: Bearer <HELICONE_API_KEY>' \
@@ -290,7 +290,7 @@ Gemini Pro Vision
 
 ```bash
 curl --request POST \
-  --url https://gateway.hconeai.com/v1/projects/<PROJECT_ID>/locations/<LOCATION>/publishers/google/models/gemini-pro-vision:streamGenerateContent \
+  --url https://gateway.helicone.ai/v1/projects/<PROJECT_ID>/locations/<LOCATION>/publishers/google/models/gemini-pro-vision:streamGenerateContent \
   --header 'Authorization: Bearer <GEMINI_API_KEY>' \
   --header 'Content-Type: application/json' \
   --header 'Helicone-Auth: Bearer <HELICONE_API_KEY>' \
@@ -314,11 +314,11 @@ curl --request POST \
 | Provider    | Domain Name                  | Cost Support | Dedicated Domain         |
 | ----------- | ---------------------------- | ------------ | ------------------------ |
 | OpenAI      | `api.openai.com`             | ✅           | `oai.helicone.ai`        |
-| Anthropic   | `api.anthropic.com`          | ✅           | `anthropic.hconeai.com`  |
-| Together-AI | `api.together.xyz`           | ✅           | `together.hconeai.com`   |
-| OpenRouter  | `openrouter.ai`              | ✅           | `openrouter.hconeai.com` |
+| Anthropic   | `api.anthropic.com`          | ✅           | `anthropic.helicone.ai`  |
+| Together-AI | `api.together.xyz`           | ✅           | `together.helicone.ai`   |
+| OpenRouter  | `openrouter.ai`              | ✅           | `openrouter.helicone.ai` |
 | Azure       | `openai.azure.com`           | ✅           | ❌                       |
-| Groq        | `api.groq.com`               | ❌           | `groq.hconeai.com`       |
+| Groq        | `api.groq.com`               | ❌           | `groq.helicone.ai`       |
 | Anyscale    | `api.endpoints.anyscale.com` | ❌           | ❌                       |
 | Cloudflare  | `gateway.ai.cloudflare.com`  | ❌           | ❌                       |
 | LemonFox    | `api.lemonfox.ai`            | ❌           | ❌                       |
