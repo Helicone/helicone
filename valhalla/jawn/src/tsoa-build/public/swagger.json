@@ -2235,13 +2235,13 @@
 						"type": "number",
 						"format": "double"
 					},
-					"model": {
+					"matched_model": {
 						"type": "string"
 					}
 				},
 				"required": [
 					"percent",
-					"model"
+					"matched_model"
 				],
 				"type": "object"
 			},

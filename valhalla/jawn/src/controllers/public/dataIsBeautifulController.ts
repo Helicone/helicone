@@ -87,7 +87,7 @@ export type DataIsBeautifulRequestBody = {
 };
 
 export type ModelBreakdown = {
-  model: string;
+  matched_model: string;
   percent: number;
 };
 

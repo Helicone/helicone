@@ -16,6 +16,7 @@ import ThemedDropdown from "../components/shared/themed/themedDropdown";
 import { BsPieChart } from "react-icons/bs";
 import StyledAreaChart from "../components/templates/dashboard/styledAreaChart";
 import { providersNames } from "../packages/cost/providers/mappings";
+import { getJawnClient } from "../lib/clients/jawn";
 
 interface PieChartData {
   name: string;
@@ -29,10 +30,19 @@ const Home = (props: HomeProps) => {
   const { isLoading, data } = useQuery({
     queryKey: ["issues"],
     queryFn: async () => {
-      const response = await fetch("/api/stats", {
-        next: { revalidate: 1000 },
-      });
-      return (await response.json()) as Result<HeliconeStats, string>;
+      const jawn = getJawnClient();
+      const modelPercentage = await jawn.POST(
+        "/v1/public/dataisbeautiful/model/percentage",
+        {
+          body: {
+            timespan: "1m",
+          },
+        }
+      );
+
+      return {
+        modelPercentage: modelPercentage.data?.data ?? [],
+      };
     },
   });
 
@@ -61,7 +71,16 @@ const Home = (props: HomeProps) => {
   ];
 
   const pieCharts = [
-    { data: exampleTopModels, name: "Top Models" },
+    {
+      data:
+        data?.modelPercentage?.map((d) => {
+          return {
+            name: d.matched_model,
+            value: d.percent,
+          };
+        }) ?? [],
+      name: "Top Models",
+    },
     { data: exampleTopModels, name: "Top Models by Cost" },
     { data: exampleTopModels, name: "Top Providers" },
   ];

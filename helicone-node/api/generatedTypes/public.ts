@@ -673,7 +673,7 @@ Json: JsonObject;
     ModelBreakdown: {
       /** Format: double */
       percent: number;
-      model: string;
+      matched_model: string;
     };
     "ResultSuccess_ModelBreakdown-Array_": {
       data: components["schemas"]["ModelBreakdown"][];
