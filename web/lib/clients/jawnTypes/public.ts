@@ -69,6 +69,9 @@ export interface paths {
   "/v1/public/dataisbeautiful/model/percentage": {
     post: operations["GetModelPercentage"];
   };
+  "/v1/public/dataisbeautiful/model/cost": {
+    post: operations["GetModelCost"];
+  };
   "/v1/public/dataisbeautiful/provider/percentage": {
     post: operations["GetProviderPercentage"];
   };
@@ -1061,6 +1064,21 @@ export interface operations {
     };
   };
   GetModelPercentage: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelBreakdown-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModelCost: {
     requestBody: {
       content: {
         "application/json": components["schemas"]["DataIsBeautifulRequestBody"];

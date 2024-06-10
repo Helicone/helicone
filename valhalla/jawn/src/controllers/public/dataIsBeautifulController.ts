@@ -118,6 +118,24 @@ export class DataIsBeautifulRouter extends Controller {
     return ok(result.data ?? []);
   }
 
+  @Post("/model/cost")
+  public async getModelCost(
+    @Body()
+    requestBody: DataIsBeautifulRequestBody,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ModelBreakdown[], string>> {
+    const dataIsBeautifulManager = new DataIsBeautifulManager();
+
+    const result = await dataIsBeautifulManager.getModelCost(requestBody);
+
+    if (result.error) {
+      this.setStatus(500);
+    }
+
+    this.setStatus(200);
+    return ok(result.data ?? []);
+  }
+
   @Post("/provider/percentage")
   public async getProviderPercentage(
     @Body()

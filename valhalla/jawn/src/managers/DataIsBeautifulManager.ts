@@ -7,7 +7,8 @@ import {
   modelNames,
 } from "../controllers/public/dataIsBeautifulController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
-import { Result, ok } from "../lib/shared/result";
+import { Result, err, ok } from "../lib/shared/result";
+import { clickhousePriceCalc } from "../packages/cost";
 
 export class DataIsBeautifulManager {
   async getProviderPercentage(
@@ -23,7 +24,7 @@ export class DataIsBeautifulManager {
         ${timeCondition}
     )
     SELECT
-      provider AS matched_model,
+      provider AS provider,
       COUNT(*) * 100.0 / total_count.total AS percent
     FROM request_response_versioned, total_count
     WHERE status = '200'
@@ -43,6 +44,70 @@ export class DataIsBeautifulManager {
 
     if (result.error) {
       return result;
+    }
+
+    return ok(result.data ?? []);
+  }
+
+  async getModelCost(
+    filters: DataIsBeautifulRequestBody
+  ): Promise<Result<ModelBreakdown[], string>> {
+    const timeCondition = this.getTimeCondition(filters.timespan);
+    const filteredModels = this.filterModelNames(
+      filters.models,
+      filters.provider
+    );
+    const { caseStatements, whereCondition } =
+      this.buildCaseStatementsAndWhereCondition(filteredModels);
+    const providerCondition = this.getProviderCondition(
+      filters.provider ? [filters.provider] : undefined
+    );
+
+    // Generate the cost calculation using the clickhousePriceCalc function
+    const costCalculation = clickhousePriceCalc("request_response_versioned");
+
+    const query = `
+  WITH total_cost AS (
+    SELECT SUM(${costCalculation}) AS total
+    FROM request_response_versioned
+    WHERE status = '200'
+      ${timeCondition}
+      ${providerCondition}
+  ),
+  model_costs AS (
+    SELECT
+      ${
+        caseStatements
+          ? `
+      CASE
+        ${caseStatements}
+        ELSE 'Other'
+      END AS matched_model`
+          : "model AS matched_model"
+      },
+      model,
+      (${costCalculation}) AS cost
+    FROM request_response_versioned
+    WHERE status = '200'
+      ${timeCondition}
+      ${providerCondition}
+      ${whereCondition ? `AND ${whereCondition}` : ""}
+    GROUP BY model
+  )
+  SELECT
+    matched_model,
+    model,
+    SUM(cost) AS cost,
+    SUM(cost) * 100.0 / (SELECT total FROM total_cost) AS percent
+  FROM model_costs
+  GROUP BY matched_model, model
+  ORDER BY cost DESC;
+`;
+
+    const result = await clickhouseDb.dbQuery<ModelBreakdown>(query, []);
+
+    if (result.error) {
+      return err(result.error);
     }
 
     return ok(result.data ?? []);
