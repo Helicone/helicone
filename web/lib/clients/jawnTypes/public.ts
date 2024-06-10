@@ -680,12 +680,11 @@ Json: JsonObject;
     "Result_ModelBreakdown-Array.string_": components["schemas"]["ResultSuccess_ModelBreakdown-Array_"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
     TimeSpan: "1m" | "3m" | "6m" | "all";
-    ModelNames: string;
-    /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL";
+    ModelName: string;
+    ProviderName: string;
     DataIsBeautifulRequestBody: {
-      provider: components["schemas"]["ProviderName"] | null;
-      model: components["schemas"]["ModelNames"] | null;
+      provider?: components["schemas"]["ProviderName"];
+      models?: components["schemas"]["ModelName"][];
       timespan: components["schemas"]["TimeSpan"];
     };
   };

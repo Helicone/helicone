@@ -53,6 +53,7 @@ export class ClickhouseClientWrapper {
     try {
       const query_params = paramsToValues(parameters);
 
+      console.log(`Executing Clickhouse query: ${query}`, query_params);
       const queryResult = await this.clickHouseClient.query({
         query,
         query_params,
