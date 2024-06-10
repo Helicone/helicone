@@ -17,6 +17,7 @@ import { BsPieChart } from "react-icons/bs";
 import StyledAreaChart from "../components/templates/dashboard/styledAreaChart";
 import { providersNames } from "../packages/cost/providers/mappings";
 import { getJawnClient } from "../lib/clients/jawn";
+import { ToggleButton } from "../components/shared/themed/themedToggle";
 
 interface PieChartData {
   name: string;
@@ -276,7 +277,23 @@ const Home = (props: HomeProps) => {
       <BasePageV2>
         <div className="w-full flex flex-col justify-center items-center">
           <div className="w-full flex flex-col justify-center items-center max-w-5xl border shadow-sm p-10 m-10">
-            <h1>We are opening up some of our data 🚀</h1>
+            <div className="flex w-full justify-between">
+              <h1 className="text-4xl font-bold text-center ">
+                Helicone{"'"}s global dashboard 🚀
+              </h1>
+              <h2>
+                Log in to see you data 👉{" "}
+                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
+                  Sign in
+                </button>
+              </h2>
+              <h2>
+                <ToggleButton
+                  label="My data"
+                  onChange={(v) => console.log(v)}
+                />
+              </h2>
+            </div>
 
             <div className="flex gap-5 w-full flex-col sm:flex-row">
               <ThemedDropdown
