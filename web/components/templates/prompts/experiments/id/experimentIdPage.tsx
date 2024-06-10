@@ -232,9 +232,9 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                       className="bg-gray-50 text-gray-700 ring-gray-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
                                     >
                                       {key}:{" "}
-                                          {renderScoreValue(
-                                            run.originResult.scores[key]
-                                          )}
+                                      {renderScoreValue(
+                                        run.originResult.scores[key]
+                                      )}
                                     </span>
                                   )
                                 )}
@@ -301,9 +301,9 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                                       className="bg-gray-50 text-gray-700 ring-gray-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
                                     >
                                       {key}:{" "}
-                                            {renderScoreValue(
-                                              run.testResult.scores[key]
-                                            )}
+                                      {renderScoreValue(
+                                        run.testResult.scores[key]
+                                      )}
                                     </span>
                                   )
                                 )}
