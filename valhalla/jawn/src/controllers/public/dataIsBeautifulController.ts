@@ -4,13 +4,8 @@ import { JawnAuthenticatedRequest } from "../../types/request";
 import { DataIsBeautifulManager } from "../../managers/DataIsBeautifulManager";
 
 export type TimeSpan = "1m" | "3m" | "6m" | "all";
-export type ModelElement = {
-  model: string;
-  provider: string;
-  variations: string[];
-};
 
-export const modelNames: ModelElement[] = [
+export const modelNames = [
   {
     model: "gpt-3.5",
     provider: "OPENAI",
@@ -81,8 +76,10 @@ export const modelNames: ModelElement[] = [
   },
 ] as const;
 
+export type ModelElement = (typeof modelNames)[number];
 export type ModelName = (typeof modelNames)[number]["model"];
 export type ProviderName = (typeof modelNames)[number]["provider"];
+
 export type DataIsBeautifulRequestBody = {
   timespan: TimeSpan;
   models?: ModelName[];
@@ -91,6 +88,11 @@ export type DataIsBeautifulRequestBody = {
 
 export type ModelBreakdown = {
   model: string;
+  percent: number;
+};
+
+export type ProviderBreakdown = {
+  provider: string;
   percent: number;
 };
 
@@ -106,7 +108,27 @@ export class DataIsBeautifulRouter extends Controller {
   ): Promise<Result<ModelBreakdown[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
-    const result = await dataIsBeautifulManager.getModelBreakdown(requestBody);
+    const result = await dataIsBeautifulManager.getModelPercentage(requestBody);
+
+    if (result.error) {
+      this.setStatus(500);
+    }
+
+    this.setStatus(200);
+    return ok(result.data ?? []);
+  }
+
+  @Post("/provider/percentage")
+  public async getProviderPercentage(
+    @Body()
+    requestBody: DataIsBeautifulRequestBody,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ModelBreakdown[], string>> {
+    const dataIsBeautifulManager = new DataIsBeautifulManager();
+
+    const result = await dataIsBeautifulManager.getProviderPercentage(
+      requestBody
+    );
 
     if (result.error) {
       this.setStatus(500);

@@ -66,8 +66,11 @@ export interface paths {
   "/v1/experiment/query": {
     post: operations["GetExperiments"];
   };
-  "/v1/public/dataisbeautiful": {
-    post: operations["CreateNewExperiment"];
+  "/v1/public/dataisbeautiful/model/percentage": {
+    post: operations["GetModelPercentage"];
+  };
+  "/v1/public/dataisbeautiful/provider/percentage": {
+    post: operations["GetProviderPercentage"];
   };
 }
 
@@ -680,8 +683,10 @@ Json: JsonObject;
     "Result_ModelBreakdown-Array.string_": components["schemas"]["ResultSuccess_ModelBreakdown-Array_"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
     TimeSpan: "1m" | "3m" | "6m" | "all";
-    ModelName: string;
-    ProviderName: string;
+    /** @enum {string} */
+    ModelName: "gpt-3.5" | "gpt-4o" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus-20240229" | "claude-3-sonnet-20240229" | "claude-3-haiku-20240307" | "claude-2" | "open-mixtral" | "Llama" | "dall-e" | "text-moderation" | "text-embedding";
+    /** @enum {string} */
+    ProviderName: "OPENAI" | "ANTHROPIC" | "MISTRAL" | "META";
     DataIsBeautifulRequestBody: {
       provider?: components["schemas"]["ProviderName"];
       models?: components["schemas"]["ModelName"][];
@@ -1025,14 +1030,14 @@ export interface operations {
   CreateNewExperiment: {
     requestBody: {
       content: {
-        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+        "application/json": components["schemas"]["NewExperimentParams"];
       };
     };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_ModelBreakdown-Array.string_"];
+          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
         };
       };
     };
@@ -1051,6 +1056,36 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Experiment-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModelPercentage: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelBreakdown-Array.string_"];
+        };
+      };
+    };
+  };
+  GetProviderPercentage: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelBreakdown-Array.string_"];
         };
       };
     };

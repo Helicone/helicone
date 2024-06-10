@@ -10,7 +10,45 @@ import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { Result, ok } from "../lib/shared/result";
 
 export class DataIsBeautifulManager {
-  async getModelBreakdown(
+  async getProviderPercentage(
+    filters: DataIsBeautifulRequestBody
+  ): Promise<Result<ModelBreakdown[], string>> {
+    const timeCondition = this.getTimeCondition(filters.timespan);
+
+    const query = `
+    WITH total_count AS (
+      SELECT COUNT(*) AS total
+      FROM request_response_versioned
+      WHERE status = '200'
+        ${timeCondition}
+    )
+    SELECT
+      provider AS matched_model,
+      COUNT(*) * 100.0 / total_count.total AS percent
+    FROM request_response_versioned, total_count
+    WHERE status = '200'
+      ${timeCondition}
+      AND provider IN (${(
+        Array.from(
+          new Set(modelNames.map((model) => model.provider))
+        ) as ProviderName[]
+      )
+        .map((provider) => `'${provider}'`)
+        .join(", ")})
+    GROUP BY provider, total_count.total
+    ORDER BY percent DESC;
+    `;
+
+    const result = await clickhouseDb.dbQuery<ModelBreakdown>(query, []);
+
+    if (result.error) {
+      return result;
+    }
+
+    return ok(result.data ?? []);
+  }
+
+  async getModelPercentage(
     filters: DataIsBeautifulRequestBody
   ): Promise<Result<ModelBreakdown[], string>> {
     const timeCondition = this.getTimeCondition(filters.timespan);
@@ -20,7 +58,9 @@ export class DataIsBeautifulManager {
     );
     const { caseStatements, whereCondition } =
       this.buildCaseStatementsAndWhereCondition(filteredModels);
-    const providerCondition = this.getProviderCondition(filters.provider);
+    const providerCondition = this.getProviderCondition(
+      filters.provider ? [filters.provider] : undefined
+    );
 
     const query = `
     WITH total_count AS (
@@ -124,7 +164,11 @@ export class DataIsBeautifulManager {
       : "";
   }
 
-  getProviderCondition(provider?: string): string {
-    return provider ? `AND provider = '${provider}'` : "";
+  getProviderCondition(providers?: ProviderName[]): string {
+    if (!providers || providers.length === 0) return "";
+    const providerList = providers
+      .map((provider) => `'${provider}'`)
+      .join(", ");
+    return `AND provider IN (${providerList})`;
   }
 }
