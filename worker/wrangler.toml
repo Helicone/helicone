@@ -57,7 +57,7 @@ routes = [
 	{ pattern = "together.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "gateway.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 
-	{ pattern = "oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "oai.helicone.ai", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "groq.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "api.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },

@@ -22,7 +22,7 @@ export HELICONE_API_KEY=<your API key>
 ```Python OpenAI v1+
 client = OpenAI(
   api_key="your-api-key-here",  # Replace with your OpenAI API key
-  base_url="https://oai.hconeai.com/v1",  # Set the API endpoint
+  base_url="https://oai.helicone.ai/v1",  # Set the API endpoint
   default_headers= {  # Optionally set default headers or set per request (see below)
     "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
   }
@@ -32,7 +32,7 @@ client = OpenAI(
 ```Python OpenAI v1
 import openai
 
-openai.api_base = "https://oai.hconeai.com/v1"
+openai.api_base = "https://oai.helicone.ai/v1"
 openai.Completion.create(
   # ...other parameters
   headers={
@@ -81,7 +81,7 @@ import OpenAI from "openai";
 
 const openai = new OpenAI({
     apiKey: request.env.OPENAI_API_KEY,
-    baseURL: "https://oai.hconeai.com/v1",
+    baseURL: "https://oai.helicone.ai/v1",
     defaultHeaders: {
         "Helicone-Auth": `Bearer ${request.env.HELICONE_API_KEY}`,
     },
