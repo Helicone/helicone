@@ -45,7 +45,7 @@ export class AnthropicProxyHeartBeat implements IHeartBeat {
     const res = await callAnthropic(
       env.ANTHROPIC_API_KEY,
       env.HELICONE_API_KEY,
-      "https://anthropic.hconeai.com/v1/complete"
+      "https://anthropic.helicone.ai/v1/complete"
     );
 
     if (isErr(res)) {

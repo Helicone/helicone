@@ -212,7 +212,7 @@ export default function VaultFeature() {
           </p>
           <pre className="mt-4 bg-gray-100 p-4 rounded">
             {`curl --request POST \\
-  --url https://oai.hconeai.com/v1/chat/completions \\
+  --url https://oai.helicone.ai/v1/chat/completions \\
   --header 'Authorization: Bearer {OPENAI_KEY}' \\
   --header 'Content-Type: application/json' \\
   --header 'Helicone-Auth: Bearer {HELICONE_API_KEY}' \\
@@ -228,7 +228,7 @@ export default function VaultFeature() {
           <p className="mt-6">With Vault, the process is streamlined:</p>
           <pre className="mt-4 bg-gray-100 p-4 rounded">
             {`curl --request POST \\
-  --url https://oai.hconeai.com/v1/chat/completions \\
+  --url https://oai.helicone.ai/v1/chat/completions \\
   --header 'Authorization: Bearer {HELICONE_PROXY_KEY}' \\
   --header 'Content-Type: application/json' \\
   --data '{

@@ -3,7 +3,7 @@ import { IHeartBeat } from "./IHeartBeat";
 
 export class FeedbackHeartBeat implements IHeartBeat {
   async beat(env: Env): Promise<number> {
-    const baseUrl = "https://api.hconeai.com/v1/feedback";
+    const baseUrl = "https://api.helicone.ai/v1/feedback";
 
     const options = {
       method: "POST",

@@ -74,7 +74,7 @@ EOF
 
   # Start a reverse proxy and save its PID
   echo "Step 4: Starting a reverse proxy and saving its PID..."
-  nohup mitmweb --mode reverse:https://oai.hconeai.com:443 --listen-port 443 -s ~/.helicone/proxy_dir/add_headers.py | tee -a ~/.helicone/mitmproxy.log 2>&1 &
+  nohup mitmweb --mode reverse:https://oai.helicone.ai:443 --listen-port 443 -s ~/.helicone/proxy_dir/add_headers.py | tee -a ~/.helicone/mitmproxy.log 2>&1 &
   echo $! > ~/.helicone/proxy_pid
 
   # Wait for the proxy to start

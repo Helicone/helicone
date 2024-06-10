@@ -62,7 +62,7 @@ import { OpenAI } from "openai";
 
 const configuration = {
   apiKey: process.env.OPENAI_API_KEY,
-  basePath: "https://oai.hconeai.com/v1",
+  basePath: "https://oai.helicone.ai/v1",
   defaultHeaders: {
     "Helicone-Auth": "Bearer ${apiKey}",
     "Helicone-Property-Session": "24",
@@ -116,7 +116,7 @@ import { OpenAI } from "openai";
 
 const configuration = {
   apiKey: process.env.OPENAI_API_KEY,
-  basePath: "https://oai.hconeai.com/v1",
+  basePath: "https://oai.helicone.ai/v1",
   defaultHeaders: {
     "Helicone-Auth": "Bearer ${apiKey}",
     "Helicone-Cache-Enabled": "true", // add this header and set to true
