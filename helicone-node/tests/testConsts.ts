@@ -8,6 +8,8 @@ const TEST_OPENAI_API_KEY = "sk-openai-12345-12345-12345-12345";
 const TEST_OPENAI_ORG = "org-12345-12345-12345-12345";
 const TEST_ASYNC_URL = "http://127.0.0.1:8788";
 const TEST_PROXY_URL = "http://127.0.0.1:8788/v1";
+const TEST_OPENAI_URL = "https://api.openai.com";
+const TEST_TELEMETRY_URL = "http://127.0.0.1:3000";
 
 const completionRequestBody = {
   model: "text-ada-001",
@@ -161,15 +163,97 @@ const createCustomModelRequestBody = (requestId: string) => ({
   },
 });
 
+const telemetryHttpRequestBody =  {
+  resourceSpans: [
+    {
+      scopeSpans: [
+        {
+          name: 'openai.chat',
+          kind: 3,
+          attributes: [
+            {
+              key: 'gen_ai.system',
+              value: { stringValue: 'OpenAI' }
+            },
+            {
+              key: 'llm.request.type',
+              value: { stringValue: 'chat' }
+            },
+            {
+              key: 'gen_ai.request.model',
+              value: { stringValue: 'gpt-3.5-turbo' }
+            },
+            {
+              key: 'gen_ai.prompt.0.role',
+              value: { stringValue: 'system' }
+            },
+            {
+              key: 'gen_ai.prompt.0.content',
+              value: { stringValue: 'You are a helpful assistant.' }
+            },
+            {
+              key: 'gen_ai.prompt.1.role',
+              value: { stringValue: 'user' }
+            },
+            {
+              key: 'gen_ai.prompt.1.content',
+              value: { stringValue: 'Hello!' }
+            },
+            {
+              key: 'gen_ai.response.model',
+              value: { stringValue: 'gpt-3.5-turbo-0613' }
+            },
+            {
+              key: 'llm.usage.total_tokens',
+              value: { intValue: 21 }
+            },
+            {
+              key: 'gen_ai.usage.completion_tokens',
+              value: { intValue: 12 }
+            },
+            {
+              key: 'gen_ai.usage.prompt_tokens',
+              value: { intValue: 9 }
+            },
+            {
+              key: 'gen_ai.completion.0.finish_reason',
+              value: { stringValue: 'stop' }
+            },
+            {
+              key: 'gen_ai.completion.0.role',
+              value: { stringValue: 'assistant' }
+            },
+            {
+              key: 'gen_ai.completion.0.content',
+              value: {
+                stringValue: "Hello there, how may I assist you today?",
+              }
+            }
+          ],
+          droppedAttributesCount: 0,
+          events: [] as unknown[],
+          droppedEventsCount: 0,
+          status: { code: 0 },
+          links: [] as unknown[],
+          droppedLinksCount: 0
+        }
+      ]
+    }
+  ]
+}
+
 export {
   TEST_HELICONE_API_KEY,
   TEST_OPENAI_API_KEY,
   TEST_OPENAI_ORG,
   TEST_ASYNC_URL,
   TEST_PROXY_URL,
+  TEST_OPENAI_URL,
+  TEST_TELEMETRY_URL, 
   completionRequestBody,
   completionResponseBody,
   chatCompletionRequestBody,
+  telemetryHttpRequestBody,
   chatCompletionResponseBody,
   completionAsyncLogModel,
   chatCompletionAsyncModel,
