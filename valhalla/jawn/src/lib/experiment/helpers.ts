@@ -2,7 +2,7 @@ export function placeInputValues(
   inputValues: Record<string, string>,
   heliconeTemplate: any
 ): any {
-  const remainingInputValues = { ...inputValues };
+  const remainingInputValues = JSON.parse(JSON.stringify(inputValues));
 
   function traverseAndTransform(obj: any, path: string[] = []): any {
     if (typeof obj === "string") {
