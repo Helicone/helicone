@@ -59,10 +59,7 @@
     "cohere-ai": "^7.10.2",
     "langchain": "^0.2.5",
     "llamaindex": "^0.3.16",
-<<<<<<< HEAD
-=======
     "nock": "^13.3.6",
->>>>>>> ebfbf5e2 (Replaced async logger with traceloop. Testing left)
     "openai": "^4.48.3",
     "openapi-fetch": "^0.9.7",
     "uuid": "^9.0.1"
