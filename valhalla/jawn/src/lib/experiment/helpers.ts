@@ -56,12 +56,14 @@ export function placeInputValues(
 
       // Add any remaining input values as new image_url objects
       if (path.length === 0 && Object.keys(remainingInputValues).length > 0) {
-        const newContent = Object.keys(remainingInputValues).map((key) => ({
-          type: "image_url",
-          image_url: {
-            url: remainingInputValues[key],
-          },
-        }));
+        const newContent = Object.keys(remainingInputValues)
+          .filter((input) => input.startsWith("http"))
+          .map((key) => ({
+            type: "image_url",
+            image_url: {
+              url: remainingInputValues[key],
+            },
+          }));
 
         if (result.messages) {
           result.messages.forEach((message: any) => {
