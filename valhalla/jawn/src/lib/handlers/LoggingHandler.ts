@@ -520,7 +520,7 @@ export class LoggingHandler extends AbstractLogHandler {
   }
 
   private ensureMaxVectorLength = (text: string): string => {
-    const maxBytes = 848000; // ~300k less than 1MB for buffer
+    const maxBytes = 512000; // ~500k less than 1MB for buffer
     text = text.replace(/[^\x00-\x7F]/g, "");
     text = text.trim();
 
