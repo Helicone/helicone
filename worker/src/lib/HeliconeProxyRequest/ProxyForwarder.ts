@@ -77,8 +77,7 @@ export async function proxyForwarder(
   }
 
   const { data: cacheSettings, error: cacheError } = getCacheSettings(
-    proxyRequest.requestWrapper.getHeaders(),
-    proxyRequest.isStream
+    proxyRequest.requestWrapper.getHeaders()
   );
 
   if (cacheError !== null) {
@@ -327,7 +326,11 @@ export async function proxyForwarder(
     }
   }
 
-  if (request?.heliconeHeaders?.heliconeAuth || request.heliconeProxyKeyId) {
+  if (
+    request?.heliconeHeaders?.heliconeAuth ||
+    request?.heliconeHeaders.heliconeAuthV2 ||
+    request.heliconeProxyKeyId
+  ) {
     ctx.waitUntil(log(loggable));
   }
 

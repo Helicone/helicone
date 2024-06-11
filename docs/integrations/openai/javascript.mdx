@@ -23,7 +23,7 @@ import OpenAI from "openai";
 
 const openai = new OpenAI({
   apiKey: request.env.OPENAI_API_KEY,
-  baseURL: "https://oai.hconeai.com/v1",
+  baseURL: "https://oai.helicone.ai/v1",
   defaultHeaders: {
     "Helicone-Auth": `Bearer ${request.env.HELICONE_API_KEY}`,
   },
@@ -35,7 +35,7 @@ import { Configuration, OpenAIApi } from "openai";
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
-  basePath: "https://oai.hconeai.com/v1",
+  basePath: "https://oai.helicone.ai/v1",
   baseOptions: {
     headers: {
       "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,

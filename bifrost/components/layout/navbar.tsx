@@ -21,6 +21,15 @@ const NavBar = (props: NavBarProps) => {
               height={150}
               width={150}
               priority={true}
+              className="w-auto h-auto md:block hidden"
+            />
+            <Image
+              src={"/static/logo.svg"}
+              alt={""}
+              height={150}
+              width={150}
+              priority={true}
+              className="block md:hidden"
             />
           </Link>
         </div>

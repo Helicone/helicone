@@ -53,7 +53,7 @@ def prepare_api_base(**kwargs):
 
     if openai.api_type == "azure":
         if helicone_global.proxy_url.endswith('/v1'):
-            if helicone_global.proxy_url != "https://oai.hconeai.com/v1":
+            if helicone_global.proxy_url != "https://oai.helicone.ai/v1":
                 logging.warning(
                     f"Detected likely invalid Azure API URL when proxying Helicone with proxy url {helicone_global.proxy_url}. Removing '/v1' from the end.")
             openai.api_base = helicone_global.proxy_url[:-3]

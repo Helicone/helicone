@@ -1,12 +1,5 @@
 import { ArrowsPointingOutIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeaderCell,
-  TableRow,
-} from "@tremor/react";
+
 import { useState } from "react";
 import { useExperiment } from "../../../../../services/hooks/prompts/experiments";
 import { clsx } from "../../../../shared/clsx";
@@ -17,6 +10,7 @@ import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
 import { usePrompt } from "../../../../../services/hooks/prompts/prompts";
 import ArrayDiffViewer from "../../id/arrayDiffViewer";
 import ScoresTable from "../scoresTable";
+import { SimpleTable } from "../../../../shared/table/simpleTable";
 
 interface PromptIdPageProps {
   id: string;
@@ -138,190 +132,173 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                   <p className="text-sm text-gray-500">Diff Viewer</p>
                 </div>
               </div>
-              <div className="p-4">
+              <div className="p-4 whitespace-pre-wrap">
                 <ArrayDiffViewer
                   origin={
                     (
                       experiment?.hypotheses?.[0]?.parentPromptVersion
                         ?.template as any
-                    ).messages
+                    )?.messages ?? null
                   }
                   target={
                     (
                       experiment?.hypotheses?.[0]?.promptVersion
                         ?.template as any
-                    ).messages
+                    )?.messages ?? null
                   }
                 />
               </div>
             </div>
             <div className="w-full flex flex-col space-y-8">
-              <Table className="bg-white border border-gray-300 rounded-lg p-4 w-full">
-                <TableHead className="border-b border-gray-300 w-full">
-                  <TableRow>
-                    <TableHeaderCell className="w-1/3">
-                      <p className="text-black text-lg">Prompt Inputs</p>
-                    </TableHeaderCell>
-                    <TableHeaderCell className="w-1/3 border-l border-gray-300">
-                      <p className="text-black text-lg">Original Output</p>
-                    </TableHeaderCell>
-                    <TableHeaderCell className="w-1/3 border-l border-gray-300">
-                      <p className="text-black text-lg">Experiment Output</p>
-                    </TableHeaderCell>
-                  </TableRow>
-                </TableHead>
-
-                <TableBody>
-                  {runs?.map((run, i) => {
-                    return (
-                      <TableRow key={i} className="w-full">
-                        <TableCell className="h-full items-start border-r border-gray-300 max-w-xs">
-                          {renderPrettyInputs(run.inputs, i)}
-                        </TableCell>
-                        <TableCell className="inline-flex h-full">
-                          <div className="flex flex-col h-full w-full space-y-4">
-                            <div className="w-full flex items-center gap-2">
-                              <span
-                                className={clsx(
-                                  (run.originResult.response?.delayMs ?? 0) <=
-                                    (run.testResult.response?.delayMs ?? 0)
-                                    ? "bg-green-50 text-green-700 ring-green-200"
-                                    : "bg-red-50 text-red-700 ring-red-200",
-                                  `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+              <SimpleTable
+                data={runs ?? []}
+                columns={[
+                  {
+                    key: "inputs",
+                    header: "Prompt Inputs",
+                    render: (value) => (
+                      <div className="w-[400px]">
+                        {renderPrettyInputs(
+                          value.inputs,
+                          runs?.indexOf(value) ?? 0
+                        )}
+                      </div>
+                    ),
+                  },
+                  {
+                    key: "originResult",
+                    header: "Original Output",
+                    render: (run) => (
+                      <div className="flex flex-col h-full w-full space-y-4">
+                        <div className="w-full flex items-center gap-2">
+                          <span
+                            className={clsx(
+                              (run.originResult.response?.delayMs ?? 0) <=
+                                (run.testResult.response?.delayMs ?? 0)
+                                ? "bg-green-50 text-green-700 ring-green-200"
+                                : "bg-red-50 text-red-700 ring-red-200",
+                              `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+                            )}
+                          >
+                            {run.originResult.response?.delayMs} ms
+                          </span>
+                          <span
+                            className={clsx(
+                              "bg-gray-50 text-gray-700 ring-gray-200",
+                              `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+                            )}
+                          >
+                            {run.originResult.response?.promptTokens ?? 0} input
+                            tokens
+                          </span>
+                          <span
+                            className={clsx(
+                              "bg-gray-50 text-gray-700 ring-gray-200",
+                              `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+                            )}
+                          >
+                            {run.originResult.response?.completionTokens ?? 0}{" "}
+                            output tokens
+                          </span>
+                          <ModelPill
+                            model={run.originResult.response?.model ?? ""}
+                          />
+                        </div>
+                        <div className="w-full flex items-center gap-2">
+                          {run.originResult.scores &&
+                            Object.keys(run.originResult.scores).length > 0 && (
+                              <>
+                                Scores:{" "}
+                                {Object.keys(run.originResult.scores).map(
+                                  (key) => (
+                                    <span
+                                      key={key}
+                                      className="bg-gray-50 text-gray-700 ring-gray-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
+                                    >
+                                      {key}: {run.originResult.scores[key]}
+                                    </span>
+                                  )
                                 )}
-                              >
-                                {run.originResult.response?.delayMs} ms
-                              </span>
-                              <span
-                                className={clsx(
-                                  "bg-gray-50 text-gray-700 ring-gray-200",
-                                  `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+                              </>
+                            )}
+                        </div>
+                        <pre className="whitespace-pre-wrap text-sm w-full h-full text-black">
+                          {
+                            (run.originResult.response?.body as any)
+                              ?.choices?.[0]?.message?.content
+                          }
+                        </pre>
+                      </div>
+                    ),
+                  },
+                  {
+                    key: "testResult",
+                    header: "Experiment Output",
+                    render: (run) => (
+                      <div className="flex flex-col h-full w-full space-y-4">
+                        <div className="w-full flex items-center gap-2">
+                          <span
+                            className={clsx(
+                              (run.originResult.response?.delayMs ?? 0) >
+                                (run.testResult.response?.delayMs ?? 0)
+                                ? "bg-green-50 text-green-700 ring-green-200"
+                                : "bg-red-50 text-red-700 ring-red-200",
+                              `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+                            )}
+                          >
+                            {run.testResult.response?.delayMs} ms
+                          </span>
+                          <span
+                            className={clsx(
+                              "bg-gray-50 text-gray-700 ring-gray-200",
+                              `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+                            )}
+                          >
+                            {run.testResult.response?.promptTokens ?? 0} input
+                            tokens
+                          </span>
+                          <span
+                            className={clsx(
+                              "bg-gray-50 text-gray-700 ring-gray-200",
+                              `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+                            )}
+                          >
+                            {run.testResult.response?.completionTokens ?? 0}{" "}
+                            output tokens
+                          </span>
+                          <ModelPill
+                            model={run.testResult.response?.model ?? ""}
+                          />
+                        </div>
+                        <div className="w-full flex items-center gap-2">
+                          {run.testResult.scores &&
+                            Object.keys(run.testResult.scores).length > 0 && (
+                              <>
+                                Scores:{" "}
+                                {Object.keys(run.testResult.scores).map(
+                                  (key) => (
+                                    <span
+                                      key={key}
+                                      className="bg-gray-50 text-gray-700 ring-gray-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
+                                    >
+                                      {key}: {run.testResult.scores[key]}
+                                    </span>
+                                  )
                                 )}
-                              >
-                                {run.originResult.response?.promptTokens ?? 0}{" "}
-                                input tokens
-                              </span>
-                              <span
-                                className={clsx(
-                                  "bg-gray-50 text-gray-700 ring-gray-200",
-                                  `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
-                                )}
-                              >
-                                {run.originResult.response?.completionTokens ??
-                                  0}{" "}
-                                output tokens
-                              </span>
-                              <ModelPill
-                                model={run.originResult.response?.model ?? ""}
-                              />
-                            </div>
-                            <div className="w-full flex items-center gap-2">
-                              {run.originResult.scores &&
-                                Object.keys(run.originResult.scores).length >
-                                  0 && (
-                                  <>
-                                    Scores:{" "}
-                                    {Object.keys(run.originResult.scores).map(
-                                      (key) => (
-                                        <span
-                                          key={key}
-                                          className="bg-gray-50 text-gray-700 ring-gray-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
-                                        >
-                                          {key}: {run.originResult.scores[key]}
-                                        </span>
-                                      )
-                                    )}
-                                  </>
-                                )}
-                            </div>
-                            <pre className="whitespace-pre-wrap text-sm w-full h-full text-black">
-                              {
-                                (run.originResult.response?.body as any)
-                                  ?.choices?.[0]?.message?.content
-                              }
-                            </pre>
-                          </div>
-                        </TableCell>
-
-                        <TableCell className="h-full border-l border-gray-300">
-                          {(run.testResult.response?.body as any)?.error ? (
-                            <pre className="whitespace-pre-wrap bg-red-50 text-red-700 ring-red-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset">
-                              {JSON.stringify(
-                                (run.testResult.response?.body as any)?.error,
-                                undefined,
-                                2
-                              )}
-                            </pre>
-                          ) : (
-                            <div className="flex flex-col h-full w-full space-y-4">
-                              <div className="w-full flex items-center gap-2">
-                                <span
-                                  className={clsx(
-                                    (run.originResult.response?.delayMs ?? 0) >=
-                                      (run.testResult.response?.delayMs ?? 0)
-                                      ? "bg-green-50 text-green-700 ring-green-200"
-                                      : "bg-red-50 text-red-700 ring-red-200",
-                                    `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
-                                  )}
-                                >
-                                  {run.testResult.response?.delayMs ?? 0} ms
-                                </span>
-                                <span
-                                  className={clsx(
-                                    "bg-gray-50 text-gray-700 ring-gray-200",
-                                    `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
-                                  )}
-                                >
-                                  {run.testResult.response?.promptTokens} input
-                                  tokens
-                                </span>
-
-                                <span
-                                  className={clsx(
-                                    "bg-gray-50 text-gray-700 ring-gray-200",
-                                    `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
-                                  )}
-                                >
-                                  {run.testResult.response?.completionTokens}{" "}
-                                  output tokens
-                                </span>
-                                <ModelPill
-                                  model={run.testResult.response?.model ?? ""}
-                                />
-                              </div>
-                              <div className="w-full flex items-center gap-2">
-                                {run.testResult.scores &&
-                                  Object.keys(run.testResult.scores).length >
-                                    0 && (
-                                    <>
-                                      Scores:{" "}
-                                      {Object.keys(run.testResult.scores).map(
-                                        (key) => (
-                                          <span
-                                            key={key}
-                                            className="bg-gray-50 text-gray-700 ring-gray-200 rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
-                                          >
-                                            {key}: {run.testResult?.scores[key]}
-                                          </span>
-                                        )
-                                      )}
-                                    </>
-                                  )}
-                              </div>
-                              <pre className="whitespace-pre-wrap text-sm overflow-auto h-full text-black">
-                                {
-                                  (run.testResult.response?.body as any) // TODO: any
-                                    ?.choices?.[0].message.content
-                                }
-                              </pre>
-                            </div>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                              </>
+                            )}
+                        </div>
+                        <pre className="whitespace-pre-wrap text-sm w-full h-full text-black">
+                          {
+                            (run.testResult.response?.body as any)?.choices?.[0]
+                              ?.message?.content
+                          }
+                        </pre>
+                      </div>
+                    ),
+                  },
+                ]}
+              />
             </div>
           </div>
         )}

@@ -18,7 +18,7 @@ import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { prepareRequestAzure } from "../../lib/experiment/requestPrep/azure";
 
-const authCheckThrow = async (userId: string | undefined) => {
+export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
     throw new Error("Unauthorized");
   }

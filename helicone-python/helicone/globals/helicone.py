@@ -48,7 +48,7 @@ class HeliconeGlobal:
     @property
     def base_url(self) -> Optional[str]:
         if (self._base_url is None):
-            return "https://api.hconeai.com"
+            return "https://api.helicone.ai"
         return self._base_url
 
     @base_url.setter
@@ -58,7 +58,7 @@ class HeliconeGlobal:
     @property
     def proxy_url(self) -> Optional[str]:
         if (self._proxy_url is None):
-            return "http://oai.hconeai.com/v1"
+            return "http://oai.helicone.ai/v1"
         return self._proxy_url
 
     @proxy_url.setter

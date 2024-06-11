@@ -38,7 +38,7 @@ export interface DBLoggableProps {
   response: {
     responseId: string;
     getResponseBody: () => Promise<{
-      body: string;
+      body: string[];
       endTime: Date;
     }>;
     status: () => Promise<number>;
@@ -117,19 +117,19 @@ interface DBLoggableRequestFromAsyncLogModelProps {
   provider: Provider;
 }
 
-function getResponseBody(json: Record<string, Json>): {
-  body: string;
+function getResponseBodyFromJSON(json: Record<string, Json>): {
+  body: string[];
   endTime: Date;
 } {
   // This will mock the response as if it came from OpenAI
   if (json.streamed_data) {
     const streamedData = json.streamed_data as Json[];
     return {
-      body: streamedData.map((d) => "data: " + JSON.stringify(d)).join("\n"),
+      body: streamedData.map((d) => "data: " + JSON.stringify(d)),
       endTime: new Date(),
     };
   }
-  return { body: JSON.stringify(json), endTime: new Date() };
+  return { body: [JSON.stringify(json)], endTime: new Date() };
 }
 
 type UnPromise<T> = T extends Promise<infer U> ? U : T;
@@ -171,8 +171,9 @@ export async function dbLoggableRequestFromAsyncLogModel(
     },
     response: {
       responseId: crypto.randomUUID(),
-      getResponseBody: async () =>
-        getResponseBody(asyncLogModel.providerResponse.json),
+      getResponseBody: async () => {
+        return getResponseBodyFromJSON(asyncLogModel.providerResponse.json);
+      },
       responseHeaders: providerResponseHeaders,
       status: async () => asyncLogModel.providerResponse.status,
       omitLog: false,
@@ -209,7 +210,7 @@ export class DBLoggable {
   }
 
   async waitForResponse(): Promise<{
-    body: string;
+    body: string[];
     endTime: Date;
   }> {
     return await this.response.getResponseBody();
@@ -363,7 +364,10 @@ export class DBLoggable {
       ? await this.timing.timeToFirstToken()
       : null;
     const status = await this.response.status();
-    const parsedResponse = await this.parseResponse(responseBody, status);
+    const parsedResponse = await this.parseResponse(
+      responseBody.join(""),
+      status
+    );
     const isStream = this.request.isStream;
 
     const usage = this.getUsage(parsedResponse.data);
@@ -373,7 +377,7 @@ export class DBLoggable {
       this.provider === "GOOGLE" &&
       parsedResponse.error === null
     ) {
-      const body = this.tryJsonParse(responseBody);
+      const body = this.tryJsonParse(responseBody.join(""));
       const model = body?.model ?? body?.body?.model ?? undefined;
 
       return {
@@ -717,7 +721,7 @@ export class DBLoggable {
         organizationId: authParams.organizationId,
         requestId: this.request.requestId,
         requestBody: this.request.bodyText ?? "{}",
-        responseBody: rawResponseBody,
+        responseBody: rawResponseBody.join(""),
       });
 
       if (s3Result.error) {

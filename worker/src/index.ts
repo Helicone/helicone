@@ -98,7 +98,7 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
   const url = new URL(request.getUrl());
   const host = url.host;
   const hostParts = host.split(".");
-  if (hostParts.includes("eu")) {
+  if (request.isEU()) {
     env = {
       ...env,
       CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
@@ -123,7 +123,7 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
     (host.includes("hconeai") || host.includes("helicone.ai")) &&
     hostParts.length >= 3
   ) {
-    // hconeai.com requests
+    // helicone.ai requests
     if (hostParts[0].includes("gateway")) {
       return {
         ...env,
@@ -170,7 +170,7 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
     hostParts[0].includes("gateway") &&
     !host.includes("hconeai")
   ) {
-    // if it is not a hconeai.com request, but it is a gateway request, then it is a customer gateway request
+    // if it is not a helicone.ai request, but it is a gateway request, then it is a customer gateway request
     return {
       ...env,
       WORKER_TYPE: "CUSTOMER_GATEWAY",

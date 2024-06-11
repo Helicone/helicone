@@ -492,7 +492,7 @@ export class LoggingHandler extends AbstractLogHandler {
         })
         .join(" ");
 
-      return allMessages.trim();
+      return this.ensureMaxVectorLength(this.cleanBody(allMessages.trim()));
     } catch (error) {
       console.error("Error pulling request body messages:", error);
       return "";
@@ -513,11 +513,39 @@ export class LoggingHandler extends AbstractLogHandler {
         })
         .join(" ");
 
-      return allMessages.trim();
+      return this.ensureMaxVectorLength(this.cleanBody(allMessages.trim()));
     } catch (error) {
       console.error("Error pulling response body messages:", error);
       return "";
     }
+  }
+
+  private ensureMaxVectorLength = (text: string): string => {
+    const maxBytes = 848000; // ~300k less than 1MB for buffer
+    text = text.replace(/[^\x00-\x7F]/g, "");
+    text = text.trim();
+
+    let buffer = Buffer.from(text, "utf-8");
+
+    if (buffer.length <= maxBytes) {
+      return text;
+    }
+
+    let truncatedBuffer = Buffer.alloc(maxBytes);
+    buffer.copy(truncatedBuffer, 0, 0, maxBytes);
+
+    let endIndex = maxBytes;
+    while (endIndex > 0 && truncatedBuffer[endIndex - 1] >> 6 === 2) {
+      endIndex--;
+    }
+
+    const truncatedText = truncatedBuffer.toString("utf-8", 0, endIndex);
+
+    return truncatedText;
+  };
+
+  cleanBody(body: string): string {
+    return body.replace(/\u0000/g, "");
   }
 
   private vectorizeModel = (model: string): boolean => {

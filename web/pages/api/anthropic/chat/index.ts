@@ -37,7 +37,7 @@ export default async function handler(
   }
 
   const anthropic = new Anthropic({
-    baseURL: "https://anthropic.hconeai.com/",
+    baseURL: "https://anthropic.helicone.ai/",
     apiKey: process.env.ANTHROPIC_API_KEY,
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${process.env.TEST_HELICONE_API_KEY}`,
