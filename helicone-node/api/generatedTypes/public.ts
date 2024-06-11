@@ -66,6 +66,9 @@ export interface paths {
   "/v1/experiment/query": {
     post: operations["GetExperiments"];
   };
+  "/v1/public/dataisbeautiful/ttft-vs-prompt-length": {
+    post: operations["GetTTFTvsPromptInputLength"];
+  };
   "/v1/public/dataisbeautiful/model/percentage": {
     post: operations["GetModelPercentage"];
   };
@@ -1093,6 +1096,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Experiment-Array.string_"];
+        };
+      };
+    };
+  };
+  GetTTFTvsPromptInputLength: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelBreakdown-Array.string_"];
         };
       };
     };

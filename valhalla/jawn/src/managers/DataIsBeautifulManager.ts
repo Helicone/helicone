@@ -199,6 +199,51 @@ export class DataIsBeautifulManager {
     return ok(modelAsPercentage);
   }
 
+  async getTTFTvsPromptInputLength(
+    filters: DataIsBeautifulRequestBody
+  ): Promise<Result<ModelBreakdown[], string>> {
+    const timeCondition = this.getTimeCondition(filters.timespan);
+    const filteredModels = this.filterModelNames(
+      filters.models,
+      filters.provider
+    );
+    const { caseStatements, whereCondition } =
+      this.buildCaseStatementsAndWhereCondition(filteredModels);
+    const providerCondition = this.getProviderCondition(
+      filters.provider ? [filters.provider] : undefined
+    );
+
+    const query = `
+    SELECT
+        AVG(time_to_first_token) AS avg_ttft,
+        AVG(time_to_first_token / completion_tokens) AS avg_ttft_normalized,
+        FLOOR(prompt_tokens / 100) * 100 AS prompt_token_bucket
+    FROM request_response_versioned
+    WHERE status = 200 -- Include only successful requests
+        AND prompt_tokens IS NOT NULL
+        AND completion_tokens IS NOT NULL
+        AND completion_tokens > 0
+        AND prompt_tokens > 0
+        AND time_to_first_token > 0
+        AND model ILIKE '%gpt-4%' 
+        ${timeCondition}
+        ${providerCondition}
+        ${whereCondition ? `AND ${whereCondition}` : ""}
+    GROUP BY
+        prompt_token_bucket
+    ORDER BY prompt_token_bucket ascending
+    `;
+
+    const result = await clickhouseDb.dbQuery<ModelBreakdown>(query, []);
+    console.log("result", JSON.stringify(result));
+
+    if (result.error) {
+      return result;
+    }
+
+    return ok(result.data ?? []);
+  }
+
   async getModelPercentage(
     filters: DataIsBeautifulRequestBody
   ): Promise<Result<ModelBreakdown[], string>> {

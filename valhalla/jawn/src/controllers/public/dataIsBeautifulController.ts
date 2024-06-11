@@ -109,6 +109,26 @@ export type ProviderBreakdown = {
 @Tags("DataIsBeautiful")
 @Security("api_key")
 export class DataIsBeautifulRouter extends Controller {
+  @Post("/ttft-vs-prompt-length")
+  public async getTTFTvsPromptInputLength(
+    @Body()
+    requestBody: DataIsBeautifulRequestBody,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ModelBreakdown[], string>> {
+    const dataIsBeautifulManager = new DataIsBeautifulManager();
+
+    const result = await dataIsBeautifulManager.getTTFTvsPromptInputLength(
+      requestBody
+    );
+
+    if (result.error) {
+      this.setStatus(500);
+    }
+
+    this.setStatus(200);
+    return ok(result.data ?? []);
+  }
+
   @Post("/model/percentage")
   public async getModelPercentage(
     @Body()

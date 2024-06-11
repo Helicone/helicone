@@ -3343,6 +3343,42 @@
 				}
 			}
 		},
+		"/v1/public/dataisbeautiful/ttft-vs-prompt-length": {
+			"post": {
+				"operationId": "GetTTFTvsPromptInputLength",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ModelBreakdown-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"DataIsBeautiful"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DataIsBeautifulRequestBody"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/public/dataisbeautiful/model/percentage": {
 			"post": {
 				"operationId": "GetModelPercentage",
