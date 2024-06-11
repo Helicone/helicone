@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { FilterNode } from "../lib/filters/filterDefs";
-import { SortLeafRequest, SortLeafSession } from "../lib/sorts/requests/sorts";
-import { Result } from "../../lib/result";
+import { SortLeafSession } from "../lib/sorts/requests/sorts";
+import { ok } from "../../lib/result";
+import { getJawnClient } from "../../lib/clients/jawn";
+import { useOrg } from "../../components/layout/organizationContext";
 
 const useSessions = (
   currentPage: number,
@@ -9,6 +11,7 @@ const useSessions = (
   sortLeaf: SortLeafSession,
   advancedFilters?: FilterNode
 ) => {
+  const org = useOrg();
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: [
       "sessions",
@@ -16,41 +19,37 @@ const useSessions = (
       currentPageSize,
       advancedFilters,
       sortLeaf,
+      org?.currentOrg?.id,
     ],
     queryFn: async (query) => {
       const currentPage = query.queryKey[1] as number;
       const currentPageSize = query.queryKey[2] as number;
       const advancedFilter = query.queryKey[3];
       const sortLeaf = query.queryKey[4];
+      const orgId = query.queryKey[5] as string;
 
-      // Fetch sessions
-      const [response] = await Promise.all([
-        fetch("api/sessions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            filter: advancedFilter,
-            offset: (currentPage - 1) * currentPageSize,
-            limit: currentPageSize,
-            sort: sortLeaf,
-            timeZoneDifference: new Date().getTimezoneOffset(),
-          }),
-        }).then((res) => res.json() as Promise<Result<Session[], string>>),
-      ]);
+      const jawnClient = getJawnClient(orgId);
+      const response = await jawnClient.POST("/v1/session/query", {
+        body: {
+          filter: advancedFilter as any,
+          offset: (currentPage - 1) * currentPageSize,
+          limit: currentPageSize,
+          sort: sortLeaf as any,
+        },
+      });
 
-      return {
-        response,
-      };
+      const result = response.data as any;
+      console.log(`Result: ${JSON.stringify(result)}`);
+
+      return ok(result);
     },
     refetchOnWindowFocus: false,
+    retry: false,
+    refetchIntervalInBackground: false,
+    refetchInterval: false,
   });
 
-  const { response } = data || {
-    response: undefined,
-  };
-
+  const response = data?.data || undefined;
   const sessions = response?.data || [];
 
   return {

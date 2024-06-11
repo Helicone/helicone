@@ -3,6 +3,16 @@ import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useSessions } from "../../../services/hooks/sessions";
+import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
+import { useRouter } from "next/router";
+import {
+  filterListToTree,
+  filterUIToFilterLeafs,
+} from "../../../services/lib/filters/filterDefs";
+import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
+import AuthHeader from "../../shared/authHeader";
+import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
+import { INITIAL_COLUMNS } from "./initialColumns";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -31,12 +41,47 @@ const SessionsPage = (props: SessionsPageProps) => {
           created_at: "desc",
         };
 
-  const { sessions, refetch } = useSessions(
+  const { sessions, refetch, isLoading } = useSessions(
     currentPage,
     pageSize,
     sortLeaf,
-    debouncedAdvancedFilters
+    filterListToTree(
+      filterUIToFilterLeafs(
+        userTableFilters.sort((a, b) => a.label.localeCompare(b.label)),
+        debouncedAdvancedFilters
+      ),
+      "and"
+    )
   );
 
-  return <>{/* SessionsPage */}</>;
+  console.log(`Sessions: ${JSON.stringify(sessions)}`);
+  return (
+    <>
+      <AuthHeader title={"Sessions"} />
+      <div className="flex flex-col space-y-4">
+        <ThemedTableV5
+          defaultData={sessions || []}
+          defaultColumns={INITIAL_COLUMNS}
+          tableKey="sessionColumnVisibility"
+          dataLoading={isLoading}
+          sortable={sort}
+          advancedFilters={{
+            filterMap: userTableFilters,
+            filters: advancedFilters,
+            setAdvancedFilters,
+            searchPropertyFilters: async () => ({
+              data: null,
+              error: "Not implemented",
+            }),
+          }}
+          exportData={sessions}
+          onRowSelect={(row: any) => {
+            router.push(`/sessions/${row.session_id}`);
+          }}
+        />
+      </div>
+    </>
+  );
 };
+
+export default SessionsPage;

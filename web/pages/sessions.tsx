@@ -1,9 +1,9 @@
 import AuthLayout from "../components/layout/authLayout";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { User } from "@supabase/auth-helpers-react";
-import SessionsPage from "../components/templates/sessions/sessionsPage";
 import { SortDirection } from "../services/lib/sorts/requests/sorts";
 import { ReactElement } from "react";
+import SessionsPage from "../components/templates/sessions/sessionsPage";
 
 interface SessionsProps {
   user: User;

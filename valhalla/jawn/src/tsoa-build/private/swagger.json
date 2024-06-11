@@ -480,21 +480,6 @@
 			},
 			"HeliconeMeta": {
 				"properties": {
-					"sessionContext": {
-						"properties": {
-							"sessionPath": {
-								"type": "string"
-							},
-							"sessionId": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"sessionPath",
-							"sessionId"
-						],
-						"type": "object"
-					},
 					"posthogHost": {
 						"type": "string"
 					},
