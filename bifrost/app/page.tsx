@@ -165,7 +165,7 @@ export default function Home() {
             <li>
               <dl className="flex flex-col space-y-2">
                 <dt className="font-bold text-5xl">99.99%</dt>
-                <dd className="text-sm text-gray-600 font-light">Uptime SLA</dd>
+                <dd className="text-sm text-gray-600 font-light">Uptime</dd>
               </dl>
             </li>
           </ul>
