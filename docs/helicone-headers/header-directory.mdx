@@ -81,6 +81,10 @@ const model = new ChatOpenAI({
 
 <ResponseField name="Helicone-Auth" type="string (HELICONE_API_KEY)" required>
   This is the first header you will use, which authenticates you to send requests to the Helicone API. Here's the format: `"Helicone-Auth": "Bearer <HELICONE_API_KEY>"`. Remember to replace it with your actual Helicone API key.
+
+  <Note>
+    When adding the `Helicone-Auth` make sure the key you add has `write` permissions. As of June 2024 all keys have write access.
+  </Note>
 </ResponseField>
 <ResponseField name="Helicone-Target-URL" type="string (url)">
 The URL to proxy the request to when using _gateway.helicone.ai_. For example, `https://api.openai.com/`.
@@ -108,6 +112,18 @@ The URL to proxy the request to when using _gateway.helicone.ai_. For example, `
 </ResponseField>
 <ResponseField name="Helicone-RateLimit-Policy" type="string">
   Set up a rate limit policy. The value should follow the format: `[quota];w=[time_window];u=[unit];s=[segment]`. For example, `10;w=1000;u=cents;s=user` is a policy that allows 10 cents of requests per 1000 seconds per user.
+</ResponseField>
+
+## 3rd Party Integrations
+
+<ResponseField name="Helicone-Posthog-Key" type="string">
+  PostHog authentication for [Helicone's PostHog
+  Integration](getting-started/integration-method/posthog)
+</ResponseField>
+
+<ResponseField name="Helicone-Posthog-Host" type="string">
+  PostHog host for [Helicone's PostHog
+  Integration](getting-started/integration-method/posthog)
 </ResponseField>
 
 ## Feature Flags
