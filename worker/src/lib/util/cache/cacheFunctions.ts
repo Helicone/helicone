@@ -139,8 +139,14 @@ export async function getCachedResponse(
   try {
     const { requests: requestCaches, freeIndexes } = await Promise.race([
       getMaxCachedResponses(request, settings, cacheKv, cacheSeed),
-      new Promise((_, reject) => setTimeout(() => reject(new Error("Cache timeout")), CACHE_TIMEOUT))
-    ]);
+      new Promise((resolve, reject) => setTimeout(() => reject(new Error("Cache timeout")), CACHE_TIMEOUT))
+    ]) as {
+      requests: {
+        headers: Record<string, string>;
+        body: string[];
+      }[];
+      freeIndexes: number[];
+    };
 
     if (freeIndexes.length > 0) {
       return null;
