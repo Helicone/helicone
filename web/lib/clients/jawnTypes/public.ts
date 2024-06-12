@@ -679,6 +679,39 @@ Json: JsonObject;
       /** @enum {boolean} */
       score?: true;
     };
+    TTFTvsPromptLength: {
+      /** Format: double */
+      prompt_length: number;
+      /** Format: double */
+      ttft_normalized_p75: number;
+      /** Format: double */
+      ttft_normalized_p99: number;
+      /** Format: double */
+      ttft_normalized: number;
+      /** Format: double */
+      ttft_p75: number;
+      /** Format: double */
+      ttft_p99: number;
+      /** Format: double */
+      ttft: number;
+    };
+    "ResultSuccess_TTFTvsPromptLength-Array_": {
+      data: components["schemas"]["TTFTvsPromptLength"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_TTFTvsPromptLength-Array.string_": components["schemas"]["ResultSuccess_TTFTvsPromptLength-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    TimeSpan: "1m" | "3m" | "1yr";
+    /** @enum {string} */
+    ModelName: "gpt-3.5" | "gpt-4o" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus-20240229" | "claude-3-sonnet-20240229" | "claude-3-haiku-20240307" | "claude-2" | "open-mixtral" | "Llama" | "dall-e" | "text-moderation" | "text-embedding";
+    /** @enum {string} */
+    ProviderName: "OPENAI" | "ANTHROPIC" | "MISTRAL" | "META";
+    DataIsBeautifulRequestBody: {
+      provider?: components["schemas"]["ProviderName"];
+      models?: components["schemas"]["ModelName"][];
+      timespan: components["schemas"]["TimeSpan"];
+    };
     ModelBreakdown: {
       /** Format: double */
       percent: number;
@@ -690,20 +723,9 @@ Json: JsonObject;
       error: null;
     };
     "Result_ModelBreakdown-Array.string_": components["schemas"]["ResultSuccess_ModelBreakdown-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @enum {string} */
-    TimeSpan: "1m" | "3m" | "6m" | "all";
-    /** @enum {string} */
-    ModelName: "gpt-3.5" | "gpt-4o" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus-20240229" | "claude-3-sonnet-20240229" | "claude-3-haiku-20240307" | "claude-2" | "open-mixtral" | "Llama" | "dall-e" | "text-moderation" | "text-embedding";
-    /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "MISTRAL" | "META";
-    DataIsBeautifulRequestBody: {
-      provider?: components["schemas"]["ProviderName"];
-      models?: components["schemas"]["ModelName"][];
-      timespan: components["schemas"]["TimeSpan"];
-    };
     ModelCost: {
       /** Format: double */
-      cost: number;
+      percent: number;
       matched_model: string;
     };
     "ResultSuccess_ModelCost-Array_": {
@@ -1110,7 +1132,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_ModelBreakdown-Array.string_"];
+          "application/json": components["schemas"]["Result_TTFTvsPromptLength-Array.string_"];
         };
       };
     };

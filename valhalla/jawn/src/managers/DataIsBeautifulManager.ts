@@ -7,6 +7,8 @@ import {
   ModelName,
   ProviderBreakdown,
   ProviderName,
+  TTFTvsPromptLength,
+  TimeSpan,
   modelNames,
 } from "../controllers/public/dataIsBeautifulController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
@@ -99,7 +101,11 @@ export class DataIsBeautifulManager {
     ORDER BY matched_model
   `;
 
-    const result = await clickhouseDb.dbQuery<ModelCost>(query, []);
+    const result = await clickhouseDb.dbQuery<
+      ModelCost & {
+        cost: number;
+      }
+    >(query, []);
 
     if (result.error) {
       return err(result.error);
@@ -109,7 +115,16 @@ export class DataIsBeautifulManager {
       (modelCost) => modelCost.cost && modelCost.cost > 0
     );
 
-    return ok(filteredResults ?? []);
+    const totalCost =
+      filteredResults?.reduce((acc, modelCost) => acc + modelCost.cost, 0) ?? 0;
+
+    const costPercentage =
+      filteredResults?.map((modelCost) => ({
+        matched_model: modelCost.matched_model,
+        percent: (modelCost.cost * 100) / totalCost,
+      })) ?? [];
+
+    return ok(costPercentage);
   }
 
   async getModelPercentageOverTime(
@@ -201,7 +216,7 @@ export class DataIsBeautifulManager {
 
   async getTTFTvsPromptInputLength(
     filters: DataIsBeautifulRequestBody
-  ): Promise<Result<ModelBreakdown[], string>> {
+  ): Promise<Result<TTFTvsPromptLength[], string>> {
     const timeCondition = this.getTimeCondition(filters.timespan);
     const filteredModels = this.filterModelNames(
       filters.models,
@@ -215,9 +230,13 @@ export class DataIsBeautifulManager {
 
     const query = `
     SELECT
-        AVG(time_to_first_token) AS avg_ttft,
-        AVG(time_to_first_token / completion_tokens) AS avg_ttft_normalized,
-        FLOOR(prompt_tokens / 100) * 100 AS prompt_token_bucket
+        AVG(time_to_first_token) AS ttft,
+        quantile(0.99)(time_to_first_token) AS ttft_p99,
+        quantile(0.75)(time_to_first_token) AS ttft_p75,
+        AVG(time_to_first_token / completion_tokens) AS ttft_normalized,
+        quantile(0.99)(time_to_first_token / completion_tokens) AS ttft_normalized_p99,
+        quantile(0.75)(time_to_first_token / completion_tokens) AS ttft_normalized_p75,
+        FLOOR(prompt_tokens / 100) * 100 AS prompt_length
     FROM request_response_versioned
     WHERE status = 200 -- Include only successful requests
         AND prompt_tokens IS NOT NULL
@@ -230,11 +249,11 @@ export class DataIsBeautifulManager {
         ${providerCondition}
         ${whereCondition ? `AND ${whereCondition}` : ""}
     GROUP BY
-        prompt_token_bucket
-    ORDER BY prompt_token_bucket ascending
+        prompt_length
+    ORDER BY prompt_length ascending
     `;
 
-    const result = await clickhouseDb.dbQuery<ModelBreakdown>(query, []);
+    const result = await clickhouseDb.dbQuery<TTFTvsPromptLength>(query, []);
     console.log("result", JSON.stringify(result));
 
     if (result.error) {
@@ -296,15 +315,14 @@ export class DataIsBeautifulManager {
     return ok(result.data ?? []);
   }
 
-  getTimeCondition(timeSpan: string): string {
+  getTimeCondition(timeSpan?: TimeSpan): string {
     switch (timeSpan) {
       case "1m":
         return "AND request_created_at >= now() - interval 1 month AND request_created_at < now()";
       case "3m":
         return "AND request_created_at >= now() - interval 3 month AND request_created_at < now()";
-      case "6m":
-        return "AND request_created_at >= now() - interval 6 month AND request_created_at < now()";
-      case "all":
+      case "1yr":
+        return "AND request_created_at >= now() - interval 12 month AND request_created_at < now()";
       default:
         return "";
     }

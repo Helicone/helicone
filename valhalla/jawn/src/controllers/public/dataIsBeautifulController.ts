@@ -3,7 +3,7 @@ import { Result, ok } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { DataIsBeautifulManager } from "../../managers/DataIsBeautifulManager";
 
-export type TimeSpan = "1m" | "3m" | "6m" | "all";
+export type TimeSpan = "1m" | "3m" | "1yr";
 
 export const modelNames = [
   {
@@ -95,9 +95,19 @@ export type ModelBreakdownOverTime = {
   date: string;
 } & ModelBreakdown;
 
+export type TTFTvsPromptLength = {
+  ttft: number;
+  ttft_p99: number;
+  ttft_p75: number;
+  ttft_normalized: number;
+  ttft_normalized_p99: number;
+  ttft_normalized_p75: number;
+  prompt_length: number;
+};
+
 export type ModelCost = {
   matched_model: string;
-  cost: number;
+  percent: number;
 };
 
 export type ProviderBreakdown = {
@@ -114,7 +124,7 @@ export class DataIsBeautifulRouter extends Controller {
     @Body()
     requestBody: DataIsBeautifulRequestBody,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<ModelBreakdown[], string>> {
+  ): Promise<Result<TTFTvsPromptLength[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
     const result = await dataIsBeautifulManager.getTTFTvsPromptInputLength(
