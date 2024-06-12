@@ -14,6 +14,7 @@ import { GenericBodyProcessor } from "../shared/bodyProcessors/genericBodyProces
 import { GoogleBodyProcessor } from "../shared/bodyProcessors/googleBodyProcessor";
 import { GoogleStreamBodyProcessor } from "../shared/bodyProcessors/googleStreamBodyProcessor";
 import { OpenAIStreamProcessor } from "../shared/bodyProcessors/openAIStreamProcessor";
+import { TogetherAIStreamProcessor } from "../shared/bodyProcessors/togetherAiStreamProcessor";
 import { ImageModelParsingResponse } from "../shared/imageParsers/core/parsingResponse";
 import { getResponseImageModelParser } from "../shared/imageParsers/parserMapper";
 import { PromiseGenericResult, Result, err, ok } from "../shared/result";
@@ -165,7 +166,11 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         responseBody: responseBody,
         requestBody: requestBody ?? "{}",
         tokenCounter: async (text: string) =>
-          await getTokenCount(text, context.processedLog.request.model, provider),
+          await getTokenCount(
+            text,
+            context.processedLog.request.model,
+            provider
+          ),
         requestModel: context.processedLog.request.model,
         modelOverride: context.message.heliconeMeta.modelOverride,
       });
@@ -200,6 +205,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       return new AnthropicStreamBodyProcessor();
     } else if (isStream && provider === "GOOGLE") {
       return new GoogleStreamBodyProcessor();
+    } else if (isStream && provider === "TOGETHER") {
+      return new TogetherAIStreamProcessor();
     } else if (isStream) {
       return new OpenAIStreamProcessor();
     } else {
