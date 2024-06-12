@@ -13,6 +13,7 @@ import { err, ok, Result } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import {
   NewOrganizationParams,
+  OrganizationFilter,
   OrganizationManager,
   UpdateOrganizationParams,
 } from "../../managers/organization/OrganizationManager";
@@ -32,7 +33,7 @@ export class OrganizationController extends Controller {
     const result = await organizationManager.createOrganization(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);
-      return err("Not implemented");
+      return err(result.error ?? "Error creating organization");
     } else {
       this.setStatus(201); // set return status 201
       return ok(null);
@@ -54,7 +55,55 @@ export class OrganizationController extends Controller {
     );
     if (result.error || !result.data) {
       this.setStatus(500);
-      return err("Not implemented");
+      return err(result.error ?? "Error updating organization");
+    } else {
+      this.setStatus(201);
+      return ok(null);
+    }
+  }
+
+  @Post("/{organizationId}/add_member")
+  public async addMemberToOrganization(
+    @Body()
+    requestBody: { email: string },
+    @Path() organizationId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.addMember(
+      organizationId,
+      requestBody.email
+    );
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(result.error ?? "Error adding member to organization");
+    } else {
+      this.setStatus(201);
+      return ok(null);
+    }
+  }
+
+  @Post("/{organizationId}/create_filter")
+  public async createOrganizationFilter(
+    @Body()
+    requestBody: {
+      filters: OrganizationFilter[];
+      type: "dashboard" | "requests";
+    },
+    @Path() organizationId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.createFilter(
+      organizationId,
+      requestBody.filters,
+      requestBody.type
+    );
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(result.error ?? "Error creating organization filter");
     } else {
       this.setStatus(201);
       return ok(null);

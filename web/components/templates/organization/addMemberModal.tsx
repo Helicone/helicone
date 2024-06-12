@@ -5,6 +5,7 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useGetOrgMembers } from "../../../services/hooks/organizations";
 import { useOrg } from "../../layout/organizationContext";
+import { useJawnClient } from "../../../lib/clients/jawnHook";
 
 interface AddMemberModalProps {
   orgId: string;
@@ -23,6 +24,7 @@ const AddMemberModal = (props: AddMemberModalProps) => {
   const { data, refetch } = useGetOrgMembers(orgId);
 
   const orgContext = useOrg();
+  const jawn = useJawnClient();
 
   const members = data?.data
     ? data?.data.map((d) => {
@@ -33,7 +35,7 @@ const AddMemberModal = (props: AddMemberModalProps) => {
       })
     : [];
 
-  const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     // if (orgContext?.currentOrg?.tier === "free" && members.length >= 3) {
@@ -63,34 +65,28 @@ const AddMemberModal = (props: AddMemberModalProps) => {
       return;
     }
 
-    fetch(`/api/organization/${orgId}/add_member`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: email.value,
-      }),
-    })
-      .then((res) => res.json())
-      .then((res) => {
-        if (res.error) {
-          if (res.error.length < 30) {
-            setNotification(res.error, "error");
-            console.error(res);
-          } else {
-            setNotification("Error adding member", "error");
-            console.error(res);
-          }
-        } else {
-          setNotification("Member added successfully", "success");
-          onSuccess && onSuccess();
-          setOpen(false);
-        }
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+    const { error: addMemberError } = await jawn.POST(
+      "/v1/organization/{organizationId}/add_member",
+      {
+        params: {
+          path: {
+            organizationId: orgId,
+          },
+        },
+        body: {
+          email: email.value,
+        },
+      }
+    );
+    if (addMemberError) {
+      setNotification("Error adding member", "error");
+      console.error(addMemberError);
+    } else {
+      setNotification("Member added successfully", "success");
+      onSuccess && onSuccess();
+      setOpen(false);
+    }
+    setIsLoading(false);
   };
 
   return (

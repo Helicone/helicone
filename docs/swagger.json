@@ -1618,6 +1618,56 @@
 			"UpdateOrganizationParams": {
 				"$ref": "#/components/schemas/Pick_NewOrganizationParams.name-or-color-or-icon-or-variant-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_"
 			},
+			"FilterRow": {
+				"properties": {
+					"value": {
+						"type": "string"
+					},
+					"operatorIdx": {
+						"type": "number",
+						"format": "double"
+					},
+					"filterMapIdx": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"value",
+					"operatorIdx",
+					"filterMapIdx"
+				],
+				"type": "object"
+			},
+			"OrganizationFilter": {
+				"properties": {
+					"softDelete": {
+						"type": "boolean"
+					},
+					"createdAt": {
+						"type": "string"
+					},
+					"filter": {
+						"items": {
+							"$ref": "#/components/schemas/FilterRow"
+						},
+						"type": "array"
+					},
+					"name": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"softDelete",
+					"filter",
+					"name",
+					"id"
+				],
+				"type": "object"
+			},
 			"ResultSuccess__datasetId-string__": {
 				"properties": {
 					"data": {
@@ -2999,6 +3049,123 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/UpdateOrganizationParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/{organizationId}/add_member": {
+			"post": {
+				"operationId": "AddMemberToOrganization",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"email"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/{organizationId}/create_filter": {
+			"post": {
+				"operationId": "CreateOrganizationFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"type": {
+										"type": "string",
+										"enum": [
+											"dashboard",
+											"requests"
+										]
+									},
+									"filters": {
+										"items": {
+											"$ref": "#/components/schemas/OrganizationFilter"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"type",
+									"filters"
+								],
+								"type": "object"
 							}
 						}
 					}

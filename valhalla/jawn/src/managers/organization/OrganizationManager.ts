@@ -32,6 +32,20 @@ export type UpdateOrganizationParams = Pick<
   | "organization_type"
 >;
 
+export type FilterRow = {
+  filterMapIdx: number;
+  operatorIdx: number;
+  value: string;
+};
+
+export type OrganizationFilter = {
+  id: string;
+  name: string;
+  filter: FilterRow[];
+  createdAt?: string;
+  softDelete: boolean;
+};
+
 export class OrganizationManager extends BaseManager {
   async createOrganization(
     createOrgParams: NewOrganizationParams
@@ -42,12 +56,12 @@ export class OrganizationManager extends BaseManager {
 
     if (createOrgParams.organization_type === "customer") {
       if (createOrgParams.org_provider_key !== "reseller") {
-        return err("Unauthorized - only resellers can create customers");
+        return err("Only resellers can create customers");
       }
     }
 
     if (createOrgParams.tier !== "free") {
-      return err("Unauthorized - only free tier is supported");
+      return err("Only free tier is supported");
     }
 
     const insert = await dbExecute<NewOrganizationParams>(
@@ -86,7 +100,7 @@ export class OrganizationManager extends BaseManager {
     }
 
     if (orgMember.data[0].org_role !== "owner") {
-      return err("Unauthorized - only organization admins can update settings");
+      return err("Only organization admins can update settings");
     }
 
     const { data, error } = await supabaseServer.client
@@ -110,5 +124,70 @@ export class OrganizationManager extends BaseManager {
       return err(`Failed to update organization: ${error}`);
     }
     return ok(data[0].id);
+  }
+
+  async addMember(
+    organizationId: string,
+    email: string
+  ): Promise<Result<string, string>> {
+    const getUserIdQuery = `
+      SELECT id FROM auth.users WHERE email = $1 LIMIT 1
+    `;
+    let { data: userId, error: userIdError } = await dbExecute<{ id: string }>(
+      getUserIdQuery,
+      [email]
+    );
+
+    if (userIdError) {
+      return err(userIdError);
+    }
+    if (!userId || userId.length === 0) {
+      await supabaseServer.client.auth.signInWithOtp({ email });
+      const result = await dbExecute<{ id: string }>(getUserIdQuery, [email]);
+      userId = result.data;
+      userIdError = result.error;
+    }
+
+    if (userIdError) {
+      return err(userIdError);
+    }
+
+    const { error: insertError } = await supabaseServer.client
+      .from("organization_member")
+      .insert([{ organization: organizationId, member: userId![0].id }]);
+
+    if (insertError && insertError !== null) {
+      if (insertError.code === "23505") {
+        return ok(userId![0].id); // User already added
+      }
+      return err(insertError.message);
+    }
+
+    return ok(userId![0].id);
+  }
+
+  async createFilter(
+    organizationId: string,
+    filters: OrganizationFilter[],
+    type: "dashboard" | "requests"
+  ): Promise<Result<string, string>> {
+    const insertRequest = {
+      organization_id: organizationId,
+      type: type,
+      filters: filters,
+    };
+
+    const insert = await supabaseServer.client
+      .from("organization_layout")
+      .insert([insertRequest])
+      .select("*")
+      .single();
+
+    if (insert.error || !insert.data) {
+      console.error(`Failed to create filter: ${insert.error}`);
+      return err(`Failed to create filter: ${insert.error}`);
+    }
+
+    return ok(insert.data.id);
   }
 }

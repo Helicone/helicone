@@ -371,10 +371,11 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 setNotification("Please select a provider key", "error");
                 return;
               }
+              const jawn = getJawnClient();
               if (initialValues) {
-                const jawn = getJawnClient();
-                const { data: updateOrgData, error: updateOrgError } =
-                  await jawn.PUT("/v1/organization/{organizationId}/update", {
+                const { error: updateOrgError } = await jawn.PUT(
+                  "/v1/organization/{organizationId}/update",
+                  {
                     params: {
                       path: {
                         organizationId: initialValues.id,
@@ -392,7 +393,8 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                         organization_type: "customer",
                       }),
                     },
-                  });
+                  }
+                );
 
                 if (updateOrgError) {
                   setNotification("Failed to update organization", "error");
@@ -406,32 +408,29 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 onCancelHandler && onCancelHandler(false);
                 orgContext?.refetchOrgs();
               } else {
-                const { data, error } = await fetch(
-                  "/api/organization/create",
+                const { error: createOrgError } = await jawn.POST(
+                  "/v1/organization/create",
                   {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
+                    body: {
                       name: orgName,
                       owner: user?.id!,
                       color: selectedColor.name,
                       icon: selectedIcon.name,
                       has_onboarded: true,
                       tier: "free",
+                      variant,
                       ...(variant === "reseller" && {
+                        org_provider_key: providerKey,
+                        limits: limits || undefined,
                         reseller_id: orgContext?.currentOrg?.id!,
                         organization_type: "customer",
-                        org_provider_key: providerKey,
-                        limits: limits,
                       }),
-                    }),
+                    },
                   }
-                ).then((res) => res.json());
-                if (error) {
+                );
+                if (createOrgError) {
                   setNotification(
-                    "Failed to create organization" + error,
+                    "Failed to create organization" + createOrgError,
                     "error"
                   );
                 } else {

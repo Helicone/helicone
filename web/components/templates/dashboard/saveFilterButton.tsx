@@ -11,6 +11,7 @@ import { OrganizationFilter } from "../../../services/lib/organization_layout/or
 import { useOrg } from "../../layout/organizationContext";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import useSearchParams from "../../shared/utils/useSearchParams";
+import { useJawnClient } from "../../../lib/clients/jawnHook";
 
 interface SaveFilterButtonProps {
   filters: UIFilterRow[];
@@ -21,6 +22,7 @@ interface SaveFilterButtonProps {
 }
 
 const SaveFilterButton = (props: SaveFilterButtonProps) => {
+  const jaws = useJawnClient();
   const { filters, onSaveFilterCallback, filterMap, savedFilters, layoutPage } =
     props;
 
@@ -74,31 +76,31 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
             setNotification(err, "error");
           });
       } else {
-        await fetch(
-          `/api/organization/${orgContext?.currentOrg?.id!}/create_filter`,
+        const { error: createFilterError } = await jaws.POST(
+          "/v1/organization/{organizationId}/create_filter",
           {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
+            params: {
+              path: {
+                organizationId: orgContext?.currentOrg?.id!,
+              },
             },
-            body: JSON.stringify({
-              type: layoutPage,
+            body: {
               filters: [saveFilter],
-            }),
+              type: layoutPage,
+            },
           }
-        )
-          .then(() => {
-            setNotification("Filter created successfully", "success");
-            setIsSaveFiltersModalOpen(false);
-            onSaveFilterCallback();
-            const currentAdvancedFilters = encodeURIComponent(
-              JSON.stringify(filters.map(encodeFilter).join("|"))
-            );
-            searchParams.set("filters", currentAdvancedFilters);
-          })
-          .catch((err) => {
-            setNotification(err, "error");
-          });
+        );
+        if (createFilterError) {
+          setNotification("Error creating filter", "error");
+        } else {
+          setNotification("Filter created successfully", "success");
+          setIsSaveFiltersModalOpen(false);
+          onSaveFilterCallback();
+          const currentAdvancedFilters = encodeURIComponent(
+            JSON.stringify(filters.map(encodeFilter).join("|"))
+          );
+          searchParams.set("filters", currentAdvancedFilters);
+        }
       }
     }
   };

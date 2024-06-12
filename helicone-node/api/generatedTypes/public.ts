@@ -51,6 +51,12 @@ export interface paths {
   "/v1/organization/{organizationId}/update": {
     put: operations["UpdateOrganization"];
   };
+  "/v1/organization/{organizationId}/add_member": {
+    post: operations["AddMemberToOrganization"];
+  };
+  "/v1/organization/{organizationId}/create_filter": {
+    post: operations["CreateOrganizationFilter"];
+  };
   "/v1/experiment/dataset": {
     post: operations["AddDataset"];
   };
@@ -525,6 +531,20 @@ Json: JsonObject;
       organization_type?: string;
     };
     UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-variant-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_"];
+    FilterRow: {
+      value: string;
+      /** Format: double */
+      operatorIdx: number;
+      /** Format: double */
+      filterMapIdx: number;
+    };
+    OrganizationFilter: {
+      softDelete: boolean;
+      createdAt?: string;
+      filter: components["schemas"]["FilterRow"][];
+      name: string;
+      id: string;
+    };
     "ResultSuccess__datasetId-string__": {
       data: {
         datasetId: string;
@@ -986,6 +1006,52 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["UpdateOrganizationParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  AddMemberToOrganization: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  CreateOrganizationFilter: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          type: "dashboard" | "requests";
+          filters: components["schemas"]["OrganizationFilter"][];
+        };
       };
     };
     responses: {
