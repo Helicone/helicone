@@ -1928,6 +1928,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@headlessui/react@npm:^1.7.19":
+  version: 1.7.19
+  resolution: "@headlessui/react@npm:1.7.19"
+  dependencies:
+    "@tanstack/react-virtual": "npm:^3.0.0-beta.60"
+    client-only: "npm:^0.0.1"
+  peerDependencies:
+    react: ^16 || ^17 || ^18
+    react-dom: ^16 || ^17 || ^18
+  checksum: c0ece0db6ca15092439177a5322de50b60fa5fd90354ae0f999b3e56abab0065ed54fa7b4b69994ec1bdc23adc6ae9919d7dd57f97922d0b9bb6515d27e3a7e5
+  languageName: node
+  linkType: hard
+
 "@headlessui/tailwindcss@npm:^0.2.0":
   version: 0.2.0
   resolution: "@headlessui/tailwindcss@npm:0.2.0"
@@ -3829,22 +3842,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tremor/react@npm:^3.9.1":
-  version: 3.15.0
-  resolution: "@tremor/react@npm:3.15.0"
+"@tremor/react@npm:^3.17.2":
+  version: 3.17.2
+  resolution: "@tremor/react@npm:3.17.2"
   dependencies:
     "@floating-ui/react": "npm:^0.19.2"
-    "@headlessui/react": "npm:^1.7.18"
+    "@headlessui/react": "npm:^1.7.19"
     "@headlessui/tailwindcss": "npm:^0.2.0"
-    date-fns: "npm:^2.30.0"
-    react-day-picker: "npm:^8.9.1"
+    date-fns: "npm:^3.6.0"
+    react-day-picker: "npm:^8.10.1"
     react-transition-state: "npm:^2.1.1"
-    recharts: "npm:^2.10.3"
+    recharts: "npm:^2.12.7"
     tailwind-merge: "npm:^1.14.0"
   peerDependencies:
     react: ^18.0.0
     react-dom: ">=16.6.0"
-  checksum: 4444f63abec7206f5c343ce512caaef1bc5601fc0c9ba79c38f2e334c677e569fe7cb93246ceea63cef94a2abe7b45a19f4d9166e3431924202d0d6d239895d8
+  checksum: d0ec9bfcc9ac6cefc485e7468844949277caedc3563b3129b9aba175cd092d00c6f26745ac597e814f3c704657494ebb2038d7ee1ec3ecdb3e0ae4687a3674cf
   languageName: node
   linkType: hard
 
@@ -6136,6 +6149,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"date-fns@npm:^3.6.0":
+  version: 3.6.0
+  resolution: "date-fns@npm:3.6.0"
+  checksum: 0b5fb981590ef2f8e5a3ba6cd6d77faece0ea7f7158948f2eaae7bbb7c80a8f63ae30b01236c2923cf89bb3719c33aeb150c715ea4fe4e86e37dcf06bed42fb6
+  languageName: node
+  linkType: hard
+
 "dateformat@npm:^5.0.3":
   version: 5.0.3
   resolution: "dateformat@npm:5.0.3"
@@ -7905,7 +7925,7 @@ __metadata:
     "@tailwindcss/typography": "npm:^0.5.12"
     "@tanstack/react-query": "npm:^4.24.10"
     "@tanstack/react-table": "npm:^8.15.0"
-    "@tremor/react": "npm:^3.9.1"
+    "@tremor/react": "npm:^3.17.2"
     "@types/dagre": "npm:^0.7.49"
     "@types/dateformat": "npm:^5.0.0"
     "@types/js-cookie": "npm:^3.0.3"
@@ -11173,7 +11193,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-day-picker@npm:^8.7.1, react-day-picker@npm:^8.9.1":
+"react-day-picker@npm:^8.10.1":
+  version: 8.10.1
+  resolution: "react-day-picker@npm:8.10.1"
+  peerDependencies:
+    date-fns: ^2.28.0 || ^3.0.0
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: a0ff28c4b61b3882e6a825b19e5679e2fdf3256cf1be8eb0a0c028949815c1ae5a6561474c2c19d231c010c8e0e0b654d3a322610881e0655abca05a2e03d9df
+  languageName: node
+  linkType: hard
+
+"react-day-picker@npm:^8.7.1":
   version: 8.10.0
   resolution: "react-day-picker@npm:8.10.0"
   peerDependencies:
@@ -11463,9 +11493,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recharts@npm:^2.10.3":
-  version: 2.12.3
-  resolution: "recharts@npm:2.12.3"
+"recharts@npm:^2.12.7":
+  version: 2.12.7
+  resolution: "recharts@npm:2.12.7"
   dependencies:
     clsx: "npm:^2.0.0"
     eventemitter3: "npm:^4.0.1"
@@ -11478,7 +11508,7 @@ __metadata:
   peerDependencies:
     react: ^16.0.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
-  checksum: 0401699a6e965ef486e1cc586e25a8a1af8c1f1eb9268c2dee0d0e853a0a86941496b51817334447d1ada6c09eeeb201faba5bb7761e8c8f1d3b00b3d992e2a4
+  checksum: 2522d841a1f4e4c0a37046ddb61fa958ac37a66df63dcd4c6cb9113e3f7a71892d74e44494a55bc40faa0afd74d9cf58fec3d2ce53a8ddf997e75367bdd033fc
   languageName: node
   linkType: hard
 
