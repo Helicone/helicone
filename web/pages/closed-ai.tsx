@@ -1,6 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import BasePageV2 from "../components/layout/basePageV2";
-import MetaData from "../components/layout/public/authMetaData";
 import {
   AreaChart,
   BarChart,
@@ -8,19 +6,13 @@ import {
   Legend,
   MultiSelect,
   MultiSelectItem,
-  ScatterChart,
 } from "@tremor/react";
-import { Result } from "../lib/result";
-import { HeliconeStats } from "./api/stats";
-import { getTimeMap } from "../lib/timeCalculations/constants";
-import { ThemedMultiSelect } from "../components/shared/themed/themedMultiSelect";
-import ThemedDropdown from "../components/shared/themed/themedDropdown";
-import { BsPieChart } from "react-icons/bs";
-import StyledAreaChart from "../components/templates/dashboard/styledAreaChart";
-import { getJawnClient } from "../lib/clients/jawn";
-import { ToggleButton } from "../components/shared/themed/themedToggle";
-import { ThemedScatterPlot } from "../components/shared/themed/themedScatterPlot";
 import { useState } from "react";
+import BasePageV2 from "../components/layout/basePageV2";
+import MetaData from "../components/layout/public/authMetaData";
+import ThemedDropdown from "../components/shared/themed/themedDropdown";
+import { ThemedScatterPlot } from "../components/shared/themed/themedScatterPlot";
+import { getJawnClient } from "../lib/clients/jawn";
 
 export const modelNames = [
   {
