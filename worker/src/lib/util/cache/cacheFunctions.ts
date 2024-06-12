@@ -132,15 +132,17 @@ export async function getCachedResponse(
   request: HeliconeProxyRequest,
   settings: { bucketSize: number },
   cacheKv: KVNamespace,
-  cacheSeed: string | null,
+  cacheSeed: string | null
 ): Promise<Response | null> {
   const CACHE_TIMEOUT = 2000;
 
   try {
-    const { requests: requestCaches, freeIndexes } = await Promise.race([
+    const { requests: requestCaches, freeIndexes } = (await Promise.race([
       getMaxCachedResponses(request, settings, cacheKv, cacheSeed),
-      new Promise((resolve, reject) => setTimeout(() => reject(new Error("Cache timeout")), CACHE_TIMEOUT))
-    ]) as {
+      new Promise((resolve, reject) =>
+        setTimeout(() => reject(new Error("Cache timeout")), CACHE_TIMEOUT)
+      ),
+    ])) as {
       requests: {
         headers: Record<string, string>;
         body: string[];
@@ -162,7 +164,6 @@ export async function getCachedResponse(
 
       const cachedStream = new ReadableStream({
         start(controller) {
-
           let index = 0;
           const encoder = new TextEncoder();
           function pushChunk() {
