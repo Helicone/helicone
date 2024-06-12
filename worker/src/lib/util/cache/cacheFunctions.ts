@@ -132,53 +132,58 @@ export async function getCachedResponse(
   request: HeliconeProxyRequest,
   settings: { bucketSize: number },
   cacheKv: KVNamespace,
-  cacheSeed: string | null
+  cacheSeed: string | null,
 ): Promise<Response | null> {
-  const { requests: requestCaches, freeIndexes } = await getMaxCachedResponses(
-    request,
-    settings,
-    cacheKv,
-    cacheSeed
-  );
-  if (freeIndexes.length > 0) {
-    return null;
-  } else {
-    const cacheIdx = Math.floor(Math.random() * requestCaches.length);
-    const randomCache = requestCaches[cacheIdx];
-    const cachedResponseHeaders = new Headers(randomCache.headers);
-    cachedResponseHeaders.append("Helicone-Cache", "HIT");
-    cachedResponseHeaders.append(
-      "Helicone-Cache-Bucket-Idx",
-      cacheIdx.toString()
-    );
+  const CACHE_TIMEOUT = 2000;
 
-    const cachedStream = new ReadableStream({
-      start(controller) {
-        let index = 0;
-        const encoder = new TextEncoder();
+  try {
+    const { requests: requestCaches, freeIndexes } = await Promise.race([
+      getMaxCachedResponses(request, settings, cacheKv, cacheSeed),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("Cache timeout")), CACHE_TIMEOUT))
+    ]);
 
-        function pushChunk() {
-          if (index < randomCache.body.length) {
-            const chunk = encoder.encode(randomCache.body[index]);
-            controller.enqueue(chunk);
-            index++;
-            setTimeout(pushChunk, 10);
-          } else {
-            controller.close();
+    if (freeIndexes.length > 0) {
+      return null;
+    } else {
+      const cacheIdx = Math.floor(Math.random() * requestCaches.length);
+      const randomCache = requestCaches[cacheIdx];
+      const cachedResponseHeaders = new Headers(randomCache.headers);
+      cachedResponseHeaders.append("Helicone-Cache", "HIT");
+      cachedResponseHeaders.append(
+        "Helicone-Cache-Bucket-Idx",
+        cacheIdx.toString()
+      );
+
+      const cachedStream = new ReadableStream({
+        start(controller) {
+
+          let index = 0;
+          const encoder = new TextEncoder();
+          function pushChunk() {
+            if (index < randomCache.body.length) {
+              const chunk = encoder.encode(randomCache.body[index]);
+              controller.enqueue(chunk);
+              index++;
+              pushChunk();
+            } else {
+              controller.close();
+            }
           }
-        }
+          pushChunk();
+        },
 
-        pushChunk();
-      },
+        cancel() {
+          console.log("Stream canceled");
+        },
+      });
 
-      cancel() {
-        console.log("Stream canceled");
-      },
-    });
-
-    return new Response(cachedStream, {
-      headers: cachedResponseHeaders,
-    });
+      return new Response(cachedStream, {
+        headers: cachedResponseHeaders,
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching cache:", error);
+    return null;
   }
 }
 
