@@ -13,7 +13,6 @@ import { costs as openRouterCosts } from "./openrouter";
 import { ModelRow } from "../interfaces/Cost";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
-const hyperbolicPattern = /^https:\/\/api\.hyperbolic\.xyz/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
 const azurePattern =
   /^(https?:\/\/)?([^.]*\.)?(openai\.azure\.com|azure-api\.net)(\/.*)?$/;
@@ -39,27 +38,31 @@ const cohere = /^https:\/\/api\.cohere\.ai/;
 // api.mistral.ai
 const mistral = /^https:\/\/api\.mistral\.ai/;
 
-export type ProviderName =
-  | "OPENAI"
-  | "ANTHROPIC"
-  | "AZURE"
-  | "LOCAL"
-  | "HELICONE"
-  | "AMDBARTEK"
-  | "ANYSCALE"
-  | "CLOUDFLARE"
-  | "2YFV"
-  | "TOGETHER"
-  | "LEMONFOX"
-  | "FIREWORKS"
-  | "PERPLEXITY"
-  | "GOOGLE"
-  | "OPENROUTER"
-  | "WISDOMINANUTSHELL"
-  | "GROQ"
-  | "COHERE"
-  | "MISTRAL"
-  | "HYPERBOLIC";
+export const providersNames = [
+  "OPENAI",
+  "ANTHROPIC",
+  "AZURE",
+  "LOCAL",
+  "HELICONE",
+  "AMDBARTEK",
+  "ANYSCALE",
+  "CLOUDFLARE",
+  "2YFV",
+  "TOGETHER",
+  "LEMONFOX",
+  "FIREWORKS",
+  "PERPLEXITY",
+  "GOOGLE",
+  "OPENROUTER",
+  "WISDOMINANUTSHELL",
+  "GROQ",
+  "COHERE",
+  "MISTRAL",
+] as const;
+
+export type ProviderName = (typeof providersNames)[number];
+
+export type ModelNames = (typeof modelNames)[number];
 
 export const providers: {
   pattern: RegExp;
@@ -155,10 +158,6 @@ export const providers: {
     provider: "MISTRAL",
     costs: mistralCosts,
   },
-  {
-    pattern: hyperbolicPattern,
-    provider: "HYPERBOLIC",
-  },
 ];
 
 export const playgroundModels: {
@@ -188,3 +187,5 @@ export const defaultProvider = providers.find(
 export const allCosts = providers.flatMap((provider) => provider.costs ?? []);
 
 export const approvedDomains = providers.map((provider) => provider.pattern);
+
+export const modelNames = allCosts.map((cost) => cost.model.value);
