@@ -12,7 +12,7 @@ export function DiffHighlight(props: DiffHighlightProps) {
 
   const hasBaseURL = (tokens: Token[]) => {
     return tokens.some((token) =>
-      token.content.includes("https://oai.hconeai.com/v1")
+      token.content.includes("https://oai.helicone.ai/v1")
     );
   };
 
@@ -26,8 +26,8 @@ export function DiffHighlight(props: DiffHighlightProps) {
                 <span className="text-gray-500 pr-4">{i + 1}</span>
                 {line.map((token, key) => {
                   if (
-                    token.content.includes("https://oai.hconeai.com") ||
-                    token.content.includes("https://anthropic.hconeai.com")
+                    token.content.includes("https://oai.helicone.ai") ||
+                    token.content.includes("https://anthropic.helicone.ai")
                   ) {
                     return (
                       <span

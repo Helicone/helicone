@@ -16,7 +16,7 @@ POST https://api.openai.com/v1
 with Helicone's
 
 ```
-POST https://oai.hconeai.com/v1
+POST https://oai.helicone.ai/v1
 ```
 
 </Tab>
@@ -28,7 +28,7 @@ Change the default base API url to Helicone's
 ```py
 import openai
 
-openai.api_base = "https://oai.hconeai.com/v1"
+openai.api_base = "https://oai.helicone.ai/v1"
 ```
 
 </Tab>
@@ -56,7 +56,7 @@ import { Configuration, OpenAIApi } from "openai";
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
-  basePath: "https://oai.hconeai.com/v1",
+  basePath: "https://oai.helicone.ai/v1",
 });
 
 const openai = new OpenAIApi(configuration);
