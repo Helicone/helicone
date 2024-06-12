@@ -45,6 +45,12 @@ export interface paths {
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
   };
+  "/v1/organization/create": {
+    post: operations["CreateNewOrganization"];
+  };
+  "/v1/organization/{organizationId}/update": {
+    put: operations["UpdateOrganization"];
+  };
   "/v1/experiment/dataset": {
     post: operations["AddDataset"];
   };
@@ -482,6 +488,43 @@ Json: JsonObject;
       error: null;
     };
     "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    NewOrganizationParams: {
+      limits?: {
+        /** Format: double */
+        requests: number;
+        /** Format: double */
+        cost: number;
+      };
+      /** @enum {string} */
+      variant: "organization" | "reseller";
+      org_provider_key?: string;
+      organization_type?: string;
+      reseller_id?: string;
+      tier: string;
+      has_onboarded: boolean;
+      icon: string;
+      color: string;
+      owner: string;
+      name: string;
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_NewOrganizationParams.name-or-color-or-icon-or-variant-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_": {
+      name: string;
+      color: string;
+      icon: string;
+      /** @enum {string} */
+      variant: "organization" | "reseller";
+      org_provider_key?: string;
+      limits?: {
+        /** Format: double */
+        requests: number;
+        /** Format: double */
+        cost: number;
+      };
+      reseller_id?: string;
+      organization_type?: string;
+    };
+    UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-variant-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_"];
     "ResultSuccess__datasetId-string__": {
       data: {
         datasetId: string;
@@ -915,6 +958,41 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResult-Array.string_"];
+        };
+      };
+    };
+  };
+  CreateNewOrganization: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NewOrganizationParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateOrganization: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateOrganizationParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

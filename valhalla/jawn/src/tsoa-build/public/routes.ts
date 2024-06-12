@@ -9,6 +9,8 @@ import { RequestController } from './../../controllers/public/requestController'
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { PromptController } from './../../controllers/public/promptController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { OrganizationController } from './../../controllers/public/organizationController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ExperimentDatasetController } from './../../controllers/public/experimentDatasetController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ExperimentController } from './../../controllers/public/experimentController';
@@ -551,6 +553,21 @@ const models: TsoaRoute.Models = {
     "Result_PromptVersionResult-Array.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_PromptVersionResult-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "NewOrganizationParams": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"limits":{"dataType":"nestedObjectLiteral","nestedProperties":{"requests":{"dataType":"double","required":true},"cost":{"dataType":"double","required":true}}},"variant":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["organization"]},{"dataType":"enum","enums":["reseller"]}],"required":true},"org_provider_key":{"dataType":"string"},"organization_type":{"dataType":"string"},"reseller_id":{"dataType":"string"},"tier":{"dataType":"string","required":true},"has_onboarded":{"dataType":"boolean","required":true},"icon":{"dataType":"string","required":true},"color":{"dataType":"string","required":true},"owner":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Pick_NewOrganizationParams.name-or-color-or-icon-or-variant-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true},"color":{"dataType":"string","required":true},"icon":{"dataType":"string","required":true},"variant":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["organization"]},{"dataType":"enum","enums":["reseller"]}],"required":true},"org_provider_key":{"dataType":"string"},"limits":{"dataType":"nestedObjectLiteral","nestedProperties":{"requests":{"dataType":"double","required":true},"cost":{"dataType":"double","required":true}}},"reseller_id":{"dataType":"string"},"organization_type":{"dataType":"string"}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "UpdateOrganizationParams": {
+        "dataType": "refAlias",
+        "type": {"ref":"Pick_NewOrganizationParams.name-or-color-or-icon-or-variant-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_","validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess__datasetId-string__": {
@@ -1183,6 +1200,71 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getPromptVersions',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/organization/create',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(OrganizationController)),
+            ...(fetchMiddlewares<RequestHandler>(OrganizationController.prototype.createNewOrganization)),
+
+            async function OrganizationController_createNewOrganization(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"NewOrganizationParams"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new OrganizationController();
+
+              await templateService.apiHandler({
+                methodName: 'createNewOrganization',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.put('/v1/organization/:organizationId/update',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(OrganizationController)),
+            ...(fetchMiddlewares<RequestHandler>(OrganizationController.prototype.updateOrganization)),
+
+            async function OrganizationController_updateOrganization(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"UpdateOrganizationParams"},
+                    organizationId: {"in":"path","name":"organizationId","required":true,"dataType":"string"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new OrganizationController();
+
+              await templateService.apiHandler({
+                methodName: 'updateOrganization',
                 controller,
                 response,
                 next,

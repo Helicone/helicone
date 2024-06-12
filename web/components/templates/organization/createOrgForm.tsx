@@ -16,6 +16,7 @@ import useNotification from "../../shared/notification/useNotification";
 import ProviderKeyList from "../enterprise/portal/id/providerKeyList";
 import CreateProviderKeyModal from "../vault/createProviderKeyModal";
 import { useVaultPage } from "../vault/useVaultPage";
+import { getJawnClient } from "../../../lib/clients/jawn";
 
 export const ORGANIZATION_COLORS = [
   {
@@ -371,23 +372,29 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 return;
               }
               if (initialValues) {
-                const { data, error } = await supabaseClient
-                  .from("organization")
-                  .update({
-                    name: orgName,
-                    color: selectedColor.name,
-                    icon: selectedIcon.name,
-                    ...(variant === "reseller" && {
-                      org_provider_key: providerKey,
-                      limits: limits,
-                      reseller_id: orgContext?.currentOrg?.id!,
-                      organization_type: "customer",
-                    }),
-                  })
-                  .eq("id", initialValues.id)
-                  .select("*");
+                const jawn = getJawnClient();
+                const { data: updateOrgData, error: updateOrgError } =
+                  await jawn.PUT("/v1/organization/{organizationId}/update", {
+                    params: {
+                      path: {
+                        organizationId: initialValues.id,
+                      },
+                    },
+                    body: {
+                      name: orgName,
+                      color: selectedColor.name,
+                      icon: selectedIcon.name,
+                      variant,
+                      ...(variant === "reseller" && {
+                        org_provider_key: providerKey,
+                        limits: limits || undefined,
+                        reseller_id: orgContext?.currentOrg?.id!,
+                        organization_type: "customer",
+                      }),
+                    },
+                  });
 
-                if (error || data.length === 0) {
+                if (updateOrgError) {
                   setNotification("Failed to update organization", "error");
                 } else {
                   setNotification(
