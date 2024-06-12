@@ -20,7 +20,7 @@ export const cacheMiddleware = async (
       JSON.stringify(req.headers["helicone-auth"]) +
       JSON.stringify(req.headers["helicone-authorization"])
   );
-  console.log("checking cache");
+
   const cachedValue = await kvCache.get(cacheKey);
   if (cachedValue) {
     res.send(cachedValue);

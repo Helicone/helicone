@@ -52,7 +52,6 @@ export const ThemedScatterPlot = ({
           // selected={selectItems}
           defaultChecked={true}
           onValueChange={(v) => {
-            console.log(v, selectItems);
             setSelectItems(v);
           }}
           value={selectItems}
