@@ -168,14 +168,12 @@ export class DataIsBeautifulManager {
       matched_model: string;
       count: number;
     }>(query, []);
-    console.log("result", JSON.stringify(result));
 
     if (result.error) {
       return result;
     }
 
     const modelCounts = result.data ?? [];
-    // console.log("modelCounts", JSON.stringify(modelCounts));
 
     const modelAsPercentage = modelCounts
       .map((modelCount) => {
@@ -254,7 +252,6 @@ export class DataIsBeautifulManager {
     `;
 
     const result = await clickhouseDb.dbQuery<TTFTvsPromptLength>(query, []);
-    console.log("result", JSON.stringify(result));
 
     if (result.error) {
       return result;
@@ -306,7 +303,6 @@ export class DataIsBeautifulManager {
     `;
 
     const result = await clickhouseDb.dbQuery<ModelBreakdown>(query, []);
-    console.log("result", JSON.stringify(result));
 
     if (result.error) {
       return result;
