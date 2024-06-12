@@ -11,7 +11,7 @@ export function getJawnClient(orgId?: string | "none") {
   orgId = orgId || Cookies.get(ORG_ID_COOKIE_KEY);
   const jwtToken = getHeliconeCookie().data?.jwtToken;
   const headers =
-    orgId === "none"
+    orgId !== "none"
       ? {
           "helicone-authorization": JSON.stringify({
             _type: "jwt",
