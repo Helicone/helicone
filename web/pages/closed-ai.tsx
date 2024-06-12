@@ -144,7 +144,7 @@ const Home = (props: HomeProps) => {
   const { isLoading, data } = useQuery({
     queryKey: ["issues", timeSpan, models, provider],
     queryFn: async (query) => {
-      const jawn = getJawnClient();
+      const jawn = getJawnClient("none");
 
       const [timeSpan, models, provider] = [
         query.queryKey[1],
