@@ -14,7 +14,7 @@ import { GenericBodyProcessor } from "../shared/bodyProcessors/genericBodyProces
 import { GoogleBodyProcessor } from "../shared/bodyProcessors/googleBodyProcessor";
 import { GoogleStreamBodyProcessor } from "../shared/bodyProcessors/googleStreamBodyProcessor";
 import { OpenAIStreamProcessor } from "../shared/bodyProcessors/openAIStreamProcessor";
-import { TogetherAIStreamProcessor } from "../shared/bodyProcessors/togetherAiStreamProcessor";
+import { TogetherAIStreamProcessor } from "../shared/bodyProcessors/togetherAIStreamProcessor";
 import { ImageModelParsingResponse } from "../shared/imageParsers/core/parsingResponse";
 import { getResponseImageModelParser } from "../shared/imageParsers/parserMapper";
 import { PromiseGenericResult, Result, err, ok } from "../shared/result";
