@@ -59,6 +59,12 @@ const NavBar = (props: NavBarProps) => {
           >
             Contact
           </Link>
+          <Link
+            href="/community"
+            className="flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-gray-700"
+          >
+            Community
+          </Link>
         </div>
         <div className="flex items-center justify-end gap-x-2 col-span-1 order-2 md:order-3">
           <Link
