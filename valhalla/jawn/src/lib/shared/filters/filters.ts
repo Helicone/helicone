@@ -150,7 +150,7 @@ const whereKeyMappings: KeyMappings = {
       "(coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text",
     body_model:
       "(coalesce(request.model_override, response.model, request.model, response.body ->> 'model', request.body ->> 'model'))::text",
-    body_tokens: "((response.body -> 'usage') ->> 'total_tokens')::bigint",
+    body_tokens: "(response.completion_tokens + response.prompt_tokens)",
     status: "response.status",
     model: "response.model",
   }),
