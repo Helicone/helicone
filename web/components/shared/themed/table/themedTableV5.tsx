@@ -22,10 +22,10 @@ import { UIFilterRow } from "../themedAdvancedFilters";
 import ThemedTableHeader from "./themedTableHeader";
 import DraggableColumnHeader from "./draggableColumnHeader";
 import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
-import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import RequestRowView from "./requestRowView";
 import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
+import { RequestViews } from "./viewButton";
 
 interface ThemedTableV5Props<T> {
   defaultData: T[];
@@ -68,6 +68,7 @@ interface ThemedTableV5Props<T> {
     onSaveFilterCallback?: () => void;
     layoutPage: "dashboard" | "requests";
   };
+  view: RequestViews;
 }
 
 export type RequestViews = "table" | "card" | "row";
@@ -89,13 +90,13 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     noDataCTA,
     onDataSet: onDataSet,
     savedFilters,
+    view,
   } = props;
 
   const [visibleColumns, setVisibleColumns] = useState<VisibilityState>({});
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
-    defaultColumns.map((column) => column.id as string) // must start out with populated columnOrder so we can splice
+    defaultColumns.map((column) => column.id as string)
   );
-  const [view, setView] = useLocalStorage<RequestViews>("view", "table");
 
   const onVisibilityHandler: OnChangeFn<VisibilityState> = (newState) => {
     setVisibleColumns(newState);
@@ -167,7 +168,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
           makeCard
             ? {
                 currentView: view,
-                onViewChange: setView,
+                onViewChange: () => {},
               }
             : undefined
         }

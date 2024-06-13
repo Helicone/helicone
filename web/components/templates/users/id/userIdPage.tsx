@@ -18,6 +18,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
+import { useState } from "react";
+import ViewButton from "../../../shared/themed/table/viewButton";
 
 interface UserIdPageProps {
   userId: string;
@@ -46,6 +48,7 @@ const UserIdPage = (props: UserIdPageProps) => {
 
   const { user, isLoading, costOverTime, requestOverTime } = useUserId(userId);
   const router = useRouter();
+  const [selectedView, setSelectedView] = useState<RequestViews>("row");
 
   return (
     <>
@@ -200,6 +203,14 @@ const UserIdPage = (props: UserIdPageProps) => {
                   </TabPanel>
                   <TabPanel>
                     <div className="py-2">
+                      <div className="flex justify-end mb-4">
+                        <ViewButton
+                          currentView={selectedView}
+                          onViewChange={(view) => {
+                            setSelectedView(view);
+                          }}
+                        />
+                      </div>
                       <RequestsPageV2
                         currentPage={1}
                         pageSize={25}

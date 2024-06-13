@@ -39,6 +39,7 @@ import {
   getModelFromPath,
   mapGeminiProJawn,
 } from "./builder/mappers/geminiMapper";
+import { RequestViews } from "../../shared/themed/table/themedTableV5";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -54,6 +55,7 @@ interface RequestsPageV2Props {
   currentFilter: OrganizationFilter | null;
   organizationLayout: OrganizationLayout | null;
   organizationLayoutAvailable: boolean;
+  view: RequestViews;
 }
 
 function getSortLeaf(
@@ -101,6 +103,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     currentFilter,
     organizationLayout,
     organizationLayoutAvailable,
+    view,
   } = props;
   const [isLive, setIsLive] = useLocalStorage("isLive", false);
   const jawn = useJawnClient();
@@ -593,6 +596,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   properties: properties,
                 }
           }
+          view={view}
         />
         <TableFooter
           currentPage={currentPage}
