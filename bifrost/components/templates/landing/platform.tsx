@@ -1,14 +1,7 @@
 "use client";
 
 import { clsx } from "@/components/shared/utils";
-import {
-  BellIcon,
-  CircleStackIcon,
-  FolderArrowDownIcon,
-  KeyIcon,
-  TagIcon,
-  UserMinusIcon,
-} from "@heroicons/react/20/solid";
+import { PiTerminalBold } from "react-icons/pi";
 import {
   ChartPieIcon,
   DocumentTextIcon,
@@ -19,40 +12,82 @@ import Image from "next/image";
 
 const features = [
   {
-    name: "Labels and Feedback.",
+    name: "Prompts",
     description:
-      "Easily segment requests, environments, and more with custom properties.",
-    icon: TagIcon,
+      "Monitor Prompts Version.",
+    icon: PiTerminalBold,
   },
   {
-    name: "Caching.",
+    name: "Custom Properties",
     description:
-      "Lower costs and improve performance as well as configure your cache responses.",
-    icon: CircleStackIcon,
+      "Label & segment requests.",
+    icon: PiTerminalBold,
   },
   {
-    name: "User Rate Limiting.",
+    name: "Caching",
     description:
-      "Rate limit power users by requests, costs, and more to prevent abuse.",
-    icon: UserMinusIcon,
+      "Save money & improve latency.",
+    icon: PiTerminalBold,
   },
   {
-    name: "Alerts.",
+    name: "Omitting Logs",
     description:
-      "Get notified when your application is down, slow, or experiencing issues.",
-    icon: BellIcon,
+      "Remove requests and responses.",
+    icon: PiTerminalBold,
   },
   {
-    name: "Key Vault",
+    name: "User Metrics",
     description:
-      "Securely map and manage your API keys, tokens, and other secrets.",
-    icon: KeyIcon,
+      "Get insights into your user's usage .",
+    icon: PiTerminalBold,
   },
   {
-    name: "Exporting.",
+    name: "Feedback",
     description:
-      "Extract, transform, and load your data using our REST API, webhooks, and more.",
-    icon: FolderArrowDownIcon,
+      "Provide user feedback on outputs. ",
+    icon: PiTerminalBold,
+  },
+  {
+    name: "Scores",
+    description:
+      "Score your requests and experiments.",
+    icon: PiTerminalBold,
+  },
+  {
+    name: "Gateway Fallback",
+    description:
+      "Use any provider via a single endpoint.",
+    icon: PiTerminalBold,
+  },
+  {
+    name: "Retries",
+    description:
+      "Smartly retry requests.",
+    icon: PiTerminalBold,
+  },
+  {
+    name: "Rate Limiting",
+    description:
+      "Easily rate limit power users.",
+    icon: PiTerminalBold,
+  },
+  {
+    name: "KeyVault",
+    description:
+      "Manage and distribute your provider API keys securely.",
+    icon: PiTerminalBold,
+  },
+  {
+    name: "Moderation Integration",
+    description:
+      "Integrate OpenAi moderation to safeguard your chat completion.",
+    icon: PiTerminalBold,
+  },
+  {
+    name: "LLM Security",
+    description:
+      "Secure OpenAI chat completions against prompt injections.",
+    icon: PiTerminalBold,
   },
 ];
 
@@ -81,71 +116,37 @@ const tabs = [
 ];
 
 export default function Platform() {
-  const [activeTab, setActiveTab] = useState<
-    "monitoring" | "logs" | "templates"
-  >("monitoring");
   return (
     <>
-      <div className="flex flex-col space-y-4 pb-2 w-full items-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-black text-center tracking-tight leading-tight">
-          One observability platform,{" "}
-          <span className="text-sky-500">everything you need</span>
+      <div className="flex flex-col space-y-4 w-full items-center">
+        <h2 className="text-3xl md:text-4xl font-bold text-black tracking-tight leading-tight">
+          No packages, just{" "}
+          <span className="text-sky-500 ">headers</span>
         </h2>
-        <p className="text-sm md:text-md text-gray-600 max-w-4xl text-center">
-          Collect data, monitor performance, and improve your LLM-powered
-          application over time
+        <p className="text-md md:text-md text-gray-600 max-w-4xl font-light">
+          Access just about every Helicone features in seconds.
         </p>
-        <ul className="hidden md:flex items-center justify-between w-full px-4 sm:px-8 pt-8 relative gap-8">
-          {tabs.map((tab) => (
-            <li key={tab.name} className="w-full z-10">
-              <button
-                onClick={() =>
-                  setActiveTab(tab.key as "monitoring" | "logs" | "templates")
-                }
-                className={clsx(
-                  "w-full justify-center text-md border px-8 py-4 rounded-lg font-semibold flex items-center gap-2",
-                  activeTab === tab.key
-                    ? "bg-sky-500 text-white border-sky-700"
-                    : "border-gray-300 bg-gray-200 text-gray-500"
-                )}
-              >
-                <tab.icon className="w-5 h-5" />
-                {tab.name}
-              </button>
-              {/* display a gray line that connects these list items */}
-            </li>
-          ))}
-          <div className="w-full flex items-center justify-center absolute">
-            <div className="h-0.5 w-2/3 bg-gray-200 flex mx-auto" />
-          </div>
-        </ul>
       </div>
       <div className="relative overflow-hidden pt-2">
         <div className="mx-auto max-w-8xl px-6 lg:px-8">
-          <Image
-            src={tabs.find((tab) => tab.key === activeTab)?.src ?? ""}
-            alt="App screenshot"
-            className="mb-[-7%] rounded-xl shadow-2xl ring-1 ring-gray-900/10"
-            width={2432}
-            height={1442}
-          />
+          
           <div className="relative" aria-hidden="true">
-            <div className="absolute -inset-x-20 bottom-0 bg-gradient-to-t from-gray-50 pt-[9%]" />
+            <div/>
           </div>
         </div>
       </div>
-      <div className="mx-auto mt-16 max-w-8xl px-6 sm:mt-20 md:mt-24 lg:px-8">
-        <dl className="mx-auto grid max-w-2xl grid-cols-1 gap-x-6 gap-y-10 text-base leading-7 text-gray-600 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3 lg:gap-x-8 lg:gap-y-16">
+      <div className="mx-auto mt-16 max-w-8xl sm:mt-20 md:mt-24 lg:px-8">
+        <dl className="mx-auto grid max-w-2xl grid-cols-2 gap-x-6 gap-y-10 text-base leading-7 text-gray-600 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-4 lg:gap-x-8 lg:gap-y-16">
           {features.map((feature) => (
-            <div key={feature.name} className="relative pl-9">
-              <dt className="inline font-semibold text-gray-900">
+            <div key={feature.name} className="relative" >
                 <feature.icon
-                  className="absolute left-1 top-1 h-5 w-5 text-sky-500"
+                  className="ableft-1 top-1 h-5 w-5 text-sky-500 "
                   aria-hidden="true"
                 />
+              <dt className="inline font-semibold text-nowrap text-sm text-sky-500">
                 {feature.name}
               </dt>{" "}
-              <dd className="inline">{feature.description}</dd>
+              <dd className="font-light text-sm pt-1">{feature.description}</dd>
             </div>
           ))}
         </dl>

@@ -15,7 +15,7 @@ import Link from "next/link";
 export default function Home() {
   return (
     <>
-      <main className="flex min-h-screen flex-col items-center justify-between text-black"> odpadoskfkspofkaspo
+      <main className="flex min-h-screen flex-col items-center justify-between text-black">
         <header className="text-center flex flex-col space-y-4 py-10 md:py-32 max-w-6xl mx-auto">
           <Link
             href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
@@ -222,8 +222,8 @@ export default function Home() {
         </section>
         <section className="w-full flex flex-col max-w-6xl mx-auto space-y-4 py-32 px-4">
           <h2 className="sr-only">
-            One observability platform,{" "}
-            <span className="text-sky-500">everything you need</span>
+            No packages, just{" "}
+            <span className="text-sky-500">headers</span>
           </h2>
           <Platform />
         </section>
