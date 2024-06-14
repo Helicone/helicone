@@ -47,9 +47,6 @@ const projects: Project[] = [
 export function Projects() {
   return (
     <div>
-      <div className="my-[24px]">
-        <div className="pb-5">Coming soon!</div>
-      </div>
       <div className="md:gap-2 md:flex-row md:justify-start sm:items-start flex flex-col justify-start items-start  bg-[#F0F9FF] border-[#0CA5E9] border border-opacity-20 rounded-lg mx-[12px] p-[24px] mt-[24px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
