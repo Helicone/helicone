@@ -20,8 +20,22 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
 
   const csvDownload = () => {
     setDownloadingCSV(true);
+    console.log(rows);
+    // Preprocess the rows to handle nested objects
+    const processedRows = rows.map((row: any) => {
+      const newRow: Record<string, any> = {};
+      for (const key in row) {
+        if (row[key] !== null && typeof row[key] === "object") {
+          newRow[key] = JSON.stringify(row[key]);
+        } else {
+          newRow[key] = row[key];
+        }
+      }
+      return newRow;
+    });
+
     // Convert JSON data to CSV
-    const csv = Papa.unparse(rows);
+    const csv = Papa.unparse(processedRows);
     // Create a blob with the CSV data
     const blob = new Blob([csv], { type: "text/csv" });
     // Create a download link and click it to start the download
