@@ -37,6 +37,8 @@ const groq = /^https:\/\/api\.groq\.com/;
 const cohere = /^https:\/\/api\.cohere\.ai/;
 // api.mistral.ai
 const mistral = /^https:\/\/api\.mistral\.ai/;
+// https://api.deepinfra.com
+const deepinfra = /^https:\/\/api\.deepinfra\.com/;
 
 export const providersNames = [
   "OPENAI",
@@ -58,6 +60,7 @@ export const providersNames = [
   "GROQ",
   "COHERE",
   "MISTRAL",
+  "DEEPINFRA",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -157,6 +160,10 @@ export const providers: {
     pattern: mistral,
     provider: "MISTRAL",
     costs: mistralCosts,
+  },
+  {
+    pattern: deepinfra,
+    provider: "DEEPINFRA",
   },
 ];
 
