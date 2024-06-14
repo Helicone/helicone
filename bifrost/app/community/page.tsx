@@ -2,11 +2,10 @@
 // import BlogPage from "../../components/templates/blog/blogPage";
 import { clsx } from "@/components/shared/utils";
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
-import { Projects } from "./projects";
-import { Integrations } from "./integrations";
 import { Customers } from "./customers";
+import { Integrations } from "./integrations";
+import { Projects } from "./projects";
 
 export type BlogStructure = {
   title: string;
@@ -21,106 +20,6 @@ export type BlogStructure = {
   }[];
   time: string; // the amount of time it takes to read the blog
 };
-
-const blogContent: BlogStructure[] = [
-  {
-    title: "Helicone vs. Weights and Biases",
-    description:
-      "Training modern LLMs is generally less c2omplex than traditional ML models. Here's how to have all the essential tools specifically designed for language model observability without the clutter.",
-    badgeText: "compare",
-    date: "May 31, 2024",
-    href: "/blog/weights-and-biases",
-    imageUrl: "/static/blog/weights-and-biases.png",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-      },
-    ],
-    time: "5 minute read",
-  },
-  {
-    title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot",
-    description:
-      "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
-    badgeText: "team's pick",
-    date: "May 30, 2024",
-    href: "/blog/cole-github-copilot",
-    imageUrl: "/static/blog/cole-copilot.png",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-      },
-    ],
-    time: "4 minute read",
-  },
-  {
-    title: "Insider Scoop: Our Founding Engineer's Take on PostHog",
-    description:
-      "No BS, no affiliations, just genuine opinions from the founding engineer at Helicone.",
-    badgeText: "team's pick",
-    date: "May 23, 2024",
-    href: "/blog/stefan-posthog",
-    imageUrl: "/static/blog/stefan-posthog/posthog-cover.png",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-      },
-    ],
-    time: "3 minute read",
-  },
-  {
-    title: "A step by step guide to switch to gpt-4o safely with Helicone",
-    description:
-      "Learn how to use Helicone's experiments features to regression test, compare and switch models.",
-    badgeText: "Product",
-    date: "May 14, 2024",
-    href: "/blog/switch-models-safely",
-    imageUrl: "static/blog/experiments/gpt-4o.png",
-    authors: [
-      {
-        name: "Scott Nguyen",
-        imageUrl: "/static/blog/scottnguyen-headshot.webp",
-      },
-    ],
-    time: "5 minute read",
-  },
-  {
-    title: "A Guide for Datadog Users Building with LLMs",
-    description:
-      "Datadog has long been a favourite among developers for monitoring and observability. But recently, LLM developers have been exploring new options. Why? We have some answers.",
-    badgeText: "Compare",
-    date: "Apr 29, 2024",
-    href: "/blog/datadog",
-    imageUrl: "static/blog/datadog/title.webp",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-      },
-    ],
-    time: "4 minute read",
-  },
-  {
-    title:
-      "A LangSmith Alternative that Takes LLM Observability to the Next Level",
-    description:
-      "Both Helicone and LangSmith are capable, powerful DevOps platform used by enterprises and developers building LLM applications. But which is better?",
-    badgeText: "Compare",
-    date: "Apr 18, 2024",
-    href: "/blog/langsmith",
-    imageUrl: "static/blog/langsmith-vs-helicone/cover-image.webp",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-      },
-    ],
-    time: "4 minute read",
-  },
-];
 
 const Blog = () => {
   const TABS = ["Projects", "Integrations", "Customers"] as const;
