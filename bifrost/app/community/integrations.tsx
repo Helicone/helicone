@@ -47,6 +47,12 @@ const integrations: Integration[] = [
     docsHref: "https://docs.helicone.ai/integrations/openai/llamaindex",
   },
   {
+    title: "Crew AI",
+    href: "https://www.crewai.com/",
+    imageHref: "/static/integrations/crewai.png",
+    docsHref: "https://docs.helicone.ai/integrations/openai/crewai",
+  },
+  {
     title: "Lytix",
     href: "https://www.lytix.co/",
     imageHref: "/static/integrations/lytix.svg",
