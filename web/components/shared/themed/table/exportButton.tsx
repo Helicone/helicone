@@ -20,7 +20,6 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
 
   const csvDownload = () => {
     setDownloadingCSV(true);
-    console.log(rows);
     // Preprocess the rows to handle nested objects
     const processedRows = rows.map((row: any) => {
       const newRow: Record<string, any> = {};
