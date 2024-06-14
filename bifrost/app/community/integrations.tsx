@@ -59,6 +59,12 @@ const integrations: Integration[] = [
     docsHref: "https://docs.helicone.ai/other-integrations/meta-gpt",
   },
   {
+    title: "Open Devin",
+    href: "https://github.com/OpenDevin/OpenDevin",
+    imageHref: "/static/integrations/open-devin.png",
+    docsHref: "https://docs.helicone.ai/other-integrations/open-devin",
+  },
+  {
     title: "PromptArmor",
     href: "https://promptarmor.com/",
     imageHref: "/static/integrations/prompt_armor.svg",
