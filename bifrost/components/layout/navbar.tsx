@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 interface NavBarProps {}
 
@@ -51,7 +52,12 @@ const MobileHeader = (props: {
             <div className="w-[.7rem] h-[.2rem] bg-slate-800 rounded-full"></div>
           </>
         ) : (
-          <div className="font-bold rounded-md">close</div>
+          <XMarkIcon
+            className="w-6 h-6 text-black"
+            onClick={() => {
+              setMenuOpen(false);
+            }}
+          />
         )}
       </button>
     </div>

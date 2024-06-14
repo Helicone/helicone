@@ -129,28 +129,30 @@ const Blog = () => {
     useState<(typeof TABS)[number]>("Projects");
 
   return (
-    <div className="w-full bg-[#f8feff] h-full antialiased relative text-black">
-      <div className="relative w-full flex flex-col space-y-4 mx-auto max-w-5xl h-full py-16 items-center text-center px-2 sm:px-2 lg:px-0">
+    <div className="w-full bg-[#F8FEFF] h-full antialiased relative text-black mb-[24px]">
+      <div className="relative w-full flex flex-col h-full mt-[24px] items-center text-center">
         <Image
-          src={"/static/pricing/bouncing-cube.webp"}
+          src={"/static/community/hero.svg"}
           alt={"bouncing-cube"}
           width={200}
           height={100}
         />
-        <h1 className="text-3xl font-black text-gray-900">Community</h1>
-        <p className="text-sm sm:text-lg text-gray-700 px-5">
+        <h1 className="mt-[24px] text-3xl font-black text-gray-900">
+          Community
+        </h1>
+        <p className="mt-[12px] text-sm sm:text-lg text-gray-700">
           All projects and companies we love who are using Helicone, and cool
           integrations.
         </p>
-        <div className="flex flex-row h-9 text-gray-500 rounded-lg bg-opacity-30 bg-gray-200">
+        <div className="mt-[24px] mb-[24px] flex flex-row h-[34px] text-gray-500 rounded-lg bg-[#F0F9FF] md:bg-transparent md:gap-5">
           {TABS.map((tab, i) => (
             <button
               key={`${tab}-${i}`}
               className={clsx(
-                "w-full h-full flex justify-items-center items-center px-6 text-xs font-bold text-center my-auto ",
+                "w-full h-full flex justify-items-center items-center px-[24px] text-xs font-bold text-center my-auto ",
                 selectedTab === tab
                   ? "bg-sky-500 text-white rounded-md"
-                  : " text-sky-500 "
+                  : " text-sky-500 bg-[#F0F9FF] rounded-md"
               )}
               onClick={() => setSelectedTab(tab)}
             >
@@ -158,7 +160,7 @@ const Blog = () => {
             </button>
           ))}
         </div>
-        <div className="border-b border-gray-300 py-4 w-full flex items-center justify-center"></div>
+
         {selectedTab === "Projects" && <Projects />}
         {selectedTab === "Integrations" && <Integrations />}
         {selectedTab === "Customers" && <Customers />}

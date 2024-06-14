@@ -47,12 +47,33 @@ const projects: Project[] = [
 export function Projects() {
   return (
     <div>
-      <div className="py-5">Coming soon!</div>
-      If you want your project featured reach out to{" "}
-      <a href="mailto:engineering@helicone.ai" className="text-blue-500">
-        engineering@helicone.ai
-      </a>
-      .
+      <div className="my-[24px]">
+        <div className="pb-5">Coming soon!</div>
+      </div>
+      <div className="md:gap-2 md:flex-row md:justify-start sm:items-start flex flex-col justify-start items-start  bg-[#F0F9FF] border-[#0CA5E9] border border-opacity-20 rounded-lg mx-[12px] p-[24px] mt-[24px]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={"/static/community/stars_icon.svg"}
+          alt="Deep Learning"
+          className="h-[24px]"
+        />
+        <div className="mt-[24px] text-[#0CA5E9] font-bold sm:mt-0 sm:whitespace-nowrap">
+          Using Helicone?{" "}
+        </div>
+        <div className="text-[#0CA5E9] sm:whitespace-nowrap">
+          We want to know what you are building!{" "}
+        </div>
+
+        <Link
+          href={"https://forms.gle/WpTEEE6vVdQccprD9"}
+          className="text-[#0CA5E9] sm:whitespace-nowrap"
+        >
+          <u className=" hover:text-[#0CA5E9] font-semibold">
+            Fill out this form
+          </u>{" "}
+          to be featured.
+        </Link>
+      </div>
     </div>
   );
   return (
