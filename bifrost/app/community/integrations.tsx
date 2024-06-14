@@ -44,8 +44,7 @@ const integrations: Integration[] = [
     title: "LLamaIndex",
     href: "https://www.llamaindex.ai/",
     imageHref: "/static/integrations/llamaindex.png",
-    docsHref: "",
-    altDocString: <>Coming soon</>,
+    docsHref: "https://docs.helicone.ai/integrations/openai/llamaindex",
   },
   {
     title: "Lytix",
