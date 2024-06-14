@@ -230,17 +230,22 @@ export class LogStore {
     function extractVersion(
       versionString: string
     ): { majorVersion: number; minorVersion: number } | undefined {
-      const versionPattern = /^(\d+)\.(\d+)$/;
-      const match = versionString.match(versionPattern);
+      try {
+        const versionPattern = /^(\d+)\.(\d+)$/;
+        const match = versionString.match(versionPattern);
 
-      if (match) {
-        const majorVersion = parseInt(match[1], 10);
-        const minorVersion = parseInt(match[2], 10);
-        return {
-          majorVersion: majorVersion,
-          minorVersion: minorVersion,
-        };
-      } else {
+        if (match) {
+          const majorVersion = parseInt(match[1], 10);
+          const minorVersion = parseInt(match[2], 10);
+          return {
+            majorVersion: majorVersion,
+            minorVersion: minorVersion,
+          };
+        } else {
+          return undefined;
+        }
+      } catch (error) {
+        console.error("Error extracting version", error);
         return undefined;
       }
     }
