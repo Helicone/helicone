@@ -51,6 +51,7 @@
             "integrations/openai/python",
             "integrations/openai/langchain",
             "integrations/openai/llamaindex",
+            "integrations/openai/crewai",
             "integrations/openai/async",
             "integrations/openai/curl"
           ]
