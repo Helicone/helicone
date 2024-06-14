@@ -25,7 +25,6 @@ import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
 import RequestRowView from "./requestRowView";
 import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
-import { RequestViews } from "./viewButton";
 
 interface ThemedTableV5Props<T> {
   defaultData: T[];
