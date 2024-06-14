@@ -117,7 +117,7 @@
     },
     {
       "group": "Other Integrations",
-      "pages": ["other-integrations/open-webui"]
+      "pages": ["other-integrations/open-webui", "other-integrations/meta-gpt"]
     },
     {
       "group": "Features",
