@@ -50,6 +50,7 @@ export interface IHeliconeHeaders {
   promptSecurityEnabled: Nullable<string>;
   moderationsEnabled: boolean;
   posthogKey: Nullable<string>;
+  lytixKey: Nullable<string>;
   posthogHost: Nullable<string>;
   webhookEnabled: boolean;
 }
@@ -90,6 +91,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   posthogKey: Nullable<string>;
   posthogHost: Nullable<string>;
   webhookEnabled: boolean;
+  lytixKey: Nullable<string>;
 
   constructor(private headers: Headers) {
     const heliconeHeaders = this.getHeliconeHeaders();
@@ -116,6 +118,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.modelOverride = heliconeHeaders.modelOverride;
     this.promptSecurityEnabled = heliconeHeaders.promptSecurityEnabled;
     this.moderationsEnabled = heliconeHeaders.moderationsEnabled;
+    this.lytixKey = heliconeHeaders.lytixKey;
     this.posthogKey = heliconeHeaders.posthogKey;
     this.posthogHost = heliconeHeaders.posthogHost;
     this.webhookEnabled = heliconeHeaders.webhookEnabled;
@@ -240,6 +243,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
           ? true
           : false,
       posthogKey: this.headers.get("Helicone-Posthog-Key") ?? null,
+      lytixKey: this.headers.get("Helicone-Lytix-Key") ?? null,
       posthogHost: this.headers.get("Helicone-Posthog-Host") ?? null,
       webhookEnabled:
         this.headers.get("Helicone-Webhook-Enabled") == "true" ? true : false,

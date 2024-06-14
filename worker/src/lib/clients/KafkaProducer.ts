@@ -38,6 +38,7 @@ export type HeliconeMeta = {
   webhookEnabled: boolean;
   posthogApiKey?: string;
   posthogHost?: string;
+  lytixKey?: string;
 };
 
 export type KafkaMessage = {
