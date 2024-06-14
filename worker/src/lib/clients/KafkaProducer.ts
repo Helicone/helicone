@@ -8,6 +8,7 @@ export type Log = {
     id: string;
     userId: string;
     promptId?: string;
+    promptVersion?: string;
     properties: Record<string, string>;
     heliconeApiKeyId?: number;
     heliconeProxyKeyId?: string;

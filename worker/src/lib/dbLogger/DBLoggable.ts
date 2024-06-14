@@ -751,6 +751,7 @@ export class DBLoggable {
             this.request.promptSettings.promptMode === "production"
               ? this.request.promptSettings.promptId
               : "",
+          promptVersion: this.request.promptSettings.promptVersion,
           properties: this.request.properties,
           heliconeApiKeyId: authParams.heliconeApiKeyId, // If undefined, proxy key id must be present
           heliconeProxyKeyId: this.request.heliconeProxyKeyId ?? undefined,
