@@ -21,13 +21,6 @@ const integrations: Integration[] = [
   },
 
   {
-    title: "PromptArmor",
-    href: "https://promptarmor.com/",
-    imageHref: "/static/integrations/prompt_armor.svg",
-    docsHref: "https://docs.helicone.ai/features/advanced-usage/llm-security",
-    imageClassName: "bg-gray-500",
-  },
-  {
     title: "Big-AGI",
     href: "https://github.com/enricoros/big-agi?tab=readme-ov-file",
     imageHref: "/static/integrations/big_agi.png",
@@ -51,6 +44,20 @@ const integrations: Integration[] = [
     href: "https://www.crewai.com/",
     imageHref: "/static/integrations/crewai.png",
     docsHref: "https://docs.helicone.ai/integrations/openai/crewai",
+  },
+  {
+    title: "Open WebUI",
+    href: "https://github.com/open-webui/open-webui",
+    imageHref: "/static/integrations/open-webui.png",
+    docsHref: "https://docs.helicone.ai/integrations/openai/crewai",
+    imageClassName: "px-[64px]",
+  },
+  {
+    title: "PromptArmor",
+    href: "https://promptarmor.com/",
+    imageHref: "/static/integrations/prompt_armor.svg",
+    docsHref: "https://docs.helicone.ai/features/advanced-usage/llm-security",
+    imageClassName: "bg-gray-500",
   },
   {
     title: "Lytix",
