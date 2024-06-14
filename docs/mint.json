@@ -50,6 +50,7 @@
             "integrations/openai/javascript",
             "integrations/openai/python",
             "integrations/openai/langchain",
+            "integrations/openai/llamaindex",
             "integrations/openai/async",
             "integrations/openai/curl"
           ]
