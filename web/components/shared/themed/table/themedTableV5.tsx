@@ -277,3 +277,4 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     </div>
   );
 }
+export { ThemedTableV5, RequestViews };
