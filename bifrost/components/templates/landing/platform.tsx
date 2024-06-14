@@ -2,13 +2,14 @@
 
 import { clsx } from "@/components/shared/utils";
 import { PiTerminalBold } from "react-icons/pi";
+import Link from "next/link";
 import {
   ChartPieIcon,
   DocumentTextIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/solid";
-import { useState } from "react";
-import Image from "next/image";
+
+
 
 const features = [
   {
@@ -16,104 +17,121 @@ const features = [
     description:
       "Monitor Prompts Version.",
     icon: PiTerminalBold,
+    href: "https://docs.helicone.ai/features/prompts",
   },
   {
     name: "Custom Properties",
     description:
       "Label & segment requests.",
     icon: PiTerminalBold,
+    href: "https://docs.helicone.ai/features/advanced-usage/custom-properties",
+
   },
   {
     name: "Caching",
     description:
       "Save money & improve latency.",
     icon: PiTerminalBold,
+    href: "https://docs.helicone.ai/features/advanced-usage/caching",
+
   },
   {
     name: "Omitting Logs",
     description:
       "Remove requests and responses.",
     icon: PiTerminalBold,
+    href: "https://docs.helicone.ai/features/advanced-usage/omit-logs",
+
   },
   {
     name: "User Metrics",
     description:
       "Get insights into your user's usage .",
     icon: PiTerminalBold,
+    href: "https://docs.helicone.ai/features/advanced-usage/user-metrics",
   },
   {
     name: "Feedback",
     description:
       "Provide user feedback on outputs. ",
     icon: PiTerminalBold,
+    href: "https://docs.helicone.ai/features/advanced-usage/feedback",
   },
   {
     name: "Scores",
     description:
       "Score your requests and experiments.",
     icon: PiTerminalBold,
+    href: "https://docs.helicone.ai/features/advanced-usage/scores",
   },
   {
     name: "Gateway Fallback",
     description:
       "Use any provider via a single endpoint.",
     icon: PiTerminalBold,
+    href: "https://docs.helicone.ai/getting-started/integration-method/gateway-fallbacks",
   },
   {
     name: "Retries",
     description:
       "Smartly retry requests.",
     icon: PiTerminalBold,
+    href: "https://docs.helicone.ai/features/advanced-usage/retries",
   },
   {
     name: "Rate Limiting",
     description:
       "Easily rate limit power users.",
     icon: PiTerminalBold,
+    href: "https://docs.helicone.ai/features/advanced-usage/custom-rate-limits",
   },
   {
     name: "KeyVault",
     description:
       "Manage and distribute your provider API keys securely.",
     icon: PiTerminalBold,
+    href: "https://docs.helicone.ai/features/advanced-usage/vault",
   },
   {
     name: "Moderation Integration",
     description:
       "Integrate OpenAi moderation to safeguard your chat completion.",
     icon: PiTerminalBold,
+    href: "https://docs.helicone.ai/features/advanced-usage/moderations",
   },
   {
     name: "LLM Security",
     description:
       "Secure OpenAI chat completions against prompt injections.",
     icon: PiTerminalBold,
+    href: "https://docs.helicone.ai/features/advanced-usage/llm-security",
+
   },
 ];
 
-const tabs = [
-  {
-    key: "monitoring",
-    name: "Monitoring and Analytics",
-    description: "Monitor performance and analyze data in real-time",
-    icon: ChartPieIcon,
-    src: "/static/platform/dashboard.webp",
-  },
-  {
-    key: "logs",
-    name: "Request Logs",
-    description: "View and search logs for your requests",
-    icon: TableCellsIcon,
-    src: "/static/platform/request.webp",
-  },
-  {
-    key: "templates",
-    name: "Prompt Templates",
-    description: "Create and manage templates for your requests",
-    icon: DocumentTextIcon,
-    src: "/static/platform/prompt.webp",
-  },
-];
+// const tabs = [
+//   {
+//     key: "monitoring",
+//     name: "Monitoring and Analytics",
+//     description: "Monitor performance and analyze data in real-time",
+//     icon: ChartPieIcon,
+//     src: "/static/platform/dashboard.webp",
+//   },
+//   {
+//     key: "logs",
+//     name: "Request Logs",
+//     description: "View and search logs for your requests",
+//     icon: TableCellsIcon,
+//     src: "/static/platform/request.webp",
+//   },
+//   {
+//     key: "templates",
+//     name: "Prompt Templates",
+//     description: "Create and manage templates for your requests",
+//     icon: DocumentTextIcon,
+//     src: "/static/platform/prompt.webp",
+//   },
+// ];
 
 export default function Platform() {
   return (
@@ -129,9 +147,9 @@ export default function Platform() {
       </div>
       <div className="relative overflow-hidden pt-2">
         <div className="mx-auto max-w-8xl px-6 lg:px-8">
-          
+
           <div className="relative" aria-hidden="true">
-            <div/>
+            <div />
           </div>
         </div>
       </div>
@@ -139,12 +157,14 @@ export default function Platform() {
         <dl className="mx-auto grid max-w-2xl grid-cols-2 gap-x-6 gap-y-10 text-base leading-7 text-gray-600 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-4 lg:gap-x-8 lg:gap-y-16">
           {features.map((feature) => (
             <div key={feature.name} className="relative" >
-                <feature.icon
-                  className="ableft-1 top-1 h-5 w-5 text-sky-500 "
-                  aria-hidden="true"
-                />
+              <feature.icon
+                className="ableft-1 top-1 h-5 w-5 text-sky-500 "
+                aria-hidden="true"
+              />
               <dt className="inline font-semibold text-nowrap text-sm text-sky-500">
-                {feature.name}
+                <Link href={feature.href}>
+                  {feature.name}
+                </Link>
               </dt>{" "}
               <dd className="font-light text-sm pt-1">{feature.description}</dd>
             </div>
