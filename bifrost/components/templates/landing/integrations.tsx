@@ -48,9 +48,10 @@ const Integrations = (props: IntegrationsProps) => {
 
 const openai = new OpenAI({
   apiKey: request.env.OPENAI_API_KEY,
-  baseURL: "https://oai.helicone.ai/v1",
+  baseURL: "https://oai.helicone.ai/HELICONE_API_KEY/v1",
   defaultHeaders: {
-    "Helicone-Auth": Bearer <HELICONE_API_KEY>,
+    "Helicone-Property-Environment": "production",
+    "Helicone-User-Id": "test@example.com",
   },
 });`,
         },
@@ -60,20 +61,22 @@ const openai = new OpenAI({
 
 client = OpenAI(
   api_key="your-api-key-here", 
-  base_url="https://oai.helicone.ai/v1",  
+  base_url="https://oai.helicone.ai/HELICONE_API_KEY/v1",  
   default_headers= {  
-    "Helicone-Auth": Bearer <HELICONE_API_KEY>,
+    "Helicone-Property-Environment": "production",
+    "Helicone-User-Id": "test@example.com",
   }
 )`,
         },
         langchain: {
           language: "python",
           code: `llm = ChatOpenAI(
-  openai_api_base="https://oai.helicone.ai/v1"
+  openai_api_base="https://oai.helicone.ai/HELICONE_API_KEY/v1"
   openai_api_key='<>',
   model_kwargs={
     "extra_headers":{
-      "Helicone-Auth": Bearer <HELICONE_API_KEY>
+      "Helicone-Property-Environment": "production",
+      "Helicone-User-Id": "test@example.com",
     }
   },
 )`,
@@ -83,9 +86,10 @@ client = OpenAI(
           code: `const llm = new OpenAI({
   modelName: "gpt-3.5-turbo",
   configuration: {
-    basePath: "https://oai.helicone.ai/v1",
+    basePath: "https://oai.helicone.ai/HELICONE_API_KEY/v1",
     defaultHeaders: {
-      "Helicone-Auth": Bearer <HELICONE_API_KEY>,
+      "Helicone-Property-Environment": "production",
+      "Helicone-User-Id": "test@example.com",
     },
   },
 });`,
