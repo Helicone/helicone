@@ -102,6 +102,7 @@
             "integrations/groq/curl"
           ]
         },
+        "getting-started/integration-method/deepinfra",
         "getting-started/integration-method/openrouter",
         "getting-started/integration-method/litellm",
         "getting-started/integration-method/posthog",

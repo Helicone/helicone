@@ -49,6 +49,7 @@ routes = [
 	{ pattern = "openrouter.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "together.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "gateway.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "deepinfra.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 
 	{ pattern = "oai.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "anthropic.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
