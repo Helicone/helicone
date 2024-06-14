@@ -42,7 +42,7 @@
       ]
     },
     {
-      "group": "Integrations",
+      "group": "Dev Integrations",
       "pages": [
         {
           "group": "OpenAI",
@@ -114,6 +114,10 @@
           ]
         }
       ]
+    },
+    {
+      "group": "Other Integrations",
+      "pages": ["other-integrations/open-webui"]
     },
     {
       "group": "Features",
