@@ -351,6 +351,7 @@ export class LoggingHandler extends AbstractLogHandler {
 
     const promptRecord: PromptRecord = {
       promptId: context.message.log.request.promptId,
+      promptVersion: context.message.log.request.promptVersion ?? "",
       requestId: context.message.log.request.id,
       orgId: context.orgParams.id,
       model: context.processedLog.model,
