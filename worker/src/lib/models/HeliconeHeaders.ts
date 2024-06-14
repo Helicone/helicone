@@ -37,6 +37,7 @@ export interface IHeliconeHeaders {
   promptHeaders: {
     promptId: Nullable<string>;
     promptMode: Nullable<string>;
+    promptVersion: Nullable<string>;
   };
   promptName: Nullable<string>;
   userId: Nullable<string>;
@@ -78,6 +79,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   promptHeaders: {
     promptId: Nullable<string>;
     promptMode: Nullable<string>;
+    promptVersion: Nullable<string>;
   };
   promptName: Nullable<string>;
   userId: Nullable<string>;
@@ -106,6 +108,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.promptHeaders = {
       promptId: heliconeHeaders.promptHeaders.promptId,
       promptMode: heliconeHeaders.promptHeaders.promptMode,
+      promptVersion: heliconeHeaders.promptHeaders.promptVersion,
     };
     this.promptName = heliconeHeaders.promptName;
     this.omitHeaders = heliconeHeaders.omitHeaders;
@@ -221,6 +224,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       promptHeaders: {
         promptId: this.headers.get("Helicone-Prompt-Id") ?? null,
         promptMode: this.headers.get("Helicone-Prompt-Mode") ?? null,
+        promptVersion: this.headers.get("Helicone-Prompt-Version") ?? null,
       },
       promptName: this.headers.get("Helicone-Prompt-Name") ?? null,
       userId: this.headers.get("Helicone-User-Id") ?? null,
