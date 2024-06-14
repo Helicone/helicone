@@ -36,7 +36,7 @@ const Blog = () => {
           width={200}
           height={100}
         />
-        <h1 className="mt-[24px] text-3xl font-black text-gray-900">
+        <h1 className="mt-[24px] text-3xl md:text-5xl font-black text-gray-900">
           Community
         </h1>
         <p className="mt-[12px] text-sm sm:text-lg text-gray-700">
@@ -48,7 +48,7 @@ const Blog = () => {
             <button
               key={`${tab}-${i}`}
               className={clsx(
-                "w-full h-full flex justify-items-center items-center px-[24px] text-xs font-bold text-center my-auto ",
+                "w-full h-full flex justify-items-center items-center px-[24px] font-semibold text-center my-auto ",
                 selectedTab === tab
                   ? "bg-sky-500 text-white rounded-md"
                   : " text-sky-500 bg-[#F0F9FF] rounded-md"
