@@ -127,7 +127,11 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
 
       const getContent = (data: any) => {
         // Check for tool calls and extract them if present
-        if (data.choices && data.choices[0].message?.tool_calls) {
+        if (
+          data.choices &&
+          data.choices.length > 0 &&
+          data.choices[0].message?.tool_calls
+        ) {
           const message = data.choices[0].message;
           const tools = message.tool_calls;
           const functionTools = tools.filter(
@@ -136,11 +140,19 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           return JSON.stringify(functionTools, null, 4);
         }
         // Check for content in choices array
-        else if (data.choices && data.choices[0].message?.content) {
+        else if (
+          data.choices &&
+          data.choices.length > 0 &&
+          data.choices[0].message?.content
+        ) {
           return data.choices[0].message.content;
         }
         // Check for content in the main content array
-        else if (data.content && data.content[0].text) {
+        else if (
+          data.content &&
+          data.content.length > 0 &&
+          data.content[0].text
+        ) {
           return data.content[0].text;
         }
         // Default case if no content is found
