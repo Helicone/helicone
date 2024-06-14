@@ -49,8 +49,14 @@ const integrations: Integration[] = [
     title: "Open WebUI",
     href: "https://github.com/open-webui/open-webui",
     imageHref: "/static/integrations/open-webui.png",
-    docsHref: "https://docs.helicone.ai/integrations/openai/crewai",
+    docsHref: "https://docs.helicone.ai/other-integrations/open-webui",
     imageClassName: "px-[64px]",
+  },
+  {
+    title: "Meta GPT",
+    href: "https://github.com/geekan/MetaGPT",
+    imageHref: "/static/integrations/meta-gpt.png",
+    docsHref: "https://docs.helicone.ai/other-integrations/meta-gpt",
   },
   {
     title: "PromptArmor",
