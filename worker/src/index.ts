@@ -156,6 +156,12 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://openrouter.ai",
       };
+    } else if (hostParts[0].includes("deepinfra")) {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://api.deepinfra.com",
+      };
     } else if (hostParts[0].includes("groq")) {
       return {
         ...env,
