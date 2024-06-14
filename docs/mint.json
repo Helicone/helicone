@@ -37,7 +37,8 @@
       "group": "Welcome",
       "pages": [
         "getting-started/quick-start",
-        "helicone-headers/header-directory"
+        "helicone-headers/header-directory",
+        "helicone-headers/helicone-auth"
       ]
     },
     {
@@ -104,7 +105,7 @@
         "getting-started/integration-method/posthog",
 
         {
-          "group": "Other",
+          "group": "Generic Gateway",
           "pages": [
             "getting-started/integration-method/gateway",
             "getting-started/integration-method/custom"
@@ -151,10 +152,7 @@
     },
     {
       "group": "Observability",
-      "pages": [
-        "use-cases/getting-user-requests", 
-        "use-cases/segmentation"
-      ]
+      "pages": ["use-cases/getting-user-requests", "use-cases/segmentation"]
     },
     {
       "group": "Guides",
