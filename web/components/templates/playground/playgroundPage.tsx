@@ -159,8 +159,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 {
                   id: "2",
                   content:
-                    "Hey there 👋! In the playground, you can replay your user's requests, experiment with your prompts, and test different models. Let's chat!",
-                  role: "assistant",
+                    "Welcome to the playground! This is a space where you can replay user requests, experiment with various prompts, and test different models. Feel free to explore and interact with the available features. Let's get started!",
+                  role: "system",
                 },
               ]}
               models={selectedModels}
