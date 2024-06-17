@@ -1,6 +1,7 @@
-import { supabaseServer } from "../../lib/db/supabase";
+import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { ok, err, Result } from "../../lib/shared/result";
+import { OrganizationStore } from "../../lib/stores/OrganizationStore";
 import { BaseManager } from "../BaseManager";
 
 export type NewOrganizationParams = {
@@ -46,7 +47,19 @@ export type OrganizationFilter = {
   softDelete: boolean;
 };
 
+export type OrganizationLayout = {
+  id: string;
+  organization_id: string;
+  type: string;
+  filters: OrganizationFilter[];
+};
+
 export class OrganizationManager extends BaseManager {
+  private organizationStore: OrganizationStore;
+  constructor(authParams: AuthParams) {
+    super(authParams);
+    this.organizationStore = new OrganizationStore(authParams.organizationId);
+  }
   async createOrganization(
     createOrgParams: NewOrganizationParams
   ): Promise<Result<NewOrganizationParams, string>> {
@@ -63,87 +76,58 @@ export class OrganizationManager extends BaseManager {
     if (createOrgParams.tier !== "free") {
       return err("Only free tier is supported");
     }
-
-    const insert = await dbExecute<NewOrganizationParams>(
-      "INSERT INTO organization (name, owner, color, icon, has_onboarded, tier, reseller_id, organization_type, org_provider_key, limits) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id",
-      [
-        createOrgParams.name,
-        createOrgParams.owner,
-        createOrgParams.color,
-        createOrgParams.icon,
-        createOrgParams.has_onboarded,
-        createOrgParams.tier,
-        createOrgParams.reseller_id,
-        createOrgParams.organization_type,
-        createOrgParams.org_provider_key,
-        createOrgParams.limits,
-      ]
+    const insert = await this.organizationStore.createNewOrganization(
+      createOrgParams
     );
-
     if (insert.error || !insert.data) {
       return err(insert.error);
     }
-    return ok(insert.data[0]);
+    return ok(insert.data);
   }
 
   async updateOrganization(
-    orgId: string,
-    updateOrgParams: UpdateOrganizationParams
+    updateOrgParams: UpdateOrganizationParams,
+    organizationId: string
   ): Promise<Result<string, string>> {
-    const orgMember = await dbExecute<{ org_role: string }>(
-      "SELECT org_role FROM organization_member WHERE organization = $1 AND member = $2",
-      [orgId, this.authParams.userId]
+    if (!this.authParams.userId) return err("Unauthorized");
+    const orgMember = await this.organizationStore.getOrganizationMember(
+      this.authParams.userId,
+      organizationId
     );
 
-    if (!orgMember.data || orgMember.data.length === 0) {
+    if (!orgMember.data) {
       return err("Unauthorized");
     }
 
-    if (orgMember.data[0].org_role !== "owner") {
+    if (orgMember.data.org_role !== "owner") {
       return err("Only organization admins can update settings");
     }
 
-    const { data, error } = await supabaseServer.client
-      .from("organization")
-      .update({
-        name: updateOrgParams.name,
-        color: updateOrgParams.color,
-        icon: updateOrgParams.icon,
-        ...(updateOrgParams.variant === "reseller" && {
-          org_provider_key: updateOrgParams.org_provider_key,
-          limits: updateOrgParams.limits,
-          reseller_id: updateOrgParams.reseller_id,
-          organization_type: "customer",
-        }),
-      })
-      .eq("id", orgId)
-      .select("id");
+    const { data, error } = await this.organizationStore.updateOrganization(
+      updateOrgParams,
+      organizationId
+    );
 
     if (error || !data || data.length === 0) {
       console.error(`Failed to update organization: ${error}`);
       return err(`Failed to update organization: ${error}`);
     }
-    return ok(data[0].id);
+    return ok(data);
   }
 
   async addMember(
     organizationId: string,
     email: string
   ): Promise<Result<string, string>> {
-    const getUserIdQuery = `
-      SELECT id FROM auth.users WHERE email = $1 LIMIT 1
-    `;
-    let { data: userId, error: userIdError } = await dbExecute<{ id: string }>(
-      getUserIdQuery,
-      [email]
-    );
+    let { data: userId, error: userIdError } =
+      await this.organizationStore.getUserByEmail(email);
 
     if (userIdError) {
       return err(userIdError);
     }
     if (!userId || userId.length === 0) {
       await supabaseServer.client.auth.signInWithOtp({ email });
-      const result = await dbExecute<{ id: string }>(getUserIdQuery, [email]);
+      const result = await this.organizationStore.getUserByEmail(email);
       userId = result.data;
       userIdError = result.error;
     }
@@ -152,18 +136,17 @@ export class OrganizationManager extends BaseManager {
       return err(userIdError);
     }
 
-    const { error: insertError } = await supabaseServer.client
-      .from("organization_member")
-      .insert([{ organization: organizationId, member: userId![0].id }]);
+    const { error: insertError } =
+      await this.organizationStore.addMemberToOrganization(
+        userId!,
+        organizationId
+      );
 
     if (insertError && insertError !== null) {
-      if (insertError.code === "23505") {
-        return ok(userId![0].id); // User already added
-      }
-      return err(insertError.message);
+      return err(insertError);
     }
 
-    return ok(userId![0].id);
+    return ok(userId!);
   }
 
   async createFilter(
@@ -177,17 +160,43 @@ export class OrganizationManager extends BaseManager {
       filters: filters,
     };
 
-    const insert = await supabaseServer.client
-      .from("organization_layout")
-      .insert([insertRequest])
-      .select("*")
-      .single();
+    const { data: createdFilter, error: createFilterError } =
+      await this.organizationStore.createOrganizationFilter(insertRequest);
 
-    if (insert.error || !insert.data) {
-      console.error(`Failed to create filter: ${insert.error}`);
-      return err(`Failed to create filter: ${insert.error}`);
+    if (createFilterError || !createdFilter) {
+      console.error(`Failed to create filter: ${createFilterError}`);
+      return err(`Failed to create filter: ${createFilterError}`);
     }
 
-    return ok(insert.data.id);
+    return ok(createdFilter);
+  }
+
+  async deleteOrganization(): Promise<Result<string, string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
+    const { data: orgData, error: orgError } =
+      await this.organizationStore.deleteOrganization(this.authParams.userId);
+
+    if (orgError || !orgData) {
+      return err(orgError ?? "Error deleting organization");
+    }
+    return ok(orgData);
+  }
+
+  async getOrganizationLayout(
+    organizationId: string,
+    type: string
+  ): Promise<Result<OrganizationLayout, string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
+    const { data: layout, error: organizationLayoutError } =
+      await this.organizationStore.getOrganizationLayout(
+        organizationId,
+        this.authParams.userId,
+        type
+      );
+
+    if (organizationLayoutError !== null) {
+      return err(organizationLayoutError);
+    }
+    return ok(layout);
   }
 }

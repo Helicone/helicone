@@ -6,6 +6,7 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { Database } from "../../../supabase/database.types";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { useJawnClient } from "../../../lib/clients/jawnHook";
 
 interface DeleteOrgModalProps {
   open: boolean;
@@ -20,6 +21,7 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
   const { setNotification } = useNotification();
   const orgContext = useOrg();
   const router = useRouter();
+  const jawn = useJawnClient();
   const supabaseClient = useSupabaseClient<Database>();
   const [confirmOrgName, setConfirmOrgName] = useState("");
 
@@ -67,12 +69,13 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
                 setNotification("Organization name does not match", "error");
                 return;
               }
-              const res = await (
-                await fetch(`/api/organization/${orgId}/delete`)
-              ).json();
 
-              if (res.error) {
-                console.error(res);
+              const { error: deleteOrgError } = await jawn.DELETE(
+                `/v1/organization/delete`
+              );
+
+              if (deleteOrgError) {
+                console.error(deleteOrgError);
                 setNotification("Error deleting organization", "error");
               } else {
                 orgContext?.refetchOrgs();

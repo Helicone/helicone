@@ -8,12 +8,16 @@ import {
   Request,
   Path,
   Put,
+  Delete,
+  Get,
+  Query,
 } from "tsoa";
 import { err, ok, Result } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import {
   NewOrganizationParams,
   OrganizationFilter,
+  OrganizationLayout,
   OrganizationManager,
   UpdateOrganizationParams,
 } from "../../managers/organization/OrganizationManager";
@@ -50,8 +54,8 @@ export class OrganizationController extends Controller {
     const organizationManager = new OrganizationManager(request.authParams);
 
     const result = await organizationManager.updateOrganization(
-      organizationId,
-      requestBody
+      requestBody,
+      organizationId
     );
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -107,6 +111,43 @@ export class OrganizationController extends Controller {
     } else {
       this.setStatus(201);
       return ok(null);
+    }
+  }
+
+  @Delete("/delete")
+  public async deleteOrganization(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.deleteOrganization();
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(result.error ?? "Error deleting organization");
+    } else {
+      this.setStatus(201);
+      return ok(null);
+    }
+  }
+
+  @Get("/{organizationId}/layout")
+  public async getOrganizationLayout(
+    @Path() organizationId: string,
+    @Query() type: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<OrganizationLayout, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.getOrganizationLayout(
+      organizationId,
+      type
+    );
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(result.error ?? "Error getting organization layout");
+    } else {
+      this.setStatus(200);
+      return ok(result.data);
     }
   }
 }
