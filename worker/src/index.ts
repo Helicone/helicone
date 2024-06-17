@@ -75,6 +75,7 @@ export interface BASE_Env {
   UPSTASH_KAFKA_PASSWORD: string;
   ORG_IDS?: string;
   PERCENT_LOG_KAFKA?: string;
+  WORKER_DEFINED_REDIRECT_URL?: string;
 }
 export type Env = BASE_Env & EU_Env;
 
@@ -91,6 +92,10 @@ export async function hash(key: string): Promise<string> {
     return paddedHexCode;
   });
   return hexCodes.join("");
+}
+
+function isRootPath(url: URL) {
+  return url.pathname === "/" || url.pathname === "" || !url.pathname;
 }
 
 // If the url starts with oai.*.<>.com then we know WORKER_TYPE is OPENAI_PROXY
@@ -145,24 +150,51 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         WORKER_TYPE: "HELICONE_API",
       };
     } else if (hostParts[0].includes("together")) {
-      return {
-        ...env,
-        WORKER_TYPE: "GATEWAY_API",
-        GATEWAY_TARGET: "https://api.together.xyz",
-      };
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://together.xyz",
+        };
+      } else {
+        return {
+          ...env,
+          WORKER_TYPE: "GATEWAY_API",
+          GATEWAY_TARGET: "https://api.together.xyz",
+        };
+      }
     } else if (hostParts[0].includes("openrouter")) {
-      return {
-        ...env,
-        WORKER_TYPE: "GATEWAY_API",
-        GATEWAY_TARGET: "https://openrouter.ai",
-      };
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://openrouter.ai",
+        };
+      } else {
+        return {
+          ...env,
+          WORKER_TYPE: "GATEWAY_API",
+          GATEWAY_TARGET: "https://openrouter.ai",
+        };
+      }
     } else if (hostParts[0].includes("deepinfra")) {
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://deepinfra.com",
+        };
+      }
       return {
         ...env,
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://api.deepinfra.com",
       };
     } else if (hostParts[0].includes("groq")) {
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://groq.com",
+        };
+      }
+
       return {
         ...env,
         WORKER_TYPE: "GATEWAY_API",
@@ -198,6 +230,11 @@ export default {
         return handleError(requestWrapper.error);
       }
       env = modifyEnvBasedOnPath(env, requestWrapper.data);
+
+      if (env.WORKER_DEFINED_REDIRECT_URL) {
+        return Response.redirect(env.WORKER_DEFINED_REDIRECT_URL, 301);
+      }
+
       const router = buildRouter(
         env.WORKER_TYPE,
         request.url.includes("browser")
