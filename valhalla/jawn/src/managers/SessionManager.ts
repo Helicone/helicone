@@ -8,9 +8,14 @@ import { buildRequestSort } from "../lib/shared/sorts/requests/sorts";
 export class SessionManager {
   constructor(private authParams: AuthParams) {}
 
-  async getSessions(
-    requestBody: SessionQueryParams
-  ): Promise<Result<any, string>> {
+  async getSessions(requestBody: SessionQueryParams): Promise<
+    Result<
+      {
+        session_id: string;
+      }[],
+      string
+    >
+  > {
     const {
       filter,
       offset = 0,
@@ -72,10 +77,6 @@ export class SessionManager {
       session_id: string;
     }>(query, builtFilter.argsAcc);
 
-    console.log(`Results: ${JSON.stringify(results)}`);
-
-    return resultMap(results, (result: any) => ({
-      session_id: result.session_id,
-    }));
+    return results;
   }
 }

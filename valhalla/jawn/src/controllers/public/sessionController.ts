@@ -63,7 +63,14 @@ export class SessionController extends Controller {
     @Body()
     requestBody: SessionQueryParams,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<any, string>> {
+  ): Promise<
+    Result<
+      {
+        session_id: string;
+      }[],
+      string
+    >
+  > {
     const sessionManager = new SessionManager(request.authParams);
 
     const result = await sessionManager.getSessions(requestBody);

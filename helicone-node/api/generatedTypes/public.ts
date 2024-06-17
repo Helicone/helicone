@@ -105,12 +105,14 @@ export interface components {
         startTimeUnixSeconds: number;
       };
     };
-    ResultSuccess_any_: {
-      data: unknown;
+    "ResultSuccess__session_id-string_-Array_": {
+      data: {
+          session_id: string;
+        }[];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_any.string_": components["schemas"]["ResultSuccess_any_"] | components["schemas"]["ResultError_string_"];
+    "Result__session_id-string_-Array.string_": components["schemas"]["ResultSuccess__session_id-string_-Array_"] | components["schemas"]["ResultError_string_"];
     /** @description Make all properties in T optional */
     Partial_TextOperators_: {
       "not-equals"?: string;
@@ -913,7 +915,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_any.string_"];
+          "application/json": components["schemas"]["Result__session_id-string_-Array.string_"];
         };
       };
     };

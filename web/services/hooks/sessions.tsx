@@ -29,7 +29,7 @@ const useSessions = (
       const orgId = query.queryKey[5] as string;
 
       const jawnClient = getJawnClient(orgId);
-      const response = await jawnClient.POST("/v1/session/query", {
+      return await jawnClient.POST("/v1/session/query", {
         body: {
           filter: advancedFilter as any,
           offset: (currentPage - 1) * currentPageSize,
@@ -37,11 +37,6 @@ const useSessions = (
           sort: sortLeaf as any,
         },
       });
-
-      const result = response.data as any;
-      console.log(`Result: ${JSON.stringify(result)}`);
-
-      return ok(result);
     },
     refetchOnWindowFocus: false,
     retry: false,
@@ -49,11 +44,8 @@ const useSessions = (
     refetchInterval: false,
   });
 
-  const response = data?.data || undefined;
-  const sessions = response?.data || [];
-
   return {
-    sessions,
+    sessions: data?.data?.data || [],
     refetch,
     isLoading,
     isRefetching,
