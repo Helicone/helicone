@@ -70,7 +70,6 @@ export class HeliconeAsyncLogger {
   init() {
     traceloop.initialize({
       apiKey: this.apiKey,
-      baseUrl: this.baseUrl,
       disableBatch: true,
       exporter: new OTLPTraceExporter({
         url: this.baseUrl,

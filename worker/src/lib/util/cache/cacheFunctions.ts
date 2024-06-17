@@ -142,7 +142,7 @@ export async function getCachedResponse(
     cacheSeed
   );
   if (freeIndexes.length > 0) {
-    console.log("Max cache size reached, not caching");
+    console.log("Bucket is not full yet");
     return null;
   } else {
     const cacheIdx = Math.floor(Math.random() * requestCaches.length);
