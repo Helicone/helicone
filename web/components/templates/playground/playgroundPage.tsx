@@ -160,7 +160,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   id: "2",
                   content:
                     "Welcome to the playground! This is a space where you can replay user requests, experiment with various prompts, and test different models. Feel free to explore and interact with the available features. Let's get started!",
-                  role: "system",
+                  role: "assistant",
                 },
                 {
                   id: "3",
