@@ -54,6 +54,12 @@ export type OrganizationLayout = {
   filters: OrganizationFilter[];
 };
 
+export type OrganizationMember = {
+  email: string;
+  member: string;
+  org_role: string;
+};
+
 export class OrganizationManager extends BaseManager {
   private organizationStore: OrganizationStore;
   constructor(authParams: AuthParams) {
@@ -171,6 +177,26 @@ export class OrganizationManager extends BaseManager {
     return ok(createdFilter);
   }
 
+  async updateFilter(
+    organizationId: string,
+    type: string,
+    filters: OrganizationFilter[]
+  ): Promise<Result<string, string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
+    const { error: updateError } =
+      await this.organizationStore.updateOrganizationFilter(
+        organizationId,
+        this.authParams.userId,
+        type,
+        filters
+      );
+
+    if (updateError) {
+      return err(updateError);
+    }
+    return ok("success");
+  }
+
   async deleteOrganization(): Promise<Result<string, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
     const { data: orgData, error: orgError } =
@@ -198,5 +224,21 @@ export class OrganizationManager extends BaseManager {
       return err(organizationLayoutError);
     }
     return ok(layout);
+  }
+
+  async getOrganizationMembers(
+    organizationId: string
+  ): Promise<Result<OrganizationMember[], string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
+    const { data: members, error: membersError } =
+      await this.organizationStore.getOrganizationMembers(
+        organizationId,
+        this.authParams.userId
+      );
+
+    if (membersError !== null) {
+      return err(membersError);
+    }
+    return ok(members);
   }
 }

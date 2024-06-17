@@ -11,6 +11,7 @@ import ThemedModal from "../themedModal";
 import { useOrg } from "../../../layout/organizationContext";
 import useNotification from "../../notification/useNotification";
 import useSearchParams from "../../utils/useSearchParams";
+import { useJawnClient } from "../../../../lib/clients/jawnHook";
 
 interface FilterButtonProps {
   filters?: OrganizationFilter[];
@@ -28,7 +29,7 @@ export default function FiltersButton({
   layoutPage,
 }: FilterButtonProps) {
   const searchParams = useSearchParams();
-
+  const jawn = useJawnClient();
   const [selectedFilter, setSelectedFilter] =
     useState<OrganizationFilter | null>(
       filters?.find((filter) => filter.id === currentFilter) ?? null
@@ -178,30 +179,29 @@ export default function FiltersButton({
                 const updatedFilters = filters?.filter(
                   (filter) => filter.id !== filterToDelete?.id
                 );
-                await fetch(
-                  `/api/organization/${orgContext?.currentOrg
-                    ?.id!}/update_filter`,
+                const { data, error } = await jawn.PUT(
+                  "/v1/organization/{organizationId}/update_filter",
                   {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
+                    params: {
+                      path: {
+                        organizationId: orgContext?.currentOrg?.id!,
+                      },
                     },
-                    body: JSON.stringify({
+                    body: {
                       type: layoutPage,
-                      filters: updatedFilters,
-                    }),
+                      filters: updatedFilters!,
+                    },
                   }
-                )
-                  .then(() => {
-                    setIsLoading(false);
-                    setIsDeleteModalOpen(false);
-                    setNotification("Filter deleted successfully", "success");
-                    onDeleteCallback && onDeleteCallback();
-                  })
-                  .catch(() => {
-                    setIsLoading(false);
-                    setNotification("Error deleting filter", "error");
-                  });
+                );
+                if (error) {
+                  setIsLoading(false);
+                  setNotification("Error deleting filter", "error");
+                  return;
+                }
+                setIsLoading(false);
+                setIsDeleteModalOpen(false);
+                setNotification("Filter deleted successfully", "success");
+                onDeleteCallback && onDeleteCallback();
               }}
               className={clsx(
                 "relative inline-flex items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"

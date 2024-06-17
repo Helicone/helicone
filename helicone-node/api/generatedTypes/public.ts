@@ -57,11 +57,17 @@ export interface paths {
   "/v1/organization/{organizationId}/create_filter": {
     post: operations["CreateOrganizationFilter"];
   };
+  "/v1/organization/{organizationId}/update_filter": {
+    put: operations["UpdateOrganizationFilter"];
+  };
   "/v1/organization/delete": {
     delete: operations["DeleteOrganization"];
   };
   "/v1/organization/{organizationId}/layout": {
     get: operations["GetOrganizationLayout"];
+  };
+  "/v1/organization/{organizationId}/members": {
+    get: operations["GetOrganizationMembers"];
   };
   "/v1/experiment/dataset": {
     post: operations["AddDataset"];
@@ -563,6 +569,17 @@ Json: JsonObject;
       error: null;
     };
     "Result_OrganizationLayout.string_": components["schemas"]["ResultSuccess_OrganizationLayout_"] | components["schemas"]["ResultError_string_"];
+    OrganizationMember: {
+      org_role: string;
+      member: string;
+      email: string;
+    };
+    "ResultSuccess_OrganizationMember-Array_": {
+      data: components["schemas"]["OrganizationMember"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_OrganizationMember-Array.string_": components["schemas"]["ResultSuccess_OrganizationMember-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__datasetId-string__": {
       data: {
         datasetId: string;
@@ -1081,6 +1098,30 @@ export interface operations {
       };
     };
   };
+  UpdateOrganizationFilter: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          type: "dashboard" | "requests";
+          filters: components["schemas"]["OrganizationFilter"][];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
   DeleteOrganization: {
     responses: {
       /** @description Ok */
@@ -1105,6 +1146,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_OrganizationLayout.string_"];
+        };
+      };
+    };
+  };
+  GetOrganizationMembers: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrganizationMember-Array.string_"];
         };
       };
     };

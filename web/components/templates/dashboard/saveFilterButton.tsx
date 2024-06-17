@@ -22,7 +22,7 @@ interface SaveFilterButtonProps {
 }
 
 const SaveFilterButton = (props: SaveFilterButtonProps) => {
-  const jaws = useJawnClient();
+  const jawn = useJawnClient();
   const { filters, onSaveFilterCallback, filterMap, savedFilters, layoutPage } =
     props;
 
@@ -50,33 +50,33 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
       };
       if (savedFilters !== undefined) {
         const updatedFilters = [...savedFilters, saveFilter];
-        await fetch(
-          `/api/organization/${orgContext?.currentOrg?.id!}/update_filter`,
+        const { data, error } = await jawn.PUT(
+          "/v1/organization/{organizationId}/update_filter",
           {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
+            params: {
+              path: {
+                organizationId: orgContext?.currentOrg?.id!,
+              },
             },
-            body: JSON.stringify({
+            body: {
               type: layoutPage,
-              filters: updatedFilters,
-            }),
+              filters: updatedFilters!,
+            },
           }
-        )
-          .then(() => {
-            setNotification("Filter created successfully", "success");
-            setIsSaveFiltersModalOpen(false);
-            onSaveFilterCallback();
-            const currentAdvancedFilters = encodeURIComponent(
-              JSON.stringify(filters.map(encodeFilter).join("|"))
-            );
-            searchParams.set("filters", currentAdvancedFilters);
-          })
-          .catch((err) => {
-            setNotification(err, "error");
-          });
+        );
+        if (error) {
+          setNotification(error, "error");
+          return;
+        }
+        setNotification("Filter created successfully", "success");
+        setIsSaveFiltersModalOpen(false);
+        onSaveFilterCallback();
+        const currentAdvancedFilters = encodeURIComponent(
+          JSON.stringify(filters.map(encodeFilter).join("|"))
+        );
+        searchParams.set("filters", currentAdvancedFilters);
       } else {
-        const { error: createFilterError } = await jaws.POST(
+        const { error: createFilterError } = await jawn.POST(
           "/v1/organization/{organizationId}/create_filter",
           {
             params: {

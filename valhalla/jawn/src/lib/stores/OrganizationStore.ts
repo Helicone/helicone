@@ -2,6 +2,7 @@ import {
   NewOrganizationParams,
   OrganizationFilter,
   OrganizationLayout,
+  OrganizationMember,
   UpdateOrganizationParams,
 } from "../../managers/organization/OrganizationManager";
 import { supabaseServer } from "../db/supabase";
@@ -115,6 +116,7 @@ export class OrganizationStore extends BaseStore {
     type: "dashboard" | "requests";
     filters: OrganizationFilter[];
   }): Promise<Result<string, string>> {
+    console.log("createOrganizationFilter", insertRequest);
     const insert = await supabaseServer.client
       .from("organization_layout")
       .insert([insertRequest])
@@ -178,6 +180,53 @@ export class OrganizationStore extends BaseStore {
       filters: layout.filters as OrganizationFilter[],
       organization_id: layout.organization_id,
     });
+  }
+
+  async updateOrganizationFilter(
+    organizationId: string,
+    userId: string,
+    type: string,
+    filters: OrganizationFilter[]
+  ): Promise<Result<string, string>> {
+    const hasAccess = await this.checkAccessToMutateOrg(organizationId, userId);
+    if (!hasAccess) {
+      return err("User does not have access to update organization filter");
+    }
+    const updateRes = await supabaseServer.client
+      .from("organization_layout")
+      .update({
+        filters: filters,
+      })
+      .eq("organization_id", organizationId)
+      .eq("type", type);
+
+    if (updateRes.error) {
+      return err("internal error" + updateRes.error);
+    }
+    return ok("success");
+  }
+
+  async getOrganizationMembers(
+    organizationId: string,
+    userId: string
+  ): Promise<Result<OrganizationMember[], string>> {
+    const hasAccess = await this.checkAccessToMutateOrg(organizationId, userId);
+
+    if (!hasAccess) {
+      return err("User does not have access to get organization members");
+    }
+
+    const query = `
+      select email, member, org_role from organization_member om 
+        left join auth.users u on u.id = om.member
+        where om.organization = $1
+    `;
+
+    return await dbExecute<{
+      email: string;
+      member: string;
+      org_role: string;
+    }>(query, [organizationId]);
   }
 
   private async checkAccessToMutateOrg(

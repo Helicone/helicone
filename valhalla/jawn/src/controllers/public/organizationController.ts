@@ -19,6 +19,7 @@ import {
   OrganizationFilter,
   OrganizationLayout,
   OrganizationManager,
+  OrganizationMember,
   UpdateOrganizationParams,
 } from "../../managers/organization/OrganizationManager";
 
@@ -114,6 +115,32 @@ export class OrganizationController extends Controller {
     }
   }
 
+  @Put("/{organizationId}/update_filter")
+  public async updateOrganizationFilter(
+    @Body()
+    requestBody: {
+      filters: OrganizationFilter[];
+      type: "dashboard" | "requests";
+    },
+    @Path() organizationId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.updateFilter(
+      organizationId,
+      requestBody.type,
+      requestBody.filters
+    );
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(result.error ?? "Error updating organization filter");
+    } else {
+      this.setStatus(201);
+      return ok(null);
+    }
+  }
+
   @Delete("/delete")
   public async deleteOrganization(
     @Request() request: JawnAuthenticatedRequest
@@ -145,6 +172,25 @@ export class OrganizationController extends Controller {
     if (result.error || !result.data) {
       this.setStatus(500);
       return err(result.error ?? "Error getting organization layout");
+    } else {
+      this.setStatus(200);
+      return ok(result.data);
+    }
+  }
+
+  @Get("/{organizationId}/members")
+  public async getOrganizationMembers(
+    @Path() organizationId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<OrganizationMember[], string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.getOrganizationMembers(
+      organizationId
+    );
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(result.error ?? "Error getting organization members");
     } else {
       this.setStatus(200);
       return ok(result.data);
