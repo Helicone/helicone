@@ -168,6 +168,12 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://api.groq.com",
       };
+    } else if (hostParts[0].includes("hyperbolic")) {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://api.hyperbolic.xyz",
+      };
     }
   }
 
