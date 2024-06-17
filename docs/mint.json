@@ -94,6 +94,7 @@
         },
         "getting-started/integration-method/anyscale",
         "getting-started/integration-method/together",
+        "getting-started/integration-method/hyperbolic",
         {
           "group": "Groq",
           "pages": [
