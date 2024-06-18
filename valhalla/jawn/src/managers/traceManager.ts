@@ -31,7 +31,6 @@ export class TraceManager {
           });
 
           const uuid = randomUUID();
-
           return {
             traceId: uuid,
             spanId: span.spanId,
