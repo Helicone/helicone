@@ -28,7 +28,7 @@ export class TraceController extends Controller {
     const traceManager = new TraceManager();
     const trace = request.body as OTELTrace;
     try {
-      await traceManager.consumeTraces(trace, request.header("authorization") ?? "");
+      await traceManager.consumeTraces(trace, request.header("authorization") ?? "", request.authParams);
       this.setStatus(200);
     } catch (error: any) {
       console.error(`Error processing OTEL trace : ${error.message}`);

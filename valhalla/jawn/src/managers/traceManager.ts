@@ -1,9 +1,24 @@
 import type { Log, Message } from "../lib/handlers/HandlerContext";
 import { KafkaProducer } from "../lib/clients/KafkaProducer";
 import util from "util";
+import { AuthParams } from "../lib/db/supabase";
+import { string } from "zod";
+import { S3Client } from "../lib/shared/db/s3Client";
 
 export class TraceManager {
-  public async consumeTraces(trace: OTELTrace, heliconeAuthorization: string) {
+
+  private s3Client: S3Client;
+  constructor() {
+    this.s3Client = new S3Client(
+      process.env.S3_ACCESS_KEY ?? "",
+      process.env.S3_SECRET_KEY ?? "",
+      process.env.S3_ENDPOINT ?? "",
+      process.env.S3_BUCKET_NAME ?? "",
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+    );
+  }
+
+  public async consumeTraces(trace: OTELTrace, heliconeAuthorization: string, authParams: AuthParams) {
 
     const spans = trace.resourceSpans.flatMap((resourceSpan) => {
       return resourceSpan.scopeSpans.flatMap((scopeSpan) => {
@@ -14,6 +29,39 @@ export class TraceManager {
             attributes.set(key, value.stringValue ?? value.intValue);
           });
 
+          const promptMessages: {
+            role: "system" | "user",
+            content: string
+          }[] = []
+          const completionMessages: {
+            role: "assistant",
+            content: string
+          }[] = []
+
+          let i = 0;
+          while (true) {
+            let x = 0;
+            if (attributes.has(`gen_ai.prompt.${i}.role`)) {
+              promptMessages.push({
+                role: attributes.get(`gen_ai.prompt.${i}.role`),
+                content: attributes.get(`gen_ai.prompt.${i}.content`),
+              });
+              x++;
+            }
+
+            if (attributes.has(`gen_ai.completion.${i}.role`)) {
+              completionMessages.push({
+                role: attributes.get(`gen_ai.completion.${i}.role`),
+                content: attributes.get(`gen_ai.completion.${i}.content`),
+              });
+              x++;
+            }
+
+            if (x==0) break;
+            i++;
+          }
+
+
           return {
             traceId: span.traceId,
             spanId: span.spanId,
@@ -22,6 +70,8 @@ export class TraceManager {
             startTimeUnixNano: span.startTimeUnixNano,
             endTimeUnixNano: span.endTimeUnixNano,
             attributes: attributes,
+            promptMessages: promptMessages,
+            completionMessages: completionMessages
           }
         })
       });
@@ -29,17 +79,41 @@ export class TraceManager {
 
     spans.forEach(async (span) => {
 
+      console.log(util.inspect(span, false, null, true));
+
+      const key = this.s3Client.getRawRequestResponseKey(span.traceId, authParams.organizationId);
+      const s3Result = await this.s3Client.store(
+        key,
+        JSON.stringify({
+          request: {
+            model: span.attributes.get("gen_ai.response.model"),
+            messages: span.promptMessages,
+          },
+          response: {
+            id: span.traceId,
+            object: span.attributes.get("llm.request.type"),
+            messages: span.completionMessages,
+          },
+        }),
+      );
+      console.log(`Stored request response in S3: ${util.inspect(span, false, null, true)}, ${key}\n\n---`);
+      if (s3Result.error) {
+        console.error(
+          `Error storing request response in S3: ${s3Result.error}`
+        );
+      }
+
       const log: Log = {
         request: {
-          id: "traceloopid-" + span.traceId,
-          userId: "spanid-" + span.traceId,
+          id: span.traceId,
+          userId: authParams.userId ?? "",
           promptId: undefined,
           properties: {},
-          heliconeApiKeyId: undefined,
+          heliconeApiKeyId: authParams.heliconeApiKeyId ?? undefined,
           heliconeProxyKeyId: undefined,
-          targetUrl: "traceloop-nourl",
+          targetUrl: "",
           provider: span.attributes.get("gen_ai.system"),
-          bodySize: 0, // span.attributes.get("gen_ai.usage.prompt_tokens"),
+          bodySize: span.promptMessages.length,
           path: "traceloop-nopath",
           threat: false,
           countryCode: undefined,
@@ -48,9 +122,9 @@ export class TraceManager {
           heliconeTemplate: undefined,
         },
         response: {
-          id: "traceloopid-" + span.traceId,
+          id: span.traceId,
           status: 200,
-          bodySize: 0, //span.attributes.get("gen_ai.usage.completion_tokens"),
+          bodySize: span.completionMessages.length,
           timeToFirstToken: undefined,
           responseCreatedAt: new Date(parseInt(span.endTimeUnixNano) / 1000000),
           delayMs: 0,
@@ -69,7 +143,6 @@ export class TraceManager {
         },
         log: log,
       }
-      console.log(util.inspect(kafkaMessage, false, null, true));
 
       const result = await fetch(`http://127.0.0.1:8585/v1/log/request`, {
         method: "POST",
@@ -96,6 +169,7 @@ export class TraceManager {
       //  );
       //}
     });
+
   }
 }
 
