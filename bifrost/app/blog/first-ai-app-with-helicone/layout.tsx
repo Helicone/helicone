@@ -15,16 +15,16 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Helicone.ai",
     title: "I built my first AI app and integrated it with Helicone", 
-    url: "https://www.helicone.ai/blog/first-ai-app-with-helicone",// <-- update
+    url: "https://www.helicone.ai/blog/first-ai-app-with-helicone",
     description: "So I decided to make my first AI app with Helicone, in the spirit of getting a first-hand exposure to our user's pain points. ",
-    images: "https://www.helicone.ai/static/blog/langsmith-vs-helicone/cover-image.webp", // <-- update
+    images: "https://www.helicone.ai/static/blog/first-ai-app/lina-first-ai-app.png",
     locale: "en_US",
   },
   twitter: {
     title: "I built my first AI app and integrated it with Helicone", 
     description: "So I decided to make my first AI app with Helicone, in the spirit of getting a first-hand exposure to our user's pain points. ",// 
     card: "summary_large_image",
-    images: "https://www.helicone.ai/static/blog/langsmith-vs-helicone/cover-image.webp",// <-- update
+    images: "https://www.helicone.ai/static/blog/first-ai-app/lina-first-ai-app.png",
   },
 };
 
