@@ -2,13 +2,12 @@ import Enterprise from "@/components/templates/landing/enterprise";
 import Integrations from "@/components/templates/landing/integrations";
 import Platform from "@/components/templates/landing/platform";
 import {
-  CheckCircleIcon,
   ChevronRightIcon,
   CodeBracketSquareIcon,
   ShieldCheckIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import Head from "next/head";
+import { FaChevronRight, FaCheck } from "react-icons/fa6";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -16,12 +15,12 @@ export default function Home() {
   return (
     <>
       <main className="flex min-h-screen flex-col items-center justify-between text-black">
-        <header className="text-center flex flex-col space-y-4 py-10 md:py-32 max-w-6xl mx-auto">
+        <header className="flex flex-col px-6 space-y-4 pt-12 pb-3 md:pt-16 md:pb-5 max-w-6xl mx-auto lg:text-center">
           <Link
             href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm inline-flex space-x-6 font-light text-gray-600 items-center w-full justify-center"
+            className="text-sm inline-flex space-x-6 mb-6 text-gray-600 items-center w-full lg:justify-center"
           >
             Backed by{" "}
             <svg
@@ -87,43 +86,43 @@ export default function Home() {
             </svg>{" "}
             Combinator
           </Link>
-          <h1 className="text-4xl md:text-5xl font-bold md:pt-4 px-2">
-            LLM-Observability for{" "}
+          <h1 className=" text-4xl md:text-5xl font-bold md:pt-4">
+            LLM Observability for{" "}
             <span className="text-sky-500">Developers</span>
           </h1>
-          <p className="text-lg md:text-xl text-gray-600">
-            The open-source platform for logging, monitoring, and debugging.
+          <p className="text-sm font-light md:text-xl text-gray-600">
+            The open-source platform for logging, monitoring and debugging.
           </p>
-          <div className="flex items-center gap-4 pt-4 w-full justify-center">
+          <div className="flex items-center gap-4 pt-4 w-full md:justify-center">
             <Link
               href="/contact"
-              className="bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 rounded-lg px-6 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
+              className="bg-white hover:bg-gray-100 ease-in-out duration-500 text-gray-600 border-[1.6px] border-gray-300 rounded-lg px-2 py-2 text-sm font-medium flex w-fit items-center gap-1 md:px-6 md:py-2 md:text-lg"
             >
               Get a demo
             </Link>
             <Link
               href="https://us.helicone.ai/signup"
-              className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 text-white border-[3px] border-sky-700 rounded-lg pl-6 pr-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
+              className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 md:border-[1.6px] border-sky-700 text-white rounded-lg pl-2 pr-2 py-2 text-sm font-semibold flex w-fit items-center gap-1 md:px-5 md:py-2 md:text-lg"
             >
               Start Building
-              <ChevronRightIcon className="w-5 h-5 inline text-white" />
+              <FaChevronRight className="w-2 h-3 inline text-white mx-1 md:mx-1" />
             </Link>
           </div>
-          <ul className="flex flex-col md:flex-row gap-4 md:gap-16 md:justify-center px-4 pt-16 text-sm">
+          <ul className="flex flex-col md:flex-row gap-3 md:gap-16 md:justify-center pt-7 md:pt-14 text-sm">
             <li className="flex items-center space-x-2">
-              <CheckCircleIcon className="h-6 w-6 text-sky-500" />
-              <span className="text-gray-600">
-                Sub-millisecond latency impact
+              <FaCheck className="h-4 w-6 text-sky-500" />
+              <span className="text-gray-600 font-light md:text-xl">
+              industry-leading query time
               </span>
             </li>
             <li className="flex items-center space-x-2">
-              <CheckCircleIcon className="h-6 w-6 text-sky-500" />
-              <span className="text-gray-600">100% log coverage</span>
+              <FaCheck className="h-4 w-6 text-sky-500" />
+              <span className="text-gray-600 font-light md:text-xl">sub-millisecond latency</span>
             </li>
             <li className="flex items-center space-x-2">
-              <CheckCircleIcon className="h-6 w-6 text-sky-500" />
-              <span className="text-gray-600">
-                Industry-leading query times
+              <FaCheck className="h-4 w-6 text-sky-500" />
+              <span className="text-gray-600 font-light md:text-xl">
+                100% log coverage
               </span>
             </li>
           </ul>

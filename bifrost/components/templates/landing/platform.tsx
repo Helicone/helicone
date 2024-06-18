@@ -1,15 +1,7 @@
 "use client";
 
-import { clsx } from "@/components/shared/utils";
 import { PiTerminalBold } from "react-icons/pi";
 import Link from "next/link";
-import {
-  ChartPieIcon,
-  DocumentTextIcon,
-  TableCellsIcon,
-} from "@heroicons/react/24/solid";
-
-
 
 const features = [
   {
@@ -108,30 +100,6 @@ const features = [
 
   },
 ];
-
-// const tabs = [
-//   {
-//     key: "monitoring",
-//     name: "Monitoring and Analytics",
-//     description: "Monitor performance and analyze data in real-time",
-//     icon: ChartPieIcon,
-//     src: "/static/platform/dashboard.webp",
-//   },
-//   {
-//     key: "logs",
-//     name: "Request Logs",
-//     description: "View and search logs for your requests",
-//     icon: TableCellsIcon,
-//     src: "/static/platform/request.webp",
-//   },
-//   {
-//     key: "templates",
-//     name: "Prompt Templates",
-//     description: "Create and manage templates for your requests",
-//     icon: DocumentTextIcon,
-//     src: "/static/platform/prompt.webp",
-//   },
-// ];
 
 export default function Platform() {
   return (
