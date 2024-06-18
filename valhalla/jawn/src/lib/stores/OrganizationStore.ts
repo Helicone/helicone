@@ -3,6 +3,7 @@ import {
   OrganizationFilter,
   OrganizationLayout,
   OrganizationMember,
+  OrganizationOwner,
   UpdateOrganizationParams,
 } from "../../managers/organization/OrganizationManager";
 import { supabaseServer } from "../db/supabase";
@@ -227,6 +228,70 @@ export class OrganizationStore extends BaseStore {
       member: string;
       org_role: string;
     }>(query, [organizationId]);
+  }
+
+  async getOrganizationOwner(
+    organizationId: string,
+    userId: string
+  ): Promise<Result<OrganizationOwner[], string>> {
+    const query = `
+      select 
+        us.tier as tier,
+        email
+        from organization o 
+        left join auth.users u on u.id = o.owner
+        left join user_settings us on us.user = u.id
+        where o.id = $1 AND (
+          -- Auth check
+          EXISTS (
+            select * from organization_member om
+            left join organization o on o.id = om.organization
+            where om.organization = $1 and (
+              o.owner = $2 or om.member = $2
+            )
+          )
+          OR o.owner = $2
+        )
+    `;
+
+    const result = await dbExecute<OrganizationOwner>(query, [
+      organizationId,
+      userId,
+    ]);
+
+    if (result.error || !result.data || result.data.length === 0) {
+      return err(result.error ?? "No access to org");
+    }
+    return ok(result.data);
+  }
+
+  async removeMemberFromOrganization(
+    organizationId: string,
+    memberId: string,
+    userId: string
+  ): Promise<Result<null, string>> {
+    if (!organizationId) {
+      return err("Invalid OrgId");
+    }
+    if (!memberId) {
+      return err("Invalid MemberId");
+    }
+    const hasAccess = await this.checkAccessToMutateOrg(organizationId, userId);
+    if (!hasAccess) {
+      return err(
+        "User does not have access to remove member from organization"
+      );
+    }
+    const { error: deleteError } = await supabaseServer.client
+      .from("organization_member")
+      .delete()
+      .eq("member", memberId)
+      .eq("organization", organizationId);
+
+    if (deleteError !== null) {
+      return err(deleteError.message);
+    }
+    return ok(null);
   }
 
   private async checkAccessToMutateOrg(

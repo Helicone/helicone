@@ -58,7 +58,7 @@ export interface paths {
     post: operations["CreateOrganizationFilter"];
   };
   "/v1/organization/{organizationId}/update_filter": {
-    put: operations["UpdateOrganizationFilter"];
+    post: operations["UpdateOrganizationFilter"];
   };
   "/v1/organization/delete": {
     delete: operations["DeleteOrganization"];
@@ -68,6 +68,12 @@ export interface paths {
   };
   "/v1/organization/{organizationId}/members": {
     get: operations["GetOrganizationMembers"];
+  };
+  "/v1/organization/{organizationId}/owner": {
+    get: operations["GetOrganizationOwner"];
+  };
+  "/v1/organization/{organizationId}/remove_member": {
+    delete: operations["RemoveMemberFromOrganization"];
   };
   "/v1/experiment/dataset": {
     post: operations["AddDataset"];
@@ -580,6 +586,16 @@ Json: JsonObject;
       error: null;
     };
     "Result_OrganizationMember-Array.string_": components["schemas"]["ResultSuccess_OrganizationMember-Array_"] | components["schemas"]["ResultError_string_"];
+    OrganizationOwner: {
+      tier: string;
+      email: string;
+    };
+    "ResultSuccess_OrganizationOwner-Array_": {
+      data: components["schemas"]["OrganizationOwner"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_OrganizationOwner-Array.string_": components["schemas"]["ResultSuccess_OrganizationOwner-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__datasetId-string__": {
       data: {
         datasetId: string;
@@ -1161,6 +1177,39 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_OrganizationMember-Array.string_"];
+        };
+      };
+    };
+  };
+  GetOrganizationOwner: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrganizationOwner-Array.string_"];
+        };
+      };
+    };
+  };
+  RemoveMemberFromOrganization: {
+    parameters: {
+      query: {
+        memberId: string;
+      };
+      path: {
+        organizationId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

@@ -179,7 +179,7 @@ export default function FiltersButton({
                 const updatedFilters = filters?.filter(
                   (filter) => filter.id !== filterToDelete?.id
                 );
-                const { data, error } = await jawn.PUT(
+                const { data, error } = await jawn.POST(
                   "/v1/organization/{organizationId}/update_filter",
                   {
                     params: {

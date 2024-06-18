@@ -1776,6 +1776,54 @@
 					}
 				]
 			},
+			"OrganizationOwner": {
+				"properties": {
+					"tier": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"tier",
+					"email"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_OrganizationOwner-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/OrganizationOwner"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_OrganizationOwner-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_OrganizationOwner-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResultSuccess__datasetId-string__": {
 				"properties": {
 					"data": {
@@ -3281,7 +3329,7 @@
 			}
 		},
 		"/v1/organization/{organizationId}/update_filter": {
-			"put": {
+			"post": {
 				"operationId": "UpdateOrganizationFilter",
 				"responses": {
 					"200": {
@@ -3440,6 +3488,84 @@
 					{
 						"in": "path",
 						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/organization/{organizationId}/owner": {
+			"get": {
+				"operationId": "GetOrganizationOwner",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_OrganizationOwner-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/organization/{organizationId}/remove_member": {
+			"delete": {
+				"operationId": "RemoveMemberFromOrganization",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "memberId",
 						"required": true,
 						"schema": {
 							"type": "string"

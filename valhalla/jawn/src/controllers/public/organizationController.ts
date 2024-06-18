@@ -20,6 +20,7 @@ import {
   OrganizationLayout,
   OrganizationManager,
   OrganizationMember,
+  OrganizationOwner,
   UpdateOrganizationParams,
 } from "../../managers/organization/OrganizationManager";
 
@@ -115,7 +116,7 @@ export class OrganizationController extends Controller {
     }
   }
 
-  @Put("/{organizationId}/update_filter")
+  @Post("/{organizationId}/update_filter")
   public async updateOrganizationFilter(
     @Body()
     requestBody: {
@@ -194,6 +195,46 @@ export class OrganizationController extends Controller {
     } else {
       this.setStatus(200);
       return ok(result.data);
+    }
+  }
+
+  @Get("/{organizationId}/owner")
+  public async getOrganizationOwner(
+    @Path() organizationId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<OrganizationOwner[], string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.getOrganizationOwner(
+      organizationId
+    );
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(result.error ?? "Error getting organization owner");
+    } else {
+      this.setStatus(200);
+      return ok(result.data);
+    }
+  }
+
+  @Delete("/{organizationId}/remove_member")
+  public async removeMemberFromOrganization(
+    @Path() organizationId: string,
+    @Query() memberId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.removeOrganizationMember(
+      organizationId,
+      memberId
+    );
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(result.error ?? "Error removing member from organization");
+    } else {
+      this.setStatus(201);
+      return ok(null);
     }
   }
 }

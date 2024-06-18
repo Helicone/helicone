@@ -1,6 +1,5 @@
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
-import { Owner } from "../../pages/api/organization/[id]/owner";
 import { Database } from "../../supabase/database.types";
 import { useCallback, useEffect, useState } from "react";
 import Cookies from "js-cookie";
@@ -25,11 +24,7 @@ const useGetOrgMembers = (orgId: string) => {
         }
       );
 
-      if (error) {
-        return [];
-      }
-
-      return orgMembers.data;
+      return orgMembers;
     },
     refetchOnWindowFocus: false,
   });
@@ -41,13 +36,23 @@ const useGetOrgMembers = (orgId: string) => {
 };
 
 const useGetOrgOwner = (orgId: string) => {
+  const jawn = useJawnClient();
   const { data, isLoading } = useQuery({
     queryKey: ["OrganizationsMembersOwner", orgId],
     queryFn: async (query) => {
       const organizationId = query.queryKey[1];
-      return fetch(`/api/organization/${organizationId}/owner`).then(
-        (res) => res.json() as Promise<Owner>
+      const { data: owner, error } = await jawn.GET(
+        "/v1/organization/{organizationId}/owner",
+        {
+          params: {
+            path: {
+              organizationId: organizationId,
+            },
+          },
+        }
       );
+
+      return owner;
     },
     refetchOnWindowFocus: false,
   });

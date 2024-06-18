@@ -60,6 +60,11 @@ export type OrganizationMember = {
   org_role: string;
 };
 
+export type OrganizationOwner = {
+  email: string;
+  tier: string;
+};
+
 export class OrganizationManager extends BaseManager {
   private organizationStore: OrganizationStore;
   constructor(authParams: AuthParams) {
@@ -153,6 +158,42 @@ export class OrganizationManager extends BaseManager {
     }
 
     return ok(userId!);
+  }
+
+  async getOrganizationOwner(
+    organizationId: string
+  ): Promise<Result<OrganizationOwner[], string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
+
+    const { data: owner, error: ownerError } =
+      await this.organizationStore.getOrganizationOwner(
+        organizationId,
+        this.authParams.userId
+      );
+
+    if (ownerError || !owner) {
+      return err(ownerError);
+    }
+    return ok(owner);
+  }
+
+  async removeOrganizationMember(
+    organizationId: string,
+    memberId: string
+  ): Promise<Result<string, string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
+
+    const { error: deleteError } =
+      await this.organizationStore.removeMemberFromOrganization(
+        organizationId,
+        memberId,
+        this.authParams.userId
+      );
+
+    if (deleteError) {
+      return err(deleteError);
+    }
+    return ok("success");
   }
 
   async createFilter(
