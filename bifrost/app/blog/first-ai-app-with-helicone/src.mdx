@@ -38,7 +38,7 @@ As a non-technical user, whenever I encounter a product that requires me to use 
 
 **Onboarding**
 
-During onboarding, I sent my first request and Helicone made sure the request was received before moving on. I like having the confirmation that the integration was working before I moved on. 
+During onboarding, I sent my first request and Helicone made sure the request was received before moving on. I like having the confirmation of a successful integration. 
 
 
 ![Helicone listening to events during onboarding to make sure everything is integrated correctly.](/static/blog/first-ai-app/listening-for-events.gif)
@@ -47,16 +47,16 @@ During onboarding, I sent my first request and Helicone made sure the request wa
 
 ## Feature Integration 
 
-Just for fun, I integrated with every Helicone feature. I'll walk through my top three, starting with *Prompts*. 
+I decided to integrate with every Helicone feature, just for fun. I'll walk through my top three, starting with *Prompts*. 
 
 ### 1. Prompts 
 
 **Problem: <span style={{color: '#0ea5e9'}}>I want to tweak my prompt and test it with some sample inputs without changing my code in production. </span>**
 
-**Solution:** Helicone automatically tracked my current prompt in production. Under the "Prompts" tab, I was able to experiment with variations of my prompt, run it on a selected dataset or with a different model configuration (<a href="https://docs.helicone.ai/features/prompts" target="_blank" rel="noopener noreferrer">doc</a>). 
+**Solution:** Helicone automatically tracked my current prompt in production. Under the "Prompts" tab, I was able to experiment with a different version of my prompt, test it with a different dataset and with a different model (<a href="https://docs.helicone.ai/features/prompts" target="_blank" rel="noopener noreferrer">doc</a>). 
 
 
-**Impact:** What was cool was being able to see how the new prompt compares to the prompt in production, and see the output in almost split seconds without having to touch my code. Once I was happy with the updated prompt, that's when I updated the prompt in my codebase. 
+**Impact:** What was cool was being able to see how the new prompt compares to the production prompt, and see the output in almost split seconds without having to touch my code. Once I was happy with the updated prompt, that's when I updated the prompt in my codebase. 
 
 ![Helicone's Experiment feature tracks prompt version automatically and allows you to test prompts without touching production code.](/static/blog/first-ai-app/compare-experiments.png)
 
@@ -68,7 +68,7 @@ Now, whenever I change my prompt in production, Helicone detects it automaticall
 
 **Problem: <span style={{color: '#0ea5e9'}}>Every time I change my prompt, I send a ton of requests to test the output. For debugging purpose, I need a way to filter only my requests. </span>**
 
-**Solution:** I added a `User` property in the requests and assigned my name to all the requests sent by me. Now I'm able to filter requests by the user-id property. 
+**Solution:** I added a `User` custom property and assigned my name to all the requests sent by me. As soon as the requests were received, I'm able to filter all requests by the user property on the "Requests" page. 
 
 ![Helicone's Custom Properties allows you to filter and segment your data easily.](/static/blog/first-ai-app/custom-properties.png)
 
@@ -76,9 +76,9 @@ As a bonus, I'm able to view my detailed usage when I head to the “Users” ta
 
 ![Helicone's User Metrics show the detailed metrics by users.](/static/blog/first-ai-app/user-metrics.png)
 
-**Impact:** This feature lends itself to let users do a ton of fun things like segmenting your requests by the types of users, especially if you have user tiers like *free* v.s. *premium*, or if your app has multiple features that use the LLM, then you can use custom properties to specify which feature the requests were coming from, or even where in the world the requests are coming from - if you specific the geographical location as a custom property. 
+**Impact:** This feature lends itself to let you do a ton of fun things like segmenting requests by user types, especially if you have user tiers like *free* v.s. *premium*, or if your app has multiple features that use the LLM, then you can use custom properties to specify which feature the requests were coming from, or even where in the world the requests are coming from - if you specific the geographical location as a custom property. 
 
-**<span style={{color: '#0ea5e9'}}>→ This is a useful article on [how to use custom properties](https://www.helicone.ai/blog/custom-properties).</span>**
+**→ This is a useful article on [how to use custom properties](https://www.helicone.ai/blog/custom-properties).**
 
 
 ### 3. Caching
@@ -95,8 +95,7 @@ As a bonus, I'm able to view my detailed usage when I head to the “Users” ta
 - `cache-seed`, which allowed me to restart my cache whenever I have an erroneous output (i.e. when the input "Chicken Nuggets" produces `🍔`). 
 
 
-
-**Impact:** By caching, developers can save a ton of money in the long term. A good use case is Conversational AIs that answer frequently asked questions. For longer text outputs, cache also makes the user experience sooo much better without having to make the user wait or get an inaccurate output.
+**Impact:** By caching, developers can save a ton of money in the long term. A good use case is a conversational AI that answers frequently asked questions. In addition, caching also makes the user experience sooo much better without having to make the user wait or produce an inaccurate output.
 
 
 
@@ -112,7 +111,7 @@ Helicone was very easy to use, and the fact that you can access all features usi
 
 **User Interface**
 
-The UI is very clean, which I love. It's also surprisingly simple and intuitive to use for a dev tool, making it accessible to non-techncially users. 
+The UI is very clean, which I love. It's also surprisingly simple and intuitive to use for a dev tool, making it accessible to non-technical users. 
 
 
 **Docs**
@@ -122,7 +121,7 @@ As a visual learner, I appreciate the step-by-step breakdown and images in the d
 
 **Customer Service** 
 
-The Helicone team is fast to respond to inquiries and works hard to get to everyone's questions. The best way to reach out is by joining the **<span style={{color: '#0ea5e9'}}>Discord</span>**. 
+The Helicone team is fast to respond to inquiries, and work hard to get to everyone's questions. The best way to reach out is by joining the **<span style={{color: '#0ea5e9'}}>Discord</span>**. 
 
 
 **Product Experience**
@@ -137,7 +136,7 @@ As someone who's not technical, I don't like having to spend a lot of time figur
 
 ## Recommendations
 
-From the other side, I would recommend new Helicone users to: 
+As a member of Helicone's team, I would recommend new Helicone users to: 
 
 - **<span style={{color: '#0ea5e9'}}>Ask the Helicone team questions!</span>** We're all very friendly.
 - **<span style={{color: '#0ea5e9'}}>Use the docs, and join Discord!</span>** But if the docs are unclear, please let us know.
@@ -147,5 +146,7 @@ In order to become developer's favourite tools, we need your help. We will conti
 
 
 ### Resources 
+
+Contact us about your use case: https://www.helicone.ai/contact
 
 Find out more about Helicone's use cases: https://docs.helicone.ai/use-cases/experiments
