@@ -160,6 +160,29 @@ export class OrganizationManager extends BaseManager {
     return ok(userId!);
   }
 
+  async updateMember(
+    organizationId: string,
+    orgRole: string,
+    memberId: string
+  ): Promise<Result<string, string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
+    if (!organizationId || !orgRole || !memberId)
+      return err("Invalid parameters");
+
+    const { error: updateError } =
+      await this.organizationStore.updateOrganizationMember(
+        organizationId,
+        this.authParams.userId,
+        orgRole,
+        memberId
+      );
+
+    if (updateError) {
+      return err(updateError);
+    }
+    return ok("success");
+  }
+
   async getOrganizationOwner(
     organizationId: string
   ): Promise<Result<OrganizationOwner[], string>> {

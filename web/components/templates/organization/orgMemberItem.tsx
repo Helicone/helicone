@@ -65,29 +65,27 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                 },
               ]}
               selectedValue={memberRole}
-              onSelect={(role) => {
-                fetch(`/api/organization/${orgId}/update_member`, {
-                  method: "PATCH",
-                  body: JSON.stringify({
-                    orgRole: role,
-                    memberId: orgMember.member,
-                  } as {
-                    orgRole: string;
-                    memberId: string;
-                  }),
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                })
-                  .then((res) => res.json())
-                  .then((res) => {
-                    if (res.error) {
-                      setNotification("Error updating member", "error");
-                      console.error(res);
-                    } else {
-                      setNotification("Successfully updated member", "success");
-                    }
-                  });
+              onSelect={async (role) => {
+                const { data, error } = await jawn.POST(
+                  "/v1/organization/{organizationId}/update_member",
+                  {
+                    params: {
+                      path: {
+                        organizationId: orgId,
+                      },
+                    },
+                    body: {
+                      role: role,
+                      memberId: orgMember.member!,
+                    },
+                  }
+                );
+                if (error) {
+                  setNotification("Error updating member", "error");
+                  console.error(error);
+                } else {
+                  setNotification("Successfully updated member", "success");
+                }
                 setMemberRole(role);
               }}
             />

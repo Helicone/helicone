@@ -69,6 +69,9 @@ export interface paths {
   "/v1/organization/{organizationId}/members": {
     get: operations["GetOrganizationMembers"];
   };
+  "/v1/organization/{organizationId}/update_member": {
+    post: operations["UpdateOrganizationMember"];
+  };
   "/v1/organization/{organizationId}/owner": {
     get: operations["GetOrganizationOwner"];
   };
@@ -1177,6 +1180,29 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_OrganizationMember-Array.string_"];
+        };
+      };
+    };
+  };
+  UpdateOrganizationMember: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          memberId: string;
+          role: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

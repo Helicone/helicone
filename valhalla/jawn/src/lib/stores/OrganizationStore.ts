@@ -294,6 +294,53 @@ export class OrganizationStore extends BaseStore {
     return ok(null);
   }
 
+  async updateOrganizationMember(
+    organizationId: string,
+    userId: string,
+    orgRole: string,
+    memberId: string
+  ): Promise<Result<null, string>> {
+    const orgAccess = await supabaseServer.client
+      .from("organization")
+      .select("*")
+      .eq("id", organizationId)
+      .single();
+
+    if (orgAccess.error !== null || orgAccess.data === null) {
+      return err(orgAccess.error.message);
+    }
+
+    const orgMember = await supabaseServer.client
+      .from("organization_member")
+      .select("*")
+      .eq("member", userId)
+      .eq("organization", organizationId)
+      .single();
+
+    if (!orgMember.data) {
+      return err("User is not a member of this organization");
+    }
+
+    const isAdmin = orgMember !== null && orgMember.data.org_role === "admin";
+    const isOwner = orgAccess.data.owner === userId;
+
+    if (!isAdmin && !isOwner) {
+      return err("Unauthorized");
+    }
+
+    const { error } = await supabaseServer.client
+      .from("organization_member")
+      .update({
+        org_role: orgRole,
+      })
+      .match({ member: memberId, organization: organizationId });
+
+    if (error) {
+      return err(error.message);
+    }
+    return ok(null);
+  }
+
   private async checkAccessToMutateOrg(
     orgId: string,
     userId: string

@@ -198,6 +198,29 @@ export class OrganizationController extends Controller {
     }
   }
 
+  @Post("/{organizationId}/update_member")
+  public async updateOrganizationMember(
+    @Body()
+    requestBody: { role: string; memberId: string },
+    @Path() organizationId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.updateMember(
+      organizationId,
+      requestBody.role,
+      requestBody.memberId
+    );
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(result.error ?? "Error updating organization member");
+    } else {
+      this.setStatus(201);
+      return ok(null);
+    }
+  }
+
   @Get("/{organizationId}/owner")
   public async getOrganizationOwner(
     @Path() organizationId: string,
