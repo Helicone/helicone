@@ -238,6 +238,7 @@ export interface components {
         /** Format: double */
         heliconeApiKeyId?: number;
         properties: components["schemas"]["Record_string.string_"];
+        promptVersion?: string;
         promptId?: string;
         userId: string;
         id: string;

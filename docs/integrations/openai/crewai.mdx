@@ -1,0 +1,30 @@
+---
+title: "Crew AI"
+description: "Easily add Helicone to Crew AI"
+---
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into www.helicone.ai or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+
+    <Note>
+      Make sure to generate a [write only API key](helicone-headers/helicone-auth).
+    </Note>
+
+  </Step>
+  <Step title="Set OPENAI_BASE_URL as an environment variable">
+
+  <CodeGroup>
+
+```python example.py
+import os
+
+os.environ["OPENAI_API_BASE"] = f"https://oai.helicone.ai/{HELICONE_API_KEY}/v1"
+```
+
+</CodeGroup>
+
+  </Step>
+  
+</Steps>

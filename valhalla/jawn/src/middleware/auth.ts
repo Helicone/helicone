@@ -8,6 +8,11 @@ export const authMiddleware = async (
   res: Response,
   next: NextFunction
 ) => {
+  if (req.path.startsWith("/v1/public")) {
+    next();
+    return;
+  }
+
   try {
     const request = new RequestWrapper(req);
     const authorization = request.authHeader();

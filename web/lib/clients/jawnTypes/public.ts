@@ -99,6 +99,21 @@ export interface paths {
   "/v1/experiment/query": {
     post: operations["GetExperiments"];
   };
+  "/v1/public/dataisbeautiful/ttft-vs-prompt-length": {
+    post: operations["GetTTFTvsPromptInputLength"];
+  };
+  "/v1/public/dataisbeautiful/model/percentage": {
+    post: operations["GetModelPercentage"];
+  };
+  "/v1/public/dataisbeautiful/model/cost": {
+    post: operations["GetModelCost"];
+  };
+  "/v1/public/dataisbeautiful/provider/percentage": {
+    post: operations["GetProviderPercentage"];
+  };
+  "/v1/public/dataisbeautiful/model/percentage/overtime": {
+    post: operations["GetModelPercentageOverTime"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -781,6 +796,81 @@ Json: JsonObject;
       /** @enum {boolean} */
       score?: true;
     };
+    TTFTvsPromptLength: {
+      /** Format: double */
+      prompt_length: number;
+      /** Format: double */
+      ttft_normalized_p75: number;
+      /** Format: double */
+      ttft_normalized_p99: number;
+      /** Format: double */
+      ttft_normalized: number;
+      /** Format: double */
+      ttft_p75: number;
+      /** Format: double */
+      ttft_p99: number;
+      /** Format: double */
+      ttft: number;
+    };
+    "ResultSuccess_TTFTvsPromptLength-Array_": {
+      data: components["schemas"]["TTFTvsPromptLength"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_TTFTvsPromptLength-Array.string_": components["schemas"]["ResultSuccess_TTFTvsPromptLength-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    TimeSpan: "1m" | "3m" | "1yr";
+    /** @enum {string} */
+    ModelName: "gpt-3.5" | "gpt-4o" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus-20240229" | "claude-3-sonnet-20240229" | "claude-3-haiku-20240307" | "claude-2" | "open-mixtral" | "Llama" | "dall-e" | "text-moderation" | "text-embedding";
+    /** @enum {string} */
+    ProviderName: "OPENAI" | "ANTHROPIC" | "MISTRAL" | "META";
+    DataIsBeautifulRequestBody: {
+      provider?: components["schemas"]["ProviderName"];
+      models?: components["schemas"]["ModelName"][];
+      timespan: components["schemas"]["TimeSpan"];
+    };
+    ModelBreakdown: {
+      /** Format: double */
+      percent: number;
+      matched_model: string;
+    };
+    "ResultSuccess_ModelBreakdown-Array_": {
+      data: components["schemas"]["ModelBreakdown"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelBreakdown-Array.string_": components["schemas"]["ResultSuccess_ModelBreakdown-Array_"] | components["schemas"]["ResultError_string_"];
+    ModelCost: {
+      /** Format: double */
+      percent: number;
+      matched_model: string;
+    };
+    "ResultSuccess_ModelCost-Array_": {
+      data: components["schemas"]["ModelCost"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelCost-Array.string_": components["schemas"]["ResultSuccess_ModelCost-Array_"] | components["schemas"]["ResultError_string_"];
+    ProviderBreakdown: {
+      /** Format: double */
+      percent: number;
+      provider: string;
+    };
+    "ResultSuccess_ProviderBreakdown-Array_": {
+      data: components["schemas"]["ProviderBreakdown"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ProviderBreakdown-Array.string_": components["schemas"]["ResultSuccess_ProviderBreakdown-Array_"] | components["schemas"]["ResultError_string_"];
+    ModelBreakdownOverTime: {
+      date: string;
+    } & components["schemas"]["ModelBreakdown"];
+    "ResultSuccess_ModelBreakdownOverTime-Array_": {
+      data: components["schemas"]["ModelBreakdownOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelBreakdownOverTime-Array.string_": components["schemas"]["ResultSuccess_ModelBreakdownOverTime-Array_"] | components["schemas"]["ResultError_string_"];
   };
   responses: {
   };
@@ -1349,6 +1439,81 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Experiment-Array.string_"];
+        };
+      };
+    };
+  };
+  GetTTFTvsPromptInputLength: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_TTFTvsPromptLength-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModelPercentage: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelBreakdown-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModelCost: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelCost-Array.string_"];
+        };
+      };
+    };
+  };
+  GetProviderPercentage: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ProviderBreakdown-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModelPercentageOverTime: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelBreakdownOverTime-Array.string_"];
         };
       };
     };
