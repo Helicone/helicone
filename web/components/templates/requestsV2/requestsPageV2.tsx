@@ -602,7 +602,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             organizationLayoutAvailable
               ? {
                   currentFilter: currFilter ?? undefined,
-                  filters: orgLayout?.filters ?? undefined,
+                  filters: orgLayout?.data?.filters ?? undefined,
                   onFilterChange: onLayoutFilterChange,
                   onSaveFilterCallback: async () => {
                     await orgLayoutRefetch();

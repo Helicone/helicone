@@ -16,6 +16,7 @@ import useNotification from "../../shared/notification/useNotification";
 import ProviderKeyList from "../enterprise/portal/id/providerKeyList";
 import CreateProviderKeyModal from "../vault/createProviderKeyModal";
 import { useVaultPage } from "../vault/useVaultPage";
+import { getJawnClient } from "../../../lib/clients/jawn";
 
 export const ORGANIZATION_COLORS = [
   {
@@ -370,24 +371,32 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 setNotification("Please select a provider key", "error");
                 return;
               }
+              const jawn = getJawnClient(orgContext?.currentOrg?.id);
               if (initialValues) {
-                const { data, error } = await supabaseClient
-                  .from("organization")
-                  .update({
-                    name: orgName,
-                    color: selectedColor.name,
-                    icon: selectedIcon.name,
-                    ...(variant === "reseller" && {
-                      org_provider_key: providerKey,
-                      limits: limits,
-                      reseller_id: orgContext?.currentOrg?.id!,
-                      organization_type: "customer",
-                    }),
-                  })
-                  .eq("id", initialValues.id)
-                  .select("*");
+                const { error: updateOrgError } = await jawn.PUT(
+                  "/v1/organization/{organizationId}/update",
+                  {
+                    params: {
+                      path: {
+                        organizationId: initialValues.id,
+                      },
+                    },
+                    body: {
+                      name: orgName,
+                      color: selectedColor.name,
+                      icon: selectedIcon.name,
+                      variant,
+                      ...(variant === "reseller" && {
+                        org_provider_key: providerKey,
+                        limits: limits || undefined,
+                        reseller_id: orgContext?.currentOrg?.id!,
+                        organization_type: "customer",
+                      }),
+                    },
+                  }
+                );
 
-                if (error || data.length === 0) {
+                if (updateOrgError) {
                   setNotification("Failed to update organization", "error");
                 } else {
                   setNotification(
@@ -399,32 +408,29 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 onCancelHandler && onCancelHandler(false);
                 orgContext?.refetchOrgs();
               } else {
-                const { data, error } = await fetch(
-                  "/api/organization/create",
+                const { error: createOrgError } = await jawn.POST(
+                  "/v1/organization/create",
                   {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
+                    body: {
                       name: orgName,
                       owner: user?.id!,
                       color: selectedColor.name,
                       icon: selectedIcon.name,
                       has_onboarded: true,
                       tier: "free",
+                      variant,
                       ...(variant === "reseller" && {
+                        org_provider_key: providerKey,
+                        limits: limits || undefined,
                         reseller_id: orgContext?.currentOrg?.id!,
                         organization_type: "customer",
-                        org_provider_key: providerKey,
-                        limits: limits,
                       }),
-                    }),
+                    },
                   }
-                ).then((res) => res.json());
-                if (error) {
+                );
+                if (createOrgError) {
                   setNotification(
-                    "Failed to create organization" + error,
+                    "Failed to create organization" + createOrgError,
                     "error"
                   );
                 } else {
