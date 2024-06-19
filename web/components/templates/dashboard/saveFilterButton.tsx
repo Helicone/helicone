@@ -11,6 +11,7 @@ import { OrganizationFilter } from "../../../services/lib/organization_layout/or
 import { useOrg } from "../../layout/organizationContext";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import useSearchParams from "../../shared/utils/useSearchParams";
+import { useJawnClient } from "../../../lib/clients/jawnHook";
 
 interface SaveFilterButtonProps {
   filters: UIFilterRow[];
@@ -21,6 +22,7 @@ interface SaveFilterButtonProps {
 }
 
 const SaveFilterButton = (props: SaveFilterButtonProps) => {
+  const jawn = useJawnClient();
   const { filters, onSaveFilterCallback, filterMap, savedFilters, layoutPage } =
     props;
 
@@ -48,57 +50,57 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
       };
       if (savedFilters !== undefined) {
         const updatedFilters = [...savedFilters, saveFilter];
-        await fetch(
-          `/api/organization/${orgContext?.currentOrg?.id!}/update_filter`,
+        const { data, error } = await jawn.POST(
+          "/v1/organization/{organizationId}/update_filter",
           {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
+            params: {
+              path: {
+                organizationId: orgContext?.currentOrg?.id!,
+              },
             },
-            body: JSON.stringify({
-              type: layoutPage,
-              filters: updatedFilters,
-            }),
+            body: {
+              filterType: layoutPage,
+              filters: updatedFilters!,
+            },
           }
-        )
-          .then(() => {
-            setNotification("Filter created successfully", "success");
-            setIsSaveFiltersModalOpen(false);
-            onSaveFilterCallback();
-            const currentAdvancedFilters = encodeURIComponent(
-              JSON.stringify(filters.map(encodeFilter).join("|"))
-            );
-            searchParams.set("filters", currentAdvancedFilters);
-          })
-          .catch((err) => {
-            setNotification(err, "error");
-          });
+        );
+        if (error) {
+          setNotification(error, "error");
+          return;
+        }
+        setNotification("Filter created successfully", "success");
+        setIsSaveFiltersModalOpen(false);
+        onSaveFilterCallback();
+        const currentAdvancedFilters = encodeURIComponent(
+          JSON.stringify(filters.map(encodeFilter).join("|"))
+        );
+        searchParams.set("filters", currentAdvancedFilters);
       } else {
-        await fetch(
-          `/api/organization/${orgContext?.currentOrg?.id!}/create_filter`,
+        const { error: createFilterError } = await jawn.POST(
+          "/v1/organization/{organizationId}/create_filter",
           {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
+            params: {
+              path: {
+                organizationId: orgContext?.currentOrg?.id!,
+              },
             },
-            body: JSON.stringify({
-              type: layoutPage,
+            body: {
               filters: [saveFilter],
-            }),
+              filterType: layoutPage,
+            },
           }
-        )
-          .then(() => {
-            setNotification("Filter created successfully", "success");
-            setIsSaveFiltersModalOpen(false);
-            onSaveFilterCallback();
-            const currentAdvancedFilters = encodeURIComponent(
-              JSON.stringify(filters.map(encodeFilter).join("|"))
-            );
-            searchParams.set("filters", currentAdvancedFilters);
-          })
-          .catch((err) => {
-            setNotification(err, "error");
-          });
+        );
+        if (createFilterError) {
+          setNotification("Error creating filter", "error");
+        } else {
+          setNotification("Filter created successfully", "success");
+          setIsSaveFiltersModalOpen(false);
+          onSaveFilterCallback();
+          const currentAdvancedFilters = encodeURIComponent(
+            JSON.stringify(filters.map(encodeFilter).join("|"))
+          );
+          searchParams.set("filters", currentAdvancedFilters);
+        }
       }
     }
   };
