@@ -158,6 +158,14 @@ export class OrganizationManager extends BaseManager {
     if (userIdError) {
       return err(userIdError);
     }
+    if (
+      (await this.organizationStore.checkAccessToMutateOrg(
+        organizationId,
+        this.authParams.userId
+      )) === false
+    ) {
+      return err("User does not have access to add member to organization");
+    }
 
     const { error: insertError } =
       await this.organizationStore.addMemberToOrganization(
