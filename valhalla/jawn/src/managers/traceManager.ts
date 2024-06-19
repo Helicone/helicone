@@ -29,39 +29,6 @@ export class TraceManager {
             attributes.set(key, value.stringValue ?? value.intValue);
           });
 
-          const promptMessages: {
-            role: "system" | "user",
-            content: string
-          }[] = []
-          const completionMessages: {
-            role: "assistant",
-            content: string
-          }[] = []
-
-          let i = 0;
-          while (true) {
-            let x = 0;
-            if (attributes.has(`gen_ai.prompt.${i}.role`)) {
-              promptMessages.push({
-                role: attributes.get(`gen_ai.prompt.${i}.role`),
-                content: attributes.get(`gen_ai.prompt.${i}.content`),
-              });
-              x++;
-            }
-
-            if (attributes.has(`gen_ai.completion.${i}.role`)) {
-              completionMessages.push({
-                role: attributes.get(`gen_ai.completion.${i}.role`),
-                content: attributes.get(`gen_ai.completion.${i}.content`),
-              });
-              x++;
-            }
-
-            if (x==0) break;
-            i++;
-          }
-
-
           return {
             traceId: span.traceId,
             spanId: span.spanId,
@@ -69,39 +36,79 @@ export class TraceManager {
             kind: span.kind,
             startTimeUnixNano: span.startTimeUnixNano,
             endTimeUnixNano: span.endTimeUnixNano,
-            attributes: attributes,
-            promptMessages: promptMessages,
-            completionMessages: completionMessages
+            attributes: attributes
           }
         })
       });
     });
 
     spans.forEach(async (span) => {
+      let i = 0;
+      const promptMessages: {
+        role: "system" | "user" | "assistant",
+        content: string
+      }[] = []
+      const completionChoices: {
+        index: number,
+        logprobs: null,
+        finish_reason: string,
+        message: {
+          role: "system" | "user" | "assistant",
+          content: string
+        }
+    }[] = []
 
-      console.log(util.inspect(span, false, null, true));
+      while (true) {
+        let x = 0;
+        if (span.attributes.has(`gen_ai.prompt.${i}.role`)) {
+          promptMessages.push({
+            role: span.attributes.get(`gen_ai.prompt.${i}.role`),
+            content: span.attributes.get(`gen_ai.prompt.${i}.content`),
+          });
+          x++;
+        }
+
+        if (span.attributes.has(`gen_ai.completion.${i}.role`)) {
+          completionChoices.push({
+            index: i,
+            logprobs: null,
+            finish_reason: span.attributes.get(`gen_ai.completion.${i}.finish_reason`) as string,
+            message: {
+              role: span.attributes.get(`gen_ai.completion.${i}.role`) as "system" | "user" | "assistant",
+              content: span.attributes.get(`gen_ai.completion.${i}.content`) as string,
+            }
+          });
+          x++;
+        }
+
+        if (x==0) break;
+        i++;
+      }
+
+      const requestBody = {
+          model: span.attributes.get("gen_ai.response.model"),
+          n: i,
+          messages: promptMessages,
+          temperature: 1,
+          max_tokens: span.attributes.get("gen_ai.response.max_tokens") ?? 50,
+          stream: false
+        }
 
       const key = this.s3Client.getRawRequestResponseKey(span.traceId, authParams.organizationId);
       const s3Result = await this.s3Client.store(
         key,
         JSON.stringify({
-          request: {
-            model: span.attributes.get("gen_ai.response.model"),
-            messages: span.promptMessages,
-          },
-          response: {
-            id: span.traceId,
-            object: span.attributes.get("llm.request.type"),
-            messages: span.completionMessages,
-          },
+          request: requestBody,
+          response: completionChoices,
         }),
       );
-      console.log(`Stored request response in S3: ${util.inspect(span, false, null, true)}, ${key}\n\n---`);
       if (s3Result.error) {
         console.error(
           `Error storing request response in S3: ${s3Result.error}`
         );
       }
+
+      console.log("\n--------SENT TO S3---------\n", JSON.stringify({ request: requestBody, response: completionChoices }), "\n");
 
       const log: Log = {
         request: {
@@ -113,7 +120,7 @@ export class TraceManager {
           heliconeProxyKeyId: undefined,
           targetUrl: "",
           provider: span.attributes.get("gen_ai.system"),
-          bodySize: span.promptMessages.length,
+          bodySize: JSON.stringify(promptMessages).length,
           path: "traceloop-nopath",
           threat: false,
           countryCode: undefined,
@@ -124,7 +131,7 @@ export class TraceManager {
         response: {
           id: span.traceId,
           status: 200,
-          bodySize: span.completionMessages.length,
+          bodySize: JSON.stringify(completionChoices).length,
           timeToFirstToken: undefined,
           responseCreatedAt: new Date(parseInt(span.endTimeUnixNano) / 1000000),
           delayMs: 0,
