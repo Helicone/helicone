@@ -112,7 +112,7 @@ export default function Home() {
             <li className="flex items-center space-x-2">
               <FaCheck className="h-4 w-6 text-sky-500" />
               <span className="text-gray-600 font-light md:text-xl">
-              industry-leading query time
+                industry-leading query time
               </span>
             </li>
             <li className="flex items-center space-x-2">
@@ -139,50 +139,53 @@ export default function Home() {
         </header>
         <section
           id="logos"
-          className="text-center flex flex-col space-y-4 pt-16 pb-32 max-w-6xl mx-auto w-full"
+          className="flex flex-col space-y-4 pt-6 pb-12 px-3 max-w-6xl mx-auto w-full"
         >
-          <h2 className="text-gray-600 text-lg md:text-xl">
+          <h2 className="text-gray-500 font-bold px-3 text-sm md:text-xl ">
             Ready for real production workloads
           </h2>
-          <ul className="flex flex-col md:flex-row items-center gap-16 md:gap-0 w-full justify-between px-16 pt-4">
+          <ul className="flex flex-col md:flex-row gap-9 md:gap-0 w-full justify-between px-3 pt-4">
             <li>
               <dl className="flex flex-col space-y-2">
-                <dt className="font-bold text-5xl">{"1,000"}</dt>
-                <dd className="text-sm text-gray-600 font-light">
+                <dt className="font-bold text-gray-600 indent-3 text-2xl text border-l-2 border-sky-500">
+                  {"1,000"}</dt>
+                <dd className="text-sm text-gray-600 indent-3 font-light">
                   Requests processed per second
                 </dd>
               </dl>
             </li>
             <li>
-              <dl className="flex flex-col space-y-2">
-                <dt className="font-bold text-5xl">{"1.2 Billion"}</dt>
-                <dd className="text-sm text-gray-600 font-light">
-                  Total Requests Logged
+              <dl className="flex flex-col space-y-2">    
+                <dt className="font-bold text-gray-600 indent-3 text-2xl border-l-2 border-sky-500">
+                {"1.2 Billion"}</dt>
+                <dd className="text-sm text-gray-600 indent-3 font-light">
+                  Total requests Logged
                 </dd>
               </dl>
             </li>
             <li>
               <dl className="flex flex-col space-y-2">
-                <dt className="font-bold text-5xl">99.99%</dt>
-                <dd className="text-sm text-gray-600 font-light">Uptime</dd>
+                <dt className="font-bold text-gray-600 indent-3 text-2xl border-l-2 border-sky-500">
+                99.99%</dt>
+                <dd className="text-sm text-gray-600 indent-3 font-light">Uptime</dd>
               </dl>
             </li>
           </ul>
           <ul className="flex flex-wrap md:flex-row items-center w-full justify-center gap-10 md:gap-32 px-0 md:px-8 pt-16">
             <li className="w-32">
               <Image
-                src={"/static/filevine.webp"}
-                alt={"Filevine"}
-                width={300}
-                height={77}
-              />
-            </li>
-            <li className="w-32">
-              <Image
                 src={"/static/qawolf.webp"}
                 alt={"QAWolf"}
                 width={640}
                 height={156}
+              />
+            </li>
+            <li className="w-32">
+              <Image
+                src={"/static/filevine.webp"}
+                alt={"Filevine"}
+                width={300}
+                height={77}
               />
             </li>
             <li className="w-32">
@@ -197,6 +200,37 @@ export default function Home() {
               <Image
                 src={"/static/greptile.webp"}
                 alt={"Greptile"}
+                width={300}
+                height={77}
+              />
+            </li>
+            <li className="w-32">
+              <Image
+                src={"/static/codegen.svg"}
+                alt={"Codegen"}
+                width={300}
+                height={77}
+              />
+            </li><li className="w-32">
+              <Image
+                src={"/static/sunrun.svg"}
+                alt={"Sunrun"}
+                width={300}
+                height={77}
+              />
+            </li>
+            <li className="w-32">
+              <Image
+                src={"/static/lex.svg"}
+                alt={"Lex"}
+                width={300}
+                height={77}
+              />
+            </li>
+            <li className="w-32">
+              <Image
+                src={"/static/connect.svg"}
+                alt={"Connect"}
                 width={300}
                 height={77}
               />
