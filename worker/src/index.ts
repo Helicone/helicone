@@ -211,8 +211,9 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
 
   if (
     hostParts.length >= 3 &&
-    hostParts[0].includes("gateway") &&
-    !host.includes("hconeai")
+    host.includes("gateway") &&
+    !host.includes("hconeai") &&
+    !host.includes("helicone")
   ) {
     // if it is not a helicone.ai request, but it is a gateway request, then it is a customer gateway request
     return {
