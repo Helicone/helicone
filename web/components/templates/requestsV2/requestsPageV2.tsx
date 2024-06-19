@@ -583,87 +583,92 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           }
         />
       )}
-
-      <div className="flex flex-col space-y-4">
-        <ThemedTableV5
-          defaultData={requests || []}
-          defaultColumns={columnsWithProperties}
-          tableKey="requestsColumnVisibility"
-          dataLoading={isDataLoading}
-          sortable={sort}
-          advancedFilters={{
-            filterMap: filterMap,
-            filters: advancedFilters,
-            setAdvancedFilters: onSetAdvancedFiltersHandler,
-            searchPropertyFilters: searchPropertyFilters,
-            show: userId ? false : true,
-          }}
-          savedFilters={
-            organizationLayoutAvailable
-              ? {
-                  currentFilter: currFilter ?? undefined,
-                  filters: orgLayout?.data?.filters ?? undefined,
-                  onFilterChange: onLayoutFilterChange,
-                  onSaveFilterCallback: async () => {
-                    await orgLayoutRefetch();
-                  },
-                  layoutPage: "requests",
-                }
-              : undefined
-          }
-          exportData={requests.map((request) => {
-            const flattenedRequest: any = {};
-            Object.entries(request).forEach(([key, value]) => {
-              // key is properties and value is not null
-              if (
-                key === "customProperties" &&
-                value !== null &&
-                value !== undefined
-              ) {
-                Object.entries(value).forEach(([key, value]) => {
-                  if (value !== null) {
-                    flattenedRequest[key] = value;
+      {unauthorized ? (
+        <>{renderUnauthorized()}</>
+      ) : (
+        <div className="flex flex-col space-y-4">
+          <ThemedTableV5
+            defaultData={requests || []}
+            defaultColumns={columnsWithProperties}
+            tableKey="requestsColumnVisibility"
+            dataLoading={isDataLoading}
+            sortable={sort}
+            advancedFilters={{
+              filterMap: filterMap,
+              filters: advancedFilters,
+              setAdvancedFilters: onSetAdvancedFiltersHandler,
+              searchPropertyFilters: searchPropertyFilters,
+              show: userId ? false : true,
+            }}
+            savedFilters={
+              organizationLayoutAvailable
+                ? {
+                    currentFilter: currFilter ?? undefined,
+                    filters: orgLayout?.data?.filters ?? undefined,
+                    onFilterChange: onLayoutFilterChange,
+                    onSaveFilterCallback: async () => {
+                      await orgLayoutRefetch();
+                    },
+                    layoutPage: "requests",
                   }
-                });
-              } else {
-                flattenedRequest[key] = value;
-              }
-            });
-            return flattenedRequest;
-          })}
-          timeFilter={{
-            currentTimeFilter: timeRange,
-            defaultValue: "24h",
-            onTimeSelectHandler: onTimeSelectHandler,
-          }}
-          onRowSelect={(row, index) => {
-            onRowSelectHandler(row, index);
-          }}
-          makeCard={
-            userId
-              ? undefined
-              : (row) => {
-                  return <RequestCard request={row} properties={properties} />;
+                : undefined
+            }
+            exportData={requests.map((request) => {
+              const flattenedRequest: any = {};
+              Object.entries(request).forEach(([key, value]) => {
+                // key is properties and value is not null
+                if (
+                  key === "customProperties" &&
+                  value !== null &&
+                  value !== undefined
+                ) {
+                  Object.entries(value).forEach(([key, value]) => {
+                    if (value !== null) {
+                      flattenedRequest[key] = value;
+                    }
+                  });
+                } else {
+                  flattenedRequest[key] = value;
                 }
-          }
-          makeRow={
-            userId
-              ? undefined
-              : {
-                  properties: properties,
-                }
-          }
-        />
-        <TableFooter
-          currentPage={currentPage}
-          pageSize={pageSize}
-          isCountLoading={isCountLoading}
-          count={count || 0}
-          onPageChange={onPageChangeHandler}
-          onPageSizeChange={onPageSizeChangeHandler}
-          pageSizeOptions={[25, 50, 100]}
-        />
-      </div>
+              });
+              return flattenedRequest;
+            })}
+            timeFilter={{
+              currentTimeFilter: timeRange,
+              defaultValue: "24h",
+              onTimeSelectHandler: onTimeSelectHandler,
+            }}
+            onRowSelect={(row, index) => {
+              onRowSelectHandler(row, index);
+            }}
+            makeCard={
+              userId
+                ? undefined
+                : (row) => {
+                    return (
+                      <RequestCard request={row} properties={properties} />
+                    );
+                  }
+            }
+            makeRow={
+              userId
+                ? undefined
+                : {
+                    properties: properties,
+                  }
+            }
+          />
+          <TableFooter
+            currentPage={currentPage}
+            pageSize={pageSize}
+            isCountLoading={isCountLoading}
+            count={count || 0}
+            onPageChange={onPageChangeHandler}
+            onPageSizeChange={onPageSizeChangeHandler}
+            pageSizeOptions={[25, 50, 100]}
+          />
+        </div>
+      )}
       <RequestDrawerV2
         open={open}
         setOpen={setOpen}
