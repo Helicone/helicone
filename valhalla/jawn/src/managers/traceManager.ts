@@ -124,8 +124,6 @@ export class TraceManager {
         );
       }
 
-      console.log("\n--------SENT TO S3---------\n", JSON.stringify({ request: requestBody, response: completionChoices }), "\n");
-
       const log: Log = {
         request: {
           id: span.traceId,
