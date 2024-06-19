@@ -71,6 +71,15 @@ export class OrganizationManager extends BaseManager {
     super(authParams);
     this.organizationStore = new OrganizationStore(authParams.organizationId);
   }
+
+  async getOrg() {
+    return supabaseServer.client
+      .from("organization")
+      .select("*")
+      .eq("id", this.authParams.organizationId)
+      .single();
+  }
+
   async createOrganization(
     createOrgParams: NewOrganizationParams
   ): Promise<Result<NewOrganizationParams, string>> {
@@ -79,7 +88,8 @@ export class OrganizationManager extends BaseManager {
     }
 
     if (createOrgParams.organization_type === "customer") {
-      if (createOrgParams.org_provider_key !== "reseller") {
+      const org = await this.getOrg();
+      if (org.data?.organization_type !== "reseller") {
         return err("Only resellers can create customers");
       }
     }
