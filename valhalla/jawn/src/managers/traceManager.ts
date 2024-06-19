@@ -1,9 +1,9 @@
 import type { Log, Message } from "../lib/handlers/HandlerContext";
 import { KafkaProducer } from "../lib/clients/KafkaProducer";
-import util from "util";
 import { AuthParams } from "../lib/db/supabase";
-import { string } from "zod";
 import { S3Client } from "../lib/shared/db/s3Client";
+
+import { randomUUID } from "crypto";
 
 export class TraceManager {
 
@@ -29,8 +29,10 @@ export class TraceManager {
             attributes.set(key, value.stringValue ?? value.intValue);
           });
 
+          const uuid = randomUUID();
+
           return {
-            traceId: span.traceId,
+            traceId: uuid,
             spanId: span.spanId,
             name: span.name,
             kind: span.kind,
@@ -98,8 +100,8 @@ export class TraceManager {
       const s3Result = await this.s3Client.store(
         key,
         JSON.stringify({
-          request: requestBody,
-          response: completionChoices,
+          request: JSON.stringify(requestBody),
+          response: JSON.stringify(completionChoices)
         }),
       );
       if (s3Result.error) {
@@ -107,8 +109,6 @@ export class TraceManager {
           `Error storing request response in S3: ${s3Result.error}`
         );
       }
-
-      console.log("\n--------SENT TO S3---------\n", JSON.stringify({ request: requestBody, response: completionChoices }), "\n");
 
       const log: Log = {
         request: {
