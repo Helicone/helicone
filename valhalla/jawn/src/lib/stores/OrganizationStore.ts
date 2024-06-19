@@ -103,7 +103,7 @@ export class OrganizationStore extends BaseStore {
     userId: string,
     organizationId: string
   ): Promise<Result<string, string>> {
-    if ((await this.checkAccessToMutateOrg(organizationId, userId)) === false) {
+    if ((await this.checkUserBelongsToOrg(organizationId, userId)) === false) {
       return err("User does not have access to add member to organization");
     }
 
@@ -129,7 +129,7 @@ export class OrganizationStore extends BaseStore {
     },
     userId: string
   ): Promise<Result<string, string>> {
-    const hasAccess = await this.checkAccessToMutateOrg(
+    const hasAccess = await this.checkUserBelongsToOrg(
       insertRequest.organization_id,
       userId
     );
@@ -177,7 +177,7 @@ export class OrganizationStore extends BaseStore {
     userId: string,
     filterType: string
   ): Promise<Result<OrganizationLayout, string>> {
-    const hasAccess = await this.checkAccessToMutateOrg(organizationId, userId);
+    const hasAccess = await this.checkUserBelongsToOrg(organizationId, userId);
 
     if (!hasAccess) {
       return err("User does not have access to get organization layout");
@@ -207,7 +207,7 @@ export class OrganizationStore extends BaseStore {
     type: string,
     filters: OrganizationFilter[]
   ): Promise<Result<string, string>> {
-    const hasAccess = await this.checkAccessToMutateOrg(organizationId, userId);
+    const hasAccess = await this.checkUserBelongsToOrg(organizationId, userId);
     if (!hasAccess) {
       return err("User does not have access to update organization filter");
     }
@@ -229,7 +229,7 @@ export class OrganizationStore extends BaseStore {
     organizationId: string,
     userId: string
   ): Promise<Result<OrganizationMember[], string>> {
-    const hasAccess = await this.checkAccessToMutateOrg(organizationId, userId);
+    const hasAccess = await this.checkUserBelongsToOrg(organizationId, userId);
 
     if (!hasAccess) {
       return err("User does not have access to get organization members");
@@ -318,7 +318,7 @@ export class OrganizationStore extends BaseStore {
     orgRole: string,
     memberId: string
   ): Promise<Result<null, string>> {
-    const hasAccess = await this.checkAccessToMutateOrg(organizationId, userId);
+    const hasAccess = await this.checkUserBelongsToOrg(organizationId, userId);
     if (!hasAccess) {
       return err("User does not have access to update organization member");
     }
@@ -390,6 +390,27 @@ export class OrganizationStore extends BaseStore {
     } else {
       return false;
     }
+  }
+
+  private async checkUserBelongsToOrg(
+    orgId: string,
+    userId: string
+  ): Promise<boolean> {
+    const query = `
+      select * from organization_member om
+      where om.organization = $1 and (om.member = $2)
+    `;
+
+    const { data, error } = await dbExecute<{
+      email: string;
+      member: string;
+      org_role: string;
+    }>(query, [orgId, userId]);
+
+    if (error || !data || data.length === 0) {
+      return false;
+    }
+    return true;
   }
 
   private async _checkAccessToOrg(
