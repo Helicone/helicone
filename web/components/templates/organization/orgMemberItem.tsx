@@ -8,6 +8,7 @@ import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDropdown from "../../shared/themed/themedDropdown";
 import ThemedModal from "../../shared/themed/themedModal";
+import { useJawnClient } from "../../../lib/clients/jawnHook";
 
 interface OrgMemberItemProps {
   index: number;
@@ -33,6 +34,8 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
   const user = useUser();
 
   const router = useRouter();
+
+  const jawn = useJawnClient();
 
   const [memberRole, setMemberRole] = useState<string>(
     orgMember.org_role || "member"
@@ -62,29 +65,27 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                 },
               ]}
               selectedValue={memberRole}
-              onSelect={(role) => {
-                fetch(`/api/organization/${orgId}/update_member`, {
-                  method: "PATCH",
-                  body: JSON.stringify({
-                    orgRole: role,
-                    memberId: orgMember.member,
-                  } as {
-                    orgRole: string;
-                    memberId: string;
-                  }),
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                })
-                  .then((res) => res.json())
-                  .then((res) => {
-                    if (res.error) {
-                      setNotification("Error updating member", "error");
-                      console.error(res);
-                    } else {
-                      setNotification("Successfully updated member", "success");
-                    }
-                  });
+              onSelect={async (role) => {
+                const { data, error } = await jawn.POST(
+                  "/v1/organization/{organizationId}/update_member",
+                  {
+                    params: {
+                      path: {
+                        organizationId: orgId,
+                      },
+                    },
+                    body: {
+                      role: role,
+                      memberId: orgMember.member!,
+                    },
+                  }
+                );
+                if (error) {
+                  setNotification("Error updating member", "error");
+                  console.error(error);
+                } else {
+                  setNotification("Successfully updated member", "success");
+                }
                 setMemberRole(role);
               }}
             />
@@ -114,31 +115,28 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
             </span>
           ) : isUser ? (
             <button
-              onClick={() => {
-                fetch(
-                  `/api/organization/${orgId}/remove_member?memberId=${orgMember.member}`
-                )
-                  .then((res) => res.json())
-                  .then((res) => {
-                    if (res.error) {
-                      if (res.error.length < 30) {
-                        setNotification(res.error, "error");
-                        console.error(res);
-                      } else {
-                        setNotification("Error leaving organizationr", "error");
-                        console.error(res);
-                      }
-                    } else {
-                      setNotification(
-                        "Successfully left organization",
-                        "success"
-                      );
-                    }
-                    refreshOrgs();
-                  })
-                  .finally(() => {
-                    router.push("/dashboard");
-                  });
+              onClick={async () => {
+                const { data, error } = await jawn.DELETE(
+                  `/v1/organization/{organizationId}/remove_member`,
+                  {
+                    params: {
+                      path: {
+                        organizationId: orgId,
+                      },
+                      query: {
+                        memberId: orgMember.member!,
+                      },
+                    },
+                  }
+                );
+                if (error) {
+                  setNotification("Error leaving organization", "error");
+                  console.error(error);
+                } else {
+                  setNotification("Successfully left organization", "success");
+                }
+                refreshOrgs();
+                router.push("/dashboard");
               }}
             >
               <p className="hover:bg-gray-200 dark:hover:bg-gray-800 inline-flex items-center rounded-full bg-white dark:bg-black px-2 py-1 text-xs font-medium text-gray-500 ring-1 ring-inset ring-gray-300 dark:ring-gray-700">
@@ -181,26 +179,28 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
             </button>
             <button
               className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              onClick={() => {
-                fetch(
-                  `/api/organization/${orgId}/remove_member?memberId=${orgMember.member}`
-                )
-                  .then((res) => res.json())
-                  .then((res) => {
-                    if (res.error) {
-                      if (res.error.length < 30) {
-                        setNotification(res.error, "error");
-                        console.error(res);
-                      } else {
-                        setNotification("Error removing member", "error");
-                        console.error(res);
-                      }
-                    } else {
-                      setNotification("Member removed successfully", "success");
-                    }
-                    refetch();
-                    setOpenDelete(false);
-                  });
+              onClick={async () => {
+                const { data, error } = await jawn.DELETE(
+                  `/v1/organization/{organizationId}/remove_member`,
+                  {
+                    params: {
+                      path: {
+                        organizationId: orgId,
+                      },
+                      query: {
+                        memberId: orgMember.member!,
+                      },
+                    },
+                  }
+                );
+                if (error) {
+                  setNotification("Error removing member", "error");
+                  console.error(error);
+                } else {
+                  setNotification("Member removed successfully", "success");
+                }
+                refetch();
+                setOpenDelete(false);
               }}
             >
               Remove
