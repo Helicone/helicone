@@ -49,8 +49,8 @@ const projects: Project[] = [
     title: "Haema",
     description:
       "An AI mobile app to help people with diabetes learn how food and exercise affects their blood sugar.",
-    usage: 
-      "We use Helicone to log all of the requests to our AI and we're using the logged data to directly improve our product.", 
+    usage:
+      "We use Helicone to log all of the requests to our AI and we're using the logged data to directly improve our product.",
     creators: [
       {
         name: "Pranav Ahluwalia",
@@ -59,7 +59,7 @@ const projects: Project[] = [
       {
         name: "Pranav",
         href: "https://x.com/PranavAhl",
-      }
+      },
     ],
     imageHref: "/static/community/projects/haema.webp",
     tags: [TAGS.Healthcare],
@@ -69,8 +69,8 @@ const projects: Project[] = [
     title: "DemoFox",
     description:
       "Instantly translates jargon and articulates business value, making inter-department communication hassle-free.",
-    usage: 
-      "We use Helicone to understand why a prompt fails to return valid data.", 
+    usage:
+      "We use Helicone to understand why a prompt fails to return valid data.",
     creators: [
       {
         name: "Tim Elam",
@@ -83,9 +83,8 @@ const projects: Project[] = [
   },
   {
     title: "CodeCrafters",
-    description:
-      "Practice writing complex software.",
-    usage: 
+    description: "Practice writing complex software.",
+    usage:
       "We use Helicone for monitoring costs on our LLM features in production. In development it also helps with inspecting the final prompts we're generating and allows quickly tweaking and experimenting using the Playground.",
     creators: [
       {
@@ -93,9 +92,9 @@ const projects: Project[] = [
         href: "https://x.com/rohitpaulk",
       },
       {
-        name: "Sarup Banskota", 
-        href: "https://x.com/sarupbanskota"
-      }
+        name: "Sarup Banskota",
+        href: "https://x.com/sarupbanskota",
+      },
     ],
     imageHref: "/static/community/projects/codecrafters.webp",
     tags: [TAGS.Education],
@@ -104,10 +103,8 @@ const projects: Project[] = [
   },
   {
     title: "Reworkd",
-    description:
-      "Either AgentGPT or some new stuff we're working on!",
-    usage: 
-      "API logging and cost analysis.",
+    description: "Either AgentGPT or some new stuff we're working on!",
+    usage: "API logging and cost analysis.",
     creators: [
       {
         name: "Asim Shrestha",
@@ -123,8 +120,7 @@ const projects: Project[] = [
     title: "Jsonify",
     description:
       "Use AI to turn websites and documents into useful structured data. ",
-    usage: 
-      "Keep track of OpenAI metrics -- cost, latency, failures, etc.",
+    usage: "Keep track of OpenAI metrics -- cost, latency, failures, etc.",
     creators: [
       {
         name: "Paul Hunkin",
@@ -141,10 +137,8 @@ const projects: Project[] = [
   },
   {
     title: "assistant-ui",
-    description:
-      "React components for AI chat.",
-    usage: 
-      "Get a detailed token cost breakdown per user.",
+    description: "React components for AI chat.",
+    usage: "Get a detailed token cost breakdown per user.",
     creators: [
       {
         name: "Simon Farshid",
@@ -160,7 +154,7 @@ const projects: Project[] = [
     title: "PitchGhost",
     description:
       "Help companies automatically find customers on social media by scanning and scraping Twitter, Reddit, LinkedIn, etc for posts and content that would make perfect sense for your brand or business to engage with.",
-    usage: 
+    usage:
       "Our platform involves tons of calls to LLMs to read and digest all of the social media posts we scan through. Helicone has been invaluable to us in checking in and monitoring these systems and especially debugging LLM calls through the playground.",
     creators: [
       {
@@ -177,7 +171,7 @@ const projects: Project[] = [
     title: "mangosqueezy",
     description:
       "An affiliate marketing platform where businesses connect with affiliates to grow their sales or audience. It's the first crypto-based affiliate marketing platform, which facilitates cross-border payments, real-time settlement in seconds, and zero processing fees.",
-    usage: 
+    usage:
       "We are using Helicone to monitor our LLM usage so we know how many tokens we have used and which countries the usage is coming from. Additionally, we plan to implement a user rate limiting feature soon.",
     creators: [
       {
@@ -196,9 +190,8 @@ const projects: Project[] = [
   },
   {
     title: "Greptile",
-    description:
-      "AI expert on any codebase, as an API.",
-    usage: 
+    description: "AI expert on any codebase, as an API.",
+    usage:
       "Tracing and logging LLM calls to debug, track usage, manage costs, and prepare datasets for finetuning.",
     creators: [
       {
@@ -223,8 +216,7 @@ const projects: Project[] = [
     title: "LinkedInFy",
     description:
       "Automate your LinkedIn, there is no need to waste hrs on your LinkedIn to think about what to post AI will do it for you.",
-    usage: 
-      "To monitor different LLM model results and see prompts result.",
+    usage: "To monitor different LLM model results and see prompts result.",
     creators: [
       {
         name: "Abhishek",
@@ -267,12 +259,12 @@ export function Projects() {
   //   </div>
   // );
   return (
-    <div className="grid grid-cols-2 space-y-8">
+    <div className="grid grid-cols-2">
       {projects.map((project, i) => {
         return (
           <Link
             id="featured"
-            className="flex flex-col gap-6 w-full hover:bg-sky-50 rounded-lg p-8 col-span-2 md:col-span-1"
+            className="flex flex-col gap-6 w-full hover:bg-sky-50 rounded-lg p-8 col-span-2 md:col-span-1 mt-8"
             href={project.href}
             key={i}
           >
