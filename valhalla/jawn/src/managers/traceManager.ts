@@ -4,6 +4,7 @@ import { AuthParams } from "../lib/db/supabase";
 import { S3Client } from "../lib/shared/db/s3Client";
 
 import { randomUUID } from "crypto";
+import { parseInt } from "lodash";
 
 export class TraceManager {
 
@@ -88,20 +89,34 @@ export class TraceManager {
       }
 
       const requestBody = {
-          model: span.attributes.get("gen_ai.response.model"),
-          n: i,
-          messages: promptMessages,
-          temperature: 1,
-          max_tokens: span.attributes.get("gen_ai.response.max_tokens") ?? 50,
-          stream: false
-        }
+        model: span.attributes.get("gen_ai.response.model"),
+        n: i,
+        messages: promptMessages,
+        temperature: 1,
+        max_tokens: span.attributes.get("gen_ai.response.max_tokens") ?? 50,
+        stream: false
+      }
+
+      const responseBody = {
+        id: span.traceId,
+        object: span.attributes.get("llm.request.type"),
+        created: new Date(parseInt(span.startTimeUnixNano)/1000000),
+        model: span.attributes.get("gen_ai.response.model"),
+        choices: completionChoices,
+        usage: {
+          prompt_tokens: span.attributes.get("gen_ai.usage.prompt_tokens"),
+          completion_tokens: span.attributes.get("gen_ai.usage.completion_tokens"),
+          total_tokens: span.attributes.get("llm.usage.total_tokens"),
+        },
+        system_fingerprint: null
+      }
 
       const key = this.s3Client.getRawRequestResponseKey(span.traceId, authParams.organizationId);
       const s3Result = await this.s3Client.store(
         key,
         JSON.stringify({
           request: JSON.stringify(requestBody),
-          response: JSON.stringify(completionChoices)
+          response: JSON.stringify(responseBody)
         }),
       );
       if (s3Result.error) {
@@ -121,7 +136,7 @@ export class TraceManager {
           targetUrl: "",
           provider: span.attributes.get("gen_ai.system"),
           bodySize: JSON.stringify(promptMessages).length,
-          path: "traceloop-nopath",
+          path: "async-unknown-path",
           threat: false,
           countryCode: undefined,
           requestCreatedAt: new Date(parseInt(span.startTimeUnixNano) / 1000000),
@@ -134,7 +149,7 @@ export class TraceManager {
           bodySize: JSON.stringify(completionChoices).length,
           timeToFirstToken: undefined,
           responseCreatedAt: new Date(parseInt(span.endTimeUnixNano) / 1000000),
-          delayMs: 0,
+          delayMs: -1,
         }
       }
 
@@ -151,30 +166,11 @@ export class TraceManager {
         log: log,
       }
 
-      const result = await fetch(`http://127.0.0.1:8585/v1/log/request`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `${kafkaMessage.authorization}`,
-        },
-        body: JSON.stringify({
-          log: kafkaMessage.log,
-          authorization: kafkaMessage.authorization,
-          heliconeMeta: kafkaMessage.heliconeMeta,
-        }),
-      });
-
-      //const kafkaProducer = new KafkaProducer();
-      //const res = await kafkaProducer.sendMessages(
-      //  [kafkaMessage],
-      //  "request-response-logs-prod"
-      //);
-
-      //if (res.error) {
-      //  console.error(
-      //    `Error sending message to DLQ: ${res.error} for request ${log.request.id}`
-      //  );
-      //}
+      const kafkaProducer = new KafkaProducer();
+      await kafkaProducer.sendMessages(
+        [kafkaMessage],
+        "request-response-logs-prod"
+      );
     });
 
   }
