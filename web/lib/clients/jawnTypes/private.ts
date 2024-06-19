@@ -30,6 +30,39 @@ export interface paths {
   "/v1/settings/query": {
     get: operations["GetSettings"];
   };
+  "/v1/organization/create": {
+    post: operations["CreateNewOrganization"];
+  };
+  "/v1/organization/{organizationId}/update": {
+    put: operations["UpdateOrganization"];
+  };
+  "/v1/organization/{organizationId}/add_member": {
+    post: operations["AddMemberToOrganization"];
+  };
+  "/v1/organization/{organizationId}/create_filter": {
+    post: operations["CreateOrganizationFilter"];
+  };
+  "/v1/organization/{organizationId}/update_filter": {
+    post: operations["UpdateOrganizationFilter"];
+  };
+  "/v1/organization/delete": {
+    delete: operations["DeleteOrganization"];
+  };
+  "/v1/organization/{organizationId}/layout": {
+    get: operations["GetOrganizationLayout"];
+  };
+  "/v1/organization/{organizationId}/members": {
+    get: operations["GetOrganizationMembers"];
+  };
+  "/v1/organization/{organizationId}/update_member": {
+    post: operations["UpdateOrganizationMember"];
+  };
+  "/v1/organization/{organizationId}/owner": {
+    get: operations["GetOrganizationOwner"];
+  };
+  "/v1/organization/{organizationId}/remove_member": {
+    delete: operations["RemoveMemberFromOrganization"];
+  };
   "/v1/log/request": {
     post: operations["GetRequests"];
   };
@@ -193,6 +226,97 @@ export interface components {
       error: null;
     };
     "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_null_: {
+      /** @enum {number|null} */
+      data: null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
+    NewOrganizationParams: {
+      limits?: {
+        /** Format: double */
+        requests: number;
+        /** Format: double */
+        cost: number;
+      };
+      /** @enum {string} */
+      variant: "organization" | "reseller";
+      org_provider_key?: string;
+      organization_type?: string;
+      reseller_id?: string;
+      tier: string;
+      has_onboarded: boolean;
+      icon: string;
+      color: string;
+      owner: string;
+      name: string;
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_NewOrganizationParams.name-or-color-or-icon-or-variant-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_": {
+      name: string;
+      color: string;
+      icon: string;
+      /** @enum {string} */
+      variant: "organization" | "reseller";
+      org_provider_key?: string;
+      limits?: {
+        /** Format: double */
+        requests: number;
+        /** Format: double */
+        cost: number;
+      };
+      reseller_id?: string;
+      organization_type?: string;
+    };
+    UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-variant-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_"];
+    FilterRow: {
+      value: string;
+      /** Format: double */
+      operatorIdx: number;
+      /** Format: double */
+      filterMapIdx: number;
+    };
+    OrganizationFilter: {
+      softDelete: boolean;
+      createdAt?: string;
+      filter: components["schemas"]["FilterRow"][];
+      name: string;
+      id: string;
+    };
+    OrganizationLayout: {
+      filters: components["schemas"]["OrganizationFilter"][];
+      type: string;
+      organization_id: string;
+      id: string;
+    };
+    ResultSuccess_OrganizationLayout_: {
+      data: components["schemas"]["OrganizationLayout"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_OrganizationLayout.string_": components["schemas"]["ResultSuccess_OrganizationLayout_"] | components["schemas"]["ResultError_string_"];
+    OrganizationMember: {
+      org_role: string;
+      member: string;
+      email: string;
+    };
+    "ResultSuccess_OrganizationMember-Array_": {
+      data: components["schemas"]["OrganizationMember"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_OrganizationMember-Array.string_": components["schemas"]["ResultSuccess_OrganizationMember-Array_"] | components["schemas"]["ResultError_string_"];
+    OrganizationOwner: {
+      tier: string;
+      email: string;
+    };
+    "ResultSuccess_OrganizationOwner-Array_": {
+      data: components["schemas"]["OrganizationOwner"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_OrganizationOwner-Array.string_": components["schemas"]["ResultSuccess_OrganizationOwner-Array_"] | components["schemas"]["ResultError_string_"];
     HeliconeMeta: {
       posthogHost?: string;
       posthogApiKey?: string;
@@ -431,6 +555,210 @@ export interface operations {
           "application/json": {
             useAzureForExperiment: boolean;
           };
+        };
+      };
+    };
+  };
+  CreateNewOrganization: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NewOrganizationParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateOrganization: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateOrganizationParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  AddMemberToOrganization: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  CreateOrganizationFilter: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          filterType: "dashboard" | "requests";
+          filters: components["schemas"]["OrganizationFilter"][];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateOrganizationFilter: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          filterType: "dashboard" | "requests";
+          filters: components["schemas"]["OrganizationFilter"][];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  DeleteOrganization: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetOrganizationLayout: {
+    parameters: {
+      query: {
+        filterType: string;
+      };
+      path: {
+        organizationId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrganizationLayout.string_"];
+        };
+      };
+    };
+  };
+  GetOrganizationMembers: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrganizationMember-Array.string_"];
+        };
+      };
+    };
+  };
+  UpdateOrganizationMember: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          memberId: string;
+          role: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetOrganizationOwner: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrganizationOwner-Array.string_"];
+        };
+      };
+    };
+  };
+  RemoveMemberFromOrganization: {
+    parameters: {
+      query: {
+        memberId: string;
+      };
+      path: {
+        organizationId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
