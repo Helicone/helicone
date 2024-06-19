@@ -7,7 +7,34 @@ import {
 import { getStripeCustomer } from "../../../utlis/stripeHelpers";
 import { stripeServer } from "../../../utlis/stripeServer";
 import { supabaseServer } from "../../../lib/supabaseServer";
-import { getJawnClient } from "../../../lib/clients/jawn";
+import { dbExecute } from "../../../lib/api/db/dbExecute";
+
+async function getOwner(orgId: String, userId: string) {
+  const query = `
+  select 
+    us.tier as tier,
+    email
+    from organization o 
+    left join auth.users u on u.id = o.owner
+    left join user_settings us on us.user = u.id
+    where o.id = $1 AND (
+      -- Auth check
+      EXISTS (
+        select * from organization_member om
+        left join organization o on o.id = om.organization
+        where om.organization = $1 and (
+          o.owner = $2 or om.member = $2
+        )
+      )
+      OR o.owner = $2
+    )
+`;
+
+  return await dbExecute<{
+    email: string;
+    tier: string;
+  }>(query, [orgId, userId]);
+}
 
 async function handler(option: HandlerWrapperOptions<Result<string, string>>) {
   const {
@@ -32,26 +59,8 @@ async function handler(option: HandlerWrapperOptions<Result<string, string>>) {
 
   let customer_id = data.stripe_customer_id;
 
-  const jawn = getJawnClient(orgId);
-
   if (data.subscription_status === "legacy") {
-    const { data: orgOwner, error: orgOwnerError } = await jawn.GET(
-      "/v1/organization/{organizationId}/owner",
-      {
-        params: {
-          path: {
-            organizationId: orgId,
-          },
-        },
-      }
-    );
-    if (orgOwnerError || !orgOwner) {
-      res.status(500).json({
-        error: orgOwnerError ?? "Cannot get organizaiton owner",
-        data: null,
-      });
-      return;
-    }
+    const orgOwner = await getOwner(orgId, user.id);
     const customer = await getStripeCustomer(orgOwner.data?.[0].email ?? "");
     customer_id = customer.data?.id ?? "";
   }
