@@ -103,7 +103,7 @@ export class OrganizationStore extends BaseStore {
     userId: string,
     organizationId: string
   ): Promise<Result<string, string>> {
-    if ((await this.checkAccessToMutateOrg(organizationId, userId)) === false) {
+    if ((await this.checkUserBelongsToOrg(organizationId, userId)) === false) {
       return err("User does not have access to add member to organization");
     }
 
