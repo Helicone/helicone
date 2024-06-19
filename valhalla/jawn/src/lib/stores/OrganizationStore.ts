@@ -103,10 +103,6 @@ export class OrganizationStore extends BaseStore {
     userId: string,
     organizationId: string
   ): Promise<Result<string, string>> {
-    if ((await this.checkAccessToMutateOrg(organizationId, userId)) === false) {
-      return err("User does not have access to add member to organization");
-    }
-
     const { error: insertError } = await supabaseServer.client
       .from("organization_member")
       .insert([{ organization: organizationId, member: userId! }]);
@@ -364,7 +360,7 @@ export class OrganizationStore extends BaseStore {
     return ok(null);
   }
 
-  private async checkAccessToMutateOrg(
+  async checkAccessToMutateOrg(
     orgId: string,
     userId: string
   ): Promise<boolean> {
