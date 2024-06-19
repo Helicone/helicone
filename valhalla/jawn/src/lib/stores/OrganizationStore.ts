@@ -54,8 +54,13 @@ export class OrganizationStore extends BaseStore {
 
   async updateOrganization(
     updateOrgParams: UpdateOrganizationParams,
-    organizationId: string
+    organizationId: string,
+    userId: string
   ): Promise<Result<string, string>> {
+    const hasAccess = await this.checkAccessToMutateOrg(organizationId, userId);
+    if (!hasAccess) {
+      return err("User does not have access to update organization");
+    }
     const { data, error } = await supabaseServer.client
       .from("organization")
       .update({
@@ -112,12 +117,21 @@ export class OrganizationStore extends BaseStore {
     return ok(userId!);
   }
 
-  async createOrganizationFilter(insertRequest: {
-    organization_id: string;
-    type: "dashboard" | "requests";
-    filters: OrganizationFilter[];
-  }): Promise<Result<string, string>> {
-    console.log("createOrganizationFilter", insertRequest);
+  async createOrganizationFilter(
+    insertRequest: {
+      organization_id: string;
+      type: "dashboard" | "requests";
+      filters: OrganizationFilter[];
+    },
+    userId: string
+  ): Promise<Result<string, string>> {
+    const hasAccess = await this.checkAccessToMutateOrg(
+      insertRequest.organization_id,
+      userId
+    );
+    if (!hasAccess) {
+      return err("User does not have access to create organization filter");
+    }
     const insert = await supabaseServer.client
       .from("organization_layout")
       .insert([insertRequest])
@@ -157,7 +171,7 @@ export class OrganizationStore extends BaseStore {
   async getOrganizationLayout(
     organizationId: string,
     userId: string,
-    type: string
+    filterType: string
   ): Promise<Result<OrganizationLayout, string>> {
     const hasAccess = await this.checkAccessToMutateOrg(organizationId, userId);
 
@@ -168,7 +182,7 @@ export class OrganizationStore extends BaseStore {
       .from("organization_layout")
       .select("*")
       .eq("organization_id", organizationId)
-      .eq("type", type)
+      .eq("type", filterType)
       .single();
 
     if (error !== null) {

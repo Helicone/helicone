@@ -6,7 +6,7 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { Database } from "../../../supabase/database.types";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { useJawnClient } from "../../../lib/clients/jawnHook";
+import { getJawnClient } from "../../../lib/clients/jawn";
 
 interface DeleteOrgModalProps {
   open: boolean;
@@ -21,7 +21,7 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
   const { setNotification } = useNotification();
   const orgContext = useOrg();
   const router = useRouter();
-  const jawn = useJawnClient();
+  const jawn = getJawnClient(orgId);
   const supabaseClient = useSupabaseClient<Database>();
   const [confirmOrgName, setConfirmOrgName] = useState("");
 

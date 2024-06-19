@@ -59,7 +59,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
               },
             },
             body: {
-              type: layoutPage,
+              filterType: layoutPage,
               filters: updatedFilters!,
             },
           }
@@ -86,7 +86,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
             },
             body: {
               filters: [saveFilter],
-              type: layoutPage,
+              filterType: layoutPage,
             },
           }
         );

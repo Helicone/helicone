@@ -1193,7 +1193,7 @@ export interface operations {
       content: {
         "application/json": {
           /** @enum {string} */
-          type: "dashboard" | "requests";
+          filterType: "dashboard" | "requests";
           filters: components["schemas"]["OrganizationFilter"][];
         };
       };
@@ -1217,7 +1217,7 @@ export interface operations {
       content: {
         "application/json": {
           /** @enum {string} */
-          type: "dashboard" | "requests";
+          filterType: "dashboard" | "requests";
           filters: components["schemas"]["OrganizationFilter"][];
         };
       };
@@ -1244,7 +1244,7 @@ export interface operations {
   GetOrganizationLayout: {
     parameters: {
       query: {
-        type: string;
+        filterType: string;
       };
       path: {
         organizationId: string;

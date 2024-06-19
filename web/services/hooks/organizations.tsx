@@ -5,10 +5,10 @@ import { useCallback, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { OrgContextValue } from "../../components/layout/organizationContext";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
-import { useJawnClient } from "../../lib/clients/jawnHook";
+import { getJawnClient } from "../../lib/clients/jawn";
 
 const useGetOrgMembers = (orgId: string) => {
-  const jawn = useJawnClient();
+  const jawn = getJawnClient(orgId);
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["OrganizationsMembers", orgId],
     queryFn: async (query) => {
@@ -36,7 +36,7 @@ const useGetOrgMembers = (orgId: string) => {
 };
 
 const useGetOrgOwner = (orgId: string) => {
-  const jawn = useJawnClient();
+  const jawn = getJawnClient(orgId);
   const { data, isLoading } = useQuery({
     queryKey: ["OrganizationsMembersOwner", orgId],
     queryFn: async (query) => {

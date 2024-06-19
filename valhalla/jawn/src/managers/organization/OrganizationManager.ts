@@ -1,5 +1,4 @@
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { ok, err, Result } from "../../lib/shared/result";
 import { OrganizationStore } from "../../lib/stores/OrganizationStore";
 import { BaseManager } from "../BaseManager";
@@ -83,6 +82,7 @@ export class OrganizationManager extends BaseManager {
   async createOrganization(
     createOrgParams: NewOrganizationParams
   ): Promise<Result<NewOrganizationParams, string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
     if (createOrgParams.owner !== this.authParams.userId) {
       return err("Unauthorized");
     }
@@ -126,7 +126,8 @@ export class OrganizationManager extends BaseManager {
 
     const { data, error } = await this.organizationStore.updateOrganization(
       updateOrgParams,
-      organizationId
+      organizationId,
+      this.authParams.userId
     );
 
     if (error || !data || data.length === 0) {
@@ -140,6 +141,7 @@ export class OrganizationManager extends BaseManager {
     organizationId: string,
     email: string
   ): Promise<Result<string, string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
     let { data: userId, error: userIdError } =
       await this.organizationStore.getUserByEmail(email);
 
@@ -232,16 +234,20 @@ export class OrganizationManager extends BaseManager {
   async createFilter(
     organizationId: string,
     filters: OrganizationFilter[],
-    type: "dashboard" | "requests"
+    filterType: "dashboard" | "requests"
   ): Promise<Result<string, string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
     const insertRequest = {
       organization_id: organizationId,
-      type: type,
+      type: filterType,
       filters: filters,
     };
 
     const { data: createdFilter, error: createFilterError } =
-      await this.organizationStore.createOrganizationFilter(insertRequest);
+      await this.organizationStore.createOrganizationFilter(
+        insertRequest,
+        this.authParams.userId
+      );
 
     if (createFilterError || !createdFilter) {
       console.error(`Failed to create filter: ${createFilterError}`);
@@ -284,14 +290,14 @@ export class OrganizationManager extends BaseManager {
 
   async getOrganizationLayout(
     organizationId: string,
-    type: string
+    filterType: string
   ): Promise<Result<OrganizationLayout, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
     const { data: layout, error: organizationLayoutError } =
       await this.organizationStore.getOrganizationLayout(
         organizationId,
         this.authParams.userId,
-        type
+        filterType
       );
 
     if (organizationLayoutError !== null) {

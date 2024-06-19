@@ -95,7 +95,7 @@ export class OrganizationController extends Controller {
     @Body()
     requestBody: {
       filters: OrganizationFilter[];
-      type: "dashboard" | "requests";
+      filterType: "dashboard" | "requests";
     },
     @Path() organizationId: string,
     @Request() request: JawnAuthenticatedRequest
@@ -105,7 +105,7 @@ export class OrganizationController extends Controller {
     const result = await organizationManager.createFilter(
       organizationId,
       requestBody.filters,
-      requestBody.type
+      requestBody.filterType
     );
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -121,7 +121,7 @@ export class OrganizationController extends Controller {
     @Body()
     requestBody: {
       filters: OrganizationFilter[];
-      type: "dashboard" | "requests";
+      filterType: "dashboard" | "requests";
     },
     @Path() organizationId: string,
     @Request() request: JawnAuthenticatedRequest
@@ -130,7 +130,7 @@ export class OrganizationController extends Controller {
 
     const result = await organizationManager.updateFilter(
       organizationId,
-      requestBody.type,
+      requestBody.filterType,
       requestBody.filters
     );
     if (result.error || !result.data) {
@@ -161,14 +161,14 @@ export class OrganizationController extends Controller {
   @Get("/{organizationId}/layout")
   public async getOrganizationLayout(
     @Path() organizationId: string,
-    @Query() type: string,
+    @Query() filterType: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<OrganizationLayout, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
     const result = await organizationManager.getOrganizationLayout(
       organizationId,
-      type
+      filterType
     );
     if (result.error || !result.data) {
       this.setStatus(500);

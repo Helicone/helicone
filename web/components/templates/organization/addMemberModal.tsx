@@ -5,7 +5,7 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useGetOrgMembers } from "../../../services/hooks/organizations";
 import { useOrg } from "../../layout/organizationContext";
-import { useJawnClient } from "../../../lib/clients/jawnHook";
+import { getJawnClient } from "../../../lib/clients/jawn";
 
 interface AddMemberModalProps {
   orgId: string;
@@ -24,7 +24,7 @@ const AddMemberModal = (props: AddMemberModalProps) => {
   const { data, refetch } = useGetOrgMembers(orgId);
 
   const orgContext = useOrg();
-  const jawn = useJawnClient();
+  const jawn = getJawnClient(orgId);
 
   const members = data?.data
     ? data?.data.map((d) => {

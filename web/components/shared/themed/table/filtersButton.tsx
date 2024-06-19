@@ -188,7 +188,7 @@ export default function FiltersButton({
                       },
                     },
                     body: {
-                      type: layoutPage,
+                      filterType: layoutPage,
                       filters: updatedFilters!,
                     },
                   }

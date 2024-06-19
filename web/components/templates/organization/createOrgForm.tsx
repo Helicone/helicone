@@ -371,7 +371,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 setNotification("Please select a provider key", "error");
                 return;
               }
-              const jawn = getJawnClient();
+              const jawn = getJawnClient(orgContext?.currentOrg?.id);
               if (initialValues) {
                 const { error: updateOrgError } = await jawn.PUT(
                   "/v1/organization/{organizationId}/update",

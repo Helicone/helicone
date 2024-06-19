@@ -3631,7 +3631,7 @@
 						"application/json": {
 							"schema": {
 								"properties": {
-									"type": {
+									"filterType": {
 										"type": "string",
 										"enum": [
 											"dashboard",
@@ -3646,7 +3646,7 @@
 									}
 								},
 								"required": [
-									"type",
+									"filterType",
 									"filters"
 								],
 								"type": "object"
@@ -3695,7 +3695,7 @@
 						"application/json": {
 							"schema": {
 								"properties": {
-									"type": {
+									"filterType": {
 										"type": "string",
 										"enum": [
 											"dashboard",
@@ -3710,7 +3710,7 @@
 									}
 								},
 								"required": [
-									"type",
+									"filterType",
 									"filters"
 								],
 								"type": "object"
@@ -3780,7 +3780,7 @@
 					},
 					{
 						"in": "query",
-						"name": "type",
+						"name": "filterType",
 						"required": true,
 						"schema": {
 							"type": "string"
