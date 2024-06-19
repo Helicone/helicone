@@ -143,7 +143,7 @@ const Blog = () => {
           width={200}
           height={100}
         />
-        <h1 className="text-5xl font-bold text-gray-900">The Helicone Blog</h1>
+        <h1 className="text-5xl font-bold text-gray-900 pt-4">The Helicone Blog</h1>
         <p className="text-lg text-gray-700">
           Thoughts about the future of AI - from the team helping to build it.
         </p>
