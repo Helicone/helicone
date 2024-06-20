@@ -618,7 +618,6 @@ export async function getProviderKeyFromProxy(
     .eq("id", storedProxyKey.data.provider_key_id)
     .eq("soft_delete", "false")
     .single();
-  console.log("providerKey data", providerKey.data);
 
   if (providerKey.error || !providerKey.data?.decrypted_provider_key) {
     return err("Provider key not found");
