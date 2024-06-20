@@ -220,6 +220,13 @@
     {
       "group": "Experiment",
       "pages": ["rest/experiment/post-v1experiment"]
+    },
+    {
+      "group": "Customer",
+      "pages": [
+        "rest/customer/post-v1customer-usagequery",
+        "rest/customer/post-v1customerquery"
+      ]
     }
   ],
   "topbarLinks": [
