@@ -12,9 +12,6 @@ export interface paths {
   "/v1/user/query": {
     post: operations["GetUsers"];
   };
-  "/v1/trace": {
-    get: operations["Healthcheck"];
-  };
   "/v1/trace/log": {
     post: operations["LogTrace"];
   };
@@ -689,18 +686,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_"];
-        };
-      };
-    };
-  };
-  Healthcheck: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            status: string;
-          };
         };
       };
     };

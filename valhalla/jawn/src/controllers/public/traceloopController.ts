@@ -3,7 +3,6 @@ import {
   Request,
   Route,
   Post,
-  Get,
   Tags,
   Security,
 } from "tsoa";
@@ -14,17 +13,8 @@ import { OTELTrace, TraceManager } from "../../managers/traceManager";
 @Tags("Trace")
 @Security("api_key")
 export class TraceController extends Controller {
-
-  @Get("/")
-  public async healthcheck() {
-    this.setStatus(200);
-    return { status: "ok" };
-  }
-
   @Post("log")
   public async logTrace(@Request() request: JawnAuthenticatedRequest) {
-    console.log("----------------RECEIVED----------------");
-
     const traceManager = new TraceManager();
     const trace = request.body as OTELTrace;
     try {

@@ -2259,40 +2259,6 @@
 				}
 			}
 		},
-		"/v1/trace": {
-			"get": {
-				"operationId": "Healthcheck",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"status": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"status"
-									],
-									"type": "object"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Trace"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
 		"/v1/trace/log": {
 			"post": {
 				"operationId": "LogTrace",
