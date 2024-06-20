@@ -233,43 +233,48 @@ export interface components {
       error: null;
     };
     "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
+Json: JsonObject;
     NewOrganizationParams: {
-      limits?: {
-        /** Format: double */
-        requests: number;
-        /** Format: double */
-        cost: number;
-      };
-      /** @enum {string} */
-      variant: "organization" | "reseller";
-      org_provider_key?: string;
-      organization_type?: string;
-      reseller_id?: string;
-      tier: string;
-      has_onboarded: boolean;
-      icon: string;
-      color: string;
+      tier?: string | null;
+      subscription_status?: string | null;
+      stripe_subscription_item_id?: string | null;
+      stripe_subscription_id?: string | null;
+      stripe_customer_id?: string | null;
+      soft_delete?: boolean;
+      size?: string | null;
+      reseller_id?: string | null;
+      /** Format: double */
+      request_limit?: number | null;
+      referral?: string | null;
+      /** Format: double */
+      percent_to_log?: number | null;
       owner: string;
+      organization_type?: string;
+      org_provider_key?: string | null;
       name: string;
+      logo_path?: string | null;
+      limits?: components["schemas"]["Json"] | null;
+      is_personal?: boolean;
+      id?: string;
+      icon?: string;
+      has_onboarded?: boolean;
+      domain?: string | null;
+      created_at?: string | null;
+      color?: string;
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_NewOrganizationParams.name-or-color-or-icon-or-variant-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_": {
+    "Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_": {
       name: string;
-      color: string;
-      icon: string;
-      /** @enum {string} */
-      variant: "organization" | "reseller";
+      color?: string;
+      icon?: string;
       org_provider_key?: string;
-      limits?: {
-        /** Format: double */
-        requests: number;
-        /** Format: double */
-        cost: number;
-      };
+      limits?: components["schemas"]["Json"];
       reseller_id?: string;
       organization_type?: string;
     };
-    UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-variant-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_"];
+    UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_"] & {
+      variant?: string;
+    };
     FilterRow: {
       value: string;
       /** Format: double */

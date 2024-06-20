@@ -512,72 +512,137 @@
 					}
 				]
 			},
-			"NewOrganizationParams": {
-				"properties": {
-					"limits": {
-						"properties": {
-							"requests": {
-								"type": "number",
-								"format": "double"
-							},
-							"cost": {
-								"type": "number",
-								"format": "double"
-							}
+			"Json": {
+				"anyOf": [
+					{
+						"type": "string"
+					},
+					{
+						"type": "number",
+						"format": "double"
+					},
+					{
+						"type": "boolean"
+					},
+					{
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Json"
 						},
-						"required": [
-							"requests",
-							"cost"
-						],
 						"type": "object"
 					},
-					"variant": {
+					{
+						"items": {
+							"$ref": "#/components/schemas/Json"
+						},
+						"type": "array"
+					}
+				],
+				"nullable": true
+			},
+			"NewOrganizationParams": {
+				"properties": {
+					"tier": {
 						"type": "string",
-						"enum": [
-							"organization",
-							"reseller"
-						]
+						"nullable": true
 					},
-					"org_provider_key": {
+					"subscription_status": {
+						"type": "string",
+						"nullable": true
+					},
+					"stripe_subscription_item_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"stripe_subscription_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"stripe_customer_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"soft_delete": {
+						"type": "boolean"
+					},
+					"size": {
+						"type": "string",
+						"nullable": true
+					},
+					"reseller_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"request_limit": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"referral": {
+						"type": "string",
+						"nullable": true
+					},
+					"percent_to_log": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"owner": {
 						"type": "string"
 					},
 					"organization_type": {
 						"type": "string"
 					},
-					"reseller_id": {
+					"org_provider_key": {
+						"type": "string",
+						"nullable": true
+					},
+					"name": {
 						"type": "string"
 					},
-					"tier": {
+					"logo_path": {
+						"type": "string",
+						"nullable": true
+					},
+					"limits": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Json"
+							}
+						],
+						"nullable": true
+					},
+					"is_personal": {
+						"type": "boolean"
+					},
+					"id": {
+						"type": "string"
+					},
+					"icon": {
 						"type": "string"
 					},
 					"has_onboarded": {
 						"type": "boolean"
 					},
-					"icon": {
-						"type": "string"
+					"domain": {
+						"type": "string",
+						"nullable": true
+					},
+					"created_at": {
+						"type": "string",
+						"nullable": true
 					},
 					"color": {
-						"type": "string"
-					},
-					"owner": {
-						"type": "string"
-					},
-					"name": {
 						"type": "string"
 					}
 				},
 				"required": [
-					"variant",
-					"tier",
-					"has_onboarded",
-					"icon",
-					"color",
 					"owner",
 					"name"
 				],
 				"type": "object"
 			},
-			"Pick_NewOrganizationParams.name-or-color-or-icon-or-variant-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_": {
+			"Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_": {
 				"properties": {
 					"name": {
 						"type": "string"
@@ -588,32 +653,11 @@
 					"icon": {
 						"type": "string"
 					},
-					"variant": {
-						"type": "string",
-						"enum": [
-							"organization",
-							"reseller"
-						]
-					},
 					"org_provider_key": {
 						"type": "string"
 					},
 					"limits": {
-						"properties": {
-							"requests": {
-								"type": "number",
-								"format": "double"
-							},
-							"cost": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"requests",
-							"cost"
-						],
-						"type": "object"
+						"$ref": "#/components/schemas/Json"
 					},
 					"reseller_id": {
 						"type": "string"
@@ -623,16 +667,25 @@
 					}
 				},
 				"required": [
-					"name",
-					"color",
-					"icon",
-					"variant"
+					"name"
 				],
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
 			"UpdateOrganizationParams": {
-				"$ref": "#/components/schemas/Pick_NewOrganizationParams.name-or-color-or-icon-or-variant-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_"
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_"
+					},
+					{
+						"properties": {
+							"variant": {
+								"type": "string"
+							}
+						},
+						"type": "object"
+					}
+				]
 			},
 			"FilterRow": {
 				"properties": {
