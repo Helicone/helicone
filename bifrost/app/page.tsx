@@ -96,7 +96,7 @@ export default function Home() {
           <div className="flex items-center gap-4 pt-4 w-full md:justify-center">
             <Link
               href="/contact"
-              className="bg-white hover:bg-gray-100 ease-in-out duration-500 text-gray-600 border-[1.6px] border-gray-300 rounded-lg px-2 py-2 text-sm font-medium flex w-fit items-center gap-1 md:px-6 md:py-2 md:text-lg"
+              className="bg-white hover:bg-gray-100 ease-in-out duration-500 text-gray-500 border-[1.6px] border-gray-300 rounded-lg px-2 py-2 text-sm font-medium flex w-fit items-center gap-1 md:px-6 md:py-2 md:text-lg"
             >
               Get a demo
             </Link>
@@ -108,7 +108,7 @@ export default function Home() {
               <FaChevronRight className="w-2 h-3 inline text-white mx-1 md:mx-1" />
             </Link>
           </div>
-          <ul className="flex flex-col md:flex-row gap-3 md:gap-16 md:justify-center pt-7 md:pt-14 text-sm">
+          <ul className="flex flex-col md:flex-row gap-3 md:gap-16 md:justify-center pt-7 md:pt-16 text-sm">
             <li className="flex items-center space-x-2">
               <FaCheck className="h-4 w-6 text-sky-500" />
               <span className="text-gray-600 font-light md:text-xl">
@@ -141,10 +141,13 @@ export default function Home() {
           id="logos"
           className="flex flex-col space-y-4 pt-6 pb-12 px-3 max-w-6xl mx-auto w-full"
         >
-          <h2 className="text-gray-500 font-bold px-3 text-sm md:text-xl ">
-            Ready for real production workloads
+          <h2 className="text-gray-600 font-bold px-3 text-sm block md:hidden">
+          Ready for real production workloads
           </h2>
-          <ul className="flex flex-col md:flex-row gap-9 md:gap-0 w-full justify-between px-3 pt-4">
+          <h2 className="text-gray-600 font-light text-center px-3 text-lg hidden md:block">
+          Trusted by thousands of companies and developers
+          </h2>
+          <ul className="flex flex-col md:flex-row gap-9 md:gap-0 w-full justify-between px-3 pt-4 md:hidden">
             <li>
               <dl className="flex flex-col space-y-2">
                 <dt className="font-bold text-gray-600 indent-3 text-2xl text border-l-2 border-sky-500">
@@ -240,7 +243,7 @@ export default function Home() {
         </section>
         <section
           id="integrations"
-          className="flex flex-col space-y-4 py-32 max-w-6xl mx-auto w-full"
+          className="flex flex-col space-y-4 py-12 max-w-6xl mx-auto w-full"
         >
           <div className="flex flex-col space-y-2 text-center">
             <h1 className="text-3xl md:text-4xl font-bold">
