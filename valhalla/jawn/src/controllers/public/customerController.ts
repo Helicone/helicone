@@ -92,7 +92,7 @@ export class CustomerController extends Controller {
   }
 
   @Post("/query")
-  public async getExperiments(
+  public async getCustomers(
     @Body()
     requestBody: {},
     @Request() request: JawnAuthenticatedRequest

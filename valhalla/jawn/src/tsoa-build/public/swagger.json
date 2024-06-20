@@ -3702,7 +3702,7 @@
 		},
 		"/v1/customer/query": {
 			"post": {
-				"operationId": "GetExperiments",
+				"operationId": "GetCustomers",
 				"responses": {
 					"200": {
 						"description": "Ok",
