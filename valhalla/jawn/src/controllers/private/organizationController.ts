@@ -7,7 +7,6 @@ import {
   Post,
   Request,
   Path,
-  Put,
   Delete,
   Get,
   Query,
@@ -46,7 +45,7 @@ export class OrganizationController extends Controller {
     }
   }
 
-  @Put("/{organizationId}/update")
+  @Post("/{organizationId}/update")
   public async updateOrganization(
     @Body()
     requestBody: UpdateOrganizationParams,

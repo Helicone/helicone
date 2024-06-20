@@ -1593,7 +1593,7 @@
 			}
 		},
 		"/v1/organization/{organizationId}/update": {
-			"put": {
+			"post": {
 				"operationId": "UpdateOrganization",
 				"responses": {
 					"200": {

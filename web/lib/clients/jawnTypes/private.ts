@@ -34,7 +34,7 @@ export interface paths {
     post: operations["CreateNewOrganization"];
   };
   "/v1/organization/{organizationId}/update": {
-    put: operations["UpdateOrganization"];
+    post: operations["UpdateOrganization"];
   };
   "/v1/organization/{organizationId}/add_member": {
     post: operations["AddMemberToOrganization"];
