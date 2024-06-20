@@ -295,7 +295,6 @@ export class OrganizationManager extends BaseManager {
     const { error: updateError } =
       await this.organizationStore.updateOrganizationFilter(
         organizationId,
-        this.authParams.userId,
         type,
         filters
       );

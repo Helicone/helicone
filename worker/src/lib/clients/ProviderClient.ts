@@ -11,6 +11,7 @@ export interface CallProps {
   body: string | null;
   increaseTimeout: boolean;
   originalUrl: URL;
+  extraHeaders: Headers | null;
 }
 
 export function callPropsFromProxyRequest(
@@ -24,6 +25,7 @@ export function callPropsFromProxyRequest(
     increaseTimeout:
       proxyRequest.requestWrapper.heliconeHeaders.featureFlags.increaseTimeout,
     originalUrl: proxyRequest.requestWrapper.url,
+    extraHeaders: proxyRequest.requestWrapper.extraHeaders,
   };
 }
 
@@ -37,13 +39,30 @@ function removeHeliconeHeaders(request: Headers): Headers {
   return newHeaders;
 }
 
+function joinHeaders(h1: Headers, h2: Headers): Headers {
+  const newHeaders = new Headers();
+  for (const [key, value] of h1.entries()) {
+    newHeaders.set(key, value);
+  }
+  for (const [key, value] of h2.entries()) {
+    newHeaders.set(key, value);
+  }
+  return newHeaders;
+}
+
 export async function callProvider(props: CallProps): Promise<Response> {
   const { headers, method, apiBase, body, increaseTimeout, originalUrl } =
     props;
 
   const targetUrl = buildTargetUrl(originalUrl, apiBase);
+  const removedHeaders = removeHeliconeHeaders(headers);
 
-  const baseInit = { method, headers: removeHeliconeHeaders(headers) };
+  let headersWithExtra = removedHeaders;
+  if (props.extraHeaders) {
+    headersWithExtra = joinHeaders(removedHeaders, props.extraHeaders);
+  }
+
+  const baseInit = { method, headers: headersWithExtra };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
 
   let response;
