@@ -85,7 +85,7 @@ export interface paths {
     post: operations["GetCustomerUsage"];
   };
   "/v1/customer/query": {
-    post: operations["GetExperiments"];
+    post: operations["GetCustomers"];
   };
 }
 
@@ -1129,14 +1129,17 @@ export interface operations {
   GetExperiments: {
     requestBody: {
       content: {
-        "application/json": Record<string, never>;
+        "application/json": {
+          include?: components["schemas"]["IncludeExperimentKeys"];
+          filter: components["schemas"]["ExperimentFilterNode"];
+        };
       };
     };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Customer"][];
+          "application/json": components["schemas"]["Result_Experiment-Array.string_"];
         };
       };
     };
@@ -1232,6 +1235,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["CustomerUsage"] | null;
+        };
+      };
+    };
+  };
+  GetCustomers: {
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Customer"][];
         };
       };
     };

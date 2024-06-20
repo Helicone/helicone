@@ -1755,9 +1755,9 @@ export function RegisterRoutes(app: Router) {
         app.post('/v1/customer/query',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(CustomerController)),
-            ...(fetchMiddlewares<RequestHandler>(CustomerController.prototype.getExperiments)),
+            ...(fetchMiddlewares<RequestHandler>(CustomerController.prototype.getCustomers)),
 
-            async function CustomerController_getExperiments(request: ExRequest, response: ExResponse, next: any) {
+            async function CustomerController_getCustomers(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -1772,7 +1772,7 @@ export function RegisterRoutes(app: Router) {
                 const controller = new CustomerController();
 
               await templateService.apiHandler({
-                methodName: 'getExperiments',
+                methodName: 'getCustomers',
                 controller,
                 response,
                 next,
