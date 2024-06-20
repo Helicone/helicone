@@ -373,7 +373,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
               }
               const jawn = getJawnClient(orgContext?.currentOrg?.id);
               if (initialValues) {
-                const { error: updateOrgError } = await jawn.PUT(
+                const { error: updateOrgError } = await jawn.POST(
                   "/v1/organization/{organizationId}/update",
                   {
                     params: {
