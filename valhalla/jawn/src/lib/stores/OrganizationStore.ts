@@ -15,26 +15,16 @@ export class OrganizationStore extends BaseStore {
   async createNewOrganization(
     createOrgParams: NewOrganizationParams
   ): Promise<Result<NewOrganizationParams, string>> {
-    const insert = await dbExecute<NewOrganizationParams>(
-      "INSERT INTO organization (name, owner, color, icon, has_onboarded, tier, reseller_id, organization_type, org_provider_key, limits) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id",
-      [
-        createOrgParams.name,
-        createOrgParams.owner,
-        createOrgParams.color,
-        createOrgParams.icon,
-        createOrgParams.has_onboarded,
-        createOrgParams.tier,
-        createOrgParams.reseller_id,
-        createOrgParams.organization_type,
-        createOrgParams.org_provider_key,
-        createOrgParams.limits,
-      ]
-    );
+    const { data: insert, error } = await supabaseServer.client
+      .from("organization")
+      .insert([createOrgParams])
+      .select("*")
+      .single();
 
-    if (insert.error || !insert.data) {
-      return err(insert.error);
+    if (error || !insert) {
+      return err(error.message ?? "Failed to create organization");
     }
-    return ok(insert.data[0]);
+    return ok(insert);
   }
 
   async getOrganizationMember(
