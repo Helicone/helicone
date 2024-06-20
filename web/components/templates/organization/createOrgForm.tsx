@@ -418,7 +418,6 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                       icon: selectedIcon.name,
                       has_onboarded: true,
                       tier: "free",
-                      variant,
                       ...(variant === "reseller" && {
                         org_provider_key: providerKey,
                         limits: limits || undefined,
