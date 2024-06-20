@@ -19,6 +19,38 @@ export type BlogStructure = {
 
 const blogContent: BlogStructure[] = [
   {
+    title: "I built my first AI app and integrated it with Helicone",
+    description:
+      "So, I decided to make my first AI app with Helicone - in the spirit of getting a first-hand exposure to our user's pain points. ",
+    badgeText: "feature",
+    date: "June 18, 2024",
+    href: "/blog/first-ai-app-with-helicone",
+    imageUrl: "/static/blog/first-ai-app/lina-first-ai-app.png",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/static/blog/linalam-headshot.webp",
+      },
+    ],
+    time: "6 minute read",
+  },
+  {
+    title: "How to Understand Your Users Better and Deliver a Top-Tier Experience with Custom Properties",
+    description:
+      "In today's digital landscape, every interaction, click, and engagement offers valuable insights into your users' preferences. But how do you harness this data to effectively grow your business? We may have the answer. ",
+    badgeText: "feature",
+    date: "June 14, 2024",
+    href: "/blog/custom-properties",
+    imageUrl: "/static/blog/custom-properties/cover.png",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/static/blog/linalam-headshot.webp",
+      },
+    ],
+    time: "6 minute read",
+  },
+  {
     title: "Helicone vs. Weights and Biases",
     description:
       "Training modern LLMs is generally less complex than traditional ML models. Here's how to have all the essential tools specifically designed for language model observability without the clutter.",
@@ -127,7 +159,7 @@ const Blog = () => {
           width={200}
           height={100}
         />
-        <h1 className="text-5xl font-bold text-gray-900">The Helicone Blog</h1>
+        <h1 className="text-5xl font-bold text-gray-900 pt-4">The Helicone Blog</h1>
         <p className="text-lg text-gray-700">
           Thoughts about the future of AI - from the team helping to build it.
         </p>

@@ -49,6 +49,8 @@ routes = [
 	{ pattern = "openrouter.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "together.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "gateway.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "deepinfra.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "hyperbolic.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 
 	{ pattern = "oai.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "anthropic.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
@@ -56,6 +58,7 @@ routes = [
 	{ pattern = "openrouter.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "together.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "gateway.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "hyperbolic.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 
 	{ pattern = "oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
@@ -128,6 +131,7 @@ routes = [
 	{ pattern = "openrouter.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "together.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "gateway.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "hyperbolic.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	# { pattern = "groq.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 
 	{ pattern = "oai.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
@@ -136,6 +140,7 @@ routes = [
 	{ pattern = "openrouter.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "together.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "gateway.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "hyperbolic.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
 
 kv_namespaces = [

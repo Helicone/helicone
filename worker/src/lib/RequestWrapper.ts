@@ -23,8 +23,16 @@ export type RequestHandlerType =
   | "feedback";
 
 export type PromptSettings =
-  | { promptId: string; promptMode: "production" | "testing" }
-  | { promptId: undefined; promptMode: "testing" | "deactivated" };
+  | {
+      promptId: string;
+      promptVersion: string;
+      promptMode: "production" | "testing";
+    }
+  | {
+      promptId: undefined;
+      promptVersion: string;
+      promptMode: "testing" | "deactivated";
+    };
 
 export class RequestWrapper {
   private authorization: string | undefined;
@@ -147,6 +155,8 @@ export class RequestWrapper {
 
   private getPromptSettings(): PromptSettings {
     const promptId = this.heliconeHeaders.promptHeaders.promptId ?? undefined;
+    const promptVersion =
+      this.heliconeHeaders.promptHeaders.promptVersion ?? "";
     const promptMode = this.getPromptMode(
       promptId,
       this.heliconeHeaders.promptHeaders.promptMode ?? undefined
@@ -154,6 +164,7 @@ export class RequestWrapper {
 
     return {
       promptId,
+      promptVersion,
       promptMode,
     } as PromptSettings;
   }

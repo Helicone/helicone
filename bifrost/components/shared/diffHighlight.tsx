@@ -10,12 +10,6 @@ interface DiffHighlightProps {
 export function DiffHighlight(props: DiffHighlightProps) {
   const { code, language } = props;
 
-  const hasBaseURL = (tokens: Token[]) => {
-    return tokens.some((token) =>
-      token.content.includes("https://oai.helicone.ai/v1")
-    );
-  };
-
   return (
     <div className="ph-no-capture w-full overflow-auto rounded-b-2xl">
       <Highlight theme={themes.jettwaveDark} code={code} language={"tsx"}>
