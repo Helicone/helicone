@@ -81,6 +81,12 @@ export interface paths {
   "/v1/public/dataisbeautiful/model/percentage/overtime": {
     post: operations["GetModelPercentageOverTime"];
   };
+  "/v1/customer/{customerId}/usage/query": {
+    post: operations["GetCustomerUsage"];
+  };
+  "/v1/customer/query": {
+    post: operations["GetExperiments"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -754,6 +760,22 @@ Json: JsonObject;
       error: null;
     };
     "Result_ModelBreakdownOverTime-Array.string_": components["schemas"]["ResultSuccess_ModelBreakdownOverTime-Array_"] | components["schemas"]["ResultError_string_"];
+    CustomerUsage: {
+      id: string;
+      name: string;
+      /** Format: double */
+      cost: number;
+      /** Format: double */
+      count: number;
+      /** Format: double */
+      prompt_tokens: number;
+      /** Format: double */
+      completion_tokens: number;
+    };
+    Customer: {
+      id: string;
+      name: string;
+    };
   };
   responses: {
   };
@@ -1107,17 +1129,14 @@ export interface operations {
   GetExperiments: {
     requestBody: {
       content: {
-        "application/json": {
-          include?: components["schemas"]["IncludeExperimentKeys"];
-          filter: components["schemas"]["ExperimentFilterNode"];
-        };
+        "application/json": Record<string, never>;
       };
     };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_Experiment-Array.string_"];
+          "application/json": components["schemas"]["Customer"][];
         };
       };
     };
@@ -1193,6 +1212,26 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ModelBreakdownOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetCustomerUsage: {
+    parameters: {
+      path: {
+        customerId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CustomerUsage"] | null;
         };
       };
     };
