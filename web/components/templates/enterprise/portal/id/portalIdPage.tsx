@@ -174,20 +174,23 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                 <div className="flex flex-row items-center w-full justify-between space-x-2 pt-4 pr-4">
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">Costs</p>
-                    <p className="text-sm text-gray-500">{`${new Intl.NumberFormat(
-                      "en-US",
-                      {
-                        style: "currency",
-                        currency: "USD",
-                      }
-                    ).format(orgLimits?.cost || 0)}`}</p>
+                    <p className="text-sm text-gray-500">{`${
+                      orgLimits?.cost === -1
+                        ? "unlimited"
+                        : new Intl.NumberFormat("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                          }).format(orgLimits?.cost || 0)
+                    }`}</p>
                   </div>
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">Requests</p>
                     <p className="text-sm text-gray-500">
-                      {new Intl.NumberFormat("en-US").format(
-                        orgLimits?.requests || 0
-                      )}
+                      {orgLimits?.requests === -1
+                        ? "unlimited"
+                        : new Intl.NumberFormat("en-US").format(
+                            orgLimits?.requests || 0
+                          )}
                     </p>
                   </div>
                   <div className="flex flex-col items-start space-y-1">

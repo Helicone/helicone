@@ -33,7 +33,7 @@ export interface IHeliconeHeaders {
   openaiBaseUrl: Nullable<string>;
   targetBaseUrl: Nullable<string>;
   promptFormat: Nullable<string>;
-  requestId: Nullable<string>;
+  requestId: string;
   promptHeaders: {
     promptId: Nullable<string>;
     promptMode: Nullable<string>;
@@ -75,7 +75,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   openaiBaseUrl: Nullable<string>;
   targetBaseUrl: Nullable<string>;
   promptFormat: Nullable<string>;
-  requestId: Nullable<string>;
+  requestId: string;
   promptHeaders: {
     promptId: Nullable<string>;
     promptMode: Nullable<string>;
