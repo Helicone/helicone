@@ -1,25 +1,33 @@
--- Drop all existing policies for the 'organization' table
+-- Drop the specific policies for the 'organization' table
+DROP POLICY IF EXISTS "Enable delete for owner" ON public.organization;
+DROP POLICY IF EXISTS "Enable only owner can update" ON public.organization;
+DROP POLICY IF EXISTS "Enable read access for all users" ON public.organization;
+
+-- Drop all existing policies for the 'organization' table if there are any left
 DROP POLICY IF EXISTS delete_policy ON public.organization;
 DROP POLICY IF EXISTS update_policy ON public.organization;
 DROP POLICY IF EXISTS select_policy ON public.organization;
 
+-- Drop the policy Enable read access for all users on 'organization_member' table
+DROP POLICY IF EXISTS "Enable read access for all users" ON public.organization_member;
+
 -- Disable Row-Level Security on the 'organization' table
 ALTER TABLE public.organization DISABLE ROW LEVEL SECURITY;
 
--- Create a new policy to allow delete for the owner
-CREATE POLICY delete_policy ON public.organization
-FOR DELETE
-USING (auth.uid() = owner_id);
+-- Drop the trigger for check_personal_soft_deleted_constraint
+DROP TRIGGER IF EXISTS check_personal_soft_deleted_constraint_trigger ON public.organization;
 
--- Create a new policy to allow updates only for the owner
-CREATE POLICY update_policy ON public.organization
-FOR UPDATE
-USING (auth.uid() = owner_id);
+-- Drop the function check_personal_soft_deleted_constraint
+DROP FUNCTION IF EXISTS public.check_personal_soft_deleted_constraint;
 
--- Create a new policy to allow read access for all users
-CREATE POLICY select_policy ON public.organization
-FOR SELECT
-USING (true);
+-- Drop the trigger for organization_insert
+DROP TRIGGER IF EXISTS organization_insert_trigger ON public.organization;
 
--- Re-enable Row-Level Security on the 'organization' table
+-- Drop the function organization_insert
+DROP FUNCTION IF EXISTS public.organization_insert;
+
+-- Optionally, re-enable Row-Level Security if needed
+-- ALTER TABLE public.organization ENABLE ROW LEVEL SECURITY;
+
+-- Enable Row-Level Security on the 'organization' table
 ALTER TABLE public.organization ENABLE ROW LEVEL SECURITY;
