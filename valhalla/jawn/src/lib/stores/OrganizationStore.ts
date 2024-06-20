@@ -54,13 +54,8 @@ export class OrganizationStore extends BaseStore {
 
   async updateOrganization(
     updateOrgParams: UpdateOrganizationParams,
-    organizationId: string,
-    userId: string
+    organizationId: string
   ): Promise<Result<string, string>> {
-    const hasAccess = await this.checkAccessToMutateOrg(organizationId, userId);
-    if (!hasAccess) {
-      return err("User does not have access to update organization");
-    }
     const { data, error } = await supabaseServer.client
       .from("organization")
       .update({
@@ -84,7 +79,7 @@ export class OrganizationStore extends BaseStore {
     return ok(data[0].id);
   }
 
-  async getUserByEmail(email: string): Promise<Result<string, string>> {
+  async getUserByEmail(email: string): Promise<Result<string | null, string>> {
     const getUserIdQuery = `
       SELECT id FROM auth.users WHERE email = $1 LIMIT 1
     `;
@@ -93,9 +88,14 @@ export class OrganizationStore extends BaseStore {
       [email]
     );
 
-    if (userIdError || !userId || userId.length === 0) {
+    if (userIdError) {
       return err(userIdError ?? "User not found");
     }
+
+    if (!userId || userId.length === 0) {
+      return ok(null);
+    }
+
     return ok(userId[0].id);
   }
 
@@ -117,21 +117,11 @@ export class OrganizationStore extends BaseStore {
     return ok(userId!);
   }
 
-  async createOrganizationFilter(
-    insertRequest: {
-      organization_id: string;
-      type: "dashboard" | "requests";
-      filters: OrganizationFilter[];
-    },
-    userId: string
-  ): Promise<Result<string, string>> {
-    const hasAccess = await this.checkUserBelongsToOrg(
-      insertRequest.organization_id,
-      userId
-    );
-    if (!hasAccess) {
-      return err("User does not have access to create organization filter");
-    }
+  async createOrganizationFilter(insertRequest: {
+    organization_id: string;
+    type: "dashboard" | "requests";
+    filters: OrganizationFilter[];
+  }): Promise<Result<string, string>> {
     const insert = await supabaseServer.client
       .from("organization_layout")
       .insert([insertRequest])
@@ -145,16 +135,7 @@ export class OrganizationStore extends BaseStore {
     return ok(insert.data.id);
   }
 
-  async deleteOrganization(userId: string): Promise<Result<string, string>> {
-    const hasAccess = await this.checkAccessToMutateOrg(
-      this.organizationId,
-      userId
-    );
-
-    if (!hasAccess) {
-      return err("User does not have access to delete organization");
-    }
-
+  async deleteOrganization(): Promise<Result<string, string>> {
     const deleteRes = await supabaseServer.client
       .from("organization")
       .update({
@@ -170,14 +151,8 @@ export class OrganizationStore extends BaseStore {
 
   async getOrganizationLayout(
     organizationId: string,
-    userId: string,
     filterType: string
   ): Promise<Result<OrganizationLayout, string>> {
-    const hasAccess = await this.checkUserBelongsToOrg(organizationId, userId);
-
-    if (!hasAccess) {
-      return err("User does not have access to get organization layout");
-    }
     const { data: layout, error } = await supabaseServer.client
       .from("organization_layout")
       .select("*")
@@ -199,14 +174,9 @@ export class OrganizationStore extends BaseStore {
 
   async updateOrganizationFilter(
     organizationId: string,
-    userId: string,
     type: string,
     filters: OrganizationFilter[]
   ): Promise<Result<string, string>> {
-    const hasAccess = await this.checkUserBelongsToOrg(organizationId, userId);
-    if (!hasAccess) {
-      return err("User does not have access to update organization filter");
-    }
     const updateRes = await supabaseServer.client
       .from("organization_layout")
       .update({
@@ -222,15 +192,8 @@ export class OrganizationStore extends BaseStore {
   }
 
   async getOrganizationMembers(
-    organizationId: string,
-    userId: string
+    organizationId: string
   ): Promise<Result<OrganizationMember[], string>> {
-    const hasAccess = await this.checkUserBelongsToOrg(organizationId, userId);
-
-    if (!hasAccess) {
-      return err("User does not have access to get organization members");
-    }
-
     const query = `
       select email, member, org_role from organization_member om 
         left join auth.users u on u.id = om.member
@@ -281,20 +244,13 @@ export class OrganizationStore extends BaseStore {
 
   async removeMemberFromOrganization(
     organizationId: string,
-    memberId: string,
-    userId: string
+    memberId: string
   ): Promise<Result<null, string>> {
     if (!organizationId) {
       return err("Invalid OrgId");
     }
     if (!memberId) {
       return err("Invalid MemberId");
-    }
-    const hasAccess = await this.checkAccessToMutateOrg(organizationId, userId);
-    if (!hasAccess) {
-      return err(
-        "User does not have access to remove member from organization"
-      );
     }
     const { error: deleteError } = await supabaseServer.client
       .from("organization_member")
@@ -314,11 +270,6 @@ export class OrganizationStore extends BaseStore {
     orgRole: string,
     memberId: string
   ): Promise<Result<null, string>> {
-    const hasAccess = await this.checkAccessToMutateOrg(organizationId, userId);
-    if (!hasAccess) {
-      return err("User does not have access to update organization member");
-    }
-
     const orgAccess = await supabaseServer.client
       .from("organization")
       .select("*")
@@ -388,7 +339,7 @@ export class OrganizationStore extends BaseStore {
     }
   }
 
-  private async checkUserBelongsToOrg(
+  public async checkUserBelongsToOrg(
     orgId: string,
     userId: string
   ): Promise<boolean> {
