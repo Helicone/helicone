@@ -44,6 +44,7 @@ export class RequestWrapper {
   baseURLOverride: string | null;
   cf: CfProperties | undefined;
   promptSettings: PromptSettings;
+  extraHeaders: Headers | null = null;
 
   private cachedText: string | null = null;
   private bodyKeyOverride: object | null = null;
@@ -348,6 +349,7 @@ export class RequestWrapper {
       /^sk-helicone-eu-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
       /^sk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
       /^sk-helicone-eu-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^[sp]k(-helicone)?(-eu)?(-cp)?-\w{7}-\w{7}-\w{7}-\w{7}$/,
     ];
 
     // We can probably do something like this... but i am scared lol
@@ -388,10 +390,7 @@ export class RequestWrapper {
       undefined;
 
     // If using proxy key, get the real key from vault
-    if (
-      authKey?.startsWith("Bearer sk-helicone-cp") ||
-      authKey?.startsWith("Bearer pk-helicone-cp")
-    ) {
+    if (authKey?.includes("-cp-")) {
       const { data, error } = await this.getProviderKeyFromCustomerPortalKey(
         authKey,
         env
@@ -402,6 +401,14 @@ export class RequestWrapper {
           `Provider key not found using Customer Portal Key. Error: ${error}`
         );
       }
+      this.extraHeaders = new Headers();
+      this.extraHeaders.set("helicone-organization-id", data.heliconeOrgId);
+
+      this.extraHeaders.set(
+        "helicone-request-id",
+        this.heliconeHeaders.requestId
+      );
+
       this.authorization = data.providerKey;
       const headers = new Headers(this.headers);
       headers.set("Authorization", `Bearer ${this.authorization}`);
@@ -467,6 +474,7 @@ export class RequestWrapper {
 
 interface CustomerPortalValues {
   providerKey: string;
+  heliconeOrgId: string;
 }
 
 export interface ProxyKeyRow {
@@ -508,7 +516,6 @@ export async function getProviderKeyFromPortalKey(
     .select("*")
     .eq("api_key_hash", await hash(authKey))
     .single();
-  console.log("apiKey", apiKey.error);
 
   const organization = await supabaseClient
     .from("organization")
@@ -544,9 +551,10 @@ export async function getProviderKeyFromPortalKey(
     .eq("id", providerKeyId.data?.id ?? "")
     .eq("soft_delete", "false")
     .single();
-  console.log("providerKey data", providerKey.data);
+
   return map(mapPostgrestErr(providerKey), (x) => ({
     providerKey: x.decrypted_provider_key ?? "",
+    heliconeOrgId: apiKey.data?.organization_id ?? "",
   }));
 }
 
