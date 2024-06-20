@@ -1,36 +1,24 @@
+import { Database } from "../../lib/db/database.types";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { ok, err, Result } from "../../lib/shared/result";
 import { OrganizationStore } from "../../lib/stores/OrganizationStore";
 import { BaseManager } from "../BaseManager";
 
-export type NewOrganizationParams = {
-  name: string;
-  owner: string;
-  color: string;
-  icon: string;
-  has_onboarded: boolean;
-  tier: string;
-  reseller_id?: string;
-  organization_type?: string;
-  org_provider_key?: string;
-  variant: "organization" | "reseller";
-  limits?: {
-    cost: number;
-    requests: number;
-  };
-};
+export type NewOrganizationParams =
+  Database["public"]["Tables"]["organization"]["Insert"];
 
 export type UpdateOrganizationParams = Pick<
   NewOrganizationParams,
   | "name"
   | "color"
   | "icon"
-  | "variant"
   | "org_provider_key"
   | "limits"
   | "reseller_id"
   | "organization_type"
->;
+> & {
+  variant?: string;
+};
 
 export type FilterRow = {
   filterMapIdx: number;
