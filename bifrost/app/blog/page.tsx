@@ -48,7 +48,7 @@ const blogContent: BlogStructure[] = [
         imageUrl: "/static/blog/linalam-headshot.webp",
       },
     ],
-    time: "5 minute read",
+    time: "6 minute read",
   },
   {
     title: "How to Understand Your Users Better and Deliver a Top-Tier Experience with Custom Properties",
@@ -64,7 +64,7 @@ const blogContent: BlogStructure[] = [
         imageUrl: "/static/blog/linalam-headshot.webp",
       },
     ],
-    time: "5 minute read",
+    time: "6 minute read",
   },
   {
     title: "Helicone vs. Weights and Biases",
