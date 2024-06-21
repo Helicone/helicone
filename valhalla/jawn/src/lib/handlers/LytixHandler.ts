@@ -15,6 +15,9 @@ interface LytixModelIO {
   modelName: string;
   modelInput: string;
   modelOutput: string;
+  metaData: Record<string, string>;
+  session: string;
+  userIdentifier: string;
 }
 
 export class LytixHandler extends AbstractLogHandler {
@@ -33,6 +36,9 @@ export class LytixHandler extends AbstractLogHandler {
       modelName: context.processedLog.model ?? "",
       modelInput: JSON.stringify(context.processedLog.request.body) ?? "",
       modelOutput: JSON.stringify(context.processedLog.response.body) ?? "",
+      metaData: context.processedLog.request.properties ?? {},
+      session: "", // TODO when sessions are added
+      userIdentifier: context.message.log.request.userId,
     });
 
     return await super.handle(context);
@@ -43,12 +49,19 @@ export class LytixHandler extends AbstractLogHandler {
       try {
         // send lytix logs to lytix
 
-        await fetch("https://api.lytix.co/v1/metrics/modelIO/helicone", {
+        await fetch("https://api.lytix.co/v1/metrics/modelIO", {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${lytixModelIO.apiKey}`,
+            "lx-api-key": `Bearer ${lytixModelIO.apiKey}`,
           },
-          body: JSON.stringify(lytixModelIO),
+          body: JSON.stringify({
+            modelName: lytixModelIO.modelName,
+            modelInput: lytixModelIO.modelInput,
+            modelOutput: lytixModelIO.modelOutput,
+            metricMetadata: {},
+            userIdentifier: lytixModelIO.userIdentifier,
+            sessionId: lytixModelIO.session,
+          }),
         });
       } catch (error: any) {
         Sentry.captureException(error);

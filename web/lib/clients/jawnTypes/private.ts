@@ -194,6 +194,7 @@ export interface components {
     };
     "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
     HeliconeMeta: {
+      lytixKey?: string;
       posthogHost?: string;
       posthogApiKey?: string;
       webhookEnabled: boolean;
