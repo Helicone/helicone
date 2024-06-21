@@ -19,13 +19,13 @@ export type BlogStructure = {
 
 const blogContent: BlogStructure[] = [
   {
-    title: "I built my first AI app and integrated it with Helicone",
+    title: "Best Practices for AI Developers: Full Guide (June 2024)",
     description:
-      "So, I decided to make my first AI app with Helicone - in the spirit of getting a first-hand exposure to our user's pain points. ",
-    badgeText: "feature",
-    date: "June 18, 2024",
-    href: "/blog/first-ai-app-with-helicone",
-    imageUrl: "/static/blog/first-ai-app/lina-first-ai-app.png",
+      "Achieving high performance requires robust observability practices. In this blog, we will explore the key challenges of building with AI and the best practices to help you advance your AI development.",
+    badgeText: "guide",
+    date: "June 20, 2024",
+    href: "/blog/ai-best-practices",
+    imageUrl: "/static/blog/ai-best-practices/cover.png",
     authors: [
       {
         name: "Lina Lam",
@@ -48,7 +48,7 @@ const blogContent: BlogStructure[] = [
         imageUrl: "/static/blog/linalam-headshot.webp",
       },
     ],
-    time: "6 minute read",
+    time: "5 minute read",
   },
   {
     title: "Helicone vs. Weights and Biases",
