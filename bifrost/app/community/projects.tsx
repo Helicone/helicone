@@ -318,7 +318,7 @@ export function Projects() {
 
                 {/* Open Source tag */}
                 {project.isOpenSourced && (
-                <span className="bg-sky-500 text-white rounded-md px-4 py-1 text-sm font-medium">
+                <span className="bg-sky-500 bg-opacity-10 text-sky-500 rounded-md px-4 py-1 text-sm font-semibold">
                   Open-source
                 </span>
               )}
