@@ -259,6 +259,21 @@ export function Projects() {
   return (
     <div>
 
+    {/* Submit a project banner */}
+    <div className="flex justify-center mt-[24px] mb-[8px] space-x-2">
+      <div className="flex flex-col items-center sm:flex-row justify-center space-x-2 py-4 px-6 sm:px-16 bg-sky-50 border border-sky-100 rounded-md">
+        <SparklesIcon className="h-5 w-5 text-sky-500" />
+        <div className="text-sm text-sky-500 font-semibold text-center sm:text-left">
+          Using Helicone? We want to know what you are building!
+        </div>
+        <Link href={"https://forms.gle/WpTEEE6vVdQccprD9"} className=" text-sm text-sky-500 sm:whitespace-nowrap">
+          <u className="hover:text-sky-500">Fill out this form</u> to be featured.
+        </Link>
+      </div>
+    </div>
+
+    
+    {/* Project grid */}
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
       {projects.map((project, i) => {
         return (
@@ -328,20 +343,7 @@ export function Projects() {
         );
       })}
       </div>
-        <div className="flex items-center justify-center mt-[24px] mb-[24px] space-x-2">
-          <div className="flex items-center justify-center space-x-2 py-4 px-16 bg-sky-50 border-2 border-sky-100 rounded-md">
-            <SparklesIcon className="h-5 w-5 text-sky-500 mr-2" />
-            <div className="text-sm text-sky-500 font-semibold sm:mt-0 sm:whitespace-nowrap">
-              Using Helicone?
-            </div>
-            <div className="text-sm text-sky-500 sm:whitespace-nowrap">
-              We want to know what you are building!
-            </div>
-            <Link href={"https://forms.gle/WpTEEE6vVdQccprD9"} className=" text-sm text-sky-500 sm:whitespace-nowrap">
-              <u className="hover:text-sky-500 font-semibold">Fill out this form</u> to be featured.
-            </Link>
-          </div>
-        </div>
+
       </div>
   );
 }
