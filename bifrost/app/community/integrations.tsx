@@ -18,6 +18,7 @@ const integrations: Integration[] = [
     href: "https://posthog.com",
     imageHref: "/static/integrations/posthog.webp",
     docsHref: "https://posthog.com/docs/ai-engineering/helicone-posthog",
+    imageClassName: "px-[12px]",
   },
 
   {
@@ -32,7 +33,7 @@ const integrations: Integration[] = [
     href: "https://www.langchain.com/",
     imageHref: "/static/integrations/langchain.jpeg",
     docsHref: "https://docs.helicone.ai/integrations/openai/langchain",
-    imageClassName: "px-[24px]",
+    imageClassName: "px-[12px]",
   },
   {
     title: "LLamaIndex",
@@ -60,7 +61,7 @@ const integrations: Integration[] = [
     href: "https://github.com/geekan/MetaGPT",
     imageHref: "/static/integrations/meta-gpt.png",
     docsHref: "https://docs.helicone.ai/other-integrations/meta-gpt",
-    imageClassName: "px-[24px]",
+    imageClassName: "px-[12px]",
   },
   {
     title: "Open Devin",
@@ -97,6 +98,7 @@ const integrations: Integration[] = [
     imageHref: "/static/integrations/ploomber.png",
     docsHref: "",
     altDocString: <> - Coming soon</>,
+    imageClassName: "px-[12px]",
   },
 ];
 
