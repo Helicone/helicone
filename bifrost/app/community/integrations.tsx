@@ -32,19 +32,21 @@ const integrations: Integration[] = [
     href: "https://www.langchain.com/",
     imageHref: "/static/integrations/langchain.jpeg",
     docsHref: "https://docs.helicone.ai/integrations/openai/langchain",
-    imageClassName: "px-[18px]",
+    imageClassName: "px-[24px]",
   },
   {
     title: "LLamaIndex",
     href: "https://www.llamaindex.ai/",
     imageHref: "/static/integrations/llamaindex.png",
     docsHref: "https://docs.helicone.ai/integrations/openai/llamaindex",
+    imageClassName: "px-[8px]",
   },
   {
     title: "Crew AI",
     href: "https://www.crewai.com/",
     imageHref: "/static/integrations/crewai.png",
     docsHref: "https://docs.helicone.ai/integrations/openai/crewai",
+    imageClassName: "px-[18px]",
   },
   {
     title: "Open WebUI",
@@ -69,9 +71,9 @@ const integrations: Integration[] = [
   {
     title: "PromptArmor",
     href: "https://promptarmor.com/",
-    imageHref: "/static/integrations/prompt_armor.svg",
+    imageHref: "/static/integrations/prompt-armor-logo.jpeg",
     docsHref: "https://docs.helicone.ai/features/advanced-usage/llm-security",
-    // imageClassName: "bg-gray-500",
+    imageClassName: "bg-gray-500 px-[18x]",
   },
   {
     title: "Lytix",
@@ -125,7 +127,7 @@ export function Integrations() {
                   objectFit: "contain",
                 }}
                 className={clsx(
-                  "rounded-lg  h-[160px] w-[160px] bg-white border border-gray-100 p-2",
+                  "rounded-lg  h-[160px] w-[160px] bg-white border border-gray-100",
                   integration.imageClassName
                 )}
               />
