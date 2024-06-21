@@ -98,40 +98,41 @@ const integrations: Integration[] = [
 
 export function Integrations() {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 px-[12px] md:gap-5">
+    <div className="grid grid-cols-4">
+
       {integrations.map((integration, i) => {
         return (
           <div
             id="featured"
-            className="flex flex-col rounded-lg col-span-1 md:col-span-1 "
+            className="flex flex-col rounded-lg col-span-2 md:col-span-1"
             key={i}
           >
-            {/*eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={integration.imageHref}
-              alt={integration.title}
-              width={160}
-              height={160}
-              style={{
-                objectFit: "contain",
-              }}
-              className={clsx(
-                "rounded-lg  h-[160px] w-[160px] p-[12px] ",
-                integration.imageClassName
-              )}
-            />
-
-            <div className="px-[12px] pt-[4px] w-full h-fit rounded-lg flex flex-col text-left text-gray-500">
+            <div className="p-4 w-full h-fit rounded-lg flex flex-col text-left text-gray-500">
               <Link
-                className="font-extrabold text-lg w-fit"
+                className="font-extrabold text-lg w-fit hover:bg-sky-50 rounded-lg p-4 col-span-1 md:col-span-1 pt-8"
                 href={integration.href}
               >
-                {integration.title}
-              </Link>
+              {/*eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={integration.imageHref}
+                alt={integration.title}
+                width={160}
+                height={120}
+                style={{
+                  objectFit: "contain",
+                }}
+                className={clsx(
+                  "rounded-lg  h-[160px] w-[160px] p-[12px] ",
+                  integration.imageClassName
+                )}
+              />
+
+              {integration.title}
+                
               {integration.altDocString || (
                 <Link
                   href={integration.docsHref}
-                  className="flex gap-2 text-sm w-fit items-center font-semibold"
+                  className="flex gap-2 py-2 text-sm w-fit items-center font-semibold"
                 >
                   <p>View doc </p>
                   <div>
@@ -141,6 +142,7 @@ export function Integrations() {
                   </div>
                 </Link>
               )}
+              </Link>
             </div>
           </div>
         );
