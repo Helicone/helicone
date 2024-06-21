@@ -25,13 +25,14 @@ const integrations: Integration[] = [
     href: "https://github.com/enricoros/big-agi?tab=readme-ov-file",
     imageHref: "/static/integrations/big_agi.png",
     docsHref: "https://github.com/enricoros/big-agi?tab=readme-ov-file",
-    imageClassName: "px-[24px]",
+    imageClassName: "px-[28px]",
   },
   {
     title: "LangChain",
     href: "https://www.langchain.com/",
     imageHref: "/static/integrations/langchain.jpeg",
     docsHref: "https://docs.helicone.ai/integrations/openai/langchain",
+    imageClassName: "px-[18px]",
   },
   {
     title: "LLamaIndex",
@@ -57,6 +58,7 @@ const integrations: Integration[] = [
     href: "https://github.com/geekan/MetaGPT",
     imageHref: "/static/integrations/meta-gpt.png",
     docsHref: "https://docs.helicone.ai/other-integrations/meta-gpt",
+    imageClassName: "px-[24px]",
   },
   {
     title: "Open Devin",
@@ -69,13 +71,13 @@ const integrations: Integration[] = [
     href: "https://promptarmor.com/",
     imageHref: "/static/integrations/prompt_armor.svg",
     docsHref: "https://docs.helicone.ai/features/advanced-usage/llm-security",
-    imageClassName: "bg-gray-500",
+    // imageClassName: "bg-gray-500",
   },
   {
     title: "Lytix",
     href: "https://www.lytix.co/",
     imageHref: "/static/integrations/lytix.svg",
-    altDocString: <>Coming soon</>,
+    altDocString: <> - Coming soon</>,
     docsHref: "",
     imageClassName: "px-[40px]",
   },
@@ -84,7 +86,7 @@ const integrations: Integration[] = [
     href: "",
     imageHref: "/static/integrations/openpipe.png",
     docsHref: "",
-    altDocString: <>Coming soon</>,
+    altDocString: <> - Coming soon</>,
     imageClassName: "px-[40px]",
   },
   {
@@ -92,7 +94,7 @@ const integrations: Integration[] = [
     href: "",
     imageHref: "/static/integrations/ploomber.png",
     docsHref: "",
-    altDocString: <>Coming soon</>,
+    altDocString: <> - Coming soon</>,
   },
 ];
 
@@ -107,9 +109,10 @@ export function Integrations() {
             className="flex flex-col rounded-lg col-span-2 md:col-span-1"
             key={i}
           >
-            <div className="p-4 w-full h-fit rounded-lg flex flex-col text-left text-gray-500">
+            <div className="p-4 w-full h-fit rounded-lg flex flex-col text-left text-gray-700">
               <Link
-                className="font-extrabold text-lg w-fit hover:bg-sky-50 rounded-lg p-4 col-span-1 md:col-span-1 pt-8"
+                className="font-semibold text-md p-4 w-fit hover:bg-sky-50 rounded-lg  mt-2"
+
                 href={integration.href}
               >
               {/*eslint-disable-next-line @next/next/no-img-element */}
@@ -122,19 +125,19 @@ export function Integrations() {
                   objectFit: "contain",
                 }}
                 className={clsx(
-                  "rounded-lg  h-[160px] w-[160px] p-[12px] ",
+                  "rounded-lg  h-[160px] w-[160px] bg-white border border-gray-100 p-2",
                   integration.imageClassName
                 )}
               />
 
-              {integration.title}
+              <div className="mt-4">{integration.title}</div>
                 
               {integration.altDocString || (
                 <Link
                   href={integration.docsHref}
-                  className="flex gap-2 py-2 text-sm w-fit items-center font-semibold"
+                  className="flex gap-2 py-2 text-xs w-fit items-center font-semibold text-sky-500"
                 >
-                  <p>View doc </p>
+                  <p>Visit website</p>
                   <div>
                     <ArrowRightIcon
                       className={clsx("transform -rotate-45 h-4 w-4 stroke-2")}

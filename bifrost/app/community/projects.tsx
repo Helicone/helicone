@@ -278,7 +278,7 @@ export function Projects() {
               style={{
                 objectFit: "cover",
               }}
-              className="rounded-lg h-64 sm:h-56 md:h-44 w-full border border-gray-300"
+              className="rounded-lg h-64 sm:h-56 md:h-44 w-full border border-gray-200"
             />
 
             {/* Overlay for tags and description */}
@@ -304,7 +304,7 @@ export function Projects() {
                 </span>
               )}
                               </div>
-              <h2 className="font-semibold text-md pt-2">{project.title}</h2>
+              <h2 className="font-semibold text-md pt-2 text-gray-700">{project.title}</h2>
               <p className="text-gray-500 text-sm">{project.description}</p>
             </div>
             </Link>
@@ -317,7 +317,7 @@ export function Projects() {
                 href={creator.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs font-medium text-gray-700"
+                className="text-xs font-medium text-sky-500"
               >
                 {creator.name}
               </a>
