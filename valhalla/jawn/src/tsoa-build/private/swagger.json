@@ -895,6 +895,9 @@
 			},
 			"HeliconeMeta": {
 				"properties": {
+					"lytixKey": {
+						"type": "string"
+					},
 					"posthogHost": {
 						"type": "string"
 					},
