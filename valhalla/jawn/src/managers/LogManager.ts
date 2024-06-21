@@ -18,6 +18,7 @@ import { WebhookStore } from "../lib/stores/WebhookStore";
 import { FeatureFlagStore } from "../lib/stores/FeatureFlagStore";
 import { supabaseServer } from "../lib/db/supabase";
 import { dataDogClient } from "../lib/clients/DataDogClient";
+import { LytixHandler } from "../lib/handlers/LytixHandler";
 
 export class LogManager {
   public async processLogEntry(logMessage: Message): Promise<void> {
@@ -59,6 +60,7 @@ export class LogManager {
     );
     // Store in S3 after logging to DB
     const posthogHandler = new PostHogHandler();
+    const lytixHandler = new LytixHandler();
 
     const webhookHandler = new WebhookHandler(
       new WebhookStore(supabaseServer.client),
@@ -73,6 +75,7 @@ export class LogManager {
       .setNext(promptHandler)
       .setNext(loggingHandler)
       .setNext(posthogHandler)
+      .setNext(lytixHandler)
       .setNext(webhookHandler);
 
     await Promise.all(
@@ -134,6 +137,7 @@ export class LogManager {
     await this.logRateLimits(rateLimitHandler, batchContext);
     await this.logHandlerResults(loggingHandler, batchContext, logMessages);
     await this.logPosthogEvents(posthogHandler, batchContext);
+    await this.logLytixEvents(lytixHandler, batchContext);
     await this.logWebhooks(webhookHandler, batchContext);
     console.log(`Finished processing batch ${batchContext.batchId}`);
   }
@@ -247,6 +251,29 @@ export class LogManager {
         `Error inserting rate limits: ${rateLimitErr} for batch ${batchContext.batchId}`
       );
     }
+  }
+
+  private async logLytixEvents(
+    handler: LytixHandler,
+    batchContext: {
+      batchId: string;
+      partition: number;
+      lastOffset: string;
+      messageCount: number;
+    }
+  ): Promise<void> {
+    const start = performance.now();
+    await handler.handleResults();
+    const end = performance.now();
+    const executionTimeMs = end - start;
+
+    dataDogClient.logHandleResults({
+      executionTimeMs,
+      handlerName: handler.constructor.name,
+      methodName: "handleResults",
+      messageCount: batchContext.messageCount,
+      message: "Lytix events",
+    });
   }
 
   private async logPosthogEvents(
