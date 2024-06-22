@@ -11,9 +11,6 @@ DROP POLICY IF EXISTS select_policy ON public.organization;
 -- Drop the policy Enable read access for all users on 'organization_member' table
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.organization_member;
 
--- Disable Row-Level Security on the 'organization' table
-ALTER TABLE public.organization DISABLE ROW LEVEL SECURITY;
-
 -- Drop the trigger for check_personal_soft_deleted_constraint
 DROP TRIGGER IF EXISTS check_personal_soft_deleted_constraint_trigger ON public.organization;
 
@@ -25,9 +22,3 @@ DROP TRIGGER IF EXISTS organization_insert_trigger ON public.organization;
 
 -- Drop the function organization_insert
 DROP FUNCTION IF EXISTS public.organization_insert;
-
--- Optionally, re-enable Row-Level Security if needed
--- ALTER TABLE public.organization ENABLE ROW LEVEL SECURITY;
-
--- Enable Row-Level Security on the 'organization' table
-ALTER TABLE public.organization ENABLE ROW LEVEL SECURITY;
