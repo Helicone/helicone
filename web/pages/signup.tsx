@@ -8,6 +8,7 @@ import AuthForm from "../components/templates/auth/authForm";
 import { DEMO_EMAIL } from "../lib/constants";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import { GetServerSidePropsContext } from "next";
+import posthog from "posthog-js";
 
 const SignUp = () => {
   const supabase = useSupabaseClient();
@@ -49,6 +50,11 @@ const SignUp = () => {
             return;
           }
 
+          posthog.capture("user_signed_up", {
+            method: "email",
+            email: email,
+          });
+
           setShowEmailConfirmation(true);
         }}
         handleGoogleSubmit={async () => {
@@ -63,6 +69,10 @@ const SignUp = () => {
             console.error(error);
             return;
           }
+
+          posthog.capture("user_signed_up", {
+            method: "google",
+          });
         }}
         handleGithubSubmit={async () => {
           const { error } = await supabase.auth.signInWithOAuth({
@@ -76,6 +86,10 @@ const SignUp = () => {
             console.error(error);
             return;
           }
+
+          posthog.capture("user_signed_up", {
+            method: "github",
+          });
         }}
         authFormType={"signup"}
       />
