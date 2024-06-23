@@ -59,22 +59,22 @@ const JobRow = (props: JobRowProps) => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (job.dataFromOpenAI.job?.fine_tuned_model) {
+                  if (job.dataFromOpenAI?.job?.fine_tuned_model) {
                     navigator.clipboard.writeText(
-                      job.dataFromOpenAI.job?.fine_tuned_model
+                      job.dataFromOpenAI?.job?.fine_tuned_model
                     );
                     setNotification("Copied to clipboard", "success");
                   }
                 }}
                 className="flex items-center font-semibold underline"
               >
-                {job.dataFromOpenAI.job?.fine_tuned_model || "n/a"}
+                {job.dataFromOpenAI?.job?.fine_tuned_model || "n/a"}
               </button>
             </Tooltip>
           </TableCell>
           <TableCell>
             <JobStatus
-              jobStatus={job.dataFromOpenAI.job?.status || job.status}
+              jobStatus={job.dataFromOpenAI?.job?.status || job.status}
             />
           </TableCell>
           <TableCell>{getUSDate(new Date(job.created_at))}</TableCell>
@@ -91,7 +91,7 @@ const JobRow = (props: JobRowProps) => {
           </TableCell>
           <TableCell>
             <ModelPill
-              model={job.dataFromOpenAI.job?.model || "gpt-3.5-turbo-1106"}
+              model={job.dataFromOpenAI?.job?.model || "gpt-3.5-turbo-1106"}
             />
           </TableCell>
 
