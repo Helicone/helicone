@@ -7,6 +7,8 @@ export function middleware(request: NextRequest) {
   const pathname = url.pathname;
 
   switch (pathname) {
+    case "/dashboard":
+      return NextResponse.redirect("https://us.helicone.ai/dashboard", 301);
     case "/job":
     case "/career":
       return NextResponse.redirect(
@@ -40,5 +42,6 @@ export const config = {
     "/prompts",
     "/requests",
     "/roadmap",
+    "/dashboard",
   ],
 };
