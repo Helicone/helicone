@@ -7,11 +7,9 @@ import * as azureOpenAI from "@azure/openai";
 import * as cohere from "cohere-ai";
 import * as bedrock from "@aws-sdk/client-bedrock-runtime";
 import * as google_aiplatform from "@google-cloud/aiplatform";
-import * as pinecone from "@pinecone-database/pinecone";
 import * as ChainsModule from "langchain/chains";
 import * as AgentsModule from "langchain/agents";
 import * as ToolsModule from "langchain/tools";
-import * as chromadb from "chromadb";
 
 type IHeliconeAsyncLoggerOptions = {
   apiKey: string;
@@ -23,15 +21,13 @@ type IHeliconeAsyncLoggerOptions = {
     cohere?: typeof cohere,
     bedrock?: typeof bedrock,
     google_aiplatform?: typeof google_aiplatform,
-    pinecone?: typeof pinecone,
     langchain?: {
       chainsModule?: typeof ChainsModule,
       agentsModule?: typeof AgentsModule,
       toolsModule?: typeof ToolsModule,
     },
-    chromadb?: typeof chromadb,
   },
-  headers?: Partial<Record<string, unknown>>
+  headers?: Record<string, string>
 };
 
 export class HeliconeAsyncLogger {
@@ -43,11 +39,9 @@ export class HeliconeAsyncLogger {
   private cohere?: typeof cohere;
   private bedrock?: typeof bedrock;
   private google_aiplatform?: typeof google_aiplatform;
-  private pinecone?: typeof pinecone;
   private chainsModule?: typeof ChainsModule;
   private agentsModule?: typeof AgentsModule;
   private toolsModule?: typeof ToolsModule;
-  private chromadb?: typeof chromadb;
   private headers?: Partial<Record<string, unknown>>;
 
   constructor(opts: IHeliconeAsyncLoggerOptions) {
@@ -59,11 +53,9 @@ export class HeliconeAsyncLogger {
     this.cohere = opts.providers?.cohere ?? undefined;
     this.bedrock = opts.providers?.bedrock ?? undefined;
     this.google_aiplatform = opts.providers?.google_aiplatform ?? undefined;
-    this.pinecone = opts.providers?.pinecone ?? undefined;
     this.chainsModule = opts.providers?.langchain?.chainsModule ?? undefined;
     this.agentsModule = opts.providers?.langchain?.agentsModule ?? undefined;
     this.toolsModule = opts.providers?.langchain?.toolsModule ?? undefined;
-    this.chromadb = opts.providers?.chromadb ?? undefined;
     this.headers = opts.headers;
   }
 
@@ -86,13 +78,11 @@ export class HeliconeAsyncLogger {
         cohere: this.cohere ?? undefined,
         bedrock: this.bedrock ?? undefined,
         google_aiplatform: this.google_aiplatform ?? undefined,
-        pinecone: this.pinecone ?? undefined,
         langchain: {
           chainsModule: this.chainsModule ?? undefined,
           agentsModule: this.agentsModule ?? undefined,
           toolsModule: this.toolsModule ?? undefined,
         },
-        chromadb: this?.chromadb ?? undefined,
       },
     });
   }
