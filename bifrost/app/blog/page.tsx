@@ -163,6 +163,21 @@ const blogContent: BlogStructure[] = [
     ],
     time: "4 minute read",
   },
+  {
+    "title": "Why Observability is the Key to Ethical and Safe Artificial Intelligence",
+    "description": "As AI continues to shape our world, the need for ethical practices and robust observability has never been greater. Learn how Helicone is rising to the challenge.",
+    "badgeText": "Read",
+    "date": "Sep 19, 2023",
+    "href": "/blog/ai-safety",
+    "imageUrl": "/static/blog/AI.webp",
+    "authors": [
+      {
+        "name": "Scott Nguyen",
+        "imageUrl": "/static/blog/scottnguyen-headshot.webp"
+      }
+    ],
+    "time": "7 minute read"
+  }  
 ];
 
 const Blog = () => {
