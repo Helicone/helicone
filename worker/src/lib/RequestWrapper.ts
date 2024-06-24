@@ -23,8 +23,16 @@ export type RequestHandlerType =
   | "feedback";
 
 export type PromptSettings =
-  | { promptId: string; promptMode: "production" | "testing" }
-  | { promptId: undefined; promptMode: "testing" | "deactivated" };
+  | {
+      promptId: string;
+      promptVersion: string;
+      promptMode: "production" | "testing";
+    }
+  | {
+      promptId: undefined;
+      promptVersion: string;
+      promptMode: "testing" | "deactivated";
+    };
 
 export class RequestWrapper {
   private authorization: string | undefined;
@@ -36,6 +44,7 @@ export class RequestWrapper {
   baseURLOverride: string | null;
   cf: CfProperties | undefined;
   promptSettings: PromptSettings;
+  extraHeaders: Headers | null = null;
 
   private cachedText: string | null = null;
   private bodyKeyOverride: object | null = null;
@@ -46,19 +55,42 @@ export class RequestWrapper {
   */
   private mutatedAuthorizationHeaders(request: Request): Headers {
     const HELICONE_KEY_ID = "sk-helicone-";
-
-    const authorization = request.headers.get("Authorization");
-    if (!authorization) {
-      return request.headers;
-    }
-    if (
-      !authorization.includes(",") ||
-      !authorization.includes(HELICONE_KEY_ID)
-    ) {
-      return request.headers;
-    }
-
+    const HELICONE_PUBLIC_KEY_ID = "pk-helicone-";
     const headers = new Headers(request.headers);
+    const authorization = request.headers.get("Authorization");
+
+    if (
+      !authorization ||
+      !authorization.includes(",") ||
+      !authorization.includes(HELICONE_KEY_ID) ||
+      !authorization.includes(HELICONE_PUBLIC_KEY_ID)
+    ) {
+      if (!headers.has("helicone-auth")) {
+        try {
+          const url = new URL(request.url);
+          const urlPath = url.pathname;
+          const pathParts = urlPath.split("/");
+          const apiKeyIndex = pathParts.findIndex(
+            (part) =>
+              part.startsWith("sk-helicone") || part.startsWith("pk-helicone")
+          );
+
+          if (apiKeyIndex > -1 && apiKeyIndex < pathParts.length) {
+            const potentialApiKey = pathParts[apiKeyIndex];
+            headers.set("helicone-auth", `Bearer ${potentialApiKey}`);
+            pathParts.splice(apiKeyIndex, 1);
+            this.url.pathname = pathParts.join("/");
+          }
+
+          return headers;
+        } catch (error) {
+          console.error(`Failed retrieving API key from path: ${error}`);
+          return request.headers;
+        }
+      }
+
+      return request.headers;
+    }
 
     if (headers.has("helicone-auth")) {
       throw new Error(
@@ -68,11 +100,11 @@ export class RequestWrapper {
 
     const authorizationKeys = authorization.split(",").map((x) => x.trim());
 
-    const heliconeAuth = authorizationKeys.find((x) =>
-      x.includes(HELICONE_KEY_ID)
+    const heliconeAuth = authorizationKeys.find(
+      (x) => x.includes(HELICONE_KEY_ID) || x.includes(HELICONE_PUBLIC_KEY_ID)
     );
     const providerAuth = authorizationKeys.find(
-      (x) => !x.includes(HELICONE_KEY_ID)
+      (x) => !x.includes(HELICONE_KEY_ID) || !x.includes(HELICONE_PUBLIC_KEY_ID)
     );
 
     if (providerAuth) {
@@ -87,7 +119,7 @@ export class RequestWrapper {
   private constructor(private request: Request, private env: Env) {
     this.url = new URL(request.url);
     this.headers = this.mutatedAuthorizationHeaders(request);
-    this.heliconeHeaders = new HeliconeHeaders(request.headers);
+    this.heliconeHeaders = new HeliconeHeaders(this.headers);
     this.promptSettings = this.getPromptSettings();
     this.injectPromptProperties();
     this.baseURLOverride = null;
@@ -124,6 +156,8 @@ export class RequestWrapper {
 
   private getPromptSettings(): PromptSettings {
     const promptId = this.heliconeHeaders.promptHeaders.promptId ?? undefined;
+    const promptVersion =
+      this.heliconeHeaders.promptHeaders.promptVersion ?? "";
     const promptMode = this.getPromptMode(
       promptId,
       this.heliconeHeaders.promptHeaders.promptMode ?? undefined
@@ -131,6 +165,7 @@ export class RequestWrapper {
 
     return {
       promptId,
+      promptVersion,
       promptMode,
     } as PromptSettings;
   }
@@ -218,6 +253,14 @@ export class RequestWrapper {
     );
   }
 
+  isEU(): boolean {
+    const url = new URL(this.getUrl());
+    const host = url.host;
+    const hostParts = host.split(".");
+    const auth = this.heliconeHeaders.heliconeAuthV2?.token;
+    return !!hostParts.includes("eu") || !!auth?.includes("helicone-eu");
+  }
+
   async getText(): Promise<string> {
     let text = await this.getRawText();
 
@@ -294,20 +337,25 @@ export class RequestWrapper {
     }
 
     const apiKey = heliconeAuth.replace("Bearer ", "").trim();
-    const apiKeyPattern =
-      /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
-    const apiKeyPatternV2 =
-      /^sk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
-    const apiKeyPatternV3 =
-      /^sk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
+    const apiKeyPatterns = [
+      /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^sk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^sk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^pk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^pk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^pk-helicone-eu-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^pk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^pk-helicone-eu-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^sk-helicone-eu-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^sk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^sk-helicone-eu-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+      /^[sp]k(-helicone)?(-eu)?(-cp)?-\w{7}-\w{7}-\w{7}-\w{7}$/,
+    ];
 
-    if (
-      !(
-        apiKeyPattern.test(apiKey) ||
-        apiKeyPatternV2.test(apiKey) ||
-        apiKeyPatternV3.test(apiKey)
-      )
-    ) {
+    // We can probably do something like this... but i am scared lol
+    // const apiKeyPattern = /^(sk|pk)(-helicone)?(-(cp|eu|eu-cp))?-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
+
+    if (!apiKeyPatterns.some((pattern) => pattern.test(apiKey))) {
       return err("API Key is not well formed");
     }
     return ok(null);
@@ -342,7 +390,7 @@ export class RequestWrapper {
       undefined;
 
     // If using proxy key, get the real key from vault
-    if (authKey?.startsWith("Bearer sk-helicone-cp")) {
+    if (authKey?.includes("-cp-")) {
       const { data, error } = await this.getProviderKeyFromCustomerPortalKey(
         authKey,
         env
@@ -353,6 +401,14 @@ export class RequestWrapper {
           `Provider key not found using Customer Portal Key. Error: ${error}`
         );
       }
+      this.extraHeaders = new Headers();
+      this.extraHeaders.set("helicone-organization-id", data.heliconeOrgId);
+
+      this.extraHeaders.set(
+        "helicone-request-id",
+        this.heliconeHeaders.requestId
+      );
+
       this.authorization = data.providerKey;
       const headers = new Headers(this.headers);
       headers.set("Authorization", `Bearer ${this.authorization}`);
@@ -364,7 +420,8 @@ export class RequestWrapper {
       this.heliconeHeaders.heliconeAuth = authKey;
     } else if (
       this.env.VAULT_ENABLED &&
-      authKey?.startsWith("Bearer sk-helicone-proxy")
+      (authKey?.startsWith("Bearer sk-helicone-proxy") ||
+        authKey?.startsWith("Bearer pk-helicone-proxy"))
     ) {
       const { data, error } = await this.getProviderKeyFromProxy(authKey, env);
 
@@ -417,6 +474,7 @@ export class RequestWrapper {
 
 interface CustomerPortalValues {
   providerKey: string;
+  heliconeOrgId: string;
 }
 
 export interface ProxyKeyRow {
@@ -458,7 +516,6 @@ export async function getProviderKeyFromPortalKey(
     .select("*")
     .eq("api_key_hash", await hash(authKey))
     .single();
-  console.log("apiKey", apiKey.error);
 
   const organization = await supabaseClient
     .from("organization")
@@ -494,9 +551,10 @@ export async function getProviderKeyFromPortalKey(
     .eq("id", providerKeyId.data?.id ?? "")
     .eq("soft_delete", "false")
     .single();
-  console.log("providerKey data", providerKey.data);
+
   return map(mapPostgrestErr(providerKey), (x) => ({
     providerKey: x.decrypted_provider_key ?? "",
+    heliconeOrgId: apiKey.data?.organization_id ?? "",
   }));
 }
 

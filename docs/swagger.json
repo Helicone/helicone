@@ -770,7 +770,28 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values_": {
+			"Partial_VectorOperators_": {
+				"properties": {
+					"contains": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_RequestResponseSearchToOperators_": {
+				"properties": {
+					"request_body_vector": {
+						"$ref": "#/components/schemas/Partial_VectorOperators_"
+					},
+					"response_body_vector": {
+						"$ref": "#/components/schemas/Partial_VectorOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search_": {
 				"properties": {
 					"feedback": {
 						"$ref": "#/components/schemas/Partial_FeedbackTableToOperators_"
@@ -794,18 +815,21 @@
 							"$ref": "#/components/schemas/Partial_TextOperators_"
 						},
 						"type": "object"
+					},
+					"request_response_search": {
+						"$ref": "#/components/schemas/Partial_RequestResponseSearchToOperators_"
 					}
 				},
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
-			"FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values_"
+			"FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search_"
 			},
 			"RequestFilterNode": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values_"
+						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search_"
 					},
 					{
 						"$ref": "#/components/schemas/RequestFilterBranch"
@@ -2204,6 +2228,386 @@
 				},
 				"type": "object",
 				"additionalProperties": false
+			},
+			"TTFTvsPromptLength": {
+				"properties": {
+					"prompt_length": {
+						"type": "number",
+						"format": "double"
+					},
+					"ttft_normalized_p75": {
+						"type": "number",
+						"format": "double"
+					},
+					"ttft_normalized_p99": {
+						"type": "number",
+						"format": "double"
+					},
+					"ttft_normalized": {
+						"type": "number",
+						"format": "double"
+					},
+					"ttft_p75": {
+						"type": "number",
+						"format": "double"
+					},
+					"ttft_p99": {
+						"type": "number",
+						"format": "double"
+					},
+					"ttft": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"prompt_length",
+					"ttft_normalized_p75",
+					"ttft_normalized_p99",
+					"ttft_normalized",
+					"ttft_p75",
+					"ttft_p99",
+					"ttft"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_TTFTvsPromptLength-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/TTFTvsPromptLength"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_TTFTvsPromptLength-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_TTFTvsPromptLength-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"TimeSpan": {
+				"type": "string",
+				"enum": [
+					"1m",
+					"3m",
+					"1yr"
+				]
+			},
+			"ModelName": {
+				"type": "string",
+				"enum": [
+					"gpt-3.5",
+					"gpt-4o",
+					"gpt-4",
+					"gpt-4-turbo",
+					"claude-3-opus-20240229",
+					"claude-3-sonnet-20240229",
+					"claude-3-haiku-20240307",
+					"claude-2",
+					"open-mixtral",
+					"Llama",
+					"dall-e",
+					"text-moderation",
+					"text-embedding"
+				]
+			},
+			"ProviderName": {
+				"type": "string",
+				"enum": [
+					"OPENAI",
+					"ANTHROPIC",
+					"MISTRAL",
+					"META"
+				]
+			},
+			"DataIsBeautifulRequestBody": {
+				"properties": {
+					"provider": {
+						"$ref": "#/components/schemas/ProviderName"
+					},
+					"models": {
+						"items": {
+							"$ref": "#/components/schemas/ModelName"
+						},
+						"type": "array"
+					},
+					"timespan": {
+						"$ref": "#/components/schemas/TimeSpan"
+					}
+				},
+				"required": [
+					"timespan"
+				],
+				"type": "object"
+			},
+			"ModelBreakdown": {
+				"properties": {
+					"percent": {
+						"type": "number",
+						"format": "double"
+					},
+					"matched_model": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"percent",
+					"matched_model"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_ModelBreakdown-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ModelBreakdown"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ModelBreakdown-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ModelBreakdown-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ModelCost": {
+				"properties": {
+					"percent": {
+						"type": "number",
+						"format": "double"
+					},
+					"matched_model": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"percent",
+					"matched_model"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_ModelCost-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ModelCost"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ModelCost-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ModelCost-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ProviderBreakdown": {
+				"properties": {
+					"percent": {
+						"type": "number",
+						"format": "double"
+					},
+					"provider": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"percent",
+					"provider"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_ProviderBreakdown-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ProviderBreakdown"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ProviderBreakdown-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ProviderBreakdown-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ModelBreakdownOverTime": {
+				"allOf": [
+					{
+						"properties": {
+							"date": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"date"
+						],
+						"type": "object"
+					},
+					{
+						"$ref": "#/components/schemas/ModelBreakdown"
+					}
+				]
+			},
+			"ResultSuccess_ModelBreakdownOverTime-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ModelBreakdownOverTime"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ModelBreakdownOverTime-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ModelBreakdownOverTime-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"CustomerUsage": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"cost": {
+						"type": "number",
+						"format": "double"
+					},
+					"count": {
+						"type": "number",
+						"format": "double"
+					},
+					"prompt_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"completion_tokens": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"cost",
+					"count",
+					"prompt_tokens",
+					"completion_tokens"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Customer": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {
@@ -3058,6 +3462,277 @@
 								"required": [
 									"filter"
 								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/public/dataisbeautiful/ttft-vs-prompt-length": {
+			"post": {
+				"operationId": "GetTTFTvsPromptInputLength",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_TTFTvsPromptLength-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"DataIsBeautiful"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DataIsBeautifulRequestBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/public/dataisbeautiful/model/percentage": {
+			"post": {
+				"operationId": "GetModelPercentage",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ModelBreakdown-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"DataIsBeautiful"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DataIsBeautifulRequestBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/public/dataisbeautiful/model/cost": {
+			"post": {
+				"operationId": "GetModelCost",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ModelCost-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"DataIsBeautiful"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DataIsBeautifulRequestBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/public/dataisbeautiful/provider/percentage": {
+			"post": {
+				"operationId": "GetProviderPercentage",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ProviderBreakdown-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"DataIsBeautiful"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DataIsBeautifulRequestBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/public/dataisbeautiful/model/percentage/overtime": {
+			"post": {
+				"operationId": "GetModelPercentageOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ModelBreakdownOverTime-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"DataIsBeautiful"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DataIsBeautifulRequestBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/customer/{customerId}/usage/query": {
+			"post": {
+				"operationId": "GetCustomerUsage",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/CustomerUsage"
+										}
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Customer"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "customerId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {},
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/customer/query": {
+			"post": {
+				"operationId": "GetCustomers",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/Customer"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Customer"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {},
 								"type": "object"
 							}
 						}

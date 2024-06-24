@@ -36,7 +36,7 @@ export default async function handler(
 
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
-    baseURL: "https://oai.hconeai.com/v1",
+    baseURL: "https://oai.helicone.ai/v1",
     defaultHeaders: {
       "OpenAI-Organization": "",
       "Helicone-Property-Tag": "experiment",
@@ -62,7 +62,7 @@ export default async function handler(
       user: user.data.user.email,
       temperature: temperature,
       max_tokens: maxTokens,
-      tools: tools.length > 0 ? tools : undefined,
+      tools: tools && tools.length > 0 ? tools : undefined,
     });
     res.status(200).json({ error: null, data: completion });
     return;

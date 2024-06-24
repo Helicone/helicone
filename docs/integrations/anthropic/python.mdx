@@ -7,7 +7,7 @@ description: "Learn how to integrate Anthropic with Helicone using Python"
 
 <Steps>
   <Step title="Create an account + Generate an API Key">
-    Log into www.helicone.ai or create an account. Once you have an account, you
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
     can generate an [API key](https://helicone.ai/developer).
   </Step>
   <Step title="Set HELICONE_API_KEY as an environment variable">
@@ -24,7 +24,7 @@ import anthropic
 
 client = anthropic.Anthropic(
   api_key=os.environ.get("ANTHROPIC_API_KEY"),
-  base_url="https://anthropic.hconeai.com/v1"
+  base_url="https://anthropic.helicone.ai/v1"
   defaultHeaders={
     "Helicone-Auth": os.environ.get("HELICONE_API_KEY"),
   },

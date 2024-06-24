@@ -73,6 +73,7 @@ from request_response_versioned
 WHERE (${builtFilter.filter})
 GROUP BY request_response_versioned.model
 HAVING (${havingFilter.filter})
+ORDER BY total_requests DESC 
 LIMIT ${limit}
 OFFSET ${offset}
   `;

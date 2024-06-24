@@ -16,17 +16,17 @@ export default function Home() {
   return (
     <>
       <main className="flex min-h-screen flex-col items-center justify-between text-black">
-        <header className="text-center flex flex-col space-y-4 py-32 max-w-6xl mx-auto">
+        <header className="text-center flex flex-col space-y-4 py-10 md:py-32 max-w-6xl mx-auto">
           <Link
             href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex space-x-6 font-light text-gray-600 items-center w-full justify-center"
+            className="text-sm inline-flex space-x-6 font-light text-gray-600 items-center w-full justify-center"
           >
             Backed by{" "}
             <svg
-              width="24"
-              height="24"
+              width="20"
+              height="20"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -87,7 +87,7 @@ export default function Home() {
             </svg>{" "}
             Combinator
           </Link>
-          <h1 className="text-4xl md:text-5xl font-bold pt-4">
+          <h1 className="text-4xl md:text-5xl font-bold md:pt-4 px-2">
             LLM-Observability for{" "}
             <span className="text-sky-500">Developers</span>
           </h1>
@@ -165,7 +165,7 @@ export default function Home() {
             <li>
               <dl className="flex flex-col space-y-2">
                 <dt className="font-bold text-5xl">99.99%</dt>
-                <dd className="text-sm text-gray-600 font-light">Uptime SLA</dd>
+                <dd className="text-sm text-gray-600 font-light">Uptime</dd>
               </dl>
             </li>
           </ul>
@@ -250,121 +250,6 @@ export default function Home() {
                     transparency. Helicone is fully open-source and available
                     for anyone to use.
                   </p>
-                  <div
-                    id="tech-stack"
-                    className="flex flex-col space-y-4 py-8 text-left"
-                  >
-                    <h3 className="text-xl text-white font-semibold">
-                      Our Tech Stack
-                    </h3>
-                    <ul className="font-semibold flex flex-col space-y-4 text-gray-300">
-                      <li>
-                        <span className="text-cyan-400">Frontend:</span>{" "}
-                        <Link
-                          href="https://react.dev/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline"
-                        >
-                          React
-                        </Link>
-                        ,{" "}
-                        <Link
-                          href="https://nextjs.org/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline"
-                        >
-                          Next.js
-                        </Link>
-                        ,{" "}
-                        <Link
-                          href="https://tailwindcss.com/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline"
-                        >
-                          TailwindCSS
-                        </Link>
-                      </li>
-                      <li>
-                        <span className="text-cyan-400">Backend:</span>{" "}
-                        <Link
-                          href="https://supabase.com/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline"
-                        >
-                          Supabase
-                        </Link>
-                        ,{" "}
-                        <Link
-                          href="https://clickhouse.com/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline"
-                        >
-                          Clickhouse
-                        </Link>
-                        ,{" "}
-                        <Link
-                          href="https://www.postgresql.org/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline"
-                        >
-                          Postgres
-                        </Link>
-                        ,{" "}
-                        <Link
-                          href="https://nodejs.org/en"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline"
-                        >
-                          Node
-                        </Link>
-                        ,{" "}
-                        <Link
-                          href="https://expressjs.com/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline"
-                        >
-                          Express
-                        </Link>
-                      </li>
-                      <li>
-                        <span className="text-cyan-400">Infrastructure:</span>{" "}
-                        <Link
-                          href="https://www.cloudflare.com/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline"
-                        >
-                          Cloudflare
-                        </Link>
-                        ,{" "}
-                        <Link
-                          href="https://aws.amazon.com/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline"
-                        >
-                          AWS
-                        </Link>
-                        ,{" "}
-                        <Link
-                          href="https://vercel.com/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline"
-                        >
-                          Vercel
-                        </Link>
-                      </li>
-                    </ul>
-                  </div>
                   <ul className="py-4 flex flex-col space-y-8">
                     <li className="flex items-start space-x-2">
                       <div>

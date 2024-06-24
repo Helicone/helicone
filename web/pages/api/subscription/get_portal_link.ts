@@ -7,7 +7,34 @@ import {
 import { getStripeCustomer } from "../../../utlis/stripeHelpers";
 import { stripeServer } from "../../../utlis/stripeServer";
 import { supabaseServer } from "../../../lib/supabaseServer";
-import { getOwner } from "../organization/[id]/owner";
+import { dbExecute } from "../../../lib/api/db/dbExecute";
+
+async function getOwner(orgId: String, userId: string) {
+  const query = `
+  select 
+    us.tier as tier,
+    email
+    from organization o 
+    left join auth.users u on u.id = o.owner
+    left join user_settings us on us.user = u.id
+    where o.id = $1 AND (
+      -- Auth check
+      EXISTS (
+        select * from organization_member om
+        left join organization o on o.id = om.organization
+        where om.organization = $1 and (
+          o.owner = $2 or om.member = $2
+        )
+      )
+      OR o.owner = $2
+    )
+`;
+
+  return await dbExecute<{
+    email: string;
+    tier: string;
+  }>(query, [orgId, userId]);
+}
 
 async function handler(option: HandlerWrapperOptions<Result<string, string>>) {
   const {

@@ -6,15 +6,15 @@ description: "Learn how to integrate Groq with Helicone using Javascript."
 <Note>
 
 Depending on the model you are using, you may need to adjust the base URL.
-For most cases with Groq, the base URL will be `https://groq.hconeai.com/openai/v1`.
+For most cases with Groq, the base URL will be `https://groq.helicone.ai/openai/v1`.
 
-However, in some cases, you may need to use `https://groq.hconeai.com/v1`.
+However, in some cases, you may need to use `https://groq.helicone.ai/v1`.
 
 </Note>
 
 <Steps>
   <Step title="Create an account + Generate an API Key">
-    Log into www.helicone.ai or create an account. Once you have an account, you
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
     can generate an [API key](https://helicone.ai/developer).
   </Step>
   <Step title="Set HELICONE_API_KEY as an environment variable">
@@ -28,7 +28,7 @@ HELICONE_API_KEY=<your API key>
 ```javascript Groq SDK
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
-  baseUrl: "https://groq.hconeai.com/openai/v1",
+  baseUrl: "https://groq.helicone.ai/openai/v1",
   defaultHeaders: {
     "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
   },

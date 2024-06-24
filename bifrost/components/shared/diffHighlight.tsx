@@ -10,12 +10,6 @@ interface DiffHighlightProps {
 export function DiffHighlight(props: DiffHighlightProps) {
   const { code, language } = props;
 
-  const hasBaseURL = (tokens: Token[]) => {
-    return tokens.some((token) =>
-      token.content.includes("https://oai.hconeai.com/v1")
-    );
-  };
-
   return (
     <div className="ph-no-capture w-full overflow-auto rounded-b-2xl">
       <Highlight theme={themes.jettwaveDark} code={code} language={"tsx"}>
@@ -26,8 +20,8 @@ export function DiffHighlight(props: DiffHighlightProps) {
                 <span className="text-gray-500 pr-4">{i + 1}</span>
                 {line.map((token, key) => {
                   if (
-                    token.content.includes("https://oai.hconeai.com") ||
-                    token.content.includes("https://anthropic.hconeai.com")
+                    token.content.includes("https://oai.helicone.ai") ||
+                    token.content.includes("https://anthropic.helicone.ai")
                   ) {
                     return (
                       <span

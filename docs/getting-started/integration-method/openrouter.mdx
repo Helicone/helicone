@@ -10,7 +10,7 @@ You can follow their documentation here: [https://openrouter.ai/docs#quick-start
 
 <Steps>
   <Step title="Create a Helicone account">
-    Log into www.helicone.ai or create an account. Once you have an account, you
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
     can generate an [API key](https://helicone.ai/developer).
   </Step>
   <Step title="Create an OpenRouter account">
@@ -27,7 +27,7 @@ OPENROUTER_API_KEY=<your API key>
 
 Replace the following OpenRouter URL with the Helicone Gateway URL:
 
-`https://openrouter.ai/api/v1/chat/completions` -> `https://openrouter.hconeai.com/api/v1/chat/completions`
+`https://openrouter.ai/api/v1/chat/completions` -> `https://openrouter.helicone.ai/api/v1/chat/completions`
 
 and then add the following authentication headers.
 
@@ -44,7 +44,7 @@ Now you can access all the models on OpenRouter with a simple fetch call:
 ## Example
 
 ```typescript
-fetch("https://openrouter.hconeai.com/api/v1/chat/completions", {
+fetch("https://openrouter.helicone.ai/api/v1/chat/completions", {
   method: "POST",
   headers: {
     Authorization: `Bearer ${OPENROUTER_API_KEY}`,
@@ -56,7 +56,7 @@ fetch("https://openrouter.hconeai.com/api/v1/chat/completions", {
   body: JSON.stringify({
     model: "openai/gpt-3.5-turbo", // Optional (user controls the default),
     messages: [{ role: "user", content: "What is the meaning of life?" }],
-    stream: true
+    stream: true,
   }),
 });
 ```
@@ -64,7 +64,9 @@ fetch("https://openrouter.hconeai.com/api/v1/chat/completions", {
 We now also support streaming in responses from OpenRouter.
 
 <Info>
-  **Note:** usage data and cost calculations _while streaming_ are only offered for OpenAI and Anthropic models. For non-stream requests, usage data and cost calculations are available for all models.
+  **Note:** usage data and cost calculations _while streaming_ are only offered
+  for OpenAI and Anthropic models. For non-stream requests, usage data and cost
+  calculations are available for all models.
 </Info>
 
 For more information on how to use headers, see [Helicone Headers](https://docs.helicone.ai/helicone-headers/header-directory#utilizing-headers) docs.

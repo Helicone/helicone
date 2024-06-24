@@ -1,10 +1,11 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import { InMemoryCache } from "../memoryCache/staticMemCache";
+import { InMemoryCache } from "../cache/staticMemCache";
 import { PromiseGenericResult, err, ok } from "../shared/result";
 import { Database } from "./database.types";
 import { hashAuth } from "./hash";
 import { HeliconeAuth } from "../requestWrapper";
 import { redisClient } from "../clients/redisClient";
+import { KeyPermissions } from "../../models/models";
 
 // SINGLETON
 class SupabaseAuthCache extends InMemoryCache {
@@ -49,6 +50,7 @@ export interface AuthParams {
   organizationId: string;
   userId?: string;
   heliconeApiKeyId?: number;
+  keyPermissions?: KeyPermissions;
 }
 type AuthResult = PromiseGenericResult<AuthParams>;
 
@@ -150,6 +152,7 @@ export class SupabaseConnector {
       organizationId: apiKey.data[0].organization_id,
       userId: apiKey.data[0].user_id,
       heliconeApiKeyId: apiKey.data[0].id,
+      keyPermissions: apiKey.data[0].key_permissions as KeyPermissions,
     });
   }
 
@@ -227,7 +230,10 @@ export class SupabaseConnector {
       }
     }
 
-    if (authorization.token.includes("sk-helicone-proxy")) {
+    if (
+      authorization.token.includes("sk-helicone-proxy") ||
+      authorization.token.includes("pk-helicone-proxy")
+    ) {
       authorization._type = "bearerProxy";
     }
 
@@ -237,7 +243,12 @@ export class SupabaseConnector {
       return err(result.error);
     }
 
-    const { organizationId: orgId, userId, heliconeApiKeyId } = result.data;
+    const {
+      organizationId: orgId,
+      userId,
+      heliconeApiKeyId,
+      keyPermissions,
+    } = result.data;
 
     if (!orgId) {
       return err("No organization ID");
@@ -247,6 +258,7 @@ export class SupabaseConnector {
       organizationId: orgId,
       userId,
       heliconeApiKeyId,
+      keyPermissions,
     };
 
     this.authCache.set(cacheKey, authParamsResult);

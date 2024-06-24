@@ -3,29 +3,31 @@ title: "User Metrics"
 description: "Get user metrics like number of requests, costs, and activities."
 ---
 
-<Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing).</Info>
+<Info>
+  **Who can use this feature**: Anyone on any
+  [plan](https://www.helicone.ai/pricing).
+</Info>
 
-import QuestionsSection from '/snippets/questions-section.mdx';
-
+import QuestionsSection from "/snippets/questions-section.mdx";
 
 ## Introduction
 
-Monitor and analyze how users interact with your LLMs. 
+Monitor and analyze how users interact with your LLMs.
 
 <Frame caption="See user metrics such as the number of requests, costs, and activities.">
   <img src="/images/user-metrics/example-user-metric.png" />
 </Frame>
 
+### Why User Metrics
 
-### Why User Metrics 
 - Get detailed insights into the number of requests, costs, and activities of selected users.
-- Optimize resources based on usage patterns. 
-
+- Optimize resources based on usage patterns.
 
 ## Quick Start
 
 ### Step 1: Add User ID
-There are two ways to specify users in your requests: 
+
+There are two ways to specify users in your requests:
 
 <AccordionGroup>
   <Accordion title="Option 1: Using OpenAI API">
@@ -35,14 +37,14 @@ There are two ways to specify users in your requests:
     Alternatively, you can send a prompt with the header `Helicone-User-Id` to include the user ID. The value must be a _string_, for example, use an `email` or the `user ID`. 
       <CodeGroup>
       ```bash Curl
-      curl https://oai.hconeai.com/v1/completions \
+      curl https://oai.helicone.ai/v1/completions \
         -H 'Content-Type: application/json' \
         -H 'Helicone-Auth: Bearer YOUR_API_KEY' \
         -H 'Helicone-User-Id: "alicebob@gmail.com"' # Add this header
       ```
 
       ```python Python
-      openai.api_base = "https://oai.hconeai.com/v1"
+      openai.api_base = "https://oai.helicone.ai/v1"
 
       openai.Completion.create(
           model="text-davinci-003",
@@ -57,7 +59,7 @@ There are two ways to specify users in your requests:
       import { Configuration, OpenAIApi } from "openai";
       const configuration = new Configuration({
         apiKey: process.env.OPENAI_API_KEY,
-        basePath: "https://oai.hconeai.com/v1",
+        basePath: "https://oai.helicone.ai/v1",
         defaultHeaders: {
             Helicone-User-Id: "alicebob@gmail.com", // Add this header
         },
@@ -70,17 +72,12 @@ There are two ways to specify users in your requests:
   </Accordion>
 </AccordionGroup>
 
+### Step 2: View Detailed Metrics
 
-
-
-### Step 2: View Detailed Metrics 
-
-Once set up correctly, you will be able to see detailed user metrics under the `Users` tab.  
+Once set up correctly, you will be able to see detailed user metrics under the `Users` tab.
 
 <Frame caption="See overview, usage and detailed logs for a specific user.">
   <img src="/images/user-metrics/example-user-metric-dashboard.png" />
 </Frame>
 
-
 <QuestionsSection />
-
