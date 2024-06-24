@@ -1,5 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";
+import posthog from "posthog-js";
 
 const monthNames = [
   "Jan",
@@ -27,6 +28,7 @@ export async function signOut(supabaseClient: SupabaseClient<Database>) {
   await supabaseClient.auth.signOut({ scope: "global" });
   await supabaseClient.auth.signOut({ scope: "others" });
   await supabaseClient.auth.signOut({ scope: "local" });
+  posthog.reset();
   return supabaseClient.auth.signOut();
 }
 

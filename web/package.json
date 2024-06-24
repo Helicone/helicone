@@ -71,7 +71,7 @@
     "openapi-fetch": "^0.9.3",
     "papaparse": "^5.4.1",
     "pg": "^8.9.0",
-    "posthog-js": "^1.89.0",
+    "posthog-js": "^1.140.1",
     "posthog-node": "^3.6.3",
     "prism-react-renderer": "^1.3.5",
     "prismjs": "^1.29.0",
