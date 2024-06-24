@@ -105,6 +105,62 @@ export interface components {
         startTimeUnixSeconds: number;
       };
     };
+    OTELTrace: {
+      resourceSpans: {
+          scopeSpans: {
+              spans: {
+                  /** Format: double */
+                  droppedLinksCount: number;
+                  links: unknown[];
+                  status: {
+                    /** Format: double */
+                    code: number;
+                  };
+                  /** Format: double */
+                  droppedEventsCount: number;
+                  events: unknown[];
+                  /** Format: double */
+                  droppedAttributesCount: number;
+                  attributes: {
+                      value: {
+                        /** Format: double */
+                        intValue?: number;
+                        stringValue?: string;
+                      };
+                      key: string;
+                    }[];
+                  endTimeUnixNano: string;
+                  startTimeUnixNano: string;
+                  /** Format: double */
+                  kind: number;
+                  name: string;
+                  spanId: string;
+                  traceId: string;
+                }[];
+              scope: {
+                version: string;
+                name: string;
+              };
+            }[];
+          resource: {
+            /** Format: double */
+            droppedAttributesCount: number;
+            attributes: {
+                value: {
+                  arrayValue?: {
+                    values: {
+                        stringValue: string;
+                      }[];
+                  };
+                  /** Format: double */
+                  intValue?: number;
+                  stringValue?: string;
+                };
+                key: string;
+              }[];
+          };
+        }[];
+    };
 Json: JsonObject;
     /** @enum {string} */
     Provider: "OPENAI" | "ANTHROPIC" | "TOGETHERAI" | "GROQ" | "GOOGLE" | "CUSTOM";
@@ -691,6 +747,11 @@ export interface operations {
     };
   };
   LogTrace: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OTELTrace"];
+      };
+    };
     responses: {
       /** @description No content */
       204: {

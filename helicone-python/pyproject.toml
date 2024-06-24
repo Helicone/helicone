@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "helicone"
-version = "1.0.14"
-description = "A Python wrapper for the OpenAI API that logs all requests to Helicone."
+version = "2.0.0"
+description = "Python SDK for Helicone."
 license = "Apache-2.0"
 authors = ["Helicone, Inc. <help@helicone.ai>"]
 homepage = "https://www.helicone.ai"

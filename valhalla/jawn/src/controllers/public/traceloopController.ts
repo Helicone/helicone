@@ -5,6 +5,7 @@ import {
   Post,
   Tags,
   Security,
+  Body,
 } from "tsoa";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { OTELTrace, TraceManager } from "../../managers/traceManager";
@@ -14,11 +15,13 @@ import { OTELTrace, TraceManager } from "../../managers/traceManager";
 @Security("api_key")
 export class TraceController extends Controller {
   @Post("log")
-  public async logTrace(@Request() request: JawnAuthenticatedRequest) {
+  public async logTrace(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() traceBody: OTELTrace
+  ) {
     const traceManager = new TraceManager();
-    const trace = request.body as OTELTrace;
     try {
-      await traceManager.consumeTraces(trace, request.header("authorization") ?? "", request.authParams);
+      await traceManager.consumeTraces(traceBody, request.header("authorization") ?? "", request.authParams);
       this.setStatus(200);
     } catch (error: any) {
       console.error(`Error processing OTEL trace : ${error.message}`);
