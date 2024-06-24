@@ -54,34 +54,6 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const user = useUser();
   const org = useOrg();
 
-  /*
-   color: string
-          created_at: string | null
-          domain: string | null
-          has_onboarded: boolean
-          icon: string
-          id: string
-          is_personal: boolean
-          limits: Json | null
-          logo_path: string | null
-          name: string
-          org_provider_key: string | null
-          organization_type: string
-          owner: string
-          percent_to_log: number | null
-          referral: string | null
-          request_limit: number | null
-          reseller_id: string | null
-          size: string | null
-          soft_delete: boolean
-          stripe_customer_id: string | null
-          stripe_subscription_id: string | null
-          stripe_subscription_item_id: string | null
-          subscription_status: string | null
-          tier: string | null
-        }
-  */
-
   useEffect(() => {
     if (user) {
       posthog.identify(user.id, {
