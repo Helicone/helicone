@@ -15,7 +15,10 @@ import { NextPage } from "next";
 import posthog from "posthog-js";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { OrgContextProvider } from "../components/layout/organizationContext";
+import {
+  OrgContextProvider,
+  useOrg,
+} from "../components/layout/organizationContext";
 import { ThemeContextProvider } from "../components/shared/theme/themeContext";
 import Script from "next/script";
 
@@ -49,6 +52,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const trackingEnabled = process.env.NEXT_PUBLIC_TRACKING_ENABLED || false;
 
   const user = useUser();
+  const org = useOrg();
 
   useEffect(() => {
     if (user) {
@@ -57,7 +61,11 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
         name: user.user_metadata?.name,
       });
     }
-  }, [user]);
+
+    if (org?.currentOrg) {
+      posthog.group("organization", org.currentOrg.id);
+    }
+  }, [user, org]);
 
   return (
     <>
