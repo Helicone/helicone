@@ -1,5 +1,7 @@
 import { clsx } from "@/utils/clsx";
 import Link from "next/link";
+import { SparklesIcon } from '@heroicons/react/20/solid';
+
 
 interface ProjectTag {
   name: string;
@@ -54,15 +56,11 @@ const projects: Project[] = [
     creators: [
       {
         name: "Pranav Ahluwalia",
-        href: "https://x.com/haema_co",
-      },
-      {
-        name: "Pranav",
         href: "https://x.com/PranavAhl",
-      },
+      }
     ],
     imageHref: "/static/community/projects/haema.webp",
-    tags: [TAGS.Healthcare],
+    tags: [TAGS.healthcare],
     href: "https://www.haema.co/",
   },
   {
@@ -78,7 +76,7 @@ const projects: Project[] = [
       },
     ],
     imageHref: "/static/community/projects/demofox.webp",
-    tags: [TAGS.Tech],
+    tags: [TAGS.tech],
     href: "https://www.demofox.com",
   },
   {
@@ -97,7 +95,7 @@ const projects: Project[] = [
       },
     ],
     imageHref: "/static/community/projects/codecrafters.webp",
-    tags: [TAGS.Education],
+    tags: [TAGS.education],
     isOpenSourced: true,
     href: "https://codecrafters.io/",
   },
@@ -112,7 +110,7 @@ const projects: Project[] = [
       },
     ],
     imageHref: "/static/community/projects/reworkd.webp",
-    tags: [TAGS.Tech],
+    tags: [TAGS.tech],
     isOpenSourced: true,
     href: "https://github.com/reworkd/",
   },
@@ -132,7 +130,7 @@ const projects: Project[] = [
       },
     ],
     imageHref: "/static/community/projects/jsonify.webp",
-    tags: [TAGS.Tech],
+    tags: [TAGS.tech],
     href: "https://jsonify.com",
   },
   {
@@ -146,7 +144,7 @@ const projects: Project[] = [
       },
     ],
     imageHref: "/static/community/projects/assistant-ui.webp",
-    tags: [TAGS.Tech],
+    tags: [TAGS.tech],
     isOpenSourced: true,
     href: "https://github.com/Yonom/assistant-ui",
   },
@@ -184,7 +182,7 @@ const projects: Project[] = [
       },
     ],
     imageHref: "/static/community/projects/mangosqueezy.webp",
-    tags: [TAGS.Marketing],
+    tags: [TAGS.marketing],
     isOpenSourced: true,
     href: "https://github.com/mangosqueezy/mangosqueezy",
   },
@@ -209,7 +207,7 @@ const projects: Project[] = [
     ],
     imageHref: "/static/community/projects/greptile.webp",
     isMonthlySpotlight: true,
-    tags: [TAGS.Tech],
+    tags: [TAGS.tech],
     href: "https://greptile.com",
   },
   {
@@ -259,12 +257,30 @@ export function Projects() {
   //   </div>
   // );
   return (
-    <div className="grid grid-cols-2">
+    <div>
+
+    {/* Submit a project banner */}
+    <div className="flex justify-center mt-[24px] mb-[8px] space-x-2">
+      <div className="flex flex-col items-center sm:flex-row justify-center space-x-2 py-4 px-6 sm:px-16 bg-sky-50 border border-sky-100 rounded-md">
+        <SparklesIcon className="h-5 w-5 text-sky-500" />
+        <div className="text-sm text-sky-500 font-semibold text-center sm:text-left">
+          Using Helicone? We want to know what you are building!
+        </div>
+        <Link href={"https://forms.gle/WpTEEE6vVdQccprD9"} className=" text-sm text-sky-500 sm:whitespace-nowrap">
+          <u className="hover:text-sky-500">Fill out this form</u> to be featured.
+        </Link>
+      </div>
+    </div>
+
+    
+    {/* Project grid */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
       {projects.map((project, i) => {
         return (
+          <div className="flex flex-col justify-between h-full gap-4 items-left py-4">
           <Link
             id="featured"
-            className="flex flex-col gap-6 w-full hover:bg-sky-50 rounded-lg p-8 col-span-2 md:col-span-1 mt-8"
+            className="flex flex-col gap-4 w-full h-full hover:bg-sky-50 rounded-lg p-4 col-span-2 md:col-span-1 mt-2"
             href={project.href}
             key={i}
           >
@@ -273,40 +289,61 @@ export function Projects() {
               src={project.imageHref}
               alt={project.title}
               width={400}
-              height={300}
+              height={250}
               style={{
                 objectFit: "cover",
               }}
-              className="rounded-lg h-60 w-full border border-gray-300"
+              className="rounded-lg h-64 sm:h-56 md:h-44 w-full border border-gray-200"
             />
-            <div className="w-full h-fit rounded-lg flex flex-col space-y-2 text-left">
+
+            {/* Overlay for tags and description */}
+            <div className="w-full h-fit rounded-lg flex flex-col text-left">
               <div className="flex items-center gap-2">
-                <span
-                  className={clsx(
-                    "bg-sky-50 text-sky-700 ring-sky-600/10 w-max items-center rounded-lg px-2 py-1 -my-1 text-sm font-medium ring-1 ring-inset"
-                  )}
-                >
-                  {project.tags.length}
+
+                {/* Industry tag */}
+                {project.tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className={clsx(
+                      "bg-sky-50 text-sky-700 ring-sky-600/10 w-max items-center rounded-lg px-2 py-1 text-xs font-medium ring-1 ring-inset"
+                    )}
+                  >
+                    {tag.name}
+                  </span>
+                ))}
+
+                {/* Open Source tag */}
+                {project.isOpenSourced && (
+                <span className="bg-sky-500 bg-opacity-10 text-sky-500 rounded-md px-2 py-1 text-xs font-semibold">
+                  Open-source
                 </span>
-                <span className="text-gray-400 text-sm">-</span>
-              </div>
-              <h2 className="font-semibold text-lg pt-2">{project.title}</h2>
+              )}
+                              </div>
+              <h2 className="font-semibold text-md pt-2 text-gray-700">{project.title}</h2>
               <p className="text-gray-500 text-sm">{project.description}</p>
-              <div className="flex flex-row justify-between gap-4 items-center py-4">
-                <div className={clsx("flex items-center space-x-3 bottom-0")}>
-                  {project.creators.map((creator, i) => (
-                    <div className="flex items-center space-x-2" key={i}>
-                      <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-                        {creator.name}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
-          </Link>
+            </Link>
+            
+            {/* Creators tag */}
+            <div className={clsx("flex items-center")}>
+            {project.creators.map((creator, i) => (
+              <div key={i} className="flex items-center hover:bg-sky-50 rounded-lg px-4 py-2">
+              <a
+                href={creator.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-medium text-sky-500"
+              >
+                {creator.name}
+              </a>
+            </div>
+            ))}
+          </div>
+        </div>
         );
       })}
-    </div>
+      </div>
+
+      </div>
   );
 }
