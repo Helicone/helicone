@@ -73,7 +73,7 @@ export default function VaultFeature() {
                 src={"/assets/blog/colegottdank-headshot.png"}
                 width={32}
                 height={32}
-                alt="Cole Gottdank"
+                alt="Cole Gottdank's headshot"
                 className="rounded-full"
               />
               <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">

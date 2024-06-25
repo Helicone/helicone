@@ -23,7 +23,7 @@ const MobileHeader = (props: {
           <span className="sr-only">Helicone</span>
           <Image
             src={"/static/logo.svg"}
-            alt={""}
+            alt={"Helicone - Open-source LLM observability and monitoring platform for developers"}
             height={150}
             width={150}
             priority={true}
@@ -31,7 +31,7 @@ const MobileHeader = (props: {
           />
           <Image
             src={"/static/logo.svg"}
-            alt={""}
+            alt={"Helicone - Open-source LLM observability and monitoring platform for developers"}
             height={150}
             width={150}
             priority={true}
@@ -157,7 +157,7 @@ const NavBar = (props: NavBarProps) => {
             <span className="sr-only">Helicone</span>
             <Image
               src={"/static/logo.svg"}
-              alt={""}
+              alt={"Helicone - Open-source LLM observability and monitoring platform for developers"}
               height={150}
               width={150}
               priority={true}
@@ -165,7 +165,7 @@ const NavBar = (props: NavBarProps) => {
             />
             <Image
               src={"/static/logo.svg"}
-              alt={""}
+              alt={"Helicone - Open-source LLM observability and monitoring platform for developers"}
               height={150}
               width={150}
               priority={true}
