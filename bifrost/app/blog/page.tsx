@@ -1,4 +1,3 @@
-// import BlogPage from "../../components/templates/blog/blogPage";
 import { clsx } from "@/components/shared/utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -55,7 +54,8 @@ const blogContent: BlogStructure[] = [
     time: "6 minute read",
   },
   {
-    title: "How to Understand Your Users Better and Deliver a Top-Tier Experience with Custom Properties",
+    title:
+      "How to Understand Your Users Better and Deliver a Top-Tier Experience with Custom Properties",
     description:
       "In today's digital landscape, every interaction, click, and engagement offers valuable insights into your users' preferences. But how do you harness this data to effectively grow your business? We may have the answer. ",
     badgeText: "feature",
@@ -101,7 +101,7 @@ const blogContent: BlogStructure[] = [
         name: "Cole Gottdank",
         imageUrl: "/static/blog/colegottdank-headshot.png",
         imageAlt: "Cole Gottdank's headshot",
-      }, 
+      },
       {
         name: "Lina Lam",
         imageUrl: "/static/blog/linalam-headshot.webp",
@@ -180,7 +180,7 @@ const blogContent: BlogStructure[] = [
         name: "Lina Lam",
         imageUrl: "/static/blog/linalam-headshot.webp",
         imageAlt: "Lina Lam's headshot",
-      }, 
+      },
     ],
     time: "4 minute read",
   },
@@ -196,12 +196,12 @@ const blogContent: BlogStructure[] = [
     authors: [
       {
         name: "Scott Nguyen",
-        imageUrl: "/static/blog/scottnguyen-headshot.webp", 
+        imageUrl: "/static/blog/scottnguyen-headshot.webp",
         imageAlt: "Scott Nguyen's headshot",
-      }
+      },
     ],
-    time: "5 minute read"
-  }, 
+    time: "5 minute read",
+  },
   {
     title:
       "Introducing Vault: The Future of Secure and Simplified Provider API Key Management",
@@ -302,14 +302,14 @@ const blogContent: BlogStructure[] = [
         name: "Matt Bornstein",
         imageUrl:
           "https://a16z.com/wp-content/uploads/2019/07/MattBornstein-Investing-400x400.jpg",
-        imageAlt: "Matt Bornstein's headshot"
-        },
+        imageAlt: "Matt Bornstein's headshot",
+      },
       {
         name: "Rajko Radovanovic",
         imageUrl:
           "https://a16z.com/wp-content/uploads/2023/05/Rajko-Radovanovic-400x400.png",
-        imageAlt: "Rajko Radovanovic's headshot"
-        },
+        imageAlt: "Rajko Radovanovic's headshot",
+      },
     ],
     time: "5 minute read",
   },
@@ -326,19 +326,18 @@ const blogContent: BlogStructure[] = [
         name: "Michelle Fradin",
         imageUrl:
           "https://www.sequoiacap.com/wp-content/uploads/sites/6/2021/12/Michelle-Bailhe-profile-1.jpg?resize=880,880",
-        imageAlt: "Michelle Fradin's headshot"
-        },
+        imageAlt: "Michelle Fradin's headshot",
+      },
       {
         name: "Lauren Reeder",
         imageUrl:
           "https://www.sequoiacap.com/wp-content/uploads/sites/6/2022/01/211118_clifford_sequoia-laurenreeder_DSF9377.jpg?resize=880,880",
-          imageAlt: "Lauren Reeder's headshot"
-        },
+        imageAlt: "Lauren Reeder's headshot",
+      },
     ],
     time: "4 minute read",
   },
 ];
-
 
 const Blog = () => {
   return (
@@ -350,7 +349,9 @@ const Blog = () => {
           width={200}
           height={100}
         />
-        <h1 className="text-5xl font-bold text-gray-900 pt-4">The Helicone Blog</h1>
+        <h1 className="text-5xl font-bold text-gray-900 pt-4">
+          The Helicone Blog
+        </h1>
         <p className="text-lg text-gray-700">
           Thoughts about the future of AI - from the team helping to build it.
         </p>
