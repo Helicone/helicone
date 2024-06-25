@@ -82,7 +82,7 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
           onSelect={async () => {
             await onSearchHandler?.(query);
           }}
-          enableClear={false}
+          enableClear={true}
         >
           {filteredPeople.map((option, i) => (
             <SearchSelectItem value={option} key={option}>
