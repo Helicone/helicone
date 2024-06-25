@@ -10,7 +10,7 @@ export default async function Home() {
     process.cwd(),
     "app",
     "blog",
-    "vault", 
+    "vault-introduction", 
     "src.mdx"
   );
 

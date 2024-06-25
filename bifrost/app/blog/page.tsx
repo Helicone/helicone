@@ -209,7 +209,7 @@ const blogContent: BlogStructure[] = [
       "Helicone's Vault revolutionizes the way businesses handle, distribute, and monitor their provider API keys, with a focus on simplicity, security, and flexibility.",
     badgeText: "Product",
     date: "Sep 13, 2023",
-    href: "/blog/vault",
+    href: "/blog/vault-introduction",
     imageUrl: "/static/blog/vault_asset.png",
     authors: [
       {
@@ -400,7 +400,7 @@ const Blog = () => {
                       </p>
                     </div>
                   </div>
-                  <Image
+                  <img
                     src={blog.imageUrl}
                     alt={blog.title}
                     width={400}
