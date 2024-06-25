@@ -14,6 +14,7 @@ import { IHeliconeHeaders } from "./HeliconeHeaders";
 import { CfProperties } from "@cloudflare/workers-types";
 import { RateLimitOptions } from "../clients/KVRateLimiterClient";
 import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
+import { recursivelyConsolidate } from "../util/helpers";
 
 export type RetryOptions = {
   retries: number; // number of times to retry the request
