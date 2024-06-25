@@ -92,9 +92,13 @@ const blogContent: BlogStructure[] = [
     imageUrl: "/static/blog/cole-copilot.png",
     authors: [
       {
+        name: "Cole Gottdank",
+        imageUrl: "/static/blog/colegottdank-headshot.png",
+      }, 
+      {
         name: "Lina Lam",
         imageUrl: "/static/blog/linalam-headshot.webp",
-      },
+      }
     ],
     time: "4 minute read",
   },
@@ -108,9 +112,13 @@ const blogContent: BlogStructure[] = [
     imageUrl: "/static/blog/stefan-posthog/posthog-cover.png",
     authors: [
       {
-        name: "Lina Lam",
+        name: "Stefan Lam",
         imageUrl: "/static/blog/linalam-headshot.webp",
       },
+      {
+        name: "Lina Lam",
+        imageUrl: "/static/blog/linalam-headshot.webp",
+      }
     ],
     time: "3 minute read",
   },
@@ -354,7 +362,7 @@ const Blog = () => {
                       >
                         {blog.authors.map((author, i) => (
                           <div className="flex items-center space-x-2" key={i}>
-                            <Image
+                            <img
                               className="inline-block h-8 w-8 rounded-full"
                               src={author.imageUrl}
                               alt=""
@@ -390,7 +398,7 @@ const Blog = () => {
                   href={blog.href}
                   key={i}
                 >
-                  <Image
+                  <img
                     src={blog.imageUrl}
                     alt={blog.title}
                     width={400}
@@ -421,7 +429,7 @@ const Blog = () => {
                       >
                         {blog.authors.map((author, i) => (
                           <div className="flex items-center space-x-2" key={i}>
-                            <Image
+                            <img
                               className="inline-block h-8 w-8 rounded-full"
                               src={author.imageUrl}
                               alt=""
