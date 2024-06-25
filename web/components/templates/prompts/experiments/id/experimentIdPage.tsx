@@ -48,11 +48,6 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
     };
   });
 
-  // get the keys from the first run
-  const keys = runs?.[0]?.inputs
-    ? Object.keys(runs?.[0]?.inputs).map((key) => key)
-    : [];
-
   const renderScoreValue = (score: {
     value: string | number;
     valueType: string;
@@ -69,8 +64,11 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
     return score.value;
   };
 
-  const renderPrettyInputs = (inputs: Record<string, string>) => {
+  const renderPrettyInputs = (inputs: Record<string, string>, run: number) => {
     const TEXT_LIMIT = 80;
+    const keys = runs?.[run]?.inputs
+      ? Object.keys(runs?.[run]?.inputs).map((key) => key)
+      : [];
 
     return (
       <div className="flex flex-col space-y-1">
@@ -177,7 +175,10 @@ const ExperimentIdPage = (props: PromptIdPageProps) => {
                     header: "Prompt Inputs",
                     render: (value) => (
                       <div className="w-[400px]">
-                        {renderPrettyInputs(value.inputs)}
+                        {renderPrettyInputs(
+                          value.inputs,
+                          runs?.indexOf(value) ?? 0
+                        )}
                       </div>
                     ),
                   },

@@ -230,14 +230,14 @@ const FineTuningPage = (props: FineTuningPageProps) => {
       </ThemedModal>
       <ThemedDrawer open={jobOpen} setOpen={setJobOpen}>
         <div className="flex flex-col py-2">
-          {selectedJob?.dataFromOpenAI.job?.status === "succeeded" && (
+          {selectedJob?.dataFromOpenAI?.job?.status === "succeeded" && (
             <>
               <p className="text-gray-500 text-sm">Model</p>
               <button
                 onClick={() => {
-                  if (selectedJob?.dataFromOpenAI.job?.fine_tuned_model) {
+                  if (selectedJob?.dataFromOpenAI?.job?.fine_tuned_model) {
                     navigator.clipboard.writeText(
-                      selectedJob?.dataFromOpenAI.job?.fine_tuned_model
+                      selectedJob?.dataFromOpenAI?.job?.fine_tuned_model
                     );
                     setNotification("Copied to clipboard", "success");
                   }
@@ -245,7 +245,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 className="flex flex-row items-center"
               >
                 <h3 className="text-xl font-semibold">
-                  {selectedJob?.dataFromOpenAI.job?.fine_tuned_model || "n/a"}
+                  {selectedJob?.dataFromOpenAI?.job?.fine_tuned_model || "n/a"}
                 </h3>
                 <ClipboardDocumentListIcon className="w-5 h-5 ml-2 text-gray-500" />
               </button>
@@ -263,7 +263,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
               </p>
               <JobStatus
                 jobStatus={
-                  selectedJob?.dataFromOpenAI.job?.status ||
+                  selectedJob?.dataFromOpenAI?.job?.status ||
                   selectedJob?.status ||
                   "unknown"
                 }
@@ -290,7 +290,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 Base Model
               </p>
               <ModelPill
-                model={selectedJob?.dataFromOpenAI.job?.model || "unknown"}
+                model={selectedJob?.dataFromOpenAI?.job?.model || "unknown"}
               />
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -320,7 +320,7 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 Trained Tokens
               </p>
               <p className="text-gray-700 dark:text-gray-300 truncate">
-                {selectedJob?.dataFromOpenAI.job?.trained_tokens}
+                {selectedJob?.dataFromOpenAI?.job?.trained_tokens}
               </p>
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -328,11 +328,11 @@ const FineTuningPage = (props: FineTuningPageProps) => {
                 Epochs
               </p>
               <p className="text-gray-700 dark:text-gray-300 truncate">
-                {selectedJob?.dataFromOpenAI.job?.hyperparameters.n_epochs}
+                {selectedJob?.dataFromOpenAI?.job?.hyperparameters?.n_epochs}
               </p>
             </li>
           </ul>
-          {selectedJob?.dataFromOpenAI.job?.status === "succeeded" && (
+          {selectedJob?.dataFromOpenAI?.job?.status === "succeeded" && (
             <div className="mt-8">
               <p className="font-semibold text-xl">How to integrate</p>
               <p className="text-gray-500 text-sm mt-1 leading-5">
@@ -347,15 +347,15 @@ import OpenAI
 # client config
 client = OpenAI(
   api_key="your-api-key-here",
-  base_url="https://oai.hconeai.com/v1", 
-  default_headers= {  
+  base_url="https://oai.helicone.ai/v1",
+  default_headers= {
     "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
   }
 )
 
 # send the request
 chat_completion = client.chat.completions.create(
-  model="${selectedJob?.dataFromOpenAI.job?.fine_tuned_model}",
+  model="${selectedJob?.dataFromOpenAI?.job?.fine_tuned_model}",
   messages=[
     {"role": "user", "content": "Hello world!"}
   ],

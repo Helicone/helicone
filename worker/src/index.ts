@@ -75,6 +75,7 @@ export interface BASE_Env {
   UPSTASH_KAFKA_PASSWORD: string;
   ORG_IDS?: string;
   PERCENT_LOG_KAFKA?: string;
+  WORKER_DEFINED_REDIRECT_URL?: string;
 }
 export type Env = BASE_Env & EU_Env;
 
@@ -91,6 +92,10 @@ export async function hash(key: string): Promise<string> {
     return paddedHexCode;
   });
   return hexCodes.join("");
+}
+
+function isRootPath(url: URL) {
+  return url.pathname === "/" || url.pathname === "" || !url.pathname;
 }
 
 // If the url starts with oai.*.<>.com then we know WORKER_TYPE is OPENAI_PROXY
@@ -123,7 +128,7 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
     (host.includes("hconeai") || host.includes("helicone.ai")) &&
     hostParts.length >= 3
   ) {
-    // hconeai.com requests
+    // helicone.ai requests
     if (hostParts[0].includes("gateway")) {
       return {
         ...env,
@@ -145,32 +150,72 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         WORKER_TYPE: "HELICONE_API",
       };
     } else if (hostParts[0].includes("together")) {
-      return {
-        ...env,
-        WORKER_TYPE: "GATEWAY_API",
-        GATEWAY_TARGET: "https://api.together.xyz",
-      };
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://together.xyz",
+        };
+      } else {
+        return {
+          ...env,
+          WORKER_TYPE: "GATEWAY_API",
+          GATEWAY_TARGET: "https://api.together.xyz",
+        };
+      }
     } else if (hostParts[0].includes("openrouter")) {
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://openrouter.ai",
+        };
+      } else {
+        return {
+          ...env,
+          WORKER_TYPE: "GATEWAY_API",
+          GATEWAY_TARGET: "https://openrouter.ai",
+        };
+      }
+    } else if (hostParts[0].includes("deepinfra")) {
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://deepinfra.com",
+        };
+      }
       return {
         ...env,
         WORKER_TYPE: "GATEWAY_API",
-        GATEWAY_TARGET: "https://openrouter.ai",
+        GATEWAY_TARGET: "https://api.deepinfra.com",
       };
     } else if (hostParts[0].includes("groq")) {
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://groq.com",
+        };
+      }
+
       return {
         ...env,
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://api.groq.com",
+      };
+    } else if (hostParts[0].includes("hyperbolic")) {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://api.hyperbolic.xyz",
       };
     }
   }
 
   if (
     hostParts.length >= 3 &&
-    hostParts[0].includes("gateway") &&
-    !host.includes("hconeai")
+    host.includes("gateway") &&
+    !host.includes("hconeai") &&
+    !host.includes("helicone")
   ) {
-    // if it is not a hconeai.com request, but it is a gateway request, then it is a customer gateway request
+    // if it is not a helicone.ai request, but it is a gateway request, then it is a customer gateway request
     return {
       ...env,
       WORKER_TYPE: "CUSTOMER_GATEWAY",
@@ -192,6 +237,11 @@ export default {
         return handleError(requestWrapper.error);
       }
       env = modifyEnvBasedOnPath(env, requestWrapper.data);
+
+      if (env.WORKER_DEFINED_REDIRECT_URL) {
+        return Response.redirect(env.WORKER_DEFINED_REDIRECT_URL, 301);
+      }
+
       const router = buildRouter(
         env.WORKER_TYPE,
         request.url.includes("browser")

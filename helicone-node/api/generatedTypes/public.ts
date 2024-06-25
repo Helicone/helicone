@@ -12,6 +12,9 @@ export interface paths {
   "/v1/user/query": {
     post: operations["GetUsers"];
   };
+  "/v1/trace/log": {
+    post: operations["LogTrace"];
+  };
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
@@ -66,6 +69,27 @@ export interface paths {
   "/v1/experiment/query": {
     post: operations["GetExperiments"];
   };
+  "/v1/public/dataisbeautiful/ttft-vs-prompt-length": {
+    post: operations["GetTTFTvsPromptInputLength"];
+  };
+  "/v1/public/dataisbeautiful/model/percentage": {
+    post: operations["GetModelPercentage"];
+  };
+  "/v1/public/dataisbeautiful/model/cost": {
+    post: operations["GetModelCost"];
+  };
+  "/v1/public/dataisbeautiful/provider/percentage": {
+    post: operations["GetProviderPercentage"];
+  };
+  "/v1/public/dataisbeautiful/model/percentage/overtime": {
+    post: operations["GetModelPercentageOverTime"];
+  };
+  "/v1/customer/{customerId}/usage/query": {
+    post: operations["GetCustomerUsage"];
+  };
+  "/v1/customer/query": {
+    post: operations["GetCustomers"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -101,6 +125,62 @@ export interface components {
         /** Format: double */
         startTimeUnixSeconds: number;
       };
+    };
+    OTELTrace: {
+      resourceSpans: {
+          scopeSpans: {
+              spans: {
+                  /** Format: double */
+                  droppedLinksCount: number;
+                  links: unknown[];
+                  status: {
+                    /** Format: double */
+                    code: number;
+                  };
+                  /** Format: double */
+                  droppedEventsCount: number;
+                  events: unknown[];
+                  /** Format: double */
+                  droppedAttributesCount: number;
+                  attributes: {
+                      value: {
+                        /** Format: double */
+                        intValue?: number;
+                        stringValue?: string;
+                      };
+                      key: string;
+                    }[];
+                  endTimeUnixNano: string;
+                  startTimeUnixNano: string;
+                  /** Format: double */
+                  kind: number;
+                  name: string;
+                  spanId: string;
+                  traceId: string;
+                }[];
+              scope: {
+                version: string;
+                name: string;
+              };
+            }[];
+          resource: {
+            /** Format: double */
+            droppedAttributesCount: number;
+            attributes: {
+                value: {
+                  arrayValue?: {
+                    values: {
+                        stringValue: string;
+                      }[];
+                  };
+                  /** Format: double */
+                  intValue?: number;
+                  stringValue?: string;
+                };
+                key: string;
+              }[];
+          };
+        }[];
     };
 Json: JsonObject;
     /** @enum {string} */
@@ -667,6 +747,97 @@ Json: JsonObject;
       /** @enum {boolean} */
       score?: true;
     };
+    TTFTvsPromptLength: {
+      /** Format: double */
+      prompt_length: number;
+      /** Format: double */
+      ttft_normalized_p75: number;
+      /** Format: double */
+      ttft_normalized_p99: number;
+      /** Format: double */
+      ttft_normalized: number;
+      /** Format: double */
+      ttft_p75: number;
+      /** Format: double */
+      ttft_p99: number;
+      /** Format: double */
+      ttft: number;
+    };
+    "ResultSuccess_TTFTvsPromptLength-Array_": {
+      data: components["schemas"]["TTFTvsPromptLength"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_TTFTvsPromptLength-Array.string_": components["schemas"]["ResultSuccess_TTFTvsPromptLength-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    TimeSpan: "1m" | "3m" | "1yr";
+    /** @enum {string} */
+    ModelName: "gpt-3.5" | "gpt-4o" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus-20240229" | "claude-3-sonnet-20240229" | "claude-3-haiku-20240307" | "claude-2" | "open-mixtral" | "Llama" | "dall-e" | "text-moderation" | "text-embedding";
+    /** @enum {string} */
+    ProviderName: "OPENAI" | "ANTHROPIC" | "MISTRAL" | "META";
+    DataIsBeautifulRequestBody: {
+      provider?: components["schemas"]["ProviderName"];
+      models?: components["schemas"]["ModelName"][];
+      timespan: components["schemas"]["TimeSpan"];
+    };
+    ModelBreakdown: {
+      /** Format: double */
+      percent: number;
+      matched_model: string;
+    };
+    "ResultSuccess_ModelBreakdown-Array_": {
+      data: components["schemas"]["ModelBreakdown"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelBreakdown-Array.string_": components["schemas"]["ResultSuccess_ModelBreakdown-Array_"] | components["schemas"]["ResultError_string_"];
+    ModelCost: {
+      /** Format: double */
+      percent: number;
+      matched_model: string;
+    };
+    "ResultSuccess_ModelCost-Array_": {
+      data: components["schemas"]["ModelCost"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelCost-Array.string_": components["schemas"]["ResultSuccess_ModelCost-Array_"] | components["schemas"]["ResultError_string_"];
+    ProviderBreakdown: {
+      /** Format: double */
+      percent: number;
+      provider: string;
+    };
+    "ResultSuccess_ProviderBreakdown-Array_": {
+      data: components["schemas"]["ProviderBreakdown"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ProviderBreakdown-Array.string_": components["schemas"]["ResultSuccess_ProviderBreakdown-Array_"] | components["schemas"]["ResultError_string_"];
+    ModelBreakdownOverTime: {
+      date: string;
+    } & components["schemas"]["ModelBreakdown"];
+    "ResultSuccess_ModelBreakdownOverTime-Array_": {
+      data: components["schemas"]["ModelBreakdownOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelBreakdownOverTime-Array.string_": components["schemas"]["ResultSuccess_ModelBreakdownOverTime-Array_"] | components["schemas"]["ResultError_string_"];
+    CustomerUsage: {
+      id: string;
+      name: string;
+      /** Format: double */
+      cost: number;
+      /** Format: double */
+      count: number;
+      /** Format: double */
+      prompt_tokens: number;
+      /** Format: double */
+      completion_tokens: number;
+    };
+    Customer: {
+      id: string;
+      name: string;
+    };
   };
   responses: {
   };
@@ -697,6 +868,19 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_"];
         };
+      };
+    };
+  };
+  LogTrace: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OTELTrace"];
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
       };
     };
   };
@@ -1031,6 +1215,116 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Experiment-Array.string_"];
+        };
+      };
+    };
+  };
+  GetTTFTvsPromptInputLength: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_TTFTvsPromptLength-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModelPercentage: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelBreakdown-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModelCost: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelCost-Array.string_"];
+        };
+      };
+    };
+  };
+  GetProviderPercentage: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ProviderBreakdown-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModelPercentageOverTime: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelBreakdownOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetCustomerUsage: {
+    parameters: {
+      path: {
+        customerId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CustomerUsage"] | null;
+        };
+      };
+    };
+  };
+  GetCustomers: {
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Customer"][];
         };
       };
     };

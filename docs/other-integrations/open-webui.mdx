@@ -1,0 +1,30 @@
+---
+title: "Open WebUI"
+description: "Easily add Helicone to Open WebUI"
+---
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+
+    <Note>
+      Make sure to generate a [write only API key](helicone-headers/helicone-auth).
+    </Note>
+
+  </Step>
+  <Step title="Set OPENAI_API_BASE_URL as an environment variable when running the container">
+
+  <CodeGroup>
+
+```bash example
+export HELICONE_API_KEY=pk-<YOUR_API_KEY>
+
+docker run -d -p 9842:8080 -e OPENAI_API_BASE_URL="https://oai.helicone.ai/${HELICONE_API_KEY}/v1" -e OPENAI_API_KEY="sk-api_key" --add-host=host.docker.internal:host-gateway -v open-webui:/app/backend/data --name open-webui --restart always ghcr.io/open-webui/open-webui:main
+```
+
+</CodeGroup>
+
+  </Step>
+
+</Steps>

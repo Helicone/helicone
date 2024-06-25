@@ -9,7 +9,7 @@ const CODE_CONVERTS = {
 import OpenAI from "openai";
 
 const openai = new OpenAI({
-  baseURL: "https://oai.hconeai.com/openai/deployments/[DEPLOYMENTNAME]",
+  baseURL: "https://oai.helicone.ai/openai/deployments/[DEPLOYMENTNAME]",
   defaultHeaders: {
     "Helicone-Auth": "Bearer ${key}",
     "Helicone-OpenAI-API-Base": "https://[AZURE_DOMAIN].openai.azure.com",
@@ -24,7 +24,7 @@ import OpenAI
 
 client = OpenAI(
   api_key="[AZURE_OPENAI_API_KEY]",
-  base_url="https://oai.hconeai.com/openai/deployments/[DEPLOYMENT]",
+  base_url="https://oai.helicone.ai/openai/deployments/[DEPLOYMENT]",
   default_headers={
       "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
       "Helicone-Auth": "Bearer ${key}",
@@ -45,7 +45,7 @@ helicone_headers = {
 }
 
 self.model = AzureChatOpenAI(
-  openai_api_base="https://oai.hconeai.com",
+  openai_api_base="https://oai.helicone.ai",
   deployment_name="gpt-35-turbo",
   openai_api_key=<AZURE_OPENAI_API_KEY>,
   openai_api_version="2023-05-15",
@@ -61,7 +61,7 @@ const model = new ChatOpenAI({
   azureOpenAIApiKey: "[AZURE_OPENAI_API_KEY]",
   azureOpenAIApiDeploymentName: "openai/deployments/gpt-35-turbo",
   azureOpenAIApiVersion: "2023-03-15-preview",
-  azureOpenAIBasePath: "https://oai.hconeai.com",
+  azureOpenAIBasePath: "https://oai.helicone.ai",
   configuration: {
     organization: "[organization]",
     baseOptions: {

@@ -10,7 +10,9 @@ export function generateAPIKeyHelper(
 ) {
   const apiKeyPrefix = permission === "rw" ? "sk" : "pk";
 
-  const apiKey = `${apiKeyPrefix}-helicone${isEu ? "-eu" : ""}${
+  const apiKey = `${apiKeyPrefix}${
+    organization_type === "customer" ? "" : "-helicone"
+  }${isEu ? "-eu" : ""}${
     organization_type === "customer" ? "-cp" : ""
   }-${generateApiKey({
     method: "base32",

@@ -351,6 +351,7 @@ export class LoggingHandler extends AbstractLogHandler {
 
     const promptRecord: PromptRecord = {
       promptId: context.message.log.request.promptId,
+      promptVersion: context.message.log.request.promptVersion ?? "",
       requestId: context.message.log.request.id,
       orgId: context.orgParams.id,
       model: context.processedLog.model,
@@ -520,7 +521,7 @@ export class LoggingHandler extends AbstractLogHandler {
   }
 
   private ensureMaxVectorLength = (text: string): string => {
-    const maxBytes = 848000; // ~300k less than 1MB for buffer
+    const maxBytes = 512000; // ~500k less than 1MB for buffer
     text = text.replace(/[^\x00-\x7F]/g, "");
     text = text.trim();
 

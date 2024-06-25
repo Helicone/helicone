@@ -1,25 +1,38 @@
 import { useQuery } from "@tanstack/react-query";
-import { OrganizationLayout } from "../lib/organization_layout/organization_layout";
 import { Result } from "../../lib/result";
+import { OrganizationLayout } from "../lib/organization_layout/organization_layout";
+import { getJawnClient } from "../../lib/clients/jawn";
 
 const useOrganizationLayout = (
   orgId: string,
   layoutPage: "dashboard" | "requests",
-  initialData?: Result<OrganizationLayout, string>
+  initialData?: Result<OrganizationLayout | null, string>
 ) => {
+  const jawn = getJawnClient(orgId);
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["organizationLayout", orgId, layoutPage],
     initialData: initialData ? () => initialData : undefined,
     queryFn: async (query) => {
       const orgId = query.queryKey[1];
-      const type = query.queryKey[2];
-      return await fetch(`/api/organization/${orgId}/layout?type=${type}`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }).then(
-        (res) => res.json() as Promise<Result<OrganizationLayout, string>>
+      const filterType = query.queryKey[2];
+      const { data: layout, error } = await jawn.GET(
+        "/v1/organization/{organizationId}/layout",
+        {
+          params: {
+            path: {
+              organizationId: orgId,
+            },
+            query: {
+              filterType,
+            },
+          },
+        }
       );
+
+      if (error) {
+        return { data: null };
+      }
+      return { data: layout.data as OrganizationLayout };
     },
     refetchOnWindowFocus: false,
   });
@@ -28,7 +41,7 @@ const useOrganizationLayout = (
     isLoading,
     refetch,
     isRefetching,
-    organizationLayout: data?.data,
+    organizationLayout: data,
   };
 };
 

@@ -534,7 +534,7 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
             savedFilters={{
               currentFilter: currFilter ?? undefined,
-              filters: orgLayout?.filters ?? undefined,
+              filters: orgLayout?.data?.filters ?? undefined,
               onFilterChange: onLayoutFilterChange,
               onSaveFilterCallback: async () => {
                 await orgLayoutRefetch();
