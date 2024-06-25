@@ -100,7 +100,7 @@ const projects: Project[] = [
   },
   {
     title: "Reworkd",
-    description: "Either AgentGPT or some new stuff we're working on!",
+    description: "The simplest way to extract structured web data.",
     usage: "API logging and cost analysis.",
     creators: [
       {
