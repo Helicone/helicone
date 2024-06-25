@@ -53,17 +53,23 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
     });
 
     try {
-      const usage = await getUsage(data, requestBody, tokenCounter);
+      const consolidatedData = consolidateTextFields(data);
+
+      const usage =
+        "usage" in consolidatedData
+          ? consolidatedData.usage
+          : await getUsage(data, requestBody, tokenCounter);
+
       return ok({
         processedBody: {
-          ...consolidateTextFields(data),
+          ...consolidatedData,
           streamed_data: data,
         },
         usage: {
-          totalTokens: usage.total_tokens,
-          completionTokens: usage.completion_tokens,
-          promptTokens: usage.prompt_tokens,
-          heliconeCalculated: usage.helicone_calculated,
+          totalTokens: usage?.total_tokens,
+          completionTokens: usage?.completion_tokens,
+          promptTokens: usage?.prompt_tokens,
+          heliconeCalculated: usage?.helicone_calculated ?? false,
         },
       });
     } catch (e) {
