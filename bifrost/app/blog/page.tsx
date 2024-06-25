@@ -163,6 +163,66 @@ const blogContent: BlogStructure[] = [
     ],
     time: "4 minute read",
   },
+  {
+    "title": "Why Observability is the Key to Ethical and Safe Artificial Intelligence",
+    "description": "As AI continues to shape our world, the need for ethical practices and robust observability has never been greater. Learn how Helicone is rising to the challenge.",
+    "badgeText": "Read",
+    "date": "Sep 19, 2023",
+    "href": "/blog/ai-safety",
+    "imageUrl": "/static/blog/AI.webp",
+    "authors": [
+      {
+        "name": "Scott Nguyen",
+        "imageUrl": "/static/blog/scottnguyen-headshot.webp"
+      }
+    ],
+    "time": "7 minute read"
+  }, 
+  {
+    "title": "The Next Evolution in OpenAI Monitoring and Optimization",
+    "description": "Learn how Helicone provides unmatched insights into your OpenAI usage, allowing you to monitor, optimize, and take control like never before.",
+    "badgeText": "Education",
+    "date": "Sep 1, 2023",
+    "href": "/blog/open-source-monitoring-for-openai",
+    "imageUrl": "/static/blog/openai.webp",
+    "authors": [
+      {
+        "name": "Scott Nguyen",
+        "imageUrl": "/static/blog/scottnguyen-headshot.webp"
+      }
+    ],
+    "time": "3 minute read"
+  }, 
+  {
+    "title": "Life after Y Combinator: Three Key Lessons for Startups",
+    "description": "From maintaining crucial relationships to keeping a razor-sharp focus, here's how to sustain your momentum after the YC batch ends.",
+    "badgeText": "Advice",
+    "date": "Mar 12, 2024",
+    "href": "/blog/life-after-yc",
+    "imageUrl": "/static/blog/yc.webp",
+    "authors": [
+      {
+        "name": "Scott Nguyen",
+        "imageUrl": "/static/blog/scottnguyen-headshot.webp"
+      }
+    ],
+    "time": "4 minute read"
+  }, 
+  // {
+  //   "title": "AutoGPT x Helicone: Optimizing Evaluation Pipelines",
+  //   "description": "Helicone is excited to announce a partnership with AutoGPT, the leader in agent development! Discover how AutoGPT leverages Helicone to build the optimal evaluation pipeline for agent comparison, enhancing workflow efficiency and cost savings.",
+  //   "badgeText": "Partnership",
+  //   "date": "Jul 30, 2023",
+  //   "href": "/blog/autoGPT",
+  //   "imageUrl": "/static/blog/autogpt.webp",
+  //   "authors": [
+  //     {
+  //       "name": "Justin Torre",
+  //       "imageUrl": "/static/blog/justintorre-headshot.webp"
+  //     }
+  //   ],
+  //   "time": "8 minute read"
+  // }
 ];
 
 const Blog = () => {
