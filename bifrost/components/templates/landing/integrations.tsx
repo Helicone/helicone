@@ -3,9 +3,9 @@
 import { DiffHighlight } from "@/components/shared/diffHighlight";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { useRouter } from "next/router";
 import { useState } from "react";
-import { text } from "stream/consumers";
+import { PiArrowUpRightLight } from "react-icons/pi";
+
 
 interface IntegrationsProps {}
 
@@ -29,7 +29,7 @@ const Integrations = (props: IntegrationsProps) => {
       name: "OpenAI",
       logo: (
         <svg
-          className="w-[2rem] m:w-[2.5rem] h-auto"
+          className="w-[2.5rem] m:w-[2.5rem] h-auto"
           width="28"
           viewBox="0 0 28 28"
           fill="none"
@@ -99,7 +99,7 @@ client = OpenAI(
     {
       name: "Azure",
       logo: (
-        <div className="p-3">
+        <div className="p-4">
           <Image
             src={"/static/azure.webp"}
             alt={"Azure"}
@@ -186,7 +186,7 @@ self.model = AzureChatOpenAI(
     {
       name: "Anthropic",
       logo: (
-        <div className="p-3">
+        <div className="p-4">
           <Image
             src={"/static/anthropic.webp"}
             alt={"Anthropic"}
@@ -255,7 +255,7 @@ client.messages.create(
     {
       name: "Gemini",
       logo: (
-        <div className="p-3">
+        <div className="p-2">
           <Image
             src={"/static/gemini.webp"}
             alt={"Gemini"}
@@ -298,7 +298,7 @@ client.messages.create(
       href: "https://docs.helicone.ai/getting-started/integration-method/together",
     },
     {
-      name: "Open Router",
+      name: "OpenRouter",
       logo: (
         <div className="p-3">
           <Image
@@ -314,9 +314,22 @@ client.messages.create(
     },
     {
       name: "LiteLLM",
-      logo: <div className="">🚅</div>,
+      logo: <div className="bg-sky-300 rounded-full w-[3rem] h-[3rem] text-3xl">🚅</div>,
       integrations: {},
       href: "https://docs.helicone.ai/getting-started/integration-method/litellm",
+    },
+    {
+      name: "Other Models",
+      logo: <div className="p-3">
+        <Image 
+        src={"/static/logo.webp"}
+        alt={"Open Router"}
+        width={2048}
+        height={2048}
+        />
+      </div>,
+      integrations: {},
+      href: ""
     },
   ];
 
@@ -332,9 +345,9 @@ client.messages.create(
 
   return (
     <div className="flex flex-col mx-auto max-w-5xl w-full">
-      <ul className="grid grid-cols-4 md:grid-cols-8 gap-8 md:gap-4 px-4 md:px-16 pt-12 pb-4">
+      <ul className="grid grid-cols-3 md:grid-cols-9 gap-4 md:gap-0 md:px-10 md:pt-12 pt-3 pb-4 ">
         {PROVIDERS.map((provider, index) => (
-          <li key={index}>
+          <li key={index} className="hover:bg-slate-100 hover:rounded-lg pl-3 pt-2 pr-1">
             <button
               onClick={() => {
                 if (provider.href) {
@@ -344,35 +357,38 @@ client.messages.create(
                 }
                 setCurrentProvider(provider.name);
               }}
-              className="flex flex-col items-center space-y-2"
+              className="flex flex-col md:items-center"
             >
-              <div className="col-span-1 rounded-lg border border-gray-300 bg-white h-16 w-16 flex items-center justify-center">
+              <div className="col-span-1 rounded-lg border border-gray-300 bg-white h-20 w-20 flex items-center justify-center">
                 {provider.logo}
               </div>
               <span
-                className={`text-sm ${
+                className={`text-sm font-semibold text-left pt-2 md:text-nowrap ${
                   currentProvider === provider.name
-                    ? "font-bold text-black"
-                    : "text-gray-500"
-                }`}
+                  ? "font-bold text-black"
+                  : "text-gray-400"
+                } md:text-center`}
               >
                 {provider.name}
               </span>
+              <p className="text-sm text-gray-600 pt-1 md:hidden">
+                View Doc <PiArrowUpRightLight className="inline w-5 h-5" />
+              </p>
             </button>
           </li>
         ))}
       </ul>
-      <div className="border rounded-2xl hidden md:flex flex-col divide-y divide-gray-700 mx-8 mt-4">
-        <div className="flex items-center justify-between py-2 px-8 bg-gray-900 rounded-t-2xl">
-          <ul className="flex items-center space-x-0">
+      <div className="border rounded-2xl hidden md:flex flex-col mx-8 mt-4 divide-y bg-gray-900 divide-gray-900">
+        <div className="flex items-center justify-between pt-4 pr-8 pl-4 bg-gray-900 rounded-t-2xl">
+          <ul className="flex items-center space-x-0 gap-3">
             {Object.keys(selectedProvider?.integrations || {}).map(
               (integration) => (
                 <li
                   key={integration}
-                  className={`text-gray-300 cursor-pointer text-sm px-4 py-2 ${
+                  className={`cursor-pointer text-base font-medium px-6 py-2 border border-gray-500 rounded-xl ${
                     currentIntegration === integration
-                      ? "border border-gray-500 rounded-lg bg-gray-700"
-                      : ""
+                      ? "text-black bg-gray-300"
+                      : "text-gray-300"
                   }`}
                   onClick={() => setCurrentIntregration(integration)}
                 >
@@ -381,7 +397,7 @@ client.messages.create(
               )
             )}
           </ul>
-          <button className="text-gray-300">
+          <button className="text-gray-500">
             <ClipboardIcon className="h-6 w-6" />
           </button>
         </div>

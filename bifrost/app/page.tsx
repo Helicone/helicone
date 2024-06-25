@@ -139,7 +139,7 @@ export default function Home() {
         </header>
         <section
           id="logos"
-          className="flex flex-col space-y-4 pt-6 pb-12 px-3 max-w-6xl mx-auto w-full"
+          className="flex flex-col space-y-4 pt-6 md:pb-12 px-3 max-w-6xl mx-auto w-full"
         >
           <h2 className="text-gray-600 font-bold px-3 text-sm block md:hidden">
           Ready for real production workloads
@@ -196,7 +196,7 @@ export default function Home() {
                 src={"/static/mintlify.svg"}
                 alt={"Mintlify"}
                 width={300}
-                height={77}
+                height={80}
               />
             </li>
             <li className="w-32">
@@ -239,20 +239,23 @@ export default function Home() {
               />
             </li>
           </ul>
-          <div className="grid grid-cols-4 gap-8"></div>
         </section>
         <section
           id="integrations"
-          className="flex flex-col space-y-4 py-12 max-w-6xl mx-auto w-full"
+          className="flex flex-col space-y-4 py-12 px-3 max-w-6xl mx-auto w-full"
         >
-          <div className="flex flex-col space-y-2 text-center">
-            <h1 className="text-3xl md:text-4xl font-bold">
-              Send your first event in{" "}
+          <div className="flex flex-col space-y-2 px-3 md:text-center">
+            <h1 className="text-3xl md:text-5xl font-bold">
+              Send your first events in{" "}
               <span className="text-sky-500">seconds</span>
             </h1>
-            <p className="text-sm md:text-md text-gray-600">
+            <p className="text-sm font-light text-gray-600 block md:hidden pt-2">
               Get started with your preferred integration and provider.
             </p>
+            <p className="text-lg font-light text-gray-600 pt-3 hidden md:block">
+              Get started with your favorite provider and programming language.
+            </p>
+              <span className="text-lg font-light text-gray-600 hidden md:block">Don't see your model? Let us know by <p className="inline font-semibold underline ">creating an issue on Github</p>!</span>
           </div>
           <Integrations />
         </section>
