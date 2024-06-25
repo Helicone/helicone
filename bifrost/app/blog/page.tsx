@@ -119,8 +119,9 @@ const blogContent: BlogStructure[] = [
     imageUrl: "/static/blog/stefan-posthog/posthog-cover.png",
     authors: [
       {
-        name: "Stefan Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
+        name: "Stefan Bokarev",
+        imageUrl: "/static/blog/stefan-bokarev-headshot.webp",
+        imageAlt: "Stefan Bokarev's headshot",
       },
       {
         name: "Lina Lam",
@@ -194,7 +195,8 @@ const blogContent: BlogStructure[] = [
     authors: [
       {
         name: "Scott Nguyen",
-        imageUrl: "/static/blog/scottnguyen-headshot.webp"
+        imageUrl: "/static/blog/scottnguyen-headshot.webp", 
+        imageAlt: "Scott Nguyen's headshot",
       }
     ],
     time: "5 minute read"
@@ -212,6 +214,7 @@ const blogContent: BlogStructure[] = [
       {
         name: "Cole Gottdank",
         imageUrl: "/static/blog/colegottdank-headshot.png",
+        imageAlt: "Cole Gottdank's headshot",
       },
     ],
     time: "3 minute read",
@@ -228,6 +231,7 @@ const blogContent: BlogStructure[] = [
       {
         name: "Scott Nguyen",
         imageUrl: "/static/blog/scottnguyen-headshot.webp",
+        imageAlt: "Scott Nguyen's headshot",
       },
     ],
     time: "4 minute read",
@@ -244,6 +248,7 @@ const blogContent: BlogStructure[] = [
       {
         name: "Scott Nguyen",
         imageUrl: "/static/blog/scottnguyen-headshot.webp",
+        imageAlt: "Scott Nguyen's headshot",
       },
     ],
     time: "3 minute read",
@@ -259,8 +264,8 @@ const blogContent: BlogStructure[] = [
     authors: [
       {
         name: "Justin Torre",
-        imageUrl:
-          "/static/blog/justintorre-headshot.webp",
+        imageUrl: "/static/blog/justintorre-headshot.webp",
+        imageAlt: "Justin Torre's headshot",
       },
     ],
     time: "3 minute read",
@@ -277,6 +282,7 @@ const blogContent: BlogStructure[] = [
       {
         name: "George Bailey",
         imageUrl: "https://dailybaileyai.com/images/avatars/my_profile.png",
+        imageAlt: "George Bailey's headshot",
       },
     ],
     time: "3 minute read",
@@ -295,12 +301,14 @@ const blogContent: BlogStructure[] = [
         name: "Matt Bornstein",
         imageUrl:
           "https://a16z.com/wp-content/uploads/2019/07/MattBornstein-Investing-400x400.jpg",
-      },
+        imageAlt: "Matt Bornstein's headshot"
+        },
       {
         name: "Rajko Radovanovic",
         imageUrl:
           "https://a16z.com/wp-content/uploads/2023/05/Rajko-Radovanovic-400x400.png",
-      },
+        imageAlt: "Rajko Radovanovic's headshot"
+        },
     ],
     time: "5 minute read",
   },
@@ -317,12 +325,14 @@ const blogContent: BlogStructure[] = [
         name: "Michelle Fradin",
         imageUrl:
           "https://www.sequoiacap.com/wp-content/uploads/sites/6/2021/12/Michelle-Bailhe-profile-1.jpg?resize=880,880",
-      },
+        imageAlt: "Michelle Fradin's headshot"
+        },
       {
         name: "Lauren Reeder",
         imageUrl:
           "https://www.sequoiacap.com/wp-content/uploads/sites/6/2022/01/211118_clifford_sequoia-laurenreeder_DSF9377.jpg?resize=880,880",
-      },
+          imageAlt: "Lauren Reeder's headshot"
+        },
     ],
     time: "4 minute read",
   },
