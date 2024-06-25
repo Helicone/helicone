@@ -181,6 +181,7 @@ export class TraceManager {
   ) {
     const spans = this.processOtelSpans(trace);
 
+    console.log("Processing spans");
     for (const span of spans) {
       const promptMessages = this.constructMessages(span, "gen_ai.prompt");
       const completionChoices = this.extractCompletions(span);
@@ -232,6 +233,7 @@ export class TraceManager {
         log: log,
       };
 
+      console.log("Sending to Kafka");
       await this.sendLogToKafka(kafkaMessage);
     }
   }
