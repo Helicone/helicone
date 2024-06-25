@@ -37,7 +37,7 @@ export default async function handler(
   }
 
   const anthropic = new Anthropic({
-    baseURL: "https://anthropic.hconeai.com/",
+    baseURL: "https://anthropic.helicone.ai/",
     apiKey: process.env.ANTHROPIC_API_KEY,
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${process.env.TEST_HELICONE_API_KEY}`,
@@ -74,15 +74,17 @@ export default async function handler(
       }
     };
 
+    const anthropicMessages = cleanMessages();
+
     const completion = await anthropic.messages.create({
-      model: "claude-3-opus-20240229",
+      model: model,
       max_tokens: maxTokens,
       temperature: temperature,
       metadata: {
         user_id: user.data.user.id,
       },
       system: systemMessage || undefined,
-      messages: cleanMessages(),
+      messages: anthropicMessages,
     });
     res.status(200).json({ error: null, data: completion });
     return;

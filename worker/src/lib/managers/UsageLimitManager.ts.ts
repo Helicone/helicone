@@ -39,11 +39,12 @@ export async function checkLimitsSingle(
     return err("Error checking limits");
   }
   const { cost, count } = data[0];
-  if (cost > costUSD) {
+
+  if (cost > costUSD && costUSD !== -1) {
     console.log("Cost exceeded:", cost, costUSD);
     return err("Cost exceeded");
   }
-  if (count > requestCount) {
+  if (count > requestCount && requestCount !== -1) {
     console.log("Count exceeded:", count, requestCount);
     return err("Count exceeded");
   }

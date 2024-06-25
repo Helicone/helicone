@@ -146,8 +146,8 @@ export const DASHBOARD_PAGE_TABLE_FILTERS: [
   },
 ];
 export const REQUEST_TABLE_FILTERS: [
-  SingleFilterDef<"request">,
-  SingleFilterDef<"response">,
+  SingleFilterDef<"request_response_search">,
+  SingleFilterDef<"request_response_search">,
   SingleFilterDef<"response">,
   SingleFilterDef<"request">,
   SingleFilterDef<"response">,
@@ -158,15 +158,15 @@ export const REQUEST_TABLE_FILTERS: [
   {
     label: "Request",
     operators: textOperators,
-    table: "request",
-    column: "prompt",
+    table: "request_response_search",
+    column: "request_body_vector",
     category: "request",
   },
   {
     label: "Response",
     operators: textOperators,
-    table: "response",
-    column: "body_completion",
+    table: "request_response_search",
+    column: "request_body_vector",
     category: "request",
   },
   {

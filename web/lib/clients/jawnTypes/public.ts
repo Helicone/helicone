@@ -69,6 +69,27 @@ export interface paths {
   "/v1/experiment/query": {
     post: operations["GetExperiments"];
   };
+  "/v1/public/dataisbeautiful/ttft-vs-prompt-length": {
+    post: operations["GetTTFTvsPromptInputLength"];
+  };
+  "/v1/public/dataisbeautiful/model/percentage": {
+    post: operations["GetModelPercentage"];
+  };
+  "/v1/public/dataisbeautiful/model/cost": {
+    post: operations["GetModelCost"];
+  };
+  "/v1/public/dataisbeautiful/provider/percentage": {
+    post: operations["GetProviderPercentage"];
+  };
+  "/v1/public/dataisbeautiful/model/percentage/overtime": {
+    post: operations["GetModelPercentageOverTime"];
+  };
+  "/v1/customer/{customerId}/usage/query": {
+    post: operations["GetCustomerUsage"];
+  };
+  "/v1/customer/query": {
+    post: operations["GetCustomers"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -352,8 +373,17 @@ Json: JsonObject;
       status?: components["schemas"]["Partial_NumberOperators_"];
       model?: components["schemas"]["Partial_TextOperators_"];
     };
+    /** @description Make all properties in T optional */
+    Partial_VectorOperators_: {
+      contains?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_RequestResponseSearchToOperators_: {
+      request_body_vector?: components["schemas"]["Partial_VectorOperators_"];
+      response_body_vector?: components["schemas"]["Partial_VectorOperators_"];
+    };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values_": {
+    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search_": {
       feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
       response?: components["schemas"]["Partial_ResponseTableToOperators_"];
@@ -363,9 +393,10 @@ Json: JsonObject;
       values?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
+      request_response_search?: components["schemas"]["Partial_RequestResponseSearchToOperators_"];
     };
-    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values_"];
-    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search_"] | components["schemas"]["RequestFilterBranch"] | "all";
     RequestFilterBranch: {
       right: components["schemas"]["RequestFilterNode"];
       /** @enum {string} */
@@ -712,6 +743,97 @@ Json: JsonObject;
       responseBodies?: true;
       /** @enum {boolean} */
       score?: true;
+    };
+    TTFTvsPromptLength: {
+      /** Format: double */
+      prompt_length: number;
+      /** Format: double */
+      ttft_normalized_p75: number;
+      /** Format: double */
+      ttft_normalized_p99: number;
+      /** Format: double */
+      ttft_normalized: number;
+      /** Format: double */
+      ttft_p75: number;
+      /** Format: double */
+      ttft_p99: number;
+      /** Format: double */
+      ttft: number;
+    };
+    "ResultSuccess_TTFTvsPromptLength-Array_": {
+      data: components["schemas"]["TTFTvsPromptLength"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_TTFTvsPromptLength-Array.string_": components["schemas"]["ResultSuccess_TTFTvsPromptLength-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    TimeSpan: "1m" | "3m" | "1yr";
+    /** @enum {string} */
+    ModelName: "gpt-3.5" | "gpt-4o" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus-20240229" | "claude-3-sonnet-20240229" | "claude-3-haiku-20240307" | "claude-2" | "open-mixtral" | "Llama" | "dall-e" | "text-moderation" | "text-embedding";
+    /** @enum {string} */
+    ProviderName: "OPENAI" | "ANTHROPIC" | "MISTRAL" | "META";
+    DataIsBeautifulRequestBody: {
+      provider?: components["schemas"]["ProviderName"];
+      models?: components["schemas"]["ModelName"][];
+      timespan: components["schemas"]["TimeSpan"];
+    };
+    ModelBreakdown: {
+      /** Format: double */
+      percent: number;
+      matched_model: string;
+    };
+    "ResultSuccess_ModelBreakdown-Array_": {
+      data: components["schemas"]["ModelBreakdown"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelBreakdown-Array.string_": components["schemas"]["ResultSuccess_ModelBreakdown-Array_"] | components["schemas"]["ResultError_string_"];
+    ModelCost: {
+      /** Format: double */
+      percent: number;
+      matched_model: string;
+    };
+    "ResultSuccess_ModelCost-Array_": {
+      data: components["schemas"]["ModelCost"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelCost-Array.string_": components["schemas"]["ResultSuccess_ModelCost-Array_"] | components["schemas"]["ResultError_string_"];
+    ProviderBreakdown: {
+      /** Format: double */
+      percent: number;
+      provider: string;
+    };
+    "ResultSuccess_ProviderBreakdown-Array_": {
+      data: components["schemas"]["ProviderBreakdown"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ProviderBreakdown-Array.string_": components["schemas"]["ResultSuccess_ProviderBreakdown-Array_"] | components["schemas"]["ResultError_string_"];
+    ModelBreakdownOverTime: {
+      date: string;
+    } & components["schemas"]["ModelBreakdown"];
+    "ResultSuccess_ModelBreakdownOverTime-Array_": {
+      data: components["schemas"]["ModelBreakdownOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelBreakdownOverTime-Array.string_": components["schemas"]["ResultSuccess_ModelBreakdownOverTime-Array_"] | components["schemas"]["ResultError_string_"];
+    CustomerUsage: {
+      id: string;
+      name: string;
+      /** Format: double */
+      cost: number;
+      /** Format: double */
+      count: number;
+      /** Format: double */
+      prompt_tokens: number;
+      /** Format: double */
+      completion_tokens: number;
+    };
+    Customer: {
+      id: string;
+      name: string;
     };
   };
   responses: {
@@ -1090,6 +1212,116 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Experiment-Array.string_"];
+        };
+      };
+    };
+  };
+  GetTTFTvsPromptInputLength: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_TTFTvsPromptLength-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModelPercentage: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelBreakdown-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModelCost: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelCost-Array.string_"];
+        };
+      };
+    };
+  };
+  GetProviderPercentage: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ProviderBreakdown-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModelPercentageOverTime: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelBreakdownOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetCustomerUsage: {
+    parameters: {
+      path: {
+        customerId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CustomerUsage"] | null;
+        };
+      };
+    };
+  };
+  GetCustomers: {
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Customer"][];
         };
       };
     };

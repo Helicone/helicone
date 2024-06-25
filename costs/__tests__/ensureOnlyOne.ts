@@ -132,6 +132,10 @@ test("cost calc snapshot test", () => {
         "provider": "ANTHROPIC"
     },
     {
+        "name": "claude-3-5-sonnet-20240620",
+        "provider": "ANTHROPIC"
+    },
+    {
         "name": "claude-3-haiku-20240307",
         "provider": "ANTHROPIC"
     },
@@ -244,6 +248,7 @@ WHEN (request_response_log.model = 'claude-instant-1.2') THEN 1630 * request_res
 WHEN (request_response_log.model = 'claude-2.0') THEN 11020 * request_response_log.prompt_tokens + 32680 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'claude-3-opus-20240229') THEN 15000 * request_response_log.prompt_tokens + 75000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'claude-3-sonnet-20240229') THEN 3000 * request_response_log.prompt_tokens + 15000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'claude-3-5-sonnet-20240620') THEN 3000 * request_response_log.prompt_tokens + 15000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'claude-3-haiku-20240307') THEN 250 * request_response_log.prompt_tokens + 1250 * request_response_log.completion_tokens
   ELSE 0
 END

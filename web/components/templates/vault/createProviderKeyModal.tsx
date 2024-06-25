@@ -115,13 +115,10 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
         </h1>
         <div className="w-full space-y-1.5 text-sm">
           <label htmlFor="api-key">Provider</label>
-          <Select
-            defaultValue="openai"
-            placeholder="openai"
-            disabled
-            enableClear={false}
-          >
-            <SelectItem value="openai">OpenAI</SelectItem>
+          <Select defaultValue="openai" disabled enableClear={false}>
+            <SelectItem value="openai">
+              {variant === "portal" ? "Custom" : "OpenAI"}
+            </SelectItem>
           </Select>
         </div>
 
@@ -138,6 +135,11 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
               />
             </Tooltip>
           </label>
+          <div className="text-gray-500 text-xs italic">
+            This will be placed in the{" "}
+            <code className="not-italic">authorization</code> header with the{" "}
+            <code className="not-italic">Bearer</code> prefix.
+          </div>
           <TextInput
             type="password"
             name="provider-key"

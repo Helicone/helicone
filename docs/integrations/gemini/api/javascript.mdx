@@ -9,7 +9,7 @@ description: "Integrate Google Generative AI with Helicone using Javascript"
 
 <Steps>
   <Step title="Create an account + Generate an API Key">
-    Log into www.helicone.ai or create an account. Once you have an account, you
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
     can generate an [API key](https://helicone.ai/developer).
   </Step>
   <Step title="Create Google Generative AI API Key">
@@ -32,7 +32,7 @@ description: "Integrate Google Generative AI with Helicone using Javascript"
     ```javascript
     const fetch = require('node-fetch');
 
-    const url = `https://gateway.hconeai.com/v1beta/models/model-name:generateContent?key=${process.env.GOOGLE_GENERATIVE_API_KEY}`;
+    const url = `https://gateway.helicone.ai/v1beta/models/model-name:generateContent?key=${process.env.GOOGLE_GENERATIVE_API_KEY}`;
 
     const headers = {
       'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ description: "Integrate Google Generative AI with Helicone using Javascript"
 
 <Steps>
   <Step title="Create an account + Generate an API Key">
-    Log into www.helicone.ai or create an account. Once you have an account, you
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
     can generate an [API key](https://helicone.ai/developer).
   </Step>
   <Step title="Create Google Generative AI API Key">
@@ -97,7 +97,7 @@ description: "Integrate Google Generative AI with Helicone using Javascript"
 
     const requestOptions = {
       customHeaders: customHeaders,
-      baseUrl: "https://gateway.hconeai.com",
+      baseUrl: "https://gateway.helicone.ai",
     } as RequestOptions;
     ```
 
