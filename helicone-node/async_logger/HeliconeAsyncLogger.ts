@@ -1,5 +1,5 @@
 import * as traceloop from "@traceloop/node-server-sdk";
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 
 import OpenAI from "openai";
 import * as anthropic from "@anthropic-ai/sdk";
@@ -13,21 +13,21 @@ import * as ToolsModule from "langchain/tools";
 
 type IHeliconeAsyncLoggerOptions = {
   apiKey: string;
-  baseUrl: string;
+  baseUrl?: string;
   providers: {
-    openAI?: typeof OpenAI,
-    anthropic?: typeof anthropic,
-    azureOpenAI?: typeof azureOpenAI,
-    cohere?: typeof cohere,
-    bedrock?: typeof bedrock,
-    google_aiplatform?: typeof google_aiplatform,
+    openAI?: typeof OpenAI;
+    anthropic?: typeof anthropic;
+    azureOpenAI?: typeof azureOpenAI;
+    cohere?: typeof cohere;
+    bedrock?: typeof bedrock;
+    google_aiplatform?: typeof google_aiplatform;
     langchain?: {
-      chainsModule?: typeof ChainsModule,
-      agentsModule?: typeof AgentsModule,
-      toolsModule?: typeof ToolsModule,
-    },
-  },
-  headers?: Record<string, string>
+      chainsModule?: typeof ChainsModule;
+      agentsModule?: typeof AgentsModule;
+      toolsModule?: typeof ToolsModule;
+    };
+  };
+  headers?: Record<string, string>;
 };
 
 export class HeliconeAsyncLogger {
@@ -46,7 +46,7 @@ export class HeliconeAsyncLogger {
 
   constructor(opts: IHeliconeAsyncLoggerOptions) {
     this.apiKey = opts.apiKey;
-    this.baseUrl = opts.baseUrl;
+    this.baseUrl = opts.baseUrl ?? "https://api.helicone.ai";
     this.openAI = opts.providers?.openAI ?? undefined;
     this.anthropic = opts.providers?.anthropic ?? undefined;
     this.azureOpenAI = opts.providers?.azureOpenAI ?? undefined;
