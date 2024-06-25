@@ -6,13 +6,6 @@ import "@mintlify/mdx/dist/styles.css";
 import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({ subsets: ["latin"] });
-// ---
-// description: "Building the Optimal Evaluation Pipeline for Agent Comparison"
-// author: "Justin Torre"
-// date: "Mar 12, 2023"
-// time: "3 minute read"
-// icon: "code"
-// ---
 export const metadata: Metadata = {
   title: "Helicone / LLM-Observability for Developers",
   description: "The open-source platform for logging, monitoring, and debugging.",
