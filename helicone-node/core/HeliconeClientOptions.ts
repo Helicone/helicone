@@ -1,5 +1,4 @@
 import { ClientOptions } from "openai";
-import { Response } from "@whatwg-node/fetch";
 
 type OnHeliconeLog = (response: Response) => Promise<void>;
 type OnHeliconeFeedback = (result: Response) => Promise<void>;

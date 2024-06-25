@@ -5,12 +5,11 @@ import {
   TEST_OPENAI_URL,
   TEST_OPENAI_API_KEY,
   TEST_TELEMETRY_URL,
-  telemetryHttpRequestBody,
   chatCompletionRequestBody,
   chatCompletionResponseBody,
 } from "./testConsts";
 import { OpenAI } from "openai";
-const util = require("util");
+
 require("dotenv").config();
 
 describe("OpenAI async logging tests", () => {
@@ -23,7 +22,7 @@ describe("OpenAI async logging tests", () => {
       baseUrl: TEST_TELEMETRY_URL,
       providers: {
         openAI: OpenAI,
-      }
+      },
     });
 
     logger.init();
@@ -49,10 +48,27 @@ describe("OpenAI async logging tests", () => {
   test("COMPLETION", async () => {
     const telemNock = nock(TEST_TELEMETRY_URL)
       .post("/", (body) => {
-        expect(Object.keys(body.resourceSpans[0].scopeSpans[0].spans[0])).toContain(['name', 'kind', 'attributes', 'droppedAttributesCount', 'events', 'droppedEventsCount', 'status', 'links', 'droppedLinksCount', 'startTimeUnixNano', 'endTimeUnixNano', 'traceId', 'spanId', 'events']);
+        expect(
+          Object.keys(body.resourceSpans[0].scopeSpans[0].spans[0])
+        ).toContain([
+          "name",
+          "kind",
+          "attributes",
+          "droppedAttributesCount",
+          "events",
+          "droppedEventsCount",
+          "status",
+          "links",
+          "droppedLinksCount",
+          "startTimeUnixNano",
+          "endTimeUnixNano",
+          "traceId",
+          "spanId",
+          "events",
+        ]);
         return true;
       })
-      .reply(200, {"status": "success"});
+      .reply(200, { status: "success" });
 
     const openaiNock = nock(TEST_OPENAI_URL)
       .post("/v1/chat/completions", (body) => {
@@ -61,8 +77,9 @@ describe("OpenAI async logging tests", () => {
       })
       .reply(200, chatCompletionResponseBody);
 
-    const completion = await openai.chat.completions
-      .create(chatCompletionRequestBody)
+    const completion = await openai.chat.completions.create(
+      chatCompletionRequestBody
+    );
 
     await new Promise(() => setTimeout(() => {}, 2000));
 
