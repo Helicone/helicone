@@ -32,7 +32,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
               <span className="sr-only">Helicone</span>
               <Image
                 src={"/static/logo.svg"}
-                alt={""}
+                alt={"Helicone logo - AI developers' LLM observability and monitoring platform"}
                 height={150}
                 width={150}
                 priority={true}

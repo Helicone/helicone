@@ -270,9 +270,9 @@ Here is an example cURL command:
 
     curl --request POST \
         --url https://oai.helicone.ai/v1/chat/completions \
-        --header 'Authorization: Bearer <<YOUR_OPENAI_API_KEY>> \
+        --header 'Authorization: Bearer <<YOUR_OPENAI_API_KEY>>' \
         --header 'Content-Type: application/json' \
-        --header 'Helicone-Auth: Bearer <<YOUR_HELICONE_API_KEY>> \
+        --header 'Helicone-Auth: Bearer <<YOUR_HELICONE_API_KEY>>' \
         --data '{
             "model": "gpt-3.5-turbo",
             "messages": [
@@ -285,7 +285,7 @@ Here is an example cURL command:
             "max_tokens": 10
     }'
 
-````
+```
 
 </Tab>
 <Tab title="Langchain">
