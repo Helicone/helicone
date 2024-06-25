@@ -100,6 +100,7 @@ const blogContent: BlogStructure[] = [
       {
         name: "Cole Gottdank",
         imageUrl: "/static/blog/colegottdank-headshot.png",
+        imageAlt: "Cole Gottdank's headshot",
       }, 
       {
         name: "Lina Lam",
