@@ -63,7 +63,7 @@ export async function getPropertyParamsV2(
   WHERE (
     ${builtFilter.filter}
   )
-  limit 10000
+  limit 1000
 `;
 
   const { data, error } = await dbQueryClickhouse<PropertyParam>(
