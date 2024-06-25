@@ -10,9 +10,11 @@ export type BlogStructure = {
   date: string;
   href: string;
   imageUrl: string;
+  imageAlt?: string; // Alt text for cover image (optional)
   authors: {
     name: string;
     imageUrl: string;
+    imageAlt?: string; // Alt text for author's headshot (optional)
   }[];
   time: string; // the amount of time it takes to read the blog
 };
@@ -30,6 +32,7 @@ const blogContent: BlogStructure[] = [
       {
         name: "Lina Lam",
         imageUrl: "/static/blog/linalam-headshot.webp",
+        imageAlt: "Lina Lam's headshot",
       },
     ],
     time: "6 minute read",
@@ -46,6 +49,7 @@ const blogContent: BlogStructure[] = [
       {
         name: "Lina Lam",
         imageUrl: "/static/blog/linalam-headshot.webp",
+        imageAlt: "Lina Lam's headshot",
       },
     ],
     time: "6 minute read",
@@ -62,6 +66,7 @@ const blogContent: BlogStructure[] = [
       {
         name: "Lina Lam",
         imageUrl: "/static/blog/linalam-headshot.webp",
+        imageAlt: "Lina Lam's headshot",
       },
     ],
     time: "6 minute read",
@@ -78,6 +83,7 @@ const blogContent: BlogStructure[] = [
       {
         name: "Lina Lam",
         imageUrl: "/static/blog/linalam-headshot.webp",
+        imageAlt: "Lina Lam's headshot",
       },
     ],
     time: "5 minute read",
@@ -98,7 +104,8 @@ const blogContent: BlogStructure[] = [
       {
         name: "Lina Lam",
         imageUrl: "/static/blog/linalam-headshot.webp",
-      }
+        imageAlt: "Lina Lam's headshot",
+      },
     ],
     time: "4 minute read",
   },
@@ -118,7 +125,8 @@ const blogContent: BlogStructure[] = [
       {
         name: "Lina Lam",
         imageUrl: "/static/blog/linalam-headshot.webp",
-      }
+        imageAlt: "Lina Lam's headshot",
+      },
     ],
     time: "3 minute read",
   },
@@ -134,6 +142,7 @@ const blogContent: BlogStructure[] = [
       {
         name: "Scott Nguyen",
         imageUrl: "/static/blog/scottnguyen-headshot.webp",
+        imageAlt: "Scott Nguyen's headshot",
       },
     ],
     time: "5 minute read",
@@ -150,6 +159,7 @@ const blogContent: BlogStructure[] = [
       {
         name: "Lina Lam",
         imageUrl: "/static/blog/linalam-headshot.webp",
+        imageAlt: "Lina Lam's headshot",
       },
     ],
     time: "4 minute read",
@@ -167,7 +177,8 @@ const blogContent: BlogStructure[] = [
       {
         name: "Lina Lam",
         imageUrl: "/static/blog/linalam-headshot.webp",
-      },
+        imageAlt: "Lina Lam's headshot",
+      }, 
     ],
     time: "4 minute read",
   },
