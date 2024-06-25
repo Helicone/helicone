@@ -179,6 +179,21 @@ const blogContent: BlogStructure[] = [
     "time": "7 minute read"
   }, 
   {
+    "title": "The Next Evolution in OpenAI Monitoring and Optimization",
+    "description": "Learn how Helicone provides unmatched insights into your OpenAI usage, allowing you to monitor, optimize, and take control like never before.",
+    "badgeText": "Education",
+    "date": "Sep 1, 2023",
+    "href": "/blog/open-source-monitoring-for-openai",
+    "imageUrl": "/static/blog/openai.webp",
+    "authors": [
+      {
+        "name": "Scott Nguyen",
+        "imageUrl": "/static/blog/scottnguyen-headshot.webp"
+      }
+    ],
+    "time": "3 minute read"
+  }, 
+  {
     "title": "Life after Y Combinator: Three Key Lessons for Startups",
     "description": "From maintaining crucial relationships to keeping a razor-sharp focus, here's how to sustain your momentum after the YC batch ends.",
     "badgeText": "Advice",
