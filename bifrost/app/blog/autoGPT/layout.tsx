@@ -6,7 +6,13 @@ import "@mintlify/mdx/dist/styles.css";
 import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({ subsets: ["latin"] });
-
+// ---
+// description: "Building the Optimal Evaluation Pipeline for Agent Comparison"
+// author: "Justin Torre"
+// date: "Mar 12, 2023"
+// time: "3 minute read"
+// icon: "code"
+// ---
 export const metadata: Metadata = {
   title: "Helicone / LLM-Observability for Developers",
   description: "The open-source platform for logging, monitoring, and debugging.",
@@ -14,17 +20,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
-    title: "A LangSmith Alternative that Takes LLM Observability to the Next Level", // <-- update
-    url: "https://www.helicone.ai/blog",// <-- update
-    description: "Both Helicone and LangSmith are capable, powerful DevOps platform used by enterprises and developers building LLM applications. But which is better?", // <-- update
-    images: "https://www.helicone.ai/static/blog/langsmith-vs-helicone/cover-image.webp", // <-- update
+    title: "AutoGPT x Helicone: Optimizing Evaluation Pipelines", 
+    url: "https://www.helicone.ai/blog/autoGPT",
+    description: "Building the Optimal Evaluation Pipeline for Agent Comparison", 
+    images: "https://www.helicone.ai/static/blog/autogpt.webp", 
     locale: "en_US",
   },
   twitter: {
-    title: "A LangSmith Alternative that Takes LLM Observability to the Next Level", // <-- update
-    description: "Both Helicone and LangSmith are capable, powerful DevOps platform used by enterprises and developers building LLM applications. But which is better?",// <-- update
+    title: "AutoGPT x Helicone: Optimizing Evaluation Pipelines", 
+    description: "Building the Optimal Evaluation Pipeline for Agent Comparison",
     card: "summary_large_image",
-    images: "https://www.helicone.ai/static/blog/langsmith-vs-helicone/cover-image.webp",// <-- update
+    images: "https://www.helicone.ai/static/blog/autogpt.webp", 
   },
 };
 
