@@ -139,6 +139,21 @@ export class HeliconeProxyRequestMapper {
       return null;
     }
 
+    if (
+      this.provider === "OPENAI" &&
+      (await this.requestJson()).stream === true
+    ) {
+      const json = await this.requestJson();
+
+      return JSON.stringify(
+        recursivelyConsolidate(json, {
+          stream_options: {
+            include_usage: true,
+          },
+        })
+      );
+    }
+
     return await this.request.getText();
   }
 
