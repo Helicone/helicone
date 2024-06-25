@@ -354,7 +354,7 @@ const Blog = () => {
                       >
                         {blog.authors.map((author, i) => (
                           <div className="flex items-center space-x-2" key={i}>
-                            <img
+                            <Image
                               className="inline-block h-8 w-8 rounded-full"
                               src={author.imageUrl}
                               alt=""
@@ -370,7 +370,7 @@ const Blog = () => {
                       </p>
                     </div>
                   </div>
-                  <img
+                  <Image
                     src={blog.imageUrl}
                     alt={blog.title}
                     width={400}
@@ -390,7 +390,7 @@ const Blog = () => {
                   href={blog.href}
                   key={i}
                 >
-                  <img
+                  <Image
                     src={blog.imageUrl}
                     alt={blog.title}
                     width={400}
@@ -421,7 +421,7 @@ const Blog = () => {
                       >
                         {blog.authors.map((author, i) => (
                           <div className="flex items-center space-x-2" key={i}>
-                            <img
+                            <Image
                               className="inline-block h-8 w-8 rounded-full"
                               src={author.imageUrl}
                               alt=""
