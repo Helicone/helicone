@@ -14,17 +14,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
-    title: "A LangSmith Alternative that Takes LLM Observability to the Next Level", // <-- update
+    title: "Navigating Life After Y Combinator: Three Key Lessons for Startups", 
     url: "https://www.helicone.ai/blog/life-after-yc",
-    description: "Both Helicone and LangSmith are capable, powerful DevOps platform used by enterprises and developers building LLM applications. But which is better?", // <-- update
-    images: "https://www.helicone.ai/static/blog/langsmith-vs-helicone/cover-image.webp", // <-- update
+    description: "From maintaining crucial relationships to keeping a razor-sharp focus, here's how to sustain your momentum after the YC batch ends.", 
+    images: "https://www.helicone.ai/static/blog/yc.webp",
     locale: "en_US",
   },
   twitter: {
-    title: "A LangSmith Alternative that Takes LLM Observability to the Next Level", // <-- update
-    description: "Both Helicone and LangSmith are capable, powerful DevOps platform used by enterprises and developers building LLM applications. But which is better?",// <-- update
+    title: "Navigating Life After Y Combinator: Three Key Lessons for Startups", 
+    description: "From maintaining crucial relationships to keeping a razor-sharp focus, here's how to sustain your momentum after the YC batch ends.",
     card: "summary_large_image",
-    images: "https://www.helicone.ai/static/blog/langsmith-vs-helicone/cover-image.webp",// <-- update
+    images: "https://www.helicone.ai/static/blog/yc.webp",
   },
 };
 
