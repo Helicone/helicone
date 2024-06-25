@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
-interface NavBarProps {}
+interface NavBarProps { }
 
 const MobileHeader = (props: {
   menuDispatch: [boolean, (menuOpen: boolean) => void];
@@ -94,7 +94,7 @@ const NavLinks = () => {
         <Link
           href={link.href}
           className={
-            "flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none " +
+            "flex flex-row items-center font-light hover:text-black rounded-md px-3 py-1.5 focus:outline-none " +
             " " +
             (path === link.href
               ? "text-black font-bold"
@@ -142,8 +142,9 @@ const MobileNav = () => {
   );
 };
 
+
 const NavBar = (props: NavBarProps) => {
-  const {} = props;
+  const { } = props;
 
   return (
     <div className="bg-inherit top-0 sticky z-30 border-b border-gray-200">
@@ -179,9 +180,15 @@ const NavBar = (props: NavBarProps) => {
         <div className="flex items-center justify-end gap-x-2 col-span-1 order-2 md:order-3">
           <Link
             href="https://us.helicone.ai/signin"
-            className="bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+            className="text-center py-3 whitespace-nowrap rounded-md px-4 text-sm font-semibold text-gray-600"
           >
-            Sign In
+            Sign in
+          </Link>
+          <Link
+            href="https://us.helicone.ai/signup"
+            className="bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-gray-200 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+          >
+            Sign up for free
           </Link>
         </div>
       </nav>
