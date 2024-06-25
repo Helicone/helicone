@@ -121,7 +121,7 @@ const blogContent: BlogStructure[] = [
     authors: [
       {
         name: "Stefan Bokarev",
-        imageUrl: "/static/blog/stefan-bokarev-headshot.webp",
+        imageUrl: "/static/blog/stefanbokarev-headshot.webp",
         imageAlt: "Stefan Bokarev's headshot",
       },
       {
