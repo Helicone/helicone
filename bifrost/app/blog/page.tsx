@@ -164,81 +164,151 @@ const blogContent: BlogStructure[] = [
     time: "4 minute read",
   },
   {
-    "title": "Why Observability is the Key to Ethical and Safe Artificial Intelligence",
-    "description": "As AI continues to shape our world, the need for ethical practices and robust observability has never been greater. Learn how Helicone is rising to the challenge.",
-    "badgeText": "Read",
-    "date": "Sep 19, 2023",
-    "href": "/blog/ai-safety",
-    "imageUrl": "/static/blog/AI.webp",
-    "authors": [
+    title:
+      "Why Observability is the Key to Ethical and Safe Artificial Intelligence",
+    description:
+      "As AI continues to shape our world, the need for ethical practices and robust observability has never been greater. Learn how Helicone is rising to the challenge.",
+    badgeText: "AI Safety",
+    date: "Sep 19, 2023",
+    href: "/blog/ai-safety",
+    imageUrl: "/static/blog/AI.webp",
+    authors: [
       {
-        "name": "Scott Nguyen",
-        "imageUrl": "/static/blog/scottnguyen-headshot.webp"
+        name: "Scott Nguyen",
+        imageUrl: "/static/blog/scottnguyen-headshot.webp"
       }
     ],
-    "time": "5 minute read"
+    time: "5 minute read"
   }, 
   {
-    "title": "Introducing Vault: The Future of Secure and Simplified Provider API Key Management",
-    "description": "Helicone's Vault revolutionizes the way businesses handle, distribute, and monitor their provider API keys, with a focus on simplicity, security, and flexibility.",
-    "badgeText": "Product",
-    "date": "Sep 13, 2023",
-    "href": "/blog/vault",
-    "imageUrl": "/static/blog/vault_asset.png",
-    "authors": [
+    title:
+      "Introducing Vault: The Future of Secure and Simplified Provider API Key Management",
+    description:
+      "Helicone's Vault revolutionizes the way businesses handle, distribute, and monitor their provider API keys, with a focus on simplicity, security, and flexibility.",
+    badgeText: "Product",
+    date: "Sep 13, 2023",
+    href: "/blog/vault",
+    imageUrl: "/static/blog/vault_asset.png",
+    authors: [
       {
-        "name": "Cole Gottdank",
-        "imageUrl": "/static/blog/colegottdank-headshot.png"
-      }
+        name: "Cole Gottdank",
+        imageUrl: "/static/blog/colegottdank-headshot.png",
+      },
     ],
-    "time": "3 minute read"
-  }, 
+    time: "3 minute read",
+  },
   {
-    "title": "Life after Y Combinator: Three Key Lessons for Startups",
-    "description": "From maintaining crucial relationships to keeping a razor-sharp focus, here's how to sustain your momentum after the YC batch ends.",
-    "badgeText": "Advice",
-    "date": "Sep 11, 2023",
-    "href": "/blog/life-after-yc",
-    "imageUrl": "/static/blog/yc.webp",
-    "authors": [
+    title: "Life after Y Combinator: Three Key Lessons for Startups",
+    description:
+      "From maintaining crucial relationships to keeping a razor-sharp focus, here's how to sustain your momentum after the YC batch ends.",
+    badgeText: "Personal",
+    date: "Sep 11, 2023",
+    href: "/blog/life-after-yc",
+    imageUrl: "/static/blog/yc.webp",
+    authors: [
       {
-        "name": "Scott Nguyen",
-        "imageUrl": "/static/blog/scottnguyen-headshot.webp"
-      }
+        name: "Scott Nguyen",
+        imageUrl: "/static/blog/scottnguyen-headshot.webp",
+      },
     ],
-    "time": "4 minute read"
-  }, 
+    time: "4 minute read",
+  },
   {
-    "title": "The Next Evolution in OpenAI Monitoring and Optimization",
-    "description": "Learn how Helicone provides unmatched insights into your OpenAI usage, allowing you to monitor, optimize, and take control like never before.",
-    "badgeText": "Education",
-    "date": "Sep 1, 2023",
-    "href": "/blog/open-source-monitoring-for-openai",
-    "imageUrl": "/static/blog/openai.webp",
-    "authors": [
+    title: "Helicone: The Next Evolution in OpenAI Monitoring and Optimization",
+    description:
+      "Learn how Helicone provides unmatched insights into your OpenAI usage, allowing you to monitor, optimize, and take control like never before.",
+    badgeText: "Education",
+    date: "Sep 1, 2023",
+    href: "/blog/open-source-monitoring-for-openai",
+    imageUrl: "/static/blog/openai.webp",
+    authors: [
       {
-        "name": "Scott Nguyen",
-        "imageUrl": "/static/blog/scottnguyen-headshot.webp"
-      }
+        name: "Scott Nguyen",
+        imageUrl: "/static/blog/scottnguyen-headshot.webp",
+      },
     ],
-    "time": "3 minute read"
-  }, 
-  // {
-  //   "title": "AutoGPT x Helicone: Optimizing Evaluation Pipelines",
-  //   "description": "Helicone is excited to announce a partnership with AutoGPT, the leader in agent development! Discover how AutoGPT leverages Helicone to build the optimal evaluation pipeline for agent comparison, enhancing workflow efficiency and cost savings.",
-  //   "badgeText": "Partnership",
-  //   "date": "Jul 30, 2023",
-  //   "href": "/blog/autoGPT",
-  //   "imageUrl": "/static/blog/autogpt.webp",
-  //   "authors": [
-  //     {
-  //       "name": "Justin Torre",
-  //       "imageUrl": "/static/blog/justintorre-headshot.webp"
-  //     }
-  //   ],
-  //   "time": "8 minute read"
-  // }
+    time: "3 minute read",
+  },
+  {
+    title: "Helicone partners with AutoGPT",
+    description:
+      "Helicone is excited to announce a partnership with AutoGPT, the leader in agent development.",
+    badgeText: "Partnership",
+    date: "Jul 30, 2023",
+    href: "/blog/autoGPT",
+    imageUrl: "/static/blog/autogpt.webp",
+    authors: [
+      {
+        name: "Justin Torre",
+        imageUrl:
+          "/static/blog/justintorre-headshot.webp",
+      },
+    ],
+    time: "3 minute read",
+  },
+  {
+    title: "Generative AI with Helicone",
+    description:
+      "In the rapidly evolving world of generative AI, companies face the exciting challenge of building innovative solutions while effectively managing costs, result quality, and latency. Enter Helicone, an open-source observability platform specifically designed for these cutting-edge endeavors.",
+    badgeText: "External",
+    date: "Jul 21, 2023",
+    href: "https://dailybaileyai.com/software/helicone.php",
+    imageUrl: "https://dailybaileyai.com/home_page_files/banner_image.jpg",
+    authors: [
+      {
+        name: "George Bailey",
+        imageUrl: "https://dailybaileyai.com/images/avatars/my_profile.png",
+      },
+    ],
+    time: "3 minute read",
+  },
+  {
+    title: "(a16z) Emerging Architectures for LLM Applications",
+    description:
+      "Large language models are a powerful new primitive for building software. But since they are so new—and behave so differently from normal computing resources—it’s not always obvious how to use them.",
+    badgeText: "External",
+    date: "Jun 20, 2023",
+    href: "https://a16z.com/2023/06/20/emerging-architectures-for-llm-applications",
+    imageUrl:
+      "https://i0.wp.com/a16z.com/wp-content/uploads/2023/06/2657-Emerging-LLM-App-Stack-R2-1-of-4-2.png?w=2000&ssl=1",
+    authors: [
+      {
+        name: "Matt Bornstein",
+        imageUrl:
+          "https://a16z.com/wp-content/uploads/2019/07/MattBornstein-Investing-400x400.jpg",
+      },
+      {
+        name: "Rajko Radovanovic",
+        imageUrl:
+          "https://a16z.com/wp-content/uploads/2023/05/Rajko-Radovanovic-400x400.png",
+      },
+    ],
+    time: "5 minute read",
+  },
+  {
+    title: "(Sequoia) The New Language Model Stack",
+    description: "How companies are bringing AI applications to life",
+    badgeText: "External",
+    date: "Jun 14, 2023",
+    href: "https://www.sequoiacap.com/article/llm-stack-perspective/",
+    imageUrl:
+      "https://www.sequoiacap.com/wp-content/uploads/sites/6/2023/06/llm-stack-hero-3.jpg",
+    authors: [
+      {
+        name: "Michelle Fradin",
+        imageUrl:
+          "https://www.sequoiacap.com/wp-content/uploads/sites/6/2021/12/Michelle-Bailhe-profile-1.jpg?resize=880,880",
+      },
+      {
+        name: "Lauren Reeder",
+        imageUrl:
+          "https://www.sequoiacap.com/wp-content/uploads/sites/6/2022/01/211118_clifford_sequoia-laurenreeder_DSF9377.jpg?resize=880,880",
+      },
+    ],
+    time: "4 minute read",
+  },
 ];
+
 
 const Blog = () => {
   return (

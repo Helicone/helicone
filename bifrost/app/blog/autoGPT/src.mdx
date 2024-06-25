@@ -3,7 +3,7 @@ title: "AutoGPT x Helicone: Optimizing Evaluation Pipelines"
 description: "Building the Optimal Evaluation Pipeline for Agent Comparison"
 author: "Justin Torre"
 date: "Mar 12, 2023"
-time: "8 minute read"
+time: "3 minute read"
 icon: "code"
 ---
 
@@ -52,13 +52,13 @@ The total integration process required at most 5 lines of code, which enabled Au
 
 AutoGPT can track how different agents are impacting their costs.
 
-
-AutoGPT's agent comparison dashboard
+![Agent Comparisons](/static/blog/agentComparisons.png)
+*AutoGPT's agent comparison dashboard*
 
 If they wish to examine specific requests, they can do this by using the filter feature.
 
-
-Filtering feature for examining specific requests
+![Agent Filters](/static/blog/agentFilters.png)
+*Filtering feature for examining specific requests*
 
 
 ### Determining Cost Savings
@@ -66,20 +66,22 @@ Filtering feature for examining specific requests
 For scenarios where testing the agent's functionality is needed but calling the API is not, such as small code changes, they can monitor their cache usage effortlessly through the dashboards. Here's an example:
 
 
-Dashboard showing cache usage statistics
+![Cache Page Stats](/static/blog/cachePageStats.png)
+*Dashboard showing cache usage statistics*
 
 We also maintain a log of each cached request, ensuring that caching is effective and marking agents as "Cacheable Agents".
 
-
-Log of each cached request
+![Cache Request Table](/static/blog/cacheRequestTable.png)
+*Log of each cached request*
 
 
 ## The Road Ahead
 
 We are currently developing a suite of GraphQL endpoints that will allow AutoGPT to easily ingest some of their data and add it directly to the reports after a run.
 
+![GraphQL](/static/blog/graphQL.png)
+*GraphQL endpoints in development*
 
-GraphQL endpoints in development
 
 This development is being paired with deep links so that we can have a tight integration between report generation and Helicone. Here is a preview of what a benchmark report will look like:
 
