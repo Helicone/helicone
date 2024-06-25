@@ -176,7 +176,37 @@ const blogContent: BlogStructure[] = [
         "imageUrl": "/static/blog/scottnguyen-headshot.webp"
       }
     ],
-    "time": "7 minute read"
+    "time": "5 minute read"
+  }, 
+  {
+    "title": "Introducing Vault: The Future of Secure and Simplified Provider API Key Management",
+    "description": "Helicone's Vault revolutionizes the way businesses handle, distribute, and monitor their provider API keys, with a focus on simplicity, security, and flexibility.",
+    "badgeText": "Product",
+    "date": "Sep 13, 2023",
+    "href": "/blog/vault",
+    "imageUrl": "/static/blog/vault_asset.png",
+    "authors": [
+      {
+        "name": "Cole Gottdank",
+        "imageUrl": "/static/blog/colegottdank-headshot.png"
+      }
+    ],
+    "time": "3 minute read"
+  }, 
+  {
+    "title": "Life after Y Combinator: Three Key Lessons for Startups",
+    "description": "From maintaining crucial relationships to keeping a razor-sharp focus, here's how to sustain your momentum after the YC batch ends.",
+    "badgeText": "Advice",
+    "date": "Sep 11, 2023",
+    "href": "/blog/life-after-yc",
+    "imageUrl": "/static/blog/yc.webp",
+    "authors": [
+      {
+        "name": "Scott Nguyen",
+        "imageUrl": "/static/blog/scottnguyen-headshot.webp"
+      }
+    ],
+    "time": "4 minute read"
   }, 
   {
     "title": "The Next Evolution in OpenAI Monitoring and Optimization",
@@ -192,21 +222,6 @@ const blogContent: BlogStructure[] = [
       }
     ],
     "time": "3 minute read"
-  }, 
-  {
-    "title": "Life after Y Combinator: Three Key Lessons for Startups",
-    "description": "From maintaining crucial relationships to keeping a razor-sharp focus, here's how to sustain your momentum after the YC batch ends.",
-    "badgeText": "Advice",
-    "date": "Mar 12, 2024",
-    "href": "/blog/life-after-yc",
-    "imageUrl": "/static/blog/yc.webp",
-    "authors": [
-      {
-        "name": "Scott Nguyen",
-        "imageUrl": "/static/blog/scottnguyen-headshot.webp"
-      }
-    ],
-    "time": "4 minute read"
   }, 
   // {
   //   "title": "AutoGPT x Helicone: Optimizing Evaluation Pipelines",
