@@ -23,26 +23,38 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
   const [query, setQuery] = useState("");
   const [tabMode, setTabMode] = useState<"smart" | "raw">("smart");
 
-  const customOption = query && !parentOptions.includes(query) ? query : null;
-
-  const options = customOption
-    ? parentOptions.concat([customOption])
-    : parentOptions;
-
-  const filteredPeople =
-    query === ""
-      ? options
-      : options.filter((option) =>
-          option
-            .toLowerCase()
-            .replace(/\s+/g, "")
-            .includes(query.toLowerCase().replace(/\s+/g, ""))
-        );
+  const [filteredOptions, setFilteredOptions] =
+    useState<string[]>(parentOptions);
 
   useEffect(() => {
     onSearchHandler?.(query);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
+
+  useEffect(() => {
+    const filterOptions = query
+      ? parentOptions.filter((option) =>
+          option
+            .toLowerCase()
+            .replace(/\s+/g, "")
+            .includes(query.toLowerCase().replace(/\s+/g, ""))
+        )
+      : parentOptions;
+
+    if (query && !filterOptions.includes(query)) {
+      filterOptions.push(query);
+    }
+
+    setFilteredOptions(filterOptions);
+  }, [query, parentOptions]);
+
+  const handleValueChange = (value: string) => {
+    setSelected(value);
+    onChange(value);
+    if (!filteredOptions.includes(value)) {
+      setFilteredOptions((prevOptions) => [...prevOptions, value]);
+    }
+  };
 
   return (
     <div className="w-full flex flex-col gap-1">
@@ -76,16 +88,20 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
         <SearchSelect
           searchValue={selected}
           onSearchValueChange={(value) => {
-            setSelected(value);
-            onChange(value);
+            setQuery(value);
+            handleValueChange(value);
+          }}
+          value={selected}
+          onValueChange={(value) => {
+            handleValueChange(value);
           }}
           onSelect={async () => {
             await onSearchHandler?.(query);
           }}
           enableClear={true}
         >
-          {filteredPeople.map((option, i) => (
-            <SearchSelectItem value={option} key={option}>
+          {filteredOptions.map((option, i) => (
+            <SearchSelectItem value={option} key={`${i}-${option}`}>
               {option}
             </SearchSelectItem>
           ))}
