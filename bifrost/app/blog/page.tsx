@@ -78,7 +78,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "compare",
     date: "May 31, 2024",
     href: "/blog/weights-and-biases",
-    imageUrl: "/static/blog/weights-and-biases.png",
+    imageUrl: "/static/blog/weights-and-biases.webp",
     authors: [
       {
         name: "Lina Lam",
@@ -95,11 +95,11 @@ const blogContent: BlogStructure[] = [
     badgeText: "team's pick",
     date: "May 30, 2024",
     href: "/blog/cole-github-copilot",
-    imageUrl: "/static/blog/cole-copilot.png",
+    imageUrl: "/static/blog/cole-copilot.webp",
     authors: [
       {
         name: "Cole Gottdank",
-        imageUrl: "/static/blog/colegottdank-headshot.png",
+        imageUrl: "/static/blog/colegottdank-headshot.webp",
         imageAlt: "Cole Gottdank's headshot",
       },
       {
@@ -210,11 +210,11 @@ const blogContent: BlogStructure[] = [
     badgeText: "Product",
     date: "Sep 13, 2023",
     href: "/blog/vault-introduction",
-    imageUrl: "/static/blog/vault_asset.png",
+    imageUrl: "/static/blog/vault_asset.webp",
     authors: [
       {
         name: "Cole Gottdank",
-        imageUrl: "/static/blog/colegottdank-headshot.png",
+        imageUrl: "/static/blog/colegottdank-headshot.webp",
         imageAlt: "Cole Gottdank's headshot",
       },
     ],

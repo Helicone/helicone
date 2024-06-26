@@ -17,14 +17,14 @@ export const metadata: Metadata = {
     title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot 🔥",
     url: "https://www.helicone.ai/blog/cole-github-copilot",
     description: "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
-    images: "https://www.helicone.ai/static/blog/cole-copilot.png",
+    images: "https://www.helicone.ai/static/blog/cole-copilot.webp",
     locale: "en_US",
   },
   twitter: {
     title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot 🔥",
     description: "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
     card: "summary_large_image",
-    images: "https://www.helicone.ai/static/blog/cole-copilot.png",
+    images: "https://www.helicone.ai/static/blog/cole-copilot.webp",
   },
 };
 
