@@ -1,5 +1,4 @@
 "use client";
-// import BlogPage from "../../components/templates/blog/blogPage";
 import { clsx } from "@/components/shared/utils";
 import Image from "next/image";
 import { useState } from "react";
