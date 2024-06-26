@@ -1,5 +1,4 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { formatNumber } from "../users/initialColumns";
 import { getUSDateFromString } from "../../shared/utils/utils";
 
 export const INITIAL_COLUMNS: ColumnDef<any>[] = [

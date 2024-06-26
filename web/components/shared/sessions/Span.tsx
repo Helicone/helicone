@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Session, Trace, TraceNode } from "../../../lib/sessions/sessionTypes";
+import { Session, Trace } from "../../../lib/sessions/sessionTypes";
 import { Col } from "../../layout/common/col";
 import { clsx } from "../clsx";
 

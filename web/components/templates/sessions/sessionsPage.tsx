@@ -1,27 +1,18 @@
-import { useState } from "react";
-import { SortDirection } from "../../../services/lib/sorts/users/sorts";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import { useDebounce } from "../../../services/hooks/debounce";
-import { useSessions } from "../../../services/hooks/sessions";
-import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { TextInput } from "@tremor/react";
 import { useRouter } from "next/router";
-import {
-  filterListToTree,
-  filterUIToFilterLeafs,
-} from "../../../services/lib/filters/filterDefs";
-import {
-  DASHBOARD_PAGE_TABLE_FILTERS,
-  userTableFilters,
-} from "../../../services/lib/filters/frontendFilterDefs";
-import AuthHeader from "../../shared/authHeader";
-import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
-import { INITIAL_COLUMNS } from "./initialColumns";
+import { useState } from "react";
 import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
-import { TextInput } from "@tremor/react";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { useDebounce } from "../../../services/hooks/debounce";
+import { useSessions } from "../../../services/hooks/sessions";
+import { SortDirection } from "../../../services/lib/sorts/users/sorts";
+import AuthHeader from "../../shared/authHeader";
+import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import { INITIAL_COLUMNS } from "./initialColumns";
 
 interface SessionsPageProps {
   currentPage: number;
