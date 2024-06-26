@@ -74,8 +74,8 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
       </div>
       {tabMode === "smart" ? (
         <SearchSelect
-          value={selected}
-          onSearchValueChange={async (value) => {
+          searchValue={selected}
+          onSearchValueChange={(value) => {
             setSelected(value);
             onChange(value);
           }}
