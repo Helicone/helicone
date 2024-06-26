@@ -81,6 +81,9 @@ export const convertToFlowElements = (
 };
 
 export const tracesToFolderNodes = (traces: Trace[]): FolderNode[] => {
+  if (traces.length === 0) {
+    return [];
+  }
   const folderMap: Record<string, FolderNode> = {};
 
   traces.forEach((trace) => {
@@ -158,24 +161,29 @@ export const latestFolder = (folder: FolderNode): number => {
 };
 
 export const tracesToTreeNodeData = (traces: Trace[]): TreeNodeData => {
+  if (traces.length === 0) {
+    return {
+      duration: "0s",
+      name: "",
+    };
+  }
   const folderNodes = tracesToFolderNodes(traces);
 
   const folderToTreeNode = (folder: FolderNode): TreeNodeData => {
     return {
       name: folder.folderName,
       duration: `${(latestFolder(folder) - earliestFolder(folder)) / 1000}s`,
-      label: "",
       children: folder.children.map((child) => {
         if ("folderName" in child) {
           return folderToTreeNode(child);
         } else {
           return {
+            trace: child,
             name: "LLM",
             duration: `${
               (child.end_unix_timestamp_ms - child.start_unix_timestamp_ms) /
               1000
             }s`,
-            label: "gpt-3.5-turbo",
             properties: child.properties,
           } as TreeNodeData;
         }

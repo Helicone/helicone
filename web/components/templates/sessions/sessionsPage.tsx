@@ -9,10 +9,19 @@ import {
   filterListToTree,
   filterUIToFilterLeafs,
 } from "../../../services/lib/filters/filterDefs";
-import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
+import {
+  DASHBOARD_PAGE_TABLE_FILTERS,
+  userTableFilters,
+} from "../../../services/lib/filters/frontendFilterDefs";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import { INITIAL_COLUMNS } from "./initialColumns";
+import {
+  getTimeIntervalAgo,
+  TimeInterval,
+} from "../../../lib/timeCalculations/time";
+import { TextInput } from "@tremor/react";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -28,55 +37,69 @@ const SessionsPage = (props: SessionsPageProps) => {
   const { currentPage, pageSize, sort, defaultIndex } = props;
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
-  const debouncedAdvancedFilters = useDebounce(advancedFilters, 500); // 0.5 seconds
 
   const router = useRouter();
 
-  const sortLeaf: SortLeafRequest =
-    sort.sortKey && sort.sortDirection
-      ? {
-          [sort.sortKey]: sort.sortDirection,
-        }
-      : {
-          created_at: "desc",
-        };
+  const [interval, setInterval] = useState<TimeInterval>("24h");
+
+  const [timeFilter, setTimeFilter] = useState<{
+    start: Date;
+    end: Date;
+  }>({
+    start: getTimeIntervalAgo(interval),
+    end: new Date(),
+  });
+
+  const [sessionIdSearch, setSessionIdSearch] = useState<string>("");
+
+  const debouncedSessionIdSearch = useDebounce(sessionIdSearch, 500); // 0.5 seconds
 
   const { sessions, refetch, isLoading } = useSessions(
-    currentPage,
-    pageSize,
-    sortLeaf,
-    filterListToTree(
-      filterUIToFilterLeafs(
-        userTableFilters.sort((a, b) => a.label.localeCompare(b.label)),
-        debouncedAdvancedFilters
-      ),
-      "and"
-    )
+    timeFilter,
+    debouncedSessionIdSearch
   );
 
-  console.log(`Sessions: ${JSON.stringify(sessions)}`);
   return (
     <>
-      <AuthHeader title={"Sessions"} />
+      <AuthHeader title={"Sessions (beta)"} />
       <div className="flex flex-col space-y-4">
+        <TextInput
+          icon={MagnifyingGlassIcon}
+          value={sessionIdSearch}
+          onValueChange={(value) => setSessionIdSearch(value)}
+          placeholder="Search session..."
+        />
         <ThemedTableV5
           defaultData={sessions || []}
           defaultColumns={INITIAL_COLUMNS}
           tableKey="sessionColumnVisibility"
           dataLoading={isLoading}
           sortable={sort}
-          advancedFilters={{
-            filterMap: userTableFilters,
-            filters: advancedFilters,
-            setAdvancedFilters,
-            searchPropertyFilters: async () => ({
-              data: null,
-              error: "Not implemented",
-            }),
+          timeFilter={{
+            currentTimeFilter: timeFilter,
+            defaultValue: "all",
+            onTimeSelectHandler: (key: TimeInterval, value: string) => {
+              if ((key as string) === "custom") {
+                const [startDate, endDate] = value.split("_");
+
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                setInterval(key);
+                setTimeFilter({
+                  start,
+                  end,
+                });
+              } else {
+                setInterval(key);
+                setTimeFilter({
+                  start: getTimeIntervalAgo(key),
+                  end: new Date(),
+                });
+              }
+            },
           }}
-          exportData={sessions}
-          onRowSelect={(row: any) => {
-            router.push(`/sessions/${row.session_id}`);
+          onRowSelect={(row) => {
+            router.push(`/sessions/${row.session}`);
           }}
         />
       </div>

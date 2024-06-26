@@ -6,35 +6,32 @@ import { getJawnClient } from "../../lib/clients/jawn";
 import { useOrg } from "../../components/layout/organizationContext";
 
 const useSessions = (
-  currentPage: number,
-  currentPageSize: number,
-  sortLeaf: SortLeafSession,
-  advancedFilters?: FilterNode
+  timeFilter: {
+    start: Date;
+    end: Date;
+  },
+  sessionIdSearch: string
 ) => {
   const org = useOrg();
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: [
-      "sessions",
-      currentPage,
-      currentPageSize,
-      advancedFilters,
-      sortLeaf,
-      org?.currentOrg?.id,
-    ],
+    queryKey: ["sessions", org?.currentOrg?.id, timeFilter, sessionIdSearch],
     queryFn: async (query) => {
-      const currentPage = query.queryKey[1] as number;
-      const currentPageSize = query.queryKey[2] as number;
-      const advancedFilter = query.queryKey[3];
-      const sortLeaf = query.queryKey[4];
-      const orgId = query.queryKey[5] as string;
+      const orgId = query.queryKey[1] as string;
+      const timeFilter = query.queryKey[2] as {
+        start: Date;
+        end: Date;
+      };
+
+      const sessionIdSearch = query.queryKey[3] as string;
 
       const jawnClient = getJawnClient(orgId);
       return await jawnClient.POST("/v1/session/query", {
         body: {
-          filter: advancedFilter as any,
-          offset: (currentPage - 1) * currentPageSize,
-          limit: currentPageSize,
-          sort: sortLeaf as any,
+          sessionIdContains: sessionIdSearch,
+          timeFilter: {
+            endTimeUnixMs: timeFilter.end.getTime(),
+            startTimeUnixMs: timeFilter.start.getTime(),
+          },
         },
       });
     },

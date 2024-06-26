@@ -4,7 +4,7 @@ import { getUSDateFromString } from "../../shared/utils/utils";
 
 export const INITIAL_COLUMNS: ColumnDef<any>[] = [
   {
-    accessorKey: "session_id",
+    accessorKey: "session",
     header: "Session ID",
     cell: (info) => (
       <span className="text-gray-900 dark:text-gray-100 font-medium">
@@ -18,36 +18,28 @@ export const INITIAL_COLUMNS: ColumnDef<any>[] = [
     header: "Created At",
     cell: (info) =>
       getUSDateFromString(convertToUSDateFormat(info.getValue() as string)),
-    meta: {
-      sortKey: "created_at",
-    },
   },
   {
     accessorKey: "latest_request_created_at",
     header: "Latest Request",
     cell: (info) =>
       getUSDateFromString(convertToUSDateFormat(info.getValue() as string)),
-    meta: {
-      sortKey: "active_for",
-    },
   },
   {
-    accessorKey: "total_prompt_tokens",
+    accessorKey: "total_cost",
+    header: "Cost",
+    cell: (info) => Number(info.getValue()).toLocaleString(),
+  },
+  {
+    accessorKey: "prompt_tokens",
     header: "Prompt Tokens",
     cell: (info) => Number(info.getValue()).toLocaleString(),
-    meta: {
-      sortKey: "first_active",
-    },
-    minSize: 200,
   },
   {
-    accessorKey: "total_completion_tokens",
+    accessorKey: "completion_tokens",
     header: "Completion Tokens",
     cell: (info) =>
       getUSDateFromString(convertToUSDateFormat(info.getValue() as string)),
-    meta: {
-      sortKey: "last_active",
-    },
     minSize: 200,
   },
   {

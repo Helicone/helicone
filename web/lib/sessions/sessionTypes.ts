@@ -1,9 +1,12 @@
+import { NormalizedRequest } from "../../components/templates/requestsV2/builder/abstractRequestBuilder";
+
 export interface Trace {
   start_unix_timestamp_ms: number;
   end_unix_timestamp_ms: number;
   properties: Record<string, string>;
   path: string;
   request_id: string;
+  request: NormalizedRequest;
 }
 
 export interface Session {
@@ -31,7 +34,6 @@ export type NodeType = "Session" | "Chain" | "Tool" | "LLM" | string;
 export interface TreeNodeData {
   name: NodeType;
   duration: string;
-  label: string;
-  properties?: Record<string, string>;
+  trace?: Trace;
   children?: TreeNodeData[];
 }

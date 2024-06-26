@@ -1,82 +1,76 @@
 import { SessionQueryParams } from "../controllers/public/sessionController";
+import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { AuthParams, supabaseServer } from "../lib/db/supabase";
 import { dbExecute } from "../lib/shared/db/dbExecute";
-import { buildFilterWithAuth } from "../lib/shared/filters/filters";
+import {
+  buildFilterClickHouse,
+  buildFilterWithAuth,
+  buildFilterWithAuthClickHouse,
+} from "../lib/shared/filters/filters";
 import { Result, resultMap } from "../lib/shared/result";
 import { buildRequestSort } from "../lib/shared/sorts/requests/sorts";
+import { clickhousePriceCalc } from "../packages/cost";
+
+export interface SessionResult {
+  created_at: string;
+  latest_request_created_at: string;
+  session: string;
+  total_cost: number;
+  total_requests: number;
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+}
 
 export class SessionManager {
   constructor(private authParams: AuthParams) {}
 
-  async getSessions(requestBody: SessionQueryParams): Promise<
-    Result<
-      {
-        session_id: string;
-      }[],
-      string
-    >
-  > {
-    const {
-      filter,
-      offset = 0,
-      limit = 10,
-      sort = {
-        created_at: "desc",
-      },
-      isCached,
-      isPartOfExperiment,
-      isScored,
-    } = requestBody;
-
-    let newFilter = filter;
-
-    // if (isScored !== undefined) {
-    //   newFilter = this.addScoreFilter(isScored, newFilter);
-    // }
-
-    // if (isPartOfExperiment !== undefined) {
-    //   newFilter = this.addPartOfExperimentFilter(isPartOfExperiment, newFilter);
-    // }
+  async getSessions(
+    requestBody: SessionQueryParams
+  ): Promise<Result<SessionResult[], string>> {
+    const { sessionIdContains, timeFilter } = requestBody;
 
     const supabaseClient = supabaseServer.client;
 
-    const builtFilter = await buildFilterWithAuth({
+    const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: this.authParams.organizationId,
-      filter,
-      argsAcc: [],
+      filter: "all",
+      argsAcc: [`%${sessionIdContains}%`],
     });
 
-    const sortSQL = buildRequestSort(sort);
-
+    // Step 1 get all the properties given this filter
     const query = `
-    WITH filtered_requests AS (
-      SELECT
-        request.created_at as created_at,
-        properties->>'Helicone-Session-Id' as session_id
-      FROM request
-      LEFT JOIN response ON request.id = response.request
-      WHERE (${builtFilter.filter}
-        AND request.properties->>'Helicone-Session-Id' IS NOT NULL)
-    ),
-    grouped_sessions AS (
-      SELECT
-        session_id,
-        MAX(created_at) as created_at
-      FROM filtered_requests
-      GROUP BY session_id
+    SELECT 
+      min(request_response_versioned.request_created_at) AS created_at,
+      max(request_response_versioned.request_created_at) AS latest_request_created_at,
+      properties['Helicone-Session-Id'] as session,
+      ${clickhousePriceCalc("request_response_versioned")} AS total_cost,
+      count(*) AS total_requests,
+      sum(request_response_versioned.prompt_tokens) AS prompt_tokens,
+      sum(request_response_versioned.completion_tokens) AS completion_tokens
+    FROM request_response_versioned
+    WHERE (
+        has(properties, 'Helicone-Session-Id')
+        AND properties['Helicone-Session-Id'] ILIKE {val_0: String}
+        AND (
+          ${builtFilter.filter}
+        )
     )
-    SELECT
-      session_id
-    FROM grouped_sessions
-    ${sortSQL !== undefined ? `ORDER BY created_at` : ""}
-    LIMIT ${limit}
-    OFFSET ${offset}
+    GROUP BY properties['Helicone-Session-Id']
+    ORDER BY created_at DESC
+    LIMIT 50
     `;
 
-    const results = await dbExecute<{
-      session_id: string;
-    }>(query, builtFilter.argsAcc);
+    const results = await clickhouseDb.dbQuery<SessionResult>(
+      query,
+      builtFilter.argsAcc
+    );
 
-    return results;
+    return resultMap(results, (x) =>
+      x.map((y) => ({
+        ...y,
+        total_tokens: y.completion_tokens + y.prompt_tokens,
+      }))
+    );
   }
 }

@@ -589,7 +589,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
             >
               <OrgContext.Provider value={org}>
                 <div
-                  className="py-4 sm:py-8 mx-auto w-full max-w-[100rem]"
+                  className="py-4 sm:py-8 mr-auto w-full max-w-[100rem]"
                   key={org?.renderKey}
                 >
                   {children}
