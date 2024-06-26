@@ -17,14 +17,14 @@ export const metadata: Metadata = {
     title: "How to Understand Your Users Better and Deliver a Top-Tier Experience with Custom Properties", 
     url: "https://www.helicone.ai/blog/custom-properties",
     description: "In today's digital landscape, every interaction, click, and engagement offers valuable insights into your users' preferences. But how do you harness this data to effectively grow your business? We may have the answer. ", 
-    images: "https://www.helicone.ai/static/blog/custom-properties/cover", 
+    images: "https://www.helicone.ai/static/blog/custom-properties/cover.webp", 
     locale: "en_US",
   },
   twitter: {
     title: "How to Understand Your Users Better and Deliver a Top-Tier Experience with Custom Properties", 
     description: "In today's digital landscape, every interaction, click, and engagement offers valuable insights into your users' preferences. But how do you harness this data to effectively grow your business? We may have the answer. ", 
     card: "summary_large_image",
-    images: "https://www.helicone.ai/static/blog/custom-properties/cover",
+    images: "https://www.helicone.ai/static/blog/custom-properties/cover.webp",
   },
 };
 

@@ -27,7 +27,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "guide",
     date: "June 20, 2024",
     href: "/blog/ai-best-practices",
-    imageUrl: "/static/blog/ai-best-practices/cover.png",
+    imageUrl: "/static/blog/ai-best-practices/cover.webp",
     authors: [
       {
         name: "Lina Lam",
@@ -44,7 +44,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "guide",
     date: "June 18, 2024",
     href: "/blog/first-ai-app-with-helicone",
-    imageUrl: "/static/blog/first-ai-app/lina-first-ai-app.png",
+    imageUrl: "/static/blog/first-ai-app/lina-first-ai-app.webp",
     authors: [
       {
         name: "Lina Lam",
@@ -61,7 +61,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "feature",
     date: "June 14, 2024",
     href: "/blog/custom-properties",
-    imageUrl: "/static/blog/custom-properties/cover.png",
+    imageUrl: "/static/blog/custom-properties/cover.webp",
     authors: [
       {
         name: "Lina Lam",
@@ -112,7 +112,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "team's pick",
     date: "May 23, 2024",
     href: "/blog/stefan-posthog",
-    imageUrl: "/static/blog/stefan-posthog/posthog-cover.png",
+    imageUrl: "/static/blog/stefan-posthog/posthog-cover.webp",
     authors: [
       {
         name: "Lina Lam",
@@ -129,7 +129,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "Product",
     date: "May 14, 2024",
     href: "/blog/switch-models-safely",
-    imageUrl: "static/blog/experiments/gpt-4o.png",
+    imageUrl: "static/blog/experiments/gpt-4o.webp",
     authors: [
       {
         name: "Scott Nguyen",

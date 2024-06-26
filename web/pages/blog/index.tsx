@@ -25,7 +25,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "team's pick",
     date: "May 23, 2024",
     href: "/blog/stefan-posthog",
-    imageUrl: "/assets/blog/stefan-posthog/posthog-cover.png",
+    imageUrl: "/assets/blog/stefan-posthog/posthog-cover.webp",
     authors: [
       {
         name: "Lina Lam",
@@ -42,7 +42,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "Product",
     date: "May 14, 2024",
     href: "/blog/switch-models-safely",
-    imageUrl: "assets/blog/experiments/gpt-4o.png",
+    imageUrl: "assets/blog/experiments/gpt-4o.webp",
     authors: [
       {
         name: "Scott Nguyen",
