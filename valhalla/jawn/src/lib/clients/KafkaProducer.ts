@@ -50,7 +50,7 @@ export class KafkaProducer {
       try {
         let data = msgs.map((msg) => {
           return {
-            value: msg,
+            value: JSON.stringify({ value: JSON.stringify(msg) }),
             topic: topic,
             key: msg.log.request.id,
           };

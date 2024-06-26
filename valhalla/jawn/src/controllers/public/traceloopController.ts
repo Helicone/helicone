@@ -19,7 +19,6 @@ export class TraceController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Body() traceBody: OTELTrace
   ) {
-    console.log("Received traces.");
     const traceManager = new TraceManager();
     try {
       await traceManager.consumeTraces(traceBody, request.header("authorization") ?? "", request.authParams);
