@@ -28,14 +28,14 @@ export const metadata: Metadata = {
     title: "Introducing Vault: Helicone's Key Management Solution", 
     url: "https://www.helicone.ai/blog/vault-introduction",
     description: "Helicone unveils Vault, transforming the way businesses manage and distribute API keys, ensuring enhanced security and streamlined processes.", 
-    images: "https://www.helicone.ai/static/blog/vault_banner.png",
+    images: "https://www.helicone.ai/static/blog/vault_banner.webp",
     locale: "en_US",
   },
   twitter: {
     title: "Introducing Vault: Helicone's Key Management Solution", 
     description: "Helicone unveils Vault, transforming the way businesses manage and distribute API keys, ensuring enhanced security and streamlined processes.",
     card: "summary_large_image",
-    images: "https://www.helicone.ai/static/blog/vault_banner.png",
+    images: "https://www.helicone.ai/static/blog/vault_banner.webp",
   },
 };
 

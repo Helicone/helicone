@@ -17,14 +17,14 @@ export const metadata: Metadata = {
     title: "A step by step guide to switch to gpt-4o safely with Helicone", 
     url: "https://www.helicone.ai/blog/switch-models-safely",
     description: "Learn how to use Helicone's experiments features to regression test, compare and switch models.",
-    images: "https://www.helicone.ai/static/blog/experiments/gpt-4o.png",
+    images: "https://www.helicone.ai/static/blog/experiments/gpt-4o.webp",
     locale: "en_US",
   },
   twitter: {
     title: "A step by step guide to switch to gpt-4o safely with Helicone", 
     description: "Learn how to use Helicone's experiments features to regression test, compare and switch models.", 
     card: "summary_large_image",
-    images: "https://www.helicone.ai/static/blog/experiments/gpt-4o.png", 
+    images: "https://www.helicone.ai/static/blog/experiments/gpt-4o.webp", 
   },
 };
 
