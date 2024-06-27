@@ -114,3 +114,20 @@ export function getModelFromResponse(responseBody: any) {
     return "unknown";
   }
 }
+
+export function recursivelyConsolidate(body: any, delta: any): any {
+  Object.keys(delta).forEach((key) => {
+    if (body[key] === undefined || body[key] === null) {
+      body[key] = delta[key];
+    } else if (typeof body[key] === "object") {
+      recursivelyConsolidate(body[key], delta[key]);
+    } else if (typeof body[key] === "number") {
+      body[key] += delta[key];
+    } else if (typeof body[key] === "string") {
+      body[key] += delta[key];
+    } else {
+      throw new Error("Invalid function call type");
+    }
+  });
+  return body;
+}

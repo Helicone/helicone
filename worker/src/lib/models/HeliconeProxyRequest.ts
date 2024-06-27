@@ -14,6 +14,7 @@ import { IHeliconeHeaders } from "./HeliconeHeaders";
 import { CfProperties } from "@cloudflare/workers-types";
 import { RateLimitOptions } from "../clients/KVRateLimiterClient";
 import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
+import { recursivelyConsolidate } from "../util/helpers";
 
 export type RetryOptions = {
   retries: number; // number of times to retry the request
@@ -137,6 +138,21 @@ export class HeliconeProxyRequestMapper {
   private async getBody(): Promise<string | null> {
     if (this.request.getMethod() === "GET") {
       return null;
+    }
+
+    if (
+      this.provider === "OPENAI" &&
+      (await this.requestJson()).stream === true
+    ) {
+      const json = await this.requestJson();
+
+      return JSON.stringify(
+        recursivelyConsolidate(json, {
+          stream_options: {
+            include_usage: true,
+          },
+        })
+      );
     }
 
     return await this.request.getText();
