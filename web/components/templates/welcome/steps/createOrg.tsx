@@ -87,17 +87,6 @@ const CreateOrg = (props: CreateOrgProps) => {
         orgContext?.refreshCurrentOrg();
       }
       checkError(error);
-    } else {
-      // update the current org
-      const { error } = await supabaseClient
-        .from("organization")
-        .update({
-          name: orgName,
-          size: orgSize,
-          referral: referralType,
-        })
-        .eq("id", orgContext?.currentOrg?.id ?? "");
-      checkError(error);
     }
 
     if (referralCode && referralCode.trim() !== "") {
