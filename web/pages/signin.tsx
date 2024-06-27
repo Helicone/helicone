@@ -7,7 +7,6 @@ import { isCustomerDomain } from "../lib/customerPortalHelpers";
 import { supabaseServer } from "../lib/supabaseServer";
 import { Result, err, ok } from "../lib/result";
 import PublicMetaData from "../components/layout/public/publicMetaData";
-import { useOrg } from "../components/layout/organizationContext";
 
 export type CustomerPortalContent = {
   domain: string;
@@ -25,7 +24,6 @@ const SignIn = ({
     string
   >;
 }) => {
-  const org = useOrg();
   const user = useUser();
   const router = useRouter();
   const supabase = useSupabaseClient();
@@ -33,7 +31,7 @@ const SignIn = ({
 
   const customerPortalContent = customerPortal?.data || undefined;
 
-  if (user && org?.currentOrg) {
+  if (user) {
     router.push("/dashboard");
   }
 
