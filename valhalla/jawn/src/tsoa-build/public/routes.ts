@@ -5,11 +5,9 @@ import { TsoaRoute, fetchMiddlewares, ExpressTemplateService } from '@tsoa/runti
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { UserController } from './../../controllers/public/userController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-<<<<<<< HEAD
-import { SessionController } from './../../controllers/public/sessionController';
-=======
 import { TraceController } from './../../controllers/public/traceloopController';
->>>>>>> main
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { SessionController } from './../../controllers/public/sessionController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { RequestController } from './../../controllers/public/requestController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -64,7 +62,11 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-<<<<<<< HEAD
+    "OTELTrace": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"resourceSpans":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"scopeSpans":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"spans":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"droppedLinksCount":{"dataType":"double","required":true},"links":{"dataType":"array","array":{"dataType":"any"},"required":true},"status":{"dataType":"nestedObjectLiteral","nestedProperties":{"code":{"dataType":"double","required":true}},"required":true},"droppedEventsCount":{"dataType":"double","required":true},"events":{"dataType":"array","array":{"dataType":"any"},"required":true},"droppedAttributesCount":{"dataType":"double","required":true},"attributes":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"value":{"dataType":"nestedObjectLiteral","nestedProperties":{"intValue":{"dataType":"double"},"stringValue":{"dataType":"string"}},"required":true},"key":{"dataType":"string","required":true}}},"required":true},"endTimeUnixNano":{"dataType":"string","required":true},"startTimeUnixNano":{"dataType":"string","required":true},"kind":{"dataType":"double","required":true},"name":{"dataType":"string","required":true},"spanId":{"dataType":"string","required":true},"traceId":{"dataType":"string","required":true}}},"required":true},"scope":{"dataType":"nestedObjectLiteral","nestedProperties":{"version":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"required":true}}},"required":true},"resource":{"dataType":"nestedObjectLiteral","nestedProperties":{"droppedAttributesCount":{"dataType":"double","required":true},"attributes":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"value":{"dataType":"nestedObjectLiteral","nestedProperties":{"arrayValue":{"dataType":"nestedObjectLiteral","nestedProperties":{"values":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"stringValue":{"dataType":"string","required":true}}},"required":true}}},"intValue":{"dataType":"double"},"stringValue":{"dataType":"string"}},"required":true},"key":{"dataType":"string","required":true}}},"required":true}},"required":true}}},"required":true}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "SessionResult": {
         "dataType": "refObject",
         "properties": {
@@ -101,11 +103,6 @@ const models: TsoaRoute.Models = {
             "timeFilter": {"dataType":"nestedObjectLiteral","nestedProperties":{"endTimeUnixMs":{"dataType":"double","required":true},"startTimeUnixMs":{"dataType":"double","required":true}},"required":true},
         },
         "additionalProperties": false,
-=======
-    "OTELTrace": {
-        "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"resourceSpans":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"scopeSpans":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"spans":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"droppedLinksCount":{"dataType":"double","required":true},"links":{"dataType":"array","array":{"dataType":"any"},"required":true},"status":{"dataType":"nestedObjectLiteral","nestedProperties":{"code":{"dataType":"double","required":true}},"required":true},"droppedEventsCount":{"dataType":"double","required":true},"events":{"dataType":"array","array":{"dataType":"any"},"required":true},"droppedAttributesCount":{"dataType":"double","required":true},"attributes":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"value":{"dataType":"nestedObjectLiteral","nestedProperties":{"intValue":{"dataType":"double"},"stringValue":{"dataType":"string"}},"required":true},"key":{"dataType":"string","required":true}}},"required":true},"endTimeUnixNano":{"dataType":"string","required":true},"startTimeUnixNano":{"dataType":"string","required":true},"kind":{"dataType":"double","required":true},"name":{"dataType":"string","required":true},"spanId":{"dataType":"string","required":true},"traceId":{"dataType":"string","required":true}}},"required":true},"scope":{"dataType":"nestedObjectLiteral","nestedProperties":{"version":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"required":true}}},"required":true},"resource":{"dataType":"nestedObjectLiteral","nestedProperties":{"droppedAttributesCount":{"dataType":"double","required":true},"attributes":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"value":{"dataType":"nestedObjectLiteral","nestedProperties":{"arrayValue":{"dataType":"nestedObjectLiteral","nestedProperties":{"values":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"stringValue":{"dataType":"string","required":true}}},"required":true}}},"intValue":{"dataType":"double"},"stringValue":{"dataType":"string"}},"required":true},"key":{"dataType":"string","required":true}}},"required":true}},"required":true}}},"required":true}},"validators":{}},
->>>>>>> main
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Json": {
@@ -1025,17 +1022,6 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-<<<<<<< HEAD
-        app.post('/v1/session/query',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(SessionController)),
-            ...(fetchMiddlewares<RequestHandler>(SessionController.prototype.getSessions)),
-
-            async function SessionController_getSessions(request: ExRequest, response: ExResponse, next: any) {
-            const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"SessionQueryParams"},
-                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
-=======
         app.post('/v1/trace/log',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(TraceController)),
@@ -1045,7 +1031,6 @@ export function RegisterRoutes(app: Router) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
                     traceBody: {"in":"body","name":"traceBody","required":true,"ref":"OTELTrace"},
->>>>>>> main
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1054,17 +1039,42 @@ export function RegisterRoutes(app: Router) {
             try {
                 validatedArgs = templateService.getValidatedArgs({ args, request, response });
 
-<<<<<<< HEAD
-                const controller = new SessionController();
-
-              await templateService.apiHandler({
-                methodName: 'getSessions',
-=======
                 const controller = new TraceController();
 
               await templateService.apiHandler({
                 methodName: 'logTrace',
->>>>>>> main
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/session/query',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(SessionController)),
+            ...(fetchMiddlewares<RequestHandler>(SessionController.prototype.getSessions)),
+
+            async function SessionController_getSessions(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"SessionQueryParams"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new SessionController();
+
+              await templateService.apiHandler({
+                methodName: 'getSessions',
                 controller,
                 response,
                 next,

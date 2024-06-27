@@ -1941,12 +1941,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@headlessui/tailwindcss@npm:^0.2.0":
-  version: 0.2.0
-  resolution: "@headlessui/tailwindcss@npm:0.2.0"
+"@headlessui/tailwindcss@npm:^0.2.1":
+  version: 0.2.1
+  resolution: "@headlessui/tailwindcss@npm:0.2.1"
   peerDependencies:
     tailwindcss: ^3.0
-  checksum: b641bef150e4ee18afd068c1af8e83c582a3131903ed1a310abbdb463b6150428a9b4c38e42cb296469fb20857f5542ae34f681cbff62f47d52332fbc5117479
+  checksum: b5d4b840e621ea6b0978bb17e95c5ff6706274d1d49ecc7783ece28ff18b67104b427263dbf52deee74d94ed17bd912a8c9c3546a6982c9229374f26823f2877
   languageName: node
   linkType: hard
 
@@ -3842,13 +3842,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tremor/react@npm:^3.17.2":
-  version: 3.17.2
-  resolution: "@tremor/react@npm:3.17.2"
+"@tremor/react@npm:^3.17.4":
+  version: 3.17.4
+  resolution: "@tremor/react@npm:3.17.4"
   dependencies:
     "@floating-ui/react": "npm:^0.19.2"
     "@headlessui/react": "npm:^1.7.19"
-    "@headlessui/tailwindcss": "npm:^0.2.0"
+    "@headlessui/tailwindcss": "npm:^0.2.1"
     date-fns: "npm:^3.6.0"
     react-day-picker: "npm:^8.10.1"
     react-transition-state: "npm:^2.1.1"
@@ -3857,7 +3857,7 @@ __metadata:
   peerDependencies:
     react: ^18.0.0
     react-dom: ">=16.6.0"
-  checksum: d0ec9bfcc9ac6cefc485e7468844949277caedc3563b3129b9aba175cd092d00c6f26745ac597e814f3c704657494ebb2038d7ee1ec3ecdb3e0ae4687a3674cf
+  checksum: 689a17c1fdc0e8d5e30cbc38a6b9c18ac6ce208e00e8bf074fd6aab183958245d4d6879d61853596a08c98ac3df8a3c9dfac9549b774eebfa6cc086e74bca7e8
   languageName: node
   linkType: hard
 
@@ -7925,7 +7925,7 @@ __metadata:
     "@tailwindcss/typography": "npm:^0.5.12"
     "@tanstack/react-query": "npm:^4.24.10"
     "@tanstack/react-table": "npm:^8.15.0"
-    "@tremor/react": "npm:^3.17.2"
+    "@tremor/react": "npm:^3.17.4"
     "@types/dagre": "npm:^0.7.49"
     "@types/dateformat": "npm:^5.0.0"
     "@types/js-cookie": "npm:^3.0.3"

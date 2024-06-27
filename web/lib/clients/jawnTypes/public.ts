@@ -12,13 +12,11 @@ export interface paths {
   "/v1/user/query": {
     post: operations["GetUsers"];
   };
-<<<<<<< HEAD
-  "/v1/session/query": {
-    post: operations["GetSessions"];
-=======
   "/v1/trace/log": {
     post: operations["LogTrace"];
->>>>>>> main
+  };
+  "/v1/session/query": {
+    post: operations["GetSessions"];
   };
   "/v1/request/query": {
     post: operations["GetRequests"];
@@ -131,37 +129,6 @@ export interface components {
         startTimeUnixSeconds: number;
       };
     };
-<<<<<<< HEAD
-    SessionResult: {
-      created_at: string;
-      latest_request_created_at: string;
-      session: string;
-      /** Format: double */
-      total_cost: number;
-      /** Format: double */
-      total_requests: number;
-      /** Format: double */
-      prompt_tokens: number;
-      /** Format: double */
-      completion_tokens: number;
-      /** Format: double */
-      total_tokens: number;
-    };
-    "ResultSuccess_SessionResult-Array_": {
-      data: components["schemas"]["SessionResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_SessionResult-Array.string_": components["schemas"]["ResultSuccess_SessionResult-Array_"] | components["schemas"]["ResultError_string_"];
-    SessionQueryParams: {
-      sessionIdContains: string;
-      timeFilter: {
-        /** Format: double */
-        endTimeUnixMs: number;
-        /** Format: double */
-        startTimeUnixMs: number;
-      };
-=======
     OTELTrace: {
       resourceSpans: {
           scopeSpans: {
@@ -217,7 +184,36 @@ export interface components {
               }[];
           };
         }[];
->>>>>>> main
+    };
+    SessionResult: {
+      created_at: string;
+      latest_request_created_at: string;
+      session: string;
+      /** Format: double */
+      total_cost: number;
+      /** Format: double */
+      total_requests: number;
+      /** Format: double */
+      prompt_tokens: number;
+      /** Format: double */
+      completion_tokens: number;
+      /** Format: double */
+      total_tokens: number;
+    };
+    "ResultSuccess_SessionResult-Array_": {
+      data: components["schemas"]["SessionResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SessionResult-Array.string_": components["schemas"]["ResultSuccess_SessionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    SessionQueryParams: {
+      sessionIdContains: string;
+      timeFilter: {
+        /** Format: double */
+        endTimeUnixMs: number;
+        /** Format: double */
+        startTimeUnixMs: number;
+      };
     };
 Json: JsonObject;
     /** @enum {string} */
@@ -905,7 +901,19 @@ export interface operations {
       };
     };
   };
-<<<<<<< HEAD
+  LogTrace: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OTELTrace"];
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
   GetSessions: {
     requestBody: {
       content: {
@@ -918,18 +926,6 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Result_SessionResult-Array.string_"];
         };
-=======
-  LogTrace: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OTELTrace"];
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
->>>>>>> main
       };
     };
   };
