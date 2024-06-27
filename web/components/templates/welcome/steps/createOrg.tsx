@@ -6,6 +6,7 @@ import useNotification from "../../../shared/notification/useNotification";
 import { PostgrestError } from "@supabase/supabase-js";
 import HcButton from "../../../ui/hcButton";
 import { Select, SelectItem, TextInput } from "@tremor/react";
+import { getJawnClient } from "../../../../lib/clients/jawn";
 
 export const COMPANY_SIZES = ["Just me", "2-5", "5-25", "25-100", "100+"];
 
@@ -68,25 +69,29 @@ const CreateOrg = (props: CreateOrgProps) => {
     }
 
     if (!orgContext?.currentOrg?.id) {
-      const { data, error } = await fetch("/api/organization/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const jawn = getJawnClient(orgContext?.currentOrg?.id);
+
+      const { data } = await jawn.POST("/v1/organization/create", {
+        body: {
           name: orgName,
           size: orgSize,
           referral: referralType,
           owner: user.id,
           is_personal: true,
           tier: "free",
-        }),
-      }).then((res) => res.json());
-      if (!error) {
+        },
+      });
+      if (!data?.error) {
         console.log("Created personal org! - refetching", orgContext);
         orgContext?.refreshCurrentOrg();
+      } else {
+        setNotification(
+          "Failed to update organization. Please try again.",
+          "error"
+        );
+        setIsLoading(false);
+        return;
       }
-      checkError(error);
     }
 
     if (referralCode && referralCode.trim() !== "") {
