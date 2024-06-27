@@ -1,9 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { FilterNode } from "../lib/filters/filterDefs";
-import { SortLeafSession } from "../lib/sorts/requests/sorts";
-import { ok } from "../../lib/result";
-import { getJawnClient } from "../../lib/clients/jawn";
 import { useOrg } from "../../components/layout/organizationContext";
+import { getJawnClient } from "../../lib/clients/jawn";
 
 const useSessions = (
   timeFilter: {
