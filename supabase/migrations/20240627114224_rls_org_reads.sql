@@ -44,3 +44,5 @@ SELECT TO PUBLIC USING (
             )
         )
     );
+
+create policy "Enable read access for all users" on "public"."organization_member" as permissive for select to public using ((member = auth.uid()));
