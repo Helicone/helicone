@@ -25,14 +25,16 @@ export class OrganizationStore extends BaseStore {
       return err(error.message ?? "Failed to create organization");
     }
 
-    const { data: memberInsert, error: memberError } = await supabaseServer.client
-      .from("organization_member")
-      .insert({
-        created_at: new Date().toISOString(),
-        member: createOrgParams.owner,
-        organization: insert.id,
-        org_role: "owner",
-      });
+    const { data: memberInsert, error: memberError } =
+      await supabaseServer.client
+        .from("organization_member")
+        .insert({
+          created_at: new Date().toISOString(),
+          member: createOrgParams.owner,
+          organization: insert.id,
+          org_role: "owner",
+        })
+        .select("*");
 
     if (memberError || !memberInsert) {
       return err(memberError?.message ?? "Failed to create organization");
