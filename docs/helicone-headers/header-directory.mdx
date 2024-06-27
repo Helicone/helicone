@@ -113,6 +113,12 @@ The URL to proxy the request to when using _gateway.helicone.ai_. For example, `
 <ResponseField name="Helicone-RateLimit-Policy" type="string">
   Set up a rate limit policy. The value should follow the format: `[quota];w=[time_window];u=[unit];s=[segment]`. For example, `10;w=1000;u=cents;s=user` is a policy that allows 10 cents of requests per 1000 seconds per user.
 </ResponseField>
+<ResponseField name="Helicone-Session-Id" type="string">
+  Add a `Helicone-Session-Id` header to your request to start tracking your (sessions and traces.)[features/sessions].
+</ResponseField>
+<ResponseField name="Helicone-Session-Path" type="string">
+  To represent parent and child traces we take advantage of a simple path syntax. For example, if you have a parent trace `parent` and a child trace `child`, you can represent this as `parent/child`.
+</ResponseField>
 
 ## 3rd Party Integrations
 
