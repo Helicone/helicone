@@ -17,14 +17,14 @@ export const metadata: Metadata = {
     title: "Helicone vs. Weights and Biases", 
     url: "https://www.helicone.ai/blog/weights-and-biases",
     description: "Training modern LLMs is generally less complex than traditional ML models. Here's how to have all the essential tools specifically designed for language model observability without the clutter.", 
-    images: "https://www.helicone.ai/static/blog/weights-and-biases.png", 
+    images: "https://www.helicone.ai/static/blog/weights-and-biases.webp", 
     locale: "en_US",
   },
   twitter: {
     title: "Helicone vs. Weights and Biases",
     description: "Training modern LLMs is generally less complex than traditional ML models. Here's how to have all the essential tools specifically designed for language model observability without the clutter.",
     card: "summary_large_image",
-    images: "https://www.helicone.ai/static/blog/weights-and-biases.png",
+    images: "https://www.helicone.ai/static/blog/weights-and-biases.webp",
   },
 };
 
