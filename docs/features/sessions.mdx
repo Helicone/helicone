@@ -1,0 +1,88 @@
+---
+title: "Sessions"
+description: "Effortlessly monitor sessions and traces."
+---
+
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+<Info>
+  **Who can use this feature**: Anyone on any
+  [plan](https://www.helicone.ai/pricing).
+</Info>
+
+<Warning>
+  **This feature is currently in beta.** While you're welcome to try it out,
+  please know that our team is still working to refine it. Your feedback is
+  valuable to help us improve!{" "}
+</Warning>
+
+## Introduction
+
+Helicone's Session management allows you to provide full control over any session and trace data that you send to Helicone. With Helicone, you can effortlessly monitor and manage your sessions and traces as they evolve.
+
+<Frame caption="Example: A Session creating an outline for a book about space">
+  <img
+    src="/images/sessions/example-session.png"
+    alt="Helicone example of a session template for monitoring and managing inputs from requests sent to your AI applications."
+  />
+</Frame>
+
+### Why Sessions
+
+Requests are now matched to a `helicone-session-id`, allowing you to:
+
+- Manage and track sessions and traces over time
+- Find long running traces or where in your session there are any issues
+
+## Quick Start
+
+Simply add a `Helicone-Session-Id` header to your request to start tracking your sessions and traces.
+
+To represent parent and child traces we take advantange of a simple path syntax in the `Helicone-Session-Path` header. For example, if you have a parent trace `parent` and a child trace `child`, you can represent this as `/parent/child`.
+
+Depending on your library you will need to add the following two headers to your request:
+
+- `Helicone-Session-Id` - The session id you want to track
+- `Helicone-Session-Path` - The path of the session
+
+Here is an example is ts: [see other languages](/helicone-headers/header-directory)
+
+```ts
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: "https://oai.helicone.ai/v1",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+  },
+});
+
+const session = randomUUID();
+
+openai.chat.completions.create(
+  {
+    messages: [
+      {
+        role: "user",
+        content: "Generate an abstract for a course on space.",
+      },
+    ],
+    model: "gpt-4",
+  },
+  {
+    headers: {
+      "Helicone-Session-Id": session,
+      "Helicone-Session-Path": "/abstract",
+    },
+  }
+);
+```
+
+<Card
+  title="Node JS Example"
+  icon="js"
+  iconType="duotone"
+  color="#FF"
+  href="https://github.com/Helicone/helicone/blob/main/examples/session_example/index.ts"
+>
+  Javascript Session example shown above
+</Card>
