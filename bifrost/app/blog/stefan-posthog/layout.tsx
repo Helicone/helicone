@@ -17,14 +17,14 @@ export const metadata: Metadata = {
     title: "Insider Scoop: Our Founding Engineer's Take on PostHog 🦔🔥",
     url: "https://www.helicone.ai/blog/stefan-posthog",
     description: "No BS, no affiliations. Just genuine opinions from Stefan, our founding engineer.",
-    images: "https://www.helicone.ai/static/blog/stefan-posthog/posthog-cover.png",
+    images: "https://www.helicone.ai/static/blog/stefan-posthog/posthog-cover.webp",
     locale: "en_US",
   },
   twitter: {
     title: "Insider Scoop: Our Founding Engineer's Take on PostHog 🦔🔥",
     description: "No BS, no affiliations. Just genuine opinions from Stefan, our founding engineer.",
     card: "summary_large_image",
-    images: "https://www.helicone.ai/static/blog/stefan-posthog/posthog-cover.png",
+    images: "https://www.helicone.ai/static/blog/stefan-posthog/posthog-cover.webp",
   },
 };
 

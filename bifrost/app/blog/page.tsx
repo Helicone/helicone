@@ -26,7 +26,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "guide",
     date: "June 20, 2024",
     href: "/blog/ai-best-practices",
-    imageUrl: "/static/blog/ai-best-practices/cover.png",
+    imageUrl: "/static/blog/ai-best-practices/cover.webp",
     authors: [
       {
         name: "Lina Lam",
@@ -43,7 +43,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "guide",
     date: "June 18, 2024",
     href: "/blog/first-ai-app-with-helicone",
-    imageUrl: "/static/blog/first-ai-app/lina-first-ai-app.png",
+    imageUrl: "/static/blog/first-ai-app/lina-first-ai-app.webp",
     authors: [
       {
         name: "Lina Lam",
@@ -61,7 +61,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "feature",
     date: "June 14, 2024",
     href: "/blog/custom-properties",
-    imageUrl: "/static/blog/custom-properties/cover.png",
+    imageUrl: "/static/blog/custom-properties/cover.webp",
     authors: [
       {
         name: "Lina Lam",
@@ -78,7 +78,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "compare",
     date: "May 31, 2024",
     href: "/blog/weights-and-biases",
-    imageUrl: "/static/blog/weights-and-biases.png",
+    imageUrl: "/static/blog/weights-and-biases.webp",
     authors: [
       {
         name: "Lina Lam",
@@ -95,11 +95,11 @@ const blogContent: BlogStructure[] = [
     badgeText: "team's pick",
     date: "May 30, 2024",
     href: "/blog/cole-github-copilot",
-    imageUrl: "/static/blog/cole-copilot.png",
+    imageUrl: "/static/blog/cole-copilot.webp",
     authors: [
       {
         name: "Cole Gottdank",
-        imageUrl: "/static/blog/colegottdank-headshot.png",
+        imageUrl: "/static/blog/colegottdank-headshot.webp",
         imageAlt: "Cole Gottdank's headshot",
       },
       {
@@ -117,7 +117,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "team's pick",
     date: "May 23, 2024",
     href: "/blog/stefan-posthog",
-    imageUrl: "/static/blog/stefan-posthog/posthog-cover.png",
+    imageUrl: "/static/blog/stefan-posthog/posthog-cover.webp",
     authors: [
       {
         name: "Stefan Bokarev",
@@ -139,7 +139,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "Product",
     date: "May 14, 2024",
     href: "/blog/switch-models-safely",
-    imageUrl: "static/blog/experiments/gpt-4o.png",
+    imageUrl: "static/blog/experiments/gpt-4o.webp",
     authors: [
       {
         name: "Scott Nguyen",
@@ -210,11 +210,11 @@ const blogContent: BlogStructure[] = [
     badgeText: "Product",
     date: "Sep 13, 2023",
     href: "/blog/vault-introduction",
-    imageUrl: "/static/blog/vault_asset.png",
+    imageUrl: "/static/blog/vault_asset.webp",
     authors: [
       {
         name: "Cole Gottdank",
-        imageUrl: "/static/blog/colegottdank-headshot.png",
+        imageUrl: "/static/blog/colegottdank-headshot.webp",
         imageAlt: "Cole Gottdank's headshot",
       },
     ],
