@@ -22,6 +22,7 @@ import {
   OrganizationOwner,
   UpdateOrganizationParams,
 } from "../../managers/organization/OrganizationManager";
+import { supabaseServer } from "../../lib/db/supabase";
 
 @Route("v1/organization")
 @Tags("Organization")
@@ -65,6 +66,22 @@ export class OrganizationController extends Controller {
       this.setStatus(201);
       return ok(null);
     }
+  }
+
+  @Post("onboard")
+  public async onboardOrganization(
+    @Body()
+    requestBody: {},
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    await supabaseServer.client
+      .from("organization")
+      .update({
+        has_onboarded: true,
+      })
+      .eq("id", request.authParams.organizationId);
+
+    return ok(null);
   }
 
   @Post("/{organizationId}/add_member")
