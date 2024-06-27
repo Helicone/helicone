@@ -205,7 +205,7 @@ const SessionDetail = ({}) => {
           Hidden
         </button>
       </div>
-      <div className="bg-white h-[em] overflow-hidden">
+      <div className="bg-white">
         {currentTopView === "span" && (
           <TraceSpan
             session={session}

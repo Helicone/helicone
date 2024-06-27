@@ -40,12 +40,12 @@ export const TraceSpan = ({
   }));
 
   return (
-    <div className="m-10">
-      <ResponsiveContainer width="100%" height={1000}>
+    <div className="m-10" style={{ height: "500px", overflowY: "auto" }}>
+      <ResponsiveContainer width="100%" height={spanData.length * 50}>
         <BarChart
           data={spanData}
           layout="vertical"
-          barSize={15}
+          barSize={30} // Increased bar size
           margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
           // style={{ backgroundColor: "#f5f5f5" }}
         >

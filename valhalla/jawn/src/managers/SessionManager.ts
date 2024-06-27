@@ -69,6 +69,8 @@ export class SessionManager {
     return resultMap(results, (x) =>
       x.map((y) => ({
         ...y,
+        completion_tokens: +y.completion_tokens,
+        prompt_tokens: +y.prompt_tokens,
         total_tokens: +y.completion_tokens + +y.prompt_tokens,
       }))
     );

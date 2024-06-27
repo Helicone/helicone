@@ -14,7 +14,7 @@ async function main() {
     },
   });
 
-  const session = randomUUID();
+  const session = `space.${randomUUID()}`;
 
   openai.chat.completions.create(
     {
