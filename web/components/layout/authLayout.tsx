@@ -22,7 +22,6 @@ import {
   UserCircleIcon,
   UsersIcon,
   XMarkIcon,
-  ClipboardIcon,
 } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
@@ -35,13 +34,13 @@ import OrgContext, { useOrg } from "./organizationContext";
 import UpgradeProModal from "../shared/upgradeProModal";
 import OrgDropdown from "./orgDropdown";
 
+import { useAlertBanners } from "../../services/hooks/admin";
+import { Database } from "../../supabase/database.types";
 import ReferralModal from "../shared/referralModal";
 import { useTheme } from "../shared/theme/themeContext";
 import { ThemedSwitch } from "../shared/themed/themedSwitch";
-import MetaData from "./public/authMetaData";
-import { Database } from "../../supabase/database.types";
 import { getUSDate, signOut } from "../shared/utils/utils";
-import { useAlertBanners } from "../../services/hooks/admin";
+import MetaData from "./public/authMetaData";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
