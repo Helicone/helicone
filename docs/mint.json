@@ -128,6 +128,7 @@
     {
       "group": "Features",
       "pages": [
+        "features/sessions",
         "features/prompts",
         "features/advanced-usage/custom-properties",
         "features/advanced-usage/caching",
