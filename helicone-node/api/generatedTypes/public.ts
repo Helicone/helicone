@@ -15,6 +15,9 @@ export interface paths {
   "/v1/trace/log": {
     post: operations["LogTrace"];
   };
+  "/v1/session/query": {
+    post: operations["GetSessions"];
+  };
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
@@ -181,6 +184,36 @@ export interface components {
               }[];
           };
         }[];
+    };
+    SessionResult: {
+      created_at: string;
+      latest_request_created_at: string;
+      session: string;
+      /** Format: double */
+      total_cost: number;
+      /** Format: double */
+      total_requests: number;
+      /** Format: double */
+      prompt_tokens: number;
+      /** Format: double */
+      completion_tokens: number;
+      /** Format: double */
+      total_tokens: number;
+    };
+    "ResultSuccess_SessionResult-Array_": {
+      data: components["schemas"]["SessionResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SessionResult-Array.string_": components["schemas"]["ResultSuccess_SessionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    SessionQueryParams: {
+      sessionIdContains: string;
+      timeFilter: {
+        /** Format: double */
+        endTimeUnixMs: number;
+        /** Format: double */
+        startTimeUnixMs: number;
+      };
     };
 Json: JsonObject;
     /** @enum {string} */
@@ -878,6 +911,21 @@ export interface operations {
       /** @description No content */
       204: {
         content: never;
+      };
+    };
+  };
+  GetSessions: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SessionQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SessionResult-Array.string_"];
+        };
       };
     };
   };
