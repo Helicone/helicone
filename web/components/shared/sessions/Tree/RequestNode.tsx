@@ -45,7 +45,7 @@ export function RequestNode(props: {
         </span>
         <Col className="w-full gap-5">
           <Row className="items-center flex-grow i">
-            <span className="text-green-700 dark:text-green-500 font-bold flex-grow">
+            <span className="font-semibold flex-grow">
               {node.trace?.request.model}
             </span>
 
