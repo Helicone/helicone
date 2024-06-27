@@ -33,10 +33,11 @@ export interface IHeliconeHeaders {
   openaiBaseUrl: Nullable<string>;
   targetBaseUrl: Nullable<string>;
   promptFormat: Nullable<string>;
-  requestId: Nullable<string>;
+  requestId: string;
   promptHeaders: {
     promptId: Nullable<string>;
     promptMode: Nullable<string>;
+    promptVersion: Nullable<string>;
   };
   promptName: Nullable<string>;
   userId: Nullable<string>;
@@ -54,6 +55,7 @@ export interface IHeliconeHeaders {
   promptSecurityEnabled: Nullable<string>;
   moderationsEnabled: boolean;
   posthogKey: Nullable<string>;
+  lytixKey: Nullable<string>;
   posthogHost: Nullable<string>;
   webhookEnabled: boolean;
 }
@@ -78,10 +80,11 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   openaiBaseUrl: Nullable<string>;
   targetBaseUrl: Nullable<string>;
   promptFormat: Nullable<string>;
-  requestId: Nullable<string>;
+  requestId: string;
   promptHeaders: {
     promptId: Nullable<string>;
     promptMode: Nullable<string>;
+    promptVersion: Nullable<string>;
   };
   promptName: Nullable<string>;
   userId: Nullable<string>;
@@ -98,6 +101,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   posthogKey: Nullable<string>;
   posthogHost: Nullable<string>;
   webhookEnabled: boolean;
+  lytixKey: Nullable<string>;
 
   constructor(private headers: Headers) {
     const heliconeHeaders = this.getHeliconeHeaders();
@@ -114,6 +118,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.promptHeaders = {
       promptId: heliconeHeaders.promptHeaders.promptId,
       promptMode: heliconeHeaders.promptHeaders.promptMode,
+      promptVersion: heliconeHeaders.promptHeaders.promptVersion,
     };
     this.promptName = heliconeHeaders.promptName;
     this.omitHeaders = heliconeHeaders.omitHeaders;
@@ -125,6 +130,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.modelOverride = heliconeHeaders.modelOverride;
     this.promptSecurityEnabled = heliconeHeaders.promptSecurityEnabled;
     this.moderationsEnabled = heliconeHeaders.moderationsEnabled;
+    this.lytixKey = heliconeHeaders.lytixKey;
     this.posthogKey = heliconeHeaders.posthogKey;
     this.posthogHost = heliconeHeaders.posthogHost;
     this.webhookEnabled = heliconeHeaders.webhookEnabled;
@@ -230,6 +236,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       promptHeaders: {
         promptId: this.headers.get("Helicone-Prompt-Id") ?? null,
         promptMode: this.headers.get("Helicone-Prompt-Mode") ?? null,
+        promptVersion: this.headers.get("Helicone-Prompt-Version") ?? null,
       },
       promptName: this.headers.get("Helicone-Prompt-Name") ?? null,
       userId: this.headers.get("Helicone-User-Id") ?? null,
@@ -253,6 +260,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
           ? true
           : false,
       posthogKey: this.headers.get("Helicone-Posthog-Key") ?? null,
+      lytixKey: this.headers.get("Helicone-Lytix-Key") ?? null,
       posthogHost: this.headers.get("Helicone-Posthog-Host") ?? null,
       webhookEnabled:
         this.headers.get("Helicone-Webhook-Enabled") == "true" ? true : false,

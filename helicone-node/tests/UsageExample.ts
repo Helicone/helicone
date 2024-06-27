@@ -12,7 +12,7 @@ async function testAsync(): Promise<void> {
     organization: process.env.OPENAI_ORG_ID,
     heliconeMeta: {
       apiKey: process.env.HELICONE_API_KEY,
-      baseUrl: "https://api_staging.hconeai.com",
+      baseUrl: "https://api_staging.helicone.ai",
       onLog: async (response: Response) => {
         console.log(`Log result: ${response.status}`);
         const heliconeId = response.headers.get("helicone-id");

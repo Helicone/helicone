@@ -18,6 +18,7 @@ import {
   DLQ_WORKER_COUNT,
   NORMAL_WORKER_COUNT,
 } from "./lib/clients/kafkaConsumers/constant";
+import { cacheMiddleware } from "./middleware/cache";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -113,6 +114,8 @@ unAuthenticatedRouter.use("/download/swagger.json", (req, res) => {
 
 v1APIRouter.use(authMiddleware);
 
+v1APIRouter.use("/v1/public", cacheMiddleware);
+
 // Create and use the rate limiter
 if (IS_RATE_LIMIT_ENABLED) {
   v1APIRouter.use(limiter);
@@ -133,7 +136,10 @@ app.use((req, res, next) => {
   } else {
     res.setHeader("Access-Control-Allow-Origin", "");
   }
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PATCH");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, OPTIONS, PATCH, PUT"
+  );
   res.setHeader(
     "Access-Control-Allow-Headers",
     "Content-Type, Authorization, Helicone-Authorization"
@@ -143,7 +149,6 @@ app.use((req, res, next) => {
 });
 
 app.use(unAuthenticatedRouter);
-
 app.use(v1APIRouter);
 
 function setRouteTimeout(

@@ -18,7 +18,7 @@ Start by creating a Helicone account and obtaining your API key from the [Helico
 
 ### 2. Implement Helicone
 
-Wherever you use the TogetherAI API, simply substitute the base URL with `https://together.hconeai.com` and include the `Helicone-Auth` header with your Helicone API key.
+Wherever you use the TogetherAI API, simply substitute the base URL with `https://together.helicone.ai` and include the `Helicone-Auth` header with your Helicone API key.
 
 ```python
 TOGETHER_API_KEY = os.environ.get("TOGETHER_API_KEY")
@@ -27,7 +27,7 @@ HELICONE_API_KEY = os.environ.get("HELICONE_API_KEY")
 client = OpenAI(
   api_key=TOGETHER_API_KEY,
   # base_url='https://api.together.xyz/v1', Old
-  base_url='https://together.hconeai.com/v1', # Change to Helicone
+  base_url='https://together.helicone.ai/v1', # Change to Helicone
   default_headers={
     "Helicone-Auth": f"Bearer {HELICONE_API_KEY}", # Add Helicone API Key
   }

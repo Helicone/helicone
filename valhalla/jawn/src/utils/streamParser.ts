@@ -3,7 +3,9 @@ export function consolidateTextFields(responseBody: any[]): any {
     const consolidated = responseBody.reduce((acc, cur) => {
       if (!cur) {
         return acc;
-      } else if (acc.choices === undefined) {
+      } else if (cur?.usage) {
+        return recursivelyConsolidate(acc, { usage: cur.usage });
+      } else if (acc?.choices === undefined) {
         return cur;
       } else {
         // This is to handle the case if the choices array is empty (happens on Azure)
@@ -83,7 +85,7 @@ export function consolidateTextFields(responseBody: any[]): any {
 
 export function recursivelyConsolidate(body: any, delta: any): any {
   Object.keys(delta).forEach((key) => {
-    if (body[key] === undefined) {
+    if (body[key] === undefined || body[key] === null) {
       body[key] = delta[key];
     } else if (typeof body[key] === "object") {
       recursivelyConsolidate(body[key], delta[key]);

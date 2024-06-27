@@ -1,11 +1,16 @@
 import type { paths as publicPaths } from "./generatedTypes/public";
 import createClient from "openapi-fetch";
 
-function getClient(apiKey: string, baseURL: string) {
+function getClient(
+  apiKey: string,
+  baseURL: string,
+  headers?: Record<string, string>
+) {
   return createClient<publicPaths>({
     baseUrl: baseURL,
     headers: {
       Authorization: `Bearer ${apiKey}`,
+      ...headers,
     },
   });
 }
@@ -55,6 +60,10 @@ class ScoringListener {
         console.log("Scoring...", response.request_id);
         let requestAndResponseBody;
         try {
+          if (!response.signed_body_url) {
+            console.log("No signed body url found for", response.request_id);
+            continue;
+          }
           requestAndResponseBody = await fetch(response.signed_body_url).then(
             (res) => res.json()
           );
@@ -106,12 +115,17 @@ export class HeliconeAPIClient {
     private config: {
       apiKey: string;
       baseURL?: string;
+      headers?: Record<string, string>;
     }
   ) {
     if (!this.config.baseURL) {
       this.config.baseURL = "https://api.helicone.ai";
     }
-    this.rawClient = getClient(this.config.apiKey, this.config.baseURL);
+    this.rawClient = getClient(
+      this.config.apiKey,
+      this.config.baseURL,
+      this.config.headers
+    );
   }
 
   scoringWorker() {

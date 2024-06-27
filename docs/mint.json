@@ -37,11 +37,12 @@
       "group": "Welcome",
       "pages": [
         "getting-started/quick-start",
-        "helicone-headers/header-directory"
+        "helicone-headers/header-directory",
+        "helicone-headers/helicone-auth"
       ]
     },
     {
-      "group": "Integrations",
+      "group": "Dev Integrations",
       "pages": [
         {
           "group": "OpenAI",
@@ -49,6 +50,8 @@
             "integrations/openai/javascript",
             "integrations/openai/python",
             "integrations/openai/langchain",
+            "integrations/openai/llamaindex",
+            "integrations/openai/crewai",
             "integrations/openai/async",
             "integrations/openai/curl"
           ]
@@ -91,6 +94,7 @@
         },
         "getting-started/integration-method/anyscale",
         "getting-started/integration-method/together",
+        "getting-started/integration-method/hyperbolic",
         {
           "group": "Groq",
           "pages": [
@@ -99,17 +103,26 @@
             "integrations/groq/curl"
           ]
         },
+        "getting-started/integration-method/deepinfra",
         "getting-started/integration-method/openrouter",
         "getting-started/integration-method/litellm",
         "getting-started/integration-method/posthog",
 
         {
-          "group": "Other",
+          "group": "Generic Gateway",
           "pages": [
             "getting-started/integration-method/gateway",
             "getting-started/integration-method/custom"
           ]
         }
+      ]
+    },
+    {
+      "group": "Other Integrations",
+      "pages": [
+        "other-integrations/open-webui",
+        "other-integrations/meta-gpt",
+        "other-integrations/open-devin"
       ]
     },
     {
@@ -138,6 +151,7 @@
         "faq/how-we-calculate-cost",
         "faq/latency-affect",
         "helicone-headers/predefining-request-id",
+        "faq/secret-vs-public-key",
         {
           "group": "Deployment",
           "pages": [
@@ -150,7 +164,7 @@
     },
     {
       "group": "Observability",
-      "pages": ["use-cases/getting-user-requests"]
+      "pages": ["use-cases/getting-user-requests", "use-cases/segmentation"]
     },
     {
       "group": "Guides",
@@ -163,10 +177,6 @@
     {
       "group": "CI/CD",
       "pages": ["use-cases/github-actions"]
-    },
-    {
-      "group": "Custom Properties",
-      "pages": ["use-cases/segmentation", "use-cases/environment-tracking"]
     },
     {
       "group": "Developer",
@@ -210,6 +220,13 @@
     {
       "group": "Experiment",
       "pages": ["rest/experiment/post-v1experiment"]
+    },
+    {
+      "group": "Customer",
+      "pages": [
+        "rest/customer/post-v1customer-usagequery",
+        "rest/customer/post-v1customerquery"
+      ]
     }
   ],
   "topbarLinks": [

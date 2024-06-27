@@ -3,33 +3,40 @@ title: "Cache"
 description: "Reduce latency and save costs by caching on the edge"
 ---
 
-import QuestionsSection from '/snippets/questions-section.mdx';
+import QuestionsSection from "/snippets/questions-section.mdx";
 
-<Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing). However, the maximum number of caches you can store within a bucket is `20`. If you need to store more, you will need to upgrade to an enterprise plan.</Info>
+<Info>
+  **Who can use this feature**: Anyone on any
+  [plan](https://www.helicone.ai/pricing). However, the maximum number of caches
+  you can store within a bucket is `20`. If you need to store more, you will
+  need to upgrade to an enterprise plan.
+</Info>
 
 ## Introduction
-Caching, by temporarily storing data closer to the user at the edge, can significantly speed up access time and enhance your application performance. 
 
-Helicone uses [Cloudflare Workers](https://www.cloudflare.com/network/) to temporarily store data closer to the user to ensure low latency, resulting in faster responses and an efficient app development process. 
+Caching, by temporarily storing data closer to the user at the edge, can significantly speed up access time and enhance your application performance.
+
+Helicone uses [Cloudflare Workers](https://www.cloudflare.com/network/) to temporarily store data closer to the user to ensure low latency, resulting in faster responses and an efficient app development process.
 
 <Frame caption="Dashboard view of cache hits, cost and time saved. ">
-  <img src="/images/example-cache.png" />
+  <img src="/images/example-cache.png" alt="Helicone Dashboard showing the number of cache hits, cost, and time saved. " />
 </Frame>
 
-
 ## Why Cache
+
 - Faster response for commonly asked questions, resulting in better experience for your users.
 - Lower latency and reduce the load on backend resources by pre-computing results or frequently accessed data, so you can develop your app more efficiently.
 - Save money while testing your app by making fewer calls to model providers such as OpenAI.
 - Determine the most common requests with your application and visualize on a dashboard.
 
 ## Quick Start
+
 To get started, set `Helicone-Cache-Enabled` to true in the headers, or use the Python or NPM packages to turn it on via parameters.
 
 <CodeGroup>
 
 ```bash Curl
-curl https://oai.hconeai.com/v1/completions \
+curl https://oai.helicone.ai/v1/completions \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer YOUR_API_KEY' \
   -H 'Helicone-Cache-Enabled: true' \ # add this header and set to true
@@ -48,7 +55,7 @@ response = openai.Completion.create(
 ```
 
 ```python Python w/o Package
-openai.api_base = "https://oai.hconeai.com/v1"
+openai.api_base = "https://oai.helicone.ai/v1"
 
 openai.Completion.create(
     model="text-davinci-003",
@@ -66,7 +73,7 @@ const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
   heliconeMeta: {
     // ... other meta data
-    cache: true,  // set cache to true
+    cache: true, // set cache to true
   },
 });
 
@@ -77,37 +84,41 @@ const openai = new OpenAIApi(configuration);
 import { Configuration, OpenAIApi } from "openai";
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
-  basePath: "https://oai.hconeai.com/v1",
+  basePath: "https://oai.helicone.ai/v1",
   defaultHeaders: {
     "Helicone-Cache-Enabled": "true", // add this header and set to true
   },
 });
 const openai = new OpenAIApi(configuration);
 ```
+
 </CodeGroup>
 
 ### Cache Parameters
 
-| Parameter                                   | Description                                           |
-| ------------------------------------------- | ----------------------------------------------------- |
-| `Helicone-Cache-Enabled`  (required)        | Set to `true` to enable storing and loading from your cache.  |
-| `Cache-Control` (optional)                  | Configure cache limit as a `string` based on the [Cloudflare Cache Directive](https://developers.cloudflare.com/cache/about/cache-control#cache-control-directives). Currently we only support `max-age`, but we will be adding more configuration options soon. I.e. 1 hour is `max-age=3600`.|
-| `Helicone-Cache-Bucket-Max-Size` (optional) | Configure your Cache Bucket size as a `number`. |
-| `Helicone-Cache-Seed` (optional) | Define a separate cache state as a `string` to generate predictable results, i.e. `user-123`.|
+| Parameter                                   | Description                                                                                                                                                                                                                                                                                     |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Helicone-Cache-Enabled` (required)         | Set to `true` to enable storing and loading from your cache.                                                                                                                                                                                                                                    |
+| `Cache-Control` (optional)                  | Configure cache limit as a `string` based on the [Cloudflare Cache Directive](https://developers.cloudflare.com/cache/about/cache-control#cache-control-directives). Currently we only support `max-age`, but we will be adding more configuration options soon. I.e. 1 hour is `max-age=3600`. |
+| `Helicone-Cache-Bucket-Max-Size` (optional) | Configure your Cache Bucket size as a `number`.                                                                                                                                                                                                                                                 |
+| `Helicone-Cache-Seed` (optional)            | Define a separate cache state as a `string` to generate predictable results, i.e. `user-123`.                                                                                                                                                                                                   |
 
-<Info>Header values have to be strings. For example, `"Helicone-Cache-Bucket-Max-Size": "10"`. </Info>
+<Info>
+  Header values have to be strings. For example,
+  `"Helicone-Cache-Bucket-Max-Size": "10"`.{" "}
+</Info>
 
 ### Changing Cache Limit
-The default cache limit is 7 days. To change the limit, add the `Cache-Control` header to your request. 
+
+The default cache limit is 7 days. To change the limit, add the `Cache-Control` header to your request.
 
 **Example**: Setting the cache limit to 30 days, aka `2592000 seconds`
 
 ```tsx
 "Cache-Control": "max-age=2592000"
 ```
+
 <Note>The max cache limit is 365 days, or `max-age=31536000`. </Note>
-
-
 
 ### Configuring Bucket Size
 
@@ -116,14 +127,14 @@ Simply add `Helicone-Cache-Bucket-Max-Size` with some number to choose how large
 <CodeGroup>
 
 ```python Python
-openai.api_base = "https://oai.hconeai.com/v1"
+openai.api_base = "https://oai.helicone.ai/v1"
 
 openai.Completion.create(
 model="text-davinci-003",
 prompt="Say this is a test",
 headers={
 "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-"Helicone-Cache-Enabled": "true", # mandatory 
+"Helicone-Cache-Enabled": "true", # mandatory
 "Helicone-Cache-Bucket-Max-Size": "3", # set cache bucket size to 3
 }
 )
@@ -133,9 +144,9 @@ headers={
 import { Configuration, OpenAIApi } from "openai";
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
-  basePath: "https://oai.hconeai.com/v1",
+  basePath: "https://oai.helicone.ai/v1",
   defaultHeaders: {
-    "Helicone-Cache-Enabled": "true", // mandatory 
+    "Helicone-Cache-Enabled": "true", // mandatory
     "Helicone-Cache-Bucket-Max-Size": "3", // set cache bucket size to 3
   },
 });
@@ -145,7 +156,6 @@ const openai = new OpenAIApi(configuration);
 </CodeGroup>
 
 **Example**: A bucket size of 3
-
 
 ```
 openai.completion("give me a random number") -> "42"
@@ -158,11 +168,16 @@ openai.completion("give me a random number") -> "17"
 openai.completion("give me a random number") -> This will randomly choose 42 | 47 | 17
 # Cache Hit
 ```
-<Note>The max number of caches you can store is `20` within a bucket, if you want more you will need to upgrade to an enterprise [plan](https://www.helicone.ai/pricing).</Note>
+
+<Note>
+  The max number of caches you can store is `20` within a bucket, if you want
+  more you will need to upgrade to an enterprise
+  [plan](https://www.helicone.ai/pricing).
+</Note>
 
 ### Adding Cache Seed
-When you make a request to Helicone with the same seed, you will receive the same cached response for the same query. This feature allows for predictable results, which can be beneficial in scenarios where you want to have a consistent cache across multiple requests.
 
+When you make a request to Helicone with the same seed, you will receive the same cached response for the same query. This feature allows for predictable results, which can be beneficial in scenarios where you want to have a consistent cache across multiple requests.
 
 To set a cache seed, add a header called `Helicone-Cache-Seed` with a string value for the seed.
 
@@ -190,15 +205,19 @@ openai.completion("give me a random number") -> "42"
 # Cache Seed "user-456"
 openai.completion("give me a random number") -> "17"
 ```
-<Tip> If you don’t like one of generated response stored in cache, you can update your seed to a different value as a way to clear your cache. </Tip> 
+
+<Tip>
+  {" "}
+  If you don't like one of generated response stored in cache, you can update your
+  seed to a different value as a way to clear your cache.
+</Tip>
 
 ### Extracting Cache Response Headers
 
 When cache is enabled, you can capture the cache status from the headers of the response, such as a `cache hit / miss` and the `cache bucket index` of the response returned.
 
-
 ```ts
-helicone-cache:	"HIT" | "MISS" // indicates whether the response was cached. 
+helicone-cache:	"HIT" | "MISS" // indicates whether the response was cached.
 helicone-cache-bucket-idx: number // indicates the cache bucket index used.
 ```
 
@@ -207,7 +226,7 @@ helicone-cache-bucket-idx: number // indicates the cache bucket index used.
 ```python
 client = OpenAI(
     api_key="<OPENAI_API_KEY>",
-    base_url="https://oai.hconeai.com/v1",
+    base_url="https://oai.helicone.ai/v1",
     default_headers={
         "Helicone-Auth": f"Bearer <API_KEY>",
     }

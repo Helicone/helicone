@@ -7,7 +7,7 @@ description: "Learn how to integrate Anthropic with Helicone using Javascript."
 
 <Steps>
   <Step title="Create an account + Generate an API Key">
-    Log into www.helicone.ai or create an account. Once you have an account, you
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
     can generate an [API key](https://helicone.ai/developer).
   </Step>
   <Step title="Set HELICONE_API_KEY as an environment variable">
@@ -22,7 +22,7 @@ HELICONE_API_KEY=<your API key>
 import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic({
-  baseURL: "https://anthropic.hconeai.com/",
+  baseURL: "https://anthropic.helicone.ai/",
   apiKey: process.env.ANTHROPIC_API_KEY,
   defaultHeaders: {
     "Helicone-Auth": process.env.HELICONE_API_KEY,

@@ -37,27 +37,35 @@ const groq = /^https:\/\/api\.groq\.com/;
 const cohere = /^https:\/\/api\.cohere\.ai/;
 // api.mistral.ai
 const mistral = /^https:\/\/api\.mistral\.ai/;
+// https://api.deepinfra.com
+const deepinfra = /^https:\/\/api\.deepinfra\.com/;
 
-export type ProviderName =
-  | "OPENAI"
-  | "ANTHROPIC"
-  | "AZURE"
-  | "LOCAL"
-  | "HELICONE"
-  | "AMDBARTEK"
-  | "ANYSCALE"
-  | "CLOUDFLARE"
-  | "2YFV"
-  | "TOGETHER"
-  | "LEMONFOX"
-  | "FIREWORKS"
-  | "PERPLEXITY"
-  | "GOOGLE"
-  | "OPENROUTER"
-  | "WISDOMINANUTSHELL"
-  | "GROQ"
-  | "COHERE"
-  | "MISTRAL";
+export const providersNames = [
+  "OPENAI",
+  "ANTHROPIC",
+  "AZURE",
+  "LOCAL",
+  "HELICONE",
+  "AMDBARTEK",
+  "ANYSCALE",
+  "CLOUDFLARE",
+  "2YFV",
+  "TOGETHER",
+  "LEMONFOX",
+  "FIREWORKS",
+  "PERPLEXITY",
+  "GOOGLE",
+  "OPENROUTER",
+  "WISDOMINANUTSHELL",
+  "GROQ",
+  "COHERE",
+  "MISTRAL",
+  "DEEPINFRA",
+] as const;
+
+export type ProviderName = (typeof providersNames)[number];
+
+export type ModelNames = (typeof modelNames)[number];
 
 export const providers: {
   pattern: RegExp;
@@ -153,6 +161,10 @@ export const providers: {
     provider: "MISTRAL",
     costs: mistralCosts,
   },
+  {
+    pattern: deepinfra,
+    provider: "DEEPINFRA",
+  },
 ];
 
 export const playgroundModels: {
@@ -182,3 +194,5 @@ export const defaultProvider = providers.find(
 export const allCosts = providers.flatMap((provider) => provider.costs ?? []);
 
 export const approvedDomains = providers.map((provider) => provider.pattern);
+
+export const modelNames = allCosts.map((cost) => cost.model.value);

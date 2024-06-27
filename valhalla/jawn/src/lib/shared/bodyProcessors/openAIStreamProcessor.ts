@@ -13,6 +13,18 @@ export const NON_DATA_LINES = [
   "event: ping",
   "event: completion",
   "event: error",
+  "event: thread.message.delta",
+  "event: thread.message.completed",
+  "event: thread.run.step.completed",
+  "event: thread.run.step.created",
+  "event: thread.run.step.in_progress",
+  "event: thread.run.step.delta",
+  "event: thread.run.requires_action",
+  "event: done",
+  "event: thread.run.queued",
+  "event: thread.run.in_progress",
+  "event: thread.message.created",
+  "event: thread.message.in_progress",
 ];
 
 export class OpenAIStreamProcessor implements IBodyProcessor {
@@ -41,17 +53,23 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
     });
 
     try {
-      const usage = await getUsage(data, requestBody, tokenCounter);
+      const consolidatedData = consolidateTextFields(data);
+
+      const usage =
+        "usage" in consolidatedData
+          ? consolidatedData.usage
+          : await getUsage(data, requestBody, tokenCounter);
+
       return ok({
         processedBody: {
-          ...consolidateTextFields(data),
+          ...consolidatedData,
           streamed_data: data,
         },
         usage: {
-          totalTokens: usage.total_tokens,
-          completionTokens: usage.completion_tokens,
-          promptTokens: usage.prompt_tokens,
-          heliconeCalculated: usage.helicone_calculated,
+          totalTokens: usage?.total_tokens,
+          completionTokens: usage?.completion_tokens,
+          promptTokens: usage?.prompt_tokens,
+          heliconeCalculated: usage?.helicone_calculated ?? false,
         },
       });
     } catch (e) {

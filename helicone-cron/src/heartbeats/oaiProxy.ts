@@ -44,7 +44,7 @@ export class OpenAIProxyHeartBeat implements IHeartBeat {
     const res = await callOpenAI(
       env.OPENAI_API_KEY,
       env.HELICONE_API_KEY,
-      "https://oai.hconeai.com/v1/completions"
+      "https://oai.helicone.ai/v1/completions"
     );
 
     if (isErr(res)) {

@@ -19,6 +19,12 @@ interface KeyPageProps {
   hideTabs?: boolean;
 }
 
+const keyPermissions = new Map([
+  ["r", "Read"],
+  ["w", "Write"],
+  ["rw", "Read/Write"],
+]);
+
 const KeyPage = (props: KeyPageProps) => {
   const user = useUser();
   const org = useOrg();
@@ -72,6 +78,7 @@ const KeyPage = (props: KeyPageProps) => {
           columns={[
             { name: "Name", key: "key_name", hidden: false },
             { name: "Created", key: "created_at", hidden: false },
+            { name: "Permissions", key: "permissions", hidden: false },
           ]}
           rows={heliconeKeys?.data?.map((key) => {
             return {
@@ -84,6 +91,12 @@ const KeyPage = (props: KeyPageProps) => {
               created_at: (
                 <p className="text-gray-500">
                   {new Date(key.created_at).toLocaleString()}
+                </p>
+              ),
+              permissions: (
+                <p className="text-gray-500">
+                  {keyPermissions.get(key.key_permissions ?? "rw") ??
+                    "Read/Write"}
                 </p>
               ),
             };

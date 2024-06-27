@@ -14,14 +14,21 @@ if (IS_RATE_LIMIT_ENABLED) {
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
     keyGenerator: (req) => {
-      return (req as JawnAuthenticatedRequest).authParams.organizationId;
+      return (
+        (req as JawnAuthenticatedRequest)?.authParams?.organizationId ??
+        req.ip ??
+        "unknown"
+      );
     },
     handler: (req, res, next) => {
       postHogClient?.capture({
         distinctId: "jawn-server",
         event: "rate-limited",
         properties: {
-          orgId: (req as JawnAuthenticatedRequest).authParams.organizationId,
+          orgId:
+            (req as JawnAuthenticatedRequest)?.authParams?.organizationId ??
+            req.ip ??
+            "unknown",
           wasRateLimited: true,
           url: req.url,
           method: req.method,

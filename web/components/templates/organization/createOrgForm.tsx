@@ -16,6 +16,7 @@ import useNotification from "../../shared/notification/useNotification";
 import ProviderKeyList from "../enterprise/portal/id/providerKeyList";
 import CreateProviderKeyModal from "../vault/createProviderKeyModal";
 import { useVaultPage } from "../vault/useVaultPage";
+import { getJawnClient } from "../../../lib/clients/jawn";
 
 export const ORGANIZATION_COLORS = [
   {
@@ -264,43 +265,112 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 <div className="space-y-1 text-sm">
                   <label
                     htmlFor="org-costs"
-                    className="block text-xs leading-6 text-gray-500"
+                    className="block text-xs leading-6 text-gray-500 "
                   >
                     Costs (USD)
                   </label>
-                  <input
-                    type="number"
-                    name="org-costs"
-                    id="org-costs"
-                    value={limits?.cost ?? 0}
-                    className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
-                    onChange={(e) =>
-                      setLimits((prev) =>
-                        prev ? { ...prev, cost: +e.target.value } : null
-                      )
-                    }
-                  />
+                  <div className="flex flex-col gap-2">
+                    <input
+                      type="number"
+                      name="org-costs"
+                      id="org-costs"
+                      disabled={limits?.cost !== -1}
+                      value={limits?.cost === -1 ? 9999999 : limits?.cost ?? 0}
+                      className={clsx(
+                        "max-w-[10em] bg-gray-50 dark:bg-gray-950",
+                        " block w-full rounded-md border-0 py-1.5",
+                        "shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2",
+                        "focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6",
+                        limits?.cost === -1
+                          ? "text-gray-400"
+                          : "text-black dark:text-white"
+                      )}
+                      onChange={(e) =>
+                        setLimits((prev) =>
+                          prev ? { ...prev, cost: +e.target.value } : null
+                        )
+                      }
+                    />
+                    <div className="flex gap-2 items-center">
+                      <div>Unlimited</div>
+                      <input
+                        type="checkbox"
+                        name="org-costs"
+                        id="org-costs"
+                        value={limits?.cost !== -1 ? 1 : 0}
+                        className=""
+                        onChange={(e) => {
+                          if (limits?.cost === -1) {
+                            setLimits((prev) =>
+                              prev ? { ...prev, cost: 1000 } : null
+                            );
+                          } else {
+                            setLimits((prev) =>
+                              prev ? { ...prev, cost: -1 } : null
+                            );
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-1 text-xs">
+                <div className="space-y-1 text-sm">
                   <label
-                    htmlFor="org-requests"
-                    className="block text-xs leading-6 text-gray-500"
+                    htmlFor="org-costs"
+                    className="block text-xs leading-6 text-gray-500 "
                   >
-                    Requests
+                    Request
                   </label>
-                  <input
-                    type="number"
-                    name="org-requests"
-                    id="org-requests"
-                    value={limits?.requests ?? 0}
-                    className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
-                    onChange={(e) =>
-                      setLimits((prev) =>
-                        prev ? { ...prev, requests: +e.target.value } : null
-                      )
-                    }
-                  />
+                  <div className="flex flex-col gap-2">
+                    <input
+                      type="number"
+                      name="org-request"
+                      id="org-request"
+                      disabled={limits?.requests !== -1}
+                      value={
+                        limits?.requests === -1
+                          ? 9999999
+                          : limits?.requests ?? 0
+                      }
+                      className={clsx(
+                        "max-w-[10em] bg-gray-50 dark:bg-gray-950",
+                        " block w-full rounded-md border-0 py-1.5",
+                        "shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2",
+                        "focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6",
+                        limits?.requests === -1
+                          ? "text-gray-400"
+                          : "text-black dark:text-white"
+                      )}
+                      onChange={(e) =>
+                        setLimits((prev) =>
+                          prev ? { ...prev, requests: +e.target.value } : null
+                        )
+                      }
+                    />
+                    <div className="flex gap-2 items-center">
+                      <div>Unlimited</div>
+                      <input
+                        type="checkbox"
+                        name="org-requests"
+                        id="org-requests"
+                        value={limits?.requests !== -1 ? 1 : 0}
+                        className=""
+                        onChange={(e) => {
+                          if (limits?.requests === -1) {
+                            setLimits((prev) =>
+                              prev ? { ...prev, requests: 1000 } : null
+                            );
+                          } else {
+                            setLimits((prev) =>
+                              prev ? { ...prev, requests: -1 } : null
+                            );
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
+
                 <div className="space-y-1 text-xs">
                   <label
                     htmlFor="org-time"
@@ -311,7 +381,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                   <select
                     id="org-size"
                     name="org-size"
-                    className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+                    className="max-w-[10em] bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
                     required
                   >
                     <option value="word">monthly</option>
@@ -370,24 +440,32 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 setNotification("Please select a provider key", "error");
                 return;
               }
+              const jawn = getJawnClient(orgContext?.currentOrg?.id);
               if (initialValues) {
-                const { data, error } = await supabaseClient
-                  .from("organization")
-                  .update({
-                    name: orgName,
-                    color: selectedColor.name,
-                    icon: selectedIcon.name,
-                    ...(variant === "reseller" && {
-                      org_provider_key: providerKey,
-                      limits: limits,
-                      reseller_id: orgContext?.currentOrg?.id!,
-                      organization_type: "customer",
-                    }),
-                  })
-                  .eq("id", initialValues.id)
-                  .select("*");
+                const { error: updateOrgError } = await jawn.POST(
+                  "/v1/organization/{organizationId}/update",
+                  {
+                    params: {
+                      path: {
+                        organizationId: initialValues.id,
+                      },
+                    },
+                    body: {
+                      name: orgName,
+                      color: selectedColor.name,
+                      icon: selectedIcon.name,
+                      variant,
+                      ...(variant === "reseller" && {
+                        org_provider_key: providerKey,
+                        limits: limits || undefined,
+                        reseller_id: orgContext?.currentOrg?.id!,
+                        organization_type: "customer",
+                      }),
+                    },
+                  }
+                );
 
-                if (error || data.length === 0) {
+                if (updateOrgError) {
                   setNotification("Failed to update organization", "error");
                 } else {
                   setNotification(
@@ -399,14 +477,10 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 onCancelHandler && onCancelHandler(false);
                 orgContext?.refetchOrgs();
               } else {
-                const { data, error } = await fetch(
-                  "/api/organization/create",
+                const { error: createOrgError } = await jawn.POST(
+                  "/v1/organization/create",
                   {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
+                    body: {
                       name: orgName,
                       owner: user?.id!,
                       color: selectedColor.name,
@@ -414,17 +488,17 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                       has_onboarded: true,
                       tier: "free",
                       ...(variant === "reseller" && {
+                        org_provider_key: providerKey,
+                        limits: limits || undefined,
                         reseller_id: orgContext?.currentOrg?.id!,
                         organization_type: "customer",
-                        org_provider_key: providerKey,
-                        limits: limits,
                       }),
-                    }),
+                    },
                   }
-                ).then((res) => res.json());
-                if (error) {
+                );
+                if (createOrgError) {
                   setNotification(
-                    "Failed to create organization" + error,
+                    "Failed to create organization" + createOrgError,
                     "error"
                   );
                 } else {

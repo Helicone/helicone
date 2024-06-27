@@ -27,6 +27,9 @@ export class HeliconeFeedback {
     let response: Response;
     let url: URL;
     try {
+      if (!heliconeMeta.baseUrl) {
+        throw new Error("No base URL provided in Helicone meta data");
+      }
       url = new URL(heliconeMeta.baseUrl);
       url.pathname = "/v1/feedback";
       response = await fetch(url, options);
