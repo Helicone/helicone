@@ -30,6 +30,16 @@ const SignIn = ({
   const { setNotification } = useNotification();
 
   const customerPortalContent = customerPortal?.data || undefined;
+  const { unauthorized } = router.query;
+  if (unauthorized === "true") {
+    supabase.auth.signOut().then(() => {
+      setNotification(
+        "You have been logged out due to unauthorized access.",
+        "error"
+      );
+      router.push("/signin");
+    });
+  }
 
   if (user) {
     router.push("/dashboard");
