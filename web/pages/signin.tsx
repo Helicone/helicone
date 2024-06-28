@@ -7,6 +7,7 @@ import { isCustomerDomain } from "../lib/customerPortalHelpers";
 import { supabaseServer } from "../lib/supabaseServer";
 import { Result, err, ok } from "../lib/result";
 import PublicMetaData from "../components/layout/public/publicMetaData";
+import { useEffect } from "react";
 
 export type CustomerPortalContent = {
   domain: string;
@@ -31,15 +32,18 @@ const SignIn = ({
 
   const customerPortalContent = customerPortal?.data || undefined;
   const { unauthorized } = router.query;
-  if (unauthorized === "true") {
-    supabase.auth.signOut().then(() => {
-      setNotification(
-        "You have been logged out due to unauthorized access.",
-        "error"
-      );
-      router.push("/signin");
-    });
-  }
+  useEffect(() => {
+    if (unauthorized === "true") {
+      supabase.auth.signOut().then(() => {
+        setNotification(
+          "You have been logged out due to unauthorized access.",
+          "error"
+        );
+        router.push("/signin");
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unauthorized]);
 
   if (user) {
     router.push("/dashboard");
