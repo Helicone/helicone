@@ -37,25 +37,18 @@ export const INITIAL_COLUMNS: ColumnDef<any>[] = [
   {
     accessorKey: "completion_tokens",
     header: "Completion Tokens",
-    cell: (info) =>
-      getUSDateFromString(convertToUSDateFormat(info.getValue() as string)),
+    cell: (info) => Number(info.getValue()).toLocaleString(),
     minSize: 200,
   },
   {
     accessorKey: "total_tokens",
     header: "Total Tokens",
     cell: (info) => Number(info.getValue()).toLocaleString(),
-    meta: {
-      sortKey: "total_tokens",
-    },
   },
   {
     accessorKey: "total_requests",
     header: "Requests",
     cell: (info) => Number(info.getValue()).toLocaleString(),
-    meta: {
-      sortKey: "total_requests",
-    },
   },
 ];
 

@@ -3,6 +3,7 @@ import { Col } from "../../../layout/common/col";
 import { Row } from "../../../layout/common/row";
 import StatusBadge from "../../../templates/requestsV2/statusBadge";
 import { clsx } from "../../clsx";
+import { HorizontalLine } from "./Tree";
 
 export function RequestNode(props: {
   selectedRequestId: string;
@@ -33,7 +34,7 @@ export function RequestNode(props: {
           : setSelectedRequestId(node.trace?.request_id ?? "")
       }
     >
-      <div className="absolute left-[-12px] top-[14px] w-[12px] h-[2px] bg-[#F0F0F0] dark:bg-gray-700" />
+      <HorizontalLine />
       <Row className="w-full">
         <span
           className={clsx(
@@ -45,7 +46,7 @@ export function RequestNode(props: {
         </span>
         <Col className="w-full gap-5">
           <Row className="items-center flex-grow i">
-            <span className="text-green-700 dark:text-green-500 font-bold flex-grow">
+            <span className="font-semibold flex-grow">
               {node.trace?.request.model}
             </span>
 

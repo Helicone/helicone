@@ -1,5 +1,3 @@
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { TextInput } from "@tremor/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import {
@@ -9,10 +7,11 @@ import {
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useSessions } from "../../../services/hooks/sessions";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
+import { Row } from "../../layout/common/row";
 import AuthHeader from "../../shared/authHeader";
-import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import { INITIAL_COLUMNS } from "./initialColumns";
+import SessionNameSelection from "./nameSelection";
+import SessionDetails from "./sessionDetails";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -44,56 +43,36 @@ const SessionsPage = (props: SessionsPageProps) => {
   const [sessionIdSearch, setSessionIdSearch] = useState<string>("");
 
   const debouncedSessionIdSearch = useDebounce(sessionIdSearch, 500); // 0.5 seconds
+  const [selectedName, setSelectedName] = useState<string>("");
 
   const { sessions, refetch, isLoading } = useSessions(
     timeFilter,
-    debouncedSessionIdSearch
+    debouncedSessionIdSearch,
+    selectedName
   );
 
   return (
     <>
       <AuthHeader title={"Sessions (beta)"} />
-      <div className="flex flex-col space-y-4">
-        <TextInput
-          icon={MagnifyingGlassIcon}
-          value={sessionIdSearch}
-          onValueChange={(value) => setSessionIdSearch(value)}
-          placeholder="Search session..."
+      <Row className="gap-5 ">
+        <SessionNameSelection
+          sessionIdSearch={sessionIdSearch}
+          setSessionIdSearch={setSessionIdSearch}
+          selectedName={selectedName}
+          setSelectedName={setSelectedName}
         />
-        <ThemedTableV5
-          defaultData={sessions || []}
-          defaultColumns={INITIAL_COLUMNS}
-          tableKey="sessionColumnVisibility"
-          dataLoading={isLoading}
-          sortable={sort}
-          timeFilter={{
-            currentTimeFilter: timeFilter,
-            defaultValue: "all",
-            onTimeSelectHandler: (key: TimeInterval, value: string) => {
-              if ((key as string) === "custom") {
-                const [startDate, endDate] = value.split("_");
-
-                const start = new Date(startDate);
-                const end = new Date(endDate);
-                setInterval(key);
-                setTimeFilter({
-                  start,
-                  end,
-                });
-              } else {
-                setInterval(key);
-                setTimeFilter({
-                  start: getTimeIntervalAgo(key),
-                  end: new Date(),
-                });
-              }
-            },
-          }}
-          onRowSelect={(row) => {
-            router.push(`/sessions/${row.session}`);
-          }}
+        <SessionDetails
+          selectedName={selectedName}
+          sessionIdSearch={sessionIdSearch}
+          setSessionIdSearch={setSessionIdSearch}
+          sessions={sessions}
+          isLoading={isLoading}
+          sort={sort}
+          timeFilter={timeFilter}
+          setTimeFilter={setTimeFilter}
+          setInterval={setInterval}
         />
-      </div>
+      </Row>
     </>
   );
 };
