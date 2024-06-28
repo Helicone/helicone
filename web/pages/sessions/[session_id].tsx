@@ -5,8 +5,6 @@ import AuthLayout from "../../components/layout/authLayout";
 import HcBreadcrumb from "../../components/ui/hcBreadcrumb";
 import { withAuthSSR } from "../../lib/api/handlerWrappers";
 
-import { clsx } from "../../components/shared/clsx";
-
 import { TraceFlow } from "../../components/shared/sessions/Flow";
 import { Tree } from "../../components/shared/sessions/Tree/Tree";
 import getNormalizedRequest from "../../components/templates/requestsV2/builder/requestBuilder";
@@ -14,10 +12,10 @@ import { tracesToTreeNodeData } from "../../lib/sessions/helpers";
 import { Session, Trace } from "../../lib/sessions/sessionTypes";
 import { useGetRequests } from "../../services/hooks/requests";
 
+import { Col } from "../../components/layout/common/col";
+import { Row } from "../../components/layout/common/row";
 import { TraceSpan } from "../../components/shared/sessions/Span";
 import { HeliconeRequest } from "../../lib/api/request/request";
-import { Row } from "../../components/layout/common/row";
-import { Col } from "../../components/layout/common/col";
 import { getTimeAgo } from "../../lib/sql/timeHelpers";
 
 const BreadCrumb = ({
