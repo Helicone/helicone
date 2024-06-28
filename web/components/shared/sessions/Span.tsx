@@ -48,8 +48,8 @@ export const TraceSpan = ({
 
   return (
     <div className="mx-10">
-      <div style={{ height: "200px", overflowY: "auto" }}>
-        <ResponsiveContainer width="100%" height={spanData.length * 50}>
+      <div style={{ height: "350px", overflowY: "auto" }}>
+        <ResponsiveContainer width="100%" height={spanData.length * 30}>
           <BarChart
             data={spanData}
             layout="vertical"
@@ -201,7 +201,7 @@ export const TraceSpan = ({
                 const { payload } = props;
                 const trace: BarChartTrace = payload?.[0]?.payload;
                 return (
-                  <Col className="bg-white p-2 gap-10">
+                  <Col className="bg-white p-2 gap-10 z-50">
                     <div>{trace?.name}</div>
                     <Col className="text-gray-500">
                       <div>Duration: {trace?.duration}s</div>

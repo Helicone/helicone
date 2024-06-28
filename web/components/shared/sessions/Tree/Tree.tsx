@@ -11,10 +11,16 @@ const VerticalLine: React.FC<VerticalLineProps> = ({ isLastChild }) => {
   return (
     <div
       className={clsx(
-        "absolute left-[-12px] top-0 w-[2px] bg-[#FFF0F0] dark:bg-gray-700",
-        !isLastChild ? "h-full" : "h-[16px]"
+        "absolute left-[-12px] top-[-20px] w-[2px] bg-[#F0F0F0] dark:bg-gray-700",
+        !isLastChild ? "h-full " : "h-[42px] "
       )}
     />
+  );
+};
+
+export const HorizontalLine: React.FC = () => {
+  return (
+    <div className="absolute left-[-12px] top-[20px] w-[12px] h-[2px] bg-[#F0F0F0] dark:bg-gray-700" />
   );
 };
 
@@ -94,6 +100,7 @@ export const Tree: React.FC<TreeProps> = ({
     <TreeNode
       node={data}
       selectedRequestIdDispatch={selectedRequestIdDispatch}
+      isLastChild={true}
     />
   </div>
 );

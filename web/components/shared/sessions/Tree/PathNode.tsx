@@ -46,7 +46,7 @@ export function PathNode(props: {
   return (
     <div
       className={clsx(
-        "relative flex flex-col rounded-md w-fit",
+        "relative flex flex-col rounded-md py-2 px-[6px] mb-2 w-fit",
 
         "hover:bg-[#F0F0F0] dark:hover:bg-gray-700 hover:cursor-pointer"
       )}
@@ -56,7 +56,7 @@ export function PathNode(props: {
           : setSelectedRequestId(node.trace?.request_id ?? "")
       }
     >
-      <div className="absolute left-[-12px] top-[14px] w-[12px] h-[2px] bg-[#FFF0F0] dark:bg-gray-700" />
+      <div className="absolute left-[-12px] top-[20px] w-[18px] h-[2px] bg-[#F0F0F0] dark:bg-gray-700" />
       <div className="flex items-center gap-2">
         {!closeChildren ? <MinusSign /> : <PlusSign />}
 

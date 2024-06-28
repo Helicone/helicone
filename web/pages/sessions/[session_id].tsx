@@ -158,53 +158,21 @@ const SessionDetail = ({}) => {
         startTime={
           requests.requests.data?.data
             ? new Date(
-                requests.requests.data?.data[
-                  requests.requests.data?.data.length - 1
-                ].request_created_at
+                requests.requests.data?.data?.[
+                  (requests.requests.data?.data?.length ?? 0) - 1
+                ]?.request_created_at
               )
-            : new Date()
+            : new Date(0)
         }
         endTime={
           requests.requests.data?.data
-            ? new Date(requests.requests.data?.data[0].request_created_at)
-            : new Date()
+            ? new Date(
+                requests.requests.data?.data?.[0]?.request_created_at ?? 0
+              )
+            : new Date(0)
         }
       />
-      <div>
-        <button
-          onClick={() => setCurrentTopView("span")}
-          className={clsx(
-            "px-4 py-2 rounded-md",
-            currentTopView === "span"
-              ? "bg-gray-200 dark:bg-gray-800"
-              : "bg-gray-100 dark:bg-gray-900"
-          )}
-        >
-          Span
-        </button>
-        <button
-          onClick={() => setCurrentTopView("flow")}
-          className={clsx(
-            "px-4 py-2 rounded-md",
-            currentTopView === "flow"
-              ? "bg-gray-200 dark:bg-gray-800"
-              : "bg-gray-100 dark:bg-gray-900"
-          )}
-        >
-          Flow (experimental)
-        </button>
-        <button
-          onClick={() => setCurrentTopView("hidden")}
-          className={clsx(
-            "px-4 py-2 rounded-md",
-            currentTopView === "hidden"
-              ? "bg-gray-200 dark:bg-gray-800"
-              : "bg-gray-100 dark:bg-gray-900"
-          )}
-        >
-          Hidden
-        </button>
-      </div>
+
       <div className="bg-white">
         {currentTopView === "span" && (
           <TraceSpan
@@ -220,7 +188,7 @@ const SessionDetail = ({}) => {
       <Row className={"gap-[12px]"}>
         <Tree
           data={tracesToTreeNodeData(session.traces)}
-          className="pr-10 min-h-[1000px] w-[30em] overflow-auto min-w-[30em] rounded-lg max-h-screen overflow-auto"
+          className="pr-10 min-h-[1000px] w-[30em] min-w-[30em] rounded-lg max-h-screen overflow-auto"
           selectedRequestIdDispatch={[selectedRequestId, setSelectedRequestId]}
         />
         <div className="flex-grow">

@@ -101,6 +101,43 @@ const models: TsoaRoute.Models = {
         "properties": {
             "sessionIdContains": {"dataType":"string","required":true},
             "timeFilter": {"dataType":"nestedObjectLiteral","nestedProperties":{"endTimeUnixMs":{"dataType":"double","required":true},"startTimeUnixMs":{"dataType":"double","required":true}},"required":true},
+            "sessionName": {"dataType":"string","required":true},
+            "timezoneDifference": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SessionNameResult": {
+        "dataType": "refObject",
+        "properties": {
+            "name": {"dataType":"string","required":true},
+            "created_at": {"dataType":"string","required":true},
+            "total_cost": {"dataType":"double","required":true},
+            "last_used": {"dataType":"string","required":true},
+            "session_count": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_SessionNameResult-Array_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"array","array":{"dataType":"refObject","ref":"SessionNameResult"},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_SessionNameResult-Array.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_SessionNameResult-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SessionNameQueryParams": {
+        "dataType": "refObject",
+        "properties": {
+            "nameContains": {"dataType":"string","required":true},
+            "timezoneDifference": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },
@@ -1075,6 +1112,38 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getSessions',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/session/name/query',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(SessionController)),
+            ...(fetchMiddlewares<RequestHandler>(SessionController.prototype.getNames)),
+
+            async function SessionController_getNames(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"SessionNameQueryParams"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new SessionController();
+
+              await templateService.apiHandler({
+                methodName: 'getNames',
                 controller,
                 response,
                 next,
