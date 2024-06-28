@@ -1,0 +1,48 @@
+---
+title: "Javascript"
+description: "Learn how to integrate Replicate with Helicone using Replicate's JS SDK."
+---
+
+## Proxy Integration (recommended)
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Set HELICONE_API_KEY as an environment variable">
+```javascript
+HELICONE_API_KEY=<your API key>
+```
+  </Step>
+  <Step title="Modify the base path and add a Helicone-Auth header">
+<CodeGroup>
+
+```javascript Replicate SDK
+import Replicate from 'replicate'
+
+// define custom fetch function to inject Helicone headers
+const heliconeFetch = (url, options) => {
+  const headers = new Headers(options && options.headers);
+
+  headers.append("Helicone-Target-Url", "https://api.replicate.com");
+  headers.append("Helicone-Auth", `Bearer ${process.env.HELICONE_LOCAL_KEY}`);
+
+  return fetch(url, { ...options, headers});
+};
+
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN,
+  baseUrl: "http://gateway.helicone.ai/v1", // override baseUrl to route calls through Helicone
+  fetch: heliconeFetch, // use custom fetch function
+})
+
+// Define parameters and call your model...
+const output = await replicate.run(model, { input })
+console.log('Done!', output)
+```
+
+</CodeGroup>
+
+  </Step>
+</Steps>

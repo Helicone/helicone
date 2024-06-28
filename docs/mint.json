@@ -103,6 +103,13 @@
             "integrations/groq/curl"
           ]
         },
+        {
+          "group": "Replicate",
+          "pages": [
+            "integrations/replicate/javascript",
+            "integrations/replicate/curl"
+          ]
+        },
         "getting-started/integration-method/deepinfra",
         "getting-started/integration-method/openrouter",
         "getting-started/integration-method/litellm",

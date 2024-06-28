@@ -1,0 +1,32 @@
+---
+title: "cURL"
+description: "Learn how to use Replicate and Helicone together using cURL."
+---
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Modify the API base and add the `Helicone-Auth` header">
+
+    <Note>
+    Please ensure to replace API keys with your own.
+    </Note>
+
+    ```bash
+    curl -X POST \
+      --url https://gateway.helicone.ai/v1/predictions \    
+      --header 'Content-Type: application/json' \
+      --header "Authorization: Bearer $REPLICATE_API_KEY" \
+      --header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+      --header "Helicone-Target-Url: https://api.replicate.com" \                                                        
+      --data '{
+        // find model ID & version on Replicate.com
+        "version": "5c7d5dc6dd8bf75c1acaa8565735e7986bc5b66206b55cca93cb72c9bf15ccaa",
+        "input": {"text": "Hello World"}
+      }'
+    ```
+    </Step>
+
+</Steps>
