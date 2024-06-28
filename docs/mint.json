@@ -25,6 +25,11 @@
     {
       "name": "API",
       "url": "rest"
+    },
+    {
+      "name": "API Reference",
+      "openapi": "/path/to/openapi.json",
+      "url": "api-reference"
     }
   ],
   "feedback": {
