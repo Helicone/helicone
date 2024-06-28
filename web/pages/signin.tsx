@@ -39,7 +39,6 @@ const SignIn = ({
           "You have been logged out due to unauthorized access.",
           "error"
         );
-        router.push("/signin");
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
