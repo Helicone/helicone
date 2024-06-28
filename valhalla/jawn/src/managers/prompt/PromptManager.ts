@@ -228,7 +228,9 @@ export class PromptManager extends BaseManager {
     const result = await dbExecute(
       `
     UPDATE prompt_v2
-    SET soft_delete = true
+    SET 
+    soft_delete = true,
+    user_defined_id = user_defined_id || '_deleted_' || id
     WHERE id = $1
     AND organization = $2
     `,
