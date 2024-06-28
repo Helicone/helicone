@@ -18,6 +18,9 @@ export interface paths {
   "/v1/session/query": {
     post: operations["GetSessions"];
   };
+  "/v1/session/name/query": {
+    post: operations["GetNames"];
+  };
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
@@ -214,6 +217,29 @@ export interface components {
         /** Format: double */
         startTimeUnixMs: number;
       };
+      sessionName: string;
+      /** Format: double */
+      timezoneDifference: number;
+    };
+    SessionNameResult: {
+      name: string;
+      created_at: string;
+      /** Format: double */
+      total_cost: number;
+      last_used: string;
+      /** Format: double */
+      session_count: number;
+    };
+    "ResultSuccess_SessionNameResult-Array_": {
+      data: components["schemas"]["SessionNameResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SessionNameResult-Array.string_": components["schemas"]["ResultSuccess_SessionNameResult-Array_"] | components["schemas"]["ResultError_string_"];
+    SessionNameQueryParams: {
+      nameContains: string;
+      /** Format: double */
+      timezoneDifference: number;
     };
 Json: JsonObject;
     /** @enum {string} */
@@ -925,6 +951,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_SessionResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetNames: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SessionNameQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SessionNameResult-Array.string_"];
         };
       };
     };

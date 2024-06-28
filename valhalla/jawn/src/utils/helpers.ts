@@ -23,10 +23,16 @@ export async function getTokenCount(
   provider: Provider
 ): Promise<number> {
   if (!inputText) return 0;
-  
-  if (provider === "OPENAI" || (provider == "OPENROUTER" && model?.includes("openai"))) {
+
+  if (
+    provider === "OPENAI" ||
+    (provider == "OPENROUTER" && model?.includes("openai"))
+  ) {
     return await getTokenCountGPT3(inputText);
-  } else if (provider === "ANTHROPIC" || (provider == "OPENROUTER" && model?.includes("anthropic"))) {
+  } else if (
+    provider === "ANTHROPIC" ||
+    (provider == "OPENROUTER" && model?.includes("anthropic"))
+  ) {
     return await getTokenCountAnthropic(inputText);
   } else {
     return 0;
@@ -114,4 +120,13 @@ export function unsupportedImage(body: any): any {
     result[key] = unsupportedImage(body[key]);
   }
   return result;
+}
+
+export function isValidTimeZoneDifference(timeZoneDifference: number): boolean {
+  const minutesInDay = 24 * 60;
+  return (
+    !isNaN(timeZoneDifference) &&
+    timeZoneDifference >= -minutesInDay &&
+    timeZoneDifference <= minutesInDay
+  );
 }
