@@ -8,13 +8,14 @@ import { OpenAI } from "openai";
 async function main() {
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
-    baseURL: "https://oai.helicone.ai/v1",
+    baseURL: process.env.HELICONE_BASE_URL ?? "https://oai.helicone.ai/v1",
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
     },
   });
 
-  const session = randomUUID();
+  const sessionName = "Space Course";
+  const session = `${randomUUID()}`;
 
   openai.chat.completions.create(
     {
@@ -29,6 +30,7 @@ async function main() {
     {
       headers: {
         "Helicone-Session-Id": session,
+        "Helicone-Session-Name": sessionName,
         "Helicone-Session-Path": "/abstract",
       },
     }
@@ -47,6 +49,7 @@ async function main() {
     {
       headers: {
         "Helicone-Session-Id": session,
+        "Helicone-Session-Name": sessionName,
         "Helicone-Session-Path": "/abstract",
       },
     }
@@ -65,6 +68,7 @@ async function main() {
     {
       headers: {
         "Helicone-Session-Id": session,
+        "Helicone-Session-Name": sessionName,
         "Helicone-Session-Path": "/outline",
       },
     }
@@ -94,6 +98,7 @@ async function main() {
         {
           headers: {
             "Helicone-Session-Id": session,
+            "Helicone-Session-Name": sessionName,
             "Helicone-Session-Path": `/outline/${chapterName}`,
           },
         }
@@ -120,6 +125,7 @@ async function main() {
             {
               headers: {
                 "Helicone-Session-Id": session,
+                "Helicone-Session-Name": sessionName,
                 "Helicone-Session-Path": `/outline/${chapterName}/${sectionName}`,
               },
             }

@@ -48,6 +48,7 @@ export interface IHeliconeHeaders {
   sessionHeaders: {
     sessionId: Nullable<string>;
     path: Nullable<string>;
+    name: Nullable<string>;
   };
   nodeId: Nullable<string>;
   fallBacks: Nullable<HeliconeFallback[]>;
@@ -92,6 +93,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   sessionHeaders: {
     sessionId: Nullable<string>;
     path: Nullable<string>;
+    name: Nullable<string>;
   };
   nodeId: Nullable<string>;
   fallBacks: Nullable<HeliconeFallback[]>;
@@ -247,6 +249,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       sessionHeaders: {
         sessionId: this.headers.get("Helicone-Session-Id") ?? null,
         path: this.headers.get("Helicone-Session-Path") ?? null,
+        name: this.headers.get("Helicone-Session-Name") ?? null,
       },
       nodeId: this.headers.get("Helicone-Node-Id") ?? null,
       fallBacks: this.getFallBacks(),
@@ -318,7 +321,10 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       heliconePropertyHeaders["Helicone-Prompt-Id"] =
         heliconeHeaders.promptHeaders.promptId;
     }
-
+    if (heliconeHeaders.sessionHeaders.name) {
+      heliconePropertyHeaders[`Helicone-Session-Name`] =
+        heliconeHeaders.sessionHeaders.name;
+    }
     if (heliconeHeaders.sessionHeaders.sessionId) {
       heliconePropertyHeaders["Helicone-Session-Id"] =
         heliconeHeaders.sessionHeaders.sessionId;

@@ -3,24 +3,47 @@ import { TreeNodeData } from "../../../../lib/sessions/sessionTypes";
 import { clsx } from "../../clsx";
 import { PathNode } from "./PathNode";
 import { RequestNode } from "./RequestNode";
+interface VerticalLineProps {
+  isLastChild: boolean;
+}
+
+const VerticalLine: React.FC<VerticalLineProps> = ({ isLastChild }) => {
+  return (
+    <div
+      className={clsx(
+        "absolute left-[-12px] top-[-20px] w-[2px] bg-[#F0F0F0] dark:bg-gray-700",
+        !isLastChild ? "h-full " : "h-[42px] "
+      )}
+    />
+  );
+};
+
+export const HorizontalLine: React.FC = () => {
+  return (
+    <div className="absolute left-[-12px] top-[20px] w-[12px] h-[2px] bg-[#F0F0F0] dark:bg-gray-700" />
+  );
+};
 
 export interface TreeNodeProps {
   node: TreeNodeData;
   selectedRequestIdDispatch: [string, (x: string) => void];
+  isLastChild: boolean;
 }
 
 const TreeNode: React.FC<TreeNodeProps> = ({
   node,
   selectedRequestIdDispatch,
+  isLastChild,
 }) => {
   const [closeChildren, setCloseChildren] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = selectedRequestIdDispatch;
 
   return (
     <div
-      className="relative flex flex-col ml-6 before:absolute before:left-[-12px] before:top-0 before:bottom-0 before:w-[2px] before:bg-[#F0F0F0] dark:before:bg-gray-700 last:before:h-[14px]"
+      className="relative flex flex-col ml-6"
       key={`${node.name}-${node.trace?.request_id}`}
     >
+      <VerticalLine isLastChild={isLastChild} />
       {node.children ? (
         <PathNode
           node={node}
@@ -44,6 +67,11 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             key={index}
             node={child}
             selectedRequestIdDispatch={selectedRequestIdDispatch}
+            isLastChild={
+              node.children?.length
+                ? index === node.children?.length - 1
+                : false
+            }
           />
         ))
       ) : (
@@ -52,7 +80,6 @@ const TreeNode: React.FC<TreeNodeProps> = ({
     </div>
   );
 };
-
 interface TreeProps {
   data: TreeNodeData;
   className?: string;
@@ -73,6 +100,7 @@ export const Tree: React.FC<TreeProps> = ({
     <TreeNode
       node={data}
       selectedRequestIdDispatch={selectedRequestIdDispatch}
+      isLastChild={true}
     />
   </div>
 );
