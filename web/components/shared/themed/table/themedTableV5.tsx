@@ -4,33 +4,35 @@ import {
 } from "@heroicons/react/24/outline";
 import {
   ColumnDef,
-  ColumnOrderState,
   flexRender,
   getCoreRowModel,
-  OnChangeFn,
   useReactTable,
-  VisibilityState,
 } from "@tanstack/react-table";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
+import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
+import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
+import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
+import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
 import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
 import { UIFilterRow } from "../themedAdvancedFilters";
-import ThemedTableHeader from "./themedTableHeader";
-import DraggableColumnHeader from "./draggableColumnHeader";
-import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
-import { useLocalStorage } from "../../../../services/hooks/localStorage";
+import {
+  columnDefsToDragColumnItems,
+  columnDefToDragColumnItem,
+  DragColumnItem,
+} from "./columns/DragList";
+import DraggableColumnHeader from "./columns/draggableColumnHeader";
 import RequestRowView from "./requestRowView";
-import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
-import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
+import ThemedTableHeader from "./themedTableHeader";
 
 interface ThemedTableV5Props<T> {
+  id: string;
   defaultData: T[];
   defaultColumns: ColumnDef<T>[];
-  tableKey: string;
   dataLoading: boolean;
   advancedFilters?: {
     filterMap: SingleFilterDef<any>[];
@@ -74,9 +76,9 @@ export type RequestViews = "table" | "card" | "row";
 
 export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
   const {
+    id,
     defaultData,
     defaultColumns,
-    tableKey,
     dataLoading,
     advancedFilters,
     exportData,
@@ -91,28 +93,12 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     savedFilters,
   } = props;
 
-  const [visibleColumns, setVisibleColumns] = useState<VisibilityState>({});
-  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
-    defaultColumns.map((column) => column.id as string) // must start out with populated columnOrder so we can splice
-  );
   const [view, setView] = useLocalStorage<RequestViews>("view", "table");
 
-  const onVisibilityHandler: OnChangeFn<VisibilityState> = (newState) => {
-    setVisibleColumns(newState);
-  };
-
-  // this needs to be abstracted out to the parent component to become modular
-  useEffect(() => {
-    const requestsVisibility = window.localStorage.getItem(tableKey) || null;
-    if (requestsVisibility) {
-      setVisibleColumns(JSON.parse(requestsVisibility));
-    }
-  }, [tableKey]);
-
-  // syncs the visibility state with local storage
-  useEffect(() => {
-    localStorage.setItem(tableKey, JSON.stringify(visibleColumns));
-  }, [visibleColumns, tableKey]);
+  const [activeColumns, setActiveColumns] = useLocalStorage<DragColumnItem[]>(
+    `${id}-activeColumns`,
+    defaultColumns?.map(columnDefToDragColumnItem)
+  );
 
   const table = useReactTable({
     data: defaultData,
@@ -120,14 +106,33 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     columnResizeMode: "onChange",
     getCoreRowModel: getCoreRowModel(),
     state: {
-      columnVisibility: visibleColumns,
-      columnOrder: columnOrder,
+      columnOrder: activeColumns.map((column) => column.id),
     },
-    onColumnOrderChange: setColumnOrder,
-    onColumnVisibilityChange: onVisibilityHandler,
   });
 
   const rows = table.getRowModel().rows;
+  const columns = table.getAllColumns();
+
+  useEffect(() => {
+    // This is a weird hack for people migrating to a new local storage
+    if (activeColumns.length > 0 && activeColumns.every((c) => c.id === "")) {
+      setActiveColumns(columnDefsToDragColumnItems(columns));
+    }
+  }, [activeColumns, columns, setActiveColumns]);
+
+  useEffect(() => {
+    for (const column of columns) {
+      if (activeColumns.find((c) => c.name === column.id)?.shown) {
+        if (!column.getIsVisible()) {
+          column.toggleVisibility(true);
+        }
+      } else {
+        if (column.getIsVisible()) {
+          column.toggleVisibility(false);
+        }
+      }
+    }
+  }, [activeColumns, columns]);
 
   return (
     <div className="flex flex-col space-y-4">
@@ -145,15 +150,9 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
             : undefined
         }
         savedFilters={savedFilters}
-        columnsFilter={
-          hideView
-            ? undefined
-            : {
-                columns: table.getAllColumns(),
-                onSelectAll: table.toggleAllColumnsVisible,
-                visibleColumns: table.getVisibleLeafColumns().length,
-              }
-        }
+        activeColumns={activeColumns}
+        setActiveColumns={setActiveColumns}
+        columns={hideView ? [] : table.getAllColumns()}
         timeFilter={
           timeFilter
             ? {
@@ -229,7 +228,6 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
                       <DraggableColumnHeader
                         key={header.id}
                         header={header}
-                        table={table}
                         sortable={sortable}
                       />
                     ))}

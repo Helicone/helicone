@@ -61,9 +61,9 @@ const ModelPage = (props: ModelPageProps) => {
     <>
       <AuthHeader title={"Models"} />
       <ThemedTableV5
+        id="modelMetrics"
         defaultData={data?.data || []}
         defaultColumns={INITIAL_COLUMNS}
-        tableKey={"modelMetrics"}
         dataLoading={isLoading}
         exportData={data?.data || []}
         onRowSelect={(row) => {}}

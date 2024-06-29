@@ -56,9 +56,9 @@ const SessionDetails = ({
         placeholder="Search session id..."
       />
       <ThemedTableV5
+        id="session-table"
         defaultData={sessions || []}
         defaultColumns={INITIAL_COLUMNS}
-        tableKey="sessionColumnVisibility"
         dataLoading={isLoading}
         sortable={sort}
         timeFilter={{
