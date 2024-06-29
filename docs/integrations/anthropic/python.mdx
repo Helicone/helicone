@@ -24,7 +24,7 @@ import anthropic
 
 client = anthropic.Anthropic(
   api_key=os.environ.get("ANTHROPIC_API_KEY"),
-  base_url="https://anthropic.helicone.ai/v1"
+  base_url="https://anthropic.helicone.ai/v1",
   default_headers={
     "Helicone-Auth": os.environ.get("HELICONE_API_KEY"),
   },
