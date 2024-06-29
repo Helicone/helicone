@@ -8,13 +8,14 @@ import { clsx } from "../../clsx";
 import { AdvancedFilters, UIFilterRow } from "../themedAdvancedFilters";
 import ThemedTimeFilter from "../themedTimeFilter";
 import ExportButton from "./exportButton";
-import ViewColumns from "../../../templates/requestsV2/viewColumns";
+import ViewColumns from "./columns/viewColumns";
 import useSearchParams from "../../utils/useSearchParams";
 import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
 import ViewButton from "./viewButton";
 import { RequestViews } from "./themedTableV5";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import FiltersButton from "./filtersButton";
+import { DragColumnItem } from "./columns/DragList";
 
 interface ThemedTableHeaderProps<T> {
   rows?: T[];
@@ -30,13 +31,7 @@ interface ThemedTableHeaderProps<T> {
     ) => Promise<Result<void, string>>;
     show?: boolean;
   };
-
-  // define this if you want the columns filter
-  columnsFilter?: {
-    onSelectAll: (value?: boolean | undefined) => void;
-    columns: Column<T, unknown>[];
-    visibleColumns: number;
-  };
+  columns: Column<T, unknown>[];
 
   // define this if you want the time filter
   timeFilter?: {
@@ -58,16 +53,20 @@ interface ThemedTableHeaderProps<T> {
     onSaveFilterCallback?: () => void;
     layoutPage: "dashboard" | "requests";
   };
+  activeColumns: DragColumnItem[];
+  setActiveColumns: (columns: DragColumnItem[]) => void;
 }
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
   const {
     rows,
-    columnsFilter,
+    columns,
     timeFilter,
     advancedFilters,
     viewToggle,
     savedFilters,
+    activeColumns,
+    setActiveColumns,
   } = props;
 
   const searchParams = useSearchParams();
@@ -149,11 +148,11 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
             />
           )}
 
-          {columnsFilter && (
+          {columns && (
             <ViewColumns
-              columns={columnsFilter.columns}
-              onSelectAll={columnsFilter.onSelectAll}
-              visibleColumns={columnsFilter.visibleColumns}
+              columns={columns}
+              activeColumns={activeColumns}
+              setActiveColumns={setActiveColumns}
             />
           )}
           {rows && <ExportButton rows={rows} />}

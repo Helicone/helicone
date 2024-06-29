@@ -91,9 +91,9 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
       <AuthHeader title={"Users"} />
       <div className="flex flex-col space-y-4">
         <ThemedTableV5
+          id="user-table"
           defaultData={users}
           defaultColumns={INITIAL_COLUMNS}
-          tableKey="userColumnVisibility"
           dataLoading={isLoading}
           sortable={sort}
           advancedFilters={{

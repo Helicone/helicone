@@ -1,25 +1,12 @@
-import {
-  BarsArrowDownIcon,
-  BarsArrowUpIcon,
-  EllipsisVerticalIcon,
-} from "@heroicons/react/20/solid";
-import {
-  Column,
-  ColumnOrderState,
-  Header,
-  SortDirection,
-  Table,
-  flexRender,
-} from "@tanstack/react-table";
-import { useRouter } from "next/router";
-import { Fragment, useEffect, useRef } from "react";
-import { useDrag, useDrop } from "react-dnd";
-import { clsx } from "../../clsx";
 import { Menu, Transition } from "@headlessui/react";
+import { BarsArrowDownIcon, BarsArrowUpIcon } from "@heroicons/react/20/solid";
+import { Header, SortDirection, flexRender } from "@tanstack/react-table";
+import { useRouter } from "next/router";
+import { Fragment } from "react";
+import { clsx } from "../../../clsx";
 
 export default function DraggableColumnHeader<T>(props: {
   header: Header<T, unknown>;
-  table: Table<T>;
   sortable:
     | {
         sortKey: string | null;
@@ -28,60 +15,11 @@ export default function DraggableColumnHeader<T>(props: {
       }
     | undefined;
 }) {
-  const { header, table, sortable } = props;
-  const { getState, setColumnOrder } = table;
-  const { columnOrder } = getState();
-  const { column } = header;
+  const { header, sortable } = props;
   const router = useRouter();
-
-  const reorderColumn = (
-    draggedColumnId: string,
-    targetColumnId: string,
-    columnOrder: string[]
-  ): ColumnOrderState => {
-    columnOrder.splice(
-      columnOrder.indexOf(targetColumnId),
-      0,
-      columnOrder.splice(columnOrder.indexOf(draggedColumnId), 1)[0] as string
-    );
-    return [...columnOrder];
-  };
-
-  const [, dropRef] = useDrop({
-    accept: "column",
-    drop: (draggedColumn: Column<T>) => {
-      const newColumnOrder = reorderColumn(
-        draggedColumn.id,
-        column.id,
-        columnOrder
-      );
-      setColumnOrder(newColumnOrder);
-    },
-  });
-
-  const [{ isDragging }, dragRef, previewRef] = useDrag({
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-    item: () => column,
-    type: "column",
-  });
 
   const meta = header.column.columnDef?.meta as any;
   const hasSortKey = meta?.sortKey !== undefined;
-
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const thRef = useRef<HTMLTableCellElement>(null);
-
-  // Apply the React DnD ref to the button element
-  useEffect(() => {
-    if (buttonRef.current) {
-      dragRef(buttonRef);
-    }
-    if (thRef.current) {
-      dropRef(thRef);
-    }
-  }, [dragRef]);
 
   return (
     <th
@@ -89,19 +27,12 @@ export default function DraggableColumnHeader<T>(props: {
         colSpan: header.colSpan,
         style: {
           width: header.getSize(),
-          opacity: isDragging ? 0.5 : 1,
         },
       }}
-      ref={thRef}
       className="text-left py-2 font-semibold text-gray-900 dark:text-gray-100 relative"
     >
       <div className="flex flex-row items-center gap-0.5">
-        <button
-          ref={buttonRef}
-          className="flex flex-row items-center py-1 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg"
-        >
-          <EllipsisVerticalIcon className="h-3 w-3 -ml-1" />
-          <EllipsisVerticalIcon className="h-3 w-3 -ml-2" />
+        <button className="flex flex-row items-center py-1 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg">
           <span className="text-gray-900 dark:text-gray-100">
             {header.isPlaceholder
               ? null
