@@ -2,7 +2,7 @@ import { Column } from "@tanstack/react-table";
 import { Col } from "../../../../layout/common/col";
 import { Row } from "../../../../layout/common/row";
 import { clsx } from "../../../clsx";
-import { DragColumnItem } from "./DragList";
+import { columnDefToDragColumnItem, DragColumnItem } from "./DragList";
 
 interface ColumnOptionsProps<T> {
   categories: string[];
@@ -72,14 +72,23 @@ export default function ColumnOptions<T>({
                         <li key={column.id}>
                           <button
                             onClick={() => {
-                              setActiveColumns(
-                                activeColumns.map((c) => {
-                                  if (c.id === column.id) {
-                                    c.shown = !c.shown;
-                                  }
-                                  return c;
-                                })
-                              );
+                              if (
+                                activeColumns.find((c) => c.id === column.id)
+                              ) {
+                                setActiveColumns(
+                                  activeColumns.map((c) => {
+                                    if (c.id === column.id) {
+                                      c.shown = !c.shown;
+                                    }
+                                    return c;
+                                  })
+                                );
+                              } else {
+                                setActiveColumns([
+                                  ...activeColumns,
+                                  columnDefToDragColumnItem(column.columnDef),
+                                ]);
+                              }
                             }}
                             className={clsx(
                               activeColumns.find((c) => c.id === column.id)
