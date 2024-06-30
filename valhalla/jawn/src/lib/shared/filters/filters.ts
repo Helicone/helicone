@@ -275,6 +275,12 @@ const havingKeyMappings: KeyMappings = {
   user_metrics: easyKeyMappings<"user_metrics">({
     last_active: "max(request.created_at)",
     total_requests: "count(request.id)",
+    active_for: "active_for",
+    average_requests_per_day_active: "average_requests_per_day_active",
+    average_tokens_per_request: "average_tokens_per_request",
+    total_completion_tokens: "total_completion_tokens",
+    total_prompt_tokens: "total_prompt_tokens",
+    cost: "cost",
   }),
   users_view: easyKeyMappings<"users_view">({
     active_for: "active_for",

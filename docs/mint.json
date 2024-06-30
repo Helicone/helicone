@@ -189,7 +189,10 @@
     },
     {
       "group": "User",
-      "pages": ["rest/user/post-v1userquery"]
+      "pages": [
+        "rest/user/post-v1userquery",
+        "rest/user/post-v1user-metricsquery"
+      ]
     },
     {
       "group": "Request",
