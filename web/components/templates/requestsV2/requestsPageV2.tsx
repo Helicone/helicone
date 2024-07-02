@@ -224,6 +224,13 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isLive
   );
 
+  const requestWithoutStream = requests.find((r) => {
+    return (
+      (r.requestBody as any)?.stream &&
+      !(r.requestBody as any)?.stream_options?.include_usage
+    );
+  });
+
   useEffect(() => {
     if (initialRequestId && selectedData === undefined) {
       const fetchRequest = async () => {
@@ -553,6 +560,22 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   return (
     <div>
+      {requestWithoutStream && (
+        <div className="alert alert-warning">
+          <p className="text-yellow-800">
+            We are unable to calculate your cost accurately because the
+            &#39;stream_usage&#39; option is not included in your message.
+            Please refer to{" "}
+            <a
+              href="https://docs.helicone.ai/use-cases/enable-stream-usage"
+              className="text-blue-600 underline"
+            >
+              this documentation
+            </a>{" "}
+            for more information.
+          </p>
+        </div>
+      )}
       {!isCached && userId === undefined && (
         <AuthHeader
           title={isCached ? "Cached Requests" : "Requests"}
