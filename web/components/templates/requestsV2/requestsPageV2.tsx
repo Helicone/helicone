@@ -227,7 +227,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const requestWithoutStream = requests.find((r) => {
     return (
       (r.requestBody as any)?.stream &&
-      !(r.requestBody as any)?.stream_options?.include_usage
+      !(r.requestBody as any)?.stream_options?.include_usage &&
+      r.provider === "OPENAI"
     );
   });
 
