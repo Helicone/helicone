@@ -565,7 +565,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             &#39;stream_usage&#39; option is not included in your message.
             Please refer to{" "}
             <a
-              href="https://docs.helicone.ai/getting-started/stream-usage"
+              href="https://docs.helicone.ai/use-cases/enable-stream-usage"
               className="text-blue-600 underline"
             >
               this documentation
