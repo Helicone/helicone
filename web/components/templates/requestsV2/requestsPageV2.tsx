@@ -427,8 +427,17 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     properties.map((property) => {
       return {
         id: `${property}`,
+        accessorFn: (row) => {
+          const value = row.customProperties
+            ? row.customProperties[property]
+            : "";
+          console.log("value", value);
+          return value;
+        },
         header: property,
-        cell: (info) => info.getValue(),
+        cell: (info) => {
+          return info.getValue();
+        },
         meta: {
           sortKey: property,
           category: "Custom Property",
