@@ -171,6 +171,7 @@
       "group": "Guides",
       "pages": [
         "use-cases/experiments",
+        "use-cases/enable-stream-usage", 
         "use-cases/resell-a-model",
         "use-cases/bill-by-usage"
       ]
