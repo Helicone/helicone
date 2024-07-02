@@ -16,14 +16,28 @@ description: "Learn how to integrate Anthropic with Helicone using cURL."
 
     ```bash
     curl --request POST \
-        --url https://anthropic.helicone.ai/v1/complete \
-        --header 'Authorization: Bearer <<YOUR_ANTHROPIC_API_KEY>>' \
-        --header 'Content-Type: application/json' \
-        --header 'Helicone-Auth: Bearer <<YOUR_HELICONE_API_KEY>>' \
-        --data '{
+      --url https://anthropic.hconeai.com/v1/messages \
+      --header 'Content-Type: application/json' \
+      --header 'Helicone-Auth: Bearer <<YOUR_HELICONE_API_KEY>>' \
+      --header 'User-Agent: insomnia/8.6.1' \
+      --header 'anthropic-version: 2023-06-01' \
+      --header 'x-api-key: <<YOUR_ANTHROPIC_API_KEY>>' \
+      --data '{
             "model": "claude-3-opus-20240229",
-            "prompt": "Hello, world",
-            "max_tokens_to_sample": 1024
+            "max_tokens": 1,
+            "system": "Respond only in Spanish.",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "Test"
+                        }
+                    ]
+                }
+            ],
+            "stream": true
     }'
     ```
 
