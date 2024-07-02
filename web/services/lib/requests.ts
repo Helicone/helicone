@@ -44,7 +44,7 @@ export const addRequestScore = async (
   requestId: string,
   orgId: string,
   key: string,
-  value: number
+  value: number | boolean
 ) => {
   const jawn = getJawnClient(orgId);
   return (

@@ -2,14 +2,17 @@ import ModelPill from "../../requestsV2/modelPill";
 import { clsx } from "../../../shared/clsx";
 import { SimpleTable } from "../../../shared/table/simpleTable";
 
-type ScoreValue = string | number;
+type Score = {
+  valueType: string;
+  value: number | string;
+};
 
 type ExperimentScores = {
   dataset: {
-    scores: Record<string, ScoreValue>;
+    scores: Record<string, Score>;
   };
   hypothesis: {
-    scores: Record<string, ScoreValue>;
+    scores: Record<string, Score>;
   };
 };
 
@@ -40,20 +43,35 @@ const ScoresTable = ({ scores }: ScoresProps) => {
     });
   };
 
-  const getScoreValue = (score: ScoreValue, field: string) => {
-    if (field === "dateCreated" && typeof score === "string") {
-      return renderScoreValue(score);
+  const getScoreValue = (score: Score, field: string) => {
+    if (field === "dateCreated" && score.valueType === "string") {
+      return renderScoreValue(score.value);
     }
-    if (field === "cost" && typeof score === "number") {
-      return `$${score.toFixed(4)}`;
+    if (
+      field === "cost" &&
+      score.valueType === "number" &&
+      typeof score.value === "number"
+    ) {
+      return `$${score.value.toFixed(4)}`;
     }
-    if (field === "latency" && typeof score === "number") {
-      return `${(+score / 1000).toFixed(2)}s`;
+    if (
+      field === "latency" &&
+      score.valueType === "number" &&
+      typeof score.value === "number"
+    ) {
+      return `${(+score.value / 1000).toFixed(2)}s`;
     }
-    if (field === "model" && typeof score === "string") {
-      return <ModelPill model={score} />;
+    if (score.valueType === "boolean") {
+      return score.value === 1 ? "True" : "False";
     }
-    return score;
+    if (
+      field === "model" &&
+      score.valueType === "string" &&
+      typeof score.value === "string"
+    ) {
+      return <ModelPill model={score.value} />;
+    }
+    return score.value;
   };
 
   const getScoreAttribute = (key: string) => {
@@ -87,8 +105,8 @@ const ScoresTable = ({ scores }: ScoresProps) => {
               "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
             )}
           >
-            {formatDate(scores.dataset.scores.dateCreated as string) ===
-            formatDate(scores.hypothesis.scores.dateCreated as string)
+            {formatDate(scores.dataset.scores.dateCreated.value as string) ===
+            formatDate(scores.hypothesis.scores.dateCreated.value as string)
               ? "same"
               : "changed"}
           </span>
@@ -147,7 +165,19 @@ const ScoresTable = ({ scores }: ScoresProps) => {
           </span>
         );
       default:
-        return (
+        return scores.dataset.scores[field].valueType === "boolean" ? (
+          <span
+            className={clsx(
+              "bg-gray-50 text-gray-700 ring-gray-200",
+              "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
+            )}
+          >
+            {scores.dataset.scores[field].value ===
+            scores.hypothesis.scores[field].value
+              ? "same"
+              : "changed"}
+          </span>
+        ) : (
           <span
             className={clsx(
               "bg-gray-50 text-gray-700 ring-gray-200",
@@ -178,28 +208,32 @@ const ScoresTable = ({ scores }: ScoresProps) => {
       return [];
     }
 
-    const experimentScoresAttributes = Object.keys(
-      scores.dataset.scores
-    ).filter((key) => key !== "customScores");
+    const experimentScoresAttributes = Object.keys(scores.dataset.scores);
 
     return experimentScoresAttributes.map((field) => {
+      const datasetScore = scores.dataset.scores[field];
+      const hypothesisScore = scores.hypothesis.scores[field];
       const comparisonCell =
         field !== "model" && field !== "dateCreated"
-          ? renderComparisonCell(
-              field,
-              scores,
-              calculateChange(
-                scores.dataset.scores[field] as number,
-                scores.hypothesis.scores[field] as number
+          ? hypothesisScore
+            ? renderComparisonCell(
+                field,
+                scores,
+                calculateChange(
+                  datasetScore.value as number,
+                  hypothesisScore.value as number
+                )
               )
-            )
+            : "N/A"
           : renderComparisonCell(field, scores, null);
 
       return {
         score_key: getScoreAttribute(field),
-        dataset: getScoreValue(scores.dataset.scores[field], field),
-        hypothesis: getScoreValue(scores.hypothesis.scores[field], field),
-        compare: comparisonCell,
+        dataset: getScoreValue(datasetScore, field),
+        hypothesis: hypothesisScore
+          ? getScoreValue(hypothesisScore, field)
+          : "N/A",
+        compare: hypothesisScore ? comparisonCell : "N/A",
       };
     });
   };

@@ -165,7 +165,13 @@ export async function getRequests(
     WHERE asset.request_id = request.id
     ) AS asset_ids,
     (
-      SELECT jsonb_object_agg(sa.score_key, sv.int_value)
+      SELECT jsonb_object_agg(
+        sa.score_key, 
+        jsonb_build_object(
+          'value', sv.int_value,
+          'valueType', sa.value_type
+        )
+      )
       FROM score_value sv
       JOIN score_attribute sa ON sv.score_attribute = sa.id
       WHERE sv.request_id = request.id
