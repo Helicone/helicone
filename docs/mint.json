@@ -114,7 +114,8 @@
             "getting-started/integration-method/gateway",
             "getting-started/integration-method/custom"
           ]
-        }
+        },
+        "getting-started/integration-method/async-integration"
       ]
     },
     {
