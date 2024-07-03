@@ -1,10 +1,11 @@
 ---
 title: "Latency Impact"
-description: "We understand that low latency is crucial for the success of your LLM application. That's why we designed Helicone to impact latency as little as possible."
+sidebarTitle: "Latency Impact"
+description: "Helicone minimizes latency for your LLM applications using Cloudflare's global network. Detailed benchmarking results and performance metrics included."
+"twitter:title": "Latency Impact - Helicone OSS LLM Observability"
 ---
 
-Helicone leverages Cloudflare's global network of servers as proxies for efficient web traffic routing. Cloudflare workers maintain extremely low latency through their worldwide distribution. This results in a fast and reliable proxy for your LLM requests. 
-
+Helicone leverages Cloudflare's global network of servers as proxies for efficient web traffic routing. Cloudflare workers maintain extremely low latency through their worldwide distribution. This results in a fast and reliable proxy for your LLM requests.
 
 ### Benchmarking Helicone's proxy service
 
@@ -37,7 +38,10 @@ Here's an experiment that we ran:
 The metrics are almost the same, except that Helicone had a few requests that
 ran longer at the right tail.
 
-<Frame>![Comparison of latency between OpenAI and Helicone proxies for LLM requests](/images/getting-started/openai-helicone.png)</Frame>
+<Frame>
+  ![Comparison of latency between OpenAI and Helicone proxies for LLM
+  requests](/images/getting-started/openai-helicone.png)
+</Frame>
 
 If you have any suggestions about how to benchmark the latency addition to
 Helicone's proxy, drop a note in our [Discord](https://discord.gg/zsSTcH2qhG)!
