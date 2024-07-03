@@ -55,7 +55,7 @@ export interface HeliconeRequest {
   country_code: string | null;
   asset_ids: string[] | null;
   asset_urls: Record<string, string> | null;
-  scores: Record<string, number> | null;
+  scores: Record<string, { value: number; valueType: string }> | null;
 }
 
 export async function getRequests(
