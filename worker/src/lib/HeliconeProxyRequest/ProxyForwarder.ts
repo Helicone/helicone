@@ -2,7 +2,10 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
 import { DBWrapper } from "../db/DBWrapper";
-import { checkRateLimit } from "../clients/KVRateLimiterClient";
+import {
+  checkRateLimit,
+  updateRateLimitCounter,
+} from "../clients/KVRateLimiterClient";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
 import {
@@ -323,6 +326,17 @@ export async function proxyForwarder(
 
     if (res.error !== null) {
       console.error("Error logging", res.error);
+    }
+    if (proxyRequest && proxyRequest.rateLimitOptions) {
+      await updateRateLimitCounter({
+        providerAuthHash: proxyRequest.providerAuthHash,
+        heliconeProperties:
+          proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
+        rateLimitKV: env.RATE_LIMIT_KV,
+        rateLimitOptions: proxyRequest.rateLimitOptions,
+        userId: proxyRequest.userId,
+        cost: res.data?.cost ?? 0,
+      });
     }
   }
 
