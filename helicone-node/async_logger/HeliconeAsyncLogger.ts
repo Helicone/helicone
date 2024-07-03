@@ -45,8 +45,9 @@ export class HeliconeAsyncLogger {
   private headers?: Partial<Record<string, unknown>>;
 
   constructor(opts: IHeliconeAsyncLoggerOptions) {
+    console.log("Runnig in test.");
     this.apiKey = opts.apiKey;
-    this.baseUrl = opts.baseUrl ?? "https://api.helicone.ai";
+    this.baseUrl = opts.baseUrl ?? "https://api.helicone.ai/v1/trace/log";
     this.openAI = opts.providers?.openAI ?? undefined;
     this.anthropic = opts.providers?.anthropic ?? undefined;
     this.azureOpenAI = opts.providers?.azureOpenAI ?? undefined;
