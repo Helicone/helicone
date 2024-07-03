@@ -115,7 +115,10 @@
             "getting-started/integration-method/custom"
           ]
         },
-        "getting-started/integration-method/async-integration"
+        {
+          "group": "Async Logging",
+          "pages": ["getting-started/integration-method/openllmetry"]
+        }
       ]
     },
     {
