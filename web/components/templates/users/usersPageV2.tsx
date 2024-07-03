@@ -9,7 +9,6 @@ import { userTableFilters } from "../../../services/lib/filters/frontendFilterDe
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
-import useNotification from "../../shared/notification/useNotification";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import TableFooter from "../requestsV2/tableFooter";

@@ -5,7 +5,7 @@ module.exports = {
   siteUrl: SITE_URL,
   generateIndexSitemap: true,
   generateRobotsTxt: true,
-  changefreq: "monthly",
+  exclude: ["/icon.ico", "*.js", "*.css", "*.xml", "*.json"],
   robotsTxtOptions: {
     additionalSitemaps: ["https://docs.helicone.ai/sitemap.xml"],
     policies: [
@@ -25,20 +25,7 @@ module.exports = {
           "/devops/",
           "/icon.ico",
         ],
-        exclude: ["/icon.ico", "*.js", "*.css", "*.xml", "*.json"],
       },
     ],
-  },
-  transform: async (config, path) => {
-    if (path === "/icon.ico") {
-      return null;
-    }
-
-    return {
-      loc: path,
-      changefreq: config.changefreq,
-      priority: config.priority,
-      lastmod: config.autoLastmod ? new Date().toISOString() : undefined,
-    };
   },
 };
