@@ -7,7 +7,7 @@ import {
   Squares2X2Icon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { RequestViews } from "./themedTableV5";
+import { RequestViews } from "./themedTable";
 
 interface ViewButtonProps {
   currentView: RequestViews;

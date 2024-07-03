@@ -1,6 +1,8 @@
 ---
-title: "Langchain"
-description: "Learn how to integrate Anthropic with Helicone using Langchain."
+title: "Anthropic LangChain Integration"
+sidebarTitle: "LangChain"
+description: "Use LangChain to integrate Anthropic with Helicone to log your Anthropic LLM usage."
+"twitter:title": "Anthropic LangChain Integration - Helicone OSS LLM Observability"
 ---
 
 <Steps>
@@ -21,9 +23,9 @@ const llm = new ChatAnthropic({
   modelName: "claude-2",
   anthropicApiKey: "ANTHROPIC_API_KEY",
   clientOptions: {
-    baseURL: "https://anthropic.helicone.ai/",
+    baseURL: "https://anthropic.helicone.ai",
     defaultHeaders: {
-      "Helicone-Auth": `Bearer HELICONE_API_KEY`,
+      "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
     },
   },
 });
@@ -33,7 +35,7 @@ const llm = new ChatAnthropic({
 anthropic = ChatAnthropic(
   temperature=0.9,
   model="claude-2",
-  anthropic_api_url="https://anthropic.helicone.ai/",
+  anthropic_api_url="https://anthropic.helicone.ai",
   anthropic_api_key="ANTHROPIC_API_KEY",
   model_kwargs={
     "extra_headers":{

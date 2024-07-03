@@ -36,6 +36,7 @@ type RequestFilterNode =
       | "properties"
       | "values"
       | "request_response_search"
+      | "cache_hits"
     >
   | RequestFilterBranch
   | "all";

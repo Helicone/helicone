@@ -1,6 +1,8 @@
 ---
-title: "Custom Rate Limits"
-description: "Enforcing custom API usage restrictions with rate limiting"
+title: "Custom LLM Rate Limits"
+sidebarTitle: "Custom Rate Limits"
+description: "Set custom rate limits for model provider API calls. Control usage by request count, cost, or custom properties to manage expenses and prevent unintended overuse."
+"twitter:title": "Custom LLM Rate Limits - Helicone OSS LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
@@ -81,7 +83,7 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 ```
 
-</CodeGroup> 
+</CodeGroup>
 <Tip>
   Fun fact: this policy format is an [IETF standard](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/)
   for specifying rate limits! Except for the segment field, that's a Helicone special
@@ -111,6 +113,7 @@ The `s=[segment]` parameter is used to specify the scope in which you want to ap
 **Header policy value:** `10000;w=3600`
 
 {" "}
+
 <Info>
   Notice the `s=[segment]` parameter is ignored since the default is
   global.{" "}
