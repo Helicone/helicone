@@ -467,7 +467,7 @@ export class DBLoggable {
     >
   > {
     try {
-      const { response, body } = await withTimeout(
+      const { response } = await withTimeout(
         this.getResponse(),
         1000 * 60 * 30
       ); // 30 minutes
