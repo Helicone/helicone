@@ -7,7 +7,7 @@ import {
 } from "../../../lib/timeCalculations/time";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import { Col } from "../../layout/common/col";
-import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
+import ThemedTable from "../../shared/themed/table/themedTable";
 import { INITIAL_COLUMNS } from "./initialColumns";
 
 interface SessionDetailsProps {
@@ -55,7 +55,7 @@ const SessionDetails = ({
         onValueChange={(value) => setSessionIdSearch(value)}
         placeholder="Search session id..."
       />
-      <ThemedTableV5
+      <ThemedTable
         id="session-table"
         defaultData={sessions || []}
         defaultColumns={INITIAL_COLUMNS}
