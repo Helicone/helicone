@@ -36,6 +36,9 @@ export interface paths {
   "/v1/organization/{organizationId}/update": {
     post: operations["UpdateOrganization"];
   };
+  "/v1/organization/onboard": {
+    post: operations["OnboardOrganization"];
+  };
   "/v1/organization/{organizationId}/add_member": {
     post: operations["AddMemberToOrganization"];
   };
@@ -589,6 +592,21 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["UpdateOrganizationParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  OnboardOrganization: {
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
       };
     };
     responses: {

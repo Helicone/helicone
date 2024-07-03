@@ -69,7 +69,8 @@ const RequestRow = (props: {
     }[]
   >();
 
-  const [currentScores, setCurrentScores] = useState<Record<string, number>>();
+  const [currentScores, setCurrentScores] =
+    useState<Record<string, { value: number; valueType: string }>>();
 
   const router = useRouter();
   const { setNotification } = useNotification();
@@ -92,7 +93,8 @@ const RequestRow = (props: {
     });
 
     setCurrentProperties(currentProperties);
-    const currentScores: Record<string, number> = request.scores || {};
+    const currentScores: Record<string, { value: number; valueType: string }> =
+      request.scores || {};
     setCurrentScores(currentScores);
   }, [properties, request.customProperties, request.scores]);
 
@@ -166,7 +168,22 @@ const RequestRow = (props: {
 
     const formData = new FormData(e.currentTarget);
     const key = formData.get("key") as string;
-    const value = formData.get("value") as any as number;
+    let value = formData.get("value") as any;
+    let valueType = "number";
+
+    if (!isNaN(Number(value))) {
+      value = Number(value);
+    } else if (value === "true") {
+      value = true;
+      valueType = "boolean";
+    } else if (value === "false") {
+      value = false;
+      valueType = "boolean";
+    } else {
+      setNotification("Value must be a number or 'true'/'false'", "error");
+      setIsScoresAdding(false);
+      return;
+    }
 
     if (currentScores && currentScores[key]) {
       setNotification("Score already exists", "error");
@@ -174,7 +191,7 @@ const RequestRow = (props: {
       return;
     }
 
-    if (!key || !value || org?.currentOrg?.id === undefined) {
+    if (!key || org?.currentOrg?.id === undefined) {
       setNotification("Error adding score", "error");
       setIsScoresAdding(false);
       return;
@@ -193,9 +210,17 @@ const RequestRow = (props: {
           currentScores
             ? {
                 ...currentScores,
-                [key]: value,
+                [key]: {
+                  value: value,
+                  valueType: valueType,
+                },
               }
-            : { [key]: value }
+            : {
+                [key]: {
+                  value: value,
+                  valueType: valueType,
+                },
+              }
         );
 
         setIsScoresAdding(false);
@@ -474,7 +499,7 @@ const RequestRow = (props: {
               <div className="">
                 <TextInput
                   //@ts-ignore
-                  type="number"
+                  type="text"
                   name="value"
                   id="value"
                   required
@@ -502,7 +527,7 @@ const RequestRow = (props: {
 
         <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
           {currentScores &&
-            Object.entries(currentScores).map(([key, value]) => (
+            Object.entries(currentScores).map(([key, scoreValue]) => (
               <li
                 className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
                 key={key}
@@ -510,7 +535,13 @@ const RequestRow = (props: {
                 <p className="font-semibold text-gray-900 dark:text-gray-100">
                   {key}
                 </p>
-                <p className="text-gray-700 dark:text-gray-300">{value}</p>
+                <p className="text-gray-700 dark:text-gray-300">
+                  {scoreValue.valueType === "boolean"
+                    ? scoreValue.value === 1
+                      ? "true"
+                      : "false"
+                    : Number(scoreValue.value)}
+                </p>
               </li>
             ))}
         </div>

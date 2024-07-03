@@ -1,8 +1,14 @@
 {
-  "name": "Helicone",
+  "name": "Helicone OSS LLM Observability",
   "logo": {
     "light": "/logo/light.png",
     "dark": "/logo/dark.svg"
+  },
+  "metadata": {
+    "og:site_name": "Helicone OSS LLM Observability",
+    "og:image": "/favicon.png",
+    "twitter:site": "@helicone_ai",
+    "twitter:image": "/favicon.png"
   },
   "favicon": "/favicon.png",
   "colors": {
@@ -15,7 +21,7 @@
   },
   "topbarCtaButton": {
     "name": "Sign In",
-    "url": "https://www.helicone.ai/#:~:text=Discord-,Sign,-In"
+    "url": "https://us.helicone.ai/#:~:text=Discord-,Sign,-In"
   },
   "tabs": [
     {
@@ -70,7 +76,8 @@
           "pages": [
             "integrations/anthropic/javascript",
             "integrations/anthropic/python",
-            "integrations/anthropic/langchain"
+            "integrations/anthropic/langchain",
+            "integrations/anthropic/curl"
           ]
         },
         {
@@ -132,6 +139,7 @@
     {
       "group": "Features",
       "pages": [
+        "features/sessions",
         "features/prompts",
         "features/advanced-usage/custom-properties",
         "features/advanced-usage/caching",
@@ -174,6 +182,7 @@
       "group": "Guides",
       "pages": [
         "use-cases/experiments",
+        "use-cases/enable-stream-usage",
         "use-cases/resell-a-model",
         "use-cases/bill-by-usage"
       ]
@@ -192,7 +201,10 @@
     },
     {
       "group": "User",
-      "pages": ["rest/user/post-v1userquery"]
+      "pages": [
+        "rest/user/post-v1userquery",
+        "rest/user/post-v1user-metricsquery"
+      ]
     },
     {
       "group": "Request",

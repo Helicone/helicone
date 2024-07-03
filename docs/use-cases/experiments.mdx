@@ -1,6 +1,8 @@
 ---
-title: "How to run experiments with prompts"
-description: "Easily maintain and version your prompts in Helicone. Test and compare the outputs using metrics you care about."
+title: "How to Run LLM Prompt Experiments"
+sidebarTitle: "Prompt Experiments"
+description: "Run experiments with historical datasets to test, evaluate, and improve prompts over time while preventing regressions in production systems."
+"twitter:title": "How to Run LLM Prompt Experiments - Helicone OSS LLM Observability"
 ---
 
 ## Feature Highlight
@@ -9,7 +11,7 @@ description: "Easily maintain and version your prompts in Helicone. Test and com
 - Evaluate the outputs of your new prompt (and have data to back you up 📈).
 - Save cost by testing on specific datasets and making fewer calls to providers like OpenAI. 🤑
 
-## Running your first experiment
+## Running your first prompt experiment
 
 To start an experiment, first, go to the [Prompts](https://www.helicone.ai/prompts) tab and select a prompt.
 
@@ -17,7 +19,7 @@ To start an experiment, first, go to the [Prompts](https://www.helicone.ai/promp
   <Step title="Click `Start Experiment`">
     On the top right, click `Start Experiment`.
     <Frame>
-  <img src="/images/use-cases/experiments/start-button.png" />
+  <img src="/images/use-cases/experiments/start-button.png" alt="Start button in the Prompts tab for initiating an experiment in Helicone."/>
 </Frame>
 
   </Step>
@@ -29,15 +31,15 @@ To start an experiment, first, go to the [Prompts](https://www.helicone.ai/promp
       tag.
     </Tip>
        <Frame>
-  <img src="/images/use-cases/experiments/select-prompt.png" />
+  <img src="/images/use-cases/experiments/select-prompt.png" alt="Selecting a base prompt to start an experiment in Helicone."/>
 </Frame>
-    
+
   </Step>
   <Step title="Edit the prompt">
     Your changes will not affect the original prompt, but rather create a new
     one to test your experiment on.
        <Frame>
-  <img src="/images/use-cases/experiments/edit-prompt.png" />
+  <img src="/images/use-cases/experiments/edit-prompt.png" alt="Editing a prompt without affecting the original prompt in production."/>
 </Frame>
   </Step>
   <Step title="Configure your experiment">
@@ -48,7 +50,7 @@ To start an experiment, first, go to the [Prompts](https://www.helicone.ai/promp
       requests.{" "}
     </Tip>
        <Frame>
-  <img src="/images/use-cases/experiments/config.png" />
+  <img src="/images/use-cases/experiments/config.png" alt="Configuring an experiment with a different dataset, model, and provider keys in Helicone."/>
 </Frame>
 
   </Step>
@@ -56,7 +58,7 @@ To start an experiment, first, go to the [Prompts](https://www.helicone.ai/promp
     The `Diff Viewer` compares your new prompt to the base prompt that you
     selected.
        <Frame>
-  <img src="/images/use-cases/experiments/confirm.png" />
+  <img src="/images/use-cases/experiments/confirm.png" alt="Confirming changes to your prompt in Helicone's Diff Viewer before running an experiment. "/>
 </Frame>
 
   </Step>
@@ -64,7 +66,7 @@ To start an experiment, first, go to the [Prompts](https://www.helicone.ai/promp
     Once the experiment is finished, click on it to see a list of inputs and the
     associated outputs from the base prompt and the experiment.
        <Frame>
-  <img src="/images/use-cases/experiments/view.png" />
+  <img src="/images/use-cases/experiments/view.png" alt="Comparing the outputs of an experiment compared to the original prompt in Helicone."/>
 </Frame>
 
   </Step>

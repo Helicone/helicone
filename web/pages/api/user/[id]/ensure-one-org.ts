@@ -16,17 +16,31 @@ export default async function handler(
     .eq("owner", userId);
 
   if (!orgs.data || orgs.data.length === 0) {
-    const result = await supabaseServer.from("organization").insert([
-      {
-        name: "My Organization",
-        owner: userId,
-        tier: "free",
-        is_personal: true,
-      },
-    ]);
+    const result = await supabaseServer
+      .from("organization")
+      .insert([
+        {
+          name: "My Organization",
+          owner: userId,
+          tier: "free",
+          is_personal: true,
+        },
+      ])
+      .select("*")
+      .single();
+
     if (result.error) {
       res.status(500).json(result.error.message);
     } else {
+      const { data: memberInsert, error: memberError } = await supabaseServer
+        .from("organization_member")
+        .insert({
+          created_at: new Date().toISOString(),
+          member: userId,
+          organization: result.data.id,
+          org_role: "owner",
+        })
+        .select("*");
       res.status(200).json("Added successfully");
     }
   } else {

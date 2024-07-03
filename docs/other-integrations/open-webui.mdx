@@ -1,7 +1,17 @@
 ---
-title: "Open WebUI"
-description: "Easily add Helicone to Open WebUI"
+title: "Open WebUI Integration"
+sidebarTitle: "Open WebUI"
+description: "Integrate Helicone with Open WebUI, an extensible, offline-capable interface for various LLM runners. Monitor interactions across Ollama, OpenAI-compatible APIs, and custom LLM setups."
+"twitter:title": "Open WebUI Integration - Helicone OSS LLM Observability"
 ---
+
+## Introduction
+
+Open WebUI (formerly Ollama WebUI) is a feature-rich, self-hosted web interface designed for interacting with various LLM runners. It supports Ollama, OpenAI-compatible APIs, and custom LLM setups.
+
+Integrating Helicone with Open WebUI allows you to monitor and analyze interactions across these diverse LLM interfaces and features.
+
+## Integration Steps
 
 <Steps>
   <Step title="Create an account + Generate an API Key">
@@ -28,3 +38,5 @@ docker run -d -p 9842:8080 -e OPENAI_API_BASE_URL="https://oai.helicone.ai/${HEL
   </Step>
 
 </Steps>
+
+For more advanced setups, including GPU support or custom Ollama configurations, refer to the [Open WebUI GitHub repository](https://github.com/open-webui/open-webui) and [documentation](https://docs.openwebui.com/).

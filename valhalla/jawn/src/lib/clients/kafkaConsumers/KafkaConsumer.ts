@@ -274,7 +274,8 @@ function mapDlqKafkaMessageToMessage(
     if (message.value) {
       try {
         const kafkaValue = JSON.parse(message.value.toString());
-        messages.push(mapMessageDates(kafkaValue));
+        const parsedMsg = JSON.parse(kafkaValue.value) as Message;
+        messages.push(mapMessageDates(parsedMsg));
       } catch (error) {
         return err(`Failed to parse message: ${error}`);
       }

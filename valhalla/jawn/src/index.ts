@@ -19,6 +19,7 @@ import {
   NORMAL_WORKER_COUNT,
 } from "./lib/clients/kafkaConsumers/constant";
 import { cacheMiddleware } from "./middleware/cache";
+import bodyParser from "body-parser";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -44,6 +45,15 @@ const allowedOriginsEnv = {
 const allowedOrigins = allowedOriginsEnv[ENVIRONMENT];
 
 const app = express();
+
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(
+  bodyParser.urlencoded({
+    limit: "50mb",
+    extended: true,
+    parameterLimit: 50000,
+  })
+);
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
@@ -85,10 +95,7 @@ app.options("*", (req, res) => {
   } else {
     res.setHeader("Access-Control-Allow-Origin", "");
   }
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, DELETE, OPTIONS, PATCH"
-  );
+  res.setHeader("Access-Control-Allow-Methods", "*");
   res.setHeader(
     "Access-Control-Allow-Headers",
     "Content-Type, Authorization, Helicone-Authorization"
@@ -121,8 +128,14 @@ if (IS_RATE_LIMIT_ENABLED) {
   v1APIRouter.use(limiter);
 }
 
-v1APIRouter.use(express.json({ limit: "50mb" }));
-v1APIRouter.use(express.urlencoded({ limit: "50mb" }));
+v1APIRouter.use(bodyParser.json({ limit: "50mb" }));
+v1APIRouter.use(
+  bodyParser.urlencoded({
+    limit: "50mb",
+    extended: true,
+    parameterLimit: 50000,
+  })
+);
 registerPublicTSOARoutes(v1APIRouter);
 registerPrivateTSOARoutes(v1APIRouter);
 

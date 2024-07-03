@@ -9,6 +9,7 @@ import Features from "./steps/features";
 import EventListen from "./steps/eventListen";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useOrg } from "../../layout/organizationContext";
+import { getJawnClient } from "../../../lib/clients/jawn";
 
 interface WelcomePageV2Props {
   currentStep: number;
@@ -97,13 +98,10 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
             <button
               className="text-xs underline"
               onClick={async () => {
-                await supabaseClient
-                  .from("organization")
-                  .update({
-                    has_onboarded: true,
-                  })
-                  .eq("id", orgContext?.currentOrg?.id);
-
+                const jawn = getJawnClient(orgContext?.currentOrg?.id ?? "");
+                jawn.POST("/v1/organization/onboard", {
+                  body: {},
+                });
                 router.push("/dashboard");
               }}
             >
