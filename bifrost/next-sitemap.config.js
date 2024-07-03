@@ -5,7 +5,15 @@ module.exports = {
   siteUrl: SITE_URL,
   generateIndexSitemap: true,
   generateRobotsTxt: true,
-  exclude: ["/icon.ico", "*.js", "*.css", "*.xml", "*.json"],
+  exclude: [
+    "/icon.ico",
+    "*.js",
+    "*.css",
+    "*.xml",
+    "*.json",
+    "/signin",
+    "/signup",
+  ],
   robotsTxtOptions: {
     additionalSitemaps: ["https://docs.helicone.ai/sitemap.xml"],
     policies: [
