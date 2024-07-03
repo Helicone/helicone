@@ -80,6 +80,8 @@ const useRequestsPageV2 = (
     operator: "and",
   };
 
+  console.log(filter);
+
   const { requests, count } = useGetRequests(
     currentPage,
     currentPageSize,

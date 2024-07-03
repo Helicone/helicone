@@ -88,7 +88,7 @@ function getSortLeaf(
 }
 
 function getTableName(isCached: boolean): string {
-  return isCached ? "cache_hits" : "request";
+  return isCached ? "cache_hits" : "request_response_versioned";
 }
 
 const RequestsPageV2 = (props: RequestsPageV2Props) => {
@@ -135,7 +135,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       const filter: FilterNode = {
         left: {
           [tableName]: {
-            created_at: {
+            request_created_at: {
               gte: new Date(start).toISOString(),
             },
           },
@@ -143,7 +143,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         operator: "and",
         right: {
           [tableName]: {
-            created_at: {
+            request_created_at: {
               lte: new Date(end).toISOString(),
             },
           },
@@ -153,7 +153,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     } else {
       return {
         [tableName]: {
-          created_at: {
+          request_created_at: {
             gte: getTimeIntervalAgo(
               (searchParams.get("t") as TimeInterval) || "24h"
             ).toISOString(),
@@ -231,11 +231,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           body: {
             filter: {
               left: {
-                request: {
-                  id: {
-                    equals: initialRequestId,
-                  },
-                },
+                request_response_versioned: {},
               },
               operator: "and",
               right: "all",
@@ -397,7 +393,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       const filter: FilterNode = {
         left: {
           [tableName]: {
-            created_at: {
+            request_created_at: {
               gte: new Date(start).toISOString(),
             },
           },
@@ -405,7 +401,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         operator: "and",
         right: {
           [tableName]: {
-            created_at: {
+            request_created_at: {
               lte: new Date(end).toISOString(),
             },
           },
@@ -416,7 +412,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
     setTimeFilter({
       [tableName]: {
-        created_at: {
+        request_created_at: {
           gte: getTimeIntervalAgo(key).toISOString(),
         },
       },

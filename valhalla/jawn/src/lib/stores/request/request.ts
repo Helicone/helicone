@@ -81,6 +81,33 @@ export interface HeliconeRequest {
   costUSD?: number | null;
 }
 
+export interface HeliconeRequestClickhouse {
+  response_id: string | null;
+  response_created_at: string | null;
+  response_status: number;
+  request_id: string;
+  request_created_at: string;
+  request_user_id: string;
+  request_properties: Record<string, string>;
+  provider: string;
+  target_url: string;
+  request_model: string;
+  time_to_first_token: number | null;
+  total_tokens: number;
+  completion_tokens: number | null;
+  prompt_tokens: number | null;
+  country_code: string | null;
+  scores: Record<string, number>;
+  properties: Record<string, string>;
+}
+
+export interface HeliconeRequestPostgres {
+  response_id: string;
+  request_id: string;
+  asset_ids: string[] | null;
+  delay_ms: number | null;
+}
+
 function addJoinQueries(joinQuery: string, filter: FilterNode): string {
   if (
     JSON.stringify(filter).includes("prompts_versions") ||
@@ -116,6 +143,10 @@ export async function getRequests(
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
+
+  const requestsV2 = await getRequestsV2(orgId, filter, offset, limit, sort);
+
+  console.log("v2requests", requestsV2);
 
   const joinQuery = addJoinQueries("", filter);
   if (offset > 10_000 || offset < 0) {
@@ -195,6 +226,151 @@ export async function getRequests(
   return resultMap(results, (data) => {
     return data;
   });
+}
+
+export async function getRequestsV2(
+  orgId: string,
+  filter: FilterNode,
+  offset: number,
+  limit: number,
+  sort: SortLeafRequest
+): Promise<Result<HeliconeRequest[], string>> {
+  if (isNaN(offset) || isNaN(limit)) {
+    return { data: null, error: "Invalid offset or limit" };
+  }
+
+  console.log("sort", JSON.stringify(sort));
+
+  // const joinQuery = addJoinQueries("", filter);
+  // if (offset > 10_000 || offset < 0) {
+  //   return err("unsupport offset value");
+  // }
+
+  if (limit < 0 || limit > 1_000) {
+    return err("invalid limit");
+  }
+  const builtFilter = await buildFilterWithAuthClickHouse({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+
+  const query = `
+    SELECT response_id,
+      response_created_at,
+      status AS response_status,
+      request_id,
+      request_created_at,
+      user_id AS request_user_id,
+      properties AS request_properties,
+      provider,
+      model AS request_model,
+      time_to_first_token,
+      (prompt_tokens + completion_tokens) AS total_tokens,
+      completion_tokens,
+      prompt_tokens,
+      country_code,
+      scores,
+      target_url
+    FROM request_response_versioned
+    WHERE request_response_versioned.organization_id = '${orgId}'
+    ORDER BY request_response_versioned.request_created_at DESC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `;
+
+  const requests = await dbQueryClickhouse<HeliconeRequestClickhouse>(
+    query,
+    []
+  );
+
+  if (!requests.data || requests.error) {
+    return { data: [], error: null };
+  }
+
+  const requestIds = requests.data?.map((request) => request.request_id);
+  const postgreData = await fetchAdditionalDataFromPostgreSQL(
+    requestIds!,
+    orgId
+  );
+
+  const combinedData = requests.data.map((row) => {
+    const additionalInfo = postgreData?.data?.find(
+      (item) => item.request_id === row.request_id
+    );
+    return {
+      asset_urls: {},
+      completion_tokens: row.completion_tokens,
+      country_code: row.country_code,
+      delay_ms: additionalInfo?.delay_ms ?? 0,
+      helicone_user: row.request_user_id,
+      provider: "OPENAI",
+      response_id: additionalInfo?.response_id ?? "",
+      response_created_at: row.response_created_at ?? "",
+      response_status: row.response_status,
+      response_model: row.request_model,
+      request_id: row.request_id,
+      request_model: row.request_model,
+      model_override: row.request_model,
+      request_created_at: row.request_created_at,
+      request_body: {
+        helicone_message:
+          "Request body no longer supported. To retrieve request body, please contact engineering@helicone.ai",
+      },
+      request_path: row.target_url,
+      request_user_id: row.request_user_id,
+      request_properties: row.properties,
+      request_feedback: null,
+      time_to_first_token: row.time_to_first_token,
+      total_tokens: row.total_tokens,
+      prompt_tokens: row.prompt_tokens,
+      prompt_id: null,
+      scores: row.scores,
+      asset_ids: additionalInfo ? additionalInfo.asset_ids : null,
+      response_body: {
+        helicone_message:
+          "Response body no longer supported. To retrieve response body, please contact engineering@helicone.ai",
+      },
+    };
+  });
+
+  const s3Client = new S3Client(
+    process.env.S3_ACCESS_KEY ?? "",
+    process.env.S3_SECRET_KEY ?? "",
+    process.env.S3_ENDPOINT ?? "",
+    process.env.S3_BUCKET_NAME ?? "",
+    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+  );
+  const results = await mapLLMCalls(
+    combinedData as HeliconeRequest[],
+    s3Client,
+    orgId
+  );
+  return resultMap(results, (data) => {
+    return data;
+  });
+}
+
+async function fetchAdditionalDataFromPostgreSQL(
+  requestIds: string[],
+  orgId: string
+): Promise<Result<HeliconeRequestPostgres[], string>> {
+  const requestIdsSQL = requestIds.map((id) => `'${id}'`).join(",");
+
+  const query = `
+    SELECT response.id AS response_id,
+    (
+      SELECT ARRAY_AGG(asset.id)
+      FROM asset
+      WHERE asset.request_id = response.request
+    ) AS asset_ids,
+    response.delay_ms as delay_ms,
+    response.request as request_id
+    FROM response
+    WHERE response.helicone_org_id = '${orgId}' and response.request IN (${requestIdsSQL})
+  `;
+
+  return await dbExecute<HeliconeRequestPostgres>(query, []);
 }
 
 export async function getRequestsCached(
@@ -526,4 +702,43 @@ export async function getRequestAsset(
   }
 
   return ok(requestAsset[0]);
+}
+
+async function _getRequestsClickhouse(
+  org_id: string,
+  filter: FilterNode,
+  offset: number,
+  limit: number,
+  sort: SortLeafRequest
+) {
+  const builtFilter = await buildFilterWithAuthClickHouse({
+    org_id,
+    argsAcc: [],
+    filter,
+  });
+
+  const query = `
+    SELECT response_id,
+      response_created_at,
+      status AS response_status,
+      request_id,
+      request_created_at,
+      user_id AS request_user_id,
+      properties AS request_properties,
+      provider,
+      model AS request_model,
+      time_to_first_token,
+      (prompt_tokens + completion_tokens) AS total_tokens,
+      completion_tokens,
+      prompt_tokens,
+      country_code,
+      scores
+    FROM request_response_versioned
+    WHERE request_response_versioned.organization_id = '${org_id}'
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `;
+
+  const requests = await dbQueryClickhouse(query, builtFilter.argsAcc);
+  console.log("clickhouse_request", requests);
 }

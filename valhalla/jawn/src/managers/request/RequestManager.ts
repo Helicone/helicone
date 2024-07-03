@@ -13,6 +13,7 @@ import {
   getRequestAsset,
   getRequests,
   getRequestsCached,
+  getRequestsV2,
 } from "../../lib/stores/request/request";
 import { costOfPrompt } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
@@ -244,7 +245,7 @@ export class RequestManager extends BaseManager {
           isPartOfExperiment,
           isScored
         )
-      : await getRequests(
+      : await getRequestsV2(
           this.authParams.organizationId,
           newFilter,
           offset,
