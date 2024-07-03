@@ -52,8 +52,6 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
       }
     });
 
-    console.log(`Data: ${JSON.stringify(data)}`);
-
     try {
       const consolidatedData = consolidateTextFields(data);
 
