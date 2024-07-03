@@ -8,23 +8,28 @@ import { Analytics } from "@vercel/analytics/react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Helicone / LLM-Observability for Developers",
-  description: "The open-source platform for logging, monitoring, and debugging.",
+  title: "Insider Scoop: Our Founding Engineer's Take on PostHog - Helicone",
+  description:
+    "No BS, no affiliations, just genuine opinions from the founding engineer at Helicone.",
   icons: "https://www.helicone.ai/static/logo.png",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
     title: "Insider Scoop: Our Founding Engineer's Take on PostHog 🦔🔥",
     url: "https://www.helicone.ai/blog/stefan-posthog",
-    description: "No BS, no affiliations. Just genuine opinions from Stefan, our founding engineer.",
-    images: "https://www.helicone.ai/static/blog/stefan-posthog/posthog-cover.webp",
+    description:
+      "No BS, no affiliations. Just genuine opinions from Stefan, our founding engineer.",
+    images:
+      "https://www.helicone.ai/static/blog/stefan-posthog/posthog-cover.webp",
     locale: "en_US",
   },
   twitter: {
     title: "Insider Scoop: Our Founding Engineer's Take on PostHog 🦔🔥",
-    description: "No BS, no affiliations. Just genuine opinions from Stefan, our founding engineer.",
+    description:
+      "No BS, no affiliations. Just genuine opinions from Stefan, our founding engineer.",
     card: "summary_large_image",
-    images: "https://www.helicone.ai/static/blog/stefan-posthog/posthog-cover.webp",
+    images:
+      "https://www.helicone.ai/static/blog/stefan-posthog/posthog-cover.webp",
   },
 };
 
@@ -33,9 +38,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <>
-    {children}
-    </>
-  );
+  return <>{children}</>;
 }
