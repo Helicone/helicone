@@ -4,11 +4,13 @@ import { Result } from "../../lib/shared/result";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import {
   FilterLeaf,
+  FilterLeafSubset,
   filterListToTree,
 } from "../../lib/shared/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { clickhousePriceCalc } from "../../packages/cost";
+import { UserManager } from "../../managers/UserManager";
 
 export interface UserQueryParams {
   userIds?: string[];
@@ -18,10 +20,67 @@ export interface UserQueryParams {
   };
 }
 
+export type UserFilterBranch = {
+  left: UserFilterNode;
+  operator: "or" | "and";
+  right: UserFilterNode;
+};
+
+type UserFilterNode =
+  | FilterLeafSubset<"user_metrics">
+  | UserFilterBranch
+  | "all";
+export interface UserMetricsQueryParams {
+  filter: UserFilterNode;
+  offset: number;
+  limit: number;
+  timeFilter?: {
+    startTimeUnixSeconds: number;
+    endTimeUnixSeconds: number;
+  };
+  timeZoneDifferenceMinutes?: number;
+}
+export interface UserMetricsResult {
+  user_id: string;
+  active_for: number;
+  first_active: string;
+  last_active: string;
+  total_requests: number;
+  average_requests_per_day_active: number;
+  average_tokens_per_request: number;
+  total_completion_tokens: number;
+  total_prompt_tokens: number;
+  cost: number;
+}
+
 @Route("v1/user")
 @Tags("User")
 @Security("api_key")
 export class UserController extends Controller {
+  @Post("metrics/query")
+  public async getUserMetrics(
+    @Body()
+    requestBody: UserMetricsQueryParams,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<UserMetricsResult[], string>> {
+    const userManager = new UserManager(request.authParams);
+    if (requestBody.limit > 1000) {
+      this.setStatus(400);
+      return {
+        error: "Limit cannot be greater than 1000",
+        data: null,
+      };
+    }
+
+    const result = await userManager.getUserMetrics(requestBody);
+    if (result.error) {
+      this.setStatus(400);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
   @Post("query")
   public async getUsers(
     @Body()
