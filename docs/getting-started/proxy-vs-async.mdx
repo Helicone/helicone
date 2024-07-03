@@ -1,6 +1,8 @@
 ---
-title: "Proxy vs. Async"
-description: "Decide whether to intergrate with Helicone using a Proxy or Async."
+title: "Proxy vs Async Integration"
+sidebarTitle: "Proxy vs Async"
+description: "Compare Helicone's Proxy and Async integration methods. Understand the features, benefits, and use cases for each approach to choose the best fit for your LLM application."
+"twitter:title": "Proxy vs Async Integration - Helicone Open Source LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
@@ -32,7 +34,10 @@ The primary reason Helicone users choose to integrate with Helicone using Proxy 
 It's as easy as changing the base URL to point to Helicone, and we'll forward the request to the LLM and return the response to you.
 
 <Frame caption="Proxy: flow of data. ">
-  <img src="/images/example-proxy.png" alt="Helicone Proxy data flow illustrating simple integration by changing the base URL for instant request forwarding and response handling."/>
+  <img
+    src="/images/example-proxy.png"
+    alt="Helicone Proxy data flow illustrating simple integration by changing the base URL for instant request forwarding and response handling."
+  />
 </Frame>
 
 Since the proxy sits on the edge and is the gatekeeper of the requests, you get access to a suite of Gateway tools such as caching, rate limiting, API key management, threat detection, moderations and more.
@@ -89,7 +94,10 @@ Since the proxy sits on the edge and is the gatekeeper of the requests, you get 
 Helicone Async allows for a more flexible workflow where the actual logging of the event is **not on the critical path**. This gives some users more confidence that if we are going down or if there is a network issue that it will not affect their application.
 
 <Frame caption="Async: flow of data. ">
-  <img src="/images/example-async.png" alt="Helicone Async workflow illustrating non-blocking event logging for improved application stability."/>
+  <img
+    src="/images/example-async.png"
+    alt="Helicone Async workflow illustrating non-blocking event logging for improved application stability."
+  />
 </Frame>
 
 <Warning>

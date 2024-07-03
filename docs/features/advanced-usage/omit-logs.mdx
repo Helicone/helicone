@@ -1,6 +1,8 @@
 ---
 title: "Omit Logs"
-description: "Omit responses and requests. "
+sidebarTitle: "Omit Logs"
+description: "Configure Helicone to selectively exclude sensitive request and response data from your LLM application logs for privacy and compliance needs."
+"twitter:title": "Omit Logs - Helicone Open Source LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
@@ -15,7 +17,10 @@ import QuestionsSection from "/snippets/questions-section.mdx";
 The "Omit Logs" feature is designed for users who may not want to have Helicone store or log their request body or response body. This can be particularly useful for those concerned with privacy, data sensitivity, or simply wanting to keep their data footprint minimal.
 
 <Frame caption="Omit requests, responses or both in your logs. ">
-  <img src="/images/omit-logs/example-omit-logs.png" alt="Manage logging preferences with Helicone's Omit Logs feature."/>
+  <img
+    src="/images/omit-logs/example-omit-logs.png"
+    alt="Manage logging preferences with Helicone's Omit Logs feature."
+  />
 </Frame>
 
 ### Why Omit Logs
@@ -82,7 +87,10 @@ const openai = new OpenAIApi(configuration);
 You can still see the key metrics for each request, without the request or response contents.
 
 <Frame caption="Focus on capturing key metrics and ignore the noise of the request and response. ">
-  <img src="/images/omit-logs/example-omit-logs-key-metrics.png" alt="View key metrics without logging request or response details with Helicone's Omit Logs feature."/>
+  <img
+    src="/images/omit-logs/example-omit-logs-key-metrics.png"
+    alt="View key metrics without logging request or response details with Helicone's Omit Logs feature."
+  />
 </Frame>
 
 <QuestionsSection />

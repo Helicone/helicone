@@ -1,6 +1,8 @@
 ---
 title: "Sessions"
-description: "Effortlessly monitor sessions and traces."
+sidebarTitle: "Sessions"
+description: "Group and visualize multi-step LLM interactions. Track request flows across multiple traces and gain insights into complex AI workflows by adding only 2 simple headers."
+"twitter:title": "Sessions - Helicone Open Source LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
@@ -18,7 +20,7 @@ import QuestionsSection from "/snippets/questions-section.mdx";
 
 ## Introduction
 
-Helicone's Session management allows you to provide full control over any session and trace data that you send to Helicone. With Helicone, you can effortlessly monitor and manage your sessions and traces as they evolve.
+Sessions in Helicone provide a powerful way to organize and analyze complex interactions within your LLM applications. By grouping related requests together, sessions offer a holistic view of user journeys, multi-step processes, or extended AI workflows. This feature is particularly valuable for applications that involve multiple back-and-forth exchanges or those that build upon previous context.
 
 <Frame caption="Example: A Session creating an outline for a book about space">
   <img
@@ -29,10 +31,12 @@ Helicone's Session management allows you to provide full control over any sessio
 
 ### Why Sessions
 
-Requests are now matched to a `helicone-session-id`, allowing you to:
+Sessions, identified by a `helicone-session-id` header, allow you to:
 
-- Manage and track sessions and traces over time
-- Find long running traces or where in your session there are any issues
+- Reconstruct the flow of a conversation or a multi-stage task
+- Analyze performance and outcomes across entire interaction sequences
+- Identify bottlenecks or areas for improvement in your AI workflows
+- Gain deeper insights into user behavior and application patterns
 
 ## Quick Start
 

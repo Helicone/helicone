@@ -1,6 +1,8 @@
 ---
-title: "Cache"
-description: "Reduce latency and save costs by caching on the edge"
+title: "LLM Caching"
+sidebarTitle: "Caching"
+description: "Reduce latency and save costs on LLM calls by caching responses on the edge. Configure cache duration, bucket sizes, and use cache seeds for consistent results across requests."
+"twitter:title": "LLM Cache - Helicone Open Source LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
@@ -14,12 +16,13 @@ import QuestionsSection from "/snippets/questions-section.mdx";
 
 ## Introduction
 
-Caching, by temporarily storing data closer to the user at the edge, can significantly speed up access time and enhance your application performance.
-
-Helicone uses [Cloudflare Workers](https://www.cloudflare.com/network/) to temporarily store data closer to the user to ensure low latency, resulting in faster responses and an efficient app development process.
+Helicone uses [Cloudflare Workers](https://www.cloudflare.com/network/) to temporarily store data closer to the user to ensure low latency, resulting in faster responses and reduced costs.
 
 <Frame caption="Dashboard view of cache hits, cost and time saved. ">
-  <img src="/images/example-cache.png" alt="Helicone Dashboard showing the number of cache hits, cost, and time saved. " />
+  <img
+    src="/images/example-cache.png"
+    alt="Helicone Dashboard showing the number of cache hits, cost, and time saved. "
+  />
 </Frame>
 
 ## Why Cache
