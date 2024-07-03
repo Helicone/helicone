@@ -10,7 +10,7 @@ import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
 import useNotification from "../../shared/notification/useNotification";
-import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
+import ThemedTable from "../../shared/themed/table/themedTable";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import TableFooter from "../requestsV2/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
@@ -73,7 +73,6 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
       "and"
     )
   );
-  const { setNotification } = useNotification();
 
   const checkIsNotUniqueUser = () => {
     if (users.length === 0 || users.length > 1) {
@@ -90,7 +89,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     <>
       <AuthHeader title={"Users"} />
       <div className="flex flex-col space-y-4">
-        <ThemedTableV5
+        <ThemedTable
           id="user-table"
           defaultData={users}
           defaultColumns={INITIAL_COLUMNS}

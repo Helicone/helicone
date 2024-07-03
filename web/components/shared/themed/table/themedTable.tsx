@@ -74,7 +74,7 @@ interface ThemedTableV5Props<T> {
 
 export type RequestViews = "table" | "card" | "row";
 
-export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
+export default function ThemedTable<T>(props: ThemedTableV5Props<T>) {
   const {
     id,
     defaultData,
