@@ -2,7 +2,7 @@
 title: "Custom LLM Rate Limits"
 sidebarTitle: "Custom Rate Limits"
 description: "Set custom rate limits for model provider API calls. Control usage by request count, cost, or custom properties to manage expenses and prevent unintended overuse."
-"twitter:title": "Custom LLM Rate Limits - Helicone Open Source LLM Observability"
+"twitter:title": "Custom LLM Rate Limits - Helicone OSS LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
@@ -150,7 +150,7 @@ The `s=[segment]` parameter is used to specify the scope in which you want to ap
 Extracting the headers allows you to test your rate limit policy in a local environment before deploying to production.
 
 If your rate limit policy is **active**, the following headers will be returned:
-{/*
+{/\*
 
 ````ts
 Helicone-RateLimit-Limit:	"number" // the request/cost quota allowed in the time window.
