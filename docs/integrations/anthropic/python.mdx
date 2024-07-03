@@ -23,12 +23,13 @@ export HELICONE_API_KEY=<your API key>
 
 ```Python example.py
 import anthropic
+import os
 
 client = anthropic.Anthropic(
   api_key=os.environ.get("ANTHROPIC_API_KEY"),
-  base_url="https://anthropic.helicone.ai/v1"
+  base_url="https://anthropic.helicone.ai",
   default_headers={
-    "Helicone-Auth": os.environ.get("HELICONE_API_KEY"),
+    "Helicone-Auth": f"Bearer {os.environ.get("HELICONE_API_KEY")}",
   },
 )
 

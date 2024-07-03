@@ -76,7 +76,8 @@
           "pages": [
             "integrations/anthropic/javascript",
             "integrations/anthropic/python",
-            "integrations/anthropic/langchain"
+            "integrations/anthropic/langchain",
+            "integrations/anthropic/curl"
           ]
         },
         {
@@ -177,6 +178,7 @@
       "group": "Guides",
       "pages": [
         "use-cases/experiments",
+        "use-cases/enable-stream-usage",
         "use-cases/resell-a-model",
         "use-cases/bill-by-usage"
       ]

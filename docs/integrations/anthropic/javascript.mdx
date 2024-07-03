@@ -24,10 +24,10 @@ HELICONE_API_KEY=<your API key>
 import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic({
-  baseURL: "https://anthropic.helicone.ai/",
+  baseURL: "https://anthropic.helicone.ai",
   apiKey: process.env.ANTHROPIC_API_KEY,
   defaultHeaders: {
-    "Helicone-Auth": process.env.HELICONE_API_KEY,
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
   },
 });
 
