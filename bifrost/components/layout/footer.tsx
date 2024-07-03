@@ -2,7 +2,7 @@ import Link from "next/link";
 import { SVGProps } from "react";
 import Image from "next/image";
 
-interface FooterProps {}
+interface FooterProps { }
 
 const meta = {
   social: [
@@ -47,12 +47,27 @@ const meta = {
 };
 
 const Footer = (props: FooterProps) => {
-  const {} = props;
+  const { } = props;
 
   return (
     <footer className="bg-inherit border-t border-gray-200">
+      <div className="mt-8 md:order-1 md:mt-0 space-x-4 flex flex-col">
+        <Image 
+        className=""
+        src={"/static/logo.webp"}
+        alt={"Helicone"}
+        width={21}
+        height={21}
+        />
+        <p className="text-nowrap text-xs leading-5 text-gray-500">
+          &copy; 2024 Helicone, Inc.{" "} 
+        </p>
+        <p className="text-xs text-gray-500">All rights reserved</p>
+      </div>
       <div className="mx-auto max-w-5xl px-4 py-8 md:flex md:items-center md:justify-between lg:px-4">
-        <div className="flex space-x-6 md:order-2">
+        
+        <div className="flex flex-col gap-2 md:order-2">
+          <h1 className="text-sky-500 text-sm font-semibold">Socials</h1>
           {meta.social.map((item) => (
             <Link
               key={item.name}
@@ -61,33 +76,9 @@ const Footer = (props: FooterProps) => {
               rel="noopener noreferrer"
               className="text-gray-400 hover:text-gray-500"
             >
-              <span className="sr-only">{item.name}</span>
-              <item.icon className="h-6 w-6" aria-hidden="true" />
+              <span className="text-sm font-normal text-gray-500 items-left">{item.name}</span>
             </Link>
           ))}
-        </div>
-        <div className="mt-8 md:order-1 md:mt-0 space-x-4 flex flex-row">
-          <p className="text-center text-xs leading-5 text-gray-500">
-            &copy; 2024 Helicone, Inc. All rights reserved.
-          </p>
-          <Link
-            href="/privacy"
-            className="text-center text-xs leading-5 text-gray-500"
-          >
-            Privacy Policy
-          </Link>
-          <Link
-            href="/terms"
-            className="text-center text-xs leading-5 text-gray-500"
-          >
-            Terms of Use
-          </Link>
-          <Link
-            href="/career"
-            className="text-center text-xs leading-5 text-gray-500"
-          >
-            Work with us
-          </Link>
         </div>
       </div>
     </footer>

@@ -1,6 +1,7 @@
 import Enterprise from "@/components/templates/landing/enterprise";
 import Integrations from "@/components/templates/landing/integrations";
 import Platform from "@/components/templates/landing/platform";
+import FAQ from "@/components/templates/landing/faq"
 import {
   ChevronRightIcon,
   CodeBracketSquareIcon,
@@ -10,6 +11,7 @@ import {
 import { FaChevronRight, FaCheck } from "react-icons/fa6";
 import Image from "next/image";
 import Link from "next/link";
+import Essentials from "@/components/templates/landing/essentials";
 
 export default function Home() {
   return (
@@ -142,10 +144,10 @@ export default function Home() {
           className="flex flex-col space-y-4 pt-6 md:pb-12 px-3 max-w-6xl mx-auto w-full"
         >
           <h2 className="text-gray-600 font-bold px-3 text-sm block md:hidden">
-          Ready for real production workloads
+            Ready for real production workloads
           </h2>
           <h2 className="text-gray-600 font-light text-center px-3 text-lg hidden md:block">
-          Trusted by thousands of companies and developers
+            Trusted by thousands of companies and developers
           </h2>
           <ul className="flex flex-col md:flex-row gap-9 md:gap-0 w-full justify-between px-3 pt-4 md:hidden">
             <li>
@@ -158,9 +160,9 @@ export default function Home() {
               </dl>
             </li>
             <li>
-              <dl className="flex flex-col space-y-2">    
+              <dl className="flex flex-col space-y-2">
                 <dt className="font-bold text-gray-600 indent-3 text-2xl border-l-2 border-sky-500">
-                {"1.2 Billion"}</dt>
+                  {"1.2 Billion"}</dt>
                 <dd className="text-sm text-gray-600 indent-3 font-light">
                   Total requests Logged
                 </dd>
@@ -169,13 +171,13 @@ export default function Home() {
             <li>
               <dl className="flex flex-col space-y-2">
                 <dt className="font-bold text-gray-600 indent-3 text-2xl border-l-2 border-sky-500">
-                99.99%</dt>
+                  99.99%</dt>
                 <dd className="text-sm text-gray-600 indent-3 font-light">Uptime</dd>
               </dl>
             </li>
           </ul>
-          <ul className="flex flex-wrap md:flex-row items-center w-full justify-center gap-10 md:gap-32 px-0 md:px-8 pt-16">
-            <li className="w-32">
+          <ul className="flex flex-wrap md:grid md:grid-cols-4 text-center items-center justify-center gap-10 md:gap- px-0 md:px-16 pt-16">
+            <li className="w-32 text-center">
               <Image
                 src={"/static/qawolf.webp"}
                 alt={"QAWolf"}
@@ -255,9 +257,20 @@ export default function Home() {
             <p className="text-lg font-light text-gray-600 pt-3 hidden md:block">
               Get started with your favorite provider and programming language.
             </p>
-              <span className="text-lg font-light text-gray-600 hidden md:block">Don't see your model? Let us know by <p className="inline font-semibold underline ">creating an issue on Github</p>!</span>
+            <span className="text-lg font-light text-gray-600 hidden md:block ">Don't see your model? Let us know by <p className="inline font-semibold underline ">creating an issue on Github</p>!</span>
           </div>
           <Integrations />
+        </section>
+        <section className="flex flex-col px-3 pt-6 pb-12">
+          <div className="flex flex-col px-3 space-y-2">
+            <h1 className="text-3xl font-bold text-sky-500 gap-3">Unified {" "}
+              <span className="text-black">observability and monitoring</span>
+            </h1>
+            <p className="font-light text-gray-600">
+            We are building a platform that provides all the essential tools for observability in Gen AI. 
+            </p>
+            <Essentials />
+          </div>
         </section>
         <section className="w-full flex flex-col max-w-6xl mx-auto space-y-4 py-32 px-4">
           <h2 className="sr-only">
@@ -275,80 +288,10 @@ export default function Home() {
             <Enterprise />
           </div>
         </section>
-        <section className="w-full bg-[#0b1c2d] relative isolate py-36 overflow-hidden">
-          <div className="flex flex-col space-y-16 w-full">
-            <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
-              <div className="flex items-start w-full">
-                <div className="flex flex-col space-y-4 w-full md:w-2/3 text-center md:text-left">
-                  <p className="text-lg font-bold text-cyan-500">Developer</p>
-                  <h2 className="text-3xl sm:text-5xl font-bold sm:leading-[1.15] text-white">
-                    Fully <span className="text-cyan-400">Open-Source</span>
-                  </h2>
-                  <p className="text-md md:text-lg text-gray-300 leading-7">
-                    We believe in the power of community and the importance of
-                    transparency. Helicone is fully open-source and available
-                    for anyone to use.
-                  </p>
-                  <ul className="py-4 flex flex-col space-y-8">
-                    <li className="flex items-start space-x-2">
-                      <div>
-                        <ShieldCheckIcon className="w-6 h-6 text-cyan-400" />
-                      </div>
-                      <div className="flex flex-col space-y-1 -mt-0.5">
-                        <p className="text-sm md:text-lg font-bold text-white">
-                          Interested in deploying Helicone on-prem?
-                        </p>
-                        <Link
-                          className="text-sm md:text-md text-gray-500 font-medium flex items-center space-x-1"
-                          href={"/contact"}
-                        >
-                          <span>Get in touch</span>
-                          <ChevronRightIcon className="w-4 h-4" />
-                        </Link>
-                      </div>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <div>
-                        <UserGroupIcon className="w-6 h-6 text-cyan-400" />
-                      </div>
-                      <div className="flex flex-col space-y-1 -mt-0.5">
-                        <p className="text-sm md:text-lg font-bold text-white">
-                          Want to ask the team a question?
-                        </p>
-                        <Link
-                          className="text-sm md:text-md text-gray-500 font-medium flex items-center space-x-1"
-                          href={"https://discord.gg/HwUbV3Q8qz"}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <span>Join our discord server</span>
-                          <ChevronRightIcon className="w-4 h-4" />
-                        </Link>
-                      </div>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <div>
-                        <CodeBracketSquareIcon className="w-6 h-6 text-cyan-400" />
-                      </div>
-                      <div className="flex flex-col space-y-1 -mt-0.5">
-                        <p className="text-sm md:text-lg font-bold text-white">
-                          Want to contribute or star us on Github?
-                        </p>
-                        <Link
-                          className="text-sm md:text-md text-gray-500 font-medium flex items-center space-x-1"
-                          href={"https://github.com/Helicone/helicone"}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <span>Check us out</span>
-                          <ChevronRightIcon className="w-4 h-4" />
-                        </Link>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+        <section className="w-full max-w-6xl lg:py-20 lg:px-7 py-12 px-3">
+          <div className="px-3 lg:text-center">
+            <h1 className="font-bold text-3xl">Frequently asked questions</h1>
+            <FAQ />
           </div>
         </section>
       </main>
