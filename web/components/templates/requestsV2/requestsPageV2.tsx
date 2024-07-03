@@ -24,7 +24,7 @@ import {
 import { useOrg } from "../../layout/organizationContext";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
-import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
+import ThemedTable from "../../shared/themed/table/themedTable";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import useSearchParams from "../../shared/utils/useSearchParams";
@@ -613,7 +613,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         <>{renderUnauthorized()}</>
       ) : (
         <div className="flex flex-col space-y-4">
-          <ThemedTableV5
+          <ThemedTable
             id="requests-table"
             defaultData={requests || []}
             defaultColumns={columnsWithProperties}
