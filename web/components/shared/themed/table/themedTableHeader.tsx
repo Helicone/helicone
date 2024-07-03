@@ -12,7 +12,7 @@ import ViewColumns from "./columns/viewColumns";
 import useSearchParams from "../../utils/useSearchParams";
 import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
 import ViewButton from "./viewButton";
-import { RequestViews } from "./themedTableV5";
+import { RequestViews } from "./themedTable";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import FiltersButton from "./filtersButton";
 import { DragColumnItem } from "./columns/DragList";
