@@ -1013,6 +1013,35 @@ export type Database = {
         }
         Relationships: []
       }
+      hidden_properties: {
+        Row: {
+          created_at: string
+          id: number
+          org_id: string | null
+          property_to_hide: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          org_id?: string | null
+          property_to_hide?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          org_id?: string | null
+          property_to_hide?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_hidden_properties_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job: {
         Row: {
           created_at: string | null
@@ -2872,7 +2901,7 @@ export type Database = {
         Args: {
           name: string
         }
-        Returns: unknown
+        Returns: string[]
       }
       get_size_by_bucket: {
         Args: Record<PropertyKey, never>

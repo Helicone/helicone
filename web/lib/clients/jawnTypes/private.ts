@@ -30,6 +30,9 @@ export interface paths {
   "/v1/settings/query": {
     get: operations["GetSettings"];
   };
+  "/v1/properties/hide": {
+    post: operations["Hide"];
+  };
   "/v1/organization/create": {
     post: operations["CreateNewOrganization"];
   };
@@ -229,6 +232,9 @@ export interface components {
       error: null;
     };
     "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    PropertiesQueryParams: {
+      propertyToHide: string;
+    };
     ResultSuccess_null_: {
       /** @enum {number|null} */
       data: null;
@@ -563,6 +569,27 @@ export interface operations {
         content: {
           "application/json": {
             useAzureForExperiment: boolean;
+          };
+        };
+      };
+    };
+  };
+  Hide: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PropertiesQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            error?: {
+              details?: string;
+              message?: string;
+            };
+            success?: boolean;
           };
         };
       };
