@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_asset_request_id ON public.asset USING btree (request_id);
