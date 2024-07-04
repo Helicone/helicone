@@ -15,6 +15,7 @@ import {
   HomeIcon,
   MoonIcon,
   QuestionMarkCircleIcon,
+  ShieldCheckIcon,
   SparklesIcon,
   SunIcon,
   TableCellsIcon,
@@ -130,12 +131,17 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: TagIcon,
       current: pathname.includes("/properties"),
     },
-
     {
       name: "Cache",
       href: "/cache",
       icon: CircleStackIcon,
       current: pathname.includes("/cache"),
+    },
+    {
+      name: "Rate Limits",
+      href: "/rate-limit",
+      icon: ShieldCheckIcon,
+      current: pathname.includes("/rate-limit"),
     },
     {
       name: "Playground",
