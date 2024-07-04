@@ -156,13 +156,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               setActiveColumns={setActiveColumns}
             />
           )}
-          {columns && (
-            <SortButton
-              columns={columns}
-              activeColumns={activeColumns}
-              setActiveColumns={setActiveColumns}
-            />
-          )}
+          {columns && <SortButton columns={columns} />}
           {rows && <ExportButton rows={rows} />}
 
           {viewToggle && (

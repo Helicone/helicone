@@ -5,44 +5,20 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { Column } from "@tanstack/react-table";
-import { Fragment, useState } from "react";
-import { Col } from "../../../../layout/common/col";
-import { Row } from "../../../../layout/common/row";
-import ColumnOptions from "./ColumnOptions";
-import {
-  columnDefsToDragColumnItems,
-  DragColumnItem,
-  DragList,
-} from "./DragList";
-import { ThemedTextDropDown } from "../../themedTextDropDown";
 import { useRouter } from "next/router";
+import { Fragment } from "react";
+import { Row } from "../../../../layout/common/row";
 import ThemedDropdown from "../../themedDropdown";
 import { ThemedSwitch } from "../../themedSwitch";
 
 interface SortButtonProps<T> {
   columns: Column<T, unknown>[];
-  activeColumns: DragColumnItem[];
-  setActiveColumns: (columns: DragColumnItem[]) => void;
 }
 
 export default function SortButton<T>(props: SortButtonProps<T>) {
-  const { columns, activeColumns, setActiveColumns } = props;
-
-  const categories = columns.reduce(
-    (acc, column) => {
-      const category = column.columnDef.meta?.category;
-      if (category && !acc.includes(category)) {
-        acc.push(category);
-      }
-      return acc;
-    },
-    ["all", "Default"] as string[]
-  );
+  const { columns } = props;
 
   const router = useRouter();
-  const [selectedCategory, setSelectedCategory] = useState<
-    string | undefined | "all"
-  >(categories[0]);
 
   return (
     <Menu as="div" className="relative inline-block text-left">
