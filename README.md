@@ -130,6 +130,7 @@ chmod +x run_all_workers.sh
 # start jawn (for serving the FE and handling API requests)
 # in another terminal
 cd valhalla/jawn
+cp .env.example .env
 yarn && yarn dev
 
 # Make your request to local host
