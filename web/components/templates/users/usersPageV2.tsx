@@ -1,3 +1,6 @@
+import { UserGroupIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useUsers } from "../../../services/hooks/users";
@@ -13,9 +16,6 @@ import ThemedTable from "../../shared/themed/table/themedTable";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import TableFooter from "../requestsV2/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
-import { useRouter } from "next/router";
-import { UserGroupIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");

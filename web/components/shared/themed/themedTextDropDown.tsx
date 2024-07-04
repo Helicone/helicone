@@ -15,10 +15,17 @@ interface ThemedTextDropDownProps {
   onChange: (option: string | null) => void;
   value: string;
   onSearchHandler?: (search: string) => Promise<Result<void, string>>;
+  hideTabModes?: boolean;
 }
 
 export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
-  const { options: parentOptions, onChange, value, onSearchHandler } = props;
+  const {
+    options: parentOptions,
+    onChange,
+    value,
+    onSearchHandler,
+    hideTabModes = false,
+  } = props;
   const [selected, setSelected] = useState(value);
   const [query, setQuery] = useState("");
   const [tabMode, setTabMode] = useState<"smart" | "raw">("smart");
@@ -58,32 +65,34 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
 
   return (
     <div className="w-full flex flex-col gap-1">
-      <div className="flex items-center gap-1 text-xs w-full justify-end">
-        <div>
-          <TabGroup>
-            <TabList variant="solid" defaultValue="1">
-              <Tab
-                value="1"
-                className="text-xs px-2 py-0.5"
-                onClick={() => {
-                  setTabMode("smart");
-                }}
-              >
-                smart
-              </Tab>
-              <Tab
-                value="2"
-                className="text-xs px-2 py-0.5"
-                onClick={() => {
-                  setTabMode("raw");
-                }}
-              >
-                raw
-              </Tab>
-            </TabList>
-          </TabGroup>
+      {!hideTabModes && (
+        <div className="flex items-center gap-1 text-xs w-full justify-end">
+          <div>
+            <TabGroup>
+              <TabList variant="solid" defaultValue="1">
+                <Tab
+                  value="1"
+                  className="text-xs px-2 py-0.5"
+                  onClick={() => {
+                    setTabMode("smart");
+                  }}
+                >
+                  smart
+                </Tab>
+                <Tab
+                  value="2"
+                  className="text-xs px-2 py-0.5"
+                  onClick={() => {
+                    setTabMode("raw");
+                  }}
+                >
+                  raw
+                </Tab>
+              </TabList>
+            </TabGroup>
+          </div>
         </div>
-      </div>
+      )}
       {tabMode === "smart" ? (
         <SearchSelect
           searchValue={selected}
