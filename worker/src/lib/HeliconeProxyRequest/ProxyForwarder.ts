@@ -54,6 +54,7 @@ export async function proxyForwarder(
   }
   const responseBuilder = new ResponseBuilder();
 
+  let rate_limited = false;
   if (proxyRequest.rateLimitOptions) {
     if (!proxyRequest.providerAuthHash) {
       return new Response("Authorization header required for rate limiting", {
@@ -75,7 +76,11 @@ export async function proxyForwarder(
       proxyRequest.rateLimitOptions
     );
     if (rateLimitCheckResult.status === "rate_limited") {
-      return responseBuilder.buildRateLimitedResponse();
+      rate_limited = true;
+      request.injectCustomProperty(
+        "Helicone-Rate-Limit-Status",
+        rateLimitCheckResult.status
+      );
     }
   }
 
@@ -237,7 +242,10 @@ export async function proxyForwarder(
     }
   }
 
-  const { data, error } = await handleProxyRequest(proxyRequest);
+  const { data, error } = await handleProxyRequest(
+    proxyRequest,
+    rate_limited ? responseBuilder.buildRateLimitedResponse() : undefined
+  );
   if (error !== null) {
     return responseBuilder.build({
       body: error,
