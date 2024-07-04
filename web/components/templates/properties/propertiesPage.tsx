@@ -9,6 +9,7 @@ import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import PropertyPanel from "./propertyPanel";
 import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
+import { hideProperty } from "../../../services/lib/propertiesV2";
 
 const PropertiesPage = (props: {}) => {
   const { properties, isLoading: isPropertiesLoading } =
@@ -56,7 +57,7 @@ const PropertiesPage = (props: {}) => {
                 <ul className="w-full bg-white h-fit border border-gray-300 dark:border-gray-700 rounded-lg">
                   {properties.map((property, i) => (
                     <li key={i}>
-                      <button
+                      <div
                         onClick={() => {
                           setSelectedProperty(property);
                         }}
@@ -66,14 +67,19 @@ const PropertiesPage = (props: {}) => {
                             : "bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-950",
                           i === 0 ? "rounded-t-md" : "",
                           i === properties.length - 1 ? "rounded-b-md" : "",
-                          "w-full flex flex-row items-center space-x-2 p-4 border-b border-gray-200 dark:border-gray-800"
+                          "w-full flex justify-between space-x-2 p-4 border-b border-gray-200 dark:border-gray-800 cursor-pointer"
                         )}
                       >
-                        <TagIcon className="h-4 w-4 text-black dark:text-white" />
-                        <p className="text-md font-semibold text-black dark:text-white">
-                          {property}
-                        </p>
-                      </button>
+                        <div className="flex flex-row items-center space-x-2">
+                          <TagIcon className="h-4 w-4 text-black dark:text-white" />
+                          <p className="text-md font-semibold text-black dark:text-white">
+                            {property}
+                          </p>
+                        </div>
+                        <button onClick={() => {hideProperty(property)}} className="items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                          Hide
+                        </button>
+                      </div>
                     </li>
                   ))}
                 </ul>
