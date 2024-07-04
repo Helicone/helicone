@@ -7,6 +7,7 @@ RUN apt install curl git -y
 RUN apt install build-essential -y
 
 COPY . /app/supabase
+RUN find /app/supabase -name ".env.*" -exec rm {} \;
 
 WORKDIR /app
 
