@@ -133,7 +133,8 @@
       "pages": [
         "other-integrations/open-webui",
         "other-integrations/meta-gpt",
-        "other-integrations/open-devin"
+        "other-integrations/open-devin",
+        "other-integrations/embedchain"
       ]
     },
     {
