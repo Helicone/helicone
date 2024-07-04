@@ -10,7 +10,8 @@
     "start": "next start",
     "build-and-start": "next build && next start",
     "lint": "next lint",
-    "codegen": "graphql-codegen --config codegen.ts"
+    "codegen": "graphql-codegen --config codegen.ts",
+    "postbuild": "next-sitemap"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.20.8",
@@ -64,6 +65,7 @@
     "mui": "^0.0.1",
     "next": "^14.0.4",
     "next-mdx-remote": "^4.4.1",
+    "next-sitemap": "^4.2.3",
     "nextjs-cors": "^2.1.2",
     "node-vault": "^0.10.2",
     "octokit": "^3.1.2",
