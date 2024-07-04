@@ -52,6 +52,7 @@ interface RequestsPageV2Props {
   isCached?: boolean;
   initialRequestId?: string;
   userId?: string;
+  rateLimited?: boolean;
   currentFilter: OrganizationFilter | null;
   organizationLayout: OrganizationLayout | null;
   organizationLayoutAvailable: boolean;
@@ -99,6 +100,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached = false,
     initialRequestId,
     userId,
+    rateLimited = false,
     currentFilter,
     organizationLayout,
     organizationLayoutAvailable,
@@ -387,6 +389,24 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       ]);
     }
   }, [advancedFilters, filterMap, userId]);
+  const userFilerMapIndex = filterMap.findIndex(
+    (filter) => filter.label === "Helicone-Rate-Limit-Status"
+  );
+  useEffect(() => {
+    if (rateLimited) {
+      if (userFilerMapIndex === -1) {
+        return;
+      }
+
+      setAdvancedFilters([
+        {
+          filterMapIdx: userFilerMapIndex,
+          operatorIdx: 0,
+          value: "rate_limited",
+        },
+      ]);
+    }
+  }, [userFilerMapIndex, rateLimited]);
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
