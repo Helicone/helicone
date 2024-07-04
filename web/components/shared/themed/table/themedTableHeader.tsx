@@ -16,6 +16,7 @@ import { RequestViews } from "./themedTable";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import FiltersButton from "./filtersButton";
 import { DragColumnItem } from "./columns/DragList";
+import SortButton from "./columns/sortButton";
 
 interface ThemedTableHeaderProps<T> {
   rows?: T[];
@@ -155,6 +156,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               setActiveColumns={setActiveColumns}
             />
           )}
+          {columns && <SortButton columns={columns} />}
           {rows && <ExportButton rows={rows} />}
 
           {viewToggle && (
