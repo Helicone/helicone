@@ -7,23 +7,28 @@ import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
-  title: "Helicone / LLM-Observability for Developers",
-  description: "The open-source platform for logging, monitoring, and debugging.",
-  icons: "https://www.helicone.ai/static/logo.png", 
+  title: "The Next Evolution in OpenAI Monitoring and Optimization - Helicone",
+  description:
+    "Learn how Helicone provides unmatched insights into your OpenAI usage, allowing you to monitor, optimize, and take control like never before.",
+  icons: "https://www.helicone.ai/static/logo.png",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
-    title: "The Next Evolution in OpenAI Monitoring and Optimization", 
+    title: "The Next Evolution in OpenAI Monitoring and Optimization",
     url: "https://www.helicone.ai/blog/open-source-monitoring-for-openai",
-    description: "Learn how Helicone provides unmatched insights into your OpenAI usage, allowing you to monitor, optimize, and take control like never before.", 
-    images: "https://www.helicone.ai/static/blog/langsmith-vs-helicone/cover-image.webp", // <-- update
+    description:
+      "Learn how Helicone provides unmatched insights into your OpenAI usage, allowing you to monitor, optimize, and take control like never before.",
+    images:
+      "https://www.helicone.ai/static/blog/langsmith-vs-helicone/cover-image.webp", // <-- update
     locale: "en_US",
   },
   twitter: {
-    title: "The Next Evolution in OpenAI Monitoring and Optimization", 
-    description: "Learn how Helicone provides unmatched insights into your OpenAI usage, allowing you to monitor, optimize, and take control like never before.",
+    title: "The Next Evolution in OpenAI Monitoring and Optimization",
+    description:
+      "Learn how Helicone provides unmatched insights into your OpenAI usage, allowing you to monitor, optimize, and take control like never before.",
     card: "summary_large_image",
-    images: "https://www.helicone.ai/static/blog/langsmith-vs-helicone/cover-image.webp",// <-- update
+    images:
+      "https://www.helicone.ai/static/blog/langsmith-vs-helicone/cover-image.webp", // <-- update
   },
 };
 
@@ -32,9 +37,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <>
-    {children}
-    </>
-  );
+  return <>{children}</>;
 }

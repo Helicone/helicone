@@ -98,7 +98,14 @@ export const PrettyInput = ({
           </div>
 
           <div className="bg-white border-gray-300 dark:bg-black dark:border-gray-700 p-4 border rounded-lg flex flex-col space-y-4">
-            {selectedProperties?.[keyName]}
+            <MarkdownEditor
+              text={selectedProperties?.[keyName] || ""}
+              setText={(text) => {
+                console.log(text);
+              }}
+              disabled={true}
+              language="markdown"
+            />
           </div>
         </div>
       </ThemedModal>

@@ -24,7 +24,7 @@ import {
 import { useOrg } from "../../layout/organizationContext";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
-import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
+import ThemedTable from "../../shared/themed/table/themedTable";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import useSearchParams from "../../shared/utils/useSearchParams";
@@ -52,6 +52,7 @@ interface RequestsPageV2Props {
   isCached?: boolean;
   initialRequestId?: string;
   userId?: string;
+  rateLimited?: boolean;
   currentFilter: OrganizationFilter | null;
   organizationLayout: OrganizationLayout | null;
   organizationLayoutAvailable: boolean;
@@ -99,6 +100,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached = false,
     initialRequestId,
     userId,
+    rateLimited = false,
     currentFilter,
     organizationLayout,
     organizationLayoutAvailable,
@@ -387,6 +389,24 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       ]);
     }
   }, [advancedFilters, filterMap, userId]);
+  const userFilerMapIndex = filterMap.findIndex(
+    (filter) => filter.label === "Helicone-Rate-Limit-Status"
+  );
+  useEffect(() => {
+    if (rateLimited) {
+      if (userFilerMapIndex === -1) {
+        return;
+      }
+
+      setAdvancedFilters([
+        {
+          filterMapIdx: userFilerMapIndex,
+          operatorIdx: 0,
+          value: "rate_limited",
+        },
+      ]);
+    }
+  }, [userFilerMapIndex, rateLimited]);
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
@@ -613,7 +633,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         <>{renderUnauthorized()}</>
       ) : (
         <div className="flex flex-col space-y-4">
-          <ThemedTableV5
+          <ThemedTable
             id="requests-table"
             defaultData={requests || []}
             defaultColumns={columnsWithProperties}

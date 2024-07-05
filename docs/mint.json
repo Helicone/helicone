@@ -1,8 +1,14 @@
 {
-  "name": "Helicone",
+  "name": "Helicone OSS LLM Observability",
   "logo": {
     "light": "/logo/light.png",
     "dark": "/logo/dark.svg"
+  },
+  "metadata": {
+    "og:site_name": "Helicone OSS LLM Observability",
+    "og:image": "/favicon.png",
+    "twitter:site": "@helicone_ai",
+    "twitter:image": "/favicon.png"
   },
   "favicon": "/favicon.png",
   "colors": {
@@ -15,7 +21,7 @@
   },
   "topbarCtaButton": {
     "name": "Sign In",
-    "url": "https://www.helicone.ai/#:~:text=Discord-,Sign,-In"
+    "url": "https://us.helicone.ai/#:~:text=Discord-,Sign,-In"
   },
   "tabs": [
     {
@@ -115,6 +121,10 @@
             "getting-started/integration-method/gateway",
             "getting-started/integration-method/custom"
           ]
+        },
+        {
+          "group": "Async Logging",
+          "pages": ["getting-started/integration-method/openllmetry"]
         }
       ]
     },
@@ -123,7 +133,8 @@
       "pages": [
         "other-integrations/open-webui",
         "other-integrations/meta-gpt",
-        "other-integrations/open-devin"
+        "other-integrations/open-devin",
+        "other-integrations/embedchain"
       ]
     },
     {

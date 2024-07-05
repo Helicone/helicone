@@ -32,7 +32,7 @@ type CommonFields = {
   promptId: string | null;
   temperature?: number;
   timeToFirstToken?: number | null;
-  scores?: Record<string, number> | null;
+  scores?: Record<string, { value: number; valueType: string }> | null;
 };
 
 export type NormalizedRequest = CommonFields & {

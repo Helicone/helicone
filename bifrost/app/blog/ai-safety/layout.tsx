@@ -8,23 +8,29 @@ import { Analytics } from "@vercel/analytics/react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Helicone / LLM-Observability for Developers",
-  description: "The open-source platform for logging, monitoring, and debugging.",
-  icons: "https://www.helicone.ai/static/logo.png", 
+  title:
+    "Why Observability is the key to ethical and safe Artificial Intelligence - Helicone",
+  description:
+    "As AI continues to shape our world, the need for ethical practices and robust observability has never been greater. Learn how Helicone is rising to the challenge.",
+  icons: "https://www.helicone.ai/static/logo.png",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
-    title: "Why Observability is the key to ethical and safe Artificial Intelligence",
+    title:
+      "Why Observability is the key to ethical and safe Artificial Intelligence",
     url: "https://helicone.ai/blog/ai-safety",
-    description: "As AI continues to shape our world, the need for ethical practices and robust observability has never been greater. Learn how Helicone is rising to the challenge.", 
+    description:
+      "As AI continues to shape our world, the need for ethical practices and robust observability has never been greater. Learn how Helicone is rising to the challenge.",
     images: "https://www.helicone.ai/static/blog/AI.webp",
     locale: "en_US",
   },
   twitter: {
-    title: "Why Observability is the key to ethical and safe Artificial Intelligence", 
-    description: "As AI continues to shape our world, the need for ethical practices and robust observability has never been greater. Learn how Helicone is rising to the challenge.",
+    title:
+      "Why Observability is the key to ethical and safe Artificial Intelligence",
+    description:
+      "As AI continues to shape our world, the need for ethical practices and robust observability has never been greater. Learn how Helicone is rising to the challenge.",
     card: "summary_large_image",
-    images: "https://www.helicone.ai/static/blog/AI.webp", 
+    images: "https://www.helicone.ai/static/blog/AI.webp",
   },
 };
 
@@ -33,9 +39,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <>
-    {children}
-    </>
-  );
+  return <>{children}</>;
 }

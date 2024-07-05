@@ -131,4 +131,12 @@ export const INITIAL_COLUMNS: ColumnDef<UserMetric>[] = [
     },
     minSize: 200,
   },
+  {
+    accessorKey: "rate_limited_count",
+    header: "Rate Limited Count",
+    cell: (info) => Number(info.getValue()).toLocaleString(),
+    meta: {
+      sortKey: "rate_limited_count",
+    },
+  },
 ];

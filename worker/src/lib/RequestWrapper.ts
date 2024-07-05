@@ -129,8 +129,12 @@ export class RequestWrapper {
   private injectPromptProperties() {
     const promptId = this.promptSettings.promptId;
     if (promptId) {
-      this.heliconeHeaders.heliconeProperties[`Helicone-Prompt-Id`] = promptId;
+      this.injectCustomProperty(`Helicone-Prompt-Id`, promptId);
     }
+  }
+
+  injectCustomProperty(key: string, value: string): void {
+    this.heliconeHeaders.heliconeProperties[key] = value;
   }
 
   private getPromptMode(
