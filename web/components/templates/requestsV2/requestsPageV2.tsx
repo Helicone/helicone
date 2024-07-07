@@ -234,7 +234,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     );
   });
 
-  const [isWarningHidden, setIsWarningHidden] = useLocalStorage("isStreamWarningHidden", false);
+  const [isWarningHidden, setIsWarningHidden] = useLocalStorage(
+    "isStreamWarningHidden",
+    false
+  );
 
   useEffect(() => {
     if (initialRequestId && selectedData === undefined) {
