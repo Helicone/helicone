@@ -494,6 +494,7 @@ WHEN (request_response_log.model = 'perplexity/llama-3-sonar-small-32k-online') 
 WHEN (request_response_log.model = 'perplexity/llama-3-sonar-large-32k-chat') THEN 1000 * request_response_log.prompt_tokens + 1000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'perplexity/llama-3-sonar-large-32k-online') THEN 1000 * request_response_log.prompt_tokens + 1000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'fireworks/firellava-13b') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'anthropic/claude-3.5-sonnet') THEN 3000 * request_response_log.prompt_tokens + 15000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'anthropic/claude-3-opus') THEN 15000 * request_response_log.prompt_tokens + 75000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'anthropic/claude-3-sonnet') THEN 3000 * request_response_log.prompt_tokens + 15000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'anthropic/claude-3-haiku') THEN 250 * request_response_log.prompt_tokens + 1250 * request_response_log.completion_tokens
@@ -583,7 +584,7 @@ WHEN (request_response_log.model = 'mistral-embed') THEN 100 * request_response_
   ELSE 0
 END
 )
-    ELSE 
+    ELSE
   CASE
   WHEN (request_response_log.model = 'ada') THEN 400 * request_response_log.prompt_tokens + 400 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'text-ada-001') THEN 400 * request_response_log.prompt_tokens + 400 * request_response_log.completion_tokens
