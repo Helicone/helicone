@@ -75,6 +75,18 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         ]
       : []
   );
+
+  useEffect(() => {
+    if (singleRequest?.model) {
+      setSelectedModels([
+        {
+          name: singleRequest.model,
+          provider: singleRequest.provider as ProviderName,
+        },
+      ]);
+    }
+  }, [singleRequest]);
+
   const [temperature, setTemperature] = useState<number>(
     reqBody !== null ? reqBody.temperature : 0.7
   );
@@ -123,6 +135,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           </div>
         }
       />
+      <code className="whitespace-pre-wrap text-[8px]">
+        {JSON.stringify(chat, undefined, 4)}
+      </code>
       <div className="flex justify-between w-full h-full gap-8 min-h-[80vh] border-t border-gray-300 pt-8">
         <div className="flex w-full h-full">
           {isLoading ? (

@@ -21,6 +21,7 @@ import HcButton from "../../ui/hcButton";
 import { PlaygroundModel } from "./playgroundPage";
 import { fetchAnthropic } from "../../../services/lib/providers/anthropic";
 import { Tooltip } from "@mui/material";
+import ChatRows from "./chatRows";
 
 interface ChatPlaygroundProps {
   requestId: string;
@@ -193,238 +194,14 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     });
   };
 
-  const generateChatRows = () => {
-    let modelMessage: Message[] = [];
-    const renderRows: JSX.Element[] = [];
-
-    currentChat.forEach((c, i) => {
-      if (c.model) {
-        modelMessage.push(c);
-      } else {
-        if (modelMessage.length > 0) {
-          renderRows.push(
-            <div
-              key={i}
-              className={clsx(
-                i !== 0 && "border-t",
-                "flex flex-col w-full h-full relative space-y-4 bg-white border-gray-300 dark:border-gray-700"
-              )}
-            >
-              <div className="w-full flex justify-between px-8 pt-4">
-                <RoleButton
-                  role={"assistant"}
-                  onRoleChange={function (
-                    role: "function" | "assistant" | "user" | "system"
-                  ): void {}}
-                  disabled={true}
-                />
-                <Tooltip title="Delete Row" placement="top">
-                  <button
-                    onClick={() => {
-                      // delete all of model messages
-                      // deleteRowHandler(modelMessage[0].id);
-                      setCurrentChat((prevChat) => {
-                        return prevChat.filter(
-                          (message) => message.model === undefined
-                        );
-                      });
-                    }}
-                    className="text-red-500 font-semibold"
-                  >
-                    <TrashIcon className="h-5 w-5" />
-                  </button>
-                </Tooltip>
-              </div>
-              <div className="w-full px-8 pb-4">
-                <div className="w-full h-full flex flex-row justify-between space-x-4 divide-x divide-gray-300 dark:divide-gray-700">
-                  {modelMessage.map((message, idx) => (
-                    <div
-                      key={idx}
-                      className={clsx(
-                        idx === 0 ? "" : "pl-4",
-                        "w-full h-auto flex flex-col space-y-2 col-span-1 relative"
-                      )}
-                    >
-                      <div className="flex justify-center items-center">
-                        <ModelPill model={message.model ?? ""} />
-                      </div>
-                      <div className="p-4 text-gray-900 dark:text-gray-100">
-                        <p>{message.content}</p>
-                      </div>
-                      <div className="flex w-full justify-end bottom-0 absolute text-xs text-gray-900 dark:text-gray-100">
-                        <p
-                          className={clsx(
-                            "bg-gray-50 text-gray-700 ring-gray-200",
-                            `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
-                          )}
-                        >{`${message.latency} ms`}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          );
-
-          modelMessage = [];
-        }
-
-        renderRows.push(
-          <ChatRow
-            key={c.id}
-            index={i}
-            message={c}
-            callback={(
-              userText: string,
-              role: string,
-              image: File | string | null
-            ) => {
-              const newChat = [...currentChat];
-
-              newChat[i].role = role as "user" | "assistant" | "system";
-              if (image) {
-                if (typeof image === "string") {
-                  newChat[i].content = [
-                    {
-                      type: "image_url",
-                      image_url: {
-                        url: image,
-                      },
-                    },
-                    { type: "text", text: userText },
-                  ];
-                  setCurrentChat(newChat);
-                  return;
-                }
-                if (image instanceof File) {
-                  // get the image from the file and set it
-                  const imageObj = URL.createObjectURL(image);
-                  // get the image from
-                  newChat[i].content = [
-                    {
-                      type: "image",
-                      image: imageObj,
-                    },
-                    { type: "text", text: userText },
-                  ];
-                  setCurrentChat(newChat);
-                  return;
-                } else {
-                  newChat[i].content = userText;
-                  setCurrentChat(newChat);
-                }
-              } else {
-                newChat[i].content = userText;
-                setCurrentChat(newChat);
-              }
-            }}
-            deleteRow={(rowId) => {
-              deleteRowHandler(rowId);
-            }}
-          />
-        );
-      }
-    });
-
-    // push the last model responses if there are any
-    if (modelMessage.length > 0) {
-      if (modelMessage.length === 1) {
-        renderRows.push(
-          <ChatRow
-            key={modelMessage[0].id}
-            index={currentChat.length - 1}
-            message={modelMessage[0]}
-            callback={(userText: string, role: string) => {
-              const newChat = [...currentChat];
-              newChat[currentChat.length - 1].content = userText;
-              newChat[currentChat.length - 1].role = role as
-                | "user"
-                | "assistant";
-            }}
-            deleteRow={(rowId) => {
-              deleteRowHandler(rowId);
-            }}
-          />
-        );
-      } else {
-        renderRows.push(
-          <div
-            key={currentChat.length - 1}
-            className="flex flex-col px-8 py-4 space-y-8 bg-white dark:bg-black border-t border-gray-300 dark:border-gray-700"
-          >
-            <div className="w-full flex justify-between">
-              <RoleButton
-                role={"assistant"}
-                onRoleChange={function (
-                  role: "function" | "assistant" | "user" | "system"
-                ): void {}}
-                disabled={true}
-              />
-              <Tooltip title="Delete Row" placement="top">
-                <button
-                  onClick={() => {
-                    // delete all of model messages
-                    // deleteRowHandler(modelMessage[0].id);
-                    setCurrentChat((prevChat) => {
-                      return prevChat.filter(
-                        (message) => message.model === undefined
-                      );
-                    });
-                  }}
-                  className="text-red-500 font-semibold"
-                >
-                  <TrashIcon className="h-5 w-5" />
-                </button>
-              </Tooltip>
-            </div>
-
-            <div
-              className={clsx(
-                modelMessage.length > 3
-                  ? `grid-cols-3`
-                  : `grid-cols-${modelMessage.length}`,
-                "w-full justify-between grid gap-4"
-              )}
-            >
-              {modelMessage.map((message, idx) => (
-                <div
-                  key={idx}
-                  className={clsx(
-                    idx % 3 === 0
-                      ? ""
-                      : "pl-4 border-l border-gray-300 dark:border-gray-700",
-                    "w-full h-auto flex flex-col space-y-2 col-span-1 relative"
-                  )}
-                >
-                  <div className="flex justify-center items-center">
-                    <ModelPill model={message.model ?? ""} />
-                  </div>
-                  <div className="p-4 text-gray-900 dark:text-gray-100">
-                    <p>{message.content}</p>
-                  </div>
-                  <div className="flex w-full justify-end pt-4 text-xs text-gray-900 dark:text-gray-100">
-                    <p
-                      className={clsx(
-                        "bg-gray-50 text-gray-700 ring-gray-200",
-                        `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
-                      )}
-                    >{`${message.latency} ms`}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      }
-    }
-
-    return renderRows;
-  };
-
   return (
     <>
       <ul className="w-full border border-gray-300 dark:border-gray-700 rounded-lg relative h-fit">
-        {generateChatRows()}
+        <ChatRows
+          currentChat={currentChat}
+          setCurrentChat={setCurrentChat}
+          deleteRowHandler={deleteRowHandler}
+        />
         {isLoading && (
           <li className="flex flex-row justify-between px-8 py-4 bg-white dark:bg-black border-t border-gray-300 dark:border-gray-700">
             <div className="flex flex-col gap-4 w-full">
@@ -523,6 +300,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           </div>
         </li>
       </ul>
+
       {customNavBar && (
         <div
           id="step-inc"
