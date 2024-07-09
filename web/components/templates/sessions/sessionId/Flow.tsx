@@ -7,11 +7,11 @@ import ReactFlow, {
   MiniMap,
   Position,
 } from "reactflow";
-import { Session, Trace } from "../../../lib/sessions/sessionTypes";
+import { Session, Trace } from "../../../../lib/sessions/sessionTypes";
 import {
   convertToFlowElements,
   createTraceNodes,
-} from "../../../lib/sessions/helpers";
+} from "../../../../lib/sessions/helpers";
 
 const CustomNode = ({ data }: { data: Trace }) => {
   return (
