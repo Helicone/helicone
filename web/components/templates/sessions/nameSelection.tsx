@@ -93,7 +93,7 @@ const SessionNameSelection = ({
 
             <Row className="flex w-full justify-between items-center">
               <p className="text-sm">
-                <span className="font-bold">{name.session_count} </span> 
+                <span className="font-bold">{name.session_count} </span>
                 total sessions
               </p>
               <p className="text-sm">
