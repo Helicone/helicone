@@ -20,6 +20,7 @@ import { OrganizationFilter } from "../../../services/lib/organization_layout/or
 
 import FilterTreeEditor from "./FilterTreeEditor";
 import { useEffect, useState } from "react";
+import useSearchParams from "../utils/useSearchParams";
 
 interface UIFilterRowNode {
   operator: "and" | "or";
@@ -236,14 +237,25 @@ export function AdvancedFilters({
     operator: "and",
     rows: filters.map((filter) => ({ ...filter })),
   });
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    // Update filterTree when filters prop changes
-    setFilterTree({
-      operator: "and",
-      rows: filters.map((filter) => ({ ...filter })),
-    });
-  }, [filters]);
+    if (searchParams.get("filters") && !filterTree) {
+      const filters = JSON.parse(searchParams.get("filters") as string);
+      setFilterTree(filters);
+    }
+    if (filterTree) {
+      searchParams.set("filters", JSON.stringify(filterTree));
+    }
+  }, [searchParams, filterTree]);
+
+  // useEffect(() => {
+  //   // Update filterTree when filters prop changes
+  //   setFilterTree({
+  //     operator: "and",
+  //     rows: filters.map((filter) => ({ ...filter })),
+  //   });
+  // }, [filters]);
 
   const handleFilterUpdate = (updatedTree: UIFilterRowTree) => {
     setFilterTree(updatedTree);
@@ -268,6 +280,7 @@ export function AdvancedFilters({
   const handleAddNode = () => {
     console.log("filterTree", filterTree);
     setFilterTree((prevTree) => {
+      console.log("prevTree", prevTree);
       if ("operator" in prevTree) {
         // If it's already an operator node, add a new empty node to its rows
         return {

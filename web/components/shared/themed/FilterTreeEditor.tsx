@@ -7,6 +7,8 @@ import {
   UIFilterRowNode,
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
+import { Row } from "../../layout/common/row";
+import { Col } from "../../layout/common/col";
 
 interface FilterTreeEditorProps {
   uiFilterRowTree: UIFilterRowTree;
@@ -31,6 +33,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
       operatorIdx: 0,
       value: "",
     };
+    console.log("Parent node", parentNode);
     parentNode.rows.push(newFilter);
     onUpdate({ ...uiFilterRowTree });
   };
@@ -39,7 +42,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
     console.log("Adding group");
     console.log("Parent node", parentNode);
     const newGroup: UIFilterRowNode = { operator: "and", rows: [] };
-    
+
     parentNode.rows.push(newGroup);
     onUpdate({ ...uiFilterRowTree });
   };
@@ -69,53 +72,59 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
           {parentNode && (
             <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-300 dark:bg-gray-700" />
           )}
-          <div className="relative">
-            <div className="flex items-center mb-2">
-              <div className="absolute -left-6 top-3 w-6 h-px bg-gray-300 dark:bg-gray-700" />
-              <Select
-                value={node.operator}
-                onValueChange={(value) =>
-                  handleOperatorChange(node, value as "and" | "or")
-                }
-                className="w-24 mr-2"
-              >
-                <SelectItem value="and">AND</SelectItem>
-                <SelectItem value="or">OR</SelectItem>
-              </Select>
-              {parentNode && (
+          <Row className="relative">
+            {node.rows.length >= 2 && (
+              <div className="flex items-center mb-2">
+                <div className="absolute -left-6 top-3 w-6 h-px " />
+                <Select
+                  value={node.operator}
+                  onValueChange={(value) =>
+                    handleOperatorChange(node, value as "and" | "or")
+                  }
+                  className="w-24 mr-2"
+                >
+                  <SelectItem value="and">AND</SelectItem>
+                  <SelectItem value="or">OR</SelectItem>
+                </Select>
+                {parentNode && (
+                  <Button
+                    onClick={() => handleRemoveNode(parentNode, index!)}
+                    variant="secondary"
+                    size="sm"
+                    className="ml-2"
+                  >
+                    <XCircleIcon className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            )}
+            <Col>
+              {node.rows.map((childNode: any, childIndex: number) => (
+                <div key={childIndex} className="relative mb-2">
+                  {renderNode(childNode, node, childIndex)}
+                </div>
+              ))}
+              <div className="mt-2">
                 <Button
-                  onClick={() => handleRemoveNode(parentNode, index!)}
+                  onClick={() => handleAddFilter(node)}
                   variant="secondary"
                   size="sm"
-                  className="ml-2"
+                  className="mr-2"
                 >
-                  <XCircleIcon className="h-4 w-4" />
+                  Add Filter
                 </Button>
-              )}
-            </div>
-            {node.rows.map((childNode: any, childIndex: number) => (
-              <div key={childIndex} className="relative mb-2">
-                {renderNode(childNode, node, childIndex)}
+                {index !== undefined && index <= 2 && (
+                  <Button
+                    onClick={() => handleAddGroup(node)}
+                    variant="secondary"
+                    size="sm"
+                  >
+                    Add Group {index}
+                  </Button>
+                )}
               </div>
-            ))}
-            <div className="mt-2">
-              <Button
-                onClick={() => handleAddFilter(node)}
-                variant="secondary"
-                size="sm"
-                className="mr-2"
-              >
-                Add Filter
-              </Button>
-              <Button
-                onClick={() => handleAddGroup(node)}
-                variant="secondary"
-                size="sm"
-              >
-                Add Group
-              </Button>
-            </div>
-          </div>
+            </Col>
+          </Row>
         </div>
       );
     } else {

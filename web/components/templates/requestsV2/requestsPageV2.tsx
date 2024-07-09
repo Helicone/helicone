@@ -512,10 +512,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     } else {
       const currentAdvancedFilters = filters.map(encodeFilter).join("|");
 
-      searchParams.set(
-        "filters",
-        `"${encodeURIComponent(currentAdvancedFilters)}"`
-      );
+      // searchParams.set(
+      //   "filters",
+      //   `"${encodeURIComponent(currentAdvancedFilters)}"`
+      // );
     }
   };
 
