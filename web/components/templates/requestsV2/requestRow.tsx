@@ -65,7 +65,6 @@ const RequestRow = (props: {
   const [currentScores, setCurrentScores] =
     useState<Record<string, { value: number; valueType: string }>>();
 
-  const router = useRouter();
   const { setNotification } = useNotification();
 
   useEffect(() => {
@@ -90,23 +89,6 @@ const RequestRow = (props: {
       request.scores || {};
     setCurrentScores(currentScores);
   }, [properties, request.customProperties, request.scores]);
-
-  const updateFeedbackHandler = async (requestId: string, rating: boolean) => {
-    updateRequestFeedback(requestId, rating)
-      .then((res) => {
-        if (res && res.status === 200) {
-          setRequestFeedback({
-            ...requestFeedback,
-            rating: rating,
-          });
-          setNotification("Feedback submitted", "success");
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        setNotification("Error submitting feedback", "error");
-      });
-  };
 
   const onAddLabelHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -420,7 +402,6 @@ const RequestRow = (props: {
             </HcButton>
           </form>
         )}
-
         <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
           {currentProperties?.map((property, i) => {
             return (
