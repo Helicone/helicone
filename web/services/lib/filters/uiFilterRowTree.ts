@@ -1,4 +1,10 @@
-import { filterListToTree, uiFilterRowToFilterLeaf } from "./filterDefs";
+import { UIFilterRow } from "../../../components/shared/themed/themedAdvancedFilters";
+import {
+  filterListToTree,
+  FilterNode,
+  uiFilterRowToFilterLeaf,
+} from "./filterDefs";
+import { SingleFilterDef } from "./frontendFilterDefs";
 
 export interface UIFilterRowNode {
   operator: "and" | "or";
@@ -9,7 +15,7 @@ export type UIFilterRowTree = UIFilterRowNode | UIFilterRow;
 
 export function filterUITreeToFilterNode(
   filterMap: SingleFilterDef<any>[],
-  uiFilterRowNode: UIFilterRowNode
+  uiFilterRowNode: UIFilterRowTree
 ): FilterNode {
   if ("operator" in uiFilterRowNode) {
     const filterNodes = uiFilterRowNode.rows.map((row: UIFilterRowTree) =>
@@ -17,6 +23,6 @@ export function filterUITreeToFilterNode(
     );
     return filterListToTree(filterNodes, uiFilterRowNode.operator);
   } else {
-    return uiFilterRowToFilterLeaf(uiFilterRowNode);
+    return uiFilterRowToFilterLeaf(filterMap, uiFilterRowNode);
   }
 }

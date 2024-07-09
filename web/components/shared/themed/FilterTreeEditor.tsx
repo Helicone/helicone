@@ -69,12 +69,12 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
     if ("operator" in node) {
       return (
         <div className="relative pl-6">
-          {parentNode && (
-            <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-300 dark:bg-gray-700" />
-          )}
           <Row className="relative">
             {node.rows.length >= 2 && (
-              <div className="flex items-center mb-2">
+              <div className="flex items-center mb-2 ">
+                {parentNode && (
+                  <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-300 dark:bg-gray-700 h-full" />
+                )}
                 <div className="absolute -left-6 top-3 w-6 h-px " />
                 <Select
                   value={node.operator}
