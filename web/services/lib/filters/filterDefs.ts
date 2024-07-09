@@ -374,6 +374,33 @@ export function filterListToTree(
     };
   }
 }
+export function uiFilterRowToFilterLeaf(
+  filterMap: SingleFilterDef<any>[],
+  filter: UIFilterRow
+): FilterLeaf {
+  const filterDef = filterMap[filter.filterMapIdx];
+  const operator = filterDef?.operators[filter.operatorIdx]?.value;
+
+  if (filterDef?.isCustomProperty) {
+    return {
+      request_response_versioned: {
+        properties: {
+          [filterDef.column]: {
+            [operator]: filter.value,
+          },
+        },
+      },
+    };
+  }
+
+  return {
+    [filterDef?.table]: {
+      [filterDef?.column]: {
+        [operator]: filter.value,
+      },
+    },
+  };
+}
 
 export function filterUIToFilterLeafs(
   filterMap: SingleFilterDef<any>[],
@@ -381,33 +408,7 @@ export function filterUIToFilterLeafs(
 ): FilterLeaf[] {
   return filters
     .filter((filter) => filter.value !== "")
-    .map((filter) => {
-      if (
-        filterMap &&
-        filterMap[filter.filterMapIdx].isCustomProperty &&
-        filterMap[filter.filterMapIdx].isCustomProperty === true
-      ) {
-        return {
-          request_response_versioned: {
-            properties: {
-              [filterMap[filter.filterMapIdx]?.column]: {
-                [filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx]
-                  ?.value]: filter.value,
-              },
-            },
-          },
-        };
-      }
-      const leaf: FilterLeaf = {
-        [filterMap[filter.filterMapIdx]?.table]: {
-          [filterMap[filter.filterMapIdx]?.column]: {
-            [filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx]
-              ?.value]: filter.value,
-          },
-        },
-      };
-      return leaf;
-    });
+    .map((filter) => uiFilterRowToFilterLeaf(filterMap, filter));
 }
 
 export const parseKey = (keyString: string): FilterLeaf => {

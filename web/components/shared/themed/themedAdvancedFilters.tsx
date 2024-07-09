@@ -6,6 +6,7 @@ import {
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { ThemedTextDropDown } from "./themedTextDropDown";
 import {
+  Button,
   NumberInput,
   SearchSelect,
   SearchSelectItem,
@@ -16,6 +17,158 @@ import {
 import ThemedNumberDropdown from "./themedNumberDropdown";
 import SaveFilterButton from "../../templates/dashboard/saveFilterButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
+
+import FilterTreeEditor from "./FilterTreeEditor";
+import { useEffect, useState } from "react";
+
+interface UIFilterRowNode {
+  operator: "and" | "or";
+  rows: UIFilterRowTree[];
+}
+
+type UIFilterRowTree = UIFilterRowNode | UIFilterRow;
+
+// function FilterTreeEditor({
+//   uiFilterRowTree,
+//   onUpdate,
+// }: {
+//   uiFilterRowTree: UIFilterRowTree;
+//   onUpdate: (updatedTree: UIFilterRowTree) => void;
+// }) {
+//   const renderTree = (tree: UIFilterRowTree, path: number[] = []) => {
+//     if ("operator" in tree) {
+//       return (
+//         <div
+//           key={path.join("-")}
+//           className="ml-4 border-l-2 border-gray-200 pl-2"
+//         >
+//           <div className="flex items-center mb-2">
+//             <Select
+//               value={tree.operator}
+//               onValueChange={(value) => {
+//                 const updatedTree = {
+//                   ...tree,
+//                   operator: value as "and" | "or",
+//                 };
+//                 onUpdate(updateTree(uiFilterRowTree, path, updatedTree));
+//               }}
+//             >
+//               <SelectItem value="and">AND</SelectItem>
+//               <SelectItem value="or">OR</SelectItem>
+//             </Select>
+//             <button
+//               onClick={() => onUpdate(removeNode(uiFilterRowTree, path))}
+//               className="ml-2 text-red-600 hover:text-red-800"
+//             >
+//               <TrashIcon className="h-4" />
+//             </button>
+//           </div>
+//           {tree.rows.map((row, index) => (
+//             <div key={index}>{renderTree(row, [...path, index])}</div>
+//           ))}
+//           <button
+//             onClick={() => {
+//               const newRow = { filterMapIdx: 0, operatorIdx: 0, value: "some" };
+//               onUpdate(addNode(uiFilterRowTree, path, newRow));
+//             }}
+//             className="text-sm text-blue-600 hover:text-blue-800"
+//           >
+//             <PlusIcon className="h-4" /> Add Filter
+//           </button>
+//           <button
+//             onClick={() => {
+//               const newNode = { operator: "and", rows: [] };
+//               onUpdate(addNode(uiFilterRowTree, path, newNode));
+//             }}
+//             className="text-sm text-green-600 hover:text-green-800"
+//           >
+//             <PlusIcon className="h-4" /> Add Group
+//           </button>
+//         </div>
+//       );
+//     } else {
+//       return (
+//         <div key={path.join("-")} className="ml-4 flex items-center mb-2">
+//           <AdvancedFilterRow
+//             filter={tree}
+//             filterMap={[]}
+//             setFilter={(updatedFilter) => {
+//               onUpdate(updateTree(uiFilterRowTree, path, updatedFilter));
+//             }}
+//             onDeleteHandler={() => onUpdate(removeNode(uiFilterRowTree, path))}
+//             onSearchHandler={() => ({ error: "hello", data: null })}
+//           />
+//         </div>
+//       );
+//     }
+//   };
+
+//   return <div>{renderTree(uiFilterRowTree)}</div>;
+// }
+
+// Utility functions to manage the tree
+const updateTree = (
+  tree: UIFilterRowTree,
+  path: number[],
+  newNode: UIFilterRowTree
+): UIFilterRowTree => {
+  if (path.length === 0) return newNode;
+  const [head, ...tail] = path;
+  if ("operator" in tree) {
+    return {
+      ...tree,
+      rows: tree.rows.map((row, index) =>
+        index === head ? updateTree(row, tail, newNode) : row
+      ),
+    };
+  }
+  return tree;
+};
+
+const addNode = (
+  tree: UIFilterRowTree,
+  path: number[],
+  newNode: UIFilterRowTree
+): UIFilterRowTree => {
+  if (path.length === 0) {
+    if ("operator" in tree) {
+      return { ...tree, rows: [...tree.rows, newNode] };
+    }
+    return { operator: "and", rows: [tree, newNode] };
+  }
+  const [head, ...tail] = path;
+  if ("operator" in tree) {
+    return {
+      ...tree,
+      rows: tree.rows.map((row, index) =>
+        index === head ? addNode(row, tail, newNode) : row
+      ),
+    };
+  }
+  return tree;
+};
+
+const removeNode = (tree: UIFilterRowTree, path: number[]): UIFilterRowTree => {
+  if (path.length === 1) {
+    if ("operator" in tree) {
+      return {
+        ...tree,
+        rows: tree.rows.filter((_, index) => index !== path[0]),
+      };
+    }
+    return tree;
+  }
+  const [head, ...tail] = path;
+  if ("operator" in tree) {
+    return {
+      ...tree,
+      rows: tree.rows.map((row, index) =>
+        index === head ? removeNode(row, tail) : row
+      ),
+    };
+  }
+  return tree;
+};
 
 export function AdvancedFilters({
   filterMap,
@@ -37,6 +190,100 @@ export function AdvancedFilters({
   savedFilters?: OrganizationFilter[];
   layoutPage: "dashboard" | "requests";
 }) {
+  const uiFilterRowTreeExampleSimple: UIFilterRowTree = {
+    operator: "and",
+    rows: [
+      {
+        filterMapIdx: 0,
+        operatorIdx: 0,
+        value: "hello",
+      },
+      {
+        filterMapIdx: 0,
+        operatorIdx: 0,
+        value: "world",
+      },
+    ],
+  };
+
+  const uiFilterRowTreeExampleNested1: UIFilterRowTree = {
+    operator: "and",
+    rows: [
+      {
+        operator: "and",
+        rows: [
+          {
+            filterMapIdx: 0,
+            operatorIdx: 0,
+            value: "hello",
+          },
+          {
+            filterMapIdx: 0,
+            operatorIdx: 0,
+            value: "hello",
+          },
+        ],
+      },
+      {
+        filterMapIdx: 0,
+        operatorIdx: 0,
+        value: "hello",
+      },
+    ],
+  };
+
+  const [filterTree, setFilterTree] = useState<UIFilterRowTree>({
+    operator: "and",
+    rows: filters.map((filter) => ({ ...filter })),
+  });
+
+  useEffect(() => {
+    // Update filterTree when filters prop changes
+    setFilterTree({
+      operator: "and",
+      rows: filters.map((filter) => ({ ...filter })),
+    });
+  }, [filters]);
+
+  const handleFilterUpdate = (updatedTree: UIFilterRowTree) => {
+    setFilterTree(updatedTree);
+    // Convert tree structure back to flat array for setAdvancedFilters
+    const flattenTree = (node: UIFilterRowTree): UIFilterRow[] => {
+      if ("filterMapIdx" in node) {
+        return [node];
+      }
+      return node.rows.flatMap(flattenTree);
+    };
+    setAdvancedFilters(flattenTree(updatedTree));
+  };
+
+  const handleAddRootGroup = () => {
+    console.log("filterTree", filterTree);
+    setFilterTree((prevTree) => ({
+      operator: "and",
+      rows: [{ ...prevTree }],
+    }));
+  };
+
+  const handleAddNode = () => {
+    console.log("filterTree", filterTree);
+    setFilterTree((prevTree) => {
+      if ("operator" in prevTree) {
+        // If it's already an operator node, add a new empty node to its rows
+        return {
+          ...prevTree,
+          rows: [...prevTree.rows, { operator: "and", rows: [] }],
+        };
+      } else {
+        // If it's a single filter, create an operator node with the existing filter and a new empty node
+        return {
+          operator: "and",
+          rows: [prevTree, { operator: "and", rows: [] }],
+        };
+      }
+    });
+  };
+
   return (
     <div className="flex flex-col bg-white dark:bg-black p-4 rounded-lg border border-gray-300 dark:border-gray-700 mt-8">
       <div className="w-full flex flex-col sm:flex-row justify-between items-center">
@@ -51,17 +298,45 @@ export function AdvancedFilters({
         </button>
       </div>
 
+      <FilterTreeEditor
+        uiFilterRowTree={filterTree}
+        onUpdate={handleFilterUpdate}
+        filterMap={filterMap}
+        onSearchHandler={searchPropertyFilters}
+      />
+
+      <div>
+        <Button
+          onClick={handleAddNode}
+          variant="secondary"
+          size="sm"
+          className="mr-2"
+        >
+          Add Node
+        </Button>
+        <Button
+          onClick={() => {
+            setFilterTree({ operator: "and", rows: [] });
+            setAdvancedFilters([]);
+          }}
+          variant="secondary"
+          size="sm"
+        >
+          Clear All
+        </Button>
+      </div>
+
       <div className="flex flex-col gap-2 bg-white dark:bg-black space-y-2 mt-4">
         {filters.map((_filter, index) => {
           return (
             <div key={index}>
-              <AdvancedFilterRow
+              {/* <AdvancedFilterRow
                 filterMap={filterMap}
                 filter={_filter}
                 setFilter={(filter) => {
                   const prev = [...filters];
                   const newFilters = [...prev];
-                  newFilters[index] = filter[0];
+                  newFilters[index] = filter;
                   setAdvancedFilters(newFilters);
                 }}
                 onDeleteHandler={() => {
@@ -70,10 +345,11 @@ export function AdvancedFilters({
                   setAdvancedFilters(prev);
                 }}
                 onSearchHandler={searchPropertyFilters}
-              />
+              /> */}
             </div>
           );
         })}
+
         <button
           onClick={() => {
             const prev = [...filters];
@@ -221,16 +497,16 @@ export type UIFilterRow = {
   value: string;
 };
 
-function AdvancedFilterRow({
-  filterMap,
-  filter,
-  setFilter,
-  onDeleteHandler,
+export function AdvancedFilterRow({
   onSearchHandler,
+  filter,
+  filterMap,
+  onDeleteHandler,
+  setFilter,
 }: {
   filterMap: SingleFilterDef<any>[];
   filter: UIFilterRow;
-  setFilter: (filters: UIFilterRow[]) => void;
+  setFilter: (filters: UIFilterRow) => void;
   onDeleteHandler: () => void;
   onSearchHandler: (
     property: string,
@@ -246,21 +522,17 @@ function AdvancedFilterRow({
             const selected = Number(value);
             const label = filterMap[selected].label;
             if (label === "Feedback") {
-              setFilter([
-                {
-                  filterMapIdx: selected,
-                  operatorIdx: 0,
-                  value: "true",
-                },
-              ]);
+              setFilter({
+                filterMapIdx: selected,
+                operatorIdx: 0,
+                value: "true",
+              });
             } else {
-              setFilter([
-                {
-                  filterMapIdx: selected,
-                  operatorIdx: 0,
-                  value: "",
-                },
-              ]);
+              setFilter({
+                filterMapIdx: selected,
+                operatorIdx: 0,
+                value: "",
+              });
             }
           }}
           enableClear={false}
@@ -278,13 +550,11 @@ function AdvancedFilterRow({
           value={filter.operatorIdx.toString()}
           onValueChange={(value: string) => {
             const selected = Number(value);
-            setFilter([
-              {
-                filterMapIdx: filter.filterMapIdx,
-                operatorIdx: selected,
-                value: "",
-              },
-            ]);
+            setFilter({
+              filterMapIdx: filter.filterMapIdx,
+              operatorIdx: selected,
+              value: "",
+            });
           }}
           enableClear={false}
         >
@@ -307,13 +577,11 @@ function AdvancedFilterRow({
               .inputParams
           }
           onChange={(value) => {
-            setFilter([
-              {
-                filterMapIdx: filter.filterMapIdx,
-                operatorIdx: filter.operatorIdx,
-                value: value ?? "",
-              },
-            ]);
+            setFilter({
+              filterMapIdx: filter.filterMapIdx,
+              operatorIdx: filter.operatorIdx,
+              value: value ?? "",
+            });
           }}
           onSearchHandler={(search: string) =>
             onSearchHandler(
