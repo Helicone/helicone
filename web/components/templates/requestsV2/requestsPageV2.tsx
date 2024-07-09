@@ -40,6 +40,10 @@ import RequestCard from "./requestCard";
 import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
 import useRequestsPageV2 from "./useRequestsPageV2";
+import {
+  ROOT_FILTER_NODE,
+  UIFilterRowTree,
+} from "../../../services/lib/filters/uiFilterRowTree";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -190,7 +194,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
   const [timeRange, setTimeRange] = useState<TimeFilter>(getTimeRange());
 
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
+  const [advancedFilters, setAdvancedFilters] =
+    useState<UIFilterRowTree>(ROOT_FILTER_NODE);
 
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
@@ -211,7 +216,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     filterMap,
     searchPropertyFilters,
     remove,
-    filter: builtFilter,
   } = useRequestsPageV2(
     page,
     currentPageSize,
@@ -318,18 +322,18 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   }, [initialRequestId]);
 
-  useEffect(() => {
-    const currentAdvancedFilters = searchParams.get("filters");
+  // useEffect(() => {
+  //   const currentAdvancedFilters = searchParams.get("filters");
 
-    if (
-      filterMap &&
-      advancedFilters.length === 0 &&
-      currentAdvancedFilters &&
-      !isDataLoading
-    ) {
-      setAdvancedFilters(getAdvancedFilters());
-    }
-  }, [isDataLoading]);
+  //   if (
+  //     filterMap &&
+  //     advancedFilters.length === 0 &&
+  //     currentAdvancedFilters &&
+  //     !isDataLoading
+  //   ) {
+  //     setAdvancedFilters(getAdvancedFilters());
+  //   }
+  // }, [advancedFilters.length, filterMap, getAdvancedFilters, isDataLoading, searchParams]);
 
   //convert this using useCallback
   const getAdvancedFilters = useCallback(() => {
@@ -375,43 +379,45 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     return [];
   }, [searchParams, filterMap]);
 
-  useEffect(() => {
-    if (advancedFilters.length !== 0 || !userId) {
-      return;
-    }
+  // TODO
+  // useEffect(() => {
+  //   if (advancedFilters.length !== 0 || !userId) {
+  //     return;
+  //   }
 
-    const userFilerMapIndex = filterMap.findIndex(
-      (filter) => filter.label === "User"
-    );
+  //   const userFilerMapIndex = filterMap.findIndex(
+  //     (filter) => filter.label === "User"
+  //   );
 
-    if (userFilerMapIndex !== -1) {
-      setAdvancedFilters([
-        {
-          filterMapIdx: userFilerMapIndex,
-          operatorIdx: 0,
-          value: userId,
-        },
-      ]);
-    }
-  }, [advancedFilters, filterMap, userId]);
+  //   if (userFilerMapIndex !== -1) {
+  //     setAdvancedFilters([
+  //       {
+  //         filterMapIdx: userFilerMapIndex,
+  //         operatorIdx: 0,
+  //         value: userId,
+  //       },
+  //     ]);
+  //   }
+  // }, [advancedFilters, filterMap, userId]);
   const userFilerMapIndex = filterMap.findIndex(
     (filter) => filter.label === "Helicone-Rate-Limit-Status"
   );
-  useEffect(() => {
-    if (rateLimited) {
-      if (userFilerMapIndex === -1) {
-        return;
-      }
+  // TODO
+  // useEffect(() => {
+  //   if (rateLimited) {
+  //     if (userFilerMapIndex === -1) {
+  //       return;
+  //     }
 
-      setAdvancedFilters([
-        {
-          filterMapIdx: userFilerMapIndex,
-          operatorIdx: 0,
-          value: "rate_limited",
-        },
-      ]);
-    }
-  }, [userFilerMapIndex, rateLimited]);
+  //     setAdvancedFilters([
+  //       {
+  //         filterMapIdx: userFilerMapIndex,
+  //         operatorIdx: 0,
+  //         value: "rate_limited",
+  //       },
+  //     ]);
+  //   }
+  // }, [userFilerMapIndex, rateLimited]);
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
@@ -502,30 +508,13 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       : undefined
   );
 
-  const onSetAdvancedFiltersHandler = (
-    filters: UIFilterRow[],
-    layoutFilterId?: string | null
-  ) => {
-    setAdvancedFilters(filters);
-    if (layoutFilterId === null || filters.length === 0) {
-      searchParams.delete("filters");
-    } else {
-      const currentAdvancedFilters = filters.map(encodeFilter).join("|");
-
-      // searchParams.set(
-      //   "filters",
-      //   `"${encodeURIComponent(currentAdvancedFilters)}"`
-      // );
-    }
-  };
-
   const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
     if (layoutFilter !== null) {
-      onSetAdvancedFiltersHandler(layoutFilter?.filter, layoutFilter.id);
+      // onSetAdvancedFiltersHandler(layoutFilter?.filter, layoutFilter.id);
       setCurrFilter(layoutFilter?.id);
     } else {
       setCurrFilter(null);
-      onSetAdvancedFiltersHandler([], null);
+      // onSetAdvancedFiltersHandler([], null);
     }
   };
 
@@ -660,7 +649,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             advancedFilters={{
               filterMap: filterMap,
               filters: advancedFilters,
-              setAdvancedFilters: onSetAdvancedFiltersHandler,
+              setAdvancedFilters: setAdvancedFilters,
               searchPropertyFilters: searchPropertyFilters,
               show: userId ? false : true,
             }}

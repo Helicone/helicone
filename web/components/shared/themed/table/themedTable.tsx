@@ -28,6 +28,7 @@ import {
 import DraggableColumnHeader from "./columns/draggableColumnHeader";
 import RequestRowView from "./requestRowView";
 import ThemedTableHeader from "./themedTableHeader";
+import { UIFilterRowTree } from "../../../../services/lib/filters/uiFilterRowTree";
 
 interface ThemedTableV5Props<T> {
   id: string;
@@ -36,8 +37,8 @@ interface ThemedTableV5Props<T> {
   dataLoading: boolean;
   advancedFilters?: {
     filterMap: SingleFilterDef<any>[];
-    filters: UIFilterRow[];
-    setAdvancedFilters: (filters: UIFilterRow[]) => void;
+    filters: UIFilterRowTree;
+    setAdvancedFilters: (filters: UIFilterRowTree) => void;
     searchPropertyFilters: (
       property: string,
       search: string

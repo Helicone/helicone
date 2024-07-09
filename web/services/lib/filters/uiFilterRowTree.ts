@@ -13,16 +13,24 @@ export interface UIFilterRowNode {
 
 export type UIFilterRowTree = UIFilterRowNode | UIFilterRow;
 
+export const ROOT_FILTER_NODE: UIFilterRowNode = {
+  operator: "and",
+  rows: [],
+};
+
 export function filterUITreeToFilterNode(
   filterMap: SingleFilterDef<any>[],
   uiFilterRowNode: UIFilterRowTree
 ): FilterNode {
   if ("operator" in uiFilterRowNode) {
-    const filterNodes = uiFilterRowNode.rows.map((row: UIFilterRowTree) =>
-      filterUITreeToFilterNode(filterMap, row)
-    );
+    const filterNodes = uiFilterRowNode.rows
+      .map((row: UIFilterRowTree) => filterUITreeToFilterNode(filterMap, row))
+      .filter((node) => node !== "all");
     return filterListToTree(filterNodes, uiFilterRowNode.operator);
   } else {
+    if (uiFilterRowNode.value === "") {
+      return "all";
+    }
     return uiFilterRowToFilterLeaf(filterMap, uiFilterRowNode);
   }
 }

@@ -17,6 +17,7 @@ import { OrganizationFilter } from "../../../../services/lib/organization_layout
 import FiltersButton from "./filtersButton";
 import { DragColumnItem } from "./columns/DragList";
 import SortButton from "./columns/sortButton";
+import { UIFilterRowTree } from "../../../../services/lib/filters/uiFilterRowTree";
 
 interface ThemedTableHeaderProps<T> {
   rows?: T[];
@@ -24,8 +25,8 @@ interface ThemedTableHeaderProps<T> {
   // define this if you want the advanced filters
   advancedFilters?: {
     filterMap: SingleFilterDef<any>[];
-    filters: UIFilterRow[];
-    setAdvancedFilters: (filters: UIFilterRow[]) => void;
+    filters: UIFilterRowTree[];
+    setAdvancedFilters: (filters: UIFilterRowTree[]) => void;
     searchPropertyFilters: (
       property: string,
       search: string
