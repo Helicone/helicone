@@ -13,6 +13,11 @@ export interface UIFilterRowNode {
 
 export type UIFilterRowTree = UIFilterRowNode | UIFilterRow;
 
+export const ROOT_FILTER_NODE: UIFilterRowNode = {
+  operator: "and",
+  rows: [],
+};
+
 export function filterUITreeToFilterNode(
   filterMap: SingleFilterDef<any>[],
   uiFilterRowNode: UIFilterRowTree
