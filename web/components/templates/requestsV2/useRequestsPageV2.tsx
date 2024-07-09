@@ -19,11 +19,15 @@ import { useModels } from "../../../services/hooks/models";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
 import { TimeFilter } from "../dashboard/dashboardPage";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
+import {
+  filterUITreeToFilterNode,
+  UIFilterRowTree,
+} from "../../../services/lib/filters/uiFilterRowTree";
 
 const useRequestsPageV2 = (
   currentPage: number,
   currentPageSize: number,
-  uiFilterIdxs: UIFilterRow[],
+  uiFilterIdxs: UIFilterRowTree,
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest,
   isCached: boolean,
@@ -72,10 +76,7 @@ const useRequestsPageV2 = (
   models?.data?.sort((a, b) => a.model.localeCompare(b.model));
 
   const filter: FilterNode = {
-    left: filterListToTree(
-      filterUIToFilterLeafs(filterMap, uiFilterIdxs),
-      "and"
-    ),
+    left: filterUITreeToFilterNode(filterMap, uiFilterIdxs),
     right: advancedFilter,
     operator: "and",
   };

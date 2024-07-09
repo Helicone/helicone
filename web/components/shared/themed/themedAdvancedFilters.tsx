@@ -21,6 +21,7 @@ import { OrganizationFilter } from "../../../services/lib/organization_layout/or
 import FilterTreeEditor from "./FilterTreeEditor";
 import { useEffect, useState } from "react";
 import useSearchParams from "../utils/useSearchParams";
+import { ROOT_FILTER_NODE } from "../../../services/lib/filters/uiFilterRowTree";
 
 interface UIFilterRowNode {
   operator: "and" | "or";
@@ -181,8 +182,8 @@ export function AdvancedFilters({
   layoutPage,
 }: {
   filterMap: SingleFilterDef<any>[];
-  filters: UIFilterRow[];
-  setAdvancedFilters: (filters: UIFilterRow[]) => void;
+  filters: UIFilterRowTree;
+  setAdvancedFilters: (filters: UIFilterRowTree) => void;
   searchPropertyFilters: (
     property: string,
     search: string
@@ -233,10 +234,8 @@ export function AdvancedFilters({
     ],
   };
 
-  const [filterTree, setFilterTree] = useState<UIFilterRowTree>({
-    operator: "and",
-    rows: filters.map((filter) => ({ ...filter })),
-  });
+  const [filterTree, setFilterTree] =
+    useState<UIFilterRowTree>(ROOT_FILTER_NODE);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -256,26 +255,6 @@ export function AdvancedFilters({
   //     rows: filters.map((filter) => ({ ...filter })),
   //   });
   // }, [filters]);
-
-  const handleFilterUpdate = (updatedTree: UIFilterRowTree) => {
-    setFilterTree(updatedTree);
-    // Convert tree structure back to flat array for setAdvancedFilters
-    const flattenTree = (node: UIFilterRowTree): UIFilterRow[] => {
-      if ("filterMapIdx" in node) {
-        return [node];
-      }
-      return node.rows.flatMap(flattenTree);
-    };
-    setAdvancedFilters(flattenTree(updatedTree));
-  };
-
-  const handleAddRootGroup = () => {
-    console.log("filterTree", filterTree);
-    setFilterTree((prevTree) => ({
-      operator: "and",
-      rows: [{ ...prevTree }],
-    }));
-  };
 
   const handleAddNode = () => {
     console.log("filterTree", filterTree);
@@ -303,7 +282,7 @@ export function AdvancedFilters({
         <p className="text-sm text-gray-500 font-medium">Filters</p>
         <button
           onClick={() => {
-            setAdvancedFilters([]);
+            // setAdvancedFilters([]);
           }}
           className="text-xs text-gray-500 font-medium py-1 px-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
         >
@@ -313,7 +292,7 @@ export function AdvancedFilters({
 
       <FilterTreeEditor
         uiFilterRowTree={filterTree}
-        onUpdate={handleFilterUpdate}
+        onUpdate={() => {}}
         filterMap={filterMap}
         onSearchHandler={searchPropertyFilters}
       />
@@ -340,36 +319,13 @@ export function AdvancedFilters({
       </div>
 
       <div className="flex flex-col gap-2 bg-white dark:bg-black space-y-2 mt-4">
-        {filters.map((_filter, index) => {
-          return (
-            <div key={index}>
-              {/* <AdvancedFilterRow
-                filterMap={filterMap}
-                filter={_filter}
-                setFilter={(filter) => {
-                  const prev = [...filters];
-                  const newFilters = [...prev];
-                  newFilters[index] = filter;
-                  setAdvancedFilters(newFilters);
-                }}
-                onDeleteHandler={() => {
-                  const prev = [...filters];
-                  prev.splice(index, 1);
-                  setAdvancedFilters(prev);
-                }}
-                onSearchHandler={searchPropertyFilters}
-              /> */}
-            </div>
-          );
-        })}
-
         <button
           onClick={() => {
-            const prev = [...filters];
-            setAdvancedFilters([
-              ...prev,
-              { filterMapIdx: 0, value: "", operatorIdx: 0 },
-            ]);
+            // const prev = [...filters];
+            // setAdvancedFilters([
+            //   ...prev,
+            //   { filterMapIdx: 0, value: "", operatorIdx: 0 },
+            // ]);
           }}
           className="bg-white dark:bg-black ml-4 flex flex-row w-fit items-center justify-center font-normal text-sm text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100 px-4 py-2 rounded-lg"
         >
@@ -381,7 +337,7 @@ export function AdvancedFilters({
         </button>
       </div>
       <div className="flex flex-row w-full items-end justify-end">
-        {onSaveFilterCallback && (
+        {/* {onSaveFilterCallback && (
           <SaveFilterButton
             filters={filters}
             onSaveFilterCallback={onSaveFilterCallback}
@@ -389,7 +345,7 @@ export function AdvancedFilters({
             savedFilters={savedFilters}
             layoutPage={layoutPage}
           />
-        )}
+        )} */}
       </div>
     </div>
   );

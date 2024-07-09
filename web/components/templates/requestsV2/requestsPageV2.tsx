@@ -649,7 +649,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             advancedFilters={{
               filterMap: filterMap,
               filters: advancedFilters,
-              setAdvancedFilters: onSetAdvancedFiltersHandler,
+              setAdvancedFilters: () => {},
               searchPropertyFilters: searchPropertyFilters,
               show: userId ? false : true,
             }}

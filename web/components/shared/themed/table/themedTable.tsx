@@ -37,8 +37,8 @@ interface ThemedTableV5Props<T> {
   dataLoading: boolean;
   advancedFilters?: {
     filterMap: SingleFilterDef<any>[];
-    filters: UIFilterRowTree[];
-    setAdvancedFilters: (filters: UIFilterRowTree[]) => void;
+    filters: UIFilterRowTree;
+    setAdvancedFilters: (filters: UIFilterRowTree) => void;
     searchPropertyFilters: (
       property: string,
       search: string
