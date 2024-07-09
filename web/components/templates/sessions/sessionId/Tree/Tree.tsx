@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { TreeNodeData } from "../../../../lib/sessions/sessionTypes";
-import { clsx } from "../../clsx";
+import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
+import { clsx } from "../../../../shared/clsx";
 import { PathNode } from "./PathNode";
 import { RequestNode } from "./RequestNode";
 interface VerticalLineProps {

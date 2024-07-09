@@ -1,31 +1,26 @@
 import {
   ArrowPathIcon,
-  HandThumbDownIcon,
-  HandThumbUpIcon,
   InformationCircleIcon,
   MinusIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
+import { TextInput } from "@tremor/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
-import ModelPill from "./modelPill";
-import StatusBadge from "./statusBadge";
-import { clsx } from "../../shared/clsx";
-import {
-  HandThumbUpIcon as HTUp,
-  HandThumbDownIcon as HTDown,
-} from "@heroicons/react/24/solid";
 import {
   addRequestLabel,
   addRequestScore,
   updateRequestFeedback,
 } from "../../../services/lib/requests";
-import useNotification from "../../shared/notification/useNotification";
 import { useOrg } from "../../layout/organizationContext";
+import { clsx } from "../../shared/clsx";
+import useNotification from "../../shared/notification/useNotification";
 import HcButton from "../../ui/hcButton";
-import { TextInput } from "@tremor/react";
+import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
+import { NormalizedRequest } from "./builder/abstractRequestBuilder";
+import ModelPill from "./modelPill";
+import StatusBadge from "./statusBadge";
 
 function getPathName(url: string) {
   try {
@@ -34,8 +29,6 @@ function getPathName(url: string) {
     return url;
   }
 }
-
-const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 const RequestRow = (props: {
   request: NormalizedRequest;
@@ -427,6 +420,7 @@ const RequestRow = (props: {
             </HcButton>
           </form>
         )}
+
         <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
           {currentProperties?.map((property, i) => {
             return (
@@ -550,38 +544,10 @@ const RequestRow = (props: {
       {displayPreview && (
         <div className="flex flex-col space-y-8">
           <div className="flex w-full justify-end">
-            <div className="flex flex-row items-center space-x-4">
-              <button
-                onClick={() => {
-                  if (requestFeedback.rating === true) {
-                    return;
-                  }
-
-                  updateFeedbackHandler(request.id, true);
-                }}
-              >
-                {requestFeedback.rating === true ? (
-                  <HTUp className={clsx("h-5 w-5 text-green-500")} />
-                ) : (
-                  <HandThumbUpIcon className="h-5 w-5 text-green-500" />
-                )}
-              </button>
-              <button
-                onClick={() => {
-                  if (requestFeedback.rating === false) {
-                    return;
-                  }
-
-                  updateFeedbackHandler(request.id, false);
-                }}
-              >
-                {requestFeedback.rating === false ? (
-                  <HTDown className={clsx("h-5 w-5 text-red-500")} />
-                ) : (
-                  <HandThumbDownIcon className="h-5 w-5 text-red-500" />
-                )}
-              </button>
-            </div>
+            <FeedbackButtons
+              requestId={request.id}
+              defaultValue={request.feedback.rating}
+            />
           </div>
 
           <div className="flex flex-col space-y-2">{request.render()}</div>

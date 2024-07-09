@@ -190,7 +190,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
     return {
       requestText: getRequestText(),
       responseText: getResponseText(),
-      render: () => {
+      render: (props) => {
         return this.response.response_status === 0 ||
           this.response.response_status === null ? (
           <p>Pending...</p>
@@ -201,6 +201,8 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
             status={this.response.response_status}
             requestId={this.response.request_id}
             model={this.model}
+            hideTopBar={props?.hideTopBar}
+            messageSlice={props?.messageSlice}
           />
         ) : (
           <div className="w-full flex flex-col text-left space-y-8 text-sm">
@@ -211,6 +213,8 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
                 status={this.response.response_status}
                 requestId={this.response.request_id}
                 model={this.model}
+                hideTopBar={props?.hideTopBar}
+                messageSlice={props?.messageSlice}
               />
             )}
             {this.response.response_status !== -4 && (

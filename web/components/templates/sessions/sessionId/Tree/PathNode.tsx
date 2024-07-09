@@ -1,5 +1,5 @@
-import { TreeNodeData } from "../../../../lib/sessions/sessionTypes";
-import { clsx } from "../../clsx";
+import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
+import { clsx } from "../../../../shared/clsx";
 
 function MinusSign() {
   return (
