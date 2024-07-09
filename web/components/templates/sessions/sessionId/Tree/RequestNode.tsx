@@ -1,8 +1,8 @@
-import { TreeNodeData } from "../../../../lib/sessions/sessionTypes";
-import { Col } from "../../../layout/common/col";
-import { Row } from "../../../layout/common/row";
-import StatusBadge from "../../../templates/requestsV2/statusBadge";
-import { clsx } from "../../clsx";
+import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
+import { Col } from "../../../../layout/common/col";
+import { Row } from "../../../../layout/common/row";
+import StatusBadge from "../../../requestsV2/statusBadge";
+import { clsx } from "../../../../shared/clsx";
 import { HorizontalLine } from "./Tree";
 
 export function RequestNode(props: {

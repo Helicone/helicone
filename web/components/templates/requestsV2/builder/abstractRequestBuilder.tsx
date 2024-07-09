@@ -41,7 +41,10 @@ export type NormalizedRequest = CommonFields & {
   responseText: string;
 
   // Value to display in request drawer
-  render(): JSX.Element;
+  render(props?: {
+    hideTopBar?: boolean;
+    messageSlice?: "lastTwo";
+  }): JSX.Element;
 };
 
 export type SpecificFields = Omit<NormalizedRequest, keyof CommonFields>;

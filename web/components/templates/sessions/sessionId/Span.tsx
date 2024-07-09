@@ -9,9 +9,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Session, Trace } from "../../../lib/sessions/sessionTypes";
-import { Col } from "../../layout/common/col";
-import { clsx } from "../clsx";
+import { Session, Trace } from "../../../../lib/sessions/sessionTypes";
+import { Col } from "../../../layout/common/col";
+import { clsx } from "../../../shared/clsx";
 
 interface BarChartTrace {
   name: string;
