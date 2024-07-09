@@ -7,10 +7,7 @@ import RequestDrawerV2 from "../../../requestsV2/requestDrawerV2";
 import { useGetPropertiesV2 } from "../../../../../services/hooks/propertiesV2";
 import FeedbackButtons from "../../../feedback/thumbsUpThumbsDown";
 import StatusBadge from "../../../requestsV2/statusBadge";
-import {
-  CustomProperties,
-  CustomPropertiesCard,
-} from "../../../requestsV2/customProperties";
+import { CustomPropertiesCard } from "../../../requestsV2/customProperties";
 
 interface ChatSessionProps {
   requests: ReturnType<typeof useGetRequests>;

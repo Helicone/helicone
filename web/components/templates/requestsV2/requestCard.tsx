@@ -1,21 +1,13 @@
 import { useState } from "react";
-import { formatNumber } from "../users/initialColumns";
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
-import ModelPill from "./modelPill";
-import StatusBadge from "./statusBadge";
-import {
-  HandThumbUpIcon as HTUp,
-  HandThumbDownIcon as HTDown,
-} from "@heroicons/react/24/solid";
-import {
-  HandThumbDownIcon,
-  HandThumbUpIcon,
-} from "@heroicons/react/24/outline";
-import { clsx } from "../../shared/clsx";
 import { updateRequestFeedback } from "../../../services/lib/requests";
 import useNotification from "../../shared/notification/useNotification";
-import CostPill from "./costPill";
 import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
+import { formatNumber } from "../users/initialColumns";
+import { NormalizedRequest } from "./builder/abstractRequestBuilder";
+import CostPill from "./costPill";
+import { CustomProperties } from "./customProperties";
+import ModelPill from "./modelPill";
+import StatusBadge from "./statusBadge";
 
 interface RequestCardProps {
   request: NormalizedRequest;
@@ -105,7 +97,7 @@ const RequestCard = (props: RequestCardProps) => {
 
           {request.customProperties && properties.length > 0 && (
             <CustomProperties
-              customProperties={request.customProperties as an}
+              customProperties={request.customProperties as any}
               properties={properties}
             />
           )}

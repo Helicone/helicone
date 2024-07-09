@@ -6,12 +6,10 @@ import {
 } from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
 import { TextInput } from "@tremor/react";
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import {
   addRequestLabel,
   addRequestScore,
-  updateRequestFeedback,
 } from "../../../services/lib/requests";
 import { useOrg } from "../../layout/organizationContext";
 import { clsx } from "../../shared/clsx";
