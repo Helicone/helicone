@@ -73,9 +73,9 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
             {node.rows.length >= 2 && (
               <div className="flex items-center mb-2 ">
                 {parentNode && (
-                  <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-300 dark:bg-gray-700 h-full" />
+                  <div className="absolute left-0 top-0 bottom-0 w-px bg-green-300 dark:bg-green-700 h-full" />
                 )}
-                <div className="absolute -left-6 top-3 w-6 h-px " />
+                <div className="absolute -left-6 top-3 w-6 h-px bg-red-600" />
                 <Select
                   value={node.operator}
                   onValueChange={(value) =>
@@ -130,8 +130,8 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
     } else {
       return (
         <div className="relative pl-6 mb-2">
-          <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-300 dark:bg-gray-700" />
-          <div className="absolute -left-6 top-3 w-6 h-px bg-gray-300 dark:bg-gray-700" />
+          <div className="absolute left-0 top-0 bottom-0 w-px bg-blue-300 dark:bg-blue-700" />
+
           <AdvancedFilterRow
             filterMap={filterMap}
             filter={node}
