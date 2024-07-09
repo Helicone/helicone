@@ -23,11 +23,14 @@ export function filterUITreeToFilterNode(
   uiFilterRowNode: UIFilterRowTree
 ): FilterNode {
   if ("operator" in uiFilterRowNode) {
-    const filterNodes = uiFilterRowNode.rows.map((row: UIFilterRowTree) =>
-      filterUITreeToFilterNode(filterMap, row)
-    );
+    const filterNodes = uiFilterRowNode.rows
+      .map((row: UIFilterRowTree) => filterUITreeToFilterNode(filterMap, row))
+      .filter((node) => node !== "all");
     return filterListToTree(filterNodes, uiFilterRowNode.operator);
   } else {
+    if (uiFilterRowNode.value === "") {
+      return "all";
+    }
     return uiFilterRowToFilterLeaf(filterMap, uiFilterRowNode);
   }
 }

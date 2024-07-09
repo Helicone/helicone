@@ -234,8 +234,7 @@ export function AdvancedFilters({
     ],
   };
 
-  const [filterTree, setFilterTree] =
-    useState<UIFilterRowTree>(ROOT_FILTER_NODE);
+  const [filterTree, setFilterTree] = [filters, setAdvancedFilters];
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -258,22 +257,21 @@ export function AdvancedFilters({
 
   const handleAddNode = () => {
     console.log("filterTree", filterTree);
-    setFilterTree((prevTree) => {
-      console.log("prevTree", prevTree);
-      if ("operator" in prevTree) {
-        // If it's already an operator node, add a new empty node to its rows
-        return {
-          ...prevTree,
-          rows: [...prevTree.rows, { operator: "and", rows: [] }],
-        };
-      } else {
-        // If it's a single filter, create an operator node with the existing filter and a new empty node
-        return {
-          operator: "and",
-          rows: [prevTree, { operator: "and", rows: [] }],
-        };
-      }
-    });
+    const prevTree = filters;
+    console.log("prevTree", prevTree);
+    if ("operator" in prevTree) {
+      // If it's already an operator node, add a new empty node to its rows
+      setFilterTree({
+        ...prevTree,
+        rows: [...prevTree.rows, { operator: "and", rows: [] }],
+      });
+    } else {
+      // If it's a single filter, create an operator node with the existing filter and a new empty node
+      setFilterTree({
+        operator: "and",
+        rows: [prevTree, { operator: "and", rows: [] }],
+      });
+    }
   };
 
   return (
@@ -308,8 +306,7 @@ export function AdvancedFilters({
         </Button>
         <Button
           onClick={() => {
-            setFilterTree({ operator: "and", rows: [] });
-            setAdvancedFilters([]);
+            setFilterTree(ROOT_FILTER_NODE);
           }}
           variant="secondary"
           size="sm"
