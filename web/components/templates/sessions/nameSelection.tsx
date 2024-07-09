@@ -1,4 +1,4 @@
-import { AcademicCapIcon, MagnifyingGlassIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 import { TextInput } from "@tremor/react";
 import { getTimeAgo } from "../../../lib/sql/timeHelpers";
 import { Col } from "../../layout/common/col";
@@ -47,7 +47,7 @@ const SessionNameSelection = ({
             className={clsx(
               "shadow-sm rounded-lg p-4 w-full items-start text-left border",
               selectedCard === name.name ? "bg-sky-100 border-sky-500 dark:bg-sky-950"
-                : "bg-white border-gray-300 dark:bg-black dark:border-gray-700",
+                : "hover:bg-gray-50 bg-white border-gray-300 dark:bg-black dark:border-gray-700",
             )}
             onClick={() => {
               setSelectedName(name.name);
@@ -84,7 +84,7 @@ const SessionNameSelection = ({
           </button>
         ))}
       </Col>
-    </Col >
+    </Col>
   );
 };
 
