@@ -1,4 +1,7 @@
-import { MagnifyingGlassIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
+import {
+  MagnifyingGlassIcon,
+  DocumentTextIcon,
+} from "@heroicons/react/24/outline";
 import { TextInput } from "@tremor/react";
 import { getTimeAgo } from "../../../lib/sql/timeHelpers";
 import { Col } from "../../layout/common/col";
@@ -33,8 +36,13 @@ const SessionNameSelection = ({
           onChange={(e) => setSessionIdSearch(e.target.value)}
           value={sessionIdSearch}
         />
-        <Tooltip title="View doc" placement="top" arrow >
-          <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener noreferrer" className="bg-white p-2.5 rounded-lg border border-gray-300 shadow-sm">
+        <Tooltip title="View doc" placement="top" arrow>
+          <a
+            href="https://docs.helicone.ai/features/sessions"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-white p-2.5 rounded-lg border border-gray-300 shadow-sm"
+          >
             <DocumentTextIcon className="h-4 w-4 text-gray-500 hover:cursor-pointer" />
           </a>
         </Tooltip>
@@ -46,8 +54,9 @@ const SessionNameSelection = ({
             key={name.name}
             className={clsx(
               "shadow-sm rounded-lg p-4 w-full items-start text-left border",
-              selectedCard === name.name ? "bg-sky-100 border-sky-500 dark:bg-sky-950"
-                : "hover:bg-gray-50 bg-white border-gray-300 dark:bg-black dark:border-gray-700",
+              selectedCard === name.name
+                ? "bg-sky-100 border-sky-500 dark:bg-sky-950"
+                : "hover:bg-gray-50 bg-white border-gray-300 dark:bg-black dark:border-gray-700"
             )}
             onClick={() => {
               setSelectedName(name.name);
@@ -56,7 +65,9 @@ const SessionNameSelection = ({
           >
             <Row className="flex w-full justify-between items-center gap-2">
               {name.name === "" ? (
-                <div className="text-gray-400 font-semibold text-lg mb-2">Unnamed</div>
+                <div className="text-gray-400 font-semibold text-lg mb-2">
+                  Unnamed
+                </div>
               ) : (
                 <div className="font-semibold text-lg mb-2">{name.name}</div>
               )}
@@ -70,7 +81,10 @@ const SessionNameSelection = ({
 
             <div className="text-gray-500 w-full mb-5">
               <p className="text-sm">
-                Last used <span className="font-semibold text-sky-500">{getTimeAgo(new Date(name.last_used))}</span>
+                Last used{" "}
+                <span className="font-semibold text-sky-500">
+                  {getTimeAgo(new Date(name.last_used))}
+                </span>
               </p>
               <p className="text-sm">
                 Created on {new Date(name.created_at).toLocaleDateString()}
@@ -78,8 +92,14 @@ const SessionNameSelection = ({
             </div>
 
             <Row className="flex w-full justify-between items-center">
-              <p className="text-sm"><span className="font-bold">{name.session_count}</span> total sessions</p>
-              <p className="text-sm">Total cost $<span className="font-bold">{name.total_cost.toFixed(2)}</span></p>
+              <p className="text-sm">
+                <span className="font-bold">{name.session_count} </span> 
+                total sessions
+              </p>
+              <p className="text-sm">
+                Total cost $
+                <span className="font-bold">{name.total_cost.toFixed(2)}</span>
+              </p>
             </Row>
           </button>
         ))}
