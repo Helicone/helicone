@@ -237,15 +237,15 @@ export function AdvancedFilters({
   const [filterTree, setFilterTree] = [filters, setAdvancedFilters];
   const searchParams = useSearchParams();
 
-  useEffect(() => {
-    if (searchParams.get("filters") && !filterTree) {
-      const filters = JSON.parse(searchParams.get("filters") as string);
-      setFilterTree(filters);
-    }
-    if (filterTree) {
-      searchParams.set("filters", JSON.stringify(filterTree));
-    }
-  }, [searchParams, filterTree]);
+  // useEffect(() => {
+  //   if (searchParams.get("filters") && !filterTree) {
+  //     const filters = JSON.parse(searchParams.get("filters") as string);
+  //     setFilterTree(filters);
+  //   }
+  //   if (filterTree) {
+  //     searchParams.set("filters", JSON.stringify(filterTree));
+  //   }
+  // }, [searchParams, filterTree]);
 
   // useEffect(() => {
   //   // Update filterTree when filters prop changes
@@ -257,21 +257,22 @@ export function AdvancedFilters({
 
   const handleAddNode = () => {
     console.log("filterTree", filterTree);
-    const prevTree = filters;
-    console.log("prevTree", prevTree);
-    if ("operator" in prevTree) {
-      // If it's already an operator node, add a new empty node to its rows
-      setFilterTree({
-        ...prevTree,
-        rows: [...prevTree.rows, { operator: "and", rows: [] }],
-      });
-    } else {
-      // If it's a single filter, create an operator node with the existing filter and a new empty node
-      setFilterTree({
-        operator: "and",
-        rows: [prevTree, { operator: "and", rows: [] }],
-      });
-    }
+    setFilterTree((prevTree) => {
+      console.log("prevTree", prevTree);
+      if ("operator" in prevTree) {
+        // If it's already an operator node, add a new empty node to its rows
+        return {
+          ...prevTree,
+          rows: [...prevTree.rows, { operator: "and", rows: [] }],
+        };
+      } else {
+        // If it's a single filter, create an operator node with the existing filter and a new empty node
+        return {
+          operator: "and",
+          rows: [prevTree, { operator: "and", rows: [] }],
+        };
+      }
+    });
   };
 
   return (
@@ -290,7 +291,7 @@ export function AdvancedFilters({
 
       <FilterTreeEditor
         uiFilterRowTree={filterTree}
-        onUpdate={() => {}}
+        onUpdate={setFilterTree}
         filterMap={filterMap}
         onSearchHandler={searchPropertyFilters}
       />

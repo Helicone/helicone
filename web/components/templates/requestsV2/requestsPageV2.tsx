@@ -510,11 +510,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
     if (layoutFilter !== null) {
-      onSetAdvancedFiltersHandler(layoutFilter?.filter, layoutFilter.id);
+      // onSetAdvancedFiltersHandler(layoutFilter?.filter, layoutFilter.id);
       setCurrFilter(layoutFilter?.id);
     } else {
       setCurrFilter(null);
-      onSetAdvancedFiltersHandler([], null);
+      // onSetAdvancedFiltersHandler([], null);
     }
   };
 
@@ -649,7 +649,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             advancedFilters={{
               filterMap: filterMap,
               filters: advancedFilters,
-              setAdvancedFilters: () => {},
+              setAdvancedFilters: setAdvancedFilters,
               searchPropertyFilters: searchPropertyFilters,
               show: userId ? false : true,
             }}
