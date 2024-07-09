@@ -50,7 +50,28 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
   const handleRemoveNode = (parentNode: UIFilterRowNode, index: number) => {
     console.log("Removing node");
     parentNode.rows.splice(index, 1);
-    onUpdate({ ...uiFilterRowTree });
+    const updatedTree = removeEmptyParents(uiFilterRowTree);
+    onUpdate(updatedTree || { operator: "and", rows: [] });
+  };
+
+  const removeEmptyParents = (
+    node: UIFilterRowTree,
+    parent?: UIFilterRowNode
+  ): UIFilterRowTree | null => {
+    if ("operator" in node) {
+      node.rows = node.rows.reduce<UIFilterRowTree[]>((acc, child) => {
+        const result = removeEmptyParents(child, node);
+        if (result) acc.push(result);
+        return acc;
+      }, []);
+
+      if (node.rows.length === 0) {
+        return null;
+      } else if (node.rows.length === 1 && "operator" in node.rows[0]) {
+        return node.rows[0];
+      }
+    }
+    return node;
   };
 
   const handleOperatorChange = (
@@ -72,21 +93,26 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
           <Row className="relative">
             {node.rows.length >= 2 && (
               <div className="flex items-center mb-2 ">
-                {parentNode && (
-                  <div className="absolute left-0 top-0 bottom-0 w-px bg-green-300 dark:bg-green-700 h-full" />
+                <div className="absolute left-[150px]  w-[27px] h-[2px] bg-[#F0F0F0] dark:bg-gray-700 transform -translate-y-1/2" />
+                <div className="absolute left-44 top-0 bottom-0 w-[2px] bg-[#F0F0F0] dark:bg-gray-700 h-full" />
+
+                {index && (
+                  <div className="absolute -left-16 top-1/2 w-[70px] h-[2px] bg-[#F0F0F0] dark:bg-gray-700 transform -translate-y-1/2" />
                 )}
-                <div className="absolute -left-6 top-3 w-6 h-px bg-red-600" />
-                <Select
-                  value={node.operator}
-                  onValueChange={(value) =>
-                    handleOperatorChange(node, value as "and" | "or")
-                  }
-                  className="w-24 mr-2"
-                >
-                  <SelectItem value="and">AND</SelectItem>
-                  <SelectItem value="or">OR</SelectItem>
-                </Select>
-                {parentNode && (
+
+                <div>
+                  <Select
+                    value={node.operator}
+                    onValueChange={(value) =>
+                      handleOperatorChange(node, value as "and" | "or")
+                    }
+                    className="w-24 mr-2"
+                  >
+                    <SelectItem value="and">AND</SelectItem>
+                    <SelectItem value="or">OR</SelectItem>
+                  </Select>
+                </div>
+                {/* {parentNode && (
                   <Button
                     onClick={() => handleRemoveNode(parentNode, index!)}
                     variant="secondary"
@@ -95,15 +121,16 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
                   >
                     <XCircleIcon className="h-4 w-4" />
                   </Button>
-                )}
+                )} */}
               </div>
             )}
-            <Col>
+            <Col className="pl-[50px]">
               {node.rows.map((childNode: any, childIndex: number) => (
                 <div key={childIndex} className="relative mb-2">
                   {renderNode(childNode, node, childIndex)}
                 </div>
               ))}
+
               <div className="mt-2">
                 <Button
                   onClick={() => handleAddFilter(node)}
@@ -113,7 +140,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
                 >
                   Add Filter
                 </Button>
-                {index !== undefined && index <= 2 && (
+                {index !== undefined && index < 2 && (
                   <Button
                     onClick={() => handleAddGroup(node)}
                     variant="secondary"
@@ -130,7 +157,18 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
     } else {
       return (
         <div className="relative pl-6 mb-2">
-          <div className="absolute left-0 top-0 bottom-0 w-px bg-blue-300 dark:bg-blue-700" />
+          {(() => {
+            if (parentNode && parentNode.rows.length == 1) {
+              return (
+                <div className="absolute -left-[115px] top-1/2 w-[155px] h-[2px] bg-[#F0F0F0] dark:bg-gray-700 transform -translate-y-1/2" />
+              );
+            } else if (parentNode) {
+              return (
+                <div className="absolute -left-[40px] top-1/2 w-[80px] h-[2px] bg-[#F0F0F0] dark:bg-gray-700 transform -translate-y-1/2" />
+              );
+            }
+            return null;
+          })()}
 
           <AdvancedFilterRow
             filterMap={filterMap}
@@ -142,6 +180,8 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
               }
             }}
             onDeleteHandler={() => {
+              console.log("Deleting filter");
+              console.log("Parent node", parentNode);
               if (parentNode) {
                 handleRemoveNode(parentNode, index!);
               }

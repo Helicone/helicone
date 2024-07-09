@@ -129,13 +129,26 @@ const updateTree = (
 const addNode = (
   tree: UIFilterRowTree,
   path: number[],
-  newNode: UIFilterRowTree
+  newNode: UIFilterRowNode
 ): UIFilterRowTree => {
+  console.log("AddNode", tree, path, newNode);
+  const defaultFilter: UIFilterRow = {
+    filterMapIdx: 0,
+    operatorIdx: 0,
+    value: "",
+  };
+
   if (path.length === 0) {
     if ("operator" in tree) {
-      return { ...tree, rows: [...tree.rows, newNode] };
+      return {
+        ...tree,
+        rows: [...tree.rows, { ...newNode, rows: [defaultFilter] }],
+      };
     }
-    return { operator: "and", rows: [tree, newNode] };
+    return {
+      operator: "and",
+      rows: [tree, { ...newNode, rows: [defaultFilter] }],
+    };
   }
   const [head, ...tail] = path;
   if ("operator" in tree) {
@@ -281,17 +294,23 @@ export function AdvancedFilters({
     console.log("filterTree", filterTree);
     setFilterTree((prevTree) => {
       console.log("prevTree", prevTree);
+      const defaultFilter: UIFilterRow = {
+        filterMapIdx: 0,
+        operatorIdx: 0,
+        value: "",
+      };
+
       if ("operator" in prevTree) {
-        // If it's already an operator node, add a new empty node to its rows
+        // If it's already an operator node, add a new node with a default filter to its rows
         return {
           ...prevTree,
-          rows: [...prevTree.rows, { operator: "and", rows: [] }],
+          rows: [...prevTree.rows, { operator: "and", rows: [defaultFilter] }],
         };
       } else {
-        // If it's a single filter, create an operator node with the existing filter and a new empty node
+        // If it's a single filter, create an operator node with the existing filter and a new node with a default filter
         return {
           operator: "and",
-          rows: [prevTree, { operator: "and", rows: [] }],
+          rows: [prevTree, { operator: "and", rows: [defaultFilter] }],
         };
       }
     });
