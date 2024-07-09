@@ -20,6 +20,23 @@ export type BlogStructure = {
 
 const blogContent: BlogStructure[] = [
   {
+    title: "Handling Billions of LLM Logs with Upstash Kafka and Cloudflare Workers",
+    description:
+      "We desperately needed a solution to these outages/data loss. Our reliability and scalability are core to our product.",
+    badgeText: "technical deep dive",
+    date: "July 1, 2024",
+    href: "https://upstash.com/blog/implementing-upstash-kafka-with-cloudflare-workers",
+    imageUrl: "/static/blog/kafka-cover.webp",
+    authors: [
+      {
+        name: "Cole Gottdank",
+        imageUrl: "/static/blog/colegottdank-headshot.webp",
+        imageAlt: "Cole Gottdank's headshot",
+      },
+    ],
+    time: "15 minute read",
+  },
+  {
     title: "Best Practices for AI Developers: Full Guide (June 2024)",
     description:
       "Achieving high performance requires robust observability practices. In this blog, we will explore the key challenges of building with AI and the best practices to help you advance your AI development.",
