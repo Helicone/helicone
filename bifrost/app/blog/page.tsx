@@ -20,23 +20,6 @@ export type BlogStructure = {
 
 const blogContent: BlogStructure[] = [
   {
-    title: "Debugging RAG Chatbots and AI Agents with Sessions",
-    description:
-      "How well do you understand your users' intents? At which point in the multi-step process does your model start hallucinating? Do you find consistent problems with a specific part of your AI agent workflow?",
-    badgeText: "developer",
-    date: "July 2, 2024",
-    href: "/blog/debugging-chatbots-and-ai-agents-with-sessions",
-    imageUrl: "/static/blog/agent-cover.webp",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-        imageAlt: "Lina Lam's headshot",
-      },
-    ],
-    time: "5 minute read",
-  },
-  {
     title: "Best Practices for AI Developers: Full Guide (June 2024)",
     description:
       "Achieving high performance requires robust observability practices. In this blog, we will explore the key challenges of building with AI and the best practices to help you advance your AI development.",
