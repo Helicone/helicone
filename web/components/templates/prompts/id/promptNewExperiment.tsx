@@ -12,7 +12,6 @@ import { Select, SelectItem } from "@tremor/react";
 import HcBadge from "../../../ui/hcBadge";
 import { clsx } from "../../../shared/clsx";
 import ChatPlayground from "../../playground/chatPlayground";
-import { PLAYGROUND_MODELS } from "../../playground/playgroundPage";
 import ProviderKeyList from "../../enterprise/portal/id/providerKeyList";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { Message } from "../../requests/chat";
@@ -28,10 +27,14 @@ import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
 import { useJawnSettings } from "../../../../services/hooks/useJawnSettings";
 
 import ArrayDiffViewer from "./arrayDiffViewer";
+import { playgroundModels } from "../../../../packages/cost/providers/mappings";
 
 interface PromptIdPageProps {
   id: string;
 }
+const PLAYGROUND_MODELS = playgroundModels
+  .filter((model) => model.provider !== "AZURE")
+  .sort((a, b) => a.name.localeCompare(b.name));
 
 // omit id from Message
 export type MessageWithoutId = Omit<Message, "id">;
