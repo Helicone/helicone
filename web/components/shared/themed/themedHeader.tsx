@@ -35,6 +35,7 @@ import { ThemedMultiSelect } from "./themedMultiSelect";
 import { TimeFilter } from "../../templates/dashboard/dashboardPage";
 import FiltersButton from "./table/filtersButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
+import { UIFilterRowTree } from "../../../services/lib/filters/uiFilterRowTree";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -65,8 +66,8 @@ interface ThemedHeaderProps {
   };
   advancedFilter?: {
     filterMap: SingleFilterDef<any>[];
-    onAdvancedFilter: (filters: UIFilterRow[]) => void;
-    filters: UIFilterRow[];
+    onAdvancedFilter: React.Dispatch<React.SetStateAction<UIFilterRowTree>>;
+    filters: UIFilterRowTree;
     searchPropertyFilters: (
       property: string,
       search: string
@@ -138,8 +139,8 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                       />
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
                         {showAdvancedFilters ? "Hide Filters" : "Show Filters"}{" "}
-                        {advancedFilter.filters.length > 0 &&
-                          `(${advancedFilter.filters.length})`}
+                        {/* {advancedFilter.filters.length > 0 &&
+                          `(${advancedFilter.filters.length})`} */}
                       </p>
                     </button>
                   </div>

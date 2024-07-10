@@ -25,8 +25,8 @@ interface ThemedTableHeaderProps<T> {
   // define this if you want the advanced filters
   advancedFilters?: {
     filterMap: SingleFilterDef<any>[];
-    filters: UIFilterRowTree[];
-    setAdvancedFilters: (filters: UIFilterRowTree[]) => void;
+    filters: UIFilterRowTree;
+    setAdvancedFilters: React.Dispatch<React.SetStateAction<UIFilterRowTree>>;
     searchPropertyFilters: (
       property: string,
       search: string
@@ -130,8 +130,8 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               <FunnelIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
               <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
                 {showFilters ? "Hide" : "Show"} Filters
-                {advancedFilters.filters.length > 0 &&
-                  ` (${advancedFilters.filters.length})`}
+                {/* TODO {advancedFilters.filters.length > 0 &&
+                  ` (${advancedFilters.filters.length})`} */}
               </p>
             </button>
           )}
