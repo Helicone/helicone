@@ -32,28 +32,33 @@ export type PlaygroundModel = {
 };
 
 export type TFinetunedJob = {
-  object: string
-  id: string
-  model: string
-  created_at: number
-  finished_at: number
-  fine_tuned_model: string
-  organization_id: string
-  result_files: Array<string>
-  status: "validating_files" | "queued" | "running" | "succeeded" | "failed" | "cancelled";
-  validation_file: any
-  training_file: string
+  object: string;
+  id: string;
+  model: string;
+  created_at: number;
+  finished_at: number;
+  fine_tuned_model: string;
+  organization_id: string;
+  result_files: Array<string>;
+  status:
+    | "validating_files"
+    | "queued"
+    | "running"
+    | "succeeded"
+    | "failed"
+    | "cancelled";
+  validation_file: any;
+  training_file: string;
   hyperparameters: {
-    n_epochs: number
-    batch_size: number
-    learning_rate_multiplier: number
-  }
-  trained_tokens: number | null
-  integrations: Array<any>
-  seed: number
-  estimated_finish: number
-}
-
+    n_epochs: number;
+    batch_size: number;
+    learning_rate_multiplier: number;
+  };
+  trained_tokens: number | null;
+  integrations: Array<any>;
+  seed: number;
+  estimated_finish: number;
+};
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { request } = props;
@@ -117,28 +122,30 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     const res = await fetch("https://api.openai.com/v1/fine_tuning/jobs", {
       headers: {
         Authorization: `Bearer ${providerAPIKey}`,
-        "Content-Type": "application/json"
-      }
+        "Content-Type": "application/json",
+      },
     });
     const ftJobsList = await res.json();
     if (ftJobsList.error) return;
 
-    const ftJobs = (ftJobsList.data) as Array<TFinetunedJob>;
+    const ftJobs = ftJobsList.data as Array<TFinetunedJob>;
 
-    const ftModels = ftJobs.map((job) => {
-      if (job.status === "succeeded") {
-        return {
-          name: job.fine_tuned_model,
-          provider: "OPENAI"
+    const ftModels = ftJobs
+      .map((job) => {
+        if (job.status === "succeeded") {
+          return {
+            name: job.fine_tuned_model,
+            provider: "OPENAI",
+          };
         }
-      }
-    }).filter((model) => model !== undefined) as PlaygroundModel[];
+      })
+      .filter((model) => model !== undefined) as PlaygroundModel[];
 
-    setPLAYGROUND_MODELS(prev => prev.concat(ftModels));
+    setPLAYGROUND_MODELS((prev) => prev.concat(ftModels));
   }
 
   useEffect(() => {
-    fetchFineTuneModels()
+    fetchFineTuneModels();
   }, [providerAPIKey]);
 
   return (
@@ -287,7 +294,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               </label>
             </div>
             <input
-              type="text"
+              type="password"
               value={providerAPIKey}
               placeholder="Enter your provider API Key"
               onChange={(e) => {

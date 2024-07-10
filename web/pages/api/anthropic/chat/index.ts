@@ -20,7 +20,14 @@ export default async function handler(
 ) {
   const client = new SupabaseServerWrapper({ req, res }).getClient();
   const user = await client.auth.getUser();
-  const { messages, requestId, temperature, model, maxTokens, anthropicAPIKey } = req.body as {
+  const {
+    messages,
+    requestId,
+    temperature,
+    model,
+    maxTokens,
+    anthropicAPIKey,
+  } = req.body as {
     messages: ChatParams[];
     requestId: string;
     temperature: number;

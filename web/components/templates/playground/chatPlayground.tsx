@@ -48,7 +48,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     onSubmit,
     submitText = "Submit",
     customNavBar,
-    providerAPIKey
+    providerAPIKey,
   } = props;
 
   const { setNotification } = useNotification();

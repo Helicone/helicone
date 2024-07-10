@@ -24,16 +24,15 @@ export default async function handler(
     maxTokens,
     tools,
     openAIApiKey,
-  } =
-    req.body as {
-      messages: ChatCompletionMessageParam[];
-      requestId: string;
-      temperature: number;
-      model: string;
-      maxTokens: number;
-      tools: ChatCompletionTool[];
-      openAIApiKey: string;
-    };
+  } = req.body as {
+    messages: ChatCompletionMessageParam[];
+    requestId: string;
+    temperature: number;
+    model: string;
+    maxTokens: number;
+    tools: ChatCompletionTool[];
+    openAIApiKey: string;
+  };
 
   if (!temperature || !model) {
     res.status(400).json({
