@@ -49,6 +49,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   );
 
   const [currentTools, setCurrentTools] = useState<ChatCompletionTool[]>();
+  const [providerAPIKey, setProviderAPIKey] = useState<string>();
 
   useEffect(() => {
     if (tools !== undefined) {
@@ -136,6 +137,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 temperature={temperature}
                 maxTokens={maxTokens}
                 tools={currentTools}
+                providerAPIKey={providerAPIKey}
               />
             </>
           ) : singleRequest !== null && !isChat ? (
@@ -171,6 +173,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               models={selectedModels}
               temperature={temperature}
               maxTokens={maxTokens}
+              providerAPIKey={providerAPIKey}
             />
           ) : (
             <div className="w-full h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-gray-500">
@@ -217,6 +220,25 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 </MultiSelectItem>
               ))}
             </MultiSelect>
+          </div>
+          <div className="flex flex-col space-y-2 w-full">
+            <div className="flex flex-row w-full justify-between items-center">
+              <label
+                htmlFor="temp"
+                className="font-medium text-sm text-gray-900 dark:text-gray-100"
+              >
+                Provider API Key
+              </label>
+            </div>
+            <input
+              type="text"
+              value={providerAPIKey}
+              placeholder="Enter your provider API Key"
+              onChange={(e) => {
+                setProviderAPIKey(e.target.value);
+              }}
+              className="w-full text-sm px-2 py-1 rounded-lg border border-gray-300"
+            />
           </div>
           <div className="flex flex-col space-y-2 w-full">
             <div className="flex flex-row w-full justify-between items-center">
