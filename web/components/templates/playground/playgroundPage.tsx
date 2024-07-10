@@ -22,6 +22,7 @@ import FunctionButton from "./functionButton";
 import HcButton from "../../ui/hcButton";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { ChatCompletionTool } from "openai/resources";
+import { Tooltip } from "@mui/material";
 interface PlaygroundPageProps {
   request?: string;
 }
@@ -279,7 +280,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   key={idx}
                   className="font-medium text-black"
                 >
-                  {model.name}
+                  <Tooltip title={model.name || ""} placement="right">
+                    <div>{model.name || ""}</div>
+                  </Tooltip>
                 </MultiSelectItem>
               ))}
             </MultiSelect>
