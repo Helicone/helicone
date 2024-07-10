@@ -9,11 +9,12 @@ import { parseJSXObject } from "../../utils/promptHelpers";
 import { hashAuth } from "../../utils/hash";
 import { Result, err, map, mapPostgrestErr, ok } from "../shared/result";
 import { supabaseServer } from "../db/supabase";
-import { getAndStoreInCache } from "../memoryCache/staticMemCache";
+
 import { usageLimitManager } from "../../managers/UsageLimitManager";
 import { Request } from "express";
 import { Headers } from "node-fetch";
 import { Readable as ReadableStream } from "stream";
+import { getAndStoreInCache } from "../cache/staticMemCache";
 
 export type RequestHandlerType =
   | "proxy_only"
