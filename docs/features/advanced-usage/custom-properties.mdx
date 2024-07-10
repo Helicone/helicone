@@ -1,11 +1,16 @@
 ---
 title: "Custom Properties"
-description: "Tag requests with any information you choose to segment, analyze, and visualize."
+sidebarTitle: "Custom Properties"
+description: "Add custom metadata to LLM requests for advanced segmentation and analysis. Tag requests with session IDs, conversation context, or application data to gain deeper insights into your AI application performance."
+"twitter:title": "Custom Properties - Helicone OSS LLM Observability"
 ---
-import QuestionsSection from '/snippets/questions-section.mdx';
 
-<Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing).</Info>
+import QuestionsSection from "/snippets/questions-section.mdx";
 
+<Info>
+  **Who can use this feature**: Anyone on any
+  [plan](https://www.helicone.ai/pricing).
+</Info>
 
 ## Introduction
 
@@ -16,9 +21,11 @@ Custom Properties allow you to add any additional information to your requests, 
 - `Application` or `user` metadata making the request
 
 <Frame caption="Custom Properties appear as headers in the `Request` table. ">
-  <img src="/images/example-custom-properties.png" />
+  <img
+    src="/images/example-custom-properties.png"
+    alt="Helicone Custom Properties feature for filtering and segmenting data in the Request table."
+  />
 </Frame>
-
 
 ### Why Custom Properties
 
@@ -26,24 +33,23 @@ Custom Properties allow you to add any additional information to your requests, 
 - Get the "unit economics" of your application. For example, the average cost of a conversation.
 - Slice and dice your requests and metrics by any custom property.
 
-
 ## Quick Start
 
 ### Adding Custom Properties at Request Time
 
-Use headers to add Custom Properties to your LLM requests. 
+Use headers to add Custom Properties to your LLM requests.
 
 <Steps>
   <Step title="Define the Header">
-    Name your header in the format `Helicone-Property-[Name]` where `Name` is the name of your custom property. 
+    Name your header in the format `Helicone-Property-[Name]` where `Name` is the name of your custom property.
   </Step>
   <Step title="Define the Value">
-    The value is a string that labels your request for this custom property. Here are some examples: 
+    The value is a string that labels your request for this custom property. Here are some examples:
 
     <CodeGroup>
 
     ```bash Curl
-    curl https://oai.hconeai.com/v1/completions \
+    curl https://oai.helicone.ai/v1/completions \
       -H 'Content-Type: application/json' \
       -H 'Helicone-Auth: Bearer HELICONE_API_KEY' \
       -H 'Helicone-Property-Session: "24"' \ # Example 1
@@ -53,7 +59,7 @@ Use headers to add Custom Properties to your LLM requests.
     ```
 
     ```python Python
-    openai.api_base = "https://oai.hconeai.com/v1"
+    openai.api_base = "https://oai.helicone.ai/v1"
     openai
 
     openai.Completion.create(
@@ -72,7 +78,7 @@ Use headers to add Custom Properties to your LLM requests.
     import { OpenAI } from "openai";
     const configuration = {
       apiKey: process.env.OPENAI_API_KEY,
-      basePath: "https://oai.hconeai.com/v1",
+      basePath: "https://oai.helicone.ai/v1",
       defaultHeaders: {
         "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
         "Helicone-Property-Session": "24", // Example 1
@@ -86,7 +92,7 @@ Use headers to add Custom Properties to your LLM requests.
     ```python Langchain (Python)
     llm = ChatOpenAI(
         openai_api_key="<OPENAI_API_KEY>",
-        openai_api_base="https://oai.hconeai.com/v1",
+        openai_api_base="https://oai.helicone.ai/v1",
         default_headers={
             "Helicone-Auth": "Bearer <HELICONE_API_KEY>"
             "Helicone-Property-Type": "Course Outline"
@@ -106,10 +112,9 @@ Use headers to add Custom Properties to your LLM requests.
   </Step>
 </Steps>
 
-
 ### Updating Custom Properties After Request
 
-You can also update Custom Properties post-request submission by making a PUT request to a designated API endpoint. 
+You can also update Custom Properties post-request submission by making a PUT request to a designated API endpoint.
 
 <Steps>
   <Step title="Obtain the Request ID">
@@ -119,12 +124,12 @@ You can also update Custom Properties post-request submission by making a PUT re
       You can pre-define the Request ID and assign to the header `Helicone-Request-Id`. This approach allows you to control the request ID yourself, to meet certain requirements or follow a specific format.
 
       <CodeGroup>
-      ```ts Node.js 
+      ```ts Node.js
       import { OpenAI } from "openai";
       const uuid = randomUUID(); // define your Request ID
       const configuration = {
-        apiKey: process.env.OPENAI_API_KEY, 
-        basePath: "https://oai.hconeai.com/v1", // Set the API endpoint
+        apiKey: process.env.OPENAI_API_KEY,
+        basePath: "https://oai.helicone.ai/v1", // Set the API endpoint
         defaultHeaders: {
           "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
           "Helicone-Request-Id": uuid, // Assign your Request ID
@@ -136,8 +141,8 @@ You can also update Custom Properties post-request submission by making a PUT re
       my_helicone_request_id = str(uuid.uuid4()) # define your Request ID
 
       client = OpenAI(
-        api_key="<your-api-key-here>", 
-        base_url="https://oai.hconeai.com/v1" # Set the API endpoint
+        api_key="<your-api-key-here>",
+        base_url="https://oai.helicone.ai/v1" # Set the API endpoint
         default_headers= {
           "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
           "Helicone-Request-Id": my_helicone_request_id # Assign your Request ID
@@ -148,13 +153,13 @@ You can also update Custom Properties post-request submission by making a PUT re
 
       <Warning>**Make sure each UUID is unique.** Otherwise, your existing log with that request ID will be overwritten. </Warning>
 
-      Refer to [Request ID Predefinition](https://docs.helicone.ai/helicone-headers/predefining-request-id) for additional documentation. 
+      Refer to [Request ID Predefinition](https://docs.helicone.ai/helicone-headers/predefining-request-id) for additional documentation.
 
     </Accordion>
     <Accordion title="Option 2: Get the Request ID From the Response Header">
       Alternatively, you can retrieve your Request ID from the response header `helicone-id`. Depending on the client library, the method to extract the Request ID may be different.
       <CodeGroup>
-      ```ts Node.js 
+      ```ts Node.js
       const { data, response } = await openai.chat.completions
           .create({
             model: "gpt-4o",
@@ -184,16 +189,16 @@ You can also update Custom Properties post-request submission by making a PUT re
       ```
       </CodeGroup>
     </Accordion>
+
   </AccordionGroup>
   </Step>
   <Step title="Make a PUT Request">
-    Here are the code snippets on how to make a PUT request: 
+    Here are the code snippets on how to make a PUT request:
     <Card title="PUT Request API" icon="link" href="https://docs.helicone.ai/rest/request/put-v1request-property">
-      Check out the detailed documentation. 
+      Check out the detailed documentation.
     </Card>
 
   </Step>
 </Steps>
-
 
 <QuestionsSection />

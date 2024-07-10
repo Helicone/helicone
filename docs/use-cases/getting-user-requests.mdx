@@ -1,19 +1,37 @@
 ---
-title: "User requests"
-description: "Get all of the requests made by a user"
+title: "Getting User Requests"
+sidebarTitle: "User Requests"
+description: "Use the Request API to retrieve user-specific requests, allowing you to monitor, debug, and track costs for individual users."
+"twitter:title": "Getting User Requests - Helicone OSS LLM Observability"
 ---
 
-![](/images/use-cases/request-filter.png)
+import QuestionsSection from "/snippets/questions-section.mdx";
 
-Navigating to our [request API page](/rest/request/post-v1requestquery) you can build a request with any filter.
+The [Request API](/rest/request/post-v1requestquery) allows you to build a request, where you can specify filtering criteria to retrieve all requests made by a user.
 
-The the following example we are getting all the requests where user_id is equal to abc@email.com
+<Frame>
+  <img
+    src="/images/use-cases/example-user-request.png"
+    alt="Helicone Request API example showing how you can built a request and specify filtering criteria and other advanced capabilities."
+  />
+</Frame>
+
+## Use Cases
+
+- Monitor your user's usage pattern and behavior.
+- Access user-specific requests to pinpoint the errors and bebug more efficiently.
+- Track requests and costs per user to facilitate better cost control.
+- Detect unusual or potentially harmful user behaviors.
+
+## Retrieving Requests by User ID
+
+Here's an example to get all the requests where `user_id` is `abc@email.com`.
 
 ```bash
 curl --request POST \
   --url https://api.helicone.ai/v1/request/query \
   --header 'Content-Type: application/json' \
-  --header 'authorization: Bearer sk-helicone-6hu2kbq-yoiuiry-qtc2hsa-rtif2pi' \
+  --header 'authorization: Bearer sk-<your-helicone-api-key>' \
   --data '{
   "filter": {
     "request": {
@@ -25,13 +43,22 @@ curl --request POST \
 }'
 ```
 
-Here you can structure your query to add any number of filters. Please note inorder for you to add multiple filters you will need to change the filter to a branch and nest the ANDs/ORs as an abstract syntax tree.
+<Tip>
+  By using the [Request API](/rest/request/post-v1requestquery), the code
+  snippet will dynamically populate on the page, so you can copy and paste.{" "}
+</Tip>
+
+## Adding Additional Filters
+
+You can structure your query to add any number of filters.
+
+**Note**: To add multiple filters, change the filter to a branch and nest the ANDs/ORs as an abstract syntax tree.
 
 ```bash
 curl --request POST \
   --url https://api.helicone.ai/v1/request/query \
   --header 'Content-Type: application/json' \
-  --header 'authorization: Bearer sk-helicone-6hu2kbq-yoiuiry-qtc2hsa-rtif2pi' \
+  --header 'authorization: Bearer sk-<your-helicone-api-key>' \
   --data '{
   "filter": {
     "operator": "and",
@@ -52,3 +79,5 @@ curl --request POST \
   }
 }'
 ```
+
+<QuestionsSection />

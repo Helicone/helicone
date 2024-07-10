@@ -1,44 +1,45 @@
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/router";
+import { ArrowPathIcon, HomeIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
+import { useJawnClient } from "../../../lib/clients/jawnHook";
 import {
   TimeInterval,
   getTimeIntervalAgo,
 } from "../../../lib/timeCalculations/time";
+import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
+import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import {
-  SortDirection,
-  SortLeafRequest,
-} from "../../../services/lib/sorts/requests/sorts";
-import AuthHeader from "../../shared/authHeader";
-import { clsx } from "../../shared/clsx";
-import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
-import { getInitialColumns } from "./initialColumns";
-import RequestDrawerV2 from "./requestDrawerV2";
-import TableFooter from "./tableFooter";
-import useRequestsPageV2 from "./useRequestsPageV2";
-import { useJawnClient } from "../../../lib/clients/jawnHook";
-import { ThemedSwitch } from "../../shared/themed/themedSwitch";
-import useSearchParams from "../../shared/utils/useSearchParams";
-import { TimeFilter } from "../dashboard/dashboardPage";
-import getNormalizedRequest from "./builder/requestBuilder";
-import RequestCard from "./requestCard";
 import {
   OrganizationFilter,
   OrganizationLayout,
 } from "../../../services/lib/organization_layout/organization_layout";
-import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
-import { useOrg } from "../../layout/organizationContext";
 import { placeAssetIdValues } from "../../../services/lib/requestTraverseHelper";
+import {
+  SortDirection,
+  SortLeafRequest,
+} from "../../../services/lib/sorts/requests/sorts";
+import { useOrg } from "../../layout/organizationContext";
+import AuthHeader from "../../shared/authHeader";
+import { clsx } from "../../shared/clsx";
+import ThemedTable from "../../shared/themed/table/themedTable";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import { ThemedSwitch } from "../../shared/themed/themedSwitch";
+import useSearchParams from "../../shared/utils/useSearchParams";
+import { TimeFilter } from "../dashboard/dashboardPage";
+import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import {
   getModelFromPath,
   mapGeminiProJawn,
 } from "./builder/mappers/geminiMapper";
+import getNormalizedRequest from "./builder/requestBuilder";
+import { getInitialColumns } from "./initialColumns";
+import RequestCard from "./requestCard";
+import RequestDrawerV2 from "./requestDrawerV2";
+import TableFooter from "./tableFooter";
+import useRequestsPageV2 from "./useRequestsPageV2";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -51,6 +52,7 @@ interface RequestsPageV2Props {
   isCached?: boolean;
   initialRequestId?: string;
   userId?: string;
+  rateLimited?: boolean;
   currentFilter: OrganizationFilter | null;
   organizationLayout: OrganizationLayout | null;
   organizationLayoutAvailable: boolean;
@@ -98,6 +100,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached = false,
     initialRequestId,
     userId,
+    rateLimited = false,
     currentFilter,
     organizationLayout,
     organizationLayoutAvailable,
@@ -114,6 +117,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const [open, setOpen] = useState(false);
   const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
+  const { unauthorized, currentTier } = useGetUnauthorized(userId || "");
   const [selectedData, setSelectedData] = useState<
     NormalizedRequest | undefined
   >(undefined);
@@ -188,8 +192,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
-  const router = useRouter();
-
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
   const sortLeaf: SortLeafRequest = getSortLeaf(
@@ -224,8 +226,20 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isLive
   );
 
+  const requestWithoutStream = requests.find((r) => {
+    return (
+      (r.requestBody as any)?.stream &&
+      !(r.requestBody as any)?.stream_options?.include_usage &&
+      r.provider === "OPENAI"
+    );
+  });
+
+  const [isWarningHidden, setIsWarningHidden] = useLocalStorage(
+    "isStreamWarningHidden",
+    false
+  );
+
   useEffect(() => {
-    console.log("HELLO");
     if (initialRequestId && selectedData === undefined) {
       const fetchRequest = async () => {
         const response = await jawn.POST("/v1/request/query", {
@@ -380,6 +394,24 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       ]);
     }
   }, [advancedFilters, filterMap, userId]);
+  const userFilerMapIndex = filterMap.findIndex(
+    (filter) => filter.label === "Helicone-Rate-Limit-Status"
+  );
+  useEffect(() => {
+    if (rateLimited) {
+      if (userFilerMapIndex === -1) {
+        return;
+      }
+
+      setAdvancedFilters([
+        {
+          filterMapIdx: userFilerMapIndex,
+          operatorIdx: 0,
+          value: "rate_limited",
+        },
+      ]);
+    }
+  }, [userFilerMapIndex, rateLimited]);
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
@@ -427,14 +459,21 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const columnsWithProperties = [...getInitialColumns(isCached)].concat(
     properties.map((property) => {
       return {
-        accessorFn: (row) =>
-          row.customProperties ? row.customProperties[property] : "",
-        id: `Custom - ${property}`,
+        id: `${property}`,
+        accessorFn: (row) => {
+          const value = row.customProperties
+            ? row.customProperties[property]
+            : "";
+          console.log("value", value);
+          return value;
+        },
         header: property,
-        cell: (info) => info.getValue(),
+        cell: (info) => {
+          return info.getValue();
+        },
         meta: {
           sortKey: property,
-          isCustomProperty: true,
+          category: "Custom Property",
         },
       };
     })
@@ -489,8 +528,93 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       onSetAdvancedFiltersHandler([], null);
     }
   };
+
+  const renderUnauthorized = () => {
+    if (currentTier === "free") {
+      return (
+        <div className="flex flex-col w-full h-[80vh] justify-center items-center">
+          <div className="flex flex-col w-2/5">
+            <HomeIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+            <p className="text-xl text-black dark:text-white font-semibold mt-8">
+              You have reached your monthly limit.
+            </p>
+            <p className="text-sm text-gray-500 max-w-sm mt-2">
+              Upgrade your plan to view your request page. Your requests are
+              still being processed, but you will not be able to view them until
+              you upgrade.
+            </p>
+            <div className="mt-4">
+              <button
+                onClick={() => {
+                  setOpen(true);
+                }}
+                className="items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                Upgrade
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    if (currentTier === "pro") {
+      return (
+        <div className="flex flex-col w-full h-[80vh] justify-center items-center">
+          <div className="flex flex-col w-full">
+            <HomeIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+            <p className="text-xl text-black dark:text-white font-semibold mt-8">
+              You have reached your monthly limit on the Pro plan.
+            </p>
+            <p className="text-sm text-gray-500 max-w-sm mt-2">
+              Please get in touch with us to discuss increasing your limits.
+            </p>
+            <div className="mt-4">
+              <Link
+                href="https://cal.com/team/helicone/helicone-discovery"
+                target="_blank"
+                rel="noreferrer"
+                className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                Contact Us
+              </Link>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  };
+
   return (
     <div>
+      {requestWithoutStream && !isWarningHidden && (
+        <div className="alert alert-warning flex justify-between items-center">
+          <p className="text-yellow-800">
+            We are unable to calculate your cost accurately because the
+            &#39;stream_usage&#39; option is not included in your message.
+            Please refer to{" "}
+            <a
+              href="https://docs.helicone.ai/use-cases/enable-stream-usage"
+              className="text-blue-600 underline"
+            >
+              this documentation
+            </a>{" "}
+            for more information.
+          </p>
+          <button
+            onClick={() => setIsWarningHidden(true)}
+            className="text-yellow-800 hover:text-yellow-900"
+          >
+            <span className="sr-only">Close</span>
+            <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fillRule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+      )}
       {!isCached && userId === undefined && (
         <AuthHeader
           title={isCached ? "Cached Requests" : "Requests"}
@@ -523,87 +647,92 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           }
         />
       )}
-
-      <div className="flex flex-col space-y-4">
-        <ThemedTableV5
-          defaultData={requests || []}
-          defaultColumns={columnsWithProperties}
-          tableKey="requestsColumnVisibility"
-          dataLoading={isDataLoading}
-          sortable={sort}
-          advancedFilters={{
-            filterMap: filterMap,
-            filters: advancedFilters,
-            setAdvancedFilters: onSetAdvancedFiltersHandler,
-            searchPropertyFilters: searchPropertyFilters,
-            show: userId ? false : true,
-          }}
-          savedFilters={
-            organizationLayoutAvailable
-              ? {
-                  currentFilter: currFilter ?? undefined,
-                  filters: orgLayout?.filters ?? undefined,
-                  onFilterChange: onLayoutFilterChange,
-                  onSaveFilterCallback: async () => {
-                    await orgLayoutRefetch();
-                  },
-                  layoutPage: "requests",
-                }
-              : undefined
-          }
-          exportData={requests.map((request) => {
-            const flattenedRequest: any = {};
-            Object.entries(request).forEach(([key, value]) => {
-              // key is properties and value is not null
-              if (
-                key === "customProperties" &&
-                value !== null &&
-                value !== undefined
-              ) {
-                Object.entries(value).forEach(([key, value]) => {
-                  if (value !== null) {
-                    flattenedRequest[key] = value;
+      {unauthorized ? (
+        <>{renderUnauthorized()}</>
+      ) : (
+        <div className="flex flex-col space-y-4">
+          <ThemedTable
+            id="requests-table"
+            defaultData={requests || []}
+            defaultColumns={columnsWithProperties}
+            dataLoading={isDataLoading}
+            sortable={sort}
+            advancedFilters={{
+              filterMap: filterMap,
+              filters: advancedFilters,
+              setAdvancedFilters: onSetAdvancedFiltersHandler,
+              searchPropertyFilters: searchPropertyFilters,
+              show: userId ? false : true,
+            }}
+            savedFilters={
+              organizationLayoutAvailable
+                ? {
+                    currentFilter: currFilter ?? undefined,
+                    filters: orgLayout?.data?.filters ?? undefined,
+                    onFilterChange: onLayoutFilterChange,
+                    onSaveFilterCallback: async () => {
+                      await orgLayoutRefetch();
+                    },
+                    layoutPage: "requests",
                   }
-                });
-              } else {
-                flattenedRequest[key] = value;
-              }
-            });
-            return flattenedRequest;
-          })}
-          timeFilter={{
-            currentTimeFilter: timeRange,
-            defaultValue: "24h",
-            onTimeSelectHandler: onTimeSelectHandler,
-          }}
-          onRowSelect={(row, index) => {
-            onRowSelectHandler(row, index);
-          }}
-          makeCard={
-            userId
-              ? undefined
-              : (row) => {
-                  return <RequestCard request={row} properties={properties} />;
+                : undefined
+            }
+            exportData={requests.map((request) => {
+              const flattenedRequest: any = {};
+              Object.entries(request).forEach(([key, value]) => {
+                // key is properties and value is not null
+                if (
+                  key === "customProperties" &&
+                  value !== null &&
+                  value !== undefined
+                ) {
+                  Object.entries(value).forEach(([key, value]) => {
+                    if (value !== null) {
+                      flattenedRequest[key] = value;
+                    }
+                  });
+                } else {
+                  flattenedRequest[key] = value;
                 }
-          }
-          makeRow={
-            userId
-              ? undefined
-              : {
-                  properties: properties,
-                }
-          }
-        />
-        <TableFooter
-          currentPage={currentPage}
-          pageSize={pageSize}
-          isCountLoading={isCountLoading}
-          count={count || 0}
-          onPageChange={onPageChangeHandler}
-          onPageSizeChange={onPageSizeChangeHandler}
-          pageSizeOptions={[25, 50, 100]}
-        />
-      </div>
+              });
+              return flattenedRequest;
+            })}
+            timeFilter={{
+              currentTimeFilter: timeRange,
+              defaultValue: "24h",
+              onTimeSelectHandler: onTimeSelectHandler,
+            }}
+            onRowSelect={(row, index) => {
+              onRowSelectHandler(row, index);
+            }}
+            makeCard={
+              userId
+                ? undefined
+                : (row) => {
+                    return (
+                      <RequestCard request={row} properties={properties} />
+                    );
+                  }
+            }
+            makeRow={
+              userId
+                ? undefined
+                : {
+                    properties: properties,
+                  }
+            }
+          />
+          <TableFooter
+            currentPage={currentPage}
+            pageSize={pageSize}
+            isCountLoading={isCountLoading}
+            count={count || 0}
+            onPageChange={onPageChangeHandler}
+            onPageSizeChange={onPageSizeChangeHandler}
+            pageSizeOptions={[25, 50, 100]}
+          />
+        </div>
+      )}
       <RequestDrawerV2
         open={open}
         setOpen={setOpen}

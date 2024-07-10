@@ -1,6 +1,6 @@
 import { Result } from "../util/results";
 import {
-  CompletedChunk,
+  CompletedStream,
   ReadableInterceptor,
 } from "../util/ReadableInterceptor";
 import {
@@ -8,11 +8,15 @@ import {
   dbLoggableRequestFromProxyRequest,
 } from "../dbLogger/DBLoggable";
 import {
+  CallProps,
   callPropsFromProxyRequest,
   callProvider,
   callProviderWithRetry,
 } from "../clients/ProviderClient";
-import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
+import {
+  HeliconeProxyRequest,
+  RetryOptions,
+} from "../models/HeliconeProxyRequest";
 
 export type ProxyResult = {
   loggable: DBLoggable;
@@ -21,7 +25,7 @@ export type ProxyResult = {
 
 function getStatus(
   responseStatus: number,
-  endReason?: CompletedChunk["reason"]
+  endReason?: CompletedStream["reason"]
 ) {
   if (!endReason) {
     return responseStatus;
@@ -35,17 +39,33 @@ function getStatus(
     return -100;
   }
 }
+async function getProviderResponse(
+  callProps: CallProps,
+  retryOptions: RetryOptions | null,
+  responseOverride?: Response
+): Promise<Response> {
+  if (responseOverride) {
+    return responseOverride;
+  } else if (retryOptions) {
+    return callProviderWithRetry(callProps, retryOptions);
+  } else {
+    return callProvider(callProps);
+  }
+}
 
 export async function handleProxyRequest(
-  proxyRequest: HeliconeProxyRequest
+  proxyRequest: HeliconeProxyRequest,
+  responseOverride?: Response
 ): Promise<Result<ProxyResult, string>> {
   const { retryOptions } = proxyRequest;
 
   const requestStartTime = new Date();
   const callProps = callPropsFromProxyRequest(proxyRequest);
-  const response = await (retryOptions
-    ? callProviderWithRetry(callProps, retryOptions)
-    : callProvider(callProps));
+  const response = await getProviderResponse(
+    callProps,
+    retryOptions,
+    responseOverride
+  );
 
   const interceptor = response.body
     ? new ReadableInterceptor(response.body, proxyRequest.isStream)
@@ -100,9 +120,9 @@ export async function handleProxyRequest(
         response: {
           responseId: crypto.randomUUID(),
           getResponseBody: async () => ({
-            body: (await interceptor?.waitForChunk())?.body ?? "",
+            body: (await interceptor?.waitForStream())?.body ?? [],
             endTime: new Date(
-              (await interceptor?.waitForChunk())?.endTimeUnix ??
+              (await interceptor?.waitForStream())?.endTimeUnix ??
                 new Date().getTime()
             ),
           }),
@@ -110,7 +130,7 @@ export async function handleProxyRequest(
           status: async () => {
             return getStatus(
               response.status,
-              (await interceptor?.waitForChunk())?.reason
+              (await interceptor?.waitForStream())?.reason
             );
           },
           omitLog:
@@ -121,7 +141,7 @@ export async function handleProxyRequest(
           startTime: proxyRequest.startTime,
           timeToFirstToken: async () => {
             if (proxyRequest.isStream) {
-              const chunk = await interceptor?.waitForChunk();
+              const chunk = await interceptor?.waitForStream();
               const startTimeUnix = proxyRequest.startTime.getTime();
               if (chunk?.firstChunkTimeUnix && startTimeUnix) {
                 return chunk.firstChunkTimeUnix - startTimeUnix;
@@ -160,7 +180,7 @@ export async function handleThreatProxyRequest(
         response: {
           responseId: crypto.randomUUID(),
           getResponseBody: async () => ({
-            body: "{}",
+            body: ["{}"],
             endTime: new Date(new Date().getTime()),
           }),
           responseHeaders: responseHeaders,

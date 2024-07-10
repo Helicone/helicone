@@ -36,13 +36,6 @@ export class KafkaProducer {
     topic: Topics
   ): PromiseGenericResult<string> {
     if (!this.kafka) {
-      const logManager = new LogManager();
-      await logManager.processLogEntries(msgs, {
-        batchId: "",
-        partition: 0,
-        lastOffset: "",
-        messageCount: 1,
-      });
       return ok("Kafka is not initialized");
     }
 
@@ -56,7 +49,7 @@ export class KafkaProducer {
       try {
         let data = msgs.map((msg) => {
           return {
-            value: msg,
+            value: JSON.stringify({ value: JSON.stringify(msg) }),
             topic: topic,
             key: msg.log.request.id,
           };

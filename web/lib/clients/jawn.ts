@@ -7,19 +7,23 @@ import type { paths as privatePaths } from "./jawnTypes/private";
 
 export type JawnFilterNode = any;
 
-export function getJawnClient(orgId?: string) {
+export function getJawnClient(orgId?: string | "none") {
   orgId = orgId || Cookies.get(ORG_ID_COOKIE_KEY);
-
   const jwtToken = getHeliconeCookie().data?.jwtToken;
+  const headers =
+    orgId !== "none"
+      ? {
+          "helicone-authorization": JSON.stringify({
+            _type: "jwt",
+            token: jwtToken,
+            orgId: orgId,
+          }),
+        }
+      : {};
+
   return createClient<publicPaths & privatePaths>({
     baseUrl: process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE,
-    headers: {
-      "helicone-authorization": JSON.stringify({
-        _type: "jwt",
-        token: jwtToken,
-        orgId: orgId,
-      }),
-    },
+    headers,
   });
 }
 

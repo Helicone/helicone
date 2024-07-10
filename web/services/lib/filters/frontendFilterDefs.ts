@@ -58,6 +58,14 @@ const textOperators: Operator<keyof TextOperators>[] = [
   },
 ];
 
+const VectorOperators: Operator<keyof TextOperators>[] = [
+  {
+    value: "contains",
+    label: "contains",
+    type: "text",
+  },
+];
+
 const numberOperators: Operator<keyof NumberOperators>[] = [
   {
     value: "equals",
@@ -125,6 +133,61 @@ export type SingleFilterDef<T extends keyof TablesAndViews> = {
   isCustomProperty?: boolean;
 };
 
+const STATUS_OPS = numberWithSuggestions([
+  {
+    key: "200",
+    param: "200 (success)",
+  },
+  {
+    key: "-4",
+    param: "threat",
+  },
+  {
+    key: "-3",
+    param: "cancelled",
+  },
+  {
+    key: "-2",
+    param: "pending",
+  },
+  {
+    key: "-1",
+    param: "timeout",
+  },
+  {
+    key: "400",
+    param: "400",
+  },
+  {
+    key: "401",
+    param: "401",
+  },
+  {
+    key: "404",
+    param: "404",
+  },
+  {
+    key: "429",
+    param: "429 (rate-limit)",
+  },
+  {
+    key: "500",
+    param: "500",
+  },
+  {
+    key: "502",
+    param: "502",
+  },
+  {
+    key: "503",
+    param: "503",
+  },
+  {
+    key: "524",
+    param: "524 (server timeout)",
+  },
+]);
+
 export const DASHBOARD_PAGE_TABLE_FILTERS: [
   SingleFilterDef<"request_response_versioned">,
   SingleFilterDef<"request_response_versioned">,
@@ -140,60 +203,7 @@ export const DASHBOARD_PAGE_TABLE_FILTERS: [
   },
   {
     label: "Status",
-    operators: numberWithSuggestions([
-      {
-        key: "200",
-        param: "200 (success)",
-      },
-      {
-        key: "-4",
-        param: "threat",
-      },
-      {
-        key: "-3",
-        param: "cancelled",
-      },
-      {
-        key: "-2",
-        param: "pending",
-      },
-      {
-        key: "-1",
-        param: "timeout",
-      },
-      {
-        key: "400",
-        param: "400",
-      },
-      {
-        key: "401",
-        param: "401",
-      },
-      {
-        key: "404",
-        param: "404",
-      },
-      {
-        key: "429",
-        param: "429 (rate-limit)",
-      },
-      {
-        key: "500",
-        param: "500",
-      },
-      {
-        key: "502",
-        param: "502",
-      },
-      {
-        key: "503",
-        param: "503",
-      },
-      {
-        key: "524",
-        param: "524 (server timeout)",
-      },
-    ]),
+    operators: STATUS_OPS,
     category: "request",
     table: "request_response_versioned",
     column: "status",
@@ -213,10 +223,11 @@ export const DASHBOARD_PAGE_TABLE_FILTERS: [
     column: "user_id",
   },
 ];
+
 export const REQUEST_TABLE_FILTERS: [
+  SingleFilterDef<"request_response_search">,
   SingleFilterDef<"request">,
-  SingleFilterDef<"request">,
-  SingleFilterDef<"response">,
+  SingleFilterDef<"request_response_search">,
   SingleFilterDef<"response">,
   SingleFilterDef<"request">,
   SingleFilterDef<"response">,
@@ -227,9 +238,9 @@ export const REQUEST_TABLE_FILTERS: [
 ] = [
   {
     label: "Request",
-    operators: textOperators,
-    table: "request",
-    column: "prompt",
+    operators: VectorOperators,
+    table: "request_response_search",
+    column: "request_body_vector",
     category: "request",
   },
   {
@@ -241,9 +252,9 @@ export const REQUEST_TABLE_FILTERS: [
   },
   {
     label: "Response",
-    operators: textOperators,
-    table: "response",
-    column: "body_completion",
+    operators: VectorOperators,
+    table: "request_response_search",
+    column: "response_body_vector",
     category: "request",
   },
   {

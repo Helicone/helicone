@@ -9,7 +9,7 @@ title: "3rd party integrations"
 Integrating with Langchain is super easy! Just change the base_url
 
 ```ini
-export OPENAI_API_BASE="https://oai.hconeai.com/v1"
+export OPENAI_API_BASE="https://oai.helicone.ai/v1"
 python3 you_lang_chain_program.py
 ```
 
@@ -21,7 +21,7 @@ Since GPT Index uses lang chain under the hood, you can use the same technique
 to integrate as well
 
 ```ini
-export OPENAI_API_BASE="https://oai.hconeai.com/v1"
+export OPENAI_API_BASE="https://oai.helicone.ai/v1"
 python3 you_lang_chain_program.py
 ```
 
@@ -38,7 +38,7 @@ import "github.com/fabiustech/openai"
 
 func main() {
 	var client = openai.NewClient("your token")
-	client.SetBaseURL("https://oai.hconeai.com/v1")
+	client.SetBaseURL("https://oai.helicone.ai/v1")
 
 	// Your code goes here!
 }

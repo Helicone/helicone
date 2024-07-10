@@ -1,0 +1,128 @@
+---
+title: "Gemini JavaScript SDK Integration"
+sidebarTitle: "JavaScript"
+description: "Use Gemini's JavaScript SDK to integrate with Helicone to log your Gemini AI usage."
+"twitter:title": "Gemini JavaScript SDK Integration - Helicone OSS LLM Observability"
+---
+
+# Proxy Integration
+
+## Fetch
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Create Google Generative AI API Key">
+    Visit the [Google Generative AI API Key](https://aistudio.google.com/app/apikey) page.
+    Follow the instructions to create a new API key. Make sure to save the key as you will need it for the next steps.
+  </Step>
+  <Step title="Set API keys as environment variables">
+    ```bash
+    export HELICONE_API_KEY=<your Helicone API key>
+    export GOOGLE_GENERATIVE_API_KEY=<your Google Generative AI API key>
+    ```
+  </Step>
+  <Step title="Install necessary packages">
+    Ensure you have the necessary packages installed in your Javascript project:
+    ```bash
+    npm install node-fetch
+    ```
+  </Step>
+  <Step title="Send a request using fetch">
+    ```javascript
+    const fetch = require('node-fetch');
+
+    const url = `https://gateway.helicone.ai/v1beta/models/model-name:generateContent?key=${process.env.GOOGLE_GENERATIVE_API_KEY}`;
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
+      'Helicone-Target-URL': `https://generativelanguage.googleapis.com`,
+    };
+
+    const body = JSON.stringify({
+      contents: [{
+        parts: [{
+          text: 'Write a story about a magic backpack.'
+        }]
+      }]
+    });
+
+    fetch(url, { method: 'POST', headers: headers, body: body })
+      .then(response => response.json())
+      .then(data => console.log(data))
+      .catch(error => console.error('Error:', error));
+    ```
+
+  </Step>
+</Steps>
+
+## Google Generative AI SDK
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Create Google Generative AI API Key">
+    Visit the [Google Generative AI API Key](https://aistudio.google.com/app/apikey) page.
+    Follow the instructions to create a new API key. Make sure to save the key as you will need it for the next steps.
+  </Step>
+  <Step title="Set API keys as environment variables">
+    ```bash
+    export HELICONE_API_KEY=<your Helicone API key>
+    export GOOGLE_GENERATIVE_API_KEY=<your Google Generative AI API key>
+    ```
+  </Step>
+  <Step title="Install necessary packages">
+    Ensure you have the necessary packages installed in your Javascript project:
+    ```bash
+    npm install @google/generative-ai
+    ```
+  </Step>
+  <Step title="Import GoogleGenerativeAI and configure the client">
+    ```javascript
+    import { GoogleGenerativeAI, RequestOptions } from "@google/generative-ai";
+
+    if (!process.env.GOOGLE_GENERATIVE_API_KEY) {
+      throw new Error("GOOGLE_GENERATIVE_API_KEY environment variable must be set");
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_API_KEY);
+
+    const customHeaders = new Headers({
+      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Helicone-Target-URL": `https://generativelanguage.googleapis.com`,
+    });
+
+    const requestOptions = {
+      customHeaders: customHeaders,
+      baseUrl: "https://gateway.helicone.ai",
+    } as RequestOptions;
+    ```
+
+  </Step>
+  <Step title="Get the generative model and generate content">
+    ```javascript
+    const model = genAI.getGenerativeModel(
+      {
+        model: "model-name",
+      },
+      requestOptions
+    );
+
+    async function run() {
+      const prompt = "Write a story about a magic backpack.";
+      const result = await model.generateContent(prompt);
+      const response = result.response;
+      const text = await response.text();
+      console.log(text);
+    }
+
+    run();
+    ```
+
+  </Step>
+</Steps>

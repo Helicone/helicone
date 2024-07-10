@@ -64,7 +64,7 @@ x = openai.ChatCompletion.create(
     <Steps>
       <Step title="To get started, install the `helicone-openai` package">
       ```bash
-      npm install @helicone/helicone
+      npm install @helicone/helicone@2.1.19
       ```
       </Step>
       <Step title="Set `HELICONE_API_KEY` as an environment variable">
@@ -154,7 +154,7 @@ A typical request will have the following structure:
 
 ```
 
-POST https://api.hconeai.com/oai/v1/log
+POST https://api.helicone.ai/oai/v1/log
 
 ```
 
@@ -211,7 +211,7 @@ export type Timing = {
 Here's an example using curl:
 
 ```sh
-curl -X POST https://api.hconeai.com/oai/v1/log \
+curl -X POST https://api.helicone.ai/oai/v1/log \
 -H 'Authorization: Bearer your_api_key' \
 -H 'Content-Type: application/json' \
 -d '{

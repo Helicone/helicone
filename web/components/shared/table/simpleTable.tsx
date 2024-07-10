@@ -60,7 +60,10 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
               onClick={() => onSelect && onSelect(item)}
             >
               {columns.map((column, subIndex) => (
-                <TableCell key={String(column.key || subIndex + column.header)}>
+                <TableCell
+                  key={String(column.key || subIndex + column.header)}
+                  className={clsx(subIndex !== 0 && "align-top")}
+                >
                   {column.render(item)}
                 </TableCell>
               ))}

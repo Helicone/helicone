@@ -1,6 +1,8 @@
 ---
-title: "Request ID Predefinition"
-description: Predetermine Helicone's request ID for asynchronous utilization in other tasks
+title: "Predefined Request IDs"
+sidebarTitle: "Request ID Predefinition"
+description: "Learn how to predefine Helicone request IDs for advanced tracking and asynchronous operations in your LLM applications."
+"twitter:title": "Predefined Request IDs - Helicone OSS LLM Observability"
 ---
 
 One of the significant advantages of using UUIDs as request IDs is the ability to predetermine the request ID before the actual request is dispatched to Helicone.
@@ -21,7 +23,7 @@ my_helicone_request_id = str(uuid.uuid4())
 
 # While the above code is executing, you can perform other tasks such as providing feedback on a specific request.
 import requests
-url = 'https://api.hconeai.com/v1/feedback'
+url = 'https://api.helicone.ai/v1/feedback'
 headers = {
     'Helicone-Auth': 'YOUR_HELICONE_AUTH_HEADER',
     'Content-Type': 'application/json'

@@ -1,0 +1,40 @@
+---
+title: "Azure OpenAI cURL Integration"
+sidebarTitle: "cURL"
+description: "Use cURL to integrate Azure OpenAI with Helicone to log your Azure OpenAI usage."
+"twitter:title": "Azure-OpenAI cURL Integration - Helicone OSS LLM Observability"
+---
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+    <Step title="Modify the API base and add the `Helicone-Auth` header">
+
+    <Note>
+    Please ensure to replace API keys with your own.
+    </Note>
+
+    ```bash
+    curl --request POST \
+        --url https://oai.helicone.ai/openai/deployments/DEPLOYMENTNAME/chat/completions?api-version=[API_VERSION] \
+        --header 'Helicone-Auth: Bearer [HELICONE_KEY]' \
+        --header 'Helicone-OpenAI-Api-Base: https://[AZUREDOMAIN].openai.azure.com' \
+        --header 'api-key: [AZURE_API_KEY]' \
+        --header 'content-type: application/json' \
+        --data '{
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "Answer in one word"
+                }
+            ],
+            "max_tokens": 800,
+            "temperature": 1,
+            "model": "gpt-3.5-turbo-0613"
+        }'
+    ```
+
+  </Step>
+</Steps>

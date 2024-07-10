@@ -35,7 +35,7 @@ import {
   MetricsPanelProps,
 } from "../../shared/metrics/metricsPanel";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import ThemedTableHeader from "../../shared/themed/themedTableHeader";
+import ThemedTableHeader from "../../shared/themed/themedHeader";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { formatNumber } from "../users/initialColumns";
@@ -534,7 +534,7 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
             savedFilters={{
               currentFilter: currFilter ?? undefined,
-              filters: orgLayout?.filters ?? undefined,
+              filters: orgLayout?.data?.filters ?? undefined,
               onFilterChange: onLayoutFilterChange,
               onSaveFilterCallback: async () => {
                 await orgLayoutRefetch();

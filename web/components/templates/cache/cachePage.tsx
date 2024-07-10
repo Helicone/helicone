@@ -245,7 +245,7 @@ const CachePage = (props: CachePageProps) => {
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
                       Top Requests
                     </h3>
-                    <ul className="h-72 px-4 overflow-auto divide-y divide-gray-300 dark:divide-gray-700">
+                    <ul className="h-auto px-4 overflow-auto divide-y divide-gray-300 dark:divide-gray-700">
                       {chMetrics.topRequests.data?.data?.map(
                         (request: any, i: any) => (
                           <ThemedListItem

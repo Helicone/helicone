@@ -121,3 +121,12 @@ export function unsupportedImage(body: any): any {
   }
   return result;
 }
+
+export function isValidTimeZoneDifference(timeZoneDifference: number): boolean {
+  const minutesInDay = 24 * 60;
+  return (
+    !isNaN(timeZoneDifference) &&
+    timeZoneDifference >= -minutesInDay &&
+    timeZoneDifference <= minutesInDay
+  );
+}

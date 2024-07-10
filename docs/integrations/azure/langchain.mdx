@@ -1,11 +1,13 @@
 ---
-title: "Langchain"
-description: "Learn how to integrate Azure-OpenAI with Helicone using Langchain."
+title: "Azure OpenAI LangChain Integration"
+sidebarTitle: "LangChain"
+description: "Use LangChain to integrate Azure OpenAI with Helicone to log your Azure OpenAI usage."
+"twitter:title": "Azure OpenAI Langchain Integration - Helicone OSS LLM Observability"
 ---
 
 <Steps>
   <Step title="Create an account + Generate an API Key">
-    Log into www.helicone.ai or create an account. Once you have an account, you
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
     can generate an [API key](https://helicone.ai/developer).
   </Step>
   <Step title="Set HELICONE_API_KEY as an environment variable">
@@ -21,7 +23,7 @@ const model = new ChatOpenAI({
   azureOpenAIApiKey: "[AZURE_OPENAI_API_KEY]",
   azureOpenAIApiDeploymentName: "openai/deployments/gpt-35-turbo",
   azureOpenAIApiVersion: "2023-03-15-preview",
-  azureOpenAIBasePath: "https://oai.hconeai.com",
+  azureOpenAIBasePath: "https://oai.helicone.ai",
   configuration: {
     organization: "[organization]",
     baseOptions: {
@@ -44,7 +46,7 @@ helicone_headers = {
 }
 
 self.model = AzureChatOpenAI(
-  openai_api_base="https://oai.hconeai.com",
+  openai_api_base="https://oai.helicone.ai",
   deployment_name="gpt-35-turbo",
   openai_api_key=<AZURE_OPENAI_API_KEY>,
   openai_api_version="2023-05-15",

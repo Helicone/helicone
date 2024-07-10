@@ -73,6 +73,10 @@ export const consume = async () => {
             messagesPerMiniBatchSetting?.miniBatchSize ??
             MESSAGES_PER_MINI_BATCH;
 
+          if (miniBatchSize <= 0) {
+            return;
+          }
+
           const miniBatch = batch.messages.slice(i, miniBatchSize + i);
 
           const firstOffset = miniBatch?.[0]?.offset;
@@ -206,11 +210,14 @@ export const consumeDlq = async () => {
         "kafka:dlq"
       );
 
-      const miniBatches = createMiniBatches(
-        batch.messages,
+      const miniBatchSize =
         messagesPerMiniBatchSetting?.miniBatchSize ??
-          DLQ_MESSAGES_PER_MINI_BATCH
-      );
+        DLQ_MESSAGES_PER_MINI_BATCH;
+      if (miniBatchSize <= 0) {
+        return;
+      }
+
+      const miniBatches = createMiniBatches(batch.messages, miniBatchSize);
 
       try {
         for (const miniBatch of miniBatches) {
@@ -267,7 +274,8 @@ function mapDlqKafkaMessageToMessage(
     if (message.value) {
       try {
         const kafkaValue = JSON.parse(message.value.toString());
-        messages.push(mapMessageDates(kafkaValue));
+        const parsedMsg = JSON.parse(kafkaValue.value) as Message;
+        messages.push(mapMessageDates(parsedMsg));
       } catch (error) {
         return err(`Failed to parse message: ${error}`);
       }

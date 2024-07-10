@@ -21,6 +21,11 @@ export interface RequestObj {
   provider: string;
 }
 
+export interface Score {
+  valueType: string;
+  value: number | Date | string;
+}
+
 export interface Experiment {
   id: string;
   organization: string;
@@ -36,7 +41,7 @@ export interface Experiment {
         response: ResponseObj;
         request: RequestObj;
       };
-      scores: Record<string, number>;
+      scores: Record<string, Score>;
     }[];
   };
   meta: any;
@@ -58,21 +63,19 @@ export interface Experiment {
       datasetRowId: string;
       resultRequestId: string;
       response?: ResponseObj;
-      scores: Record<string, number>;
+      scores: Record<string, Score>;
       request?: RequestObj;
     }[];
   }[];
   scores: ExperimentScores | null;
 }
 
-type ScoreValue = string | number | Date;
-
 export interface ExperimentScores {
   dataset: {
-    scores: Record<string, ScoreValue>;
+    scores: Record<string, Score>;
   };
   hypothesis: {
-    scores: Record<string, ScoreValue>;
+    scores: Record<string, Score>;
   };
 }
 
@@ -155,7 +158,13 @@ function getExperimentsQuery(
                     }
                     'rowId', dsr.id,
                     'scores', (
-                      SELECT jsonb_object_agg(sa.score_key, sv.int_value)
+                      SELECT jsonb_object_agg(
+                        sa.score_key, 
+                        jsonb_build_object(
+                          'value', sv.int_value,
+                          'valueType', sa.value_type
+                        )
+                      )
                       FROM score_value sv
                       JOIN score_attribute sa ON sa.id = sv.score_attribute
                       JOIN prompt_input_record pir ON pir.source_request = sv.request_id
@@ -197,7 +206,8 @@ function getExperimentsQuery(
                         AND pv_parent.helicone_template is not null
                         AND pv_parent.organization = e.organization
                         AND pv_current.organization = e.organization
-                        AND pv_parent.major_version = 0
+                        AND pv_parent.minor_version = 0
+                        and pv_parent.major_version = pv_current.major_version
                         limit 1
                       ),`
                           : ""
@@ -223,7 +233,13 @@ function getExperimentsQuery(
                                   'datasetRowId', hr.dataset_row,
                                   'resultRequestId', hr.result_request_id,
                                   'scores', (
-                                    SELECT jsonb_object_agg(sa.score_key, sv.int_value)
+                                    SELECT jsonb_object_agg(
+                                      sa.score_key, 
+                                      jsonb_build_object(
+                                        'value', sv.int_value,
+                                        'valueType', sa.value_type
+                                      )
+                                    )
                                     FROM score_value sv
                                     JOIN score_attribute sa ON sa.id = sv.score_attribute
                                     WHERE sv.request_id = hr.result_request_id
@@ -462,17 +478,24 @@ function getExperimentHypothesisScores(
       { totalCost: 0, totalLatency: 0 }
     );
 
-    console.log("hypothesisLatency", totalLatency, validRuns.length);
-
     return ok({
       scores: {
-        dateCreated: new Date(hypothesis.createdAt),
-        model: hypothesis.model,
-        cost: validRuns.length > 0 ? totalCost / validRuns.length : 0,
-        latency: validRuns.length > 0 ? totalLatency / validRuns.length : 0,
+        dateCreated: {
+          value: new Date(hypothesis.createdAt),
+          valueType: "date",
+        },
+        model: { value: hypothesis.model, valueType: "string" },
+        cost: {
+          value: validRuns.length > 0 ? totalCost / validRuns.length : 0,
+          valueType: "number",
+        },
+        latency: {
+          value: validRuns.length > 0 ? totalLatency / validRuns.length : 0,
+          valueType: "number",
+        },
         ...getCustomScores(hypothesis.runs.map((run) => run.scores)),
       },
-    });
+    }) as Result<ExperimentScores["hypothesis"], string>;
   } catch (error) {
     console.error("Error calculating hypothesis cost", error);
     return err("Error calculating hypothesis cost");
@@ -521,17 +544,21 @@ function getExperimentDatasetScores(
       }
     );
 
-    console.log("experimentLatency", totalLatency, validRows.length);
-
     return ok({
       scores: {
-        dateCreated: new Date(latest.createdAt),
-        model: latest.model,
-        cost: validRows.length > 0 ? totalCost / validRows.length : 0,
-        latency: validRows.length > 0 ? totalLatency / validRows.length : 0,
+        dateCreated: { value: new Date(latest.createdAt), valueType: "date" },
+        model: { value: latest.model, valueType: "string" },
+        cost: {
+          value: validRows.length > 0 ? totalCost / validRows.length : 0,
+          valueType: "number",
+        },
+        latency: {
+          value: validRows.length > 0 ? totalLatency / validRows.length : 0,
+          valueType: "number",
+        },
         ...getCustomScores(validRows.map((row) => row.scores)),
       },
-    });
+    }) as Result<ExperimentScores["dataset"], string>;
   } catch (error) {
     console.error("Error calculating dataset cost", error);
     return err("Error calculating dataset cost");
@@ -539,25 +566,25 @@ function getExperimentDatasetScores(
 }
 
 function getCustomScores(
-  scores: Record<string, number>[]
-): Record<string, number> {
+  scores: Record<string, Score>[]
+): Record<string, Score> {
   const scoresValues = scores.reduce((acc, record) => {
     for (const key in record) {
-      if (record.hasOwnProperty(key)) {
+      if (record.hasOwnProperty(key) && typeof record[key].value === "number") {
         if (!acc[key]) {
-          acc[key] = { sum: 0, count: 0 };
+          acc[key] = { sum: 0, count: 0, valueType: record[key].valueType };
         }
-        acc[key].sum += record[key];
+        acc[key].sum += record[key].value as number;
         acc[key].count += 1;
       }
     }
     return acc;
-  }, {} as Record<string, { sum: number; count: number }>);
+  }, {} as Record<string, { sum: number; count: number; valueType: string }>);
 
   return Object.fromEntries(
-    Object.entries(scoresValues).map(([key, { sum, count }]) => [
+    Object.entries(scoresValues).map(([key, { sum, count, valueType }]) => [
       key,
-      sum / count,
+      { value: sum / count, valueType },
     ])
   );
 }

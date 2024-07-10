@@ -29,6 +29,7 @@ interface ChatPlaygroundProps {
   temperature: number;
   maxTokens: number;
   tools?: ChatCompletionTool[];
+  providerAPIKey?: string;
   onSubmit?: (history: Message[]) => void;
   submitText?: string;
   customNavBar?: {
@@ -47,6 +48,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     onSubmit,
     submitText = "Submit",
     customNavBar,
+    providerAPIKey,
   } = props;
 
   const { setNotification } = useNotification();
@@ -57,6 +59,11 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
   const handleSubmit = async (history: Message[]) => {
     if (models.length < 1) {
       setNotification("Please select a model", "error");
+      return;
+    }
+
+    if (!providerAPIKey) {
+      setNotification("Please enter your API key to access provider.", "error");
       return;
     }
     setIsLoading(true);
@@ -92,6 +99,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             model: model.name,
             maxTokens,
             tools,
+            openAIApiKey: providerAPIKey,
           });
 
           // Record the end time and calculate latency
@@ -106,7 +114,8 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             historyWithoutId as unknown as ChatCompletionCreateParams[],
             temperature,
             model.name,
-            maxTokens
+            maxTokens,
+            providerAPIKey
           );
 
           // Record the end time and calculate latency
@@ -126,22 +135,42 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
       }
 
       const getContent = (data: any) => {
-        if (data.choices[0].message.tool_calls) {
+        // Check for tool calls and extract them if present
+        if (
+          data.choices &&
+          data.choices.length > 0 &&
+          data.choices[0].message?.tool_calls
+        ) {
           const message = data.choices[0].message;
           const tools = message.tool_calls;
           const functionTools = tools.filter(
             (tool: any) => tool.type === "function"
           );
           return JSON.stringify(functionTools, null, 4);
-        } else if (data.choices && data.choices[0].message?.content) {
+        }
+        // Check for content in choices array
+        else if (
+          data.choices &&
+          data.choices.length > 0 &&
+          data.choices[0].message?.content
+        ) {
           return data.choices[0].message.content;
-        } else if (data.content && data.content[0].text) {
+        }
+        // Check for content in the main content array
+        else if (
+          data.content &&
+          data.content.length > 0 &&
+          data.content[0].text
+        ) {
           return data.content[0].text;
-        } else {
-          return `${model} failed to fetch response. Please try again`;
+        }
+        // Default case if no content is found
+        else {
+          return `${
+            data.model || "Model"
+          } failed to fetch response. Please try again`;
         }
       };
-
       const getRole = (data: any) => {
         if (data.choices && data.choices[0].message?.role) {
           return data.choices[0].message.role;

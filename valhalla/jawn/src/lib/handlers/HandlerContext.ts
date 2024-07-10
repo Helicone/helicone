@@ -32,6 +32,7 @@ export type Log = {
     id: string;
     userId: string;
     promptId?: string;
+    promptVersion?: string;
     properties: Record<string, string>;
     heliconeApiKeyId?: number;
     heliconeProxyKeyId?: string;
@@ -92,6 +93,7 @@ export type HeliconeMeta = {
   webhookEnabled: boolean;
   posthogApiKey?: string;
   posthogHost?: string;
+  lytixKey?: string;
 };
 
 export type Message = {
@@ -102,6 +104,7 @@ export type Message = {
 
 export type PromptRecord = {
   promptId: string;
+  promptVersion: string;
   orgId: string;
   requestId: string;
   model?: string;

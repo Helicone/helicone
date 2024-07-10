@@ -13,15 +13,21 @@ VALUES
     ('83635a30-5ba6-41a8-8cc6-fb7df941b24a', 'Organization for Test', 'f76629c5-a070-4bbc-9918-64beaea48848', true, 'reseller'),
     ('a75d76e3-02e7-4d02-8a2b-c65ed27c69b2', 'Organization for Demo', 'd9064bb5-1501-4ec9-bfee-21ab74d645b8', true, 'reseller');
 
+
+INSERT INTO public.organization_member (member, organization, org_role) VALUES
+('f76629c5-a070-4bbc-9918-64beaea48848', '83635a30-5ba6-41a8-8cc6-fb7df941b24a', 'owner'),
+('d9064bb5-1501-4ec9-bfee-21ab74d645b8', 'a75d76e3-02e7-4d02-8a2b-c65ed27c69b2', 'owner');
+
+
 -- sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa -- Organization for Test
-INSERT INTO public.helicone_api_keys (api_key_hash, api_key_name, user_id, organization_id, soft_delete)
+INSERT INTO public.helicone_api_keys (api_key_hash, api_key_name, user_id, organization_id, soft_delete, key_permissions)
 VALUES
-('014c02f17208d4f521b0bad39a1d0174e015e86f925cbbcc25108ffea74fd7f2', 'Test', 'f76629c5-a070-4bbc-9918-64beaea48848', '83635a30-5ba6-41a8-8cc6-fb7df941b24a', FALSE);
+('014c02f17208d4f521b0bad39a1d0174e015e86f925cbbcc25108ffea74fd7f2', 'Test', 'f76629c5-a070-4bbc-9918-64beaea48848', '83635a30-5ba6-41a8-8cc6-fb7df941b24a', FALSE, 'rw');
 
 -- sk-helicone-zk6xu4a-kluegtq-sbljk7q-drnixzi
-INSERT INTO public.helicone_api_keys (api_key_hash, api_key_name, user_id, organization_id, soft_delete)
+INSERT INTO public.helicone_api_keys (api_key_hash, api_key_name, user_id, organization_id, soft_delete, key_permissions)
 VALUES
-('4a6ced8c61492670cfd56f31e6e4c40e7cf8c6b88b7ab0a70efc5f86c136b9c3', 'Demo', 'd9064bb5-1501-4ec9-bfee-21ab74d645b8', 'a75d76e3-02e7-4d02-8a2b-c65ed27c69b2', FALSE);
+('4a6ced8c61492670cfd56f31e6e4c40e7cf8c6b88b7ab0a70efc5f86c136b9c3', 'Demo', 'd9064bb5-1501-4ec9-bfee-21ab74d645b8', 'a75d76e3-02e7-4d02-8a2b-c65ed27c69b2', FALSE, 'rw');
 
 INSERT INTO public.admins (user_id, user_email) VALUES
 ('f76629c5-a070-4bbc-9918-64beaea48848', 'test@helicone.ai'),

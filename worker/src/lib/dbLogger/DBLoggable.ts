@@ -38,7 +38,7 @@ export interface DBLoggableProps {
   response: {
     responseId: string;
     getResponseBody: () => Promise<{
-      body: string;
+      body: string[];
       endTime: Date;
     }>;
     status: () => Promise<number>;
@@ -117,19 +117,19 @@ interface DBLoggableRequestFromAsyncLogModelProps {
   provider: Provider;
 }
 
-function getResponseBody(json: Record<string, Json>): {
-  body: string;
+function getResponseBodyFromJSON(json: Record<string, Json>): {
+  body: string[];
   endTime: Date;
 } {
   // This will mock the response as if it came from OpenAI
   if (json.streamed_data) {
     const streamedData = json.streamed_data as Json[];
     return {
-      body: streamedData.map((d) => "data: " + JSON.stringify(d)).join("\n"),
+      body: streamedData.map((d) => "data: " + JSON.stringify(d)),
       endTime: new Date(),
     };
   }
-  return { body: JSON.stringify(json), endTime: new Date() };
+  return { body: [JSON.stringify(json)], endTime: new Date() };
 }
 
 type UnPromise<T> = T extends Promise<infer U> ? U : T;
@@ -171,8 +171,9 @@ export async function dbLoggableRequestFromAsyncLogModel(
     },
     response: {
       responseId: crypto.randomUUID(),
-      getResponseBody: async () =>
-        getResponseBody(asyncLogModel.providerResponse.json),
+      getResponseBody: async () => {
+        return getResponseBodyFromJSON(asyncLogModel.providerResponse.json);
+      },
       responseHeaders: providerResponseHeaders,
       status: async () => asyncLogModel.providerResponse.status,
       omitLog: false,
@@ -209,7 +210,7 @@ export class DBLoggable {
   }
 
   async waitForResponse(): Promise<{
-    body: string;
+    body: string[];
     endTime: Date;
   }> {
     return await this.response.getResponseBody();
@@ -363,7 +364,10 @@ export class DBLoggable {
       ? await this.timing.timeToFirstToken()
       : null;
     const status = await this.response.status();
-    const parsedResponse = await this.parseResponse(responseBody, status);
+    const parsedResponse = await this.parseResponse(
+      responseBody.join(""),
+      status
+    );
     const isStream = this.request.isStream;
 
     const usage = this.getUsage(parsedResponse.data);
@@ -373,7 +377,7 @@ export class DBLoggable {
       this.provider === "GOOGLE" &&
       parsedResponse.error === null
     ) {
-      const body = this.tryJsonParse(responseBody);
+      const body = this.tryJsonParse(responseBody.join(""));
       const model = body?.model ?? body?.body?.model ?? undefined;
 
       return {
@@ -454,62 +458,24 @@ export class DBLoggable {
         };
   }
 
-  async readAndLogResponse(
-    queue: RequestResponseStore,
-    model: string | null
-  ): Promise<
+  async readResponse(): Promise<
     Result<
       {
         response: Database["public"]["Tables"]["response"]["Insert"];
-        body: string;
-        responseAssets: Map<string, string>;
       },
       string
     >
   > {
     try {
-      const { response, body } = await withTimeout(
+      const { response } = await withTimeout(
         this.getResponse(),
         1000 * 60 * 30
       ); // 30 minutes
-      let imageModelParsingResponse: ImageModelParsingResponse = {
-        body,
-        assets: new Map<string, string>(),
-      };
-      if (model && isResponseImageModel(model)) {
-        const imageModelParser = getResponseImageModelParser(model);
-        if (imageModelParser) {
-          imageModelParsingResponse =
-            imageModelParser.processResponseBody(body);
-        }
-      }
-      response.body = imageModelParsingResponse.body;
-      const { error } = await queue.updateResponse(
-        this.response.responseId,
-        this.request.requestId,
-        response
-      );
-      if (error !== null) {
-        console.error("Error updating response", error);
-        // return err(error);
-      }
+
       return ok({
         response,
-        body: imageModelParsingResponse.body,
-        responseAssets: imageModelParsingResponse.assets,
       });
     } catch (e) {
-      const { error } = await queue.updateResponse(
-        this.response.responseId,
-        this.request.requestId,
-        {
-          status: -1,
-          body: "",
-        }
-      );
-      if (error !== null) {
-        return err(error);
-      }
       return err("error getting response, " + e);
     }
   }
@@ -633,7 +599,14 @@ export class DBLoggable {
     },
     S3_ENABLED: Env["S3_ENABLED"],
     requestHeaders?: HeliconeHeaders
-  ): Promise<Result<undefined, string>> {
+  ): Promise<
+    Result<
+      {
+        cost: number;
+      } | null,
+      string
+    >
+  > {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
       return err(`Auth failed! ${error}` ?? "Helicone organization not found");
@@ -669,7 +642,9 @@ export class DBLoggable {
             ),
           },
         ]);
-        return ok(undefined);
+        return ok({
+          cost: 0,
+        });
       }
     } catch (e) {
       console.error(`Error checking rate limit: ${e}`);
@@ -677,7 +652,28 @@ export class DBLoggable {
 
     await this.useKafka(db, authParams, S3_ENABLED, requestHeaders);
 
-    return ok(undefined);
+    const readResponse = await this.readResponse();
+
+    const model =
+      this.request.modelOverride ??
+      readResponse.data?.response.model ??
+      "not-found";
+
+    const cost =
+      this.modelCost({
+        model: model,
+        sum_completion_tokens:
+          readResponse.data?.response?.completion_tokens ?? 0,
+        sum_prompt_tokens: readResponse.data?.response?.prompt_tokens ?? 0,
+        sum_tokens:
+          (readResponse.data?.response.completion_tokens ?? 0) +
+          (readResponse.data?.response.prompt_tokens ?? 0),
+        provider: this.request.provider ?? "",
+      }) ?? 0;
+
+    return ok({
+      cost: cost,
+    });
   }
 
   async useKafka(
@@ -692,7 +688,7 @@ export class DBLoggable {
     authParams: AuthParams,
     S3_ENABLED: Env["S3_ENABLED"],
     requestHeaders?: HeliconeHeaders
-  ) {
+  ): Promise<Result<null, string>> {
     if (
       !authParams?.organizationId ||
       // Must be helicone api key or proxy key
@@ -717,7 +713,7 @@ export class DBLoggable {
         organizationId: authParams.organizationId,
         requestId: this.request.requestId,
         requestBody: this.request.bodyText ?? "{}",
-        responseBody: rawResponseBody,
+        responseBody: rawResponseBody.join(""),
       });
 
       if (s3Result.error) {
@@ -737,6 +733,7 @@ export class DBLoggable {
         omitResponseLog: requestHeaders.omitHeaders.omitResponse,
         webhookEnabled: requestHeaders.webhookEnabled,
         posthogApiKey: requestHeaders.posthogKey ?? undefined,
+        lytixKey: requestHeaders.lytixKey ?? undefined,
         posthogHost: requestHeaders.posthogHost ?? undefined,
       },
       log: {
@@ -747,6 +744,7 @@ export class DBLoggable {
             this.request.promptSettings.promptMode === "production"
               ? this.request.promptSettings.promptId
               : "",
+          promptVersion: this.request.promptSettings.promptVersion,
           properties: this.request.properties,
           heliconeApiKeyId: authParams.heliconeApiKeyId, // If undefined, proxy key id must be present
           heliconeProxyKeyId: this.request.heliconeProxyKeyId ?? undefined,

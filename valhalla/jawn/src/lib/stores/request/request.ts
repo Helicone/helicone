@@ -9,7 +9,11 @@ import {
   buildRequestSort,
 } from "../../shared/sorts/requests/sorts";
 import { Result, resultMap, ok, err } from "../../shared/result";
-import { dbExecute, dbQueryClickhouse } from "../../shared/db/dbExecute";
+import {
+  dbExecute,
+  dbQueryClickhouse,
+  printRunnableQuery,
+} from "../../shared/db/dbExecute";
 import { LlmSchema } from "../../shared/requestResponseModel";
 import { Json } from "../../db/database.types";
 import { mapGeminiPro } from "./mappers";
@@ -99,6 +103,10 @@ function addJoinQueries(joinQuery: string, filter: FilterNode): string {
     left join score_value ON request.id = score_value.request_id`;
   }
 
+  if (JSON.stringify(filter).includes("request_response_search")) {
+    joinQuery += `
+    left join request_response_search on request.id = request_response_search.request_id`;
+  }
   return joinQuery;
 }
 
@@ -131,19 +139,11 @@ export async function getRequests(
   const query = `
   SELECT response.id AS response_id,
     response.created_at as response_created_at,
-    CASE
-      WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} THEN '{"helicone_message": "request body too large"}'::jsonb
-      WHEN request.path LIKE '%embeddings%' THEN '{"helicone_message": "embeddings response omitted"}'::jsonb
-      ELSE response.body::jsonb
-    END AS response_body,
+    '{"helicone_message": "Response body no longer supported. To retrieve response body, please contact engineering@helicone.ai"}'::jsonb AS response_body,
     response.status AS response_status,
     request.id AS request_id,
     request.created_at as request_created_at,
-    CASE
-      WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE}
-      THEN '{"helicone_message": "request body too large"}'::jsonb
-      ELSE request.body::jsonb
-    END AS request_body,
+    '{"helicone_message": "Request body no longer supported. To retrieve request body, please contact engineering@helicone.ai"}'::jsonb AS request_body,
     request.country_code as country_code,
     request.path AS request_path,
     request.user_id AS request_user_id,
@@ -169,7 +169,13 @@ export async function getRequests(
     WHERE asset.request_id = request.id
     ) AS asset_ids,
     (
-      SELECT jsonb_object_agg(sa.score_key, sv.int_value)
+      SELECT jsonb_object_agg(
+        sa.score_key, 
+        jsonb_build_object(
+          'value', sv.int_value,
+          'valueType', sa.value_type
+        )
+      )
       FROM score_value sv
       JOIN score_attribute sa ON sv.score_attribute = sa.id
       WHERE sv.request_id = request.id
@@ -191,7 +197,7 @@ export async function getRequests(
   const s3Client = new S3Client(
     process.env.S3_ACCESS_KEY ?? "",
     process.env.S3_SECRET_KEY ?? "",
-    process.env.S3_ENDPOINT ?? "",
+    process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
     process.env.S3_BUCKET_NAME ?? "",
     (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
   );
@@ -222,6 +228,7 @@ export async function getRequestsCached(
     return err("invalid limit");
   }
 
+  const joinQuery = addJoinQueries("", filter);
   const builtFilter = await buildFilterWithAuthCacheHits({
     org_id: orgId,
     filter,
@@ -231,20 +238,12 @@ export async function getRequestsCached(
   const query = `
   SELECT response.id AS response_id,
     cache_hits.created_at as response_created_at,
-    CASE
-      WHEN LENGTH(response.body::text) > ${MAX_TOTAL_BODY_SIZE} THEN '{"helicone_message": "request body too large"}'::jsonb
-      WHEN request.path LIKE '%embeddings%' THEN '{"helicone_message": "embeddings response omitted"}'::jsonb
-      ELSE response.body::jsonb
-    END AS response_body,
-    request.country_code as country_code,
+    '{"helicone_message": "Response body no longer supported. To retrieve response body, please contact engineering@helicone.ai"}'::jsonb AS response_body,
     response.status AS response_status,
     request.id AS request_id,
-    cache_hits.created_at as request_created_at,
-    CASE
-      WHEN LENGTH(request.body::text) > ${MAX_TOTAL_BODY_SIZE}
-      THEN '{"helicone_message": "request body too large"}'::jsonb
-      ELSE request.body::jsonb
-    END AS request_body,
+    request.created_at as request_created_at,
+    '{"helicone_message": "Request body no longer supported. To retrieve request body, please contact engineering@helicone.ai"}'::jsonb AS request_body,
+    request.country_code as country_code,
     request.path AS request_path,
     request.user_id AS request_user_id,
     request.properties AS request_properties,
@@ -267,11 +266,18 @@ export async function getRequestsCached(
     SELECT ARRAY_AGG(asset.id)
     FROM asset
     WHERE asset.request_id = request.id
-    ) AS asset_ids
+    ) AS asset_ids,
+    (
+      SELECT jsonb_object_agg(sa.score_key, sv.int_value)
+      FROM score_value sv
+      JOIN score_attribute sa ON sv.score_attribute = sa.id
+      WHERE sv.request_id = request.id
+    ) AS scores
   FROM cache_hits
     inner join request on cache_hits.request_id = request.id
     inner join response on request.id = response.request
     left join feedback on response.id = feedback.response_id
+    ${joinQuery}
   WHERE (
     (${builtFilter.filter})
   )
@@ -281,10 +287,11 @@ export async function getRequestsCached(
 `;
 
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
+
   const s3Client = new S3Client(
     process.env.S3_ACCESS_KEY ?? "",
     process.env.S3_SECRET_KEY ?? "",
-    process.env.S3_ENDPOINT ?? "",
+    process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
     process.env.S3_BUCKET_NAME ?? "",
     (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
   );

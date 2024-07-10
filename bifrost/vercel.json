@@ -3,6 +3,18 @@
     {
       "source": "/api/:path*",
       "destination": "https://us.helicone.ai/api/:path*"
+    },
+    {
+      "source": "/ingest/:path*",
+      "destination": "https://app.posthog.com/:path*"
+    },
+    {
+      "source": "/data-is-beautiful",
+      "destination": "https://us.helicone.ai/closed-ai"
+    },
+    {
+      "source": "/closed-ai",
+      "destination": "https://us.helicone.ai/closed-ai"
     }
   ]
 }

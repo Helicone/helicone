@@ -9,9 +9,6 @@ import { OpenAPIRouterType } from "@cloudflare/itty-router-openapi";
 import { Route } from "itty-router";
 import { logAsync } from "../../lib/managers/AsyncLogManager";
 import { createAPIClient } from "../../api/lib/apiClient";
-import { CustomerGet } from "../../api/routes/customer-portal/customer/get";
-import { ProviderKeyGet } from "../../api/routes/customer-portal/customer/provderKey/get";
-import { CustomerUsageGet } from "../../api/routes/customer-portal/customer/usage/get";
 import { PromptsGet } from "../../api/routes/prompts/get";
 
 function getOpenAPIRouter(
@@ -21,11 +18,6 @@ function getOpenAPIRouter(
   >
 ) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  router.get("/v1/customer/:customerId/usage", CustomerUsageGet as any);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  router.get("/v1/customer/:customerId/provider-key", ProviderKeyGet as any);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  router.get("/v1/customers", CustomerGet as any);
   router.get(
     "/v1/prompts",
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -11,7 +11,7 @@ export class HeliconeProxyOpenAI extends OpenAI {
   public helicone: Helicone;
   private heliconeHeaders: { [key: string]: string };
 
-  constructor(private options: IHeliconeProxyClientOptions) {
+  constructor(options: IHeliconeProxyClientOptions) {
     const {
       apiKey,
       organization,
@@ -22,7 +22,7 @@ export class HeliconeProxyOpenAI extends OpenAI {
     const heliconeMeta: IHeliconeMeta = {
       ...providedHeliconeMeta,
       apiKey: providedHeliconeMeta.apiKey || Core.readEnv("HELICONE_API_KEY"),
-      baseUrl: providedHeliconeMeta.baseUrl || "https://oai.hconeai.com/v1",
+      baseUrl: providedHeliconeMeta.baseUrl || "https://oai.helicone.ai/v1",
     };
 
     super({

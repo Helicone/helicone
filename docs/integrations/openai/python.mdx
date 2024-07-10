@@ -1,13 +1,15 @@
 ---
-title: "Python"
-description: "Learn how to integrate OpenAI with Helicone using Python"
+title: "OpenAI Python SDK Integration"
+sidebarTitle: "Python"
+description: "Use OpenAI's Python SDK to integrate with Helicone to log your OpenAI usage."
+"twitter:title": "OpenAI Python SDK Integration - Helicone OSS LLM Observability"
 ---
 
 ## Proxy Integration (recommended)
 
 <Steps>
   <Step title="Create an account + Generate an API Key">
-    Log into www.helicone.ai or create an account. Once you have an account, you
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
     can generate an [API key](https://helicone.ai/developer).
   </Step>
   <Step title="Set HELICONE_API_KEY as an environment variable">
@@ -22,7 +24,7 @@ export HELICONE_API_KEY=<your API key>
 ```Python OpenAI v1+
 client = OpenAI(
   api_key="your-api-key-here",  # Replace with your OpenAI API key
-  base_url="https://oai.hconeai.com/v1",  # Set the API endpoint
+  base_url="https://oai.helicone.ai/v1",  # Set the API endpoint
   default_headers= {  # Optionally set default headers or set per request (see below)
     "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
   }
@@ -32,7 +34,7 @@ client = OpenAI(
 ```Python OpenAI v1
 import openai
 
-openai.api_base = "https://oai.hconeai.com/v1"
+openai.api_base = "https://oai.helicone.ai/v1"
 openai.Completion.create(
   # ...other parameters
   headers={
@@ -50,18 +52,18 @@ openai.Completion.create(
 
 <Steps>
   <Step title="Create an account + Generate an API Key">
-    Log into www.helicone.ai or create an account. Once you have an account, you
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
     can generate an [API key](https://helicone.ai/developer).
   </Step>
   <Step title="Set HELICONE_API_KEY as an environment variable">
-    
+
 ```Python
 export HELICONE_API_KEY=<your API key>
 ```
 
   </Step>
   <Step title="Install the Helicone package">
-    
+
 ```Python
 pip install helicone
 ```
@@ -81,7 +83,7 @@ import OpenAI from "openai";
 
 const openai = new OpenAI({
     apiKey: request.env.OPENAI_API_KEY,
-    baseURL: "https://oai.hconeai.com/v1",
+    baseURL: "https://oai.helicone.ai/v1",
     defaultHeaders: {
         "Helicone-Auth": `Bearer ${request.env.HELICONE_API_KEY}`,
     },

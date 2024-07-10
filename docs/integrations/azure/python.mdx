@@ -1,6 +1,8 @@
 ---
-title: "Python"
-description: "Learn how to integrate Azure-OpenAI with Helicone using Python"
+title: "Azure OpenAI Python Integration"
+sidebarTitle: "Python"
+description: "Use Python to integrate Azure OpenAI with Helicone to log your Azure OpenAI usage."
+"twitter:title": "Azure OpenAI Python Integration - Helicone OSS LLM Observability"
 ---
 
 <Info>
@@ -18,7 +20,7 @@ When using Azure, the model displays differently than expected at times. We have
 
 <Steps>
   <Step title="Create an account + Generate an API Key">
-    Log into www.helicone.ai or create an account. Once you have an account, you
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
     can generate an [API key](https://helicone.ai/developer).
   </Step>
   <Step title="Set HELICONE_API_KEY as an environment variable">
@@ -34,7 +36,7 @@ export HELICONE_API_KEY=<your API key>
 ```Python OpenAI v1+
 client = OpenAI(
   api_key="[AZURE_OPENAI_API_KEY]",
-  base_url="https://oai.hconeai.com/openai/deployments/[DEPLOYMENT]",
+  base_url="https://oai.helicone.ai/openai/deployments/[DEPLOYMENT]",
   default_headers={
       "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
       "Helicone-Auth": "Bearer [HELICONE_API_KEY]",
@@ -49,7 +51,7 @@ client = OpenAI(
 ```Python OpenAI v1
 import openai
 
-openai.api_base = "https://oai.hconeai.com"
+openai.api_base = "https://oai.helicone.ai"
 openai.api_key = "[AZURE_OPENAI_API_KEY]"
 openai.api_version = "[API_VERSION]"
 openai.api_type = "azure"
@@ -73,18 +75,18 @@ openai.ChatCompletion.create(
 
 <Steps>
   <Step title="Create an account + Generate an API Key">
-    Log into www.helicone.ai or create an account. Once you have an account, you
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
     can generate an [API key](https://helicone.ai/developer).
   </Step>
   <Step title="Set HELICONE_API_KEY as an environment variable">
-    
+
 ```Python
 export HELICONE_API_KEY=<your API key>
 ```
 
   </Step>
   <Step title="Install the Helicone package">
-    
+
 ```Python
 pip install helicone
 ```

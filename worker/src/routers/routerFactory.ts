@@ -44,14 +44,30 @@ const WORKER_MAP: Omit<
         env: Env,
         _ctx: ExecutionContext
       ) => {
-        console.log("CUSTOMER_GATEWAY", requestWrapper?.heliconeProxyKeyId);
+        let urlsObj: {
+          [key: string]: string;
+        } = {};
+        try {
+          urlsObj = JSON.parse(env.CUSTOMER_GATEWAY_URL ?? "{}");
+        } catch {
+          console.error("Error in parsing urlsObj");
+        }
+
+        const baseHost = requestWrapper.url.host;
+
         if (!env.CUSTOMER_GATEWAY_URL) {
           return error(500, "CUSTOMER_GATEWAY_URL not set.");
         }
         if (!requestWrapper?.heliconeHeaders?.heliconeAuthV2?.token) {
           return error(500, "Invalid User");
         }
-        requestWrapper.setBaseURLOverride(env.CUSTOMER_GATEWAY_URL);
+        const gatewayTarget = urlsObj?.[baseHost];
+
+        if (!gatewayTarget) {
+          return error(500, "Invalid Host");
+        }
+
+        requestWrapper.setBaseURLOverride(gatewayTarget);
       }
     );
     return getOpenAIProxyRouter(router);

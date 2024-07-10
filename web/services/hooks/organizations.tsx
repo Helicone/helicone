@@ -1,21 +1,30 @@
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
-import { Members } from "../../pages/api/organization/[id]/members";
-import { Owner } from "../../pages/api/organization/[id]/owner";
 import { Database } from "../../supabase/database.types";
 import { useCallback, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { OrgContextValue } from "../../components/layout/organizationContext";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
+import { getJawnClient } from "../../lib/clients/jawn";
 
 const useGetOrgMembers = (orgId: string) => {
+  const jawn = getJawnClient(orgId);
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["OrganizationsMembers", orgId],
     queryFn: async (query) => {
       const organizationId = query.queryKey[1];
-      return fetch(`/api/organization/${organizationId}/members`).then(
-        (res) => res.json() as Promise<Members>
+      const { data: orgMembers, error } = await jawn.GET(
+        `/v1/organization/{organizationId}/members`,
+        {
+          params: {
+            path: {
+              organizationId,
+            },
+          },
+        }
       );
+
+      return orgMembers;
     },
     refetchOnWindowFocus: false,
   });
@@ -27,13 +36,23 @@ const useGetOrgMembers = (orgId: string) => {
 };
 
 const useGetOrgOwner = (orgId: string) => {
+  const jawn = getJawnClient(orgId);
   const { data, isLoading } = useQuery({
     queryKey: ["OrganizationsMembersOwner", orgId],
     queryFn: async (query) => {
       const organizationId = query.queryKey[1];
-      return fetch(`/api/organization/${organizationId}/owner`).then(
-        (res) => res.json() as Promise<Owner>
+      const { data: owner, error } = await jawn.GET(
+        "/v1/organization/{organizationId}/owner",
+        {
+          params: {
+            path: {
+              organizationId: organizationId,
+            },
+          },
+        }
       );
+
+      return owner;
     },
     refetchOnWindowFocus: false,
   });

@@ -3,11 +3,13 @@ import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
 import { hashAuth } from "../../utils/hash";
 import { supabaseServer } from "../../lib/routers/withAuth";
 import { JawnAuthenticatedRequest } from "../../types/request";
+import { KeyPermissions } from "../../models/models";
 
 export interface GenerateHashQueryParams {
   apiKey: string;
   userId: string;
   keyName: string;
+  permissions: KeyPermissions;
 }
 
 @Route("v1/key")
@@ -37,6 +39,7 @@ export class GenerateHashController extends Controller {
           user_id: userId,
           api_key_name: keyName,
           organization_id: request.authParams.organizationId,
+          key_permissions: requestBody.permissions,
         });
 
       if (insertRes.error) {

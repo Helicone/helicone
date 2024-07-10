@@ -203,7 +203,7 @@ export default function Example() {
           <span className="block sm:hidden">
             <Image
               src={"/static/pricing/bouncing-cube.webp"}
-              alt={""}
+              alt={"bouncing-cube"}
               width={100}
               height={50}
             />
@@ -211,7 +211,7 @@ export default function Example() {
           <span className="hidden sm:block">
             <Image
               src={"/static/pricing/bouncing-cube.webp"}
-              alt={""}
+              alt={"bouncing-cube"}
               width={200}
               height={100}
             />

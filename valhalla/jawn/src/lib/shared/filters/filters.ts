@@ -150,7 +150,7 @@ const whereKeyMappings: KeyMappings = {
       "(coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text",
     body_model:
       "(coalesce(request.model_override, response.model, request.model, response.body ->> 'model', request.body ->> 'model'))::text",
-    body_tokens: "((response.body -> 'usage') ->> 'total_tokens')::bigint",
+    body_tokens: "(response.completion_tokens + response.prompt_tokens)",
     status: "response.status",
     model: "response.model",
   }),
@@ -222,6 +222,22 @@ const whereKeyMappings: KeyMappings = {
       threat: "request_response_versioned.threat",
     })(filter, placeValueSafely);
   },
+  request_response_search: (filter, placeValueSafely) => {
+    const keys = Object.keys(filter);
+    if (keys.length !== 1) {
+      throw new Error("Invalid filter, only one key is allowed");
+    }
+    const key = keys[0];
+    const { operator, value } = extractOperatorAndValueFromAnOperator(
+      filter[key as keyof typeof filter]!
+    );
+
+    return {
+      column: `request_response_search.${key}`,
+      operator: "vector-contains",
+      value: placeValueSafely(value),
+    };
+  },
   users_view: easyKeyMappings<"request_response_log">({
     status: "r.status",
     user_id: "r.user_id",
@@ -259,6 +275,12 @@ const havingKeyMappings: KeyMappings = {
   user_metrics: easyKeyMappings<"user_metrics">({
     last_active: "max(request.created_at)",
     total_requests: "count(request.id)",
+    active_for: "active_for",
+    average_requests_per_day_active: "average_requests_per_day_active",
+    average_tokens_per_request: "average_tokens_per_request",
+    total_completion_tokens: "total_completion_tokens",
+    total_prompt_tokens: "total_prompt_tokens",
+    cost: "cost",
   }),
   users_view: easyKeyMappings<"users_view">({
     active_for: "active_for",
@@ -271,6 +293,7 @@ const havingKeyMappings: KeyMappings = {
     total_prompt_token: "total_prompt_token",
     cost: "cost",
   }),
+  request_response_search: NOT_IMPLEMENTED,
   score_value: NOT_IMPLEMENTED,
   experiment_hypothesis_run: NOT_IMPLEMENTED,
   user_api_keys: NOT_IMPLEMENTED,
@@ -319,6 +342,8 @@ function operatorToSql(operator: AllOperators): string {
       return "NOT ILIKE";
     case "gin-contains":
       return "@>";
+    case "vector-contains":
+      return "@@";
   }
 }
 
@@ -361,6 +386,10 @@ export function buildFilterLeaf(
     } else {
       if (operatorKey === "contains" || operatorKey === "not-contains") {
         filters.push(`${column} ${sqlOperator} %${value}%`);
+      } else if (operatorKey === "vector-contains") {
+        filters.push(
+          `${column} ${sqlOperator} plainto_tsquery('helicone_search_config', ${value}::text)`
+        );
       } else {
         filters.push(`${column} ${sqlOperator} ${value}`);
       }

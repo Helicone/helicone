@@ -107,10 +107,12 @@ export class LogStore {
           );
 
           try {
-            const insertRequest =
-              pgp.helpers.insert(filteredRequests, requestColumns) +
-              onConflictRequest;
-            await t.none(insertRequest);
+            if (filteredRequests && filteredRequests.length > 0) {
+              const insertRequest =
+                pgp.helpers.insert(filteredRequests, requestColumns) +
+                onConflictRequest;
+              await t.none(insertRequest);
+            }
           } catch (error) {
             console.error("Error inserting request", error);
             throw error;
@@ -124,10 +126,12 @@ export class LogStore {
           );
 
           try {
-            const insertResponse =
-              pgp.helpers.insert(filteredResponses, responseColumns) +
-              onConflictResponse;
-            await t.none(insertResponse);
+            if (filteredResponses && filteredResponses.length > 0) {
+              const insertResponse =
+                pgp.helpers.insert(filteredResponses, responseColumns) +
+                onConflictResponse;
+              await t.none(insertResponse);
+            }
           } catch (error) {
             console.error("Error inserting response", error);
             throw error;
@@ -159,7 +163,9 @@ export class LogStore {
         }
 
         try {
-          const searchRecords = payload.searchRecords.map((record) => ({
+          const searchRecords = this.filterDuplicateSearchRecords(
+            payload.searchRecords
+          ).map((record) => ({
             request_id: record.request_id,
             request_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
               record.request_body_vector
@@ -170,13 +176,16 @@ export class LogStore {
             organization_id: record.organization_id,
           }));
 
-          const insertSearchQuery =
-            pgp.helpers.insert(searchRecords, requestResponseSearchColumns) +
-            onConflictRequestResponseSearch;
+          if (searchRecords && searchRecords.length > 0) {
+            const insertSearchQuery =
+              pgp.helpers.insert(searchRecords, requestResponseSearchColumns) +
+              onConflictRequestResponseSearch;
 
-          await t.none(insertSearchQuery);
+            await t.none(insertSearchQuery);
+          }
         } catch (error: any) {
           console.error("Error inserting search records", error);
+          throw error;
         }
       });
 
@@ -218,52 +227,144 @@ export class LogStore {
       }
     }
 
+    function extractVersion(
+      versionString: string
+    ): { majorVersion: number; minorVersion: number } | undefined {
+      try {
+        const versionPattern = /^(\d+)\.(\d+)$/;
+        const match = versionString.match(versionPattern);
+
+        if (match) {
+          const majorVersion = parseInt(match[1], 10);
+          const minorVersion = parseInt(match[2], 10);
+          return {
+            majorVersion: majorVersion,
+            minorVersion: minorVersion,
+          };
+        } else {
+          return undefined;
+        }
+      } catch (error) {
+        console.error("Error extracting version", error);
+        return undefined;
+      }
+    }
+
     // Check the latest version and decide whether to update
     const existingPromptVersion = await t.oneOrNone<{
       id: string;
       major_version: number;
+      minor_version: number;
       helicone_template: any;
       created_at: Date;
     }>(
-      `SELECT id, major_version, helicone_template, created_at FROM prompts_versions
-       WHERE organization = $1 AND prompt_v2 = $2 ORDER BY major_version DESC LIMIT 1`,
+      `SELECT id, major_version, minor_version, helicone_template, created_at FROM prompts_versions
+     WHERE organization = $1 AND prompt_v2 = $2 ORDER BY major_version DESC, minor_version DESC LIMIT 1`,
       [orgId, existingPrompt.id]
     );
 
     let versionId = existingPromptVersion?.id ?? "";
 
+    // Extract passed prompt version
+    const passedPromptVersion = extractVersion(newPromptRecord.promptVersion);
+
     // Check if an update is necessary based on template comparison
     if (
       !existingPromptVersion ||
       (existingPromptVersion &&
-        existingPromptVersion.created_at <= newPromptRecord.createdAt &&
-        !deepCompare(
-          existingPromptVersion.helicone_template,
-          heliconeTemplate.template
-        ))
+        existingPromptVersion.created_at <= newPromptRecord.createdAt)
     ) {
       // Create a new version if the template has changed
-      let majorVersion = existingPromptVersion
-        ? existingPromptVersion.major_version + 1
-        : 0;
-      try {
-        const newVersionResult = await t.one(
-          `INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-          [
+      if (passedPromptVersion && heliconeTemplate.template) {
+        if (
+          existingPromptVersion &&
+          passedPromptVersion.majorVersion ===
+            existingPromptVersion.major_version &&
+          passedPromptVersion.minorVersion ===
+            existingPromptVersion.minor_version
+        ) {
+          // Update existing record with same major and minor version
+          try {
+            const newHeliconeTemplate =
+              JSON.stringify(heliconeTemplate.template).length >
+              JSON.stringify(existingPromptVersion.helicone_template).length
+                ? heliconeTemplate.template
+                : existingPromptVersion.helicone_template;
+            const updateQuery = `
+          UPDATE prompts_versions
+          SET helicone_template = $1
+          WHERE prompt_v2 = $2 AND organization = $3 AND major_version = $4 AND minor_version = $5`;
+
+            await t.result(updateQuery, [
+              newHeliconeTemplate,
+              existingPrompt.id,
+              orgId,
+              passedPromptVersion.majorVersion,
+              passedPromptVersion.minorVersion,
+            ]);
+          } catch (error) {
+            console.error("Error updating prompt version", error);
+            throw error;
+          }
+        } else {
+          // Insert new record with the passed version
+          try {
+            const insertQuery = `
+          INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)
+          RETURNING id`;
+
+            const insertResult = await t.one(insertQuery, [
+              existingPrompt.id,
+              orgId,
+              passedPromptVersion.majorVersion,
+              passedPromptVersion.minorVersion,
+              heliconeTemplate.template,
+              model,
+              newPromptRecord.createdAt,
+            ]);
+
+            versionId = insertResult.id;
+          } catch (error) {
+            console.error("Error inserting prompt version", error);
+            throw error;
+          }
+        }
+      } else if (
+        !existingPromptVersion ||
+        (existingPromptVersion &&
+          existingPromptVersion.created_at <= newPromptRecord.createdAt &&
+          !deepCompare(
+            existingPromptVersion.helicone_template,
+            heliconeTemplate.template
+          ))
+      ) {
+        // Insert new record with incremented version
+        const newMajorVersion = existingPromptVersion
+          ? existingPromptVersion.major_version + 1
+          : 0;
+
+        try {
+          const insertQuery = `
+        INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING id`;
+
+          const insertResult = await t.one(insertQuery, [
             existingPrompt.id,
             orgId,
-            majorVersion,
+            newMajorVersion,
             0,
             heliconeTemplate.template,
             model,
             newPromptRecord.createdAt,
-          ]
-        );
-        versionId = newVersionResult.id;
-      } catch (error) {
-        console.error("Error inserting prompt version", error);
-        throw error;
+          ]);
+
+          versionId = insertResult.id;
+        } catch (error) {
+          console.error("Error inserting prompt version", error);
+          throw error;
+        }
       }
     }
 
@@ -272,8 +373,8 @@ export class LogStore {
       try {
         await t.none(
           `INSERT INTO prompt_input_keys (key, prompt_version, created_at)
-         SELECT unnest($1::text[]), $2, $3
-         ON CONFLICT (key, prompt_version) DO NOTHING`,
+       SELECT unnest($1::text[]), $2, $3
+       ON CONFLICT (key, prompt_version) DO NOTHING`,
           [
             `{${Object.keys(heliconeTemplate.inputs).join(",")}}`,
             versionId,
@@ -289,7 +390,7 @@ export class LogStore {
         // Record the inputs and source request
         await t.none(
           `INSERT INTO prompt_input_record (inputs, source_request, prompt_version, created_at)
-         VALUES ($1, $2, $3, $4)`,
+       VALUES ($1, $2, $3, $4)`,
           [
             JSON.stringify(heliconeTemplate.inputs),
             requestId,
@@ -364,6 +465,42 @@ export class LogStore {
         new Date(entry.created_at) < new Date(existingEntry.created_at)
       ) {
         entryMap.set(entry.request, entry);
+      }
+    });
+
+    return Array.from(entryMap.values());
+  }
+
+  filterDuplicateSearchRecords(
+    entries: Database["public"]["Tables"]["request_response_search"]["Insert"][]
+  ) {
+    const entryMap = new Map<
+      string,
+      Database["public"]["Tables"]["request_response_search"]["Insert"]
+    >();
+
+    entries.forEach((entry) => {
+      if (!entry.request_id) {
+        return;
+      }
+
+      const existingEntry = entryMap.get(entry.request_id);
+
+      // No existing entry, add it
+      if (!existingEntry || !existingEntry.created_at) {
+        entryMap.set(entry.request_id, entry);
+        return;
+      }
+
+      const newEntryIsMoreRecent =
+        entry.created_at &&
+        new Date(entry.created_at) < new Date(existingEntry.created_at);
+      const newEntryHasVectors =
+        (entry.request_body_vector && !existingEntry.request_body_vector) ||
+        (entry.response_body_vector && !existingEntry.response_body_vector);
+
+      if (newEntryIsMoreRecent || newEntryHasVectors) {
+        entryMap.set(entry.request_id, entry);
       }
     });
 

@@ -1,20 +1,22 @@
 ---
-title: "Curl"
-description: "Learn how to integrate Groq with Helicone using Curl."
+title: "Groq cURL Integration"
+sidebarTitle: "cURL"
+description: "Use cURL to integrate Groq with Helicone to log your Groq usage."
+"twitter:title": "Groq cURL Integration - Helicone OSS LLM Observability"
 ---
 
 <Note>
 
 Depending on the model you are using, you may need to adjust the base URL.
-For most cases with Groq, the base URL will be `https://groq.hconeai.com/openai/v1`.
+For most cases with Groq, the base URL will be `https://groq.helicone.ai/openai/v1`.
 
-However, in some cases, you may need to use `https://groq.hconeai.com/v1`.
+However, in some cases, you may need to use `https://groq.helicone.ai/v1`.
 
 </Note>
 
 <Steps>
   <Step title="Create an account + Generate an API Key">
-    Log into www.helicone.ai or create an account. Once you have an account, you
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
     can generate an [API key](https://helicone.ai/developer).
   </Step>
   <Step title="Set HELICONE_API_KEY as an environment variable">
@@ -25,8 +27,8 @@ HELICONE_API_KEY=<your API key>
   <Step title="Modify the base path and add a Helicone-Auth header">
 <CodeGroup>
 
-```Curl CLI example
-curl -X POST "https://groq.staging.hconeai.com/openai/v1/chat/completions" \
+```cURL CLI example
+curl -X POST "https://groq.staging.helicone.ai/openai/v1/chat/completions" \
      -H "Authorization: Bearer $GROQ_API_KEY" \
      -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
      -H "Content-Type: application/json" \

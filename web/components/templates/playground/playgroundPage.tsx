@@ -22,6 +22,7 @@ import FunctionButton from "./functionButton";
 import HcButton from "../../ui/hcButton";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { ChatCompletionTool } from "openai/resources";
+import { Tooltip } from "@mui/material";
 interface PlaygroundPageProps {
   request?: string;
 }
@@ -31,9 +32,34 @@ export type PlaygroundModel = {
   provider: ProviderName;
 };
 
-export const PLAYGROUND_MODELS: PlaygroundModel[] = playgroundModels
-  .filter((model) => model.provider !== "AZURE")
-  .sort((a, b) => a.name.localeCompare(b.name));
+export type TFinetunedJob = {
+  object: string;
+  id: string;
+  model: string;
+  created_at: number;
+  finished_at: number;
+  fine_tuned_model: string;
+  organization_id: string;
+  result_files: Array<string>;
+  status:
+    | "validating_files"
+    | "queued"
+    | "running"
+    | "succeeded"
+    | "failed"
+    | "cancelled";
+  validation_file: any;
+  training_file: string;
+  hyperparameters: {
+    n_epochs: number;
+    batch_size: number;
+    learning_rate_multiplier: number;
+  };
+  trained_tokens: number | null;
+  integrations: Array<any>;
+  seed: number;
+  estimated_finish: number;
+};
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { request } = props;
@@ -49,14 +75,13 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   );
 
   const [currentTools, setCurrentTools] = useState<ChatCompletionTool[]>();
+  const [providerAPIKey, setProviderAPIKey] = useState<string>();
 
-  useEffect(() => {
-    if (tools !== undefined) {
-      setCurrentTools(tools);
-    } else {
-      setCurrentTools([]);
-    }
-  }, [tools, requestId]);
+  const [PLAYGROUND_MODELS, setPLAYGROUND_MODELS] = useState<PlaygroundModel[]>(
+    playgroundModels
+      .filter((model) => model.provider !== "AZURE")
+      .sort((a, b) => a.name.localeCompare(b.name))
+  );
 
   const singleRequest = data.length > 0 ? data[0] : null;
   const singleModel = PLAYGROUND_MODELS.find(
@@ -65,6 +90,13 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
   const reqBody =
     singleRequest !== null ? (singleRequest.requestBody as any) : null;
+
+  const [temperature, setTemperature] = useState<number>(
+    reqBody !== null ? reqBody.temperature : 0.7
+  );
+  const [maxTokens, setMaxTokens] = useState<number>(
+    reqBody !== null ? reqBody.max_tokens : 256
+  );
 
   const [selectedModels, setSelectedModels] = useState<PlaygroundModel[]>(
     singleModel
@@ -75,14 +107,47 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         ]
       : []
   );
-  const [temperature, setTemperature] = useState<number>(
-    reqBody !== null ? reqBody.temperature : 0.7
-  );
-  const [maxTokens, setMaxTokens] = useState<number>(
-    reqBody !== null ? reqBody.max_tokens : 256
-  );
 
   const { setNotification } = useNotification();
+
+  useEffect(() => {
+    if (tools !== undefined) {
+      setCurrentTools(tools);
+    } else {
+      setCurrentTools([]);
+    }
+  }, [tools, requestId]);
+
+  async function fetchFineTuneModels() {
+    // Using user's own api key, so no need to use /api routes
+    const res = await fetch("https://api.openai.com/v1/fine_tuning/jobs", {
+      headers: {
+        Authorization: `Bearer ${providerAPIKey}`,
+        "Content-Type": "application/json",
+      },
+    });
+    const ftJobsList = await res.json();
+    if (ftJobsList.error) return;
+
+    const ftJobs = ftJobsList.data as Array<TFinetunedJob>;
+
+    const ftModels = ftJobs
+      .map((job) => {
+        if (job.status === "succeeded") {
+          return {
+            name: job.fine_tuned_model,
+            provider: "OPENAI",
+          };
+        }
+      })
+      .filter((model) => model !== undefined) as PlaygroundModel[];
+
+    setPLAYGROUND_MODELS((prev) => prev.concat(ftModels));
+  }
+
+  useEffect(() => {
+    fetchFineTuneModels();
+  }, [providerAPIKey]);
 
   return (
     <>
@@ -136,6 +201,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 temperature={temperature}
                 maxTokens={maxTokens}
                 tools={currentTools}
+                providerAPIKey={providerAPIKey}
               />
             </>
           ) : singleRequest !== null && !isChat ? (
@@ -159,13 +225,19 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 {
                   id: "2",
                   content:
-                    "Hey there 👋! In the playground, you can replay your user's requests, experiment with your prompts, and test different models. Let's chat!",
+                    "Welcome to the playground! This is a space where you can replay user requests, experiment with various prompts, and test different models. Feel free to explore and interact with the available features. Let's get started!",
                   role: "assistant",
+                },
+                {
+                  id: "3",
+                  content: "What is the weather in Tokyo?",
+                  role: "user",
                 },
               ]}
               models={selectedModels}
               temperature={temperature}
               maxTokens={maxTokens}
+              providerAPIKey={providerAPIKey}
             />
           ) : (
             <div className="w-full h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-gray-500">
@@ -208,10 +280,31 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   key={idx}
                   className="font-medium text-black"
                 >
-                  {model.name}
+                  <Tooltip title={model.name || ""} placement="right">
+                    <div>{model.name || ""}</div>
+                  </Tooltip>
                 </MultiSelectItem>
               ))}
             </MultiSelect>
+          </div>
+          <div className="flex flex-col space-y-2 w-full">
+            <div className="flex flex-row w-full justify-between items-center">
+              <label
+                htmlFor="temp"
+                className="font-medium text-sm text-gray-900 dark:text-gray-100"
+              >
+                Provider API Key
+              </label>
+            </div>
+            <input
+              type="password"
+              value={providerAPIKey}
+              placeholder="Enter your provider API Key"
+              onChange={(e) => {
+                setProviderAPIKey(e.target.value);
+              }}
+              className="w-full text-sm px-2 py-1 rounded-lg border border-gray-300"
+            />
           </div>
           <div className="flex flex-col space-y-2 w-full">
             <div className="flex flex-row w-full justify-between items-center">

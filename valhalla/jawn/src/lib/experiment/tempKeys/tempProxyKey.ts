@@ -1,9 +1,7 @@
 import generateApiKey from "generate-api-key";
+import { hashAuth } from "../../../utils/hash";
 import { supabaseServer } from "../../db/supabase";
 import { Result, err, ok } from "../../shared/result";
-import { uuid } from "uuidv4";
-import { dbExecute } from "../../shared/db/dbExecute";
-import { hashAuth } from "../../../utils/hash";
 import { BaseTempKey } from "./baseTempKey";
 
 async function getHeliconeApiKey() {

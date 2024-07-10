@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { InMemoryCache } from "../lib/memoryCache/staticMemCache";
+import { InMemoryCache } from "../lib/cache/staticMemCache";
 import { Database } from "../lib/db/database.types";
 import { supabaseServer } from "../lib/db/supabase";
 

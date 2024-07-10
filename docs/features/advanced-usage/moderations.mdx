@@ -1,24 +1,26 @@
 ---
 title: "Moderations"
-description: "Integrate OpenAI moderation to safeguard your chat completions."
+sidebarTitle: "Moderations"
+description: "Enable OpenAI's moderation feature in your LLM applications to automatically detect and filter harmful content in user messages."
+"twitter:title": "Moderations - Helicone OSS LLM Observability"
 ---
 
-import QuestionsSection from '/snippets/questions-section.mdx';
+import QuestionsSection from "/snippets/questions-section.mdx";
 
-<Info>**Who can use this feature**: Anyone on any [plan](https://www.helicone.ai/pricing) who uses OpenAI as their provider.</Info>
-
+<Info>
+  **Who can use this feature**: Anyone on any
+  [plan](https://www.helicone.ai/pricing) who uses OpenAI as their provider.
+</Info>
 
 ## Introduction
 
-By integrating with OpenAI's moderation endpoint, Helicone helps you check whether the user message is potentially harmful. 
-
+By integrating with OpenAI's moderation endpoint, Helicone helps you check whether the user message is potentially harmful.
 
 ### Why Moderations
 
 - Identifying harmful requests and take action, for example, by filtering it.
 - Ensuring any inappropriate or harmful content in user messages is flagged and prevented from being processed.
-- Maintaining the safety of the interactions with your application. 
-
+- Maintaining the safety of the interactions with your application.
 
 ## Getting Started
 
@@ -26,7 +28,7 @@ To enable moderation, set `Helicone-Moderations-Enabled` to `true`.
 
 <CodeGroup>
 ```bash Curl
-curl https://oai.hconeai.com/v1/completions \
+curl https://oai.helicone.ai/v1/completions \
   -H 'Content-Type: application/json' \
   -H 'Helicone-Auth: Bearer YOUR_API_KEY' \
   -H 'Helicone-Moderations-Enabled: true' \ # Add this header and set to true
@@ -37,7 +39,7 @@ curl https://oai.hconeai.com/v1/completions \
 ```
 
 ```python Python
-openai.api_base = "https://oai.hconeai.com/v1"
+openai.api_base = "https://oai.helicone.ai/v1"
 
 openai.Completion.create(
     model="text-davinci-003",
@@ -52,7 +54,7 @@ openai.Completion.create(
 import { Configuration, OpenAIApi } from "openai";
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
-  basePath: "https://oai.hconeai.com/v1",
+  basePath: "https://oai.helicone.ai/v1",
   defaultHeaders: {
     "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
     "Helicone-Moderations-Enabled": "true", // Add this header and set to true
@@ -63,38 +65,41 @@ const openai = new OpenAIApi(configuration);
 
 </CodeGroup>
 
-<Note>The moderation call to the OpenAI endpoint will utilize your provided OpenAI API key.</Note>
+<Note>
+  The moderation call to the OpenAI endpoint will utilize your provided OpenAI
+  API key.
+</Note>
 
 <Accordion title="A Deep-Dive of the Moderation Process">
   1. **Activation:** When `Helicone-Moderations-Enabled` is true and the provider is OpenAI, the user's latest message is prepared for moderation before any chat completion request.
   2. **Moderation Check:** Our proxy sends the message to the OpenAI Moderation endpoint to assess its content.
-  3. **Flag Evaluation:** If the moderation endpoint flags the message as inappropriate or harmful, an error response is generated. 
+  3. **Flag Evaluation:** If the moderation endpoint flags the message as inappropriate or harmful, an error response is generated.
 
 </Accordion>
 
-
-### Error Repsonse 
+### Error Repsonse
 
 If the message is flagged, the response will have a `400 status code`. **It's crucial to handle this response appropriately.**
 
 If the message is not flagged, the proxy forwards it to the chat completion endpoint, and the process continues as normal.
 
-Here's an example of the error response when flagged: 
-   ```json
-   {
-     "success": false,
-     "error": {
-       "code": "PROMPT_FLAGGED_FOR_MODERATION",
-       "message": "The given prompt was flagged by the OpenAI Moderation endpoint.",
-       "details": "See your Helicone request page for more info: https://www.helicone.ai/requests?[REQUEST_ID]"
-     }
-   }
-   ```
+Here's an example of the error response when flagged:
 
+```json
+{
+  "success": false,
+  "error": {
+    "code": "PROMPT_FLAGGED_FOR_MODERATION",
+    "message": "The given prompt was flagged by the OpenAI Moderation endpoint.",
+    "details": "See your Helicone request page for more info: https://www.helicone.ai/requests?[REQUEST_ID]"
+  }
+}
+```
 
 ## Coming Soon
 
 We're continually expanding our moderation features. Upcoming updates include:
+
 - Customizable moderation criteria
 
 <QuestionsSection />

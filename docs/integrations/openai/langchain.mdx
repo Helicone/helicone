@@ -1,11 +1,13 @@
 ---
-title: "Langchain"
-description: "Learn how to integrate OpenAI with Helicone using Langchain."
+title: "OpenAI LangChain Integration"
+sidebarTitle: "LangChain"
+description: "Use LangChain to integrate OpenAI with Helicone to log your OpenAI usage."
+"twitter:title": "OpenAI Langchain Integration - Helicone OSS LLM Observability"
 ---
 
 <Steps>
   <Step title="Create an account + Generate an API Key">
-    Log into www.helicone.ai or create an account. Once you have an account, you
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
     can generate an [API key](https://helicone.ai/developer).
   </Step>
   <Step title="Set HELICONE_API_KEY as an environment variable">
@@ -20,7 +22,7 @@ export HELICONE_API_KEY=<your API key>
 const llm = new OpenAI({
   modelName: "gpt-3.5-turbo",
   configuration: {
-    basePath: "https://oai.hconeai.com/v1",
+    basePath: "https://oai.helicone.ai/v1",
     defaultHeaders: {
       "Helicone-Auth": `Bearer HELICONE_API_KEY`,
     },
@@ -30,7 +32,7 @@ const llm = new OpenAI({
 
 ```python example.py
 # Option 1
-openai.api_base = "https://oai.hconeai.com/v1"
+openai.api_base = "https://oai.helicone.ai/v1"
 llm = ChatOpenAI(
     openai_api_key='<>',
     model_kwargs={
@@ -48,7 +50,7 @@ llm = ChatOpenAI(
         "Helicone-Auth": f"Bearer {HELICONE_API_KEY}"
       }
     },
-    openai_api_base="https://oai.hconeai.com/v1",
+    openai_api_base="https://oai.helicone.ai/v1",
 )
 
 ```

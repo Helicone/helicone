@@ -2,7 +2,10 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
 import { DBWrapper } from "../db/DBWrapper";
-import { checkRateLimit } from "../clients/KVRateLimiterClient";
+import {
+  checkRateLimit,
+  updateRateLimitCounter,
+} from "../clients/KVRateLimiterClient";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
 import {
@@ -51,6 +54,7 @@ export async function proxyForwarder(
   }
   const responseBuilder = new ResponseBuilder();
 
+  let rate_limited = false;
   if (proxyRequest.rateLimitOptions) {
     if (!proxyRequest.providerAuthHash) {
       return new Response("Authorization header required for rate limiting", {
@@ -72,13 +76,16 @@ export async function proxyForwarder(
       proxyRequest.rateLimitOptions
     );
     if (rateLimitCheckResult.status === "rate_limited") {
-      return responseBuilder.buildRateLimitedResponse();
+      rate_limited = true;
+      request.injectCustomProperty(
+        "Helicone-Rate-Limit-Status",
+        rateLimitCheckResult.status
+      );
     }
   }
 
   const { data: cacheSettings, error: cacheError } = getCacheSettings(
-    proxyRequest.requestWrapper.getHeaders(),
-    proxyRequest.isStream
+    proxyRequest.requestWrapper.getHeaders()
   );
 
   if (cacheError !== null) {
@@ -235,7 +242,10 @@ export async function proxyForwarder(
     }
   }
 
-  const { data, error } = await handleProxyRequest(proxyRequest);
+  const { data, error } = await handleProxyRequest(
+    proxyRequest,
+    rate_limited ? responseBuilder.buildRateLimitedResponse() : undefined
+  );
   if (error !== null) {
     return responseBuilder.build({
       body: error,
@@ -325,9 +335,24 @@ export async function proxyForwarder(
     if (res.error !== null) {
       console.error("Error logging", res.error);
     }
+    if (proxyRequest && proxyRequest.rateLimitOptions) {
+      await updateRateLimitCounter({
+        providerAuthHash: proxyRequest.providerAuthHash,
+        heliconeProperties:
+          proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
+        rateLimitKV: env.RATE_LIMIT_KV,
+        rateLimitOptions: proxyRequest.rateLimitOptions,
+        userId: proxyRequest.userId,
+        cost: res.data?.cost ?? 0,
+      });
+    }
   }
 
-  if (request?.heliconeHeaders?.heliconeAuth || request.heliconeProxyKeyId) {
+  if (
+    request?.heliconeHeaders?.heliconeAuth ||
+    request?.heliconeHeaders.heliconeAuthV2 ||
+    request.heliconeProxyKeyId
+  ) {
     ctx.waitUntil(log(loggable));
   }
 
