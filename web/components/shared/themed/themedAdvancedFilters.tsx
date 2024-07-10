@@ -315,7 +315,7 @@ export function AdvancedFilters({
         onSearchHandler={searchPropertyFilters}
       />
 
-      <div>
+      {/* <div>
         <Button
           onClick={handleAddNode}
           variant="secondary"
@@ -333,10 +333,10 @@ export function AdvancedFilters({
         >
           Clear All
         </Button>
-      </div>
+      </div> */}
 
       <div className="flex flex-col gap-2 bg-white dark:bg-black space-y-2 mt-4">
-        <button
+        {/* <button
           onClick={() => {
             // const prev = [...filters];
             // setAdvancedFilters([
@@ -351,7 +351,7 @@ export function AdvancedFilters({
             aria-hidden="true"
           />
           Add Filter
-        </button>
+        </button> */}
       </div>
       <div className="flex flex-row w-full items-end justify-end">
         {/* {onSaveFilterCallback && (
@@ -489,6 +489,8 @@ export function AdvancedFilterRow({
   filterMap,
   onDeleteHandler,
   setFilter,
+  onAddFilter,
+  showAddFilter,
 }: {
   filterMap: SingleFilterDef<any>[];
   filter: UIFilterRow;
@@ -498,6 +500,8 @@ export function AdvancedFilterRow({
     property: string,
     search: string
   ) => Promise<Result<void, string>>;
+  onAddFilter: () => void;
+  showAddFilter?: boolean;
 }) {
   return (
     <div className="w-full flex flex-col lg:flex-row gap-3 items-left lg:items-end ml-4">
@@ -577,13 +581,25 @@ export function AdvancedFilterRow({
           }
         />
       </div>
-      <div className="w-full lg:w-fit mr-16 pb-1">
-        <button
-          onClick={onDeleteHandler}
-          className="bg-red-700  text-white rounded-md p-1 hover:bg-red-500"
-        >
-          <TrashIcon className="h-4" />
-        </button>
+      <div className="flex flex-row justify-between items-center w-full pr-4 h-full">
+        <div className="w-full lg:w-fit mr-16 pb-1">
+          <button
+            onClick={onDeleteHandler}
+            className="bg-red-700  text-white rounded-md p-1 hover:bg-red-500"
+          >
+            <TrashIcon className="h-4" />
+          </button>
+        </div>
+        {showAddFilter && showAddFilter === true && (
+          <Button
+            onClick={() => onAddFilter()}
+            variant="secondary"
+            size="xs"
+            color="black"
+            className="ml-2 border-[#D1D5DB]"
+            icon={PlusIcon}
+          />
+        )}
       </div>
     </div>
   );
