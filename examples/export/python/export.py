@@ -54,6 +54,7 @@ class ResponseData:
     scores: Optional[Any]
     signed_body_url: str
     costUSD: float
+    asset_urls: Optional[Any] = None
     signed_body_content: Optional[Dict[str, Any]] = None
 
 
@@ -142,7 +143,21 @@ async def fetch_all_signed_bodies(data: List[ResponseData]):
                     f"Failed to fetch or decode signed_body_url for response_id {d.response_id}: {e}")
 
 
-def get_all_data(start_time, end_time: str, step_hours: int) -> List[ResponseData]:
+def write_data_to_csv(data: List[ResponseData], file_name: str):
+    # Convert the list of ResponseData to a list of dictionaries
+    data_dicts = [asdict(d) for d in data]
+    for d in data_dicts:
+        if isinstance(d['request_properties'], RequestProperties):
+            d['request_properties'] = asdict(d['request_properties'])
+
+    # Convert the list of dictionaries to a pandas DataFrame
+    df = pd.DataFrame(data_dicts)
+
+    # Write the DataFrame to a CSV file
+    df.to_csv(file_name, index=False)
+
+
+def get_all_data(start_time, end_time: str, step_hours: int, file_name: str) -> List[ResponseData]:
     all_data: List[ResponseData] = []
     current_time = datetime.datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
     start_time = datetime.datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
@@ -172,6 +187,8 @@ def get_all_data(start_time, end_time: str, step_hours: int) -> List[ResponseDat
                                                     next_time.strftime('%Y-%m-%d %H:%M:%S'), offset)
                     asyncio.run(fetch_all_signed_bodies(api_response.data))
                     all_data.extend(api_response.data)
+                    # Write data incrementally
+                    write_data_to_csv(all_data, file_name)
                     break
                 except Exception as e:
                     print(f"Failed to fetch signed bodies: {
@@ -188,24 +205,11 @@ def get_all_data(start_time, end_time: str, step_hours: int) -> List[ResponseDat
     return all_data
 
 
-def write_data_to_excel(data: List[ResponseData], file_name: str):
-    # Convert the list of ResponseData to a list of dictionaries
-    data_dicts = [asdict(d) for d in data]
-    for d in data_dicts:
-        if isinstance(d['request_properties'], RequestProperties):
-            d['request_properties'] = asdict(d['request_properties'])
-
-    # Convert the list of dictionaries to a pandas DataFrame
-    df = pd.DataFrame(data_dicts)
-
-    # Write the DataFrame to an Excel file
-    df.to_excel(file_name, index=False)
-
-
 # Example usage
-start_time_input = "2024-05-7 07:00:00"
-end_time_input = "2024-05-21 00:00:00"
+start_time_input = "2024-06-01 00:00:00"
+end_time_input = "2024-07-11 00:00:00"
 step_hours = 1  # Configurable step size in hours
-all_data = get_all_data(start_time_input, end_time_input, step_hours)
-write_data_to_excel(all_data, 'output.xlsx')
-print(f"Data written to output.xlsx")
+file_name = f'output_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+all_data = get_all_data(
+    start_time_input, end_time_input, step_hours, file_name)
+print(f"Data written to {file_name}")
