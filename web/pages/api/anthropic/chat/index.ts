@@ -20,12 +20,20 @@ export default async function handler(
 ) {
   const client = new SupabaseServerWrapper({ req, res }).getClient();
   const user = await client.auth.getUser();
-  const { messages, requestId, temperature, model, maxTokens } = req.body as {
+  const {
+    messages,
+    requestId,
+    temperature,
+    model,
+    maxTokens,
+    anthropicAPIKey,
+  } = req.body as {
     messages: ChatParams[];
     requestId: string;
     temperature: number;
     model: string;
     maxTokens: number;
+    anthropicAPIKey: string;
   };
 
   if (!temperature || !model) {
@@ -38,7 +46,7 @@ export default async function handler(
 
   const anthropic = new Anthropic({
     baseURL: "https://anthropic.helicone.ai/",
-    apiKey: process.env.ANTHROPIC_API_KEY,
+    apiKey: anthropicAPIKey ?? process.env.ANTHROPIC_API_KEY,
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${process.env.TEST_HELICONE_API_KEY}`,
       user: user.data.user?.id || "",

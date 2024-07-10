@@ -16,15 +16,23 @@ export default async function handler(
 ) {
   const client = new SupabaseServerWrapper({ req, res }).getClient();
   const user = await client.auth.getUser();
-  const { messages, requestId, temperature, model, maxTokens, tools } =
-    req.body as {
-      messages: ChatCompletionMessageParam[];
-      requestId: string;
-      temperature: number;
-      model: string;
-      maxTokens: number;
-      tools: ChatCompletionTool[];
-    };
+  const {
+    messages,
+    requestId,
+    temperature,
+    model,
+    maxTokens,
+    tools,
+    openAIApiKey,
+  } = req.body as {
+    messages: ChatCompletionMessageParam[];
+    requestId: string;
+    temperature: number;
+    model: string;
+    maxTokens: number;
+    tools: ChatCompletionTool[];
+    openAIApiKey: string;
+  };
 
   if (!temperature || !model) {
     res.status(400).json({
@@ -35,7 +43,7 @@ export default async function handler(
   }
 
   const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: openAIApiKey ?? process.env.OPENAI_API_KEY,
     baseURL: "https://oai.helicone.ai/v1",
     defaultHeaders: {
       "OpenAI-Organization": "",
