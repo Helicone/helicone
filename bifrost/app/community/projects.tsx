@@ -28,6 +28,10 @@ const TAGS: Record<string, ProjectTag> = {
     name: "Healthcare",
     href: "",
   },
+  civictech: {
+    name: "Civic Technology",
+    href: "",
+  },
 };
 
 interface Project {
@@ -46,6 +50,58 @@ interface Project {
 }
 
 const projects: Project[] = [
+  {
+    title: "Charm",
+    description:
+      "Charm doubles your MQLs! It's an AI Sales Chatbot for B2B Growth & Marketing Teams. 1 line of code — 2x your conversion rate!",
+    usage:
+      "Helicone has solved LLM observability for us. Integration was painless and now we can quickly see what's happening under the hood for requests & embeddings across all of our LLMs. Totally recommend.",
+    creators: [
+      {
+        name: "Izu Elechi",
+        href: "https://www.linkedin.com/in/izuchukwu/",
+      },
+      {
+        name: "Caleb Lewis",
+        href: "https://www.linkedin.com/in/developercaleb/",
+      },
+    ],
+    imageHref: "/static/community/projects/charm.webp", // <- change this
+    tags: [TAGS.tech],
+    href: "https://joincharm.com/",
+  },
+  {
+    title: "Dating Studio",
+    description:
+      "Copilot for Dating Apps. Get a second opinion, ice breakers, funny lines, writing ideas and more right in your chats. Designed to elevate your chats, not replace them. Grow your skills, not your dependency. ",
+    usage:
+      "Logging AI requests to unlock insights into how models are performing to optimize the experience and pick the best match for users' tasks.",
+    creators: [
+      {
+        name: "LV",
+        href: "",
+      },
+    ],
+    imageHref: "/static/community/projects/dating-studio.webp", 
+    tags: [TAGS.tech],
+    href: "https://about.dating.studio/extension",
+  },
+  {
+    title: "Open Council Network",
+    description:
+      "Open Council Network exists to make the decision making process of local government accessible to citizens. We listen to all of the meetings and decisions made by UK local councillors and send out easy-to-read emails each week explaining what they're doing, and how you can make your voice heard.",
+    usage:
+      "We use LLMs to transcribe council meetings, extract data from them, and generate summaries and email updates. Helicone has been invaluable to monitor, track and optimise those queries, and to allow us to compare performance across different LLM providers, so that we don't feel locked in to any provider and can make effective decisions to optimise costs and performance.",
+    creators: [
+      {
+        name: "Toby Abel",
+        href: "",
+      },
+    ],
+    imageHref: "/static/community/projects/open-council-network.webp", // <- change this
+    tags: [TAGS.civictech],
+    href: "https://opencouncil.network",
+  },
   {
     title: "Haema",
     description:
@@ -287,6 +343,7 @@ export function Projects() {
                 className="flex flex-col gap-4 w-full h-full hover:bg-sky-50 rounded-lg p-4 col-span-2 md:col-span-1 mt-2"
                 href={project.href}
                 key={i}
+                target="_blank"
               >
                 {/*eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -334,13 +391,16 @@ export function Projects() {
                 {project.creators.map((creator, i) => (
                   <div
                     key={i}
-                    className="flex items-center hover:bg-sky-50 rounded-lg px-4 py-2"
+                    className="flex items-center px-4 py-1"
                   >
                     <a
-                      href={creator.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs font-medium text-sky-500"
+                      href={creator.href || undefined}
+                      target={creator.href ? "_blank" : undefined}
+                      rel={creator.href ? "noopener noreferrer" : undefined}
+                      className={clsx(
+                        "text-xs font-medium",
+                        creator.href ? "text-sky-500 hover:underline" : "text-gray-500"
+                      )}
                     >
                       {creator.name}
                     </a>

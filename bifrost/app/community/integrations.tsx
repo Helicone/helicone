@@ -77,6 +77,13 @@ const integrations: Integration[] = [
     imageClassName: "bg-gray-500 px-[18x]",
   },
   {
+    title: "Mem0 Embedchain",
+    href: "https://embedchain.ai/",
+    imageHref: "/static/integrations/mem0.webp",
+    docsHref: "https://docs.helicone.ai/other-integrations/embedchain",
+    imageClassName: "",
+  },
+  {
     title: "Lytix",
     href: "https://www.lytix.co/",
     imageHref: "/static/integrations/lytix.svg",
@@ -116,8 +123,9 @@ export function Integrations() {
             <div className="p-4 w-full h-fit rounded-lg flex flex-col text-left text-gray-700">
               <Link
                 className="font-semibold text-md p-4 w-fit hover:bg-sky-50 rounded-lg  mt-2"
-
                 href={integration.href}
+                target="_blank"
+                rel="noopener noreferrer"
               >
               {/*eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -140,6 +148,8 @@ export function Integrations() {
                 <Link
                   href={integration.docsHref}
                   className="flex gap-2 py-2 text-xs w-fit items-center font-semibold text-sky-500"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   <p>Visit website</p>
                   <div>
