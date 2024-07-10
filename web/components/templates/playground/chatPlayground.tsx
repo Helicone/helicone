@@ -114,7 +114,8 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             historyWithoutId as unknown as ChatCompletionCreateParams[],
             temperature,
             model.name,
-            maxTokens
+            maxTokens,
+            providerAPIKey
           );
 
           // Record the end time and calculate latency
