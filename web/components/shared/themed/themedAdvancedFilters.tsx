@@ -354,7 +354,7 @@ export function AdvancedFilters({
         </button>
       </div>
       <div className="flex flex-row w-full items-end justify-end">
-        {/* {onSaveFilterCallback && (
+        {onSaveFilterCallback && (
           <SaveFilterButton
             filters={filters}
             onSaveFilterCallback={onSaveFilterCallback}
@@ -362,7 +362,7 @@ export function AdvancedFilters({
             savedFilters={savedFilters}
             layoutPage={layoutPage}
           />
-        )} */}
+        )}
       </div>
     </div>
   );
