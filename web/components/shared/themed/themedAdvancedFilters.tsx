@@ -21,7 +21,10 @@ import { OrganizationFilter } from "../../../services/lib/organization_layout/or
 import FilterTreeEditor from "./FilterTreeEditor";
 import { useEffect, useState } from "react";
 import useSearchParams from "../utils/useSearchParams";
-import { ROOT_FILTER_NODE } from "../../../services/lib/filters/uiFilterRowTree";
+import {
+  getRootFilterNode,
+  ROOT_FILTER_NODE,
+} from "../../../services/lib/filters/uiFilterRowTree";
 
 interface UIFilterRowNode {
   operator: "and" | "or";
@@ -326,7 +329,7 @@ export function AdvancedFilters({
         </Button>
         <Button
           onClick={() => {
-            setFilterTree(ROOT_FILTER_NODE);
+            setFilterTree(getRootFilterNode());
           }}
           variant="secondary"
           size="sm"

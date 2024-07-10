@@ -41,6 +41,7 @@ import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
 import useRequestsPageV2 from "./useRequestsPageV2";
 import {
+  getRootFilterNode,
   ROOT_FILTER_NODE,
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
@@ -194,8 +195,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
   const [timeRange, setTimeRange] = useState<TimeFilter>(getTimeRange());
 
-  const [advancedFilters, setAdvancedFilters] =
-    useState<UIFilterRowTree>(ROOT_FILTER_NODE);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
+    getRootFilterNode()
+  );
 
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
