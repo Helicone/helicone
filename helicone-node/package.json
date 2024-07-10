@@ -44,22 +44,19 @@
     "nock": "^13.5.4",
     "prettier": "^2.8.8",
     "ts-jest": "^29.1.0",
-    "typescript": "^5.2.2"
-  },
-  "dependencies": {
+    "typescript": "^5.2.2",
     "@anthropic-ai/sdk": "^0.22.0",
     "@aws-sdk/client-bedrock-runtime": "^3.590.0",
     "@azure/openai": "^1.0.0-beta.12",
     "@google-cloud/aiplatform": "^3.23.0",
-    "@pinecone-database/pinecone": "^2.2.2",
+    "cohere-ai": "^7.10.2",
+    "langchain": "^0.2.5",
+    "openai": "^4.48.3"
+  },
+  "dependencies": {
     "@traceloop/node-server-sdk": "^0.8.6",
     "@types/uuid": "^9.0.1",
     "@whatwg-node/fetch": "^0.9.14",
-    "chromadb": "^1.8.1",
-    "cohere-ai": "^7.10.2",
-    "langchain": "^0.2.5",
-    "llamaindex": "^0.3.16",
-    "openai": "^4.48.3",
     "openapi-fetch": "^0.9.7",
     "uuid": "^9.0.1"
   }
