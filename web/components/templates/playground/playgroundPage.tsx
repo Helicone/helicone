@@ -31,9 +31,29 @@ export type PlaygroundModel = {
   provider: ProviderName;
 };
 
-export const PLAYGROUND_MODELS: PlaygroundModel[] = playgroundModels
-  .filter((model) => model.provider !== "AZURE")
-  .sort((a, b) => a.name.localeCompare(b.name));
+export type TFinetunedJob = {
+  object: string
+  id: string
+  model: string
+  created_at: number
+  finished_at: number
+  fine_tuned_model: string
+  organization_id: string
+  result_files: Array<string>
+  status: "validating_files" | "queued" | "running" | "succeeded" | "failed" | "cancelled";
+  validation_file: any
+  training_file: string
+  hyperparameters: {
+    n_epochs: number
+    batch_size: number
+    learning_rate_multiplier: number
+  }
+  trained_tokens: number | null
+  integrations: Array<any>
+  seed: number
+  estimated_finish: number
+}
+
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { request } = props;
@@ -51,6 +71,12 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const [currentTools, setCurrentTools] = useState<ChatCompletionTool[]>();
   const [providerAPIKey, setProviderAPIKey] = useState<string>();
 
+  const [PLAYGROUND_MODELS, setPLAYGROUND_MODELS] = useState<PlaygroundModel[]>(
+    playgroundModels
+      .filter((model) => model.provider !== "AZURE")
+      .sort((a, b) => a.name.localeCompare(b.name))
+  );
+
   useEffect(() => {
     if (tools !== undefined) {
       setCurrentTools(tools);
@@ -58,6 +84,35 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       setCurrentTools([]);
     }
   }, [tools, requestId]);
+
+  async function fetchFineTuneModels() {
+    const res = await fetch("https://api.openai.com/v1/fine_tuning/jobs", {
+      headers: {
+        Authorization: `Bearer ${providerAPIKey}`,
+        "Content-Type": "application/json"
+      }
+    });
+    const ftJobsList = await res.json();
+    if (ftJobsList.error) return;
+
+    const ftJobs = (ftJobsList.data) as Array<TFinetunedJob>;
+
+    const ftModels = ftJobs.map((job) => {
+      if (job.status === "succeeded") {
+        return {
+          name: job.fine_tuned_model,
+          provider: "OPENAI"
+        }
+      }
+    }).filter((model) => model !== undefined) as PlaygroundModel[];
+
+    setPLAYGROUND_MODELS(prev => prev.concat(ftModels));
+  }
+
+  // Using user's own api key, so no need to use /api routes
+  useEffect(() => {
+    fetchFineTuneModels()
+  }, [providerAPIKey]);
 
   const singleRequest = data.length > 0 ? data[0] : null;
   const singleModel = PLAYGROUND_MODELS.find(
