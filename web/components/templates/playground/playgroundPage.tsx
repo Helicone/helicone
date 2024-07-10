@@ -77,6 +77,33 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       .sort((a, b) => a.name.localeCompare(b.name))
   );
 
+  const singleRequest = data.length > 0 ? data[0] : null;
+  const singleModel = PLAYGROUND_MODELS.find(
+    (model) => model.name === singleRequest?.model
+  );
+
+  const reqBody =
+    singleRequest !== null ? (singleRequest.requestBody as any) : null;
+
+  const [temperature, setTemperature] = useState<number>(
+    reqBody !== null ? reqBody.temperature : 0.7
+  );
+  const [maxTokens, setMaxTokens] = useState<number>(
+    reqBody !== null ? reqBody.max_tokens : 256
+  );
+
+  const [selectedModels, setSelectedModels] = useState<PlaygroundModel[]>(
+    singleModel
+      ? [
+          {
+            ...singleModel,
+          },
+        ]
+      : []
+  );
+
+  const { setNotification } = useNotification();
+
   useEffect(() => {
     if (tools !== undefined) {
       setCurrentTools(tools);
@@ -86,6 +113,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   }, [tools, requestId]);
 
   async function fetchFineTuneModels() {
+    // Using user's own api key, so no need to use /api routes
     const res = await fetch("https://api.openai.com/v1/fine_tuning/jobs", {
       headers: {
         Authorization: `Bearer ${providerAPIKey}`,
@@ -109,36 +137,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     setPLAYGROUND_MODELS(prev => prev.concat(ftModels));
   }
 
-  // Using user's own api key, so no need to use /api routes
   useEffect(() => {
     fetchFineTuneModels()
   }, [providerAPIKey]);
-
-  const singleRequest = data.length > 0 ? data[0] : null;
-  const singleModel = PLAYGROUND_MODELS.find(
-    (model) => model.name === singleRequest?.model
-  );
-
-  const reqBody =
-    singleRequest !== null ? (singleRequest.requestBody as any) : null;
-
-  const [selectedModels, setSelectedModels] = useState<PlaygroundModel[]>(
-    singleModel
-      ? [
-          {
-            ...singleModel,
-          },
-        ]
-      : []
-  );
-  const [temperature, setTemperature] = useState<number>(
-    reqBody !== null ? reqBody.temperature : 0.7
-  );
-  const [maxTokens, setMaxTokens] = useState<number>(
-    reqBody !== null ? reqBody.max_tokens : 256
-  );
-
-  const { setNotification } = useNotification();
 
   return (
     <>
