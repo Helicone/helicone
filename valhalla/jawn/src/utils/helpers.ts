@@ -106,8 +106,8 @@ export function unsupportedImage(body: any): any {
     }
     if (
       typeof imageUrl === "object" &&
-      imageUrl.url !== undefined &&
-      typeof imageUrl.url === "string" &&
+      imageUrl?.url !== undefined &&
+      typeof imageUrl?.url === "string" &&
       !imageUrl.url.startsWith("http") &&
       !imageUrl.url.startsWith("<helicone-asset-id")
     ) {
