@@ -45,20 +45,28 @@ logger.sendLog(res);
 A typical request will have the following structure:
 
 ```typescript
-type ILogRequest = {
+type BaseRequest = {
   model: string,
-
-  // The name and structure of this field depends on the model you are using. Eg: for chat models it
-  // is named "messages" and for embeddings models it is named "input".
-  [key: string]: Array<{
-    role: "system" | "user" | "assistant",
-    content: string
-  }> | string;
-
   temperature?: number;
   max_tokens?: number;
   stream?: boolean;
 }
+
+// The name and structure of the prompt field depends on the model you are using.
+// Eg: for chat models it is named "messages", for embeddings models it is named "input".
+
+type MessageBody = {
+  messages: Array<{
+    role: "system" | "user" | "assistant",
+    content: string
+  }>;
+}
+
+type StringBody = {
+  input: string;
+}
+
+type ILogRequest = BaseRequest & (MessageBody | StringBody);
 ```
 
 ### Sending Log
