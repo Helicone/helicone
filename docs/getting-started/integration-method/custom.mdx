@@ -5,179 +5,84 @@ description: "Integrate any custom LLM, including open-source models like Llama 
 "twitter:title": "Custom Model Integration - Helicone OSS LLM Observability"
 ---
 
-This allows you to use your own models with Helicone.
-This is currently in beta, so please report any issues.
+# Quickstart
 
-<Tabs>
-<Tab title="NodeJS">
-
-Add `HELICONE_API_KEY` to your environment variables.
-
-```bash
-export HELICONE_API_KEY=sk-<your-api-key>
-# You can also set it in your code (See below)
-```
-
+Logging calls to custom models is currently supported via the Helicone NodeJS SDK.
 ```typescript
-import {
-  IHeliconeAsyncClientOptions,
-  HeliconeLogBuilder,
-  HeliconeLogger,
-  ResponseBody,
-} from "@helicone/helicone";
+import { HeliconeManualLogger } from "@helicone/helicone";
 
-const heliconeApiKey = process.env.HELICONE_API_KEY;
+const logger = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY
+});
 
-const config: IHeliconeAsyncClientOptions = {
-  heliconeMeta: {
-    apiKey: heliconeApiKey,
-    baseUrl: "https://api.hconeai.com/custom/v1/logs",
-  },
-};
-
-const logger = new HeliconeLogger(config);
-
-const llmArgs = {
-  model: "llama-2",
-  prompt: "Say hi!",
-};
-const builder = new HeliconeLogBuilder(llmArgs);
-
-/*
-result = callToLLM(llmArgs)
-*/
-
-const result: ResponseBody = {
-  text: "This is my response",
-  usage: {
-    total_tokens: 13,
-    prompt_tokens: 5,
-    completion_tokens: 8,
-  },
-};
-
-builder.addResponse(result);
-builder.addUser("test-user");
-const response = await logger.submit(builder);
-if (response.status !== 200) {
-  throw new Error(response.data);
+const reqBody = {
+  "model": "text-embedding-ada-002",
+  "input": "The food was delicious and the waiter was very friendly.",
+  "encoding_format": "float"
 }
+
+logger.registerRequest(reqBody);
+
+const r = await fetch("https://api.openai.com/v1/embeddings", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+  },
+  body: JSON.stringify(reqBody)
+})
+
+const res = await r.json();
+console.log(res);
+
+logger.sendLog(res);
 ```
 
-</Tab>
+## Structure of Objects
 
-<Tab title="Curl">
-The Helicone Async Log Request API is used for logging requests and responses that
-go through an endpoint. This is highly useful for auditing, debugging and observing
-the behavior of your interactions with the system.
-
-## Request Structure
+### Registering Request
 
 A typical request will have the following structure:
 
-### Endpoint
+```typescript
+type ILogRequest = {
+  model: string,
 
+  // The name and structure of this field depends on the model you are using. Eg: for chat models it
+  // is named "messages" and for embeddings models it is named "input".
+  [key: string]: Array<{
+    role: "system" | "user" | "assistant",
+    content: string
+  }> | string;
+
+  temperature?: number;
+  max_tokens?: number;
+  stream?: boolean;
+}
 ```
 
-POST https://api.hconeai.com/custom/v1/log
+### Sending Log
+To submit logs, you need to extract the response from the model and send it to Helicone. The
+response should follow the below structure:
 
-```
-
-### Headers
-
-| Name          | Value              |
-| ------------- | ------------------ |
-| Authorization | Bearer `{API_KEY}` |
-
-Replace `{API_KEY}` with your actual API Key.
-
-### Body
-
-The body of the request should follow the `HeliconeAyncLogRequest` structure:
-
-```ts
-export type HeliconeAyncLogRequest = {
-  providerRequest: ProviderRequest;
-  providerResponse: ProviderResponse;
-  timing: Timing;
-};
-
-export type ProviderRequest = {
-  url: string;
-  json: {
-    [key: string]: any;
-  };
-  meta: Record<string, string>;
-};
-
-export type ProviderResponse = {
-  json: {
-    [key: string]: any;
-  };
-  status: number;
-  headers: Record<string, string>;
-};
-
-export type Timing = {
-  // From Unix epoch in Milliseconds
-  startTime: {
-    seconds: number;
-    milliseconds: number;
-  };
-  endTime: {
-    seconds: number;
-    milliseconds: number;
-  };
-};
-```
-
-## Example Usage
-
-Here's an example using curl:
-
-```sh
-curl -X POST https://api.hconeai.com/custom/v1/log \
--H 'Authorization: Bearer your_api_key' \
--H 'Content-Type: application/json' \
--d '{
-  "providerRequest": {
-    "url": "https://example.com",
-    "json": {
-      "key1": "value1",
-      "key2": "value2"
-    },
-    "meta": {
-      "metaKey1": "metaValue1",
-      "metaKey2": "metaValue2"
-    }
-  },
-  "providerResponse": {
-    "json": {
-      "responseKey1": "responseValue1",
-      "responseKey2": "responseValue2"
-    },
-    "status": 200,
-    "headers": {
-      "headerKey1": "headerValue1",
-      "headerKey2": "headerValue2"
-    }
-  },
-  "timing": {
-    "startTime": {
-      "seconds": 1625686222,
-      "milliseconds": 500
-    },
-    "endTime": {
-      "seconds": 1625686244,
-      "milliseconds": 750
-    }
+```typescript
+type ILogResponse = {
+  id: string;
+  object: string;
+  created: string;
+  model: string;
+  choices: Array<{
+    index: number;
+    finish_reason: string;
+    message: {
+      role: string;
+      content: string;
+    };
+  }>
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
   }
-}'
+}
 ```
-
-In the curl command above, replace `your_api_key` with your actual API key, and adjust the values in the JSON to fit your actual request and response data and timing.
-
-The response body is a JSON object of the entire response returned by OpenAI, unless it is a streamed request. In that case, it is a JSON object with a key called "streamed_data", which is an array of every single chunk.
-
-</Tab>
-</Tabs>
