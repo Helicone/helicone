@@ -62,30 +62,51 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
 
   const removeNodeByPath = (
     tree: UIFilterRowTree,
-    path: number[]
+    path: number[],
+    isRoot: boolean = true
   ): UIFilterRowTree | null => {
     if (path.length === 0) return tree;
 
     if ("operator" in tree) {
       const [index, ...restPath] = path;
-      if (path.length === 1) {
-        // Remove the node at this level
+      if (restPath.length === 0) {
         const newRows = [...tree.rows];
         newRows.splice(index, 1);
-        return newRows.length > 0 ? { ...tree, rows: newRows } : null;
+
+        if (newRows.length === 0) {
+          return null;
+        } else if (isRoot && newRows.length === 1) {
+          return { ...tree, rows: newRows };
+        } else if (!isRoot && newRows.length === 1) {
+          return newRows[0];
+        } else {
+          return { ...tree, rows: newRows };
+        }
       } else {
-        // Continue traversing
-        const updatedChild = removeNodeByPath(tree.rows[index], restPath);
+        const updatedChild = removeNodeByPath(
+          tree.rows[index],
+          restPath,
+          false
+        );
         const newRows = [...tree.rows];
         if (updatedChild === null) {
           newRows.splice(index, 1);
         } else {
           newRows[index] = updatedChild;
         }
-        return newRows.length > 0 ? { ...tree, rows: newRows } : null;
+
+        if (newRows.length === 0) {
+          return null;
+        } else if (isRoot && newRows.length === 1) {
+          return { ...tree, rows: newRows };
+        } else if (!isRoot && newRows.length === 1) {
+          return newRows[0];
+        } else {
+          return { ...tree, rows: newRows };
+        }
       }
     }
-    return tree;
+    return null;
   };
 
   const handleOperatorToggle = (node: UIFilterRowNode) => {
@@ -122,7 +143,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
               {renderNode(childNode, [...path, childIndex], false)}
             </div>
           ))}
-          {path.length === 0 && (
+          {isRoot && (
             <div className="mt-4 flex">
               <button
                 onClick={() => handleAddFilter(node)}
@@ -147,6 +168,14 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
         </div>
       );
     } else {
+      const parentNode = getNodeByPath(
+        uiFilterRowTree,
+        path.slice(0, -1)
+      ) as UIFilterRowNode;
+      const showAddFilter =
+        path.length === 1 ||
+        path[path.length - 1] === parentNode?.rows?.length - 1;
+
       const filterRow = (
         <div className="flex flex-row items-center justify-around">
           <AdvancedFilterRow
@@ -174,17 +203,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
                 handleTransformToNode(parentNode, path[path.length - 1]);
               }
             }}
-            showAddFilter={
-              path.length === 1 ||
-              path[path.length - 1] ===
-                (
-                  getNodeByPath(
-                    uiFilterRowTree,
-                    path.slice(0, -1)
-                  ) as UIFilterRowNode
-                ).rows.length -
-                  1
-            }
+            showAddFilter={showAddFilter}
           />
         </div>
       );
