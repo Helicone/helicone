@@ -6,8 +6,7 @@ export class HeliconeManualLogger {
   private startTime: number;
   private endTime: number | null = null;
 
-  //private readonly LOGGING_ENDPOINT: string = "https://api.hconeai.com/custom/v1/log";
-  private readonly LOGGING_ENDPOINT: string = "http://localhost:8788/custom/v1/log";
+  private readonly LOGGING_ENDPOINT: string = "https://api.hconeai.com/custom/v1/log";
 
   constructor(opts: IHeliconeManualLogger) {
     this.apiKey = opts.apiKey;
