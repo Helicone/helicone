@@ -39,7 +39,7 @@ export class S3Client {
   constructor(
     accessKey: string,
     secretKey: string,
-    endpoint: string,
+    private endpoint: string,
     private bucketName: string,
     private region: "us-west-2" | "eu-west-1"
   ) {
@@ -222,7 +222,11 @@ export class S3Client {
     });
   }
 
-  async store(key: string, value: string): Promise<Result<string, string>> {
+  async store(
+    key: string,
+    value: string,
+    tags?: Record<string, string>
+  ): Promise<Result<string, string>> {
     return await putLimiter.schedule(async () => {
       try {
         const compressedValue = await compressData(value);
@@ -243,6 +247,7 @@ export class S3Client {
             Body: compressedValue.data,
             ContentEncoding: "gzip",
             ContentType: "application/json",
+            Metadata: tags,
           });
         }
 
@@ -284,5 +289,9 @@ export class S3Client {
     assetId: string
   ) => {
     return `organizations/${orgId}/requests/${requestId}/assets/${assetId}`;
+  };
+
+  getRequestResponseRawUrl = (requestId: string, orgId: string) => {
+    return `organizations/${orgId}/requests/${requestId}/raw_request_response_body`;
   };
 }

@@ -2,11 +2,18 @@ require("dotenv").config({
   path: "./.env",
 });
 
+import bodyParser from "body-parser";
 import express, { NextFunction } from "express";
 import swaggerUi from "swagger-ui-express";
+import { proxyRouter } from "./controllers/public/proxyController";
+import {
+  DLQ_WORKER_COUNT,
+  NORMAL_WORKER_COUNT,
+} from "./lib/clients/kafkaConsumers/constant";
 import { tokenRouter } from "./lib/routers/tokenRouter";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authMiddleware } from "./middleware/auth";
+import { cacheMiddleware } from "./middleware/cache";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
 import { RegisterRoutes as registerPrivateTSOARoutes } from "./tsoa-build/private/routes";
 import { RegisterRoutes as registerPublicTSOARoutes } from "./tsoa-build/public/routes";
@@ -14,12 +21,9 @@ import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
-import {
-  DLQ_WORKER_COUNT,
-  NORMAL_WORKER_COUNT,
-} from "./lib/clients/kafkaConsumers/constant";
-import { cacheMiddleware } from "./middleware/cache";
-import bodyParser from "body-parser";
+import { hello } from "../../../shared/hello";
+
+console.log(hello);
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -106,6 +110,21 @@ app.options("*", (req, res) => {
 
 const v1APIRouter = express.Router();
 const unAuthenticatedRouter = express.Router();
+const v1ProxyRouter = express.Router();
+
+v1ProxyRouter.use(
+  "/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(publicSwaggerDoc as any)
+);
+
+v1ProxyRouter.use(proxyRouter);
+
+v1ProxyRouter.use("/download/swagger.json", (req, res) => {
+  res.json(publicSwaggerDoc as any);
+});
+
+v1ProxyRouter.use(authMiddleware);
 
 unAuthenticatedRouter.use(
   "/docs",
@@ -162,6 +181,7 @@ app.use((req, res, next) => {
 });
 
 app.use(unAuthenticatedRouter);
+app.use(v1ProxyRouter);
 app.use(v1APIRouter);
 
 function setRouteTimeout(

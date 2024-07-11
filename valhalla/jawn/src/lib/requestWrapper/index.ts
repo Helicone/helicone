@@ -7,7 +7,7 @@ import { Result, err, ok } from "../shared/result";
 export type JwtAuth = {
   _type: "jwt";
   token: string;
-  orgId: string;
+  orgId?: string;
 };
 
 export type BearerAuth = {

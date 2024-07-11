@@ -1,6 +1,7 @@
 import { Kafka } from "@upstash/kafka";
 import { Message } from "../handlers/HandlerContext";
 import { PromiseGenericResult, err, ok } from "../shared/result";
+import { LogManager } from "../../managers/LogManager";
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
@@ -35,8 +36,6 @@ export class KafkaProducer {
     topic: Topics
   ): PromiseGenericResult<string> {
     if (!this.kafka) {
-      console.log("Kafka is not initialized, using http.");
-      this.sendMessageHttp(msgs[0]);
       return ok("Kafka is not initialized");
     }
 
@@ -73,29 +72,5 @@ export class KafkaProducer {
     }
 
     return err(`Failed to produce messages after ${maxAttempts} attempts`);
-  }
-
-  async sendMessageHttp(msg: Message) {
-    try {
-      const result = await fetch(`http://127.0.0.1:8585/v1/log/request`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `${msg.authorization}`,
-        },
-        body: JSON.stringify({
-          log: msg.log,
-          authorization: msg.authorization,
-          heliconeMeta: msg.heliconeMeta,
-        }),
-      });
-
-      if (result.status !== 200) {
-        console.error(`Failed to send message via REST: ${result.statusText}`);
-      }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      console.error(`Failed to send message via REST: ${error.message}`);
-    }
   }
 }

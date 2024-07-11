@@ -8,7 +8,7 @@
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
     "resolveJsonModule": true,
-    "rootDir": "./src",
+    "rootDir": "../../", // Adjusted to include the shared directory
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true
   },

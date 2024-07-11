@@ -57,6 +57,16 @@ export function resultMap<T, K, Z>(
   return { data: f(result.data), error: null };
 }
 
+export function map<T, K, L>(
+  result: Result<T, K>,
+  map: (data: T) => L
+): Result<L, K> {
+  if (result.error === null) {
+    return ok(map(result.data as T));
+  }
+  return err(result.error);
+}
+
 export function promiseResultMap<T, K, Z>(
   result: Result<T, K>,
   f: (data: T) => Promise<Z>
