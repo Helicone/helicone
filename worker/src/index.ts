@@ -9,7 +9,9 @@ import { AlertManager } from "./lib/managers/AlertManager";
 import { AlertStore } from "./lib/db/AlertStore";
 import { ClickhouseClientWrapper } from "./lib/db/ClickhouseWrapper";
 import { ProviderName } from "./packages/cost/providers/mappings";
-import { hello } from "../../shared-lib/hello";
+import { sharedFunction } from "shared-lib";
+
+sharedFunction();
 
 const FALLBACK_QUEUE = "fallback-queue";
 
