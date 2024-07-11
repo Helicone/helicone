@@ -1,6 +1,6 @@
 import { ArrowPathIcon, HomeIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import {
@@ -42,7 +42,6 @@ import TableFooter from "./tableFooter";
 import useRequestsPageV2 from "./useRequestsPageV2";
 import {
   getRootFilterNode,
-  ROOT_FILTER_NODE,
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
 

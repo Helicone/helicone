@@ -5,7 +5,7 @@ import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
 import { clsx } from "../../clsx";
-import { AdvancedFilters, UIFilterRow } from "../themedAdvancedFilters";
+import { AdvancedFilters } from "../themedAdvancedFilters";
 import ThemedTimeFilter from "../themedTimeFilter";
 import ExportButton from "./exportButton";
 import ViewColumns from "./columns/viewColumns";

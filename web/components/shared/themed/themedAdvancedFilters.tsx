@@ -6,7 +6,6 @@ import {
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { ThemedTextDropDown } from "./themedTextDropDown";
 import {
-  Button,
   NumberInput,
   SearchSelect,
   SearchSelectItem,
@@ -19,12 +18,6 @@ import SaveFilterButton from "../../templates/dashboard/saveFilterButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 
 import FilterTreeEditor from "./FilterTreeEditor";
-import { useEffect, useState } from "react";
-import useSearchParams from "../utils/useSearchParams";
-import {
-  getRootFilterNode,
-  ROOT_FILTER_NODE,
-} from "../../../services/lib/filters/uiFilterRowTree";
 
 interface UIFilterRowNode {
   operator: "and" | "or";
@@ -32,161 +25,6 @@ interface UIFilterRowNode {
 }
 
 type UIFilterRowTree = UIFilterRowNode | UIFilterRow;
-
-// function FilterTreeEditor({
-//   uiFilterRowTree,
-//   onUpdate,
-// }: {
-//   uiFilterRowTree: UIFilterRowTree;
-//   onUpdate: (updatedTree: UIFilterRowTree) => void;
-// }) {
-//   const renderTree = (tree: UIFilterRowTree, path: number[] = []) => {
-//     if ("operator" in tree) {
-//       return (
-//         <div
-//           key={path.join("-")}
-//           className="ml-4 border-l-2 border-gray-200 pl-2"
-//         >
-//           <div className="flex items-center mb-2">
-//             <Select
-//               value={tree.operator}
-//               onValueChange={(value) => {
-//                 const updatedTree = {
-//                   ...tree,
-//                   operator: value as "and" | "or",
-//                 };
-//                 onUpdate(updateTree(uiFilterRowTree, path, updatedTree));
-//               }}
-//             >
-//               <SelectItem value="and">AND</SelectItem>
-//               <SelectItem value="or">OR</SelectItem>
-//             </Select>
-//             <button
-//               onClick={() => onUpdate(removeNode(uiFilterRowTree, path))}
-//               className="ml-2 text-red-600 hover:text-red-800"
-//             >
-//               <TrashIcon className="h-4" />
-//             </button>
-//           </div>
-//           {tree.rows.map((row, index) => (
-//             <div key={index}>{renderTree(row, [...path, index])}</div>
-//           ))}
-//           <button
-//             onClick={() => {
-//               const newRow = { filterMapIdx: 0, operatorIdx: 0, value: "some" };
-//               onUpdate(addNode(uiFilterRowTree, path, newRow));
-//             }}
-//             className="text-sm text-blue-600 hover:text-blue-800"
-//           >
-//             <PlusIcon className="h-4" /> Add Filter
-//           </button>
-//           <button
-//             onClick={() => {
-//               const newNode = { operator: "and", rows: [] };
-//               onUpdate(addNode(uiFilterRowTree, path, newNode));
-//             }}
-//             className="text-sm text-green-600 hover:text-green-800"
-//           >
-//             <PlusIcon className="h-4" /> Add Group
-//           </button>
-//         </div>
-//       );
-//     } else {
-//       return (
-//         <div key={path.join("-")} className="ml-4 flex items-center mb-2">
-//           <AdvancedFilterRow
-//             filter={tree}
-//             filterMap={[]}
-//             setFilter={(updatedFilter) => {
-//               onUpdate(updateTree(uiFilterRowTree, path, updatedFilter));
-//             }}
-//             onDeleteHandler={() => onUpdate(removeNode(uiFilterRowTree, path))}
-//             onSearchHandler={() => ({ error: "hello", data: null })}
-//           />
-//         </div>
-//       );
-//     }
-//   };
-
-//   return <div>{renderTree(uiFilterRowTree)}</div>;
-// }
-
-// Utility functions to manage the tree
-const updateTree = (
-  tree: UIFilterRowTree,
-  path: number[],
-  newNode: UIFilterRowTree
-): UIFilterRowTree => {
-  if (path.length === 0) return newNode;
-  const [head, ...tail] = path;
-  if ("operator" in tree) {
-    return {
-      ...tree,
-      rows: tree.rows.map((row, index) =>
-        index === head ? updateTree(row, tail, newNode) : row
-      ),
-    };
-  }
-  return tree;
-};
-
-const addNode = (
-  tree: UIFilterRowTree,
-  path: number[],
-  newNode: UIFilterRowNode
-): UIFilterRowTree => {
-  console.log("AddNode", tree, path, newNode);
-  const defaultFilter: UIFilterRow = {
-    filterMapIdx: 0,
-    operatorIdx: 0,
-    value: "",
-  };
-
-  if (path.length === 0) {
-    if ("operator" in tree) {
-      return {
-        ...tree,
-        rows: [...tree.rows, { ...newNode, rows: [defaultFilter] }],
-      };
-    }
-    return {
-      operator: "and",
-      rows: [tree, { ...newNode, rows: [defaultFilter] }],
-    };
-  }
-  const [head, ...tail] = path;
-  if ("operator" in tree) {
-    return {
-      ...tree,
-      rows: tree.rows.map((row, index) =>
-        index === head ? addNode(row, tail, newNode) : row
-      ),
-    };
-  }
-  return tree;
-};
-
-const removeNode = (tree: UIFilterRowTree, path: number[]): UIFilterRowTree => {
-  if (path.length === 1) {
-    if ("operator" in tree) {
-      return {
-        ...tree,
-        rows: tree.rows.filter((_, index) => index !== path[0]),
-      };
-    }
-    return tree;
-  }
-  const [head, ...tail] = path;
-  if ("operator" in tree) {
-    return {
-      ...tree,
-      rows: tree.rows.map((row, index) =>
-        index === head ? removeNode(row, tail) : row
-      ),
-    };
-  }
-  return tree;
-};
 
 export function AdvancedFilters({
   filterMap,
@@ -208,94 +46,7 @@ export function AdvancedFilters({
   savedFilters?: OrganizationFilter[];
   layoutPage: "dashboard" | "requests";
 }) {
-  const uiFilterRowTreeExampleSimple: UIFilterRowTree = {
-    operator: "and",
-    rows: [
-      {
-        filterMapIdx: 0,
-        operatorIdx: 0,
-        value: "hello",
-      },
-      {
-        filterMapIdx: 0,
-        operatorIdx: 0,
-        value: "world",
-      },
-    ],
-  };
-
-  const uiFilterRowTreeExampleNested1: UIFilterRowTree = {
-    operator: "and",
-    rows: [
-      {
-        operator: "and",
-        rows: [
-          {
-            filterMapIdx: 0,
-            operatorIdx: 0,
-            value: "hello",
-          },
-          {
-            filterMapIdx: 0,
-            operatorIdx: 0,
-            value: "hello",
-          },
-        ],
-      },
-      {
-        filterMapIdx: 0,
-        operatorIdx: 0,
-        value: "hello",
-      },
-    ],
-  };
-
   const [filterTree, setFilterTree] = [filters, setAdvancedFilters];
-  const searchParams = useSearchParams();
-
-  // useEffect(() => {
-  //   if (searchParams.get("filters") && !filterTree) {
-  //     const filters = JSON.parse(searchParams.get("filters") as string);
-  //     setFilterTree(filters);
-  //   }
-  //   if (filterTree) {
-  //     searchParams.set("filters", JSON.stringify(filterTree));
-  //   }
-  // }, [searchParams, filterTree]);
-
-  // useEffect(() => {
-  //   // Update filterTree when filters prop changes
-  //   setFilterTree({
-  //     operator: "and",
-  //     rows: filters.map((filter) => ({ ...filter })),
-  //   });
-  // }, [filters]);
-
-  const handleAddNode = () => {
-    console.log("filterTree", filterTree);
-    setFilterTree((prevTree) => {
-      console.log("prevTree", prevTree);
-      const defaultFilter: UIFilterRow = {
-        filterMapIdx: 0,
-        operatorIdx: 0,
-        value: "",
-      };
-
-      if ("operator" in prevTree) {
-        // If it's already an operator node, add a new node with a default filter to its rows
-        return {
-          ...prevTree,
-          rows: [...prevTree.rows, { operator: "and", rows: [defaultFilter] }],
-        };
-      } else {
-        // If it's a single filter, create an operator node with the existing filter and a new node with a default filter
-        return {
-          operator: "and",
-          rows: [prevTree, { operator: "and", rows: [defaultFilter] }],
-        };
-      }
-    });
-  };
 
   return (
     <div className="flex flex-col bg-white dark:bg-black p-4 rounded-lg border border-gray-300 dark:border-gray-700 mt-8">
@@ -317,45 +68,6 @@ export function AdvancedFilters({
         filterMap={filterMap}
         onSearchHandler={searchPropertyFilters}
       />
-
-      {/* <div>
-        <Button
-          onClick={handleAddNode}
-          variant="secondary"
-          size="sm"
-          className="mr-2"
-        >
-          Add Node
-        </Button>
-        <Button
-          onClick={() => {
-            setFilterTree(getRootFilterNode());
-          }}
-          variant="secondary"
-          size="sm"
-        >
-          Clear All
-        </Button>
-      </div> */}
-
-      <div className="flex flex-col gap-2 bg-white dark:bg-black space-y-2 mt-4">
-        {/* <button
-          onClick={() => {
-            // const prev = [...filters];
-            // setAdvancedFilters([
-            //   ...prev,
-            //   { filterMapIdx: 0, value: "", operatorIdx: 0 },
-            // ]);
-          }}
-          className="bg-white dark:bg-black ml-4 flex flex-row w-fit items-center justify-center font-normal text-sm text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100 px-4 py-2 rounded-lg"
-        >
-          <PlusIcon
-            className="mr-1 h-3.5 flex-none text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100"
-            aria-hidden="true"
-          />
-          Add Filter
-        </button> */}
-      </div>
       <div className="flex flex-row w-full items-end justify-end">
         {onSaveFilterCallback && (
           <SaveFilterButton
@@ -584,8 +296,8 @@ export function AdvancedFilterRow({
           }
         />
       </div>
-      <div className="flex flex-row justify-between items-center w-full pr-4 h-full">
-        <div className="w-full lg:w-fit mr-16 pb-1">
+      <div className="flex flex-row  justify-start items-center w-full pr-4 h-full">
+        <div className="w-full lg:w-fit mr-4 pb-1">
           <button
             onClick={onDeleteHandler}
             className="bg-red-700  text-white rounded-md p-1 hover:bg-red-500"
@@ -594,14 +306,15 @@ export function AdvancedFilterRow({
           </button>
         </div>
         {showAddFilter && showAddFilter === true && (
-          <Button
+          <button
             onClick={() => onAddFilter()}
-            variant="secondary"
-            size="xs"
-            color="black"
-            className="ml-2 border-[#D1D5DB]"
-            icon={PlusIcon}
-          />
+            className="border bg-gray-100 dark:bg-black border-gray-300 dark:border-gray-700 flex flex-row w-fit font-normal text-sm text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100 px-4 py-2 rounded-lg -mt-2 items-center justify-center"
+          >
+            <PlusIcon
+              className=" h-3.5 flex-none text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100"
+              aria-hidden="true"
+            />
+          </button>
         )}
       </div>
     </div>

@@ -407,11 +407,11 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
     if (layoutFilter !== null) {
-      onSetAdvancedFiltersHandler(layoutFilter?.filter, layoutFilter.id);
+      //onSetAdvancedFiltersHandler(layoutFilter?.filter, layoutFilter.id);
       setCurrFilter(layoutFilter?.id);
     } else {
       setCurrFilter(null);
-      onSetAdvancedFiltersHandler([], null);
+      //onSetAdvancedFiltersHandler([], null);
     }
   };
 

@@ -19,7 +19,6 @@ import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
 import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
 import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
-import { UIFilterRow } from "../themedAdvancedFilters";
 import {
   columnDefsToDragColumnItems,
   columnDefToDragColumnItem,

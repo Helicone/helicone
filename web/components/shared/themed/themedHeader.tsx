@@ -19,7 +19,7 @@ import {
   ArrowPathIcon,
   FunnelIcon,
 } from "@heroicons/react/24/outline";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
 import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
@@ -27,7 +27,7 @@ import { clsx } from "../clsx";
 import ThemedTimeFilter from "./themedTimeFilter";
 
 import { Column } from "../../ThemedTableV2";
-import { AdvancedFilters, UIFilterRow } from "./themedAdvancedFilters";
+import { AdvancedFilters } from "./themedAdvancedFilters";
 import ThemedModal from "./themedModal";
 import Link from "next/link";
 import { Result } from "../../../lib/result";

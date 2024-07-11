@@ -1,11 +1,7 @@
 import { useCallback, useState } from "react";
 
 import { useGetRequests } from "../../../services/hooks/requests";
-import {
-  filterListToTree,
-  FilterNode,
-  filterUIToFilterLeafs,
-} from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   getPropertyFilters,
   REQUEST_TABLE_FILTERS,
@@ -13,7 +9,6 @@ import {
   textWithSuggestions,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import getNormalizedRequest from "./builder/requestBuilder";
 import { useModels } from "../../../services/hooks/models";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";

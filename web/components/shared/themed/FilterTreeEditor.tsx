@@ -31,7 +31,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
       operatorIdx: 0,
       value: "",
     };
-    parentNode.rows.unshift(newFilter);
+    parentNode.rows.push(newFilter);
     onUpdate({ ...uiFilterRowTree });
   };
 
@@ -209,7 +209,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
       );
 
       return path.length === 1 ? (
-        <div className="flex flex-col bg-gray-100 dark:bg-black py-4 rounded-lg border border-gray-300 dark:border-gray-700">
+        <div className="flex flex-col bg-gray-100 dark:bg-black py-4 rounded-lg border border-gray-300 dark:border-gray-700 ">
           {filterRow}
         </div>
       ) : (

@@ -6,7 +6,6 @@ import { TextInput } from "@tremor/react";
 import { v4 as uuidv4 } from "uuid";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
-import { FunnelIcon } from "@heroicons/react/24/outline";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
 import { PlusIcon } from "@heroicons/react/24/solid";
