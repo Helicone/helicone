@@ -41,6 +41,7 @@ import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
 import useRequestsPageV2 from "./useRequestsPageV2";
 import {
+  getRootFilterNode,
   ROOT_FILTER_NODE,
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
@@ -194,8 +195,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
   const [timeRange, setTimeRange] = useState<TimeFilter>(getTimeRange());
 
-  const [advancedFilters, setAdvancedFilters] =
-    useState<UIFilterRowTree>(ROOT_FILTER_NODE);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
+    getRootFilterNode()
+  );
 
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
@@ -322,6 +324,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   }, [initialRequestId]);
 
+  // TODO
   // useEffect(() => {
   //   const currentAdvancedFilters = searchParams.get("filters");
 
@@ -336,48 +339,50 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   // }, [advancedFilters.length, filterMap, getAdvancedFilters, isDataLoading, searchParams]);
 
   //convert this using useCallback
-  const getAdvancedFilters = useCallback(() => {
-    function decodeFilter(encoded: string): UIFilterRow | null {
-      try {
-        const parts = encoded.split(":");
-        if (parts.length !== 3) return null;
-        const filterLabel = decodeURIComponent(parts[0]);
-        const operator = decodeURIComponent(parts[1]);
-        const value = decodeURIComponent(parts[2]);
 
-        const filterMapIdx = filterMap.findIndex(
-          (f) =>
-            f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
-        );
-        const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
-          (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
-        );
+  // TODO can i kill this?
+  // const getAdvancedFilters = useCallback(() => {
+  //   function decodeFilter(encoded: string): UIFilterRow | null {
+  //     try {
+  //       const parts = encoded.split(":");
+  //       if (parts.length !== 3) return null;
+  //       const filterLabel = decodeURIComponent(parts[0]);
+  //       const operator = decodeURIComponent(parts[1]);
+  //       const value = decodeURIComponent(parts[2]);
 
-        if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
+  //       const filterMapIdx = filterMap.findIndex(
+  //         (f) =>
+  //           f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
+  //       );
+  //       const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
+  //         (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
+  //       );
 
-        return { filterMapIdx, operatorIdx, value };
-      } catch (error) {
-        console.error("Error decoding filter:", error);
-        return null;
-      }
-    }
-    try {
-      const currentAdvancedFilters = searchParams.get("filters");
+  //       if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
 
-      if (currentAdvancedFilters) {
-        const filters = decodeURIComponent(currentAdvancedFilters).slice(1, -1);
-        const decodedFilters = filters
-          .split("|")
-          .map(decodeFilter)
-          .filter((filter) => filter !== null) as UIFilterRow[];
+  //       return { filterMapIdx, operatorIdx, value };
+  //     } catch (error) {
+  //       console.error("Error decoding filter:", error);
+  //       return null;
+  //     }
+  //   }
+  //   try {
+  //     const currentAdvancedFilters = searchParams.get("filters");
 
-        return decodedFilters;
-      }
-    } catch (error) {
-      console.error("Error decoding advanced filters:", error);
-    }
-    return [];
-  }, [searchParams, filterMap]);
+  //     if (currentAdvancedFilters) {
+  //       const filters = decodeURIComponent(currentAdvancedFilters).slice(1, -1);
+  //       const decodedFilters = filters
+  //         .split("|")
+  //         .map(decodeFilter)
+  //         .filter((filter) => filter !== null) as UIFilterRow[];
+
+  //       return decodedFilters;
+  //     }
+  //   } catch (error) {
+  //     console.error("Error decoding advanced filters:", error);
+  //   }
+  //   return [];
+  // }, [searchParams, filterMap]);
 
   // TODO
   // useEffect(() => {

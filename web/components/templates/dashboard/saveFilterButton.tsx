@@ -12,9 +12,10 @@ import { useOrg } from "../../layout/organizationContext";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
+import { UIFilterRowTree } from "../../../services/lib/filters/uiFilterRowTree";
 
 interface SaveFilterButtonProps {
-  filters: UIFilterRow[];
+  filters: UIFilterRowTree;
   onSaveFilterCallback: () => void;
   filterMap: SingleFilterDef<any>[];
   savedFilters?: OrganizationFilter[];
@@ -40,11 +41,11 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
   }
 
   const onSaveFilter = async (name: string) => {
-    if (filters.length > 0) {
+    if (filters) {
       const saveFilter: OrganizationFilter = {
         id: uuidv4(),
         name: name,
-        filter: filters,
+        filter: [filters],
         createdAt: new Date().toISOString(),
         softDelete: false,
       };
@@ -60,7 +61,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
             },
             body: {
               filterType: layoutPage,
-              filters: updatedFilters!,
+              filters: updatedFilters,
             },
           }
         );
@@ -96,10 +97,6 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
           setNotification("Filter created successfully", "success");
           setIsSaveFiltersModalOpen(false);
           onSaveFilterCallback();
-          const currentAdvancedFilters = encodeURIComponent(
-            JSON.stringify(filters.map(encodeFilter).join("|"))
-          );
-          searchParams.set("filters", currentAdvancedFilters);
         }
       }
     }
@@ -109,10 +106,6 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
     <>
       <button
         onClick={() => {
-          if (filters.length === 0) {
-            setNotification("Saved Filters can not be empty", "error");
-            return;
-          }
           setIsSaveFiltersModalOpen(true);
         }}
         className={clsx(
@@ -149,7 +142,9 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
             />
           </div>
           <ul>
-            {filters.map((filter, index) => {
+            {JSON.stringify(filters)}
+            {/*TODO */}
+            {/* {filters.map((filter, index) => {
               return (
                 <li key={index}>
                   <div className="flex flex-row gap-2 items-center">
@@ -170,7 +165,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
                   </div>
                 </li>
               );
-            })}
+            })} */}
           </ul>
           <div className="col-span-4 flex justify-end gap-2 pt-4">
             <button

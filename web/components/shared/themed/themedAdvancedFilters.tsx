@@ -21,7 +21,10 @@ import { OrganizationFilter } from "../../../services/lib/organization_layout/or
 import FilterTreeEditor from "./FilterTreeEditor";
 import { useEffect, useState } from "react";
 import useSearchParams from "../utils/useSearchParams";
-import { ROOT_FILTER_NODE } from "../../../services/lib/filters/uiFilterRowTree";
+import {
+  getRootFilterNode,
+  ROOT_FILTER_NODE,
+} from "../../../services/lib/filters/uiFilterRowTree";
 
 interface UIFilterRowNode {
   operator: "and" | "or";
@@ -196,7 +199,7 @@ export function AdvancedFilters({
 }: {
   filterMap: SingleFilterDef<any>[];
   filters: UIFilterRowTree;
-  setAdvancedFilters: (filters: UIFilterRowTree) => void;
+  setAdvancedFilters: React.Dispatch<React.SetStateAction<UIFilterRowTree>>;
   searchPropertyFilters: (
     property: string,
     search: string
@@ -326,7 +329,7 @@ export function AdvancedFilters({
         </Button>
         <Button
           onClick={() => {
-            setFilterTree(ROOT_FILTER_NODE);
+            setFilterTree(getRootFilterNode());
           }}
           variant="secondary"
           size="sm"
@@ -354,7 +357,7 @@ export function AdvancedFilters({
         </button> */}
       </div>
       <div className="flex flex-row w-full items-end justify-end">
-        {/* {onSaveFilterCallback && (
+        {onSaveFilterCallback && (
           <SaveFilterButton
             filters={filters}
             onSaveFilterCallback={onSaveFilterCallback}
@@ -362,7 +365,7 @@ export function AdvancedFilters({
             savedFilters={savedFilters}
             layoutPage={layoutPage}
           />
-        )} */}
+        )}
       </div>
     </div>
   );
