@@ -4,6 +4,8 @@ import React from "react";
 import Image from "next/image";
 import { AiOutlineDollarCircle } from "react-icons/ai";
 import { HiOutlineTableCells } from "react-icons/hi2";
+import { Row } from "@/components/common/row";
+import { Col } from "@/components/common/col";
 
 
 
@@ -29,32 +31,32 @@ export default function Essentials() {
                                 </button>
                             </div>
                             <div className="pl-4 pt-2">
-                                <div className="bg-white p-3 rounded-md gap-2">
-                                    <div className="flex justify-between py-2">
+                                <Col className="bg-white p-3 rounded-md gap-2">
+                                    <Row className="justify-between py-2">
                                         <p className="text-black font-semibold text-[9px]">Created At</p>
                                         <p className="text-black font-semibold text-[9px]">Status</p>
                                         <p className="text-black font-semibold text-[9px]">Latency</p>
                                         <p className="text-black font-semibold text-[9px]">Cost</p>
-                                    </div>
-                                    <div className="flex justify-between border rounded-md border-slate-200 bg-gray-50 p-2 mb-2 ">
+                                    </Row>
+                                    <Row className="justify-between border rounded-md border-slate-200 bg-gray-50 p-2 mb-2 ">
                                         <p className="text-black text-[9px]">June 1 11:07 AM</p>
                                         <p className="text-green-700 bg-green-50 font-medium border border-green-200 rounded-md text-[9px] px-2 ">Success</p>
                                         <p className="text-black text-[9px]">0.417 s</p>
                                         <p className="text-black text-[9px]">$0.000023</p>
-                                    </div>
-                                    <div className="flex justify-between border rounded-md border-slate-200 bg-gray-50 p-2 mb-2">
+                                    </Row>
+                                    <Row className="justify-between border rounded-md border-slate-200 bg-gray-50 p-2 mb-2">
                                         <p className="text-black text-[9px]">June 1 11:07 AM</p>
                                         <p className="text-green-700 bg-green-50 font-medium border border-green-200 rounded-md text-[9px] px-2">Success</p>
                                         <p className="text-black text-[9px]">0.333 s</p>
                                         <p className="text-black text-[9px]">$0.000016</p>
-                                    </div>
-                                    <div className="flex justify-between rounded-md border-slate-200 bg-gray-50 py-4 px-2 mb-2 opacity-25">
+                                    </Row>
+                                    <Row className="justify-between rounded-md border-slate-200 bg-gray-50 py-4 px-2 mb-2 opacity-25">
                                         <p className="text-black text-[9px]">June 1 11:05 AM</p>
                                         <p className="text-green-700 bg-green-50 font-medium border border-green-200 rounded-md text-[9px] px-2">Success</p>
                                         <p className="text-black text-[9px]">0.348 s</p>
                                         <p className="text-black text-[9px]">$0.000027</p>
-                                    </div>
-                                </div>
+                                    </Row>
+                                </Col>
                             </div>
                             <div className="p-4 bg-white ">
                                 <p className="text-2xl text-blue-600 font-semibold">Send requests in seconds</p>
