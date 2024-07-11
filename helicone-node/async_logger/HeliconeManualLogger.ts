@@ -6,7 +6,8 @@ export class HeliconeManualLogger {
   private startTime: number;
   private endTime: number | null = null;
 
-  private readonly LOGGING_ENDPOINT: string = "https://api.hconeai.com/custom/v1/log";
+  private readonly LOGGING_ENDPOINT: string =
+    "https://api.hconeai.com/custom/v1/log";
 
   constructor(opts: IHeliconeManualLogger) {
     this.apiKey = opts.apiKey;
@@ -15,9 +16,6 @@ export class HeliconeManualLogger {
   }
 
   public registerRequest(request: ILogRequest): void {
-    if (request.messages) {
-
-    }
     this.request = request;
   }
 
@@ -33,14 +31,14 @@ export class HeliconeManualLogger {
       const providerRequest: ProviderRequest = {
         url: "custom-model-nopath",
         json: this.request,
-        meta: meta ?? {}
-      }
+        meta: meta ?? {},
+      };
 
       const providerResponse: ProviderResponse = {
         headers: this.headers,
-        status: parseInt(meta ? (meta.status ?? "200") : "200"),
-        json: response
-      }
+        status: parseInt(meta ? meta.status ?? "200" : "200"),
+        json: response,
+      };
 
       const timing: Timing = {
         startTime: {
@@ -51,7 +49,7 @@ export class HeliconeManualLogger {
           seconds: Math.trunc(this.endTime / 1000),
           milliseconds: this.endTime % 1000,
         },
-      }
+      };
 
       const options = {
         method: "POST",
@@ -63,7 +61,7 @@ export class HeliconeManualLogger {
         body: JSON.stringify({
           providerRequest,
           providerResponse,
-          timing
+          timing,
         }),
       };
 
@@ -79,7 +77,6 @@ export class HeliconeManualLogger {
     }
   }
 }
-
 
 /*
  * Type Definitions
@@ -116,27 +113,13 @@ type Timing = {
 type IHeliconeManualLogger = {
   apiKey: string;
   headers?: Record<string, string>;
-}
+};
 
-type BaseRequest = {
-  model: string,
-  temperature?: number;
-  max_tokens?: number;
-  stream?: boolean;
-}
-
-type MessageBody = {
-  messages: Array<{
-    role: "system" | "user" | "assistant",
-    content: string
-  }>;
-}
-
-type StringBody = {
-  input: string;
-}
-
-type ILogRequest = BaseRequest & (MessageBody | StringBody);
+type ILogRequest = {
+  model: string;
+} & {
+  [key: string]: any;
+};
 
 type ILogResponse = {
   id: string;
@@ -150,10 +133,10 @@ type ILogResponse = {
       role: string;
       content: string;
     };
-  }>
+  }>;
   usage?: {
     prompt_tokens: number;
     completion_tokens: number;
     total_tokens: number;
-  }
-}
+  };
+};
