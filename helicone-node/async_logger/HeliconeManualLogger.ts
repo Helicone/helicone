@@ -15,6 +15,9 @@ export class HeliconeManualLogger {
   }
 
   public registerRequest(request: ILogRequest): void {
+    if (request.messages) {
+
+    }
     this.request = request;
   }
 
@@ -115,16 +118,25 @@ type IHeliconeManualLogger = {
   headers?: Record<string, string>;
 }
 
-type ILogRequest = {
+type BaseRequest = {
   model: string,
-  prompt: Array<{
-    role: "system" | "user" | "assistant",
-    content: string
-  }> | string;
   temperature?: number;
   max_tokens?: number;
   stream?: boolean;
 }
+
+type MessageBody = {
+  messages: Array<{
+    role: "system" | "user" | "assistant",
+    content: string
+  }>;
+}
+
+type StringBody = {
+  input: string;
+}
+
+type ILogRequest = BaseRequest & (MessageBody | StringBody);
 
 type ILogResponse = {
   id: string;
