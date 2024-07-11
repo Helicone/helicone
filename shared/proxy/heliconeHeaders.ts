@@ -1,4 +1,5 @@
-import { InternalHeaders } from "./types/internalHeaders";
+import { getValidUUID } from "../../valhalla/jawn/src/lib/utils/getValidUUID";
+import { IInternalHeaders } from "./types/internalHeaders";
 
 type Nullable<T> = T | null;
 
@@ -61,7 +62,7 @@ export interface IHeliconeHeaders {
   webhookEnabled: boolean;
 }
 
-export class HeliconeHeaders<T extends InternalHeaders>
+export class HeliconeHeaders<T extends IInternalHeaders>
   implements IHeliconeHeaders
 {
   heliconeProperties: Record<string, string>;
@@ -108,7 +109,9 @@ export class HeliconeHeaders<T extends InternalHeaders>
   lytixKey: Nullable<string>;
 
   constructor(private headers: T) {
-    const heliconeHeaders = this.getHeliconeHeaders();
+    const heliconeHeaders = this.getHeliconeHeaders({
+      getValidUUID: getValidUUID,
+    });
     this.heliconeAuth = heliconeHeaders.heliconeAuth;
     this.heliconeAuthV2 = heliconeHeaders.heliconeAuthV2;
     this.rateLimitPolicy = heliconeHeaders.rateLimitPolicy;
@@ -223,10 +226,12 @@ export class HeliconeHeaders<T extends InternalHeaders>
     return null;
   }
 
-  private getHeliconeHeaders(): IHeliconeHeaders {
-    const requestId = this.getValidUUID(
-      this.headers.get("Helicone-Request-Id")
-    );
+  private getHeliconeHeaders({
+    getValidUUID,
+  }: {
+    getValidUUID: (uuid: string | undefined | null) => string;
+  }): IHeliconeHeaders {
+    const requestId = getValidUUID(this.headers.get("Helicone-Request-Id"));
     return {
       heliconeAuth: this.headers.get("helicone-auth") ?? null,
       heliconeAuthV2: this.getHeliconeAuthV2(),
@@ -338,14 +343,5 @@ export class HeliconeHeaders<T extends InternalHeaders>
     }
 
     return heliconePropertyHeaders;
-  }
-
-  getValidUUID(uuid: string | undefined | null): string {
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (uuid && uuidRegex.test(uuid)) {
-      return uuid;
-    }
-    return crypto.randomUUID();
   }
 }

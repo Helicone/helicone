@@ -1,4 +1,10 @@
-export class InternalHeaders {
+export interface IInternalHeaders {
+  get: (key: string) => string | null;
+  set: (key: string, value: string) => void;
+  entries: () => IterableIterator<[string, string]>;
+}
+
+export class InternalHeaders implements IInternalHeaders {
   private headers: Record<string, string>;
 
   constructor(headers: Record<string, string>) {

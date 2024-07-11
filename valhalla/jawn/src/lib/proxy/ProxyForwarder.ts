@@ -67,6 +67,7 @@ export async function proxyForwarder(
   } catch (e) {
     console.error("Error logging", e);
   }
+  // const tex;
 
   return response;
 }

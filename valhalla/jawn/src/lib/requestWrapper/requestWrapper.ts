@@ -15,6 +15,7 @@ import { Request } from "express";
 import { Readable as ReadableStream } from "stream";
 import { Headers } from "node-fetch";
 import { getAndStoreInCache } from "../cache/staticMemCache";
+import { hashAuth } from "../db/hash";
 
 export type RequestHandlerType =
   | "proxy_only"

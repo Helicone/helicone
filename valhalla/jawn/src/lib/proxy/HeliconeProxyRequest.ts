@@ -1,4 +1,4 @@
-import { IHeliconeHeaders } from "../../models/HeliconeHeaders";
+import { IHeliconeHeaders } from "../../../../../shared/proxy/heliconeHeaders";
 import { Provider } from "../../models/models";
 import { approvedDomains } from "../../packages/cost/providers/mappings";
 import { TemplateWithInputs, parseJSXObject } from "../../utils/promptHelpers";

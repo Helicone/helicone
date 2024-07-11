@@ -1,4 +1,4 @@
-import { HeliconeHeaders } from "../../models/HeliconeHeaders";
+import { HeliconeHeaders } from "../../../../../shared/proxy/heliconeHeaders";
 import { Provider } from "../../models/models";
 import { TemplateWithInputs } from "../../utils/promptHelpers";
 import { PromptSettings } from "../requestWrapper/requestWrapper";
@@ -96,7 +96,7 @@ export class DBLoggable {
     },
     authParams: AuthParams,
     orgParams: OrgParams,
-    requestHeaders?: HeliconeHeaders
+    requestHeaders?: HeliconeHeaders<Headers>
   ) {
     // TODO: Add logging rate limiting
     if (
