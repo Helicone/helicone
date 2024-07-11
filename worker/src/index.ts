@@ -9,9 +9,6 @@ import { AlertManager } from "./lib/managers/AlertManager";
 import { AlertStore } from "./lib/db/AlertStore";
 import { ClickhouseClientWrapper } from "./lib/db/ClickhouseWrapper";
 import { ProviderName } from "./packages/cost/providers/mappings";
-import { sharedFunction } from "shared-lib";
-
-sharedFunction();
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -234,7 +231,6 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
-    console.log(hello);
     try {
       const requestWrapper = await RequestWrapper.create(request, env);
       if (requestWrapper.error || !requestWrapper.data) {

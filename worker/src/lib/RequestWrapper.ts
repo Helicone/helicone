@@ -5,9 +5,9 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from "..";
 import { Database } from "../../supabase/database.types";
-import { HeliconeAuth } from "./db/DBWrapper";
+import { HeliconeAuth } from "../../../shared/proxy/types/heliconeAuth";
 import { Result, err, map, mapPostgrestErr, ok } from "./util/results";
-import { HeliconeHeaders } from "./models/HeliconeHeaders";
+import { HeliconeHeaders } from "../../../shared/proxy/heliconeHeaders";
 import {
   checkLimits,
   checkLimitsSingle,
@@ -15,6 +15,7 @@ import {
 import { getAndStoreInCache } from "./util/cache/secureCache";
 import { parseJSXObject } from "../api/lib/promptHelpers";
 import { CfProperties } from "@cloudflare/workers-types";
+import { Headers } from "@cloudflare/workers-types";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -37,7 +38,7 @@ export type PromptSettings =
 export class RequestWrapper {
   private authorization: string | undefined;
   url: URL;
-  heliconeHeaders: HeliconeHeaders;
+  heliconeHeaders: HeliconeHeaders<Headers>;
   providerAuth: string | undefined;
   headers: Headers;
   heliconeProxyKeyId: string | undefined;

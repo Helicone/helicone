@@ -3,17 +3,17 @@
 // without modifying the request object itself.
 // This also allows us to not have to redefine other objects repetitively like URL.
 
-import { HeliconeAuth } from ".";
-import { HeliconeHeaders } from "../../models/HeliconeHeaders";
+import { HeliconeHeaders } from "../../../../../shared/proxy/heliconeHeaders";
 import { parseJSXObject } from "../../utils/promptHelpers";
-import { hashAuth } from "../../utils/hash";
+import { HeliconeAuth } from "../../../../../shared/proxy/types/heliconeAuth";
 import { Result, err, map, mapPostgrestErr, ok } from "../shared/result";
 import { supabaseServer } from "../db/supabase";
 
 import { usageLimitManager } from "../../managers/UsageLimitManager";
 import { Request } from "express";
-import { Headers } from "node-fetch";
+
 import { Readable as ReadableStream } from "stream";
+import { Headers } from "node-fetch";
 import { getAndStoreInCache } from "../cache/staticMemCache";
 
 export type RequestHandlerType =
@@ -29,7 +29,7 @@ export type PromptSettings =
 export class RequestWrapper {
   private authorization: string | undefined;
   url: URL;
-  heliconeHeaders: HeliconeHeaders;
+  heliconeHeaders: HeliconeHeaders<Headers>;
   providerAuth: string | undefined;
   headers: Headers;
   heliconeProxyKeyId: string | undefined;

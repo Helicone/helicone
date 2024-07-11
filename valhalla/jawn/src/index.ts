@@ -21,7 +21,7 @@ import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
-import { hello } from "../../../shared-lib/hello";
+import { hello } from "../../../shared/hello";
 
 console.log(hello);
 
