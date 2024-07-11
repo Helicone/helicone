@@ -1,8 +1,8 @@
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
-import { SessionContextProvider } from "@supabase/auth-helpers-react";
+import { SessionContextProvider, useUser } from "@supabase/auth-helpers-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProps } from "next/app";
-import { ReactElement, ReactNode, useState } from "react";
+import { ReactElement, ReactNode, useEffect, useState } from "react";
 import Notification from "../components/shared/notification/Notification";
 import { NotificationProvider } from "../components/shared/notification/NotificationContext";
 import "../node_modules/react-grid-layout/css/styles.css";
@@ -15,7 +15,10 @@ import { NextPage } from "next";
 import posthog from "posthog-js";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { OrgContextProvider } from "../components/layout/organizationContext";
+import {
+  OrgContextProvider,
+  useOrg,
+} from "../components/layout/organizationContext";
 import { ThemeContextProvider } from "../components/shared/theme/themeContext";
 import Script from "next/script";
 
@@ -47,6 +50,29 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
 
   const trackingEnabled = process.env.NEXT_PUBLIC_TRACKING_ENABLED || false;
+
+  const user = useUser();
+  const org = useOrg();
+
+  useEffect(() => {
+    if (user) {
+      posthog.identify(user.id, {
+        email: user.email,
+        name: user.user_metadata?.name,
+      });
+    }
+
+    if (org?.currentOrg) {
+      posthog.group("organization", org.currentOrg.id, {
+        name: org.currentOrg.name,
+        tier: org.currentOrg.tier,
+        stripe_customer_id: org.currentOrg.stripe_customer_id,
+        organization_type: org.currentOrg.organization_type,
+        size: org.currentOrg.size,
+        date_joined: org.currentOrg.created_at,
+      });
+    }
+  }, [user, org]);
 
   return (
     <>

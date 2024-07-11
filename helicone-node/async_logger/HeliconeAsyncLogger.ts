@@ -1,125 +1,89 @@
-import { IHeliconeAsyncClientOptions } from "../core/HeliconeClientOptions";
-import { fetch, Response } from "@whatwg-node/fetch";
+import * as traceloop from "@traceloop/node-server-sdk";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 
-export type HeliconeAsyncLogRequest = {
-  providerRequest: ProviderRequest;
-  providerResponse: ProviderResponse;
-  timing: Timing;
-};
+import OpenAI from "openai";
+import * as anthropic from "@anthropic-ai/sdk";
+import * as azureOpenAI from "@azure/openai";
+import * as cohere from "cohere-ai";
+import * as bedrock from "@aws-sdk/client-bedrock-runtime";
+import * as google_aiplatform from "@google-cloud/aiplatform";
+import * as ChainsModule from "langchain/chains";
+import * as AgentsModule from "langchain/agents";
+import * as ToolsModule from "langchain/tools";
 
-export type ProviderRequest = {
-  url: string;
-  json: {
-    [key: string]: any;
+type IHeliconeAsyncLoggerOptions = {
+  apiKey: string;
+  baseUrl?: string;
+  providers: {
+    openAI?: typeof OpenAI;
+    anthropic?: typeof anthropic;
+    azureOpenAI?: typeof azureOpenAI;
+    cohere?: typeof cohere;
+    bedrock?: typeof bedrock;
+    google_aiplatform?: typeof google_aiplatform;
+    langchain?: {
+      chainsModule?: typeof ChainsModule;
+      agentsModule?: typeof AgentsModule;
+      toolsModule?: typeof ToolsModule;
+    };
   };
-  meta: Record<string, string>;
+  headers?: Record<string, string>;
 };
-
-export type ProviderResponse = {
-  json: {
-    [key: string]: any;
-  };
-  status: number;
-  headers: Record<string, string>;
-};
-
-export type Timing = {
-  // From Unix epoch in Milliseconds
-  startTime: {
-    seconds: number;
-    milliseconds: number;
-  };
-  endTime: {
-    seconds: number;
-    milliseconds: number;
-  };
-};
-
-export enum Provider {
-  OPENAI = "openai",
-  AZURE_OPENAI = "azure-openai",
-  ANTHROPIC = "anthropic",
-  CUSTOM_MODEL = "custom-model",
-}
 
 export class HeliconeAsyncLogger {
-  private options: IHeliconeAsyncClientOptions;
-  constructor(options: IHeliconeAsyncClientOptions) {
-    this.options = options;
+  private apiKey: string;
+  private baseUrl: string;
+  private openAI?: typeof OpenAI;
+  private anthropic?: typeof anthropic;
+  private azureOpenAI?: typeof azureOpenAI;
+  private cohere?: typeof cohere;
+  private bedrock?: typeof bedrock;
+  private google_aiplatform?: typeof google_aiplatform;
+  private chainsModule?: typeof ChainsModule;
+  private agentsModule?: typeof AgentsModule;
+  private toolsModule?: typeof ToolsModule;
+  private headers?: Partial<Record<string, unknown>>;
+
+  constructor(opts: IHeliconeAsyncLoggerOptions) {
+    this.apiKey = opts.apiKey;
+    this.baseUrl = opts.baseUrl ?? "https://api.helicone.ai/v1/trace/log";
+    this.openAI = opts.providers?.openAI ?? undefined;
+    this.anthropic = opts.providers?.anthropic ?? undefined;
+    this.azureOpenAI = opts.providers?.azureOpenAI ?? undefined;
+    this.cohere = opts.providers?.cohere ?? undefined;
+    this.bedrock = opts.providers?.bedrock ?? undefined;
+    this.google_aiplatform = opts.providers?.google_aiplatform ?? undefined;
+    this.chainsModule = opts.providers?.langchain?.chainsModule ?? undefined;
+    this.agentsModule = opts.providers?.langchain?.agentsModule ?? undefined;
+    this.toolsModule = opts.providers?.langchain?.toolsModule ?? undefined;
+    this.headers = opts.headers;
   }
 
-  async log(
-    asyncLogModel: HeliconeAsyncLogRequest,
-    provider: Provider
-  ): Promise<Response | undefined> {
-    const basePath = this.options.heliconeMeta.baseUrl;
-    if (!basePath) {
-      console.error("Failed to log to Helicone: Base path is undefined");
-      return;
-    }
-
-    const url = HeliconeAsyncLogger.getUrlForProvider(basePath, provider);
-    if (!url) return;
-    let response: Response;
-    try {
-      const options = {
-        method: "POST",
+  init() {
+    traceloop.initialize({
+      apiKey: this.apiKey,
+      baseUrl: this.baseUrl,
+      disableBatch: true,
+      exporter: new OTLPTraceExporter({
+        url: this.baseUrl,
         headers: {
-          Authorization: `Bearer ${this.options.heliconeMeta.apiKey}`,
-          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.apiKey}`,
+          ...this.headers,
         },
-        body: JSON.stringify(asyncLogModel),
-      };
-      response = await fetch(url, options);
-    } catch (error: any) {
-      console.error(
-        "Error making request to Helicone log endpoint:",
-        error?.message,
-        error
-      );
-
-      return;
-    }
-
-    const consumerResponse = new Response(await response.text(), response);
-    const onHeliconeLog = this.options.heliconeMeta?.onLog;
-    if (onHeliconeLog) {
-      onHeliconeLog(consumerResponse);
-    }
-
-    return response;
-  }
-
-  static createTiming(startTime: number, endTime: number) {
-    return {
-      startTime: {
-        seconds: Math.floor(startTime / 1000),
-        milliseconds: startTime % 1000,
+      }),
+      instrumentModules: {
+        openAI: this.openAI ?? undefined,
+        anthropic: this.anthropic ?? undefined,
+        azureOpenAI: this.azureOpenAI ?? undefined,
+        cohere: this.cohere ?? undefined,
+        bedrock: this.bedrock ?? undefined,
+        google_aiplatform: this.google_aiplatform ?? undefined,
+        langchain: {
+          chainsModule: this.chainsModule ?? undefined,
+          agentsModule: this.agentsModule ?? undefined,
+          toolsModule: this.toolsModule ?? undefined,
+        },
       },
-      endTime: {
-        seconds: Math.floor(endTime / 1000),
-        milliseconds: endTime % 1000,
-      },
-    };
-  }
-
-  static getUrlForProvider(
-    basePath: string,
-    provider: Provider
-  ): string | null {
-    switch (provider) {
-      case Provider.CUSTOM_MODEL:
-        const urlObj = new URL(basePath);
-        urlObj.pathname = "/custom/v1/log";
-        return urlObj.toString();
-      case Provider.OPENAI:
-      case Provider.AZURE_OPENAI:
-        return `${basePath}/oai/v1/log`;
-      case Provider.ANTHROPIC:
-        return `${basePath}/anthropic/v1/log`;
-      default:
-        console.error("Failed to log to Helicone: Provider not supported");
-        return null;
-    }
+    });
   }
 }

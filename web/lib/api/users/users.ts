@@ -20,6 +20,7 @@ export interface UserMetric {
   average_requests_per_day_active: number;
   average_tokens_per_request: number;
   cost: number;
+  rate_limited_count: number;
 }
 
 export async function userMetrics(
@@ -65,7 +66,8 @@ SELECT
   (sum(r.prompt_tokens) + sum(r.completion_tokens)) / count(r.request_id) as average_tokens_per_request,
   sum(r.completion_tokens) as total_completion_tokens,
   sum(r.prompt_tokens) as total_prompt_token,
-  (${clickhousePriceCalc("r")}) as cost
+  (${clickhousePriceCalc("r")}) as cost,
+  sum(CASE WHEN r.properties['Helicone-Rate-Limit-Status'] = 'rate_limited' THEN 1 ELSE 0 END) as rate_limited_count
 from request_response_versioned r
 WHERE (${builtFilter.filter})
 GROUP BY r.user_id

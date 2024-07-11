@@ -895,6 +895,9 @@
 			},
 			"HeliconeMeta": {
 				"properties": {
+					"lytixKey": {
+						"type": "string"
+					},
 					"posthogHost": {
 						"type": "string"
 					},
@@ -1631,6 +1634,43 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/UpdateOrganizationParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/onboard": {
+			"post": {
+				"operationId": "OnboardOrganization",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {},
+								"type": "object"
 							}
 						}
 					}

@@ -1,28 +1,31 @@
 ---
 title: "Getting User Requests"
-description: "Get user-specific requests using the Request API. "
+sidebarTitle: "User Requests"
+description: "Use the Request API to retrieve user-specific requests, allowing you to monitor, debug, and track costs for individual users."
+"twitter:title": "Getting User Requests - Helicone OSS LLM Observability"
 ---
 
-import QuestionsSection from '/snippets/questions-section.mdx';
-
+import QuestionsSection from "/snippets/questions-section.mdx";
 
 The [Request API](/rest/request/post-v1requestquery) allows you to build a request, where you can specify filtering criteria to retrieve all requests made by a user.
 
 <Frame>
- <img src="/images/use-cases/example-user-request.png" />
+  <img
+    src="/images/use-cases/example-user-request.png"
+    alt="Helicone Request API example showing how you can built a request and specify filtering criteria and other advanced capabilities."
+  />
 </Frame>
 
 ## Use Cases
 
-- Monitor your user's usage pattern and behavior. 
-- Access user-specific requests to pinpoint the errors and bebug more efficiently. 
+- Monitor your user's usage pattern and behavior.
+- Access user-specific requests to pinpoint the errors and bebug more efficiently.
 - Track requests and costs per user to facilitate better cost control.
 - Detect unusual or potentially harmful user behaviors.
 
+## Retrieving Requests by User ID
 
-## Retrieving Requests by User ID  
-
-Here's an example to get all the requests where `user_id` is `abc@email.com`. 
+Here's an example to get all the requests where `user_id` is `abc@email.com`.
 
 ```bash
 curl --request POST \
@@ -33,21 +36,23 @@ curl --request POST \
   "filter": {
     "request": {
       "user_id": {
-        "equals": "abc@email.com" 
+        "equals": "abc@email.com"
       }
     }
   }
 }'
 ```
 
-<Tip>By using the [Request API](/rest/request/post-v1requestquery), the code snippet will dynamically populate on the page, so you can copy and paste. </Tip>
+<Tip>
+  By using the [Request API](/rest/request/post-v1requestquery), the code
+  snippet will dynamically populate on the page, so you can copy and paste.{" "}
+</Tip>
 
-
-## Adding Additional Filters  
+## Adding Additional Filters
 
 You can structure your query to add any number of filters.
 
-**Note**: To add multiple filters, change the filter to a branch and nest the ANDs/ORs as an abstract syntax tree. 
+**Note**: To add multiple filters, change the filter to a branch and nest the ANDs/ORs as an abstract syntax tree.
 
 ```bash
 curl --request POST \

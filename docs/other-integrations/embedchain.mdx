@@ -1,0 +1,56 @@
+---
+title: "Mem0 Embedchain Integration"
+sidebarTitle: "Mem0 Embedchain"
+description: "Integrate Helicone with Embedchain, an Open Source Framework for personalizing LLM responses. Monitor interactions across different LLMs in AI applications."
+"twitter:title": "Mem0 Embedchain Integration - Helicone OSS LLM Observability"
+---
+
+## Introduction
+
+Mem0 Embedchain is an Open Source Framework for personalizing LLM responses. It makes it easy to create and deploy personalized AI apps.
+
+Integrating Helicone with Mem0 Embedchain allows you to monitor interactions across different LLMs in AI applications.
+
+## Integration Steps
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into [Helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+
+    <Note>
+      Make sure to generate a [write only API key](helicone-headers/helicone-auth).
+    </Note>
+
+  </Step>
+  <Step title="Set base_url in the your code">
+You can configure your base_url and OpenAI API key in your codebase
+  <CodeGroup>
+
+```python main.py
+import os
+from embedchain import App
+
+# Modify the base path and add a Helicone URL
+os.environ["OPENAI_API_BASE"] = "https://oai.helicone.ai/{YOUR_HELICONE_API_KEY}/v1"
+# Add your OpenAI API Key
+os.environ["OPENAI_API_KEY"] = "{YOUR_OPENAI_API_KEY}"
+
+app = App()
+
+# Add data to your app
+app.add("https://en.wikipedia.org/wiki/Elon_Musk")
+
+# Query your app
+print(app.query("How many companies did Elon found? Which companies?"))
+```
+
+</CodeGroup>
+
+  </Step>
+  <Step title="Now you can see all passing requests through Embedchain in Helicone">
+    <img src="/images/helicone-embedchain.png" alt="Embedchain requests" />
+  </Step>
+</Steps>
+
+Check out the [Embedchain](https://github.com/embedchain/embedchain) GitHub repository for more information and examples.

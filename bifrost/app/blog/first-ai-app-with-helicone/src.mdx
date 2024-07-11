@@ -7,7 +7,7 @@ time: "6 minute read"
 icon: "code"
 ---
 
-![Our Designer made an AI app with Helicone](/static/blog/first-ai-app/lina-first-ai-app.png)
+![Our Designer made an AI app with Helicone](/static/blog/first-ai-app/lina-first-ai-app.webp)
 
 Heya! My name is Lina, I'm a product designer at Helicone and have recently joined the team. 
 
@@ -20,7 +20,7 @@ I've always been interested in designing for people and creating delight in digi
 Over the course of a week, I bothered Justin (CEO of Helicone) and begged him to teach me how to create an **<span style={{color: '#0ea5e9'}}>Emoji Translator</span>** - an app that uses AI to interpret and translate text messages into emoji expressions. The app will suggest relevant emojis based on the sentiment you want to convey. Eventually, you can send emojis back and forth with your friends - this is just for fun by the way, and probably doesn't solve any actual problems.
 
 
-![Emoji translater](/static/blog/first-ai-app/emoji-converter.png)
+![Emoji translater](/static/blog/first-ai-app/emoji-converter.webp)
 
 
 
@@ -34,7 +34,7 @@ As a non-technical user, whenever I encounter a product that requires me to use 
 
 **<span style={{color: '#0ea5e9'}}>With Helicone, the integration was pretty straightforward.</span>** I just had to change my endpoint from Open AI to the Open AI custom domain that Helicone provided: `https://oai.hconeai.com/v1` and it stored all my AI requests in an exportable table.
 
-![1-line integration](/static/blog/first-ai-app/integration.png)
+![1-line integration](/static/blog/first-ai-app/integration.webp)
 
 **Onboarding**
 
@@ -58,7 +58,7 @@ I decided to integrate with every Helicone feature, just for fun. I'll walk thro
 
 **Impact:** What was cool was being able to see how the new prompt compares to the production prompt, and see the output in almost split seconds without having to touch my code. Once I was happy with the updated prompt, that's when I updated the prompt in my codebase. 
 
-![Helicone's Experiment feature tracks prompt version automatically and allows you to test prompts without touching production code.](/static/blog/first-ai-app/compare-experiments.png)
+![Helicone's Experiment feature tracks prompt version automatically and allows you to test prompts without touching production code.](/static/blog/first-ai-app/compare-experiments.webp)
 
 Now, whenever I change my prompt in production, Helicone detects it automatically and keeps track of the version history for me. *The prompts and experiments feature could be really useful to do prompt regression test more easily.*
 
@@ -70,11 +70,11 @@ Now, whenever I change my prompt in production, Helicone detects it automaticall
 
 **Solution:** I added a `User` custom property and assigned my name to all the requests sent by me. As soon as the requests were received, I'm able to filter all requests by the user property on the "Requests" page. 
 
-![Helicone's Custom Properties allows you to filter and segment your data easily.](/static/blog/first-ai-app/custom-properties.png)
+![Helicone's Custom Properties allows you to filter and segment your data easily.](/static/blog/first-ai-app/custom-properties.webp)
 
 As a bonus, I'm able to view my detailed usage when I head to the “Users” tab which includes the `total cost`, `number of requests made` and a log of requests made by me, in this case (<a href="https://docs.helicone.ai/features/advanced-usage/custom-properties" target="_blank" rel="noopener noreferrer">doc</a>).    
 
-![Helicone's User Metrics show the detailed metrics by users.](/static/blog/first-ai-app/user-metrics.png)
+![Helicone's User Metrics show the detailed metrics by users.](/static/blog/first-ai-app/user-metrics.webp)
 
 **Impact:** This feature lends itself to let you do a ton of fun things like segmenting requests by user types, especially if you have user tiers like *free* v.s. *premium*, or if your app has multiple features that use the LLM, then you can use custom properties to specify which feature the requests were coming from, or even where in the world the requests are coming from - if you specific the geographical location as a custom property. 
 
@@ -101,7 +101,7 @@ As a bonus, I'm able to view my detailed usage when I head to the “Users” ta
 
 ### Rating Helicone
 
-![Rating Helicone's Dashboard](/static/blog/first-ai-app/helicone-dashboard.png)
+![Rating Helicone's Dashboard](/static/blog/first-ai-app/helicone-dashboard.webp)
 
 
 **Integration**

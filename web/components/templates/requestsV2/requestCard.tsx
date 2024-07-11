@@ -1,20 +1,13 @@
 import { useState } from "react";
-import { formatNumber } from "../users/initialColumns";
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
-import ModelPill from "./modelPill";
-import StatusBadge from "./statusBadge";
-import {
-  HandThumbUpIcon as HTUp,
-  HandThumbDownIcon as HTDown,
-} from "@heroicons/react/24/solid";
-import {
-  HandThumbDownIcon,
-  HandThumbUpIcon,
-} from "@heroicons/react/24/outline";
-import { clsx } from "../../shared/clsx";
 import { updateRequestFeedback } from "../../../services/lib/requests";
 import useNotification from "../../shared/notification/useNotification";
+import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
+import { formatNumber } from "../users/initialColumns";
+import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import CostPill from "./costPill";
+import { CustomProperties } from "./customProperties";
+import ModelPill from "./modelPill";
+import StatusBadge from "./statusBadge";
 
 interface RequestCardProps {
   request: NormalizedRequest;
@@ -67,39 +60,10 @@ const RequestCard = (props: RequestCardProps) => {
               errorCode={request.status.code}
             />
           </div>
-
-          <div className="flex flex-row items-center space-x-4">
-            <button
-              onClick={() => {
-                if (requestFeedback.rating === true) {
-                  return;
-                }
-
-                updateFeedbackHandler(request.id, true);
-              }}
-            >
-              {requestFeedback.rating === true ? (
-                <HTUp className={clsx("h-5 w-5 text-green-500")} />
-              ) : (
-                <HandThumbUpIcon className="h-5 w-5 text-green-500" />
-              )}
-            </button>
-            <button
-              onClick={() => {
-                if (requestFeedback.rating === false) {
-                  return;
-                }
-
-                updateFeedbackHandler(request.id, false);
-              }}
-            >
-              {requestFeedback.rating === false ? (
-                <HTDown className={clsx("h-5 w-5 text-red-500")} />
-              ) : (
-                <HandThumbDownIcon className="h-5 w-5 text-red-500" />
-              )}
-            </button>
-          </div>
+          <FeedbackButtons
+            requestId={request.id}
+            defaultValue={request.feedback.rating}
+          />
         </div>
 
         <div className="flex flex-wrap gap-4 items-center">
@@ -130,25 +94,13 @@ const RequestCard = (props: RequestCardProps) => {
               {request.promptTokens})
             </span>
           </p>
-          {request.customProperties &&
-            properties.length > 0 &&
-            Object.keys(request.customProperties).length > 0 && (
-              <>
-                {properties.map((property, i) => {
-                  if (
-                    request.customProperties &&
-                    request.customProperties.hasOwnProperty(property)
-                  ) {
-                    return (
-                      <p className="text-sm" key={i}>
-                        <span className="font-semibold">{property}:</span>{" "}
-                        {request.customProperties[property] as string}
-                      </p>
-                    );
-                  }
-                })}
-              </>
-            )}
+
+          {request.customProperties && properties.length > 0 && (
+            <CustomProperties
+              customProperties={request.customProperties as any}
+              properties={properties}
+            />
+          )}
         </div>
       </div>
       <div className="w-full max-w-3xl">{request.render()}</div>

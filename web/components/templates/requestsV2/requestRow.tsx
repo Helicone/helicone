@@ -1,31 +1,24 @@
 import {
   ArrowPathIcon,
-  HandThumbDownIcon,
-  HandThumbUpIcon,
   InformationCircleIcon,
   MinusIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
-import { useRouter } from "next/router";
+import { TextInput } from "@tremor/react";
 import { useEffect, useState } from "react";
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
-import ModelPill from "./modelPill";
-import StatusBadge from "./statusBadge";
-import { clsx } from "../../shared/clsx";
-import {
-  HandThumbUpIcon as HTUp,
-  HandThumbDownIcon as HTDown,
-} from "@heroicons/react/24/solid";
 import {
   addRequestLabel,
   addRequestScore,
-  updateRequestFeedback,
 } from "../../../services/lib/requests";
-import useNotification from "../../shared/notification/useNotification";
 import { useOrg } from "../../layout/organizationContext";
+import { clsx } from "../../shared/clsx";
+import useNotification from "../../shared/notification/useNotification";
 import HcButton from "../../ui/hcButton";
-import { TextInput } from "@tremor/react";
+import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
+import { NormalizedRequest } from "./builder/abstractRequestBuilder";
+import ModelPill from "./modelPill";
+import StatusBadge from "./statusBadge";
 
 function getPathName(url: string) {
   try {
@@ -34,8 +27,6 @@ function getPathName(url: string) {
     return url;
   }
 }
-
-const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 const RequestRow = (props: {
   request: NormalizedRequest;
@@ -69,9 +60,9 @@ const RequestRow = (props: {
     }[]
   >();
 
-  const [currentScores, setCurrentScores] = useState<Record<string, number>>();
+  const [currentScores, setCurrentScores] =
+    useState<Record<string, { value: number; valueType: string }>>();
 
-  const router = useRouter();
   const { setNotification } = useNotification();
 
   useEffect(() => {
@@ -92,26 +83,10 @@ const RequestRow = (props: {
     });
 
     setCurrentProperties(currentProperties);
-    const currentScores: Record<string, number> = request.scores || {};
+    const currentScores: Record<string, { value: number; valueType: string }> =
+      request.scores || {};
     setCurrentScores(currentScores);
   }, [properties, request.customProperties, request.scores]);
-
-  const updateFeedbackHandler = async (requestId: string, rating: boolean) => {
-    updateRequestFeedback(requestId, rating)
-      .then((res) => {
-        if (res && res.status === 200) {
-          setRequestFeedback({
-            ...requestFeedback,
-            rating: rating,
-          });
-          setNotification("Feedback submitted", "success");
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        setNotification("Error submitting feedback", "error");
-      });
-  };
 
   const onAddLabelHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -166,7 +141,22 @@ const RequestRow = (props: {
 
     const formData = new FormData(e.currentTarget);
     const key = formData.get("key") as string;
-    const value = formData.get("value") as any as number;
+    let value = formData.get("value") as any;
+    let valueType = "number";
+
+    if (!isNaN(Number(value))) {
+      value = Number(value);
+    } else if (value === "true") {
+      value = true;
+      valueType = "boolean";
+    } else if (value === "false") {
+      value = false;
+      valueType = "boolean";
+    } else {
+      setNotification("Value must be a number or 'true'/'false'", "error");
+      setIsScoresAdding(false);
+      return;
+    }
 
     if (currentScores && currentScores[key]) {
       setNotification("Score already exists", "error");
@@ -174,7 +164,7 @@ const RequestRow = (props: {
       return;
     }
 
-    if (!key || !value || org?.currentOrg?.id === undefined) {
+    if (!key || org?.currentOrg?.id === undefined) {
       setNotification("Error adding score", "error");
       setIsScoresAdding(false);
       return;
@@ -193,9 +183,17 @@ const RequestRow = (props: {
           currentScores
             ? {
                 ...currentScores,
-                [key]: value,
+                [key]: {
+                  value: value,
+                  valueType: valueType,
+                },
               }
-            : { [key]: value }
+            : {
+                [key]: {
+                  value: value,
+                  valueType: valueType,
+                },
+              }
         );
 
         setIsScoresAdding(false);
@@ -474,7 +472,7 @@ const RequestRow = (props: {
               <div className="">
                 <TextInput
                   //@ts-ignore
-                  type="number"
+                  type="text"
                   name="value"
                   id="value"
                   required
@@ -502,7 +500,7 @@ const RequestRow = (props: {
 
         <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
           {currentScores &&
-            Object.entries(currentScores).map(([key, value]) => (
+            Object.entries(currentScores).map(([key, scoreValue]) => (
               <li
                 className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
                 key={key}
@@ -510,7 +508,13 @@ const RequestRow = (props: {
                 <p className="font-semibold text-gray-900 dark:text-gray-100">
                   {key}
                 </p>
-                <p className="text-gray-700 dark:text-gray-300">{value}</p>
+                <p className="text-gray-700 dark:text-gray-300">
+                  {scoreValue.valueType === "boolean"
+                    ? scoreValue.value === 1
+                      ? "true"
+                      : "false"
+                    : Number(scoreValue.value)}
+                </p>
               </li>
             ))}
         </div>
@@ -519,38 +523,10 @@ const RequestRow = (props: {
       {displayPreview && (
         <div className="flex flex-col space-y-8">
           <div className="flex w-full justify-end">
-            <div className="flex flex-row items-center space-x-4">
-              <button
-                onClick={() => {
-                  if (requestFeedback.rating === true) {
-                    return;
-                  }
-
-                  updateFeedbackHandler(request.id, true);
-                }}
-              >
-                {requestFeedback.rating === true ? (
-                  <HTUp className={clsx("h-5 w-5 text-green-500")} />
-                ) : (
-                  <HandThumbUpIcon className="h-5 w-5 text-green-500" />
-                )}
-              </button>
-              <button
-                onClick={() => {
-                  if (requestFeedback.rating === false) {
-                    return;
-                  }
-
-                  updateFeedbackHandler(request.id, false);
-                }}
-              >
-                {requestFeedback.rating === false ? (
-                  <HTDown className={clsx("h-5 w-5 text-red-500")} />
-                ) : (
-                  <HandThumbDownIcon className="h-5 w-5 text-red-500" />
-                )}
-              </button>
-            </div>
+            <FeedbackButtons
+              requestId={request.id}
+              defaultValue={request.feedback.rating}
+            />
           </div>
 
           <div className="flex flex-col space-y-2">{request.render()}</div>

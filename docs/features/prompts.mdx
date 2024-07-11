@@ -1,9 +1,11 @@
 ---
-title: "Prompts"
-description: "Effortlessly monitor prompt versions and inputs."
+title: "Prompts & Experiments"
+sidebarTitle: "Prompts & Experiments"
+description: "Automatically version prompts from your codebase via our proxy, without changing your workflow. Run experiments using historical datasets to test, evaluate, and improve prompts over time while preventing regressions in production systems."
+"twitter:title": "Prompts and Experiments - Helicone OSS LLM Observability"
 ---
 
-import QuestionsSection from '/snippets/questions-section.mdx';
+import QuestionsSection from "/snippets/questions-section.mdx";
 
 <Info>
   **Who can use this feature**: Anyone on any
@@ -21,7 +23,10 @@ import QuestionsSection from '/snippets/questions-section.mdx';
 Helicone's prompt management provides a seamless way for users to track the prompts used in their generative AI applications. With Helicone, you can effortlessly monitor versions and inputs as they evolve.
 
 <Frame caption="Example: A Prompt Template designed for a rap battle between two people. ">
-  <img src="/images/prompts/example-prompt-rap-battle.png" />
+  <img
+    src="/images/prompts/example-prompt-rap-battle.png"
+    alt="Helicone example of a prompt template for monitoring and managing inputs from requests sent to your AI applications."
+  />
 </Frame>
 
 ### Why Prompts
@@ -30,7 +35,6 @@ Requests are now matched to a `helicone-prompt-id`, allowing you to:
 
 - version and track iterations to your prompt over time, without losing any previous versions.
 - maintain a dataset of inputs and outputs for each prompt version.
-
 
 ## Quick Start
 
@@ -44,8 +48,8 @@ To use Prompts, you must set up Helicone in proxy mode. Please ensure you use on
   integration](https://docs.helicone.ai/getting-started/proxy-vs-async).
 </Note>
 
-
 ### How Prompt Templates Work
+
 As you modify your prompt in code, Helicone automatically tracks the new version and maintains a record of the old prompt. Additionally, a dataset of input/output keys is preserved for each version.
 
 <Accordion title="Get a deep dive of the feature">
@@ -68,17 +72,17 @@ Currently, we only support packages for TypeScript and JavaScript for easy integ
 
 1. When you send over a prompt with the following syntax, we are able to extract the children text between the JSX element `helicone-prompt-input`, then place it back into the prompt to be sent to your LLM.
 
-  ```tsx
-  <helicone-prompt-input key="my_input_key">
+```tsx
+<helicone-prompt-input key="my_input_key">
+  Input to your LLM
+</helicone-prompt-input>
+```
+
+Only the following will be sent to your LLM:
+
+```tsx
     Input to your LLM
-  </helicone-prompt-input>
-  ```
-
-  Only the following will be sent to your LLM:
-
-  ```tsx
-      Input to your LLM
-  ```
+```
 
 <Note>
   It is crucial that each key has a unique identifier; otherwise, you will get
@@ -169,7 +173,7 @@ Let's say we have an app that generates a short story, where users are able to i
     ```
 
   </Tab>
-  
+
   <Tab title="Packageless (cURL)">
       Currently, we only support packages for TypeScript and JavaScript for easy integration. For other users, we recommend manually implementing input variables as follow:
     <Steps>
@@ -228,6 +232,12 @@ Let's say we have an app that generates a short story, where users are able to i
   </Tab>
 </Tabs>
 
+## Running Experiments
+
+Once you've set up prompt management, you can leverage Helicone's experimentation features to test and improve your prompts.
+
+To learn more about running experiments with your prompts, including step-by-step guides and best practices, visit our [Experiments guide](/use-cases/experiments).
+
 ## Local Testing
 
 Many times in development, you may want to test your prompt locally before deploying it to production and you don't want Helicone to track new prompt versions.
@@ -239,4 +249,5 @@ headers: {
   "Helicone-Prompt-Mode": "testing",
 },
 ```
+
 <QuestionsSection />

@@ -1,47 +1,45 @@
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/router";
+import { ArrowPathIcon, HomeIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
+import { useJawnClient } from "../../../lib/clients/jawnHook";
 import {
   TimeInterval,
   getTimeIntervalAgo,
 } from "../../../lib/timeCalculations/time";
+import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
+import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import {
-  SortDirection,
-  SortLeafRequest,
-} from "../../../services/lib/sorts/requests/sorts";
-import AuthHeader from "../../shared/authHeader";
-import { clsx } from "../../shared/clsx";
-import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
-import { getInitialColumns } from "./initialColumns";
-import RequestDrawerV2 from "./requestDrawerV2";
-import TableFooter from "./tableFooter";
-import useRequestsPageV2 from "./useRequestsPageV2";
-import { useJawnClient } from "../../../lib/clients/jawnHook";
-import { ThemedSwitch } from "../../shared/themed/themedSwitch";
-import useSearchParams from "../../shared/utils/useSearchParams";
-import { TimeFilter } from "../dashboard/dashboardPage";
-import getNormalizedRequest from "./builder/requestBuilder";
-import RequestCard from "./requestCard";
 import {
   OrganizationFilter,
   OrganizationLayout,
 } from "../../../services/lib/organization_layout/organization_layout";
-import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
-import { useOrg } from "../../layout/organizationContext";
 import { placeAssetIdValues } from "../../../services/lib/requestTraverseHelper";
+import {
+  SortDirection,
+  SortLeafRequest,
+} from "../../../services/lib/sorts/requests/sorts";
+import { useOrg } from "../../layout/organizationContext";
+import AuthHeader from "../../shared/authHeader";
+import { clsx } from "../../shared/clsx";
+import ThemedTable from "../../shared/themed/table/themedTable";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import { ThemedSwitch } from "../../shared/themed/themedSwitch";
+import useSearchParams from "../../shared/utils/useSearchParams";
+import { TimeFilter } from "../dashboard/dashboardPage";
+import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import {
   getModelFromPath,
   mapGeminiProJawn,
 } from "./builder/mappers/geminiMapper";
-import { useGetUnauthorized } from "../../../services/hooks/dashboard";
-import { HomeIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
+import getNormalizedRequest from "./builder/requestBuilder";
+import { getInitialColumns } from "./initialColumns";
+import RequestCard from "./requestCard";
+import RequestDrawerV2 from "./requestDrawerV2";
+import TableFooter from "./tableFooter";
+import useRequestsPageV2 from "./useRequestsPageV2";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -54,6 +52,7 @@ interface RequestsPageV2Props {
   isCached?: boolean;
   initialRequestId?: string;
   userId?: string;
+  rateLimited?: boolean;
   currentFilter: OrganizationFilter | null;
   organizationLayout: OrganizationLayout | null;
   organizationLayoutAvailable: boolean;
@@ -101,6 +100,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached = false,
     initialRequestId,
     userId,
+    rateLimited = false,
     currentFilter,
     organizationLayout,
     organizationLayoutAvailable,
@@ -192,8 +192,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
-  const router = useRouter();
-
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
   const sortLeaf: SortLeafRequest = getSortLeaf(
@@ -228,8 +226,20 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isLive
   );
 
+  const requestWithoutStream = requests.find((r) => {
+    return (
+      (r.requestBody as any)?.stream &&
+      !(r.requestBody as any)?.stream_options?.include_usage &&
+      r.provider === "OPENAI"
+    );
+  });
+
+  const [isWarningHidden, setIsWarningHidden] = useLocalStorage(
+    "isStreamWarningHidden",
+    false
+  );
+
   useEffect(() => {
-    console.log("HELLO");
     if (initialRequestId && selectedData === undefined) {
       const fetchRequest = async () => {
         const response = await jawn.POST("/v1/request/query", {
@@ -384,6 +394,24 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       ]);
     }
   }, [advancedFilters, filterMap, userId]);
+  const userFilerMapIndex = filterMap.findIndex(
+    (filter) => filter.label === "Helicone-Rate-Limit-Status"
+  );
+  useEffect(() => {
+    if (rateLimited) {
+      if (userFilerMapIndex === -1) {
+        return;
+      }
+
+      setAdvancedFilters([
+        {
+          filterMapIdx: userFilerMapIndex,
+          operatorIdx: 0,
+          value: "rate_limited",
+        },
+      ]);
+    }
+  }, [userFilerMapIndex, rateLimited]);
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
@@ -431,14 +459,21 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const columnsWithProperties = [...getInitialColumns(isCached)].concat(
     properties.map((property) => {
       return {
-        accessorFn: (row) =>
-          row.customProperties ? row.customProperties[property] : "",
-        id: `Custom - ${property}`,
+        id: `${property}`,
+        accessorFn: (row) => {
+          const value = row.customProperties
+            ? row.customProperties[property]
+            : "";
+          console.log("value", value);
+          return value;
+        },
         header: property,
-        cell: (info) => info.getValue(),
+        cell: (info) => {
+          return info.getValue();
+        },
         meta: {
           sortKey: property,
-          isCustomProperty: true,
+          category: "Custom Property",
         },
       };
     })
@@ -551,6 +586,35 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   return (
     <div>
+      {requestWithoutStream && !isWarningHidden && (
+        <div className="alert alert-warning flex justify-between items-center">
+          <p className="text-yellow-800">
+            We are unable to calculate your cost accurately because the
+            &#39;stream_usage&#39; option is not included in your message.
+            Please refer to{" "}
+            <a
+              href="https://docs.helicone.ai/use-cases/enable-stream-usage"
+              className="text-blue-600 underline"
+            >
+              this documentation
+            </a>{" "}
+            for more information.
+          </p>
+          <button
+            onClick={() => setIsWarningHidden(true)}
+            className="text-yellow-800 hover:text-yellow-900"
+          >
+            <span className="sr-only">Close</span>
+            <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fillRule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+      )}
       {!isCached && userId === undefined && (
         <AuthHeader
           title={isCached ? "Cached Requests" : "Requests"}
@@ -587,10 +651,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         <>{renderUnauthorized()}</>
       ) : (
         <div className="flex flex-col space-y-4">
-          <ThemedTableV5
+          <ThemedTable
+            id="requests-table"
             defaultData={requests || []}
             defaultColumns={columnsWithProperties}
-            tableKey="requestsColumnVisibility"
             dataLoading={isDataLoading}
             sortable={sort}
             advancedFilters={{

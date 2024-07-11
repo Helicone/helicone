@@ -265,43 +265,112 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 <div className="space-y-1 text-sm">
                   <label
                     htmlFor="org-costs"
-                    className="block text-xs leading-6 text-gray-500"
+                    className="block text-xs leading-6 text-gray-500 "
                   >
                     Costs (USD)
                   </label>
-                  <input
-                    type="number"
-                    name="org-costs"
-                    id="org-costs"
-                    value={limits?.cost ?? 0}
-                    className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
-                    onChange={(e) =>
-                      setLimits((prev) =>
-                        prev ? { ...prev, cost: +e.target.value } : null
-                      )
-                    }
-                  />
+                  <div className="flex flex-col gap-2">
+                    <input
+                      type="number"
+                      name="org-costs"
+                      id="org-costs"
+                      disabled={limits?.cost !== -1}
+                      value={limits?.cost === -1 ? 9999999 : limits?.cost ?? 0}
+                      className={clsx(
+                        "max-w-[10em] bg-gray-50 dark:bg-gray-950",
+                        " block w-full rounded-md border-0 py-1.5",
+                        "shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2",
+                        "focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6",
+                        limits?.cost === -1
+                          ? "text-gray-400"
+                          : "text-black dark:text-white"
+                      )}
+                      onChange={(e) =>
+                        setLimits((prev) =>
+                          prev ? { ...prev, cost: +e.target.value } : null
+                        )
+                      }
+                    />
+                    <div className="flex gap-2 items-center">
+                      <div>Unlimited</div>
+                      <input
+                        type="checkbox"
+                        name="org-costs"
+                        id="org-costs"
+                        value={limits?.cost !== -1 ? 1 : 0}
+                        className=""
+                        onChange={(e) => {
+                          if (limits?.cost === -1) {
+                            setLimits((prev) =>
+                              prev ? { ...prev, cost: 1000 } : null
+                            );
+                          } else {
+                            setLimits((prev) =>
+                              prev ? { ...prev, cost: -1 } : null
+                            );
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-1 text-xs">
+                <div className="space-y-1 text-sm">
                   <label
-                    htmlFor="org-requests"
-                    className="block text-xs leading-6 text-gray-500"
+                    htmlFor="org-costs"
+                    className="block text-xs leading-6 text-gray-500 "
                   >
-                    Requests
+                    Request
                   </label>
-                  <input
-                    type="number"
-                    name="org-requests"
-                    id="org-requests"
-                    value={limits?.requests ?? 0}
-                    className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
-                    onChange={(e) =>
-                      setLimits((prev) =>
-                        prev ? { ...prev, requests: +e.target.value } : null
-                      )
-                    }
-                  />
+                  <div className="flex flex-col gap-2">
+                    <input
+                      type="number"
+                      name="org-request"
+                      id="org-request"
+                      disabled={limits?.requests !== -1}
+                      value={
+                        limits?.requests === -1
+                          ? 9999999
+                          : limits?.requests ?? 0
+                      }
+                      className={clsx(
+                        "max-w-[10em] bg-gray-50 dark:bg-gray-950",
+                        " block w-full rounded-md border-0 py-1.5",
+                        "shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2",
+                        "focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6",
+                        limits?.requests === -1
+                          ? "text-gray-400"
+                          : "text-black dark:text-white"
+                      )}
+                      onChange={(e) =>
+                        setLimits((prev) =>
+                          prev ? { ...prev, requests: +e.target.value } : null
+                        )
+                      }
+                    />
+                    <div className="flex gap-2 items-center">
+                      <div>Unlimited</div>
+                      <input
+                        type="checkbox"
+                        name="org-requests"
+                        id="org-requests"
+                        value={limits?.requests !== -1 ? 1 : 0}
+                        className=""
+                        onChange={(e) => {
+                          if (limits?.requests === -1) {
+                            setLimits((prev) =>
+                              prev ? { ...prev, requests: 1000 } : null
+                            );
+                          } else {
+                            setLimits((prev) =>
+                              prev ? { ...prev, requests: -1 } : null
+                            );
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
+
                 <div className="space-y-1 text-xs">
                   <label
                     htmlFor="org-time"
@@ -312,7 +381,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                   <select
                     id="org-size"
                     name="org-size"
-                    className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+                    className="max-w-[10em] bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
                     required
                   >
                     <option value="word">monthly</option>

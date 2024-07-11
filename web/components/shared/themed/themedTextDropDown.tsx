@@ -15,77 +15,102 @@ interface ThemedTextDropDownProps {
   onChange: (option: string | null) => void;
   value: string;
   onSearchHandler?: (search: string) => Promise<Result<void, string>>;
+  hideTabModes?: boolean;
 }
 
 export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
-  const { options: parentOptions, onChange, value, onSearchHandler } = props;
+  const {
+    options: parentOptions,
+    onChange,
+    value,
+    onSearchHandler,
+    hideTabModes = false,
+  } = props;
   const [selected, setSelected] = useState(value);
   const [query, setQuery] = useState("");
   const [tabMode, setTabMode] = useState<"smart" | "raw">("smart");
 
-  const customOption = query && !parentOptions.includes(query) ? query : null;
-
-  const options = customOption
-    ? parentOptions.concat([customOption])
-    : parentOptions;
-
-  const filteredPeople =
-    query === ""
-      ? options
-      : options.filter((option) =>
-          option
-            .toLowerCase()
-            .replace(/\s+/g, "")
-            .includes(query.toLowerCase().replace(/\s+/g, ""))
-        );
+  const [filteredOptions, setFilteredOptions] =
+    useState<string[]>(parentOptions);
 
   useEffect(() => {
     onSearchHandler?.(query);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
+  useEffect(() => {
+    const filterOptions = query
+      ? parentOptions.filter((option) =>
+          option
+            .toLowerCase()
+            .replace(/\s+/g, "")
+            .includes(query.toLowerCase().replace(/\s+/g, ""))
+        )
+      : parentOptions;
+
+    if (query && !filterOptions.includes(query)) {
+      filterOptions.push(query);
+    }
+
+    setFilteredOptions(filterOptions);
+  }, [query, parentOptions]);
+
+  const handleValueChange = (value: string) => {
+    setSelected(value);
+    onChange(value);
+    if (!filteredOptions.includes(value)) {
+      setFilteredOptions((prevOptions) => [...prevOptions, value]);
+    }
+  };
+
   return (
     <div className="w-full flex flex-col gap-1">
-      <div className="flex items-center gap-1 text-xs w-full justify-end">
-        <div>
-          <TabGroup>
-            <TabList variant="solid" defaultValue="1">
-              <Tab
-                value="1"
-                className="text-xs px-2 py-0.5"
-                onClick={() => {
-                  setTabMode("smart");
-                }}
-              >
-                smart
-              </Tab>
-              <Tab
-                value="2"
-                className="text-xs px-2 py-0.5"
-                onClick={() => {
-                  setTabMode("raw");
-                }}
-              >
-                raw
-              </Tab>
-            </TabList>
-          </TabGroup>
+      {!hideTabModes && (
+        <div className="flex items-center gap-1 text-xs w-full justify-end">
+          <div>
+            <TabGroup>
+              <TabList variant="solid" defaultValue="1">
+                <Tab
+                  value="1"
+                  className="text-xs px-2 py-0.5"
+                  onClick={() => {
+                    setTabMode("smart");
+                  }}
+                >
+                  smart
+                </Tab>
+                <Tab
+                  value="2"
+                  className="text-xs px-2 py-0.5"
+                  onClick={() => {
+                    setTabMode("raw");
+                  }}
+                >
+                  raw
+                </Tab>
+              </TabList>
+            </TabGroup>
+          </div>
         </div>
-      </div>
+      )}
       {tabMode === "smart" ? (
         <SearchSelect
+          searchValue={selected}
+          onSearchValueChange={(value) => {
+            setQuery(value);
+            handleValueChange(value);
+          }}
           value={selected}
           onValueChange={(value) => {
-            setSelected(value);
-            onChange(value);
+            handleValueChange(value);
           }}
           onSelect={async () => {
-            if (!selected) await onSearchHandler?.(query);
+            await onSearchHandler?.(query);
           }}
-          enableClear={false}
+          enableClear={true}
         >
-          {filteredPeople.map((option, i) => (
-            <SearchSelectItem value={option} key={option}>
+          {filteredOptions.map((option, i) => (
+            <SearchSelectItem value={option} key={`${i}-${option}`}>
               {option}
             </SearchSelectItem>
           ))}

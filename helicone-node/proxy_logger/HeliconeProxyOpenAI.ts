@@ -11,7 +11,7 @@ export class HeliconeProxyOpenAI extends OpenAI {
   public helicone: Helicone;
   private heliconeHeaders: { [key: string]: string };
 
-  constructor(private options: IHeliconeProxyClientOptions) {
+  constructor(options: IHeliconeProxyClientOptions) {
     const {
       apiKey,
       organization,

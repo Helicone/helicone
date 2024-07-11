@@ -33,7 +33,7 @@ export interface IHeliconeHeaders {
   openaiBaseUrl: Nullable<string>;
   targetBaseUrl: Nullable<string>;
   promptFormat: Nullable<string>;
-  requestId: Nullable<string>;
+  requestId: string;
   promptHeaders: {
     promptId: Nullable<string>;
     promptMode: Nullable<string>;
@@ -45,12 +45,18 @@ export interface IHeliconeHeaders {
     omitResponse: boolean;
     omitRequest: boolean;
   };
+  sessionHeaders: {
+    sessionId: Nullable<string>;
+    path: Nullable<string>;
+    name: Nullable<string>;
+  };
   nodeId: Nullable<string>;
   fallBacks: Nullable<HeliconeFallback[]>;
   modelOverride: Nullable<string>;
   promptSecurityEnabled: Nullable<string>;
   moderationsEnabled: boolean;
   posthogKey: Nullable<string>;
+  lytixKey: Nullable<string>;
   posthogHost: Nullable<string>;
   webhookEnabled: boolean;
 }
@@ -75,7 +81,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   openaiBaseUrl: Nullable<string>;
   targetBaseUrl: Nullable<string>;
   promptFormat: Nullable<string>;
-  requestId: Nullable<string>;
+  requestId: string;
   promptHeaders: {
     promptId: Nullable<string>;
     promptMode: Nullable<string>;
@@ -84,6 +90,11 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   promptName: Nullable<string>;
   userId: Nullable<string>;
   omitHeaders: { omitResponse: boolean; omitRequest: boolean };
+  sessionHeaders: {
+    sessionId: Nullable<string>;
+    path: Nullable<string>;
+    name: Nullable<string>;
+  };
   nodeId: Nullable<string>;
   fallBacks: Nullable<HeliconeFallback[]>;
   modelOverride: Nullable<string>;
@@ -92,6 +103,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   posthogKey: Nullable<string>;
   posthogHost: Nullable<string>;
   webhookEnabled: boolean;
+  lytixKey: Nullable<string>;
 
   constructor(private headers: Headers) {
     const heliconeHeaders = this.getHeliconeHeaders();
@@ -112,6 +124,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     };
     this.promptName = heliconeHeaders.promptName;
     this.omitHeaders = heliconeHeaders.omitHeaders;
+    this.sessionHeaders = heliconeHeaders.sessionHeaders;
     this.userId = heliconeHeaders.userId;
     this.heliconeProperties = this.getHeliconeProperties(heliconeHeaders);
     this.nodeId = heliconeHeaders.nodeId;
@@ -119,6 +132,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.modelOverride = heliconeHeaders.modelOverride;
     this.promptSecurityEnabled = heliconeHeaders.promptSecurityEnabled;
     this.moderationsEnabled = heliconeHeaders.moderationsEnabled;
+    this.lytixKey = heliconeHeaders.lytixKey;
     this.posthogKey = heliconeHeaders.posthogKey;
     this.posthogHost = heliconeHeaders.posthogHost;
     this.webhookEnabled = heliconeHeaders.webhookEnabled;
@@ -232,6 +246,11 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         omitResponse: this.headers.get("Helicone-Omit-Response") === "true",
         omitRequest: this.headers.get("Helicone-Omit-Request") === "true",
       },
+      sessionHeaders: {
+        sessionId: this.headers.get("Helicone-Session-Id") ?? null,
+        path: this.headers.get("Helicone-Session-Path") ?? null,
+        name: this.headers.get("Helicone-Session-Name") ?? null,
+      },
       nodeId: this.headers.get("Helicone-Node-Id") ?? null,
       fallBacks: this.getFallBacks(),
       modelOverride: this.headers.get("Helicone-Model-Override") ?? null,
@@ -244,6 +263,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
           ? true
           : false,
       posthogKey: this.headers.get("Helicone-Posthog-Key") ?? null,
+      lytixKey: this.headers.get("Helicone-Lytix-Key") ?? null,
       posthogHost: this.headers.get("Helicone-Posthog-Host") ?? null,
       webhookEnabled:
         this.headers.get("Helicone-Webhook-Enabled") == "true" ? true : false,
@@ -300,6 +320,19 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     if (heliconeHeaders.promptHeaders.promptId) {
       heliconePropertyHeaders["Helicone-Prompt-Id"] =
         heliconeHeaders.promptHeaders.promptId;
+    }
+    if (heliconeHeaders.sessionHeaders.name) {
+      heliconePropertyHeaders[`Helicone-Session-Name`] =
+        heliconeHeaders.sessionHeaders.name;
+    }
+    if (heliconeHeaders.sessionHeaders.sessionId) {
+      heliconePropertyHeaders["Helicone-Session-Id"] =
+        heliconeHeaders.sessionHeaders.sessionId;
+    }
+
+    if (heliconeHeaders.sessionHeaders.path) {
+      heliconePropertyHeaders["Helicone-Session-Path"] =
+        heliconeHeaders.sessionHeaders.path;
     }
 
     return heliconePropertyHeaders;

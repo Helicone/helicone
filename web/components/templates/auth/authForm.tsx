@@ -94,7 +94,7 @@ const AuthForm = (props: AuthFormProps) => {
               <span className="sr-only">Helicone</span>
               <Image
                 src={"/static/logo.svg"}
-                alt={""}
+                alt="Helicone - Open-source LLM observability and monitoring platform for developers"
                 height={200}
                 width={200}
                 priority={true}

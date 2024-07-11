@@ -33,7 +33,7 @@ import {
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ExportButton from "../../shared/themed/table/exportButton";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import ThemedTableHeader from "../../shared/themed/themedTableHeader";
+import ThemedTableHeader from "../../shared/themed/themedHeader";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { formatNumber } from "../users/initialColumns";
 

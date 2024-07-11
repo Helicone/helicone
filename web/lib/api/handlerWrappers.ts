@@ -151,7 +151,7 @@ export function withAuthSSR<T>(
     if (error !== null || !data.orgId || !data.userId) {
       return {
         redirect: {
-          destination: "/",
+          destination: "/signin?unauthorized=true",
           permanent: false,
         },
       };
