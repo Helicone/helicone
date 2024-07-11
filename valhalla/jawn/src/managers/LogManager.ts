@@ -12,7 +12,7 @@ import { S3Client } from "../lib/shared/db/s3Client";
 import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
 import * as Sentry from "@sentry/node";
 import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestStore";
-import { KafkaProducer } from "../lib/clients/KafkaProducer";
+import { KafkaProducer, PROD_TOPIC } from "../lib/clients/KafkaProducer";
 import { WebhookHandler } from "../lib/handlers/WebhookHandler";
 import { WebhookStore } from "../lib/stores/WebhookStore";
 import { FeatureFlagStore } from "../lib/stores/FeatureFlagStore";
@@ -87,7 +87,7 @@ export class LogManager {
           Sentry.captureException(new Error(result.error), {
             tags: {
               type: "HandlerError",
-              topic: "request-response-logs-prod",
+              topic: PROD_TOPIC,
             },
             extra: {
               requestId: logMessage.log.request.id,
@@ -170,7 +170,7 @@ export class LogManager {
       Sentry.captureException(new Error(JSON.stringify(result.error)), {
         tags: {
           type: "UpsertError",
-          topic: "request-response-logs-prod",
+          topic: PROD_TOPIC,
         },
         extra: {
           batchId: batchContext.batchId,
@@ -237,7 +237,7 @@ export class LogManager {
       Sentry.captureException(rateLimitErr, {
         tags: {
           type: "RateLimitError",
-          topic: "request-response-logs-prod",
+          topic: PROD_TOPIC,
         },
         extra: {
           batchId: batchContext.batchId,

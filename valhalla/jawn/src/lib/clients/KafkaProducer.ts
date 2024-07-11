@@ -8,9 +8,9 @@ const KAFKA_URL = KAFKA_CREDS?.UPSTASH_KAFKA_URL;
 const KAFKA_USERNAME = KAFKA_CREDS?.UPSTASH_KAFKA_USERNAME;
 const KAFKA_PASSWORD = KAFKA_CREDS?.UPSTASH_KAFKA_PASSWORD;
 
-export type Topics =
-  | "request-response-logs-prod-dlq"
-  | "request-response-logs-prod";
+export const PROD_TOPIC = "request-response-logs-prod" as const;
+
+export type Topics = "request-response-logs-prod-dlq" | typeof PROD_TOPIC;
 
 export class KafkaProducer {
   private kafka: Kafka | null = null;

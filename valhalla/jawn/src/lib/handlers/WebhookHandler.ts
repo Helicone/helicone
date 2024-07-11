@@ -1,3 +1,4 @@
+import { PROD_TOPIC } from "../clients/KafkaProducer";
 import { Database } from "../db/database.types";
 import { PromiseGenericResult, err, ok } from "../shared/result";
 import { FeatureFlagStore } from "../stores/FeatureFlagStore";
@@ -84,7 +85,7 @@ export class WebhookHandler extends AbstractLogHandler {
           Sentry.captureException(error, {
             tags: {
               type: "WebhookError",
-              topic: "request-response-logs-prod",
+              topic: PROD_TOPIC,
             },
             extra: {
               orgId: webhookPayload.orgId,

@@ -9,6 +9,7 @@ import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 import crypto from "crypto";
 import * as Sentry from "@sentry/node";
+import { PROD_TOPIC } from "../clients/KafkaProducer";
 
 export class PostHogHandler extends AbstractLogHandler {
   private posthogEvents: PostHogEvent[] = [];
@@ -61,7 +62,7 @@ export class PostHogHandler extends AbstractLogHandler {
         Sentry.captureException(new Error(JSON.stringify(error)), {
           tags: {
             type: "WebhookError",
-            topic: "request-response-logs-prod",
+            topic: PROD_TOPIC,
           },
         });
       }

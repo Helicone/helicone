@@ -15,6 +15,7 @@ import {
   MESSAGES_PER_MINI_BATCH,
 } from "./constant";
 import { SettingsManager } from "../../../utils/settings";
+import { PROD_TOPIC } from "../KafkaProducer";
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
@@ -47,7 +48,7 @@ export const consume = async () => {
 
   await consumer?.connect();
   await consumer?.subscribe({
-    topic: "request-response-logs-prod",
+    topic: PROD_TOPIC,
     fromBeginning: true,
   });
 
@@ -104,7 +105,7 @@ export const consume = async () => {
               lastOffset,
               miniBatchId,
               batch.partition,
-              "request-response-logs-prod"
+              PROD_TOPIC
             );
 
             if (consumeResult.error) {

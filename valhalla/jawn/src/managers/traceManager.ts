@@ -1,5 +1,5 @@
 import type { Log, Message } from "../lib/handlers/HandlerContext";
-import { KafkaProducer } from "../lib/clients/KafkaProducer";
+import { KafkaProducer, PROD_TOPIC } from "../lib/clients/KafkaProducer";
 import { AuthParams } from "../lib/db/supabase";
 import { S3Client } from "../lib/shared/db/s3Client";
 import { randomUUID } from "crypto";
@@ -148,10 +148,7 @@ export class TraceManager {
 
   private async sendLogToKafka(kafkaMessage: Message) {
     const kafkaProducer = new KafkaProducer();
-    await kafkaProducer.sendMessages(
-      [kafkaMessage],
-      "request-response-logs-prod"
-    );
+    await kafkaProducer.sendMessages([kafkaMessage], PROD_TOPIC);
   }
 
   private processOtelSpans(trace: OTELTrace): TModifiedSpan[] {
