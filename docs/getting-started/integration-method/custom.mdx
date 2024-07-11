@@ -54,19 +54,13 @@ type BaseRequest = {
 
 // The name and structure of the prompt field depends on the model you are using.
 // Eg: for chat models it is named "messages", for embeddings models it is named "input".
-
-type MessageBody = {
-  messages: Array<{
-    role: "system" | "user" | "assistant",
-    content: string
-  }>;
-}
-
-type StringBody = {
-  input: string;
-}
-
-type ILogRequest = BaseRequest & (MessageBody | StringBody);
+// Hence, the only enforced type is `model`, you need still add the respective prompt property for your model.
+// You may also add more properties (eg: temperature, stop reason etc)
+type ILogRequest = {
+  model: string;
+} & {
+  [key: string]: any;
+};
 ```
 
 ### Sending Log
