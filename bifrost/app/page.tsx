@@ -2,16 +2,11 @@ import Enterprise from "@/components/templates/landing/enterprise";
 import Integrations from "@/components/templates/landing/integrations";
 import Platform from "@/components/templates/landing/platform";
 import FAQ from "@/components/templates/landing/faq"
-import {
-  ChevronRightIcon,
-  CodeBracketSquareIcon,
-  ShieldCheckIcon,
-  UserGroupIcon,
-} from "@heroicons/react/24/outline";
 import { FaChevronRight, FaCheck } from "react-icons/fa6";
 import Image from "next/image";
 import Link from "next/link";
 import Essentials from "@/components/templates/landing/essentials";
+import OpenSource from "@/components/templates/landing/openSource";
 
 export default function Home() {
   return (
@@ -261,15 +256,24 @@ export default function Home() {
           </div>
           <Integrations />
         </section>
-        <section className="flex flex-col px-3 pt-6 pb-12">
-          <div className="flex flex-col px-3 space-y-2">
-            <h1 className="text-3xl font-bold text-sky-500 gap-3">Unified {" "}
+        <section className="flex flex-col px-3 pt-6 pb-12 mx-auto max-w-full">
+          <div className="flex flex-col px-3 space-y-2 ">
+            <h1 className="text-3xl px-3 font-bold text-sky-500 gap-3 md:text-center md:text-5xl">Unified {" "}
               <span className="text-black">observability and monitoring</span>
             </h1>
-            <p className="font-light text-gray-600">
+            <p className="font-light text-gray-600 px-3 md:text-center md:text-xl">
             We are building a platform that provides all the essential tools for observability in Gen AI. 
             </p>
             <Essentials />
+          </div>
+        </section>
+        <section id="enterprise" className="py-6">
+          <h2 className="sr-only">
+            Get to production-quality{" "}
+            <span className="text-violet-800">faster</span>
+          </h2>
+          <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
+            <Enterprise />
           </div>
         </section>
         <section className="w-full flex flex-col max-w-6xl mx-auto space-y-4 py-32 px-4">
@@ -279,13 +283,10 @@ export default function Home() {
           </h2>
           <Platform />
         </section>
-        <section id="enterprise" className="py-36">
-          <h2 className="sr-only">
-            Get to production-quality{" "}
-            <span className="text-violet-800">faster</span>
-          </h2>
-          <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
-            <Enterprise />
+        <section className="w-full max-w-6xl lg:py-20 lg:px-7 py-6 px-3">
+          <div className="px-3 lg:text-center">
+            <h1 className="sr-only">Frequently asked questions</h1>
+            <OpenSource />
           </div>
         </section>
         <section className="w-full max-w-6xl lg:py-20 lg:px-7 py-12 px-3">

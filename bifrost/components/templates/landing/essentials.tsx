@@ -10,7 +10,7 @@ import { HiOutlineTableCells } from "react-icons/hi2";
 export default function Essentials() {
     return (
         <>
-            <div className="">
+            <div id="essentials" className="md:grid md:grid-cols-2 md:gap-5 ">
                 <div className="max-w-md  bg-gradient-to-b from-slate-200 border to-white rounded-xl shadow-d overflow-hidden md:max-w-2xl mb-2">
                     <div className="md:flex flex-col">
                         <div className="p-3">
@@ -65,7 +65,7 @@ export default function Essentials() {
                 </div>
                 <div className="max-w-md pt-3 pb-2 mb-3 bg-gradient-to-b from-slate-200 border to-white rounded-xl shadow-d overflow-hidden md:max-w-2xl">
                     <div className="md:flex flex-col">
-                        <div className="flex justify-end rounded-md bg-white mt-5 ml-36 mr-3 ">
+                        <div className="flex text-center w-fit rounded-md bg-white mt-5 ml-36 mr-3 ">
                             <button className="text-sky-500 bg-white font-semibold px-3 my-1 flex items-center border rounded-md shadow-lg">
                                 <AiOutlineDollarCircle className="inline-block h-6 w-6 text-center pr-2" />
                                 <span className="text-[10px]">Cost</span>
@@ -93,10 +93,10 @@ export default function Essentials() {
                         </div>
                     </div>
                 </div>
-                <div className="max-w-md pt-3 bg-gradient-to-b from-slate-200 border to-white rounded-xl shadow-d overflow-hidden md:max-w-2xl">
+                <div className="max-w-md pt-3 mb-3 bg-gradient-to-b from-slate-200 border to-white rounded-xl shadow-d overflow-hidden md:max-w-2xl">
                     <div className="flex flex-col mb-10 bg-white rounded-md translate-x-10">
                         <h1 className="text-gray-700 bg-gray-100 text-[10px] border px-4 py-3">Version</h1>
-                        <h2 className="text-gray-700 text-[10px] px-4 py-4 border"><span className="font-medium bg-gray-100 rounded-md py-1 px-2">System</span> 
+                        <h2 className="text-gray-700 text-[10px] px-4 py-4 border"><span className="font-medium bg-gray-100 rounded-md py-1 px-2">System</span>
                             <p className="inline-block font-medium pl-3">{" "}This is a rap battle between <span className="bg-yellow-100 border rounded-md font-semibold p-1">person1</span> and</p>
                             <p className="pl-16 font-medium">Here are the rules...</p>
                         </h2>
@@ -104,9 +104,38 @@ export default function Essentials() {
                             <span className="ml-6 bg-yellow-100 border rounded-md font-semibold py-1 px-2 ">output</span>
                         </h3>
                     </div>
-                    <div className="p-4 bg-white">
-                    <p className="text-2xl text-blue-600 font-semibold">Create prompt templates</p>
-                    <p className="text-gray-500 text-sm">Create variations of your prompts and collect a dataset of input and outputs. </p>
+                    <div className="p-4">
+                        <p className="text-2xl text-blue-600 font-semibold">Create prompt templates</p>
+                        <p className="text-gray-500 text-sm">Create variations of your prompts and collect a dataset of input and outputs. </p>
+                    </div>
+                </div>
+                <div className="max-w-md pt-3 pb-2 mb-3 bg-gradient-to-b from-slate-200 border to-white rounded-xl shadow-d overflow-hidden md:max-w-2xl">
+                    <div className="absolute inset-0 bg-grid-pattern bg-no-repeat bg-cover z-0"></div>
+                    <div className="relative z-10">
+                        <div className="bg-white p-4 mt-12 mb-3 rounded-xl shadow-md border border-gray-200 flex items-end justify-center flex-col -translate-x-10 ">
+                            <p className="text-gray-400 text-sm font-semibold mt-2 mb-3 pr-7">uptime 99.99%</p>
+                            <div className="flex justify-center items-center gap-1 mb-4 -translate-x-10 ">
+                                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 rounded-r-xl"></div>
+                            </div>
+                        </div>
+                        <div className="mt-6 px-5">
+                            <h2 className="text-2xl font-bold text-blue-600">99.99% uptime</h2>
+                            <p className="text-gray-500 mt-2 text-sm">Helicone leverages Cloudflare Workers to maintain low latency and high reliability.</p>
+                        </div>
                     </div>
                 </div>
             </div>

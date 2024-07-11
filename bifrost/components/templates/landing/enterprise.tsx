@@ -1,342 +1,130 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
-import {
-  BeakerIcon,
-  ChartBarIcon,
-  CircleStackIcon,
-  DocumentTextIcon,
-  FolderArrowDownIcon,
-  HandThumbUpIcon,
-  PaintBrushIcon,
-  UserGroupIcon,
-  WrenchIcon,
-} from "@heroicons/react/20/solid";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
-import Link from "next/link";
-import { clsx } from "@/components/shared/utils";
+import { PiTerminalBold } from "react-icons/pi";
+import { PiArrowUpRightLight } from "react-icons/pi";
 
-interface EnterpriseProps {}
-
-const ENTERPRISE_TABS: {
-  id: string;
-  name: string;
-  description: string;
-  bullets: {
-    icon: React.ForwardRefExoticComponent<
-      Omit<React.SVGProps<SVGSVGElement>, "ref"> & {
-        title?: string | undefined;
-        titleId?: string | undefined;
-      } & React.RefAttributes<SVGSVGElement>
-    >;
-    text: string;
-  }[];
-  cta: React.ReactNode;
-  src: string;
-  graphic: string;
-  new: boolean;
-}[] = [
+const prompts = [
   {
-    id: "experiments",
-    name: "Experiments",
-    description:
-      "Test prompt changes and analyze results with ease. Easily version prompts and compare results across datasets",
-    bullets: [
-      {
-        icon: DocumentTextIcon,
-        text: "Prompt Regression Testing",
-      },
-      {
-        icon: BeakerIcon,
-        text: "Version and Test",
-      },
-      {
-        icon: CircleStackIcon,
-        text: "Dataset Comparison and Analysis",
-      },
-    ],
-    cta: (
-      <Link
-        href="/contact"
-        className="bg-violet-500 hover:bg-violet-600 ease-in-out duration-500 text-white border-2 border-violet-700 rounded-lg px-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
-      >
-        Schedule a Demo
-      </Link>
-    ),
-    src: "/static/enterprise/experiment-graphic.webp",
-    graphic: "/static/enterprise/experiments-example.webp",
-    new: false,
+    title: "Scalability & Reliability",
+    description: "Helicone is 100x more scalable than competitors, offering read and write abilities for millions of logs."
   },
   {
-    id: "portal",
-    name: "Customer Portal",
-    description:
-      "Share Helicone dashboards with your team and clients. Easily manage permissions and access.",
-    bullets: [
-      {
-        icon: ChartBarIcon,
-        text: "Share Dashboards",
-      },
-      {
-        icon: UserGroupIcon,
-        text: "Manage Rate-Limits and Permissions",
-      },
-      {
-        icon: PaintBrushIcon,
-        text: "Customize Branding and Look and Feel",
-      },
-    ],
-    cta: (
-      <Link
-        href="/contact"
-        className="bg-violet-500 hover:bg-violet-600 ease-in-out duration-500 text-white border-2 border-violet-700 rounded-lg px-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
-      >
-        Schedule a Demo
-      </Link>
-    ),
-    src: "/static/enterprise/portal-graphic.webp",
-    graphic: "/static/enterprise/portal-example.webp",
-    new: false,
+    title: "Sub-millisecond latency",
+    description: "As a Gateway, we deploy using Cloudflare Workers to minimize response time while bringing smart analytics and convenience to you."
   },
   {
-    id: "fine-tuning",
-    name: "Fine-Tuning",
-    description:
-      "Collect feedback and improve model performance over time. We make it easy to fine-tune and export data.",
-    bullets: [
-      {
-        icon: WrenchIcon,
-        text: "Fine-tune OpenAI Models",
-      },
-      {
-        icon: HandThumbUpIcon,
-        text: "Collect and label data for fine-tuning",
-      },
-      {
-        icon: FolderArrowDownIcon,
-        text: "Export Data as CSV or JSONL",
-      },
-    ],
-    cta: (
-      <Link
-        href="https://us.helicone.ai/signup"
-        className="bg-violet-500 hover:bg-violet-600 ease-in-out duration-500 text-white border-2 border-violet-700 rounded-lg px-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
-      >
-        Get Started
-      </Link>
-    ),
-    src: "/static/enterprise/finetune-graphic.webp",
-    graphic: "/static/enterprise/finetune-example.webp",
-    new: false,
-  },
-  {
-    id: "evaluations",
-    name: "Evaluations",
-    description: "Analyze model performance to make informed decisions.",
-    src: "/static/enterprise/eval-graphic.webp",
-    bullets: [],
-    cta: (
-      <Link
-        href="https://us.helicone.ai/signup"
-        className="bg-violet-500 hover:bg-violet-600 ease-in-out duration-500 text-white border-2 border-violet-700 rounded-lg px-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
-      >
-        Get Started
-      </Link>
-    ),
-    graphic: "/static/enterprise/experiments-example.webp",
-    new: true,
+    title: "Risk-free Experimentation",
+    description: "Evaluate the outputs of your new prompt without impacting production data (and have stats to back you up)."
   },
 ];
 
-const Enterprise = (props: EnterpriseProps) => {
-  const {} = props;
+const Enterprise = () => {
 
-  const [activeTab, setActiveTab] = useState(ENTERPRISE_TABS[0].id);
-
-  const currentTab = ENTERPRISE_TABS.find((tab) => tab.id === activeTab);
 
   return (
-    <div className="flex flex-col space-y-16 w-full">
-      <div className="flex items-start w-full">
-        <div className="flex flex-col space-y-4 w-full lg:w-2/3 text-center lg:text-left">
-          <p className="text-lg font-bold text-violet-700">Enterprise</p>
+    <div className="flex flex-col space-y-16 w-full px-3">
+      <div className="flex md:text-center w-full">
+        <div className="flex flex-col md:items-center space-y-4 w-full ">
+          <p className="text-[16px] font-bold text-blue-600">Enterprise</p>
           <h2 className="text-3xl sm:text-5xl font-bold sm:leading-[1.15]">
             Get to production-quality{" "}
-            <span className="text-violet-800">faster</span>
+            <span className="text-blue-600">faster</span>
           </h2>
-          <p className="text-md lg:text-lg text-gray-500 leading-7">
-            Helicone makes it easy for companies to innovate faster and smarter,
-            ensuring your team can stay ahead of the competition.
-          </p>
-        </div>
-        <div className="w-full h-full hidden lg:flex items-center justify-center py-12">
-          <Image
-            src={"/static/enterprise/enterprise-graphic.webp"}
-            alt={"enterprise-graphic"}
-            width={550}
-            height={550}
-          />
+          <button className="md:items-center w-fit px-3 py-[6px] text-blue-600 text-sm font-semibold border border-blue-600 rounded-lg  ">
+            Get a demo
+          </button>
         </div>
       </div>
-      <ul className="w-full hidden lg:flex justify-between items-center gap-8">
-        <li className="flex items-center justify-center w-full">
-          <button
-            onClick={() => {
-              // go the previous tab, skipping the evaluation tab, which is the last tab in the list
-              const currentIndex = ENTERPRISE_TABS.findIndex(
-                (tab) => tab.id === activeTab
-              );
-              const previousTab = ENTERPRISE_TABS[currentIndex - 1];
-              setActiveTab(
-                previousTab
-                  ? previousTab.id
-                  : ENTERPRISE_TABS[ENTERPRISE_TABS.length - 2].id
-              );
-            }}
-          >
-            <ChevronLeftIcon className="h-6 w-6 text-gray-500" />
-          </button>
-        </li>
-        {ENTERPRISE_TABS.map((tab) => (
-          <li key={tab.id} className="w-full z-10 relative">
-            <button
-              onClick={() => setActiveTab(tab.id)}
-              className={clsx(
-                tab.id === activeTab
-                  ? "border-violet-700 bg-violet-50"
-                  : "border-gray-300",
-                tab.id === "evaluations"
-                  ? "bg-gray-200 hover:cursor-not-allowed"
-                  : "border-gray-300",
-                "w-48 h-40 justify-center text-md border-2 px-8 py-4 rounded-lg font-semibold flex flex-col items-center gap-2"
-              )}
-              disabled={tab.id === "evaluations"}
-            >
-              <Image src={tab.src} alt={tab.name} width={60} height={60} />
-              {tab.name}
-            </button>
-            {tab.new && (
-              <div className="absolute -top-2 -right-4 bg-violet-800 text-white px-2 py-1 text-sm rounded-lg rotate-12">
-                Coming Soon
-              </div>
-            )}
-          </li>
-        ))}
-        <li className="flex items-center justify-center w-full">
-          <button
-            onClick={() => {
-              // if the current tab is one before the evaluations tab, go to the first tab, otherwise go to the next tab
-              const currentIndex = ENTERPRISE_TABS.findIndex(
-                (tab) => tab.id === activeTab
-              );
-              const nextTab = ENTERPRISE_TABS[currentIndex + 1];
-              if (nextTab?.id === "evaluations") {
-                setActiveTab(ENTERPRISE_TABS[0].id);
-              } else {
-                setActiveTab(nextTab ? nextTab.id : ENTERPRISE_TABS[0].id);
-              }
-            }}
-          >
-            <ChevronRightIcon className="h-6 w-6 text-gray-500" />
-          </button>
-        </li>
-      </ul>
-      <div className="h-full w-full border border-gray-300 rounded-lg hidden lg:flex items-center justify-center">
-        <div className="w-full grid grid-cols-1 lg:grid-cols-2 h-full bg-sky-50 rounded-lg">
-          <div className="col-span-1 h-full w-full flex flex-col items-start p-8 text-left space-y-2">
-            <div className="flex items-center space-x-4">
-              <Image
-                src={
-                  currentTab?.src ||
-                  "/static/enterprise/enterprise-graphic.webp"
-                }
-                alt={currentTab?.name || "enterprise-graphic"}
-                width={25}
-                height={25}
-              />
-              <h2 className="text-3xl font-semibold">{currentTab?.name}</h2>
-            </div>
-
-            <p className="text-lg text-gray-500">{currentTab?.description}</p>
-            <ul className="pt-4 flex flex-col space-y-6">
-              {currentTab?.bullets?.map((bullet) => (
-                <li key={bullet.text} className="flex items-center space-x-2">
-                  <bullet.icon className="h-6 w-6 text-violet-700" />
-                  <span className="font-semibold">{bullet.text}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="pt-4">{currentTab?.cta}</div>
+      <div className="flex flex-col md:flex-row gap-4 md:gap-40">
+        {prompts.map((pr) => (
+          <div key={pr.title} className="flex flex-col md:text-left gap-2">
+            <PiTerminalBold className="text-blue-700 h-6 w-6 pr-1" />
+            <h1 className="font-bold text-[14px]">{pr.title} </h1>
+            <p className="text-[14px]">{pr.description}</p>
           </div>
-          <div className="col-span-1 h-full w-full rounded-lg p-4 flex justify-center items-center">
-            <Image
-              src={
-                currentTab?.graphic ||
-                "/static/enterprise/experiments-example.webp"
-              }
-              alt={"123"}
-              width={500}
-              height={500}
-              className="rounded-lg shadow-xl"
+        ))}
+      </div>
+
+      <div className="h-full w-full border border-gray-200 rounded-lg lg:flex items-center justify-center overflow-hidden">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-2 h-full bg-sky-50 rounded-lg">
+          <div className="col-span-1 h-full w-full flex flex-col items-start p-8 text-left space-y-2 gap-3">
+            <p className="text-blue-700 text-sm bg-blue-100 w-fit border border-blue-700 py-[6px] px-4 rounded-lg font-medium">Experiments</p>
+            <h1 className="font-semibold text-2xl text-blue-700">Run expirements on prompts</h1>
+            <p className="text-gray-600 font-normal text-sm">Identify issues and analyze the performance of your prompt, by modifying it, changing the model or datasets.</p>
+            <p className="text-blue-700 font-semibold text-sm">View Doc <PiArrowUpRightLight className="text-blue-700 inline h-5 w-5"/> </p>
+          </div>
+          <div className="">
+            <Image 
+            src={"static/enterprise/run-experiments.svg"}
+            alt="run-exp"
+            width={500}
+            height={500}
+            className="translate-x-16 scale-125"
+            />
+            <Image 
+            src={"static/enterprise/output-2.1.svg"}
+            alt="run-exp"
+            width={200}
+            height={200}
+            className="translate-x-32 -translate-y-24 h-fit"
+            />
+            <Image 
+            src={"static/enterprise/output-2.0.svg"}
+            alt="run-exp"
+            width={200}
+            height={200}
+            className="-translate-y-36 h-fit"
             />
           </div>
         </div>
-      </div>
-      <ul className="flex flex-col lg:hidden space-y-8">
-        {ENTERPRISE_TABS.filter((tab) => tab.id !== "evaluations").map(
-          (tab) => (
-            <div
-              key={tab.id}
-              className="h-full w-full border border-gray-300 rounded-lg flex items-center justify-center"
-            >
-              <div className="w-full grid grid-cols-1 lg:grid-cols-2 h-full bg-sky-50 rounded-lg">
-                <div className="col-span-1 h-full w-full flex flex-col items-start p-8 text-left space-y-2">
-                  <div className="flex items-center space-x-4">
-                    <Image
-                      src={
-                        tab?.src || "/static/enterprise/enterprise-graphic.webp"
-                      }
-                      alt={tab?.name || "enterprise-graphic"}
-                      width={20}
-                      height={20}
-                    />
-                    <h2 className="text-2xl font-semibold">{tab?.name}</h2>
-                  </div>
+      </div><div className="h-full w-full border border-gray-200 rounded-lg lg:flex items-center justify-center overflow-hidden">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-2 h-full bg-sky-50 rounded-lg">
+          <div className="col-span-1 h-full w-full flex flex-col items-start px-6 py-7 text-left space-y-2 gap-3">
+            <p className="text-blue-700 text-sm bg-blue-100 w-fit border border-blue-700 py-[6px] px-4 rounded-lg font-medium">Customer Portal</p>
+            <h1 className="font-semibold text-2xl text-blue-700">Share analytics with your customers</h1>
+            <p className="text-gray-600 font-normal text-sm">Access built-in customer usage dashboard, billing system and usage tracking by customers. </p>
+            <p className="text-blue-700 font-semibold text-sm">Contact Us <PiArrowUpRightLight className="text-blue-700 inline h-5 w-5"/> </p>
+          </div>
+          <div>
+          <Image 
+            src={"static/enterprise/customer-portal.svg"}
+            alt="cust-exp"
+            width={700}
+            height={700}
+            className="scale-150 translate-x-36"
+            />
+            <Image 
+            src={"static/enterprise/set-limits.svg"}
+            alt="limits-exp"
+            width={200}
+            height={200}
+            className="-translate-y-20"
+            />
 
-                  <p className="text-sm text-gray-500">{tab?.description}</p>
-                  <ul className="pt-8 pb-4 flex flex-col space-y-6">
-                    {tab?.bullets?.map((bullet) => (
-                      <li
-                        key={bullet.text}
-                        className="flex items-center space-x-2"
-                      >
-                        <bullet.icon className="h-6 w-6 text-violet-700" />
-                        <span className="font-semibold text-sm">
-                          {bullet.text}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="pt-4">{tab?.cta}</div>
-                </div>
-                <div className="col-span-1 h-full w-full rounded-lg p-4 hidden lg:flex justify-center items-center">
-                  <Image
-                    src={
-                      currentTab?.graphic ||
-                      "/static/enterprise/experiments-example.webp"
-                    }
-                    alt={"123"}
-                    width={700}
-                    height={700}
-                    className="rounded-lg shadow-xl"
-                  />
-                </div>
-              </div>
-            </div>
-          )
-        )}
-      </ul>
+          </div>
+        </div>
+      </div>
+      <div className="h-full w-full border border-gray-200 rounded-lg lg:flex items-center justify-center overflow-hidden">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-2 h-full bg-sky-50 rounded-lg">
+          <div className="col-span-1 h-full w-full flex flex-col items-start p-8 text-left space-y-2 gap-3">
+            <p className="text-blue-700 text-sm bg-blue-100 w-fit border border-blue-700 py-[6px] px-4 rounded-lg font-medium">ETL</p>
+            <h1 className="font-semibold text-2xl text-blue-700">Bring data into your data warehouse</h1>
+            <p className="text-gray-600 font-normal text-sm">Extracting, Transforming, and Loading (ETL) data from Helicone into your personal data warehouse.</p>
+            <p className="text-blue-700 font-semibold text-sm">View Doc <PiArrowUpRightLight className="text-blue-700 inline h-5 w-5"/> </p>
+          </div>
+        </div>
+        <div className="hidden md:flex">
+        <Image 
+            src={"static/enterprise/customer-portal.svg"}
+            alt="cust-exp"
+            width={700}
+            height={700}
+            className="scale-150 translate-x-36"
+            />
+        </div>
+      </div>
     </div>
   );
 };

@@ -46,28 +46,113 @@ const meta = {
   ],
 };
 
+const integrations = [
+  {
+    name: "Open AI"
+  },
+  {
+    name: "Azure"
+  },
+  {
+    name: "Anthropic"
+  },
+  {
+    name: "Gemini"
+  },
+  {
+    name: "Anyscale"
+  },
+  {
+    name: "Together AI"
+  },
+  {
+    name: "Groq"
+  },
+  {
+    name: "OpenRouter"
+  },
+  {
+    name: "LiteLLM"
+  },
+  {
+    name: "Gateway"
+  },
+]
+
+const versus = [
+  {
+    name: "Helicone vs. LangSmith"
+  },
+  {
+    name: "Helicone vs. DataDog"
+  },
+  {
+    name: "Helicone vs. W&B"
+  },
+]
+
+const learnMore = [
+  {
+    name: "Documentation"
+  },
+  {
+    name: "Pricing"
+  },
+  {
+    name: "Community"
+  },
+  {
+    name: "Blog"
+  },
+  {
+    name: "Contact"
+  },
+]
+
 const Footer = (props: FooterProps) => {
   const { } = props;
 
   return (
     <footer className="bg-inherit border-t border-gray-200">
-      <div className="mt-8 md:order-1 md:mt-0 space-x-4 flex flex-col">
-        <Image 
-        className=""
-        src={"/static/logo.webp"}
-        alt={"Helicone"}
-        width={21}
-        height={21}
+      <div className="mt-8 md:order-1 md:mt-0 space-x-4 flex flex-col gap-2">
+        <Image
+          className="ml-3"
+          src={"/static/logo.webp"}
+          alt={"Helicone"}
+          width={21.78}
+          height={21.78}
         />
         <p className="text-nowrap text-xs leading-5 text-gray-500">
-          &copy; 2024 Helicone, Inc.{" "} 
+          &copy; 2024 Helicone, Inc.{" "}
         </p>
         <p className="text-xs text-gray-500">All rights reserved</p>
       </div>
+      <div className="mx-auto max-w-5xl px-4 py-8 flex grid-cols-2 justify-between ">
+        <div className="flex flex-col gap-4">
+          <h1 className="text-sky-500 font-semibold text-sm">INTEGRATIONS</h1>
+          {integrations.map((integration) => (
+            <p key={integration.name} className="text-gray-500 text-sm font-normal">{integration.name}</p>
+          ))}
+        </div>
+        <div className="flex flex-col justify-between">
+          <div className="flex flex-col gap-4">
+            <h1 className="text-sky-500 font-semibold text-sm">COMPARE</h1>
+            {versus.map((vs) => (
+              <p key={vs.name} className="text-gray-500 text-sm font-normal">{vs.name}</p>
+            ))}
+          </div>
+            <div className="flex flex-col gap-4 ">
+              <h1 className="text-sky-500 font-semibold text-sm">LEARN MORE</h1>
+              {learnMore.map((learn) => (
+                <p key={learn.name} className="text-gray-500 text-sm font-normal">{learn.name}</p>
+              ))}
+            </div>
+        </div>
+
+      </div>
       <div className="mx-auto max-w-5xl px-4 py-8 md:flex md:items-center md:justify-between lg:px-4">
-        
         <div className="flex flex-col gap-2 md:order-2">
-          <h1 className="text-sky-500 text-sm font-semibold">Socials</h1>
+          <h1 className="text-sky-500 text-sm font-semibold">SOCIALS</h1>
           {meta.social.map((item) => (
             <Link
               key={item.name}
