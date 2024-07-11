@@ -1,4 +1,5 @@
 export * from "./async_logger/HeliconeAsyncLogger";
+export * from "./async_logger/HeliconeManualLogger";
 
 export * from "./core/HeliconeClientOptions";
 export * from "./core/HeliconeFeedback";
