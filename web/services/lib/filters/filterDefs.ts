@@ -1,6 +1,7 @@
 import { UIFilterRow } from "../../../components/shared/themed/themedAdvancedFilters";
 import { TimeFilter } from "../../../lib/api/handlerWrappers";
 import { SingleFilterDef } from "./frontendFilterDefs";
+import { UIFilterRowTree } from "./uiFilterRowTree";
 export type AllOperators =
   | "equals"
   | "like"
@@ -420,3 +421,22 @@ export const parseKey = (keyString: string): FilterLeaf => {
     },
   };
 };
+
+export function uiFilterRowTreeToFilterLeafArray(
+  filterMap: SingleFilterDef<any>[],
+  tree: UIFilterRowTree
+): FilterLeaf[] {
+  let filterLeafArray: FilterLeaf[] = [];
+
+  const traverseTree = (node: UIFilterRowTree) => {
+    if ("rows" in node) {
+      node.rows.forEach((childNode) => traverseTree(childNode));
+    } else {
+      const filterLeaf = uiFilterRowToFilterLeaf(filterMap, node);
+      filterLeafArray.push(filterLeaf);
+    }
+  };
+
+  traverseTree(tree);
+  return filterLeafArray;
+}

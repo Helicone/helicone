@@ -16,7 +16,7 @@ import {
 } from "../../../services/hooks/useBackendFunction";
 import {
   FilterLeaf,
-  filterUIToFilterLeafs,
+  uiFilterRowTreeToFilterLeafArray,
 } from "../../../services/lib/filters/filterDefs";
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
@@ -32,6 +32,10 @@ import { TimeToFirstToken } from "../../../pages/api/metrics/timeToFirstToken";
 import { ThreatsOverTime } from "../../../pages/api/metrics/threatsOverTime";
 import { useModels } from "../../../services/hooks/models";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
+import {
+  filterUITreeToFilterNode,
+  UIFilterRowTree,
+} from "../../../services/lib/filters/uiFilterRowTree";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -65,7 +69,7 @@ export interface DashboardPageData {
     start: Date;
     end: Date;
   };
-  uiFilters: UIFilterRow[];
+  uiFilters: UIFilterRowTree;
   apiKeyFilter: string | null;
   timeZoneDifference: number;
   dbIncrement: TimeIncrement;
@@ -88,7 +92,7 @@ export const useDashboardPage = ({
     DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]
   ).concat(propertyFilters);
 
-  const userFilters = filterUIToFilterLeafs(filterMap, uiFilters);
+  const userFilters = uiFilterRowTreeToFilterLeafArray(filterMap, uiFilters);
   const { isLoading: isModelsLoading, models } = useModels(
     timeFilter,
     1000,

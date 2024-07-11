@@ -1,6 +1,6 @@
 import { ArrowPathIcon, HomeIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import {
@@ -42,6 +42,9 @@ import TableFooter from "./tableFooter";
 import useRequestsPageV2 from "./useRequestsPageV2";
 import {
   getRootFilterNode,
+  isFilterRowNode,
+  isUIFilterRow,
+  UIFilterRowNode,
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
 
@@ -109,6 +112,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     organizationLayout,
     organizationLayoutAvailable,
   } = props;
+  const initialLoadRef = useRef(true);
   const [isLive, setIsLive] = useLocalStorage("isLive", false);
   const jawn = useJawnClient();
   const orgContext = useOrg();
@@ -128,8 +132,23 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   function encodeFilter(filter: UIFilterRow): string {
     return `${filterMap[filter.filterMapIdx].label}:${
       filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label
-    }:${filter.value}`;
+    }:${encodeURIComponent(filter.value)}`;
   }
+  const encodeFilters = (filters: UIFilterRowTree): string => {
+    if (isFilterRowNode(filters)) {
+      return filters.rows
+        .map((row) => {
+          if (isFilterRowNode(row)) {
+            return encodeFilters(row);
+          } else {
+            return encodeFilter(row);
+          }
+        })
+        .join("|");
+    } else {
+      return encodeFilter(filters);
+    }
+  };
 
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -323,106 +342,140 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   }, [initialRequestId]);
 
-  // TODO
-  // useEffect(() => {
-  //   const currentAdvancedFilters = searchParams.get("filters");
-
-  //   if (
-  //     filterMap &&
-  //     advancedFilters.length === 0 &&
-  //     currentAdvancedFilters &&
-  //     !isDataLoading
-  //   ) {
-  //     setAdvancedFilters(getAdvancedFilters());
-  //   }
-  // }, [advancedFilters.length, filterMap, getAdvancedFilters, isDataLoading, searchParams]);
-
   //convert this using useCallback
 
-  // TODO can i kill this?
-  // const getAdvancedFilters = useCallback(() => {
-  //   function decodeFilter(encoded: string): UIFilterRow | null {
-  //     try {
-  //       const parts = encoded.split(":");
-  //       if (parts.length !== 3) return null;
-  //       const filterLabel = decodeURIComponent(parts[0]);
-  //       const operator = decodeURIComponent(parts[1]);
-  //       const value = decodeURIComponent(parts[2]);
+  // TODO fix this to return correct UIFilterRowTree instead of UIFilterRow[]
+  const getAdvancedFilters = useCallback((): UIFilterRowTree => {
+    function decodeFilter(encoded: string): UIFilterRow | null {
+      try {
+        const parts = encoded.split(":");
+        if (parts.length !== 3) return null;
+        const filterLabel = decodeURIComponent(parts[0]);
+        const operator = decodeURIComponent(parts[1]);
+        const value = decodeURIComponent(parts[2]);
 
-  //       const filterMapIdx = filterMap.findIndex(
-  //         (f) =>
-  //           f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
-  //       );
-  //       const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
-  //         (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
-  //       );
+        const filterMapIdx = filterMap.findIndex(
+          (f) =>
+            f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
+        );
+        const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
+          (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
+        );
 
-  //       if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
+        if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
 
-  //       return { filterMapIdx, operatorIdx, value };
-  //     } catch (error) {
-  //       console.error("Error decoding filter:", error);
-  //       return null;
-  //     }
-  //   }
-  //   try {
-  //     const currentAdvancedFilters = searchParams.get("filters");
+        return { filterMapIdx, operatorIdx, value };
+      } catch (error) {
+        console.error("Error decoding filter:", error);
+        return null;
+      }
+    }
 
-  //     if (currentAdvancedFilters) {
-  //       const filters = decodeURIComponent(currentAdvancedFilters).slice(1, -1);
-  //       const decodedFilters = filters
-  //         .split("|")
-  //         .map(decodeFilter)
-  //         .filter((filter) => filter !== null) as UIFilterRow[];
+    try {
+      const currentAdvancedFilters = searchParams.get("filters");
 
-  //       return decodedFilters;
-  //     }
-  //   } catch (error) {
-  //     console.error("Error decoding advanced filters:", error);
-  //   }
-  //   return [];
-  // }, [searchParams, filterMap]);
+      if (currentAdvancedFilters) {
+        const filters = decodeURIComponent(currentAdvancedFilters).replace(
+          /^"|"$/g,
+          ""
+        );
+        const decodedFilters = filters
+          .split("|")
+          .map(decodeFilter)
+          .filter((filter): filter is UIFilterRow => filter !== null);
+
+        return {
+          operator: "and",
+          rows: decodedFilters,
+        };
+      }
+    } catch (error) {
+      console.error("Error decoding advanced filters:", error);
+    }
+
+    return getRootFilterNode();
+  }, [searchParams, filterMap]);
+
+  useEffect(() => {
+    if (initialLoadRef.current && filterMap.length > 0) {
+      const loadedFilters = getAdvancedFilters();
+      setAdvancedFilters(loadedFilters);
+      initialLoadRef.current = false;
+    }
+  }, [filterMap, getAdvancedFilters]);
 
   // TODO
-  // useEffect(() => {
-  //   if (advancedFilters.length !== 0 || !userId) {
-  //     return;
-  //   }
+  useEffect(() => {
+    if (
+      !isFilterRowNode(advancedFilters) ||
+      advancedFilters.rows.length === 0
+    ) {
+      if (userId) {
+        const userFilterMapIndex = filterMap.findIndex(
+          (filter) => filter.label === "User"
+        );
 
-  //   const userFilerMapIndex = filterMap.findIndex(
-  //     (filter) => filter.label === "User"
-  //   );
-
-  //   if (userFilerMapIndex !== -1) {
-  //     setAdvancedFilters([
-  //       {
-  //         filterMapIdx: userFilerMapIndex,
-  //         operatorIdx: 0,
-  //         value: userId,
-  //       },
-  //     ]);
-  //   }
-  // }, [advancedFilters, filterMap, userId]);
-  const userFilerMapIndex = filterMap.findIndex(
+        if (userFilterMapIndex !== -1) {
+          setAdvancedFilters({
+            operator: "and",
+            rows: [
+              {
+                filterMapIdx: userFilterMapIndex,
+                operatorIdx: 0,
+                value: userId,
+              },
+            ],
+          } as UIFilterRowNode);
+        }
+      }
+    }
+  }, [advancedFilters, filterMap, userId]);
+  const userFilterMapIndex = filterMap.findIndex(
+    (filter) => filter.label === "Helicone-Rate-Limit-Status"
+  );
+  const rateLimitFilterMapIndex = filterMap.findIndex(
     (filter) => filter.label === "Helicone-Rate-Limit-Status"
   );
   // TODO
-  // useEffect(() => {
-  //   if (rateLimited) {
-  //     if (userFilerMapIndex === -1) {
-  //       return;
-  //     }
+  useEffect(() => {
+    if (rateLimited) {
+      if (userFilterMapIndex === -1) {
+        return;
+      }
 
-  //     setAdvancedFilters([
-  //       {
-  //         filterMapIdx: userFilerMapIndex,
-  //         operatorIdx: 0,
-  //         value: "rate_limited",
-  //       },
-  //     ]);
-  //   }
-  // }, [userFilerMapIndex, rateLimited]);
+      setAdvancedFilters((prev) => {
+        const newFilter: UIFilterRow = {
+          filterMapIdx: userFilterMapIndex,
+          operatorIdx: 0,
+          value: "rate_limited",
+        };
 
+        if (isFilterRowNode(prev)) {
+          // Check if the rate limit filter already exists
+          const existingFilterIndex = prev.rows.findIndex(
+            (row) =>
+              isUIFilterRow(row) && row.filterMapIdx === userFilterMapIndex
+          );
+
+          if (existingFilterIndex !== -1) {
+            // Update existing filter
+            const updatedRows = [...prev.rows];
+            updatedRows[existingFilterIndex] = newFilter;
+            return { ...prev, rows: updatedRows };
+          } else {
+            // Add new filter
+            return { ...prev, rows: [...prev.rows, newFilter] };
+          }
+        } else {
+          // If prev is a single UIFilterRow, create a new UIFilterRowNode
+          return {
+            operator: "and",
+            rows: [prev, newFilter],
+          };
+        }
+      });
+    }
+  }, [userFilterMapIndex, rateLimited, setAdvancedFilters]);
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
     refetch();
@@ -496,6 +549,25 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     searchParams.set("requestId", row.id);
   };
 
+  const onSetAdvancedFiltersHandler = useCallback(
+    (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
+      setAdvancedFilters(filters);
+      if (
+        layoutFilterId === null ||
+        (isFilterRowNode(filters) && filters.rows.length === 0)
+      ) {
+        searchParams.delete("filters");
+      } else {
+        const currentAdvancedFilters = encodeFilters(filters);
+        searchParams.set(
+          "filters",
+          `"${encodeURIComponent(currentAdvancedFilters)}"`
+        );
+      }
+    },
+    [searchParams]
+  );
+
   const {
     organizationLayout: orgLayout,
     isLoading: isOrgLayoutLoading,
@@ -513,12 +585,18 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   );
 
   const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
+    console.log(1);
     if (layoutFilter !== null) {
-      // onSetAdvancedFiltersHandler(layoutFilter?.filter, layoutFilter.id);
-      setCurrFilter(layoutFilter?.id);
+      // Assuming layoutFilter.filter is UIFilterRowTree[]
+      const combinedFilter: UIFilterRowTree = {
+        operator: "and",
+        rows: layoutFilter.filter,
+      };
+      onSetAdvancedFiltersHandler(combinedFilter, layoutFilter.id);
+      setCurrFilter(layoutFilter.id);
     } else {
       setCurrFilter(null);
-      // onSetAdvancedFiltersHandler([], null);
+      onSetAdvancedFiltersHandler({ operator: "and", rows: [] }, null);
     }
   };
 
@@ -653,7 +731,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             advancedFilters={{
               filterMap: filterMap,
               filters: advancedFilters,
-              setAdvancedFilters: setAdvancedFilters,
+              setAdvancedFilters: onSetAdvancedFiltersHandler,
               searchPropertyFilters: searchPropertyFilters,
               show: userId ? false : true,
             }}

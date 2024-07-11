@@ -14,7 +14,7 @@ import {
   Legend,
 } from "@tremor/react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { ModelMetric } from "../../../lib/api/models/models";
 import {
@@ -53,7 +53,11 @@ import { useOrganizationLayout } from "../../../services/hooks/organization_layo
 import CountryPanel from "./panels/countryPanel";
 import useNotification from "../../shared/notification/useNotification";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
-import { filterUIToFilterLeafs } from "../../../services/lib/filters/filterDefs";
+import { uiFilterRowTreeToFilterLeafArray } from "../../../services/lib/filters/filterDefs";
+import {
+  getRootFilterNode,
+  UIFilterRowTree,
+} from "../../../services/lib/filters/uiFilterRowTree";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -174,9 +178,11 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [open, setOpen] = useState(false);
 
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
+    getRootFilterNode()
+  );
 
-  const debouncedAdvancedFilters = useDebounce(advancedFilters, 500);
+  const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
   const timeIncrement = getTimeInterval(timeFilter);
 
@@ -201,35 +207,36 @@ const DashboardPage = (props: DashboardPageProps) => {
     isModelsLoading,
   } = useDashboardPage({
     timeFilter,
-    uiFilters: debouncedAdvancedFilters,
+    uiFilters: debouncedAdvancedFilter,
     apiKeyFilter: null,
     timeZoneDifference: new Date().getTimezoneOffset(),
     dbIncrement: timeIncrement,
   });
+  
 
-  useEffect(() => {
-    if (!isAnyLoading && filterMap) {
-      setAdvancedFilters(getAdvancedFilters());
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAnyLoading]);
+  // useEffect(() => {
+  //   if (!isAnyLoading && filterMap) {
+  //     setAdvancedFilters(getAdvancedFilters());
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [isAnyLoading]);
 
-  const onSetAdvancedFiltersHandler = (
-    filters: UIFilterRow[],
-    layoutFilterId?: string | null
-  ) => {
-    if (layoutFilterId === null || filters.length === 0) {
-      searchParams.delete("filters");
-    } else {
-      const currentAdvancedFilters = filters.map(encodeFilter).join("|");
+  // const onSetAdvancedFiltersHandler = (
+  //   filters: UIFilterRow[],
+  //   layoutFilterId?: string | null
+  // ) => {
+  //   if (layoutFilterId === null || filters.length === 0) {
+  //     searchParams.delete("filters");
+  //   } else {
+  //     const currentAdvancedFilters = filters.map(encodeFilter).join("|");
 
-      searchParams.set(
-        "filters",
-        `"${encodeURIComponent(currentAdvancedFilters)}"`
-      );
-    }
-    setAdvancedFilters(filters);
-  };
+  //     searchParams.set(
+  //       "filters",
+  //       `"${encodeURIComponent(currentAdvancedFilters)}"`
+  //     );
+  //   }
+  //   setAdvancedFilters(filters);
+  // };
 
   const metricsData: MetricsPanelProps["metric"][] = [
     {
@@ -528,7 +535,7 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
             advancedFilter={{
               filterMap,
-              onAdvancedFilter: onSetAdvancedFiltersHandler,
+              onAdvancedFilter: setAdvancedFilters,
               filters: advancedFilters,
               searchPropertyFilters: searchPropertyFilters,
             }}
@@ -709,7 +716,7 @@ const DashboardPage = (props: DashboardPageProps) => {
               <div key="countries">
                 <CountryPanel
                   timeFilter={timeFilter}
-                  userFilters={filterUIToFilterLeafs(
+                  userFilters={uiFilterRowTreeToFilterLeafArray(
                     filterMap,
                     advancedFilters
                   )}
@@ -747,7 +754,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
               <div key="quantiles">
                 <QuantilesGraph
-                  uiFilters={debouncedAdvancedFilters}
+                  uiFilters={debouncedAdvancedFilter}
                   timeFilter={timeFilter}
                   timeIncrement={timeIncrement}
                 />

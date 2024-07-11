@@ -13,6 +13,15 @@ export interface UIFilterRowNode {
 
 export type UIFilterRowTree = UIFilterRowNode | UIFilterRow;
 
+export function isFilterRowNode(
+  filter: UIFilterRowTree
+): filter is UIFilterRowNode {
+  return (filter as UIFilterRowNode).rows !== undefined;
+}
+
+export function isUIFilterRow(filter: UIFilterRowTree): filter is UIFilterRow {
+  return (filter as UIFilterRow).filterMapIdx !== undefined;
+}
 export const getRootFilterNode = (): UIFilterRowNode => {
   return {
     operator: "and",
