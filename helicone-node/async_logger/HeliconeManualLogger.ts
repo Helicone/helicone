@@ -19,7 +19,7 @@ export class HeliconeManualLogger {
     this.request = request;
   }
 
-  public sendLog(response: ILogResponse, meta: IMeta): void {
+  public sendLog(response: ILogResponse, meta: Record<string, string>): void {
     if (this.request === null) {
       console.error("Request is not registered.");
       return;
@@ -31,12 +31,12 @@ export class HeliconeManualLogger {
       const providerRequest: ProviderRequest = {
         url: "custom-model-nopath",
         json: this.request,
-        meta: meta.heliconeMeta ?? {}
+        meta: meta ?? {}
       }
 
       const providerResponse: ProviderResponse = {
         headers: this.headers,
-        status: 200,
+        status: parseInt(meta ? (meta.status ?? "200") : "200"),
         json: response
       }
 
@@ -84,11 +84,6 @@ export class HeliconeManualLogger {
  *
  * */
 
-type IMeta = {
-  status: "SUCCESS" | "ERROR";
-  heliconeMeta?: Record<string, string>;
-}
-
 type ProviderRequest = {
   url: string;
   json: {
@@ -106,7 +101,6 @@ type ProviderResponse = {
 };
 
 type Timing = {
-  // From Unix epoch in Milliseconds
   startTime: {
     seconds: number;
     milliseconds: number;
