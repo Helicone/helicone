@@ -22,29 +22,6 @@ const SignUp = () => {
     router.push("/welcome");
   }
 
-  const addLeadToClose = async (email: string, name: string = "") => {
-    try {
-      const response = await fetch("https://api.close.com/api/v1/lead/", {
-        body: JSON.stringify({
-          name: name || email.split("@")[0], // Use email username if name not provided
-          contacts: [
-            {
-              emails: [{ email: email, type: "office" }],
-            },
-          ],
-        }),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Basic ${process.env.NEXT_PUBLIC_CLOSE_API_KEY}`,
-        },
-      });
-      const responseData = await response.json();
-      console.log("Lead added to Close:", responseData);
-    } catch (error) {
-      console.error("Error adding lead to Close:", error);
-    }
-  };
-
   return (
     <PublicMetaData
       description={
@@ -78,7 +55,6 @@ const SignUp = () => {
             email: email,
           });
 
-          await addLeadToClose(email);
           setShowEmailConfirmation(true);
         }}
         handleGoogleSubmit={async () => {
@@ -97,8 +73,6 @@ const SignUp = () => {
           posthog.capture("user_signed_up", {
             method: "google",
           });
-
-          await addLeadToClose();
         }}
         handleGithubSubmit={async () => {
           const { error } = await supabase.auth.signInWithOAuth({
