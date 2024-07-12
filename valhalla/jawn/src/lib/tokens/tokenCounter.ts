@@ -1,5 +1,7 @@
 import claudeRanks from "@anthropic-ai/tokenizer/claude.json";
 import { Tiktoken } from "js-tiktoken";
+import { get_encoding, encoding_for_model } from "tiktoken";
+
 import { Worker } from "worker_threads";
 
 // Moved all the tokenizer here so it won't be loaded for every request
@@ -18,29 +20,74 @@ function restartGptWorker() {
   gptWorker = new Worker(`${__dirname}/gptWorker.js`);
 }
 
-export async function getTokenCountGPT3(inputText: string): Promise<number> {
+const TIKTOKEN_MODELS = [
+  "davinci-002",
+  "babbage-002",
+  "text-davinci-003",
+  "text-davinci-002",
+  "text-davinci-001",
+  "text-curie-001",
+  "text-babbage-001",
+  "text-ada-001",
+  "davinci",
+  "curie",
+  "babbage",
+  "ada",
+  "code-davinci-002",
+  "code-davinci-001",
+  "code-cushman-002",
+  "code-cushman-001",
+  "davinci-codex",
+  "cushman-codex",
+  "text-davinci-edit-001",
+  "code-davinci-edit-001",
+  "text-embedding-ada-002",
+  "text-similarity-davinci-001",
+  "text-similarity-curie-001",
+  "text-similarity-babbage-001",
+  "text-similarity-ada-001",
+  "text-search-davinci-doc-001",
+  "text-search-curie-doc-001",
+  "text-search-babbage-doc-001",
+  "text-search-ada-doc-001",
+  "code-search-babbage-code-001",
+  "code-search-ada-code-001",
+  "gpt2",
+  "gpt-3.5-turbo",
+  "gpt-35-turbo",
+  "gpt-3.5-turbo-0301",
+  "gpt-3.5-turbo-0613",
+  "gpt-3.5-turbo-1106",
+  "gpt-3.5-turbo-0125",
+  "gpt-3.5-turbo-16k",
+  "gpt-3.5-turbo-16k-0613",
+  "gpt-3.5-turbo-instruct",
+  "gpt-3.5-turbo-instruct-0914",
+  "gpt-4",
+  "gpt-4-0314",
+  "gpt-4-0613",
+  "gpt-4-32k",
+  "gpt-4-32k-0314",
+  "gpt-4-32k-0613",
+  "gpt-4-turbo",
+  "gpt-4-turbo-2024-04-09",
+  "gpt-4-turbo-preview",
+  "gpt-4-1106-preview",
+  "gpt-4-0125-preview",
+  "gpt-4-vision-preview",
+  "gpt-4o",
+  "gpt-4o-2024-05-13",
+];
+export async function getTokenCountGPT3(
+  inputText: string,
+  model: string
+): Promise<number> {
   if (!inputText) return 0;
+  model = TIKTOKEN_MODELS.find((m) => m === model) ?? "gpt-3.5-turbo";
 
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      restartGptWorker();
-      reject(new Error("Timeout: gptEncode took too long"));
-    }, 5000);
-
-    gptWorker.on("message", (event) => {
-      if (!event) return;
-      clearTimeout(timeout);
-      const { success, length, error } = event;
-      restartGptWorker();
-      if (success) {
-        resolve(length);
-      } else {
-        reject(new Error(error));
-      }
-    });
-
-    gptWorker.postMessage({ inputText });
-  });
+  const encoding = encoding_for_model(model as any);
+  const tokens = encoding.encode(inputText);
+  return tokens.length;
 }
 
 export async function getTokenCountAnthropic(
