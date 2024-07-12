@@ -10,7 +10,7 @@ COPY ./valhalla/jawn/package.json ./valhalla/jawn/yarn.lock ./
 
 RUN yarn install
 
-WORKDIR /usr/src/app
+WORKDIR /usr/src/app/shared
 COPY ./shared .
 
 WORKDIR /usr/src/app/valhalla/jawn
