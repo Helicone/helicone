@@ -1,12 +1,4 @@
-const { parentPort } = require("worker_threads");
-const { encode: gptEncode } = require("gpt-tokenizer");
+const path = require("path");
 
-parentPort.on("message", (event) => {
-  const { inputText } = event;
-  try {
-    const encoded = gptEncode(inputText);
-    parentPort.postMessage({ success: true, length: encoded.length });
-  } catch (error) {
-    parentPort.postMessage({ success: false, error: error.message });
-  }
-});
+require("ts-node").register();
+require(path.resolve(__dirname, "./gptWorker.ts"));
