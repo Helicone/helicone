@@ -138,16 +138,30 @@ export class SupabaseConnector {
   }
 
   private async authenticateBearer(bearer: string): AuthResult {
-    const apiKey = await this.client
+    let apiKey = await this.client
       .from("helicone_api_keys")
       .select("*")
       .eq("api_key_hash", await hashAuth(bearer.replace("Bearer ", "")));
+
     if (apiKey.error) {
       return err(JSON.stringify(apiKey.error));
     }
+    // I dont know how we are getting in this case... but we are in some cases - Justin
+    if (apiKey.data.length === 0) {
+      apiKey = await this.client
+        .from("helicone_api_keys")
+        .select("*")
+        .eq("api_key_hash", await hashAuth(bearer));
+    }
+
+    if (apiKey.error) {
+      return err(JSON.stringify(apiKey.error));
+    }
+
     if (apiKey.data.length === 0) {
       return err("No API key found");
     }
+
     return ok({
       organizationId: apiKey.data[0].organization_id,
       userId: apiKey.data[0].user_id,
