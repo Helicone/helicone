@@ -20,6 +20,23 @@ export type BlogStructure = {
 
 const blogContent: BlogStructure[] = [
   {
+    title: "What is LLM Observability?",
+    description:
+      "Building with LLM in production is incredibly difficult. Here's a very in-depth read by Arize AI addressing the biggest challenges and why LLM observability is crucial.",
+    badgeText: "insight",
+    date: "July 12, 2024",
+    href: "/blog/llm-observability",
+    imageUrl: "/static/blog/langsmith-vs-helicone/cover-image.webp",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/static/blog/linalam-headshot.webp",
+        imageAlt: "Lina Lam's headshot",
+      },
+    ],
+    time: "1 minute read",
+  },
+  {
     title: "Handling Billions of LLM Logs with Upstash Kafka and Cloudflare Workers",
     description:
       "We desperately needed a solution to these outages/data loss. Our reliability and scalability are core to our product.",

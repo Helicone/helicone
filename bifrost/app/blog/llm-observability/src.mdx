@@ -1,0 +1,88 @@
+---
+title: "What is LLM Observability?"
+description: "Building with LLM in production is incredibly difficult. Here's a very in-depth read by Arize AI addressing the biggest challenges and why LLM observability is crucial."
+author: "Lina Lam"
+date: "July 12, 2024"
+time: "1 minute read"
+icon: "code"
+---
+
+Implementing LLM apps is easy due to the level of abstraction, but understanding how each layer of your system is performing is complex without LLM observability. 
+
+
+![Helicone: What is LLM Observability](/static/blog/llm-observability.webp)
+
+
+
+## The TL;DR
+
+Arize AI created a very in-depth read about why LLM observability is crucial to make your application reliable, and key issues with LLM that make building with LLM incredibly difficult. 
+
+
+## What you'll learn
+
+- Common use cases and issues with LLM Apps
+- Importance of LLM observability
+- The five pillars of LLM observability
+    - evaluation
+    - traces and spans
+    - retrieval augmented generation
+    - fine-tuning
+    - prompt engineering
+
+
+## Our notes
+
+The 7 key issues to look out for when building with LLMs are: 
+
+
+**1. Hallucination**
+
+LLMs' objective is to predict the next few characters and not accuracy. This means that responses are not grounded in facts. 
+
+
+**2. Complex use cases**
+
+LLM-based software systems require an increasing number of LLM calls to execute a complex task (i.e. agentic workflow). Reflexion is a technique engineers use to get LLMs to analyze their own results. But this consists of having multiple calls inside of multiple spans for checking hallucinations. 
+
+
+**3. Proprietary data**
+
+Managing proprietary data is tricky. You need it to answer specific customer questions, but it can accidentally find its way into the responses.
+
+
+**4. Quality of response** 
+
+Is the response in the wrong tone? Is the amount of detail appropriate for your users' ask? 
+
+
+**5. Cost (the big elephant in the room)**
+
+As usage goes up, and your LLM setup becomes more complicated (i.e. adding Reflexion), the cost can easily add up.
+
+
+**6. Third-party models**
+
+Their API can change, new models and new guardrails can be added, causing your LLM app to behave differently than before.
+
+
+**7. Limited competitive advantage**
+
+LLMs are hard to train and maintain. Chances are that you are using the same model as your competitor. Your differentiator becomes your prompt engineering and proprietary data.
+
+
+
+## The author
+
+**Aparna Dhinakaran** is the Co-Founder and Chief Product Officer at Arize AI, a leader in machine learning observability. She is recognized in Forbes 30 Under 30 and led ML engineering at Uber, Apple, and TubeMogul (Adobe). 
+
+
+## What we've learned
+
+At Helicone, we've seen the complexities of productizing LLMs first-hand. Effective observability is key to navigating these challenges, and we strive to help our customers produce reliable and high-quality LLM applications, making the observability process easier and faster.
+
+
+What are your thoughts?
+
+<a href="https://arize.com/blog-course/large-language-model-monitoring-observability/" target="_blank">Full article: What is LLM Observability</a>
+
