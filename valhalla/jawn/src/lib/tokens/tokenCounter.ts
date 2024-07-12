@@ -28,8 +28,9 @@ export async function getTokenCountGPT3(inputText: string): Promise<number> {
     }, 5000);
 
     gptWorker.on("message", (event) => {
+      if (!event) return;
       clearTimeout(timeout);
-      const { success, length, error } = event.data;
+      const { success, length, error } = event;
       restartGptWorker();
       if (success) {
         resolve(length);
