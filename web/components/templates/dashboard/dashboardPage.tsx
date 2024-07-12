@@ -14,7 +14,7 @@ import {
   Legend,
 } from "@tremor/react";
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { ModelMetric } from "../../../lib/api/models/models";
 import {
@@ -56,6 +56,7 @@ import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 import { uiFilterRowTreeToFilterLeafArray } from "../../../services/lib/filters/filterDefs";
 import {
   getRootFilterNode,
+  isFilterRowNode,
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
 
@@ -98,6 +99,7 @@ export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
   const { user, currentFilter, organizationLayout } = props;
+  const initialLoadRef = useRef(true);
 
   const searchParams = useSearchParams();
 
@@ -152,25 +154,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     return range;
   };
 
-  const getAdvancedFilters = (): UIFilterRow[] => {
-    try {
-      const currentAdvancedFilters = searchParams.get("filters");
-
-      if (currentAdvancedFilters) {
-        const filters = decodeURIComponent(currentAdvancedFilters).slice(1, -1);
-        const decodedFilters = filters
-          .split("|")
-          .map(decodeFilter)
-          .filter((filter) => filter !== null) as UIFilterRow[];
-
-        return decodedFilters;
-      }
-    } catch (error) {
-      console.error("Error decoding advanced filters:", error);
-    }
-    return [];
-  };
-
   const [interval, setInterval] = useState<TimeInterval>(
     getInterval() as TimeInterval
   );
@@ -188,6 +171,27 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
   const { setNotification } = useNotification();
+
+  const encodeFilters = (filters: UIFilterRowTree): string => {
+    console.log("Encoding filters:", JSON.stringify(filters, null, 2));
+    if (isFilterRowNode(filters)) {
+      const encoded = `${filters.operator}(${filters.rows
+        .map((row) => {
+          if (isFilterRowNode(row)) {
+            return encodeFilters(row);
+          } else {
+            return encodeFilter(row);
+          }
+        })
+        .join("|")})`;
+      console.log("Encoded filter node:", encoded);
+      return encoded;
+    } else {
+      const encoded = encodeFilter(filters);
+      console.log("Encoded filter leaf:", encoded);
+      return encoded;
+    }
+  };
 
   function encodeFilter(filter: UIFilterRow): string {
     return `${filterMap[filter.filterMapIdx].label}:${
@@ -212,32 +216,143 @@ const DashboardPage = (props: DashboardPageProps) => {
     timeZoneDifference: new Date().getTimezoneOffset(),
     dbIncrement: timeIncrement,
   });
-  
 
   // useEffect(() => {
-  //   if (!isAnyLoading && filterMap) {
-  //     setAdvancedFilters(getAdvancedFilters());
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [isAnyLoading]);
+  //   const handleURLChange = () => {
+  //     const filtersFromURL = getAdvancedFilters();
+  //     console.log("Filters from URL:", filtersFromURL);
+  //     setAdvancedFilters(filtersFromURL);
+  //   };
 
-  // const onSetAdvancedFiltersHandler = (
-  //   filters: UIFilterRow[],
-  //   layoutFilterId?: string | null
-  // ) => {
-  //   if (layoutFilterId === null || filters.length === 0) {
-  //     searchParams.delete("filters");
-  //   } else {
-  //     const currentAdvancedFilters = filters.map(encodeFilter).join("|");
+  //   // Call it once on mount
+  //   handleURLChange();
 
-  //     searchParams.set(
-  //       "filters",
-  //       `"${encodeURIComponent(currentAdvancedFilters)}"`
-  //     );
-  //   }
-  //   setAdvancedFilters(filters);
-  // };
+  //   // Listen for popstate events (back/forward navigation)
+  //   window.addEventListener('popstate', handleURLChange);
 
+  //   // Cleanup
+  //   return () => {
+  //     window.removeEventListener('popstate', handleURLChange);
+  //   };
+  // }, [getAdvancedFilters]);
+
+  const getAdvancedFilters = useCallback((): UIFilterRowTree => {
+    console.log("gettingAdvFilters")
+    function decodeFilter(encoded: string): UIFilterRow | UIFilterRowTree {
+      if (encoded.includes("(") && encoded.endsWith(")")) {
+        // This is a nested filter
+        const [operator, rest] = encoded.split("(");
+        const innerContent = rest.slice(0, -1); // Remove the closing parenthesis
+        const rows = innerContent.split("|").map(decodeFilter);
+        return {
+          operator: operator as "and" | "or",
+          rows,
+        };
+      } else {
+        // This is a leaf filter
+        const parts = encoded.split(":");
+        if (parts.length !== 3) return getRootFilterNode();
+        const filterLabel = decodeURIComponent(parts[0]);
+        const operator = decodeURIComponent(parts[1]);
+        const value = decodeURIComponent(parts[2]);
+
+        const filterMapIdx = filterMap.findIndex(
+          (f) =>
+            f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
+        );
+        const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
+          (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
+        );
+
+        if (isNaN(filterMapIdx) || isNaN(operatorIdx))
+          return getRootFilterNode();
+
+        return { filterMapIdx, operatorIdx, value };
+      }
+    }
+
+    try {
+      const currentAdvancedFilters = searchParams.get("filters");
+
+      if (currentAdvancedFilters) {
+        const filters = decodeURIComponent(currentAdvancedFilters).replace(
+          /^"|"$/g,
+          ""
+        );
+        return decodeFilter(filters) as UIFilterRowTree;
+      }
+    } catch (error) {
+      console.error("Error decoding advanced filters:", error);
+    }
+
+    return getRootFilterNode();
+  }, [searchParams, filterMap]);
+
+  useEffect(() => {
+    if (initialLoadRef.current && filterMap.length > 0) {
+      console.log("load");
+      const loadedFilters = getAdvancedFilters();
+      setAdvancedFilters(loadedFilters);
+      initialLoadRef.current = false;
+    }
+  }, [filterMap, getAdvancedFilters]);
+
+  // useEffect(() => {
+  //   const handlePopState = () => {
+  //     const loadedFilters = getAdvancedFilters();
+  //     setAdvancedFilters(loadedFilters);
+  //   };
+
+  //   window.addEventListener("popstate", handlePopState);
+
+  //   return () => {
+  //     window.removeEventListener("popstate", handlePopState);
+  //   };
+  // }, [getAdvancedFilters]);
+
+  const onSetAdvancedFiltersHandler = useCallback(
+    (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
+      console.log(
+        "onSetAdvancedFiltersHandler called with:",
+        JSON.stringify(filters, null, 2)
+      );
+
+      setAdvancedFilters(filters);
+
+      // Create a new URLSearchParams object from the current URL
+      const newSearchParams = new URLSearchParams(window.location.search);
+
+      if (
+        layoutFilterId === null ||
+        (isFilterRowNode(filters) && filters.rows.length === 0)
+      ) {
+        console.log("Deleting filters from searchParams");
+        newSearchParams.delete("filters");
+      } else {
+        const currentAdvancedFilters = encodeFilters(filters);
+        console.log("Encoded filters:", currentAdvancedFilters);
+        newSearchParams.set(
+          "filters",
+          `"${encodeURIComponent(currentAdvancedFilters)}"`
+        );
+      }
+
+      // Update the URL immediately
+      const newUrl = `${
+        window.location.pathname
+      }?${newSearchParams.toString()}`;
+      console.log("Updating URL to:", newUrl);
+      window.history.pushState({ path: newUrl }, "", newUrl);
+
+      // Trigger an immediate refetch with the new filters
+      console.log(
+        "Triggering refetch with filters:",
+        JSON.stringify(filters, null, 2)
+      );
+      refetch();
+    },
+    [encodeFilters, refetch]
+  );
   const metricsData: MetricsPanelProps["metric"][] = [
     {
       id: "cost-req",
@@ -414,11 +529,15 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
     if (layoutFilter !== null) {
-      //onSetAdvancedFiltersHandler(layoutFilter?.filter, layoutFilter.id);
-      setCurrFilter(layoutFilter?.id);
+      const combinedFilter: UIFilterRowTree = {
+        operator: "and",
+        rows: layoutFilter.filter,
+      };
+      onSetAdvancedFiltersHandler(combinedFilter, layoutFilter.id);
+      setCurrFilter(layoutFilter.id);
     } else {
       setCurrFilter(null);
-      //onSetAdvancedFiltersHandler([], null);
+      onSetAdvancedFiltersHandler({ operator: "and", rows: [] }, null);
     }
   };
 
@@ -535,7 +654,7 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
             advancedFilter={{
               filterMap,
-              onAdvancedFilter: setAdvancedFilters,
+              onAdvancedFilter: onSetAdvancedFiltersHandler,
               filters: advancedFilters,
               searchPropertyFilters: searchPropertyFilters,
             }}

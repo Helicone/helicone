@@ -66,7 +66,7 @@ interface ThemedHeaderProps {
   };
   advancedFilter?: {
     filterMap: SingleFilterDef<any>[];
-    onAdvancedFilter: React.Dispatch<React.SetStateAction<UIFilterRowTree>>;
+    onAdvancedFilter: (filters: UIFilterRowTree) => void;
     filters: UIFilterRowTree;
     searchPropertyFilters: (
       property: string,

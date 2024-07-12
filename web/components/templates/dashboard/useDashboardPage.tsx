@@ -92,7 +92,9 @@ export const useDashboardPage = ({
     DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]
   ).concat(propertyFilters);
 
-  const userFilters = uiFilterRowTreeToFilterLeafArray(filterMap, uiFilters);
+  console.log("uiFilters", uiFilters);
+
+  const userFilters = filterUITreeToFilterNode(filterMap, uiFilters);
   const { isLoading: isModelsLoading, models } = useModels(
     timeFilter,
     1000,
@@ -105,8 +107,7 @@ export const useDashboardPage = ({
 
   const { isLoading: isAllModelsLoading, models: allModels } = useModels(
     timeFilter,
-    1000,
-    []
+    1000
   );
 
   const allModelsData = allModels?.data;
@@ -134,6 +135,8 @@ export const useDashboardPage = ({
       column: "model",
     };
   }
+
+  console.log("userFilters", userFilters);
 
   const params: BackendMetricsCall<any>["params"] = {
     timeFilter,

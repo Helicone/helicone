@@ -134,9 +134,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label
     }:${encodeURIComponent(filter.value)}`;
   }
+
   const encodeFilters = (filters: UIFilterRowTree): string => {
     if (isFilterRowNode(filters)) {
-      return filters.rows
+      return `${filters.operator}(${filters.rows
         .map((row) => {
           if (isFilterRowNode(row)) {
             return encodeFilters(row);
@@ -144,7 +145,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             return encodeFilter(row);
           }
         })
-        .join("|");
+        .join("|")})`;
     } else {
       return encodeFilter(filters);
     }
@@ -346,10 +347,20 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   // TODO fix this to return correct UIFilterRowTree instead of UIFilterRow[]
   const getAdvancedFilters = useCallback((): UIFilterRowTree => {
-    function decodeFilter(encoded: string): UIFilterRow | null {
-      try {
+    function decodeFilter(encoded: string): UIFilterRow | UIFilterRowTree {
+      if (encoded.includes("(") && encoded.endsWith(")")) {
+        // This is a nested filter
+        const [operator, rest] = encoded.split("(");
+        const innerContent = rest.slice(0, -1); // Remove the closing parenthesis
+        const rows = innerContent.split("|").map(decodeFilter);
+        return {
+          operator: operator as "and" | "or",
+          rows,
+        };
+      } else {
+        // This is a leaf filter
         const parts = encoded.split(":");
-        if (parts.length !== 3) return null;
+        if (parts.length !== 3) return getRootFilterNode();
         const filterLabel = decodeURIComponent(parts[0]);
         const operator = decodeURIComponent(parts[1]);
         const value = decodeURIComponent(parts[2]);
@@ -362,12 +373,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
         );
 
-        if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
+        if (isNaN(filterMapIdx) || isNaN(operatorIdx))
+          return getRootFilterNode();
 
         return { filterMapIdx, operatorIdx, value };
-      } catch (error) {
-        console.error("Error decoding filter:", error);
-        return null;
       }
     }
 
@@ -379,15 +388,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           /^"|"$/g,
           ""
         );
-        const decodedFilters = filters
-          .split("|")
-          .map(decodeFilter)
-          .filter((filter): filter is UIFilterRow => filter !== null);
-
-        return {
-          operator: "and",
-          rows: decodedFilters,
-        };
+        return decodeFilter(filters) as UIFilterRowTree;
       }
     } catch (error) {
       console.error("Error decoding advanced filters:", error);
@@ -551,6 +552,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   const onSetAdvancedFiltersHandler = useCallback(
     (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
+      console.log("filters", filters);
       setAdvancedFilters(filters);
       if (
         layoutFilterId === null ||
