@@ -165,12 +165,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       return await parser.parse({
         responseBody: responseBody,
         requestBody: requestBody ?? "{}",
-        tokenCounter: async (text: string) =>
-          await getTokenCount(
-            text,
-            context.processedLog.request.model,
-            provider
-          ),
         requestModel: context.processedLog.request.model,
         modelOverride: context.message.heliconeMeta.modelOverride,
       });

@@ -6,6 +6,7 @@ import {
 import { Provider } from "../models/models";
 import crypto from "crypto";
 import zlib from "zlib";
+import { GPTTokens } from "gpt-tokens";
 
 export function tryParse(text: string, errorMsg?: string): any {
   try {
@@ -19,6 +20,7 @@ export function tryParse(text: string, errorMsg?: string): any {
 
 export async function getTokenCount(
   inputText: string,
+  responseBody: string,
   model: string | undefined,
   provider: Provider
 ): Promise<number> {
