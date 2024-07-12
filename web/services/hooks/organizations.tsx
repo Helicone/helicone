@@ -183,9 +183,6 @@ const useOrgsContextManager = () => {
 
   useEffect(() => {
     if (user) {
-      console.log("Identifying user", user.id);
-      console.log("Email", user.email);
-      console.log("Name", user.user_metadata?.name);
       posthog.identify(
         user.id,
         {
@@ -197,14 +194,7 @@ const useOrgsContextManager = () => {
       );
     }
 
-    posthog.debug(true);
     if (org) {
-      console.log("Grouping user", org.id);
-      console.log("Name", org.name);
-      console.log("Tier", org.tier);
-      console.log("Stripe customer ID", org.stripe_customer_id);
-      console.log("Organization type", org.organization_type);
-      console.log("Date joined", org.created_at);
       posthog.group("organization", org.id, {
         name: org.name || "",
         tier: org.tier || "",
