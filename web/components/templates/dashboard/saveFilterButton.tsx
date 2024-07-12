@@ -8,7 +8,7 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
-import { PlusIcon, FunnelIcon } from "@heroicons/react/24/solid";
+import { FunnelIcon } from "@heroicons/react/24/solid";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import {

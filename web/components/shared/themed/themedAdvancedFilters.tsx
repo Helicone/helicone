@@ -14,7 +14,6 @@ import {
   TextInput,
 } from "@tremor/react";
 import ThemedNumberDropdown from "./themedNumberDropdown";
-import SaveFilterButton from "../../templates/dashboard/saveFilterButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 
 import FilterTreeEditor from "./FilterTreeEditor";
