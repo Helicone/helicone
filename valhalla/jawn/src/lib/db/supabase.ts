@@ -2,7 +2,7 @@ import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { InMemoryCache } from "../cache/staticMemCache";
 import { PromiseGenericResult, err, ok } from "../shared/result";
 import { Database } from "./database.types";
-import { hashAuth } from "./hash";
+import { hashAuth } from "../../utils/hash";
 import { HeliconeAuth } from "../requestWrapper";
 import { redisClient } from "../clients/redisClient";
 import { KeyPermissions } from "../../models/models";

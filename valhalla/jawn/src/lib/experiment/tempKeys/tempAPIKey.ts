@@ -3,7 +3,7 @@ import { supabaseServer } from "../../db/supabase";
 import { Result, err, ok } from "../../shared/result";
 import { uuid } from "uuidv4";
 import { dbExecute } from "../../shared/db/dbExecute";
-import { hashAuth } from "../../db/hash";
+import { hashAuth } from "../../../utils/hash";
 import { BaseTempKey } from "./baseTempKey";
 type HashedPasswordRow = {
   hashed_password: string;
