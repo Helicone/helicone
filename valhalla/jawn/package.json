@@ -3,7 +3,7 @@
   "scripts": {
     "start": "ts-node src/index.ts",
     "build": "tsc",
-    "serve": "node dist/index.js",
+    "serve": "node dist/valhalla/jawn/src/index.js",
     "dev": "nodemon",
     "test:jawn": "npx jest --config packages/jawn/jest.config.js --detectOpenHandles"
   },
