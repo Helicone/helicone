@@ -1,6 +1,5 @@
 import {
   ArrowPathIcon,
-  InformationCircleIcon,
   MinusIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
