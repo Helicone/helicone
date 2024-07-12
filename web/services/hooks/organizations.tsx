@@ -6,6 +6,7 @@ import Cookies from "js-cookie";
 import { OrgContextValue } from "../../components/layout/organizationContext";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
 import { getJawnClient } from "../../lib/clients/jawn";
+import posthog from "posthog-js";
 
 const useGetOrgMembers = (orgId: string) => {
   const jawn = getJawnClient(orgId);
@@ -179,6 +180,26 @@ const useOrgsContextManager = () => {
       });
     }
   }, [orgs, user?.id, refreshCurrentOrg]);
+
+  useEffect(() => {
+    if (user) {
+      posthog.identify(user.id, {
+        email: user.email,
+        name: user.user_metadata?.name,
+      });
+    }
+
+    posthog.debug(true);
+    if (org) {
+      posthog.group("organization", org.id, {
+        name: org.name || "",
+        tier: org.tier || "",
+        stripe_customer_id: org.stripe_customer_id || "",
+        organization_type: org.organization_type || "",
+        date_joined: org.created_at || "",
+      });
+    }
+  }, [user, org?.id]);
 
   useEffect(() => {
     if (orgs && orgs.length > 0) {
