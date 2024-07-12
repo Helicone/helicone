@@ -1,6 +1,6 @@
 import claudeRanks from "@anthropic-ai/tokenizer/claude.json";
-import { encode as gptEncode } from "gpt-tokenizer";
 import { Tiktoken } from "js-tiktoken";
+import { Worker } from "worker_threads";
 
 // Moved all the tokenizer here so it won't be loaded for every request
 // const openAITokenizer = new GPT3Tokenizer({ type: "gpt3" });
@@ -12,10 +12,34 @@ const anthropicTokenizer = new Tiktoken({
   pat_str: claudeRanks.pat_str,
 });
 
+let gptWorker = new Worker(`${__dirname}/gptWorker.js`);
+function restartGptWorker() {
+  gptWorker.terminate();
+  gptWorker = new Worker(`${__dirname}/gptWorker.js`);
+}
+
 export async function getTokenCountGPT3(inputText: string): Promise<number> {
   if (!inputText) return 0;
-  const encoded = gptEncode(inputText);
-  return encoded.length;
+
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      restartGptWorker();
+      reject(new Error("Timeout: gptEncode took too long"));
+    }, 5000);
+
+    gptWorker.on("message", (event) => {
+      clearTimeout(timeout);
+      const { success, length, error } = event.data;
+      restartGptWorker();
+      if (success) {
+        resolve(length);
+      } else {
+        reject(new Error(error));
+      }
+    });
+
+    gptWorker.postMessage({ inputText });
+  });
 }
 
 export async function getTokenCountAnthropic(
