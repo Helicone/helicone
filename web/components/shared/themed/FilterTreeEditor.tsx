@@ -154,7 +154,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
             </div>
           ))}
           {isRoot && (
-            <div className="flex flex-row w-full items-center justify-between ">
+            <div className="flex flex-row w-full items-center justify-between my-4">
               <button
                 onClick={() => handleAddFilter(node)}
                 className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
