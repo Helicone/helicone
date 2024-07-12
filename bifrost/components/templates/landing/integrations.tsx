@@ -221,7 +221,7 @@ await anthropic.messages.create({
 
 client = anthropic.Anthropic(
   api_key=os.environ.get("ANTHROPIC_API_KEY"),
-  base_url="https://anthropic.helicone.ai/v1"
+  base_url="https://anthropic.helicone.ai"
   defaultHeaders={
     "Helicone-Auth": <HELICONE_API_KEY>,
   },
