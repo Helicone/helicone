@@ -165,7 +165,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
           setIsSaveFiltersModalOpen(true);
         }}
         className={clsx(
-          "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+          "bg-gray-100 dark:bg-[#17191d]   border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
         )}
       >
         <BookmarkIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />

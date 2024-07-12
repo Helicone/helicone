@@ -157,7 +157,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
             <div className="flex flex-row w-full items-center justify-between my-4">
               <button
                 onClick={() => handleAddFilter(node)}
-                className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+                className="bg-gray-100 dark:bg-[#17191d] border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
               >
                 <PlusIcon
                   className="mr-1 h-3.5 flex-none text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100"
@@ -230,7 +230,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
       );
 
       return path.length === 1 ? (
-        <div className="flex flex-col bg-gray-100 dark:bg-black py-4 rounded-lg border border-gray-300 dark:border-gray-700 ">
+        <div className="flex flex-col bg-gray-100 dark:bg-[#17191d] py-4 rounded-lg border border-gray-300 dark:border-gray-700 ">
           {filterRow}
         </div>
       ) : (
