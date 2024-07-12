@@ -14,17 +14,13 @@ import {
   BackendMetricsCall,
   useBackendMetricCall,
 } from "../../../services/hooks/useBackendFunction";
-import {
-  FilterLeaf,
-  uiFilterRowTreeToFilterLeafArray,
-} from "../../../services/lib/filters/filterDefs";
+import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
   SingleFilterDef,
   getPropertyFiltersV2,
   textWithSuggestions,
 } from "../../../services/lib/filters/frontendFilterDefs";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { LatencyOverTime } from "../../../pages/api/metrics/latencyOverTime";
 import { UsersOverTime } from "../../../pages/api/metrics/usersOverTime";
 import { TokensOverTime } from "../../../pages/api/metrics/tokensOverTime";

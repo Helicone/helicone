@@ -53,8 +53,8 @@ import { useOrganizationLayout } from "../../../services/hooks/organization_layo
 import CountryPanel from "./panels/countryPanel";
 import useNotification from "../../shared/notification/useNotification";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
-import { uiFilterRowTreeToFilterLeafArray } from "../../../services/lib/filters/filterDefs";
 import {
+  filterUITreeToFilterNode,
   getRootFilterNode,
   isFilterRowNode,
   UIFilterRowTree,
@@ -172,6 +172,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
   const { setNotification } = useNotification();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const encodeFilters = (filters: UIFilterRowTree): string => {
     console.log("Encoding filters:", JSON.stringify(filters, null, 2));
     if (isFilterRowNode(filters)) {
@@ -237,7 +238,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   // }, [getAdvancedFilters]);
 
   const getAdvancedFilters = useCallback((): UIFilterRowTree => {
-    console.log("gettingAdvFilters")
+    console.log("gettingAdvFilters");
     function decodeFilter(encoded: string): UIFilterRow | UIFilterRowTree {
       if (encoded.includes("(") && encoded.endsWith(")")) {
         // This is a nested filter
@@ -492,6 +493,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     });
 
     return statusCounts;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overTimeData.requestsWithStatus.data?.data, timeIncrement]);
 
   // flatten the status counts over time
@@ -835,9 +837,9 @@ const DashboardPage = (props: DashboardPageProps) => {
               <div key="countries">
                 <CountryPanel
                   timeFilter={timeFilter}
-                  userFilters={uiFilterRowTreeToFilterLeafArray(
+                  userFilters={filterUITreeToFilterNode(
                     filterMap,
-                    advancedFilters
+                    debouncedAdvancedFilter
                   )}
                 />
               </div>
@@ -873,7 +875,10 @@ const DashboardPage = (props: DashboardPageProps) => {
 
               <div key="quantiles">
                 <QuantilesGraph
-                  uiFilters={debouncedAdvancedFilter}
+                  uiFilters={filterUITreeToFilterNode(
+                    filterMap,
+                    debouncedAdvancedFilter
+                  )}
                   timeFilter={timeFilter}
                   timeIncrement={timeIncrement}
                 />

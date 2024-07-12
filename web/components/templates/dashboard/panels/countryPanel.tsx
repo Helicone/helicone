@@ -10,11 +10,11 @@ import { COUTNRY_CODE_DIRECTORY } from "../../requestsV2/countryCodeDirectory";
 import { CountryData } from "../../../../services/lib/country";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { useState } from "react";
-import { FilterLeaf } from "../../../../services/lib/filters/filterDefs";
+import { FilterNode } from "../../../../services/lib/filters/filterDefs";
 
 interface CountryPanelProps {
   timeFilter: TimeFilter;
-  userFilters: FilterLeaf[];
+  userFilters: FilterNode;
 }
 
 const CountryPanel = (props: CountryPanelProps) => {
