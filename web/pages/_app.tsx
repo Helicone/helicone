@@ -66,12 +66,12 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
     posthog.debug(true);
     if (org?.currentOrg) {
       posthog.group("organization", org.currentOrg.id, {
-        name: org.currentOrg.name,
-        tier: org.currentOrg.tier,
-        stripe_customer_id: org.currentOrg.stripe_customer_id,
-        organization_type: org.currentOrg.organization_type,
-        size: org.currentOrg.size,
-        date_joined: org.currentOrg.created_at,
+        name: org.currentOrg.name || "",
+        tier: org.currentOrg.tier || "",
+        stripe_customer_id: org.currentOrg.stripe_customer_id || "",
+        organization_type: org.currentOrg.organization_type || "",
+        size: org.currentOrg.size || "",
+        date_joined: org.currentOrg.created_at || "",
       });
     }
   }, [user, org]);
