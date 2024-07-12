@@ -74,7 +74,7 @@ def main(test_mode, dont_prune, preview, latest):
         {"image": "helicone/web-dev", "context": "../web"},
         {"image": "helicone/supabase-migration-runner", "context": "../supabase"},
         {"image": "helicone/clickhouse-migration-runner", "context": "../clickhouse"},
-        {"image": "helicone/jawn", "context": "../valhalla"}
+        {"image": "helicone/jawn", "context": ".."}
     ]
 
     if preview:
