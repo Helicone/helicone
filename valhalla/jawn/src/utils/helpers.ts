@@ -1,11 +1,6 @@
-import { PromiseGenericResult, ok, err } from "../lib/shared/result";
-import {
-  getTokenCountAnthropic,
-  getTokenCountGPT3,
-} from "../lib/tokens/tokenCounter";
-import { Provider } from "../models/models";
 import crypto from "crypto";
 import zlib from "zlib";
+import { PromiseGenericResult, err, ok } from "../lib/shared/result";
 
 export function tryParse(text: string, errorMsg?: string): any {
   try {
@@ -14,33 +9,6 @@ export function tryParse(text: string, errorMsg?: string): any {
     return {
       error: `Error parsing ${errorMsg}, ${e}, ${text}`,
     };
-  }
-}
-
-export async function getTokenCount(
-  inputText: string,
-  model: string | undefined,
-  provider: Provider
-): Promise<number> {
-  try {
-    if (!inputText) return 0;
-
-    if (
-      provider === "OPENAI" ||
-      (provider == "OPENROUTER" && model?.includes("openai"))
-    ) {
-      return await getTokenCountGPT3(inputText);
-    } else if (
-      provider === "ANTHROPIC" ||
-      (provider == "OPENROUTER" && model?.includes("anthropic"))
-    ) {
-      return await getTokenCountAnthropic(inputText);
-    } else {
-      return 0;
-    }
-  } catch (e) {
-    console.error(e);
-    return -1;
   }
 }
 

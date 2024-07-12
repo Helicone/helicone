@@ -1,4 +1,5 @@
 import { consolidateTextFields } from "../../../utils/streamParser";
+import { getTokenCountGPT3 } from "../../tokens/tokenCounter";
 import { PromiseGenericResult, err, ok } from "../result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 import { isParseInputJson } from "./helpers";
@@ -27,6 +28,15 @@ export const NON_DATA_LINES = [
   "event: thread.message.in_progress",
 ];
 
+function tryModel(requestData: string) {
+  try {
+    const parsed = JSON.parse(requestData);
+    return parsed.model;
+  } catch (e) {
+    return undefined;
+  }
+}
+
 export class OpenAIStreamProcessor implements IBodyProcessor {
   async parse(parseInput: ParseInput): PromiseGenericResult<ParseOutput> {
     if (isParseInputJson(parseInput)) {
@@ -35,7 +45,7 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
       });
     }
 
-    const { responseBody, requestBody, tokenCounter } = parseInput;
+    const { responseBody, requestBody } = parseInput;
     const lines = responseBody
       .split("\n")
       .filter((line) => !line.includes("OPENROUTER PROCESSING"))
@@ -58,7 +68,11 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
       const usage =
         "usage" in consolidatedData
           ? consolidatedData.usage
-          : await getUsage(data, requestBody, tokenCounter);
+          : await getUsage(
+              data,
+              requestBody,
+              consolidatedData?.model ?? tryModel(requestBody ?? "{}") ?? ""
+            );
 
       return ok({
         processedBody: {
@@ -87,7 +101,7 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
 export async function getUsage(
   streamedData: any[],
   requestBody: any,
-  tokenCounter: (text: string) => Promise<number>
+  model: string
 ): Promise<{
   total_tokens: number;
   completion_tokens: number;
@@ -95,15 +109,16 @@ export async function getUsage(
   helicone_calculated: boolean;
 }> {
   try {
-    const responseTokenCount = await tokenCounter(
+    const responseTokenCount = await getTokenCountGPT3(
       streamedData
         .filter((d) => "id" in d)
         .map((d) => getResponseText(d))
-        .join("")
+        .join(""),
+      model
     );
     const requestTokenCount = await getRequestTokenCount(
       JSON.parse(requestBody),
-      tokenCounter
+      model
     );
     const totalTokens = requestTokenCount + responseTokenCount;
     return {
@@ -153,14 +168,14 @@ function getResponseText(responseBody: any): string {
 
 async function getRequestTokenCount(
   requestBody: any,
-  tokenCounter: (text: string) => Promise<number>
+  model: string
 ): Promise<number> {
   if (requestBody.prompt !== undefined) {
     const prompt = requestBody.prompt;
     if (typeof prompt === "string") {
-      return tokenCounter(requestBody.prompt);
+      return getTokenCountGPT3(requestBody.prompt, model);
     } else if ("length" in prompt) {
-      return tokenCounter((prompt as string[]).join(""));
+      return getTokenCountGPT3((prompt as string[]).join(""), model);
     } else {
       throw new Error("Invalid prompt type");
     }
@@ -170,7 +185,7 @@ async function getRequestTokenCount(
     let totalTokenCount = 0;
 
     for (const message of messages) {
-      const tokenCount = await tokenCounter(message.content);
+      const tokenCount = await getTokenCountGPT3(message.content, model);
       totalTokenCount += tokenCount;
     }
 
