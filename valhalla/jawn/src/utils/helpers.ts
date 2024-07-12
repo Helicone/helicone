@@ -1,12 +1,6 @@
-import { PromiseGenericResult, ok, err } from "../lib/shared/result";
-import {
-  getTokenCountAnthropic,
-  getTokenCountGPT3,
-} from "../lib/tokens/tokenCounter";
-import { Provider } from "../models/models";
 import crypto from "crypto";
 import zlib from "zlib";
-import { GPTTokens } from "gpt-tokens";
+import { PromiseGenericResult, err, ok } from "../lib/shared/result";
 
 export function tryParse(text: string, errorMsg?: string): any {
   try {
