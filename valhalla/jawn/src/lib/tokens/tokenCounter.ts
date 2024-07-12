@@ -14,12 +14,6 @@ const anthropicTokenizer = new Tiktoken({
   pat_str: claudeRanks.pat_str,
 });
 
-let gptWorker = new Worker(`${__dirname}/gptWorker.js`);
-function restartGptWorker() {
-  gptWorker.terminate();
-  gptWorker = new Worker(`${__dirname}/gptWorker.js`);
-}
-
 const TIKTOKEN_MODELS = [
   "davinci-002",
   "babbage-002",
@@ -83,11 +77,12 @@ export async function getTokenCountGPT3(
   model: string
 ): Promise<number> {
   if (!inputText) return 0;
-  model = TIKTOKEN_MODELS.find((m) => m === model) ?? "gpt-3.5-turbo";
+  return -1;
+  // model = TIKTOKEN_MODELS.find((m) => m === model) ?? "gpt-3.5-turbo";
 
-  const encoding = encoding_for_model(model as any);
-  const tokens = encoding.encode(inputText);
-  return tokens.length;
+  // const encoding = encoding_for_model(model as any);
+  // const tokens = encoding.encode(inputText);
+  // return tokens.length;
 }
 
 export async function getTokenCountAnthropic(
