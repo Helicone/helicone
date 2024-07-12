@@ -112,19 +112,15 @@ export class DBLoggable {
     const { body: rawResponseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
 
-    if ((process.env.S3_ENABLED ?? "false") === "true") {
-      const s3Result = await db.s3Manager.storeRequestResponseRaw({
-        organizationId: orgParams.id,
-        requestId: this.request.requestId,
-        requestBody: this.request.bodyText ?? "{}",
-        responseBody: rawResponseBody,
-      });
+    const s3Result = await db.s3Manager.storeRequestResponseRaw({
+      organizationId: orgParams.id,
+      requestId: this.request.requestId,
+      requestBody: this.request.bodyText ?? "{}",
+      responseBody: rawResponseBody,
+    });
 
-      if (s3Result.error) {
-        console.error(
-          `Error storing request response in S3: ${s3Result.error}`
-        );
-      }
+    if (s3Result.error) {
+      console.error(`Error storing request response in S3: ${s3Result.error}`);
     }
 
     const endTime = this.timing.endTime ?? responseEndTime;
