@@ -20,7 +20,7 @@ def fetch_data_and_map():
     response = requests.get(url)
 
     if response.status_code == 200:
-        data = response.json()["data"]
+        data = response. json()["data"]
         mapped_data = []
 
         for item in data:
