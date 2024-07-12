@@ -552,7 +552,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   const onSetAdvancedFiltersHandler = useCallback(
     (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
-      console.log("filters", filters);
       setAdvancedFilters(filters);
       if (
         layoutFilterId === null ||

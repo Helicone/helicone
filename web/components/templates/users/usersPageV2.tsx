@@ -86,7 +86,6 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
 
   const onSetAdvancedFiltersHandler = useCallback(
     (filters: UIFilterRowTree) => {
-      console.log("Setting new filters:", JSON.stringify(filters, null, 2));
       setAdvancedFilters(filters);
     },
     []
