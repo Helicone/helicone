@@ -186,10 +186,15 @@ const useOrgsContextManager = () => {
       console.log("Identifying user", user.id);
       console.log("Email", user.email);
       console.log("Name", user.user_metadata?.name);
-      posthog.identify(user.id, {
-        email: user.email,
-        name: user.user_metadata?.name,
-      });
+      posthog.identify(
+        user.id,
+        {
+          name: user.user_metadata?.name,
+        },
+        {
+          email: user.email,
+        }
+      );
     }
 
     posthog.debug(true);
