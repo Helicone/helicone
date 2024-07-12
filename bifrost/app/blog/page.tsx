@@ -26,7 +26,7 @@ const blogContent: BlogStructure[] = [
     badgeText: "insight",
     date: "July 12, 2024",
     href: "/blog/llm-observability",
-    imageUrl: "/static/blog/langsmith-vs-helicone/cover-image.webp",
+    imageUrl: "/static/blog/llm-observability.webp",
     authors: [
       {
         name: "Lina Lam",

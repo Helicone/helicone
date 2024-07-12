@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     description:
       "Building with LLM in production is incredibly difficult. Here's a very in-depth read by Arize AI addressing the biggest challenges and why LLM observability is crucial.",
     images:
-      "https://www.helicone.ai/static/blog/langsmith-vs-helicone/cover-image.webp", // <-- update
+      "https://www.helicone.ai/static/blog/llm-observability.webp", 
     locale: "en_US",
   },
   twitter: {
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
       "Building with LLM in production is incredibly difficult. Here's a very in-depth read by Arize AI addressing the biggest challenges and why LLM observability is crucial.", 
     card: "summary_large_image",
     images:
-      "https://www.helicone.ai/static/blog/langsmith-vs-helicone/cover-image.webp", // <-- update
+      "https://www.helicone.ai/static/blog/llm-observability.webp", 
   },
 };
 
