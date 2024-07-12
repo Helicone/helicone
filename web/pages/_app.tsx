@@ -95,12 +95,19 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
       </SessionContextProvider>
       {trackingEnabled && <Analytics />}
       {trackingEnabled && (
-        <Script
-          id="koala-snippet"
-          dangerouslySetInnerHTML={{
-            __html: `!function(t){if(window.ko)return;window.ko=[],["identify","track","removeListeners","open","on","off","qualify","ready"].forEach(function(t){ko[t]=function(){var n=[].slice.call(arguments);return n.unshift(t),ko.push(n),ko}});var n=document.createElement("script");n.async=!0,n.setAttribute("src","https://cdn.getkoala.com/v1/pk_3d24ae9e69e18decfcb68b9d7b668c4501b5/sdk.js"),(document.body || document.head).appendChild(n)}();`,
-          }}
-        />
+        <>
+          <Script
+            id="warmly-script-loader"
+            src="https://opps-widget.getwarmly.com/warmly.js?clientId=489345224dd85359988138e0fb912d04"
+            defer
+          />
+          <Script
+            id="koala-snippet"
+            dangerouslySetInnerHTML={{
+              __html: `!function(t){if(window.ko)return;window.ko=[],["identify","track","removeListeners","open","on","off","qualify","ready"].forEach(function(t){ko[t]=function(){var n=[].slice.call(arguments);return n.unshift(t),ko.push(n),ko}});var n=document.createElement("script");n.async=!0,n.setAttribute("src","https://cdn.getkoala.com/v1/pk_3d24ae9e69e18decfcb68b9d7b668c4501b5/sdk.js"),(document.body || document.head).appendChild(n)}();`,
+            }}
+          />
+        </>
       )}
     </>
   );
