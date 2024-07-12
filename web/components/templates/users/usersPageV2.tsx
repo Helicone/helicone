@@ -1,19 +1,19 @@
 import { UserGroupIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useUsers } from "../../../services/hooks/users";
-import {
-  filterListToTree,
-  filterUIToFilterLeafs,
-} from "../../../services/lib/filters/filterDefs";
 import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTable";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import {
+  UIFilterRowTree,
+  filterUITreeToFilterNode,
+  getRootFilterNode,
+} from "../../../services/lib/filters/uiFilterRowTree";
 import TableFooter from "../requestsV2/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 
@@ -33,6 +33,7 @@ function formatNumber(num: number) {
     return num.toFixed(2);
   }
 }
+
 interface UsersPageV2Props {
   currentPage: number;
   pageSize: number;
@@ -46,7 +47,9 @@ interface UsersPageV2Props {
 const UsersPageV2 = (props: UsersPageV2Props) => {
   const { currentPage, pageSize, sort } = props;
 
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
+    getRootFilterNode()
+  );
   const debouncedAdvancedFilters = useDebounce(advancedFilters, 500); // 0.5 seconds
 
   const router = useRouter();
@@ -64,16 +67,13 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     currentPage,
     pageSize,
     sortLeaf,
-    filterListToTree(
-      filterUIToFilterLeafs(
-        userTableFilters.sort((a, b) => a.label.localeCompare(b.label)),
-        debouncedAdvancedFilters
-      ),
-      "and"
+    filterUITreeToFilterNode(
+      userTableFilters.sort((a, b) => a.label.localeCompare(b.label)),
+      debouncedAdvancedFilters
     )
   );
 
-  const checkIsNotUniqueUser = () => {
+  const checkIsNotUniqueUser = useCallback(() => {
     if (users.length === 0 || users.length > 1) {
       return false;
     }
@@ -82,7 +82,15 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
       const user = users[0];
       return user.user_id === "";
     }
-  };
+  }, [users]);
+
+  const onSetAdvancedFiltersHandler = useCallback(
+    (filters: UIFilterRowTree) => {
+      console.log("Setting new filters:", JSON.stringify(filters, null, 2));
+      setAdvancedFilters(filters);
+    },
+    []
+  );
 
   return (
     <>
@@ -96,8 +104,8 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           sortable={sort}
           advancedFilters={{
             filterMap: userTableFilters,
+            setAdvancedFilters: onSetAdvancedFiltersHandler,
             filters: advancedFilters,
-            setAdvancedFilters,
             searchPropertyFilters: async () => ({
               data: null,
               error: "Not implemented",
