@@ -62,6 +62,8 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
       });
     }
 
+    console.log(`Org: ${org?.currentOrg?.id}`);
+    posthog.debug(true);
     if (org?.currentOrg) {
       posthog.group("organization", org.currentOrg.id, {
         name: org.currentOrg.name,
