@@ -59,17 +59,8 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
       posthog.identify(user.id, {
         email: user.email,
         name: user.user_metadata?.name,
-      });
-    }
-
-    if (org?.currentOrg) {
-      posthog.group("organization", org.currentOrg.id, {
-        name: org.currentOrg.name,
-        tier: org.currentOrg.tier,
-        stripe_customer_id: org.currentOrg.stripe_customer_id,
-        organization_type: org.currentOrg.organization_type,
-        size: org.currentOrg.size,
-        date_joined: org.currentOrg.created_at,
+        organizations: org?.allOrgs?.map((org) => org.id),
+        current_organization_id: org?.currentOrg?.id,
       });
     }
   }, [user, org]);
