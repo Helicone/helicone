@@ -54,7 +54,7 @@ export function AdvancedFilters({
         <p className="text-sm text-gray-500 font-medium">Filters</p>
         <button
           onClick={() => {
-            // setAdvancedFilters([]);
+            setAdvancedFilters({ operator: "and", rows: [] });
           }}
           className="text-xs text-gray-500 font-medium py-1 px-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
         >
@@ -67,18 +67,11 @@ export function AdvancedFilters({
         onUpdate={setFilterTree}
         filterMap={filterMap}
         onSearchHandler={searchPropertyFilters}
+        filters={filters}
+        onSaveFilterCallback={onSaveFilterCallback}
+        savedFilters={savedFilters}
+        layoutPage={layoutPage}
       />
-      <div className="flex flex-row w-full items-end justify-end">
-        {onSaveFilterCallback && (
-          <SaveFilterButton
-            filters={filters}
-            onSaveFilterCallback={onSaveFilterCallback}
-            filterMap={filterMap}
-            savedFilters={savedFilters}
-            layoutPage={layoutPage}
-          />
-        )}
-      </div>
     </div>
   );
 }

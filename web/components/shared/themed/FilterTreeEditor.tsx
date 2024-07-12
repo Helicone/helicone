@@ -8,6 +8,8 @@ import {
   UIFilterRowNode,
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
+import SaveFilterButton from "../../templates/dashboard/saveFilterButton";
+import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 
 interface FilterTreeEditorProps {
   uiFilterRowTree: UIFilterRowTree;
@@ -17,6 +19,10 @@ interface FilterTreeEditorProps {
     property: string,
     search: string
   ) => Promise<Result<void, string>>;
+  filters: UIFilterRowTree;
+  onSaveFilterCallback?: () => void;
+  savedFilters?: OrganizationFilter[];
+  layoutPage: "dashboard" | "requests";
 }
 
 const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
@@ -24,6 +30,10 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
   onUpdate,
   filterMap,
   onSearchHandler,
+  filters,
+  onSaveFilterCallback,
+  savedFilters,
+  layoutPage,
 }) => {
   const handleAddFilter = (parentNode: UIFilterRowNode) => {
     const newFilter: UIFilterRow = {
@@ -144,17 +154,28 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
             </div>
           ))}
           {isRoot && (
-            <div className="mt-4 flex">
+            <div className="flex flex-row w-full items-center justify-between ">
               <button
                 onClick={() => handleAddFilter(node)}
-                className="border bg-gray-100 dark:bg-black border-gray-300 dark:border-gray-700 flex flex-row w-fit items-center justify-center font-normal text-sm text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100 px-4 py-2 rounded-lg"
+                className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
               >
                 <PlusIcon
                   className="mr-1 h-3.5 flex-none text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100"
                   aria-hidden="true"
                 />
-                Add Filter
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
+                  Add Filter
+                </p>
               </button>
+              {onSaveFilterCallback && (
+                <SaveFilterButton
+                  filters={filters}
+                  onSaveFilterCallback={onSaveFilterCallback}
+                  filterMap={filterMap}
+                  savedFilters={savedFilters}
+                  layoutPage={layoutPage}
+                />
+              )}
             </div>
           )}
         </>
@@ -246,9 +267,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
   };
 
   return (
-    <div className="filter-tree-editor mt-4">
-      {renderNode(uiFilterRowTree, [], true)}
-    </div>
+    <div className="-mb-4 mt-4">{renderNode(uiFilterRowTree, [], true)}</div>
   );
 };
 

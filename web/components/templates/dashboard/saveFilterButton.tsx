@@ -15,6 +15,7 @@ import {
   UIFilterRowTree,
   isFilterRowNode,
 } from "../../../services/lib/filters/uiFilterRowTree";
+import { BookmarkIcon } from "@heroicons/react/24/outline";
 
 interface SaveFilterButtonProps {
   filters: UIFilterRowTree;
@@ -167,9 +168,9 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
           "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
         )}
       >
-        <PlusIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+        <BookmarkIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
         <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-          Create New Filter
+          Save Filter
         </p>
       </button>
       <ThemedModal

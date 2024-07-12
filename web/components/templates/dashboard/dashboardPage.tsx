@@ -268,6 +268,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   useEffect(() => {
     if (initialLoadRef.current && filterMap.length > 0) {
+      console.log("load");
       const loadedFilters = getAdvancedFilters();
       setAdvancedFilters(loadedFilters);
       initialLoadRef.current = false;
@@ -290,6 +291,11 @@ const DashboardPage = (props: DashboardPageProps) => {
           `"${encodeURIComponent(currentAdvancedFilters)}"`
         );
       }
+
+      // Update the URL immediately
+      const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
+      console.log("Updating URL to:", newUrl);
+      window.history.pushState({ path: newUrl }, "", newUrl);
 
       refetch();
     },
