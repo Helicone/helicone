@@ -1,4 +1,4 @@
-import { getTokenCount, unsupportedImage } from "../../utils/helpers";
+import { unsupportedImage } from "../../utils/helpers";
 import {
   calculateModel,
   getModelFromResponse,
