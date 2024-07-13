@@ -919,7 +919,7 @@ Json: JsonObject;
     /** @enum {string} */
     TimeSpan: "1m" | "3m" | "1yr";
     /** @enum {string} */
-    ModelName: "gpt-3.5" | "gpt-4o" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus-20240229" | "claude-3-sonnet-20240229" | "claude-3-haiku-20240307" | "claude-2" | "open-mixtral" | "Llama" | "dall-e" | "text-moderation" | "text-embedding";
+    ModelName: "gpt-3.5" | "gpt-4o" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus-20240229" | "claude-3-sonnet-20240229" | "claude-3-5-sonnet-20240620" | "claude-3-haiku-20240307" | "claude-2" | "open-mixtral" | "Llama" | "dall-e" | "text-moderation" | "text-embedding";
     /** @enum {string} */
     ProviderName: "OPENAI" | "ANTHROPIC" | "MISTRAL" | "META";
     DataIsBeautifulRequestBody: {
