@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title:
     "What is LLM Observability and Monitoring?",
   description:
-    "Building with LLMs in production (well) is incredibly difficult. You probably have heard of the word 'LLM observability'. What is it? How does it differ from traditional observability? What is observed? We have the answers. ",
+    "LLM observability is the practice of monitoring and analyzing Large Language Model systems in production. It tracks inputs, outputs, and performance metrics to ensure reliability and improve AI applications. Learn how it differs from traditional observability.",
   icons: "https://www.helicone.ai/static/logo.png",
   openGraph: {
     type: "website",
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
       "What is LLM Observability and Monitoring?", 
     url: "https://www.helicone.ai/blog/llm-observability", 
     description:
-      "Building with LLMs in production (well) is incredibly difficult. You probably have heard of the word 'LLM observability'. What is it? How does it differ from traditional observability? What is observed? We have the answers. ",
+      "LLM observability is the practice of monitoring and analyzing Large Language Model systems in production. It tracks inputs, outputs, and performance metrics to ensure reliability and improve AI applications. Learn how it differs from traditional observability.",
     images:
       "https://www.helicone.ai/static/blog/llm-observability.webp", 
     locale: "en_US",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     title:
       "What is LLM Observability and Monitoring?", 
     description:
-      "Building with LLMs in production (well) is incredibly difficult. You probably have heard of the word 'LLM observability'. What is it? How does it differ from traditional observability? What is observed? We have the answers. ", 
+      "LLM observability is the practice of monitoring and analyzing Large Language Model systems in production. It tracks inputs, outputs, and performance metrics to ensure reliability and improve AI applications. Learn how it differs from traditional observability.", 
     card: "summary_large_image",
     images:
       "https://www.helicone.ai/static/blog/llm-observability.webp", 
