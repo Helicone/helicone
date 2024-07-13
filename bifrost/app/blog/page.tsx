@@ -20,9 +20,9 @@ export type BlogStructure = {
 
 const blogContent: BlogStructure[] = [
   {
-    title: "What is LLM Observability?",
+    title: "What is LLM Observability and Monitoring?",
     description:
-      "Building with LLM in production is incredibly difficult. Here's a very in-depth read by Arize AI addressing the biggest challenges and why LLM observability is crucial.",
+      "Building with LLMs in production (well) is incredibly difficult. You probably have heard of the word LLM observability'. What is it? How does it differ from traditional observability? What is observed? We have the answers. ",
     badgeText: "insight",
     date: "July 12, 2024",
     href: "/blog/llm-observability",

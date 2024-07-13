@@ -9,27 +9,27 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title:
-    "What is LLM Observability?",
+    "What is LLM Observability and Monitoring?",
   description:
-    "Building with LLM in production is incredibly difficult. Here's a very in-depth read by Arize AI addressing the biggest challenges and why LLM observability is crucial.",
+    "Building with LLMs in production (well) is incredibly difficult. You probably have heard of the word 'LLM observability'. What is it? How does it differ from traditional observability? What is observed? We have the answers. ",
   icons: "https://www.helicone.ai/static/logo.png",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
     title:
-      "What is LLM Observability?", 
+      "What is LLM Observability and Monitoring?", 
     url: "https://www.helicone.ai/blog/llm-observability", 
     description:
-      "Building with LLM in production is incredibly difficult. Here's a very in-depth read by Arize AI addressing the biggest challenges and why LLM observability is crucial.",
+      "Building with LLMs in production (well) is incredibly difficult. You probably have heard of the word 'LLM observability'. What is it? How does it differ from traditional observability? What is observed? We have the answers. ",
     images:
       "https://www.helicone.ai/static/blog/llm-observability.webp", 
     locale: "en_US",
   },
   twitter: {
     title:
-      "What is LLM Observability?", 
+      "What is LLM Observability and Monitoring?", 
     description:
-      "Building with LLM in production is incredibly difficult. Here's a very in-depth read by Arize AI addressing the biggest challenges and why LLM observability is crucial.", 
+      "Building with LLMs in production (well) is incredibly difficult. You probably have heard of the word 'LLM observability'. What is it? How does it differ from traditional observability? What is observed? We have the answers. ", 
     card: "summary_large_image",
     images:
       "https://www.helicone.ai/static/blog/llm-observability.webp", 

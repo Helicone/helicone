@@ -1,85 +1,84 @@
 ---
-title: "What is LLM Observability?"
-description: "Building with LLM in production is incredibly difficult. Here's a very in-depth read by Arize AI addressing the biggest challenges and why LLM observability is crucial."
+title: "What is LLM Observability and Monitoring?"
+description: "Building with LLM in production is incredibly difficult. Here's a very in-depth read by Arize AI addressing the biggest challenges and why LLM Observability is crucial."
 author: "Lina Lam"
 date: "July 12, 2024"
 time: "1 minute read"
 icon: "code"
 ---
 
-Implementing LLM apps is easy due to the level of abstraction, but understanding how each layer of your system is performing is complex without LLM observability. 
+**Building with LLMs in production (well) is incredibly difficult.** You probably have heard of the word *LLM Observability*. But what is it? How does it differ from traditional observability? What is being observed? We have the answers. 
 
 
-![Helicone: What is LLM Observability](/static/blog/llm-observability.webp)
-
+![Helicone: What is LLM Observability and Monitoring](/static/blog/llm-observability.webp)
 
 
 ## The TL;DR
 
-**LLM Observability is complete visibility into every layer of an LLM-based software system: the application, the prompt, and the response.**
+**LLM Observability is complete visibility** into every layer of an LLM-based software system - the application, the prompt, and the response. LLM Observability comes hand-in-hand with *LLM Monitoring*. While monitoring tracks application performance metrics, observability is **<span style={{color: '#0ea5e9'}}>more investigative</span>**. 
 
-LLM Monitoring tracks application performance using various metrics and methods, and LLM Observability provides the tracing needed for effective monitoring, like leveraging copilots to automatically identify issues.
-
-
-Arize AI created a very in-depth read about **<span style={{color: '#0ea5e9'}}>why LLM observability is crucial</span>** to make your application reliable, and key issues with LLM that make building with LLM incredibly difficult. 
-
-
-## What you'll learn
-
-- Common use cases and issues with LLM Apps
-- Importance of LLM observability
-- The five pillars of LLM observability
-    - evaluation
-    - traces and spans
-    - retrieval augmented generation
-    - fine-tuning
-    - prompt engineering
+|          | **LLM Observability** | **LLM Monitoring** |
+| :------- |:------------------------------------------------------------|:----------------------------------------------------------|
+| **Purpose**  | Event logging | Collect metrics |
+| **Key Aspects** | Trace the flow of requests to understand system dependencies and interactions | Track application performance metrics, such as usage, cost, latency, error rates |
+| **Example** | Correlate different types of data to understand issues and complex behaviours | Set up thresholds for unexpected behaviors |
 
 
-## Our notes
+---
 
-The 7 key issues to look out for when building with LLMs are: 
+## LLM vs. Traditional Observability - What's the Diff? 
 
+**Traditional development is typically transactional**. Developers observe how the application handles HTTP requests/responses, a database query, or a published message. In contrast, **<span style={{color: '#0ea5e9'}}>LLMs are much more complex</span>**. 
 
-**1. Hallucination**
+Here's a comparison of the logs: 
 
-LLMs' objective is to predict the next few characters and not accuracy. This means that responses are not grounded in facts. 
+| Traditional | LLMs |
+|:------------|:-----|
+| Simple, isolated interactions | Indefinitely nested interactions, creating a complex tree structure |
+| Clear start and end points | Encompass multiple interactions |
+| Small body size (low KBs of data) | Massive payloads (potentially GBs) |
+| Predictable behavior (easy to evaluate) | Lack of predictability (difficult to evaluate) | 
+| | Multi-modal data (text, image, audio, video) |
 
+## Issues with LLMs
 
-**2. Complex use cases**
+**<span style={{color: '#0ea5e9'}}>Hallucination</span>**: LLMs' objective is to predict the next few characters and not accuracy. This means that responses are not grounded in facts. 
 
-LLM-based software systems require an increasing number of LLM calls to execute a complex task (i.e. agentic workflow). Reflexion is a technique engineers use to get LLMs to analyze their own results. But this consists of having multiple calls inside of multiple spans for checking hallucinations. 
+**<span style={{color: '#0ea5e9'}}>Complex use cases</span>**: LLM-based software systems require an increasing number of LLM calls to execute a complex task (i.e. agentic workflow). Reflexion is a technique engineers use to get LLMs to analyze their own results. But this consists of having multiple calls inside of multiple spans for checking hallucinations. 
 
+**<span style={{color: '#0ea5e9'}}>Proprietary data</span>**: Managing proprietary data is tricky. You need it to answer specific customer questions, but it can accidentally find its way into the responses.
 
-**3. Proprietary data**
+**<span style={{color: '#0ea5e9'}}>Quality of response</span>**: Is the response in the wrong tone? Is the amount of detail appropriate for your users' ask? 
 
-Managing proprietary data is tricky. You need it to answer specific customer questions, but it can accidentally find its way into the responses.
+**<span style={{color: '#0ea5e9'}}>Cost (the big elephant in the room)</span>** - As usage goes up, and your LLM setup becomes more complicated (i.e. adding Reflexion), the cost can easily add up.
 
+**<span style={{color: '#0ea5e9'}}>Third-party models</span>**: Their API can change, new models and new guardrails can be added, causing your LLM app to behave differently than before.
 
-**4. Quality of response** 
-
-Is the response in the wrong tone? Is the amount of detail appropriate for your users' ask? 
-
-
-**5. Cost (the big elephant in the room)**
-
-As usage goes up, and your LLM setup becomes more complicated (i.e. adding Reflexion), the cost can easily add up.
-
-
-**6. Third-party models**
-
-Their API can change, new models and new guardrails can be added, causing your LLM app to behave differently than before.
+**<span style={{color: '#0ea5e9'}}>Limited competitive advantage</span>**: LLMs are hard to train and maintain. Chances are that you are using the same model as your competitor. Your differentiator becomes your prompt engineering and proprietary data.
 
 
-**7. Limited competitive advantage**
+## What LLM Observability Tools Have In Common
 
-LLMs are hard to train and maintain. Chances are that you are using the same model as your competitor. Your differentiator becomes your prompt engineering and proprietary data.
+Developers working on LLM applications need effective tools to understand and address bugs, and exceptions, and prevent regressions. They require unique visibility into the functioning of these applications, including:
 
+- Real-time monitoring of AI models
+- Detailed error tracking and reporting
+- Insights into user interactions and feedback
+- Performance metrics and trend analysis
+- Multi-metric correlations
+- Tools for prompt iterations and experimentation
+
+---
+
+## Further Reading
+
+Arize AI created a very in-depth read about <a href="https://arize.com/blog-course/large-language-model-monitoring-observability/" target="_blank"><span style={{color: '#0ea5e9'}}>the Five Pillars of LLM Observability</span></a>, covering common use cases and issues with LLM apps, the importance of LLM observability, and the five pillars (evaluation, traces and spans, retrieval augmented generation, fine-tuning, prompt engineering) crucial for making your application reliable.
 
 
 ## The author
 
 **Aparna Dhinakaran** is the Co-Founder and Chief Product Officer at Arize AI, a leader in machine learning observability. She is recognized in Forbes 30 Under 30 and led ML engineering at Uber, Apple, and TubeMogul (Adobe). 
+
 
 
 ## What we've learned
@@ -88,6 +87,4 @@ At Helicone, we've seen the complexities of productizing LLMs first-hand. Effect
 
 
 What are your thoughts?
-
-<a href="https://arize.com/blog-course/large-language-model-monitoring-observability/" target="_blank">Full article: What is LLM Observability</a>
 
