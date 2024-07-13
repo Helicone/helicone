@@ -34,7 +34,7 @@ const blogContent: BlogStructure[] = [
         imageAlt: "Lina Lam's headshot",
       },
     ],
-    time: "1 minute read",
+    time: "3 minute read",
   },
   {
     title: "Handling Billions of LLM Logs with Upstash Kafka and Cloudflare Workers",
