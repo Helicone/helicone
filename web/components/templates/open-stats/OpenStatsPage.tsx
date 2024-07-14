@@ -1,21 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  AreaChart,
-  BarChart,
-  DonutChart,
-  Legend,
-  MultiSelect,
-  MultiSelectItem,
-} from "@tremor/react";
+import { AreaChart, BarChart, DonutChart, Legend } from "@tremor/react";
 import { useState } from "react";
+import { FaXTwitter } from "react-icons/fa6";
 import ThemedDropdown from "../../../components/shared/themed/themedDropdown";
 import { ThemedScatterPlot } from "../../../components/shared/themed/themedScatterPlot";
 import { getJawnClient } from "../../../lib/clients/jawn";
-import { Col, Row, Grid, Card } from "../../layout/common";
-import { Logo } from "./logo";
-import { FaXTwitter } from "react-icons/fa6";
+import { Card, Col, Grid, Row } from "../../layout/common";
 import CheckBox from "../../layout/common/checkBox";
 import LoadingAnimation from "../../shared/loadingAnimation";
+import { Logo } from "./logo";
 
 const modelNames = [
   {
