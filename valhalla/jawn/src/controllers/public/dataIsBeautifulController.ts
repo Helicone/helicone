@@ -52,6 +52,11 @@ export const modelNames = [
     variations: ["claude-3-sonnet-20240229"],
   },
   {
+    model: "claude-3-5-sonnet-20240620",
+    provider: "ANTHROPIC",
+    variations: ["claude-3-5-sonnet-20240620"],
+  },
+  {
     model: "claude-3-haiku-20240307",
     provider: "ANTHROPIC",
     variations: ["claude-3-haiku-20240307"],
