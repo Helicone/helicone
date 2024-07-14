@@ -185,7 +185,6 @@ export interface InsertRequestResponseVersioned {
   provider: Nullable<string>;
   country_code: Nullable<string>;
   target_url: Nullable<string>;
-  created_at?: string;
   sign: 1;
   version: number;
   properties: Record<string, string>;
