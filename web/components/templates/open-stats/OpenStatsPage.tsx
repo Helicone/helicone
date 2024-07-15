@@ -94,6 +94,17 @@ interface PieChartData {
   value: number;
 }
 
+function humanReadableNumber(num: number): string {
+  if (num >= 1_000_000_000) {
+    return `${Math.ceil(num / 1_000_000_000)}B+`;
+  } else if (num >= 1_000_000) {
+    return `${Math.ceil(num / 1_000_000)}M+`;
+  } else if (num >= 1_000) {
+    return `${Math.ceil(num / 1000)}k+`;
+  }
+  return num.toLocaleString();
+}
+
 function transformData(
   data: { date: string; matched_model: string; percent: number }[]
 ) {
@@ -112,6 +123,24 @@ function transformData(
 
   return { transformedData: result, models: Array.from(models) };
 }
+const transformAllModelData = (
+  data: { date: string; provider: string; tokens: number }[]
+) => {
+  const result: { [key: string]: any }[] = [];
+  const providers = new Set<string>();
+
+  data.forEach((item) => {
+    providers.add(item.provider);
+    let dateEntry = result.find((entry) => entry.date === item.date);
+    if (!dateEntry) {
+      dateEntry = { date: item.date };
+      result.push(dateEntry);
+    }
+    dateEntry[item.provider] = (dateEntry[item.provider] || 0) + item.tokens;
+  });
+
+  return { transformedData: result, providers: Array.from(providers) };
+};
 
 function addOther<T>(
   data: T[],
@@ -132,12 +161,12 @@ function addOther<T>(
   return [...sorted.slice(0, limit), other(accumulatedValue)];
   // return sorted;
 }
-
+const timeSpans = ["7d", "1m", "3m"] as const;
 export const OpenStatsPage = () => {
   const [models, setModels] = useState<string[]>(MODELS);
   const [provider, setProvider] = useState<string>("all");
 
-  const [timeSpan, setTimeSpan] = useState("1m");
+  const [timeSpan, setTimeSpan] = useState<(typeof timeSpans)[number]>("1m");
   const { isLoading, data } = useQuery({
     queryKey: ["issues", timeSpan, models, provider],
     queryFn: async (query) => {
@@ -160,6 +189,10 @@ export const OpenStatsPage = () => {
         providerPercentage,
         modelCost,
         ttftVsPromptLength,
+        totalCount,
+        allModelUsageOverTime,
+        allProviderUsageOverTime,
+        totalValues,
       ] = await Promise.all([
         jawn.POST("/v1/public/dataisbeautiful/model/percentage/overtime", {
           body,
@@ -174,6 +207,18 @@ export const OpenStatsPage = () => {
           body,
         }),
         jawn.POST("/v1/public/dataisbeautiful/ttft-vs-prompt-length", {
+          body,
+        }),
+        jawn.POST("/v1/public/dataisbeautiful/total-requests", {
+          body,
+        }),
+        jawn.POST("/v1/public/dataisbeautiful/model/usage/overtime", {
+          body,
+        }),
+        jawn.POST("/v1/public/dataisbeautiful/provider/usage/overtime", {
+          body,
+        }),
+        jawn.POST("/v1/public/dataisbeautiful/total-values", {
           body,
         }),
       ]);
@@ -204,6 +249,10 @@ export const OpenStatsPage = () => {
         modelUsageOverTime: modelUsageOverTime.data?.data ?? [],
         modelCost: modelCost.data?.data ?? [],
         ttftVsPromptLength: ttftVsPromptLength.data?.data ?? [],
+        totalCount: totalCount.data,
+        allProviderUsageOverTime: allProviderUsageOverTime.data?.data ?? [],
+        allModelUsageOverTime: allModelUsageOverTime.data?.data ?? [],
+        totalValues: totalValues.data?.data,
       };
     },
   });
@@ -354,37 +403,49 @@ export const OpenStatsPage = () => {
           </div>
         </Row>
       </Col>
+      <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 py-3 rounded-lg px-10">
+        <h2>
+          Tokens sent / Day {"("}last month{")"}
+        </h2>
+        <AreaChart
+          data={
+            transformAllModelData(data?.allProviderUsageOverTime ?? [])
+              .transformedData
+          }
+          index="date"
+          categories={[
+            "OPENAI",
+            "ANTHROPIC",
+            "AZURE",
+            "GOOGLE",
+            "OPENROUTER",
+            "TOGETHER",
+            "CLOUDFLARE",
+            "CUSTOM",
+            "DEEPINFRA",
+            "FIREWORKS",
+            "GROQ",
+          ]}
+          valueFormatter={(v) => humanReadableNumber(v)}
+          colors={colors}
+        />
+      </div>
       <Grid className="grid-cols-12 w-full gap-[24px]">
         <Card className="col-span-3">
           <Col className="justify-between items-center gap-[16px] h-full">
             <div>
               <Row className="gap-[16px] bg-[#F3F4F6] p-[4px] font-bold rounded-lg">
-                <button
-                  className={`py-[8px] px-[16px] rounded-lg ${
-                    timeSpan === "1m" ? "bg-white text-[#0CA5E9] shadow-lg" : ""
-                  }`}
-                  onClick={() => setTimeSpan("1m")}
-                >
-                  1M
-                </button>
-                <button
-                  className={`py-[8px] px-[16px] rounded-lg ${
-                    timeSpan === "3m" ? "bg-white text-[#0CA5E9] shadow-lg" : ""
-                  }`}
-                  onClick={() => setTimeSpan("3m")}
-                >
-                  3M
-                </button>
-                <button
-                  className={`py-[8px] px-[16px] rounded-lg ${
-                    timeSpan === "1yr"
-                      ? "bg-white text-[#0CA5E9] shadow-lg"
-                      : ""
-                  }`}
-                  onClick={() => setTimeSpan("1yr")}
-                >
-                  1Y
-                </button>
+                {timeSpans.map((x, i) => (
+                  <button
+                    className={`py-[8px] px-[16px] rounded-lg ${
+                      timeSpan === x ? "bg-white text-[#0CA5E9] shadow-lg" : ""
+                    }`}
+                    key={`${x}-${i}`}
+                    onClick={() => setTimeSpan(x)}
+                  >
+                    {x.toUpperCase()}
+                  </button>
+                ))}
               </Row>
             </div>
             <Col className="w-full gap-3">
@@ -447,10 +508,10 @@ export const OpenStatsPage = () => {
         <Grid className="grid-cols-12 w-full gap-[24px]">
           <Col className="p-10 border w-full col-span-1 md:col-span-3 flex justify-between flex-col items-center gap-5 py-3 rounded-lg">
             <h2 className="whitespace-nowrap text-[18px] font-bold text-[#5D6673]">
-              Total requests Logged
+              Total Requests
             </h2>
             <div className="w-full text-[36px] font-bold text-[#5D6673]">
-              1,000,000
+              {humanReadableNumber(data?.totalCount?.data ?? 0)}
             </div>
           </Col>
           {pieCharts.map((chart, i) => (
@@ -479,7 +540,7 @@ export const OpenStatsPage = () => {
             </div>
           ))}
           <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 py-3 rounded-lg px-10">
-            <h2>Top Models Over time</h2>
+            <h2>Model market share %</h2>
             <AreaChart
               data={
                 transformData(data?.modelUsageOverTime ?? []).transformedData
