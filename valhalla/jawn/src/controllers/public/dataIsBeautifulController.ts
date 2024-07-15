@@ -3,7 +3,13 @@ import { Result, ok } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { DataIsBeautifulManager } from "../../managers/DataIsBeautifulManager";
 
-export type TimeSpan = "1m" | "3m" | "1yr";
+/***
+ * FUTURE HELICONE DEVS ALL THE ROUTES HERE ARE CACHE UNAUTHENTICATED!! PLEASE DO NOT USE THE AUTH PARAM
+ *
+ *
+ */
+
+export type TimeSpan = "7d" | "1m" | "3m";
 
 export const modelNames = [
   {
@@ -120,10 +126,99 @@ export type ProviderBreakdown = {
   percent: number;
 };
 
+export type ProviderUsageOverTime = {
+  provider: string;
+  date: string;
+  tokens: number;
+};
+
+export type ModelUsageOverTime = {
+  model: string;
+  date: string;
+  tokens: number;
+};
+
+export type TotalValuesForAllOfTime = {
+  total_requests: number;
+  total_tokens: number;
+};
+
 @Route("v1/public/dataisbeautiful")
 @Tags("DataIsBeautiful")
 @Security("api_key")
 export class DataIsBeautifulRouter extends Controller {
+  @Post("/total-values")
+  public async getTotalValues(
+    @Body()
+    requestBody: DataIsBeautifulRequestBody,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<TotalValuesForAllOfTime, string>> {
+    const dataIsBeautifulManager = new DataIsBeautifulManager();
+
+    const result = await dataIsBeautifulManager.getTotalValues();
+
+    if (result.error) {
+      this.setStatus(500);
+    }
+
+    this.setStatus(200);
+    return ok(result.data!);
+  }
+
+  @Post("/model/usage/overtime")
+  public async getModelUsageOverTime(
+    @Body()
+    requestBody: DataIsBeautifulRequestBody,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ModelUsageOverTime[], string>> {
+    const dataIsBeautifulManager = new DataIsBeautifulManager();
+
+    const result = await dataIsBeautifulManager.getModelUsageOverTime();
+
+    if (result.error) {
+      this.setStatus(500);
+    }
+
+    this.setStatus(200);
+    return ok(result.data ?? []);
+  }
+
+  @Post("/provider/usage/overtime")
+  public async getProviderUsageOverTime(
+    @Body()
+    requestBody: DataIsBeautifulRequestBody,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ProviderUsageOverTime[], string>> {
+    const dataIsBeautifulManager = new DataIsBeautifulManager();
+
+    const result = await dataIsBeautifulManager.providerUsageOverTime();
+
+    if (result.error) {
+      this.setStatus(500);
+    }
+
+    this.setStatus(200);
+    return ok(result.data ?? []);
+  }
+
+  @Post("/total-requests")
+  public async getTotalRequests(
+    @Body()
+    requestBody: DataIsBeautifulRequestBody,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<number, string>> {
+    const dataIsBeautifulManager = new DataIsBeautifulManager();
+
+    const result = await dataIsBeautifulManager.getTotalRequests(requestBody);
+
+    if (result.error) {
+      this.setStatus(500);
+    }
+
+    this.setStatus(200);
+    return ok(result.data ?? 0);
+  }
+
   @Post("/ttft-vs-prompt-length")
   public async getTTFTvsPromptInputLength(
     @Body()

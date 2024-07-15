@@ -38,7 +38,7 @@ export const ThemedScatterPlot = ({
       const multiSelectItemsArray = Array.from(multiSelectItems);
       setSelectItems(multiSelectItemsArray);
     }
-  }, [chart.data, multiSelectItemsArray, selectItems.length]);
+  }, [chart.data, selectItems.length]);
 
   const dataToViz = chart.data.filter((d) => selectItems.includes(d.grain));
 
