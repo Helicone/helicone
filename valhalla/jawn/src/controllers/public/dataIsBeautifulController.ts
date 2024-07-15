@@ -12,6 +12,7 @@ import { Result, ok } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { DataIsBeautifulManager } from "../../managers/DataIsBeautifulManager";
 import { providersNames } from "../../packages/cost/providers/mappings";
+import { cacheResult } from "../../utils/cacheResult";
 
 /***
  * FUTURE HELICONE DEVS ALL THE ROUTES HERE ARE CACHE UNAUTHENTICATED!! PLEASE DO NOT USE THE AUTH PARAM
@@ -192,7 +193,9 @@ export class DataIsBeautifulRouter extends Controller {
   ): Promise<Result<TotalValuesForAllOfTime, string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
-    const result = await dataIsBeautifulManager.getTotalValues();
+    const result = await cacheResult("total-values", async () =>
+      dataIsBeautifulManager.getTotalValues()
+    );
 
     if (result.error) {
       this.setStatus(500);
@@ -208,7 +211,9 @@ export class DataIsBeautifulRouter extends Controller {
   ): Promise<Result<ModelUsageOverTime[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
-    const result = await dataIsBeautifulManager.getModelUsageOverTime();
+    const result = await cacheResult("model-usage-overtime", async () =>
+      dataIsBeautifulManager.getModelUsageOverTime()
+    );
 
     if (result.error) {
       this.setStatus(500);
@@ -224,7 +229,9 @@ export class DataIsBeautifulRouter extends Controller {
   ): Promise<Result<ProviderUsageOverTime[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
-    const result = await dataIsBeautifulManager.providerUsageOverTime();
+    const result = await cacheResult("provider-usage-overtime", async () =>
+      dataIsBeautifulManager.providerUsageOverTime()
+    );
 
     if (result.error) {
       this.setStatus(500);
@@ -242,7 +249,9 @@ export class DataIsBeautifulRouter extends Controller {
   ): Promise<Result<number, string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
-    const result = await dataIsBeautifulManager.getTotalRequests(requestBody);
+    const result = await cacheResult("total-requests", async () =>
+      dataIsBeautifulManager.getTotalRequests(requestBody)
+    );
 
     if (result.error) {
       this.setStatus(500);
@@ -260,8 +269,8 @@ export class DataIsBeautifulRouter extends Controller {
   ): Promise<Result<TTFTvsPromptLength[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
-    const result = await dataIsBeautifulManager.getTTFTvsPromptInputLength(
-      requestBody
+    const result = await cacheResult("ttft-vs-prompt-length", async () =>
+      dataIsBeautifulManager.getTTFTvsPromptInputLength(requestBody)
     );
 
     if (result.error) {
@@ -280,7 +289,9 @@ export class DataIsBeautifulRouter extends Controller {
   ): Promise<Result<ModelBreakdown[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
-    const result = await dataIsBeautifulManager.getModelPercentage(requestBody);
+    const result = await cacheResult("model-percentage", async () =>
+      dataIsBeautifulManager.getModelPercentage(requestBody)
+    );
 
     if (result.error) {
       this.setStatus(500);
@@ -298,7 +309,9 @@ export class DataIsBeautifulRouter extends Controller {
   ): Promise<Result<ModelCost[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
-    const result = await dataIsBeautifulManager.getModelCost(requestBody);
+    const result = await cacheResult("model-cost", async () =>
+      dataIsBeautifulManager.getModelCost(requestBody)
+    );
 
     if (result.error) {
       this.setStatus(500);
@@ -316,8 +329,8 @@ export class DataIsBeautifulRouter extends Controller {
   ): Promise<Result<ProviderBreakdown[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
-    const result = await dataIsBeautifulManager.getProviderPercentage(
-      requestBody
+    const result = await cacheResult("provider-percentage", async () =>
+      dataIsBeautifulManager.getProviderPercentage(requestBody)
     );
 
     if (result.error) {
@@ -336,8 +349,10 @@ export class DataIsBeautifulRouter extends Controller {
   ): Promise<Result<ModelBreakdownOverTime[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
-    const result = await dataIsBeautifulManager.getModelPercentageOverTime(
-      requestBody
+    const result = await cacheResult(
+      "model-percentage-overtime",
+      async () =>
+        await dataIsBeautifulManager.getModelPercentageOverTime(requestBody)
     );
 
     if (result.error) {

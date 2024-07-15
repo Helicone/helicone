@@ -444,25 +444,23 @@ export class DataIsBeautifulManager {
   }
 
   private async getTotalCost(): Promise<number> {
-    // This is taking too long
-    return 5_700_000;
-    // const costQuery = clickhousePriceCalc("request_response_versioned");
-    // const query = `
-    // SELECT
-    //   ${costQuery} AS total_cost
-    // FROM request_response_versioned
-    // WHERE status = 200
-    // `;
+    const costQuery = clickhousePriceCalc("request_response_versioned");
+    const query = `
+    SELECT
+      ${costQuery} AS total_cost
+    FROM request_response_versioned
+    WHERE status = 200
+    `;
 
-    // const result = await clickhouseDb.dbQuery<{ total_cost: number }>(
-    //   query,
-    //   []
-    // );
-    // if (!result.data?.[0]?.total_cost) {
-    //   return 5_700_000
-    // }
+    const result = await clickhouseDb.dbQuery<{ total_cost: number }>(
+      query,
+      []
+    );
+    if (!result.data?.[0]?.total_cost) {
+      return 5_700_000;
+    }
 
-    // return result.data?.[0]?.total_cost;
+    return result.data?.[0]?.total_cost;
   }
 
   async getTotalValues(): Promise<Result<TotalValuesForAllOfTime, string>> {
