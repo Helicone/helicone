@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 export const useQueryParams = () => {
   const router = useRouter();
   const [queryParams, setQueryParamsState] = useState<{
-    models: string[];
+    models: string[] | "none";
     provider: string;
     timeSpan: string;
     tab: number;
@@ -28,13 +28,17 @@ export const useQueryParams = () => {
   }, []);
 
   const setQueryParams = (params: {
-    models: string[];
+    models: string[] | "none";
     provider: string;
     timeSpan: string;
     tab: number;
   }) => {
     const newParams = new URLSearchParams();
-    if (params.models.length) newParams.set("models", params.models.join(","));
+    if (params.models !== "none") {
+      newParams.set("models", params.models.join(","));
+    } else {
+      newParams.set("models", "none");
+    }
     if (params.provider) newParams.set("provider", params.provider);
     if (params.timeSpan) newParams.set("timeSpan", params.timeSpan);
     if (params.tab) newParams.set("tab", params.tab.toString());
