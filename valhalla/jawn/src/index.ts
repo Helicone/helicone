@@ -124,10 +124,10 @@ unAuthenticatedRouter.use("/download/swagger.json", (req, res) => {
   res.json(publicSwaggerDoc as any);
 });
 
-v1APIRouter.use(
-  "/v1/public/dataisbeautiful",
-  unauthorizedCacheMiddleware("/v1/public/dataisbeautiful")
-);
+// v1APIRouter.use(
+//   "/v1/public/dataisbeautiful",
+//   unauthorizedCacheMiddleware("/v1/public/dataisbeautiful")
+// );
 
 v1APIRouter.use(authMiddleware);
 
