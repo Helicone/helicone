@@ -176,9 +176,6 @@ export class SessionManager {
     LIMIT 50
     `;
 
-    console.log("Query", query);
-    console.log("Args", builtFilter.argsAcc);
-
     const results = await clickhouseDb.dbQuery<SessionResult>(
       query,
       builtFilter.argsAcc
