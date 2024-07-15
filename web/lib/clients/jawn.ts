@@ -28,9 +28,3 @@ export function getJawnClient(orgId?: string | "none") {
 }
 
 export type ClientType = ReturnType<typeof getJawnClient>;
-
-export function getUnauthenticatedJawnClient() {
-  return createClient<publicPaths & privatePaths>({
-    baseUrl: process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE,
-  });
-}

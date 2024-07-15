@@ -908,6 +908,8 @@ Json: JsonObject;
     };
     TotalValuesForAllOfTime: {
       /** Format: double */
+      total_cost: number;
+      /** Format: double */
       total_tokens: number;
       /** Format: double */
       total_requests: number;
@@ -918,21 +920,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_TotalValuesForAllOfTime.string_": components["schemas"]["ResultSuccess_TotalValuesForAllOfTime_"] | components["schemas"]["ResultError_string_"];
-    /**
-     * @description *
-     * FUTURE HELICONE DEVS ALL THE ROUTES HERE ARE CACHE UNAUTHENTICATED!! PLEASE DO NOT USE THE AUTH PARAM
-     * @enum {string}
-     */
-    TimeSpan: "7d" | "1m" | "3m";
-    /** @enum {string} */
-    ModelName: "gpt-3.5" | "gpt-4o" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus-20240229" | "claude-3-sonnet-20240229" | "claude-3-5-sonnet-20240620" | "claude-3-haiku-20240307" | "claude-2" | "open-mixtral" | "Llama" | "dall-e" | "text-moderation" | "text-embedding";
-    /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "MISTRAL" | "META";
-    DataIsBeautifulRequestBody: {
-      provider?: components["schemas"]["ProviderName"];
-      models?: components["schemas"]["ModelName"][];
-      timespan: components["schemas"]["TimeSpan"];
-    };
     ModelUsageOverTime: {
       /** Format: double */
       tokens: number;
@@ -964,6 +951,21 @@ Json: JsonObject;
       error: null;
     };
     "Result_number.string_": components["schemas"]["ResultSuccess_number_"] | components["schemas"]["ResultError_string_"];
+    /**
+     * @description *
+     * FUTURE HELICONE DEVS ALL THE ROUTES HERE ARE CACHE UNAUTHENTICATED!! PLEASE DO NOT USE THE AUTH PARAM
+     * @enum {string}
+     */
+    TimeSpan: "7d" | "1m" | "3m";
+    /** @enum {string} */
+    ModelName: "gpt-3.5" | "gpt-4o" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus" | "claude-3-sonnet" | "claude-3-haiku" | "claude-2" | "open-mixtral" | "Llama" | "dall-e" | "text-moderation" | "text-embedding" | "anthropic/claude-3.5-sonnet";
+    /** @enum {string} */
+    ProviderName: "OPENAI" | "ANTHROPIC" | "MISTRAL" | "META" | "OPENROUTER";
+    DataIsBeautifulRequestBody: {
+      provider?: components["schemas"]["ProviderName"];
+      models?: components["schemas"]["ModelName"][];
+      timespan: components["schemas"]["TimeSpan"];
+    };
     TTFTvsPromptLength: {
       /** Format: double */
       prompt_length: number;
@@ -1471,11 +1473,6 @@ export interface operations {
     };
   };
   GetTotalValues: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
-      };
-    };
     responses: {
       /** @description Ok */
       200: {
@@ -1486,11 +1483,6 @@ export interface operations {
     };
   };
   GetModelUsageOverTime: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
-      };
-    };
     responses: {
       /** @description Ok */
       200: {
@@ -1501,11 +1493,6 @@ export interface operations {
     };
   };
   GetProviderUsageOverTime: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
-      };
-    };
     responses: {
       /** @description Ok */
       200: {
