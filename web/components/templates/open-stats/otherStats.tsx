@@ -6,10 +6,9 @@ import { ThemedScatterPlot } from "../../../components/shared/themed/themedScatt
 import { getJawnClient } from "../../../lib/clients/jawn";
 import { Card, Col, Grid, Row } from "../../layout/common";
 import CheckBox from "../../layout/common/checkBox";
-import LoadingAnimation from "../../shared/loadingAnimation";
+import { clsx } from "../../shared/clsx";
 import { colors, humanReadableNumber } from "./OpenStatsPage";
 import { useQueryParams } from "./useQueryParams";
-import { clsx } from "../../shared/clsx";
 const timeSpans = ["7d", "1m", "3m"] as const;
 export const allProviders = [
   "OPENAI",
@@ -28,11 +27,7 @@ export const allProviders = [
   "OTHER",
 ] as const;
 
-export const modelNames: {
-  model: string;
-  provider: (typeof allProviders)[number];
-  variations: string[];
-}[] = [
+export const modelNames = [
   {
     model: "gpt-3.5",
     provider: "OPENAI",

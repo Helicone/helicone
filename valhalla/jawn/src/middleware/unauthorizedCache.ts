@@ -30,6 +30,10 @@ export const unauthorizedCacheMiddleware =
     const originalSend = res.send.bind(res);
 
     res.send = (body: any) => {
+      if (res.statusCode !== 200) {
+        return originalSend(body);
+      }
+
       kvCache.set(cacheKey, body).catch((err) => {
         console.error("Failed to set cache:", err);
       });

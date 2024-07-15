@@ -456,8 +456,11 @@ export class DataIsBeautifulManager {
       query,
       []
     );
+    if (!result.data?.[0]?.total_cost) {
+      throw new Error("No total cost found");
+    }
 
-    return result.data?.[0]?.total_cost ?? 0;
+    return result.data?.[0]?.total_cost;
   }
 
   async getTotalValues(): Promise<Result<TotalValuesForAllOfTime, string>> {
