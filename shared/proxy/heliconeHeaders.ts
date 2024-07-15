@@ -1,4 +1,4 @@
-import { getValidUUID } from "../../valhalla/jawn/src/lib/utils/getValidUUID";
+import { getValidUUID } from "../utils/getValidUUID";
 import { IInternalHeaders } from "./types/internalHeaders";
 
 type Nullable<T> = T | null;
