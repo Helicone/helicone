@@ -1,9 +1,9 @@
-import { BarChart } from "@tremor/react";
-import { Card, Grid } from "../../layout/common";
-import { humanReadableNumber, colors } from "./OpenStatsPage";
-import { getJawnClient } from "../../../lib/clients/jawn";
 import { useQuery } from "@tanstack/react-query";
-import LoadingAnimation from "../../shared/loadingAnimation";
+import { BarChart } from "@tremor/react";
+import { getJawnClient } from "../../../lib/clients/jawn";
+import { Card, Grid } from "../../layout/common";
+import { clsx } from "../../shared/clsx";
+import { colors, humanReadableNumber } from "./OpenStatsPage";
 const transformAllProviderData = (
   data: { date: string; provider: string; tokens: number }[]
 ) => {
@@ -75,97 +75,70 @@ export function TopStats() {
 
   return (
     <>
-      <Grid className="grid-cols-9 w-full gap-[24px]">
+      <Grid
+        className={clsx(
+          "grid-cols-9 w-full gap-[24px]",
+          isLoadingTotalValues ? "animate-pulse" : ""
+        )}
+      >
         <Card className="col-span-3">
-          {isLoadingTotalValues ? (
-            <LoadingAnimation />
-          ) : (
-            <>
-              <h2 className="whitespace-nowrap text-[18px] font-bold text-[#5D6673]">
-                Total Requests
-              </h2>
-              <div className="w-full text-[36px] font-bold text-[#5D6673]">
-                {humanReadableNumber(totalValuesData?.total_requests ?? 0)}
-              </div>
-            </>
-          )}
+          <h2 className="whitespace-nowrap text-[18px] font-bold text-[#5D6673]">
+            Total Requests
+          </h2>
+          <div className="w-full text-[36px] font-bold text-[#5D6673]">
+            {humanReadableNumber(totalValuesData?.total_requests ?? 0)}
+          </div>
         </Card>
         <Card className="col-span-3">
-          {isLoadingTotalValues ? (
-            <LoadingAnimation />
-          ) : (
-            <>
-              <h2 className="whitespace-nowrap text-[18px] font-bold text-[#5D6673]">
-                Total Tokens
-              </h2>
-              <div className="w-full text-[36px] font-bold text-[#5D6673]">
-                {humanReadableNumber(totalValuesData?.total_tokens ?? 0)}
-              </div>
-            </>
-          )}
+          <h2 className="whitespace-nowrap text-[18px] font-bold text-[#5D6673]">
+            Total Tokens
+          </h2>
+          <div className="w-full text-[36px] font-bold text-[#5D6673]">
+            {humanReadableNumber(totalValuesData?.total_tokens ?? 0)}
+          </div>
         </Card>
         <Card className="col-span-3">
-          {isLoadingTotalValues ? (
-            <LoadingAnimation />
-          ) : (
-            <>
-              <h2 className="whitespace-nowrap text-[18px] font-bold text-[#5D6673]">
-                Total Spent
-              </h2>
-              <div className="w-full text-[36px] font-bold text-[#5D6673]">
-                $ {humanReadableNumber(totalValuesData?.total_cost ?? 0)}
-              </div>
-            </>
-          )}
+          <>
+            <h2 className="whitespace-nowrap text-[18px] font-bold text-[#5D6673]">
+              Total Spent
+            </h2>
+            <div className="w-full text-[36px] font-bold text-[#5D6673]">
+              $ {humanReadableNumber(totalValuesData?.total_cost ?? 0)}
+            </div>
+          </>
         </Card>
       </Grid>
       <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 py-3 rounded-lg px-10">
-        {isLoadingProviders ? (
-          <LoadingAnimation />
-        ) : (
-          <>
-            <h2>
-              Tokens / Provider
-              <i className="text-gray-400">
-                {"("}last month{")"}
-              </i>
-            </h2>
-            <BarChart
-              data={
-                transformAllProviderData(providerData ?? []).transformedData
-              }
-              index="date"
-              categories={
-                transformAllProviderData(providerData ?? []).providers
-              }
-              valueFormatter={(v) => humanReadableNumber(v)}
-              colors={colors}
-              stack
-            />
-          </>
-        )}
+        <h2>
+          Tokens / Provider
+          <i className="text-gray-400">
+            {"("}last month{")"}
+          </i>
+        </h2>
+        <BarChart
+          data={transformAllProviderData(providerData ?? []).transformedData}
+          index="date"
+          categories={transformAllProviderData(providerData ?? []).providers}
+          valueFormatter={(v) => humanReadableNumber(v)}
+          colors={colors}
+          stack
+        />
       </div>
       <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 py-3 rounded-lg px-10">
-        {isLoadingModels ? (
-          <LoadingAnimation />
-        ) : (
-          <>
-            <h2>
-              Tokens / Model{" "}
-              <i className="text-gray-400">
-                {"("}last month{")"}
-              </i>
-            </h2>
-            <BarChart
-              data={transformAllModelData(modelData ?? []).transformedData}
-              index="date"
-              categories={transformAllModelData(modelData ?? []).models}
-              valueFormatter={(v) => humanReadableNumber(v)}
-              colors={colors}
-              stack
-            />
-          </>
-        )}
+        <h2>
+          Tokens / Model{" "}
+          <i className="text-gray-400">
+            {"("}last month{")"}
+          </i>
+        </h2>
+        <BarChart
+          data={transformAllModelData(modelData ?? []).transformedData}
+          index="date"
+          categories={transformAllModelData(modelData ?? []).models}
+          valueFormatter={(v) => humanReadableNumber(v)}
+          colors={colors}
+          stack
+        />
       </div>
     </>
   );
