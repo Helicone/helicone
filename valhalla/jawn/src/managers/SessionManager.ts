@@ -43,15 +43,17 @@ export class SessionManager {
 
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: this.authParams.organizationId,
-      filter: {
-        request_response_versioned: {
-          properties: {
-            "Helicone-Session-Name": {
-              ilike: `'%${nameContains}%'`,
+      filter: nameContains
+        ? {
+            request_response_versioned: {
+              properties: {
+                "Helicone-Session-Name": {
+                  ilike: `'%${nameContains}%'`,
+                },
+              },
             },
-          },
-        },
-      },
+          }
+        : "all",
       argsAcc: [],
     });
 
@@ -72,6 +74,8 @@ export class SessionManager {
       count(DISTINCT properties['Helicone-Session-Id']) AS session_count
     FROM request_response_versioned
     WHERE (
+      has(properties, 'Helicone-Session-Id')
+      AND
       ${builtFilter.filter}
     )
     GROUP BY properties['Helicone-Session-Name']
@@ -95,6 +99,8 @@ export class SessionManager {
   ): Promise<Result<SessionResult[], string>> {
     const { sessionIdContains, timeFilter, sessionName, timezoneDifference } =
       requestBody;
+
+    console.log("sessionName", sessionName);
 
     if (!isValidTimeZoneDifference(timezoneDifference)) {
       return err("Invalid timezone difference");
@@ -160,6 +166,7 @@ export class SessionManager {
     FROM request_response_versioned
     WHERE (
         has(properties, 'Helicone-Session-Id')
+        ${sessionName ? "" : "AND NOT has(properties, 'Helicone-Session-Name')"}
         AND (
           ${builtFilter.filter}
         )
@@ -168,6 +175,9 @@ export class SessionManager {
     ORDER BY created_at DESC
     LIMIT 50
     `;
+
+    console.log("Query", query);
+    console.log("Args", builtFilter.argsAcc);
 
     const results = await clickhouseDb.dbQuery<SessionResult>(
       query,
