@@ -8,35 +8,33 @@ function getCacheKey(text: string): string {
   return `cache:${stringToNumberHash(text)}`;
 }
 
-export const unauthorizedCacheMiddleware = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  if (req.headers["authorization"] || req.headers["helicone-authorization"]) {
-    res.status(401).send({
-      message: "CANNOT USE UNAUTHORIZED CACHE WITH AUTHENTICATED ROUTES",
-    });
-    return;
-  }
-  const cacheKey = getCacheKey(
-    req.originalUrl + JSON.stringify(req.body) + req.path
-  );
+export const unauthorizedCacheMiddleware =
+  (cacheKeyMiddle: string) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.headers["authorization"] || req.headers["helicone-authorization"]) {
+      res.status(401).send({
+        message: "CANNOT USE UNAUTHORIZED CACHE WITH AUTHENTICATED ROUTES",
+      });
+      return;
+    }
+    const cacheKey = getCacheKey(
+      req.originalUrl + JSON.stringify(req.body) + req.path + cacheKeyMiddle
+    );
 
-  const cachedValue = await kvCache.get(cacheKey);
-  if (cachedValue) {
-    res.send(cachedValue);
-    return;
-  }
+    const cachedValue = await kvCache.get(cacheKey);
+    if (cachedValue) {
+      res.send(cachedValue);
+      return;
+    }
 
-  const originalSend = res.send.bind(res);
+    const originalSend = res.send.bind(res);
 
-  res.send = (body: any) => {
-    kvCache.set(cacheKey, body).catch((err) => {
-      console.error("Failed to set cache:", err);
-    });
-    return originalSend(body);
+    res.send = (body: any) => {
+      kvCache.set(cacheKey, body).catch((err) => {
+        console.error("Failed to set cache:", err);
+      });
+      return originalSend(body);
+    };
+
+    next();
   };
-
-  next();
-};

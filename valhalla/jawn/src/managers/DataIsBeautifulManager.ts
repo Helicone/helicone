@@ -12,6 +12,8 @@ import {
   TTFTvsPromptLength,
   TimeSpan,
   TotalValuesForAllOfTime,
+  allModelVariations,
+  allProviders,
   modelNames,
 } from "../controllers/public/dataIsBeautifulController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
@@ -36,20 +38,6 @@ function bigNumberRound(num: number): number {
     return shifted / magnitude;
   }
 }
-
-const TOP_PROVIDERS = [
-  "OPENAI",
-  "ANTHROPIC",
-  "AZURE",
-  "GOOGLE",
-  "OPENROUTER",
-  "TOGETHER",
-  "CLOUDFLARE",
-  "CUSTOM",
-  "DEEPINFRA",
-  "FIREWORKS",
-  "GROQ",
-];
 
 export class DataIsBeautifulManager {
   async getTotalRequests(
@@ -389,14 +377,20 @@ export class DataIsBeautifulManager {
   > {
     const query = `
     SELECT
-      provider,
+      CASE
+        ${allProviders
+          .map(
+            (provider) =>
+              `WHEN provider LIKE '%${provider}%' THEN '${provider}'`
+          )
+          .join(" ")}
+        ELSE 'Other'
+      END AS provider,
       formatDateTime(request_created_at, '%Y-%m-%d') AS date,
       SUM(completion_tokens) + SUM(prompt_tokens) AS tokens
     FROM request_response_versioned
     WHERE prompt_tokens IS NOT NULL
-    AND provider IN (${TOP_PROVIDERS.map((provider) => `'${provider}'`).join(
-      ", "
-    )})
+    AND status = 200
     AND completion_tokens IS NOT NULL
     AND prompt_tokens > 0
     AND completion_tokens > 0
@@ -419,14 +413,17 @@ export class DataIsBeautifulManager {
   async getModelUsageOverTime(): Promise<Result<ModelUsageOverTime[], string>> {
     const query = `
     SELECT
-      model,
+      CASE
+        ${allModelVariations
+          .map((model) => `WHEN model LIKE '%${model}%' THEN '${model}'`)
+          .join(" ")}
+        ELSE 'Other'
+      END AS model,
       formatDateTime(request_created_at, '%Y-%m-%d') AS date,
       SUM(completion_tokens) + SUM(prompt_tokens) AS tokens
     FROM request_response_versioned
     WHERE prompt_tokens IS NOT NULL
-    AND provider IN (${TOP_PROVIDERS.map((provider) => `'${provider}'`).join(
-      ", "
-    )})
+    AND status = 200
     AND completion_tokens IS NOT NULL
     AND prompt_tokens > 0
     AND completion_tokens > 0
@@ -446,6 +443,23 @@ export class DataIsBeautifulManager {
     return ok(result.data?.map((d) => ({ ...d, tokens: +d.tokens })) ?? []);
   }
 
+  private async getTotalCost(): Promise<number> {
+    const costQuery = clickhousePriceCalc("request_response_versioned");
+    const query = `
+    SELECT
+      ${costQuery} AS total_cost
+    FROM request_response_versioned 
+    WHERE status = 200
+    `;
+
+    const result = await clickhouseDb.dbQuery<{ total_cost: number }>(
+      query,
+      []
+    );
+
+    return result.data?.[0]?.total_cost ?? 0;
+  }
+
   async getTotalValues(): Promise<Result<TotalValuesForAllOfTime, string>> {
     const query = `
     SELECT
@@ -454,16 +468,20 @@ export class DataIsBeautifulManager {
     FROM request_response_versioned 
     `;
 
-    const result = await clickhouseDb.dbQuery<TotalValuesForAllOfTime>(
-      query,
-      []
-    );
+    const result = await clickhouseDb.dbQuery<{
+      total_requests: number;
+      total_tokens: number;
+    }>(query, []);
 
     if (result.error) {
       return result;
     }
 
-    return ok(result.data?.[0] ?? { total_requests: 0, total_tokens: 0 });
+    return ok({
+      total_requests: result.data?.[0].total_requests ?? 0,
+      total_tokens: result.data?.[0].total_tokens ?? 0,
+      total_cost: await this.getTotalCost(),
+    });
   }
 
   getTimeCondition(timeSpan?: TimeSpan): string {

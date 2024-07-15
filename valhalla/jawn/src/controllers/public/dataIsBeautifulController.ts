@@ -1,7 +1,17 @@
-import { Body, Controller, Post, Route, Security, Tags, Request } from "tsoa";
+import {
+  Body,
+  Controller,
+  Post,
+  Route,
+  Security,
+  Tags,
+  Request,
+  Get,
+} from "tsoa";
 import { Result, ok } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { DataIsBeautifulManager } from "../../managers/DataIsBeautifulManager";
+import { providersNames } from "../../packages/cost/providers/mappings";
 
 /***
  * FUTURE HELICONE DEVS ALL THE ROUTES HERE ARE CACHE UNAUTHENTICATED!! PLEASE DO NOT USE THE AUTH PARAM
@@ -10,6 +20,23 @@ import { DataIsBeautifulManager } from "../../managers/DataIsBeautifulManager";
  */
 
 export type TimeSpan = "7d" | "1m" | "3m";
+
+export const allProviders = [
+  "OPENAI",
+  "ANTHROPIC",
+  "AZURE",
+  "GOOGLE",
+  "OPENROUTER",
+  "TOGETHER",
+  "CLOUDFLARE",
+  "CUSTOM",
+  "DEEPINFRA",
+  "FIREWORKS",
+  "GROQ",
+  "META",
+  "MISTRAL",
+  "OTHER",
+] as const;
 
 export const modelNames = [
   {
@@ -48,22 +75,17 @@ export const modelNames = [
     ],
   },
   {
-    model: "claude-3-opus-20240229",
+    model: "claude-3-opus",
     provider: "ANTHROPIC",
     variations: ["claude-3-opus-20240229"],
   },
   {
-    model: "claude-3-sonnet-20240229",
+    model: "claude-3-sonnet",
     provider: "ANTHROPIC",
-    variations: ["claude-3-sonnet-20240229"],
+    variations: ["claude-3-sonnet-20240229", "claude-3-5-sonnet-20240620"],
   },
   {
-    model: "claude-3-5-sonnet-20240620",
-    provider: "ANTHROPIC",
-    variations: ["claude-3-5-sonnet-20240620"],
-  },
-  {
-    model: "claude-3-haiku-20240307",
+    model: "claude-3-haiku",
     provider: "ANTHROPIC",
     variations: ["claude-3-haiku-20240307"],
   },
@@ -85,12 +107,28 @@ export const modelNames = [
       "text-embedding-ada-002",
     ],
   },
+  {
+    model: "anthropic/claude-3.5-sonnet",
+    provider: "OPENROUTER",
+    variations: ["anthropic/claude-3.5-sonnet"],
+  },
 ] as const;
+
+export const allModelVariations = modelNames.flatMap(
+  (model) => model.variations
+);
+
+for (const model of modelNames) {
+  if (!providersNames.includes(model.provider as any)) {
+    throw new Error(`Provider ${model.provider} is not a valid provider`);
+  }
+}
 
 export type ModelElement = (typeof modelNames)[number];
 export type ModelName = (typeof modelNames)[number]["model"];
 export type ProviderName = (typeof modelNames)[number]["provider"];
 
+// NOTE do not make any of these strings otherwise it will be a security risk
 export type DataIsBeautifulRequestBody = {
   timespan: TimeSpan;
   models?: ModelName[];
@@ -141,6 +179,7 @@ export type ModelUsageOverTime = {
 export type TotalValuesForAllOfTime = {
   total_requests: number;
   total_tokens: number;
+  total_cost: number;
 };
 
 @Route("v1/public/dataisbeautiful")
@@ -149,8 +188,6 @@ export type TotalValuesForAllOfTime = {
 export class DataIsBeautifulRouter extends Controller {
   @Post("/total-values")
   public async getTotalValues(
-    @Body()
-    requestBody: DataIsBeautifulRequestBody,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<TotalValuesForAllOfTime, string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
@@ -167,8 +204,6 @@ export class DataIsBeautifulRouter extends Controller {
 
   @Post("/model/usage/overtime")
   public async getModelUsageOverTime(
-    @Body()
-    requestBody: DataIsBeautifulRequestBody,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ModelUsageOverTime[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
@@ -185,8 +220,6 @@ export class DataIsBeautifulRouter extends Controller {
 
   @Post("/provider/usage/overtime")
   public async getProviderUsageOverTime(
-    @Body()
-    requestBody: DataIsBeautifulRequestBody,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ProviderUsageOverTime[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
