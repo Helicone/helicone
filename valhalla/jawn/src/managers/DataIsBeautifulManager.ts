@@ -5,17 +5,80 @@ import {
   ModelCost,
   ModelElement,
   ModelName,
+  ModelUsageOverTime,
   ProviderBreakdown,
   ProviderName,
+  ProviderUsageOverTime,
   TTFTvsPromptLength,
   TimeSpan,
+  TotalValuesForAllOfTime,
   modelNames,
 } from "../controllers/public/dataIsBeautifulController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { Result, err, ok } from "../lib/shared/result";
 import { clickhousePriceCalc } from "../packages/cost";
 
+function andCondition(...conditions: string[]): string {
+  return conditions.filter(Boolean).join(" AND ");
+}
+// Always just gives 2 decimal places of accuracy.
+// ex: 24893629 -> 25000000
+// ex: 398 -> 400
+// ex: 234 ->230
+function bigNumberRound(num: number): number {
+  if (num === 0) {
+    return 0;
+  } else {
+    const d = Math.ceil(Math.log10(num < 0 ? -num : num));
+    const power = 2 - d;
+    const magnitude = Math.pow(10, power);
+    const shifted = Math.round(num * magnitude);
+    return shifted / magnitude;
+  }
+}
+
+const TOP_PROVIDERS = [
+  "OPENAI",
+  "ANTHROPIC",
+  "AZURE",
+  "GOOGLE",
+  "OPENROUTER",
+  "TOGETHER",
+  "CLOUDFLARE",
+  "CUSTOM",
+  "DEEPINFRA",
+  "FIREWORKS",
+  "GROQ",
+];
+
 export class DataIsBeautifulManager {
+  async getTotalRequests(
+    filters: DataIsBeautifulRequestBody
+  ): Promise<Result<number, string>> {
+    const timeCondition = this.getTimeCondition(filters.timespan);
+    const filteredModels = this.filterModelNames(
+      filters.models,
+      filters.provider
+    );
+    const { caseStatements, whereCondition } =
+      this.buildCaseStatementsAndWhereCondition(filteredModels);
+    const providerCondition = this.getProviderCondition(
+      filters.provider ? [filters.provider] : undefined
+    );
+
+    const query = `
+    SELECT
+      COUNT(*) AS total
+    FROM request_response_versioned
+    WHERE ${andCondition(timeCondition, providerCondition, whereCondition)}
+    `;
+    const result = await clickhouseDb.dbQuery<{ total: number }>(query, []);
+    if (result.error) {
+      return result;
+    }
+    return ok(bigNumberRound(result.data?.[0]?.total ?? 0));
+  }
+
   async getProviderPercentage(
     filters: DataIsBeautifulRequestBody
   ): Promise<Result<ProviderBreakdown[], string>> {
@@ -26,14 +89,14 @@ export class DataIsBeautifulManager {
       SELECT COUNT(*) AS total
       FROM request_response_versioned
       WHERE status = '200'
-        ${timeCondition}
+        AND ${timeCondition}
     )
     SELECT
       provider AS provider,
       COUNT(*) * 100.0 / total_count.total AS percent
     FROM request_response_versioned, total_count
     WHERE status = '200'
-      ${timeCondition}
+      AND ${timeCondition}
       AND provider IN (${(
         Array.from(
           new Set(modelNames.map((model) => model.provider))
@@ -87,10 +150,13 @@ export class DataIsBeautifulManager {
         ${costCalculation} AS cost,
         model
       FROM request_response_versioned rrv
-      WHERE status = '200'
-        ${timeCondition}
-        ${providerCondition}
-        ${whereCondition ? `AND ${whereCondition}` : ""}
+      WHERE 
+        ${andCondition(
+          "status = '200'",
+          timeCondition,
+          providerCondition,
+          whereCondition
+        )}
       GROUP BY model
     )
     SELECT
@@ -155,10 +221,13 @@ export class DataIsBeautifulManager {
      },
      COUNT(*) AS count
   FROM request_response_versioned
-  WHERE status = '200'
-    ${timeCondition}
-    ${providerCondition}
-    ${whereCondition ? `AND ${whereCondition}` : ""}
+  WHERE 
+    ${andCondition(
+      "status = '200'",
+      timeCondition,
+      providerCondition,
+      whereCondition
+    )}
   GROUP BY day, matched_model
   ORDER BY day, matched_model
     `;
@@ -242,10 +311,12 @@ export class DataIsBeautifulManager {
         AND completion_tokens > 0
         AND prompt_tokens > 0
         AND time_to_first_token > 0
-        AND model ILIKE '%gpt-4%' 
-        ${timeCondition}
-        ${providerCondition}
-        ${whereCondition ? `AND ${whereCondition}` : ""}
+        AND ${andCondition(
+          timeCondition,
+          providerCondition,
+          whereCondition,
+          "true"
+        )}
     GROUP BY
         prompt_length
     ORDER BY prompt_length ascending
@@ -278,9 +349,8 @@ export class DataIsBeautifulManager {
     WITH total_count AS (
       SELECT COUNT(*) AS total
       FROM request_response_versioned
-      WHERE status = '200'
-        ${timeCondition}
-        ${providerCondition}
+      WHERE 
+        ${andCondition("status = '200'", timeCondition, providerCondition)}
     )
     SELECT
       ${
@@ -294,10 +364,13 @@ export class DataIsBeautifulManager {
       },
       COUNT(*) * 100.0 / total_count.total AS percent
     FROM request_response_versioned, total_count
-    WHERE status = '200'
-      ${timeCondition}
-      ${providerCondition}
-      ${whereCondition ? `AND ${whereCondition}` : ""}
+    WHERE 
+      ${andCondition(
+        "status = '200'",
+        timeCondition,
+        providerCondition,
+        whereCondition
+      )}
     GROUP BY ${caseStatements ? "matched_model" : "model"}, total_count.total
     ORDER BY percent DESC;
     `;
@@ -311,14 +384,96 @@ export class DataIsBeautifulManager {
     return ok(result.data ?? []);
   }
 
+  async providerUsageOverTime(): Promise<
+    Result<ProviderUsageOverTime[], string>
+  > {
+    const query = `
+    SELECT
+      provider,
+      formatDateTime(request_created_at, '%Y-%m-%d') AS date,
+      SUM(completion_tokens) + SUM(prompt_tokens) AS tokens
+    FROM request_response_versioned
+    WHERE prompt_tokens IS NOT NULL
+    AND provider IN (${TOP_PROVIDERS.map((provider) => `'${provider}'`).join(
+      ", "
+    )})
+    AND completion_tokens IS NOT NULL
+    AND prompt_tokens > 0
+    AND completion_tokens > 0
+    AND model is not null
+    AND request_created_at >= now() - interval 1 month 
+    AND request_created_at < now()
+    GROUP BY provider, date
+    ORDER BY provider, date
+    `;
+
+    const result = await clickhouseDb.dbQuery<ProviderUsageOverTime>(query, []);
+
+    if (result.error) {
+      return result;
+    }
+
+    return ok(result.data?.map((d) => ({ ...d, tokens: +d.tokens })) ?? []);
+  }
+
+  async getModelUsageOverTime(): Promise<Result<ModelUsageOverTime[], string>> {
+    const query = `
+    SELECT
+      model,
+      formatDateTime(request_created_at, '%Y-%m-%d') AS date,
+      SUM(completion_tokens) + SUM(prompt_tokens) AS tokens
+    FROM request_response_versioned
+    WHERE prompt_tokens IS NOT NULL
+    AND provider IN (${TOP_PROVIDERS.map((provider) => `'${provider}'`).join(
+      ", "
+    )})
+    AND completion_tokens IS NOT NULL
+    AND prompt_tokens > 0
+    AND completion_tokens > 0
+    AND model is not null
+    AND request_created_at >= now() - interval 1 month 
+    AND request_created_at < now()
+    GROUP BY model, date
+    ORDER BY model, date
+    `;
+
+    const result = await clickhouseDb.dbQuery<ModelUsageOverTime>(query, []);
+
+    if (result.error) {
+      return result;
+    }
+
+    return ok(result.data?.map((d) => ({ ...d, tokens: +d.tokens })) ?? []);
+  }
+
+  async getTotalValues(): Promise<Result<TotalValuesForAllOfTime, string>> {
+    const query = `
+    SELECT
+      COUNT(*) AS total_requests,
+      SUM(completion_tokens) + SUM(prompt_tokens) AS total_tokens
+    FROM request_response_versioned 
+    `;
+
+    const result = await clickhouseDb.dbQuery<TotalValuesForAllOfTime>(
+      query,
+      []
+    );
+
+    if (result.error) {
+      return result;
+    }
+
+    return ok(result.data?.[0] ?? { total_requests: 0, total_tokens: 0 });
+  }
+
   getTimeCondition(timeSpan?: TimeSpan): string {
     switch (timeSpan) {
       case "1m":
-        return "AND request_created_at >= now() - interval 1 month AND request_created_at < now()";
+        return "request_created_at >= now() - interval 1 month AND request_created_at < now()";
+      case "7d":
+        return "request_created_at >= now() - interval 7 day AND request_created_at < now()";
       case "3m":
-        return "AND request_created_at >= now() - interval 3 month AND request_created_at < now()";
-      case "1yr":
-        return "AND request_created_at >= now() - interval 12 month AND request_created_at < now()";
+        return "request_created_at >= now() - interval 3 month AND request_created_at < now()";
       default:
         return "";
     }
@@ -379,6 +534,6 @@ export class DataIsBeautifulManager {
     const providerList = providers
       .map((provider) => `'${provider}'`)
       .join(", ");
-    return `AND provider IN (${providerList})`;
+    return `provider IN (${providerList})`;
   }
 }
