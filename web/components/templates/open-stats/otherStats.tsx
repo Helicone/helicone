@@ -254,7 +254,10 @@ export function OtherStats({
   const provider = queryParams.provider || "all";
   const timeSpan = (queryParams.timeSpan as any) || "1m";
   useEffect(() => {
-    if (!queryParams.models || queryParams.models.length === 0) {
+    if (
+      !queryParams.models ||
+      (queryParams.models !== "none" && queryParams.models.length === 0)
+    ) {
       setQueryParams({ ...queryParams, models: MODELS });
     }
     if (!queryParams.provider) {
@@ -446,7 +449,9 @@ export function OtherStats({
               <Row className="gap-[16px]">
                 <button
                   className="underline"
-                  onClick={() => setQueryParams({ ...queryParams, models: [] })}
+                  onClick={() =>
+                    setQueryParams({ ...queryParams, models: "none" })
+                  }
                 >
                   Clear all
                 </button>
@@ -469,12 +474,15 @@ export function OtherStats({
                     if (models.includes(item)) {
                       setQueryParams({
                         ...queryParams,
-                        models: models.filter((model) => model !== item),
+                        models:
+                          models === "none"
+                            ? "none"
+                            : models.filter((model) => model !== item),
                       });
                     } else {
                       setQueryParams({
                         ...queryParams,
-                        models: [...models, item],
+                        models: models === "none" ? [item] : [...models, item],
                       });
                     }
                   }}
