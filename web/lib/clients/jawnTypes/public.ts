@@ -918,7 +918,11 @@ Json: JsonObject;
       error: null;
     };
     "Result_TotalValuesForAllOfTime.string_": components["schemas"]["ResultSuccess_TotalValuesForAllOfTime_"] | components["schemas"]["ResultError_string_"];
-    /** @enum {string} */
+    /**
+     * @description *
+     * FUTURE HELICONE DEVS ALL THE ROUTES HERE ARE CACHE UNAUTHENTICATED!! PLEASE DO NOT USE THE AUTH PARAM
+     * @enum {string}
+     */
     TimeSpan: "7d" | "1m" | "3m";
     /** @enum {string} */
     ModelName: "gpt-3.5" | "gpt-4o" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus-20240229" | "claude-3-sonnet-20240229" | "claude-3-5-sonnet-20240620" | "claude-3-haiku-20240307" | "claude-2" | "open-mixtral" | "Llama" | "dall-e" | "text-moderation" | "text-embedding";

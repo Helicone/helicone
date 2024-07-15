@@ -8,18 +8,19 @@ function getCacheKey(text: string): string {
   return `cache:${stringToNumberHash(text)}`;
 }
 
-export const cacheMiddleware = async (
+export const unauthorizedCacheMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
+  if (req.headers["authorization"] || req.headers["helicone-authorization"]) {
+    res.status(401).send({
+      message: "CANNOT USE UNAUTHORIZED CACHE WITH AUTHENTICATED ROUTES",
+    });
+    return;
+  }
   const cacheKey = getCacheKey(
-    req.originalUrl +
-      JSON.stringify(req.body) +
-      JSON.stringify(req.headers.authorization) +
-      JSON.stringify(req.headers["helicone-auth"]) +
-      JSON.stringify(req.headers["helicone-authorization"]) +
-      req.path
+    req.originalUrl + JSON.stringify(req.body) + req.path
   );
 
   const cachedValue = await kvCache.get(cacheKey);

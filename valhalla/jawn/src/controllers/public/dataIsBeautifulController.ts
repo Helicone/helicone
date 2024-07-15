@@ -3,6 +3,12 @@ import { Result, ok } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { DataIsBeautifulManager } from "../../managers/DataIsBeautifulManager";
 
+/***
+ * FUTURE HELICONE DEVS ALL THE ROUTES HERE ARE CACHE UNAUTHENTICATED!! PLEASE DO NOT USE THE AUTH PARAM
+ *
+ *
+ */
+
 export type TimeSpan = "7d" | "1m" | "3m";
 
 export const modelNames = [
