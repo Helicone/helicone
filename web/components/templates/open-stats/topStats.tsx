@@ -125,7 +125,10 @@ export function TopStats() {
         ) : (
           <>
             <h2>
-              Tokens / Provider / Day {"("}last month{")"}
+              Tokens / Provider
+              <i className="text-gray-400">
+                {"("}last month{")"}
+              </i>
             </h2>
             <BarChart
               data={
@@ -148,7 +151,10 @@ export function TopStats() {
         ) : (
           <>
             <h2>
-              Tokens / Model / Day {"("}last month{")"}
+              Tokens / Model{" "}
+              <i className="text-gray-400">
+                {"("}last month{")"}
+              </i>
             </h2>
             <BarChart
               data={transformAllModelData(modelData ?? []).transformedData}
