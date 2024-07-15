@@ -13,7 +13,6 @@ import {
 import { tokenRouter } from "./lib/routers/tokenRouter";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authMiddleware } from "./middleware/auth";
-import { cacheMiddleware } from "./middleware/cache";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
 import { RegisterRoutes as registerPrivateTSOARoutes } from "./tsoa-build/private/routes";
 import { RegisterRoutes as registerPublicTSOARoutes } from "./tsoa-build/public/routes";
@@ -125,7 +124,10 @@ unAuthenticatedRouter.use("/download/swagger.json", (req, res) => {
   res.json(publicSwaggerDoc as any);
 });
 
-v1APIRouter.use("/v1/public/dataisbeautiful", unauthorizedCacheMiddleware);
+v1APIRouter.use(
+  "/v1/public/dataisbeautiful",
+  unauthorizedCacheMiddleware("/v1/public/dataisbeautiful")
+);
 
 v1APIRouter.use(authMiddleware);
 
