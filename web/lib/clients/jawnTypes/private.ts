@@ -278,6 +278,12 @@ Json: JsonObject;
     UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_"] & {
       variant?: string;
     };
+    UIFilterRowTree: components["schemas"]["UIFilterRowNode"] | components["schemas"]["FilterRow"];
+    UIFilterRowNode: {
+      /** @enum {string} */
+      operator: "and" | "or";
+      rows: components["schemas"]["UIFilterRowTree"][];
+    };
     FilterRow: {
       value: string;
       /** Format: double */
@@ -288,7 +294,7 @@ Json: JsonObject;
     OrganizationFilter: {
       softDelete: boolean;
       createdAt?: string;
-      filter: components["schemas"]["FilterRow"][];
+      filter: components["schemas"]["UIFilterRowTree"][];
       name: string;
       id: string;
     };

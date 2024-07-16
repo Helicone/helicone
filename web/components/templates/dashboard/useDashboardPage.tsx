@@ -14,17 +14,13 @@ import {
   BackendMetricsCall,
   useBackendMetricCall,
 } from "../../../services/hooks/useBackendFunction";
-import {
-  FilterLeaf,
-  filterUIToFilterLeafs,
-} from "../../../services/lib/filters/filterDefs";
+import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
   SingleFilterDef,
   getPropertyFiltersV2,
   textWithSuggestions,
 } from "../../../services/lib/filters/frontendFilterDefs";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { LatencyOverTime } from "../../../pages/api/metrics/latencyOverTime";
 import { UsersOverTime } from "../../../pages/api/metrics/usersOverTime";
 import { TokensOverTime } from "../../../pages/api/metrics/tokensOverTime";
@@ -32,6 +28,10 @@ import { TimeToFirstToken } from "../../../pages/api/metrics/timeToFirstToken";
 import { ThreatsOverTime } from "../../../pages/api/metrics/threatsOverTime";
 import { useModels } from "../../../services/hooks/models";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
+import {
+  filterUITreeToFilterNode,
+  UIFilterRowTree,
+} from "../../../services/lib/filters/uiFilterRowTree";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -65,7 +65,7 @@ export interface DashboardPageData {
     start: Date;
     end: Date;
   };
-  uiFilters: UIFilterRow[];
+  uiFilters: UIFilterRowTree;
   apiKeyFilter: string | null;
   timeZoneDifference: number;
   dbIncrement: TimeIncrement;
@@ -88,7 +88,7 @@ export const useDashboardPage = ({
     DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]
   ).concat(propertyFilters);
 
-  const userFilters = filterUIToFilterLeafs(filterMap, uiFilters);
+  const userFilters = filterUITreeToFilterNode(filterMap, uiFilters);
   const { isLoading: isModelsLoading, models } = useModels(
     timeFilter,
     1000,
@@ -101,8 +101,7 @@ export const useDashboardPage = ({
 
   const { isLoading: isAllModelsLoading, models: allModels } = useModels(
     timeFilter,
-    1000,
-    []
+    1000
   );
 
   const allModelsData = allModels?.data;

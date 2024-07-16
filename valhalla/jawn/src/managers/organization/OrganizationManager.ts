@@ -26,10 +26,17 @@ export type FilterRow = {
   value: string;
 };
 
+export interface UIFilterRowNode {
+  operator: "and" | "or";
+  rows: UIFilterRowTree[];
+}
+
+export type UIFilterRowTree = UIFilterRowNode | FilterRow;
+
 export type OrganizationFilter = {
   id: string;
   name: string;
-  filter: FilterRow[];
+  filter: UIFilterRowTree[];
   createdAt?: string;
   softDelete: boolean;
 };
