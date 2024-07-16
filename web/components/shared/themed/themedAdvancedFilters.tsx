@@ -265,6 +265,7 @@ export function AdvancedFilterRow({
 
       <div className="w-full max-w-[20rem]">
         <AdvancedFilterInput
+          key={`${filter.filterMapIdx}-${filter.operatorIdx}`}
           type={
             filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx].type
           }

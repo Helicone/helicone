@@ -39,6 +39,10 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
   }, [query]);
 
   useEffect(() => {
+    setSelected(value); // Update selected state when value prop changes
+  }, [value]);
+
+  useEffect(() => {
     const filterOptions = query
       ? parentOptions.filter((option) =>
           option
@@ -95,6 +99,7 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
       )}
       {tabMode === "smart" ? (
         <SearchSelect
+          key={`search-select-${selected}`}
           searchValue={selected}
           onSearchValueChange={(value) => {
             setQuery(value);

@@ -14,7 +14,7 @@ import {
   Legend,
 } from "@tremor/react";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { ModelMetric } from "../../../lib/api/models/models";
 import {
@@ -34,7 +34,6 @@ import {
   MetricsPanel,
   MetricsPanelProps,
 } from "../../shared/metrics/metricsPanel";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTableHeader from "../../shared/themed/themedHeader";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
@@ -47,6 +46,8 @@ import LoadingAnimation from "../../shared/loadingAnimation";
 import {
   OrganizationFilter,
   OrganizationLayout,
+  transformFilter,
+  transformOrganizationLayoutFilters,
 } from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
@@ -120,6 +121,13 @@ const DashboardPage = (props: DashboardPageProps) => {
         }
       : undefined
   );
+
+  const transformedFilters = useMemo(() => {
+    if (orgLayout?.data?.filters) {
+      return transformOrganizationLayoutFilters(orgLayout.data.filters);
+    }
+    return [];
+  }, [orgLayout?.data?.filters]);
 
   const [currFilter, setCurrFilter] = useState<string | null>("");
 
@@ -281,27 +289,16 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const onSetAdvancedFiltersHandler = useCallback(
     (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
-      console.log("Setting new filters:", JSON.stringify(filters, null, 2));
       setAdvancedFilters(filters);
-
       if (
         layoutFilterId === null ||
         (isFilterRowNode(filters) && filters.rows.length === 0)
       ) {
         searchParams.delete("filters");
       } else {
-        const encodedFilters = encodeFilters(filters);
-        // Remove the extra encodeURIComponent here
-        searchParams.set("filters", encodedFilters);
+        const currentAdvancedFilters = encodeFilters(filters);
+        searchParams.set("filters", currentAdvancedFilters);
       }
-
-      // Update the URL immediately
-      const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
-      console.log("Updating URL to:", newUrl);
-      window.history.pushState({ path: newUrl }, "", newUrl);
-
-      // Trigger an immediate refetch with the new filters
-      refetch();
     },
     [encodeFilters, refetch]
   );
@@ -458,11 +455,8 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
     if (layoutFilter !== null) {
-      const combinedFilter: UIFilterRowTree = {
-        operator: "and",
-        rows: layoutFilter.filter,
-      };
-      onSetAdvancedFiltersHandler(combinedFilter, layoutFilter.id);
+      const transformedFilter = transformFilter(layoutFilter.filter[0]);
+      onSetAdvancedFiltersHandler(transformedFilter, layoutFilter.id);
       setCurrFilter(layoutFilter.id);
     } else {
       setCurrFilter(null);
@@ -589,7 +583,10 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
             savedFilters={{
               currentFilter: currFilter ?? undefined,
-              filters: orgLayout?.data?.filters ?? undefined,
+              filters:
+                transformedFilters && orgLayout?.data?.id
+                  ? transformedFilters
+                  : undefined,
               onFilterChange: onLayoutFilterChange,
               onSaveFilterCallback: async () => {
                 await orgLayoutRefetch();

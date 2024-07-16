@@ -1,6 +1,6 @@
 import { ArrowPathIcon, HomeIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import {
@@ -15,6 +15,8 @@ import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   OrganizationFilter,
   OrganizationLayout,
+  transformFilter,
+  transformOrganizationLayoutFilters,
 } from "../../../services/lib/organization_layout/organization_layout";
 import { placeAssetIdValues } from "../../../services/lib/requestTraverseHelper";
 import {
@@ -589,15 +591,17 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       : undefined
   );
 
+  const transformedFilters = useMemo(() => {
+    if (orgLayout?.data?.filters) {
+      return transformOrganizationLayoutFilters(orgLayout.data.filters);
+    }
+    return [];
+  }, [orgLayout?.data?.filters]);
+
   const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
-    console.log(1);
     if (layoutFilter !== null) {
-      // Assuming layoutFilter.filter is UIFilterRowTree[]
-      const combinedFilter: UIFilterRowTree = {
-        operator: "and",
-        rows: layoutFilter.filter,
-      };
-      onSetAdvancedFiltersHandler(combinedFilter, layoutFilter.id);
+      const transformedFilter = transformFilter(layoutFilter.filter[0]);
+      onSetAdvancedFiltersHandler(transformedFilter, layoutFilter.id);
       setCurrFilter(layoutFilter.id);
     } else {
       setCurrFilter(null);
@@ -744,7 +748,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
               organizationLayoutAvailable
                 ? {
                     currentFilter: currFilter ?? undefined,
-                    filters: orgLayout?.data?.filters ?? undefined,
+                    filters:
+                      transformedFilters && orgLayout?.data?.id
+                        ? transformedFilters
+                        : undefined,
                     onFilterChange: onLayoutFilterChange,
                     onSaveFilterCallback: async () => {
                       await orgLayoutRefetch();
