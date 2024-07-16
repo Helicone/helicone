@@ -42,7 +42,13 @@ const SessionContent: React.FC<SessionContentProps> = ({
   return (
     <Col className="gap-[12px]">
       <BreadCrumb
+        users={session.traces.map(trace => trace.request.user).filter(user => user !== "" && user != null)}
+        models={session.traces.map((trace) => trace.request.model ?? "")}
+        promptTokens={session.traces.reduce((acc, trace) => acc + (trace?.request?.promptTokens || 0), 0)}
+        completionTokens={session.traces.reduce((acc, trace) => acc + (trace?.request?.promptTokens || 0), 0)}
         sessionId={session_id as string}
+        numTraces={session.traces.length}
+        sessionCost={session.session_cost_usd}
         startTime={
           requests.requests.data?.data
             ? new Date(
