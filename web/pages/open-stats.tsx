@@ -7,14 +7,17 @@ const Home = (props: HomeProps) => {
   const {} = props;
 
   return (
-    <MetaData
-      title="Home"
-      image="https://www.helicone.ai/assets/open_stats.png"
-    >
-      <BasePageV2>
-        <OpenStatsPage />
-      </BasePageV2>
-    </MetaData>
+    <div className="dark">
+      <MetaData
+        title="Open Stats"
+        image="https://us.helicone.ai/assets/open_stats.webp"
+        description="Explore our open-sourced LLM usage metrics: 1.5B+ requests, 1108B+ tokens, and 16+ TB of anonymized data. Equivalent to 3000 years of continuous conversation, this is the largest open AI conversation dataset available for research and analysis."
+      >
+        <BasePageV2>
+          <OpenStatsPage />
+        </BasePageV2>
+      </MetaData>
+    </div>
   );
 };
 
