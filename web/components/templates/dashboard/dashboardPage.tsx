@@ -281,6 +281,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const onSetAdvancedFiltersHandler = useCallback(
     (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
+      console.log("Setting new filters:", JSON.stringify(filters, null, 2));
       setAdvancedFilters(filters);
 
       if (
@@ -289,11 +290,9 @@ const DashboardPage = (props: DashboardPageProps) => {
       ) {
         searchParams.delete("filters");
       } else {
-        const currentAdvancedFilters = encodeFilters(filters);
-        searchParams.set(
-          "filters",
-          `"${encodeURIComponent(currentAdvancedFilters)}"`
-        );
+        const encodedFilters = encodeFilters(filters);
+        // Remove the extra encodeURIComponent here
+        searchParams.set("filters", encodedFilters);
       }
 
       // Update the URL immediately
@@ -301,6 +300,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       console.log("Updating URL to:", newUrl);
       window.history.pushState({ path: newUrl }, "", newUrl);
 
+      // Trigger an immediate refetch with the new filters
       refetch();
     },
     [encodeFilters, refetch]
