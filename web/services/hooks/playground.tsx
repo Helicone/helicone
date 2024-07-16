@@ -102,7 +102,10 @@ export const usePlaygroundPage = (requestId: string) => {
   const requests = useRequestsPageV2(
     1,
     1,
-    [],
+    {
+      operator: "and",
+      rows: [],
+    },
     {
       request: {
         id: {

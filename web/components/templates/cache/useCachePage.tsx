@@ -23,7 +23,7 @@ export const useCachePageClickHouse = ({
 }: CachePageData) => {
   const params: BackendMetricsCall<any>["params"] = {
     timeFilter,
-    userFilters: [],
+    userFilters: "all",
     dbIncrement,
     timeZoneDifference,
   };

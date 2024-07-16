@@ -687,6 +687,39 @@
 					}
 				]
 			},
+			"UIFilterRowTree": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/UIFilterRowNode"
+					},
+					{
+						"$ref": "#/components/schemas/FilterRow"
+					}
+				]
+			},
+			"UIFilterRowNode": {
+				"properties": {
+					"operator": {
+						"type": "string",
+						"enum": [
+							"and",
+							"or"
+						]
+					},
+					"rows": {
+						"items": {
+							"$ref": "#/components/schemas/UIFilterRowTree"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"operator",
+					"rows"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"FilterRow": {
 				"properties": {
 					"value": {
@@ -718,7 +751,7 @@
 					},
 					"filter": {
 						"items": {
-							"$ref": "#/components/schemas/FilterRow"
+							"$ref": "#/components/schemas/UIFilterRowTree"
 						},
 						"type": "array"
 					},
@@ -946,7 +979,8 @@
 					"GROQ",
 					"COHERE",
 					"MISTRAL",
-					"DEEPINFRA"
+					"DEEPINFRA",
+					"META"
 				]
 			},
 			"Provider": {

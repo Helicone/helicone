@@ -14,7 +14,7 @@ import {
   Legend,
 } from "@tremor/react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { ModelMetric } from "../../../lib/api/models/models";
 import {
@@ -53,7 +53,12 @@ import { useOrganizationLayout } from "../../../services/hooks/organization_layo
 import CountryPanel from "./panels/countryPanel";
 import useNotification from "../../shared/notification/useNotification";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
-import { filterUIToFilterLeafs } from "../../../services/lib/filters/filterDefs";
+import {
+  filterUITreeToFilterNode,
+  getRootFilterNode,
+  isFilterRowNode,
+  UIFilterRowTree,
+} from "../../../services/lib/filters/uiFilterRowTree";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -94,6 +99,7 @@ export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
   const { user, currentFilter, organizationLayout } = props;
+  const initialLoadRef = useRef(true);
 
   const searchParams = useSearchParams();
 
@@ -148,25 +154,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     return range;
   };
 
-  const getAdvancedFilters = (): UIFilterRow[] => {
-    try {
-      const currentAdvancedFilters = searchParams.get("filters");
-
-      if (currentAdvancedFilters) {
-        const filters = decodeURIComponent(currentAdvancedFilters).slice(1, -1);
-        const decodedFilters = filters
-          .split("|")
-          .map(decodeFilter)
-          .filter((filter) => filter !== null) as UIFilterRow[];
-
-        return decodedFilters;
-      }
-    } catch (error) {
-      console.error("Error decoding advanced filters:", error);
-    }
-    return [];
-  };
-
   const [interval, setInterval] = useState<TimeInterval>(
     getInterval() as TimeInterval
   );
@@ -174,14 +161,35 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [open, setOpen] = useState(false);
 
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
+    getRootFilterNode()
+  );
 
-  const debouncedAdvancedFilters = useDebounce(advancedFilters, 500);
+  const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
   const timeIncrement = getTimeInterval(timeFilter);
 
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
   const { setNotification } = useNotification();
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const encodeFilters = (filters: UIFilterRowTree): string => {
+    if (isFilterRowNode(filters)) {
+      const encoded = `${filters.operator}(${filters.rows
+        .map((row) => {
+          if (isFilterRowNode(row)) {
+            return encodeFilters(row);
+          } else {
+            return encodeFilter(row);
+          }
+        })
+        .join("|")})`;
+      return encoded;
+    } else {
+      const encoded = encodeFilter(filters);
+      return encoded;
+    }
+  };
 
   function encodeFilter(filter: UIFilterRow): string {
     return `${filterMap[filter.filterMapIdx].label}:${
@@ -201,36 +209,98 @@ const DashboardPage = (props: DashboardPageProps) => {
     isModelsLoading,
   } = useDashboardPage({
     timeFilter,
-    uiFilters: debouncedAdvancedFilters,
+    uiFilters: debouncedAdvancedFilter,
     apiKeyFilter: null,
     timeZoneDifference: new Date().getTimezoneOffset(),
     dbIncrement: timeIncrement,
   });
 
+  const getAdvancedFilters = useCallback((): UIFilterRowTree => {
+    function decodeFilter(encoded: string): UIFilterRow | UIFilterRowTree {
+      if (encoded.includes("(") && encoded.endsWith(")")) {
+        // This is a nested filter
+        const [operator, rest] = encoded.split("(");
+        const innerContent = rest.slice(0, -1); // Remove the closing parenthesis
+        const rows = innerContent.split("|").map(decodeFilter);
+        return {
+          operator: operator as "and" | "or",
+          rows,
+        };
+      } else {
+        // This is a leaf filter
+        const parts = encoded.split(":");
+        if (parts.length !== 3) return getRootFilterNode();
+        const filterLabel = decodeURIComponent(parts[0]);
+        const operator = decodeURIComponent(parts[1]);
+        const value = decodeURIComponent(parts[2]);
+
+        const filterMapIdx = filterMap.findIndex(
+          (f) =>
+            f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
+        );
+        const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
+          (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
+        );
+
+        if (isNaN(filterMapIdx) || isNaN(operatorIdx))
+          return getRootFilterNode();
+
+        return { filterMapIdx, operatorIdx, value };
+      }
+    }
+
+    try {
+      const currentAdvancedFilters = searchParams.get("filters");
+
+      if (currentAdvancedFilters) {
+        const filters = decodeURIComponent(currentAdvancedFilters).replace(
+          /^"|"$/g,
+          ""
+        );
+        return decodeFilter(filters) as UIFilterRowTree;
+      }
+    } catch (error) {
+      console.error("Error decoding advanced filters:", error);
+    }
+
+    return getRootFilterNode();
+  }, [searchParams, filterMap]);
+
   useEffect(() => {
-    if (!isAnyLoading && filterMap) {
-      setAdvancedFilters(getAdvancedFilters());
+    if (initialLoadRef.current && filterMap.length > 0) {
+      console.log("load");
+      const loadedFilters = getAdvancedFilters();
+      setAdvancedFilters(loadedFilters);
+      initialLoadRef.current = false;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAnyLoading]);
+  }, [filterMap, getAdvancedFilters]);
 
-  const onSetAdvancedFiltersHandler = (
-    filters: UIFilterRow[],
-    layoutFilterId?: string | null
-  ) => {
-    if (layoutFilterId === null || filters.length === 0) {
-      searchParams.delete("filters");
-    } else {
-      const currentAdvancedFilters = filters.map(encodeFilter).join("|");
+  const onSetAdvancedFiltersHandler = useCallback(
+    (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
+      setAdvancedFilters(filters);
 
-      searchParams.set(
-        "filters",
-        `"${encodeURIComponent(currentAdvancedFilters)}"`
-      );
-    }
-    setAdvancedFilters(filters);
-  };
+      if (
+        layoutFilterId === null ||
+        (isFilterRowNode(filters) && filters.rows.length === 0)
+      ) {
+        searchParams.delete("filters");
+      } else {
+        const currentAdvancedFilters = encodeFilters(filters);
+        searchParams.set(
+          "filters",
+          `"${encodeURIComponent(currentAdvancedFilters)}"`
+        );
+      }
 
+      // Update the URL immediately
+      const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
+      console.log("Updating URL to:", newUrl);
+      window.history.pushState({ path: newUrl }, "", newUrl);
+
+      refetch();
+    },
+    [encodeFilters, refetch]
+  );
   const metricsData: MetricsPanelProps["metric"][] = [
     {
       id: "cost-req",
@@ -307,30 +377,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     };
   };
 
-  function decodeFilter(encoded: string): UIFilterRow | null {
-    try {
-      const parts = encoded.split(":");
-      if (parts.length !== 3) return null;
-      const filterLabel = decodeURIComponent(parts[0]);
-      const operator = decodeURIComponent(parts[1]);
-      const value = decodeURIComponent(parts[2]);
-
-      const filterMapIdx = filterMap.findIndex(
-        (f) => f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
-      );
-      const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
-        (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
-      );
-
-      if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
-
-      return { filterMapIdx, operatorIdx, value };
-    } catch (error) {
-      console.error("Error decoding filter:", error);
-      return null;
-    }
-  }
-
   // put this forEach inside of a useCallback to prevent unnecessary re-renders
   const getStatusCountsOverTime = useCallback(() => {
     const statusCounts: {
@@ -370,6 +416,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     });
 
     return statusCounts;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overTimeData.requestsWithStatus.data?.data, timeIncrement]);
 
   // flatten the status counts over time
@@ -407,11 +454,15 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
     if (layoutFilter !== null) {
-      onSetAdvancedFiltersHandler(layoutFilter?.filter, layoutFilter.id);
-      setCurrFilter(layoutFilter?.id);
+      const combinedFilter: UIFilterRowTree = {
+        operator: "and",
+        rows: layoutFilter.filter,
+      };
+      onSetAdvancedFiltersHandler(combinedFilter, layoutFilter.id);
+      setCurrFilter(layoutFilter.id);
     } else {
       setCurrFilter(null);
-      onSetAdvancedFiltersHandler([], null);
+      onSetAdvancedFiltersHandler({ operator: "and", rows: [] }, null);
     }
   };
 
@@ -709,9 +760,9 @@ const DashboardPage = (props: DashboardPageProps) => {
               <div key="countries">
                 <CountryPanel
                   timeFilter={timeFilter}
-                  userFilters={filterUIToFilterLeafs(
+                  userFilters={filterUITreeToFilterNode(
                     filterMap,
-                    advancedFilters
+                    debouncedAdvancedFilter
                   )}
                 />
               </div>
@@ -747,7 +798,10 @@ const DashboardPage = (props: DashboardPageProps) => {
 
               <div key="quantiles">
                 <QuantilesGraph
-                  uiFilters={debouncedAdvancedFilters}
+                  uiFilters={filterUITreeToFilterNode(
+                    filterMap,
+                    debouncedAdvancedFilter
+                  )}
                   timeFilter={timeFilter}
                   timeIncrement={timeIncrement}
                 />

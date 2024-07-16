@@ -2,12 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { TimeFilter } from "../../components/templates/dashboard/dashboardPage";
 import { Result } from "../../lib/result";
 import { ModelMetric } from "../../lib/api/models/models";
-import { FilterLeaf, filterListToTree } from "../lib/filters/filterDefs";
+import { FilterNode } from "../lib/filters/filterDefs";
 
 const useModels = (
   timeFilter: TimeFilter,
   limit: number,
-  userFilters?: FilterLeaf[]
+  userFilters?: FilterNode
 ) => {
   const { data: models, isLoading } = useQuery({
     queryKey: ["modelMetrics", timeFilter, userFilters],
@@ -18,7 +18,7 @@ const useModels = (
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          filter: userFilters ? filterListToTree(userFilters, "and") : "all",
+          filter: userFilters ?? "all",
           offset: 0,
           limit,
           timeFilter,

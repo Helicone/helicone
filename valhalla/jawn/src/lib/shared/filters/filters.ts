@@ -385,7 +385,7 @@ export function buildFilterLeaf(
       filters.push(`${column} is null`);
     } else {
       if (operatorKey === "contains" || operatorKey === "not-contains") {
-        filters.push(`${column} ${sqlOperator} %${value}%`);
+        filters.push(`${column} ${sqlOperator} '%' || ${value}::text || '%'`);
       } else if (operatorKey === "vector-contains") {
         filters.push(
           `${column} ${sqlOperator} plainto_tsquery('helicone_search_config', ${value}::text)`

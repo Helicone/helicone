@@ -13,7 +13,6 @@ import {
 import { tokenRouter } from "./lib/routers/tokenRouter";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authMiddleware } from "./middleware/auth";
-import { cacheMiddleware } from "./middleware/cache";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
 import { RegisterRoutes as registerPrivateTSOARoutes } from "./tsoa-build/private/routes";
 import { RegisterRoutes as registerPublicTSOARoutes } from "./tsoa-build/public/routes";
@@ -21,6 +20,7 @@ import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
+import { unauthorizedCacheMiddleware } from "./middleware/unauthorizedCache";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -124,9 +124,12 @@ unAuthenticatedRouter.use("/download/swagger.json", (req, res) => {
   res.json(publicSwaggerDoc as any);
 });
 
-v1APIRouter.use(authMiddleware);
+// v1APIRouter.use(
+//   "/v1/public/dataisbeautiful",
+//   unauthorizedCacheMiddleware("/v1/public/dataisbeautiful")
+// );
 
-v1APIRouter.use("/v1/public", cacheMiddleware);
+v1APIRouter.use(authMiddleware);
 
 // Create and use the rate limiter
 if (IS_RATE_LIMIT_ENABLED) {
