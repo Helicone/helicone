@@ -404,8 +404,8 @@ export function OtherStats({
   ];
   return (
     <>
-      <Grid className="grid-cols-12 w-full gap-[24px]">
-        <Card className="col-span-3">
+      <Grid className="grid-cols-3 lg:grid-cols-12 w-full gap-[24px]">
+        <Card className="col-span-3 lg:col-span-12">
           <Col className="justify-between items-center gap-[16px] h-full">
             <div>
               <Row className="gap-[16px] bg-[#F3F4F6] p-[4px] font-bold rounded-lg">
@@ -442,7 +442,7 @@ export function OtherStats({
             </Col>
           </Col>
         </Card>
-        <Card className="col-span-9">
+        <Card className="col-span-3 lg:col-span-9">
           <Col className="justify-between items-center gap-[18px]">
             <Row className="justify-between items-center gap-[16px] w-full">
               <div>Top Models</div>
@@ -502,7 +502,7 @@ export function OtherStats({
 
       <Grid
         className={clsx(
-          "grid-cols-12 w-full gap-[24px]",
+          "grid-cols-1 lg:grid-cols-12 w-full gap-[24px]",
           isLoading && "animate-pulse"
         )}
       >

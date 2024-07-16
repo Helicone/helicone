@@ -77,7 +77,7 @@ export function TopStats() {
     <>
       <Grid
         className={clsx(
-          "grid-cols-9 w-full gap-[24px]",
+          "grid-cols-3 lg:grid-cols-9 w-full gap-[24px]",
           isLoadingTotalValues ? "animate-pulse" : ""
         )}
       >
