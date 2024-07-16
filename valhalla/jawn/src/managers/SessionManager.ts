@@ -98,9 +98,7 @@ export class SessionManager {
     requestBody: SessionQueryParams
   ): Promise<Result<SessionResult[], string>> {
     const { sessionIdContains, timeFilter, sessionName, timezoneDifference } =
-      requestBody;
-
-    console.log("sessionName", sessionName);
+      requestBody;    console.log("sessionName", sessionName);
 
     if (!isValidTimeZoneDifference(timezoneDifference)) {
       return err("Invalid timezone difference");
