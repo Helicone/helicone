@@ -38,7 +38,7 @@ const AuthMetaData = (props: AuthMetaDataProps) => {
           content={descriptionFinal}
           key="desc"
         />
-        <meta name="twitter:card" content="open_stats_twitter_card" />
+        <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={descriptionFinal} />
         <meta name="twitter:image" content={imageUrl} />
