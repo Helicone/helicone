@@ -5,7 +5,7 @@ import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
 import { clsx } from "../../clsx";
-import { AdvancedFilters, UIFilterRow } from "../themedAdvancedFilters";
+import { AdvancedFilters } from "../themedAdvancedFilters";
 import ThemedTimeFilter from "../themedTimeFilter";
 import ExportButton from "./exportButton";
 import ViewColumns from "./columns/viewColumns";
@@ -17,6 +17,7 @@ import { OrganizationFilter } from "../../../../services/lib/organization_layout
 import FiltersButton from "./filtersButton";
 import { DragColumnItem } from "./columns/DragList";
 import SortButton from "./columns/sortButton";
+import { UIFilterRowTree } from "../../../../services/lib/filters/uiFilterRowTree";
 
 interface ThemedTableHeaderProps<T> {
   rows?: T[];
@@ -24,8 +25,8 @@ interface ThemedTableHeaderProps<T> {
   // define this if you want the advanced filters
   advancedFilters?: {
     filterMap: SingleFilterDef<any>[];
-    filters: UIFilterRow[];
-    setAdvancedFilters: (filters: UIFilterRow[]) => void;
+    filters: UIFilterRowTree;
+    setAdvancedFilters: (filters: UIFilterRowTree) => void;
     searchPropertyFilters: (
       property: string,
       search: string
@@ -129,8 +130,8 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               <FunnelIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
               <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
                 {showFilters ? "Hide" : "Show"} Filters
-                {advancedFilters.filters.length > 0 &&
-                  ` (${advancedFilters.filters.length})`}
+                {/* TODO {advancedFilters.filters.length > 0 &&
+                  ` (${advancedFilters.filters.length})`} */}
               </p>
             </button>
           )}

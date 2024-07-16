@@ -36,22 +36,26 @@ const RateLimitPage = (props: {}) => {
   };
   const { properties } = useGetPropertiesV2(getPropertyFiltersV2);
 
+  const rateLimitFilterLeaf = {
+    request_response_versioned: {
+      properties: {
+        "Helicone-Rate-Limit-Status": {
+          equals: "rate_limited",
+        },
+      },
+    },
+  };
+
   const rateLimitOverTime = useBackendMetricCall<
     Result<RequestsOverTime[], string>
   >({
     params: {
       timeFilter: timeFilter,
-      userFilters: [
-        {
-          request_response_versioned: {
-            properties: {
-              "Helicone-Rate-Limit-Status": {
-                equals: "rate_limited",
-              },
-            },
-          },
-        },
-      ],
+      userFilters: {
+        left: rateLimitFilterLeaf,
+        operator: "and",
+        right: "all",
+      },
       timeZoneDifference: 0,
     },
     endpoint: "/api/metrics/requestOverTime",

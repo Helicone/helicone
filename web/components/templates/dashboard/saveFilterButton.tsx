@@ -6,15 +6,19 @@ import { TextInput } from "@tremor/react";
 import { v4 as uuidv4 } from "uuid";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
-import { FunnelIcon } from "@heroicons/react/24/outline";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
-import { PlusIcon } from "@heroicons/react/24/solid";
+import { FunnelIcon } from "@heroicons/react/24/solid";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
+import {
+  UIFilterRowTree,
+  isFilterRowNode,
+} from "../../../services/lib/filters/uiFilterRowTree";
+import { BookmarkIcon } from "@heroicons/react/24/outline";
 
 interface SaveFilterButtonProps {
-  filters: UIFilterRow[];
+  filters: UIFilterRowTree;
   onSaveFilterCallback: () => void;
   filterMap: SingleFilterDef<any>[];
   savedFilters?: OrganizationFilter[];
@@ -39,12 +43,28 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
     }:${encodeURIComponent(filter.value)}`;
   }
 
+  function encodeFilters(filterTree: UIFilterRowTree): string {
+    if (isFilterRowNode(filterTree)) {
+      return filterTree.rows
+        .map((row) => {
+          if (isFilterRowNode(row)) {
+            return encodeFilters(row);
+          } else {
+            return encodeFilter(row);
+          }
+        })
+        .join("|");
+    } else {
+      return encodeFilter(filterTree);
+    }
+  }
+
   const onSaveFilter = async (name: string) => {
-    if (filters.length > 0) {
+    if (filters) {
       const saveFilter: OrganizationFilter = {
         id: uuidv4(),
         name: name,
-        filter: filters,
+        filter: [filters],
         createdAt: new Date().toISOString(),
         softDelete: false,
       };
@@ -60,7 +80,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
             },
             body: {
               filterType: layoutPage,
-              filters: updatedFilters!,
+              filters: updatedFilters,
             },
           }
         );
@@ -72,7 +92,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
         setIsSaveFiltersModalOpen(false);
         onSaveFilterCallback();
         const currentAdvancedFilters = encodeURIComponent(
-          JSON.stringify(filters.map(encodeFilter).join("|"))
+          encodeFilters(filters)
         );
         searchParams.set("filters", currentAdvancedFilters);
       } else {
@@ -97,7 +117,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
           setIsSaveFiltersModalOpen(false);
           onSaveFilterCallback();
           const currentAdvancedFilters = encodeURIComponent(
-            JSON.stringify(filters.map(encodeFilter).join("|"))
+            encodeFilters(filters)
           );
           searchParams.set("filters", currentAdvancedFilters);
         }
@@ -105,23 +125,52 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
     }
   };
 
+  const renderFilterTree = (filterTree: UIFilterRowTree) => {
+    if (isFilterRowNode(filterTree)) {
+      return (
+        <ul>
+          {filterTree.rows.map((row, index) => (
+            <li key={index}>
+              {isFilterRowNode(row)
+                ? renderFilterTree(row)
+                : renderFilterRow(row)}
+            </li>
+          ))}
+        </ul>
+      );
+    } else {
+      return renderFilterRow(filterTree);
+    }
+  };
+
+  const renderFilterRow = (filter: UIFilterRow) => (
+    <div className="flex flex-row gap-2 items-center">
+      <FunnelIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+        {filterMap[filter.filterMapIdx].label}
+      </p>
+      <p className="text-sm text-gray-500 dark:text-gray-400">
+        {filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label}
+      </p>
+      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+        {filter.value}
+      </p>
+    </div>
+  );
+
   return (
     <>
       <button
         onClick={() => {
-          if (filters.length === 0) {
-            setNotification("Saved Filters can not be empty", "error");
-            return;
-          }
           setIsSaveFiltersModalOpen(true);
         }}
         className={clsx(
-          "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+          "bg-gray-100 dark:bg-[#17191d]   border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
         )}
       >
-        <PlusIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+        <BookmarkIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
         <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
-          Create New Filter
+          Save Filter
         </p>
       </button>
       <ThemedModal
@@ -148,30 +197,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
               }}
             />
           </div>
-          <ul>
-            {filters.map((filter, index) => {
-              return (
-                <li key={index}>
-                  <div className="flex flex-row gap-2 items-center">
-                    <FunnelIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
-                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                      {filterMap[filter.filterMapIdx].label}
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {
-                        filterMap[filter.filterMapIdx].operators[
-                          filter.operatorIdx
-                        ].label
-                      }
-                    </p>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                      {filter.value}
-                    </p>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+          {renderFilterTree(filters)}
           <div className="col-span-4 flex justify-end gap-2 pt-4">
             <button
               type="button"

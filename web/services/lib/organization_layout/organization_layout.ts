@@ -1,3 +1,5 @@
+import { UIFilterRowTree } from "../filters/uiFilterRowTree";
+
 export type FilterRow = {
   filterMapIdx: number;
   operatorIdx: number;
@@ -7,7 +9,7 @@ export type FilterRow = {
 export type OrganizationFilter = {
   id: string;
   name: string;
-  filter: FilterRow[];
+  filter: UIFilterRowTree[];
   createdAt?: string;
   softDelete: boolean;
 };
