@@ -43,7 +43,7 @@ export const ThemedScatterPlot = ({
   const dataToViz = chart.data.filter((d) => selectItems.includes(d.grain));
 
   return (
-    <div className=" border w-full  col-span-1 md:col-span-6  flex flex-col items-center gap-5 p-3 rounded-lg">
+    <div className=" border w-full  col-span-1 md:col-span-6  flex flex-col items-center gap-5 p-3 rounded-lg bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
       <div className="flex flex-col sm:flex-row justify-between items-center w-full gap-3">
         <h2 className="whitespace-nowrap">{chart.name}</h2>
         <MultiSelect
