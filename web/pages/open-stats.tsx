@@ -7,7 +7,10 @@ const Home = (props: HomeProps) => {
   const {} = props;
 
   return (
-    <MetaData title="Home">
+    <MetaData
+      title="Home"
+      image="https://www.helicone.ai/assets/open_stats.png"
+    >
       <BasePageV2>
         <OpenStatsPage />
       </BasePageV2>
