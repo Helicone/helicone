@@ -42,7 +42,7 @@ const Footer = (props: FooterProps) => {
   const {} = props;
 
   return (
-    <footer className="bg-inherit border-t border-gray-200">
+    <footer className="bg-inherit dark:bg-black border-t border-gray-200 dark:border-gray-700">
       <div className="mx-auto max-w-5xl px-4 py-8 md:flex md:items-center md:justify-between lg:px-4">
         <div className="flex space-x-6 md:order-2">
           {meta.social.map((item) => (
@@ -51,7 +51,7 @@ const Footer = (props: FooterProps) => {
               href={item.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-400 hover:text-gray-500"
+              className="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-400"
             >
               <span className="sr-only">{item.name}</span>
               <item.icon className="h-6 w-6" aria-hidden="true" />
@@ -59,24 +59,24 @@ const Footer = (props: FooterProps) => {
           ))}
         </div>
         <div className="mt-8 md:order-1 md:mt-0 space-x-4 flex flex-row">
-          <p className="text-center text-xs leading-5 text-gray-500">
+          <p className="text-center text-xs leading-5 text-gray-500 dark:text-gray-300">
             &copy; 2024 Helicone, Inc. All rights reserved.
           </p>
           <Link
             href="/privacy"
-            className="text-center text-xs leading-5 text-gray-500"
+            className="text-center text-xs leading-5 text-gray-500 dark:text-gray-300"
           >
             Privacy Policy
           </Link>
           <Link
             href="/terms"
-            className="text-center text-xs leading-5 text-gray-500"
+            className="text-center text-xs leading-5 text-gray-500 dark:text-gray-300"
           >
             Terms of Use
           </Link>
           <Link
             href="/career"
-            className="text-center text-xs leading-5 text-gray-500"
+            className="text-center text-xs leading-5 text-gray-500 dark:text-gray-300"
           >
             Work with us
           </Link>
