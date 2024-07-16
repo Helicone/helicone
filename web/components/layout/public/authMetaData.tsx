@@ -16,6 +16,10 @@ const AuthMetaData = (props: AuthMetaDataProps) => {
   // Conditionally set favicon path
   const faviconPath = isLocalhost ? "/static/logo-dev.png" : "/static/logo.png";
 
+  const imageUrl =
+    image ||
+    "https://www.helicone.ai/_next/image?url=%2Fassets%2Flanding%2Fhelicone-mobile.webp&w=384&q=75";
+
   return (
     <>
       <Head>
@@ -29,14 +33,7 @@ const AuthMetaData = (props: AuthMetaDataProps) => {
           content="Monitoring usage and costs for language models shouldn't be a hassle. With Helicone, you can focus on building your product, not building and maintaining your own analytics solution."
           key="desc"
         />
-        <meta
-          property="og:image"
-          content={
-            image
-              ? image
-              : "https://www.helicone.ai/_next/image?url=%2Fassets%2Flanding%2Fhelicone-mobile.webp&w=384&q=75"
-          }
-        />
+        <meta property="og:image" content={imageUrl} />
       </Head>
       {children}
     </>
