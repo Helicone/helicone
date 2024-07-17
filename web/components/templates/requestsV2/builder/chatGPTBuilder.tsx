@@ -43,8 +43,8 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
   protected buildSpecific(): SpecificFields {
     const hasNoContent = this.response.response_body?.choices
       ? this.response.response_body?.choices?.[0]?.message?.content === null ||
-        this.response.response_body?.choices?.[0]?.message?.content ===
-          undefined
+      this.response.response_body?.choices?.[0]?.message?.content ===
+      undefined
       : true;
 
     const getRequestText = () => {
@@ -202,6 +202,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
             requestId={this.response.request_id}
             model={this.model}
             hideTopBar={props?.hideTopBar}
+            className={props?.className}
             messageSlice={props?.messageSlice}
           />
         ) : (

@@ -35,15 +35,16 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
         return (
           <Row
             key={request.request_id}
-            className="request-item rounded-lg mb-4 shadow-sm border border-gray-300 "
+            className="request-item rounded-lg mb-4 shadow-sm border border-gray-300 bg-gray-50"
           >
             <div className="flex-1">
               {normalizeRequest.render({
                 hideTopBar: true,
                 messageSlice: idx === 0 ? undefined : "lastTwo",
+                className: ""
               })}
             </div>
-            <div className="min-w-[350px] p-5 rounded-tl-none rounded-tr-lg rounded-bl-none rounded-br-lg"> 
+            <div className="lg:min-w-[350px] p-5 rounded-lg bg-gray-100">
               <Col className="justify-between h-full">
                 <Col className="gap-y-2">
                   <Row className="justify-between mb-2 w-full">

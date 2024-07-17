@@ -235,7 +235,7 @@ export const SingleChat = (props: {
   const formattedMessageContent = getFormattedMessageContent();
 
   const getBgColor = () => {
-    return "bg-gray-50 dark:bg-gray-950";
+    return "bg-transparent dark:bg-gray-950";
   };
 
   const isJSON = (content: string): boolean => {
@@ -254,7 +254,7 @@ export const SingleChat = (props: {
       <div
         className={clsx(
           getBgColor(),
-          "items-start p-4 text-left flex flex-row space-x-4 text-black dark:text-white ",
+          "items-start p-4 text-left flex flex-row space-x-4 text-black dark:text-white",
           isSystem && "font-semibold",
           isLast && "rounded-b-md"
         )}
@@ -266,7 +266,7 @@ export const SingleChat = (props: {
               role={message.role}
               onRoleChange={function (
                 role: "function" | "assistant" | "user" | "system"
-              ): void {}}
+              ): void { }}
               disabled={true}
               size={"small"}
             />
@@ -303,10 +303,10 @@ export const SingleChat = (props: {
                   text={
                     isJSON(formattedMessageContent)
                       ? JSON.stringify(
-                          JSON.parse(formattedMessageContent),
-                          null,
-                          2
-                        )
+                        JSON.parse(formattedMessageContent),
+                        null,
+                        2
+                      )
                       : formattedMessageContent
                   }
                   selectedProperties={props.selectedProperties}
@@ -343,6 +343,7 @@ interface ChatProps {
   isHeliconeTemplate?: boolean;
   hideTopBar?: boolean;
   messageSlice?: "lastTwo";
+  className?: string;
 }
 
 export const Chat = (props: ChatProps) => {
@@ -355,6 +356,7 @@ export const Chat = (props: ChatProps) => {
     selectedProperties,
     editable,
     isHeliconeTemplate,
+    className = "bg-gray-50"
   } = props;
 
   const [open, setOpen] = useState(false);
@@ -522,7 +524,7 @@ export const Chat = (props: ChatProps) => {
 
   return (
     <>
-      <div className="w-full flex flex-col text-left space-y-2 text-sm">
+      <div className={clsx("w-full flex flex-col text-left space-y-2 text-sm", className)}>
         <div className="w-full border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
           {!props.hideTopBar && (
             <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100">
@@ -554,18 +556,18 @@ export const Chat = (props: ChatProps) => {
                   model === "gpt-4-1106-vision-preview" ||
                   requestId === ""
                 ) && (
-                  <button
-                    onClick={() => {
-                      if (requestMessages) {
-                        router.push("/playground?request=" + requestId);
-                      }
-                    }}
-                    className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
-                  >
-                    <BeakerIcon className="h-4 w-4" />
-                    <p className="text-xs font-semibold">Playground</p>
-                  </button>
-                )}
+                    <button
+                      onClick={() => {
+                        if (requestMessages) {
+                          router.push("/playground?request=" + requestId);
+                        }
+                      }}
+                      className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+                    >
+                      <BeakerIcon className="h-4 w-4" />
+                      <p className="text-xs font-semibold">Playground</p>
+                    </button>
+                  )}
               </div>
               <div className="flex flex-row items-center space-x-2">
                 <button
@@ -629,7 +631,7 @@ export const Chat = (props: ChatProps) => {
             </div>
           )}
         </div>
-      </div>
+      </div >
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="w-[80vw] border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
           <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100">
@@ -661,18 +663,18 @@ export const Chat = (props: ChatProps) => {
                 model === "gpt-4-1106-vision-preview" ||
                 /^claude/.test(model)
               ) && (
-                <button
-                  onClick={() => {
-                    if (requestMessages) {
-                      router.push("/playground?request=" + requestId);
-                    }
-                  }}
-                  className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
-                >
-                  <BeakerIcon className="h-4 w-4" />
-                  <p className="text-xs font-semibold">Playground</p>
-                </button>
-              )}
+                  <button
+                    onClick={() => {
+                      if (requestMessages) {
+                        router.push("/playground?request=" + requestId);
+                      }
+                    }}
+                    className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+                  >
+                    <BeakerIcon className="h-4 w-4" />
+                    <p className="text-xs font-semibold">Playground</p>
+                  </button>
+                )}
             </div>
             <div className="flex flex-row items-center space-x-2">
               <button
