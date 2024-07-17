@@ -8,6 +8,7 @@ import { useGetPropertiesV2 } from "../../../../../services/hooks/propertiesV2";
 import FeedbackButtons from "../../../feedback/thumbsUpThumbsDown";
 import StatusBadge from "../../../requestsV2/statusBadge";
 import { CustomPropertiesCard } from "../../../requestsV2/customProperties";
+import { FaChevronRight } from "react-icons/fa";
 
 interface ChatSessionProps {
   requests: ReturnType<typeof useGetRequests>;
@@ -34,18 +35,18 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
         return (
           <Row
             key={request.request_id}
-            className="request-item mt-5 border-2 rounded-lg"
+            className="request-item rounded-lg mb-4 shadow-sm border border-gray-300 "
           >
-            <div>
+            <div className="flex-1">
               {normalizeRequest.render({
                 hideTopBar: true,
                 messageSlice: idx === 0 ? undefined : "lastTwo",
               })}
             </div>
-            <div className="min-w-[350px] p-5">
+            <div className="min-w-[350px] p-5 rounded-tl-none rounded-tr-lg rounded-bl-none rounded-br-lg"> 
               <Col className="justify-between h-full">
                 <Col className="gap-y-2">
-                  <Row className="justify-between">
+                  <Row className="justify-between mb-2 w-full">
                     <StatusBadge
                       statusType={normalizeRequest.status.statusType}
                       errorCode={normalizeRequest.status.code}
@@ -56,32 +57,32 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
                     />
                   </Row>
 
-                  <Row className="justify-between">
-                    <div className="text-sm text-[#6B7280] font-semibold">
+                  <Row className="justify-between flex-wrap">
+                    <div className="text-sm text-gray-500 font-medium w-full sm:w-auto">
                       Created at
                     </div>
-                    <i className="text-sm font-thin text-[#6B7280]">
+                    <i className="text-sm font-light text-gray-500 w-full sm:w-auto">
                       {new Date(request.request_created_at).toLocaleString()}
                     </i>
                   </Row>
-                  <Row className="justify-between">
-                    <div className="text-sm text-[#6B7280] font-semibold">
+                  <Row className="justify-between flex-wrap">
+                    <div className="text-sm text-gray-500 font-medium">
                       Cost
                     </div>
-                    <div className="text-sm font-thin text-[#6B7280]">
+                    <div className="text-sm font-light text-gray-500 w-full sm:w-auto">
                       $ {normalizeRequest.cost}
                     </div>
                   </Row>
-                  <Row className="justify-between">
-                    <div className="text-sm text-[#6B7280] font-semibold">
+                  <Row className="justify-between flex-wrap">
+                    <div className="text-sm text-gray-500 font-medium">
                       Latency
                     </div>
-                    <div className="text-sm font-thin text-[#6B7280]">
+                    <div className="text-sm font-light text-gray-500 w-full sm:w-auto">
                       {normalizeRequest.latency} ms
                     </div>
                   </Row>
-                  <Col className="justify-between">
-                    <div className="text-sm text-[#6B7280] font-semibold">
+                  <Col className="justify-between flex-wrap">
+                    <div className="text-sm font-medium text-gray-500 w-full sm:w-auto">
                       Custom Properties
                     </div>
                     {normalizeRequest.customProperties &&
@@ -103,15 +104,15 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
                       )}
                   </Col>
                 </Col>
-                <Row className="justify-end">
+                <Row className="justify-end mt-4">
                   <button
-                    className="text-sm"
+                    className="text-sm flex items-center text-blue-500 hover:text-blue-700"
                     onClick={() => {
                       setRequestDrawerRequest(normalizeRequest);
                       setOpen(true);
                     }}
                   >
-                    view more {">"}
+                    <span className="mr-1 font-medium">View more</span> <FaChevronRight />
                   </button>
                 </Row>
               </Col>
