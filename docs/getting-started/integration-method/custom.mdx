@@ -7,6 +7,8 @@ description: "Integrate any custom LLM, including open-source models like Llama 
 
 # Quickstart
 
+<Tabs>
+<Tab title="NodeJS">
 Logging calls to custom models is currently supported via the Helicone NodeJS SDK.
 ```typescript
 import { HeliconeManualLogger } from "@helicone/helicone";
@@ -88,3 +90,105 @@ type ILogResponse = {
   }
 }
 ```
+</Tab>
+
+<Tab title="Curl">
+
+## Request Structure
+A typical request will have the following structure:
+
+### Endpoint
+```
+POST https://api.hconeai.com/custom/v1/log
+```
+
+### Headers
+
+| Name          | Value              |
+| ------------- | ------------------ |
+| Authorization | Bearer `{API_KEY}` |
+
+Replace `{API_KEY}` with your actual API Key.
+
+### Body
+```typescript
+export type HeliconeAyncLogRequest = {
+  providerRequest: ProviderRequest;
+  providerResponse: ProviderResponse;
+  timing: Timing;
+};
+
+export type ProviderRequest = {
+  url: string;
+  json: {
+    [key: string]: any;
+  };
+  meta: Record<string, string>;
+};
+
+export type ProviderResponse = {
+  json: {
+    [key: string]: any;
+  };
+  status: number;
+  headers: Record<string, string>;
+};
+
+export type Timing = {
+  // From Unix epoch in Milliseconds
+  startTime: {
+    seconds: number;
+    milliseconds: number;
+  };
+  endTime: {
+    seconds: number;
+    milliseconds: number;
+  };
+};
+```
+
+## Example Usage
+```
+curl -X POST https://api.hconeai.com/custom/v1/log \
+-H 'Authorization: Bearer your_api_key' \
+-H 'Content-Type: application/json' \
+-d '{
+  "providerRequest": {
+    "url": "https://example.com",
+    "json": {
+      "key1": "value1",
+      "key2": "value2"
+    },
+    "meta": {
+      "metaKey1": "metaValue1",
+      "metaKey2": "metaValue2"
+    }
+  },
+  "providerResponse": {
+    "json": {
+      "responseKey1": "responseValue1",
+      "responseKey2": "responseValue2"
+    },
+    "status": 200,
+    "headers": {
+      "headerKey1": "headerValue1",
+      "headerKey2": "headerValue2"
+    }
+  },
+  "timing": {
+    "startTime": {
+      "seconds": 1625686222,
+      "milliseconds": 500
+    },
+    "endTime": {
+      "seconds": 1625686244,
+      "milliseconds": 750
+    }
+  }
+}'
+```
+
+
+</Tab>
+
+</Tabs>
