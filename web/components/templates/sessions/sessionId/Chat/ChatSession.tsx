@@ -41,7 +41,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
               {normalizeRequest.render({
                 hideTopBar: true,
                 messageSlice: idx === 0 ? undefined : "lastTwo",
-                className: ""
+                className: "",
               })}
             </div>
             <div className="lg:min-w-[350px] p-5 rounded-lg bg-gray-100">
@@ -113,7 +113,8 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
                       setOpen(true);
                     }}
                   >
-                    <span className="mr-1 font-medium">View more</span> <FaChevronRight />
+                    <span className="mr-1 font-medium">View more</span>{" "}
+                    <FaChevronRight />
                   </button>
                 </Row>
               </Col>
