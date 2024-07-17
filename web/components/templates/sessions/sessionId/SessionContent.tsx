@@ -45,6 +45,7 @@ const SessionContent: React.FC<SessionContentProps> = ({
   return (
     <Col className="gap-[12px]">
       <BreadCrumb
+        // @ts-ignore
         users={session.traces
           .map((trace) => trace.request.user)
           .filter((user) => user !== "" && user != null)}

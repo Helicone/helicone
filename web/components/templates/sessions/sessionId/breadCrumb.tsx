@@ -99,7 +99,7 @@ export const BreadCrumb = ({
                     href="/users"
                     target="_blank"
                     key={idx}
-                    className="font-semibold text-xs border-2 border-solid border-gray-500 rounded-md gap-2 px-2 mx-1 font-normal"
+                    className="font-semibold text-xs border-2 border-solid border-gray-500 rounded-md gap-2 px-2 mx-1"
                   >
                     {user}
                   </a>
