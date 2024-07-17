@@ -24,15 +24,17 @@ const Enterprise = () => {
 
 
   return (
-    <div className="flex flex-col space-y-16 w-full px-3 md:grid md:md">
-      <div className="flex md:text-center w-full">
-        <div className="flex flex-col md:items-center space-y-4 w-full ">
-          <p className="text-[16px] font-bold text-blue-600">Enterprise</p>
-          <h2 className="text-3xl sm:text-5xl font-bold sm:leading-[1.15]">
+    <div className="flex flex-col space-y-16 w-full px-3">
+      <div className="flex flex-col md:text-center w-full md:gap-4">
+        <div className="flex flex-col md:items-center space-y-4 w-full md:py-6 ">
+          <p className="text-[16px] md:text-lg font-bold text-blue-600">Enterprise</p>
+          <h2 className="text-3xl md:text-5xl font-semibold sm:leading-[1.15]">
             Get to production-quality{" "}
             <span className="text-blue-600">faster</span>
           </h2>
-          <button className="md:items-center w-fit px-3 py-[6px] text-blue-600 text-sm font-semibold border border-blue-600 rounded-lg  ">
+        </div>
+        <div>
+          <button className="md:items-center w-fit px-3 py-[6px] md:px-6 md:py-3 text-blue-600 text-sm md:text-lg font-semibold border border-blue-600 rounded-lg md:tracking-wide">
             Get a demo
           </button>
         </div>
@@ -40,9 +42,9 @@ const Enterprise = () => {
       <div className="flex flex-col md:flex-row gap-4 md:gap-40">
         {prompts.map((pr) => (
           <div key={pr.title} className="flex flex-col md:text-left gap-2">
-            <PiTerminalBold className="text-blue-700 h-6 w-6 pr-1" />
-            <h1 className="font-bold text-[14px]">{pr.title} </h1>
-            <p className="text-[14px]">{pr.description}</p>
+            <PiTerminalBold className="text-blue-700 h-6 w-6 pr-1 md:h-7 md:w-7" />
+            <h1 className="font-bold text-[14px] md:text-lg">{pr.title} </h1>
+            <p className="text-[14px] md:text-base font-light">{pr.description}</p>
           </div>
         ))}
       </div>
@@ -81,7 +83,7 @@ const Enterprise = () => {
           </div>
         </div>
         <div className="w-full border border-gray-200 rounded-lg lg:flex lg:flex-col lg:col-span-2 items-center justify-center overflow-hidden">
-          <div className="w-full grid grid-cols-1 bg-sky-50 rounded-lg">
+          <div className="w-full grid grid-cols-1 bg-sky-50 md:bg-[url('/static/enterprise/stripes.webp')] bg-repeat rounded-lg">
             <div className="col-span-1 w-full flex flex-col items-start px-6 py-7 text-left space-y-2 gap-3">
               <p className="text-blue-700 text-sm bg-blue-100 w-fit border border-blue-700 py-[6px] px-4 rounded-lg font-medium">Customer Portal</p>
               <h1 className="font-semibold text-2xl text-blue-700">Share analytics with your customers</h1>
@@ -108,7 +110,7 @@ const Enterprise = () => {
           </div>
         </div>
         <div className="w-full h-fit border border-gray-200 rounded-lg items-center justify-center overflow-hidden">
-          <div className="w-full grid grid-cols-1 bg-sky-50 rounded-lg">
+          <div className="w-full grid grid-cols-1 bg-sky-50 md:bg-[url('/static/enterprise/stripes.webp')] bg-repeat rounded-lg">
             <div className="col-span-1 w-full flex flex-col items-start p-8 text-left space-y-2 gap-3">
               <p className="text-blue-700 text-sm bg-blue-100 w-fit border border-blue-700 py-[6px] px-4 rounded-lg font-medium">ETL</p>
               <h1 className="font-semibold text-2xl text-blue-700">Bring data into your data warehouse</h1>

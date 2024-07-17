@@ -93,7 +93,7 @@ export default function Home() {
           <div className="flex items-center gap-4 pt-4 w-full md:justify-center">
             <Link
               href="/contact"
-              className="bg-white hover:bg-gray-100 ease-in-out duration-500 text-gray-500 border-[1.6px] border-gray-300 rounded-lg px-2 py-2 text-sm font-medium flex w-fit items-center gap-1 md:px-6 md:py-2 md:text-lg"
+              className="bg-white hover:bg-gray-100 ease-in-out duration-500 text-gray-600 border-[1.6px] border-gray-300 rounded-lg px-2 py-2 text-sm font-medium flex w-fit items-center gap-1 md:px-6 md:py-2 md:text-lg"
             >
               Get a demo
             </Link>
@@ -136,7 +136,7 @@ export default function Home() {
         </header>
         <section
           id="logos"
-          className="flex flex-col space-y-4 pt-6 md:pb-12 px-3 max-w-6xl mx-auto w-full"
+          className="flex flex-col space-y-4 pt-6 md:pb-14 md:pt-24 px-3 max-w-6xl mx-auto w-full"
         >
           <h2 className="text-gray-600 font-bold px-3 text-sm block md:hidden">
             Ready for real production workloads
@@ -258,16 +258,16 @@ export default function Home() {
         </section>
         <section
           id="essentials"
-          className="flex flex-col px-3 pt-6 pb-12 mx-auto max-w-full">
+          className="flex flex-col px-3 pt-6 pb-12 gap-6 md:pt-24 md:pb-14 md:px-0 md:gap-24 mx-auto max-w-full">
           <div className="flex flex-col px-3 space-y-2 gap-3 md:gap-3">
-            <h1 className="text-3xl px-3 font-bold text-sky-500 gap-3 md:text-center md:text-5xl">Unified {" "}
+            <h1 className="text-3xl font-bold text-sky-500 gap-3 md:text-center md:text-5xl ">Unified {" "}
               <span className="text-black">observability and monitoring</span>
             </h1>
-            <p className="font-light text-gray-600 px-3 md:text-center md:text-xl">
+            <p className="font-light text-sm text-gray-600 md:text-center md:text-xl">
               We are building a platform that provides all the essential tools for observability in Gen AI.
             </p>
-            <Essentials />
           </div>
+            <Essentials />
         </section>
         <section id="enterprise" className="py-6">
           <h2 className="sr-only">
@@ -291,7 +291,7 @@ export default function Home() {
             <OpenSource />
           </div>
         </section>
-        <section className="w-full max-w-6xl lg:py-20 lg:px-7 py-12 px-3">
+        <section id="faq" className="w-full max-w-6xl lg:py-20 lg:px-7 py-12 px-3">
           <div className="px-3 lg:text-center">
             <h1 className="font-bold text-3xl md:text-5xl lg:py-6">Frequently asked questions</h1>
             <FAQ />

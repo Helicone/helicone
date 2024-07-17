@@ -10,7 +10,7 @@ import { HiOutlineTableCells } from "react-icons/hi2";
 export default function Essentials() {
   return (
     <>
-      <div className="max-w-6xl md:grid md:grid-cols-3 md:gap-5 ">
+      <div className="max-w-6xl md:grid md:grid-cols-3 flex flex-col gap-6 md:gap-5 px-3">
         <div className="max-w-sm bg-gradient-to-b from-slate-200 border to-white rounded-xl shadow-d overflow-hidden mb-2 md:h-fit ">
           <div className="md:flex flex-col">
             <div className="p-3">
