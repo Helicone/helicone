@@ -16,14 +16,13 @@ export const BreadCrumb = ({
   sessionId: string;
   startTime: Date;
   endTime: Date;
-  numTraces: number,
-  sessionCost: number,
-  models: string[],
-  promptTokens: number,
-  completionTokens: number,
-  users: string[],
+  numTraces: number;
+  sessionCost: number;
+  models: string[];
+  promptTokens: number;
+  completionTokens: number;
+  users: string[];
 }) => {
-
   const [expanded, setExpanded] = useState(false);
 
   console.log(startTime.getMilliseconds(), endTime.getMilliseconds());
@@ -51,32 +50,96 @@ export const BreadCrumb = ({
             </div>
           </div>
           <ul className="list-disc flex items-center gap-7 text-sm text-gray-500">
-            <p>Last used <span className="text-sky-500 font-semibold">{getTimeAgo(endTime)}</span></p>
-            <li className={expanded ? "" : "hidden"}>Created on: <span className="font-semibold">{startTime.toLocaleDateString()}</span></li>
+            <p>
+              Last used{" "}
+              <span className="text-sky-500 font-semibold">
+                {getTimeAgo(endTime)}
+              </span>
+            </p>
+            <li className={expanded ? "" : "hidden"}>
+              Created on:{" "}
+              <span className="font-semibold">
+                {startTime.toLocaleDateString()}
+              </span>
+            </li>
 
-            <li>{' '}<span className="font-semibold">{numTraces}</span> trace{numTraces == 1 ? "": "s"}</li>
-            <li>Total Cost: <span className="font-semibold">${sessionCost}</span></li>
-            <li>Total Latency: <span className="font-semibold">{endTime.getMilliseconds() - startTime.getMilliseconds()} ms</span></li>
+            <li>
+              {" "}
+              <span className="font-semibold">{numTraces}</span> trace
+              {numTraces == 1 ? "" : "s"}
+            </li>
+            <li>
+              Total Cost: <span className="font-semibold">${sessionCost}</span>
+            </li>
+            <li>
+              Total Latency:{" "}
+              <span className="font-semibold">
+                {endTime.getMilliseconds() - startTime.getMilliseconds()} ms
+              </span>
+            </li>
 
-            <li onClick={() => setExpanded(true)} className={expanded ? "hidden" : "hover:cursor-pointer"}>More...</li>
+            <li
+              onClick={() => setExpanded(true)}
+              className={expanded ? "hidden" : "hover:cursor-pointer"}
+            >
+              More...
+            </li>
 
-            <ul className={expanded ? "list-disc flex items-center gap-6 text-sm text-gray-500" : "hidden"}>
-
-              <li className={users.length > 0 ? "" : "hidden"}>User{users.length == 1 ? "" : "s"}:{' '}
-                {users.map(user => <a href="/users" target="_blank" className="font-semibold text-xs border-2 border-solid border-gray-500 rounded-md gap-2 px-2 mx-1 font-normal">{user}</a>)}
+            <ul
+              className={
+                expanded
+                  ? "list-disc flex items-center gap-6 text-sm text-gray-500"
+                  : "hidden"
+              }
+            >
+              <li className={users.length > 0 ? "" : "hidden"}>
+                User{users.length == 1 ? "" : "s"}:{" "}
+                {users.map((user, idx) => (
+                  <a
+                    href="/users"
+                    target="_blank"
+                    key={idx}
+                    className="font-semibold text-xs border-2 border-solid border-gray-500 rounded-md gap-2 px-2 mx-1 font-normal"
+                  >
+                    {user}
+                  </a>
+                ))}
               </li>
 
-              <li>Model{models.length == 1 ? "" : "s"}:{' '}
-                {models.map((model, index) => <span className="font-semibold">{model + (models.length != 1 && index != models.length - 1 ? ", " : "")}</span>)}
+              <li>
+                Model{models.length == 1 ? "" : "s"}:{" "}
+                {models.map((model, index) => (
+                  <span key={index} className="font-semibold">
+                    {model +
+                      (models.length != 1 && index != models.length - 1
+                        ? ", "
+                        : "")}
+                  </span>
+                ))}
               </li>
 
-              <li>Total Tokens: <span className="font-semibold">{promptTokens + completionTokens}</span></li>
-              <li>Prompt Tokens: <span className="font-semibold">{promptTokens}</span></li>
-              <li>Completion Tokens: <span className="font-semibold">{completionTokens}</span></li>
+              <li>
+                Total Tokens:{" "}
+                <span className="font-semibold">
+                  {promptTokens + completionTokens}
+                </span>
+              </li>
+              <li>
+                Prompt Tokens:{" "}
+                <span className="font-semibold">{promptTokens}</span>
+              </li>
+              <li>
+                Completion Tokens:{" "}
+                <span className="font-semibold">{completionTokens}</span>
+              </li>
 
-              <li onClick={() => setExpanded(false)} className={expanded ? "hover:cursor-pointer" : "hidden"}>Less...</li>
+              <li
+                onClick={() => setExpanded(false)}
+                className={expanded ? "hover:cursor-pointer" : "hidden"}
+              >
+                Less...
+              </li>
             </ul>
-
           </ul>
         </div>
       </div>

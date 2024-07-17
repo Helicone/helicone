@@ -45,10 +45,18 @@ const SessionContent: React.FC<SessionContentProps> = ({
   return (
     <Col className="gap-[12px]">
       <BreadCrumb
-        users={session.traces.map(trace => trace.request.user).filter(user => user !== "" && user != null)}
+        users={session.traces
+          .map((trace) => trace.request.user)
+          .filter((user) => user !== "" && user != null)}
         models={session.traces.map((trace) => trace.request.model ?? "")}
-        promptTokens={session.traces.reduce((acc, trace) => acc + (trace?.request?.promptTokens || 0), 0)}
-        completionTokens={session.traces.reduce((acc, trace) => acc + (trace?.request?.promptTokens || 0), 0)}
+        promptTokens={session.traces.reduce(
+          (acc, trace) => acc + (trace?.request?.promptTokens || 0),
+          0
+        )}
+        completionTokens={session.traces.reduce(
+          (acc, trace) => acc + (trace?.request?.promptTokens || 0),
+          0
+        )}
         sessionId={session_id as string}
         numTraces={session.traces.length}
         sessionCost={session.session_cost_usd}
@@ -98,27 +106,56 @@ const SessionContent: React.FC<SessionContentProps> = ({
             ]}
           />
           <div className="flex flex-col gap-5">
-
-            {requestIdToShow &&
+            {requestIdToShow && (
               <div>
-
-                <div className={expandReq ? "bg-white p-5 rounded-lg flex-shrink border border-gray-300" : "hidden"}>
-                  <button className="flex flex-row gap-1 items-center ml-0 pl-0 mb-3" type="button" onClick={() => setExpandReq(false)}>
+                <div
+                  className={
+                    expandReq
+                      ? "bg-white p-5 rounded-lg flex-shrink border border-gray-300"
+                      : "hidden"
+                  }
+                >
+                  <button
+                    className="flex flex-row gap-1 items-center ml-0 pl-0 mb-3"
+                    type="button"
+                    onClick={() => setExpandReq(false)}
+                  >
                     <ChevronDownIcon className="h-6 w-6 m-0 p-0" />
                     <span className="text-sm font-semibold">Hide Details</span>
                   </button>
-                  <RequestRow displayPreview={false} wFull={false} request={session.traces.filter(trace => trace.request_id == selectedRequestId)[0].request} properties={[]} open={true} />
+                  <RequestRow
+                    displayPreview={false}
+                    wFull={false}
+                    request={
+                      session.traces.filter(
+                        (trace) => trace.request_id == selectedRequestId
+                      )[0].request
+                    }
+                    properties={[]}
+                    open={true}
+                  />
                 </div>
 
-                <div className={expandReq ? "hidden" : "bg-white p-5 rounded-lg flex-shrink border border-gray-300" }>
-                  <button className="flex flex-row gap-1 items-center" type="button" onClick={() => setExpandReq(true)}>
+                <div
+                  className={
+                    expandReq
+                      ? "hidden"
+                      : "bg-white p-5 rounded-lg flex-shrink border border-gray-300"
+                  }
+                >
+                  <button
+                    className="flex flex-row gap-1 items-center"
+                    type="button"
+                    onClick={() => setExpandReq(true)}
+                  >
                     <ChevronDownIcon className="h-6 w-6" />
-                    <span className="text-sm font-semibold">Expand Details</span>
+                    <span className="text-sm font-semibold">
+                      Expand Details
+                    </span>
                   </button>
                 </div>
-
               </div>
-            }
+            )}
 
             <div className="flex-grow">
               {requestIdToShow &&
@@ -131,7 +168,6 @@ const SessionContent: React.FC<SessionContentProps> = ({
                   )!
                 ).render()}
             </div>
-
           </div>
         </Row>
       )}
