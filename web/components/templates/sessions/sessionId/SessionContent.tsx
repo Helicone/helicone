@@ -12,6 +12,8 @@ import { Tree } from "./Tree/Tree";
 import { BreadCrumb } from "./breadCrumb";
 import TabSelector from "./TabSelector";
 import ChatSession from "./Chat/ChatSession";
+import RequestRow from "../../requestsV2/requestRow";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 interface SessionContentProps {
   session: Session;
@@ -27,6 +29,7 @@ const SessionContent: React.FC<SessionContentProps> = ({
   requests,
 }) => {
   const [selectedRequestId, setSelectedRequestId] = useState<string>("");
+  const [expandReq, setExpandReq] = useState(false);
   const requestIdToShow =
     selectedRequestId ?? session.traces?.[0]?.request_id ?? null;
 
@@ -94,16 +97,41 @@ const SessionContent: React.FC<SessionContentProps> = ({
               setSelectedRequestId,
             ]}
           />
-          <div className="flex-grow">
+          <div className="flex flex-col gap-5">
+
             {requestIdToShow &&
-              requests.requests.data?.data?.find(
-                (r) => r.request_id === requestIdToShow
-              ) &&
-              getNormalizedRequest(
+              <div>
+
+                <div className={expandReq ? "bg-white p-5 rounded-lg flex-shrink border border-gray-300" : "hidden"}>
+                  <button className="flex flex-row gap-1 items-center ml-0 pl-0 mb-3" type="button" onClick={() => setExpandReq(false)}>
+                    <ChevronDownIcon className="h-6 w-6 m-0 p-0" />
+                    <span className="text-sm font-semibold">Hide Details</span>
+                  </button>
+                  <RequestRow displayPreview={false} wFull={false} request={session.traces.filter(trace => trace.request_id == selectedRequestId)[0].request} properties={[]} open={true} />
+                </div>
+
+                <div className={expandReq ? "hidden" : "bg-white p-5 rounded-lg flex-shrink border border-gray-300" }>
+                  <button className="flex flex-row gap-1 items-center" type="button" onClick={() => setExpandReq(true)}>
+                    <ChevronDownIcon className="h-6 w-6" />
+                    <span className="text-sm font-semibold">Expand Details</span>
+                  </button>
+                </div>
+
+              </div>
+            }
+
+            <div className="flex-grow">
+              {requestIdToShow &&
                 requests.requests.data?.data?.find(
                   (r) => r.request_id === requestIdToShow
-                )!
-              ).render()}
+                ) &&
+                getNormalizedRequest(
+                  requests.requests.data?.data?.find(
+                    (r) => r.request_id === requestIdToShow
+                  )!
+                ).render()}
+            </div>
+
           </div>
         </Row>
       )}

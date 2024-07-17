@@ -26,7 +26,7 @@ export const BreadCrumb = ({
 
   const [expanded, setExpanded] = useState(false);
 
-  console.log('models:',models);
+  console.log(startTime.getMilliseconds(), endTime.getMilliseconds());
   return (
     <div className="w-full h-full flex flex-col space-y-8">
       <div className="flex flex-row items-center justify-between">
@@ -56,7 +56,7 @@ export const BreadCrumb = ({
 
             <li>{' '}<span className="font-semibold">{numTraces}</span> trace{numTraces == 1 ? "": "s"}</li>
             <li>Total Cost: <span className="font-semibold">${sessionCost}</span></li>
-            <li>Total Latency: <span className="font-semibold">${sessionCost}</span></li>
+            <li>Total Latency: <span className="font-semibold">{endTime.getMilliseconds() - startTime.getMilliseconds()} ms</span></li>
 
             <li onClick={() => setExpanded(true)} className={expanded ? "hidden" : "hover:cursor-pointer"}>More...</li>
 
