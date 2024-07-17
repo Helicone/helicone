@@ -3,7 +3,7 @@
   "scripts": {
     "start": "ts-node src/index.ts",
     "build": "tsc",
-    "serve": "node dist/index.js",
+    "serve": "node dist/valhalla/jawn/src/index.js",
     "dev": "nodemon",
     "test:jawn": "npx jest --config packages/jawn/jest.config.js --detectOpenHandles"
   },
@@ -43,6 +43,7 @@
     "posthog-node": "^4.0.1",
     "rate-limit-redis": "^4.2.0",
     "swagger-ui-express": "^5.0.0",
+    "tiktoken": "^1.0.15",
     "typescript": "^5.2.2",
     "uuid": "^9.0.1",
     "uuidv4": "^6.2.13",

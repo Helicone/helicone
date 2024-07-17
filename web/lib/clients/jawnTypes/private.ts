@@ -278,6 +278,12 @@ Json: JsonObject;
     UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_"] & {
       variant?: string;
     };
+    UIFilterRowTree: components["schemas"]["UIFilterRowNode"] | components["schemas"]["FilterRow"];
+    UIFilterRowNode: {
+      /** @enum {string} */
+      operator: "and" | "or";
+      rows: components["schemas"]["UIFilterRowTree"][];
+    };
     FilterRow: {
       value: string;
       /** Format: double */
@@ -288,7 +294,7 @@ Json: JsonObject;
     OrganizationFilter: {
       softDelete: boolean;
       createdAt?: string;
-      filter: components["schemas"]["FilterRow"][];
+      filter: components["schemas"]["UIFilterRowTree"][];
       name: string;
       id: string;
     };
@@ -334,7 +340,9 @@ Json: JsonObject;
       omitRequestLog: boolean;
       modelOverride?: string;
     };
-    Provider: string | ("OPENAI" | "ANTHROPIC" | "CUSTOM");
+    /** @enum {string} */
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "META";
+    Provider: components["schemas"]["ProviderName"] | string | "CUSTOM";
     TemplateWithInputs: {
       template: Record<string, never>;
       inputs: {

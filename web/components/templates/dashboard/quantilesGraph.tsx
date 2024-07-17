@@ -5,10 +5,10 @@ import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { TimeIncrement } from "../../../lib/timeCalculations/fetchTimeData";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
 type QuantilesGraphProps = {
-  uiFilters: UIFilterRow[];
+  uiFilters: FilterNode;
   timeFilter: {
     start: Date;
     end: Date;

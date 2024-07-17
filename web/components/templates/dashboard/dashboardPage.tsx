@@ -14,7 +14,7 @@ import {
   Legend,
 } from "@tremor/react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { ModelMetric } from "../../../lib/api/models/models";
 import {
@@ -34,7 +34,6 @@ import {
   MetricsPanel,
   MetricsPanelProps,
 } from "../../shared/metrics/metricsPanel";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTableHeader from "../../shared/themed/themedHeader";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
@@ -47,13 +46,20 @@ import LoadingAnimation from "../../shared/loadingAnimation";
 import {
   OrganizationFilter,
   OrganizationLayout,
+  transformFilter,
+  transformOrganizationLayoutFilters,
 } from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import CountryPanel from "./panels/countryPanel";
 import useNotification from "../../shared/notification/useNotification";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
-import { filterUIToFilterLeafs } from "../../../services/lib/filters/filterDefs";
+import {
+  filterUITreeToFilterNode,
+  getRootFilterNode,
+  isFilterRowNode,
+  UIFilterRowTree,
+} from "../../../services/lib/filters/uiFilterRowTree";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -94,6 +100,7 @@ export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
   const { user, currentFilter, organizationLayout } = props;
+  const initialLoadRef = useRef(true);
 
   const searchParams = useSearchParams();
 
@@ -114,6 +121,13 @@ const DashboardPage = (props: DashboardPageProps) => {
         }
       : undefined
   );
+
+  const transformedFilters = useMemo(() => {
+    if (orgLayout?.data?.filters) {
+      return transformOrganizationLayoutFilters(orgLayout.data.filters);
+    }
+    return [];
+  }, [orgLayout?.data?.filters]);
 
   const [currFilter, setCurrFilter] = useState<string | null>("");
 
@@ -148,25 +162,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     return range;
   };
 
-  const getAdvancedFilters = (): UIFilterRow[] => {
-    try {
-      const currentAdvancedFilters = searchParams.get("filters");
-
-      if (currentAdvancedFilters) {
-        const filters = decodeURIComponent(currentAdvancedFilters).slice(1, -1);
-        const decodedFilters = filters
-          .split("|")
-          .map(decodeFilter)
-          .filter((filter) => filter !== null) as UIFilterRow[];
-
-        return decodedFilters;
-      }
-    } catch (error) {
-      console.error("Error decoding advanced filters:", error);
-    }
-    return [];
-  };
-
   const [interval, setInterval] = useState<TimeInterval>(
     getInterval() as TimeInterval
   );
@@ -174,20 +169,38 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [open, setOpen] = useState(false);
 
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
+    getRootFilterNode()
+  );
 
-  const debouncedAdvancedFilters = useDebounce(advancedFilters, 500);
+  const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
   const timeIncrement = getTimeInterval(timeFilter);
 
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
   const { setNotification } = useNotification();
 
-  function encodeFilter(filter: UIFilterRow): string {
-    return `${filterMap[filter.filterMapIdx].label}:${
-      filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label
-    }:${filter.value}`;
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const encodeFilters = (filters: UIFilterRowTree): string => {
+    const encode = (node: UIFilterRowTree): any => {
+      if (isFilterRowNode(node)) {
+        return {
+          type: "node",
+          operator: node.operator,
+          rows: node.rows.map(encode),
+        };
+      } else {
+        return {
+          type: "leaf",
+          filter: `${filterMap[node.filterMapIdx].label}:${
+            filterMap[node.filterMapIdx].operators[node.operatorIdx].label
+          }:${encodeURIComponent(node.value)}`,
+        };
+      }
+    };
+
+    return JSON.stringify(encode(filters));
+  };
 
   const {
     metrics,
@@ -201,36 +214,94 @@ const DashboardPage = (props: DashboardPageProps) => {
     isModelsLoading,
   } = useDashboardPage({
     timeFilter,
-    uiFilters: debouncedAdvancedFilters,
+    uiFilters: debouncedAdvancedFilter,
     apiKeyFilter: null,
     timeZoneDifference: new Date().getTimezoneOffset(),
     dbIncrement: timeIncrement,
   });
 
+  const getAdvancedFilters = useCallback((): UIFilterRowTree => {
+    const decodeFilter = (encoded: any): UIFilterRowTree => {
+      if (encoded.type === "node") {
+        return {
+          operator: encoded.operator as "and" | "or",
+          rows: encoded.rows.map(decodeFilter),
+        };
+      } else {
+        const [filterLabel, operator, value] = encoded.filter.split(":");
+        const filterMapIdx = filterMap.findIndex(
+          (f) =>
+            f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
+        );
+        const operatorIdx = filterMap[filterMapIdx]?.operators.findIndex(
+          (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
+        );
+
+        if (
+          isNaN(filterMapIdx) ||
+          isNaN(operatorIdx) ||
+          filterMapIdx === -1 ||
+          operatorIdx === -1
+        ) {
+          console.log("Invalid filter map or operator index", {
+            filterLabel,
+            operator,
+          });
+          return getRootFilterNode();
+        }
+
+        return {
+          filterMapIdx,
+          operatorIdx,
+          value: decodeURIComponent(value),
+        };
+      }
+    };
+
+    try {
+      const currentAdvancedFilters = searchParams.get("filters");
+
+      if (currentAdvancedFilters) {
+        const filters = decodeURIComponent(currentAdvancedFilters).replace(
+          /^"|"$/g,
+          ""
+        );
+
+        const parsedFilters = JSON.parse(filters);
+        const result = decodeFilter(parsedFilters);
+        return result;
+      }
+    } catch (error) {
+      console.error("Error decoding advanced filters:", error);
+    }
+
+    return getRootFilterNode();
+  }, [searchParams, filterMap]);
+
   useEffect(() => {
-    if (!isAnyLoading && filterMap) {
-      setAdvancedFilters(getAdvancedFilters());
+    if (initialLoadRef.current && filterMap.length > 0) {
+      console.log("load");
+      const loadedFilters = getAdvancedFilters();
+      setAdvancedFilters(loadedFilters);
+      initialLoadRef.current = false;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAnyLoading]);
+  }, [filterMap, getAdvancedFilters]);
 
-  const onSetAdvancedFiltersHandler = (
-    filters: UIFilterRow[],
-    layoutFilterId?: string | null
-  ) => {
-    if (layoutFilterId === null || filters.length === 0) {
-      searchParams.delete("filters");
-    } else {
-      const currentAdvancedFilters = filters.map(encodeFilter).join("|");
-
-      searchParams.set(
-        "filters",
-        `"${encodeURIComponent(currentAdvancedFilters)}"`
-      );
-    }
-    setAdvancedFilters(filters);
-  };
-
+  const onSetAdvancedFiltersHandler = useCallback(
+    (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
+      setAdvancedFilters(filters);
+      if (
+        layoutFilterId === null ||
+        (isFilterRowNode(filters) && filters.rows.length === 0)
+      ) {
+        searchParams.delete("filters");
+      } else {
+        const currentAdvancedFilters = encodeFilters(filters);
+        searchParams.set("filters", currentAdvancedFilters);
+      }
+    },
+    [encodeFilters, refetch]
+  );
   const metricsData: MetricsPanelProps["metric"][] = [
     {
       id: "cost-req",
@@ -307,30 +378,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     };
   };
 
-  function decodeFilter(encoded: string): UIFilterRow | null {
-    try {
-      const parts = encoded.split(":");
-      if (parts.length !== 3) return null;
-      const filterLabel = decodeURIComponent(parts[0]);
-      const operator = decodeURIComponent(parts[1]);
-      const value = decodeURIComponent(parts[2]);
-
-      const filterMapIdx = filterMap.findIndex(
-        (f) => f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
-      );
-      const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
-        (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
-      );
-
-      if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
-
-      return { filterMapIdx, operatorIdx, value };
-    } catch (error) {
-      console.error("Error decoding filter:", error);
-      return null;
-    }
-  }
-
   // put this forEach inside of a useCallback to prevent unnecessary re-renders
   const getStatusCountsOverTime = useCallback(() => {
     const statusCounts: {
@@ -370,6 +417,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     });
 
     return statusCounts;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overTimeData.requestsWithStatus.data?.data, timeIncrement]);
 
   // flatten the status counts over time
@@ -407,11 +455,12 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
     if (layoutFilter !== null) {
-      onSetAdvancedFiltersHandler(layoutFilter?.filter, layoutFilter.id);
-      setCurrFilter(layoutFilter?.id);
+      const transformedFilter = transformFilter(layoutFilter.filter[0]);
+      onSetAdvancedFiltersHandler(transformedFilter, layoutFilter.id);
+      setCurrFilter(layoutFilter.id);
     } else {
       setCurrFilter(null);
-      onSetAdvancedFiltersHandler([], null);
+      onSetAdvancedFiltersHandler({ operator: "and", rows: [] }, null);
     }
   };
 
@@ -534,7 +583,10 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
             savedFilters={{
               currentFilter: currFilter ?? undefined,
-              filters: orgLayout?.data?.filters ?? undefined,
+              filters:
+                transformedFilters && orgLayout?.data?.id
+                  ? transformedFilters
+                  : undefined,
               onFilterChange: onLayoutFilterChange,
               onSaveFilterCallback: async () => {
                 await orgLayoutRefetch();
@@ -709,9 +761,9 @@ const DashboardPage = (props: DashboardPageProps) => {
               <div key="countries">
                 <CountryPanel
                   timeFilter={timeFilter}
-                  userFilters={filterUIToFilterLeafs(
+                  userFilters={filterUITreeToFilterNode(
                     filterMap,
-                    advancedFilters
+                    debouncedAdvancedFilter
                   )}
                 />
               </div>
@@ -747,7 +799,10 @@ const DashboardPage = (props: DashboardPageProps) => {
 
               <div key="quantiles">
                 <QuantilesGraph
-                  uiFilters={debouncedAdvancedFilters}
+                  uiFilters={filterUITreeToFilterNode(
+                    filterMap,
+                    debouncedAdvancedFilter
+                  )}
                   timeFilter={timeFilter}
                   timeIncrement={timeIncrement}
                 />

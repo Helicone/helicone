@@ -41,10 +41,10 @@ export class GptVisionImageParser extends ImageModelRequestBodyParser {
   processContentItem(item: any) {
     const assetId = this.generateAssetId(this.requestId, this.assetIndex++);
     if (
-      item.type === "image_url" &&
-      item.image_url &&
-      typeof item.image_url === "object" &&
-      "url" in item.image_url
+      item?.type === "image_url" &&
+      item?.image_url &&
+      typeof item?.image_url === "object" &&
+      "url" in item?.image_url
     ) {
       const oldUrl = item.image_url.url;
       item.image_url.url = `<helicone-asset-id key="${assetId}"/>`;

@@ -48,6 +48,10 @@ import {
 import { useSearchParams } from "next/navigation";
 import { TimeFilter } from "../../dashboard/dashboardPage";
 import { getTimeAgo } from "../../../../lib/sql/timeHelpers";
+import {
+  FilterBranch,
+  FilterLeaf,
+} from "../../../../services/lib/filters/filterDefs";
 
 interface PromptIdPageProps {
   id: string;
@@ -168,19 +172,23 @@ const PromptIdPage = (props: PromptIdPageProps) => {
 
   const timeIncrement = getTimeInterval(timeFilter);
 
-  const params: BackendMetricsCall<any>["params"] = {
-    timeFilter: timeFilter,
-    userFilters: [
-      {
-        request_response_versioned: {
-          properties: {
-            "Helicone-Prompt-Id": {
-              equals: prompt?.user_defined_id,
-            },
-          },
+  const promptIdFilterLeaf: FilterLeaf = {
+    request_response_versioned: {
+      properties: {
+        "Helicone-Prompt-Id": {
+          equals: prompt?.user_defined_id,
         },
       },
-    ],
+    },
+  };
+
+  const params: BackendMetricsCall<any>["params"] = {
+    timeFilter: timeFilter,
+    userFilters: {
+      left: promptIdFilterLeaf,
+      operator: "and",
+      right: "all",
+    } as FilterBranch,
     dbIncrement: timeIncrement,
     timeZoneDifference: new Date().getTimezoneOffset(),
   };

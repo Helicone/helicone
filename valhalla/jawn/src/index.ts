@@ -2,8 +2,14 @@ require("dotenv").config({
   path: "./.env",
 });
 
+import bodyParser from "body-parser";
 import express, { NextFunction } from "express";
 import swaggerUi from "swagger-ui-express";
+import { proxyRouter } from "./controllers/public/proxyController";
+import {
+  DLQ_WORKER_COUNT,
+  NORMAL_WORKER_COUNT,
+} from "./lib/clients/kafkaConsumers/constant";
 import { tokenRouter } from "./lib/routers/tokenRouter";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authMiddleware } from "./middleware/auth";
@@ -14,12 +20,7 @@ import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
-import {
-  DLQ_WORKER_COUNT,
-  NORMAL_WORKER_COUNT,
-} from "./lib/clients/kafkaConsumers/constant";
-import { cacheMiddleware } from "./middleware/cache";
-import bodyParser from "body-parser";
+import { unauthorizedCacheMiddleware } from "./middleware/unauthorizedCache";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -106,6 +107,10 @@ app.options("*", (req, res) => {
 
 const v1APIRouter = express.Router();
 const unAuthenticatedRouter = express.Router();
+const v1ProxyRouter = express.Router();
+
+v1ProxyRouter.use(proxyRouter);
+app.use(v1ProxyRouter);
 
 unAuthenticatedRouter.use(
   "/docs",
@@ -119,9 +124,12 @@ unAuthenticatedRouter.use("/download/swagger.json", (req, res) => {
   res.json(publicSwaggerDoc as any);
 });
 
-v1APIRouter.use(authMiddleware);
+// v1APIRouter.use(
+//   "/v1/public/dataisbeautiful",
+//   unauthorizedCacheMiddleware("/v1/public/dataisbeautiful")
+// );
 
-v1APIRouter.use("/v1/public", cacheMiddleware);
+v1APIRouter.use(authMiddleware);
 
 // Create and use the rate limiter
 if (IS_RATE_LIMIT_ENABLED) {

@@ -20,6 +20,23 @@ export type BlogStructure = {
 
 const blogContent: BlogStructure[] = [
   {
+    title: "What is LLM Observability and Monitoring?",
+    description:
+      "Building with LLMs in production (well) is incredibly difficult. You probably have heard of the word LLM observability'. What is it? How does it differ from traditional observability? What is observed? We have the answers. ",
+    badgeText: "insight",
+    date: "July 12, 2024",
+    href: "/blog/llm-observability",
+    imageUrl: "/static/blog/llm-observability.webp",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/static/blog/linalam-headshot.webp",
+        imageAlt: "Lina Lam's headshot",
+      },
+    ],
+    time: "3 minute read",
+  },
+    {
     title: "Compare: The Best LangSmith Alternatives & Competitors",
     description:
       "Observability tools allow developers to monitor, analyze, and optimize AI model performance, which helps overcome the 'black box' nature of LLMs. But which LangSmith alternative is the best in 2024? We will shed some light.",
@@ -35,7 +52,7 @@ const blogContent: BlogStructure[] = [
       },
     ],
     time: "8 minute read",
-  },
+    },
   {
     title: "Handling Billions of LLM Logs with Upstash Kafka and Cloudflare Workers",
     description:

@@ -1,6 +1,6 @@
 import { ArrowPathIcon, HomeIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import {
@@ -15,6 +15,8 @@ import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   OrganizationFilter,
   OrganizationLayout,
+  transformFilter,
+  transformOrganizationLayoutFilters,
 } from "../../../services/lib/organization_layout/organization_layout";
 import { placeAssetIdValues } from "../../../services/lib/requestTraverseHelper";
 import {
@@ -40,6 +42,13 @@ import RequestCard from "./requestCard";
 import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
 import useRequestsPageV2 from "./useRequestsPageV2";
+import {
+  getRootFilterNode,
+  isFilterRowNode,
+  isUIFilterRow,
+  UIFilterRowNode,
+  UIFilterRowTree,
+} from "../../../services/lib/filters/uiFilterRowTree";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -105,6 +114,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     organizationLayout,
     organizationLayoutAvailable,
   } = props;
+  const initialLoadRef = useRef(true);
   const [isLive, setIsLive] = useLocalStorage("isLive", false);
   const jawn = useJawnClient();
   const orgContext = useOrg();
@@ -121,11 +131,27 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [selectedData, setSelectedData] = useState<
     NormalizedRequest | undefined
   >(undefined);
-  function encodeFilter(filter: UIFilterRow): string {
-    return `${filterMap[filter.filterMapIdx].label}:${
-      filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label
-    }:${filter.value}`;
-  }
+
+  const encodeFilters = (filters: UIFilterRowTree): string => {
+    const encode = (node: UIFilterRowTree): any => {
+      if (isFilterRowNode(node)) {
+        return {
+          type: "node",
+          operator: node.operator,
+          rows: node.rows.map(encode),
+        };
+      } else {
+        return {
+          type: "leaf",
+          filter: `${filterMap[node.filterMapIdx].label}:${
+            filterMap[node.filterMapIdx].operators[node.operatorIdx].label
+          }:${encodeURIComponent(node.value)}`,
+        };
+      }
+    };
+
+    return JSON.stringify(encode(filters));
+  };
 
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -190,7 +216,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
   const [timeRange, setTimeRange] = useState<TimeFilter>(getTimeRange());
 
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
+    getRootFilterNode()
+  );
 
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
@@ -211,7 +239,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     filterMap,
     searchPropertyFilters,
     remove,
-    filter: builtFilter,
   } = useRequestsPageV2(
     page,
     currentPageSize,
@@ -318,101 +345,147 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   }, [initialRequestId]);
 
-  useEffect(() => {
-    const currentAdvancedFilters = searchParams.get("filters");
-
-    if (
-      filterMap &&
-      advancedFilters.length === 0 &&
-      currentAdvancedFilters &&
-      !isDataLoading
-    ) {
-      setAdvancedFilters(getAdvancedFilters());
-    }
-  }, [isDataLoading]);
-
   //convert this using useCallback
-  const getAdvancedFilters = useCallback(() => {
-    function decodeFilter(encoded: string): UIFilterRow | null {
-      try {
-        const parts = encoded.split(":");
-        if (parts.length !== 3) return null;
-        const filterLabel = decodeURIComponent(parts[0]);
-        const operator = decodeURIComponent(parts[1]);
-        const value = decodeURIComponent(parts[2]);
 
+  // TODO fix this to return correct UIFilterRowTree instead of UIFilterRow[]
+  const getAdvancedFilters = useCallback((): UIFilterRowTree => {
+    const decodeFilter = (encoded: any): UIFilterRowTree => {
+      if (encoded.type === "node") {
+        return {
+          operator: encoded.operator as "and" | "or",
+          rows: encoded.rows.map(decodeFilter),
+        };
+      } else {
+        const [filterLabel, operator, value] = encoded.filter.split(":");
         const filterMapIdx = filterMap.findIndex(
           (f) =>
             f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
         );
-        const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
+        const operatorIdx = filterMap[filterMapIdx]?.operators.findIndex(
           (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
         );
 
-        if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
+        if (
+          isNaN(filterMapIdx) ||
+          isNaN(operatorIdx) ||
+          filterMapIdx === -1 ||
+          operatorIdx === -1
+        ) {
+          console.log("Invalid filter map or operator index", {
+            filterLabel,
+            operator,
+          });
+          return getRootFilterNode();
+        }
 
-        return { filterMapIdx, operatorIdx, value };
-      } catch (error) {
-        console.error("Error decoding filter:", error);
-        return null;
+        return {
+          filterMapIdx,
+          operatorIdx,
+          value: decodeURIComponent(value),
+        };
       }
-    }
+    };
+
     try {
       const currentAdvancedFilters = searchParams.get("filters");
 
       if (currentAdvancedFilters) {
-        const filters = decodeURIComponent(currentAdvancedFilters).slice(1, -1);
-        const decodedFilters = filters
-          .split("|")
-          .map(decodeFilter)
-          .filter((filter) => filter !== null) as UIFilterRow[];
+        const filters = decodeURIComponent(currentAdvancedFilters).replace(
+          /^"|"$/g,
+          ""
+        );
 
-        return decodedFilters;
+        const parsedFilters = JSON.parse(filters);
+        const result = decodeFilter(parsedFilters);
+        return result;
       }
     } catch (error) {
       console.error("Error decoding advanced filters:", error);
     }
-    return [];
+
+    return getRootFilterNode();
   }, [searchParams, filterMap]);
 
   useEffect(() => {
-    if (advancedFilters.length !== 0 || !userId) {
-      return;
+    if (initialLoadRef.current && filterMap.length > 0) {
+      const loadedFilters = getAdvancedFilters();
+      setAdvancedFilters(loadedFilters);
+      initialLoadRef.current = false;
     }
+  }, [filterMap, getAdvancedFilters]);
 
-    const userFilerMapIndex = filterMap.findIndex(
-      (filter) => filter.label === "User"
-    );
+  // TODO
+  useEffect(() => {
+    if (
+      !isFilterRowNode(advancedFilters) ||
+      advancedFilters.rows.length === 0
+    ) {
+      if (userId) {
+        const userFilterMapIndex = filterMap.findIndex(
+          (filter) => filter.label === "User"
+        );
 
-    if (userFilerMapIndex !== -1) {
-      setAdvancedFilters([
-        {
-          filterMapIdx: userFilerMapIndex,
-          operatorIdx: 0,
-          value: userId,
-        },
-      ]);
+        if (userFilterMapIndex !== -1) {
+          setAdvancedFilters({
+            operator: "and",
+            rows: [
+              {
+                filterMapIdx: userFilterMapIndex,
+                operatorIdx: 0,
+                value: userId,
+              },
+            ],
+          } as UIFilterRowNode);
+        }
+      }
     }
   }, [advancedFilters, filterMap, userId]);
-  const userFilerMapIndex = filterMap.findIndex(
+  const userFilterMapIndex = filterMap.findIndex(
     (filter) => filter.label === "Helicone-Rate-Limit-Status"
   );
+  const rateLimitFilterMapIndex = filterMap.findIndex(
+    (filter) => filter.label === "Helicone-Rate-Limit-Status"
+  );
+  // TODO
   useEffect(() => {
     if (rateLimited) {
-      if (userFilerMapIndex === -1) {
+      if (userFilterMapIndex === -1) {
         return;
       }
 
-      setAdvancedFilters([
-        {
-          filterMapIdx: userFilerMapIndex,
+      setAdvancedFilters((prev) => {
+        const newFilter: UIFilterRow = {
+          filterMapIdx: userFilterMapIndex,
           operatorIdx: 0,
           value: "rate_limited",
-        },
-      ]);
-    }
-  }, [userFilerMapIndex, rateLimited]);
+        };
 
+        if (isFilterRowNode(prev)) {
+          // Check if the rate limit filter already exists
+          const existingFilterIndex = prev.rows.findIndex(
+            (row) =>
+              isUIFilterRow(row) && row.filterMapIdx === userFilterMapIndex
+          );
+
+          if (existingFilterIndex !== -1) {
+            // Update existing filter
+            const updatedRows = [...prev.rows];
+            updatedRows[existingFilterIndex] = newFilter;
+            return { ...prev, rows: updatedRows };
+          } else {
+            // Add new filter
+            return { ...prev, rows: [...prev.rows, newFilter] };
+          }
+        } else {
+          // If prev is a single UIFilterRow, create a new UIFilterRowNode
+          return {
+            operator: "and",
+            rows: [prev, newFilter],
+          };
+        }
+      });
+    }
+  }, [userFilterMapIndex, rateLimited, setAdvancedFilters]);
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
     refetch();
@@ -486,6 +559,22 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     searchParams.set("requestId", row.id);
   };
 
+  const onSetAdvancedFiltersHandler = useCallback(
+    (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
+      setAdvancedFilters(filters);
+      if (
+        layoutFilterId === null ||
+        (isFilterRowNode(filters) && filters.rows.length === 0)
+      ) {
+        searchParams.delete("filters");
+      } else {
+        const currentAdvancedFilters = encodeFilters(filters);
+        searchParams.set("filters", currentAdvancedFilters);
+      }
+    },
+    [searchParams]
+  );
+
   const {
     organizationLayout: orgLayout,
     isLoading: isOrgLayoutLoading,
@@ -502,30 +591,21 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       : undefined
   );
 
-  const onSetAdvancedFiltersHandler = (
-    filters: UIFilterRow[],
-    layoutFilterId?: string | null
-  ) => {
-    setAdvancedFilters(filters);
-    if (layoutFilterId === null || filters.length === 0) {
-      searchParams.delete("filters");
-    } else {
-      const currentAdvancedFilters = filters.map(encodeFilter).join("|");
-
-      searchParams.set(
-        "filters",
-        `"${encodeURIComponent(currentAdvancedFilters)}"`
-      );
+  const transformedFilters = useMemo(() => {
+    if (orgLayout?.data?.filters) {
+      return transformOrganizationLayoutFilters(orgLayout.data.filters);
     }
-  };
+    return [];
+  }, [orgLayout?.data?.filters]);
 
   const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
     if (layoutFilter !== null) {
-      onSetAdvancedFiltersHandler(layoutFilter?.filter, layoutFilter.id);
-      setCurrFilter(layoutFilter?.id);
+      const transformedFilter = transformFilter(layoutFilter.filter[0]);
+      onSetAdvancedFiltersHandler(transformedFilter, layoutFilter.id);
+      setCurrFilter(layoutFilter.id);
     } else {
       setCurrFilter(null);
-      onSetAdvancedFiltersHandler([], null);
+      onSetAdvancedFiltersHandler({ operator: "and", rows: [] }, null);
     }
   };
 
@@ -668,7 +748,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
               organizationLayoutAvailable
                 ? {
                     currentFilter: currFilter ?? undefined,
-                    filters: orgLayout?.data?.filters ?? undefined,
+                    filters:
+                      transformedFilters && orgLayout?.data?.id
+                        ? transformedFilters
+                        : undefined,
                     onFilterChange: onLayoutFilterChange,
                     onSaveFilterCallback: async () => {
                       await orgLayoutRefetch();

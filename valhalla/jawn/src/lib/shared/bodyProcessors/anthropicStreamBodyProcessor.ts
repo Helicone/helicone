@@ -1,5 +1,6 @@
 import { calculateModel } from "../../../utils/modelMapper";
 import { consolidateTextFields } from "../../../utils/streamParser";
+import { getTokenCountAnthropic } from "../../tokens/tokenCounter";
 import { PromiseGenericResult, ok } from "../result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 import { isParseInputJson } from "./helpers";
@@ -15,13 +16,8 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
       });
     }
 
-    const {
-      responseBody,
-      requestBody,
-      tokenCounter,
-      requestModel,
-      modelOverride,
-    } = parseInput;
+    const { responseBody, requestBody, requestModel, modelOverride } =
+      parseInput;
     const model = calculateModel(requestModel, undefined, modelOverride);
     const lines = responseBody
       .split("\n")
@@ -69,8 +65,10 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
           ...lines[lines.length - 1],
           completion: lines.map((d) => d.completion).join(""),
         };
-        const completionTokens = await tokenCounter(claudeData.completion);
-        const promptTokens = await tokenCounter(
+        const completionTokens = await getTokenCountAnthropic(
+          claudeData.completion
+        );
+        const promptTokens = await getTokenCountAnthropic(
           JSON.parse(requestBody ?? "{}")?.prompt ?? ""
         );
         return ok({

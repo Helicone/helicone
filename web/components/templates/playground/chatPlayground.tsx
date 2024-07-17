@@ -29,6 +29,7 @@ interface ChatPlaygroundProps {
   temperature: number;
   maxTokens: number;
   tools?: ChatCompletionTool[];
+  providerAPIKey?: string;
   onSubmit?: (history: Message[]) => void;
   submitText?: string;
   customNavBar?: {
@@ -47,6 +48,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     onSubmit,
     submitText = "Submit",
     customNavBar,
+    providerAPIKey,
   } = props;
 
   const { setNotification } = useNotification();
@@ -57,6 +59,11 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
   const handleSubmit = async (history: Message[]) => {
     if (models.length < 1) {
       setNotification("Please select a model", "error");
+      return;
+    }
+
+    if (!providerAPIKey) {
+      setNotification("Please enter your API key to access provider.", "error");
       return;
     }
     setIsLoading(true);
@@ -92,6 +99,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             model: model.name,
             maxTokens,
             tools,
+            openAIApiKey: providerAPIKey,
           });
 
           // Record the end time and calculate latency
@@ -106,7 +114,8 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             historyWithoutId as unknown as ChatCompletionCreateParams[],
             temperature,
             model.name,
-            maxTokens
+            maxTokens,
+            providerAPIKey
           );
 
           // Record the end time and calculate latency
