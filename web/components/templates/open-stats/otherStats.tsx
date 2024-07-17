@@ -206,11 +206,13 @@ const fetchTotalCount = async (body: any) => {
   return response.data;
 };
 
-function useStats(queryParams: any) {
+function useStats(
+  queryParams: ReturnType<typeof useQueryParams>["queryParams"]
+) {
   const { timeSpan, models, provider } = queryParams;
   const body = {
     timespan: timeSpan,
-    models: models,
+    models: models === "none" ? [] : models.map((model) => model).sort(),
     provider: provider === "all" ? undefined : provider,
   };
 
