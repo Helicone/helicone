@@ -260,6 +260,12 @@ We are extremely open to contributors on documentation, integrations, and featur
 3. Run `yarn test -- -u` in the `cost/` directory to update the snapshot tests
 4. Run `yarn copy` in the `cost/` directory to copy the cost data into other directories
 
+# Contributors
+
+<a href="https://github.com/Helicone/helicone/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Helicone/helicone" />
+</a>
+
 ## License
 
 Helicone is licensed under the [Apache v2.0 License](LICENSE).
