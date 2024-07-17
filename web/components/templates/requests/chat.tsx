@@ -235,7 +235,7 @@ export const SingleChat = (props: {
   const formattedMessageContent = getFormattedMessageContent();
 
   const getBgColor = () => {
-    return "bg-gray-50 dark:bg-gray-950";
+    return "bg-transparent dark:bg-gray-950";
   };
 
   const isJSON = (content: string): boolean => {
@@ -254,7 +254,7 @@ export const SingleChat = (props: {
       <div
         className={clsx(
           getBgColor(),
-          "items-start p-4 text-left flex flex-row space-x-4 text-black dark:text-white ",
+          "items-start p-4 text-left flex flex-row space-x-4 text-black dark:text-white",
           isSystem && "font-semibold",
           isLast && "rounded-b-md"
         )}
@@ -343,6 +343,7 @@ interface ChatProps {
   isHeliconeTemplate?: boolean;
   hideTopBar?: boolean;
   messageSlice?: "lastTwo";
+  className?: string;
 }
 
 export const Chat = (props: ChatProps) => {
@@ -355,6 +356,7 @@ export const Chat = (props: ChatProps) => {
     selectedProperties,
     editable,
     isHeliconeTemplate,
+    className = "bg-gray-50",
   } = props;
 
   const [open, setOpen] = useState(false);
@@ -522,7 +524,12 @@ export const Chat = (props: ChatProps) => {
 
   return (
     <>
-      <div className="w-full flex flex-col text-left space-y-2 text-sm">
+      <div
+        className={clsx(
+          "w-full flex flex-col text-left space-y-2 text-sm",
+          className
+        )}
+      >
         <div className="w-full border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
           {!props.hideTopBar && (
             <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100">
