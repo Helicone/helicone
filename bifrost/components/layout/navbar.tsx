@@ -76,6 +76,10 @@ const NavLinks = () => {
       label: "Pricing",
     },
     {
+      href: "https://us.helicone.ai/open-stats",
+      label: "🌑 Open Stats",
+    },
+    {
       href: "/community",
       label: "Community",
     },
