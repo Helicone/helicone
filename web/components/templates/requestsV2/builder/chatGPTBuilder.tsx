@@ -202,6 +202,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
             requestId={this.response.request_id}
             model={this.model}
             hideTopBar={props?.hideTopBar}
+            className={props?.className}
             messageSlice={props?.messageSlice}
           />
         ) : (
