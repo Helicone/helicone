@@ -37,27 +37,26 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
   const [isSaveFiltersModalOpen, setIsSaveFiltersModalOpen] = useState(false);
   const [filterName, setFilterName] = useState("");
 
-  function encodeFilter(filter: UIFilterRow): string {
-    return `${filterMap[filter.filterMapIdx].label}:${
-      filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label
-    }:${encodeURIComponent(filter.value)}`;
-  }
+  const encodeFilters = (filters: UIFilterRowTree): string => {
+    const encode = (node: UIFilterRowTree): any => {
+      if (isFilterRowNode(node)) {
+        return {
+          type: "node",
+          operator: node.operator,
+          rows: node.rows.map(encode),
+        };
+      } else {
+        return {
+          type: "leaf",
+          filter: `${filterMap[node.filterMapIdx].label}:${
+            filterMap[node.filterMapIdx].operators[node.operatorIdx].label
+          }:${encodeURIComponent(node.value)}`,
+        };
+      }
+    };
 
-  function encodeFilters(filterTree: UIFilterRowTree): string {
-    if (isFilterRowNode(filterTree)) {
-      return filterTree.rows
-        .map((row) => {
-          if (isFilterRowNode(row)) {
-            return encodeFilters(row);
-          } else {
-            return encodeFilter(row);
-          }
-        })
-        .join("|");
-    } else {
-      return encodeFilter(filterTree);
-    }
-  }
+    return JSON.stringify(encode(filters));
+  };
 
   const onSaveFilter = async (name: string) => {
     if (filters) {
@@ -91,9 +90,8 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
         setNotification("Filter created successfully", "success");
         setIsSaveFiltersModalOpen(false);
         onSaveFilterCallback();
-        const currentAdvancedFilters = encodeURIComponent(
-          encodeFilters(filters)
-        );
+        const currentAdvancedFilters = encodeFilters(filters);
+
         searchParams.set("filters", currentAdvancedFilters);
       } else {
         const { error: createFilterError } = await jawn.POST(
@@ -116,9 +114,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
           setNotification("Filter created successfully", "success");
           setIsSaveFiltersModalOpen(false);
           onSaveFilterCallback();
-          const currentAdvancedFilters = encodeURIComponent(
-            encodeFilters(filters)
-          );
+          const currentAdvancedFilters = encodeFilters(filters);
           searchParams.set("filters", currentAdvancedFilters);
         }
       }

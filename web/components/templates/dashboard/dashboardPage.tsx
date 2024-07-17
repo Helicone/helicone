@@ -14,7 +14,7 @@ import {
   Legend,
 } from "@tremor/react";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { ModelMetric } from "../../../lib/api/models/models";
 import {
@@ -34,7 +34,6 @@ import {
   MetricsPanel,
   MetricsPanelProps,
 } from "../../shared/metrics/metricsPanel";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTableHeader from "../../shared/themed/themedHeader";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
@@ -47,6 +46,8 @@ import LoadingAnimation from "../../shared/loadingAnimation";
 import {
   OrganizationFilter,
   OrganizationLayout,
+  transformFilter,
+  transformOrganizationLayoutFilters,
 } from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
@@ -121,6 +122,13 @@ const DashboardPage = (props: DashboardPageProps) => {
       : undefined
   );
 
+  const transformedFilters = useMemo(() => {
+    if (orgLayout?.data?.filters) {
+      return transformOrganizationLayoutFilters(orgLayout.data.filters);
+    }
+    return [];
+  }, [orgLayout?.data?.filters]);
+
   const [currFilter, setCurrFilter] = useState<string | null>("");
 
   const getInterval = () => {
@@ -174,28 +182,25 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const encodeFilters = (filters: UIFilterRowTree): string => {
-    if (isFilterRowNode(filters)) {
-      const encoded = `${filters.operator}(${filters.rows
-        .map((row) => {
-          if (isFilterRowNode(row)) {
-            return encodeFilters(row);
-          } else {
-            return encodeFilter(row);
-          }
-        })
-        .join("|")})`;
-      return encoded;
-    } else {
-      const encoded = encodeFilter(filters);
-      return encoded;
-    }
-  };
+    const encode = (node: UIFilterRowTree): any => {
+      if (isFilterRowNode(node)) {
+        return {
+          type: "node",
+          operator: node.operator,
+          rows: node.rows.map(encode),
+        };
+      } else {
+        return {
+          type: "leaf",
+          filter: `${filterMap[node.filterMapIdx].label}:${
+            filterMap[node.filterMapIdx].operators[node.operatorIdx].label
+          }:${encodeURIComponent(node.value)}`,
+        };
+      }
+    };
 
-  function encodeFilter(filter: UIFilterRow): string {
-    return `${filterMap[filter.filterMapIdx].label}:${
-      filterMap[filter.filterMapIdx].operators[filter.operatorIdx].label
-    }:${filter.value}`;
-  }
+    return JSON.stringify(encode(filters));
+  };
 
   const {
     metrics,
@@ -216,38 +221,42 @@ const DashboardPage = (props: DashboardPageProps) => {
   });
 
   const getAdvancedFilters = useCallback((): UIFilterRowTree => {
-    function decodeFilter(encoded: string): UIFilterRow | UIFilterRowTree {
-      if (encoded.includes("(") && encoded.endsWith(")")) {
-        // This is a nested filter
-        const [operator, rest] = encoded.split("(");
-        const innerContent = rest.slice(0, -1); // Remove the closing parenthesis
-        const rows = innerContent.split("|").map(decodeFilter);
+    const decodeFilter = (encoded: any): UIFilterRowTree => {
+      if (encoded.type === "node") {
         return {
-          operator: operator as "and" | "or",
-          rows,
+          operator: encoded.operator as "and" | "or",
+          rows: encoded.rows.map(decodeFilter),
         };
       } else {
-        // This is a leaf filter
-        const parts = encoded.split(":");
-        if (parts.length !== 3) return getRootFilterNode();
-        const filterLabel = decodeURIComponent(parts[0]);
-        const operator = decodeURIComponent(parts[1]);
-        const value = decodeURIComponent(parts[2]);
-
+        const [filterLabel, operator, value] = encoded.filter.split(":");
         const filterMapIdx = filterMap.findIndex(
           (f) =>
             f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
         );
-        const operatorIdx = filterMap[filterMapIdx].operators.findIndex(
+        const operatorIdx = filterMap[filterMapIdx]?.operators.findIndex(
           (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
         );
 
-        if (isNaN(filterMapIdx) || isNaN(operatorIdx))
+        if (
+          isNaN(filterMapIdx) ||
+          isNaN(operatorIdx) ||
+          filterMapIdx === -1 ||
+          operatorIdx === -1
+        ) {
+          console.log("Invalid filter map or operator index", {
+            filterLabel,
+            operator,
+          });
           return getRootFilterNode();
+        }
 
-        return { filterMapIdx, operatorIdx, value };
+        return {
+          filterMapIdx,
+          operatorIdx,
+          value: decodeURIComponent(value),
+        };
       }
-    }
+    };
 
     try {
       const currentAdvancedFilters = searchParams.get("filters");
@@ -257,7 +266,10 @@ const DashboardPage = (props: DashboardPageProps) => {
           /^"|"$/g,
           ""
         );
-        return decodeFilter(filters) as UIFilterRowTree;
+
+        const parsedFilters = JSON.parse(filters);
+        const result = decodeFilter(parsedFilters);
+        return result;
       }
     } catch (error) {
       console.error("Error decoding advanced filters:", error);
@@ -278,7 +290,6 @@ const DashboardPage = (props: DashboardPageProps) => {
   const onSetAdvancedFiltersHandler = useCallback(
     (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
       setAdvancedFilters(filters);
-
       if (
         layoutFilterId === null ||
         (isFilterRowNode(filters) && filters.rows.length === 0)
@@ -286,18 +297,8 @@ const DashboardPage = (props: DashboardPageProps) => {
         searchParams.delete("filters");
       } else {
         const currentAdvancedFilters = encodeFilters(filters);
-        searchParams.set(
-          "filters",
-          `"${encodeURIComponent(currentAdvancedFilters)}"`
-        );
+        searchParams.set("filters", currentAdvancedFilters);
       }
-
-      // Update the URL immediately
-      const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
-      console.log("Updating URL to:", newUrl);
-      window.history.pushState({ path: newUrl }, "", newUrl);
-
-      refetch();
     },
     [encodeFilters, refetch]
   );
@@ -454,11 +455,8 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
     if (layoutFilter !== null) {
-      const combinedFilter: UIFilterRowTree = {
-        operator: "and",
-        rows: layoutFilter.filter,
-      };
-      onSetAdvancedFiltersHandler(combinedFilter, layoutFilter.id);
+      const transformedFilter = transformFilter(layoutFilter.filter[0]);
+      onSetAdvancedFiltersHandler(transformedFilter, layoutFilter.id);
       setCurrFilter(layoutFilter.id);
     } else {
       setCurrFilter(null);
@@ -585,7 +583,10 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
             savedFilters={{
               currentFilter: currFilter ?? undefined,
-              filters: orgLayout?.data?.filters ?? undefined,
+              filters:
+                transformedFilters && orgLayout?.data?.id
+                  ? transformedFilters
+                  : undefined,
               onFilterChange: onLayoutFilterChange,
               onSaveFilterCallback: async () => {
                 await orgLayoutRefetch();
