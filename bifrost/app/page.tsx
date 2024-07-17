@@ -256,13 +256,15 @@ export default function Home() {
           </div>
           <Integrations />
         </section>
-        <section className="flex flex-col px-3 pt-6 pb-12 mx-auto max-w-full">
-          <div className="flex flex-col px-3 space-y-2 ">
+        <section
+          id="essentials"
+          className="flex flex-col px-3 pt-6 pb-12 mx-auto max-w-full">
+          <div className="flex flex-col px-3 space-y-2 gap-3 md:gap-3">
             <h1 className="text-3xl px-3 font-bold text-sky-500 gap-3 md:text-center md:text-5xl">Unified {" "}
               <span className="text-black">observability and monitoring</span>
             </h1>
             <p className="font-light text-gray-600 px-3 md:text-center md:text-xl">
-            We are building a platform that provides all the essential tools for observability in Gen AI. 
+              We are building a platform that provides all the essential tools for observability in Gen AI.
             </p>
             <Essentials />
           </div>
@@ -276,14 +278,14 @@ export default function Home() {
             <Enterprise />
           </div>
         </section>
-        <section className="w-full flex flex-col max-w-6xl mx-auto space-y-4 py-32 px-4">
+        <section className="w-full flex flex-col gap-4 max-w-6xl mx-auto space-y-4 py-32 px-4">
           <h2 className="sr-only">
             No packages, just{" "}
             <span className="text-sky-500">headers</span>
           </h2>
           <Platform />
         </section>
-        <section className="w-full max-w-6xl lg:py-20 lg:px-7 py-6 px-3">
+        <section id="opensource" className="max-w-6xl lg:py-20 lg:px-7 py-6 px-3">
           <div className="px-3 lg:text-center">
             <h1 className="sr-only">Frequently asked questions</h1>
             <OpenSource />
@@ -291,8 +293,38 @@ export default function Home() {
         </section>
         <section className="w-full max-w-6xl lg:py-20 lg:px-7 py-12 px-3">
           <div className="px-3 lg:text-center">
-            <h1 className="font-bold text-3xl">Frequently asked questions</h1>
+            <h1 className="font-bold text-3xl md:text-5xl lg:py-6">Frequently asked questions</h1>
             <FAQ />
+          </div>
+        </section>
+        <section className="w-full lg:flex  bg-blue-800 hidden">
+          <div className="bg-[url('/static/leftbg.webp')] bg-repeat">
+            <Image
+              src={"/static/left-sidecube.webp"}
+              alt=""
+              height={500}
+              width={500}
+              className=""
+            />
+          </div>
+          <div className="flex flex-col items-center gap-12 py-12 px-12 ">
+            <div className="px-3 lg:text-center">
+              <h1 className="font-semibold text-5xl text-white md:text-5xl lg:py-6">Starting with Helicone is simple, free and fun.</h1>
+              <p className="text-white text-2xl font-light">Join users from all over the planet that used Helicone to supercharge their AI workflow.</p>
+            </div>
+            <div className="flex flex-row gap-[10px] ">
+              <button className="text-white text-lg border-2 px-6 py-2 rounded-lg font-semibold">Get a demo</button>
+              <button className="text-blue-800 bg-white text-lg border-2 px-6 py-3 rounded-lg font-semibold ">Start for free <FaChevronRight className="inline h-5 w-5 pb-1" /> </button>
+            </div>
+          </div>
+          <div className="bg-[url('/static/rightbg.webp')]">
+            <Image
+              src={"/static/right-sidecube.webp"}
+              alt=""
+              height={500}
+              width={500}
+              className=""
+            />
           </div>
         </section>
       </main>

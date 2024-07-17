@@ -104,39 +104,31 @@ const features = [
 export default function Platform() {
   return (
     <>
-      <div className="flex flex-col space-y-4 w-full items-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-black tracking-tight leading-tight">
+      <div className="flex flex-col space-y-4 w-full items-center lg:py-14">
+        <h2 className="text-3xl md:text-5xl font-bold text-black tracking-tight md:tracking-normal leading-tight">
           No packages, just{" "}
           <span className="text-sky-500 ">headers</span>
         </h2>
-        <p className="text-md md:text-md text-gray-600 max-w-4xl font-light">
+        <p className="text-md md:text-2xl text-gray-600 max-w-4xl font-light">
           Access just about every Helicone features in seconds.
         </p>
-      </div>
-      <div className="relative overflow-hidden pt-2">
-        <div className="mx-auto max-w-8xl px-6 lg:px-8">
-
-          <div className="relative" aria-hidden="true">
-            <div />
-          </div>
-        </div>
       </div>
       <div className="mx-auto mt-16 max-w-8xl sm:mt-20 md:mt-24 lg:px-8">
         <dl className="mx-auto grid max-w-2xl grid-cols-2 gap-x-6 gap-y-10 text-base leading-7 text-gray-600 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-4 lg:gap-x-8 lg:gap-y-16">
           {features.map((feature) => (
             <div key={feature.name} className="relative lg:flex" >
               <feature.icon
-                className=" h-5 w-5 text-sky-500 lg:mr-2 flex-shrink-0"
+                className=" h-5 w-5 lg:h-8 lg:w-6 text-sky-500 lg:mr-2 flex-shrink-0"
                 aria-hidden="true"
 
               />
               <div className="lg:flex flex-col">
-                <dt className="inline font-semibold text-nowrap text-sm text-sky-500">
+                <dt className="inline font-semibold text-nowrap text-sm lg:text-lg text-sky-500">
                   <Link href={feature.href}>
                     {feature.name}
                   </Link>
                 </dt>{" "}
-                <dd className="font-light text-sm pt-1 lg:">{feature.description}</dd>
+                <dd className="font-light text-gray-400 text-sm pt-1 lg:">{feature.description}</dd>
               </div>
             </div>
           ))}
