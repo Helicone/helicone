@@ -11,6 +11,15 @@ module.exports = {
     transparent: "transparent",
     current: "currentColor",
     extend: {
+      animation: {
+        popin: "popin 1s ease-out forwards",
+      },
+      keyframes: {
+        popin: {
+          "0%": { transform: "scale(0)", opacity: "0" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
+      },
       colors: {
         // light mode
         tremor: {
