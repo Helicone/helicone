@@ -2174,7 +2174,7 @@
 						"enum": [
 							"line",
 							"bar",
-							"pie"
+							"donut"
 						]
 					},
 					"data": {

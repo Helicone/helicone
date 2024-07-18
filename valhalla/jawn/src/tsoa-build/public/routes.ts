@@ -724,7 +724,7 @@ const models: TsoaRoute.Models = {
     "GeneratedChart": {
         "dataType": "refObject",
         "properties": {
-            "chartType": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["line"]},{"dataType":"enum","enums":["bar"]},{"dataType":"enum","enums":["pie"]}],"required":true},
+            "chartType": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["line"]},{"dataType":"enum","enums":["bar"]},{"dataType":"enum","enums":["donut"]}],"required":true},
             "data": {"dataType":"array","array":{"dataType":"any"},"required":true},
         },
         "additionalProperties": false,

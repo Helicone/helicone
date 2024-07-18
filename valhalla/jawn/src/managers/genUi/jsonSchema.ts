@@ -42,10 +42,13 @@ export const generateRequestFiltersSchema: ChatCompletionTool[] = [
   },
 ];
 
-export const getFinalPrompt = (prompt: string, additionalParams: string): string =>
+export const getFinalPrompt = (
+  prompt: string,
+  additionalParams: string
+): string =>
   `Generate Clickhouse query for the request data based on follow user request: ${prompt} and return as a query with output params(selected fields with types).
    Final result of executing this query should return data like {name: string, value: number} to be rendered in Frontend, so you need to diced which metric or DB field to pass to name and value. And also you need to choose suitable chart to render this data. For line chart we need return data in follow style {name: "date", value1: "number", value2: "number"} and so on, so this line chart can have multiple lines like value1 it's a first metric, value2 is a second and so on.
-   Use Line chart for multiple metric comparison and bar or pie chart for single metric comparison.
+   Use Line chart for multiple metric comparison and bar or donut chart for single metric comparison.
     here's Clickhouse DB schema:
     default.request_response_versioned (
     response_id Nullable(UUID),

@@ -726,7 +726,7 @@ Json: JsonObject;
     "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
     GeneratedChart: {
       /** @enum {string} */
-      chartType: "line" | "bar" | "pie";
+      chartType: "line" | "bar" | "donut";
       data: unknown[];
     };
     ResultSuccess_GeneratedChart_: {

@@ -18,7 +18,7 @@ import { isValidTimeZoneDifference } from "../../utils/helpers";
 import moment from "moment";
 
 export interface GeneratedChart {
-  chartType: "line" | "bar" | "pie";
+  chartType: "line" | "bar" | "donut";
   data: any[];
 }
 
@@ -28,7 +28,7 @@ type GeneratedQuery = {
     name: string;
     parameterType: string;
   }[];
-  chartType: "line" | "bar" | "pie";
+  chartType: "line" | "bar" | "donut";
 };
 
 export class GenUiManager extends BaseManager {
