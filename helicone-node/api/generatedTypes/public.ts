@@ -57,6 +57,9 @@ export interface paths {
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
   };
+  "/v1/genUi": {
+    post: operations["GenearteChart"];
+  };
   "/v1/experiment/dataset": {
     post: operations["AddDataset"];
   };
@@ -721,6 +724,20 @@ Json: JsonObject;
       error: null;
     };
     "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    GeneratedChart: {
+      /** @enum {string} */
+      chartType: "line" | "bar" | "pie";
+      data: unknown[];
+    };
+    ResultSuccess_GeneratedChart_: {
+      data: components["schemas"]["GeneratedChart"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_GeneratedChart.string_": components["schemas"]["ResultSuccess_GeneratedChart_"] | components["schemas"]["ResultError_string_"];
+    NewChartParams: {
+      prompt: string;
+    };
     "ResultSuccess__datasetId-string__": {
       data: {
         datasetId: string;
@@ -1355,6 +1372,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GenearteChart: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NewChartParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_GeneratedChart.string_"];
         };
       };
     };

@@ -234,6 +234,8 @@ export class RequestManager extends BaseManager {
       newFilter = this.addPartOfExperimentFilter(isPartOfExperiment, newFilter);
     }
 
+    console.log("filterFinal", JSON.stringify(newFilter));
+
     const requests = isCached
       ? await getRequestsCached(
           this.authParams.organizationId,
