@@ -57,7 +57,7 @@ export interface paths {
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
   };
-  "/v1/genUi": {
+  "/v1/genUi/chart": {
     post: operations["GenearteChart"];
   };
   "/v1/experiment/dataset": {
