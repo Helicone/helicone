@@ -54,7 +54,11 @@ export class DemoController extends Controller {
         apiKey: process.env.OPENAI_API_KEY,
         baseURL: "https://oai.helicone.ai/v1",
         defaultHeaders: {
-          "Helicone-Auth": `Bearer ${request.env.HELICONE_API_KEY}`,
+          "Helicone-Auth": `Bearer ${apiKey}`,
+          "Helicone-Rate-Limit":
+            "Helicone-RateLimit-Policy: 10;w=1000;u=requests;s=user",
+
+          "Helicone-Cache-Enabled": "true",
         },
       });
 
