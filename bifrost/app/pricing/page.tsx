@@ -229,7 +229,7 @@ export default function Example() {
           </p>
           <div className="flex items-center gap-4 pt-4">
             <Link
-              href="/contact"
+              href="https://us.helicone.ai/signup?demo=true"
               className="bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
             >
               Get a demo

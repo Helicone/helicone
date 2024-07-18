@@ -1,11 +1,10 @@
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useUser } from "@supabase/auth-helpers-react";
+import { useState } from "react";
+import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { Database } from "../../../../supabase/database.types";
+import { Row } from "../../../layout/common";
 import { clsx } from "../../../shared/clsx";
 import CreateOrgForm from "../createOrgForm";
-import { useState } from "react";
-import useNotification from "../../../shared/notification/useNotification";
-import { useRouter } from "next/router";
-import { useOrg } from "../../../layout/organizationContext";
 import { DeleteOrgModal } from "../deleteOrgModal";
 
 interface OrgSettingsPageProps {
@@ -16,11 +15,9 @@ interface OrgSettingsPageProps {
 const OrgSettingsPage = (props: OrgSettingsPageProps) => {
   const { org, variant = "organization" } = props;
   const user = useUser();
-  const orgContext = useOrg();
-  const router = useRouter();
-  const { setNotification } = useNotification();
-  const supabaseClient = useSupabaseClient();
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [, setOpenDemo] = useLocalStorage("openDemo", false);
+  const [, setRemovedDemo] = useLocalStorage("removedDemo", false);
 
   const isOwner = org.owner === user?.id;
 
@@ -58,9 +55,21 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
             }}
             variant={"organization"}
           />
+          <Row className="w-full justify-end mt-10 ">
+            <button
+              className="bg-white rounded-lg px-5 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+              onClick={() => {
+                setOpenDemo(true);
+                setRemovedDemo(false);
+                window.location.reload();
+              }}
+            >
+              Launch Demo Widget (Reload) 🚀
+            </button>
+          </Row>
         </div>
         {isOwner && (
-          <div className="py-36 flex flex-col">
+          <div className="py-20 flex flex-col">
             <div className="flex flex-row">
               <button
                 type="button"

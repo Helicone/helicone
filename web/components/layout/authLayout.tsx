@@ -42,6 +42,9 @@ import { useTheme } from "../shared/theme/themeContext";
 import { ThemedSwitch } from "../shared/themed/themedSwitch";
 import { getUSDate, signOut } from "../shared/utils/utils";
 import MetaData from "./public/authMetaData";
+import ThemedBubbleModal from "../shared/themed/themedBubbleModal";
+import { DemoGame } from "../shared/themed/demo/demoGame";
+import { useLocalStorage } from "../../services/hooks/localStorage";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
@@ -169,11 +172,22 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const { alertBanners, isAlertBannersLoading, refetch } = useAlertBanners();
 
+  const [openDemo, setOpenDemo] = useLocalStorage("openDemo", false);
+  const [removedDemo, setRemovedDemo] = useLocalStorage("removedDemo", false);
   const banner = alertBanners?.data?.find((x) => x.active);
 
   return (
     <MetaData title={`${currentPage} ${"- " + (org?.currentOrg?.name || "")}`}>
       <div>
+        <ThemedBubbleModal
+          open={openDemo}
+          setOpen={setOpenDemo}
+          setRemoved={setRemovedDemo}
+          removed={removedDemo}
+        >
+          <DemoGame setOpenDemo={setOpenDemo} />
+        </ThemedBubbleModal>
+
         <Transition.Root show={sidebarOpen} as={Fragment}>
           <Dialog
             as="div"
