@@ -125,7 +125,7 @@ export const allModelVariations = modelNames.flatMap(
 );
 
 for (const model of modelNames) {
-  if (!providersNames.includes(model.provider as any)) {
+  if (!allProviders.includes(model.provider as any)) {
     throw new Error(`Provider ${model.provider} is not a valid provider`);
   }
 }

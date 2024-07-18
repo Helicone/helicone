@@ -979,8 +979,7 @@
 					"GROQ",
 					"COHERE",
 					"MISTRAL",
-					"DEEPINFRA",
-					"META"
+					"DEEPINFRA"
 				]
 			},
 			"Provider": {

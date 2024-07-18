@@ -631,7 +631,7 @@ WHEN (request_response_log.model = 'mistral-embed') THEN 100 * request_response_
   ELSE 0
 END
 )
-    ELSE
+    ELSE 
   CASE
   WHEN (request_response_log.model = 'ada') THEN 400 * request_response_log.prompt_tokens + 400 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'text-ada-001') THEN 400 * request_response_log.prompt_tokens + 400 * request_response_log.completion_tokens
