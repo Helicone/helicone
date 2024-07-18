@@ -64,11 +64,28 @@ export class GenUiManager extends BaseManager {
       return { data: null, error: "Error fetching data from Clickhouse" };
     }
     console.log("filter", generatedQuerry.data);
+    //@ts-ignore
+    const data = clickhouseData.data.filter((x) => x.name !== "") ?? [];
+    if (generatedQuerry.data.chartType === "donut") {
+      const c = data.map((x) => ({
+        //@ts-ignore
+        name: x.name,
+        //@ts-ignore
+        value: Number(x.value),
+      }));
+      return {
+        data: {
+          chartType: generatedQuerry.data.chartType,
+          data: c,
+        },
+        error: null,
+      };
+    }
     return {
       data: {
         chartType: generatedQuerry.data.chartType,
-        //@ts-ignore
-        data: clickhouseData.data.filter((x) => x.name !== "") ?? [],
+
+        data: data,
       },
       error: null,
     };
