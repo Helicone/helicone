@@ -101,6 +101,11 @@ export const modelNames = [
       "text-embedding-ada-002",
     ],
   },
+  {
+    model: "anthropic/claude-3.5-sonnet",
+    provider: "OPENROUTER",
+    variations: ["anthropic/claude-3.5-sonnet"],
+  },
 ] as const;
 
 const MODELS = Array.from(new Set(modelNames.map((m) => m.model)));
