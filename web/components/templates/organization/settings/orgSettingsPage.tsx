@@ -1,14 +1,11 @@
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useUser } from "@supabase/auth-helpers-react";
+import { useState } from "react";
+import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { Database } from "../../../../supabase/database.types";
+import { Row } from "../../../layout/common";
 import { clsx } from "../../../shared/clsx";
 import CreateOrgForm from "../createOrgForm";
-import { useState } from "react";
-import useNotification from "../../../shared/notification/useNotification";
-import { useRouter } from "next/router";
-import { useOrg } from "../../../layout/organizationContext";
 import { DeleteOrgModal } from "../deleteOrgModal";
-import { Row } from "../../../layout/common";
-import { useLocalStorage } from "../../../../services/hooks/localStorage";
 
 interface OrgSettingsPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];

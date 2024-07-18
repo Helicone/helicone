@@ -82,7 +82,7 @@ export interface paths {
     get: operations["FineTuneJobStats"];
   };
   "/v1/demo/completion": {
-    post: operations["DatasetFineTune"];
+    post: operations["DemoCompletion"];
   };
   "/v1/admin/orgs/top": {
     post: operations["GetTopOrgs"];
@@ -1128,22 +1128,21 @@ export interface operations {
     };
   };
   DatasetFineTune: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
     requestBody: {
       content: {
-        "application/json": {
-          sessionName?: string;
-          sessionId?: string;
-          userEmail?: string;
-          promptId: string;
-          messages: components["schemas"]["ChatCompletionMessageParam"][];
-        };
+        "application/json": components["schemas"]["FineTuneBodyParams"];
       };
     };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_ChatCompletion.string_"];
+          "application/json": components["schemas"]["FineTuneResult"];
         };
       };
     };
@@ -1187,6 +1186,27 @@ export interface operations {
             events: unknown;
             job: unknown;
           };
+        };
+      };
+    };
+  };
+  DemoCompletion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          sessionName?: string;
+          sessionId?: string;
+          userEmail?: string;
+          promptId: string;
+          messages: components["schemas"]["ChatCompletionMessageParam"][];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ChatCompletion.string_"];
         };
       };
     };

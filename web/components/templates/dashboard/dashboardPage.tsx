@@ -60,8 +60,6 @@ import {
   isFilterRowNode,
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
-import ThemedModal from "../../shared/themed/themedModal";
-import ThemedBubbleModal from "../../shared/themed/themedBubbleModal";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 

@@ -23,7 +23,7 @@ OPENAI_KEY = OPENAI_KEY ?? process.env.OPENAI_API_KEY;
 export class DemoController extends Controller {
   @Post("completion")
   @Tags("Demo")
-  public async datasetFineTune(
+  public async demoCompletion(
     @Body()
     body: {
       messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[];

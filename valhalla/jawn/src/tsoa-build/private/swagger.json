@@ -3036,7 +3036,7 @@
 		},
 		"/v1/demo/completion": {
 			"post": {
-				"operationId": "DatasetFineTune",
+				"operationId": "DemoCompletion",
 				"responses": {
 					"200": {
 						"description": "Ok",

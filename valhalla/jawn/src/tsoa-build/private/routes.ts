@@ -1451,9 +1451,9 @@ export function RegisterRoutes(app: Router) {
         app.post('/v1/demo/completion',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(DemoController)),
-            ...(fetchMiddlewares<RequestHandler>(DemoController.prototype.datasetFineTune)),
+            ...(fetchMiddlewares<RequestHandler>(DemoController.prototype.demoCompletion)),
 
-            async function DemoController_datasetFineTune(request: ExRequest, response: ExResponse, next: any) {
+            async function DemoController_demoCompletion(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"sessionName":{"dataType":"string"},"sessionId":{"dataType":"string"},"userEmail":{"dataType":"string"},"promptId":{"dataType":"string","required":true},"messages":{"dataType":"array","array":{"dataType":"refAlias","ref":"ChatCompletionMessageParam"},"required":true}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -1468,7 +1468,7 @@ export function RegisterRoutes(app: Router) {
                 const controller = new DemoController();
 
               await templateService.apiHandler({
-                methodName: 'datasetFineTune',
+                methodName: 'demoCompletion',
                 controller,
                 response,
                 next,
