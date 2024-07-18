@@ -1,3 +1,4 @@
+import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { Provider } from "../../models/models";
 import { SetOnce } from "../../utils/setOnce";
 import { AuthParams, OrgParams } from "../db/supabase";
@@ -20,11 +21,6 @@ export class HandlerContext extends SetOnce {
     this.usage = {};
     this.rawLog = {};
   }
-}
-
-export interface TemplateWithInputs {
-  template: object;
-  inputs: { [key: string]: string };
 }
 
 export type Log = {

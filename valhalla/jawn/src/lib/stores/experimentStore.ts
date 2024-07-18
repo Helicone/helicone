@@ -38,6 +38,7 @@ export interface Experiment {
         requestId: string;
         requestPath: string;
         inputs: Record<string, string>;
+        autoInputs: Record<string, string>[];
         response: ResponseObj;
         request: RequestObj;
       };
@@ -147,7 +148,8 @@ function getExperimentsQuery(
                         }
                         'requestId', pir.source_request,
                         'requestPath', re.path,
-                        'inputs', pir.inputs
+                        'inputs', pir.inputs,
+                        'autoInputs', pir.auto_prompt_inputs
                       )
                       FROM prompt_input_record pir
                       left join request re on re.id = pir.source_request

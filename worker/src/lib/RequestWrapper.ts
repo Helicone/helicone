@@ -13,8 +13,9 @@ import {
   checkLimitsSingle,
 } from "./managers/UsageLimitManager.ts";
 import { getAndStoreInCache } from "./util/cache/secureCache";
-import { parseJSXObject } from "../api/lib/promptHelpers";
+
 import { CfProperties } from "@cloudflare/workers-types";
+import { parseJSXObject } from "@helicone/prompts";
 
 export type RequestHandlerType =
   | "proxy_only"

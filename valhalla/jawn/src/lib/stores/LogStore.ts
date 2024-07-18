@@ -389,10 +389,11 @@ export class LogStore {
       try {
         // Record the inputs and source request
         await t.none(
-          `INSERT INTO prompt_input_record (inputs, source_request, prompt_version, created_at)
+          `INSERT INTO prompt_input_record (inputs, auto_prompt_inputs, source_request, prompt_version, created_at)
        VALUES ($1, $2, $3, $4)`,
           [
             JSON.stringify(heliconeTemplate.inputs),
+            JSON.stringify(heliconeTemplate?.autoInputs ?? []),
             requestId,
             versionId,
             newPromptRecord.createdAt.toISOString(),
