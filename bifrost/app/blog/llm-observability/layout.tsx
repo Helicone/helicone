@@ -19,7 +19,8 @@ export const metadata: Metadata = {
     url: "https://www.helicone.ai/blog/llm-observability",
     description:
       "LLM observability is the practice of monitoring and analyzing Large Language Model systems in production. It tracks inputs, outputs, and performance metrics to ensure reliability and improve AI applications. Learn how it differs from traditional observability.",
-    images: "https://www.helicone.ai/static/blog/llm-observability.webp",
+    images:
+      "https://www.helicone.ai/static/blog/llm-observability-cover.webp", 
     locale: "en_US",
   },
   twitter: {
@@ -27,7 +28,8 @@ export const metadata: Metadata = {
     description:
       "LLM observability is the practice of monitoring and analyzing Large Language Model systems in production. It tracks inputs, outputs, and performance metrics to ensure reliability and improve AI applications. Learn how it differs from traditional observability.",
     card: "summary_large_image",
-    images: "https://www.helicone.ai/static/blog/llm-observability.webp",
+    images:
+      "https://www.helicone.ai/static/blog/llm-observability-cover.webp", 
   },
 };
 
