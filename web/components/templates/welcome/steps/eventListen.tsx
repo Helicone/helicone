@@ -160,14 +160,14 @@ const EventListen = (props: EventListenProps) => {
           </button>
         </div>
       </div>
-      <ThemedBubbleModal
+      {/* <ThemedBubbleModal
         open={openDemo}
         setOpen={setOpenDemo}
         setRemoved={setRemovedDemo}
         removed={removedDemo}
       >
         <DemoGame setOpenDemo={setOpenDemo} />
-      </ThemedBubbleModal>
+      </ThemedBubbleModal> */}
     </div>
   );
 };
