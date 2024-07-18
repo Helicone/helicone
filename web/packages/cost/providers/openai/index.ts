@@ -285,6 +285,28 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "gpt-4o-mini",
+    },
+    cost: {
+      prompt_token: 0.00000015,
+      completion_token: 0.0000006,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-4o-mini-2024-07-18",
+    },
+    cost: {
+      prompt_token: 0.00000015,
+      completion_token: 0.0000006,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
       value: "gpt-3.5-turbo-0613",
     },
     cost: {

@@ -100,6 +100,14 @@ test("cost calc snapshot test", () => {
         "provider": "OPENAI"
     },
     {
+        "name": "gpt-4o-mini",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "gpt-4o-mini-2024-07-18",
+        "provider": "OPENAI"
+    },
+    {
         "name": "gpt-3.5-turbo-0613",
         "provider": "OPENAI"
     },
@@ -204,6 +212,14 @@ test("cost calc snapshot test", () => {
         "provider": "AZURE"
     },
     {
+        "name": "gpt-4o-mini",
+        "provider": "AZURE"
+    },
+    {
+        "name": "gpt-4o-mini-2024-07-18",
+        "provider": "AZURE"
+    },
+    {
         "name": "gpt-3.5-turbo-0613",
         "provider": "AZURE"
     },
@@ -290,6 +306,8 @@ WHEN (request_response_log.model = 'gpt-4-1106-preview') THEN 10000 * request_re
 WHEN (request_response_log.model = 'gpt-4-1106-vision-preview') THEN 10000 * request_response_log.prompt_tokens + 30000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-4o') THEN 5000 * request_response_log.prompt_tokens + 15000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-4o-2024-05-13') THEN 5000 * request_response_log.prompt_tokens + 15000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt-4o-mini') THEN 150 * request_response_log.prompt_tokens + 600 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt-4o-mini-2024-07-18') THEN 150 * request_response_log.prompt_tokens + 600 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-3.5-turbo-0613') THEN 1500 * request_response_log.prompt_tokens + 2000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-35-turbo-16k') THEN 3000 * request_response_log.prompt_tokens + 4000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-3.5-turbo-16k-0613') THEN 3000 * request_response_log.prompt_tokens + 4000 * request_response_log.completion_tokens
@@ -613,7 +631,7 @@ WHEN (request_response_log.model = 'mistral-embed') THEN 100 * request_response_
   ELSE 0
 END
 )
-    ELSE 
+    ELSE
   CASE
   WHEN (request_response_log.model = 'ada') THEN 400 * request_response_log.prompt_tokens + 400 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'text-ada-001') THEN 400 * request_response_log.prompt_tokens + 400 * request_response_log.completion_tokens
@@ -641,6 +659,8 @@ WHEN (request_response_log.model = 'gpt-4-1106-preview') THEN 10000 * request_re
 WHEN (request_response_log.model = 'gpt-4-1106-vision-preview') THEN 10000 * request_response_log.prompt_tokens + 30000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-4o') THEN 5000 * request_response_log.prompt_tokens + 15000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-4o-2024-05-13') THEN 5000 * request_response_log.prompt_tokens + 15000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt-4o-mini') THEN 150 * request_response_log.prompt_tokens + 600 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gpt-4o-mini-2024-07-18') THEN 150 * request_response_log.prompt_tokens + 600 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-3.5-turbo-0613') THEN 1500 * request_response_log.prompt_tokens + 2000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-35-turbo-16k') THEN 3000 * request_response_log.prompt_tokens + 4000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'gpt-3.5-turbo-16k-0613') THEN 3000 * request_response_log.prompt_tokens + 4000 * request_response_log.completion_tokens
