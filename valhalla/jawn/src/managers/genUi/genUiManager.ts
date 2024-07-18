@@ -42,8 +42,17 @@ export class GenUiManager extends BaseManager {
       prompt,
       `WHERE default.request_response_versioned.organization_id = '${this.authParams.organizationId}'`
     );
+
     if (!generatedQuerry.data || generatedQuerry.error) {
       return { data: null, error: "Error generating chart" };
+    }
+
+    if (
+      generatedQuerry.data.query.toLowerCase().includes("drop") ||
+      generatedQuerry.data.query.toLowerCase().includes("truncate") ||
+      generatedQuerry.data.query.toLowerCase().includes("delete")
+    ) {
+      return { data: null, error: "Invalid query" };
     }
 
     const clickhouseData = await dbQueryClickhouse<any[]>(
