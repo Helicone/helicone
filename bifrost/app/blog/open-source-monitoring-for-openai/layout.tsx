@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: "The Next Evolution in OpenAI Monitoring and Optimization - Helicone",
   description:
     "Learn how Helicone provides unmatched insights into your OpenAI usage, allowing you to monitor, optimize, and take control like never before.",
-  icons: "https://www.helicone.ai/static/logo.png",
+  icons: "https://www.helicone.ai/static/logo.webp",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     "A LangSmith Alternative that Takes LLM Observability to the Next Level - Helicone",
   description:
     "Both Helicone and LangSmith are capable, powerful DevOps platform used by enterprises and developers building LLM applications. But which is better?",
-  icons: "https://www.helicone.ai/static/logo.png",
+  icons: "https://www.helicone.ai/static/logo.webp",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",

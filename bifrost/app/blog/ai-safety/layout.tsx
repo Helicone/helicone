@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     "Why Observability is the key to ethical and safe Artificial Intelligence - Helicone",
   description:
     "As AI continues to shape our world, the need for ethical practices and robust observability has never been greater. Learn how Helicone is rising to the challenge.",
-  icons: "https://www.helicone.ai/static/logo.png",
+  icons: "https://www.helicone.ai/static/logo.webp",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
