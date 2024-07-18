@@ -22,6 +22,27 @@ const ChartsModal = (props: ModalProps) => {
     data: null,
   });
 
+  function convertToCSV(arr: any[]) {
+    const array = [Object.keys(arr[0])].concat(arr)
+
+    return array.map(it => {
+      return Object.values(it).toString()
+    }).join('\n')
+  }
+
+  function handleDownload(content: string) {
+    const file = new Blob([content], { type: 'text/csv' });
+    const fileURL = URL.createObjectURL(file);
+    const link = document.createElement('a');
+    link.href = fileURL;
+    link.download = 'export.csv';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+
   async function handleSubmit() {
     const res = await fetch("/api/genui/chartData", {
       method: "POST",
@@ -152,7 +173,15 @@ const ChartsModal = (props: ModalProps) => {
                 onValueChange={(v) => console.log(v)}
               />
             )}
+
+            <button type="button" className="bg-black text-white rounded-md p-2 w-max" onClick={() => {
+              handleDownload(convertToCSV(chartData.data));
+            }}>
+              Export
+            </button>
+
           </div>
+
         )}
       </div>
     </ThemedModal>
