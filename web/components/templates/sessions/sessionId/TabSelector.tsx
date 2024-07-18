@@ -13,7 +13,7 @@ function TabSelector<T extends string>({
   setCurrentTopView,
 }: TabSelectorProps<T>) {
   return (
-    <div className="border-2 mt-[24px] mb-[24px] flex flex-row h-[34px] text-gray-500 rounded-md bg-white w-fit">
+    <div className="border-2 mt-4 mb flex flex-row h-[34px] text-gray-500 rounded-lg bg-white w-fit">
       {tabs.map((tab, i) => (
         <button
           key={`${tab}-${i}`}

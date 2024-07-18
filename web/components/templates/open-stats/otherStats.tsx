@@ -43,6 +43,11 @@ export const modelNames = [
     variations: ["gpt-4o", "gpt-4o-2024-05-13"],
   },
   {
+    model: "gpt-4o-mini",
+    provider: "OPENAI",
+    variations: ["gpt-4o-mini", "gpt-4o-mini-2024-07-18"],
+  },
+  {
     model: "gpt-4",
     provider: "OPENAI",
     variations: [
@@ -206,11 +211,13 @@ const fetchTotalCount = async (body: any) => {
   return response.data;
 };
 
-function useStats(queryParams: any) {
+function useStats(
+  queryParams: ReturnType<typeof useQueryParams>["queryParams"]
+) {
   const { timeSpan, models, provider } = queryParams;
   const body = {
     timespan: timeSpan,
-    models: models,
+    models: models === "none" ? [] : models.map((model) => model).sort(),
     provider: provider === "all" ? undefined : provider,
   };
 
@@ -405,14 +412,14 @@ export function OtherStats({
   return (
     <>
       <Grid className="grid-cols-3 lg:grid-cols-12 w-full gap-[24px]">
-        <Card className="col-span-3 lg:col-span-12">
+        <Card className="col-span-3 bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
           <Col className="justify-between items-center gap-[16px] h-full">
             <div>
-              <Row className="gap-[16px] bg-[#F3F4F6] p-[4px] font-bold rounded-lg">
+              <Row className="gap-[16px] bg-black p-[4px] font-bold rounded-lg">
                 {timeSpans.map((x, i) => (
                   <button
                     className={`py-[8px] px-[16px] rounded-lg ${
-                      timeSpan === x ? "bg-white text-[#0CA5E9] shadow-lg" : ""
+                      timeSpan === x ? "bg-sky-800 shadow-lg" : " bg-black"
                     }`}
                     key={`${x}-${i}`}
                     onClick={() =>
@@ -424,8 +431,8 @@ export function OtherStats({
                 ))}
               </Row>
             </div>
-            <Col className="w-full gap-3">
-              <div className="text-[14px] font-semibold text-[#5D6673]">
+            <Col className="w-full gap-3 ">
+              <div className="text-[14px] font-semibold text-white">
                 Provider
               </div>
               <ThemedDropdown
@@ -442,11 +449,11 @@ export function OtherStats({
             </Col>
           </Col>
         </Card>
-        <Card className="col-span-3 lg:col-span-9">
+        <Card className="col-span-3 lg:col-span-9 bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
           <Col className="justify-between items-center gap-[18px]">
             <Row className="justify-between items-center gap-[16px] w-full">
               <div>Top Models</div>
-              <Row className="gap-[16px]">
+              <Row className="gap-[16px] text-gray-500">
                 <button
                   className="underline"
                   onClick={() =>
@@ -469,7 +476,9 @@ export function OtherStats({
               {[...MODELS].map((item) => (
                 <Row
                   key={item}
-                  className="items-center border p-[12px] rounded-lg gap-[10px] hover:cursor-pointer"
+                  className={`items-center border border-[#63758933] border-opacity-20 p-[12px] rounded-lg gap-[10px] hover:cursor-pointer ${
+                    models.includes(item) ? "bg-[#00C2FF] bg-opacity-10" : ""
+                  }`}
                   onClick={() => {
                     if (models.includes(item)) {
                       setQueryParams({
@@ -506,20 +515,20 @@ export function OtherStats({
           isLoading && "animate-pulse"
         )}
       >
-        <Col className="p-10 border w-full col-span-1 md:col-span-3 flex justify-between flex-col items-center gap-5 py-3 rounded-lg">
-          <h2 className="whitespace-nowrap text-[18px] font-bold text-[#5D6673]">
+        <Col className="p-10 border w-full col-span-1 md:col-span-3 flex justify-between flex-col items-center gap-5 py-3 rounded-lg bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
+          <h2 className="whitespace-nowrap text-[18px] font-bold text-white">
             Total Requests
           </h2>
-          <div className="w-full text-[36px] font-bold text-[#5D6673]">
+          <div className="w-full text-[36px] font-bold text-[#00C2FF]">
             {humanReadableNumber(data?.totalCount?.data ?? 0)}
           </div>
         </Col>
         {pieCharts.map((chart, i) => (
           <div
-            className="p-10 border w-full col-span-1 md:col-span-3 flex justify-between flex-col items-center gap-5 py-3 rounded-lg"
+            className="p-10 border w-full col-span-1 md:col-span-3 flex justify-between flex-col items-center gap-5 py-3 rounded-lg bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20"
             key={`${chart.name}-${i}`}
           >
-            <h2 className="whitespace-nowrap text-[18px] font-bold text-[#5D6673]">
+            <h2 className="whitespace-nowrap text-[18px] font-bold text-white">
               {chart.name}
             </h2>
             <DonutChart
@@ -539,7 +548,7 @@ export function OtherStats({
             />
           </div>
         ))}
-        <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 py-3 rounded-lg px-10">
+        <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 py-3 rounded-lg px-10 bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
           <h2>Model market share %</h2>
           <AreaChart
             data={transformData(data?.modelUsageOverTime ?? []).transformedData}
@@ -552,7 +561,7 @@ export function OtherStats({
         {scatterCharts.map((chart, i) => (
           <ThemedScatterPlot chart={chart} key={`${chart.name}-${i}`} />
         ))}
-        <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 p-3 rounded-lg">
+        <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 p-3 rounded-lg bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
           <h2>TTFT Per model (soon)</h2>
           <BarChart
             data={

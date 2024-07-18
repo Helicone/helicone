@@ -44,6 +44,7 @@ export type NormalizedRequest = CommonFields & {
   render(props?: {
     hideTopBar?: boolean;
     messageSlice?: "lastTwo";
+    className?: string;
   }): JSX.Element;
 };
 

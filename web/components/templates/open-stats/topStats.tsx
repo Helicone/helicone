@@ -77,38 +77,38 @@ export function TopStats() {
     <>
       <Grid
         className={clsx(
-          "grid-cols-3 lg:grid-cols-9 w-full gap-[24px]",
+          "grid-cols-3 lg:grid-cols-9 w-full gap-[24px] ",
           isLoadingTotalValues ? "animate-pulse" : ""
         )}
       >
-        <Card className="col-span-3">
-          <h2 className="whitespace-nowrap text-[18px] font-bold text-[#5D6673]">
+        <Card className="col-span-3 bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
+          <h2 className="whitespace-nowrap text-[18px] font-bold text-[#DFE4EB]">
             Total Requests
           </h2>
-          <div className="w-full text-[36px] font-bold text-[#5D6673]">
+          <div className="w-full text-[36px] font-bold text-[#00C2FF]">
             {humanReadableNumber(totalValuesData?.total_requests ?? 0)}
           </div>
         </Card>
-        <Card className="col-span-3">
-          <h2 className="whitespace-nowrap text-[18px] font-bold text-[#5D6673]">
+        <Card className="col-span-3 bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
+          <h2 className="whitespace-nowrap text-[18px] font-bold text-[#DFE4EB]">
             Total Tokens
           </h2>
-          <div className="w-full text-[36px] font-bold text-[#5D6673]">
+          <div className="w-full text-[36px] font-bold text-[#00C2FF]">
             {humanReadableNumber(totalValuesData?.total_tokens ?? 0)}
           </div>
         </Card>
-        <Card className="col-span-3">
+        <Card className="col-span-3 bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
           <>
-            <h2 className="whitespace-nowrap text-[18px] font-bold text-[#5D6673]">
+            <h2 className="whitespace-nowrap text-[18px] font-bold text-[#DFE4EB]">
               Total Spent
             </h2>
-            <div className="w-full text-[36px] font-bold text-[#5D6673]">
+            <div className="w-full text-[36px] font-bold text-[#00C2FF]">
               $ {humanReadableNumber(totalValuesData?.total_cost ?? 0)}
             </div>
           </>
         </Card>
       </Grid>
-      <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 py-3 rounded-lg px-10">
+      <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 py-3 rounded-lg px-10  bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
         <h2>
           Tokens / Provider
           <i className="text-gray-400">
@@ -116,6 +116,7 @@ export function TopStats() {
           </i>
         </h2>
         <BarChart
+          className="text-white"
           data={transformAllProviderData(providerData ?? []).transformedData}
           index="date"
           categories={transformAllProviderData(providerData ?? []).providers}
@@ -124,7 +125,7 @@ export function TopStats() {
           stack
         />
       </div>
-      <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 py-3 rounded-lg px-10">
+      <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 py-3 rounded-lg px-10  bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
         <h2>
           Tokens / Model{" "}
           <i className="text-gray-400">

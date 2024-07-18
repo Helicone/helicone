@@ -17,8 +17,8 @@ Disallow: /devops/
 Disallow: /icon.ico
 
 # Host
-Host: https://helicone.ai
+Host: https://www.helicone.ai
 
 # Sitemaps
-Sitemap: https://helicone.ai/sitemap.xml
+Sitemap: https://www.helicone.ai/sitemap.xml
 Sitemap: https://docs.helicone.ai/sitemap.xml

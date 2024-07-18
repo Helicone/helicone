@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   title: "Helicone / LLM-Observability for Developers",
   description:
     "The open-source platform for logging, monitoring, and debugging.",
-  icons: "https://www.helicone.ai/static/logo.png",
+  icons: "https://www.helicone.ai/static/logo.webp",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "A Guide for Datadog Users Building with LLMs - Helicone",
   description:
     "Datadog has long been a favourite among developers for monitoring and observability. But recently, LLM developers have been exploring new options. Why? We have some answers.",
-  icons: "https://www.helicone.ai/static/logo.png",
+  icons: "https://www.helicone.ai/static/logo.webp",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",

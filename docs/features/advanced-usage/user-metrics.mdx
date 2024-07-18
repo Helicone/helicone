@@ -51,12 +51,17 @@ There are two ways to specify users in your requests:
       ```
 
       ```python Python
-      openai.api_base = "https://oai.helicone.ai/v1"
+      client = OpenAI(
+        base_url="https://oai.helicone.ai/v1",
+        default_headers={
+            "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+        }
+      )
 
-      openai.Completion.create(
+      client.chat.completions.create(
           model="text-davinci-003",
           prompt="How do I log users?",
-          headers={
+          extra_headers={
               "Helicone-User-Id": "alicebob@gmail.com" # Add this header
           }
       )
