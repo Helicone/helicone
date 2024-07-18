@@ -1,6 +1,4 @@
 import { autoFillInputs } from "@helicone/prompts";
-import { Experiment } from "../../stores/experimentStore";
-import { placeInputValues } from "../helpers";
 import { PreparedRequest, PreparedRequestArgs } from "./PreparedRequest";
 
 function prepareRequestOpenAI(

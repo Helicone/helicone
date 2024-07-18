@@ -1,5 +1,5 @@
+import { autoFillInputs } from "@helicone/prompts";
 import { SettingsManager } from "../../../utils/settings";
-import { placeInputValues } from "../helpers";
 import { PreparedRequest, PreparedRequestArgs } from "./PreparedRequest";
 
 const settingsManager = new SettingsManager();
@@ -52,10 +52,11 @@ export async function prepareRequestAzureFull({
   datasetRow,
   requestId,
 }: PreparedRequestArgs): Promise<PreparedRequest> {
-  const newRequestBody = placeInputValues(
-    datasetRow.inputRecord?.inputs ?? {},
-    hypothesis.promptVersion?.template ?? {}
-  );
+  const newRequestBody = autoFillInputs({
+    template: hypothesis.promptVersion?.template ?? {},
+    inputs: datasetRow.inputRecord?.inputs ?? {},
+    autoInputs: datasetRow.inputRecord?.autoInputs ?? [],
+  });
 
   const { url: fetchUrl, headers } = await prepareRequestAzure(
     apiKey,

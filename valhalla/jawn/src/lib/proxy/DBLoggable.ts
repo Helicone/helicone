@@ -1,6 +1,5 @@
 import { HeliconeHeaders } from "../../../../../shared/proxy/heliconeHeaders";
 import { Provider } from "../../models/models";
-import { TemplateWithInputs } from "../../utils/promptHelpers";
 import { PromptSettings } from "../requestWrapper/requestWrapper";
 import { err, ok } from "../shared/result";
 import { HeliconeProxyRequest } from "./HeliconeProxyRequest";
@@ -9,6 +8,7 @@ import { AuthParams, OrgParams } from "../db/supabase";
 import { S3Manager } from "./S3Manager";
 import { Message } from "../handlers/HandlerContext";
 import { Headers } from "node-fetch";
+import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 
 export interface DBLoggableProps {
   response: {
