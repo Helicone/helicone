@@ -57,8 +57,9 @@ export class DemoController extends Controller {
           "Helicone-Auth": `Bearer ${apiKey}`,
           "Helicone-Rate-Limit":
             "Helicone-RateLimit-Policy: 10;w=1000;u=requests;s=user",
-
           "Helicone-Cache-Enabled": "true",
+          "Helicone-Cache-Seed": request.authParams.userId ?? "",
+          "Helicone-User-Id": request.authParams.userId ?? "",
         },
       });
 
