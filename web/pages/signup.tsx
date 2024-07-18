@@ -9,6 +9,7 @@ import { DEMO_EMAIL } from "../lib/constants";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import { GetServerSidePropsContext } from "next";
 import posthog from "posthog-js";
+import { InfoBanner } from "../components/shared/themed/themedDemoBanner";
 
 const SignUp = () => {
   const supabase = useSupabaseClient();
@@ -17,9 +18,10 @@ const SignUp = () => {
 
   const user = useUser();
   const router = useRouter();
+  const { demo = "false" } = router.query;
 
   if (user && user.email !== DEMO_EMAIL) {
-    router.push("/welcome");
+    router.push(`/welcome?demo=${demo}`);
   }
 
   return (
@@ -29,6 +31,7 @@ const SignUp = () => {
       }
       ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
     >
+      {demo === "true" && <InfoBanner />}
       <AuthForm
         handleEmailSubmit={async (email: string, password: string) => {
           const origin = window.location.origin;

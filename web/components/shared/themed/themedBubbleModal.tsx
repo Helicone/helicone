@@ -4,6 +4,7 @@ interface ThemedBubbleModalProps {
   setRemoved: (removed: boolean) => void;
   removed: boolean;
   children: React.ReactNode;
+  buttonText?: string;
 }
 
 const ThemedBubbleModal = ({
@@ -12,6 +13,7 @@ const ThemedBubbleModal = ({
   setRemoved,
   removed,
   children,
+  buttonText = "Demo 🚀",
 }: ThemedBubbleModalProps) => {
   return (
     <>
@@ -21,7 +23,7 @@ const ThemedBubbleModal = ({
             className="fixed bottom-[16px] right-[16px] z-50 px-5 font-extralight h-[48px] rounded-full bg-blue-500 shadow-lg cursor-pointer flex items-center justify-center text-white text-2xl hover:bg-blue-600 transition-colors"
             onClick={() => setOpen(true)}
           >
-            Demo 🚀
+            {buttonText}
           </div>
           <div
             className="fixed bottom-[52px] right-[4px] z-50 w-6 h-6 rounded-full bg-red-500 shadow-lg cursor-pointer flex items-center justify-center text-white text-2xl hover:bg-red-600 transition-colors"
