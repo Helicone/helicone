@@ -1,4 +1,3 @@
-import { useState } from "react";
 import StartPage from "./startPage";
 
 import { useLocalStorage } from "../../../../services/hooks/localStorage";

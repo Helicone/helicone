@@ -1,24 +1,21 @@
 // src/users/usersController.ts
-import * as Sentry from "@sentry/node";
-import {
-  Body,
-  Controller,
-  Path,
-  Post,
-  Request,
-  Route,
-  Security,
-  Tags,
-} from "tsoa";
-import { supabaseServer } from "../../lib/routers/withAuth";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
-import { getRequests } from "../../lib/stores/request/request";
-import { FineTuningManager } from "../../managers/FineTuningManager";
-import { JawnAuthenticatedRequest } from "../../types/request";
-import { postHogClient } from "../../lib/clients/postHogClient";
 import OpenAI from "openai";
+import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
 import { generateHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
 import { ok, Result } from "../../lib/shared/result";
+import { JawnAuthenticatedRequest } from "../../types/request";
+
+let OPENAI_KEY: string | undefined = undefined;
+
+if (process.env.PROVIDER_KEYS) {
+  try {
+    const keys = JSON.parse(process.env.PROVIDER_KEYS);
+    OPENAI_KEY = keys.DEMO_OPENAI_API_KEY;
+  } catch (e) {
+    console.error(e);
+  }
+}
+OPENAI_KEY = OPENAI_KEY ?? process.env.OPENAI_API_KEY;
 
 @Route("v1/demo")
 @Tags("Demo")
@@ -37,6 +34,14 @@ export class DemoController extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<OpenAI.Chat.Completions.ChatCompletion, string>> {
+    if (!OPENAI_KEY) {
+      this.setStatus(500);
+      return {
+        error: "No OpenAI key found",
+        data: null,
+      };
+    }
+
     const tempAPIKey = await generateHeliconeAPIKey(
       request.authParams.organizationId
     );
@@ -55,7 +60,7 @@ export class DemoController extends Controller {
 
     const result = await tempAPIKey.data?.with(async (apiKey) => {
       const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
+        apiKey: OPENAI_KEY,
         baseURL: "http://localhost:8787/v1",
         defaultHeaders: {
           "Helicone-Auth": `Bearer ${apiKey}`,

@@ -172,7 +172,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const { alertBanners, isAlertBannersLoading, refetch } = useAlertBanners();
 
-  const [openDemo, setOpenDemo] = useState(true);
+  const [openDemo, setOpenDemo] = useLocalStorage("openDemo", false);
   const [removedDemo, setRemovedDemo] = useLocalStorage("removedDemo", false);
   const banner = alertBanners?.data?.find((x) => x.active);
 
