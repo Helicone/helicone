@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "I built my first AI app and integrated it with Helicone",
   description:
     "So I decided to make my first AI app with Helicone, in the spirit of getting a first-hand exposure to our user's pain points.",
-  icons: "https://www.helicone.ai/static/logo.png",
+  icons: "https://www.helicone.ai/static/logo.webp",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "Insider Scoop: Our Founding Engineer's Take on PostHog - Helicone",
   description:
     "No BS, no affiliations, just genuine opinions from the founding engineer at Helicone.",
-  icons: "https://www.helicone.ai/static/logo.png",
+  icons: "https://www.helicone.ai/static/logo.webp",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",

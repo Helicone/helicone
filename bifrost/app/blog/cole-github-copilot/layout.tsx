@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot - Helicone",
   description:
     "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
-  icons: "https://www.helicone.ai/static/logo.png",
+  icons: "https://www.helicone.ai/static/logo.webp",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
