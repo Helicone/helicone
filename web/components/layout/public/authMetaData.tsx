@@ -15,7 +15,9 @@ const AuthMetaData = (props: AuthMetaDataProps) => {
     typeof window !== "undefined" && window.location.hostname === "localhost";
 
   // Conditionally set favicon path
-  const faviconPath = isLocalhost ? "/static/logo-dev.png" : "/static/logo.png";
+  const faviconPath = isLocalhost
+    ? "/static/logo-dev.png"
+    : "/static/logo.webp";
 
   const imageUrl =
     image ||
