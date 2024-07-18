@@ -18,6 +18,7 @@ import {
   ArrowDownTrayIcon,
   ArrowPathIcon,
   FunnelIcon,
+  SparklesIcon
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
@@ -36,6 +37,7 @@ import { TimeFilter } from "../../templates/dashboard/dashboardPage";
 import FiltersButton from "./table/filtersButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 import { UIFilterRowTree } from "../../../services/lib/filters/uiFilterRowTree";
+import ChartsModal from "../chartsModal";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -98,6 +100,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
   } = props;
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showAICharts, setShowAICharts] = useState(false);
   const [exportFiltered, setExportFiltered] = useState(false);
 
   return (
@@ -122,14 +125,28 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               />
             )}
           </div>
+
           {(advancedFilter || editColumns || csvExport) && (
             <div className="flex flex-wrap space-x-2 items-center">
+
+              <div className="flex flex-wrap space-x-2 self-end">
+                <button
+                  onClick={() => setShowAICharts(prev => !prev)}
+                  className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 dark:bg-black dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+                >
+                  <SparklesIcon
+                    className="h-5 w-5 text-gray-900 dark:text-gray-100"
+                    aria-hidden="true"
+                  />
+                </button>
+              </div>
+
               {advancedFilter && (
                 <>
                   <div className="mx-auto flex text-sm">
                     <button
                       onClick={() =>
-                        setShowAdvancedFilters(!showAdvancedFilters)
+                        setShowAdvancedFilters(prev => !prev)
                       }
                       className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 dark:bg-black dark:hover:bg-sky-900 flex flex-row items-center gap-2"
                     >
@@ -240,6 +257,11 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
           </div>
         )}
       </div>
+
+      {showAICharts && (
+        <ChartsModal open={showAICharts} setOpen={setShowAICharts} />
+      )}
+
       {csvExport && (
         <ThemedModal
           open={csvExport.openExport}
