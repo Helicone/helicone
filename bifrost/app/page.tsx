@@ -206,14 +206,14 @@ export default function Home() {
             </li>
             <li className="w-32">
               <Image
-                src={"/static/codegen.svg"}
+                src={"/static/codegen.webp"}
                 alt={"Codegen"}
                 width={300}
                 height={77}
               />
             </li><li className="w-32">
               <Image
-                src={"/static/sunrun.svg"}
+                src={"/static/sunrun.webp"}
                 alt={"Sunrun"}
                 width={300}
                 height={77}

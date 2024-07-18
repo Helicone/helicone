@@ -16,7 +16,7 @@ export default function Essentials() {
             <div className="p-3">
               <p className="text-[9px] text-gray-500 ml-4 px-1 mt-5 bg-slate-200 rounded-lg absolute">oai.hconeai.com /</p>
             </div>
-            <div className="md:flex-shrink-0">
+            <div className="">
               <div className="flex items-center justify-between gap-2 p-4">
                 <div className="bg-white rounded-lg py-2 pl-4 ">
                   <p className="text-blue-700 font-bold text-xs inline bg-blue-200 rounded-lg px-2 py-1">POST</p>
@@ -63,23 +63,23 @@ export default function Essentials() {
             </div>
           </div>
         </div>
-        <div className="max-w-md pt-3 pb-2 mb-3 md:col-span-2 bg-gradient-to-b from-slate-200 border to-white rounded-xl shadow-d overflow-hidden md:max-w-2xl">
+        <div className="max-w-sm h-fit pt-3 pb-2 mb-3 md:col-span-2 bg-gradient-to-b from-slate-200 border to-white rounded-xl shadow-d overflow-hidden md:max-w-2xl">
           <div className="md:flex flex-col">
-            <div className="flex text-center w-fit rounded-md bg-white mt-5 ml-36 mr-3 ">
+            <div className="flex flex-row text-center w-fit rounded-md bg-white mt-5 ml-36 mr-3 lg:ml-56">
               <button className="text-sky-500 bg-white font-semibold px-3 my-1 flex items-center border rounded-md shadow-lg">
                 <AiOutlineDollarCircle className="inline-block h-6 w-6 text-center pr-2" />
-                <span className="text-[10px]">Cost</span>
+                <span className="text-[10px] lg:text-sm">Cost</span>
               </button>
               <button className="px-4 my-1 mr-1 font-semibold flex items-center bg-white">
                 <HiOutlineTableCells className="inline-block h-6 w-6 pr-2" />
-                <span className="text-[10px]">Requests</span>
+                <span className="text-[10px] lg:text-sm">Requests</span>
               </button>
             </div>
             <div className="relative">
               <div className="relative pt-3 pb-5">
                 <Image
-                  className="translate-x-16 scale-125 mt-5 md:scale-100 md:translate-x-0 "
-                  src={"/static/chart.svg"}
+                  className="translate-x-16 scale-125 mt-5 md:scale-90 md:translate-x-7 md:-translate-y-6 "
+                  src={"/static/chart.webp"}
                   alt={"Chart"}
                   height={500}
                   width={600}
@@ -87,7 +87,7 @@ export default function Essentials() {
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white"></div>
               </div>
             </div>
-            <div className="p-4 bg-white">
+            <div className="flex flex-col p-4 bg-white lg:text-right gap-2">
               <p className="text-2xl text-blue-600 font-semibold">Instant analytics</p>
               <p className="text-gray-500 text-sm">Get detailed analytics such as latency, cost, time to first tokens.</p>
             </div>
@@ -115,6 +115,11 @@ export default function Essentials() {
             <div className="bg-white p-4 mt-12 mb-3 rounded-xl shadow-md border border-gray-200 flex items-end justify-center flex-col -translate-x-10  ">
               <p className="text-gray-400 text-sm font-semibold mt-2 mb-3 pr-7">uptime 99.99%</p>
               <div className="flex justify-center items-center gap-1 mb-4 -translate-x-10 ">
+                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
+                <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
                 <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
                 <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>
                 <div className="h-[59px] w-3 bg-gradient-to-t from-green-400 to-blue-500 "></div>

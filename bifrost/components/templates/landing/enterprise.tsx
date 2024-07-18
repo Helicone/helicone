@@ -2,8 +2,8 @@
 
 import React from "react";
 import Image from "next/image";
-import { PiTerminalBold } from "react-icons/pi";
-import { PiArrowUpRightLight } from "react-icons/pi";
+import { PiTerminalBold, PiArrowUpRightLight } from "react-icons/pi";
+import { FiArrowRight } from "react-icons/fi";
 
 const prompts = [
   {
@@ -48,7 +48,7 @@ const Enterprise = () => {
           </div>
         ))}
       </div>
-      <div className="md:grid md:grid-cols-3 md:gap-5 flex flex-col gap-6">
+      <div className="md:grid md:grid-cols-3 md:gap-4 flex flex-col gap-6">
         <div className="w-full border border-gray-200 rounded-lg lg:flex lg:col-span-3 items-center justify-center overflow-hidden">
           <div className="w-full grid grid-cols-1 lg:grid-cols-2 md:bg-[url('/static/enterprise/stripes.webp')] bg-repeat bg-sky-50 rounded-lg">
             <div className="col-span-1 w-full flex flex-col items-start p-8 text-left space-y-2 gap-3">
@@ -82,48 +82,48 @@ const Enterprise = () => {
             </div>
           </div>
         </div>
-        <div className="w-full border border-gray-200 rounded-lg lg:flex lg:flex-col lg:col-span-2 items-center justify-center overflow-hidden">
+        <div className="h-fit border border-gray-200 rounded-lg lg:flex lg:flex-col lg:col-span-2 items-center justify-center overflow-hidden">
           <div className="w-full grid grid-cols-1 bg-sky-50 md:bg-[url('/static/enterprise/stripes.webp')] bg-repeat rounded-lg">
-            <div className="col-span-1 w-full flex flex-col items-start px-6 py-7 text-left space-y-2 gap-3">
-              <p className="text-blue-700 text-sm bg-blue-100 w-fit border border-blue-700 py-[6px] px-4 rounded-lg font-medium">Customer Portal</p>
-              <h1 className="font-semibold text-2xl text-blue-700">Share analytics with your customers</h1>
+            <div className="col-span-1 flex flex-col items-start px-6 py-7 text-left space-y-2 gap-3 lg:px-9 lg:gap-6">
+              <p className="text-blue-700 text-sm bg-blue-100 w-fit border border-blue-700 py-[6px] px-4 rounded-lg font-medium lg:text-base">Customer Portal</p>
+              <h1 className="font-semibold text-2xl text-blue-700 lg:text-3xl">Share analytics with your customers</h1>
               <p className="text-gray-600 font-normal text-sm">Access built-in customer usage dashboard, billing system and usage tracking by customers. </p>
-              <p className="text-blue-700 font-semibold text-sm">Contact Us <PiArrowUpRightLight className="text-blue-700 inline h-5 w-5" /> </p>
+              <p className="text-blue-700 font-semibold text-sm lg:text-[14.9px]">Contact Us <PiArrowUpRightLight className="text-blue-700 inline h-5 w-5" /> </p>
             </div>
-            <div className="lg:grid lg:grid-rows-1 relative">
+            <div className="lg:flex relative">
               <Image
                 src={"/static/enterprise/customer-portal.webp"}
                 alt="cust-exp"
                 width={500}
-                height={500}
-                className="translate-x-40 translate-y-6 scale-125 lg:translate-x-0 lg:scale-100"
+                height={700}
+                className="translate-x-36 scale-110 lg:translate-x-56 lg:translate-y-4 lg:scale-95 border rounded-lg shadow-2xl"
               />
               <Image
                 src={"/static/enterprise/set-limits.webp"}
                 alt="limits-exp"
                 width={200}
                 height={200}
-                className="-translate-y-20 "
+                className="translate-x-3 -translate-y-36 scale-95 absolute lg:translate-x-4 lg:translate-y-36 lg:scale-105 "
               />
 
             </div>
           </div>
         </div>
-        <div className="w-full h-fit border border-gray-200 rounded-lg items-center justify-center overflow-hidden">
+        <div className="h-fit border border-gray-200 rounded-lg items-center justify-center overflow-hidden">
           <div className="w-full grid grid-cols-1 bg-sky-50 md:bg-[url('/static/enterprise/stripes.webp')] bg-repeat rounded-lg">
-            <div className="col-span-1 w-full flex flex-col items-start p-8 text-left space-y-2 gap-3">
-              <p className="text-blue-700 text-sm bg-blue-100 w-fit border border-blue-700 py-[6px] px-4 rounded-lg font-medium">ETL</p>
-              <h1 className="font-semibold text-2xl text-blue-700">Bring data into your data warehouse</h1>
-              <p className="text-gray-600 font-normal text-sm">Extracting, Transforming, and Loading (ETL) data from Helicone into your personal data warehouse.</p>
-              <p className="text-blue-700 font-semibold text-sm">View docs <PiArrowUpRightLight className="text-blue-700 inline h-5 w-5" /> </p>
+            <div className="col-span-1 w-full flex flex-col items-start p-8 text-left space-y-2 gap-3 lg:py-6">
+              <p className="text-blue-700 text-sm bg-blue-100 w-fit border border-blue-700 py-[6px] px-4 rounded-lg font-medium lg:text-base">ETL</p>
+              <h1 className="font-semibold text-2xl text-blue-700 lg:text-[28px]">Bring data into your data warehouse</h1>
+              <p className="text-gray-600 font-normal text-sm lg:text-[14.9px]">Extracting, Transforming, and Loading (ETL) data from Helicone into your personal data warehouse.</p>
+              <p className="text-blue-700 font-semibold text-sm lg:text-lg">View docs <PiArrowUpRightLight className="text-blue-700 inline h-5 w-5" /> </p>
             </div>
-            <div className="relative justify-center items-center p-8 hidden md:flex">
+            <div className="max-w-full hidden md:flex">
               <Image
                 src={"/static/enterprise/customer-portal.webp"}
                 alt="cust-exp"
-                width={700}
-                height={700}
-                className="scale-150 translate-x-36 lg:scale-100"
+                width={800}
+                height={600}
+                className="translate-x-40 translate-y-5 border rounded-lg shadow-2xl scale-125"
               />
             </div>
           </div>
