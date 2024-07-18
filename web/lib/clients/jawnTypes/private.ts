@@ -1131,6 +1131,10 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          sessionName?: string;
+          sessionId?: string;
+          userEmail?: string;
+          promptId: string;
           messages: components["schemas"]["ChatCompletionMessageParam"][];
         };
       };

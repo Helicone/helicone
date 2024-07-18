@@ -12,12 +12,17 @@ module.exports = {
     current: "currentColor",
     extend: {
       animation: {
+        blink: "blink 1s step-end infinite",
         popin: "popin 1s ease-out forwards",
       },
       keyframes: {
         popin: {
           "0%": { transform: "scale(0)", opacity: "0" },
           "100%": { transform: "scale(1)", opacity: "1" },
+        },
+        blink: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0" },
         },
       },
       colors: {

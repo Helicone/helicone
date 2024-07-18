@@ -30,6 +30,10 @@ export class DemoController extends Controller {
     @Body()
     body: {
       messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[];
+      promptId: string;
+      userEmail?: string;
+      sessionId?: string;
+      sessionName?: string;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<OpenAI.Chat.Completions.ChatCompletion, string>> {
@@ -52,19 +56,22 @@ export class DemoController extends Controller {
     const result = await tempAPIKey.data?.with(async (apiKey) => {
       const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
-        baseURL: "https://oai.helicone.ai/v1",
+        baseURL: "http://localhost:8787/v1",
         defaultHeaders: {
           "Helicone-Auth": `Bearer ${apiKey}`,
           "Helicone-Rate-Limit":
-            "Helicone-RateLimit-Policy: 10;w=1000;u=requests;s=user",
+            "Helicone-RateLimit-Policy: 10;w=10000;u=requests;s=user",
           "Helicone-Cache-Enabled": "true",
           "Helicone-Cache-Seed": request.authParams.userId ?? "",
-          "Helicone-User-Id": request.authParams.userId ?? "",
+          "Helicone-User-Id": body.userEmail ?? "",
+          "Helicone-Prompt-Id": body.promptId,
+          "Helicone-Session-Id": body.sessionId ?? "",
+          "Helicone-Session-Name": body.sessionName ?? "",
         },
       });
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         messages: body.messages,
       });
 

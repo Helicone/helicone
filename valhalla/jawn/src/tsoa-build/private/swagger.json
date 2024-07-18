@@ -3065,6 +3065,18 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"sessionName": {
+										"type": "string"
+									},
+									"sessionId": {
+										"type": "string"
+									},
+									"userEmail": {
+										"type": "string"
+									},
+									"promptId": {
+										"type": "string"
+									},
 									"messages": {
 										"items": {
 											"$ref": "#/components/schemas/ChatCompletionMessageParam"
@@ -3073,6 +3085,7 @@
 									}
 								},
 								"required": [
+									"promptId",
 									"messages"
 								],
 								"type": "object"
