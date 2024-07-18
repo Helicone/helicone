@@ -19,10 +19,25 @@ const ChartsModal = (props: ModalProps) => {
 
   const [chartData, setChartData] = useState<TChart>({chartType: "bar", data: null});
 
-  function handleSubmit() {
+  async function handleSubmit() {
+    const res = await fetch("/api/genui/chartData", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Helicone-Auth": process.env.HELICONE_LOCAL_KEY || "",
+      },
+      body: JSON.stringify({
+        prompt,
+      }),
+    });
+    const data = await res.json();
+    if (data.error) return console.error(data.error);
+
+    console.log(data.data);
+
     setChartData({
-      chartType: prompt as TChart["chartType"],
-      data: prompt == "bar" ? barChartData : prompt == "donut" ? donutChartData : lineChartData
+      chartType: data.data.chartType as "bar" | "line" | "donut",
+      data: data.data.data,
     });
   }
 
@@ -39,7 +54,7 @@ const ChartsModal = (props: ModalProps) => {
 
           <button
             type="button"
-            onClick={handleSubmit}
+            onClick={() => handleSubmit()}
             className="w-max text-white rounded-md p-2 bg-blue-500 border-2 border-blue-500 hover:border-blue-700 transition-colors ease-in-out duration-300"
           >Generate</button>
         </form>
@@ -81,9 +96,9 @@ const ChartsModal = (props: ModalProps) => {
           <div className="pb-4">
             {chartData.chartType === "bar" && (
               <BarChart
-                data={barChartData}
+                data={chartData.data}
                 index="name"
-                categories={['Number of threatened species']}
+                categories={['value']}
                 colors={['blue']}
                 valueFormatter={dataFormatter}
                 yAxisWidth={48}
@@ -92,7 +107,7 @@ const ChartsModal = (props: ModalProps) => {
             )}
             {chartData.chartType === "donut" && (
               <DonutChart
-                data={donutChartData}
+                data={chartData.data}
                 variant="donut"
                 valueFormatter={dataFormatter}
                 onValueChange={(v) => console.log(v)}
@@ -101,7 +116,7 @@ const ChartsModal = (props: ModalProps) => {
             {chartData.chartType === "line" && (
               <LineChart
                 className="h-80"
-                data={lineChartData}
+                data={chartData.data}
                 index="date"
                 categories={['SolarPanels', 'Inverters']}
                 colors={['indigo', 'rose']}
@@ -124,31 +139,31 @@ export default ChartsModal;
 const barChartData = [
   {
     name: 'Amphibians',
-    'Number of threatened species': 2488,
+    'value': 2488,
   },
   {
     name: 'Birds',
-    'Number of threatened species': 1445,
+    'value': 1445,
   },
   {
     name: 'Crustaceans',
-    'Number of threatened species': 743,
+    'value': 743,
   },
   {
     name: 'Ferns',
-    'Number of threatened species': 281,
+    'value': 281,
   },
   {
     name: 'Arachnids',
-    'Number of threatened species': 251,
+    'value': 251,
   },
   {
     name: 'Corals',
-    'Number of threatened species': 232,
+    'value': 232,
   },
   {
     name: 'Algae',
-    'Number of threatened species': 98,
+    'value': 98,
   },
 ];
 
