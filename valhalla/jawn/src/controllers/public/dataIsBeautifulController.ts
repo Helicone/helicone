@@ -55,6 +55,11 @@ export const modelNames = [
     variations: ["gpt-4o", "gpt-4o-2024-05-13"],
   },
   {
+    model: "gpt-4o-mini",
+    provider: "OPENAI",
+    variations: ["gpt-4o-mini", "gpt-4o-mini-2024-07-18"],
+  },
+  {
     model: "gpt-4",
     provider: "OPENAI",
     variations: [
