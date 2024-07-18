@@ -48,9 +48,9 @@ Organizations use **Custom Properties** to track different environments (i.e. de
     <Step title="Add the 'Environment' property and assign a value.">
 
     ```python
-    openai.Completion.create(
+    client.chat.completions.create(
         # ...
-        headers={
+        extra_headers={
             "Helicone-Property-Environment": "development",
         }
     )
@@ -93,9 +93,9 @@ A common method of data segmentation is by `user type`. For example, you might w
 To do this, create a `user_type` custom property and assign either **"paid"** or **"free"**.
 
 ```python
-openai.Completion.create(
+client.chat.completions.create(
     # ...
-    headers={
+    extra_headers={
         "Helicone-Property-User-Type": "free",
     }
 )
@@ -113,9 +113,9 @@ Then, you can filter by paid/free users, or view associated metrics in the same 
 Suppose you want to understand the behavior of paying users when they use a specific feature (i.e. spellcheck). You can add a `Feature` custom property.
 
 ```python
-openai.Completion.create(
+client.chat.completions.create(
     # ...
-    headers={
+    extra_headers={
         "Helicone-Property-User-Type": "paid",
         "Helicone-Property-Feature": "spellcheck",
     }
@@ -125,9 +125,9 @@ openai.Completion.create(
 You can create highly detailed segment by adding even more custom properties. For example, you may segment users further by `plan` and `Job ID`. There are no limits on the number of custom properties you can add.
 
 ```python
-openai.Completion.create(
+client.chat.completions.create(
     # ...
-    headers={
+    extra_headers={
         "Helicone-Property-User-Type": "paid",
         "Helicone-Property-Feature": "spellcheck",
         "Helicone-Property-Plan": "enterprise",

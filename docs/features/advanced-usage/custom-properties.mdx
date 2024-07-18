@@ -62,10 +62,10 @@ Use headers to add Custom Properties to your LLM requests.
     openai.api_base = "https://oai.helicone.ai/v1"
     openai
 
-    openai.Completion.create(
+    client.chat.completions.create(
         model="text-davinci-003",
         prompt="Say this is a test",
-        headers={
+        extra_headers={
             "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
             "Helicone-Property-Session": "24", # Example 1
             "Helicone-Property-Conversation": "support_issue_2", # Example 2

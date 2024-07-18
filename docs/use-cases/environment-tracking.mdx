@@ -8,9 +8,9 @@ description: "Effortlessly track and manage your development, staging, and produ
 Many organizations operate across multiple environments, such as development, staging, and production. To differentiate these environments, you can establish a `Helicone-Property-Environment` property. In the example below, we assign the "development" property to the environment:
 
 ```python
-openai.Completion.create(
+client.chat.completions.create(
     # ...
-    headers={
+    extra_headers={
         "Helicone-Property-Environment": "development",
     }
 )
