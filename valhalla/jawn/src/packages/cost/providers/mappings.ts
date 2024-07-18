@@ -61,7 +61,6 @@ export const providersNames = [
   "COHERE",
   "MISTRAL",
   "DEEPINFRA",
-  "META",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
