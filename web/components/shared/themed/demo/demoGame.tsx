@@ -88,12 +88,12 @@ export const DemoGame = ({
   };
 
   return (
-    <div className="bg-gradient-to-bl from-indigo-200 to-indigo-300 flex flex-col items-center justify-center bg-white h-[80vh] w-[500px] rounded-lg ">
+    <div className="bg-gradient-to-bl from-indigo-200 to-indigo-300 flex flex-col items-center justify-center bg-white h-[80vh] max-h-[80vh] w-[500px] rounded-lg ">
       {gameState === "start" && (
         <StartPage setOpenDemo={setOpenDemo} onPlay={onPlay} />
       )}
       {gameState !== "start" && (
-        <Col className="w-full p px-5 py-10 justify-between items-center h-full">
+        <Col className="w-full p px-5 py-10 justify-between items-center h-fit ">
           <i
             className="text-sm text-gray-500 underline hover:text-gray-700 cursor-pointer"
             onClick={onReset}

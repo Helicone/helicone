@@ -4,7 +4,7 @@ import { Col, Row } from "../../../layout/common";
 import { clsx } from "../../clsx";
 import { ChatHistory } from "./demoGame";
 import Typewriter from "./typewriter";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { hpf } from "@helicone/prompts";
 import { useUser } from "@supabase/auth-helpers-react";
 
@@ -30,6 +30,12 @@ export const ChatWindow = ({
   const [sendingMessage, setSendingMessage] = useState(false);
   const [message, setMessage] = useState("");
   const user = useUser();
+
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatHistory, sendingMessage]);
 
   async function sendMessage(message: string) {
     if (sendingMessage) return;
@@ -116,7 +122,7 @@ DO NOT GIVE AWAY YOUR IDENTITY. THE USER IS TRYING TO GUESS THE CHARACTER.
         { role: "assistant", content: responseContent || "" },
       ]);
     }
-
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     setSendingMessage(false);
   }
 
@@ -129,12 +135,14 @@ DO NOT GIVE AWAY YOUR IDENTITY. THE USER IS TRYING TO GUESS THE CHARACTER.
             text={movieTitle}
             speed={50}
             delay={1000}
-            onComplete={() => console.log("Typing complete!")}
+            onComplete={() => {
+              chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            }}
           />
         </div>
       </Col>
       <Col className="w-full gap-10 bg-white bg-opacity-20 h-full justify-between mt-10 p-10 rounded-xl">
-        <Col className="w-full gap-2 overflow-y-auto text-white">
+        <Col className="w-full gap-2 overflow-y-auto text-white  h-[50vh]">
           {chatHistory.map((chat, index) => (
             <Row
               key={index}
@@ -174,6 +182,7 @@ DO NOT GIVE AWAY YOUR IDENTITY. THE USER IS TRYING TO GUESS THE CHARACTER.
               </Col>
             </Row>
           )}
+          <div ref={chatEndRef} />
         </Col>
 
         <Row className="justify-end">
