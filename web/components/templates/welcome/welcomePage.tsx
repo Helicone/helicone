@@ -10,6 +10,7 @@ import EventListen from "./steps/eventListen";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useOrg } from "../../layout/organizationContext";
 import { getJawnClient } from "../../../lib/clients/jawn";
+import { InfoBanner } from "../../shared/themed/themedDemoBanner";
 
 interface WelcomePageV2Props {
   currentStep: number;
@@ -21,11 +22,12 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
   const [step, setStep] = useState<number>(currentStep);
   const [apiKey, setApiKey] = useState<string>("");
   const router = useRouter();
+  const { demo } = router.query;
   const supabaseClient = useSupabaseClient();
   const orgContext = useOrg();
 
   const handleStepChange = (step: number) => {
-    router.replace(`/welcome?step=${step}`);
+    router.replace(`/welcome?step=${step}&demo=${demo}`);
     setStep(step);
   };
 
@@ -79,6 +81,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
 
   return (
     <div className="h-screen w-full bg-gray-50">
+      {demo === "true" && <InfoBanner />}
       <div className="w-full max-w-6xl mx-auto h-full flex flex-col lg:flex-row p-4 lg:divide-x divide-gray-200">
         <section
           id="steps"
@@ -129,6 +132,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
             />
           </div>
         </section>
+
         <div className="overflow-auto lg:pt-32 flex flex-auto">
           {stepArray[step - 1]}
         </div>
