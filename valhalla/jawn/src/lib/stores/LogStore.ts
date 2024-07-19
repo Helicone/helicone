@@ -5,6 +5,8 @@ import { PromptRecord } from "../handlers/HandlerContext";
 import { PromiseGenericResult, ok, err } from "../shared/result";
 import { Database } from "../db/database.types";
 
+import { shouldBumpVersion } from "@helicone/prompts";
+
 const pgp = pgPromise();
 const db = pgp({
   connectionString: process.env.SUPABASE_DATABASE_URL,
@@ -227,29 +229,6 @@ export class LogStore {
       }
     }
 
-    function extractVersion(
-      versionString: string
-    ): { majorVersion: number; minorVersion: number } | undefined {
-      try {
-        const versionPattern = /^(\d+)\.(\d+)$/;
-        const match = versionString.match(versionPattern);
-
-        if (match) {
-          const majorVersion = parseInt(match[1], 10);
-          const minorVersion = parseInt(match[2], 10);
-          return {
-            majorVersion: majorVersion,
-            minorVersion: minorVersion,
-          };
-        } else {
-          return undefined;
-        }
-      } catch (error) {
-        console.error("Error extracting version", error);
-        return undefined;
-      }
-    }
-
     // Check the latest version and decide whether to update
     const existingPromptVersion = await t.oneOrNone<{
       id: string;
@@ -265,142 +244,41 @@ export class LogStore {
 
     let versionId = existingPromptVersion?.id ?? "";
 
-    // Extract passed prompt version
-    const passedPromptVersion = extractVersion(newPromptRecord.promptVersion);
+    const shouldBump = shouldBumpVersion({
+      old: existingPromptVersion?.helicone_template ?? {},
+      new: heliconeTemplate.template,
+    });
 
     // Check if an update is necessary based on template comparison
     if (
       !existingPromptVersion ||
-      (existingPromptVersion &&
+      (shouldBump.shouldBump &&
         existingPromptVersion.created_at <= newPromptRecord.createdAt)
     ) {
-      // Create a new version if the template has changed
-      if (passedPromptVersion && heliconeTemplate.template) {
-        if (
-          existingPromptVersion &&
-          passedPromptVersion.majorVersion ===
-            existingPromptVersion.major_version &&
-          passedPromptVersion.minorVersion ===
-            existingPromptVersion.minor_version
-        ) {
-          // Update existing record with same major and minor version
-          try {
-            const newHeliconeTemplate =
-              JSON.stringify(heliconeTemplate.template).length >
-              JSON.stringify(existingPromptVersion.helicone_template).length
-                ? heliconeTemplate.template
-                : existingPromptVersion.helicone_template;
-            const updateQuery = `
-          UPDATE prompts_versions
-          SET helicone_template = $1
-          WHERE prompt_v2 = $2 AND organization = $3 AND major_version = $4 AND minor_version = $5`;
+      // Insert new record with incremented version
+      const newMajorVersion = existingPromptVersion
+        ? existingPromptVersion.major_version + 1
+        : 0;
 
-            await t.result(updateQuery, [
-              newHeliconeTemplate,
-              existingPrompt.id,
-              orgId,
-              passedPromptVersion.majorVersion,
-              passedPromptVersion.minorVersion,
-            ]);
-          } catch (error) {
-            console.error("Error updating prompt version", error);
-            throw error;
-          }
-        } else {
-          // Insert new record with the passed version
-          try {
-            const insertQuery = `
-          INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at)
-          VALUES ($1, $2, $3, $4, $5, $6, $7)
-          RETURNING id`;
-
-            const insertResult = await t.one(insertQuery, [
-              existingPrompt.id,
-              orgId,
-              passedPromptVersion.majorVersion,
-              passedPromptVersion.minorVersion,
-              heliconeTemplate.template,
-              model,
-              newPromptRecord.createdAt,
-            ]);
-
-            versionId = insertResult.id;
-          } catch (error) {
-            console.error("Error inserting prompt version", error);
-            throw error;
-          }
-        }
-      } else if (
-        !existingPromptVersion ||
-        (existingPromptVersion &&
-          existingPromptVersion.created_at <= newPromptRecord.createdAt &&
-          !deepCompare(
-            existingPromptVersion.helicone_template,
-            heliconeTemplate.template
-          ))
-      ) {
-        // Insert new record with incremented version
-        const newMajorVersion = existingPromptVersion
-          ? existingPromptVersion.major_version + 1
-          : 0;
-
-        try {
-          const insertQuery = `
+      try {
+        const insertQuery = `
         INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING id`;
 
-          const insertResult = await t.one(insertQuery, [
-            existingPrompt.id,
-            orgId,
-            newMajorVersion,
-            0,
-            heliconeTemplate.template,
-            model,
-            newPromptRecord.createdAt,
-          ]);
+        const insertResult = await t.one(insertQuery, [
+          existingPrompt.id,
+          orgId,
+          newMajorVersion,
+          0,
+          heliconeTemplate.template,
+          model,
+          newPromptRecord.createdAt,
+        ]);
 
-          versionId = insertResult.id;
-        } catch (error) {
-          console.error("Error inserting prompt version", error);
-          throw error;
-        }
-      }
-    }
-
-    // Insert or update prompt input keys if there's a new version or no existing version
-    if (versionId && Object.keys(heliconeTemplate.inputs).length > 0) {
-      try {
-        await t.none(
-          `INSERT INTO prompt_input_keys (key, prompt_version, created_at)
-       SELECT unnest($1::text[]), $2, $3
-       ON CONFLICT (key, prompt_version) DO NOTHING`,
-          [
-            `{${Object.keys(heliconeTemplate.inputs).join(",")}}`,
-            versionId,
-            newPromptRecord.createdAt.toISOString(),
-          ]
-        );
+        versionId = insertResult.id;
       } catch (error) {
-        console.error("Error inserting prompt input keys", error);
-        throw error;
-      }
-
-      try {
-        // Record the inputs and source request
-        await t.none(
-          `INSERT INTO prompt_input_record (inputs, auto_prompt_inputs, source_request, prompt_version, created_at)
-       VALUES ($1, $2, $3, $4)`,
-          [
-            JSON.stringify(heliconeTemplate.inputs),
-            JSON.stringify(heliconeTemplate?.autoInputs ?? []),
-            requestId,
-            versionId,
-            newPromptRecord.createdAt.toISOString(),
-          ]
-        );
-      } catch (error) {
-        console.error("Error inserting prompt input record", error);
+        console.error("Error inserting prompt version", error);
         throw error;
       }
     }

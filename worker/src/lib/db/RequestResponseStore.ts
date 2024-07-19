@@ -14,7 +14,7 @@ import {
   DBQueryTimer,
   FREQUENT_PRECENT_LOGGING,
 } from "../util/loggers/DBQueryTimer";
-import { PromptStore } from "./PromptStore";
+
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 
 export interface RequestPayload {
@@ -30,7 +30,6 @@ export interface ResponsePayload {
 }
 
 export class RequestResponseStore {
-  promptStore: PromptStore;
   constructor(
     private database: SupabaseClient<Database>,
     private queryTimer: DBQueryTimer,
@@ -38,9 +37,7 @@ export class RequestResponseStore {
     private clickhouseWrapper: ClickhouseClientWrapper,
     public fallBackQueue: Queue,
     public responseAndResponseQueueKV: KVNamespace
-  ) {
-    this.promptStore = new PromptStore(database, queryTimer);
-  }
+  ) {}
 
   async insertIntoRequest(
     requestPayload: RequestPayload
