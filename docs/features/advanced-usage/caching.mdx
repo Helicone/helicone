@@ -55,21 +55,13 @@ curl https://oai.helicone.ai/v1/completions \
 }'
 ```
 
-```python Python w/Package
-response = openai.Completion.create(
-	model="text-davinci-003",
-	prompt="How do I cache with helicone?",
-	cache=True,  # set cache to true
-)
-```
-
 ```python Python w/o Package
 openai.api_base = "https://oai.helicone.ai/v1"
 
-openai.Completion.create(
+client.chat.completions.create(
     model="text-davinci-003",
     prompt="How do I cache with helicone?",
-    headers={
+    extra_headers={
       "Helicone-Cache-Enabled": "true", # add this header and set to true
     }
 )
@@ -138,14 +130,14 @@ Simply add `Helicone-Cache-Bucket-Max-Size` with some number to choose how large
 ```python Python
 openai.api_base = "https://oai.helicone.ai/v1"
 
-openai.Completion.create(
-model="text-davinci-003",
-prompt="Say this is a test",
-headers={
-"Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-"Helicone-Cache-Enabled": "true", # mandatory
-"Helicone-Cache-Bucket-Max-Size": "3", # set cache bucket size to 3
-}
+client.chat.completions.create(
+  model="text-davinci-003",
+  prompt="Say this is a test",
+  extra_headers={
+    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+    "Helicone-Cache-Enabled": "true", # mandatory
+    "Helicone-Cache-Bucket-Max-Size": "3", # set cache bucket size to 3
+  }
 )
 ```
 

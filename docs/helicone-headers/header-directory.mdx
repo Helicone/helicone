@@ -16,11 +16,16 @@ curl https://gateway.helicone.ai/v1/completions \
 ```
 
 ```python Python
-openai.api_base = "https://gateway.helicone.ai/v1"
-openai.Completion.create(
+client = OpenAI(
+    base_url="https://gateway.helicone.ai/v1",
+    default_headers={
+        "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+    }
+)
+client.chat.completions.create(
     model="text-davinci-003",
     prompt="This is a test",
-    headers={
+    extra_headers={
         "Helicone-Auth": f"Bearer {HELICONE_API_KEY}", # required header
         "Helicone-<Header>": "<Value>", # all headers will follow this format
     }

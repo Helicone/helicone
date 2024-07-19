@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "Best Practices for AI Developers: Full Guide (June 2024) - Helicone",
   description:
     "Achieving high performance requires robust observability practices. In this blog, we will explore the key challenges of building with AI and the best practices to help you advance your AI development.",
-  icons: "https://www.helicone.ai/static/logo.png",
+  icons: "https://www.helicone.ai/static/logo.webp",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",

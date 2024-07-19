@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     "Introducing Vault: Helicone's Key Management Solution For LLM Applications",
   description:
     "Helicone unveils Vault, transforming the way businesses manage and distribute LLM API keys, ensuring enhanced security and streamlined processes.",
-  icons: "https://www.helicone.ai/static/logo.png",
+  icons: "https://www.helicone.ai/static/logo.webp",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",

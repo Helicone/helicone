@@ -8,7 +8,6 @@ import {
   ShieldCheckIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -96,7 +95,7 @@ export default function Home() {
           </p>
           <div className="flex items-center gap-4 pt-4 w-full justify-center">
             <Link
-              href="/contact"
+              href="https://us.helicone.ai/signup?demo=true"
               className="bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 rounded-lg px-6 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
             >
               Get a demo

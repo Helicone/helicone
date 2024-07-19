@@ -20,21 +20,21 @@ export const metadata: Metadata = {
   title: "Helicone / LLM-Observability for Developers",
   description:
     "The open-source platform for logging, monitoring, and debugging.",
-  icons: "https://www.helicone.ai/static/logo.png",
+  icons: "https://www.helicone.ai/static/logo.webp",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
     title: "Helicone",
     url: "https://www.helicone.ai",
     description: "LLM-Observability for Developers",
-    images: "https://www.helicone.ai/static/helicone-og.webp",
+    images: "https://www.helicone.ai/static/dashboard-preview.png",
     locale: "en_US",
   },
   twitter: {
     title: "Helicone",
     description: "LLM-Observability for Developers",
     card: "summary_large_image",
-    images: "https://www.helicone.ai/static/helicone-og.webp",
+    images: "https://www.helicone.ai/static/dashboard-preview.png",
   },
 };
 

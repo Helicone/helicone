@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     "How to Understand Your Users Better and Deliver a Top-Tier Experience with Custom Properties - Helicone",
   description:
     "In today's digital landscape, every interaction, click, and engagement offers valuable insights into your users' preferences. But how do you harness this data to effectively grow your business? We may have the answer. ",
-  icons: "https://www.helicone.ai/static/logo.png",
+  icons: "https://www.helicone.ai/static/logo.webp",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",

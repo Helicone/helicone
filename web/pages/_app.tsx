@@ -18,6 +18,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { OrgContextProvider } from "../components/layout/organizationContext";
 import { ThemeContextProvider } from "../components/shared/theme/themeContext";
 import Script from "next/script";
+import { PostHogProvider } from "posthog-js/react";
 
 if (
   typeof window !== "undefined" &&
@@ -37,6 +38,9 @@ export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
 type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
 };
+export function PHProvider({ children }: { children: React.ReactNode }) {
+  return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
+}
 
 export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const queryClient = new QueryClient();
@@ -50,23 +54,25 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
 
   return (
     <>
-      <SessionContextProvider
-        supabaseClient={supabaseClient}
-        initialSession={pageProps.initialSession}
-      >
-        <QueryClientProvider client={queryClient}>
-          <NotificationProvider>
-            <DndProvider backend={HTML5Backend}>
-              <OrgContextProvider>
-                <ThemeContextProvider>
-                  {getLayout(<Component {...pageProps} />)}
-                </ThemeContextProvider>
-                <Notification />
-              </OrgContextProvider>
-            </DndProvider>
-          </NotificationProvider>
-        </QueryClientProvider>
-      </SessionContextProvider>
+      <PHProvider>
+        <SessionContextProvider
+          supabaseClient={supabaseClient}
+          initialSession={pageProps.initialSession}
+        >
+          <QueryClientProvider client={queryClient}>
+            <NotificationProvider>
+              <DndProvider backend={HTML5Backend}>
+                <OrgContextProvider>
+                  <ThemeContextProvider>
+                    {getLayout(<Component {...pageProps} />)}
+                  </ThemeContextProvider>
+                  <Notification />
+                </OrgContextProvider>
+              </DndProvider>
+            </NotificationProvider>
+          </QueryClientProvider>
+        </SessionContextProvider>
+      </PHProvider>
       {trackingEnabled && <Analytics />}
       {trackingEnabled && (
         <Script

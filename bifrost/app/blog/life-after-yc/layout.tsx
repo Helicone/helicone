@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     "Navigating Life After Y Combinator: Three Key Lessons for Startups - Helicone",
   description:
     "From maintaining crucial relationships to keeping a razor-sharp focus, here's how to sustain your momentum after the YC batch ends.",
-  icons: "https://www.helicone.ai/static/logo.png",
+  icons: "https://www.helicone.ai/static/logo.webp",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",

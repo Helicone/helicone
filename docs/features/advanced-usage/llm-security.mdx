@@ -89,10 +89,10 @@ curl https://oai.helicone.ai/v1/completions \
 ```python Python
 openai.api_base = "https://oai.helicone.ai/v1"
 
-openai.Completion.create(
+client.chat.completions.create(
     model="text-davinci-003",
     prompt="How do I enable LLM security with helicone?",
-    headers={
+    extra_headers={
       "Helicone-LLM-Security-Enabled": "true", # add this header and set to true
     }
 )

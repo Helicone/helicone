@@ -7,8 +7,8 @@ import { BaseTempKey } from "./tempKeys/baseTempKey";
 import { prepareRequestOpenAIFull } from "./requestPrep/openaiCloud";
 import { prepareRequestAzureFull as prepareRequestAzureOnPremFull } from "./requestPrep/azure";
 import { runHypothesis } from "./hypothesisRunner";
-import { generateHeliconeAPIKey } from "./tempKeys/tempProxyKey";
-import { generateProxyKey } from "./tempKeys/tempAPIKey";
+import { generateHeliconeAPIKey } from "./tempKeys/tempAPIKey";
+import { generateProxyKey } from "./tempKeys/tempProxyKey";
 import {
   PreparedRequest,
   PreparedRequestArgs,

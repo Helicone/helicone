@@ -60,10 +60,10 @@ curl https://oai.helicone.ai/v1/completions \
 ```python Python
 openai.api_base = "https://oai.helicone.ai/v1"
 
-openai.Completion.create(
+client.chat.completions.create(
     model="text-davinci-003",
     prompt="How do I set custom rate limits?",
-    headers={
+    extra_headers={
       "Helicone-Property-IP": "111.1.1.1",
       "Helicone-RateLimit-Policy": "10;w=1000;u=cents;s=user", # add this header and set the header value
     }

@@ -55,9 +55,13 @@ curl https://oai.helicone.ai/v1/completions \
 ```
 
 ```python Python
-openai.api_base = "https://oai.helicone.ai/v1"
-
-openai.Completion.create(
+client = OpenAI(
+    base_url="https://oai.helicone.ai/v1",
+    default_headers={
+        "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+    }
+)
+client.chat.completions.create(
     model="text-davinci-003",
     prompt="How do I enable retries?",
     headers={

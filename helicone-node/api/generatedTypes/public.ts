@@ -959,7 +959,7 @@ Json: JsonObject;
      */
     TimeSpan: "7d" | "1m" | "3m";
     /** @enum {string} */
-    ModelName: "gpt-3.5" | "gpt-4o" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus" | "claude-3-sonnet" | "claude-3-haiku" | "claude-2" | "open-mixtral" | "Llama" | "dall-e" | "text-moderation" | "text-embedding" | "anthropic/claude-3.5-sonnet";
+    ModelName: "gpt-3.5" | "gpt-4o" | "gpt-4o-mini" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus" | "claude-3-sonnet" | "claude-3-haiku" | "claude-2" | "open-mixtral" | "Llama" | "dall-e" | "text-moderation" | "text-embedding" | "anthropic/claude-3.5-sonnet";
     /** @enum {string} */
     ProviderName: "OPENAI" | "ANTHROPIC" | "MISTRAL" | "META" | "OPENROUTER";
     DataIsBeautifulRequestBody: {
