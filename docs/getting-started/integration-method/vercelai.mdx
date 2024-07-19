@@ -39,25 +39,6 @@ const response = await openai.chat.completions.create({
 
 ```
 
-``` javascript example2.js
-import { openai } from "@ai-sdk/openai";
-import { streamText } from "ai";
-
-export async function POST(req: Request) {
-  const { messages } = await req.json();
-
-  const result = await streamText({
-    model: openai("gpt-4o"),
-    messages,
-    headers: {
-      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-    },
-  });
-
-  return result.toAIStreamResponse();
-}
-```
-
 </CodeGroup>
   </Step>
 </Steps>
