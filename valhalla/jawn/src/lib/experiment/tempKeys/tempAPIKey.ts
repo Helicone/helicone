@@ -20,6 +20,12 @@ class TempHeliconeAPIKey implements BaseTempKey {
     if (this.keyUsed) {
       return;
     }
+    await supabaseServer.client
+      .from("helicone_api_keys")
+      .update({
+        soft_delete: true,
+      })
+      .eq("id", this.heliconeApiKeyId);
     return await supabaseServer.client
       .from("helicone_api_keys")
       .delete({
