@@ -291,9 +291,17 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             <div className="flex flex-row w-full justify-between items-center">
               <label
                 htmlFor="temp"
-                className="font-medium text-sm text-gray-900 dark:text-gray-100"
+                className="flex gap-1 font-medium text-sm text-gray-900 dark:text-gray-100"
               >
-                Provider API Key
+                <span>Provider API Key</span>
+
+                <Tooltip title={
+                    "Your API keys are required to use fine-tuned models in the playground."
+                  }
+                  placement="top-end"
+                >
+                  <InformationCircleIcon className="h-5 w-5 text-gray-500" />
+                </Tooltip>
               </label>
             </div>
             <input

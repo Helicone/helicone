@@ -62,10 +62,10 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
       return;
     }
 
-    if (!providerAPIKey) {
-      setNotification("Please enter your API key to access provider.", "error");
-      return;
-    }
+    //if (!providerAPIKey) {
+    //  setNotification("Please enter your API key to access provider.", "error");
+    //  return;
+    //}
     setIsLoading(true);
 
     const responses = await Promise.all(
