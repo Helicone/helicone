@@ -308,7 +308,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             <input
               type="password"
               value={providerAPIKey}
-              placeholder="Enter your provider API Key"
+              placeholder="Enter your provider API Key (optional)"
               onChange={(e) => {
                 setProviderAPIKey(e.target.value);
               }}
