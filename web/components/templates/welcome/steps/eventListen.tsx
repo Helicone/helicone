@@ -6,7 +6,9 @@ import LoadingAnimation from "../../../shared/loadingAnimation";
 import * as PartyParrot from "../../../../public/lottie/PartyParrot.json";
 import dynamic from "next/dynamic";
 import HcButton from "../../../ui/hcButton";
+import { DemoGame } from "../../../shared/themed/demo/demoGame";
 import { useState } from "react";
+import ThemedBubbleModal from "../../../shared/themed/themedBubbleModal";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 
 interface EventListenProps {
@@ -158,14 +160,14 @@ const EventListen = (props: EventListenProps) => {
           </button>
         </div>
       </div>
-      {/* <ThemedBubbleModal
+      <ThemedBubbleModal
         open={openDemo}
         setOpen={setOpenDemo}
         setRemoved={setRemovedDemo}
         removed={removedDemo}
       >
         <DemoGame setOpenDemo={setOpenDemo} />
-      </ThemedBubbleModal> */}
+      </ThemedBubbleModal>
     </div>
   );
 };

@@ -36,13 +36,15 @@ import UpgradeProModal from "../shared/upgradeProModal";
 import OrgDropdown from "./orgDropdown";
 
 import { useAlertBanners } from "../../services/hooks/admin";
-import { useLocalStorage } from "../../services/hooks/localStorage";
 import { Database } from "../../supabase/database.types";
 import ReferralModal from "../shared/referralModal";
 import { useTheme } from "../shared/theme/themeContext";
 import { ThemedSwitch } from "../shared/themed/themedSwitch";
 import { getUSDate, signOut } from "../shared/utils/utils";
 import MetaData from "./public/authMetaData";
+import ThemedBubbleModal from "../shared/themed/themedBubbleModal";
+import { DemoGame } from "../shared/themed/demo/demoGame";
+import { useLocalStorage } from "../../services/hooks/localStorage";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
@@ -177,14 +179,14 @@ const AuthLayout = (props: AuthLayoutProps) => {
   return (
     <MetaData title={`${currentPage} ${"- " + (org?.currentOrg?.name || "")}`}>
       <div>
-        {/* <ThemedBubbleModal
+        <ThemedBubbleModal
           open={openDemo}
           setOpen={setOpenDemo}
           setRemoved={setRemovedDemo}
           removed={removedDemo}
         >
           <DemoGame setOpenDemo={setOpenDemo} />
-        </ThemedBubbleModal> */}
+        </ThemedBubbleModal>
 
         <Transition.Root show={sidebarOpen} as={Fragment}>
           <Dialog
