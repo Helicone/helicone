@@ -135,14 +135,12 @@ DO NOT GIVE AWAY YOUR IDENTITY. THE USER IS TRYING TO GUESS THE CHARACTER.
             text={movieTitle}
             speed={50}
             delay={1000}
-            onComplete={() => {
-              chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-            }}
+            onComplete={() => {}}
           />
         </div>
       </Col>
-      <Col className="w-full gap-10 bg-white bg-opacity-20 h-full justify-between mt-10 p-10 rounded-xl">
-        <Col className="w-full gap-2 overflow-y-auto text-white shrink-0 grow bg-blue">
+      <Col className="w-full gap-10 bg-white bg-opacity-20 h-full justify-between p-10 rounded-xl">
+        <Col className="w-full gap-2 overflow-y-auto text-white bg-blue ">
           {chatHistory.map((chat, index) => (
             <Row
               key={index}
@@ -164,7 +162,11 @@ DO NOT GIVE AWAY YOUR IDENTITY. THE USER IS TRYING TO GUESS THE CHARACTER.
                     text={chat.content}
                     speed={5}
                     delay={0}
-                    onComplete={() => console.log("Typing complete!")}
+                    onComplete={() =>
+                      chatEndRef.current?.scrollIntoView({
+                        behavior: "smooth",
+                      })
+                    }
                   />
                 )}
               </Col>
