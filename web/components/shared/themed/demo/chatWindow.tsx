@@ -127,10 +127,12 @@ DO NOT GIVE AWAY YOUR IDENTITY. THE USER IS TRYING TO GUESS THE CHARACTER.
   }
 
   return (
-    <Col className="w-full h-full justify-between ">
-      <Col className="w-full justify-center items-center ">
-        <p className="text-2xl tracking-[10px] animate-popin">Your movie is</p>
-        <div className="tracking-[5px] flex flex-col items-center justify-center ">
+    <Col className="w-full h-full flex flex-col">
+      <Col className="flex-shrink-0 p-4">
+        <p className="text-2xl tracking-[10px] animate-popin text-center">
+          Your movie is
+        </p>
+        <div className="tracking-[5px] flex justify-center">
           <Typewriter
             text={movieTitle}
             speed={50}
@@ -139,82 +141,80 @@ DO NOT GIVE AWAY YOUR IDENTITY. THE USER IS TRYING TO GUESS THE CHARACTER.
           />
         </div>
       </Col>
-      <Col className="w-full gap-10 bg-white bg-opacity-20 h-full justify-between p-10 rounded-xl">
-        <Col className="w-full gap-2 overflow-y-auto text-white bg-blue ">
-          {chatHistory.map((chat, index) => (
-            <Row
-              key={index}
-              className={clsx(
-                "w-full",
-                chat.role === "user" ? "justify-end" : "justify-start"
-              )}
-            >
-              <Col
+      <Col className="flex-grow overflow-hidden bg-white bg-opacity-20 rounded-xl">
+        <Col className="h-full flex flex-col">
+          <Col className="flex-grow overflow-y-auto p-4 space-y-4 text-white">
+            {chatHistory.map((chat, index) => (
+              <Row
+                key={index}
                 className={clsx(
-                  "w-[80%] p-2 rounded-lg shadow-sm px-3",
-                  chat.role === "user" ? "bg-blue-500" : "bg-blue-400"
+                  "w-full",
+                  chat.role === "user" ? "justify-end" : "justify-start"
                 )}
               >
-                {chat.role === "user" ? (
-                  <div>{chat.content}</div>
-                ) : (
-                  <Typewriter
-                    text={chat.content}
-                    speed={5}
-                    delay={0}
-                    onComplete={() =>
-                      chatEndRef.current?.scrollIntoView({
-                        behavior: "smooth",
-                      })
-                    }
-                  />
-                )}
-              </Col>
-            </Row>
-          ))}
-          {sendingMessage && (
-            <Row className={clsx("w-full", "justify-start animate-pulse")}>
-              <Col
-                className={clsx(
-                  "w-[80%] p-2 rounded-lg shadow-sm px-3",
-                  "bg-blue-400"
-                )}
-              >
-                ...
-              </Col>
-            </Row>
-          )}
-          <div ref={chatEndRef} />
-        </Col>
-
-        <Row className="justify-end">
-          <Col className="w-[80%]">
+                <Col
+                  className={clsx(
+                    "max-w-[80%] p-2 rounded-lg shadow-sm px-3",
+                    chat.role === "user" ? "bg-blue-500" : "bg-blue-400"
+                  )}
+                >
+                  {chat.role === "user" ? (
+                    <div>{chat.content}</div>
+                  ) : (
+                    <Typewriter
+                      text={chat.content}
+                      speed={5}
+                      delay={0}
+                      onComplete={() =>
+                        chatEndRef.current?.scrollIntoView({
+                          behavior: "smooth",
+                        })
+                      }
+                    />
+                  )}
+                </Col>
+              </Row>
+            ))}
+            {sendingMessage && (
+              <Row className={clsx("w-full", "justify-start animate-pulse")}>
+                <Col
+                  className={clsx(
+                    "max-w-[80%] p-2 rounded-lg shadow-sm px-3",
+                    "bg-blue-400"
+                  )}
+                >
+                  ...
+                </Col>
+              </Row>
+            )}
+            <div ref={chatEndRef} />
+          </Col>
+          <Col className="flex-shrink-0 p-4 bg-white bg-opacity-10">
             <Row className={clsx("w-full", sendingMessage && "opacity-50")}>
               <Textarea
                 disabled={sendingMessage}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
-                    // Add your send message logic here
                     sendMessage(message);
                   }
                 }}
-                className=""
+                className="flex-grow"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
               />
               <button
                 onClick={() => sendMessage(message)}
-                className="text-2xl h-full flex items-center justify-center p-2"
+                className="text-2xl flex items-center justify-center p-2 ml-2"
               >
                 🚀
               </button>
             </Row>
-            <div className="px-10 text-opacity-45 text-sm italic">
+            <div className="text-center text-opacity-45 text-sm italic mt-2">
               Ask questions to try to guess the character from the movie.
             </div>
           </Col>
-        </Row>
+        </Col>
       </Col>
     </Col>
   );
