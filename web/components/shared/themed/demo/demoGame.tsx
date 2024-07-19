@@ -101,7 +101,7 @@ export const DemoGame = ({
             reset
           </i>
           {gameState === "playing" && (
-            <div className="w-full grow">
+            <div className="h-full w-full">
               <ChatWindow
                 onFinish={() => setGameState("finished")}
                 chatHistory={chatHistory}
