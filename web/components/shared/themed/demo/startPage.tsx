@@ -11,9 +11,9 @@ const StartPage = ({
   return (
     <div className="flex flex-col items-center justify-center gap-5">
       <p className="text-2xl tracking-[10px]">Helicone Presents</p>
-      <div className="tracking-[10px] flex flex-col items-center justify-center animate-popin">
+      <div className="tracking-[10px] flex flex-col items-center justify-center animate-popin gap-2">
         <p className="text-4xl">GUESS</p>
-        <p className="text-4xl">THE STAR</p>
+        <p className="text-4xl">WHO</p>
       </div>
       <Lottie
         options={{

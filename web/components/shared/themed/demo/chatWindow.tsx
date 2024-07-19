@@ -142,7 +142,7 @@ DO NOT GIVE AWAY YOUR IDENTITY. THE USER IS TRYING TO GUESS THE CHARACTER.
         </div>
       </Col>
       <Col className="w-full gap-10 bg-white bg-opacity-20 h-full justify-between mt-10 p-10 rounded-xl">
-        <Col className="w-full gap-2 overflow-y-auto text-white  h-[50vh]">
+        <Col className="w-full gap-2 overflow-y-auto text-white shrink-0 grow bg-blue">
           {chatHistory.map((chat, index) => (
             <Row
               key={index}
