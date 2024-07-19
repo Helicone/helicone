@@ -24,10 +24,10 @@ HELICONE_API_KEY=<your API key>
 import OpenAI from "openai";
 
 const openai = new OpenAI({
-  apiKey: request.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
   baseURL: "https://oai.helicone.ai/v1",
   defaultHeaders: {
-    "Helicone-Auth": `Bearer ${request.env.HELICONE_API_KEY}`,
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
   },
 });
 ```
