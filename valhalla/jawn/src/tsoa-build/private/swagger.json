@@ -1000,6 +1000,7 @@
 				]
 			},
 			"TemplateWithInputs": {
+				"description": "Parses a string containing custom JSX-like tags and extracts information to produce two outputs:\n1. A version of the string with all JSX tags removed, leaving only the text content.\n2. An object representing a template with self-closing JSX tags and a separate mapping of keys to their\n   corresponding text content.\n\nThe function specifically targets `<helicone-prompt-input>` tags, which include a `key` attribute and enclosed text content.\nThese tags are transformed or removed based on the desired output structure. The process involves regular expressions\nto match and manipulate the input string to produce the outputs.\n\nParameters:\n- input: A string containing the text and JSX-like tags to be parsed.\n\nReturns:\nAn object with two properties:\n1. stringWithoutJSXTags: A string where all `<helicone-prompt-input>` tags are removed, and only their text content remains.\n2. templateWithInputs: An object containing:\n   - template: A version of the input string where `<helicone-prompt-input>` tags are replaced with self-closing versions,\n     preserving the `key` attributes but removing the text content.\n   - inputs: An object mapping the `key` attributes to their corresponding text content, effectively extracting\n     the data from the original tags.\n\nExample Usage:\n```ts\nconst input = `\nThe scene is <helicone-prompt-input key=\"scene\" >Harry Potter</helicone-prompt-input>.\n<helicone-prompt-input key=\"name\" >justin</helicone-prompt-input>  test`;\n\nconst expectedOutput = parseJSXString(input);\nconsole.log(expectedOutput);\n```\nThe function is useful for preprocessing strings with embedded custom JSX-like tags, extracting useful data,\nand preparing templates for further processing or rendering. It demonstrates a practical application of regular\nexpressions for text manipulation in TypeScript, specifically tailored to a custom JSX-like syntax.",
 				"properties": {
 					"template": {
 						"additionalProperties": false,
@@ -1011,11 +1012,16 @@
 							"type": "string"
 						},
 						"type": "object"
+					},
+					"autoInputs": {
+						"items": {},
+						"type": "array"
 					}
 				},
 				"required": [
 					"template",
-					"inputs"
+					"inputs",
+					"autoInputs"
 				],
 				"type": "object",
 				"additionalProperties": false

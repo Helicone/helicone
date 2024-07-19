@@ -2632,6 +2632,12 @@
 												"response": {
 													"$ref": "#/components/schemas/ResponseObj"
 												},
+												"autoInputs": {
+													"items": {
+														"$ref": "#/components/schemas/Record_string.string_"
+													},
+													"type": "array"
+												},
 												"inputs": {
 													"$ref": "#/components/schemas/Record_string.string_"
 												},
@@ -2645,6 +2651,7 @@
 											"required": [
 												"request",
 												"response",
+												"autoInputs",
 												"inputs",
 												"requestPath",
 												"requestId"

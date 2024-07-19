@@ -1,9 +1,9 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database, Json } from "../../../supabase/database.types";
-import { TemplateWithInputs } from "../../api/lib/promptHelpers";
 import { deepCompare } from "../util/helpers";
 import { DBQueryTimer } from "../util/loggers/DBQueryTimer";
 import { Result, err, ok } from "../util/results";
+import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function tryModel(x: any) {

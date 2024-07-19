@@ -357,6 +357,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "template": {"dataType":"object","required":true},
             "inputs": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"string"},"required":true},
+            "autoInputs": {"dataType":"array","array":{"dataType":"any"},"required":true},
         },
         "additionalProperties": false,
     },

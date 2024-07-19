@@ -839,6 +839,7 @@ Json: JsonObject;
             inputRecord?: {
               request: components["schemas"]["RequestObj"];
               response: components["schemas"]["ResponseObj"];
+              autoInputs: components["schemas"]["Record_string.string_"][];
               inputs: components["schemas"]["Record_string.string_"];
               requestPath: string;
               requestId: string;
