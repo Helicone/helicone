@@ -60,7 +60,6 @@ routes = [
 	{ pattern = "together.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "gateway.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "hyperbolic.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
-  { pattern = "fireworks.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 
 	{ pattern = "oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
@@ -80,7 +79,6 @@ routes = [
 	{ pattern = "together.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "gateway.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "2yfv.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-  { pattern = "fireworks.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 
 	{ pattern = "oai.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
@@ -89,7 +87,6 @@ routes = [
 	{ pattern = "openrouter.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "together.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "gateway.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-  { pattern = "fireworks.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
 
 durable_objects.bindings = [
@@ -146,7 +143,6 @@ routes = [
 	{ pattern = "together.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "gateway.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "hyperbolic.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-  { pattern = "fireworks.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
 
 kv_namespaces = [
