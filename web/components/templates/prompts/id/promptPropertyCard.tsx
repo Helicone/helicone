@@ -16,6 +16,7 @@ interface PromptPropertyCardProps {
   properties: Record<string, string>;
   onSelect?: () => void;
   onRemove?: () => void;
+  autoInputs: Record<string, any>;
   view?: "list" | "grid";
   index?: number;
   size?: "small" | "large";
@@ -31,6 +32,7 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
     properties,
     view = "list",
     index,
+    autoInputs,
     size = "large",
   } = props;
   const { setNotification } = useNotification();
@@ -117,6 +119,7 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
           </div>
         </div>
         <ul className="divide-y divide-gray-300 dark:divide-gray-700 flex flex-col mt-4 w-full">
+          {JSON.stringify(autoInputs)}
           {Object.entries(properties).map(([key, value]) => (
             <li
               key={key}

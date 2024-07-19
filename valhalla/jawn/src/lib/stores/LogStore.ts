@@ -282,6 +282,41 @@ export class LogStore {
         throw error;
       }
     }
+    if (versionId && Object.keys(heliconeTemplate.inputs).length > 0) {
+      try {
+        await t.none(
+          `INSERT INTO prompt_input_keys (key, prompt_version, created_at)
+       SELECT unnest($1::text[]), $2, $3
+       ON CONFLICT (key, prompt_version) DO NOTHING`,
+          [
+            `{${Object.keys(heliconeTemplate.inputs).join(",")}}`,
+            versionId,
+            newPromptRecord.createdAt.toISOString(),
+          ]
+        );
+      } catch (error) {
+        console.error("Error inserting prompt input keys", error);
+        throw error;
+      }
+
+      try {
+        // Record the inputs and source request
+        await t.none(
+          `INSERT INTO prompt_input_record (inputs, auto_prompt_inputs, source_request, prompt_version, created_at)
+       VALUES ($1, $2, $3, $4, $5)`,
+          [
+            JSON.stringify(heliconeTemplate.inputs),
+            JSON.stringify(heliconeTemplate?.autoInputs ?? []),
+            requestId,
+            versionId,
+            newPromptRecord.createdAt.toISOString(),
+          ]
+        );
+      } catch (error) {
+        console.error("Error inserting prompt input record", error);
+        throw error;
+      }
+    }
 
     return ok("Prompt processed successfully");
   }

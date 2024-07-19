@@ -41,12 +41,14 @@ export const SingleChat = (props: {
     setExpanded: (expanded: boolean) => void;
   };
   selectedProperties?: Record<string, string>;
+  autoInputs?: any[];
   isHeliconeTemplate?: boolean;
 }) => {
   const {
     message,
     index,
     isLast,
+    autoInputs,
     expandedProps: { expanded, setExpanded },
     isHeliconeTemplate,
   } = props;
@@ -273,7 +275,19 @@ export const SingleChat = (props: {
           </div>
         </div>
         <div className="relative whitespace-pre-wrap items-center h-full w-full">
-          {isFunction ? (
+          {typeof message === "string" &&
+          (message as string).includes("helicone-auto-prompt-input") ? (
+            autoInputs?.[0] ? (
+              <SingleChat
+                message={autoInputs?.[0] as Message}
+                index={index}
+                isLast={isLast}
+                expandedProps={{ expanded, setExpanded }}
+              />
+            ) : (
+              <></>
+            )
+          ) : isFunction ? (
             <div className="flex flex-col space-y-2">
               <code className="text-xs whitespace-pre-wrap font-semibold">
                 {message.name}
@@ -298,7 +312,7 @@ export const SingleChat = (props: {
                 )}
                 style={{ maxHeight: expanded ? "none" : "10.5rem" }}
               >
-                {/* render the string or stringify the array/object */}
+                {JSON.stringify(formattedMessageContent)}
                 <RenderWithPrettyInputKeys
                   text={
                     isJSON(formattedMessageContent)
@@ -344,6 +358,7 @@ interface ChatProps {
   hideTopBar?: boolean;
   messageSlice?: "lastTwo";
   className?: string;
+  autoInputs?: any[];
 }
 
 export const Chat = (props: ChatProps) => {
@@ -356,6 +371,7 @@ export const Chat = (props: ChatProps) => {
     selectedProperties,
     editable,
     isHeliconeTemplate,
+    autoInputs,
     className = "bg-gray-50",
   } = props;
 
@@ -438,6 +454,7 @@ export const Chat = (props: ChatProps) => {
           {firstTwo.map((message, index) => {
             return (
               <SingleChat
+                autoInputs={autoInputs}
                 message={message}
                 index={index}
                 isLast={index === messages.length - 1}
@@ -475,6 +492,7 @@ export const Chat = (props: ChatProps) => {
           {lastTwo.map((message, index) => {
             return (
               <SingleChat
+                autoInputs={autoInputs}
                 message={message}
                 index={index}
                 isLast={index === messages.length - 1}
@@ -499,6 +517,7 @@ export const Chat = (props: ChatProps) => {
       return messages.map((message, index) => {
         return (
           <SingleChat
+            autoInputs={autoInputs}
             message={message}
             index={index}
             isLast={index === messages.length - 1}

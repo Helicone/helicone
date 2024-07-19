@@ -708,6 +708,7 @@ Json: JsonObject;
       prompt_version: string;
       created_at: string;
       response_body: string;
+      auto_prompt_inputs: unknown[];
     };
     "ResultSuccess_PromptInputRecord-Array_": {
       data: components["schemas"]["PromptInputRecord"][];

@@ -555,6 +555,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       )
                       .map((input) => (
                         <li key={input.id}>
+                          {input.auto_prompt_inputs.length}
                           <PromptPropertyCard
                             isSelected={selectedInput?.id === input.id}
                             onSelect={function (): void {
@@ -567,6 +568,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                             requestId={input.source_request}
                             createdAt={input.created_at}
                             properties={input.inputs}
+                            autoInputs={input.auto_prompt_inputs}
                             view={inputView}
                           />
                         </li>
@@ -623,6 +625,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       requestId={selectedInput?.source_request || ""}
                       model={prompts?.at(0)?.model || "unknown"}
                       selectedProperties={selectedInput?.inputs}
+                      autoInputs={selectedInput?.auto_prompt_inputs}
                     />
                   </div>
                 </div>

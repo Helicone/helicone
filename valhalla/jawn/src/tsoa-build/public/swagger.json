@@ -2088,6 +2088,10 @@
 					},
 					"response_body": {
 						"type": "string"
+					},
+					"auto_prompt_inputs": {
+						"items": {},
+						"type": "array"
 					}
 				},
 				"required": [
@@ -2096,7 +2100,8 @@
 					"source_request",
 					"prompt_version",
 					"created_at",
-					"response_body"
+					"response_body",
+					"auto_prompt_inputs"
 				],
 				"type": "object",
 				"additionalProperties": false
