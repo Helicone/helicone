@@ -93,7 +93,7 @@ export const DemoGame = ({
         <StartPage setOpenDemo={setOpenDemo} onPlay={onPlay} />
       )}
       {gameState !== "start" && (
-        <Col className="w-full p px-5 py-10 justify-between items-center h-fit ">
+        <Col className="w-full p px-5 py-10 justify-between items-center h-full">
           <i
             className="text-sm text-gray-500 underline hover:text-gray-700 cursor-pointer"
             onClick={onReset}
@@ -101,15 +101,17 @@ export const DemoGame = ({
             reset
           </i>
           {gameState === "playing" && (
-            <ChatWindow
-              onFinish={() => setGameState("finished")}
-              chatHistory={chatHistory}
-              setChatHistory={setChatHistory}
-              movieTitle={selectedMovie.title}
-              isLoading={false}
-              movieCharacter={selectedCharacter}
-              gameSessionId={gameSessionId}
-            />
+            <div className="w-full grow">
+              <ChatWindow
+                onFinish={() => setGameState("finished")}
+                chatHistory={chatHistory}
+                setChatHistory={setChatHistory}
+                movieTitle={selectedMovie.title}
+                isLoading={false}
+                movieCharacter={selectedCharacter}
+                gameSessionId={gameSessionId}
+              />
+            </div>
           )}
           {gameState === "finished" && (
             <Col className="h-full flex items-center justify-center gap-5">
