@@ -88,18 +88,18 @@ export const DemoGame = ({
   };
 
   return (
-    <div className="bg-gradient-to-bl from-indigo-200 to-indigo-300 flex flex-col items-center justify-center bg-white h-[80vh] max-h-[80vh] w-[500px] rounded-lg ">
+    <div className="bg-indigo-100 flex flex-col items-center justify-between bg-white h-[80vh] max-h-[80vh] w-[500px] rounded-lg relative overflow-hidden">
       {gameState === "start" && (
         <StartPage setOpenDemo={setOpenDemo} onPlay={onPlay} />
       )}
       {gameState !== "start" && (
-        <Col className="w-full p px-5 py-10 justify-between items-center h-full">
-          <i
-            className="text-sm text-gray-500 underline hover:text-gray-700 cursor-pointer"
+        <Col className="w-full px-5 py-10 justify-between items-center h-full">
+          <button
+            className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer absolute top-4 left-4"
             onClick={onReset}
           >
-            reset
-          </i>
+            Reset
+          </button>
           {gameState === "playing" && (
             <div className="h-full w-full">
               <ChatWindow
@@ -115,14 +115,14 @@ export const DemoGame = ({
           )}
           {gameState === "finished" && (
             <Col className="h-full flex items-center justify-center gap-5">
-              <h1 className="text-2xl">🎉 You won! 🎉</h1>
+              <h1 className="text-2xl font-bold">🎉 You won! 🎉</h1>
               <p className="text-sm">
                 You found the character in{" "}
-                {chatHistory.length - 2 > 1 ? `${chatHistory.length - 2}` : ""}{" "}
-                messages!
+                {chatHistory.length - 2 > 1 ? `${chatHistory.length - 2}` : "1"}{" "}
+                {chatHistory.length - 2 > 1 ? "messages" : "message"}!
               </p>
               <button
-                className="bg-indigo-500 text-white px-2 py-1 rounded-md"
+                className="bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600 transition-colors"
                 onClick={() => onReset()}
               >
                 Play again
@@ -133,10 +133,10 @@ export const DemoGame = ({
       )}
 
       <button
-        className="absolute top-0 right-0 h-[30px] w-[30px]  bg-red-500 flex items-center justify-center rounded-lg text-white font-bold"
+        className="absolute top-2 right-2 h-8 w-8 bg-red-500 flex items-center justify-center rounded-full text-white font-bold hover:bg-red-600 transition-colors"
         onClick={() => setOpenDemo(false)}
       >
-        x
+        ×
       </button>
     </div>
   );

@@ -9,11 +9,12 @@ const StartPage = ({
   onPlay: () => void;
 }) => {
   return (
-    <div className="flex flex-col items-center justify-center gap-5">
-      <p className="text-2xl tracking-[10px]">Helicone Presents</p>
+    <div className="flex flex-col items-center justify-center gap-6 p-8 max-w-md mx-auto text-center">
+      <h1 className="text-2xl font-semibold tracking-[10px]">
+        Helicone Presents
+      </h1>
       <div className="tracking-[10px] flex flex-col items-center justify-center animate-popin gap-2">
-        <p className="text-4xl">GUESS</p>
-        <p className="text-4xl">WHO</p>
+        <p className="text-5xl ">GUESS WHO</p>
       </div>
       <Lottie
         options={{
@@ -30,16 +31,23 @@ const StartPage = ({
         isPaused={false}
         isClickToPauseDisabled={true}
       />
-      <div className="text-center text-sm w-[300px] font-light text-gray-600">
+      <p className="text-sm font-light text-gray-600 max-w-[300px]">
         An LLM-based game that will send logs to your Helicone dashboard!
+      </p>
+      <div className="flex flex-col gap-3 w-full">
+        <button
+          className="bg-indigo-500 text-white py-3 px-6 rounded-md hover:bg-indigo-600 transition-colors"
+          onClick={onPlay}
+        >
+          Play Game
+        </button>
+        <button
+          className="text-gray-600 hover:text-gray-800 transition-colors"
+          onClick={() => setOpenDemo(false)}
+        >
+          Close
+        </button>
       </div>
-      <button
-        className="bg-indigo-500 text-white p-2 rounded-md"
-        onClick={onPlay}
-      >
-        Play Game
-      </button>
-      <button onClick={() => setOpenDemo(false)}>Close</button>
     </div>
   );
 };
