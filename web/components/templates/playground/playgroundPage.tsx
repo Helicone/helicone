@@ -295,7 +295,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               >
                 <span>Provider API Key</span>
 
-                <Tooltip title={
+                <Tooltip
+                  title={
                     "Your API keys are required to use fine-tuned models in the playground."
                   }
                   placement="top-end"
