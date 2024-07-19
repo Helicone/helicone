@@ -10,7 +10,7 @@ import {
 import { useEffect, useState } from "react";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
-import { Message } from "../requests/chat";
+import { Message } from "../requests/chatComponent/chat";
 import RoleButton from "./new/roleButton";
 import useNotification from "../../shared/notification/useNotification";
 import { Tooltip } from "@mui/material";

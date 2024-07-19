@@ -13,7 +13,7 @@ import {
   ChatCompletionTool,
 } from "openai/resources/chat";
 import { fetchOpenAI } from "../../../services/lib/providers/openAI";
-import { Message } from "../requests/chat";
+import { Message } from "../requests/chatComponent/chat";
 import ModelPill from "../requestsV2/modelPill";
 import ChatRow from "./chatRow";
 import RoleButton from "./new/roleButton";

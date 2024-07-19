@@ -14,7 +14,7 @@ import { clsx } from "../../../shared/clsx";
 import ChatPlayground from "../../playground/chatPlayground";
 import ProviderKeyList from "../../enterprise/portal/id/providerKeyList";
 import { PlusIcon } from "@heroicons/react/20/solid";
-import { Message } from "../../requests/chat";
+import { Message } from "../../requests/chatComponent/chat";
 import ModelPill from "../../requestsV2/modelPill";
 import SelectRandomDataset from "./selectRandomDataset";
 import useNotification from "../../../shared/notification/useNotification";

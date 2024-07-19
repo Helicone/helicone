@@ -1,4 +1,4 @@
-import { Chat } from "../../requests/chat";
+import { Chat } from "../../requests/chatComponent/chat";
 import AbstractRequestBuilder, {
   SpecificFields,
 } from "./abstractRequestBuilder";

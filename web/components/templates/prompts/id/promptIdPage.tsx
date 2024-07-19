@@ -28,7 +28,7 @@ import { getUSDateFromString } from "../../../shared/utils/utils";
 import HcBadge from "../../../ui/hcBadge";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
 import HcButton from "../../../ui/hcButton";
-import { Chat } from "../../requests/chat";
+import { Chat } from "../../requests/chatComponent/chat";
 import ModelPill from "../../requestsV2/modelPill";
 import StatusBadge from "../../requestsV2/statusBadge";
 import TableFooter from "../../requestsV2/tableFooter";

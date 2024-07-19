@@ -6,16 +6,16 @@ import {
   EyeIcon,
   EyeSlashIcon,
 } from "@heroicons/react/24/outline";
-import { clsx } from "../../shared/clsx";
-import { removeLeadingWhitespace } from "../../shared/utils/utils";
+import { clsx } from "../../../shared/clsx";
+import { removeLeadingWhitespace } from "../../../shared/utils/utils";
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
-import { LlmSchema } from "../../../lib/api/models/requestResponseModel";
-import ThemedModal from "../../shared/themed/themedModal";
-import { RenderWithPrettyInputKeys } from "../playground/chatRow";
-import { RenderImageWithPrettyInputKeys } from "../prompts/id/promptIdPage";
-import RoleButton from "../playground/new/roleButton";
+import { LlmSchema } from "../../../../lib/api/models/requestResponseModel";
+import ThemedModal from "../../../shared/themed/themedModal";
+import { RenderWithPrettyInputKeys } from "../../playground/chatRow";
+import { RenderImageWithPrettyInputKeys } from "../../prompts/id/promptIdPage";
+import RoleButton from "../../playground/new/roleButton";
 
 export type Message = {
   id: string;

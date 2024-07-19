@@ -1,5 +1,5 @@
 import { ToolCall } from "openai/resources/beta/threads/runs/steps";
-import { Message } from "../../components/templates/requests/chat";
+import { Message } from "../../components/templates/requests/chatComponent/chat";
 import { NormalizedRequest } from "../../components/templates/requestsV2/builder/abstractRequestBuilder";
 import useRequestsPageV2 from "../../components/templates/requestsV2/useRequestsPageV2";
 import { ChatCompletion, ChatCompletionTool } from "openai/resources";
