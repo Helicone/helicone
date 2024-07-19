@@ -88,7 +88,7 @@ export const DemoGame = ({
   };
 
   return (
-    <div className="bg-indigo-100 flex flex-col items-center justify-between bg-white h-[80vh] max-h-[80vh] w-[500px] rounded-lg relative overflow-hidden">
+    <div className="border border-2 flex flex-col items-center justify-between bg-white h-[80vh] max-h-[80vh] w-[500px] rounded-lg relative overflow-hidden">
       {gameState === "start" && (
         <StartPage setOpenDemo={setOpenDemo} onPlay={onPlay} />
       )}
