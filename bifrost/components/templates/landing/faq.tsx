@@ -21,7 +21,7 @@ const questions = [
     description: (
       <>
         <div className="flex flex-col gap-5">
-          <p>Using a proxy means that any downtime or issues with the proxy can affect your application's performance. Helicone provides an <span className="font-bold underline">async option</span> for logging events that is not on the critical path, which can offer more reliability in case of network issues or service downtimes. That being said, Helicone has consistently had 99.9999% up-time in the last year.</p>
+          <p>Using a proxy means that any downtime or issues with the proxy can affect your application's performance. Helicone provides an <Link href={"https://docs.helicone.ai/getting-started/proxy-vs-async"} passHref> <span className="font-bold underline hover:bg-blue-300">async option</span> </Link> for logging events that is not on the critical path, which can offer more reliability in case of network issues or service downtimes. That being said, Helicone has consistently had 99.9999% up-time in the last year.</p>
           <p>In addition, while Helicone uses Cloudflare’s global network to minimize latency, there can still be a minor increase in latency. Benchmarking data showed that Helicone's proxy service latency was nearly identical to OpenAI's, but with a few requests running longer. This slight performance difference needs to be considered, especially in latency-sensitive applications.</p>
         </div>
       </>
@@ -34,7 +34,7 @@ const questions = [
         <div className="flex flex-col gap-5">
         <p>Yes, you can still use Helicone without using the proxy by using the <span className="font-bold">Async</span> method. This allows for request logging without being on the critical path, ensuring that network issues do not affect your application.</p>
         <p>However, async integration does not come with the suite of middleware features available to proxy integrations, such as caching, prompt threat detection, moderation, key vault, rate limiting, etc. In addition, integrating using Proxy is simple and requires 2 lines of code.</p>
-        <p>Check out our docs for instructions on <Link href={"https://docs.helicone.ai/integrations/openai/async"} passHref></Link><a className="underline">async logging with OpenAI</a> /> and other providers. For more ways to integrate Helicone into your application, feel free to reach out to <span className="underline">help@helicone.ai</span>.</p>
+        <p>Check out our docs for instructions on <Link href={"https://docs.helicone.ai/integrations/openai/async"} passHref><span className="underline hover:bg-blue-300">async logging with OpenAI</span></Link> and other providers. For more ways to integrate Helicone into your application, feel free to reach out to <Link href={"https://docs.helicone.ai/getting-started/quick-start"} passHref><span className="underline hover:bg-blue-300">help@helicone.ai</span></Link>.</p>
         </div>
       </>
     )
