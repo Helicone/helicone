@@ -61,7 +61,10 @@ export class DemoController extends Controller {
     const result = await tempAPIKey.data?.with(async (apiKey) => {
       const openai = new OpenAI({
         apiKey: OPENAI_KEY,
-        baseURL: "http://localhost:8787/v1",
+        baseURL:
+          process.env.VERCEL_ENV === "production"
+            ? "https://oai.helicone.ai/v1"
+            : "http://localhost:8787/v1",
         defaultHeaders: {
           "Helicone-Auth": `Bearer ${apiKey}`,
           "Helicone-Rate-Limit":
