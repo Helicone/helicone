@@ -12,7 +12,7 @@ interface OpenAIReq {
   maxTokens: number;
   tools?: ChatCompletionTool[];
   requestId?: string;
-  openAIApiKey: string;
+  openAIApiKey?: string;
 }
 
 export const fetchOpenAI = async (props: OpenAIReq) => {
