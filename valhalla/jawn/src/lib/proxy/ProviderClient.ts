@@ -49,11 +49,14 @@ export async function callProvider(props: CallProps) {
   const init =
     method === "GET" ? { ...baseInit } : { ...baseInit, body: body ?? "" };
   init.headers.delete("host");
+  init.headers.delete("Content-Encoding");
 
   console.log(`Type of body: ${typeof body}`);
   console.log(`Fetching ${targetUrl.href}`);
   console.log(`Init: ${JSON.stringify(init)}`);
-  return await fetch(targetUrl.href, init);
+  const result = await fetch(targetUrl.href, init);
+  result.headers.delete("Content-Encoding");
+  return result;
 }
 
 export function buildTargetUrl(originalUrl: URL, apiBase: string): URL {
