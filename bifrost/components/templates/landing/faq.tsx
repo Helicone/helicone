@@ -2,6 +2,7 @@
 
 import { MdOutlineArrowForwardIos, MdOutlineExpandMore } from "react-icons/md";
 import React, { useState } from "react";
+import Link from "next/link";
 
 
 
@@ -33,7 +34,7 @@ const questions = [
         <div className="flex flex-col gap-5">
         <p>Yes, you can still use Helicone without using the proxy by using the <span className="font-bold">Async</span> method. This allows for request logging without being on the critical path, ensuring that network issues do not affect your application.</p>
         <p>However, async integration does not come with the suite of middleware features available to proxy integrations, such as caching, prompt threat detection, moderation, key vault, rate limiting, etc. In addition, integrating using Proxy is simple and requires 2 lines of code.</p>
-        <p>Check out our docs for instructions on <span className="underline">async logging with OpenAI</span> and other providers. For more ways to integrate Helicone into your application, feel free to reach out to <span className="underline">help@helicone.ai</span>.</p>
+        <p>Check out our docs for instructions on <Link href={"https://docs.helicone.ai/integrations/openai/async"} passHref></Link><a className="underline">async logging with OpenAI</a> /> and other providers. For more ways to integrate Helicone into your application, feel free to reach out to <span className="underline">help@helicone.ai</span>.</p>
         </div>
       </>
     )
