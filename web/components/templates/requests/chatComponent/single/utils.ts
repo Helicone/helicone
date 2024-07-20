@@ -20,3 +20,13 @@ export const getFormattedMessageContent = (message: Message): string => {
   }
   return removeLeadingWhitespace(message?.content?.toString() || "");
 };
+
+export const hasFunctionCall = (message: Message): boolean =>
+  !!message.function_call ||
+  (message.tool_calls?.some((tool) => tool.type === "function") ?? false);
+
+export const hasImage = (message: Message): boolean =>
+  Array.isArray(message.content) &&
+  message.content.some(
+    (item) => item.type === "image_url" || item.type === "image"
+  );

@@ -1,8 +1,21 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { Message } from "../types";
-import { renderFunctionCall, renderImageRow } from "../renderingUtils";
 import { ExpandableMessage } from "./ExpandableMessage";
-import { getFormattedMessageContent, isJSON } from "./utils";
+import { FunctionCall, FunctionMessage, ImageRow } from "./renderingUtils";
+import { getFormattedMessageContent, hasFunctionCall, hasImage } from "./utils";
+function getContentType(
+  message: Message
+): "function" | "functionCall" | "image" | "message" | "autoInput" {
+  if (message.role === "function") return "function";
+  if (hasFunctionCall(message)) return "functionCall";
+  if (hasImage(message)) return "image";
+  if (
+    typeof message === "string" &&
+    (message as string).includes("helicone-auto-prompt-input")
+  )
+    return "autoInput";
+  return "message";
+}
 
 interface MessageContentProps {
   message: Message;
@@ -41,63 +54,42 @@ export const MessageContent: React.FC<MessageContentProps> = ({
 
   const formattedMessageContent = getFormattedMessageContent(message);
 
-  if (
-    typeof message === "string" &&
-    (message as string).includes("helicone-auto-prompt-input")
-  ) {
-    return autoInputs?.[0] ? (
-      <MessageContent
-        message={autoInputs[0] as Message}
-        expandedProps={{ expanded: false, setExpanded: () => {} }}
-      />
-    ) : null;
-  }
+  const contentType = getContentType(message);
 
-  if (message.role === "function") {
-    return renderFunctionMessage(message, formattedMessageContent);
+  switch (contentType) {
+    case "function":
+      return (
+        <FunctionMessage
+          message={message}
+          formattedMessageContent={formattedMessageContent}
+        />
+      );
+    case "functionCall":
+      return <FunctionCall message={message} />;
+    case "image":
+      return (
+        <ImageRow
+          message={message}
+          selectedProperties={selectedProperties}
+          isHeliconeTemplate={isHeliconeTemplate}
+        />
+      );
+    case "autoInput":
+      return autoInputs?.[0] ? (
+        <MessageContent
+          message={autoInputs[0] as Message}
+          expandedProps={{ expanded: false, setExpanded: () => {} }}
+        />
+      ) : null;
+    case "message":
+      return (
+        <ExpandableMessage
+          formattedMessageContent={formattedMessageContent}
+          textContainerRef={textContainerRef}
+          expandedProps={expandedProps}
+          showButton={showButton}
+          selectedProperties={selectedProperties}
+        />
+      );
   }
-
-  if (hasFunctionCall(message)) {
-    return renderFunctionCall(message);
-  }
-
-  if (hasImage(message)) {
-    return renderImageRow(message, selectedProperties, isHeliconeTemplate);
-  }
-
-  return (
-    <ExpandableMessage
-      formattedMessageContent={formattedMessageContent}
-      textContainerRef={textContainerRef}
-      expandedProps={expandedProps}
-      showButton={showButton}
-      selectedProperties={selectedProperties}
-    />
-  );
 };
-
-const renderFunctionMessage = (
-  message: Message,
-  formattedMessageContent: string
-) => (
-  <div className="flex flex-col space-y-2">
-    <code className="text-xs whitespace-pre-wrap font-semibold">
-      {message.name}
-    </code>
-    <pre className="text-xs whitespace-pre-wrap bg-gray-50 dark:bg-gray-950 p-2 rounded-lg overflow-auto">
-      {isJSON(formattedMessageContent)
-        ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
-        : formattedMessageContent}
-    </pre>
-  </div>
-);
-
-const hasFunctionCall = (message: Message): boolean =>
-  !!message.function_call ||
-  (message.tool_calls?.some((tool) => tool.type === "function") ?? false);
-
-const hasImage = (message: Message): boolean =>
-  Array.isArray(message.content) &&
-  message.content.some(
-    (item) => item.type === "image_url" || item.type === "image"
-  );
