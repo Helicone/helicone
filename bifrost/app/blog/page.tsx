@@ -20,6 +20,23 @@ export type BlogStructure = {
 
 const blogContent: BlogStructure[] = [
   {
+    title: "What is Prompt Management?",
+    description:
+      "Prompt management for large language models (LLMs) is crucial for optimizing AI interactions. What are the challenges, or the benefits of prompt management tools like Helicone, Pezzo, and Agenta? We will explore what to look for when choosing a prompt management tool for your AI apps.",
+    badgeText: "insight",
+    date: "July 19, 2024",
+    href: "/blog/prompt-management",
+    imageUrl: "/static/blog/prompt-management/cover.webp",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/static/blog/linalam-headshot.webp",
+        imageAlt: "Lina Lam's headshot",
+      },
+    ],
+    time: "3 minute read",
+  },
+  {
     title: "What is LLM Observability and Monitoring?",
     description:
       "Building with LLMs in production (well) is incredibly difficult. You probably have heard of the word LLM observability'. What is it? How does it differ from traditional observability? What is observed? We have the answers. ",
@@ -36,7 +53,7 @@ const blogContent: BlogStructure[] = [
     ],
     time: "3 minute read",
   },
-    {
+  {
     title: "Compare: The Best LangSmith Alternatives & Competitors",
     description:
       "Observability tools allow developers to monitor, analyze, and optimize AI model performance, which helps overcome the 'black box' nature of LLMs. But which LangSmith alternative is the best in 2024? We will shed some light.",
@@ -52,7 +69,7 @@ const blogContent: BlogStructure[] = [
       },
     ],
     time: "8 minute read",
-    },
+  },
   {
     title: "Handling Billions of LLM Logs with Upstash Kafka and Cloudflare Workers",
     description:
