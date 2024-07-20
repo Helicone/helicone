@@ -122,7 +122,10 @@ export class OrganizationManager extends BaseManager {
       return err("Unauthorized");
     }
 
-    if (orgMember.data.org_role !== "owner") {
+    if (
+      orgMember.data.org_role !== "owner" &&
+      orgMember.data.org_role !== "admin"
+    ) {
       return err("Only organization admins can update settings");
     }
 
