@@ -1,6 +1,20 @@
 import { Message } from "../types";
 import { removeLeadingWhitespace } from "../../../../shared/utils/utils";
 
+export function getContentType(
+  message: Message
+): "function" | "functionCall" | "image" | "message" | "autoInput" {
+  if (message.role === "function") return "function";
+  if (hasFunctionCall(message)) return "functionCall";
+  if (hasImage(message)) return "image";
+  if (
+    typeof message === "string" &&
+    (message as string).includes("helicone-auto-prompt-input")
+  )
+    return "autoInput";
+  return "message";
+}
+
 export const isJSON = (str: string): boolean => {
   try {
     JSON.parse(str);

@@ -1,8 +1,9 @@
-import React from "react";
-import { Message } from "../types";
-import { MessageHeader } from "./MessageHeader";
-import { MessageContent } from "./MessageContent";
+import React, { useMemo } from "react";
 import { clsx } from "../../../../shared/clsx";
+import { Message } from "../types";
+import { MessageContent } from "./MessageContent";
+import { MessageHeader } from "./MessageHeader";
+import { getContentType } from "./utils";
 
 interface SingleChatProps {
   message: Message;
@@ -18,7 +19,7 @@ interface SingleChatProps {
 }
 
 export const SingleChat: React.FC<SingleChatProps> = ({
-  message,
+  message: messageContent,
   index,
   isLast,
   autoInputs,
@@ -26,8 +27,22 @@ export const SingleChat: React.FC<SingleChatProps> = ({
   selectedProperties,
   isHeliconeTemplate,
 }) => {
-  const isSystem = message.role === "system";
+  const isSystem = messageContent.role === "system";
   const getBgColor = () => "bg-transparent dark:bg-gray-950";
+
+  const message = useMemo(() => {
+    const contentType = getContentType(messageContent);
+    if (contentType === "autoInput" && autoInputs) {
+      const indexMatch = (messageContent as any as string).match(
+        /<helicone-auto-prompt-input idx=(\d+) \/>/
+      );
+      const index = indexMatch ? parseInt(indexMatch[1], 10) : 0;
+      return autoInputs[index];
+    }
+    return messageContent;
+  }, [messageContent, autoInputs]);
+
+  if (!message) return null;
 
   return (
     <div

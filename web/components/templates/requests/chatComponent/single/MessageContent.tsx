@@ -1,21 +1,9 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { Message } from "../types";
+import { AutoInputMessage } from "./AutoInputMessage";
 import { ExpandableMessage } from "./ExpandableMessage";
 import { FunctionCall, FunctionMessage, ImageRow } from "./renderingUtils";
-import { getFormattedMessageContent, hasFunctionCall, hasImage } from "./utils";
-function getContentType(
-  message: Message
-): "function" | "functionCall" | "image" | "message" | "autoInput" {
-  if (message.role === "function") return "function";
-  if (hasFunctionCall(message)) return "functionCall";
-  if (hasImage(message)) return "image";
-  if (
-    typeof message === "string" &&
-    (message as string).includes("helicone-auto-prompt-input")
-  )
-    return "autoInput";
-  return "message";
-}
+import { getContentType, getFormattedMessageContent } from "./utils";
 
 interface MessageContentProps {
   message: Message;
@@ -75,12 +63,7 @@ export const MessageContent: React.FC<MessageContentProps> = ({
         />
       );
     case "autoInput":
-      return autoInputs?.[0] ? (
-        <MessageContent
-          message={autoInputs[0] as Message}
-          expandedProps={{ expanded: false, setExpanded: () => {} }}
-        />
-      ) : null;
+      return <AutoInputMessage message={message as any as string} />;
     case "message":
       return (
         <ExpandableMessage

@@ -555,7 +555,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       )
                       .map((input) => (
                         <li key={input.id}>
-                          {input.auto_prompt_inputs.length}
                           <PromptPropertyCard
                             isSelected={selectedInput?.id === input.id}
                             onSelect={function (): void {

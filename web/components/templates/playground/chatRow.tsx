@@ -10,7 +10,7 @@ import {
 import { useEffect, useState } from "react";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
-import { Message } from "../requests/chatComponent/chat";
+
 import RoleButton from "./new/roleButton";
 import useNotification from "../../shared/notification/useNotification";
 import { Tooltip } from "@mui/material";
@@ -18,6 +18,7 @@ import { enforceString } from "../../../lib/helpers/typeEnforcers";
 import AddFileButton from "./new/addFileButton";
 import ThemedModal from "../../shared/themed/themedModal";
 import MarkdownEditor from "../../shared/markdownEditor";
+import { Message } from "../requests/chatComponent/types";
 
 interface ChatRowProps {
   index: number;

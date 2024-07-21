@@ -1,8 +1,8 @@
 import React from "react";
 
-import { Message } from "./types";
+import { MessageGroup } from "./MessageGroup";
 import { PartialMessages } from "./ParitalMessage";
-import { AllMessages } from "./AllMessages";
+import { Message } from "./types";
 
 interface MessageRendererProps {
   messages: Message[];
@@ -43,7 +43,7 @@ export const MessageRenderer: React.FC<MessageRendererProps> = ({
 
   if (messages.length > 0) {
     return (
-      <AllMessages
+      <MessageGroup
         messages={messages}
         expandedChildren={expandedChildren}
         setExpandedChildren={setExpandedChildren}
