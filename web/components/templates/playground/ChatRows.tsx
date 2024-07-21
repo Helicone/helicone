@@ -52,7 +52,47 @@ const ChatRows: React.FC<ChatRowsProps> = ({
                   index={index}
                   message={message}
                   callback={(userText, role, image) => {
-                    // ... (keep existing callback logic)
+                    const newChat = [...currentChat];
+
+                    newChat[index].role = role as
+                      | "user"
+                      | "assistant"
+                      | "system";
+                    if (image) {
+                      if (typeof image === "string") {
+                        newChat[index].content = [
+                          {
+                            type: "image_url",
+                            image_url: {
+                              url: image,
+                            },
+                          },
+                          { type: "text", text: userText },
+                        ];
+                        setCurrentChat(newChat);
+                        return;
+                      }
+                      if (image instanceof File) {
+                        // get the image from the file and set it
+                        const imageObj = URL.createObjectURL(image);
+                        // get the image from
+                        newChat[index].content = [
+                          {
+                            type: "image",
+                            image: imageObj,
+                          },
+                          { type: "text", text: userText },
+                        ];
+                        setCurrentChat(newChat);
+                        return;
+                      } else {
+                        newChat[index].content = userText;
+                        setCurrentChat(newChat);
+                      }
+                    } else {
+                      newChat[index].content = userText;
+                      setCurrentChat(newChat);
+                    }
                   }}
                   deleteRow={deleteRowHandler}
                 />
