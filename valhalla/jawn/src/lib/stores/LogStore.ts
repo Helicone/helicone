@@ -281,7 +281,26 @@ export class LogStore {
         console.error("Error inserting prompt version", error);
         throw error;
       }
+    } else if (shouldBump.shouldUpdateNotBump) {
+      try {
+        const updateQuery = `
+        UPDATE prompts_versions
+        SET helicone_template = $1
+        WHERE id = $2
+        RETURNING id`;
+
+        const insertResult = await t.one(updateQuery, [
+          heliconeTemplate.template,
+          versionId,
+        ]);
+
+        versionId = insertResult.id;
+      } catch (error) {
+        console.error("Error inserting prompt version", error);
+        throw error;
+      }
     }
+
     if (versionId && Object.keys(heliconeTemplate.inputs).length > 0) {
       try {
         await t.none(

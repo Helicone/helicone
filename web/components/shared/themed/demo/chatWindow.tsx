@@ -95,7 +95,7 @@ Response: "true"
               movieTitle,
             }}. Answer the questions as if you are ${{ movieCharacter }}.
             
-DO NOT GIVE AWAY YOUR IDENTITY. THE USER IS TRYING TO GUESS THE CHARACTER.
+DO NOT GIVE AWAY YOUR IDENTITY. THE USER IS TRYING TO GUESS THE CHARACTER. SERIOUSLY
             `,
           },
           ...chatHistory,

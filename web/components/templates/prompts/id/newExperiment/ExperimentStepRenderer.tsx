@@ -78,8 +78,15 @@ const ExperimentStepRenderer: React.FC<ExperimentStepRendererProps> = ({
             maxTokens={256}
             submitText={"Save Changes"}
             onSubmit={(chat) => {
-              const cleanedChat = chat.map(({ id, ...rest }) => rest);
+              const cleanedChat = chat.map((msg) => {
+                if (typeof msg === "string") {
+                  return msg;
+                }
+                const { id, ...rest } = msg;
+                return rest;
+              });
               setCurrentChat(cleanedChat);
+              console.log(cleanedChat);
             }}
             customNavBar={{
               onBack: () => setCurrentStep(0),
