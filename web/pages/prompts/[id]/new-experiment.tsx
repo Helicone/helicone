@@ -4,7 +4,7 @@ import { GetServerSidePropsContext } from "next";
 import { ReactElement } from "react";
 import AuthLayout from "../../../components/layout/authLayout";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
-import PromptNewExperimentPage from "../../../components/templates/prompts/id/promptNewExperiment";
+import PromptNewExperimentPage from "../../../components/templates/prompts/id/newExperiment/promptNewExperiment";
 
 interface PlaygroundProps {
   user: User;

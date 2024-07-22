@@ -1,6 +1,7 @@
+import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { PromiseGenericResult } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
-import { HandlerContext, TemplateWithInputs } from "./HandlerContext";
+import { HandlerContext } from "./HandlerContext";
 
 export class PromptHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
@@ -38,6 +39,7 @@ export class PromptHandler extends AbstractLogHandler {
         const processedTemplate: TemplateWithInputs = {
           template: heliconeTemplate.template,
           inputs: inputs,
+          autoInputs: heliconeTemplate.autoInputs,
         };
 
         context.processedLog.request.heliconeTemplate = processedTemplate;
@@ -79,6 +81,9 @@ export class PromptHandler extends AbstractLogHandler {
     return {
       template: this.sanitizeTemplate(templateWithInputs.template),
       inputs: this.sanitizeInputs(templateWithInputs.inputs),
+      autoInputs: templateWithInputs.autoInputs.map((autoInput) =>
+        this.sanitizeInputs(autoInput)
+      ),
     };
   }
 

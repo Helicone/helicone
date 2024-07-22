@@ -2088,6 +2088,10 @@
 					},
 					"response_body": {
 						"type": "string"
+					},
+					"auto_prompt_inputs": {
+						"items": {},
+						"type": "array"
 					}
 				},
 				"required": [
@@ -2096,7 +2100,8 @@
 					"source_request",
 					"prompt_version",
 					"created_at",
-					"response_body"
+					"response_body",
+					"auto_prompt_inputs"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -2207,7 +2212,7 @@
 			},
 			"DatasetMetadata": {
 				"properties": {
-					"promptId": {
+					"promptVersionId": {
 						"type": "string"
 					},
 					"inputRecordsIds": {
@@ -2632,6 +2637,12 @@
 												"response": {
 													"$ref": "#/components/schemas/ResponseObj"
 												},
+												"autoInputs": {
+													"items": {
+														"$ref": "#/components/schemas/Record_string.string_"
+													},
+													"type": "array"
+												},
 												"inputs": {
 													"$ref": "#/components/schemas/Record_string.string_"
 												},
@@ -2645,6 +2656,7 @@
 											"required": [
 												"request",
 												"response",
+												"autoInputs",
 												"inputs",
 												"requestPath",
 												"requestId"
@@ -4298,7 +4310,7 @@
 						"application/json": {
 							"schema": {
 								"properties": {
-									"promptId": {
+									"promptVersionId": {
 										"type": "string"
 									}
 								},

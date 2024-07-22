@@ -28,7 +28,7 @@ import { getUSDateFromString } from "../../../shared/utils/utils";
 import HcBadge from "../../../ui/hcBadge";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
 import HcButton from "../../../ui/hcButton";
-import { Chat } from "../../requests/chat";
+import { Chat } from "../../requests/chatComponent/chat";
 import ModelPill from "../../requestsV2/modelPill";
 import StatusBadge from "../../requestsV2/statusBadge";
 import TableFooter from "../../requestsV2/tableFooter";
@@ -567,6 +567,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                             requestId={input.source_request}
                             createdAt={input.created_at}
                             properties={input.inputs}
+                            autoInputs={input.auto_prompt_inputs}
                             view={inputView}
                           />
                         </li>
@@ -623,6 +624,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       requestId={selectedInput?.source_request || ""}
                       model={prompts?.at(0)?.model || "unknown"}
                       selectedProperties={selectedInput?.inputs}
+                      autoInputs={selectedInput?.auto_prompt_inputs}
                     />
                   </div>
                 </div>

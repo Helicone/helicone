@@ -152,6 +152,7 @@ const ExperimentConfig = (props: ExperimentConfigProps) => {
                 properties={property.properties}
                 size="small"
                 index={i + 1}
+                autoInputs={[]}
               />
             </div>
           ))}

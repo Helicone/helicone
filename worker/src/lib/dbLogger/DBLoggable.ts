@@ -29,10 +29,11 @@ import {
   getRequestImageModelParser,
   getResponseImageModelParser,
 } from "./imageParsers/parserMapper";
-import { TemplateWithInputs } from "../../api/lib/promptHelpers";
+
 import { ImageModelParsingResponse } from "./imageParsers/core/parsingResponse";
 import { costOfPrompt } from "../../packages/cost";
 import { KafkaMessage, KafkaProducer } from "../clients/KafkaProducer";
+import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 
 export interface DBLoggableProps {
   response: {

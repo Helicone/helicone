@@ -85,6 +85,7 @@ const SelectRandomDataset = (props: SelectRandomDatasetProps) => {
             {selectedRequests?.map((request) => (
               <li key={request.id} className="w-full">
                 <PromptPropertyCard
+                  autoInputs={request.inputs}
                   isSelected={false}
                   onRemove={() => {
                     const copy = JSON.parse(JSON.stringify(selectedRequests));
@@ -116,6 +117,7 @@ const SelectRandomDataset = (props: SelectRandomDatasetProps) => {
             title={"Cancel"}
             onClick={() => setOpen(false)}
           />
+
           <HcButton
             variant={"primary"}
             size={"sm"}
@@ -127,7 +129,7 @@ const SelectRandomDataset = (props: SelectRandomDatasetProps) => {
                   requestIds:
                     selectedRequests?.map((r) => r.source_request) ?? [],
                   meta: {
-                    promptId: props.meta?.promptVersionId,
+                    promptVersionId: props.meta?.promptVersionId,
                   },
                 },
               });

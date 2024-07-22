@@ -96,6 +96,7 @@ export class InputsManager extends BaseManager {
       SELECT 
         prompt_input_record.id as id,
         prompt_input_record.inputs as inputs,
+        prompt_input_record.auto_prompt_inputs as auto_prompt_inputs,
         prompt_input_record.source_request as source_request,
         prompt_input_record.prompt_version as prompt_version,
         prompt_input_record.created_at as created_at,

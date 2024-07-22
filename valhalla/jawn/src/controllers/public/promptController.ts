@@ -84,6 +84,7 @@ export interface PromptInputRecord {
   prompt_version: string;
   created_at: string;
   response_body: string;
+  auto_prompt_inputs: any[];
 }
 
 @Route("v1/prompt")

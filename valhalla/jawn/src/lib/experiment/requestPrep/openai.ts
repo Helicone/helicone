@@ -1,5 +1,4 @@
-import { Experiment } from "../../stores/experimentStore";
-import { placeInputValues } from "../helpers";
+import { autoFillInputs } from "@helicone/prompts";
 import { PreparedRequest, PreparedRequestArgs } from "./PreparedRequest";
 
 function prepareRequestAzure(
@@ -35,10 +34,11 @@ export function prepareRequestOpenAIOnPremFull({
   datasetRow,
   requestId,
 }: PreparedRequestArgs): PreparedRequest {
-  const newRequestBody = placeInputValues(
-    datasetRow.inputRecord?.inputs ?? {},
-    hypothesis.promptVersion?.template ?? {}
-  );
+  const newRequestBody = autoFillInputs({
+    template: hypothesis.promptVersion?.template ?? {},
+    inputs: datasetRow.inputRecord?.inputs ?? {},
+    autoInputs: datasetRow.inputRecord?.autoInputs ?? [],
+  });
 
   const { url: fetchUrl, headers } = prepareRequestAzure(
     datasetRow.inputRecord!.requestPath,
