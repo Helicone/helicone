@@ -99,7 +99,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             model: model.name,
             maxTokens,
             tools,
-            openAIApiKey: providerAPIKey ?? "",
+            openAIApiKey: providerAPIKey,
           });
 
           // Record the end time and calculate latency
@@ -115,7 +115,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             temperature,
             model.name,
             maxTokens,
-            providerAPIKey ?? ""
+            providerAPIKey
           );
 
           // Record the end time and calculate latency
