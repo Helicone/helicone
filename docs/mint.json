@@ -178,9 +178,9 @@
         {
           "group": "Deployment",
           "pages": [
-            "getting-started/self-deploy",
+            "getting-started/self-deploy-cloud",
             "getting-started/self-deploy-docker",
-            "getting-started/self-deploy-cloud"
+            "getting-started/self-deploy"
           ]
         }
       ]
