@@ -108,8 +108,8 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--latest", action="store_true",
                         help="Print the latest tag for each image")
 
-    parser.add_argument("-c", "--custom-tag", action="store_true",
-                        help="Custom Tag to add to the image")
+    parser.add_argument("-c", "--custom-tag", type=str,
+                        help="Custom tag to add to the image")
 
     args = parser.parse_args()
 
