@@ -216,7 +216,7 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         return {
           ...env,
           WORKER_TYPE: "GATEWAY_API",
-          GATEWAY_TARGET: "https://fireworks.ai",
+          GATEWAY_TARGET: "https://api.fireworks.ai",
         };
       }
     }
