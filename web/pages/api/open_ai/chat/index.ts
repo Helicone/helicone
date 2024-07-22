@@ -16,7 +16,7 @@ export default async function handler(
 ) {
   const client = new SupabaseServerWrapper({ req, res }).getClient();
   const user = await client.auth.getUser();
-  const {
+  let {
     messages,
     requestId,
     temperature,
@@ -40,6 +40,10 @@ export default async function handler(
       data: null,
     });
     return;
+  }
+
+  if (!openAIApiKey || openAIApiKey == "") {
+    openAIApiKey = process.env.OPENAI_API_KEY;
   }
 
   const openai = new OpenAI({

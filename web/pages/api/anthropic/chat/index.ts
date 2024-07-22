@@ -20,7 +20,7 @@ export default async function handler(
 ) {
   const client = new SupabaseServerWrapper({ req, res }).getClient();
   const user = await client.auth.getUser();
-  const {
+  let {
     messages,
     requestId,
     temperature,
@@ -42,6 +42,10 @@ export default async function handler(
       data: null,
     });
     return;
+  }
+
+  if (!anthropicAPIKey || anthropicAPIKey == "") {
+    anthropicAPIKey = process.env.ANTHROPIC_API_KEY;
   }
 
   const anthropic = new Anthropic({
