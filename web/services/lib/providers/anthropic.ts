@@ -9,7 +9,7 @@ export const fetchAnthropic = async (
   temperature: number,
   model: string,
   maxTokens: number,
-  anthropicAPIKey: string,
+  anthropicAPIKey?: string,
   requestId?: string
 ) => {
   const completion = await fetch("/api/anthropic/chat", {

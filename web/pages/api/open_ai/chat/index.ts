@@ -31,7 +31,7 @@ export default async function handler(
     model: string;
     maxTokens: number;
     tools: ChatCompletionTool[];
-    openAIApiKey: string;
+    openAIApiKey?: string;
   };
 
   if (!temperature || !model) {
