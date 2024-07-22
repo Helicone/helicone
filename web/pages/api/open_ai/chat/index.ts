@@ -16,7 +16,7 @@ export default async function handler(
 ) {
   const client = new SupabaseServerWrapper({ req, res }).getClient();
   const user = await client.auth.getUser();
-  const {
+  let {
     messages,
     requestId,
     temperature,
@@ -42,8 +42,12 @@ export default async function handler(
     return;
   }
 
+  if (!openAIApiKey || openAIApiKey == "") {
+    openAIApiKey = process.env.OPENAI_API_KEY;
+  }
+
   const openai = new OpenAI({
-    apiKey: openAIApiKey ?? process.env.OPENAI_API_KEY,
+    apiKey: openAIApiKey,
     baseURL: "https://oai.helicone.ai/v1",
     defaultHeaders: {
       "OpenAI-Organization": "",
