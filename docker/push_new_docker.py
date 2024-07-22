@@ -64,9 +64,9 @@ def print_latest_tags(docker_image_context):
         print(f"Image: {image}, Latest Tag: {latest_tag}")
 
 
-def main(test_mode, dont_prune, preview, latest):
+def main(test_mode, dont_prune, preview, latest, custom_tag):
     date = datetime.datetime.now().strftime("%Y.%m.%d")
-    version_tag = f"v{date}"
+    version_tag = f"v{date}{f'-{custom_tag}' if custom_tag else ''}"
 
     docker_image_context = [
         {"image": "helicone/worker", "context": "../worker"},
@@ -108,7 +108,10 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--latest", action="store_true",
                         help="Print the latest tag for each image")
 
+    parser.add_argument("-c", "--custom-tag", action="store_true",
+                        help="Custom Tag to add to the image")
+
     args = parser.parse_args()
 
     main(test_mode=args.test, dont_prune=args.dont_prune,
-         preview=args.preview, latest=args.latest)
+         preview=args.preview, latest=args.latest, custom_tag=args.custom_tag)
