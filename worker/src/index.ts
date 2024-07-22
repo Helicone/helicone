@@ -219,6 +219,19 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
           GATEWAY_TARGET: "https://fireworks.ai",
         };
       }
+    } else if (hostParts[0].includes("predibase")) {
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://app.predibase.com",
+        };
+      } else {
+        return {
+          ...env,
+          WORKER_TYPE: "GATEWAY_API",
+          GATEWAY_TARGET: "https://api.app.predibase.com",
+        };
+      }
     }
   }
 
