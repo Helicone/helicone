@@ -43,7 +43,9 @@ const ExperimentStepRenderer: React.FC<ExperimentStepRendererProps> = ({
     JSON.stringify(selectedPrompt?.helicone_template ?? "")
   ).messages;
 
-  const { datasets: datasets, refetch: refetchDataSets } = useGetDataSets(id);
+  const { datasets: datasets, refetch: refetchDataSets } = useGetDataSets(
+    selectedPrompt?.id
+  );
 
   const selectedDataset = datasets.find(
     (dataset) => dataset.id === selectedDatasetId

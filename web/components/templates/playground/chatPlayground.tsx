@@ -21,6 +21,8 @@ import HcButton from "../../ui/hcButton";
 import { PlaygroundModel } from "./playgroundPage";
 import { fetchAnthropic } from "../../../services/lib/providers/anthropic";
 import { Tooltip } from "@mui/material";
+import { AutoInputMessage } from "../requests/chatComponent/single/AutoInputMessage";
+import { SingleChat } from "../requests/chatComponent/single/singleChat";
 
 interface ChatPlaygroundProps {
   requestId: string;
@@ -207,6 +209,30 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     const renderRows: JSX.Element[] = [];
 
     currentChat.forEach((c, i) => {
+      if (typeof c === "string") {
+        renderRows.push(
+          <div
+            key={i}
+            className={clsx(
+              i !== 0 && "border-t",
+              "flex flex-col w-full h-full relative space-y-4 bg-white border-gray-300 dark:border-gray-700"
+            )}
+          >
+            <div className="p-4">
+              <SingleChat
+                message={c as any}
+                index={1000}
+                isLast={false}
+                expandedProps={{
+                  expanded: true,
+                  setExpanded: () => {},
+                }}
+              />
+            </div>
+          </div>
+        );
+        return;
+      }
       if (c.model) {
         modelMessage.push(c);
       } else {
@@ -277,7 +303,6 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
 
           modelMessage = [];
         }
-
         renderRows.push(
           <ChatRow
             key={c.id}

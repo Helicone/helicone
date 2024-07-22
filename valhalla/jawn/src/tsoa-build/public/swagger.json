@@ -2212,7 +2212,7 @@
 			},
 			"DatasetMetadata": {
 				"properties": {
-					"promptId": {
+					"promptVersionId": {
 						"type": "string"
 					},
 					"inputRecordsIds": {
@@ -4310,7 +4310,7 @@
 						"application/json": {
 							"schema": {
 								"properties": {
-									"promptId": {
+									"promptVersionId": {
 										"type": "string"
 									}
 								},

@@ -27,7 +27,7 @@ export type UserCreationParams = Pick<User, "email" | "name" | "phoneNumbers">;
 
 export class DatasetManager extends BaseManager {
   async getDatasets(
-    promptId?: string
+    promptVersionId?: string
   ): Promise<Result<DatasetResult[], string>> {
     const result = dbExecute<{
       id: string;
@@ -42,10 +42,14 @@ export class DatasetManager extends BaseManager {
       created_at,
       meta
     FROM experiment_dataset_v2
-    WHERE organization = $1 ${promptId ? "AND meta->>'promptId' = $2" : ""}
+    WHERE organization = $1 ${
+      promptVersionId ? "AND meta->>'promptVersionId' = $2" : ""
+    }
     LIMIT 100
     `,
-      [this.authParams.organizationId].concat(promptId ? [promptId] : [])
+      [this.authParams.organizationId].concat(
+        promptVersionId ? [promptVersionId] : []
+      )
     );
     return result;
   }

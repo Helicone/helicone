@@ -737,7 +737,7 @@ const models: TsoaRoute.Models = {
     "DatasetMetadata": {
         "dataType": "refObject",
         "properties": {
-            "promptId": {"dataType":"string"},
+            "promptVersionId": {"dataType":"string"},
             "inputRecordsIds": {"dataType":"array","array":{"dataType":"string"}},
         },
         "additionalProperties": false,
@@ -1772,7 +1772,7 @@ export function RegisterRoutes(app: Router) {
 
             async function ExperimentDatasetController_getDatasets(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"promptId":{"dataType":"string"}}},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"promptVersionId":{"dataType":"string"}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 

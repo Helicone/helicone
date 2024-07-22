@@ -129,7 +129,7 @@ const SelectRandomDataset = (props: SelectRandomDatasetProps) => {
                   requestIds:
                     selectedRequests?.map((r) => r.source_request) ?? [],
                   meta: {
-                    promptId: props.meta?.promptVersionId,
+                    promptVersionId: props.meta?.promptVersionId,
                   },
                 },
               });

@@ -731,7 +731,7 @@ Json: JsonObject;
     };
     "Result__datasetId-string_.string_": components["schemas"]["ResultSuccess__datasetId-string__"] | components["schemas"]["ResultError_string_"];
     DatasetMetadata: {
-      promptId?: string;
+      promptVersionId?: string;
       inputRecordsIds?: string[];
     };
     NewDatasetParams: {
@@ -1395,7 +1395,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          promptId?: string;
+          promptVersionId?: string;
         };
       };
     };
