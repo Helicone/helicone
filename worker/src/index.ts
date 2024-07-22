@@ -206,6 +206,19 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://api.hyperbolic.xyz",
       };
+    } else if (hostParts[0].includes("fireworks")) {
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://fireworks.ai",
+        };
+      } else {
+        return {
+          ...env,
+          WORKER_TYPE: "GATEWAY_API",
+          GATEWAY_TARGET: "https://fireworks.ai",
+        };
+      }
     }
   }
 
