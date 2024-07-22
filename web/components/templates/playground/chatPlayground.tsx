@@ -7,22 +7,20 @@ import {
 import { useState } from "react";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
-
+import { Tooltip } from "@mui/material";
 import {
   ChatCompletionCreateParams,
   ChatCompletionTool,
 } from "openai/resources/chat";
+import { fetchAnthropic } from "../../../services/lib/providers/anthropic";
 import { fetchOpenAI } from "../../../services/lib/providers/openAI";
-import { Message } from "../requests/chat";
+import HcButton from "../../ui/hcButton";
+import { SingleChat } from "../requests/chatComponent/single/singleChat";
+import { Message } from "../requests/chatComponent/types";
 import ModelPill from "../requestsV2/modelPill";
 import ChatRow from "./chatRow";
 import RoleButton from "./new/roleButton";
-import HcButton from "../../ui/hcButton";
 import { PlaygroundModel } from "./playgroundPage";
-import { fetchAnthropic } from "../../../services/lib/providers/anthropic";
-import { Tooltip } from "@mui/material";
-import { AutoInputMessage } from "../requests/chatComponent/single/AutoInputMessage";
-import { SingleChat } from "../requests/chatComponent/single/singleChat";
 
 interface ChatPlaygroundProps {
   requestId: string;
@@ -101,7 +99,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             model: model.name,
             maxTokens,
             tools,
-            openAIApiKey: providerAPIKey,
+            openAIApiKey: providerAPIKey ?? "",
           });
 
           // Record the end time and calculate latency
@@ -117,7 +115,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             temperature,
             model.name,
             maxTokens,
-            providerAPIKey
+            providerAPIKey ?? ""
           );
 
           // Record the end time and calculate latency

@@ -110,14 +110,7 @@ const OpenAIImage: React.FC<{
 }> = ({ item, selectedProperties, isHeliconeTemplate }) => {
   const imageUrl =
     typeof item.image_url === "string" ? item.image_url : item.image_url.url;
-  if (isHeliconeTemplate || selectedProperties) {
-    return (
-      <RenderImageWithPrettyInputKeys
-        text={imageUrl}
-        selectedProperties={selectedProperties}
-      />
-    );
-  }
+
   // eslint-disable-next-line @next/next/no-img-element
   return <img src={imageUrl} alt="" width={600} height={600} />;
 };

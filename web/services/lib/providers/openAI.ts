@@ -16,7 +16,15 @@ interface OpenAIReq {
 }
 
 export const fetchOpenAI = async (props: OpenAIReq) => {
-  const { messages, temperature, model, maxTokens, tools, requestId, openAIApiKey } = props;
+  const {
+    messages,
+    temperature,
+    model,
+    maxTokens,
+    tools,
+    requestId,
+    openAIApiKey,
+  } = props;
   const completion = await fetch("/api/open_ai/chat", {
     method: "POST",
     headers: {
