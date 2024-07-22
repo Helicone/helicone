@@ -10,6 +10,7 @@ import { costs as anthropicCosts } from "./anthropic";
 import { costs as cohereCosts } from "./cohere";
 import { costs as mistralCosts } from "./mistral";
 import { costs as openRouterCosts } from "./openrouter";
+import { costs as fireworksAICosts } from "./fireworks";
 import { ModelRow } from "../interfaces/Cost";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
@@ -128,6 +129,7 @@ export const providers: {
   {
     pattern: fireworks,
     provider: "FIREWORKS",
+    costs: [...fireworksAICosts],
   },
   {
     pattern: perplexity,
