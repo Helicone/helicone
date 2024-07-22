@@ -47,7 +47,7 @@ export default async function handler(
   }
 
   const openai = new OpenAI({
-    apiKey: openAIApiKey ?? process.env.OPENAI_API_KEY,
+    apiKey: openAIApiKey,
     baseURL: "https://oai.helicone.ai/v1",
     defaultHeaders: {
       "OpenAI-Organization": "",

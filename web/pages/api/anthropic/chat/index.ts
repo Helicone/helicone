@@ -27,7 +27,7 @@ export default async function handler(
       temperature: number;
       model: string;
       maxTokens: number;
-      anthropicAPIKey: string;
+      anthropicAPIKey?: string;
     };
 
   if (!temperature || !model) {
@@ -44,7 +44,7 @@ export default async function handler(
 
   const anthropic = new Anthropic({
     baseURL: "https://anthropic.helicone.ai/",
-    apiKey: anthropicAPIKey ?? process.env.ANTHROPIC_API_KEY,
+    apiKey: anthropicAPIKey,
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${process.env.TEST_HELICONE_API_KEY}`,
       user: user.data.user?.id || "",
