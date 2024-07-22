@@ -211,7 +211,7 @@ const ExperimentConfigSelector: React.FC<ExperimentConfigSelectorProps> = ({
         setOpen={setOpenConfirmModal}
         requestIds={requestIds}
         meta={{
-          promptVersionId: selectedPrompt?.id,
+          promptId: selectedPrompt?.id,
         }}
         onSuccess={(datasetId) => {
           setSelectedDatasetId(datasetId ?? "");

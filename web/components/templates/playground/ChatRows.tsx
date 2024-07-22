@@ -21,25 +21,23 @@ const ChatRows: React.FC<ChatRowsProps> = ({
     <Col>
       {currentChat.map((message, index) => {
         if (message.model) {
-          modelMessage.push(message);
           if (
             index === currentChat.length - 1 ||
             !currentChat[index + 1]?.model
           ) {
-            const group = (
-              <ModelResponseGroup
-                key={`model-group-${index}`}
-                modelMessage={modelMessage}
-                setCurrentChat={setCurrentChat}
-              />
+            return (
+              <>
+                <ModelResponseGroup
+                  key={`model-group-${index}`}
+                  modelMessage={modelMessage}
+                  setCurrentChat={setCurrentChat}
+                />
+              </>
             );
-            modelMessage = [];
-            return group;
           }
           return null;
         } else {
           if (modelMessage.length > 0) {
-            modelMessage = [];
             return (
               <React.Fragment key={`fragment-${index}`}>
                 <ModelResponseGroup
@@ -47,6 +45,7 @@ const ChatRows: React.FC<ChatRowsProps> = ({
                   modelMessage={modelMessage}
                   setCurrentChat={setCurrentChat}
                 />
+
                 <ChatRow
                   key={message.id}
                   index={index}
@@ -100,15 +99,17 @@ const ChatRows: React.FC<ChatRowsProps> = ({
             );
           }
           return (
-            <ChatRow
-              key={message.id}
-              index={index}
-              message={message}
-              callback={(userText, role, image) => {
-                // ... (keep existing callback logic)
-              }}
-              deleteRow={deleteRowHandler}
-            />
+            <>
+              <ChatRow
+                key={message.id}
+                index={index}
+                message={message}
+                callback={(userText, role, image) => {
+                  // ... (keep existing callback logic)
+                }}
+                deleteRow={deleteRowHandler}
+              />
+            </>
           );
         }
       })}

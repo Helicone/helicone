@@ -146,7 +146,7 @@ const UnsupportedImage: React.FC = () => (
   </div>
 );
 
-const FunctionMessage: React.FC<{
+export const FunctionMessage: React.FC<{
   message: Message;
   formattedMessageContent: string;
 }> = ({ message, formattedMessageContent }) => (

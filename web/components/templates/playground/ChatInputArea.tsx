@@ -31,7 +31,10 @@ const ChatInputArea: React.FC<ChatInputAreaProps> = ({
       <div className="w-full">
         <button
           onClick={() => {
-            // ... (keep existing logic for adding a new message)
+            setCurrentChat([
+              ...currentChat,
+              { id: crypto.randomUUID(), role: "user", content: "" },
+            ]);
           }}
           className={clsx(
             "bg-white hover:bg-gray-100 border border-gray-300 text-black dark:bg-black dark:hover:bg-gray-900 dark:border-gray-700 dark:text-white",

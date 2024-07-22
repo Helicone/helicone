@@ -67,22 +67,24 @@ const ExperimentStepRenderer: React.FC<ExperimentStepRendererProps> = ({
       );
     case 1:
       return (
-        <ChatPlayground
-          requestId={""}
-          chat={currentChat || template}
-          models={[]}
-          temperature={0.5}
-          maxTokens={256}
-          submitText={"Save Changes"}
-          onSubmit={(chat) => {
-            const cleanedChat = chat.map(({ id, ...rest }) => rest);
-            setCurrentChat(cleanedChat);
-          }}
-          customNavBar={{
-            onBack: () => setCurrentStep(0),
-            onContinue: () => setCurrentStep(2),
-          }}
-        />
+        <>
+          <ChatPlayground
+            requestId={""}
+            chat={template}
+            models={[]}
+            temperature={0.5}
+            maxTokens={256}
+            submitText={"Save Changes"}
+            onSubmit={(chat) => {
+              const cleanedChat = chat.map(({ id, ...rest }) => rest);
+              setCurrentChat(cleanedChat);
+            }}
+            customNavBar={{
+              onBack: () => setCurrentStep(0),
+              onContinue: () => setCurrentStep(2),
+            }}
+          />
+        </>
       );
     case 2:
       return (

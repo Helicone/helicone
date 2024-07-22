@@ -1,9 +1,21 @@
 import React from "react";
 
-const ChatPlaygroundHeader: React.FC = () => {
+const ChatPlaygroundHeader: React.FC<{
+  mode: "pretty" | "json";
+  setMode: (mode: "pretty" | "json") => void;
+}> = ({ mode, setMode }) => {
   return (
-    <ul className="w-full border border-gray-300 dark:border-gray-700 rounded-lg relative h-fit">
-      {/* Add any header content if needed */}
+    <ul className="w-full rounded-lg relative h-fit">
+      <li className="flex justify-end items-center">
+        <div>
+          <button
+            className="text-gray-500 dark:text-gray-400 bg-white px-3 py-2 rounded-lg shadow-sm text-xs"
+            onClick={() => setMode(mode === "pretty" ? "json" : "pretty")}
+          >
+            {mode === "pretty" ? "JSON" : "Pretty"}
+          </button>
+        </div>
+      </li>
     </ul>
   );
 };
