@@ -4,7 +4,6 @@
 // This also allows us to not have to redefine other objects repetitively like URL.
 
 import { HeliconeHeaders } from "../../../../../shared/proxy/heliconeHeaders";
-import { parseJSXObject } from "../../utils/promptHelpers";
 import { HeliconeAuth } from "../../../../../shared/proxy/types/heliconeAuth";
 import { Result, err, map, mapPostgrestErr, ok } from "../shared/result";
 import { supabaseServer } from "../db/supabase";
@@ -16,6 +15,7 @@ import { Readable as ReadableStream } from "stream";
 import { Headers } from "node-fetch";
 import { getAndStoreInCache } from "../cache/staticMemCache";
 import { hashAuth } from "../db/hash";
+import { parseJSXObject } from "@helicone/prompts";
 
 export type RequestHandlerType =
   | "proxy_only"

@@ -44,7 +44,7 @@ const RoleButton = (props: RoleButtonProps) => {
             `border border-${ROLE_COLORS[role]}-500 text-${ROLE_COLORS[role]}-900 dark:text-${ROLE_COLORS[role]}-300 font-semibold rounded-md bg-${ROLE_COLORS[role]}-100 dark:bg-${ROLE_COLORS[role]}-900  px-2 py-1 w-fit flex items-center`
           )}
         >
-          {role}
+          {role ?? "Role"}
           {!disabled && <ChevronDownIcon className="h-4 w-4 ml-1" />}
         </Menu.Button>
       </div>

@@ -1,10 +1,6 @@
 // This will store all of the information coming from the client.
 
 import { Env, Provider } from "../..";
-import {
-  TemplateWithInputs,
-  parseJSXObject,
-} from "../../api/lib/promptHelpers";
 import { approvedDomains } from "../../packages/cost/providers/mappings";
 import { RequestWrapper } from "../RequestWrapper";
 import { buildTargetUrl } from "../clients/ProviderClient";
@@ -14,6 +10,8 @@ import { IHeliconeHeaders } from "./HeliconeHeaders";
 import { CfProperties } from "@cloudflare/workers-types";
 import { RateLimitOptions } from "../clients/KVRateLimiterClient";
 import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
+import { parseJSXObject } from "@helicone/prompts";
+import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 
 export type RetryOptions = {
   retries: number; // number of times to retry the request

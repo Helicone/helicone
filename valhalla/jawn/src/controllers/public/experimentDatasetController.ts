@@ -19,7 +19,7 @@ type DatasetFilterNode =
   | "all";
 
 export interface DatasetMetadata {
-  promptId?: string;
+  promptVersionId?: string;
   inputRecordsIds?: string[];
 }
 
@@ -106,12 +106,14 @@ export class ExperimentDatasetController extends Controller {
   public async getDatasets(
     @Body()
     requestBody: {
-      promptId?: string;
+      promptVersionId?: string;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<DatasetResult[], string>> {
     const datasetManager = new DatasetManager(request.authParams);
-    const result = await datasetManager.getDatasets(requestBody.promptId);
+    const result = await datasetManager.getDatasets(
+      requestBody.promptVersionId
+    );
     if (result.error || !result.data) {
       this.setStatus(500);
     } else {

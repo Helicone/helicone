@@ -687,6 +687,7 @@ const models: TsoaRoute.Models = {
             "prompt_version": {"dataType":"string","required":true},
             "created_at": {"dataType":"string","required":true},
             "response_body": {"dataType":"string","required":true},
+            "auto_prompt_inputs": {"dataType":"array","array":{"dataType":"any"},"required":true},
         },
         "additionalProperties": false,
     },
@@ -736,7 +737,7 @@ const models: TsoaRoute.Models = {
     "DatasetMetadata": {
         "dataType": "refObject",
         "properties": {
-            "promptId": {"dataType":"string"},
+            "promptVersionId": {"dataType":"string"},
             "inputRecordsIds": {"dataType":"array","array":{"dataType":"string"}},
         },
         "additionalProperties": false,
@@ -903,7 +904,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "id": {"dataType":"string","required":true},
             "organization": {"dataType":"string","required":true},
-            "dataset": {"dataType":"nestedObjectLiteral","nestedProperties":{"rows":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"scores":{"ref":"Record_string.Score_","required":true},"inputRecord":{"dataType":"nestedObjectLiteral","nestedProperties":{"request":{"ref":"RequestObj","required":true},"response":{"ref":"ResponseObj","required":true},"inputs":{"ref":"Record_string.string_","required":true},"requestPath":{"dataType":"string","required":true},"requestId":{"dataType":"string","required":true}}},"rowId":{"dataType":"string","required":true}}},"required":true},"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}},"required":true},
+            "dataset": {"dataType":"nestedObjectLiteral","nestedProperties":{"rows":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"scores":{"ref":"Record_string.Score_","required":true},"inputRecord":{"dataType":"nestedObjectLiteral","nestedProperties":{"request":{"ref":"RequestObj","required":true},"response":{"ref":"ResponseObj","required":true},"autoInputs":{"dataType":"array","array":{"dataType":"refAlias","ref":"Record_string.string_"},"required":true},"inputs":{"ref":"Record_string.string_","required":true},"requestPath":{"dataType":"string","required":true},"requestId":{"dataType":"string","required":true}}},"rowId":{"dataType":"string","required":true}}},"required":true},"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}},"required":true},
             "meta": {"dataType":"any","required":true},
             "createdAt": {"dataType":"string","required":true},
             "hypotheses": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"runs":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"request":{"ref":"RequestObj"},"scores":{"ref":"Record_string.Score_","required":true},"response":{"ref":"ResponseObj"},"resultRequestId":{"dataType":"string","required":true},"datasetRowId":{"dataType":"string","required":true}}},"required":true},"providerKey":{"dataType":"string","required":true},"createdAt":{"dataType":"string","required":true},"status":{"dataType":"string","required":true},"model":{"dataType":"string","required":true},"parentPromptVersion":{"dataType":"nestedObjectLiteral","nestedProperties":{"template":{"dataType":"any","required":true}}},"promptVersion":{"dataType":"nestedObjectLiteral","nestedProperties":{"template":{"dataType":"any","required":true}}},"promptVersionId":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}}},"required":true},
@@ -1771,7 +1772,7 @@ export function RegisterRoutes(app: Router) {
 
             async function ExperimentDatasetController_getDatasets(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"promptId":{"dataType":"string"}}},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"promptVersionId":{"dataType":"string"}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 

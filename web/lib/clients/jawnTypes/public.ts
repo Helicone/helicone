@@ -708,6 +708,7 @@ Json: JsonObject;
       prompt_version: string;
       created_at: string;
       response_body: string;
+      auto_prompt_inputs: unknown[];
     };
     "ResultSuccess_PromptInputRecord-Array_": {
       data: components["schemas"]["PromptInputRecord"][];
@@ -730,7 +731,7 @@ Json: JsonObject;
     };
     "Result__datasetId-string_.string_": components["schemas"]["ResultSuccess__datasetId-string__"] | components["schemas"]["ResultError_string_"];
     DatasetMetadata: {
-      promptId?: string;
+      promptVersionId?: string;
       inputRecordsIds?: string[];
     };
     NewDatasetParams: {
@@ -839,6 +840,7 @@ Json: JsonObject;
             inputRecord?: {
               request: components["schemas"]["RequestObj"];
               response: components["schemas"]["ResponseObj"];
+              autoInputs: components["schemas"]["Record_string.string_"][];
               inputs: components["schemas"]["Record_string.string_"];
               requestPath: string;
               requestId: string;
@@ -1393,7 +1395,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          promptId?: string;
+          promptVersionId?: string;
         };
       };
     };

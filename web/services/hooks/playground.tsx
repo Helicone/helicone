@@ -1,8 +1,7 @@
-import { ToolCall } from "openai/resources/beta/threads/runs/steps";
-import { Message } from "../../components/templates/requests/chat";
+import { ChatCompletionTool } from "openai/resources";
+import { Message } from "../../components/templates/requests/chatComponent/types";
 import { NormalizedRequest } from "../../components/templates/requestsV2/builder/abstractRequestBuilder";
 import useRequestsPageV2 from "../../components/templates/requestsV2/useRequestsPageV2";
-import { ChatCompletion, ChatCompletionTool } from "openai/resources";
 
 export const getChat = (
   requests: NormalizedRequest[]
