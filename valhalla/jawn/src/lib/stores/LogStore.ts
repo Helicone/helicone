@@ -208,6 +208,13 @@ export class LogStore {
       return ok("No Helicone template to process");
     }
 
+    if (typeof heliconeTemplate.template === "string") {
+      heliconeTemplate.template = {
+        error: "Invalid template",
+        template: heliconeTemplate.template,
+      };
+    }
+
     // Ensure the prompt exists or create it, and lock the row
     let existingPrompt = await t.oneOrNone<{
       id: string;
@@ -259,12 +266,6 @@ export class LogStore {
       const newMajorVersion = existingPromptVersion
         ? existingPromptVersion.major_version + 1
         : 0;
-      if (typeof heliconeTemplate.template === "string") {
-        heliconeTemplate.template = {
-          error: "Invalid template",
-          template: heliconeTemplate.template,
-        };
-      }
 
       try {
         const insertQuery = `
