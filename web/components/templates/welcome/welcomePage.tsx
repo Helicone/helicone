@@ -1,7 +1,7 @@
 import Image from "next/image";
 import StepList from "./steps/stepList";
 import CreateOrg from "./steps/createOrg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import GenerateAPIKey from "./steps/generateAPIKey";
 import Integrations from "./steps/integrations";
@@ -22,12 +22,17 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
   const [step, setStep] = useState<number>(currentStep);
   const [apiKey, setApiKey] = useState<string>("");
   const router = useRouter();
-  const { demo } = router.query;
+  const [isDemo, setIsDemo] = useState<boolean>(false);
   const supabaseClient = useSupabaseClient();
   const orgContext = useOrg();
 
+  useEffect(() => {
+    const demoState = localStorage.getItem("helicone_demo");
+    setIsDemo(demoState === "true");
+  }, []);
+
   const handleStepChange = (step: number) => {
-    router.replace(`/welcome?step=${step}&demo=${demo}`);
+    router.replace(`/welcome?step=${step}}`);
     setStep(step);
   };
 
@@ -81,7 +86,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
 
   return (
     <div className="h-screen w-full bg-gray-50">
-      {demo === "true" && <InfoBanner />}
+      {isDemo && <InfoBanner />}
       <div className="w-full max-w-6xl mx-auto h-full flex flex-col lg:flex-row p-4 lg:divide-x divide-gray-200">
         <section
           id="steps"
