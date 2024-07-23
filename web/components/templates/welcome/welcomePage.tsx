@@ -27,7 +27,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
   const orgContext = useOrg();
 
   useEffect(() => {
-    const demoState = localStorage.getItem("helicone_demo");
+    const demoState = localStorage.getItem("openDemo");
     setIsDemo(demoState === "true");
   }, []);
 
