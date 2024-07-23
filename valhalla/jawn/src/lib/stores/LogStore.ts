@@ -259,6 +259,12 @@ export class LogStore {
       const newMajorVersion = existingPromptVersion
         ? existingPromptVersion.major_version + 1
         : 0;
+      if (typeof heliconeTemplate.template === "string") {
+        heliconeTemplate.template = {
+          error: "Invalid template",
+          template: heliconeTemplate.template,
+        };
+      }
 
       try {
         const insertQuery = `
