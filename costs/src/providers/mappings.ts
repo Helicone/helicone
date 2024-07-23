@@ -129,7 +129,7 @@ export const providers: {
   {
     pattern: fireworks,
     provider: "FIREWORKS",
-    costs: [...fireworksAICosts],
+    costs: fireworksAICosts,
   },
   {
     pattern: perplexity,
