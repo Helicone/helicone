@@ -420,25 +420,26 @@ END
 )
 WHEN (request_response_log.provider = 'FIREWORKS') THEN (
   CASE
-  WHEN (request_response_log.model = 'mixtral-8x7b-instruct') THEN 500 * request_response_log.prompt_tokens + 500 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'mixtral-8x22b-instruct') THEN 1200 * request_response_log.prompt_tokens + 1200 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'yi-large') THEN 3000 * request_response_log.prompt_tokens + 3000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'sd3') THEN 130000 * request_response_log.prompt_tokens + 130000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'sd3-medium') THEN 130000 * request_response_log.prompt_tokens + 130000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'stable-diffusion-xl-1024-v1-0') THEN 130000 * request_response_log.prompt_tokens + 130000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'playground-v2-1024px-aesthetic') THEN 130000 * request_response_log.prompt_tokens + 130000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'playground-v2-5-1024px-aesthetic') THEN 130000 * request_response_log.prompt_tokens + 130000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'SSD-1B') THEN 130000 * request_response_log.prompt_tokens + 130000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'japanese-stable-diffusion-xl') THEN 130000 * request_response_log.prompt_tokens + 130000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'sd3-turbo') THEN 130000 * request_response_log.prompt_tokens + 130000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'sd3-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'sd3-medium-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'stable-diffusion-xl-1024-v1-0-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'playground-v2-1024px-aesthetic-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'playground-v2-5-1024px-aesthetic-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'SSD-1B-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'japanese-stable-diffusion-xl-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'sd3-turbo-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
+  WHEN (request_response_log.model = 'accounts/fireworks/models/mixtral-8x7b-instruct') THEN 500 * request_response_log.prompt_tokens + 500 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/mixtral-8x22b-instruct') THEN 1200 * request_response_log.prompt_tokens + 1200 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/yi-large') THEN 3000 * request_response_log.prompt_tokens + 3000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/sd3') THEN 130000 * request_response_log.prompt_tokens + 130000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/sd3-medium') THEN 130000 * request_response_log.prompt_tokens + 130000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/stable-diffusion-xl-1024-v1-0') THEN 130000 * request_response_log.prompt_tokens + 130000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/playground-v2-1024px-aesthetic') THEN 130000 * request_response_log.prompt_tokens + 130000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/playground-v2-5-1024px-aesthetic') THEN 130000 * request_response_log.prompt_tokens + 130000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/SSD-1B') THEN 130000 * request_response_log.prompt_tokens + 130000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/japanese-stable-diffusion-xl') THEN 130000 * request_response_log.prompt_tokens + 130000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/sd3-turbo') THEN 130000 * request_response_log.prompt_tokens + 130000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/sd3-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/sd3-medium-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/stable-diffusion-xl-1024-v1-0-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/playground-v2-1024px-aesthetic-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/playground-v2-5-1024px-aesthetic-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/SSD-1B-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/japanese-stable-diffusion-xl-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/sd3-turbo-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/llama-v3p1-405b-instruct') THEN 3000 * request_response_log.prompt_tokens + 3000 * request_response_log.completion_tokens
   ELSE 0
 END
 )
