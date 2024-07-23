@@ -10,14 +10,17 @@ import { DemoGame } from "../../../shared/themed/demo/demoGame";
 import { useEffect } from "react";
 import ThemedBubbleModal from "../../../shared/themed/themedBubbleModal";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
+import { getJawnClient } from "../../../../lib/clients/jawn";
+import router from "next/router";
 
 interface EventListenProps {
   previousStep: () => void;
   nextStep: () => void;
+  orgId: string;
 }
 
 const EventListen = (props: EventListenProps) => {
-  const { previousStep, nextStep } = props;
+  const { previousStep, nextStep, orgId } = props;
   const [openDemo, setOpenDemo] = useLocalStorage("openDemo", false);
   const [removedDemo, setRemovedDemo] = useLocalStorage("removedDemo", false);
 
@@ -108,14 +111,17 @@ const EventListen = (props: EventListenProps) => {
           title={"Back"}
           onClick={previousStep}
         />
+
         <HcButton
           variant={"primary"}
           size={"sm"}
           title={"Go to Dashboard"}
-          onClick={() => {
-            if (data && data.data) {
-              nextStepHandler();
-            }
+          onClick={async () => {
+            const jawn = getJawnClient(orgId);
+            jawn.POST("/v1/organization/onboard", {
+              body: {},
+            });
+            router.push("/dashboard");
           }}
           disabled={!isSuccess}
         />

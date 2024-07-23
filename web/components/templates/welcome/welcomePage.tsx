@@ -81,6 +81,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
       nextStep={function (): void {
         router.push("/dashboard");
       }}
+      orgId={orgContext?.currentOrg?.id ?? ""}
     />,
   ];
 
