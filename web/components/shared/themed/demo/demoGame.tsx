@@ -1,8 +1,35 @@
 import StartPage from "./startPage";
-
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { Col } from "../../../layout/common";
-import { ChatWindow } from "./chatWindow";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { useEffect, useRef, useState } from "react";
+import * as Pacman from "../../../../public/lottie/Pacman.json";
+import Lottie from "react-lottie";
+import { start } from "repl";
+
+const DEMO_GAMES = [
+  {
+    id: "1",
+    name: "Guess Who Game",
+    type: "Game",
+    animation: Pacman,
+    component: StartPage,
+  },
+  {
+    id: "2",
+    name: "Course Generator",
+    type: "Tool",
+    animation: Pacman,
+    component: StartPage,
+  },
+  {
+    id: "3",
+    name: "Chat Support Bot",
+    type: "Bot",
+    animation: Pacman,
+    component: StartPage,
+  },
+];
 
 const FAMOUS_MOVIES = [
   {
@@ -37,6 +64,15 @@ const FAMOUS_MOVIES = [
   },
 ];
 
+const calculateInitialPosition = () => {
+  if (typeof window === "undefined") return { x: 20, y: 20 }; // Default for SSR
+  const padding = 20; // Distance from the edges
+  return {
+    x: window.innerWidth - 500 - padding, // Assuming max width of 500px
+    y: window.innerHeight - 600 - padding, // Assuming max height of 600px
+  };
+};
+
 export interface ChatHistory {
   role: "user" | "assistant";
   content: string;
@@ -47,6 +83,12 @@ export const DemoGame = ({
 }: {
   setOpenDemo: (open: boolean) => void;
 }) => {
+  const [currentDemo, setCurrentDemo] = useState<string | null>(null);
+  const [position, setPosition] = useState({ x: 20, y: 20 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [gameState, setGameState] = useLocalStorage<
     "start" | "playing" | "finished"
   >("gameState", "playing");
@@ -67,6 +109,7 @@ export const DemoGame = ({
   >("selectedCharacter", selectedMovie.leadCharacters[0]);
 
   const onReset = () => {
+    setCurrentDemo(null);
     setGameState("start");
     setChatHistory([
       { role: "assistant", content: "Hello, type a message to begin..." },
@@ -74,70 +117,195 @@ export const DemoGame = ({
     setGameSessionId(null);
   };
 
-  const onPlay = () => {
-    const randomMovie =
-      FAMOUS_MOVIES[Math.floor(Math.random() * FAMOUS_MOVIES.length)];
-    setSelectedMovie(randomMovie);
-    const randomCharacter =
-      randomMovie.leadCharacters[
-        Math.floor(Math.random() * randomMovie.leadCharacters.length)
-      ];
-    setSelectedCharacter(randomCharacter);
-    setGameState("playing");
-    setGameSessionId(crypto.randomUUID());
+  // const onPlay = (demoId: string) => {
+  //   if (demoId === "1") {
+  //     // Guess Who Game
+  //     const randomMovie =
+  //       FAMOUS_MOVIES[Math.floor(Math.random() * FAMOUS_MOVIES.length)];
+  //     setSelectedMovie(randomMovie);
+  //     const randomCharacter =
+  //       randomMovie.leadCharacters[
+  //         Math.floor(Math.random() * randomMovie.leadCharacters.length)
+  //       ];
+  //     setSelectedCharacter(randomCharacter);
+  //     setGameState("playing");
+  //     setGameSessionId(crypto.randomUUID());
+  //   } else {
+  //     // Handle other demo options here
+  //     console.log(`Starting demo: ${demoId}`);
+  //     // For now, we'll just close the demo selector
+  //     setOpenDemo(false);
+  //   }
+  // };
+
+  const onPlay = (demoId: string) => {
+    setIsLoading(true);
+    setCurrentDemo(demoId);
+    setTimeout(() => setIsLoading(false), 2000); // Simulating loading time
   };
 
-  return (
-    <div className="border-2 flex flex-col items-center justify-between bg-white h-[80vh] max-h-[80vh] w-[500px] rounded-lg relative overflow-hidden">
-      {gameState === "start" && (
-        <StartPage setOpenDemo={setOpenDemo} onPlay={onPlay} />
-      )}
-      {gameState !== "start" && (
-        <Col className="w-full px-5 py-10 justify-between items-center h-full">
-          <button
-            className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer absolute top-4 left-4"
-            onClick={onReset}
-          >
-            Reset
-          </button>
-          {gameState === "playing" && (
-            <div className="h-full w-full">
-              <ChatWindow
-                onFinish={() => setGameState("finished")}
-                chatHistory={chatHistory}
-                setChatHistory={setChatHistory}
-                movieTitle={selectedMovie.title}
-                isLoading={false}
-                movieCharacter={selectedCharacter}
-                gameSessionId={gameSessionId}
-              />
-            </div>
-          )}
-          {gameState === "finished" && (
-            <Col className="h-full flex items-center justify-center gap-5">
-              <h1 className="text-2xl font-bold">🎉 You won! 🎉</h1>
-              <p className="text-sm">
-                You found the character in{" "}
-                {chatHistory.length - 2 > 1 ? `${chatHistory.length - 2}` : "1"}{" "}
-                {chatHistory.length - 2 > 1 ? "messages" : "message"}!
-              </p>
-              <button
-                className="bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600 transition-colors"
-                onClick={() => onReset()}
-              >
-                Play again
-              </button>
-            </Col>
-          )}
-        </Col>
-      )}
+  const onMouseDown = (e: React.MouseEvent) => {
+    if (dragRef.current && dragRef.current.contains(e.target as Node)) {
+      setIsDragging(true);
+    }
+  };
 
-      <button
-        className="absolute top-2 right-2 h-8 w-8 bg-red-500 flex items-center justify-center rounded-full text-white font-bold hover:bg-red-600 transition-colors"
-        onClick={() => setOpenDemo(false)}
+  const onMouseMove = (e: MouseEvent) => {
+    if (isDragging) {
+      setPosition((prev) => ({
+        x: prev.x + e.movementX,
+        y: prev.y + e.movementY,
+      }));
+    }
+  };
+
+  const onMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+    return () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+  }, [isDragging]);
+
+  useEffect(() => {
+    setPosition(calculateInitialPosition());
+  }, []);
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+      }}
+      className="bg-white shadow-2xl rounded-lg overflow-hidden w-[360px]"
+    >
+      <div
+        ref={dragRef}
+        onMouseDown={onMouseDown}
+        className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-4 flex justify-between items-center cursor-move"
       >
-        ×
-      </button>
+        <h1 className="text-xl font-bold">Helicone Demos</h1>
+        <button
+          onClick={() => setOpenDemo(false)}
+          className="text-white hover:text-gray-200 transition-colors"
+        >
+          <XMarkIcon className="h-6 w-6" />
+        </button>
+      </div>
+      <div className="h-[600px] overflow-y-auto">
+        <StartPage />
+      </div>
     </div>
   );
+
+  // return (
+  //   <div
+  //     style={{
+  //       position: "fixed",
+  //       left: `${position.x}px`,
+  //       top: `${position.y}px`,
+  //     }}
+  //     className="bg-white shadow-2xl rounded-lg overflow-hidden w-[360px]"
+  //   >
+  //     <div
+  //       ref={dragRef}
+  //       onMouseDown={onMouseDown}
+  //       className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-4 flex justify-between items-center cursor-move"
+  //     >
+  //       <h1 className="text-xl font-bold">Helicone Demos</h1>
+  //       <button
+  //         onClick={() => setOpenDemo(false)}
+  //         className="text-white hover:text-gray-200 transition-colors"
+  //       >
+  //         <XMarkIcon className="h-6 w-6" />
+  //       </button>
+  //     </div>
+  //     <div className="h-[600px] overflow-y-auto">
+  //       {!currentDemo ? (
+  //         <div className="p-6">
+  //           <h2 className="text-2xl font-bold mb-6 text-gray-800">
+  //             Select a Demo
+  //           </h2>
+  //           <div className="space-y-4">
+  //             {DEMO_GAMES.map((game) => (
+  //               <div
+  //                 key={game.id}
+  //                 className="flex items-center space-x-4 p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all duration-300 cursor-pointer"
+  //                 onClick={() => onPlay(game.id)}
+  //               >
+  //                 <div className="w-16 h-16 flex-shrink-0 bg-indigo-100 rounded-full flex items-center justify-center">
+  //                   <Lottie
+  //                     options={{
+  //                       loop: true,
+  //                       autoplay: true,
+  //                       animationData: game.animation,
+  //                     }}
+  //                     height={50}
+  //                     width={50}
+  //                   />
+  //                 </div>
+  //                 <div>
+  //                   <h3 className="font-semibold text-lg text-gray-800">
+  //                     {game.name}
+  //                   </h3>
+  //                   <p className="text-sm text-gray-500">{game.type}</p>
+  //                 </div>
+  //               </div>
+  //             ))}
+  //           </div>
+  //         </div>
+  //       ) : isLoading ? (
+  //         <div className="flex flex-col items-center justify-center h-full bg-gray-50">
+  //           <Lottie
+  //             options={{
+  //               loop: true,
+  //               autoplay: true,
+  //               animationData: Pacman,
+  //             }}
+  //             height={200}
+  //             width={300}
+  //           />
+  //           <p className="mt-4 text-lg font-medium text-gray-600">
+  //             Loading {DEMO_GAMES.find((g) => g.id === currentDemo)?.name}...
+  //           </p>
+  //         </div>
+  //       ) : (
+  //         <div className="h-full relative">
+  //           <button
+  //             className="absolute top-4 left-4 text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors flex items-center"
+  //             onClick={() => setCurrentDemo(null)}
+  //           >
+  //             <svg
+  //               className="w-4 h-4 mr-1"
+  //               fill="none"
+  //               stroke="currentColor"
+  //               viewBox="0 0 24 24"
+  //               xmlns="http://www.w3.org/2000/svg"
+  //             >
+  //               <path
+  //                 strokeLinecap="round"
+  //                 strokeLinejoin="round"
+  //                 strokeWidth={2}
+  //                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
+  //               />
+  //             </svg>
+  //             Back to Demos
+  //           </button>
+  //           <div className="pt-14 px-6">
+  //             {DEMO_GAMES.find((g) => g.id === currentDemo)?.component({
+  //               onReset: () => setCurrentDemo(null),
+  //               // Add other props as needed
+  //             })}
+  //           </div>
+  //         </div>
+  //       )}
+  //     </div>
+  //   </div>
+  // );
 };
