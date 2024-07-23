@@ -195,4 +195,14 @@ export const costs: ModelRow[] = [
       completion_token: 0.0002,
     },
   },
+  {
+    model: {
+      operator: "equals",
+      value: "accounts/fireworks/models/llama-v3p1-405b-instruct",
+    },
+    cost: {
+      prompt_token: 0.000003,
+      completion_token: 0.000003,
+    },
+  },
 ];

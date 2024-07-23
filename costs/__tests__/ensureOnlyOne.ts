@@ -439,6 +439,7 @@ WHEN (request_response_log.model = 'accounts/fireworks/models/playground-v2-5-10
 WHEN (request_response_log.model = 'accounts/fireworks/models/SSD-1B-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'accounts/fireworks/models/japanese-stable-diffusion-xl-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'accounts/fireworks/models/sd3-turbo-ControlNet') THEN 200000 * request_response_log.prompt_tokens + 200000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'accounts/fireworks/models/llama-v3p1-405b-instruct') THEN 3000 * request_response_log.prompt_tokens + 3000 * request_response_log.completion_tokens
   ELSE 0
 END
 )
