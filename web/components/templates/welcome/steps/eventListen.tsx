@@ -7,7 +7,7 @@ import * as PartyParrot from "../../../../public/lottie/PartyParrot.json";
 import dynamic from "next/dynamic";
 import HcButton from "../../../ui/hcButton";
 import { DemoGame } from "../../../shared/themed/demo/demoGame";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ThemedBubbleModal from "../../../shared/themed/themedBubbleModal";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 
@@ -18,8 +18,8 @@ interface EventListenProps {
 
 const EventListen = (props: EventListenProps) => {
   const { previousStep, nextStep } = props;
-  const [openDemo, setOpenDemo] = useState(false);
-  const [removedDemo, setRemovedDemo] = useLocalStorage("removedDemo", true);
+  const [openDemo, setOpenDemo] = useLocalStorage("openDemo", false);
+  const [removedDemo, setRemovedDemo] = useLocalStorage("removedDemo", false);
 
   const nextStepHandler = async () => {
     nextStep();
@@ -49,6 +49,12 @@ const EventListen = (props: EventListenProps) => {
       enabled: true,
     }
   );
+
+  useEffect(() => {
+    if (openDemo) {
+      setOpenDemo(true);
+    }
+  }, [openDemo, setOpenDemo]);
 
   return (
     <div id="content" className="w-full flex flex-col">
@@ -139,7 +145,10 @@ const EventListen = (props: EventListenProps) => {
             Try our interactive demo to see how Helicone works!
           </p>
           <button
-            onClick={() => setOpenDemo(true)}
+            onClick={() => {
+              setOpenDemo(true);
+              setRemovedDemo(false);
+            }}
             className="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center transition duration-150 ease-in-out"
           >
             <span>Launch Interactive Demo</span>

@@ -24,6 +24,7 @@ const SignUp = () => {
     const { demo } = router.query;
     if (demo === "true") {
       localStorage.setItem("helicone_demo", "true");
+      localStorage.setItem("openDemo", "true");
     }
   }, [router.query]);
 
