@@ -7,7 +7,7 @@ import * as PartyParrot from "../../../../public/lottie/PartyParrot.json";
 import dynamic from "next/dynamic";
 import HcButton from "../../../ui/hcButton";
 import { DemoGame } from "../../../shared/themed/demo/demoGame";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import ThemedBubbleModal from "../../../shared/themed/themedBubbleModal";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 
