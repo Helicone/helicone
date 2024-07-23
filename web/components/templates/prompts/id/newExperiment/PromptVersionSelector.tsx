@@ -94,7 +94,7 @@ const PromptVersionSelector: React.FC<PromptVersionSelectorProps> = ({
                   <li
                     key={prompt.id}
                     className={clsx(
-                      index === sortedPrompts.length - 1 ? "rounded-b-lg" : "",
+                      index === sortedPrompts?.length - 1 ? "rounded-b-lg" : "",
                       selectedPrompt?.id === prompt.id
                         ? "bg-sky-50 dark:bg-sky-950"
                         : "bg-white dark:bg-black",
@@ -130,7 +130,7 @@ const PromptVersionSelector: React.FC<PromptVersionSelectorProps> = ({
                     <div className="relative w-full">
                       <MarkdownEditor
                         text={
-                          template.length > 200
+                          template?.length > 200
                             ? `${template.substring(0, 200)}...`
                             : template
                         }
@@ -138,7 +138,7 @@ const PromptVersionSelector: React.FC<PromptVersionSelectorProps> = ({
                         disabled={true}
                         language="markdown"
                       />
-                      {template.length > 200 && (
+                      {template?.length > 200 && (
                         <Tooltip title="Expand">
                           <button
                             onClick={() => {
