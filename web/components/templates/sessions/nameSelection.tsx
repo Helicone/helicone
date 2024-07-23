@@ -6,10 +6,9 @@ import { TextInput } from "@tremor/react";
 import { getTimeAgo } from "../../../lib/sql/timeHelpers";
 import { Col } from "../../layout/common/col";
 import { clsx } from "../../shared/clsx";
-import { useSessionNames } from "../../../services/hooks/sessions";
 import { Row } from "../../layout/common/row";
 import { Tooltip } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface SessionNameSelectionProps {
   sessionIdSearch: string;
@@ -76,7 +75,9 @@ const SessionNameSelection = ({
                   Unnamed
                 </div>
               ) : (
-                <div className="font-semibold text-lg mb-2">{seshName.name}</div>
+                <div className="font-semibold text-lg mb-2">
+                  {seshName.name}
+                </div>
               )}
 
               <div className="border rounded-full border-gray-500 bg-white dark:bg-black h-6 w-6 flex items-center justify-center">
@@ -105,7 +106,9 @@ const SessionNameSelection = ({
               </p>
               <p className="text-sm">
                 Total cost $
-                <span className="font-bold">{seshName.total_cost.toFixed(2)}</span>
+                <span className="font-bold">
+                  {seshName.total_cost.toFixed(2)}
+                </span>
               </p>
             </Row>
           </button>

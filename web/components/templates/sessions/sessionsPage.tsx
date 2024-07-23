@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   getTimeIntervalAgo,
   TimeInterval,
@@ -157,7 +157,6 @@ openai.chat.completions.create(
             </div>
           </div>
         )}
-
       </div>
     </>
   );
