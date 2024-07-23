@@ -1,7 +1,7 @@
 import { InboxArrowDownIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useNotification from "../components/shared/notification/useNotification";
 import ThemedModal from "../components/shared/themed/themedModal";
 import AuthForm from "../components/templates/auth/authForm";
@@ -20,8 +20,15 @@ const SignUp = () => {
   const router = useRouter();
   const { demo = "false" } = router.query;
 
+  useEffect(() => {
+    const { demo } = router.query;
+    if (demo === "true") {
+      localStorage.setItem("helicone_demo", "true");
+    }
+  }, [router.query]);
+
   if (user && user.email !== DEMO_EMAIL) {
-    router.push(`/welcome?demo=${demo}`);
+    router.push(`/welcome`);
   }
 
   return (
