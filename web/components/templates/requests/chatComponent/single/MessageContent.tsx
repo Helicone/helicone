@@ -4,6 +4,7 @@ import { AutoInputMessage } from "./AutoInputMessage";
 import { ExpandableMessage } from "./ExpandableMessage";
 import { FunctionCall, FunctionMessage, ImageRow } from "./renderingUtils";
 import { getContentType, getFormattedMessageContent } from "./utils";
+import { PROMPT_MODES } from "../chatTopBar";
 
 interface MessageContentProps {
   message: Message;
@@ -14,6 +15,7 @@ interface MessageContentProps {
   selectedProperties?: Record<string, string>;
   isHeliconeTemplate?: boolean;
   autoInputs?: any[];
+  mode: (typeof PROMPT_MODES)[number];
 }
 
 export const MessageContent: React.FC<MessageContentProps> = ({
@@ -22,6 +24,7 @@ export const MessageContent: React.FC<MessageContentProps> = ({
   selectedProperties,
   isHeliconeTemplate,
   autoInputs,
+  mode,
 }) => {
   const [showButton, setShowButton] = useState(true);
   const textContainerRef = useRef<HTMLDivElement>(null);
@@ -72,6 +75,7 @@ export const MessageContent: React.FC<MessageContentProps> = ({
           expandedProps={expandedProps}
           showButton={showButton}
           selectedProperties={selectedProperties}
+          mode={mode}
         />
       );
   }

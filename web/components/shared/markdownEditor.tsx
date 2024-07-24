@@ -13,10 +13,11 @@ interface MarkdownEditorProps {
   setText: (text: string) => void;
   language: "json" | "markdown";
   disabled?: boolean;
+  className?: string;
 }
 
 const MarkdownEditor = (props: MarkdownEditorProps) => {
-  const { text, setText, language, disabled = false } = props;
+  const { text, setText, language, disabled = false, className } = props;
 
   const languageMap = {
     json: {
@@ -41,7 +42,10 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
         return highlight(code, lang, ref);
       }}
       padding={16}
-      className="text-sm text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded-lg whitespace-pre-wrap"
+      className={
+        className ??
+        `text-sm text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded-lg whitespace-pre-wrap `
+      }
       // mono font
       style={{
         fontFamily: '"Fira Code", "Fira Mono", monospace',

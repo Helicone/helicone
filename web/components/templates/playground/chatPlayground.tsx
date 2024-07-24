@@ -225,6 +225,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                   expanded: true,
                   setExpanded: () => {},
                 }}
+                mode="Pretty"
               />
             </div>
           </div>
