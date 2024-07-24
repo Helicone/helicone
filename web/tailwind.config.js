@@ -5,12 +5,18 @@ module.exports = {
     "./pages/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
     "./node_modules/@tremor/**/*.{js,ts,jsx,tsx}", // Tremor module
+    "./node_modules/@assistant-ui/react-playground/dist/**/*.js",
   ],
   theme: {
     fontFamily: {},
     transparent: "transparent",
     current: "currentColor",
     extend: {
+      aui: {
+        primary: {
+          DEFAULT: "#0284c7",
+        },
+      },
       animation: {
         blink: "blink 1s step-end infinite",
         popin: "popin 1s ease-out forwards",
@@ -144,6 +150,7 @@ module.exports = {
     },
   ],
   plugins: [
+    require("tailwindcss-animate"), // <- 2. add this
     require("@tailwindcss/forms"),
     require("@headlessui/tailwindcss"),
     require("@tailwindcss/typography"),
