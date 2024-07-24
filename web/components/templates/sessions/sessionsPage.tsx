@@ -56,20 +56,19 @@ const SessionsPage = (props: SessionsPageProps) => {
     selectedName
   );
 
-  const [hasSomeSessions, setHasSomeSessions] = useState<boolean>(true);
+  const [hasSomeSessions, setHasSomeSessions] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (hasSomeSessions && !names.isLoading) {
+    if (hasSomeSessions === null && !names.isLoading) {
       setHasSomeSessions(names.sessions.length > 0);
     }
-  }, [hasSomeSessions, names.isLoading, names.sessions]);
+  }, [hasSomeSessions, names.sessions.length, names.isLoading]);
 
   return (
     <>
       <AuthHeader title={"Sessions (beta)"} />
-
       <div>
-        {hasSomeSessions ? (
+        {hasSomeSessions || hasSomeSessions === null ? (
           <Row className="gap-5 ">
             <SessionNameSelection
               sessionIdSearch={sessionIdSearch}
