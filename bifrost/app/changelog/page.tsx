@@ -35,7 +35,7 @@ export default async function Home() {
   return (
     <>
       <div className="flex flex-col w-full bg-[#f8feff] h-full antialiased relative divide-gray-200 divide-y-2">
-        {mdxs.map(({ frontmatter, path, link, folder }, i) => (
+        {mdxs.reverse().map(({ frontmatter, path, link, folder }, i) => (
           <Link
             href={link}
             className="flex flex-col md:flex-row items-start w-full mx-auto max-w-5xl py-16 px-4 md:py-24 relative"
