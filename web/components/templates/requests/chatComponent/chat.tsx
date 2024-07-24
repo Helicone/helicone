@@ -88,7 +88,6 @@ export const Chat: React.FC<ChatProps> = ({
     messageSlice === "lastTwo" && messages.length > 2
       ? messages.slice(-2)
       : messages;
-
   return (
     <>
       <div

@@ -163,6 +163,7 @@ const getRequestBuilder = (request: HeliconeRequest) => {
     request.request_path,
     request.llmSchema?.request?.llm_type ?? null
   );
+  console.log("builderType", builderType);
   let builder = builders[builderType];
   return new builder(request, model);
 };
