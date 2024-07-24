@@ -9,6 +9,15 @@ import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { Message } from "./types";
 
+export const PROMPT_MODES = ["Pretty", "JSON", "Markdown"] as const;
+
+function cycleMode(
+  mode: (typeof PROMPT_MODES)[number]
+): (typeof PROMPT_MODES)[number] {
+  const index = PROMPT_MODES.indexOf(mode);
+  return PROMPT_MODES[(index + 1) % PROMPT_MODES.length];
+}
+
 interface ChatTopBarProps {
   allExpanded: boolean;
   toggleAllExpanded: () => void;
@@ -16,8 +25,8 @@ interface ChatTopBarProps {
   requestId: string;
   model: string;
   setOpen: (open: boolean) => void;
-  mode: "pretty" | "json";
-  setMode: (mode: "pretty" | "json") => void;
+  mode: (typeof PROMPT_MODES)[number];
+  setMode: (mode: (typeof PROMPT_MODES)[number]) => void;
   isModal?: boolean;
 }
 
@@ -80,14 +89,12 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
         )}
         <button
           onClick={() => {
-            setMode(mode === "pretty" ? "json" : "pretty");
+            setMode(cycleMode(mode));
           }}
           className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
         >
           <ChevronUpDownIcon className="h-4 w-4" />
-          <p className="text-xs font-semibold">
-            {mode === "pretty" ? "JSON" : "Pretty"}
-          </p>
+          <p className="text-xs font-semibold">{mode}</p>
         </button>
       </div>
     </div>

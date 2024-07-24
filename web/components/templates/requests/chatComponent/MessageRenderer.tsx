@@ -3,6 +3,7 @@ import React from "react";
 import { MessageGroup } from "./MessageGroup";
 import { PartialMessages } from "./ParitalMessage";
 import { Message } from "./types";
+import { PROMPT_MODES } from "./chatTopBar";
 
 interface MessageRendererProps {
   messages: Message[];
@@ -15,6 +16,7 @@ interface MessageRendererProps {
   isHeliconeTemplate?: boolean;
   autoInputs?: any[];
   setShowAllMessages: React.Dispatch<React.SetStateAction<boolean>>;
+  mode: (typeof PROMPT_MODES)[number];
 }
 
 export const MessageRenderer: React.FC<MessageRendererProps> = ({
@@ -26,6 +28,7 @@ export const MessageRenderer: React.FC<MessageRendererProps> = ({
   isHeliconeTemplate,
   autoInputs,
   setShowAllMessages,
+  mode,
 }) => {
   if (!showAllMessages && messages.length >= 10) {
     return (
@@ -37,6 +40,7 @@ export const MessageRenderer: React.FC<MessageRendererProps> = ({
         isHeliconeTemplate={isHeliconeTemplate}
         autoInputs={autoInputs}
         setShowAllMessages={setShowAllMessages}
+        mode={mode}
       />
     );
   }
@@ -50,6 +54,7 @@ export const MessageRenderer: React.FC<MessageRendererProps> = ({
         selectedProperties={selectedProperties}
         isHeliconeTemplate={isHeliconeTemplate}
         autoInputs={autoInputs}
+        mode={mode}
       />
     );
   }

@@ -1,6 +1,7 @@
 import React from "react";
 import { Message } from "./types";
 import { SingleChat } from "./single/singleChat";
+import { PROMPT_MODES } from "./chatTopBar";
 
 interface MessageGroupProps {
   messages: Message[];
@@ -11,6 +12,7 @@ interface MessageGroupProps {
   selectedProperties?: Record<string, string>;
   isHeliconeTemplate?: boolean;
   autoInputs?: any[];
+  mode: (typeof PROMPT_MODES)[number];
 }
 
 export const MessageGroup: React.FC<MessageGroupProps> = ({
@@ -20,6 +22,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({
   selectedProperties,
   isHeliconeTemplate,
   autoInputs,
+  mode,
 }) => {
   return (
     <>
@@ -41,6 +44,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({
           selectedProperties={selectedProperties}
           isHeliconeTemplate={isHeliconeTemplate}
           autoInputs={autoInputs}
+          mode={mode}
         />
       ))}
     </>

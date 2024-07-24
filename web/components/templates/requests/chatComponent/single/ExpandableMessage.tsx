@@ -4,6 +4,8 @@ import { clsx } from "../../../../shared/clsx";
 import { RenderWithPrettyInputKeys } from "../../../playground/chatRow";
 import { isJSON } from "./utils";
 import { Col } from "../../../../layout/common";
+import MarkdownEditor from "../../../../shared/markdownEditor";
+import { PROMPT_MODES } from "../chatTopBar";
 
 interface ExpandableMessageProps {
   formattedMessageContent: string;
@@ -14,6 +16,7 @@ interface ExpandableMessageProps {
   };
   showButton: boolean;
   selectedProperties?: Record<string, string>;
+  mode: (typeof PROMPT_MODES)[number];
 }
 
 export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
@@ -22,6 +25,7 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
   expandedProps: { expanded, setExpanded },
   showButton,
   selectedProperties,
+  mode,
 }) => {
   const handleToggle = () => setExpanded(!expanded);
 
@@ -35,14 +39,23 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
         )}
         style={{ maxHeight: expanded ? "none" : "10.5rem" }}
       >
-        <RenderWithPrettyInputKeys
-          text={
-            isJSON(formattedMessageContent)
-              ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
-              : formattedMessageContent
-          }
-          selectedProperties={selectedProperties}
-        />
+        {mode === "Pretty" ? (
+          <RenderWithPrettyInputKeys
+            text={
+              isJSON(formattedMessageContent)
+                ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
+                : formattedMessageContent
+            }
+            selectedProperties={selectedProperties}
+          />
+        ) : (
+          <MarkdownEditor
+            language="markdown"
+            text={formattedMessageContent}
+            setText={() => {}}
+            className=""
+          />
+        )}
       </div>
 
       {showButton && (

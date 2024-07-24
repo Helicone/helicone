@@ -22,8 +22,6 @@ export default async function Home({
     "file-path": string;
   };
 }) {
-  // const mdxs = await getChangeMdxs();
-
   const changelogFolder = path.join(
     process.cwd(),
     "app",
