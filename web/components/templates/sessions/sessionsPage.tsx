@@ -56,7 +56,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     selectedName
   );
 
-  const [hasSomeSessions, setHasSomeSessions] = useState<boolean>(false);
+  const [hasSomeSessions, setHasSomeSessions] = useState<boolean>(true);
 
   useEffect(() => {
     if (!hasSomeSessions && !names.isLoading) {
