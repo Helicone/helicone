@@ -4,6 +4,7 @@ import { Message } from "../types";
 import { MessageContent } from "./MessageContent";
 import { MessageHeader } from "./MessageHeader";
 import { getContentType } from "./utils";
+import { PROMPT_MODES } from "../chatTopBar";
 
 interface SingleChatProps {
   message: Message;
@@ -16,6 +17,7 @@ interface SingleChatProps {
   selectedProperties?: Record<string, string>;
   autoInputs?: any[];
   isHeliconeTemplate?: boolean;
+  mode: (typeof PROMPT_MODES)[number];
 }
 
 export const SingleChat: React.FC<SingleChatProps> = ({
@@ -26,6 +28,7 @@ export const SingleChat: React.FC<SingleChatProps> = ({
   expandedProps,
   selectedProperties,
   isHeliconeTemplate,
+  mode,
 }) => {
   const isSystem = messageContent.role === "system";
   const getBgColor = () => "bg-transparent dark:bg-gray-950";
@@ -55,12 +58,14 @@ export const SingleChat: React.FC<SingleChatProps> = ({
       key={index}
     >
       <MessageHeader role={message.role} />
+
       <MessageContent
         message={message}
         expandedProps={expandedProps}
         selectedProperties={selectedProperties}
         isHeliconeTemplate={isHeliconeTemplate}
         autoInputs={autoInputs}
+        mode={mode}
       />
     </div>
   );

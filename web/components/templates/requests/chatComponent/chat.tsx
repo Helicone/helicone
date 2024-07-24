@@ -9,9 +9,10 @@ import {
 } from "./messageUtils";
 
 import ThemedModal from "../../../shared/themed/themedModal";
-import { ChatTopBar } from "./chatTopBar";
+import { ChatTopBar, PROMPT_MODES } from "./chatTopBar";
 import { JsonView } from "./jsonView";
 import { LlmSchema } from "../../../../lib/api/models/requestResponseModel";
+import { useLocalStorage } from "../../../../services/hooks/localStorage";
 
 interface ChatProps {
   llmSchema?: LlmSchema;
@@ -46,7 +47,10 @@ export const Chat: React.FC<ChatProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [showAllMessages, setShowAllMessages] = useState(false);
-  const [mode, setMode] = useState<"pretty" | "json">("pretty");
+  const [mode, setMode] = useLocalStorage<(typeof PROMPT_MODES)[number]>(
+    "chat-mode",
+    "Pretty"
+  );
 
   const { requestMessages, messages } = useMemo(() => {
     const requestMessages = getRequestMessages(llmSchema, requestBody);
@@ -96,7 +100,7 @@ export const Chat: React.FC<ChatProps> = ({
         <div className="w-full border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
           {!hideTopBar && <ChatTopBar {...chatTopBarProps} />}
 
-          {mode === "json" ? (
+          {mode === "JSON" ? (
             <JsonView requestBody={requestBody} responseBody={responseBody} />
           ) : messages.length > 0 ? (
             <MessageRenderer
@@ -108,6 +112,7 @@ export const Chat: React.FC<ChatProps> = ({
               isHeliconeTemplate={isHeliconeTemplate}
               autoInputs={autoInputs}
               setShowAllMessages={setShowAllMessages}
+              mode={mode}
             />
           ) : (
             <div className="bg-gray-100 dark:bg-gray-900 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2">
@@ -119,7 +124,7 @@ export const Chat: React.FC<ChatProps> = ({
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="w-[80vw] border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
           <ChatTopBar {...chatTopBarProps} isModal={true} />
-          {mode === "json" ? (
+          {mode === "JSON" ? (
             <JsonView requestBody={requestBody} responseBody={responseBody} />
           ) : messages.length > 0 ? (
             <MessageRenderer
@@ -131,6 +136,7 @@ export const Chat: React.FC<ChatProps> = ({
               isHeliconeTemplate={isHeliconeTemplate}
               autoInputs={autoInputs}
               setShowAllMessages={setShowAllMessages}
+              mode={mode}
             />
           ) : (
             <div className="bg-gray-100 dark:bg-gray-900 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2">

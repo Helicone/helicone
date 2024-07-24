@@ -2,6 +2,7 @@ import React from "react";
 import { Message } from "./types";
 import { MessageGroup } from "./MessageGroup";
 import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
+import { PROMPT_MODES } from "./chatTopBar";
 
 interface ShowMoreButtonProps {
   messagesCount: number;
@@ -38,6 +39,7 @@ interface PartialMessagesProps {
   isHeliconeTemplate?: boolean;
   autoInputs?: any[];
   setShowAllMessages: (show: boolean) => void;
+  mode: (typeof PROMPT_MODES)[number];
 }
 
 export const PartialMessages: React.FC<PartialMessagesProps> = ({
@@ -48,6 +50,7 @@ export const PartialMessages: React.FC<PartialMessagesProps> = ({
   isHeliconeTemplate,
   autoInputs,
   setShowAllMessages,
+  mode,
 }) => {
   const firstTwo = messages.slice(0, 2);
   const lastTwo = messages.slice(messages.length - 2, messages.length);
@@ -61,6 +64,7 @@ export const PartialMessages: React.FC<PartialMessagesProps> = ({
         selectedProperties={selectedProperties}
         isHeliconeTemplate={isHeliconeTemplate}
         autoInputs={autoInputs}
+        mode={mode}
       />
       <ShowMoreButton
         messagesCount={messages.length}
@@ -73,6 +77,7 @@ export const PartialMessages: React.FC<PartialMessagesProps> = ({
         selectedProperties={selectedProperties}
         isHeliconeTemplate={isHeliconeTemplate}
         autoInputs={autoInputs}
+        mode={mode}
       />
     </>
   );
