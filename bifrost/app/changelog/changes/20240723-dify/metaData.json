@@ -1,0 +1,20 @@
+{
+  "title": "Dify + Helicone",
+  "description": "Track your Dify instance with Helicone. Get logs, metrics, and insights into your Dify instance.",
+  "icons": "https://www.helicone.ai/static/logo.webp",
+  "openGraph": {
+    "type": "website",
+    "siteName": "Helicone.ai",
+    "title": "Dify + Helicone",
+    "url": "https://www.helicone.ai/blog/llm-observability",
+    "description": "Track your Dify instance with Helicone. Get logs, metrics, and insights into your Dify instance.",
+    "images": "https://www.helicone.ai/static/blog/llm-observability-cover.webp",
+    "locale": "en_US"
+  },
+  "twitter": {
+    "title": "Dify + Helicone",
+    "description": "Track your Dify instance with Helicone. Get logs, metrics, and insights into your Dify instance.",
+    "card": "summary_large_image",
+    "images": "https://www.helicone.ai/static/blog/llm-observability-cover.webp"
+  }
+}

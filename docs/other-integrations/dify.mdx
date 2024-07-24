@@ -1,0 +1,37 @@
+---
+title: "Dify"
+sidebarTitle: "Dify LLM Observability and Logs"
+description: "Dify is an open-source LLM app development platform. Its intuitive interface combines AI workflow, RAG pipeline, agent capabilities, model management, observability features and more, letting you quickly go from prototype to production. Here is how to get Observability and logs for your dify instance."
+---
+
+## Introduction
+
+Dify is an open-source LLM app development platform. Its intuitive interface combines AI workflow, RAG pipeline, agent capabilities, model management, observability features and more, letting you quickly go from prototype to production.
+
+## Integration Steps
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+
+    <Note>
+      Make sure to generate a [write only API key](helicone-headers/helicone-auth).
+    </Note>
+
+  </Step>
+  <Step title="Configure API Base in Dify to use Helicone">
+
+Choose whichever provider you are using that is [supported by Helicone](/getting-started/integration-method/gateway#approved-domains). Here is an example using OpenAI.
+
+<Frame caption="Set your API base to the Helicone API URL with your API key in the path.">
+  <img src="/images/integrations/dify.png" alt="dify example" />
+</Frame>
+
+It's that simple!
+
+  </Step>
+
+</Steps>
+
+Check out the [Open Devin GitHub repository](https://github.com/OpenDevin/OpenDevin) for more information and examples.
