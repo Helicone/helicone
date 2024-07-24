@@ -59,7 +59,7 @@ const SessionsPage = (props: SessionsPageProps) => {
   const [hasSomeSessions, setHasSomeSessions] = useState<boolean>(true);
 
   useEffect(() => {
-    if (!hasSomeSessions && !names.isLoading) {
+    if (hasSomeSessions && !names.isLoading) {
       setHasSomeSessions(names.sessions.length > 0);
     }
   }, [hasSomeSessions, names.isLoading, names.sessions]);
