@@ -19,11 +19,13 @@ interface ProviderKeyListProps {
   orgId?: string; // the id of the org that we want to change provider keys for
   orgProviderKey?: string;
   showTitle?: boolean;
+  setDecryptedKey: (key: string) => void;
 }
 
 const ProviderKeyList = (props: ProviderKeyListProps) => {
   const {
     setProviderKeyCallback,
+    setDecryptedKey,
     orgId,
     orgProviderKey,
     variant = "portal",
@@ -128,6 +130,9 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
                   <RadioGroup.Option
                     key={key.id}
                     value={key.id}
+                    onClick={() => {
+                      setDecryptedKey(key.provider_key || "");
+                    }}
                     className={({ active, checked }) =>
                       clsx(
                         checked

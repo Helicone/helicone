@@ -7,15 +7,11 @@ import SelectRandomDataset from "../selectRandomDataset";
 import { Prompt } from "./types";
 import { useJawnClient } from "../../../../../lib/clients/jawnHook";
 import useNotification from "../../../../shared/notification/useNotification";
+import { PlaygroundModel } from "../../../playground/playgroundPage";
 
 interface Dataset {
   id: string;
   name: string;
-}
-
-interface Model {
-  name: string;
-  provider: string;
 }
 
 interface ExperimentConfigSelectorProps {
@@ -29,7 +25,8 @@ interface ExperimentConfigSelectorProps {
   selectedProviderKey: string | undefined;
   setSelectedProviderKey: (key: string) => void;
   useAzureForExperiment: boolean;
-  PLAYGROUND_MODELS: Model[];
+  PLAYGROUND_MODELS: PlaygroundModel[];
+  setDecryptedKey: (key: string) => void;
   selectedPrompt: Prompt | undefined;
 
   setCurrentStep: (step: number) => void;
@@ -48,6 +45,7 @@ const ExperimentConfigSelector: React.FC<ExperimentConfigSelectorProps> = ({
   setSelectedProviderKey,
   useAzureForExperiment,
   PLAYGROUND_MODELS,
+  setDecryptedKey,
   selectedPrompt,
   setCurrentStep,
   refetchDataSets,
@@ -120,9 +118,7 @@ const ExperimentConfigSelector: React.FC<ExperimentConfigSelectorProps> = ({
                     value={selectedModel}
                     onValueChange={(value) => setSelectedModel(value)}
                   >
-                    {PLAYGROUND_MODELS.filter(
-                      (model) => model.provider === "OPENAI"
-                    ).map((model) => (
+                    {PLAYGROUND_MODELS.map((model) => (
                       <SelectItem key={model.name} value={model.name}>
                         {model.name}
                       </SelectItem>
@@ -157,6 +153,7 @@ const ExperimentConfigSelector: React.FC<ExperimentConfigSelectorProps> = ({
                   <div className="flex w-full max-w-lg">
                     <ProviderKeyList
                       showTitle={false}
+                      setDecryptedKey={setDecryptedKey}
                       setProviderKeyCallback={(providerKey) =>
                         setSelectedProviderKey(providerKey)
                       }

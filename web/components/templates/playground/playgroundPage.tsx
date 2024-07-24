@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { usePlaygroundPage } from "../../../services/hooks/playground";
 import { clsx } from "../../shared/clsx";
 import ChatPlayground from "./chatPlayground";
@@ -23,43 +23,6 @@ import HcButton from "../../ui/hcButton";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { ChatCompletionTool } from "openai/resources";
 import { Tooltip } from "@mui/material";
-interface PlaygroundPageProps {
-  request?: string;
-}
-
-export type PlaygroundModel = {
-  name: string;
-  provider: ProviderName;
-};
-
-export type TFinetunedJob = {
-  object: string;
-  id: string;
-  model: string;
-  created_at: number;
-  finished_at: number;
-  fine_tuned_model: string;
-  organization_id: string;
-  result_files: Array<string>;
-  status:
-    | "validating_files"
-    | "queued"
-    | "running"
-    | "succeeded"
-    | "failed"
-    | "cancelled";
-  validation_file: any;
-  training_file: string;
-  hyperparameters: {
-    n_epochs: number;
-    batch_size: number;
-    learning_rate_multiplier: number;
-  };
-  trained_tokens: number | null;
-  integrations: Array<any>;
-  seed: number;
-  estimated_finish: number;
-};
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { request } = props;
@@ -118,35 +81,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
   }, [tools, requestId]);
 
-  async function fetchFineTuneModels() {
-    // Using user's own api key, so no need to use /api routes
-    const res = await fetch("https://api.openai.com/v1/fine_tuning/jobs", {
-      headers: {
-        Authorization: `Bearer ${providerAPIKey}`,
-        "Content-Type": "application/json",
-      },
-    });
-    const ftJobsList = await res.json();
-    if (ftJobsList.error) return;
-
-    const ftJobs = ftJobsList.data as Array<TFinetunedJob>;
-
-    const ftModels = ftJobs
-      .map((job) => {
-        if (job.status === "succeeded") {
-          return {
-            name: job.fine_tuned_model,
-            provider: "OPENAI",
-          };
-        }
-      })
-      .filter((model) => model !== undefined) as PlaygroundModel[];
-
-    setPLAYGROUND_MODELS((prev) => prev.concat(ftModels));
-  }
-
   useEffect(() => {
-    fetchFineTuneModels();
+    fetchFineTuneModels(providerAPIKey, setPLAYGROUND_MODELS);
   }, [providerAPIKey]);
 
   return (
@@ -541,3 +477,72 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 };
 
 export default PlaygroundPage;
+
+/** Types and Function for using finetuned models in Playground, Experiments Page */
+interface PlaygroundPageProps {
+  request?: string;
+}
+
+export type PlaygroundModel = {
+  name: string;
+  provider: ProviderName;
+};
+
+export type TFinetunedJob = {
+  object: string;
+  id: string;
+  model: string;
+  created_at: number;
+  finished_at: number;
+  fine_tuned_model: string;
+  organization_id: string;
+  result_files: Array<string>;
+  status:
+    | "validating_files"
+    | "queued"
+    | "running"
+    | "succeeded"
+    | "failed"
+    | "cancelled";
+  validation_file: any;
+  training_file: string;
+  hyperparameters: {
+    n_epochs: number;
+    batch_size: number;
+    learning_rate_multiplier: number;
+  };
+  trained_tokens: number | null;
+  integrations: Array<any>;
+  seed: number;
+  estimated_finish: number;
+};
+
+export async function fetchFineTuneModels(
+  providerAPIKey: string | undefined,
+  setPlaygroundModels: Dispatch<SetStateAction<PlaygroundModel[]>>
+) {
+  // Using user's own api key, so no need to use /api routes
+  const res = await fetch("https://api.openai.com/v1/fine_tuning/jobs", {
+    headers: {
+      Authorization: `Bearer ${providerAPIKey}`,
+      "Content-Type": "application/json",
+    },
+  });
+  const ftJobsList = await res.json();
+  if (ftJobsList.error) return;
+
+  const ftJobs = ftJobsList.data as Array<TFinetunedJob>;
+
+  const ftModels = ftJobs
+    .map((job) => {
+      if (job.status === "succeeded") {
+        return {
+          name: job.fine_tuned_model,
+          provider: "OPENAI",
+        };
+      }
+    })
+    .filter((model) => model !== undefined) as PlaygroundModel[];
+
+  setPlaygroundModels((prev) => playgroundModels.concat(ftModels));
+}
