@@ -38,26 +38,30 @@ export default function ColumnSelectButton(props: ColumnSelectButtonProps) {
         >
           <Menu.Items className="absolute left-0 mt-2 w-40 z-10 origin-top-left divide-y divide-gray-100 dark:divide-gray-900 rounded-md bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="px-1 py-1 ">
-              {categories.map((category) => (
-                <Menu.Item key={category}>
-                  {({ active }) => (
-                    <button
-                      className={`${
-                        active ? "bg-sky-100 dark:bg-sky-900" : ""
-                      } text-gray-900 dark:text-gray-100 group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                      onClick={() => {
-                        onViewChangeHandler(category as ColumnViewOptions);
-                      }}
-                    >
-                      <div className="flex w-full items-center">{category}</div>
+              {categories
+                .filter((x) => x !== "Default")
+                .map((category) => (
+                  <Menu.Item key={category}>
+                    {({ active }) => (
+                      <button
+                        className={`${
+                          active ? "bg-sky-100 dark:bg-sky-900" : ""
+                        } text-gray-900 dark:text-gray-100 group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                        onClick={() => {
+                          onViewChangeHandler(category as ColumnViewOptions);
+                        }}
+                      >
+                        <div className="flex w-full items-center">
+                          {category}
+                        </div>
 
-                      {currentView === category && (
-                        <CheckIcon className="h-5 w-5" />
-                      )}
-                    </button>
-                  )}
-                </Menu.Item>
-              ))}
+                        {currentView === category && (
+                          <CheckIcon className="h-5 w-5" />
+                        )}
+                      </button>
+                    )}
+                  </Menu.Item>
+                ))}
               {/* <Menu.Item>
                 {({ active }) => (
                   <button
