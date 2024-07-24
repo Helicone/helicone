@@ -3,11 +3,12 @@ import { Col } from "../../../../layout/common/col";
 import { Row } from "../../../../layout/common/row";
 import { clsx } from "../../../clsx";
 import { columnDefToDragColumnItem, DragColumnItem } from "./DragList";
+import ColumnSelectButton, { ColumnViewOptions } from "./ColumnSelect";
 
 interface ColumnOptionsProps<T> {
   categories: string[];
-  selectedCategory: string | undefined | "all";
-  setSelectedCategory: (category: string | undefined | "all") => void;
+  selectedCategory: string | undefined | "All columns";
+  setSelectedCategory: (category: string | undefined | "All columns") => void;
   columns: Column<T, unknown>[];
   activeColumns: DragColumnItem[];
   setActiveColumns: (columns: DragColumnItem[]) => void;
@@ -22,32 +23,18 @@ export default function ColumnOptions<T>({
   setActiveColumns,
 }: ColumnOptionsProps<T>) {
   return (
-    <Col className="space-y-2 divide-y divide-gray-200 flex-1">
-      <h3 className="text-xs text-black dark:text-white font-medium">
-        Column Options
-      </h3>
+    <Col className="space-y-2 flex-1 pl-2">
+      <ColumnSelectButton
+        categories={categories}
+        currentView={selectedCategory as ColumnViewOptions}
+        onViewChange={setSelectedCategory}
+      />
       <Col className="pt-2">
-        <Row className="gap-2">
-          {categories.map((category, idx) => (
-            <button
-              key={`${category}-${idx}`}
-              className={clsx(
-                selectedCategory === category
-                  ? "bg-green-100 dark:bg-green-900 text-green-700 font-semibold hover:text-green-900 dark:hover:text-green-100 dark:text-green-300"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 hover:bg-green-50 dark:hover:bg-green-800 hover:text-green-900 dark:hover:text-green-100",
-                "text-xs border border-gray-400 dark:border-gray-600 w-full px-3 py-2 rounded-lg whitespace-nowrap text-center"
-              )}
-              onClick={() => setSelectedCategory(category)}
-            >
-              {category}
-            </button>
-          ))}
-        </Row>
         <Col className="flex flex-col space-y-2 pt-2">
           {categories
             .filter((category) => category !== "all")
             .filter((category) => {
-              if (selectedCategory === "all") {
+              if (selectedCategory === "All columns") {
                 return true;
               }
               return category === selectedCategory;
