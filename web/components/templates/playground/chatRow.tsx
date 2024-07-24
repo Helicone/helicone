@@ -164,7 +164,7 @@ export const RenderWithPrettyInputKeys = (props: {
   };
 
   return (
-    <div className="text-md leading-8 text-black dark:text-white">
+    <div className="text-md leading-8 text-black dark:text-white whitespace-pre-wrap">
       {replaceInputKeysWithComponents(text)}
     </div>
   );
