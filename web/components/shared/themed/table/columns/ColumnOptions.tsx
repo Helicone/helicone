@@ -3,6 +3,7 @@ import { Col } from "../../../../layout/common/col";
 import { clsx } from "../../../clsx";
 import { columnDefToDragColumnItem, DragColumnItem } from "./DragList";
 import ColumnSelectButton, { ColumnViewOptions } from "./ColumnSelect";
+import { CheckIcon } from "@heroicons/react/24/outline";
 
 interface ColumnOptionsProps<T> {
   categories: string[];
@@ -79,12 +80,14 @@ export default function ColumnOptions<T>({
                             className={clsx(
                               activeColumns.find((c) => c.id === column.id)
                                 ?.shown
-                                ? "bg-sky-100 dark:bg-sky-900 text-sky-700 font-medium hover:text-sky-900 dark:hover:text-sky-100 dark:text-sky-300"
+                                ? "bg-sky-100 border-[#73ACCF] dark:bg-sky-900 text-sky-700 font-medium hover:text-sky-900 dark:hover:text-sky-100 dark:text-sky-300"
                                 : "bg-white dark:bg-black text-gray-500 hover:bg-sky-50 dark:hover:bg-sky-900 hover:text-sky-900 dark:hover:text-sky-100",
-                              "text-xs border border-gray-300 dark:border-gray-700 w-fit px-2 py-1 rounded-md whitespace-pre-wrap text-left"
+                              "text-xs border border-gray-300 dark:border-gray-700 w-fit px-2 py-1 rounded-md whitespace-pre-wrap text-left flex flex-row items-center  space-x-2"
                             )}
                           >
-                            {header}
+                            {header}{" "}
+                            {activeColumns.find((c) => c.id === column.id)
+                              ?.shown && <CheckIcon className="h-4 w-4" />}
                           </button>
                         </li>
                       );
