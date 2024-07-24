@@ -62,60 +62,6 @@ export default function ColumnSelectButton(props: ColumnSelectButtonProps) {
                     )}
                   </Menu.Item>
                 ))}
-              {/* <Menu.Item>
-                {({ active }) => (
-                  <button
-                    className={`${
-                      active ? "bg-sky-100 dark:bg-sky-900" : ""
-                    } text-gray-900 dark:text-gray-100 group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                    onClick={() => {
-                      onViewChangeHandler("All columns");
-                    }}
-                  >
-                    <div className="flex w-full items-center">All columns</div>
-
-                    {currentView === "All columns" && (
-                      <CheckIcon className="h-5 w-5" />
-                    )}
-                  </button>
-                )}
-              </Menu.Item>
-              <Menu.Item>
-                {({ active }) => (
-                  <button
-                    className={`${
-                      active ? "bg-sky-100 dark:bg-sky-900" : ""
-                    } text-gray-900 dark:text-gray-100 group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                    onClick={() => {
-                      onViewChangeHandler("Default");
-                    }}
-                  >
-                    <div className="flex w-full items-center">Default</div>
-                    {currentView === "Default" && (
-                      <CheckIcon className="h-5 w-5" />
-                    )}
-                  </button>
-                )}
-              </Menu.Item>
-              <Menu.Item>
-                {({ active }) => (
-                  <button
-                    className={`${
-                      active ? "bg-sky-100 dark:bg-sky-900" : ""
-                    } text-gray-900 dark:text-gray-100 group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                    onClick={() => {
-                      onViewChangeHandler("Custom properties");
-                    }}
-                  >
-                    <div className="flex w-full items-center">
-                      Custom properties
-                    </div>
-                    {currentView === "Custom properties" && (
-                      <CheckIcon className="h-5 w-5" />
-                    )}
-                  </button>
-                )}
-              </Menu.Item> */}
             </div>
           </Menu.Items>
         </Transition>
