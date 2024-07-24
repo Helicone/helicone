@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   getTimeIntervalAgo,
   TimeInterval,
@@ -56,12 +56,20 @@ const SessionsPage = (props: SessionsPageProps) => {
     selectedName
   );
 
+  const [hasSomeSessions, setHasSomeSessions] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!hasSomeSessions && !names.isLoading) {
+      setHasSomeSessions(names.sessions.length > 0);
+    }
+  }, [hasSomeSessions, names.isLoading, names.sessions]);
+
   return (
     <>
       <AuthHeader title={"Sessions (beta)"} />
 
       <div>
-        {names.sessions.length > 0 ? (
+        {names.isLoading || names?.sessions?.length > 0 ? (
           <Row className="gap-5 ">
             <SessionNameSelection
               sessionIdSearch={sessionIdSearch}
