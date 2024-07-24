@@ -1,37 +1,39 @@
+import "@mintlify/mdx/dist/styles.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import NavBar from "@/components/layout/navbar";
-import Footer from "@/components/layout/footer";
-import "@mintlify/mdx/dist/styles.css";
-import { Analytics } from "@vercel/analytics/react";
+import { promises as fs } from "fs";
+import path from "path";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "What is LLM Observability and Monitoring?",
-  description:
-    "LLM observability is the practice of monitoring and analyzing Large Language Model systems in production. It tracks inputs, outputs, and performance metrics to ensure reliability and improve AI applications. Learn how it differs from traditional observability.",
-  icons: "https://www.helicone.ai/static/logo.webp",
-  openGraph: {
-    type: "website",
-    siteName: "Helicone.ai",
-    title: "What is LLM Observability and Monitoring?",
-    url: "https://www.helicone.ai/blog/llm-observability",
-    description:
-      "LLM observability is the practice of monitoring and analyzing Large Language Model systems in production. It tracks inputs, outputs, and performance metrics to ensure reliability and improve AI applications. Learn how it differs from traditional observability.",
-    images:
-      "https://www.helicone.ai/static/blog/llm-observability-cover.webp", 
-    locale: "en_US",
-  },
-  twitter: {
-    title: "What is LLM Observability and Monitoring?",
-    description:
-      "LLM observability is the practice of monitoring and analyzing Large Language Model systems in production. It tracks inputs, outputs, and performance metrics to ensure reliability and improve AI applications. Learn how it differs from traditional observability.",
-    card: "summary_large_image",
-    images:
-      "https://www.helicone.ai/static/blog/llm-observability-cover.webp", 
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: { "file-path": string };
+}): Promise<Metadata> {
+  const filePath = params["file-path"];
+  let metadata: Metadata = {};
+
+  const basePath = path.join(
+    process.cwd(),
+    "app",
+    "changelog",
+    "changes",
+    filePath
+  );
+  const jsonPath = path.join(basePath, "metadata.json");
+  const tsPath = path.join(basePath, "metaData.ts");
+
+  try {
+    // Try to read JSON file first
+    const jsonContent = await fs.readFile(jsonPath, "utf8");
+    metadata = JSON.parse(jsonContent);
+  } catch (error) {
+    console.error("Error loading metadata:", error);
+  }
+
+  return metadata;
+}
 
 export default function RootLayout({
   children,

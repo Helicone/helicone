@@ -1,10 +1,9 @@
 import { getCompiledServerMdx } from "@mintlify/mdx";
-import path from "path";
-import fs from "fs";
-import Link from "next/link";
-import { ChevronLeftIcon } from "@heroicons/react/20/solid";
 import "@mintlify/mdx/dist/styles.css";
+import fs from "fs";
 import Image from "next/image";
+import Link from "next/link";
+import path from "path";
 
 const getChangeMdxs = async () => {
   const changelogFolder = path.join(
