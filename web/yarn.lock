@@ -20,17 +20,10 @@
     nanoid "3.3.6"
     secure-json-parse "2.7.0"
 
-"@ai-sdk/provider@0.0.13":
+"@ai-sdk/provider@0.0.13", "@ai-sdk/provider@^0.0.13":
   version "0.0.13"
   resolved "https://registry.yarnpkg.com/@ai-sdk/provider/-/provider-0.0.13.tgz#a0e7191efe5b12470da3c6b9eb12f58957fcfa28"
   integrity sha512-RBstpG/3RqVBBJgTvjZpou/+1fNQMDIwB9enqQPXqr0MoCrJHscLD2Zsfr6cKM5HFfY1D4KhdSPTycCDebVGlQ==
-  dependencies:
-    json-schema "0.4.0"
-
-"@ai-sdk/provider@^0.0.12":
-  version "0.0.12"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/provider/-/provider-0.0.12.tgz#74d594c1bfd498ac6411610d37aacbf40adabba0"
-  integrity sha512-oOwPQD8i2Ynpn22cur4sk26FW3mSy6t6/X/K1Ay2yGBKYiSpRyLfObhOrZEGsXDx+3euKy4nEZ193R36NM+tpQ==
   dependencies:
     json-schema "0.4.0"
 
@@ -219,12 +212,12 @@
   dependencies:
     node-fetch "^2.6.1"
 
-"@assistant-ui/react-playground@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@assistant-ui/react-playground/-/react-playground-0.0.3.tgz#3e5c408d3c7cfe4e061caa082e892af67d5c1aeb"
-  integrity sha512-3i21myYQdALVHtVoj6IPWrhSDz7rj45v0ZkpF+tNG7tCJc2cABgTffdlI781iFnUlsIxgBaJN3HRpbtschdUCg==
+"@assistant-ui/react-playground@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@assistant-ui/react-playground/-/react-playground-0.0.5.tgz#4acad874bd9ee0aa10c0fca6bc095c060d624d0f"
+  integrity sha512-i4fyOfPqkiiniYIO8QqrU1l309/NrPdea/UsY09aPyprgs9fVxAAvqzLDfVwr785zfiscy06mQOik0TgBU/N1Q==
   dependencies:
-    "@ai-sdk/provider" "^0.0.12"
+    "@ai-sdk/provider" "^0.0.13"
     "@radix-ui/react-avatar" "^1.1.0"
     "@radix-ui/react-dialog" "^1.1.1"
     "@radix-ui/react-dropdown-menu" "^2.1.1"
@@ -235,20 +228,20 @@
     class-variance-authority "^0.7.0"
     classnames "^2.5.1"
     clsx "^2.1.1"
-    lucide-react "^0.412.0"
-    openai "^4.52.7"
+    lucide-react "^0.414.0"
+    openai "^4.53.0"
     prismjs "^1.29.0"
     react-simple-code-editor "^0.14.1"
     react-textarea-autosize "^8.5.3"
     tailwind-merge "^2.4.0"
     zustand "^4.5.4"
 
-"@assistant-ui/react@^0.5.6":
-  version "0.5.6"
-  resolved "https://registry.yarnpkg.com/@assistant-ui/react/-/react-0.5.6.tgz#8679ed12ea093555adc4c58636b0ad37069ce510"
-  integrity sha512-cZg7pTT1QN1I+CKoLyEErHKLnrXFzh0tB0n3H8B8yNhqhwNC4UsmTMwtbuFPpQooHcCSgOgBxVlw4QYDeaJ5jQ==
+"@assistant-ui/react@^0.5.9":
+  version "0.5.9"
+  resolved "https://registry.yarnpkg.com/@assistant-ui/react/-/react-0.5.9.tgz#c7c722d6e9cdf79074d157a1a49ae46d6a3b0d64"
+  integrity sha512-PPFNN0pf793olu/w/saYwWq2MHV0/z15MWi1ziY+ejbEoWSOl5SSCg0BPQNxApXCOcddVpSqNrdik9ZmtqVs6A==
   dependencies:
-    "@ai-sdk/provider" "^0.0.12"
+    "@ai-sdk/provider" "^0.0.13"
     "@radix-ui/primitive" "^1.1.0"
     "@radix-ui/react-avatar" "^1.1.0"
     "@radix-ui/react-compose-refs" "^1.1.0"
@@ -262,7 +255,7 @@
     class-variance-authority "^0.7.0"
     classnames "^2.5.1"
     json-schema "^0.4.0"
-    lucide-react "^0.412.0"
+    lucide-react "^0.414.0"
     nanoid "^5.0.7"
     react-textarea-autosize "^8.5.3"
     secure-json-parse "^2.7.0"
@@ -8460,10 +8453,10 @@ lru-cache@^6.0.0:
   dependencies:
     yallist "^4.0.0"
 
-lucide-react@^0.412.0:
-  version "0.412.0"
-  resolved "https://registry.yarnpkg.com/lucide-react/-/lucide-react-0.412.0.tgz#d4673e8cdb41661dd9bf7964502967980b46b843"
-  integrity sha512-m7argY/PhSfjhwP2Dxey+VzFBvusfd8ULt+vWWFnzQhURLOtNyD1qWmMVdtJ4Nn+d+DTcoOiILrjThSjY9kaow==
+lucide-react@^0.414.0:
+  version "0.414.0"
+  resolved "https://registry.yarnpkg.com/lucide-react/-/lucide-react-0.414.0.tgz#15245174d3ea111c85eae571b0e903c1026ac1fd"
+  integrity sha512-Krr/MHg9AWoJc52qx8hyJ64X9++JNfS1wjaJviLM1EP/68VNB7Tv0VMldLCB1aUe6Ka9QxURPhQm/eB6cqOM3A==
 
 make-dir@^4.0.0:
   version "4.0.0"
@@ -9494,7 +9487,7 @@ openai@^4.24.7:
     node-fetch "^2.6.7"
     web-streams-polyfill "^3.2.1"
 
-openai@^4.52.7:
+openai@^4.53.0:
   version "4.53.0"
   resolved "https://registry.yarnpkg.com/openai/-/openai-4.53.0.tgz#5ac6fc2ba1bba239a31c910bd57d793814bea61d"
   integrity sha512-XoMaJsSLuedW5eoMEMmZbdNoXgML3ujcU5KfwRnC6rnbmZkHE2Q4J/SArwhqCxQRqJwHnQUj1LpiROmKPExZJA==

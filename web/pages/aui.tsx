@@ -6,6 +6,7 @@ import { AssistantRuntimeProvider } from "@assistant-ui/react";
 
 // Update Prism.js import
 
+import "prismjs";
 import "prismjs/components/prism-json";
 import "prismjs/themes/prism.css";
 import React from "react";
