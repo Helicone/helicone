@@ -1,6 +1,5 @@
 import { Column } from "@tanstack/react-table";
 import { Col } from "../../../../layout/common/col";
-import { Row } from "../../../../layout/common/row";
 import { clsx } from "../../../clsx";
 import { columnDefToDragColumnItem, DragColumnItem } from "./DragList";
 import ColumnSelectButton, { ColumnViewOptions } from "./ColumnSelect";
