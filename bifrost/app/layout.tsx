@@ -45,6 +45,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.ico" />
+      </head>
       <PHProvider>
         <body>
           <div className={`bg-[#f8feff] flex flex-col ${inter.className}`}>
