@@ -98,7 +98,7 @@ export class SessionManager {
     requestBody: SessionQueryParams
   ): Promise<Result<SessionResult[], string>> {
     const { sessionIdContains, timeFilter, sessionName, timezoneDifference } =
-      requestBody;    console.log("sessionName", sessionName);
+      requestBody;
 
     if (!isValidTimeZoneDifference(timezoneDifference)) {
       return err("Invalid timezone difference");
@@ -154,8 +154,8 @@ export class SessionManager {
     // Step 1 get all the properties given this filter
     const query = `
     SELECT 
-      min(request_response_versioned.request_created_at + INTERVAL '${timezoneDifference} minutes')  AS created_at,
-      max(request_response_versioned.request_created_at + INTERVAL '${timezoneDifference} minutes')  AS latest_request_created_at,
+      min(request_response_versioned.request_created_at) + INTERVAL ${timezoneDifference} MINUTE AS created_at,
+      max(request_response_versioned.request_created_at) + INTERVAL ${timezoneDifference} MINUTE AS latest_request_created_at,
       properties['Helicone-Session-Id'] as session,
       ${clickhousePriceCalc("request_response_versioned")} AS total_cost,
       count(*) AS total_requests,
