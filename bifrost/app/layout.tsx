@@ -9,6 +9,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { PHProvider } from "./providers";
 import dynamic from "next/dynamic";
 import Script from "next/script";
+import Head from "next/head";
 
 const PostHogPageView = dynamic(() => import("./PostHogPageView"), {
   ssr: false,
@@ -45,6 +46,25 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Head>
+        <Head>
+          <link rel="shortcut icon" href="/favicon.ico" />
+          <link rel="icon" href="/static/logo.png" />
+          <link rel="icon" href="/favicon-16x16.png" sizes="16x16" />
+          <link rel="icon" href="/favicon-32x32.png" sizes="32x32" />
+          <link
+            rel="apple-touch-icon"
+            href="/apple-touch-icon.png"
+            sizes="180x180"
+          />
+        </Head>
+        <link
+          rel="icon"
+          href="/favicon.ico"
+          type="image/x-icon"
+          sizes="16x16"
+        />
+      </Head>
       <PHProvider>
         <body>
           <div className={`bg-[#f8feff] flex flex-col ${inter.className}`}>
