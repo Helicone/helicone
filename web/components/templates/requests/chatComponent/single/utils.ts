@@ -37,7 +37,15 @@ export const getFormattedMessageContent = (message: Message): string => {
 
 export const hasFunctionCall = (message: Message): boolean =>
   !!message.function_call ||
-  (message.tool_calls?.some((tool) => tool.type === "function") ?? false);
+  (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) ||
+  (Array.isArray(message.content) &&
+    message.content.some(
+      (item) =>
+        typeof item === "object" &&
+        item !== null &&
+        "type" in item &&
+        item.type === "tool_use"
+    ));
 
 export const hasImage = (message: Message): boolean =>
   Array.isArray(message.content) &&
