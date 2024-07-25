@@ -7,6 +7,27 @@ export function getRequestMessages(
   requestBody: any
 ): Message[] {
   let messages = llmSchema?.request.messages ?? requestBody?.messages ?? [];
+
+  // Process each message to ensure correct formatting
+  messages = messages.map((msg: any) => {
+    if (Array.isArray(msg.content)) {
+      // Handle array content (e.g., tool results)
+      return {
+        ...msg,
+        content: msg.content.map((item: any) => {
+          if (item.type === "tool_result") {
+            return {
+              type: "text",
+              text: `tool_result(${item.content})`,
+            };
+          }
+          return item;
+        }),
+      };
+    }
+    return msg;
+  });
+
   if (
     requestBody?.system &&
     !messages.some(
