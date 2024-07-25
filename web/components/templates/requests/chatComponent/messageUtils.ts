@@ -18,7 +18,7 @@ export function getRequestMessages(
           if (item.type === "tool_result") {
             return {
               type: "text",
-              text: `Tool Result (${item.tool_use_id}): ${item.content}`,
+              text: `tool_result(${item.content})`,
             };
           }
           return item;
