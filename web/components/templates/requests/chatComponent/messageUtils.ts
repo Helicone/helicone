@@ -32,15 +32,38 @@ export function getResponseMessage(
   model: string
 ): Message | null {
   if (/^claude/.test(model)) {
-    return {
-      content: responseBody?.content?.[0]?.text ?? "",
-      id: "123",
-      role: "assistant",
-    };
+    // Handle Anthropic (Claude) response
+    if (Array.isArray(responseBody?.content)) {
+      return {
+        id: responseBody.id || crypto.randomUUID(),
+        role: "assistant",
+        content: responseBody.content,
+        model: responseBody.model,
+      };
+    } else {
+      // Fallback for unexpected structure
+      return {
+        id: responseBody.id || crypto.randomUUID(),
+        role: "assistant",
+        content: responseBody?.content?.[0]?.text ?? "",
+        model: responseBody.model,
+      };
+    }
+  } else {
+    // Handle OpenAI response
+    const openAIMessage =
+      llmSchema?.response?.message ??
+      responseBody?.choices?.[0]?.message ??
+      null;
+    if (openAIMessage) {
+      return {
+        ...openAIMessage,
+        id: openAIMessage.id || crypto.randomUUID(),
+        model: model,
+      };
+    }
   }
-  return (
-    llmSchema?.response?.message ?? responseBody?.choices?.[0]?.message ?? null
-  );
+  return null;
 }
 
 export function getMessages(
