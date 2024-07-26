@@ -22,12 +22,32 @@ export async function generateMetadata({
     filePath
   );
   const jsonPath = path.join(basePath, "metadata.json");
-  const tsPath = path.join(basePath, "metaData.ts");
 
   try {
     // Try to read JSON file first
     const jsonContent = await fs.readFile(jsonPath, "utf8");
     metadata = JSON.parse(jsonContent);
+
+    metadata = {
+      title: metadata.title,
+      description: metadata.description,
+      icons: "https://www.helicone.ai/static/logo.webp",
+      openGraph: {
+        type: "website",
+        siteName: "Helicone.ai",
+        title: metadata.title ?? "",
+        url: `https://www.helicone.ai/changelog/${filePath}`,
+        description: metadata.description ?? "",
+        images: `https://www.helicone.ai/static/changelog/images/${filePath}.webp`,
+        locale: "en_US",
+      },
+      twitter: {
+        title: metadata.title ?? "",
+        description: metadata.description ?? "",
+        card: "summary_large_image",
+        images: `https://www.helicone.ai/static/changelog/images/${filePath}.webp`,
+      },
+    };
   } catch (error) {
     console.error("Error loading metadata:", error);
   }

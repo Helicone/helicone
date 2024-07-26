@@ -23,7 +23,9 @@ const MobileHeader = (props: {
           <span className="sr-only">Helicone</span>
           <Image
             src={"/static/logo.svg"}
-            alt={"Helicone - Open-source LLM observability and monitoring platform for developers"}
+            alt={
+              "Helicone - Open-source LLM observability and monitoring platform for developers"
+            }
             height={150}
             width={150}
             priority={true}
@@ -31,7 +33,9 @@ const MobileHeader = (props: {
           />
           <Image
             src={"/static/logo.svg"}
-            alt={"Helicone - Open-source LLM observability and monitoring platform for developers"}
+            alt={
+              "Helicone - Open-source LLM observability and monitoring platform for developers"
+            }
             height={150}
             width={150}
             priority={true}
@@ -65,6 +69,55 @@ const MobileHeader = (props: {
 };
 
 const NavLinks = () => {
+  const path = usePathname();
+  const links = [
+    {
+      href: "https://docs.helicone.ai/",
+      label: "Documentation",
+    },
+    {
+      href: "/pricing",
+      label: "Pricing",
+    },
+    {
+      href: "https://us.helicone.ai/open-stats",
+      label: "🌑 Open Stats",
+    },
+    {
+      href: "/community",
+      label: "Community",
+    },
+    {
+      href: "/blog",
+      label: "Blog",
+    },
+    {
+      href: "/contact",
+      label: "Contact",
+    },
+  ];
+  return (
+    <>
+      {links.map((link, i) => (
+        <Link
+          href={link.href}
+          className={
+            "flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none " +
+            " " +
+            (path === link.href
+              ? "text-black font-bold"
+              : "text-gray-600 opacity-75")
+          }
+          key={`${link}-${i}`}
+        >
+          {link.label}
+        </Link>
+      ))}
+    </>
+  );
+};
+
+const NavIcons = () => {
   const path = usePathname();
   const links = [
     {
@@ -161,7 +214,9 @@ const NavBar = (props: NavBarProps) => {
             <span className="sr-only">Helicone</span>
             <Image
               src={"/static/logo.svg"}
-              alt={"Helicone - Open-source LLM observability and monitoring platform for developers"}
+              alt={
+                "Helicone - Open-source LLM observability and monitoring platform for developers"
+              }
               height={150}
               width={150}
               priority={true}
@@ -169,7 +224,9 @@ const NavBar = (props: NavBarProps) => {
             />
             <Image
               src={"/static/logo.svg"}
-              alt={"Helicone - Open-source LLM observability and monitoring platform for developers"}
+              alt={
+                "Helicone - Open-source LLM observability and monitoring platform for developers"
+              }
               height={150}
               width={150}
               priority={true}
