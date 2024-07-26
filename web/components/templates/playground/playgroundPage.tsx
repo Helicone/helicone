@@ -242,7 +242,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           {newPlaygroundOpen ? "Close New Playground" : "🚀 New (beta)"}
         </button>
       )}
-      {newPlaygroundOpen ? (
+      {newPlaygroundOpen && showNewButton ? (
         <div>
           <AssistantRuntimeProvider runtime={runtime}>
             <AssistantPlayground
