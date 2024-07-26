@@ -276,7 +276,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       </Row>
 
       {newPlaygroundOpen && showNewButton ? (
-        <div className="w-full flex flex-col min-h-[80vh] h-full">
+        <div className="w-full flex flex-col min-h-[80vh] h-full max-h-[80vh]">
           <AssistantRuntimeProvider runtime={runtime}>
             <AssistantPlayground
               modelSelector={{
