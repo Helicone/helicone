@@ -80,7 +80,10 @@ export default async function Home() {
               },
               i
             ) => (
-              <div className="flex flex-col md:flex-row items-start w-full mx-auto max-w-5xl py-16 px-4 md:py-24 relative">
+              <div
+                className="flex flex-col md:flex-row items-start w-full mx-auto max-w-5xl py-16 px-4 md:py-24 relative"
+                key={`changes-${i}`}
+              >
                 <div className="w-56 h-full flex flex-col space-y-2 md:sticky top-16 md:top-32">
                   <h3 className="text-sm font-semibold text-gray-500">
                     {date.toLocaleDateString("en-US", {
