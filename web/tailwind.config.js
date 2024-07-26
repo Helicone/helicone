@@ -5,6 +5,7 @@ module.exports = {
     "./pages/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
     "./node_modules/@tremor/**/*.{js,ts,jsx,tsx}", // Tremor module
+    "./node_modules/@assistant-ui/react-playground/dist/**/*.js",
   ],
   theme: {
     fontFamily: {},
@@ -26,6 +27,11 @@ module.exports = {
         },
       },
       colors: {
+        aui: {
+          primary: {
+            DEFAULT: "#0284c7",
+          },
+        },
         // light mode
         tremor: {
           brand: {
@@ -144,7 +150,11 @@ module.exports = {
     },
   ],
   plugins: [
+    require("tailwindcss-animate"),
     require("@tailwindcss/forms"),
+    require("@assistant-ui/react/tailwindcss")({
+      components: ["default-theme"],
+    }),
     require("@headlessui/tailwindcss"),
     require("@tailwindcss/typography"),
   ],

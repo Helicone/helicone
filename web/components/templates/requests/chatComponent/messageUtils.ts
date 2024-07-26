@@ -7,6 +7,27 @@ export function getRequestMessages(
   requestBody: any
 ): Message[] {
   let messages = llmSchema?.request.messages ?? requestBody?.messages ?? [];
+
+  // Process each message to ensure correct formatting
+  messages = messages.map((msg: any) => {
+    if (Array.isArray(msg.content)) {
+      // Handle array content (e.g., tool results)
+      return {
+        ...msg,
+        content: msg.content.map((item: any) => {
+          if (item.type === "tool_result") {
+            return {
+              type: "text",
+              text: `tool_result(${item.content})`,
+            };
+          }
+          return item;
+        }),
+      };
+    }
+    return msg;
+  });
+
   if (
     requestBody?.system &&
     !messages.some(
@@ -32,15 +53,38 @@ export function getResponseMessage(
   model: string
 ): Message | null {
   if (/^claude/.test(model)) {
-    return {
-      content: responseBody?.content?.[0]?.text ?? "",
-      id: "123",
-      role: "assistant",
-    };
+    // Handle Anthropic (Claude) response
+    if (Array.isArray(responseBody?.content)) {
+      return {
+        id: responseBody.id || crypto.randomUUID(),
+        role: "assistant",
+        content: responseBody.content,
+        model: responseBody.model,
+      };
+    } else {
+      // Fallback for unexpected structure
+      return {
+        id: responseBody.id || crypto.randomUUID(),
+        role: "assistant",
+        content: responseBody?.content?.[0]?.text ?? "",
+        model: responseBody.model,
+      };
+    }
+  } else {
+    // Handle OpenAI response
+    const openAIMessage =
+      llmSchema?.response?.message ??
+      responseBody?.choices?.[0]?.message ??
+      null;
+    if (openAIMessage) {
+      return {
+        ...openAIMessage,
+        id: openAIMessage.id || crypto.randomUUID(),
+        model: model,
+      };
+    }
   }
-  return (
-    llmSchema?.response?.message ?? responseBody?.choices?.[0]?.message ?? null
-  );
+  return null;
 }
 
 export function getMessages(

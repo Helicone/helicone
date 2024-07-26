@@ -116,7 +116,6 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
       try {
         const { response_status: statusCode, response_body: responseBody } =
           this.response;
-
         // Handle pending response or network error scenarios upfront
         if (statusCode === 0 || statusCode === null) return ""; // Pending response
         if (![200, 201, -3].includes(statusCode)) {
@@ -130,6 +129,29 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
         if (responseBody?.error) {
           // Check for an error from OpenAI
           return responseBody.error.message || "";
+        }
+
+        if (
+          /^claude/.test(this.model) &&
+          responseBody?.content?.[0].type === "tool_use"
+        ) {
+          // Check for tool_use in the content array
+          if (Array.isArray(this.response.response_body?.content)) {
+            const toolUse = this.response.response_body.content.find(
+              (item: any) => item.type === "tool_use"
+            );
+            if (toolUse) {
+              return `${toolUse.name}(${JSON.stringify(toolUse.input)})`;
+            }
+
+            // If no tool_use, find the text content
+            const textContent = this.response.response_body.content.find(
+              (item: any) => item.type === "text"
+            );
+            if (textContent) {
+              return textContent.text || "";
+            }
+          }
         }
 
         if (/^claude/.test(this.model) && responseBody?.content?.[0]?.text) {
