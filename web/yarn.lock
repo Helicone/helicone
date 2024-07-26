@@ -212,10 +212,10 @@
   dependencies:
     node-fetch "^2.6.1"
 
-"@assistant-ui/react-playground@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@assistant-ui/react-playground/-/react-playground-0.0.5.tgz#4acad874bd9ee0aa10c0fca6bc095c060d624d0f"
-  integrity sha512-i4fyOfPqkiiniYIO8QqrU1l309/NrPdea/UsY09aPyprgs9fVxAAvqzLDfVwr785zfiscy06mQOik0TgBU/N1Q==
+"@assistant-ui/react-playground@0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@assistant-ui/react-playground/-/react-playground-0.0.8.tgz#00d911f2b53973179d002b1c19f43cb4982f0f82"
+  integrity sha512-7Lyd2kFNhG5zQFrLUiI2dNN784nYzPBS+qUv6DR8BsihMWtDMjCaX3udPeDzxzTpe6QW7Os5REp7Q0PCKE5gJA==
   dependencies:
     "@ai-sdk/provider" "^0.0.13"
     "@radix-ui/react-avatar" "^1.1.0"
@@ -236,10 +236,10 @@
     tailwind-merge "^2.4.0"
     zustand "^4.5.4"
 
-"@assistant-ui/react@^0.5.9":
-  version "0.5.9"
-  resolved "https://registry.yarnpkg.com/@assistant-ui/react/-/react-0.5.9.tgz#c7c722d6e9cdf79074d157a1a49ae46d6a3b0d64"
-  integrity sha512-PPFNN0pf793olu/w/saYwWq2MHV0/z15MWi1ziY+ejbEoWSOl5SSCg0BPQNxApXCOcddVpSqNrdik9ZmtqVs6A==
+"@assistant-ui/react@^0.5.12":
+  version "0.5.12"
+  resolved "https://registry.yarnpkg.com/@assistant-ui/react/-/react-0.5.12.tgz#3318bc3f414c4559fbba79eb3121605e6c0f24b2"
+  integrity sha512-6gp2p6WOoSrRRV7Vd3mHYCQxTqGVAdBJ71duO6M+oMQKgP8uaMuFcVUc4e3THZLQ4Ys/9IEq3sDiryGBxRJYgA==
   dependencies:
     "@ai-sdk/provider" "^0.0.13"
     "@radix-ui/primitive" "^1.1.0"

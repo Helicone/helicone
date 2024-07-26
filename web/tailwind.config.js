@@ -12,11 +12,6 @@ module.exports = {
     transparent: "transparent",
     current: "currentColor",
     extend: {
-      aui: {
-        primary: {
-          DEFAULT: "#0284c7",
-        },
-      },
       animation: {
         blink: "blink 1s step-end infinite",
         popin: "popin 1s ease-out forwards",
@@ -32,6 +27,11 @@ module.exports = {
         },
       },
       colors: {
+        aui: {
+          primary: {
+            DEFAULT: "#0284c7",
+          },
+        },
         // light mode
         tremor: {
           brand: {

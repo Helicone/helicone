@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { usePlaygroundPage } from "../../../services/hooks/playground";
 import { clsx } from "../../shared/clsx";
 import ChatPlayground from "./chatPlayground";
@@ -10,19 +10,36 @@ import {
   CodeBracketSquareIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import { MultiSelect, MultiSelectItem, TextInput } from "@tremor/react";
+import { Button, MultiSelect, MultiSelectItem, TextInput } from "@tremor/react";
 import ThemedModal from "../../shared/themed/themedModal";
 import Image from "next/image";
 
 import {
   ProviderName,
-  playgroundModels,
+  playgroundModels as PLAYGROUND_MODELS,
 } from "../../../packages/cost/providers/mappings";
 import FunctionButton from "./functionButton";
 import HcButton from "../../ui/hcButton";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { ChatCompletionTool } from "openai/resources";
 import { Tooltip } from "@mui/material";
+
+import {
+  AssistantPlayground,
+  requestOptionsFromOpenAI,
+  usePlaygroundRuntime,
+} from "@assistant-ui/react-playground";
+import { AssistantRuntimeProvider } from "@assistant-ui/react";
+
+// Update Prism.js import
+
+import "prismjs";
+import "prismjs/components/prism-json";
+import "prismjs/themes/prism.css";
+import React from "react";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
+import Link from "next/link";
+
 interface PlaygroundPageProps {
   request?: string;
 }
@@ -77,15 +94,19 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const [currentTools, setCurrentTools] = useState<ChatCompletionTool[]>();
   const [providerAPIKey, setProviderAPIKey] = useState<string>();
 
-  const [PLAYGROUND_MODELS, setPLAYGROUND_MODELS] = useState<PlaygroundModel[]>(
-    playgroundModels
-      .filter((model) => model.provider !== "AZURE")
-      .sort((a, b) => a.name.localeCompare(b.name))
+  const memoedPlaygroundModels = useMemo(() => {
+    return PLAYGROUND_MODELS.filter((model) => model.provider !== "AZURE").sort(
+      (a, b) => a.name.localeCompare(b.name)
+    );
+  }, []);
+  const [playgroundModels, setPlaygroundModels] = useState<PlaygroundModel[]>(
+    memoedPlaygroundModels
   );
 
   const singleRequest = data.length > 0 ? data[0] : null;
-  const singleModel = PLAYGROUND_MODELS.find(
-    (model) => model.name === singleRequest?.model
+  const singleModel = useMemo(
+    () => playgroundModels.find((model) => model.name === singleRequest?.model),
+    [singleRequest?.model, playgroundModels]
   );
 
   const reqBody =
@@ -142,12 +163,34 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       })
       .filter((model) => model !== undefined) as PlaygroundModel[];
 
-    setPLAYGROUND_MODELS((prev) => prev.concat(ftModels));
+    setPlaygroundModels((prev) => prev.concat(ftModels));
   }
 
   useEffect(() => {
     fetchFineTuneModels();
   }, [providerAPIKey]);
+
+  const [newPlaygroundOpen, setNewPlaygroundOpen] = useLocalStorage<boolean>(
+    "newPlaygroundOpen",
+    false
+  );
+  const runtime = usePlaygroundRuntime({
+    api: "https://helicone-playground.pzero.workers.dev", // TODO update this
+    initialMessages: requestOptionsFromOpenAI({
+      model: "gpt-3.5-turbo",
+      messages: chat as any,
+    }).messages,
+  });
+
+  useEffect(() => {
+    runtime.thread.setRequestData({
+      modelName: "gpt-3.5-turbo",
+      messages: requestOptionsFromOpenAI({
+        model: "gpt-3.5-turbo",
+        messages: chat as any,
+      }).messages,
+    });
+  }, [chat]);
 
   return (
     <>
@@ -188,145 +231,214 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           </div>
         }
       />
-      <div className="flex justify-between w-full h-full gap-8 min-h-[80vh] border-t border-gray-300 pt-8">
-        <div className="flex w-full h-full">
-          {isLoading ? (
-            <div className="col-span-8 flex w-full border border-gray-300 rounded-lg bg-gray-200 h-96 animate-pulse" />
-          ) : hasData && isChat && singleRequest !== null ? (
-            <>
+      <button
+        onClick={() => {
+          setNewPlaygroundOpen(!newPlaygroundOpen);
+        }}
+        className="mb-5 w-fit bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+      >
+        {newPlaygroundOpen ? "Close New Playground" : "🚀 New (beta)"}
+      </button>
+      {newPlaygroundOpen ? (
+        <div>
+          <AssistantRuntimeProvider runtime={runtime}>
+            <AssistantPlayground
+              modelSelector={{
+                models: playgroundModels
+                  .map((model) => model.name)
+                  .filter((model) => model.includes("gpt")),
+              }}
+            />
+          </AssistantRuntimeProvider>
+          <div className="flex flex-row items-center gap-2 mt-10">
+            <Link href="https://github.com/Yonom/assistant-ui/issues/new">
+              <Button>Report an issue</Button>
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <div className="flex justify-between w-full h-full gap-8 min-h-[80vh] border-t border-gray-300 pt-8">
+          <div className="flex w-full h-full">
+            {isLoading ? (
+              <div className="col-span-8 flex w-full border border-gray-300 rounded-lg bg-gray-200 h-96 animate-pulse" />
+            ) : hasData && isChat && singleRequest !== null ? (
+              <>
+                <ChatPlayground
+                  requestId={requestId || ""}
+                  chat={chat}
+                  models={selectedModels}
+                  temperature={temperature}
+                  maxTokens={maxTokens}
+                  tools={currentTools}
+                  providerAPIKey={providerAPIKey}
+                />
+              </>
+            ) : singleRequest !== null && !isChat ? (
+              <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-gray-500">
+                This request is not a chat completion request. We do not
+                currently support non-chat completion requests in playground
+                {JSON.stringify(chat, null, 4)}
+                <div className="whitespace-pre-wrap text-black overflow-auto">
+                  {JSON.stringify(singleRequest, null, 4)}
+                </div>
+              </div>
+            ) : debouncedRequestId === "" ? (
               <ChatPlayground
-                requestId={requestId || ""}
-                chat={chat}
+                requestId={"requestId"}
+                chat={[
+                  {
+                    id: "1",
+                    createdAt: new Date().toISOString(),
+                    content: [
+                      {
+                        type: "text",
+                        text: "Hi, what can I do in the playground?",
+                      },
+                    ],
+                    role: "user",
+                  },
+                  {
+                    id: "2",
+                    createdAt: new Date().toISOString(),
+                    content: [
+                      {
+                        type: "text",
+                        text: "Welcome to the playground! This is a space where you can replay user requests, experiment with various prompts, and test different models. Feel free to explore and interact with the available features. Let's get started!",
+                      },
+                    ],
+                    role: "assistant",
+                  },
+                  {
+                    id: "3",
+                    createdAt: new Date().toISOString(),
+                    content: [
+                      {
+                        type: "text",
+                        text: "What is the weather in Tokyo?",
+                      },
+                    ],
+                    role: "user",
+                  },
+                ]}
                 models={selectedModels}
                 temperature={temperature}
                 maxTokens={maxTokens}
-                tools={currentTools}
                 providerAPIKey={providerAPIKey}
               />
-            </>
-          ) : singleRequest !== null && !isChat ? (
-            <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-gray-500">
-              This request is not a chat completion request. We do not currently
-              support non-chat completion requests in playground
-              {JSON.stringify(chat, null, 4)}
-              <div className="whitespace-pre-wrap text-black overflow-auto">
-                {JSON.stringify(singleRequest, null, 4)}
+            ) : (
+              <div className="w-full h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-gray-500">
+                No data found for this request. Please make sure the request is
+                correct or try another request.
               </div>
-            </div>
-          ) : debouncedRequestId === "" ? (
-            <ChatPlayground
-              requestId={"requestId"}
-              chat={[
-                {
-                  id: "1",
-                  content: "Hi, what can I do in the playground?",
-                  role: "user",
-                },
-                {
-                  id: "2",
-                  content:
-                    "Welcome to the playground! This is a space where you can replay user requests, experiment with various prompts, and test different models. Feel free to explore and interact with the available features. Let's get started!",
-                  role: "assistant",
-                },
-                {
-                  id: "3",
-                  content: "What is the weather in Tokyo?",
-                  role: "user",
-                },
-              ]}
-              models={selectedModels}
-              temperature={temperature}
-              maxTokens={maxTokens}
-              providerAPIKey={providerAPIKey}
-            />
-          ) : (
-            <div className="w-full h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-gray-500">
-              No data found for this request. Please make sure the request is
-              correct or try another request.
-            </div>
-          )}
-        </div>
-        <div className="flex flex-col w-full max-w-[16rem] h-full space-y-8">
-          <div className="flex flex-col space-y-2 w-full">
-            <div className="flex flex-row w-full space-x-1 items-center">
-              <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
-                Models
-              </p>
-              <button
-                onClick={() => {
-                  setInfoOpen(true);
-                }}
-                className="hover:cursor-pointer"
-              >
-                <InformationCircleIcon className="h-5 w-5 text-gray-500" />
-              </button>
-            </div>
-            <MultiSelect
-              placeholder="Select your models..."
-              value={selectedModels?.map((model) => model.name) || []}
-              onValueChange={(values: string[]) => {
-                setSelectedModels(
-                  values.map(
-                    (value) =>
-                      PLAYGROUND_MODELS.find((model) => model.name === value)!
-                  )
-                );
-              }}
-              className=""
-            >
-              {PLAYGROUND_MODELS.map((model, idx) => (
-                <MultiSelectItem
-                  value={model.name}
-                  key={idx}
-                  className="font-medium text-black"
-                >
-                  <Tooltip title={model.name || ""} placement="right">
-                    <div>{model.name || ""}</div>
-                  </Tooltip>
-                </MultiSelectItem>
-              ))}
-            </MultiSelect>
+            )}
           </div>
-          <div className="flex flex-col space-y-2 w-full">
-            <div className="flex flex-row w-full justify-between items-center">
-              <label
-                htmlFor="temp"
-                className="flex gap-1 font-medium text-sm text-gray-900 dark:text-gray-100"
-              >
-                <span>Provider API Key</span>
-
-                <Tooltip
-                  title={
-                    "Your API keys are required to use fine-tuned models in the playground."
-                  }
-                  placement="top-end"
+          <div className="flex flex-col w-full max-w-[16rem] h-full space-y-8">
+            <div className="flex flex-col space-y-2 w-full">
+              <div className="flex flex-row w-full space-x-1 items-center">
+                <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
+                  Models
+                </p>
+                <button
+                  onClick={() => {
+                    setInfoOpen(true);
+                  }}
+                  className="hover:cursor-pointer"
                 >
                   <InformationCircleIcon className="h-5 w-5 text-gray-500" />
-                </Tooltip>
-              </label>
-            </div>
-            <input
-              type="password"
-              value={providerAPIKey}
-              placeholder="Enter your provider API Key (optional)"
-              onChange={(e) => {
-                setProviderAPIKey(e.target.value);
-              }}
-              className="w-full text-sm px-2 py-1 rounded-lg border border-gray-300"
-            />
-          </div>
-          <div className="flex flex-col space-y-2 w-full">
-            <div className="flex flex-row w-full justify-between items-center">
-              <label
-                htmlFor="temp"
-                className="font-medium text-sm text-gray-900 dark:text-gray-100"
+                </button>
+              </div>
+              <MultiSelect
+                placeholder="Select your models..."
+                value={selectedModels?.map((model) => model.name) || []}
+                onValueChange={(values: string[]) => {
+                  setSelectedModels(
+                    values.map(
+                      (value) =>
+                        playgroundModels.find((model) => model.name === value)!
+                    )
+                  );
+                }}
+                className=""
               >
-                Temperature
-              </label>
+                {playgroundModels.map((model, idx) => (
+                  <MultiSelectItem
+                    value={model.name}
+                    key={idx}
+                    className="font-medium text-black"
+                  >
+                    <Tooltip title={model.name || ""} placement="right">
+                      <div>{model.name || ""}</div>
+                    </Tooltip>
+                  </MultiSelectItem>
+                ))}
+              </MultiSelect>
+            </div>
+            <div className="flex flex-col space-y-2 w-full">
+              <div className="flex flex-row w-full justify-between items-center">
+                <label
+                  htmlFor="temp"
+                  className="flex gap-1 font-medium text-sm text-gray-900 dark:text-gray-100"
+                >
+                  <span>Provider API Key</span>
+
+                  <Tooltip
+                    title={
+                      "Your API keys are required to use fine-tuned models in the playground."
+                    }
+                    placement="top-end"
+                  >
+                    <InformationCircleIcon className="h-5 w-5 text-gray-500" />
+                  </Tooltip>
+                </label>
+              </div>
               <input
-                type="number"
-                id="temp"
-                name="temp"
+                type="password"
+                value={providerAPIKey}
+                placeholder="Enter your provider API Key (optional)"
+                onChange={(e) => {
+                  setProviderAPIKey(e.target.value);
+                }}
+                className="w-full text-sm px-2 py-1 rounded-lg border border-gray-300"
+              />
+            </div>
+            <div className="flex flex-col space-y-2 w-full">
+              <div className="flex flex-row w-full justify-between items-center">
+                <label
+                  htmlFor="temp"
+                  className="font-medium text-sm text-gray-900 dark:text-gray-100"
+                >
+                  Temperature
+                </label>
+                <input
+                  type="number"
+                  id="temp"
+                  name="temp"
+                  value={temperature}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+                    if (value < 0.01) {
+                      setTemperature(0.01);
+                      return;
+                    }
+                    if (value > 1.99) {
+                      setTemperature(1.99);
+                      return;
+                    }
+                    setTemperature(parseFloat(e.target.value));
+                  }}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  className="w-14 text-sm px-2 py-1 rounded-lg border border-gray-300"
+                />
+              </div>
+              <input
+                type="range"
+                id="temp-range"
+                name="temp-range"
+                min={0}
+                max={1.99}
+                step={0.01}
                 value={temperature}
                 onChange={(e) => {
                   const value = parseFloat(e.target.value);
@@ -340,50 +452,50 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   }
                   setTemperature(parseFloat(e.target.value));
                 }}
-                min={0}
-                max={1}
-                step={0.01}
-                className="w-14 text-sm px-2 py-1 rounded-lg border border-gray-300"
+                className="text-black"
+                style={{
+                  accentColor: "black",
+                }}
               />
             </div>
-            <input
-              type="range"
-              id="temp-range"
-              name="temp-range"
-              min={0}
-              max={1.99}
-              step={0.01}
-              value={temperature}
-              onChange={(e) => {
-                const value = parseFloat(e.target.value);
-                if (value < 0.01) {
-                  setTemperature(0.01);
-                  return;
-                }
-                if (value > 1.99) {
-                  setTemperature(1.99);
-                  return;
-                }
-                setTemperature(parseFloat(e.target.value));
-              }}
-              className="text-black"
-              style={{
-                accentColor: "black",
-              }}
-            />
-          </div>
-          <div className="flex flex-col space-y-2 w-full">
-            <div className="flex flex-row w-full justify-between items-center">
-              <label
-                htmlFor="tokens"
-                className="font-medium text-sm text-gray-900 dark:text-gray-100"
-              >
-                Max Tokens
-              </label>
+            <div className="flex flex-col space-y-2 w-full">
+              <div className="flex flex-row w-full justify-between items-center">
+                <label
+                  htmlFor="tokens"
+                  className="font-medium text-sm text-gray-900 dark:text-gray-100"
+                >
+                  Max Tokens
+                </label>
+                <input
+                  type="number"
+                  id="tokens"
+                  name="tokens"
+                  value={maxTokens}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+                    if (value < 1) {
+                      setMaxTokens(1);
+                      return;
+                    }
+                    if (value > 2048) {
+                      setMaxTokens(2048);
+                      return;
+                    }
+                    setMaxTokens(parseFloat(e.target.value));
+                  }}
+                  min={1}
+                  max={2048}
+                  step={1}
+                  className="w-14 text-sm px-2 py-1 rounded-lg border border-gray-300"
+                />
+              </div>
               <input
-                type="number"
-                id="tokens"
-                name="tokens"
+                type="range"
+                id="token-range"
+                name="token-range"
+                min={1}
+                max={2048}
+                step={1}
                 value={maxTokens}
                 onChange={(e) => {
                   const value = parseFloat(e.target.value);
@@ -397,111 +509,89 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   }
                   setMaxTokens(parseFloat(e.target.value));
                 }}
-                min={1}
-                max={2048}
-                step={1}
-                className="w-14 text-sm px-2 py-1 rounded-lg border border-gray-300"
-              />
-            </div>
-            <input
-              type="range"
-              id="token-range"
-              name="token-range"
-              min={1}
-              max={2048}
-              step={1}
-              value={maxTokens}
-              onChange={(e) => {
-                const value = parseFloat(e.target.value);
-                if (value < 1) {
-                  setMaxTokens(1);
-                  return;
-                }
-                if (value > 2048) {
-                  setMaxTokens(2048);
-                  return;
-                }
-                setMaxTokens(parseFloat(e.target.value));
-              }}
-              style={{
-                accentColor: "black",
-              }}
-            />
-          </div>
-          <div className="flex flex-col space-y-2 w-full">
-            <div className="flex flex-row w-full space-x-1 items-center">
-              <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
-                Tools
-              </p>
-              <HcButton
-                variant={"light"}
-                size={"xs"}
-                title={""}
-                icon={PlusIcon}
-                onClick={() => {
-                  const defaultTool = {
-                    type: "function",
-                    function: {
-                      name: `get_current_weather`,
-                      description:
-                        "Get the current weather in a given location",
-                      parameters: {
-                        type: "object",
-                        properties: {
-                          location: {
-                            type: "string",
-                            description:
-                              "The city and state, e.g. San Francisco, CA",
-                          },
-                          unit: {
-                            type: "string",
-                            enum: ["celsius", "fahrenheit"],
-                          },
-                        },
-                        required: ["location"],
-                      },
-                    },
-                  };
-                  // append the default tool to a deep copy of the current tools
-                  const copy = JSON.parse(JSON.stringify(currentTools));
-                  const newTools = copy.concat(defaultTool);
-
-                  setCurrentTools(newTools);
+                style={{
+                  accentColor: "black",
                 }}
               />
             </div>
-            <ul className="flex flex-col space-y-2">
-              {currentTools?.map((tool: ChatCompletionTool, index: number) => (
-                <FunctionButton
-                  key={index}
-                  tool={tool}
-                  onSave={(functionText: string) => {
-                    // parse the function text and update the current tools
-                    try {
-                      // update the current tools
-                      const newTools = JSON.parse(JSON.stringify(currentTools));
-                      newTools[index].function = JSON.parse(functionText);
-                      setCurrentTools(newTools);
-                      setNotification("Function updated", "success");
-                    } catch (e) {
-                      console.error(e);
-                      setNotification("Failed to update function", "error");
-                    }
-                  }}
-                  onDelete={(name: string) => {
-                    // delete the function from the current tools
-                    const newTools = currentTools.filter(
-                      (tool: any) => tool.function.name !== name
-                    );
+            <div className="flex flex-col space-y-2 w-full">
+              <div className="flex flex-row w-full space-x-1 items-center">
+                <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
+                  Tools
+                </p>
+                <HcButton
+                  variant={"light"}
+                  size={"xs"}
+                  title={""}
+                  icon={PlusIcon}
+                  onClick={() => {
+                    const defaultTool = {
+                      type: "function",
+                      function: {
+                        name: `get_current_weather`,
+                        description:
+                          "Get the current weather in a given location",
+                        parameters: {
+                          type: "object",
+                          properties: {
+                            location: {
+                              type: "string",
+                              description:
+                                "The city and state, e.g. San Francisco, CA",
+                            },
+                            unit: {
+                              type: "string",
+                              enum: ["celsius", "fahrenheit"],
+                            },
+                          },
+                          required: ["location"],
+                        },
+                      },
+                    };
+                    // append the default tool to a deep copy of the current tools
+                    const copy = JSON.parse(JSON.stringify(currentTools));
+                    const newTools = copy.concat(defaultTool);
+
                     setCurrentTools(newTools);
                   }}
                 />
-              ))}
-            </ul>
+              </div>
+              <ul className="flex flex-col space-y-2">
+                {currentTools?.map(
+                  (tool: ChatCompletionTool, index: number) => (
+                    <FunctionButton
+                      key={index}
+                      tool={tool}
+                      onSave={(functionText: string) => {
+                        // parse the function text and update the current tools
+                        try {
+                          // update the current tools
+                          const newTools = JSON.parse(
+                            JSON.stringify(currentTools)
+                          );
+                          newTools[index].function = JSON.parse(functionText);
+                          setCurrentTools(newTools);
+                          setNotification("Function updated", "success");
+                        } catch (e) {
+                          console.error(e);
+                          setNotification("Failed to update function", "error");
+                        }
+                      }}
+                      onDelete={(name: string) => {
+                        // delete the function from the current tools
+                        const newTools = currentTools.filter(
+                          (tool: any) => tool.function.name !== name
+                        );
+                        setCurrentTools(newTools);
+                      }}
+                    />
+                  )
+                )}
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
-
+      )}
       <ThemedModal open={infoOpen} setOpen={setInfoOpen}>
         <div className="w-[450px] flex flex-col space-y-4">
           <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
