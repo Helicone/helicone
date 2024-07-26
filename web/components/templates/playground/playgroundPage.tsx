@@ -42,6 +42,7 @@ import Link from "next/link";
 
 interface PlaygroundPageProps {
   request?: string;
+  showNewButton?: boolean;
 }
 
 export type PlaygroundModel = {
@@ -79,7 +80,7 @@ export type TFinetunedJob = {
 };
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
-  const { request } = props;
+  const { request, showNewButton } = props;
   const [requestId, setRequestId] = useState<string | undefined>(request ?? "");
 
   const [open, setOpen] = useState<boolean>(false);
@@ -231,14 +232,16 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           </div>
         }
       />
-      <button
-        onClick={() => {
-          setNewPlaygroundOpen(!newPlaygroundOpen);
-        }}
-        className="mb-5 w-fit bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
-      >
-        {newPlaygroundOpen ? "Close New Playground" : "🚀 New (beta)"}
-      </button>
+      {showNewButton && (
+        <button
+          onClick={() => {
+            setNewPlaygroundOpen(!newPlaygroundOpen);
+          }}
+          className="mb-5 w-fit bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
+        >
+          {newPlaygroundOpen ? "Close New Playground" : "🚀 New (beta)"}
+        </button>
+      )}
       {newPlaygroundOpen ? (
         <div>
           <AssistantRuntimeProvider runtime={runtime}>
