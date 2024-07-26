@@ -288,7 +288,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 chat={[
                   {
                     id: "1",
-                    createdAt: new Date().toISOString(),
                     content: [
                       {
                         type: "text",
@@ -299,7 +298,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   },
                   {
                     id: "2",
-                    createdAt: new Date().toISOString(),
                     content: [
                       {
                         type: "text",
@@ -310,7 +308,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   },
                   {
                     id: "3",
-                    createdAt: new Date().toISOString(),
                     content: [
                       {
                         type: "text",
