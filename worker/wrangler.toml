@@ -53,7 +53,7 @@ routes = [
 	{ pattern = "hyperbolic.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "fireworks.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "predibase.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
-	{ pattern = "api.worker.helicone.ai", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "api.worker.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 
 	{ pattern = "oai.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "anthropic.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
