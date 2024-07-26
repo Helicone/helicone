@@ -177,12 +177,12 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
   const [newPlaygroundOpen, setNewPlaygroundOpen] = useLocalStorage<boolean>(
     "newPlaygroundOpen",
-    true
+    false
   );
   const runtime = usePlaygroundRuntime({
     api: "/api/aui", // TODO update this
     initialMessages: requestOptionsFromOpenAI({
-      model: "gpt-3.5-turbo",
+      model: selectedModels?.[0]?.name || "gpt-3.5-turbo",
       messages: chat as any,
     }).messages,
   });
@@ -190,9 +190,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   useEffect(() => {
     if (chat.length) {
       runtime.thread.setRequestData({
-        modelName: "gpt-3.5-turbo",
+        modelName: selectedModels?.[0]?.name || "gpt-3.5-turbo",
         messages: requestOptionsFromOpenAI({
-          model: "gpt-3.5-turbo",
+          model: selectedModels?.[0]?.name || "gpt-3.5-turbo",
           messages: chat as any,
         }).messages,
       });
