@@ -242,7 +242,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         {showNewButton && (
           <Button
             onClick={() => setNewPlaygroundOpen(!newPlaygroundOpen)}
-            className="transition-all duration-300 hover:bg-sky-50 dark:hover:bg-sky-900"
+            className="transition-all duration-300 hover:bg-sky-500 dark:hover:bg-sky-900"
           >
             {newPlaygroundOpen ? (
               <Row>
@@ -264,7 +264,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           >
             <Button
               variant="secondary"
-              className="flex items-center transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="flex items-center transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               <Row>
                 <FlagIcon className="w-5 h-5 mr-2" />
@@ -286,6 +286,12 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               }}
             />
           </AssistantRuntimeProvider>
+          <Link
+            href="https://www.assistant-ui.com/"
+            className="flex justify-center items-center text-opacity-50 italic text-xs text-gray-500 mt-2 hover:text-opacity-20"
+          >
+            In partnership with assistant-ui
+          </Link>
         </div>
       ) : (
         <div className="flex justify-between w-full h-full gap-8 min-h-[80vh]">
