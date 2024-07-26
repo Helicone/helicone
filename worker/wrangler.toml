@@ -51,8 +51,9 @@ routes = [
 	{ pattern = "gateway.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "deepinfra.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "hyperbolic.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
-  { pattern = "fireworks.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
-  { pattern = "predibase.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "fireworks.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "predibase.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "api.worker.helicone.ai", custom_domain = true, zone_name = "hconeai.com" },
 
 	{ pattern = "oai.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "anthropic.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
@@ -70,8 +71,8 @@ routes = [
 	{ pattern = "together.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "gateway.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "2yfv.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-  { pattern = "fireworks.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-  { pattern = "predibase.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "fireworks.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "predibase.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 
 	{ pattern = "oai.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.us.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
@@ -136,7 +137,7 @@ routes = [
 	{ pattern = "gateway.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "hyperbolic.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	# { pattern = "groq.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-  { pattern = "fireworks.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "fireworks.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 
 	{ pattern = "oai.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
