@@ -8,28 +8,26 @@ import { Analytics } from "@vercel/analytics/react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "What is LLM Observability and Monitoring?",
+  title: "Changelog",
   description:
-    "LLM observability is the practice of monitoring and analyzing Large Language Model systems in production. It tracks inputs, outputs, and performance metrics to ensure reliability and improve AI applications. Learn how it differs from traditional observability.",
+    "Comprehensive changelog for Helicone.ai, detailing our continuous improvements in LLM observability, monitoring, and optimization. Track our latest updates on advanced analytics, real-time metrics, and innovative features for enhancing AI model performance, reliability, and cost-efficiency in production environments.",
   icons: "https://www.helicone.ai/static/logo.webp",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
-    title: "What is LLM Observability and Monitoring?",
-    url: "https://www.helicone.ai/blog/llm-observability",
+    title: "Changelog",
+    url: "https://www.helicone.ai/changelog",
     description:
-      "LLM observability is the practice of monitoring and analyzing Large Language Model systems in production. It tracks inputs, outputs, and performance metrics to ensure reliability and improve AI applications. Learn how it differs from traditional observability.",
-    images:
-      "https://www.helicone.ai/static/blog/llm-observability-cover.webp", 
+      "Comprehensive changelog for Helicone.ai, detailing our continuous improvements in LLM observability, monitoring, and optimization. Track our latest updates on advanced analytics, real-time metrics, and innovative features for enhancing AI model performance, reliability, and cost-efficiency in production environments.",
+    images: "https://www.helicone.ai/static/logo.webp",
     locale: "en_US",
   },
   twitter: {
-    title: "What is LLM Observability and Monitoring?",
+    title: "Changelog",
     description:
-      "LLM observability is the practice of monitoring and analyzing Large Language Model systems in production. It tracks inputs, outputs, and performance metrics to ensure reliability and improve AI applications. Learn how it differs from traditional observability.",
+      "Comprehensive changelog for Helicone.ai, detailing our continuous improvements in LLM observability, monitoring, and optimization. Track our latest updates on advanced analytics, real-time metrics, and innovative features for enhancing AI model performance, reliability, and cost-efficiency in production environments.",
     card: "summary_large_image",
-    images:
-      "https://www.helicone.ai/static/blog/llm-observability-cover.webp", 
+    images: "https://www.helicone.ai/static/logo.webp",
   },
 };
 
