@@ -134,7 +134,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   const router = useRouter();
 
   const getTimeFilter = () => {
-    const currentTimeFilter = searchParams.get("t");
+    const currentTimeFilter = searchParams?.get("t");
     let range: TimeFilter;
 
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
@@ -158,7 +158,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>(getTimeFilter());
 
   const getInterval = () => {
-    const currentTimeFilter = searchParams.get("t");
+    const currentTimeFilter = searchParams?.get("t");
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
       return "custom";
     } else {

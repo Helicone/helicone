@@ -2,6 +2,14 @@
 # yarn lockfile v1
 
 
+"@ai-sdk/anthropic@^0.0.33":
+  version "0.0.33"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/anthropic/-/anthropic-0.0.33.tgz#ab0d690e844965e0f54e6bbc85b91f0a90a4153d"
+  integrity sha512-xCgerb04tpVOYLL3CmaXUWXa+U8Dt8vflkat4m/0PKQdYGq06JLx/+vaRO8dEz+zU12sQl+3HTPrX53v/wVSxQ==
+  dependencies:
+    "@ai-sdk/provider" "0.0.14"
+    "@ai-sdk/provider-utils" "1.0.5"
+
 "@ai-sdk/openai@^0.0.38":
   version "0.0.38"
   resolved "https://registry.yarnpkg.com/@ai-sdk/openai/-/openai-0.0.38.tgz#73a4001447af1a881edc492d546a39f15f9beb91"
@@ -20,10 +28,27 @@
     nanoid "3.3.6"
     secure-json-parse "2.7.0"
 
+"@ai-sdk/provider-utils@1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/provider-utils/-/provider-utils-1.0.5.tgz#765c60871019ded104d79b4cea0805ba563bb5aa"
+  integrity sha512-XfOawxk95X3S43arn2iQIFyWGMi0DTxsf9ETc6t7bh91RPWOOPYN1tsmS5MTKD33OGJeaDQ/gnVRzXUCRBrckQ==
+  dependencies:
+    "@ai-sdk/provider" "0.0.14"
+    eventsource-parser "1.1.2"
+    nanoid "3.3.6"
+    secure-json-parse "2.7.0"
+
 "@ai-sdk/provider@0.0.13", "@ai-sdk/provider@^0.0.13":
   version "0.0.13"
   resolved "https://registry.yarnpkg.com/@ai-sdk/provider/-/provider-0.0.13.tgz#a0e7191efe5b12470da3c6b9eb12f58957fcfa28"
   integrity sha512-RBstpG/3RqVBBJgTvjZpou/+1fNQMDIwB9enqQPXqr0MoCrJHscLD2Zsfr6cKM5HFfY1D4KhdSPTycCDebVGlQ==
+  dependencies:
+    json-schema "0.4.0"
+
+"@ai-sdk/provider@0.0.14":
+  version "0.0.14"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/provider/-/provider-0.0.14.tgz#a07569c39a8828aa8312cf1ac6f35ce6ee1b2fce"
+  integrity sha512-gaQ5Y033nro9iX1YUjEDFDRhmMcEiCk56LJdIUbX5ozEiCNCfpiBpEqrjSp/Gp5RzBS2W0BVxfG7UGW6Ezcrzg==
   dependencies:
     json-schema "0.4.0"
 
@@ -9246,7 +9271,7 @@ next-sitemap@^4.2.3:
     fast-glob "^3.2.12"
     minimist "^1.2.8"
 
-next@^14.0.4:
+next@^14.2.5:
   version "14.2.5"
   resolved "https://registry.yarnpkg.com/next/-/next-14.2.5.tgz#afe4022bb0b752962e2205836587a289270efbea"
   integrity sha512-0f8aRfBVL+mpzfBjYfQuLWh2WyAwtJXCRfkPF4UJ5qd2YwrHczsrSzXU4tRMV0OAxR8ZJZWPFn6uhSC56UTsLA==
