@@ -72,16 +72,32 @@ export function getResponseMessage(
     }
   } else {
     // Handle OpenAI response
-    const openAIMessage =
-      llmSchema?.response?.message ??
-      responseBody?.choices?.[0]?.message ??
-      null;
-    if (openAIMessage) {
-      return {
-        ...openAIMessage,
-        id: openAIMessage.id || crypto.randomUUID(),
-        model: model,
-      };
+    if (responseBody?.object === "chat.completion.chunk") {
+      // Handle streaming response chunk
+      const choice = responseBody.choices?.[0];
+      if (choice) {
+        return {
+          id: responseBody.id || crypto.randomUUID(),
+          role: "assistant",
+          content: choice.delta?.content ?? "",
+          model: model,
+          function_call: choice.delta?.function_call,
+          tool_calls: choice.delta?.tool_calls,
+        };
+      }
+    } else {
+      // Handle standard OpenAI response
+      const openAIMessage =
+        llmSchema?.response?.message ??
+        responseBody?.choices?.[0]?.message ??
+        null;
+      if (openAIMessage) {
+        return {
+          ...openAIMessage,
+          id: openAIMessage.id || crypto.randomUUID(),
+          model: model,
+        };
+      }
     }
   }
   return null;
