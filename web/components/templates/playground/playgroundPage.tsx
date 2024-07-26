@@ -8,7 +8,10 @@ import RequestDrawerV2 from "../requestsV2/requestDrawerV2";
 import useNotification from "../../shared/notification/useNotification";
 import {
   CodeBracketSquareIcon,
+  FlagIcon,
   InformationCircleIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 import { Button, MultiSelect, MultiSelectItem, TextInput } from "@tremor/react";
 import ThemedModal from "../../shared/themed/themedModal";
@@ -39,6 +42,7 @@ import "prismjs/themes/prism.css";
 import React from "react";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import Link from "next/link";
+import { Row } from "../../layout/common";
 
 interface PlaygroundPageProps {
   request?: string;
@@ -176,21 +180,23 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     false
   );
   const runtime = usePlaygroundRuntime({
-    api: "https://helicone-playground.pzero.workers.dev", // TODO update this
+    api: "/api/aui", // TODO update this
     initialMessages: requestOptionsFromOpenAI({
-      model: "gpt-3.5-turbo",
+      model: selectedModels?.[0]?.name || "gpt-3.5-turbo",
       messages: chat as any,
     }).messages,
   });
 
   useEffect(() => {
-    runtime.thread.setRequestData({
-      modelName: "gpt-3.5-turbo",
-      messages: requestOptionsFromOpenAI({
-        model: "gpt-3.5-turbo",
-        messages: chat as any,
-      }).messages,
-    });
+    if (chat.length) {
+      runtime.thread.setRequestData({
+        modelName: selectedModels?.[0]?.name || "gpt-3.5-turbo",
+        messages: requestOptionsFromOpenAI({
+          model: selectedModels?.[0]?.name || "gpt-3.5-turbo",
+          messages: chat as any,
+        }).messages,
+      });
+    }
   }, [chat]);
 
   return (
@@ -232,18 +238,45 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           </div>
         }
       />
-      {showNewButton && (
-        <button
-          onClick={() => {
-            setNewPlaygroundOpen(!newPlaygroundOpen);
-          }}
-          className="mb-5 w-fit bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
-        >
-          {newPlaygroundOpen ? "Close New Playground" : "🚀 New (beta)"}
-        </button>
-      )}
+      <Row className="gap-4  border-t border-gray-300 py-4">
+        {showNewButton && (
+          <Button
+            onClick={() => setNewPlaygroundOpen(!newPlaygroundOpen)}
+            className="transition-all duration-300 hover:bg-sky-500 dark:hover:bg-sky-900"
+          >
+            {newPlaygroundOpen ? (
+              <Row>
+                <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                Return to Classic Playground
+              </Row>
+            ) : (
+              <Row>
+                🚀 Try New Playground (Beta)
+                <ArrowRightIcon className="w-5 h-5 ml-2" />
+              </Row>
+            )}
+          </Button>
+        )}
+        {newPlaygroundOpen && (
+          <Link
+            href="https://github.com/Yonom/assistant-ui/issues/new"
+            passHref
+          >
+            <Button
+              variant="secondary"
+              className="flex items-center transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+            >
+              <Row>
+                <FlagIcon className="w-5 h-5 mr-2" />
+                Report an Issue
+              </Row>
+            </Button>
+          </Link>
+        )}
+      </Row>
+
       {newPlaygroundOpen && showNewButton ? (
-        <div>
+        <div className="w-full flex flex-col min-h-[80vh] h-full">
           <AssistantRuntimeProvider runtime={runtime}>
             <AssistantPlayground
               modelSelector={{
@@ -253,15 +286,16 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               }}
             />
           </AssistantRuntimeProvider>
-          <div className="flex flex-row items-center gap-2 mt-10">
-            <Link href="https://github.com/Yonom/assistant-ui/issues/new">
-              <Button>Report an issue</Button>
-            </Link>
-          </div>
+          <Link
+            href="https://www.assistant-ui.com/"
+            className="flex justify-center items-center text-opacity-50 italic text-xs text-gray-500 mt-2 hover:text-opacity-20"
+          >
+            In partnership with assistant-ui
+          </Link>
         </div>
       ) : (
-        <div className="flex justify-between w-full h-full gap-8 min-h-[80vh] border-t border-gray-300 pt-8">
-          <div className="flex w-full h-full">
+        <div className="flex justify-between w-full h-full gap-8 min-h-[80vh]">
+          <div className="flex w-full h-full ">
             {isLoading ? (
               <div className="col-span-8 flex w-full border border-gray-300 rounded-lg bg-gray-200 h-96 animate-pulse" />
             ) : hasData && isChat && singleRequest !== null ? (
@@ -332,7 +366,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               </div>
             )}
           </div>
-          <div className="flex flex-col w-full max-w-[16rem] h-full space-y-8">
+          <div className="flex flex-col w-full max-w-[16rem] h-full space-y-8 ">
             <div className="flex flex-col space-y-2 w-full">
               <div className="flex flex-row w-full space-x-1 items-center">
                 <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
@@ -592,6 +626,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           </div>
         </div>
       )}
+
       <ThemedModal open={infoOpen} setOpen={setInfoOpen}>
         <div className="w-[450px] flex flex-col space-y-4">
           <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
