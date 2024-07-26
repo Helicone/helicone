@@ -280,9 +280,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           <AssistantRuntimeProvider runtime={runtime}>
             <AssistantPlayground
               modelSelector={{
-                models: playgroundModels
-                  .map((model) => model.name)
-                  .filter((model) => model.includes("gpt")),
+                models: playgroundModels.map((model) => model.name),
               }}
             />
           </AssistantRuntimeProvider>
