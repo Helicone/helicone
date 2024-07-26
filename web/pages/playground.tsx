@@ -21,7 +21,10 @@ const Playground = (props: PlaygroundProps) => {
 
   return (
     <div className="flex flex-col">
-      <PlaygroundPage request={request as string | undefined} />
+      <PlaygroundPage
+        request={request as string | undefined}
+        showNewButton={true}
+      />
     </div>
   );
 };
