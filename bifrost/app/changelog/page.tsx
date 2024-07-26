@@ -35,6 +35,7 @@ export default async function Home() {
 
   return (
     <>
+      {/* add a changelog title  */}
       <div className="flex flex-col w-full bg-[#f8feff] h-full antialiased relative divide-gray-200 divide-y-2">
         {mdxs
           .reverse()
@@ -51,7 +52,7 @@ export default async function Home() {
               </div>
 
               <article className="prose w-full h-full">
-                <Image
+                {/* <Image
                   src={
                     typeof frontmatter.image === "string" &&
                     frontmatter.image.includes(".webp")
@@ -62,10 +63,10 @@ export default async function Home() {
                   width={500}
                   height={300}
                   layout="responsive"
-                />
-                <h1 className="text-sky-500 mt-16 md:mt-0 font-semibold">
+                /> */}
+                <h2 className="text-sky-500 mt-16 md:mt-0 font-bold">
                   {String(frontmatter.title)}
-                </h1>
+                </h2>
                 <p>{content}</p>
               </article>
             </Link>
