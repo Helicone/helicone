@@ -77,8 +77,8 @@ export const costs: ModelRow[] = [
       value: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
     },
     cost: {
-      prompt_token: 0.00000020,
-      completion_token: 0.00000020,
+      prompt_token: 0.0000002,
+      completion_token: 0.0000002,
     },
   },
   {
@@ -107,7 +107,7 @@ export const costs: ModelRow[] = [
       value: "togethercomputer/Meta-Llama-3.1-8B-Instruct-Reference",
     },
     cost: {
-      prompt_token: 0.00000020,
+      prompt_token: 0.0000002,
       completion_token: 0.00000018,
     },
   },
