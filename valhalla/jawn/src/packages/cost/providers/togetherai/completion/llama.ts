@@ -77,8 +77,8 @@ export const costs: ModelRow[] = [
       value: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
     },
     cost: {
-      prompt_token: 0.00000018,
-      completion_token: 0.00000018,
+      prompt_token: 0.00000020,
+      completion_token: 0.00000020,
     },
   },
   {
@@ -95,6 +95,36 @@ export const costs: ModelRow[] = [
     model: {
       operator: "equals",
       value: "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo",
+    },
+    cost: {
+      prompt_token: 0.000005,
+      completion_token: 0.000005,
+    },
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "togethercomputer/Meta-Llama-3.1-8B-Instruct-Reference",
+    },
+    cost: {
+      prompt_token: 0.00000020,
+      completion_token: 0.00000018,
+    },
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "togethercomputer/Meta-Llama-3.1-70B-Instruct-Turbo",
+    },
+    cost: {
+      prompt_token: 0.00000088,
+      completion_token: 0.00000088,
+    },
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "togethercomputer/Meta-Llama-3.1-405B-Instruct-Turbo",
     },
     cost: {
       prompt_token: 0.000005,
