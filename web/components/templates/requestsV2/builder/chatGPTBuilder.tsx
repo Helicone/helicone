@@ -131,6 +131,24 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
           return responseBody.error.message || "";
         }
 
+        // Handle streaming response chunks
+        if (responseBody?.object === "chat.completion.chunk") {
+          const choice = responseBody.choices?.[0];
+          if (choice?.delta?.content) {
+            return choice.delta.content;
+          }
+          // If there's no content in the delta, it might be a function call or tool call
+          if (choice?.delta?.function_call) {
+            return `Function Call: ${JSON.stringify(
+              choice.delta.function_call
+            )}`;
+          }
+          if (choice?.delta?.tool_calls) {
+            return `Tool Calls: ${JSON.stringify(choice.delta.tool_calls)}`;
+          }
+          return ""; // Empty string for other cases in streaming
+        }
+
         if (
           /^claude/.test(this.model) &&
           responseBody?.content?.[0].type === "tool_use"
