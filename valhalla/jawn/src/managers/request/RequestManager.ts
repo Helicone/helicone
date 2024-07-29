@@ -152,7 +152,7 @@ export class RequestManager extends BaseManager {
     const feedbackScoreResult = await scoreManager.addSignleScoreToClickhouse(
       requestId,
       {
-        score_attribute_key: "helicone-feedback",
+        score_attribute_key: "helicone-score-feedback",
         score_attribute_type: "number",
         score_attribute_value: feedback ? 1 : 0,
       }
@@ -162,7 +162,6 @@ export class RequestManager extends BaseManager {
       console.error("Error upserting feedback:", feedbackScoreResult.error);
       return err(feedbackScoreResult.error);
     }
-   
 
     return ok(null);
   }
