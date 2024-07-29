@@ -3538,6 +3538,110 @@
 				}
 			}
 		},
+		"/v1/admin/orgs/over-time/query": {
+			"post": {
+				"operationId": "NewOrgsOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"newUsersOvertime": {
+											"items": {
+												"properties": {
+													"day": {
+														"type": "string"
+													},
+													"count": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"day",
+													"count"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										},
+										"newOrgsOvertime": {
+											"items": {
+												"properties": {
+													"day": {
+														"type": "string"
+													},
+													"count": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"day",
+													"count"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"newUsersOvertime",
+										"newOrgsOvertime"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"groupBy": {
+										"type": "string",
+										"enum": [
+											"hour",
+											"day",
+											"week",
+											"month"
+										]
+									},
+									"timeFilter": {
+										"type": "string",
+										"enum": [
+											"1 days",
+											"7 days",
+											"1 month",
+											"3 months",
+											"12 months",
+											"24 months"
+										]
+									}
+								},
+								"required": [
+									"groupBy",
+									"timeFilter"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/admin/admins/org/query": {
 			"post": {
 				"operationId": "AddAdminsToOrg",
