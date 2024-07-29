@@ -3603,7 +3603,43 @@
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"groupBy": {
+										"type": "string",
+										"enum": [
+											"hour",
+											"day",
+											"week",
+											"month"
+										]
+									},
+									"timeFilter": {
+										"type": "string",
+										"enum": [
+											"1 days",
+											"7 days",
+											"1 month",
+											"3 months",
+											"12 months",
+											"24 months"
+										]
+									}
+								},
+								"required": [
+									"groupBy",
+									"timeFilter"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/admin/admins/org/query": {
