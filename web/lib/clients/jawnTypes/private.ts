@@ -1391,6 +1391,16 @@ export interface operations {
     };
   };
   NewOrgsOverTime: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          groupBy: "hour" | "day" | "week" | "month";
+          /** @enum {string} */
+          timeFilter: "1 days" | "7 days" | "1 month" | "3 months" | "12 months" | "24 months";
+        };
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
