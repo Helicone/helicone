@@ -20,6 +20,7 @@ import Image from "next/image";
 import {
   ProviderName,
   playgroundModels as PLAYGROUND_MODELS,
+  playgroundModels,
 } from "../../../packages/cost/providers/mappings";
 import FunctionButton from "./functionButton";
 import HcButton from "../../ui/hcButton";
@@ -104,7 +105,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   }, [tools, requestId]);
 
   useEffect(() => {
-    fetchFineTuneModels(providerAPIKey, setPLAYGROUND_MODELS);
+    fetchFineTuneModels(providerAPIKey, setPlaygroundModels);
   }, [providerAPIKey]);
 
   const [newPlaygroundOpen, setNewPlaygroundOpen] = useLocalStorage<boolean>(
@@ -599,6 +600,7 @@ export default PlaygroundPage;
 
 /** Types and Function for using finetuned models in Playground, Experiments Page */
 interface PlaygroundPageProps {
+  showNewButton?: boolean;
   request?: string;
 }
 
