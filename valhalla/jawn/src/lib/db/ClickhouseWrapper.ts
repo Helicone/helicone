@@ -189,6 +189,7 @@ export interface InsertRequestResponseVersioned {
   version: number;
   properties: Record<string, string>;
   scores: Record<string, number>;
+  assets: Record<string, string>;
 }
 export type RequestResponseVersioned =
   | InsertRequestResponseVersioned
