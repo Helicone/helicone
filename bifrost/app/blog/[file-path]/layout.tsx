@@ -1,38 +1,9 @@
 import "@mintlify/mdx/dist/styles.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { promises as fs } from "fs";
-import path from "path";
+import { getMetadata } from "@/components/templates/blog/getMetaData";
 
 const inter = Inter({ subsets: ["latin"] });
-
-interface BlogStructureMetaData {
-  title: string;
-  title1?: string;
-  title2?: string;
-  description: string;
-  shortDescription?: string;
-  images: string;
-  time: string;
-  date: string;
-  author?: string;
-  authors?: string[];
-}
-
-export async function getMetadata(
-  filePath: string
-): Promise<BlogStructureMetaData> {
-  const basePath = path.join(process.cwd(), "app", "blog", "blogs", filePath);
-  const jsonPath = path.join(basePath, "metadata.json");
-  try {
-    const jsonContent = await fs.readFile(jsonPath, "utf8");
-    const hMetadata = JSON.parse(jsonContent);
-    return hMetadata;
-  } catch (error) {
-    console.error("Error loading metadata:", error);
-  }
-  return null;
-}
 
 export async function generateMetadata({
   params,

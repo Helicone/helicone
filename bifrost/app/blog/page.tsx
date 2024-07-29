@@ -1,7 +1,7 @@
 import { clsx } from "@/components/shared/utils";
 import Image from "next/image";
 import Link from "next/link";
-import { getMetadata } from "./[file-path]/layout";
+import { getMetadata } from "@/components/templates/blog/getMetaData";
 
 type BlogPostProps = {
   blog: BlogStructure;
@@ -21,6 +21,9 @@ function metaDataToBlogStructure(
   folderName: string,
   metadata: UnPromise<ReturnType<typeof getMetadata>>
 ): ManualBlogStructure {
+  if (!metadata) {
+    throw new Error("Metadata is null");
+  }
   return {
     authors:
       metadata.authors && metadata.authors.length > 0

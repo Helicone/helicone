@@ -6,7 +6,7 @@ import { ChevronLeftIcon } from "@heroicons/react/20/solid";
 import { notFound } from "next/navigation";
 
 import "@mintlify/mdx/dist/styles.css";
-import { getMetadata } from "./layout";
+import { getMetadata } from "@/components/templates/blog/getMetaData";
 
 function getContent(filePath: string) {
   try {
@@ -41,6 +41,10 @@ export default async function Home({
   const metadata = await getMetadata(params["file-path"]);
 
   const { content } = contentResult;
+
+  if (!metadata) {
+    notFound();
+  }
 
   return (
     <div className="w-full bg-[#f8feff] h-full antialiased relative">
