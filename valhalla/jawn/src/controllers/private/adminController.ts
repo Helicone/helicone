@@ -380,7 +380,18 @@ export class AdminController extends Controller {
 
   @Post("/orgs/over-time/query")
   public async newOrgsOverTime(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      timeFilter:
+        | "1 days"
+        | "7 days"
+        | "1 month"
+        | "3 months"
+        | "12 months"
+        | "24 months";
+      groupBy: "hour" | "day" | "week" | "month";
+    }
   ): Promise<{
     newOrgsOvertime: {
       count: string;
@@ -400,10 +411,13 @@ export class AdminController extends Controller {
       `
       SELECT
         count(*) as count,
-        date_trunc('day', created_at) AS day
+        date_trunc('${body.groupBy}', created_at) AS day
       FROM organization
+      WHERE 
+        created_at > now() - INTERVAL '${body.timeFilter}'
       GROUP BY day
       ORDER BY day ASC
+
     `,
       []
     );
@@ -415,8 +429,10 @@ export class AdminController extends Controller {
       `
       SELECT
         count(*) as count,
-        date_trunc('day', created_at) AS day
+        date_trunc('${body.groupBy}', created_at) AS day
       FROM auth.users
+      WHERE 
+        created_at > now() - INTERVAL '${body.timeFilter}'
       GROUP BY day
       ORDER BY day ASC
     `,
