@@ -85,6 +85,18 @@ export default function RootLayout({
             src="https://app.joincharm.com/setup.js?id=MJibnfjF_EatbOHnyLMGp"
             async
           ></script>
+          <Script
+            id="google-analytics"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-0FXQRTHGBZ');
+            `,
+            }}
+          />
         </body>
       </PHProvider>
     </html>
