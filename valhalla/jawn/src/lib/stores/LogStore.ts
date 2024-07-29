@@ -46,6 +46,7 @@ const requestColumns = new pgp.helpers.ColumnSet(
     { name: "threat", def: null },
     { name: "user_id", def: null },
     { name: "country_code", def: null },
+    { name: "version", def: 1 },
   ],
   { table: "request" }
 );
