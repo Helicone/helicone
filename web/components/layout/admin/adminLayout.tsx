@@ -19,7 +19,12 @@ const navigation = [
     name: "All Orgs",
     href: "/admin/stats",
     icon: ChartBarIcon,
-
+    current: false,
+  },
+  {
+    name: "Metrics",
+    href: "/admin/metrics",
+    icon: ChartBarIcon,
     current: false,
   },
 ];
