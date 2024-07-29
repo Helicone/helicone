@@ -3538,6 +3538,74 @@
 				}
 			}
 		},
+		"/v1/admin/orgs/over-time/query": {
+			"post": {
+				"operationId": "NewOrgsOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"newUsersOvertime": {
+											"items": {
+												"properties": {
+													"day": {
+														"type": "string"
+													},
+													"count": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"day",
+													"count"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										},
+										"newOrgsOvertime": {
+											"items": {
+												"properties": {
+													"day": {
+														"type": "string"
+													},
+													"count": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"day",
+													"count"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"newUsersOvertime",
+										"newOrgsOvertime"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/admin/admins/org/query": {
 			"post": {
 				"operationId": "AddAdminsToOrg",

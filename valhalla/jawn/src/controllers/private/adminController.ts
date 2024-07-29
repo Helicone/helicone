@@ -378,6 +378,57 @@ export class AdminController extends Controller {
     };
   }
 
+  @Post("/orgs/over-time/query")
+  public async newOrgsOverTime(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<{
+    newOrgsOvertime: {
+      count: string;
+      day: string;
+    }[];
+    newUsersOvertime: {
+      count: string;
+      day: string;
+    }[];
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    const orgData = await dbExecute<{
+      count: string;
+      day: string;
+    }>(
+      `
+      SELECT
+        count(*) as count,
+        date_trunc('day', created_at) AS day
+      FROM organization
+      GROUP BY day
+      ORDER BY day ASC
+    `,
+      []
+    );
+
+    const userData = await dbExecute<{
+      count: string;
+      day: string;
+    }>(
+      `
+      SELECT
+        count(*) as count,
+        date_trunc('day', created_at) AS day
+      FROM auth.users
+      GROUP BY day
+      ORDER BY day ASC
+    `,
+      []
+    );
+
+    return {
+      newOrgsOvertime: orgData.data ?? [],
+      newUsersOvertime: userData.data ?? [],
+    };
+  }
+
   @Post("/admins/org/query")
   public async addAdminsToOrg(
     @Request() request: JawnAuthenticatedRequest,
