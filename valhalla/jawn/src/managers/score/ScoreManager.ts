@@ -68,12 +68,40 @@ export class ScoreManager extends BaseManager {
     }
   }
 
+  public async addSignleScoreToClickhouse(
+    requestId: string,
+    mappedScores: Score
+  ): Promise<Result<string, string>> {
+    const request = await this.scoreStore.bumpRequestVersion(requestId);
+
+    console.log("version bumped", request);
+
+    if (request.error || !request.data) {
+      return err(request.error);
+    }
+
+    if (request.data.length === 0) {
+      return err(`Request not found: ${requestId}`);
+    }
+
+    const requestInClickhouse = await this.scoreStore.putScoreIntoClickhouse({
+      ...request.data[0],
+      score: mappedScores,
+    });
+
+    if (requestInClickhouse.error || !requestInClickhouse.data) {
+      return requestInClickhouse;
+    }
+    return { data: "Scores added to Clickhouse successfully", error: null };
+  }
+
   private mapScores(scores: Scores): Score[] {
     return Object.entries(scores).map(([key, value]) => {
       return {
         score_attribute_key: key,
         score_attribute_type: typeof value === "boolean" ? "boolean" : "number",
-        score_attribute_value: typeof value === "boolean" ? (value ? 1 : 0) : value,
+        score_attribute_value:
+          typeof value === "boolean" ? (value ? 1 : 0) : value,
       };
     });
   }

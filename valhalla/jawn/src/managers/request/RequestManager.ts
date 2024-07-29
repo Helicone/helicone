@@ -16,6 +16,7 @@ import {
 } from "../../lib/stores/request/request";
 import { costOfPrompt } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
+import { ScoreManager } from "../score/ScoreManager";
 
 export class RequestManager extends BaseManager {
   private versionedRequestStore: VersionedRequestStore;
@@ -146,6 +147,17 @@ export class RequestManager extends BaseManager {
       console.error("Error upserting feedback:", feedbackResult.error);
       return err(feedbackResult.error.message);
     }
+
+    const scoreManager = new ScoreManager(this.authParams);
+    const scoreResult = await scoreManager.addSignleScoreToClickhouse(
+      requestId,
+      {
+        score_attribute_key: "helicone-feedback",
+        score_attribute_type: "number",
+        score_attribute_value: feedback ? 1 : 0,
+      }
+    );
+    console.log("Score result", scoreResult);
 
     return ok(null);
   }

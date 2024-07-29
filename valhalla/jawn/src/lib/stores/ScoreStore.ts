@@ -10,17 +10,14 @@ export type Score = {
   score_attribute_key: string;
   score_attribute_type: string;
   score_attribute_value: number;
-}
+};
 
 export class ScoreStore extends BaseStore {
   constructor(organizationId: string) {
     super(organizationId);
   }
 
-  public async putScoresIntoSupabase(
-    requestId: string,
-    scores: Score[]
-  ) {
+  public async putScoresIntoSupabase(requestId: string, scores: Score[]) {
     try {
       const scoreKeys = scores.map((score) => score.score_attribute_key);
       const scoreTypes = scores.map((score) => score.score_attribute_type);
@@ -51,7 +48,7 @@ export class ScoreStore extends BaseStore {
         SELECT id, score_key
         FROM upserted_attributes;
       `;
-      
+
       const { data: upsertedAttributes, error: upsertError } = await dbExecute(
         upsertQuery,
         [scoreKeys, scoreTypes, organizationIds]
@@ -159,6 +156,92 @@ export class ScoreStore extends BaseStore {
             acc[score.score_attribute_key] = score.score_attribute_value;
             return acc;
           }, {} as Record<string, number>),
+        },
+      ]
+    );
+    if (res.error) {
+      return err(res.error);
+    }
+
+    return ok(rowContents.data);
+  }
+
+  public async putScoreIntoClickhouse(newVersion: {
+    id: string;
+    version: number;
+    provider: string;
+    score: Score;
+  }): Promise<Result<InsertRequestResponseVersioned, string>> {
+    let rowContents = resultMap(
+      await clickhouseDb.dbQuery<InsertRequestResponseVersioned>(
+        `
+      SELECT *
+      FROM request_response_versioned
+      WHERE request_id = {val_0: UUID}
+      AND version = {val_1: UInt64}
+      AND organization_id = {val_2: String}
+      AND provider = {val_3: String}
+    `,
+        [
+          newVersion.id,
+          newVersion.version - 1,
+          this.organizationId,
+          newVersion.provider,
+        ]
+      ),
+      (x) => x[0]
+    );
+
+    if (rowContents.error) {
+      return rowContents;
+    }
+    if (!rowContents.data) {
+      rowContents = resultMap(
+        await clickhouseDb.dbQuery<InsertRequestResponseVersioned>(
+          `
+        SELECT *
+        FROM request_response_versioned
+        WHERE request_id = {val_0: UUID}
+        AND organization_id = {val_1: String}
+        AND provider = {val_2: String}
+        ORDER BY version DESC
+        LIMIT 1
+      `,
+          [newVersion.id, this.organizationId, newVersion.provider]
+        ),
+        (x) => x[0]
+      );
+    }
+
+    if (rowContents.error || !rowContents.data) {
+      return err("Could not find previous version of request");
+    }
+
+    const res = await clickhouseDb.dbInsertClickhouse(
+      "request_response_versioned",
+      [
+        // Delete the previous version
+        {
+          sign: -1,
+          version: rowContents.data.version,
+          request_id: newVersion.id,
+          organization_id: this.organizationId,
+          provider: newVersion.provider,
+          model: rowContents.data.model,
+          request_created_at: rowContents.data.request_created_at,
+        },
+        // Insert the new version
+        {
+          ...rowContents.data,
+          sign: 1,
+          version: newVersion.version,
+          scores: {
+            ...rowContents.data.scores,
+            ...{
+              [newVersion.score.score_attribute_key]:
+                newVersion.score.score_attribute_value,
+            },
+          },
         },
       ]
     );
