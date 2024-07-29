@@ -3,6 +3,7 @@ import { BarChart, Select, SelectItem } from "@tremor/react";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import { useOrg } from "../../layout/organizationContext";
 import { useState } from "react";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
 
 interface AdminStatsProps {}
 
@@ -19,9 +20,13 @@ const AdminMetrics = (props: AdminStatsProps) => {
   ] as const;
   const groupBys = ["hour", "day", "week", "month"] as const;
 
-  const [timeFilter, setTimeFilter] =
-    useState<(typeof timeFilters)[number]>("24 months");
-  const [groupBy, setGroupBy] = useState<(typeof groupBys)[number]>("month");
+  const [timeFilter, setTimeFilter] = useLocalStorage<
+    (typeof timeFilters)[number]
+  >("admin-metrics-time-filter", "24 months");
+  const [groupBy, setGroupBy] = useLocalStorage<(typeof groupBys)[number]>(
+    "admin-metrics-group-by",
+    "month"
+  );
 
   const metricsOverTime = useQuery({
     queryKey: ["newOrgsOverTime", org?.currentOrg?.id, timeFilter, groupBy],
