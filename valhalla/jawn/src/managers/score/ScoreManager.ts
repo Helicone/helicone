@@ -74,8 +74,6 @@ export class ScoreManager extends BaseManager {
   ): Promise<Result<string, string>> {
     const request = await this.scoreStore.bumpRequestVersion(requestId);
 
-    console.log("version bumped", request);
-
     if (request.error || !request.data) {
       return err(request.error);
     }
