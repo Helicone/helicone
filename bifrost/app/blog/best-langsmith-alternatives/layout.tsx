@@ -8,17 +8,15 @@ import { Analytics } from "@vercel/analytics/react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title:
-    "Compare: The Best LangSmith Alternatives & Competitors",
+  title: "Compare: The Best LangSmith Alternatives & Competitors",
   description:
     "Observability tools allow developers to monitor, analyze, and optimize AI model performance, which helps overcome the 'black box' nature of LLMs. But which LangSmith alternative is the best in 2024? We will shed some light.",
-  icons: "https://www.helicone.ai/static/logo.png",
+  icons: "https://www.helicone.ai/static/logo.webp",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
-    title:
-      "Compare: The Best LangSmith Alternatives & Competitors",
-    url: "https://www.helicone.ai/best-langsmith-alternatives", 
+    title: "Compare: The Best LangSmith Alternatives & Competitors",
+    url: "https://www.helicone.ai/best-langsmith-alternatives",
     description:
       "Observability tools allow developers to monitor, analyze, and optimize AI model performance, which helps overcome the 'black box' nature of LLMs. But which LangSmith alternative is the best in 2024? We will shed some light.",
     images:
@@ -26,8 +24,7 @@ export const metadata: Metadata = {
     locale: "en_US",
   },
   twitter: {
-    title:
-      "Compare: The Best LangSmith Alternatives & Competitors",
+    title: "Compare: The Best LangSmith Alternatives & Competitors",
     description:
       "Observability tools allow developers to monitor, analyze, and optimize AI model performance, which helps overcome the 'black box' nature of LLMs. But which LangSmith alternative is the best in 2024? We will shed some light.",
     card: "summary_large_image",
