@@ -102,6 +102,9 @@ export interface paths {
   "/v1/admin/orgs/query": {
     post: operations["FindAllOrgs"];
   };
+  "/v1/admin/orgs/over-time/query": {
+    post: operations["NewOrgsOverTime"];
+  };
   "/v1/admin/admins/org/query": {
     post: operations["AddAdminsToOrg"];
   };
@@ -1381,6 +1384,25 @@ export interface operations {
             orgs: {
                 id: string;
                 name: string;
+              }[];
+          };
+        };
+      };
+    };
+  };
+  NewOrgsOverTime: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            newUsersOvertime: {
+                day: string;
+                count: string;
+              }[];
+            newOrgsOvertime: {
+                day: string;
+                count: string;
               }[];
           };
         };
