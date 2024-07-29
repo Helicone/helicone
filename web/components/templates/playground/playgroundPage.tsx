@@ -602,7 +602,6 @@ export default PlaygroundPage;
 interface PlaygroundPageProps {
   showNewButton?: boolean;
   request?: string;
-  showNewButton: boolean;
 }
 
 export type PlaygroundModel = {
