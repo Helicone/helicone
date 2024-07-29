@@ -7,6 +7,10 @@ import ExperimentConfirmation from "./ExperimentConfirmation";
 import { MessageWithoutId } from "./promptNewExperiment";
 import PromptVersionSelector from "./PromptVersionSelector";
 import { Prompt } from "./types";
+import {
+  PlaygroundModel,
+  fetchFineTuneModels,
+} from "../../../playground/playgroundPage";
 
 const PLAYGROUND_MODELS = playgroundModels
   .filter((model) => model.provider !== "AZURE")
@@ -20,6 +24,11 @@ interface ExperimentStepRendererProps {
   setCurrentStep: (step: number) => void;
   useAzureForExperiment: boolean;
   id: string;
+}
+
+export interface Model {
+  name: string;
+  provider: string;
 }
 
 const ExperimentStepRenderer: React.FC<ExperimentStepRendererProps> = ({
@@ -50,6 +59,15 @@ const ExperimentStepRenderer: React.FC<ExperimentStepRendererProps> = ({
   const selectedDataset = datasets.find(
     (dataset) => dataset.id === selectedDatasetId
   );
+
+  const [decryptedKey, setDecryptedKey] = useState("");
+  const [playgroundModels, setPlaygroundModels] = useState<PlaygroundModel[]>(
+    PLAYGROUND_MODELS.filter((model) => model.provider == "OPENAI")
+  );
+
+  useEffect(() => {
+    fetchFineTuneModels(decryptedKey, setPlaygroundModels);
+  }, [decryptedKey]);
 
   useEffect(() => {
     if (selectedPrompt?.model) {
@@ -86,7 +104,6 @@ const ExperimentStepRenderer: React.FC<ExperimentStepRendererProps> = ({
                 return rest;
               });
               setCurrentChat(cleanedChat);
-              console.log(cleanedChat);
             }}
             customNavBar={{
               onBack: () => setCurrentStep(0),
@@ -109,7 +126,8 @@ const ExperimentStepRenderer: React.FC<ExperimentStepRendererProps> = ({
           selectedProviderKey={selectedProviderKey}
           setSelectedProviderKey={setSelectedProviderKey}
           useAzureForExperiment={useAzureForExperiment}
-          PLAYGROUND_MODELS={PLAYGROUND_MODELS}
+          PLAYGROUND_MODELS={playgroundModels}
+          setDecryptedKey={setDecryptedKey}
           selectedPrompt={selectedPrompt}
           setCurrentStep={setCurrentStep}
           refetchDataSets={refetchDataSets}
