@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { BarChart, Select, SelectItem } from "@tremor/react";
 import { getJawnClient } from "../../../lib/clients/jawn";
-import { useOrg } from "../../layout/organizationContext";
-import { useState } from "react";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
+import { useOrg } from "../../layout/organizationContext";
 
 interface AdminStatsProps {}
 
