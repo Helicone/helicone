@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import OrgMember from "./panels/orgMember";
-import TopOrgs from "./panels/topOrgs";
-import { useOrg } from "../../layout/organizationContext";
-import { getJawnClient } from "../../../lib/clients/jawn";
 import { BarChart } from "@tremor/react";
+import { getJawnClient } from "../../../lib/clients/jawn";
+import { useOrg } from "../../layout/organizationContext";
 
 interface AdminStatsProps {}
 
