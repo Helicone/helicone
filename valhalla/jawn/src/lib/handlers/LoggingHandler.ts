@@ -307,12 +307,8 @@ export class LoggingHandler extends AbstractLogHandler {
       {
         request_id: request.id,
         organization_id: orgParams.id,
-        request_body_vector: this.extractRequestBodyMessage(
-          context.processedLog.request.body
-        ),
-        response_body_vector: this.extractResponseBodyMessage(
-          context.processedLog.response.body
-        ),
+        request_body_vector: "",
+        response_body_vector: "",
       };
 
     return [searchRecord];
@@ -396,6 +392,12 @@ export class LoggingHandler extends AbstractLogHandler {
         country_code: request.countryCode ?? null,
         properties: context.processedLog.request.properties ?? {},
         scores: {},
+        request_body:
+          this.extractRequestBodyMessage(context.processedLog.request.body) ??
+          null,
+        response_body:
+          this.extractResponseBodyMessage(context.processedLog.response.body) ??
+          null,
         sign: 1,
         version: 1,
       };
