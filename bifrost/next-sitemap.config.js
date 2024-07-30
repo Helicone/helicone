@@ -7,6 +7,11 @@ const getBlogPosts = () => {
   return fs.readdirSync(blogDir).map((file) => `/blog/${file}`);
 };
 
+const getChangelogEntries = () => {
+  const changelogDir = path.join(process.cwd(), "app", "changelog", "changes");
+  return fs.readdirSync(changelogDir).map((file) => `/changelog/${file}`);
+};
+
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
   siteUrl: SITE_URL,
@@ -23,11 +28,40 @@ module.exports = {
   ],
   additionalPaths: async (config) => {
     const blogPosts = getBlogPosts();
-    return blogPosts.map((path) => ({
-      loc: path,
-      changefreq: "weekly",
-      priority: 0.7,
-    }));
+    const changelogEntries = getChangelogEntries();
+    return [
+      ...blogPosts.map((path) => ({
+        loc: path,
+        changefreq: "weekly",
+        priority: 0.7,
+      })),
+      ...changelogEntries.map((path) => ({
+        loc: path,
+        changefreq: "weekly",
+        priority: 0.6,
+      })),
+    ];
   },
-  // ... rest of the existing configuration
+  robotsTxtOptions: {
+    additionalSitemaps: ["https://docs.helicone.ai/sitemap.xml"],
+    policies: [
+      { userAgent: "Twitterbot", allow: "/" },
+      {
+        userAgent: "*",
+        allow: "/",
+        disallow: [
+          "/*?",
+          "/*%",
+          "/v1*",
+          "/v2*",
+          "/help/",
+          "/oss/",
+          "/api/",
+          "/tags/",
+          "/devops/",
+          "/icon.ico",
+        ],
+      },
+    ],
+  },
 };
