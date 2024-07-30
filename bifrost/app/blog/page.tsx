@@ -28,15 +28,15 @@ function metaDataToBlogStructure(
     authors:
       metadata.authors && metadata.authors.length > 0
         ? metadata.authors.map((author) => ({
-            name: author,
-            imageUrl: HEADSHOTS[author as keyof typeof HEADSHOTS],
-          }))
+          name: author,
+          imageUrl: HEADSHOTS[author as keyof typeof HEADSHOTS],
+        }))
         : [
-            {
-              name: metadata.author || "",
-              imageUrl: HEADSHOTS[metadata.author as keyof typeof HEADSHOTS],
-            },
-          ],
+          {
+            name: metadata.author || "",
+            imageUrl: HEADSHOTS[metadata.author as keyof typeof HEADSHOTS],
+          },
+        ],
     title: metadata.title,
     description: metadata.description,
     badgeText: "insight",
@@ -184,12 +184,29 @@ type ManualBlogStructure = {
 export type BlogStructure =
   | ManualBlogStructure
   | {
-      dynmaicEntry: {
-        folderName: string;
-      };
+    dynmaicEntry: {
+      folderName: string;
     };
+  };
 
 const blogContent: BlogStructure[] = [
+  {
+    title: "Meta Releases SAM 2 and What It Means for Developers Building Multi-Modal AI",
+    description:
+      "Meta's release of SAM 2 (Segment Anything Model for videos and images) represents a significant leap in AI capabilities, revolutionizing how developers and tools like Helicone approach multi-modal observability in AI systems.",
+    badgeText: "insight",
+    date: "July 30, 2024",
+    href: "/blog/sam-2",
+    imageUrl: "/static/blog/sam-2-cover.webp",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/static/blog/linalam-headshot.webp",
+        imageAlt: "Lina Lam's headshot",
+      },
+    ],
+    time: "4 minute read",
+  },
   {
     title: "What is LLM Observability and Monitoring?",
     description:
