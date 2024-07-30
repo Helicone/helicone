@@ -136,6 +136,105 @@ const useGetRequests = (
   };
 };
 
+const useGetRequestsSkeleton = (
+  currentPage: number,
+  currentPageSize: number,
+  advancedFilter: FilterNode,
+  sortLeaf: SortLeafRequest,
+  isCached: boolean = false,
+  isLive: boolean = false
+) => {
+  const org = useOrg();
+  return {
+    requests: useQuery({
+      queryKey: [
+        "requestsDataSkeleton",
+        currentPage,
+        currentPageSize,
+        advancedFilter,
+        sortLeaf,
+        isCached,
+        org?.currentOrg?.id,
+      ],
+      queryFn: async (query) => {
+        const currentPage = query.queryKey[1] as number;
+        const currentPageSize = query.queryKey[2] as number;
+        const advancedFilter = query.queryKey[3];
+        const sortLeaf = query.queryKey[4];
+        const isCached = query.queryKey[5];
+        const orgId = query.queryKey[6] as string;
+        const jawn = getJawnClient(orgId);
+        const response = await jawn.POST("/v1/request/query/skeleton", {
+          body: {
+            filter: advancedFilter as any,
+            offset: (currentPage - 1) * currentPageSize,
+            limit: currentPageSize,
+            sort: sortLeaf as any,
+            isCached: isCached as any,
+          },
+        });
+
+        const result = response.data as Result<HeliconeRequest[], string>;
+        console.log("result", result);
+        return { data: result?.data || [], error: null };
+      }
+    }),
+    count: useQuery({
+      queryKey: [
+        "requestsCount",
+        currentPage,
+        currentPageSize,
+        advancedFilter,
+        sortLeaf,
+        isCached,
+      ],
+      queryFn: async (query) => {
+        const advancedFilter = query.queryKey[3];
+        const isCached = query.queryKey[5];
+
+        return await fetch("/api/request/count", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            filter: advancedFilter,
+            isCached,
+          }),
+        }).then((res) => res.json() as Promise<Result<number, string>>);
+      },
+      refetchOnWindowFocus: false,
+      refetchInterval: isLive ? 2_000 : false,
+      // cache the count for 5 minutes
+      cacheTime: 5 * 60 * 1000,
+    }),
+  }
+}
+
+const useGetRequestsFull = (requests: HeliconeRequest[]) => {
+  const org = useOrg();
+  return {
+    requests: useQuery({
+      queryKey: [
+        "requestsDataFull",
+        org?.currentOrg?.id,
+      ],
+      queryFn: async (query) => {
+        const orgId = query.queryKey[6] as string;
+        const jawn = getJawnClient(orgId);
+        const response = await jawn.POST("/v1/request/query/full", {
+          // @ts-ignore
+          body: requests,
+        });
+
+        const result = response.data as Result<HeliconeRequest[], string>;
+        console.log("result", result);
+        return { data: result?.data || [], error: null };
+      }
+    }),
+  }
+}
+
 const useGetRequestCountClickhouse = (
   startDateISO: string,
   endDateISO: string,
@@ -185,4 +284,4 @@ const useGetRequestCountClickhouse = (
   };
 };
 
-export { useGetRequestCountClickhouse, useGetRequests };
+export { useGetRequestCountClickhouse, useGetRequests, useGetRequestsSkeleton, useGetRequestsFull };

@@ -10,9 +10,11 @@ import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequest
 import {
   HeliconeRequest,
   HeliconeRequestAsset,
+  getFullRequests,
   getRequestAsset,
   getRequests,
   getRequestsCached,
+  getRequestsSkeleton,
 } from "../../lib/stores/request/request";
 import { costOfPrompt } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
@@ -266,6 +268,76 @@ export class RequestManager extends BaseManager {
         };
       });
     });
+  }
+
+  async getRequestsSkeleton(
+    params: RequestQueryParams
+  ): Promise<Result<HeliconeRequest[], string>> {
+    const {
+      filter,
+      offset = 0,
+      limit = 10,
+      sort = {
+        created_at: "desc",
+      },
+      isCached,
+      isPartOfExperiment,
+      isScored,
+    } = params;
+
+    let newFilter = filter;
+
+    if (isScored !== undefined) {
+      newFilter = this.addScoreFilter(isScored, newFilter);
+    }
+
+    if (isPartOfExperiment !== undefined) {
+      newFilter = this.addPartOfExperimentFilter(isPartOfExperiment, newFilter);
+    }
+
+    const requests = isCached
+      ? await getRequestsCached(
+          this.authParams.organizationId,
+          filter,
+          offset,
+          limit,
+          sort,
+          isPartOfExperiment,
+          isScored
+        )
+      : await getRequestsSkeleton(
+          this.authParams.organizationId,
+          newFilter,
+          offset,
+          limit,
+          sort
+        );
+
+    return resultMap(requests, (req) => {
+      return req.map((r) => {
+        return {
+          ...r,
+          costUSD: costOfPrompt({
+            model:
+              r.model_override ?? r.response_model ?? r.request_model ?? "",
+            provider: r.provider ?? "",
+            completionTokens: r.completion_tokens ?? 0,
+            promptTokens: r.prompt_tokens ?? 0,
+          }),
+        };
+      });
+    });
+  }
+
+  async getFullRequests(
+    requests: HeliconeRequest[]
+  ): Promise<Result<HeliconeRequest[], string>> {
+    const fullRequests = await getFullRequests(
+      this.authParams.organizationId,
+      requests
+    );
+    console.log("full requests", fullRequests);
+    return fullRequests;
   }
 
   async getRequestAssetById(

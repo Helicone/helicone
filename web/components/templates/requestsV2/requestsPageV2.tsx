@@ -41,7 +41,7 @@ import { getInitialColumns } from "./initialColumns";
 import RequestCard from "./requestCard";
 import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
-import useRequestsPageV2 from "./useRequestsPageV2";
+import useRequestsPageV2, { useRequestsPageV2Full, useRequestsPageV2Skeleton } from "./useRequestsPageV2";
 import {
   getRootFilterNode,
   isFilterRowNode,
@@ -239,7 +239,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     filterMap,
     searchPropertyFilters,
     remove,
-  } = useRequestsPageV2(
+  } = useRequestsPageV2Skeleton(
     page,
     currentPageSize,
     debouncedAdvancedFilter,
@@ -252,6 +252,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached,
     isLive
   );
+  
+  // @ts-ignore
+  const { data } = useRequestsPageV2Full(requests);
+  const requestsFull = data?.data || [];
+  console.log("requestsFull", requestsFull);
 
   const requestWithoutStream = requests.find((r) => {
     return (

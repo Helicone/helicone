@@ -3753,6 +3753,109 @@
 				}
 			}
 		},
+		"/v1/request/query/skeleton": {
+			"post": {
+				"operationId": "GetRequestsSkeleton",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HeliconeRequest-Array.string_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"filter": "all",
+											"isCached": false,
+											"limit": 10,
+											"offset": 0,
+											"sort": {
+												"created_at": "desc"
+											},
+											"isScored": false,
+											"isPartOfExperiment": false
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "Request query filters",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RequestQueryParams",
+								"description": "Request query filters"
+							},
+							"example": {
+								"filter": "all",
+								"isCached": false,
+								"limit": 10,
+								"offset": 0,
+								"sort": {
+									"created_at": "desc"
+								},
+								"isScored": false,
+								"isPartOfExperiment": false
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/request/query/full": {
+			"post": {
+				"operationId": "GetFullRequests",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HeliconeRequest-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"items": {
+									"$ref": "#/components/schemas/HeliconeRequest"
+								},
+								"type": "array"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/request/{requestId}/feedback": {
 			"post": {
 				"operationId": "FeedbackRequest",
