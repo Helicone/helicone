@@ -23,7 +23,7 @@ Helicone is an open-source observability platform for Language Learning Models (
 
 - 📲 Sessions to group and visualize multi-step LLM interactions.
 
-# Quick Use ⚡️ Just add a Header
+# Quick Start ⚡️ Just add a Header
 
 Get your API key by signing up [here](https://helicone.ai).
 
