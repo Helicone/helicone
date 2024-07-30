@@ -152,10 +152,13 @@ export class ScoreStore extends BaseStore {
           ...rowContents.data,
           sign: 1,
           version: newVersion.version,
-          scores: newVersion.scores.reduce((acc, score) => {
-            acc[score.score_attribute_key] = score.score_attribute_value;
-            return acc;
-          }, {} as Record<string, number>),
+          scores: {
+            ...rowContents.data.scores,
+            ...newVersion.scores.reduce((acc, score) => {
+              acc[score.score_attribute_key] = score.score_attribute_value;
+              return acc;
+            }, {} as Record<string, number>),
+          },
         },
       ]
     );

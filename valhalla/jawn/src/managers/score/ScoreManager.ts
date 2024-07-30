@@ -41,6 +41,26 @@ export class ScoreManager extends BaseManager {
         return err(supabaseRequest.error);
       }
 
+      const requestInClickhouse = await this.addScoresToClickhouse(
+        requestId,
+        mappedScores
+      );
+
+      if (requestInClickhouse.error || !requestInClickhouse.data) {
+        return requestInClickhouse;
+      }
+
+      return { data: "Scores added to Clickhouse successfully", error: null };
+    } catch (error: any) {
+      return err(error.message);
+    }
+  }
+
+  public async addScoresToClickhouse(
+    requestId: string,
+    mappedScores: Score[]
+  ): Promise<Result<string, string>> {
+    try {
       const request = await this.scoreStore.bumpRequestVersion(requestId);
 
       if (request.error || !request.data) {
@@ -61,36 +81,10 @@ export class ScoreManager extends BaseManager {
       if (requestInClickhouse.error || !requestInClickhouse.data) {
         return requestInClickhouse;
       }
-
       return { data: "Scores added to Clickhouse successfully", error: null };
-    } catch (error: any) {
-      return err(error.message);
+    } catch {
+      return err("Error adding scores to Clickhouse");
     }
-  }
-
-  public async addSignleScoreToClickhouse(
-    requestId: string,
-    mappedScores: Score
-  ): Promise<Result<string, string>> {
-    const request = await this.scoreStore.bumpRequestVersion(requestId);
-
-    if (request.error || !request.data) {
-      return err(request.error);
-    }
-
-    if (request.data.length === 0) {
-      return err(`Request not found: ${requestId}`);
-    }
-
-    const requestInClickhouse = await this.scoreStore.putScoreIntoClickhouse({
-      ...request.data[0],
-      score: mappedScores,
-    });
-
-    if (requestInClickhouse.error || !requestInClickhouse.data) {
-      return requestInClickhouse;
-    }
-    return { data: "Scores added to Clickhouse successfully", error: null };
   }
 
   private mapScores(scores: Scores): Score[] {
