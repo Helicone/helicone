@@ -61,7 +61,16 @@ jobs:
           fi
 
 
-
+  helicone-node-tests:
+    name: Helicone Node Package tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run node tests
+        working-directory: helicone-node
+        run: |
+          npm install
+          npm test
 
   lint:
     name: Lint
