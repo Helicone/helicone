@@ -191,9 +191,21 @@ export type BlogStructure =
 
 const blogContent: BlogStructure[] = [
   {
-    dynmaicEntry: {
-      folderName: "llm-observability",
-    },
+    title: "What is LLM Observability and Monitoring?",
+    description:
+      "Building with LLMs in production (well) is incredibly difficult. You probably have heard of the word LLM observability'. What is it? How does it differ from traditional observability? What is observed? We have the answers. ",
+    badgeText: "insight",
+    date: "July 12, 2024",
+    href: "/blog/llm-observability",
+    imageUrl: "/static/blog/llm-observability-cover.webp",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/static/blog/linalam-headshot.webp",
+        imageAlt: "Lina Lam's headshot",
+      },
+    ],
+    time: "3 minute read",
   },
   {
     title: "Compare: The Best LangSmith Alternatives & Competitors",
