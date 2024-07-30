@@ -9,7 +9,7 @@
 
 Helicone is an open-source observability platform for Language Learning Models (LLMs). It offers the following features:
 
-- 📝 Logs all of your requests to OpenAI in a user-friendly UI
+- 📝 Logs all of your requests to OpenAI (and other providers) in a user-friendly UI
 
 - 💾 Caching, custom rate limits, and retries
 
@@ -19,37 +19,29 @@ Helicone is an open-source observability platform for Language Learning Models (
 
 - 🚀 Share results and collaborate with your friends or teammates
 
-- 🔜 (Coming soon) APIs to log feedback and evaluate results
+- 👍👎 APIs to log feedback and evaluate results
 
-# Quick Use ⚡️
+- 📲 Sessions to group and visualize multi-step LLM interactions.
+
+# Quick Use ⚡️ Just add a Header
 
 Get your API key by signing up [here](https://helicone.ai).
 
-```bash
-export HELICONE_API_KEY=<your API key>
-```
+```typescript
+import OpenAI from "openai";
 
-```bash
-pip install helicone
-```
-
-```python
-from helicone.openai_proxy import openai
-
-response = openai.Completion.create(
-	model="text-davinci-003",
-	prompt="What is Helicone?",
-	user="alice@bob.com",
-	# Optional Helicone features:
-	cache=True,
-	properties={"conversation_id": 12},
-	rate_limit_policy={"quota": 100, "time_window": 60, "segment": "user"}
-)
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: "https://oai.helicone.ai/v1",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+  },
+});
 ```
 
 👉 Then view your logs at [Helicone](https://www.helicone.ai).
 
-## More resources
+## Resources
 
 - [Langchain integration](https://python.langchain.com/docs/integrations/providers/helicone)
 - [LangchainJS integration](https://js.langchain.com/docs/ecosystem/integrations/helicone)
@@ -63,24 +55,25 @@ Helicone's [cloud offering](https://www.helicone.ai) is deployed on Cloudflare a
 
 To get started locally, Helicone is comprised of five services:
 
-- Web: Frontend Platform (NextJs)
-- Worker: Proxy & Async Logging (Cloudflare Workers)
-- Jawn: Dedicated Server for serving Web (Express)
+- Web: Frontend Platform (NextJS)
+- Worker: Proxy Logging (Cloudflare Workers)
+- Jawn: Dedicated Server for serving collecting logs (Express + Tsoa)
 - Supabase: Application Database and Auth
 - ClickHouse: Analytics Database
+- Minio: Object Storage for logs.
 
 If you have any questions, contact help@helicone.ai or join [discord](https://discord.gg/zsSTcH2qhG).
 
 ## Install Wrangler and Yarn
 
 ```bash
-nvm install 18.11.0
-nvm use 18.11.0
+nvm install 18.18.0
+nvm use 18.18.0
 npm install -g wrangler
 npm install -g yarn
 ```
 
-## Install [Supabase](https://supabase.com/docs/guides/cli)
+## Install [Supabase CLI](https://supabase.com/docs/guides/cli)
 
 ```bash
 brew install supabase/tap/supabase
@@ -96,13 +89,13 @@ python3 clickhouse/ch_hcone.py --start
 ## Install and setup MinIO
 
 ```bash
-# Install minio
+# Install minio globally
 python3 -m pip install minio
 
 # Start minio
 python3 minio_hcone.py --restart
 
-# Dashboard will be available at http://localhost:9001
+# Minio Dashboard will be available at http://localhost:9001
 # Default credentials:
 # Username: minioadmin
 # Password: minioadmin
@@ -113,22 +106,21 @@ python3 minio_hcone.py --restart
 ```bash
 cd web
 
-# start supabase to log all the db stuff...
+# start supabase to collect logs metadata
 supabase start
 
 # start frontend
 yarn
-yarn dev
+yarn dev:local
 
-# start workers (for proxying, async logging and some API requests)
+# start workers for proxying requests
 # in another terminal
 cd worker
 yarn
 chmod +x run_all_workers.sh
 ./run_all_workers.sh
 
-# start jawn (for serving the FE and handling API requests)
-# in another terminal
+# start jawn (for serving the FE, collecting logs and handling API requests)
 cd valhalla/jawn
 cp .env.example .env
 yarn && yarn dev
@@ -138,11 +130,11 @@ curl --request POST \
   --url http://127.0.0.1:8787/v1/chat/completions \
   --header 'Authorization: Bearer <KEY>' \
   --data '{
-	"model": "gpt-3.5-turbo",
+	"model": "gpt-4o-mini",
 	"messages": [
 		{
 			"role": "user",
-			"content": "Can you give me a random number?"
+			"content": "What is the UNIX Epoch?"
 		}
 	],
 	"temperature": 1,
