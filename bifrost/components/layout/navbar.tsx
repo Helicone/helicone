@@ -235,10 +235,25 @@ const NavBar = (props: NavBarProps) => {
             />
           </Link>
         </div>
-        <div className="w-full mt-4  md:mt-0 flex gap-x-1 items-center text-sm col-span-8 md:col-span-6 order-3 md:order-2 justify-between">
+        <div className="w-full mt-4 md:mt-0 flex gap-x-1 items-center text-sm col-span-8 md:col-span-6 order-3 md:order-2 justify-between">
           <NavLinks />
-          <NavIcons />
+          <div className="flex items-center gap-x-2">
+            <a
+              href="https://www.producthunt.com/posts/helicone-ai?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-helicone&#0045;ai"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=475050&theme=light"
+                alt="Helicone&#0032;AI - Open&#0045;source&#0032;LLM&#0032;Observability&#0032;for&#0032;Developers | Product Hunt"
+                width="180"
+                height="54"
+              />
+            </a>
+            <NavIcons />
+          </div>
         </div>
+
         <div className="flex items-center justify-end gap-x-2 col-span-1 order-2 md:order-3">
           <Link
             href="https://us.helicone.ai/signin"

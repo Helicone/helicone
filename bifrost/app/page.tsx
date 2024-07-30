@@ -93,10 +93,10 @@ export default function Home() {
           <p className="text-lg md:text-xl text-gray-600">
             The open-source platform for logging, monitoring, and debugging.
           </p>
-          <div className="flex items-center gap-4 pt-4 w-full justify-center">
+          <div className="flex items-center gap-4 pt-4 w-full justify-center flex-col md:flex-row">
             <Link
               href="https://us.helicone.ai/signup?demo=true"
-              className="bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 rounded-lg px-6 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
+              className="hidden md:flex bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 rounded-lg px-6 py-2 font-bold shadow-lg items-center gap-1 w-fit"
             >
               Get a demo
             </Link>
@@ -107,6 +107,19 @@ export default function Home() {
               Start Building
               <ChevronRightIcon className="w-5 h-5 inline text-white" />
             </Link>
+            <a
+              href="https://www.producthunt.com/posts/helicone-ai?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-helicone&#0045;ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="md:hidden flex justify-center"
+            >
+              <img
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=475050&theme=light"
+                alt="Helicone&#0032;AI - Open&#0045;source&#0032;LLM&#0032;Observability&#0032;for&#0032;Developers | Product Hunt"
+                width="180"
+                height="54"
+              />
+            </a>
           </div>
           <ul className="flex flex-col md:flex-row gap-4 md:gap-16 md:justify-center px-4 pt-16 text-sm">
             <li className="flex items-center space-x-2">
