@@ -21,6 +21,10 @@
     {
       "source": "/changelog/20240723-prompts-package",
       "destination": "/changelog/20240722-prompts-package"
+    },
+    {
+      "source": "/open-stats",
+      "destination": "https://us.helicone.ai/open-stats"
     }
   ]
 }
