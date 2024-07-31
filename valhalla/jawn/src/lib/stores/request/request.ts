@@ -415,7 +415,9 @@ export async function getRequestsCachedV2(
     argsAcc: [],
   });
 
-  const sortSQL = buildRequestSort(sort);
+  // TODO: FIX
+
+  //const sortSQL = buildRequestSort(sort);
 
   const query = `
   SELECT
@@ -446,9 +448,10 @@ export async function getRequestsCachedV2(
   WHERE rrv.organization_id = '${orgId}'
     AND (${builtFilter.filter})
   ${
-    sortSQL !== undefined
-      ? `ORDER BY ${sortSQL}`
-      : "ORDER BY rrv.request_created_at DESC"
+    // sortSQL !== undefined
+    //   ? `ORDER BY ${sortSQL}`
+    //   :
+    "ORDER BY rrv.request_created_at DESC"
   }
   LIMIT ${limit}
   OFFSET ${offset}
