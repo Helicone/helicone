@@ -395,6 +395,9 @@ export class LoggingHandler extends AbstractLogHandler {
         provider: request.provider ?? null,
         country_code: request.countryCode ?? null,
         properties: context.processedLog.request.properties ?? {},
+        assets: context.processedLog.assets
+          ? Array.from(context.processedLog.assets.keys())
+          : [],
         scores: {},
         sign: 1,
         version: 1,
