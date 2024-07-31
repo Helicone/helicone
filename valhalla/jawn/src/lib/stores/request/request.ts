@@ -388,6 +388,92 @@ async function mapLLMCallsV2(
   }
 }
 
+export async function getRequestsCachedV2(
+  orgId: string,
+  filter: FilterNode,
+  offset: number,
+  limit: number,
+  sort: SortLeafRequest,
+  isPartOfExperiment?: boolean,
+  isScored?: boolean
+): Promise<Result<HeliconeRequestV2[], string>> {
+  if (isNaN(offset) || isNaN(limit)) {
+    return { data: null, error: "Invalid offset or limit" };
+  }
+
+  if (offset > 10_000 || offset < 0) {
+    return err("unsupported offset value");
+  }
+
+  if (limit < 0 || limit > 1_000) {
+    return err("invalid limit");
+  }
+
+  const builtFilter = await buildFilterWithAuthClickHouse({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+
+  const sortSQL = buildRequestSort(sort);
+
+  const query = `
+  SELECT
+    rrv.response_id,
+    rrv.response_body,
+    rrv.response_created_at,
+    rrv.status AS response_status,
+    rrv.request_id,
+    rrv.request_body,
+    rrv.request_created_at,
+    rrv.user_id AS request_user_id,
+    rrv.properties AS request_properties,
+    rrv.provider,
+    rrv.target_url,
+    rrv.model AS request_model,
+    rrv.time_to_first_token,
+    rrv.prompt_tokens + rrv.completion_tokens AS total_tokens,
+    rrv.completion_tokens,
+    rrv.prompt_tokens,
+    rrv.country_code,
+    rrv.scores,
+    rrv.properties,
+    rrv.assets,
+    ch.created_at AS cache_hit_created_at,
+    ch.latency AS cache_hit_latency
+  FROM request_response_versioned rrv
+  INNER JOIN cache_hits ch ON rrv.request_id = ch.request_id
+  WHERE rrv.organization_id = '${orgId}'
+    AND (${builtFilter.filter})
+  ${
+    sortSQL !== undefined
+      ? `ORDER BY ${sortSQL}`
+      : "ORDER BY rrv.request_created_at DESC"
+  }
+  LIMIT ${limit}
+  OFFSET ${offset}
+  `;
+
+  const requests = await dbQueryClickhouse<HeliconeRequestV2>(
+    query,
+    builtFilter.argsAcc
+  );
+
+  const s3Client = new S3Client(
+    process.env.S3_ACCESS_KEY ?? "",
+    process.env.S3_SECRET_KEY ?? "",
+    process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
+    process.env.S3_BUCKET_NAME ?? "",
+    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+  );
+
+  const results = await mapLLMCallsV2(requests.data, s3Client, orgId);
+
+  return resultMap(results, (data) => {
+    return data;
+  });
+}
+
 export async function getRequestsCached(
   orgId: string,
   filter: FilterNode,

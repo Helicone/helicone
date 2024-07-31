@@ -14,6 +14,7 @@ import {
   getRequestAsset,
   getRequests,
   getRequestsCached,
+  getRequestsCachedV2,
   getRequestsV2,
 } from "../../lib/stores/request/request";
 import { costOfPrompt } from "../../packages/cost";
@@ -295,13 +296,23 @@ export class RequestManager extends BaseManager {
       newFilter = this.addPartOfExperimentFilter(isPartOfExperiment, newFilter);
     }
 
-    const requests = await getRequestsV2(
-      this.authParams.organizationId,
-      newFilter,
-      offset,
-      limit,
-      sort
-    );
+    const requests = isCached
+      ? await getRequestsCachedV2(
+          this.authParams.organizationId,
+          filter,
+          offset,
+          limit,
+          sort,
+          isPartOfExperiment,
+          isScored
+        )
+      : await getRequestsV2(
+          this.authParams.organizationId,
+          newFilter,
+          offset,
+          limit,
+          sort
+        );
 
     return resultMap(requests, (req) => {
       return req.map((r) => {
