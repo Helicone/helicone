@@ -189,6 +189,8 @@ export interface InsertRequestResponseVersioned {
   version: number;
   properties: Record<string, string>;
   scores: Record<string, number>;
+  request_body: Nullable<string>;
+  response_body: Nullable<string>;
   assets: Array<string>;
 }
 export type RequestResponseVersioned =
