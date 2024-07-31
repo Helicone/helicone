@@ -1435,6 +1435,56 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
+			"Partial_RequestResponseVersionedToOperators_": {
+				"properties": {
+					"latency": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"status": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"request_created_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
+					},
+					"response_created_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
+					},
+					"model": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"user_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"organization_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"node_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"job_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"threat": {
+						"$ref": "#/components/schemas/Partial_BooleanOperators_"
+					},
+					"properties": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Partial_TextOperators_"
+						},
+						"type": "object"
+					},
+					"search_properties": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Partial_TextOperators_"
+						},
+						"type": "object"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
 			"Partial_CacheHitsTableToOperators_": {
 				"properties": {
 					"organization_id": {
@@ -1459,7 +1509,7 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_": {
+			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_versioned_": {
 				"properties": {
 					"response": {
 						"$ref": "#/components/schemas/Partial_ResponseTableToOperators_"
@@ -1472,6 +1522,9 @@
 					},
 					"request_response_search": {
 						"$ref": "#/components/schemas/Partial_RequestResponseSearchToOperators_"
+					},
+					"request_response_versioned": {
+						"$ref": "#/components/schemas/Partial_RequestResponseVersionedToOperators_"
 					},
 					"cache_hits": {
 						"$ref": "#/components/schemas/Partial_CacheHitsTableToOperators_"
@@ -1494,13 +1547,13 @@
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
-			"FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_"
+			"FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_versioned_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_versioned_"
 			},
 			"RequestFilterNode": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_"
+						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_versioned_"
 					},
 					{
 						"$ref": "#/components/schemas/RequestFilterBranch"
@@ -1640,6 +1693,158 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"HeliconeRequestV2": {
+				"properties": {
+					"response_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"response_body": {},
+					"response_created_at": {
+						"type": "string",
+						"nullable": true
+					},
+					"response_status": {
+						"type": "number",
+						"format": "double"
+					},
+					"request_id": {
+						"type": "string"
+					},
+					"request_body": {},
+					"request_created_at": {
+						"type": "string"
+					},
+					"request_user_id": {
+						"type": "string"
+					},
+					"request_properties": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					},
+					"provider": {
+						"type": "string"
+					},
+					"target_url": {
+						"type": "string"
+					},
+					"request_model": {
+						"type": "string"
+					},
+					"signed_body_url": {
+						"type": "string",
+						"nullable": true
+					},
+					"time_to_first_token": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"total_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"completion_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"prompt_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"country_code": {
+						"type": "string",
+						"nullable": true
+					},
+					"scores": {
+						"$ref": "#/components/schemas/Record_string.number_"
+					},
+					"properties": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					},
+					"llmSchema": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/LlmSchema"
+							}
+						],
+						"nullable": true
+					},
+					"assets": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"asset_urls": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"response_id",
+					"response_created_at",
+					"response_status",
+					"request_id",
+					"request_body",
+					"request_created_at",
+					"request_user_id",
+					"request_properties",
+					"provider",
+					"target_url",
+					"request_model",
+					"time_to_first_token",
+					"total_tokens",
+					"completion_tokens",
+					"prompt_tokens",
+					"country_code",
+					"scores",
+					"properties",
+					"llmSchema",
+					"assets",
+					"asset_urls"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_HeliconeRequestV2-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/HeliconeRequestV2"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_HeliconeRequestV2-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_HeliconeRequestV2-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			},
 			"ResultSuccess_null_": {
 				"properties": {
@@ -3699,6 +3904,70 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Result_HeliconeRequest-Array.string_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"filter": "all",
+											"isCached": false,
+											"limit": 10,
+											"offset": 0,
+											"sort": {
+												"created_at": "desc"
+											},
+											"isScored": false,
+											"isPartOfExperiment": false
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "Request query filters",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RequestQueryParams",
+								"description": "Request query filters"
+							},
+							"example": {
+								"filter": "all",
+								"isCached": false,
+								"limit": 10,
+								"offset": 0,
+								"sort": {
+									"created_at": "desc"
+								},
+								"isScored": false,
+								"isPartOfExperiment": false
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/request/queryV2": {
+			"post": {
+				"operationId": "GetRequestsV2",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HeliconeRequestV2-Array.string_"
 								},
 								"examples": {
 									"Example 1": {

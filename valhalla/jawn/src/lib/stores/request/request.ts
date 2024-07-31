@@ -16,7 +16,7 @@ import {
 } from "../../shared/db/dbExecute";
 import { LlmSchema } from "../../shared/requestResponseModel";
 import { Json } from "../../db/database.types";
-import { mapGeminiPro } from "./mappers";
+import { mapGeminiPro, mapGeminiProV2 } from "./mappers";
 import { S3Client } from "../../shared/db/s3Client";
 
 export type Provider =
@@ -83,6 +83,32 @@ export interface HeliconeRequest {
   asset_urls: Record<string, string> | null;
   scores: Record<string, number> | null;
   costUSD?: number | null;
+}
+
+export interface HeliconeRequestV2 {
+  response_id: string | null;
+  response_body?: any;
+  response_created_at: string | null;
+  response_status: number;
+  request_id: string;
+  request_body: any;
+  request_created_at: string;
+  request_user_id: string;
+  request_properties: Record<string, string>;
+  provider: string;
+  target_url: string;
+  request_model: string;
+  signed_body_url?: string | null;
+  time_to_first_token: number | null;
+  total_tokens: number;
+  completion_tokens: number | null;
+  prompt_tokens: number | null;
+  country_code: string | null;
+  scores: Record<string, number>;
+  properties: Record<string, string>;
+  llmSchema: LlmSchema | null;
+  assets: Array<string>;
+  asset_urls: Record<string, string> | null;
 }
 
 function addJoinQueries(joinQuery: string, filter: FilterNode): string {
@@ -205,6 +231,161 @@ export async function getRequests(
   return resultMap(results, (data) => {
     return data;
   });
+}
+
+export async function getRequestsV2(
+  orgId: string,
+  filter: FilterNode,
+  offset: number,
+  limit: number,
+  sort: SortLeafRequest
+): Promise<Result<HeliconeRequestV2[], string>> {
+  if (isNaN(offset) || isNaN(limit)) {
+    return { data: null, error: "Invalid offset or limit" };
+  }
+
+  console.log("sort", JSON.stringify(sort));
+
+  // const joinQuery = addJoinQueries("", filter);
+  // if (offset > 10_000 || offset < 0) {
+  //   return err("unsupport offset value");
+  // }
+
+  if (limit < 0 || limit > 1_000) {
+    return err("invalid limit");
+  }
+  const builtFilter = await buildFilterWithAuthClickHouse({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+
+  const query = `
+    SELECT response_id,
+      response_created_at,
+      status AS response_status,
+      request_id,
+      request_created_at,
+      user_id AS request_user_id,
+      properties AS request_properties,
+      provider,
+      model AS request_model,
+      time_to_first_token,
+      (prompt_tokens + completion_tokens) AS total_tokens,
+      completion_tokens,
+      prompt_tokens,
+      country_code,
+      scores,
+      properties,
+      assets,
+      target_url,
+    FROM request_response_versioned
+    WHERE request_response_versioned.organization_id = '${orgId}'
+    ORDER BY request_response_versioned.request_created_at DESC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `;
+
+  const requests = await dbQueryClickhouse<HeliconeRequestV2>(
+    query,
+    builtFilter.argsAcc
+  );
+
+  const s3Client = new S3Client(
+    process.env.S3_ACCESS_KEY ?? "",
+    process.env.S3_SECRET_KEY ?? "",
+    process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
+    process.env.S3_BUCKET_NAME ?? "",
+    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+  );
+
+  const mappedRequests = await mapLLMCallsV2(requests.data, s3Client, orgId);
+
+  return mappedRequests;
+}
+
+async function mapLLMCallsV2(
+  heliconeRequests: HeliconeRequestV2[] | null,
+  s3Client: S3Client,
+  orgId: string
+): Promise<Result<HeliconeRequestV2[], string>> {
+  const s3ImplementationDate = new Date("2024-03-30T02:00:00Z");
+
+  const promises =
+    heliconeRequests?.map(async (heliconeRequest) => {
+      const requestCreatedAt = new Date(heliconeRequest.request_created_at);
+
+      if (
+        (process.env.S3_ENABLED ?? "true") === "true" &&
+        requestCreatedAt > s3ImplementationDate
+      ) {
+        const { data: signedBodyUrl, error: signedBodyUrlErr } =
+          await s3Client.getRequestResponseBodySignedUrl(
+            orgId,
+            heliconeRequest.request_id
+          );
+
+        if (!signedBodyUrlErr && signedBodyUrl) {
+          heliconeRequest.signed_body_url = signedBodyUrl;
+        }
+
+        if (heliconeRequest.assets && heliconeRequest.assets.length > 0) {
+          const assetUrls: Record<string, string> = {};
+
+          const signedUrlPromises = heliconeRequest.assets.map(
+            async (assetId: string) => {
+              const { data: signedImageUrl, error: signedImageUrlErr } =
+                await s3Client.getRequestResponseImageSignedUrl(
+                  orgId,
+                  heliconeRequest.request_id,
+                  assetId
+                );
+
+              return {
+                assetId,
+                signedImageUrl:
+                  signedImageUrlErr || !signedImageUrl ? "" : signedImageUrl,
+              };
+            }
+          );
+
+          const signedUrls = await Promise.all(signedUrlPromises);
+
+          signedUrls.forEach(({ assetId, signedImageUrl }) => {
+            assetUrls[assetId] = signedImageUrl;
+          });
+
+          heliconeRequest.asset_urls = assetUrls;
+        }
+      }
+
+      // Extract the model from various possible locations
+      const model =
+        heliconeRequest.request_model ||
+        getModelFromPath(heliconeRequest.target_url) ||
+        "";
+
+      try {
+        if (
+          model.toLowerCase().includes("gemini") &&
+          heliconeRequest.provider === "GOOGLE"
+        ) {
+          const mappedSchema = mapGeminiProV2(heliconeRequest, model);
+          heliconeRequest.llmSchema = mappedSchema;
+        }
+      } catch (error: any) {
+        // Do nothing, FE will fall back to existing mappers
+      }
+
+      return heliconeRequest;
+    }) ?? [];
+
+  try {
+    const mappedRequests = await Promise.all(promises);
+    return ok(mappedRequests);
+  } catch (error) {
+    return err(`Error mapping LLM calls: ${error}`);
+  }
 }
 
 export async function getRequestsCached(

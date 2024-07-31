@@ -27,6 +27,9 @@ export interface paths {
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
+  "/v1/request/queryV2": {
+    post: operations["GetRequestsV2"];
+  };
   "/v1/request/{requestId}/feedback": {
     post: operations["FeedbackRequest"];
   };
@@ -532,6 +535,25 @@ Json: JsonObject;
       gt?: string;
     };
     /** @description Make all properties in T optional */
+    Partial_RequestResponseVersionedToOperators_: {
+      latency?: components["schemas"]["Partial_NumberOperators_"];
+      status?: components["schemas"]["Partial_NumberOperators_"];
+      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      node_id?: components["schemas"]["Partial_TextOperators_"];
+      job_id?: components["schemas"]["Partial_TextOperators_"];
+      threat?: components["schemas"]["Partial_BooleanOperators_"];
+      properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      search_properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+    };
+    /** @description Make all properties in T optional */
     Partial_CacheHitsTableToOperators_: {
       organization_id?: components["schemas"]["Partial_TextOperators_"];
       request_id?: components["schemas"]["Partial_TextOperators_"];
@@ -541,11 +563,12 @@ Json: JsonObject;
       created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_": {
+    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_versioned_": {
       response?: components["schemas"]["Partial_ResponseTableToOperators_"];
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
       feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
       request_response_search?: components["schemas"]["Partial_RequestResponseSearchToOperators_"];
+      request_response_versioned?: components["schemas"]["Partial_RequestResponseVersionedToOperators_"];
       cache_hits?: components["schemas"]["Partial_CacheHitsTableToOperators_"];
       properties?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
@@ -554,8 +577,8 @@ Json: JsonObject;
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
     };
-    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_"];
-    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_versioned_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_versioned_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_versioned_"] | components["schemas"]["RequestFilterBranch"] | "all";
     RequestFilterBranch: {
       right: components["schemas"]["RequestFilterNode"];
       /** @enum {string} */
@@ -598,6 +621,42 @@ Json: JsonObject;
       isPartOfExperiment?: boolean;
       isScored?: boolean;
     };
+    HeliconeRequestV2: {
+      response_id: string | null;
+      response_body?: unknown;
+      response_created_at: string | null;
+      /** Format: double */
+      response_status: number;
+      request_id: string;
+      request_body: unknown;
+      request_created_at: string;
+      request_user_id: string;
+      request_properties: components["schemas"]["Record_string.string_"];
+      provider: string;
+      target_url: string;
+      request_model: string;
+      signed_body_url?: string | null;
+      /** Format: double */
+      time_to_first_token: number | null;
+      /** Format: double */
+      total_tokens: number;
+      /** Format: double */
+      completion_tokens: number | null;
+      /** Format: double */
+      prompt_tokens: number | null;
+      country_code: string | null;
+      scores: components["schemas"]["Record_string.number_"];
+      properties: components["schemas"]["Record_string.string_"];
+      llmSchema: components["schemas"]["LlmSchema"] | null;
+      assets: string[];
+      asset_urls: components["schemas"]["Record_string.string_"] | null;
+    };
+    "ResultSuccess_HeliconeRequestV2-Array_": {
+      data: components["schemas"]["HeliconeRequestV2"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HeliconeRequestV2-Array.string_": components["schemas"]["ResultSuccess_HeliconeRequestV2-Array_"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_null_: {
       /** @enum {number|null} */
       data: null;
@@ -1164,6 +1223,35 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
+        };
+      };
+    };
+  };
+  GetRequestsV2: {
+    /** @description Request query filters */
+    requestBody: {
+      content: {
+        /**
+         * @example {
+         *   "filter": "all",
+         *   "isCached": false,
+         *   "limit": 10,
+         *   "offset": 0,
+         *   "sort": {
+         *     "created_at": "desc"
+         *   },
+         *   "isScored": false,
+         *   "isPartOfExperiment": false
+         * }
+         */
+        "application/json": components["schemas"]["RequestQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequestV2-Array.string_"];
         };
       };
     };

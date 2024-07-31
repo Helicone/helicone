@@ -10,9 +10,11 @@ import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequest
 import {
   HeliconeRequest,
   HeliconeRequestAsset,
+  HeliconeRequestV2,
   getRequestAsset,
   getRequests,
   getRequestsCached,
+  getRequestsV2,
 } from "../../lib/stores/request/request";
 import { costOfPrompt } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
@@ -259,6 +261,54 @@ export class RequestManager extends BaseManager {
           costUSD: costOfPrompt({
             model:
               r.model_override ?? r.response_model ?? r.request_model ?? "",
+            provider: r.provider ?? "",
+            completionTokens: r.completion_tokens ?? 0,
+            promptTokens: r.prompt_tokens ?? 0,
+          }),
+        };
+      });
+    });
+  }
+
+  async getRequestsV2(
+    params: RequestQueryParams
+  ): Promise<Result<HeliconeRequestV2[], string>> {
+    const {
+      filter,
+      offset = 0,
+      limit = 10,
+      sort = {
+        created_at: "desc",
+      },
+      isCached,
+      isPartOfExperiment,
+      isScored,
+    } = params;
+
+    let newFilter = filter;
+
+    if (isScored !== undefined) {
+      newFilter = this.addScoreFilter(isScored, newFilter);
+    }
+
+    if (isPartOfExperiment !== undefined) {
+      newFilter = this.addPartOfExperimentFilter(isPartOfExperiment, newFilter);
+    }
+
+    const requests = await getRequestsV2(
+      this.authParams.organizationId,
+      newFilter,
+      offset,
+      limit,
+      sort
+    );
+
+    return resultMap(requests, (req) => {
+      return req.map((r) => {
+        return {
+          ...r,
+          costUSD: costOfPrompt({
+            model: r.request_model ?? "",
             provider: r.provider ?? "",
             completionTokens: r.completion_tokens ?? 0,
             promptTokens: r.prompt_tokens ?? 0,

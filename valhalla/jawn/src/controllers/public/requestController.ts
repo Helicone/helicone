@@ -17,6 +17,7 @@ import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import {
   HeliconeRequest,
   HeliconeRequestAsset,
+  HeliconeRequestV2,
 } from "../../lib/stores/request/request";
 import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
@@ -37,6 +38,7 @@ type RequestFilterNode =
       | "values"
       | "request_response_search"
       | "cache_hits"
+      | "request_response_versioned"
     >
   | RequestFilterBranch
   | "all";
@@ -92,6 +94,50 @@ export class RequestController extends Controller {
   ): Promise<Result<HeliconeRequest[], string>> {
     const reqManager = new RequestManager(request.authParams);
     const requests = await reqManager.getRequests(requestBody);
+    if (requests.error || !requests.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200); // set return status 201
+    }
+    return requests;
+  }
+
+  /**
+   *
+   * @param requestBody Request query filters
+   * @example requestBody {
+   *  "filter": "all",
+   *  "isCached": false,
+   *  "limit": 10,
+   *  "offset": 0,
+   *  "sort": {
+   *    "created_at": "desc"
+   *  },
+   *  "isScored": false,
+   *  "isPartOfExperiment": false
+   * }
+   * @param request
+   * @returns
+   */
+  @Post("queryV2")
+  @Example<RequestQueryParams>({
+    filter: "all",
+    isCached: false,
+    limit: 10,
+    offset: 0,
+    sort: {
+      created_at: "desc",
+    },
+    isScored: false,
+    isPartOfExperiment: false,
+  })
+  public async getRequestsV2(
+    @Body()
+    requestBody: RequestQueryParams,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<HeliconeRequestV2[], string>> {
+    const reqManager = new RequestManager(request.authParams);
+    const requests = await reqManager.getRequestsV2(requestBody);
     if (requests.error || !requests.data) {
       this.setStatus(500);
     } else {
