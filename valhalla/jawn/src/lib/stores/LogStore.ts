@@ -165,31 +165,31 @@ export class LogStore {
           }
         }
 
-        // try {
-        //   const searchRecords = this.filterDuplicateSearchRecords(
-        //     payload.searchRecords
-        //   ).map((record) => ({
-        //     request_id: record.request_id,
-        //     request_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
-        //       record.request_body_vector
-        //     )})`,
-        //     response_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
-        //       record.response_body_vector
-        //     )})`,
-        //     organization_id: record.organization_id,
-        //   }));
+        try {
+          const searchRecords = this.filterDuplicateSearchRecords(
+            payload.searchRecords
+          ).map((record) => ({
+            request_id: record.request_id,
+            request_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
+              record.request_body_vector
+            )})`,
+            response_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
+              record.response_body_vector
+            )})`,
+            organization_id: record.organization_id,
+          }));
 
-        //   if (searchRecords && searchRecords.length > 0) {
-        //     const insertSearchQuery =
-        //       pgp.helpers.insert(searchRecords, requestResponseSearchColumns) +
-        //       onConflictRequestResponseSearch;
+          if (searchRecords && searchRecords.length > 0) {
+            const insertSearchQuery =
+              pgp.helpers.insert(searchRecords, requestResponseSearchColumns) +
+              onConflictRequestResponseSearch;
 
-        //     await t.none(insertSearchQuery);
-        //   }
-        // } catch (error: any) {
-        //   console.error("Error inserting search records", error);
-        //   throw error;
-        // }
+            await t.none(insertSearchQuery);
+          }
+        } catch (error: any) {
+          console.error("Error inserting search records", error);
+          throw error;
+        }
       });
 
       return ok("Successfully inserted log batch");

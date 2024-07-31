@@ -307,8 +307,12 @@ export class LoggingHandler extends AbstractLogHandler {
       {
         request_id: request.id,
         organization_id: orgParams.id,
-        request_body_vector: "",
-        response_body_vector: "",
+        request_body_vector: this.extractRequestBodyMessage(
+          context.processedLog.request.body
+        ),
+        response_body_vector: this.extractResponseBodyMessage(
+          context.processedLog.response.body
+        ),
       };
 
     return [searchRecord];
