@@ -3845,12 +3845,7 @@
 					"required": true,
 					"content": {
 						"application/json": {
-							"schema": {
-								"items": {
-									"$ref": "#/components/schemas/HeliconeRequest"
-								},
-								"type": "array"
-							}
+							"schema": {}
 						}
 					}
 				}

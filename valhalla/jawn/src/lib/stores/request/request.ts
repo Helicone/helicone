@@ -123,7 +123,11 @@ export async function getRequests(
   if (requests.error) {
     return { data: null, error: requests.error };
   }
-  return getFullRequests(orgId, requests.data || []);
+  const t = await getFullRequests(orgId, requests.data || []);
+  console.log("OLD STYLE");
+  console.log("Requests", util.inspect(requests.data, { depth: null, colors: true }));
+  console.log("Response", util.inspect(t, { depth: null, colors: true }));
+  return t;
 }
 
 export async function getRequestsSkeleton(
@@ -345,6 +349,7 @@ async function mapLLMCalls(
 
         if (signedBodyUrlErr || !signedBodyUrl) {
           // If there was an error, just return the request as is
+          console.log("Returning cuz of signed body url error");
           return heliconeRequest;
         }
 

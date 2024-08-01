@@ -1206,7 +1206,7 @@ export interface operations {
   GetFullRequests: {
     requestBody: {
       content: {
-        "application/json": components["schemas"]["HeliconeRequest"][];
+        "application/json": unknown;
       };
     };
     responses: {

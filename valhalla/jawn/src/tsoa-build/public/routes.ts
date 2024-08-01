@@ -1412,7 +1412,7 @@ export function RegisterRoutes(app: Router) {
 
             async function RequestController_getFullRequests(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"array","array":{"dataType":"refObject","ref":"HeliconeRequest"}},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"any"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 

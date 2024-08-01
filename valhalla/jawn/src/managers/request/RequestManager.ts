@@ -332,12 +332,10 @@ export class RequestManager extends BaseManager {
   async getFullRequests(
     requests: HeliconeRequest[]
   ): Promise<Result<HeliconeRequest[], string>> {
-    const fullRequests = await getFullRequests(
+    return await getFullRequests(
       this.authParams.organizationId,
       requests
     );
-    console.log("full requests", fullRequests);
-    return fullRequests;
   }
 
   async getRequestAssetById(

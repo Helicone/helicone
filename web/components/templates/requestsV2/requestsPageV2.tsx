@@ -49,6 +49,7 @@ import {
   UIFilterRowNode,
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
+import { useGetRequestsSkeleton } from "../../../services/hooks/requests";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -233,7 +234,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     count,
     isDataLoading,
     isCountLoading,
-    requests,
+    requests: heliconeRequestsSkeleton,
     properties,
     refetch,
     filterMap,
@@ -252,11 +253,19 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached,
     isLive
   );
-  
-  // @ts-ignore
-  const { data } = useRequestsPageV2Full(requests);
-  const requestsFull = data?.data || [];
-  console.log("requestsFull", requestsFull);
+
+  const { requests, isLoading: isRequestsLoading, refetch: refetchRequests } = useRequestsPageV2Full(heliconeRequestsSkeleton);
+  const [normalizedRequestsSkeleton, setNormalizedReqsSkeleton] = useState<NormalizedRequest[]>([]);
+
+  useEffect(() => {
+    const normalizedRequests = heliconeRequestsSkeleton.map((request) => getNormalizedRequest(request));
+    setNormalizedReqsSkeleton(normalizedRequests);
+    console.log("here", requests, isRequestsLoading);
+  }, [heliconeRequestsSkeleton]);
+
+  useEffect(() => {
+    console.log("here", requests, isRequestsLoading);
+  }, [requests]);
 
   const requestWithoutStream = requests.find((r) => {
     return (
@@ -671,6 +680,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   return (
     <div>
+      <button onClick={() => {
+        console.log("here", requests, isRequestsLoading);
+      }}>click me</button>
       {requestWithoutStream && !isWarningHidden && (
         <div className="alert alert-warning flex justify-between items-center">
           <p className="text-yellow-800">
@@ -738,7 +750,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         <div className="flex flex-col space-y-4">
           <ThemedTable
             id="requests-table"
-            defaultData={requests || []}
+            defaultData={normalizedRequestsSkeleton || []}
             defaultColumns={columnsWithProperties}
             dataLoading={isDataLoading}
             sortable={sort}

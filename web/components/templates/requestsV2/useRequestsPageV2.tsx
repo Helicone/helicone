@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { useGetRequests, useGetRequestsFull, useGetRequestsSkeleton } from "../../../services/hooks/requests";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
@@ -88,17 +88,8 @@ const useRequestsPageV2 = (
 
   const isDataLoading = requests.isLoading || isPropertiesLoading;
 
-  const getNormalizedRequests = useCallback(() => {
-    const rawRequests = requests.data?.data || [];
-    return rawRequests.map((request) => {
-      return getNormalizedRequest(request);
-    });
-  }, [requests]);
-
-  const normalizedRequests = getNormalizedRequests();
-
   return {
-    requests: normalizedRequests,
+    requests: requests.data?.data,
     count: count.data?.data,
     isDataLoading,
     isCountLoading: count.isLoading,
@@ -179,17 +170,8 @@ export const useRequestsPageV2Skeleton = (
 
   const isDataLoading = requests.isLoading || isPropertiesLoading;
 
-  const getNormalizedRequests = useCallback(() => {
-    const rawRequests = requests.data?.data || [];
-    return rawRequests.map((request) => {
-      return getNormalizedRequest(request);
-    });
-  }, [requests]);
-
-  const normalizedRequests = getNormalizedRequests();
-
   return {
-    requests: normalizedRequests,
+    requests: requests.data?.data || [],
     count: count.data?.data,
     isDataLoading,
     isCountLoading: count.isLoading,
@@ -204,7 +186,16 @@ export const useRequestsPageV2Skeleton = (
 
 export const useRequestsPageV2Full = (requests: HeliconeRequest[]) => {
   const { requests: fullRequests } = useGetRequestsFull(requests);
-  return fullRequests;
+  const normalizedRequests = useMemo(() => getNormalizedRequests(fullRequests.data?.data || []), [requests, fullRequests.data?.data]);
+  return {
+    requests: normalizedRequests,
+    isLoading: fullRequests.isLoading,
+    refetch: fullRequests.refetch,
+  };
 };
+
+export function getNormalizedRequests(requests: HeliconeRequest[]) {
+  return requests.map(getNormalizedRequest);
+}
 
 export default useRequestsPageV2;

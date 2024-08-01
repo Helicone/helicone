@@ -21,6 +21,7 @@ import {
 import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { ScoreManager, ScoreRequest } from "../../managers/score/ScoreManager";
+import util from "util";
 
 export type RequestFilterBranch = {
   left: RequestFilterNode;
@@ -144,15 +145,16 @@ export class RequestController extends Controller {
     return requests;
   }
 
-
   @Post("query/full")
   public async getFullRequests(
     @Body()
-    requestBody: HeliconeRequest[],
+    requestBody: any,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<HeliconeRequest[], string>> {
+    console.log("HERE");
     const reqManager = new RequestManager(request.authParams);
     const requests = await reqManager.getFullRequests(requestBody);
+    console.log("FULL RESPONSE", requests);
     if (requests.error || !requests.data) {
       this.setStatus(500);
     } else {
