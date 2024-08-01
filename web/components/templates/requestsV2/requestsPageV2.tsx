@@ -738,7 +738,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         <div className="flex flex-col space-y-4">
           <ThemedTable
             id="requests-table"
-            defaultData={normalizedRequests || []}
+            defaultData={
+              s3Bodies.isLoading
+                ? normalizedRequests
+                : s3Bodies.data?.data || []
+            }
             defaultColumns={columnsWithProperties}
             skeletonLoading={isDataLoading}
             dataLoading={s3Bodies.isLoading}
