@@ -97,6 +97,11 @@ export default function RootLayout({
             `,
             }}
           />
+          <Script
+            id="warmly-script-loader"
+            src="https://opps-widget.getwarmly.com/warmly.js?clientId=489345224dd85359988138e0fb912d04"
+            defer
+          />
         </body>
       </PHProvider>
     </html>
