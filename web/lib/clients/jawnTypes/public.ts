@@ -27,12 +27,6 @@ export interface paths {
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
-  "/v1/request/query/skeleton": {
-    post: operations["GetRequestsSkeleton"];
-  };
-  "/v1/request/query/full": {
-    post: operations["GetFullRequests"];
-  };
   "/v1/request/{requestId}/feedback": {
     post: operations["FeedbackRequest"];
   };
@@ -1163,50 +1157,6 @@ export interface operations {
          * }
          */
         "application/json": components["schemas"]["RequestQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
-        };
-      };
-    };
-  };
-  GetRequestsSkeleton: {
-    /** @description Request query filters */
-    requestBody: {
-      content: {
-        /**
-         * @example {
-         *   "filter": "all",
-         *   "isCached": false,
-         *   "limit": 10,
-         *   "offset": 0,
-         *   "sort": {
-         *     "created_at": "desc"
-         *   },
-         *   "isScored": false,
-         *   "isPartOfExperiment": false
-         * }
-         */
-        "application/json": components["schemas"]["RequestQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
-        };
-      };
-    };
-  };
-  GetFullRequests: {
-    requestBody: {
-      content: {
-        "application/json": unknown;
       };
     };
     responses: {

@@ -101,68 +101,6 @@ export class RequestController extends Controller {
     return requests;
   }
 
-  /**
-   *
-   * @param requestBody Request query filters
-   * @example requestBody {
-   *  "filter": "all",
-   *  "isCached": false,
-   *  "limit": 10,
-   *  "offset": 0,
-   *  "sort": {
-   *    "created_at": "desc"
-   *  },
-   *  "isScored": false,
-   *  "isPartOfExperiment": false
-   * }
-   * @param request
-   * @returns
-   */
-  @Post("query/skeleton")
-  @Example<RequestQueryParams>({
-    filter: "all",
-    isCached: false,
-    limit: 10,
-    offset: 0,
-    sort: {
-      created_at: "desc",
-    },
-    isScored: false,
-    isPartOfExperiment: false,
-  })
-  public async getRequestsSkeleton(
-    @Body()
-    requestBody: RequestQueryParams,
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<HeliconeRequest[], string>> {
-    const reqManager = new RequestManager(request.authParams);
-    const requests = await reqManager.getRequestsSkeleton(requestBody);
-    if (requests.error || !requests.data) {
-      this.setStatus(500);
-    } else {
-      this.setStatus(200);
-    }
-    return requests;
-  }
-
-  @Post("query/full")
-  public async getFullRequests(
-    @Body()
-    requestBody: any,
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<HeliconeRequest[], string>> {
-    console.log("HERE");
-    const reqManager = new RequestManager(request.authParams);
-    const requests = await reqManager.getFullRequests(requestBody);
-    console.log("FULL RESPONSE", requests);
-    if (requests.error || !requests.data) {
-      this.setStatus(500);
-    } else {
-      this.setStatus(200);
-    }
-    return requests;
-  }
-
   @Post("/{requestId}/feedback")
   public async feedbackRequest(
     @Body()
