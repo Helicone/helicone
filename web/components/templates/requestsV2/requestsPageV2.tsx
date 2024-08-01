@@ -41,7 +41,7 @@ import { getInitialColumns } from "./initialColumns";
 import RequestCard from "./requestCard";
 import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
-import useRequestsPageV2, { useRequestsPageV2Full, useRequestsPageV2Skeleton } from "./useRequestsPageV2";
+import useRequestsPageV2 from "./useRequestsPageV2";
 import {
   getRootFilterNode,
   isFilterRowNode,
@@ -49,7 +49,7 @@ import {
   UIFilterRowNode,
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
-import { useGetRequestsSkeleton, useGetS3Bodies } from "../../../services/hooks/requests";
+import { useGetS3Bodies } from "../../../services/hooks/requests";
 import Link from "next/link";
 
 interface RequestsPageV2Props {
@@ -835,7 +835,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           if (selectedDataIndex !== undefined && selectedDataIndex > 0) {
             setSelectedDataIndex(selectedDataIndex - 1);
             setSelectedData(normalizedRequests[selectedDataIndex - 1]);
-            searchParams.set("requestId", normalizedRequests[selectedDataIndex - 1].id);
+            searchParams.set(
+              "requestId",
+              normalizedRequests[selectedDataIndex - 1].id
+            );
           }
         }}
         onNextHandler={() => {
@@ -845,7 +848,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           ) {
             setSelectedDataIndex(selectedDataIndex + 1);
             setSelectedData(normalizedRequests[selectedDataIndex + 1]);
-            searchParams.set("requestId", normalizedRequests[selectedDataIndex + 1].id);
+            searchParams.set(
+              "requestId",
+              normalizedRequests[selectedDataIndex + 1].id
+            );
           }
         }}
       />

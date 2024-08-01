@@ -1,6 +1,10 @@
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
-import { useGetRequests, useGetRequestsFull, useGetRequestsSkeleton } from "../../../services/hooks/requests";
+import {
+  useGetRequests,
+  useGetRequestsFull,
+  useGetRequestsSkeleton,
+} from "../../../services/hooks/requests";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   getPropertyFilters,
@@ -187,7 +191,10 @@ export const useRequestsPageV2Skeleton = (
 
 export const useRequestsPageV2Full = (requests: HeliconeRequest[]) => {
   const { requests: fullRequests } = useGetRequestsFull(requests);
-  const normalizedRequests = useMemo(() => getNormalizedRequests(fullRequests.data?.data || []), [requests, fullRequests.data?.data]);
+  const normalizedRequests = useMemo(
+    () => getNormalizedRequests(fullRequests.data?.data || []),
+    [requests, fullRequests.data?.data]
+  );
   return {
     requests: normalizedRequests,
     isLoading: fullRequests.isLoading,
