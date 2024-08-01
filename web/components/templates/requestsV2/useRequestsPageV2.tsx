@@ -89,7 +89,8 @@ const useRequestsPageV2 = (
   const isDataLoading = requests.isLoading || isPropertiesLoading;
 
   return {
-    requests: requests.data?.data,
+    requests: requests.data?.data || [],
+    normalizedRequests: getNormalizedRequests(requests.data?.data || []),
     count: count.data?.data,
     isDataLoading,
     isCountLoading: count.isLoading,

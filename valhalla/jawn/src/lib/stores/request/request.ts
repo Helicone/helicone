@@ -123,11 +123,7 @@ export async function getRequests(
   if (requests.error) {
     return { data: null, error: requests.error };
   }
-  const t = await getFullRequests(orgId, requests.data || []);
-  console.log("OLD STYLE");
-  console.log("Requests", util.inspect(requests.data, { depth: null, colors: true }));
-  console.log("Response", util.inspect(t, { depth: null, colors: true }));
-  return t;
+  return await getFullRequests(orgId, requests.data || []);
 }
 
 export async function getRequestsSkeleton(

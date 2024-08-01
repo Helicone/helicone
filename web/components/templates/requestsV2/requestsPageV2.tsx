@@ -1,5 +1,5 @@
 import { ArrowPathIcon, HomeIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
@@ -49,7 +49,8 @@ import {
   UIFilterRowNode,
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
-import { useGetRequestsSkeleton } from "../../../services/hooks/requests";
+import { useGetRequestsSkeleton, useGetS3Bodies } from "../../../services/hooks/requests";
+import Link from "next/link";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -234,13 +235,14 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     count,
     isDataLoading,
     isCountLoading,
-    requests: heliconeRequestsSkeleton,
+    requests: requestsSkeleton,
+    normalizedRequests,
     properties,
     refetch,
     filterMap,
     searchPropertyFilters,
     remove,
-  } = useRequestsPageV2Skeleton(
+  } = useRequestsPageV2(
     page,
     currentPageSize,
     debouncedAdvancedFilter,
@@ -254,20 +256,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isLive
   );
 
-  const { requests, isLoading: isRequestsLoading, refetch: refetchRequests } = useRequestsPageV2Full(heliconeRequestsSkeleton);
-  const [normalizedRequestsSkeleton, setNormalizedReqsSkeleton] = useState<NormalizedRequest[]>([]);
+  useGetS3Bodies(requestsSkeleton); // how the data ends up in the table??
 
-  useEffect(() => {
-    const normalizedRequests = heliconeRequestsSkeleton.map((request) => getNormalizedRequest(request));
-    setNormalizedReqsSkeleton(normalizedRequests);
-    console.log("here", requests, isRequestsLoading);
-  }, [heliconeRequestsSkeleton]);
-
-  useEffect(() => {
-    console.log("here", requests, isRequestsLoading);
-  }, [requests]);
-
-  const requestWithoutStream = requests.find((r) => {
+  const requestWithoutStream = normalizedRequests.find((r) => {
     return (
       (r.requestBody as any)?.stream &&
       !(r.requestBody as any)?.stream_options?.include_usage &&
@@ -680,9 +671,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   return (
     <div>
-      <button onClick={() => {
-        console.log("here", requests, isRequestsLoading);
-      }}>click me</button>
       {requestWithoutStream && !isWarningHidden && (
         <div className="alert alert-warning flex justify-between items-center">
           <p className="text-yellow-800">
@@ -750,7 +738,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         <div className="flex flex-col space-y-4">
           <ThemedTable
             id="requests-table"
-            defaultData={normalizedRequestsSkeleton || []}
+            defaultData={normalizedRequests || []}
             defaultColumns={columnsWithProperties}
             dataLoading={isDataLoading}
             sortable={sort}
@@ -777,7 +765,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   }
                 : undefined
             }
-            exportData={requests.map((request) => {
+            exportData={normalizedRequests.map((request) => {
               const flattenedRequest: any = {};
               Object.entries(request).forEach(([key, value]) => {
                 // key is properties and value is not null
@@ -841,23 +829,23 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         hasPrevious={selectedDataIndex !== undefined && selectedDataIndex > 0}
         hasNext={
           selectedDataIndex !== undefined &&
-          selectedDataIndex < requests.length - 1
+          selectedDataIndex < normalizedRequests.length - 1
         }
         onPrevHandler={() => {
           if (selectedDataIndex !== undefined && selectedDataIndex > 0) {
             setSelectedDataIndex(selectedDataIndex - 1);
-            setSelectedData(requests[selectedDataIndex - 1]);
-            searchParams.set("requestId", requests[selectedDataIndex - 1].id);
+            setSelectedData(normalizedRequests[selectedDataIndex - 1]);
+            searchParams.set("requestId", normalizedRequests[selectedDataIndex - 1].id);
           }
         }}
         onNextHandler={() => {
           if (
             selectedDataIndex !== undefined &&
-            selectedDataIndex < requests.length - 1
+            selectedDataIndex < normalizedRequests.length - 1
           ) {
             setSelectedDataIndex(selectedDataIndex + 1);
-            setSelectedData(requests[selectedDataIndex + 1]);
-            searchParams.set("requestId", requests[selectedDataIndex + 1].id);
+            setSelectedData(normalizedRequests[selectedDataIndex + 1]);
+            searchParams.set("requestId", normalizedRequests[selectedDataIndex + 1].id);
           }
         }}
       />
