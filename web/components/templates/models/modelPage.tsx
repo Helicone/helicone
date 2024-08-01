@@ -64,7 +64,8 @@ const ModelPage = (props: ModelPageProps) => {
         id="modelMetrics"
         defaultData={data?.data || []}
         defaultColumns={INITIAL_COLUMNS}
-        dataLoading={isLoading}
+        skeletonLoading={isLoading}
+        dataLoading={false}
         exportData={data?.data || []}
         onRowSelect={(row) => {}}
         timeFilter={{

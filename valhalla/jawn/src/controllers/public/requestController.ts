@@ -21,7 +21,6 @@ import {
 import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { ScoreManager, ScoreRequest } from "../../managers/score/ScoreManager";
-import util from "util";
 
 export type RequestFilterBranch = {
   left: RequestFilterNode;

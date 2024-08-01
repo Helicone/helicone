@@ -256,7 +256,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isLive
   );
 
-  useGetS3Bodies(requestsSkeleton); // how the data ends up in the table??
+  const { requestBodies: s3Bodies } = useGetS3Bodies(requestsSkeleton); // how the data ends up in the table??
 
   const requestWithoutStream = normalizedRequests.find((r) => {
     return (
@@ -740,7 +740,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             id="requests-table"
             defaultData={normalizedRequests || []}
             defaultColumns={columnsWithProperties}
-            dataLoading={isDataLoading}
+            skeletonLoading={isDataLoading}
+            dataLoading={s3Bodies.isLoading}
             sortable={sort}
             advancedFilters={{
               filterMap: filterMap,

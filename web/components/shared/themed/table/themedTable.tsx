@@ -33,6 +33,7 @@ interface ThemedTableV5Props<T> {
   id: string;
   defaultData: T[];
   defaultColumns: ColumnDef<T>[];
+  skeletonLoading: boolean;
   dataLoading: boolean;
   advancedFilters?: {
     filterMap: SingleFilterDef<any>[];
@@ -79,6 +80,7 @@ export default function ThemedTable<T>(props: ThemedTableV5Props<T>) {
     id,
     defaultData,
     defaultColumns,
+    skeletonLoading,
     dataLoading,
     advancedFilters,
     exportData,
@@ -118,6 +120,7 @@ export default function ThemedTable<T>(props: ThemedTableV5Props<T>) {
     if (activeColumns.length > 0 && activeColumns.every((c) => c.id === "")) {
       setActiveColumns(columnDefsToDragColumnItems(columns));
     }
+    console.log(rows);
   }, [activeColumns, columns, setActiveColumns]);
 
   useEffect(() => {
@@ -173,7 +176,7 @@ export default function ThemedTable<T>(props: ThemedTableV5Props<T>) {
         rows={exportData}
       />
 
-      {dataLoading ? (
+      {skeletonLoading ? (
         <LoadingAnimation title="Loading Data..." />
       ) : rows.length === 0 ? (
         <div className="bg-white dark:bg-black h-48 w-full rounded-lg border border-gray-300 dark:border-gray-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
@@ -258,6 +261,19 @@ export default function ThemedTable<T>(props: ThemedTableV5Props<T>) {
                           },
                         }}
                       >
+                        <span
+                          className={clsx(
+                            "w-full flex flex-grow",
+                            (cell.column.id == "requestText" ||
+                              cell.column.id == "responseText") &&
+                              dataLoading
+                              ? "animate-pulse bg-gray-200 rounded-md"
+                              : "hidden"
+                          )}
+                        >
+                          &nbsp;
+                        </span>
+
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
