@@ -633,6 +633,8 @@ Json: JsonObject;
       request_user_id: string;
       request_properties: components["schemas"]["Record_string.string_"];
       provider: string;
+      /** Format: double */
+      delay_ms: number | null;
       target_url: string;
       request_model: string;
       signed_body_url?: string | null;

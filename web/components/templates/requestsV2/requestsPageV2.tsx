@@ -98,7 +98,11 @@ function getSortLeaf(
 }
 
 function getTableName(isCached: boolean): string {
-  return isCached ? "cache_hits" : "request";
+  return isCached ? "cache_hits" : "request_response_versioned";
+}
+
+function getCreatedAtColumn(isCached: boolean): string {
+  return isCached ? "created_at" : "request_created_at";
 }
 
 const RequestsPageV2 = (props: RequestsPageV2Props) => {
@@ -156,6 +160,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
     const tableName = getTableName(isCached);
+    const createdAtColumn = getCreatedAtColumn(isCached);
 
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
       const [_, start, end] = currentTimeFilter.split("_");
@@ -163,7 +168,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       const filter: FilterNode = {
         left: {
           [tableName]: {
-            created_at: {
+            [createdAtColumn]: {
               gte: new Date(start).toISOString(),
             },
           },
@@ -171,7 +176,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         operator: "and",
         right: {
           [tableName]: {
-            created_at: {
+            [createdAtColumn]: {
               lte: new Date(end).toISOString(),
             },
           },
@@ -181,7 +186,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     } else {
       return {
         [tableName]: {
-          created_at: {
+          [createdAtColumn]: {
             gte: getTimeIntervalAgo(
               (searchParams.get("t") as TimeInterval) || "24h"
             ).toISOString(),
@@ -269,7 +274,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   useEffect(() => {
     if (initialRequestId && selectedData === undefined) {
       const fetchRequest = async () => {
-        const response = await jawn.POST("/v1/request/query", {
+        const response = await jawn.POST("/v1/request/queryV2", {
           body: {
             filter: {
               left: {
@@ -498,12 +503,13 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   const onTimeSelectHandler = (key: TimeInterval, value: string) => {
     const tableName = getTableName(isCached);
+    const createdAtColumn = getCreatedAtColumn(isCached);
     if (key === "custom") {
       const [start, end] = value.split("_");
       const filter: FilterNode = {
         left: {
           [tableName]: {
-            created_at: {
+            [createdAtColumn]: {
               gte: new Date(start).toISOString(),
             },
           },
@@ -511,7 +517,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         operator: "and",
         right: {
           [tableName]: {
-            created_at: {
+            [createdAtColumn]: {
               lte: new Date(end).toISOString(),
             },
           },
@@ -522,7 +528,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
     setTimeFilter({
       [tableName]: {
-        created_at: {
+        [createdAtColumn]: {
           gte: getTimeIntervalAgo(key).toISOString(),
         },
       },

@@ -508,6 +508,7 @@ const models: TsoaRoute.Models = {
             "request_user_id": {"dataType":"string","required":true},
             "request_properties": {"ref":"Record_string.string_","required":true},
             "provider": {"dataType":"string","required":true},
+            "delay_ms": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
             "target_url": {"dataType":"string","required":true},
             "request_model": {"dataType":"string","required":true},
             "signed_body_url": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},

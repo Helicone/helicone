@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../components/layout/organizationContext";
-import { HeliconeRequest } from "../../lib/api/request/request";
+import { HeliconeRequestV2 } from "../../lib/api/request/request";
 import { getJawnClient } from "../../lib/clients/jawn";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
@@ -8,7 +8,7 @@ import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
 import {
   getModelFromPath,
-  mapGeminiPro,
+  mapGeminiProV2,
 } from "../../components/templates/requestsV2/builder/mappers/geminiMapper";
 
 const useGetRequests = (
@@ -39,7 +39,7 @@ const useGetRequests = (
         const isCached = query.queryKey[5];
         const orgId = query.queryKey[6] as string;
         const jawn = getJawnClient(orgId);
-        const response = await jawn.POST("/v1/request/query", {
+        const response = await jawn.POST("/v1/request/queryV2", {
           body: {
             filter: advancedFilter as any,
             offset: (currentPage - 1) * currentPageSize,
@@ -49,10 +49,10 @@ const useGetRequests = (
           },
         });
 
-        const result = response.data as Result<HeliconeRequest[], string>;
+        const result = response.data as Result<HeliconeRequestV2[], string>;
 
         const requests = await Promise.all(
-          result.data?.map(async (request: HeliconeRequest) => {
+          result.data?.map(async (request: HeliconeRequestV2) => {
             if (request.signed_body_url) {
               try {
                 const contentResponse = await fetch(request.signed_body_url);
@@ -69,21 +69,19 @@ const useGetRequests = (
                   request.response_body = content.response;
 
                   const model =
-                    request.model_override ||
-                    request.response_model ||
                     request.request_model ||
                     content.response?.model ||
                     content.request?.model ||
                     content.response?.body?.model || // anthropic
-                    getModelFromPath(request.request_path) ||
+                    getModelFromPath(request.target_url) ||
                     "";
 
                   if (
                     request.provider === "GOOGLE" &&
                     model.toLowerCase().includes("gemini")
                   ) {
-                    request.llmSchema = mapGeminiPro(
-                      request as HeliconeRequest,
+                    request.llmSchema = mapGeminiProV2(
+                      request as HeliconeRequestV2,
                       model
                     );
                   }

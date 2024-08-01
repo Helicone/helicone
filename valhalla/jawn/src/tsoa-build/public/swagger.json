@@ -1725,6 +1725,11 @@
 					"provider": {
 						"type": "string"
 					},
+					"delay_ms": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"target_url": {
 						"type": "string"
 					},
@@ -1797,6 +1802,7 @@
 					"request_user_id",
 					"request_properties",
 					"provider",
+					"delay_ms",
 					"target_url",
 					"request_model",
 					"time_to_first_token",

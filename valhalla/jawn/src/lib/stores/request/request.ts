@@ -96,6 +96,7 @@ export interface HeliconeRequestV2 {
   request_user_id: string;
   request_properties: Record<string, string>;
   provider: string;
+  delay_ms: number | null;
   target_url: string;
   request_model: string;
   signed_body_url?: string | null;
@@ -262,13 +263,16 @@ export async function getRequestsV2(
 
   const query = `
     SELECT response_id,
+      map('helicone_message', 'Response body no longer supported. To retrieve response body, please contact engineering@helicone.ai') as response_body,
       response_created_at,
-      status AS response_status,
+      toInt32(status) AS response_status,
       request_id,
+      map('helicone_message', 'Request body no longer supported. To retrieve request body, please contact engineering@helicone.ai') as request_body,
       request_created_at,
       user_id AS request_user_id,
       properties AS request_properties,
       provider,
+      toInt32(latency) AS delay_ms,
       model AS request_model,
       time_to_first_token,
       (prompt_tokens + completion_tokens) AS total_tokens,
@@ -280,11 +284,16 @@ export async function getRequestsV2(
       assets,
       target_url,
     FROM request_response_versioned
-    WHERE request_response_versioned.organization_id = '${orgId}'
+    WHERE (
+      (${builtFilter.filter})
+    )
     ORDER BY request_response_versioned.request_created_at DESC
     LIMIT ${limit}
     OFFSET ${offset}
   `;
+
+  console.log("query", query);
+  console.log("filter", builtFilter.filter);
 
   const requests = await dbQueryClickhouse<HeliconeRequestV2>(
     query,
