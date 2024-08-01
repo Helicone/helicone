@@ -170,6 +170,9 @@ interface RequestResponseVersionedToOperators {
   node_id: SingleKey<TextOperators>;
   job_id: SingleKey<TextOperators>;
   threat: SingleKey<BooleanOperators>;
+  request_id: SingleKey<TextOperators>;
+  prompt_tokens: SingleKey<NumberOperators>;
+  target_url: SingleKey<TextOperators>;
   properties: {
     [key: string]: SingleKey<TextOperators>;
   };

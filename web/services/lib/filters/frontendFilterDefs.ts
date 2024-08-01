@@ -226,15 +226,15 @@ export const DASHBOARD_PAGE_TABLE_FILTERS: [
 
 export const REQUEST_TABLE_FILTERS: [
   SingleFilterDef<"request_response_search">,
-  SingleFilterDef<"request">,
+  SingleFilterDef<"request_response_versioned">,
   SingleFilterDef<"request_response_search">,
-  SingleFilterDef<"response">,
-  SingleFilterDef<"request">,
-  SingleFilterDef<"response">,
-  SingleFilterDef<"response">,
-  SingleFilterDef<"request">,
-  SingleFilterDef<"feedback">,
-  SingleFilterDef<"request">
+  SingleFilterDef<"request_response_versioned">,
+  SingleFilterDef<"request_response_versioned">,
+  SingleFilterDef<"request_response_versioned">,
+  SingleFilterDef<"request_response_versioned">,
+  SingleFilterDef<"request_response_versioned">
+  // SingleFilterDef<"request_response_versioned">,
+  // SingleFilterDef<"request_response_versioned">
 ] = [
   {
     label: "Request",
@@ -246,8 +246,8 @@ export const REQUEST_TABLE_FILTERS: [
   {
     label: "Request-Id",
     operators: booleanToTextOperators,
-    table: "request",
-    column: "id",
+    table: "request_response_versioned",
+    column: "request_id",
     category: "request",
   },
   {
@@ -260,22 +260,22 @@ export const REQUEST_TABLE_FILTERS: [
   {
     label: "Total Tokens",
     operators: numberOperators,
-    table: "response",
-    column: "body_tokens",
+    table: "request_response_versioned",
+    column: "prompt_tokens",
     category: "request",
   },
   {
     label: "User",
     operators: textOperators,
-    table: "request",
+    table: "request_response_versioned",
     column: "user_id",
     category: "request",
   },
   {
     label: "Model",
     operators: textOperators,
-    table: "response",
-    column: "body_model",
+    table: "request_response_versioned",
+    column: "model",
     category: "request",
   },
   {
@@ -335,30 +335,30 @@ export const REQUEST_TABLE_FILTERS: [
       },
     ]),
     category: "response",
-    table: "response",
+    table: "request_response_versioned",
     column: "status",
   },
   {
     label: "Path",
     operators: textOperators,
-    table: "request",
-    column: "path",
+    table: "request_response_versioned",
+    column: "target_url",
     category: "request",
   },
-  {
-    label: "Feedback",
-    operators: booleanOperators,
-    table: "feedback",
-    column: "rating",
-    category: "feedback",
-  },
-  {
-    label: "Prompt Id",
-    operators: textOperators,
-    table: "request",
-    column: "prompt_id",
-    category: "request",
-  },
+  // {
+  //   label: "Feedback",
+  //   operators: booleanOperators,
+  //   table: "feedback",
+  //   column: "rating",
+  //   category: "feedback",
+  // },
+  // {
+  //   label: "Prompt Id",
+  //   operators: textOperators,
+  //   table: "request",
+  //   column: "prompt_id",
+  //   category: "request",
+  // },
 ];
 
 export const userTableFilters: [

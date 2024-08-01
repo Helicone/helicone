@@ -61,8 +61,8 @@ const useRequestsPageV2 = (
             param: model.model,
           })) || []
       ),
-      table: "response",
-      column: "body_model",
+      table: "request_response_versioned",
+      column: "model",
       category: "request",
     };
   }
