@@ -137,7 +137,11 @@ export const useGetS3Bodies = (result: HeliconeRequest[]) => {
                     );
                   }
 
-                  return r;
+                  return {
+                      ...request,
+                      request_body: content.request,
+                      response_body: content.response,
+                  };
                 }
               } catch (error) {
                 console.log(`Error fetching content: ${error}`);
