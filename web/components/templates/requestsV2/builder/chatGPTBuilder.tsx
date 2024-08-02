@@ -62,11 +62,11 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
         }
 
         // Get the last message content
-        const lastMessageContent = messages.at(-1)?.content;
+        const firstMessageContent = messages.at(0)?.content;
 
         // If content is an array, try to find the first string or a text message
-        if (Array.isArray(lastMessageContent)) {
-          const firstString = lastMessageContent.find(
+        if (Array.isArray(firstMessageContent)) {
+          const firstString = firstMessageContent.find(
             (item) => typeof item === "string"
           );
           if (firstString) return firstString;
@@ -96,16 +96,16 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
 
         // If content is an object, handle specific keys
         else if (
-          typeof lastMessageContent === "object" &&
-          lastMessageContent !== null
+          typeof firstMessageContent === "object" &&
+          firstMessageContent !== null
         ) {
-          return lastMessageContent.transcript || ""; // Return 'transcript' or default to "hello"
+          return firstMessageContent.transcript || ""; // Return 'transcript' or default to "hello"
         }
 
         // Return the last message content if it's neither an array nor an object, or its string representation
-        return typeof lastMessageContent === "string"
-          ? lastMessageContent
-          : JSON.stringify(lastMessageContent || "");
+        return typeof firstMessageContent === "string"
+          ? firstMessageContent
+          : JSON.stringify(firstMessageContent || "");
       } catch (error) {
         console.error("Error parsing request text:", error);
         return "error_parsing_request";
