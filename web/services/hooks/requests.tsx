@@ -89,7 +89,7 @@ const useGetRequests = (
   };
 };
 
-export const useGetS3Bodies = (result: HeliconeRequest[]) => {
+export const useGetFullRequest = (result: HeliconeRequest[]) => {
   return {
     requestBodies: useQuery({
       queryKey: [

@@ -49,7 +49,7 @@ import {
   UIFilterRowNode,
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
-import { useGetS3Bodies } from "../../../services/hooks/requests";
+import { useGetFullRequest } from "../../../services/hooks/requests";
 import Link from "next/link";
 
 interface RequestsPageV2Props {
@@ -256,7 +256,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isLive
   );
 
-  const { requestBodies: s3Bodies } = useGetS3Bodies(requestsSkeleton); // how the data ends up in the table??
+  const { requestBodies } = useGetFullRequest(requestsSkeleton); // how the data ends up in the table??
 
   const requestWithoutStream = normalizedRequests.find((r) => {
     return (
@@ -739,13 +739,13 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           <ThemedTable
             id="requests-table"
             defaultData={
-              s3Bodies.isLoading
+              requestBodies.isLoading
                 ? normalizedRequests
-                : s3Bodies.data?.data || []
+                : requestBodies.data?.data || []
             }
             defaultColumns={columnsWithProperties}
             skeletonLoading={isDataLoading}
-            dataLoading={s3Bodies.isLoading}
+            dataLoading={requestBodies.isLoading}
             sortable={sort}
             advancedFilters={{
               filterMap: filterMap,
