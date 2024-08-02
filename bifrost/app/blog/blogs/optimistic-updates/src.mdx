@@ -1,6 +1,6 @@
 ![Optimizing Large Data Table Rendering with Asynchronous Loading in React](/static/blog/optimistic-updates/cover.webp)
 
-As developers, we often face challenges when rendering large datasets in web applications. At Helicone, an AI observability platform, we recently tackled such a challenge on our requests page. This blog post details how we optimized our data loading process, significantly improving render times and overall user experience.
+Rendering large amounts of data in web applications can be challenging. At Helicone, we recently improved the performance of our requests page, which handles substantial amounts of data. This post outlines the steps we took to optimize data loading, resulting in faster render times and improved usability.
 
 ### Background
 
@@ -34,10 +34,6 @@ To improve performance, we implemented an asynchronous loading strategy with opt
 This approach reduced initial render time to approximately 0.25 seconds, a 6x improvement.
 
 # Implementation Challenges
-
-Thank you for providing this additional context. I'll revise the "Implementation Challenges" section of the blog post to include this specific issue. Here's an updated version of that section:
-
-Implementation Challenges
 
 While implementing this solution, we encountered several challenges:
 
@@ -98,8 +94,6 @@ r.response_body = content.response;
 return r;
 ```
 
-Thank you for providing this additional context about the data transformations. I'll incorporate this information into the blog post, specifically expanding on the "Data Shape Transformation" challenge. Here's an updated version of that section:
-
 ## Data Shape Transformation
 
 The shift to asynchronous loading also introduced a mismatch between the data types used by different parts of our system. This required careful handling of data transformations.
@@ -130,3 +124,6 @@ const builders: {
 ```
 
 At the core of the transformation logic is a builders object that maps different builder types to their corresponding classes. These builders allows us to convert `HeliconeRequest` objects into `NormalizedRequest` objects, which are more suitable for our table component. A `getRequestBuilder` function determines the appropriate builder based on the request, and the `getNormalizedRequest` function uses this builder to create a normalized version of the request.
+
+# Conclusion
+The adoption of asynchronous loading and optimistic rendering has significantly enhanced the performance and user experience of Helicone's requests page. By rendering metadata immediately and fetching message bodies in the background, we achieved a 6x improvement in initial render times, reducing them from 1.5 seconds to 0.25 seconds. This optimization not only improved responsiveness but also helped us identify and address challenges related to React state management and data shape transformations. These improvements make handling large amounts of data more efficient and user-friendly.
