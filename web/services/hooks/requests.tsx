@@ -90,7 +90,6 @@ const useGetRequests = (
 };
 
 export const useGetS3Bodies = (result: HeliconeRequest[]) => {
-  const org = useOrg();
   return {
     requestBodies: useQuery({
       queryKey: [
