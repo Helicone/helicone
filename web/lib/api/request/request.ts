@@ -259,11 +259,12 @@ export async function getRequestCountClickhouse(
 
   const query = `
 SELECT
-  count(DISTINCT r.request_id) as count
-from request_response_versioned r
+  count(DISTINCT request_response_versioned.request_id) as count
+from request_response_versioned 
 WHERE (${builtFilter.filter})
   `;
   console.log("query", query);
+  console.log("filter", builtFilter.filter);
   console.log("args", builtFilter.argsAcc);
   const { data, error } = await dbQueryClickhouse<{ count: number }>(
     query,

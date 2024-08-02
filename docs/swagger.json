@@ -1428,6 +1428,18 @@
 					"threat": {
 						"$ref": "#/components/schemas/Partial_BooleanOperators_"
 					},
+					"request_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"prompt_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"completion_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"target_url": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
 					"properties": {
 						"properties": {},
 						"additionalProperties": {
@@ -1441,6 +1453,12 @@
 							"$ref": "#/components/schemas/Partial_TextOperators_"
 						},
 						"type": "object"
+					},
+					"request_body": {
+						"$ref": "#/components/schemas/Partial_VectorOperators_"
+					},
+					"response_body": {
+						"$ref": "#/components/schemas/Partial_VectorOperators_"
 					}
 				},
 				"type": "object",

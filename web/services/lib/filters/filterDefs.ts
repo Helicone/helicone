@@ -172,6 +172,7 @@ interface RequestResponseVersionedToOperators {
   threat: SingleKey<BooleanOperators>;
   request_id: SingleKey<TextOperators>;
   prompt_tokens: SingleKey<NumberOperators>;
+  completion_tokens: SingleKey<NumberOperators>;
   target_url: SingleKey<TextOperators>;
   properties: {
     [key: string]: SingleKey<TextOperators>;
@@ -179,6 +180,8 @@ interface RequestResponseVersionedToOperators {
   search_properties: {
     [key: string]: SingleKey<TextOperators>;
   };
+  request_body: SingleKey<VectorOperators>;
+  response_body: SingleKey<VectorOperators>;
 }
 
 export type FilterLeafRequestResponseLog =

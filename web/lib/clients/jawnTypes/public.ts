@@ -539,12 +539,18 @@ export interface components {
       node_id?: components["schemas"]["Partial_TextOperators_"];
       job_id?: components["schemas"]["Partial_TextOperators_"];
       threat?: components["schemas"]["Partial_BooleanOperators_"];
+      request_id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      target_url?: components["schemas"]["Partial_TextOperators_"];
       properties?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
       search_properties?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
+      request_body?: components["schemas"]["Partial_VectorOperators_"];
+      response_body?: components["schemas"]["Partial_VectorOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_CacheHitsTableToOperators_: {

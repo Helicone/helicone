@@ -184,6 +184,10 @@ const whereKeyMappings: KeyMappings = {
       node_id: "request_response_versioned.node_id",
       job_id: "request_response_versioned.job_id",
       threat: "request_response_versioned.threat",
+      prompt_tokens: "request_response_versioned.prompt_tokens",
+      completion_tokens: "request_response_versioned.completion_tokens",
+      request_body: "request_response_versioned.request_body",
+      response_body: "request_response_versioned.response_body",
     })(filter, placeValueSafely);
   },
   request_response_search: (filter, placeValueSafely) => {
@@ -365,7 +369,7 @@ export function buildFilterLeaf(
       filters.push(`${column} is null`);
     } else {
       if (operatorKey === "contains" || operatorKey === "not-contains") {
-        filters.push(`${column} ${sqlOperator} %${value}%`);
+        filters.push(`${column} ${sqlOperator} '%' || ${value}::text || '%'`);
       } else {
         filters.push(`${column} ${sqlOperator} ${value}`);
       }

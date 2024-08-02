@@ -225,22 +225,21 @@ export const DASHBOARD_PAGE_TABLE_FILTERS: [
 ];
 
 export const REQUEST_TABLE_FILTERS: [
-  SingleFilterDef<"request_response_search">,
   SingleFilterDef<"request_response_versioned">,
-  SingleFilterDef<"request_response_search">,
+  SingleFilterDef<"request_response_versioned">,
+  SingleFilterDef<"request_response_versioned">,
+  SingleFilterDef<"request_response_versioned">,
   SingleFilterDef<"request_response_versioned">,
   SingleFilterDef<"request_response_versioned">,
   SingleFilterDef<"request_response_versioned">,
   SingleFilterDef<"request_response_versioned">,
   SingleFilterDef<"request_response_versioned">
-  // SingleFilterDef<"request_response_versioned">,
-  // SingleFilterDef<"request_response_versioned">
 ] = [
   {
     label: "Request",
     operators: VectorOperators,
-    table: "request_response_search",
-    column: "request_body_vector",
+    table: "request_response_versioned",
+    column: "request_body",
     category: "request",
   },
   {
@@ -253,8 +252,8 @@ export const REQUEST_TABLE_FILTERS: [
   {
     label: "Response",
     operators: VectorOperators,
-    table: "request_response_search",
-    column: "response_body_vector",
+    table: "request_response_versioned",
+    column: "response_body",
     category: "request",
   },
   {
@@ -345,20 +344,13 @@ export const REQUEST_TABLE_FILTERS: [
     column: "target_url",
     category: "request",
   },
-  // {
-  //   label: "Feedback",
-  //   operators: booleanOperators,
-  //   table: "feedback",
-  //   column: "rating",
-  //   category: "feedback",
-  // },
-  // {
-  //   label: "Prompt Id",
-  //   operators: textOperators,
-  //   table: "request",
-  //   column: "prompt_id",
-  //   category: "request",
-  // },
+  {
+    label: "Feedback",
+    operators: booleanOperators,
+    table: "request_response_versioned",
+    column: "properties",
+    category: "feedback",
+  },
 ];
 
 export const userTableFilters: [

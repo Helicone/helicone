@@ -7,6 +7,7 @@ import {
 import {
   SortLeafRequest,
   buildRequestSort,
+  buildRequestSortV2,
 } from "../../shared/sorts/requests/sorts";
 import { Result, resultMap, ok, err } from "../../shared/result";
 import {
@@ -243,10 +244,7 @@ export async function getRequestsV2(
 
   console.log("sort", JSON.stringify(sort));
 
-  // const joinQuery = addJoinQueries("", filter);
-  // if (offset > 10_000 || offset < 0) {
-  //   return err("unsupport offset value");
-  // }
+  const sortSQL = buildRequestSortV2(sort);
 
   if (limit < 0 || limit > 1_000) {
     return err("invalid limit");
@@ -283,7 +281,7 @@ export async function getRequestsV2(
     WHERE (
       (${builtFilter.filter})
     )
-    ORDER BY request_response_versioned.request_created_at DESC
+    ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
     LIMIT ${limit}
     OFFSET ${offset}
   `;
@@ -420,9 +418,7 @@ export async function getRequestsCachedV2(
     argsAcc: [],
   });
 
-  // TODO: FIX
-
-  //const sortSQL = buildRequestSort(sort);
+  const sortSQL = buildRequestSortV2(sort);
 
   const query = `
   SELECT
@@ -453,10 +449,9 @@ export async function getRequestsCachedV2(
   WHERE rrv.organization_id = '${orgId}'
     AND (${builtFilter.filter})
   ${
-    // sortSQL !== undefined
-    //   ? `ORDER BY ${sortSQL}`
-    //   :
-    "ORDER BY rrv.request_created_at DESC"
+    sortSQL !== undefined
+      ? `ORDER BY ${sortSQL}`
+      : "ORDER BY rrv.request_created_at DESC"
   }
   LIMIT ${limit}
   OFFSET ${offset}
