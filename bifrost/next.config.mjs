@@ -19,6 +19,9 @@ const nextConfig = {
       },
     ];
   },
+  images: {
+    domains: ["api.producthunt.com"],
+  },
 };
 
 export default nextConfig;
