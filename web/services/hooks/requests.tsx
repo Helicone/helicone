@@ -95,7 +95,6 @@ export const useGetS3Bodies = (result: HeliconeRequest[]) => {
       queryKey: [
         "requestsBodies",
         result,
-        org?.currentOrg?.id,
       ],
       queryFn: async (query) => {
         const requests = await Promise.all(
