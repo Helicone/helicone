@@ -28,8 +28,6 @@ export type Provider =
   | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
-import util from "util";
-
 export interface HeliconeRequestAsset {
   assetUrl: string;
 }
@@ -119,20 +117,6 @@ export async function getRequests(
   limit: number,
   sort: SortLeafRequest
 ): Promise<Result<HeliconeRequest[], string>> {
-  const requests = await getRequestsSkeleton(orgId, filter, offset, limit, sort);
-  if (requests.error) {
-    return { data: null, error: requests.error };
-  }
-  return await getFullRequests(orgId, requests.data || []);
-}
-
-export async function getRequestsSkeleton(
-  orgId: string,
-  filter: FilterNode,
-  offset: number,
-  limit: number,
-  sort: SortLeafRequest
-): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
@@ -208,13 +192,8 @@ export async function getRequestsSkeleton(
   OFFSET ${offset}
 
 `;
-  return await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
-}
+  const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
 
-export async function getFullRequests(
-  orgId: string,
-  requests: HeliconeRequest[]
-): Promise<Result<HeliconeRequest[], string>> {
   const s3Client = new S3Client(
     process.env.S3_ACCESS_KEY ?? "",
     process.env.S3_SECRET_KEY ?? "",
@@ -222,7 +201,7 @@ export async function getFullRequests(
     process.env.S3_BUCKET_NAME ?? "",
     (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
   );
-  const results = await mapLLMCalls(requests, s3Client, orgId);
+  const results = await mapLLMCalls(requests.data, s3Client, orgId);
   return resultMap(results, (data) => {
     return data;
   });
@@ -345,7 +324,6 @@ async function mapLLMCalls(
 
         if (signedBodyUrlErr || !signedBodyUrl) {
           // If there was an error, just return the request as is
-          console.log("Returning cuz of signed body url error");
           return heliconeRequest;
         }
 

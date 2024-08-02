@@ -95,7 +95,7 @@ export class RequestController extends Controller {
     if (requests.error || !requests.data) {
       this.setStatus(500);
     } else {
-      this.setStatus(200);
+      this.setStatus(200); // set return status 201
     }
     return requests;
   }
