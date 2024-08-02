@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../components/layout/organizationContext";
-import { HeliconeRequestV2 } from "../../lib/api/request/request";
+import { HeliconeRequest } from "../../lib/api/request/request";
 import { getJawnClient } from "../../lib/clients/jawn";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
@@ -8,8 +8,32 @@ import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
 import {
   getModelFromPath,
-  mapGeminiProV2,
+  mapGeminiPro,
 } from "../../components/templates/requestsV2/builder/mappers/geminiMapper";
+
+function formatDateForClickHouse(date: Date): string {
+  return date.toISOString().slice(0, 19).replace("T", " ");
+}
+
+function processFilter(filter: any): any {
+  if (typeof filter !== "object" || filter === null) {
+    return filter;
+  }
+
+  const result: any = Array.isArray(filter) ? [] : {};
+
+  for (const key in filter) {
+    if (key === "gte" || key === "lte") {
+      result[key] = formatDateForClickHouse(new Date(filter[key]));
+    } else if (typeof filter[key] === "object") {
+      result[key] = processFilter(filter[key]);
+    } else {
+      result[key] = filter[key];
+    }
+  }
+
+  return result;
+}
 
 const useGetRequests = (
   currentPage: number,
@@ -39,6 +63,7 @@ const useGetRequests = (
         const isCached = query.queryKey[5];
         const orgId = query.queryKey[6] as string;
         const jawn = getJawnClient(orgId);
+        console.log("sentfilter", JSON.stringify(advancedFilter));
         const response = await jawn.POST("/v1/request/queryV2", {
           body: {
             filter: advancedFilter as any,
@@ -49,10 +74,10 @@ const useGetRequests = (
           },
         });
 
-        const result = response.data as Result<HeliconeRequestV2[], string>;
+        const result = response.data as Result<HeliconeRequest[], string>;
 
         const requests = await Promise.all(
-          result.data?.map(async (request: HeliconeRequestV2) => {
+          result.data?.map(async (request: HeliconeRequest) => {
             if (request.signed_body_url) {
               try {
                 const contentResponse = await fetch(request.signed_body_url);
@@ -80,8 +105,8 @@ const useGetRequests = (
                     request.provider === "GOOGLE" &&
                     model.toLowerCase().includes("gemini")
                   ) {
-                    request.llmSchema = mapGeminiProV2(
-                      request as HeliconeRequestV2,
+                    request.llmSchema = mapGeminiPro(
+                      request as HeliconeRequest,
                       model
                     );
                   }
@@ -114,14 +139,15 @@ const useGetRequests = (
       queryFn: async (query) => {
         const advancedFilter = query.queryKey[3];
         const isCached = query.queryKey[5];
-
+        const processedFilter = processFilter(advancedFilter);
+        console.log("advancedFilter", advancedFilter);
         return await fetch("/api/request/count", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            filter: advancedFilter,
+            filter: processedFilter,
             isCached,
           }),
         }).then((res) => res.json() as Promise<Result<number, string>>);

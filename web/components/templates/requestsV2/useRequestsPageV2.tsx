@@ -76,6 +76,8 @@ const useRequestsPageV2 = (
     operator: "and",
   };
 
+  console.log("adv", filter);
+
   const { requests, count } = useGetRequests(
     currentPage,
     currentPageSize,

@@ -354,7 +354,10 @@ export interface components {
           };
         }[];
     };
-Json: JsonObject;
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.string_": {
+      [key: string]: string;
+    };
     /** @enum {string} */
     Provider: "OPENAI" | "ANTHROPIC" | "TOGETHERAI" | "GROQ" | "GOOGLE" | "CUSTOM";
     /** @enum {string} */
@@ -418,38 +421,27 @@ Json: JsonObject;
       response?: components["schemas"]["Response"] | null;
     };
     /** @description Construct a type with a set of properties K of type T */
-    "Record_string.string_": {
-      [key: string]: string;
-    };
-    /** @description Construct a type with a set of properties K of type T */
     "Record_string.number_": {
       [key: string]: number;
     };
     HeliconeRequest: {
       /** @example Happy */
-      response_id: string;
-      response_created_at: string;
+      response_id: string | null;
+      response_created_at: string | null;
       response_body?: unknown;
       /** Format: double */
       response_status: number;
       response_model: string | null;
       request_id: string;
-      request_model: string | null;
-      model_override: string | null;
       request_created_at: string;
       request_body: unknown;
       request_path: string;
       request_user_id: string | null;
-      request_properties: {
-        [key: string]: components["schemas"]["Json"];
-      } | null;
-      request_feedback: {
-        [key: string]: components["schemas"]["Json"];
-      } | null;
+      request_properties: components["schemas"]["Record_string.string_"] | null;
+      request_model: string | null;
+      model_override: string | null;
       helicone_user: string | null;
-      prompt_name: string | null;
-      prompt_regex: string | null;
-      key_name: string;
+      provider: components["schemas"]["Provider"];
       /** Format: double */
       delay_ms: number | null;
       /** Format: double */
@@ -460,8 +452,6 @@ Json: JsonObject;
       prompt_tokens: number | null;
       /** Format: double */
       completion_tokens: number | null;
-      provider: components["schemas"]["Provider"];
-      node_id: string | null;
       prompt_id: string | null;
       feedback_created_at?: string | null;
       feedback_id?: string | null;
@@ -474,6 +464,9 @@ Json: JsonObject;
       scores: components["schemas"]["Record_string.number_"] | null;
       /** Format: double */
       costUSD?: number | null;
+      properties: components["schemas"]["Record_string.string_"];
+      assets: string[];
+      target_url: string;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -621,44 +614,6 @@ Json: JsonObject;
       isPartOfExperiment?: boolean;
       isScored?: boolean;
     };
-    HeliconeRequestV2: {
-      response_id: string | null;
-      response_body?: unknown;
-      response_created_at: string | null;
-      /** Format: double */
-      response_status: number;
-      request_id: string;
-      request_body: unknown;
-      request_created_at: string;
-      request_user_id: string;
-      request_properties: components["schemas"]["Record_string.string_"];
-      provider: string;
-      /** Format: double */
-      delay_ms: number | null;
-      target_url: string;
-      request_model: string;
-      signed_body_url?: string | null;
-      /** Format: double */
-      time_to_first_token: number | null;
-      /** Format: double */
-      total_tokens: number;
-      /** Format: double */
-      completion_tokens: number | null;
-      /** Format: double */
-      prompt_tokens: number | null;
-      country_code: string | null;
-      scores: components["schemas"]["Record_string.number_"];
-      properties: components["schemas"]["Record_string.string_"];
-      llmSchema: components["schemas"]["LlmSchema"] | null;
-      assets: string[];
-      asset_urls: components["schemas"]["Record_string.string_"] | null;
-    };
-    "ResultSuccess_HeliconeRequestV2-Array_": {
-      data: components["schemas"]["HeliconeRequestV2"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_HeliconeRequestV2-Array.string_": components["schemas"]["ResultSuccess_HeliconeRequestV2-Array_"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_null_: {
       /** @enum {number|null} */
       data: null;
@@ -1253,7 +1208,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_HeliconeRequestV2-Array.string_"];
+          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
         };
       };
     };

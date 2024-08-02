@@ -273,7 +273,7 @@ export class RequestManager extends BaseManager {
 
   async getRequestsV2(
     params: RequestQueryParams
-  ): Promise<Result<HeliconeRequestV2[], string>> {
+  ): Promise<Result<HeliconeRequest[], string>> {
     const {
       filter,
       offset = 0,

@@ -43,35 +43,26 @@ export interface HeliconeRequest {
   /**
    * @example "Happy"
    */
-  response_id: string;
-  response_created_at: string;
+  response_id: string | null;
+  response_created_at: string | null;
   response_body?: any;
   response_status: number;
   response_model: string | null;
   request_id: string;
-  request_model: string | null;
-  model_override: string | null;
   request_created_at: string;
   request_body: any;
   request_path: string;
   request_user_id: string | null;
-  request_properties: {
-    [key: string]: Json;
-  } | null;
-  request_feedback: {
-    [key: string]: Json;
-  } | null;
+  request_properties: Record<string, string> | null;
+  request_model: string | null;
+  model_override: string | null;
   helicone_user: string | null;
-  prompt_name: string | null;
-  prompt_regex: string | null;
-  key_name: string;
+  provider: Provider;
   delay_ms: number | null;
   time_to_first_token: number | null;
   total_tokens: number | null;
   prompt_tokens: number | null;
   completion_tokens: number | null;
-  provider: Provider;
-  node_id: string | null;
   prompt_id: string | null;
   feedback_created_at?: string | null;
   feedback_id?: string | null;
@@ -83,6 +74,9 @@ export interface HeliconeRequest {
   asset_urls: Record<string, string> | null;
   scores: Record<string, number> | null;
   costUSD?: number | null;
+  properties: Record<string, string>;
+  assets: Array<string>;
+  target_url: string;
 }
 
 export interface HeliconeRequestV2 {
@@ -240,10 +234,12 @@ export async function getRequestsV2(
   offset: number,
   limit: number,
   sort: SortLeafRequest
-): Promise<Result<HeliconeRequestV2[], string>> {
+): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
+
+  console.log("filtttt", JSON.stringify(filter));
 
   console.log("sort", JSON.stringify(sort));
 
@@ -293,9 +289,9 @@ export async function getRequestsV2(
   `;
 
   console.log("query", query);
-  console.log("filter", builtFilter.filter);
+  console.log("filter", builtFilter.argsAcc);
 
-  const requests = await dbQueryClickhouse<HeliconeRequestV2>(
+  const requests = await dbQueryClickhouse<HeliconeRequest>(
     query,
     builtFilter.argsAcc
   );
@@ -308,7 +304,7 @@ export async function getRequestsV2(
     (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
   );
 
-  const mappedRequests = await mapLLMCallsV2(requests.data, s3Client, orgId);
+  const mappedRequests = await mapLLMCalls(requests.data, s3Client, orgId);
 
   return mappedRequests;
 }
@@ -405,7 +401,7 @@ export async function getRequestsCachedV2(
   sort: SortLeafRequest,
   isPartOfExperiment?: boolean,
   isScored?: boolean
-): Promise<Result<HeliconeRequestV2[], string>> {
+): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
@@ -466,7 +462,7 @@ export async function getRequestsCachedV2(
   OFFSET ${offset}
   `;
 
-  const requests = await dbQueryClickhouse<HeliconeRequestV2>(
+  const requests = await dbQueryClickhouse<HeliconeRequest>(
     query,
     builtFilter.argsAcc
   );
@@ -479,7 +475,7 @@ export async function getRequestsCachedV2(
     (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
   );
 
-  const results = await mapLLMCallsV2(requests.data, s3Client, orgId);
+  const results = await mapLLMCalls(requests.data, s3Client, orgId);
 
   return resultMap(results, (data) => {
     return data;

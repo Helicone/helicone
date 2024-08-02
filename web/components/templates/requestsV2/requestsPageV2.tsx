@@ -3,10 +3,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
-import {
-  TimeInterval,
-  getTimeIntervalAgo,
-} from "../../../lib/timeCalculations/time";
+import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
@@ -65,6 +62,31 @@ interface RequestsPageV2Props {
   currentFilter: OrganizationFilter | null;
   organizationLayout: OrganizationLayout | null;
   organizationLayoutAvailable: boolean;
+}
+
+function formatDateForClickHouse(date: Date): string {
+  return date.toISOString();
+}
+
+function getTimeIntervalAgo(interval: TimeInterval): Date {
+  const now = new Date();
+
+  switch (interval) {
+    case "3m":
+      return new Date(now.getTime() - 3 * 30 * 24 * 60 * 60 * 1000);
+    case "1m":
+      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    case "7d":
+      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    case "24h":
+      return new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    case "1h":
+      return new Date(now.getTime() - 60 * 60 * 1000);
+    case "all":
+      return new Date(0);
+    default:
+      return new Date(now.getTime() - 24 * 60 * 60 * 1000); // Default to 24h
+  }
 }
 
 function getSortLeaf(
@@ -169,7 +191,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         left: {
           [tableName]: {
             [createdAtColumn]: {
-              gte: new Date(start).toISOString(),
+              gte: formatDateForClickHouse(new Date(start)),
             },
           },
         },
@@ -177,19 +199,26 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         right: {
           [tableName]: {
             [createdAtColumn]: {
-              lte: new Date(end).toISOString(),
+              lte: formatDateForClickHouse(new Date(end)),
             },
           },
         },
       };
       return filter;
     } else {
+      const timeIntervalDate = getTimeIntervalAgo(
+        (currentTimeFilter as TimeInterval) || "24h"
+      );
+      console.log(
+        "tf",
+        formatDateForClickHouse(timeIntervalDate),
+        "Original Date:",
+        timeIntervalDate.toISOString()
+      );
       return {
         [tableName]: {
           [createdAtColumn]: {
-            gte: getTimeIntervalAgo(
-              (searchParams.get("t") as TimeInterval) || "24h"
-            ).toISOString(),
+            gte: formatDateForClickHouse(timeIntervalDate),
           },
         },
       };
@@ -510,7 +539,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         left: {
           [tableName]: {
             [createdAtColumn]: {
-              gte: new Date(start).toISOString(),
+              gte: formatDateForClickHouse(new Date(start)),
             },
           },
         },
@@ -518,7 +547,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         right: {
           [tableName]: {
             [createdAtColumn]: {
-              lte: new Date(end).toISOString(),
+              lte: formatDateForClickHouse(new Date(end)),
             },
           },
         },
@@ -526,10 +555,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       setTimeFilter(filter);
       return;
     }
+    console.log("tf1", formatDateForClickHouse(getTimeIntervalAgo(key)));
     setTimeFilter({
       [tableName]: {
         [createdAtColumn]: {
-          gte: getTimeIntervalAgo(key).toISOString(),
+          gte: formatDateForClickHouse(getTimeIntervalAgo(key)),
         },
       },
     });

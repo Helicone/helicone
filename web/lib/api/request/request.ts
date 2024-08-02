@@ -8,7 +8,6 @@ import {
   SortLeafRequest,
   buildRequestSort,
 } from "../../../services/lib/sorts/requests/sorts";
-import { Json } from "../../../supabase/database.types";
 import { Result, resultMap } from "../../result";
 import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { LlmSchema } from "../models/requestResponseModel";
@@ -17,36 +16,27 @@ export type Provider = ProviderName | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 3 * 1024 * 1024;
 
 export interface HeliconeRequest {
-  response_id: string;
-  response_created_at: string;
+  response_id: string | null;
+  response_created_at: string | null;
   response_body?: any;
   response_status: number;
   response_model: string | null;
   request_id: string;
-  request_model: string | null;
-  model_override: string | null;
   request_created_at: string;
   request_body: any;
   request_path: string;
   request_user_id: string | null;
-  request_properties: {
-    [key: string]: Json;
-  } | null;
-  request_feedback: {
-    [key: string]: Json;
-  } | null;
+  request_properties: Record<string, string> | null;
+  request_model: string | null;
+  model_override: string | null;
   helicone_user: string | null;
-  prompt_name: string | null;
-  prompt_regex: string | null;
-  key_name: string;
+  provider: Provider;
   delay_ms: number | null;
   time_to_first_token: number | null;
   total_tokens: number | null;
   prompt_tokens: number | null;
   completion_tokens: number | null;
-  provider: Provider;
-  node_id: string | null;
-  prompt_id: string;
+  prompt_id: string | null;
   feedback_created_at?: string | null;
   feedback_id?: string | null;
   feedback_rating?: boolean | null;
@@ -55,7 +45,11 @@ export interface HeliconeRequest {
   country_code: string | null;
   asset_ids: string[] | null;
   asset_urls: Record<string, string> | null;
-  scores: Record<string, { value: number; valueType: string }> | null;
+  scores: Record<string, number> | null;
+  costUSD?: number | null;
+  properties: Record<string, string>;
+  assets: Array<string>;
+  target_url: string;
 }
 
 export interface HeliconeRequestV2 {
@@ -256,6 +250,7 @@ export async function getRequestCountClickhouse(
   org_id: string,
   filter: FilterNode
 ): Promise<Result<number, string>> {
+  console.log("coming here", JSON.stringify(filter));
   const builtFilter = await buildFilterWithAuthClickHouse({
     org_id,
     argsAcc: [],
@@ -266,6 +261,36 @@ export async function getRequestCountClickhouse(
 SELECT
   count(DISTINCT r.request_id) as count
 from request_response_versioned r
+WHERE (${builtFilter.filter})
+  `;
+  console.log("query", query);
+  console.log("args", builtFilter.argsAcc);
+  const { data, error } = await dbQueryClickhouse<{ count: number }>(
+    query,
+    builtFilter.argsAcc
+  );
+  if (error !== null) {
+    return { data: null, error: error };
+  }
+
+  console.log("data", data);
+  return { data: data[0].count, error: null };
+}
+
+export async function getRequestCachedCountClickhouse(
+  org_id: string,
+  filter: FilterNode
+): Promise<Result<number, string>> {
+  const builtFilter = await buildFilterWithAuthClickHouse({
+    org_id,
+    argsAcc: [],
+    filter,
+  });
+
+  const query = `
+SELECT
+  count(DISTINCT r.request_id) as count
+from cache_hits r
 WHERE (${builtFilter.filter})
   `;
   const { data, error } = await dbQueryClickhouse<{ count: number }>(
