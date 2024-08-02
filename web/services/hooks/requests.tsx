@@ -151,7 +151,7 @@ export const useGetS3Bodies = (result: HeliconeRequest[]) => {
         return { data: getNormalizedRequests(requests), error: null };
       },
       refetchOnWindowFocus: false,
-      retry: true,
+      retry: false,
     }),
   };
 };
