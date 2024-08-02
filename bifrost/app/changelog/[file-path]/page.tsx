@@ -22,12 +22,13 @@ export default async function Home({
     "file-path": string;
   };
 }) {
+  const { "file-path": filePath } = params;
   const changelogFolder = path.join(
     process.cwd(),
     "app",
     "changelog",
     "changes",
-    params["file-path"],
+    filePath,
     "src.mdx"
   );
   const contentResult = await getContent(changelogFolder);
@@ -36,7 +37,13 @@ export default async function Home({
   }
 
   const { content, frontmatter } = contentResult;
-
+  const date = filePath.split("-")[0];
+  // 20240723
+  const dateObject = new Date(
+    Number(date.slice(0, 4)),
+    Number(date.slice(4, 6)) - 1,
+    Number(date.slice(6, 8))
+  );
   return (
     <>
       <div className="w-full bg-[#f8feff] h-full antialiased relative">
@@ -53,7 +60,11 @@ export default async function Home({
                 {String(frontmatter.title)}
               </h1>
               <h3 className="text-sm font-semibold text-gray-500">
-                {String(frontmatter.date)}
+                {dateObject.toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
               </h3>
               {content}
             </article>

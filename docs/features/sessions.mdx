@@ -48,6 +48,7 @@ Depending on your library you will need to add the following two headers to your
 
 - `Helicone-Session-Id` - The session id you want to track
 - `Helicone-Session-Path` - The path of the session
+- `Helicone-Session-Name` - The name of the session
 
 Here is an example is ts: [see other languages](/helicone-headers/header-directory)
 
@@ -76,6 +77,7 @@ openai.chat.completions.create(
     headers: {
       "Helicone-Session-Id": session,
       "Helicone-Session-Path": "/abstract",
+      "Helicone-Session-Name": "Course Plan",
     },
   }
 );
