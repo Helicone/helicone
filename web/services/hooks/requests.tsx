@@ -111,9 +111,6 @@ export const useGetS3Bodies = (result: HeliconeRequest[]) => {
                     content = placeAssetIdValues(request.asset_urls, content);
                   }
 
-                  const r = {...request};
-                  r.request_body = content.request;
-                  r.response_body = content.response;
 
                   const model =
                     request.model_override ||
