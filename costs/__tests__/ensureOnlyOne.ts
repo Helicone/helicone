@@ -395,26 +395,18 @@ WHEN (request_response_log.model = 'togethercomputer/RedPajama-INCITE-7B-Instruc
 WHEN (request_response_log.model = 'togethercomputer/StripedHyena-Hessian-7B') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'mistralai/Mistral-7B-v0.1') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'mistralai/Mixtral-8x7B-v0.1') THEN 900 * request_response_log.prompt_tokens + 900 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'zero-one-ai/Yi-34B') THEN 800 * request_response_log.prompt_tokens + 800 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'zero-one-ai/Yi-6B') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'google/gemma-2b') THEN 100 * request_response_log.prompt_tokens + 100 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'google/gemma-7b') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'microsoft/phi-2') THEN 100 * request_response_log.prompt_tokens + 100 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'Nexusflow/NexusRaven-V2-13B') THEN 300 * request_response_log.prompt_tokens + 300 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'Qwen/Qwen1.5-0.5B') THEN 100 * request_response_log.prompt_tokens + 100 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'Qwen/Qwen1.5-1.8B') THEN 100 * request_response_log.prompt_tokens + 100 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'Qwen/Qwen1.5-4B') THEN 100 * request_response_log.prompt_tokens + 100 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'Qwen/Qwen1.5-7B') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'Qwen/Qwen1.5-14B') THEN 300 * request_response_log.prompt_tokens + 300 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'Qwen/Qwen1.5-72B') THEN 900 * request_response_log.prompt_tokens + 900 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'togethercomputer/GPT-JT-Moderation-6B') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'togethercomputer/RedPajama-INCITE-Base-3B-v1') THEN 100 * request_response_log.prompt_tokens + 100 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'togethercomputer/RedPajama-INCITE-7B-Base') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'togethercomputer/RedPajama-INCITE-Instruct-3B-v1') THEN 100 * request_response_log.prompt_tokens + 100 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'togethercomputer/RedPajama-INCITE-7B-Instruct') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'togethercomputer/StripedHyena-Hessian-7B') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'mistralai/Mistral-7B-v0.1') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
-WHEN (request_response_log.model = 'mistralai/Mixtral-8x7B-v0.1') THEN 900 * request_response_log.prompt_tokens + 900 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'meta-llama/Llama-2-70b-hf') THEN 900 * request_response_log.prompt_tokens + 900 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'meta-llama/Llama-2-13b-hf') THEN 225 * request_response_log.prompt_tokens + 225 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'meta-llama/Llama-2-7b-hf') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'meta-llama/Meta-Llama-3-70B') THEN 900 * request_response_log.prompt_tokens + 900 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'meta-llama/Llama-3-8b-hf') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'togethercomputer/LLaMA-2-7B-32K') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo') THEN 880 * request_response_log.prompt_tokens + 880 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo') THEN 5000 * request_response_log.prompt_tokens + 5000 * request_response_log.completion_tokens
+WHEN (request_response_log.model ILIKE '%togethercomputer/Meta-Llama-3.1-8B-Instruct-Reference%') THEN 200 * request_response_log.prompt_tokens + 180 * request_response_log.completion_tokens
+WHEN (request_response_log.model ILIKE '%togethercomputer/Meta-Llama-3.1-70B-Instruct-Turbo%') THEN 880 * request_response_log.prompt_tokens + 880 * request_response_log.completion_tokens
+WHEN (request_response_log.model ILIKE '%togethercomputer/Meta-Llama-3.1-405B-Instruct-Turbo%') THEN 5000 * request_response_log.prompt_tokens + 5000 * request_response_log.completion_tokens
   ELSE 0
 END
 )
