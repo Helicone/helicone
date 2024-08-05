@@ -65,6 +65,7 @@
     "graphql-type-json": "^0.3.2",
     "gsap": "^3.12.5",
     "js-cookie": "^3.0.5",
+    "marked": "^13.0.3",
     "micro": "^10.0.1",
     "moment": "^2.29.4",
     "mui": "^0.0.1",

@@ -1311,6 +1311,7 @@ export interface operations {
           max_tokens?: number;
           tool_choice?: components["schemas"]["ChatCompletionToolChoiceOption"];
           tools?: components["schemas"]["ChatCompletionTool"][];
+          sessionPath?: string;
           sessionName?: string;
           sessionId?: string;
           userEmail?: string;

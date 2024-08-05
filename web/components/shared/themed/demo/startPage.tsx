@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Lottie from "react-lottie";
-import * as Pacman from "../../../../public/lottie/Pacman.json";
+import * as guesswho from "../../../../public/lottie/guesswho.json";
+import * as notebook from "../../../../public/lottie/notebook.json";
+import * as chatbot from "../../../../public/lottie/chatbot.json";
 import GuessWhoGame from "./guessWho";
 import { CourseGenerator } from "./courseGenerator";
 
@@ -19,21 +21,21 @@ const DEMO_GAMES = [
     id: "1",
     name: "Guess Who Game",
     type: "Game",
-    animation: Pacman,
+    animation: guesswho,
     component: GuessWhoGame,
   },
   {
     id: "2",
     name: "Course Generator",
     type: "Tool",
-    animation: Pacman,
+    animation: notebook,
     component: CourseGenerator,
   },
   {
     id: "3",
     name: "Chat Support Bot",
     type: "Bot",
-    animation: Pacman,
+    animation: chatbot,
     component: ChatSupportBot,
   },
 ];
@@ -120,12 +122,6 @@ const StartPage = () => {
           onClick={onReset}
         >
           ← Back to Demos
-        </button>
-        <button
-          className="text-sm text-white hover:text-gray-200 transition-colors"
-          onClick={onReset}
-        >
-          Exit Game
         </button>
       </div>
       <div className="flex-grow overflow-hidden">

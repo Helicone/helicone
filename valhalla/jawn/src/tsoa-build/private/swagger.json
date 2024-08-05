@@ -3194,6 +3194,9 @@
 										},
 										"type": "array"
 									},
+									"sessionPath": {
+										"type": "string"
+									},
 									"sessionName": {
 										"type": "string"
 									},

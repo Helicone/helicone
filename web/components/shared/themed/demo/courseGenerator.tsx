@@ -7,11 +7,16 @@ import { useUser } from "@supabase/auth-helpers-react";
 import OpenAI from "openai";
 import { hpf } from "@helicone/prompts";
 import TextbookCourse from "./textbookCourse";
+import {
+  AcademicCapIcon,
+  BookOpenIcon,
+  ClockIcon,
+  UserGroupIcon,
+} from "@heroicons/react/20/solid";
 
 interface CourseParams {
   topic: string;
   difficulty: "Beginner" | "Intermediate" | "Advanced";
-  duration: string;
   audience: string;
 }
 
@@ -54,7 +59,6 @@ export const CourseGenerator: React.FC = () => {
   const [params, setParams] = useState<CourseParams>({
     topic: "Helicone.ai Best Practices",
     difficulty: "Beginner",
-    duration: "4",
     audience: "Developers",
   });
   const [course, setCourse] = useState<Partial<Course>>({});
@@ -86,10 +90,7 @@ export const CourseGenerator: React.FC = () => {
         sessionId
       );
 
-      const sectionCount = Math.min(
-        sectionTitles.titles.length,
-        parseInt(params.duration) || 4
-      );
+      const sectionCount = Math.min(sectionTitles.titles.length, 5);
       const sections: CourseSection[] = [];
       const quizzes: CourseQuiz[] = [];
 
@@ -166,12 +167,13 @@ export const CourseGenerator: React.FC = () => {
     let toolDescription = "";
     let toolParameters: any = {};
     let maxTokens = 1000;
+    let sessionPath = "";
 
     switch (part) {
       case "overview":
         messages.push({
           role: "user",
-          content: hpf`Generate an overview for a ${args.difficulty} level course on ${args.topic} for ${args.audience}, lasting ${args.duration} sessions.`,
+          content: hpf`Generate an overview for a ${args.difficulty} level course on ${args.topic} for ${args.audience}, lasting 5 sessions.`,
         });
         toolName = "generateOverview";
         toolDescription = "Generate the course overview";
@@ -180,6 +182,8 @@ export const CourseGenerator: React.FC = () => {
           description: { type: "string" },
         };
         maxTokens = 250;
+        // Based on the other sections, what should the overview and section titles be?
+        sessionPath = "/overview";
         break;
       case "sectionTitles":
         messages.push({
@@ -192,6 +196,7 @@ export const CourseGenerator: React.FC = () => {
           titles: { type: "array", items: { type: "string" } },
         };
         maxTokens = 500;
+        sessionPath = "/sectionTitles";
         break;
       case "sectionContent":
         messages.push({
@@ -204,6 +209,7 @@ export const CourseGenerator: React.FC = () => {
           content: { type: "string" },
         };
         maxTokens = 500;
+        sessionPath = `/${args.sectionTitle}/content`;
         break;
       case "quiz":
         messages.push({
@@ -231,6 +237,7 @@ export const CourseGenerator: React.FC = () => {
             },
           },
         };
+        sessionPath = `/${args.sectionTitle}/quiz`;
         break;
     }
 
@@ -378,62 +385,102 @@ export const CourseGenerator: React.FC = () => {
   );
 
   return (
-    <Col className="w-full h-full flex flex-col p-8 space-y-6">
-      <h1 className="text-3xl font-bold text-center mb-6">Course Generator</h1>
+    <div className="w-full h-full flex flex-col bg-white overflow-y-auto">
+      <h1 className="text-3xl font-bold text-center my-6 text-indigo-900">
+        Course Generator
+      </h1>
 
-      <div className="flex flex-col space-y-4 max-w-2xl mx-auto">
-        <TextInput
-          placeholder="Enter course topic"
-          value={params.topic}
-          onChange={(e) => setParams({ ...params, topic: e.target.value })}
-        />
+      <div className="w-full max-w-sm mx-auto px-4 pb-6">
+        <div className="space-y-4">
+          <div className="relative">
+            <label
+              htmlFor="topic"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Course Topic
+            </label>
+            <div className="relative">
+              <BookOpenIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-indigo-400" />
+              <TextInput
+                id="topic"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-md focus:ring-1 focus:ring-indigo-400"
+                placeholder="e.g. Helicone.ai Best Practices"
+                value={params.topic}
+                onChange={(e) =>
+                  setParams({ ...params, topic: e.target.value })
+                }
+              />
+            </div>
+          </div>
 
-        <Select
-          value={params.difficulty}
-          onValueChange={(value) =>
-            setParams({
-              ...params,
-              difficulty: value as CourseParams["difficulty"],
-            })
-          }
-        >
-          <SelectItem value="Beginner">Beginner</SelectItem>
-          <SelectItem value="Intermediate">Intermediate</SelectItem>
-          <SelectItem value="Advanced">Advanced</SelectItem>
-        </Select>
+          <div className="relative">
+            <label
+              htmlFor="difficulty"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Difficulty Level
+            </label>
+            <div className="relative">
+              <AcademicCapIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-indigo-400" />
+              <Select
+                id="difficulty"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-md focus:ring-1 focus:ring-indigo-400"
+                value={params.difficulty}
+                onValueChange={(value) =>
+                  setParams({
+                    ...params,
+                    difficulty: value as CourseParams["difficulty"],
+                  })
+                }
+              >
+                <SelectItem value="Beginner">Beginner</SelectItem>
+                <SelectItem value="Intermediate">Intermediate</SelectItem>
+                <SelectItem value="Advanced">Advanced</SelectItem>
+              </Select>
+            </div>
+          </div>
 
-        <TextInput
-          placeholder="Course duration (in weeks)"
-          value={params.duration}
-          onChange={(e) => setParams({ ...params, duration: e.target.value })}
-        />
-
-        <TextInput
-          placeholder="Target audience"
-          value={params.audience}
-          onChange={(e) => setParams({ ...params, audience: e.target.value })}
-        />
+          <div className="relative">
+            <label
+              htmlFor="audience"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Target Audience
+            </label>
+            <div className="relative">
+              <UserGroupIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-indigo-400" />
+              <TextInput
+                id="audience"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-md focus:ring-1 focus:ring-indigo-400"
+                placeholder="e.g. Developers"
+                value={params.audience}
+                onChange={(e) =>
+                  setParams({ ...params, audience: e.target.value })
+                }
+              />
+            </div>
+          </div>
+        </div>
 
         <Button
           onClick={generateCourse}
           disabled={isGenerating}
-          className={clsx(
-            "bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors",
-            isGenerating && "opacity-50 cursor-not-allowed"
-          )}
+          className={`w-full mt-6 bg-indigo-600 text-white px-4 py-2 rounded-md font-medium text-sm hover:bg-indigo-700 transition-colors duration-300 ${
+            isGenerating ? "opacity-50 cursor-not-allowed" : ""
+          }`}
         >
           {isGenerating ? currentStep : "Generate Course"}
         </Button>
       </div>
 
       {Object.keys(course).length > 0 && (
-        <div className="mt-8 p-6 bg-white bg-opacity-20 rounded-xl overflow-y-auto max-h-[60vh]">
+        <div className="mt-8 p-6 bg-white bg-opacity-20 rounded-xl overflow-y-auto max-h-[calc(100vh-400px)] w-full">
           <h2 className="text-2xl font-semibold mb-4">
             Generated Course Outline:
           </h2>
           {renderCourse(course)}
         </div>
       )}
-    </Col>
+    </div>
   );
 };

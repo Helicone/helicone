@@ -35,6 +35,7 @@ export class DemoController extends Controller {
       userEmail?: string;
       sessionId?: string;
       sessionName?: string;
+      sessionPath?: string;
       tools?: Array<ChatCompletionTool>;
       tool_choice?: ChatCompletionToolChoiceOption;
       max_tokens?: number;
@@ -89,6 +90,7 @@ export class DemoController extends Controller {
           "Helicone-Prompt-Id": body.promptId,
           "Helicone-Session-Id": body.sessionId ?? "",
           "Helicone-Session-Name": body.sessionName ?? "",
+          "Helicone-Session-Path": body.sessionPath ?? "",
         },
       });
 
