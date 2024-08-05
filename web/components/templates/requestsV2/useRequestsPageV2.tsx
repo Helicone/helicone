@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { useGetRequests } from "../../../services/hooks/requests";
+import { useGetFullRequest, useGetRequests } from "../../../services/hooks/requests";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   getPropertyFilters,
@@ -87,12 +87,15 @@ const useRequestsPageV2 = (
   );
 
   const isDataLoading = requests.isLoading || isPropertiesLoading;
+  const { requestBodies } = useGetFullRequest(requests.data?.data || []);
 
   return {
-    requests: requests.data?.data || [],
-    normalizedRequests: getNormalizedRequests(requests.data?.data || []),
+    normalizedRequests: requestBodies.isLoading
+      ? getNormalizedRequests(requests.data?.data || [])
+      : requestBodies.data?.data || [],
     count: count.data?.data,
     isDataLoading,
+    isBodyLoading: requestBodies.isLoading,
     isCountLoading: count.isLoading,
     properties,
     refetch: requests.refetch,

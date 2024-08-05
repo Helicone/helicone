@@ -120,7 +120,6 @@ export default function ThemedTable<T>(props: ThemedTableV5Props<T>) {
     if (activeColumns.length > 0 && activeColumns.every((c) => c.id === "")) {
       setActiveColumns(columnDefsToDragColumnItems(columns));
     }
-    console.log(rows);
   }, [activeColumns, columns, setActiveColumns]);
 
   useEffect(() => {

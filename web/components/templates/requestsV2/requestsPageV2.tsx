@@ -234,8 +234,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const {
     count,
     isDataLoading,
+    isBodyLoading,
     isCountLoading,
-    requests: requestsSkeleton,
     normalizedRequests,
     properties,
     refetch,
@@ -255,8 +255,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached,
     isLive
   );
-
-  const { requestBodies } = useGetFullRequest(requestsSkeleton); // how the data ends up in the table??
 
   const requestWithoutStream = normalizedRequests.find((r) => {
     return (
@@ -738,14 +736,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         <div className="flex flex-col space-y-4">
           <ThemedTable
             id="requests-table"
-            defaultData={
-              requestBodies.isLoading
-                ? normalizedRequests
-                : requestBodies.data?.data || []
-            }
+            defaultData={normalizedRequests}
             defaultColumns={columnsWithProperties}
             skeletonLoading={isDataLoading}
-            dataLoading={requestBodies.isLoading}
+            dataLoading={isBodyLoading}
             sortable={sort}
             advancedFilters={{
               filterMap: filterMap,
