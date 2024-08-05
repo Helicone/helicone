@@ -44,7 +44,7 @@ Simply add a `Helicone-Session-Id` header to your request to start tracking your
 
 To represent parent and child traces we take advantange of a simple path syntax in the `Helicone-Session-Path` header. For example, if you have a parent trace `parent` and a child trace `child`, you can represent this as `/parent/child`.
 
-Depending on your library you will need to add the following two headers to your request:
+Depending on your library you will need to add the following three headers to your request:
 
 - `Helicone-Session-Id` - The session id you want to track
 - `Helicone-Session-Path` - The path of the session
