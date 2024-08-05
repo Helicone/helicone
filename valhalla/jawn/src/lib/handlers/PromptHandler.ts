@@ -14,7 +14,7 @@ export class PromptHandler extends AbstractLogHandler {
       const assets = context.processedLog.assets;
       let heliconeTemplate: TemplateWithInputs;
       try {
-        heliconeTemplate = this.sanitizeTemplateWithInputs(
+        heliconeTemplate = sanitizeObject(
           context.message.log.request.heliconeTemplate
         );
       } catch {
@@ -51,33 +51,5 @@ export class PromptHandler extends AbstractLogHandler {
     }
 
     return await super.handle(context);
-  }
-
-  private sanitizeTemplate(template: any): any {
-    return sanitizeObject(template);
-  }
-
-  private sanitizeTemplateWithInputs(
-    templateWithInputs: TemplateWithInputs
-  ): TemplateWithInputs {
-    return {
-      template: this.sanitizeTemplate(templateWithInputs.template),
-      inputs: this.sanitizeInputs(templateWithInputs.inputs),
-      autoInputs: templateWithInputs.autoInputs.map((autoInput) =>
-        this.sanitizeInputs(autoInput)
-      ),
-    };
-  }
-
-  private sanitizeInputs(inputs: { [key: string]: string }): {
-    [key: string]: string;
-  } {
-    const sanitizedInputs: { [key: string]: string } = {};
-    for (const key in inputs) {
-      if (inputs.hasOwnProperty(key)) {
-        sanitizedInputs[key] = this.escapeUnicode(inputs[key]);
-      }
-    }
-    return sanitizedInputs;
   }
 }
