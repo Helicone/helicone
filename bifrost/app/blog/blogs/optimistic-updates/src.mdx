@@ -1,0 +1,129 @@
+![Optimizing Large Data Table Rendering with Asynchronous Loading in React](/static/blog/optimistic-updates/cover.webp)
+
+Rendering large amounts of data in web applications can be challenging. At Helicone, we recently improved the performance of our requests page, which handles substantial amounts of data. This post outlines the steps we took to optimize data loading, resulting in faster render times and improved usability.
+
+### Background
+
+Helicone acts as a proxy between our customers' applications and various LLM providers like OpenAI and Anthropic. We log these requests for monitoring, fine-tuning, and prompt experiments. Our requests page displays this data in a giant table.
+
+### The Challenge
+
+Our data architecture splits the storage of logs like so:
+1. Metadata (timestamp, model, provider, path, etc.) is stored in a SQL database (Supabase).
+2. Message bodies (request and response content) are stored in AWS S3 for efficiency.
+
+Initially, our rendering process was as follows:
+1. User navigates to /requests, triggering request to the backend.
+2. Backend fetches metadata from the database.
+3. Frontend receives this data and generates the signed URLs for S3.
+4. Frontend initiates calls to S3 and fetches message bodies.
+5. Once all data is received, the table is renders
+
+This process resulted in a noticeable delay, with initial render times around 1.5 seconds.
+
+# The Solution: Asynchronous Loading and Optimistic Rendering
+
+To improve performance, we implemented an asynchronous loading strategy with optimistic rendering:
+
+1. User navigates to /requests, triggering request to backend.
+2. Backend fetches and returns the metadata
+3. Frontend immediately renders the table with available metadata.
+4. In the background, frontend initiates calls to S3 for message bodies.
+5. As message bodies from S3 arrive, the table updates dynamically.
+
+This approach reduced initial render time to approximately 0.25 seconds, a 6x improvement.
+
+# Implementation Challenges
+
+While implementing this solution, we encountered several challenges:
+
+## React Hook Errors and Unintended State Mutations
+
+One of the most subtle and problematic issues we faced was related to unintended state mutations within our React hooks. Here's an example of the problematic code:
+
+```typescript
+export const useGetS3Bodies = (result: HeliconeRequest[]) => {
+  const org = useOrg();
+  return {
+    requestBodies: useQuery({
+      queryKey: ["requestsBodies", result, org?.currentOrg?.id],
+      queryFn: async (query) => {
+        const requests = await Promise.all(
+          result.map(async (request: HeliconeRequest) => {
+            if (request.signed_body_url) {
+              try {
+                const contentResponse = await fetch(request.signed_body_url);
+                if (contentResponse.ok) {
+                  const text = await contentResponse.text();
+                  let content = JSON.parse(text);
+                  if (request.asset_urls) {
+                    content = placeAssetIdValues(request.asset_urls, content);
+                  }
+                  // Direct mutation of the request object
+                  request.request_body = content.request;
+                  request.response_body = content.response;
+                  // More mutations...
+                }
+              } catch (error) {
+                console.log(`Error fetching content: ${error}`);
+                return request;
+              }
+            }
+            return request;
+          }) ?? []
+        );
+        return { data: requests, error: null };
+      },
+      refetchOnWindowFocus: false,
+      retry: true,
+    }),
+  };
+};
+```
+
+The issue here was that we were directly mutating the `request` object passed as an argument. This led to unreliable behavior, as React's reconciliation process might not detect these mutations, causing inconsistent renders and hard-to-track bugs.
+
+To fix this, we needed to create new objects instead of mutating existing ones:
+
+```typescript
+// ...
+const r = {...request};
+r.request_body = content.request;
+r.response_body = content.response;
+// ...
+return r;
+```
+
+## Data Shape Transformation
+
+The shift to asynchronous loading also introduced a mismatch between the data types used by different parts of our system. This required careful handling of data transformations.
+
+Initially, our backend was returning data of type `NormalizedData[]`, which was convenient for direct use in our table component. However, the hook responsible for fetching data from S3 required input of type `HeliconeRequests[]`. This mismatch necessitated additional transformation logic.
+
+Here's an example of how we handled these transformations:
+
+```typescript
+const builders: {
+  [key in BuilderType]: new (
+    request: HeliconeRequest,
+    model: string
+  ) => AbstractRequestBuilder;
+} = {
+  ChatBuilder: ChatBuilder,
+  GeminiBuilder: ChatBuilder,
+  CompletionBuilder: CompletionBuilder,
+  ChatGPTBuilder: ChatGPTBuilder,
+  GPT3Builder: GPT3Builder,
+  ModerationBuilder: ModerationBuilder,
+  EmbeddingBuilder: EmbeddingBuilder,
+  ClaudeBuilder: ClaudeBuilder,
+  CustomBuilder: CustomBuilder,
+  DalleBuilder: DalleBuilder,
+  UnknownBuilder: UnknownBuilder,
+};
+```
+
+At the core of the transformation logic is a builders object that maps different builder types to their corresponding classes. These builders allows us to convert `HeliconeRequest` objects into `NormalizedRequest` objects, which are more suitable for our table component. A `getRequestBuilder` function determines the appropriate builder based on the request, and the `getNormalizedRequest` function uses this builder to create a normalized version of the request.
+
+# Conclusion
+The adoption of asynchronous loading and optimistic rendering has significantly enhanced the performance and user experience of Helicone's requests page. By rendering metadata immediately and fetching message bodies in the background, we achieved a 6x improvement in initial render times, reducing them from 1.5 seconds to 0.25 seconds. This optimization not only improved responsiveness but also helped us identify and address challenges related to React state management and data shape transformations. These improvements make handling large amounts of data more efficient and user-friendly.

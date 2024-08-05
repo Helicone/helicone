@@ -28,15 +28,15 @@ function metaDataToBlogStructure(
     authors:
       metadata.authors && metadata.authors.length > 0
         ? metadata.authors.map((author) => ({
-          name: author,
-          imageUrl: HEADSHOTS[author as keyof typeof HEADSHOTS],
-        }))
+            name: author,
+            imageUrl: HEADSHOTS[author as keyof typeof HEADSHOTS],
+          }))
         : [
-          {
-            name: metadata.author || "",
-            imageUrl: HEADSHOTS[metadata.author as keyof typeof HEADSHOTS],
-          },
-        ],
+            {
+              name: metadata.author || "",
+              imageUrl: HEADSHOTS[metadata.author as keyof typeof HEADSHOTS],
+            },
+          ],
     title: metadata.title,
     description: metadata.description,
     badgeText: "insight",
@@ -184,14 +184,32 @@ type ManualBlogStructure = {
 export type BlogStructure =
   | ManualBlogStructure
   | {
-    dynmaicEntry: {
-      folderName: string;
+      dynmaicEntry: {
+        folderName: string;
+      };
     };
-  };
 
 const blogContent: BlogStructure[] = [
   {
-    title: "Meta Releases SAM 2 and What It Means for Developers Building Multi-Modal AI",
+    title: "What is Prompt Management?",
+    description:
+      "Iterating your prompts is the #1 way to optimize user interactions with large language models (LLMs). Should you choose Helicone, Pezzo, or Agenta? We will explore the benefits of choosing a prompt management tool and what to look for.",
+    badgeText: "insight",
+    date: "Aug 1, 2024",
+    href: "/blog/prompt-management",
+    imageUrl: "/static/blog/prompt-management/cover.webp",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/static/blog/linalam-headshot.webp",
+        imageAlt: "Lina Lam's headshot",
+      },
+    ],
+    time: "5 minute read",
+  },
+  {
+    title:
+      "Meta Releases SAM 2 and What It Means for Developers Building Multi-Modal AI",
     description:
       "Meta's release of SAM 2 (Segment Anything Model for videos and images) represents a significant leap in AI capabilities, revolutionizing how developers and tools like Helicone approach multi-modal observability in AI systems.",
     badgeText: "insight",
