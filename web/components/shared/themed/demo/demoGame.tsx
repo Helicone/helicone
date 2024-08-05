@@ -1,5 +1,4 @@
 import StartPage from "./startPage";
-import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useEffect, useRef, useState } from "react";
 import * as Pacman from "../../../../public/lottie/Pacman.json";

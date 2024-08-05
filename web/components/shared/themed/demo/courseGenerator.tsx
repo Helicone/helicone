@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Select, SelectItem, TextInput, Button } from "@tremor/react";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import { Col } from "../../../layout/common";
-import { clsx } from "../../clsx";
 import { useUser } from "@supabase/auth-helpers-react";
 import OpenAI from "openai";
 import { hpf } from "@helicone/prompts";
@@ -10,7 +9,6 @@ import TextbookCourse from "./textbookCourse";
 import {
   AcademicCapIcon,
   BookOpenIcon,
-  ClockIcon,
   UserGroupIcon,
 } from "@heroicons/react/20/solid";
 
