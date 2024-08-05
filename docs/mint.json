@@ -86,6 +86,12 @@
           ]
         },
         {
+          "group": "Ollama",
+          "pages": [
+            "integrations/ollama/javascript"
+          ]
+        },
+        {
           "group": "AWS Bedrock",
           "pages": ["integrations/bedrock/javascript"]
         },
