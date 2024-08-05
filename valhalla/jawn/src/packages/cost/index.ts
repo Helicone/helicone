@@ -81,7 +81,7 @@ function caseForCost(costs: ModelRow[], table: string, multiple: number) {
       };
 
       if (cost.model.operator === "equals") {
-        return `WHEN (${table}.model = '${cost.model.value}') THEN ${costPerMultiple.prompt} * ${table}.prompt_tokens + ${costPerMultiple.completion} * ${table}.completion_tokens`;
+        return `WHEN (${table}.model ILIKE '${cost.model.value}') THEN ${costPerMultiple.prompt} * ${table}.prompt_tokens + ${costPerMultiple.completion} * ${table}.completion_tokens`;
       } else if (cost.model.operator === "startsWith") {
         return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${costPerMultiple.prompt} * ${table}.prompt_tokens + ${costPerMultiple.completion} * ${table}.completion_tokens`;
       } else if (cost.model.operator === "includes") {
