@@ -1,7 +1,7 @@
-import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
-import { Kafka } from "@upstash/kafka";
 import { Env, Provider } from "../..";
+import { Kafka } from "@upstash/kafka";
 import { err } from "../util/results";
+import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 
 export type Log = {
   request: {
