@@ -41,6 +41,26 @@ export class ScoreManager extends BaseManager {
         return err(supabaseRequest.error);
       }
 
+      const requestInClickhouse = await this.addScoresToClickhouse(
+        requestId,
+        mappedScores
+      );
+
+      if (requestInClickhouse.error || !requestInClickhouse.data) {
+        return requestInClickhouse;
+      }
+
+      return { data: "Scores added to Clickhouse successfully", error: null };
+    } catch (error: any) {
+      return err(error.message);
+    }
+  }
+
+  public async addScoresToClickhouse(
+    requestId: string,
+    mappedScores: Score[]
+  ): Promise<Result<string, string>> {
+    try {
       const request = await this.scoreStore.bumpRequestVersion(requestId);
 
       if (request.error || !request.data) {
@@ -61,10 +81,9 @@ export class ScoreManager extends BaseManager {
       if (requestInClickhouse.error || !requestInClickhouse.data) {
         return requestInClickhouse;
       }
-
       return { data: "Scores added to Clickhouse successfully", error: null };
-    } catch (error: any) {
-      return err(error.message);
+    } catch {
+      return err("Error adding scores to Clickhouse");
     }
   }
 
@@ -73,7 +92,8 @@ export class ScoreManager extends BaseManager {
       return {
         score_attribute_key: key,
         score_attribute_type: typeof value === "boolean" ? "boolean" : "number",
-        score_attribute_value: typeof value === "boolean" ? (value ? 1 : 0) : value,
+        score_attribute_value:
+          typeof value === "boolean" ? (value ? 1 : 0) : value,
       };
     });
   }
