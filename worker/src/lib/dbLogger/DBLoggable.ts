@@ -3,37 +3,37 @@ import { Headers } from "@cloudflare/workers-types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
 import { Database, Json } from "../../../supabase/database.types";
+import { PromptSettings, RequestWrapper } from "../RequestWrapper";
+import { getTokenCount } from "../clients/TokenCounterClient";
+import { formatTimeStringDateTime } from "../db/ClickhouseStore";
+import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { DBWrapper } from "../db/DBWrapper";
-import { withTimeout } from "../util/helpers";
-import { Result, err, ok } from "../util/results";
+import { RequestResponseStore } from "../db/RequestResponseStore";
+import { RequestResponseManager } from "../managers/RequestResponseManager";
+import { AsyncLogModel } from "../models/AsyncLog";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
-import { PromptSettings, RequestWrapper } from "../RequestWrapper";
 import { INTERNAL_ERRORS } from "../util/constants";
-import { AsyncLogModel } from "../models/AsyncLog";
-import { formatTimeStringDateTime } from "../db/ClickhouseStore";
-import { RequestResponseStore } from "../db/RequestResponseStore";
+import { withTimeout } from "../util/helpers";
+import {
+  isRequestImageModel,
+  isResponseImageModel,
+} from "../util/imageModelMapper";
+import { Result, err, ok } from "../util/results";
+import {
+  getRequestImageModelParser,
+  getResponseImageModelParser,
+} from "./imageParsers/parserMapper";
 import {
   anthropicAIStream,
   getModel,
 } from "./streamParsers/anthropicStreamParser";
 import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
-import { getTokenCount } from "../clients/TokenCounterClient";
-import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
-import { RequestResponseManager } from "../managers/RequestResponseManager";
-import {
-  isRequestImageModel,
-  isResponseImageModel,
-} from "../util/imageModelMapper";
-import {
-  getRequestImageModelParser,
-  getResponseImageModelParser,
-} from "./imageParsers/parserMapper";
 
-import { ImageModelParsingResponse } from "./imageParsers/core/parsingResponse";
+import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { costOfPrompt } from "../../packages/cost";
 import { KafkaMessage, KafkaProducer } from "../clients/KafkaProducer";
-import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
+import { ImageModelParsingResponse } from "./imageParsers/core/parsingResponse";
 
 export interface DBLoggableProps {
   response: {
@@ -734,8 +734,9 @@ export class DBLoggable {
         omitResponseLog: requestHeaders.omitHeaders.omitResponse,
         webhookEnabled: requestHeaders.webhookEnabled,
         posthogApiKey: requestHeaders.posthogKey ?? undefined,
-        lytixKey: requestHeaders.lytixKey ?? undefined,
         posthogHost: requestHeaders.posthogHost ?? undefined,
+        lytixKey: requestHeaders.lytixKey ?? undefined,
+        lytixHost: requestHeaders.lytixHost ?? undefined,
       },
       log: {
         request: {

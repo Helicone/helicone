@@ -1,7 +1,7 @@
-import { Env, Provider } from "../..";
-import { Kafka } from "@upstash/kafka";
-import { err } from "../util/results";
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
+import { Kafka } from "@upstash/kafka";
+import { Env, Provider } from "../..";
+import { err } from "../util/results";
 
 export type Log = {
   request: {
@@ -40,6 +40,7 @@ export type HeliconeMeta = {
   posthogApiKey?: string;
   posthogHost?: string;
   lytixKey?: string;
+  lytixHost?: string;
 };
 
 export type KafkaMessage = {
