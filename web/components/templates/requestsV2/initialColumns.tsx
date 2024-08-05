@@ -183,12 +183,16 @@ export const getInitialColumns: (
   },
   {
     id: "feedback",
-    accessorKey: "feedback",
+    accessorKey: "scores",
     header: "Feedback",
     cell: (info) => {
-      const feedback = info.getValue() as NormalizedRequest["feedback"];
-      const rating = feedback?.rating;
-
+      const scores = info.getValue() as NormalizedRequest["scores"];
+      const rating =
+        scores && scores["helicone-score-feedback"]
+          ? Number(scores["helicone-score-feedback"]) === 1
+            ? true
+            : false
+          : null;
       if (rating === null) {
         return <span className="text-gray-500"></span>;
       }

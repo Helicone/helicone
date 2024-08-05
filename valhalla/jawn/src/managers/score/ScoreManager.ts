@@ -61,6 +61,11 @@ export class ScoreManager extends BaseManager {
     mappedScores: Score[]
   ): Promise<Result<string, string>> {
     try {
+      mappedScores.forEach((score) => {
+        if (score.score_attribute_type === "boolean") {
+          score.score_attribute_key = `${score.score_attribute_key}-hcone-bool`;
+        }
+      });
       const request = await this.scoreStore.bumpRequestVersion(requestId);
 
       if (request.error || !request.data) {
