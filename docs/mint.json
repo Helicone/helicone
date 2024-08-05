@@ -126,6 +126,13 @@
             "integrations/groq/curl"
           ]
         },
+        {
+          "group": "Instructor",
+          "pages": [
+            "integrations/instructor/javascript",
+            "integrations/instructor/python"
+          ]
+        },
         "getting-started/integration-method/deepinfra",
         "getting-started/integration-method/openrouter",
         "getting-started/integration-method/litellm",
