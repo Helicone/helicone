@@ -11,6 +11,7 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useOrg } from "../../layout/organizationContext";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import { InfoBanner } from "../../shared/themed/themedDemoBanner";
+import React from "react";
 
 interface WelcomePageV2Props {
   currentStep: number;

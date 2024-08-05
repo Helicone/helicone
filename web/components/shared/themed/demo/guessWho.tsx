@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useLocalStorage } from "../../../../services/hooks/localStorage";
-import { Col } from "../../../layout/common";
 import { ChatWindow } from "./chatWindow";
 
 const FAMOUS_MOVIES = [

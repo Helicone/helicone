@@ -5,7 +5,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useEffect, useRef, useState } from "react";
 import * as Pacman from "../../../../public/lottie/Pacman.json";
 import Lottie from "react-lottie";
-import { start } from "repl";
+import React from "react";
 
 const DEMO_GAMES = [
   {

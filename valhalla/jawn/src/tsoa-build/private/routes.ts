@@ -628,6 +628,57 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ChatCompletionSystemMessageParam"},{"ref":"ChatCompletionUserMessageParam"},{"ref":"ChatCompletionAssistantMessageParam"},{"ref":"ChatCompletionToolMessageParam"},{"ref":"ChatCompletionFunctionMessageParam"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Record_string.unknown_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"any"},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "FunctionParameters": {
+        "dataType": "refAlias",
+        "type": {"ref":"Record_string.unknown_","validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "FunctionDefinition": {
+        "dataType": "refObject",
+        "properties": {
+            "name": {"dataType":"string","required":true},
+            "description": {"dataType":"string"},
+            "parameters": {"ref":"FunctionParameters"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletionTool": {
+        "dataType": "refObject",
+        "properties": {
+            "function": {"ref":"FunctionDefinition","required":true},
+            "type": {"dataType":"enum","enums":["function"],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletionNamedToolChoice.Function": {
+        "dataType": "refObject",
+        "properties": {
+            "name": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletionNamedToolChoice": {
+        "dataType": "refObject",
+        "properties": {
+            "function": {"ref":"ChatCompletionNamedToolChoice.Function","required":true},
+            "type": {"dataType":"enum","enums":["function"],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletionToolChoiceOption": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["none"]},{"dataType":"enum","enums":["auto"]},{"dataType":"enum","enums":["required"]},{"ref":"ChatCompletionNamedToolChoice"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "KafkaSettings": {
         "dataType": "refObject",
         "properties": {
@@ -1457,7 +1508,7 @@ export function RegisterRoutes(app: Router) {
 
             async function DemoController_demoCompletion(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"sessionName":{"dataType":"string"},"sessionId":{"dataType":"string"},"userEmail":{"dataType":"string"},"promptId":{"dataType":"string","required":true},"messages":{"dataType":"array","array":{"dataType":"refAlias","ref":"ChatCompletionMessageParam"},"required":true}}},
+                    body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"cache_enabled":{"dataType":"boolean"},"max_tokens":{"dataType":"double"},"tool_choice":{"ref":"ChatCompletionToolChoiceOption"},"tools":{"dataType":"array","array":{"dataType":"refObject","ref":"ChatCompletionTool"}},"sessionName":{"dataType":"string"},"sessionId":{"dataType":"string"},"userEmail":{"dataType":"string"},"promptId":{"dataType":"string","required":true},"messages":{"dataType":"array","array":{"dataType":"refAlias","ref":"ChatCompletionMessageParam"},"required":true}}},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 

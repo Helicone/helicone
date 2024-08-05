@@ -7,6 +7,7 @@ import Typewriter from "./typewriter";
 import { useState, useEffect, useRef } from "react";
 import { hpf } from "@helicone/prompts";
 import { useUser } from "@supabase/auth-helpers-react";
+import React from "react";
 
 export const ChatWindow = ({
   chatHistory,
@@ -14,7 +15,6 @@ export const ChatWindow = ({
   onFinish,
   movieTitle,
   movieCharacter,
-  isLoading,
   gameSessionId,
 }: {
   chatHistory: ChatHistory[];
@@ -94,7 +94,7 @@ Response: "true"
             content: hpf`You are ${{ movieCharacter }} from the movie ${{
               movieTitle,
             }}. Answer the questions as if you are ${{ movieCharacter }}.
-            
+
 DO NOT GIVE AWAY YOUR IDENTITY. THE USER IS TRYING TO GUESS THE CHARACTER.
             `,
           },

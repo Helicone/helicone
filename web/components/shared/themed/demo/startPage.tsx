@@ -2,16 +2,7 @@ import React, { useState } from "react";
 import Lottie from "react-lottie";
 import * as Pacman from "../../../../public/lottie/Pacman.json";
 import GuessWhoGame from "./guessWho";
-
-const CourseGenerator = ({ onReset }) => {
-  // Implement the Course Generator logic here
-  return (
-    <div>
-      <h2>Course Generator</h2>
-      {/* Add your course generator components */}
-    </div>
-  );
-};
+import { CourseGenerator } from "./courseGenerator";
 
 const ChatSupportBot = ({ onReset }) => {
   // Implement the Chat Support Bot logic here
