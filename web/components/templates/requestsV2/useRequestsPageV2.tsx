@@ -74,9 +74,7 @@ const useRequestsPageV2 = (
     left: filterUITreeToFilterNode(filterMap, uiFilterIdxs),
     right: advancedFilter,
     operator: "and",
-  };
-
-  console.log("adv", filter);
+  };  
 
   const { requests, count } = useGetRequests(
     currentPage,

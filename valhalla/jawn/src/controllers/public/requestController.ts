@@ -137,7 +137,6 @@ export class RequestController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<HeliconeRequest[], string>> {
     const reqManager = new RequestManager(request.authParams);
-    console.log("comingfilter", JSON.stringify(requestBody.filter));
     const requests = await reqManager.getRequestsV2(requestBody);
     if (requests.error || !requests.data) {
       this.setStatus(500);

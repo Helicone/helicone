@@ -209,12 +209,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       const timeIntervalDate = getTimeIntervalAgo(
         (currentTimeFilter as TimeInterval) || "24h"
       );
-      console.log(
-        "tf",
-        formatDateForClickHouse(timeIntervalDate),
-        "Original Date:",
-        timeIntervalDate.toISOString()
-      );
       return {
         [tableName]: {
           [createdAtColumn]: {
@@ -555,7 +549,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       setTimeFilter(filter);
       return;
     }
-    console.log("tf1", formatDateForClickHouse(getTimeIntervalAgo(key)));
+
     setTimeFilter({
       [tableName]: {
         [createdAtColumn]: {

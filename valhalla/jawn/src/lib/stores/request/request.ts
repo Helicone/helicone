@@ -240,10 +240,6 @@ export async function getRequestsV2(
     return { data: null, error: "Invalid offset or limit" };
   }
 
-  console.log("filtttt", JSON.stringify(filter));
-
-  console.log("sort", JSON.stringify(sort));
-
   const sortSQL = buildRequestSortV2(sort);
 
   if (limit < 0 || limit > 1_000) {
@@ -286,9 +282,6 @@ export async function getRequestsV2(
     OFFSET ${offset}
   `;
 
-  console.log("query", query);
-  console.log("filter", builtFilter.argsAcc);
-
   const requests = await dbQueryClickhouse<HeliconeRequest>(
     query,
     builtFilter.argsAcc
@@ -305,90 +298,6 @@ export async function getRequestsV2(
   const mappedRequests = await mapLLMCalls(requests.data, s3Client, orgId);
 
   return mappedRequests;
-}
-
-async function mapLLMCallsV2(
-  heliconeRequests: HeliconeRequestV2[] | null,
-  s3Client: S3Client,
-  orgId: string
-): Promise<Result<HeliconeRequestV2[], string>> {
-  const s3ImplementationDate = new Date("2024-03-30T02:00:00Z");
-
-  const promises =
-    heliconeRequests?.map(async (heliconeRequest) => {
-      const requestCreatedAt = new Date(heliconeRequest.request_created_at);
-
-      if (
-        (process.env.S3_ENABLED ?? "true") === "true" &&
-        requestCreatedAt > s3ImplementationDate
-      ) {
-        const { data: signedBodyUrl, error: signedBodyUrlErr } =
-          await s3Client.getRequestResponseBodySignedUrl(
-            orgId,
-            heliconeRequest.request_id
-          );
-
-        if (!signedBodyUrlErr && signedBodyUrl) {
-          heliconeRequest.signed_body_url = signedBodyUrl;
-        }
-
-        if (heliconeRequest.assets && heliconeRequest.assets.length > 0) {
-          const assetUrls: Record<string, string> = {};
-
-          const signedUrlPromises = heliconeRequest.assets.map(
-            async (assetId: string) => {
-              const { data: signedImageUrl, error: signedImageUrlErr } =
-                await s3Client.getRequestResponseImageSignedUrl(
-                  orgId,
-                  heliconeRequest.request_id,
-                  assetId
-                );
-
-              return {
-                assetId,
-                signedImageUrl:
-                  signedImageUrlErr || !signedImageUrl ? "" : signedImageUrl,
-              };
-            }
-          );
-
-          const signedUrls = await Promise.all(signedUrlPromises);
-
-          signedUrls.forEach(({ assetId, signedImageUrl }) => {
-            assetUrls[assetId] = signedImageUrl;
-          });
-
-          heliconeRequest.asset_urls = assetUrls;
-        }
-      }
-
-      // Extract the model from various possible locations
-      const model =
-        heliconeRequest.request_model ||
-        getModelFromPath(heliconeRequest.target_url) ||
-        "";
-
-      try {
-        if (
-          model.toLowerCase().includes("gemini") &&
-          heliconeRequest.provider === "GOOGLE"
-        ) {
-          const mappedSchema = mapGeminiProV2(heliconeRequest, model);
-          heliconeRequest.llmSchema = mappedSchema;
-        }
-      } catch (error: any) {
-        // Do nothing, FE will fall back to existing mappers
-      }
-
-      return heliconeRequest;
-    }) ?? [];
-
-  try {
-    const mappedRequests = await Promise.all(promises);
-    return ok(mappedRequests);
-  } catch (error) {
-    return err(`Error mapping LLM calls: ${error}`);
-  }
 }
 
 export async function getRequestsCachedV2(

@@ -1,5 +1,8 @@
 import { LlmSchema } from "../../../../../lib/api/models/requestResponseModel";
-import { HeliconeRequest, HeliconeRequestV2 } from "../../../../../lib/api/request/request";
+import {
+  HeliconeRequest,
+  HeliconeRequestV2,
+} from "../../../../../lib/api/request/request";
 import { components } from "../../../../../lib/clients/jawnTypes/public";
 
 export const getModelFromPath = (path: string) => {

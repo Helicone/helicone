@@ -63,7 +63,6 @@ const useGetRequests = (
         const isCached = query.queryKey[5];
         const orgId = query.queryKey[6] as string;
         const jawn = getJawnClient(orgId);
-        console.log("sentfilter", JSON.stringify(advancedFilter));
         const response = await jawn.POST("/v1/request/queryV2", {
           body: {
             filter: advancedFilter as any,
@@ -140,7 +139,6 @@ const useGetRequests = (
         const advancedFilter = query.queryKey[3];
         const isCached = query.queryKey[5];
         const processedFilter = processFilter(advancedFilter);
-        console.log("advancedFilter", advancedFilter);
         return await fetch("/api/request/count", {
           method: "POST",
           headers: {

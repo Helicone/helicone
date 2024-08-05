@@ -250,7 +250,6 @@ export async function getRequestCountClickhouse(
   org_id: string,
   filter: FilterNode
 ): Promise<Result<number, string>> {
-  console.log("coming here", JSON.stringify(filter));
   const builtFilter = await buildFilterWithAuthClickHouse({
     org_id,
     argsAcc: [],
@@ -260,12 +259,9 @@ export async function getRequestCountClickhouse(
   const query = `
 SELECT
   count(DISTINCT request_response_versioned.request_id) as count
-from request_response_versioned 
+from request_response_versioned FINAL
 WHERE (${builtFilter.filter})
   `;
-  console.log("query", query);
-  console.log("filter", builtFilter.filter);
-  console.log("args", builtFilter.argsAcc);
   const { data, error } = await dbQueryClickhouse<{ count: number }>(
     query,
     builtFilter.argsAcc
@@ -274,7 +270,6 @@ WHERE (${builtFilter.filter})
     return { data: null, error: error };
   }
 
-  console.log("data", data);
   return { data: data[0].count, error: null };
 }
 
