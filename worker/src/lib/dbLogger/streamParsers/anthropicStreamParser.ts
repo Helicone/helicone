@@ -5,7 +5,7 @@ import { consolidateTextFields } from "./responseParserHelpers";
 export function recursivelyConsolidateAnthropic(body: any, delta: any): any {
   Object.keys(delta).forEach((key) => {
     if (key === "stop_reason") {
-      console.log("Stop Reason", delta[key]);
+      // console.log("Stop Reason", delta[key]);
     }
     if (key === "delta") {
       console.log("Delta", delta[key]);
