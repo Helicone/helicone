@@ -306,13 +306,13 @@ export const CourseGenerator: React.FC = () => {
       try {
         const parsedArguments = JSON.parse(toolCall.function.arguments);
         return parsedArguments;
-      } catch (parseError) {
+      } catch (parseError: any) {
         console.error(
           `Error parsing arguments for ${part}:`,
           toolCall.function.arguments
         );
         throw new Error(
-          `Failed to parse arguments for ${part}: ${parseError.message}`
+          `Failed to parse arguments for ${part}: ${JSON.stringify(parseError)}`
         );
       }
     } catch (error) {
