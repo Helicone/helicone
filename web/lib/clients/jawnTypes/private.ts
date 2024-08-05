@@ -339,6 +339,7 @@ Json: JsonObject;
     };
     "Result_OrganizationOwner-Array.string_": components["schemas"]["ResultSuccess_OrganizationOwner-Array_"] | components["schemas"]["ResultError_string_"];
     HeliconeMeta: {
+      lytixHost?: string;
       lytixKey?: string;
       posthogHost?: string;
       posthogApiKey?: string;
