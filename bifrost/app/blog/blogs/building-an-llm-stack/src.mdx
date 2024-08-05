@@ -1,21 +1,23 @@
-Figuring out the right tech stack is hard. Here is a very simplified guide to illustrate how a simple LLM chat bot application can increase in completexity.
+Figuring out the right tech stack can be challenging. This simplified guide illustrates how a basic LLM chatbot application can evolve in complexity.
 
-At Helicone we have seen thousands of LLM applications all at different scales and this article is a generalization of the different stages we believe most apps go through.
+At Helicone, we've observed thousands of LLM applications at various scales. This article generalizes the different stages that most applications typically go through.
 
-We wrote a [complimentary blog](/blogs/llm-stack-guide) that goes into more detail about the LLM Stack and where Helicone sits in the stack.
+We also wrote a [complementary blog](/blog/llm-stack-guide) that delves deeper into the LLM Stack and Helicone's role within it.
 
-# <b>Example:</b> <i>Evolution of a chatbot</i>
+## <b>Example:</b> <i>Evolution of a Chatbot</i>
 
 <i>
-  Let's take the example of a simple internal chatbot that helps employees of a
-  small business manage their inbox.
+  Let's consider a simple internal chatbot designed to help employees of a small
+  business manage their inbox.
 </i>
 
-`Stage 1` At first you can just copy and paste all of the past 10 emails into the context.
+### `Stage 1` - Basics
+
+Initially, you can simply copy and paste the last 10 emails into the context.
 
 ![LLM Stack Example - Stage 1](/static/pasted_images/llm-stack-ex-stage-1.png)
 
-System:
+**System:**
 
 ```md
 HERE ARE THE LAST 10 EMAILS IN THE INBOX
@@ -33,34 +35,58 @@ User:
 What is the status of the order with the id 123456?
 ```
 
-`Stage 2` Woohoo! Your app is exploding in popularity, but you are spending 100 dollars a day on OpenAI and you just need some basic observability.
+### `Stage 2` - Observability
+
+As your app gains popularity, you may find yourself spending $100 a day on OpenAI. At this stage, basic observability becomes essential.
 
 ![LLM Stack Example - Stage 2](/static/pasted_images/llm-stack-ex-stage-2.png)
 
-`Stage 3` Your users are complaining that it only look at the last 10 emails, so you implement a Vector DB to store all of **your** emails and use embeddings to get only the 10 most relevant emails.
+### `Stage 3` - Scaling
+
+Users may complain that the chatbot only considers the last 10 emails. To address this, implement a Vector DB to store all emails and use embeddings to retrieve the 10 most relevant ones.
 
 ![LLM Stack Example - Stage 3](/static/pasted_images/llm-stack-ex-stage-3.png)
 
-`Stage 4` You find out that you are spending way too much money and you need to rate limit some of your users and add a caching layer to save costs. So, you add a gateway.
+### `Stage 4` - Gateway
+
+To manage costs, you may need to rate-limit users and add a caching layer. This is where a gateway comes into play.
 
 ![LLM Stack Example - Stage 4](/static/pasted_images/llm-stack-ex-stage-4.png)
-`Stage 5` Add tools to perform actions for the user on their behalf such as marking emails as read, adding to a calendar, or adding to a to-do list.
+
+### `Stage 5` - Tools
+
+Enhance functionality by adding tools that perform actions on behalf of users, such as marking emails as read or adding events to a calendar.
 
 ![LLM Stack Example - Stage 5](/static/pasted_images/llm-stack-ex-stage-5.png)
 
-`Stage 6` Implement a real prompt solution to help manage your prompt versions for testing and observability.
+### `Stage 6` - Prompting
 
-![](/static/pasted_images/llm-stack-ex-stage-6.png)
+Implement a robust prompt management solution to handle prompt versions for testing and observability.
 
-`Stage 7` Some of the new actions require multiple tools calls in a loop, where the tools decide on the next tool - this is what we call Agents.
+![LLM Stack Example - Stage 6](/static/pasted_images/llm-stack-ex-stage-6.png)
 
-![](/static/pasted_images/llm-stack-ex-stage-7.png)
-Agents are basically like integrations, except the can act within the context of some environment that leans "turing complete" and can act on the data in the environment. The also have direct connects to integrations and have the ability to call the providers. notice how they are using prompts now and not just calling the provider directly.
+### `Stage 7` - Agents
 
-`Stage 8`
+Some actions may require multiple tool calls in a loop, where tools decide on the next action. This is where Agents come into play.
 
-![](/static/pasted_images/llm-stack-ex-stage-8.png)
+![LLM Stack Example - Stage 7](/static/pasted_images/llm-stack-ex-stage-7.png)
 
-![](/static/pasted_images/llm-stack-ex-stage-9.png)
+Agents are advanced integrations that operate within complex environments, allowing for sophisticated interactions through prompts instead of direct provider calls.
 
-![](/static/pasted_images/llm-stack-ex-stage-10.png)
+### `Stage 8` - Model Load Balancer
+
+As your application grows, different models may be better suited for specific tasks. A model load balancer can help distribute the workload effectively.
+
+![LLM Stack Example - Stage 8](/static/pasted_images/llm-stack-ex-stage-8.png)
+
+### `Stage 9` - Testing
+
+To make data actionable, implement a testing framework that provides insights and evaluators to assess the quality of your model's outputs.
+
+![LLM Stack Example - Stage 9](/static/pasted_images/llm-stack-ex-stage-9.png)
+
+### `Stage 10` - Fine Tuning
+
+Fine-tuning is typically employed for workloads requiring significant customization, especially when optimizing for specific problems or cost savings.
+
+![LLM Stack Example - Stage 10](/static/pasted_images/llm-stack-ex-stage-10.png)

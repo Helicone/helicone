@@ -1,53 +1,64 @@
-As seassoned Developers we are all familiar with the rise and falls of many tech stacks.
-Whether it's the rise of the MERN stack, the fall of the AngularJS, or the rise of the Jamstack, the tech stack has always been a part of the web development process.
+As seasoned developers, we are all familiar with the rise and fall of various tech stacks. Whether it's the rise of the MERN stack, the decline of AngularJS, or the emergence of the Jamstack, tech stacks have always been integral to the web development process.
 
-The LLM Stack is a new breed of tech stack that is designed to help developers build and run LLM applications.
+The LLM Stack represents a new breed of tech stack designed to help developers build and run LLM applications effectively.
 
-## Why do we need a new stack?
+## Why Do We Need a New Stack?
 
-LLM applications are really easy to get started, however once you begin to start scaling you quickly run into the limitations of the platform, and the need for tooling, observability, security, and more arise.
+While LLM applications are easy to start with, scaling them often reveals limitations in the platform. This leads to an increased need for tooling, observability, security, and more.
 
-We wrote a complimentary blog that shows a [simple example of an LLM application](/blog/building-an-llm-stack) that goes from zero to hero and shows how the stack evolves.
+We wrote a complementary blog that illustrates a [simple example of an LLM application](/blog/building-an-llm-stack) that evolves from zero to hero, showcasing how the stack develops.
 
-<div>dfk;lk</div>
+# Common LLM Architecture
 
-# The LLM Stack
+The following architecture diagram depicts the most common components of an LLM stack. This simplified view is derived from the example [outlined here](/blog/building-an-llm-stack).
 
-| Service       | Products                                                                                                                                           |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Vector DB     | - [Helicone Vector](/products/helicone-vector)<br/>- [Pinecone](https://www.pinecone.io/)<br/>- [Weaviate](https://www.weaviate.io/)               |
-| Observability | - [Helicone Observability](/products/helicone-observability)<br/>- [Pinecone](https://www.pinecone.io/)<br/>- [Weaviate](https://www.weaviate.io/) |
+![](/static/pasted_images/llm-stack-the-modern-stack.png)
 
-# Where Helicone sits in the stack
+Let's break this down into its components.
+
+### Observability Layer
+
+<img
+  src="/static/pasted_images/observability-layer.png"
+  alt="Observability Layer"
+  width="50%"
+/>
+
+| Service         | Products (Examples)                                                                                                                            |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Observability   | - [Helicone](/products/helicone-observability)<br/>- LangSmith<br/>- LangFuse<br/>- Traceloop<br/>- PromptLayer<br/>- HoneyHive<br/>- AgentOps |
+| Clients         | - LangChain<br/>- LiteLLM<br/>- LlamaIndex                                                                                                     |
+| Agents          | - CrewAI<br/>- AutoGPT                                                                                                                         |
+| Prompting Layer | - [Helicone Prompting](https://docs.helicone.ai/features/prompts)<br/>- PromptLayer<br/>- PromptFoo                                            |
+| Integrations    | - Zapier<br/>- LlamaIndex                                                                                                                      |
+
+### Inference Layer
+
+<img
+  src="/static/pasted_images/inference-layer.png"
+  alt="Inference Layer"
+  width="70%"
+/>
+
+| Service           | Products (Examples)                                                                                                                          |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Gateway           | - [Helicone Gateway](https://docs.helicone.ai/getting-started/integration-method/gateway)<br/>- Cloudflare AI<br/>- PortKey<br/>- KeywordsAI |
+| LLM Load Balancer | - Martian<br/>- LiteLLM                                                                                                                      |
+| Model Providers   | - OpenAI<br/>- Anthropic<br/>- TogetherAI<br/>- Anyscale<br/>- Groq                                                                          |
+
+### Testing / Experiments
+
+![](/static/pasted_images/testing-layer.png)
+
+| Service         | Products (Examples)                                                                                                                         |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Datastores      | - [Helicone API](https://docs.helicone.ai/rest/request/post-v1requestquery)<br/>- LangFuse<br/>- LangSmith                                  |
+| Experimentation | - [Helicone Experiments](https://docs.helicone.ai/use-cases/experiments#how-to-run-llm-prompt-experiments)<br/>- Promptfoo<br/>- Braintrust |
+| Evaluators      | - PromptFoo<br/>- Lastmile<br/>- BaseRun                                                                                                    |
+| Fine Tuning     | - OpenPipe<br/>- Autonomi                                                                                                                   |
+
+# Where Helicone Fits in the Stack
+
+If you are a user of Helicone, you may want to explore the various areas where Helicone can integrate within your LLM application. Our primary focus is on Gateway and Observability.
 
 ![](/static/pasted_images/llm-stack-helicone-in-picture.png)
-
-## Observability
-
-![](/static/pasted_images/llm-stack-helicone-observability.png)
-
-## Gateway
-
-![](/static/pasted_images/llm-stack-helicone-gateway.png)
-
-## Experiments
-
-![](/static/pasted_images/llm-stack-helicone-experiments.png)
-
-### LLM Stack for - Hobbiest
-
-- Side projects
-- Internal tools
-- Small classifier
-- Sub-feature within a larger application
-
-For these users we typically recommend just to call the model itself. You can get 99% of the way there for most cases just prompting the model directly.
-You probably don't need to use a tooling layer, you can probably just use classic string formatting libraries to format your prompts, and simple logs to help you debug.
-
-### LLM Stack for - Startups
-
-2024-08-04-23-16-24.png
-
-### LLM Stack for - Small to Medium Businesses
-
-### LLM Stack for - Enterprise Scale Enterprises
