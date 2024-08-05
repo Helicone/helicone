@@ -277,7 +277,7 @@ export async function getRequestsV2(
       properties,
       assets,
       target_url,
-    FROM request_response_versioned
+    FROM request_response_versioned FINAL
     WHERE (
       (${builtFilter.filter})
     )
