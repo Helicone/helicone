@@ -15,11 +15,11 @@ export class HeliconeManualLogger {
     this.startTime = Date.now();
   }
 
-  public registerRequest(request: ILogRequest): void {
+  public registerRequest(request: ILogRequest | any): void {
     this.request = request;
   }
 
-  public sendLog(response: ILogResponse, meta: Record<string, string>): void {
+  public sendLog(response: ILogResponse | any, meta: Record<string, string>): void {
     if (this.request === null) {
       console.error("Request is not registered.");
       return;
