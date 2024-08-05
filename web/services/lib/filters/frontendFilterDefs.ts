@@ -348,7 +348,7 @@ export const REQUEST_TABLE_FILTERS: [
     label: "Feedback",
     operators: booleanOperators,
     table: "request_response_versioned",
-    column: "properties",
+    column: "helicone-score-feedback",
     category: "feedback",
   },
 ];

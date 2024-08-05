@@ -193,9 +193,11 @@ const whereKeyMappings: KeyMappings = {
         filter.properties[key as keyof typeof filter.properties]
       );
       return {
-        column: `properties[${placeValueSafely(key)}]`,
+        column: `request_response_versioned.properties[${placeValueSafely(
+          key
+        )}]`,
         operator: operator,
-        value: value,
+        value: `'${value}'`,
       };
     }
     if ("search_properties" in filter && filter.search_properties) {
@@ -205,6 +207,17 @@ const whereKeyMappings: KeyMappings = {
       );
       return {
         column: `key`,
+        operator: operator,
+        value: value,
+      };
+    }
+    if ("scores" in filter && filter.scores) {
+      const key = Object.keys(filter.scores)[0];
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.scores[key as keyof typeof filter.scores]
+      );
+      return {
+        column: `scores[${placeValueSafely(key)}]`,
         operator: operator,
         value: value,
       };

@@ -180,8 +180,12 @@ interface RequestResponseVersionedToOperators {
   search_properties: {
     [key: string]: SingleKey<TextOperators>;
   };
+  scores: {
+    [key: string]: SingleKey<TextOperators>;
+  };
   request_body: SingleKey<VectorOperators>;
   response_body: SingleKey<VectorOperators>;
+  "helicone-score-feedback": SingleKey<BooleanOperators>;
 }
 
 export type FilterLeafRequestResponseLog =
@@ -394,6 +398,22 @@ export function uiFilterRowToFilterLeaf(
         properties: {
           [filterDef.column]: {
             [operator]: filter.value,
+          },
+        },
+      },
+    };
+  }
+
+  if (
+    filterDef?.column === "helicone-score-feedback" &&
+    filterDef?.table === "request_response_versioned" &&
+    filterDef?.category === "feedback"
+  ) {
+    return {
+      request_response_versioned: {
+        scores: {
+          [filterDef.column]: {
+            [operator]: filter.value === "true" ? "1" : "0",
           },
         },
       },

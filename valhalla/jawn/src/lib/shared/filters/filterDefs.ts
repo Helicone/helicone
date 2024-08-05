@@ -188,6 +188,9 @@ interface RequestResponseVersionedToOperators {
   search_properties: {
     [key: string]: SingleKey<TextOperators>;
   };
+  scores: {
+    [key: string]: SingleKey<TextOperators>;
+  };
   request_body: SingleKey<VectorOperators>;
   response_body: SingleKey<VectorOperators>;
 }

@@ -549,6 +549,9 @@ export interface components {
       search_properties?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
+      scores?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
       request_body?: components["schemas"]["Partial_VectorOperators_"];
       response_body?: components["schemas"]["Partial_VectorOperators_"];
     };

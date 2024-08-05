@@ -1454,6 +1454,13 @@
 						},
 						"type": "object"
 					},
+					"scores": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Partial_TextOperators_"
+						},
+						"type": "object"
+					},
 					"request_body": {
 						"$ref": "#/components/schemas/Partial_VectorOperators_"
 					},
