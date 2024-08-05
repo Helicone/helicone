@@ -191,6 +191,16 @@ export type BlogStructure =
 
 const blogContent: BlogStructure[] = [
   {
+    dynmaicEntry: {
+      folderName: "llm-stack-guide",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "building-an-llm-stack",
+    },
+  },
+  {
     title: "What is Prompt Management?",
     description:
       "Iterating your prompts is the #1 way to optimize user interactions with large language models (LLMs). Should you choose Helicone, Pezzo, or Agenta? We will explore the benefits of choosing a prompt management tool and what to look for.",
