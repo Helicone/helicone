@@ -401,10 +401,10 @@ export class LoggingHandler extends AbstractLogHandler {
         scores: {},
         request_body:
           this.extractRequestBodyMessage(context.processedLog.request.body) ??
-          null,
+          "",
         response_body:
           this.extractResponseBodyMessage(context.processedLog.response.body) ??
-          null,
+          "",
         sign: 1,
         version: 1,
       };
