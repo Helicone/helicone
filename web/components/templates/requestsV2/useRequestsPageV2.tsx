@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 import { useGetRequests } from "../../../services/hooks/requests";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
-  getPropertyFilters,
+  getPropertyFiltersV2,
   REQUEST_TABLE_FILTERS,
   SingleFilterDef,
   textWithSuggestions,
@@ -38,7 +38,7 @@ const useRequestsPageV2 = (
     isLoading: isPropertiesLoading,
     propertyFilters,
     searchPropertyFilters,
-  } = useGetPropertiesV2(getPropertyFilters);
+  } = useGetPropertiesV2(getPropertyFiltersV2);
 
   const { models, isLoading: isModelsLoading } = useModels(timeFilter, 50);
 
