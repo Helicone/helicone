@@ -49,7 +49,6 @@ import {
   UIFilterRowNode,
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
-import { useGetFullRequest } from "../../../services/hooks/requests";
 import Link from "next/link";
 
 interface RequestsPageV2Props {
