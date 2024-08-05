@@ -3,7 +3,7 @@ import { costs as fineTunedOpenAICosts } from "./openai/fine-tuned-models";
 import { costs as togetherAIChatCosts } from "./togetherai/chat";
 import { costs as togetherAIChatLlamaCosts } from "./togetherai/chat/llama";
 import { costs as togetherAICompletionCosts } from "./togetherai/completion";
-import { costs as togetherAICompletionLlamaCosts } from "./togetherai/completion";
+import { costs as togetherAICompletionLlamaCosts } from "./togetherai/completion/llama";
 import { costs as azureCosts } from "./azure";
 import { costs as googleCosts } from "./google";
 import { costs as anthropicCosts } from "./anthropic";
