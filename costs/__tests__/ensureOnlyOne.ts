@@ -375,6 +375,13 @@ WHEN (request_response_log.model = 'meta-llama/Llama-3-8b-chat-hf') THEN 200 * r
 WHEN (request_response_log.model = 'NousResearch/Nous-Hermes-llama-2-7b') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'NousResearch/Nous-Hermes-Llama2-13b') THEN 225 * request_response_log.prompt_tokens + 225 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'togethercomputer/Llama-2-7B-32K-Instruct') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo') THEN 880 * request_response_log.prompt_tokens + 880 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo') THEN 180 * request_response_log.prompt_tokens + 180 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo') THEN 5000 * request_response_log.prompt_tokens + 5000 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'meta-llama/Meta-Llama-3-70B-Instruct-Turbo') THEN 880 * request_response_log.prompt_tokens + 880 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'meta-llama/Meta-Llama-3-8B-Instruct-Turbo') THEN 180 * request_response_log.prompt_tokens + 180 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'meta-llama/Meta-Llama-3-70B-Instruct-Lite') THEN 540 * request_response_log.prompt_tokens + 540 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'meta-llama/Meta-Llama-3-8B-Instruct-Lite') THEN 100 * request_response_log.prompt_tokens + 100 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'zero-one-ai/Yi-34B') THEN 800 * request_response_log.prompt_tokens + 800 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'zero-one-ai/Yi-6B') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'google/gemma-2b') THEN 100 * request_response_log.prompt_tokens + 100 * request_response_log.completion_tokens
@@ -636,6 +643,19 @@ WHEN (request_response_log.model = 'openai/gpt-3.5-turbo-0125') THEN 500 * reque
 WHEN (request_response_log.model = 'openai/gpt-3.5-turbo-0301') THEN 1000 * request_response_log.prompt_tokens + 2000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'openai/gpt-4') THEN 30000 * request_response_log.prompt_tokens + 60000 * request_response_log.completion_tokens
 WHEN (request_response_log.model = 'openai/gpt-4-0314') THEN 30000 * request_response_log.prompt_tokens + 60000 * request_response_log.completion_tokens
+  ELSE 0
+END
+)
+WHEN (request_response_log.provider = 'GROQ') THEN (
+  CASE
+  WHEN (request_response_log.model = 'llama2-70b-4096') THEN 700 * request_response_log.prompt_tokens + 800 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'mixtral-8x7b-32768') THEN 240 * request_response_log.prompt_tokens + 240 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gemma-7b-it') THEN 70 * request_response_log.prompt_tokens + 70 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gemma2-9b-it') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'llama3-70b-8192') THEN 590 * request_response_log.prompt_tokens + 790 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'llama3-8b-8192') THEN 50 * request_response_log.prompt_tokens + 80 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'llama3-groq-70b-8192-tool-use-preview') THEN 890 * request_response_log.prompt_tokens + 890 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'llama3-groq-8b-8192-tool-use-preview') THEN 190 * request_response_log.prompt_tokens + 190 * request_response_log.completion_tokens
   ELSE 0
 END
 )

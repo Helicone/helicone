@@ -933,6 +933,9 @@
 			},
 			"HeliconeMeta": {
 				"properties": {
+					"lytixHost": {
+						"type": "string"
+					},
 					"lytixKey": {
 						"type": "string"
 					},

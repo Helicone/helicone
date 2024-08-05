@@ -11,6 +11,7 @@ import { costs as cohereCosts } from "./cohere";
 import { costs as mistralCosts } from "./mistral";
 import { costs as openRouterCosts } from "./openrouter";
 import { costs as fireworksAICosts } from "./fireworks";
+import { costs as groqCosts } from "./groq";
 import { ModelRow } from "../interfaces/Cost";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
@@ -152,6 +153,7 @@ export const providers: {
   {
     pattern: groq,
     provider: "GROQ",
+    costs: groqCosts,
   },
   {
     pattern: cohere,

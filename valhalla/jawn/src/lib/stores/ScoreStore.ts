@@ -10,17 +10,14 @@ export type Score = {
   score_attribute_key: string;
   score_attribute_type: string;
   score_attribute_value: number;
-}
+};
 
 export class ScoreStore extends BaseStore {
   constructor(organizationId: string) {
     super(organizationId);
   }
 
-  public async putScoresIntoSupabase(
-    requestId: string,
-    scores: Score[]
-  ) {
+  public async putScoresIntoSupabase(requestId: string, scores: Score[]) {
     try {
       const scoreKeys = scores.map((score) => score.score_attribute_key);
       const scoreTypes = scores.map((score) => score.score_attribute_type);
@@ -51,7 +48,7 @@ export class ScoreStore extends BaseStore {
         SELECT id, score_key
         FROM upserted_attributes;
       `;
-      
+
       const { data: upsertedAttributes, error: upsertError } = await dbExecute(
         upsertQuery,
         [scoreKeys, scoreTypes, organizationIds]
@@ -155,10 +152,13 @@ export class ScoreStore extends BaseStore {
           ...rowContents.data,
           sign: 1,
           version: newVersion.version,
-          scores: newVersion.scores.reduce((acc, score) => {
-            acc[score.score_attribute_key] = score.score_attribute_value;
-            return acc;
-          }, {} as Record<string, number>),
+          scores: {
+            ...rowContents.data.scores,
+            ...newVersion.scores.reduce((acc, score) => {
+              acc[score.score_attribute_key] = score.score_attribute_value;
+              return acc;
+            }, {} as Record<string, number>),
+          },
         },
       ]
     );

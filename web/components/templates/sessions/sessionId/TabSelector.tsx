@@ -1,6 +1,12 @@
 import React from "react";
 import { clsx } from "../../../shared/clsx";
 
+import {
+  ChatBubbleLeftIcon,
+  ArrowTurnDownRightIcon,
+  Bars3BottomRightIcon,
+} from "@heroicons/react/24/outline";
+
 interface TabSelectorProps<T> {
   tabs: readonly T[];
   currentTopView: T;
@@ -25,9 +31,21 @@ function TabSelector<T extends string>({
           )}
           onClick={() => setCurrentTopView(tab)}
         >
-          {tab === "span" && <span className="mr-2">≡</span>}
-          {tab === "tree" && <span className="mr-2">🗂️</span>}
-          {tab === "chat" && <span className="mr-2">💬</span>}
+          {tab === "span" && (
+            <span className="mr-2">
+              <Bars3BottomRightIcon className="size-5" />
+            </span>
+          )}
+          {tab === "tree" && (
+            <span className="mr-2">
+              <ArrowTurnDownRightIcon className="size-5" />
+            </span>
+          )}
+          {tab === "chat" && (
+            <span className="mr-2">
+              <ChatBubbleLeftIcon className="size-5" />
+            </span>
+          )}
           {tab.charAt(0).toUpperCase() + tab.slice(1)}
         </button>
       ))}

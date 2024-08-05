@@ -191,6 +191,23 @@ export type BlogStructure =
 
 const blogContent: BlogStructure[] = [
   {
+    title: "What is Prompt Management?",
+    description:
+      "Iterating your prompts is the #1 way to optimize user interactions with large language models (LLMs). Should you choose Helicone, Pezzo, or Agenta? We will explore the benefits of choosing a prompt management tool and what to look for.",
+    badgeText: "insight",
+    date: "Aug 1, 2024",
+    href: "/blog/prompt-management",
+    imageUrl: "/static/blog/prompt-management/cover.webp",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/static/blog/linalam-headshot.webp",
+        imageAlt: "Lina Lam's headshot",
+      },
+    ],
+    time: "5 minute read",
+  },
+  {
     title: "Meta Releases SAM 2 and What It Means for Developers Building Multi-Modal AI",
     description:
       "Meta's release of SAM 2 (Segment Anything Model for videos and images) represents a significant leap in AI capabilities, revolutionizing how developers and tools like Helicone approach multi-modal observability in AI systems.",
