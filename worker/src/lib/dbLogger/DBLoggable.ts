@@ -735,6 +735,7 @@ export class DBLoggable {
         webhookEnabled: requestHeaders.webhookEnabled,
         posthogApiKey: requestHeaders.posthogKey ?? undefined,
         lytixKey: requestHeaders.lytixKey ?? undefined,
+        lytixHost: requestHeaders.lytixHost ?? undefined,
         posthogHost: requestHeaders.posthogHost ?? undefined,
       },
       log: {
