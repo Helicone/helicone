@@ -639,6 +639,19 @@ WHEN (request_response_log.model = 'openai/gpt-4-0314') THEN 30000 * request_res
   ELSE 0
 END
 )
+WHEN (request_response_log.provider = 'GROQ') THEN (
+  CASE
+  WHEN (request_response_log.model = 'llama2-70b-4096') THEN 700 * request_response_log.prompt_tokens + 800 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'mixtral-8x7b-32768') THEN 240 * request_response_log.prompt_tokens + 240 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gemma-7b-it') THEN 70 * request_response_log.prompt_tokens + 70 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'gemma2-9b-it') THEN 200 * request_response_log.prompt_tokens + 200 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'llama3-70b-8192') THEN 590 * request_response_log.prompt_tokens + 790 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'llama3-8b-8192') THEN 50 * request_response_log.prompt_tokens + 80 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'llama3-groq-70b-8192-tool-use-preview') THEN 890 * request_response_log.prompt_tokens + 890 * request_response_log.completion_tokens
+WHEN (request_response_log.model = 'llama3-groq-8b-8192-tool-use-preview') THEN 190 * request_response_log.prompt_tokens + 190 * request_response_log.completion_tokens
+  ELSE 0
+END
+)
 WHEN (request_response_log.provider = 'COHERE') THEN (
   CASE
   WHEN (request_response_log.model = 'cohere/command-r') THEN 500 * request_response_log.prompt_tokens + 1500 * request_response_log.completion_tokens
