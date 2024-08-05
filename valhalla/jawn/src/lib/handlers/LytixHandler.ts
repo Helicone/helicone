@@ -1,16 +1,10 @@
-import { costOfPrompt } from "../../packages/cost";
-import {
-  HeliconeRequestResponseToPosthog,
-  PostHogEvent,
-  PosthogUserClient,
-} from "../clients/PosthogUserClient";
+import * as Sentry from "@sentry/node";
 import { PromiseGenericResult, err, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
-import crypto from "crypto";
-import * as Sentry from "@sentry/node";
 
 interface LytixModelIO {
+  lytixHost?: string;
   apiKey: string;
   modelName: string;
   modelInput: string;
@@ -32,6 +26,7 @@ export class LytixHandler extends AbstractLogHandler {
     }
 
     this.lytixModelIO.push({
+      lytixHost: context.message.heliconeMeta.lytixHost,
       apiKey: context.message.heliconeMeta.lytixKey,
       modelName: context.processedLog.model ?? "",
       modelInput: JSON.stringify(context.processedLog.request.body) ?? "",
@@ -48,8 +43,8 @@ export class LytixHandler extends AbstractLogHandler {
     for (const lytixModelIO of this.lytixModelIO) {
       try {
         // send lytix logs to lytix
-
-        await fetch("https://api.lytix.co/v1/metrics/modelIO", {
+        const lytixHost = lytixModelIO.lytixHost ?? "https://api.lytix.co";
+        await fetch(`${lytixHost}/v1/metrics/modelIO`, {
           method: "POST",
           headers: {
             "lx-api-key": `Bearer ${lytixModelIO.apiKey}`,

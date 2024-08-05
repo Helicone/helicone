@@ -936,6 +936,9 @@
 					"lytixKey": {
 						"type": "string"
 					},
+					"lytixHost": {
+						"type": "string"
+					},
 					"posthogHost": {
 						"type": "string"
 					},
