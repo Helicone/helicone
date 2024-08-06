@@ -24,7 +24,7 @@ HELICONE_API_KEY=<your API key>
 import { createOpenAI } from "@ai-sdk/openai";
 
 const openai = createOpenAI({
-    baseURL: "https://oai.hconeai.com/v1",
+    baseURL: "https://oai.helicone.ai/v1",
     headers: {
         "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
     },
