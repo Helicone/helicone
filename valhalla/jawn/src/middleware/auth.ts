@@ -7,8 +7,14 @@ import { uuid } from "uuidv4";
 import { AuthParams } from "../lib/db/supabase";
 
 export const logInPostHog = (
-  req: Request,
-  res: Response,
+  reqParams: {
+    method: string;
+    url: string;
+    userAgent: string;
+  },
+  resParams: {
+    status: number;
+  },
   authParams?: AuthParams
 ) => {
   const start = Date.now();
@@ -39,7 +45,7 @@ export const logInPostHog = (
     }
   }
 
-  const captureRequest = async () => {
+  const onFinish = async () => {
     const duration = Date.now() - start;
 
     try {
@@ -47,11 +53,11 @@ export const logInPostHog = (
         distinctId: uuid(),
         event: "jawn_http_request",
         properties: {
-          method: req.method,
-          url: req.originalUrl,
-          status: res.statusCode,
+          method: reqParams.method,
+          url: reqParams.url,
+          status: resParams.status,
           duration: duration,
-          userAgent: req.headers["user-agent"],
+          userAgent: reqParams.userAgent,
         },
       });
     } catch (error) {
@@ -59,7 +65,7 @@ export const logInPostHog = (
     }
   };
 
-  res.on("finish", captureRequest);
+  return onFinish;
 };
 
 export const authMiddleware = async (
@@ -97,7 +103,20 @@ export const authMiddleware = async (
     }
 
     (req as any).authParams = authParams.data;
-    logInPostHog(req, res, authParams.data);
+
+    const onFinish = logInPostHog(
+      {
+        method: `${req.method}`,
+        url: `${req.originalUrl}`,
+        userAgent: `${req.headers["user-agent"] ?? ""}`,
+      },
+      {
+        status: res.statusCode,
+      },
+      authParams.data
+    );
+
+    res.on("finish", onFinish);
 
     if (req.path.startsWith("/admin")) {
       await authCheckThrow(authParams.data.userId);
