@@ -21,6 +21,8 @@ import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
 import { unauthorizedCacheMiddleware } from "./middleware/unauthorizedCache";
+import { postHogClient } from "./lib/clients/postHogClient";
+import { uuid } from "uuidv4";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;
@@ -66,6 +68,32 @@ if (KAFKA_ENABLED) {
   });
 }
 
+app.use((req, res, next) => {
+  const start = Date.now();
+
+  const captureRequest = () => {
+    const duration = Date.now() - start;
+    try {
+      postHogClient?.capture({
+        distinctId: uuid(),
+        event: "jawn_http_request",
+        properties: {
+          method: req.method,
+          url: req.originalUrl,
+          status: res.statusCode,
+          duration: duration,
+          userAgent: req.headers["user-agent"],
+        },
+      });
+    } catch (error) {
+      console.error("Failed to capture request in PostHog:", error);
+    }
+  };
+
+  res.on("finish", captureRequest);
+
+  next();
+});
 app.get("/healthcheck", (req, res) => {
   res.json({
     status: "healthy :)",
