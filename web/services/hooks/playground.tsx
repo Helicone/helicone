@@ -117,14 +117,14 @@ export const usePlaygroundPage = (requestId: string) => {
     false
   );
 
-  const { chat, isChat, tools } = getChat(requests.requests);
+  const { chat, isChat, tools } = getChat(requests.normalizedRequests);
 
   return {
     isLoading: requests.isDataLoading,
-    data: requests.requests,
+    data: requests.normalizedRequests,
     chat,
     refetch: requests.refetch,
-    hasData: requests.requests && requests.requests.length > 0,
+    hasData: requests.normalizedRequests && requests.normalizedRequests.length > 0,
     isChat,
     tools,
   };

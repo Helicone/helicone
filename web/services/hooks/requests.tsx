@@ -10,6 +10,7 @@ import {
   getModelFromPath,
   mapGeminiPro,
 } from "../../components/templates/requestsV2/builder/mappers/geminiMapper";
+import { getNormalizedRequests } from "../../components/templates/requestsV2/useRequestsPageV2";
 
 const useGetRequests = (
   currentPage: number,
@@ -49,55 +50,7 @@ const useGetRequests = (
           },
         });
 
-        const result = response.data as Result<HeliconeRequest[], string>;
-
-        const requests = await Promise.all(
-          result.data?.map(async (request: HeliconeRequest) => {
-            if (request.signed_body_url) {
-              try {
-                const contentResponse = await fetch(request.signed_body_url);
-                if (contentResponse.ok) {
-                  const text = await contentResponse.text();
-
-                  let content = JSON.parse(text);
-
-                  if (request.asset_urls) {
-                    content = placeAssetIdValues(request.asset_urls, content);
-                  }
-
-                  request.request_body = content.request;
-                  request.response_body = content.response;
-
-                  const model =
-                    request.model_override ||
-                    request.response_model ||
-                    request.request_model ||
-                    content.response?.model ||
-                    content.request?.model ||
-                    content.response?.body?.model || // anthropic
-                    getModelFromPath(request.request_path) ||
-                    "";
-
-                  if (
-                    request.provider === "GOOGLE" &&
-                    model.toLowerCase().includes("gemini")
-                  ) {
-                    request.llmSchema = mapGeminiPro(
-                      request as HeliconeRequest,
-                      model
-                    );
-                  }
-                }
-              } catch (error) {
-                console.log(`Error fetching content: ${error}`);
-                return request;
-              }
-            }
-            return request; // Return request if no signed_body_url
-          }) ?? []
-        );
-
-        return { data: requests, error: null };
+        return response.data as Result<HeliconeRequest[], string>;
       },
       refetchOnWindowFocus: false,
       retry: false,
@@ -132,6 +85,73 @@ const useGetRequests = (
       refetchInterval: isLive ? 2_000 : false,
       // cache the count for 5 minutes
       cacheTime: 5 * 60 * 1000,
+    }),
+  };
+};
+
+export const useGetFullRequest = (result: HeliconeRequest[]) => {
+  return {
+    requestBodies: useQuery({
+      queryKey: [
+        "requestsBodies",
+        result,
+      ],
+      queryFn: async (query) => {
+        const requests = await Promise.all(
+          result.map(async (request: HeliconeRequest) => {
+            if (request.signed_body_url) {
+              try {
+                const contentResponse = await fetch(request.signed_body_url);
+                if (contentResponse.ok) {
+                  const text = await contentResponse.text();
+
+                  let content = JSON.parse(text);
+
+                  if (request.asset_urls) {
+                    content = placeAssetIdValues(request.asset_urls, content);
+                  }
+
+
+                  const model =
+                    request.model_override ||
+                    request.response_model ||
+                    request.request_model ||
+                    content.response?.model ||
+                    content.request?.model ||
+                    content.response?.body?.model || // anthropic
+                    getModelFromPath(request.request_path) ||
+                    "";
+
+                  if (
+                    request.provider === "GOOGLE" &&
+                    model.toLowerCase().includes("gemini")
+                  ) {
+                    request.llmSchema = mapGeminiPro(
+                      request as HeliconeRequest,
+                      model
+                    );
+                  }
+
+                  return {
+                      ...request,
+                      request_body: content.request,
+                      response_body: content.response,
+                  };
+                }
+              } catch (error) {
+                console.log(`Error fetching content: ${error}`);
+                return request;
+              }
+            }
+            console.log("no url");
+            return request; // Return request if no signed_body_url
+          }) ?? []
+        );
+
+        return { data: getNormalizedRequests(requests), error: null };
+      },
+      refetchOnWindowFocus: false,
+      retry: false,
     }),
   };
 };
