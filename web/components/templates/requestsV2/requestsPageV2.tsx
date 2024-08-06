@@ -435,7 +435,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   }, [searchParams, filterMap]);
 
   useEffect(() => {
-    if (initialLoadRef.current && filterMap.length > 0) {
+    if (initialLoadRef.current && filterMap.length > 0 && !isDataLoading) {
       const loadedFilters = getAdvancedFilters();
       setAdvancedFilters(loadedFilters);
       initialLoadRef.current = false;
