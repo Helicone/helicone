@@ -7,12 +7,26 @@ import "prismjs/themes/prism.css";
 import "prismjs/components/prism-clike";
 import "prismjs/components/prism-javascript";
 import "prismjs/components/prism-json";
+import { Course } from "./courseGenerator";
 
-const TextbookCourse = ({ course, isGenerating, currentStep }) => {
-  const [activeSection, setActiveSection] = useState(null);
-  const [quizAnswers, setQuizAnswers] = useState({});
-  const [quizSubmitted, setQuizSubmitted] = useState({});
-  const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
+interface TextbookCourseProps {
+  course: Partial<Course>;
+  isGenerating: boolean;
+  currentStep: string;
+}
+
+type QuizAnswers = Record<number, Record<number, number>>;
+type QuizSubmitted = Record<number, boolean>;
+
+const TextbookCourse: React.FC<TextbookCourseProps> = ({
+  course,
+  isGenerating,
+  currentStep,
+}) => {
+  const [activeSection, setActiveSection] = useState<number | null>(null);
+  const [quizAnswers, setQuizAnswers] = useState<QuizAnswers>({});
+  const [quizSubmitted, setQuizSubmitted] = useState<QuizSubmitted>({});
+  const [isOverviewExpanded, setIsOverviewExpanded] = useState<boolean>(false);
 
   useEffect(() => {
     const renderer = new marked.Renderer();
@@ -34,7 +48,11 @@ const TextbookCourse = ({ course, isGenerating, currentStep }) => {
     });
   }, []);
 
-  const handleQuizAnswer = (sectionIndex, questionIndex, answerIndex) => {
+  const handleQuizAnswer = (
+    sectionIndex: number,
+    questionIndex: number,
+    answerIndex: number
+  ): void => {
     setQuizAnswers((prev) => ({
       ...prev,
       [sectionIndex]: {
@@ -44,11 +62,11 @@ const TextbookCourse = ({ course, isGenerating, currentStep }) => {
     }));
   };
 
-  const submitQuiz = (sectionIndex) => {
+  const submitQuiz = (sectionIndex: number): void => {
     setQuizSubmitted((prev) => ({ ...prev, [sectionIndex]: true }));
   };
 
-  const renderMarkdown = (content) => {
+  const renderMarkdown = (content: string): JSX.Element => {
     const html = marked(content);
     return (
       <div
@@ -62,7 +80,7 @@ const TextbookCourse = ({ course, isGenerating, currentStep }) => {
     );
   };
 
-  const toggleOverview = () => {
+  const toggleOverview = (): void => {
     setIsOverviewExpanded(!isOverviewExpanded);
   };
 

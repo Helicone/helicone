@@ -38,7 +38,7 @@ export interface ChatHistory {
   content: string;
 }
 
-const GuessWhoGame = ({ onReset }) => {
+const GuessWhoGame = () => {
   const [gameState, setGameState] = useState<"playing" | "finished">("playing");
   const [gameSessionId, setGameSessionId] = useState<string | null>(null);
   const [chatHistory, setChatHistory] = useState<ChatHistory[]>([

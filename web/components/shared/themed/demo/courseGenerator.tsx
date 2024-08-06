@@ -12,23 +12,23 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/20/solid";
 
-interface CourseParams {
+export interface CourseParams {
   topic: string;
   difficulty: "Beginner" | "Intermediate" | "Advanced";
   audience: string;
 }
 
-interface CourseOverview {
+export interface CourseOverview {
   title: string;
   description: string;
 }
 
-interface CourseSection {
+export interface CourseSection {
   title: string;
   content: string;
 }
 
-interface CourseQuiz {
+export interface CourseQuiz {
   questions: Array<{
     question: string;
     options: string[];
@@ -36,7 +36,7 @@ interface CourseQuiz {
   }>;
 }
 
-interface Course {
+export interface Course {
   overview: CourseOverview;
   sections: CourseSection[];
   quizzes: CourseQuiz[];

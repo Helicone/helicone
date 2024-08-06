@@ -6,7 +6,7 @@ import * as chatbot from "../../../../public/lottie/chatbot.json";
 import GuessWhoGame from "./guessWho";
 import { CourseGenerator } from "./courseGenerator";
 
-const ChatSupportBot = ({ onReset }) => {
+const ChatSupportBot = () => {
   // Implement the Chat Support Bot logic here
   return (
     <div>
@@ -125,7 +125,7 @@ const StartPage = () => {
         </button>
       </div>
       <div className="flex-grow overflow-hidden">
-        {GameComponent && <GameComponent onReset={onReset} />}
+        {GameComponent && <GameComponent />}
       </div>
     </div>
   );
