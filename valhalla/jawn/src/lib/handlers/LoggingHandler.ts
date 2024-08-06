@@ -64,7 +64,8 @@ export class LoggingHandler extends AbstractLogHandler {
     try {
       const requestMapped = this.mapRequest(context);
       const responseMapped = this.mapResponse(context);
-      const assetsMapped = this.mapAssets(context);
+      const assetsMapped = this.mapAssets(context).slice(0, 100);
+
       const s3RecordMapped = this.mapS3Records(context);
       const searchRecordsMapped = this.mapSearchRecords(context);
       const promptMapped =
