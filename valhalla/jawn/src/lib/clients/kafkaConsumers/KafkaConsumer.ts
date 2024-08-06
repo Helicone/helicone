@@ -69,9 +69,7 @@ export const consume = async () => {
             "kafka:log"
           );
 
-          const miniBatchSize =
-            messagesPerMiniBatchSetting?.miniBatchSize ??
-            MESSAGES_PER_MINI_BATCH;
+          const miniBatchSize = 1;
 
           if (miniBatchSize <= 0) {
             return;
@@ -127,7 +125,7 @@ export const consume = async () => {
   });
 };
 
-function mapKafkaMessageToMessage(
+export function mapKafkaMessageToMessage(
   kafkaMessage: KafkaMessage[]
 ): GenericResult<Message[]> {
   const messages: Message[] = [];

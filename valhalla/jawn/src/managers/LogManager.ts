@@ -136,6 +136,7 @@ export class LogManager {
 
     await this.logRateLimits(rateLimitHandler, batchContext);
     await this.logHandlerResults(loggingHandler, batchContext, logMessages);
+
     await this.logPosthogEvents(posthogHandler, batchContext);
     await this.logLytixEvents(lytixHandler, batchContext);
     await this.logWebhooks(webhookHandler, batchContext);
@@ -262,6 +263,7 @@ export class LogManager {
       messageCount: number;
     }
   ): Promise<void> {
+    console.log("Logging Lytix events");
     const start = performance.now();
     await handler.handleResults();
     const end = performance.now();
