@@ -99,7 +99,8 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           id="user-table"
           defaultData={users}
           defaultColumns={INITIAL_COLUMNS}
-          dataLoading={isLoading}
+          skeletonLoading={isLoading}
+          dataLoading={false}
           sortable={sort}
           advancedFilters={{
             filterMap: userTableFilters,
