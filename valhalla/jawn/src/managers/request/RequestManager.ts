@@ -149,21 +149,21 @@ export class RequestManager extends BaseManager {
     }
 
     const scoreManager = new ScoreManager(this.authParams);
-    const feedbackScoreResult = await scoreManager.addScoresToClickhouse(
-      requestId,
-      [
-        {
-          score_attribute_key: "helicone-score-feedback",
-          score_attribute_type: "number",
-          score_attribute_value: feedback ? 1 : 0,
-        },
-      ]
-    );
+    // const feedbackScoreResult = await scoreManager.addScoresToClickhouse(
+    //   requestId,
+    //   [
+    //     {
+    //       score_attribute_key: "helicone-score-feedback",
+    //       score_attribute_type: "number",
+    //       score_attribute_value: feedback ? 1 : 0,
+    //     },
+    //   ]
+    // );
 
-    if (feedbackScoreResult.error) {
-      console.error("Error upserting feedback:", feedbackScoreResult.error);
-      return err(feedbackScoreResult.error);
-    }
+    // if (feedbackScoreResult.error) {
+    //   console.error("Error upserting feedback:", feedbackScoreResult.error);
+    //   return err(feedbackScoreResult.error);
+    // }
 
     return ok(null);
   }
