@@ -2,7 +2,65 @@ import { NextFunction, Request, Response } from "express";
 import { RequestWrapper } from "../lib/requestWrapper";
 import { supabaseServer } from "../lib/routers/withAuth";
 import { authCheckThrow } from "../controllers/private/adminController";
-import { postHogClient } from "../lib/clients/postHogClient";
+import { newPostHogClient } from "../lib/clients/postHogClient";
+import { uuid } from "uuidv4";
+import { AuthParams } from "../lib/db/supabase";
+
+export const logInPostHog = (
+  req: Request,
+  res: Response,
+  authParams?: AuthParams
+) => {
+  const start = Date.now();
+  const postHogClient = newPostHogClient();
+  postHogClient?.capture({
+    distinctId: uuid(),
+    event: "jawn_http_request",
+  });
+
+  if (authParams?.userId && postHogClient) {
+    try {
+      postHogClient.identify({
+        distinctId: authParams?.userId,
+      });
+    } catch (error) {
+      console.error("Error identifying user in PostHog:", error);
+    }
+  }
+
+  if (authParams?.organizationId && postHogClient) {
+    try {
+      postHogClient.groupIdentify({
+        groupType: "organization",
+        groupKey: authParams.organizationId,
+      });
+    } catch (error) {
+      console.error("Error identifying organization in PostHog:", error);
+    }
+  }
+
+  const captureRequest = async () => {
+    const duration = Date.now() - start;
+
+    try {
+      postHogClient?.capture({
+        distinctId: uuid(),
+        event: "jawn_http_request",
+        properties: {
+          method: req.method,
+          url: req.originalUrl,
+          status: res.statusCode,
+          duration: duration,
+          userAgent: req.headers["user-agent"],
+        },
+      });
+    } catch (error) {
+      console.error("Failed to capture request in PostHog:", error);
+    }
+  };
+
+  res.on("finish", captureRequest);
+};
 
 export const authMiddleware = async (
   req: Request,
@@ -39,27 +97,7 @@ export const authMiddleware = async (
     }
 
     (req as any).authParams = authParams.data;
-
-    if (authParams.data?.userId && postHogClient) {
-      try {
-        postHogClient.identify({
-          distinctId: authParams.data.userId,
-        });
-      } catch (error) {
-        console.error("Error identifying user in PostHog:", error);
-      }
-    }
-
-    if (authParams.data?.organizationId && postHogClient) {
-      try {
-        postHogClient.groupIdentify({
-          groupType: "organization",
-          groupKey: authParams.data.organizationId,
-        });
-      } catch (error) {
-        console.error("Error identifying organization in PostHog:", error);
-      }
-    }
+    logInPostHog(req, res, authParams.data);
 
     if (req.path.startsWith("/admin")) {
       await authCheckThrow(authParams.data.userId);
