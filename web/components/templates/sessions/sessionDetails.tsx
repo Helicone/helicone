@@ -127,7 +127,8 @@ const SessionDetails = ({
         id="session-table"
         defaultData={sessions || []}
         defaultColumns={INITIAL_COLUMNS}
-        dataLoading={isLoading}
+        skeletonLoading={isLoading}
+        dataLoading={false}
         sortable={sort}
         timeFilter={{
           currentTimeFilter: timeFilter,
