@@ -152,7 +152,7 @@ function recursivelyConsolidateAnthropicListForClaude3(delta: any[]): any {
 function recursivelyConsolidateAnthropic(body: any, delta: any): any {
   Object.keys(delta).forEach((key) => {
     if (key === "stop_reason") {
-      console.log("Stop Reason", delta[key]);
+      // console.log("Stop Reason", delta[key]);
     }
     if (key === "delta") {
     } else if (key === "type") {
