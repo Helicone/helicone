@@ -63,8 +63,8 @@ const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
 
 if (KAFKA_ENABLED) {
   startConsumers({
-    dlqCount: 0,
-    normalCount: 0,
+    dlqCount: DLQ_WORKER_COUNT,
+    normalCount: NORMAL_WORKER_COUNT,
   });
 }
 
@@ -94,7 +94,6 @@ app.use((req, res, next) => {
 
   next();
 });
-
 app.get("/healthcheck", (req, res) => {
   res.json({
     status: "healthy :)",

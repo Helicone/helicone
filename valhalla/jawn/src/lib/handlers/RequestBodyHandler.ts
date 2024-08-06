@@ -9,6 +9,15 @@ import { PromiseGenericResult, err, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
+export const MAX_ASSETS = 100;
+
+function truncMap(
+  map: Map<string, string>,
+  maxSize: number
+): Map<string, string> {
+  return new Map(Array.from(map.entries()).slice(0, maxSize));
+}
+
 export class RequestBodyHandler extends AbstractLogHandler {
   async handle(context: HandlerContext): PromiseGenericResult<string> {
     try {
@@ -99,6 +108,13 @@ export class RequestBodyHandler extends AbstractLogHandler {
     imageModelParsingResponse.body = unsupportedImage(
       imageModelParsingResponse.body
     );
+
+    if (imageModelParsingResponse.assets.size > MAX_ASSETS) {
+      imageModelParsingResponse.assets = truncMap(
+        imageModelParsingResponse.assets,
+        MAX_ASSETS
+      );
+    }
 
     return imageModelParsingResponse;
   }
