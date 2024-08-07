@@ -28,6 +28,9 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
   mode,
 }) => {
   const handleToggle = () => setExpanded(!expanded);
+  if (formattedMessageContent.length > 100 * 1000 * 1000 * 1000) {
+    return <div>Too long to display</div>;
+  }
 
   return (
     <Col>
