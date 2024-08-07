@@ -151,7 +151,7 @@ export class RequestManager extends BaseManager {
 
     const res = await kafkaProducer.sendFeedbackMessage(
       [feedbackMessage],
-      "helicone-feedback-prod"
+      "helicone-scores-prod"
     );
 
     if (res.error) {

@@ -107,7 +107,7 @@ export class FeedbackManager {
       Sentry.captureException(new Error(JSON.stringify(result.error)), {
         tags: {
           type: "HandleFeedbackError",
-          topic: "helicone-feedback-prod-dlq",
+          topic: "helicone-scores-prod",
         },
         extra: {
           batchId: batchContext.batchId,
@@ -126,14 +126,14 @@ export class FeedbackManager {
       const kafkaProducer = new KafkaProducer();
       const kafkaResult = await kafkaProducer.sendFeedbackMessage(
         feedbackMessages,
-        "helicone-feedback-prod-dlq"
+        "helicone-scores-prod"
       );
 
       if (kafkaResult.error) {
         Sentry.captureException(new Error(kafkaResult.error), {
           tags: {
             type: "KafkaError",
-            topic: "helicone-feedback-prod-dlq",
+            topic: "helicone-scores-prod",
           },
           extra: {
             batchId: batchContext.batchId,

@@ -320,7 +320,7 @@ export const consumeFeedback = async () => {
 
   await consumer?.connect();
   await consumer?.subscribe({
-    topic: "helicone-feedback-prod",
+    topic: "helicone-scores-prod",
     fromBeginning: true,
   });
 
@@ -377,7 +377,7 @@ export const consumeFeedback = async () => {
               lastOffset,
               miniBatchId,
               batch.partition,
-              "helicone-feedback-prod"
+              "helicone-scores-prod"
             );
 
             if (consumeResult.error) {
