@@ -1,7 +1,10 @@
 import * as Sentry from "@sentry/node";
 import { KafkaMessage } from "kafkajs";
 import { LogManager } from "../../../managers/LogManager";
-import { Message } from "../../handlers/HandlerContext";
+import {
+  HeliconeFeedbackMessage,
+  Message,
+} from "../../handlers/HandlerContext";
 import {
   GenericResult,
   PromiseGenericResult,
@@ -15,6 +18,8 @@ import {
   MESSAGES_PER_MINI_BATCH,
 } from "./constant";
 import { SettingsManager } from "../../../utils/settings";
+import { RequestManager } from "../../../managers/request/RequestManager";
+import { FeedbackManager } from "../../../managers/feedback/FeedbackManager";
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
@@ -148,6 +153,29 @@ function mapKafkaMessageToMessage(
   return ok(messages);
 }
 
+function mapKafkaMessageToFeedbackMessage(
+  kafkaMessage: KafkaMessage[]
+): GenericResult<HeliconeFeedbackMessage[]> {
+  const messages: HeliconeFeedbackMessage[] = [];
+  for (const message of kafkaMessage) {
+    if (message.value) {
+      try {
+        const kafkaValue = JSON.parse(message.value.toString());
+        const parsedMsg = JSON.parse(
+          kafkaValue.value
+        ) as HeliconeFeedbackMessage;
+        messages.push(parsedMsg);
+      } catch (error) {
+        return err(`Failed to parse message: ${error}`);
+      }
+    } else {
+      return err("Message value is empty");
+    }
+  }
+
+  return ok(messages);
+}
+
 function mapMessageDates(message: Message): Message {
   return {
     ...message,
@@ -266,6 +294,111 @@ export const consumeDlq = async () => {
   });
 };
 
+export const consumeFeedback = async () => {
+  const consumer = generateKafkaConsumer("jawn-consumer-feedback");
+  if (KAFKA_ENABLED && !consumer) {
+    console.error("Failed to create Kafka consumer");
+    return;
+  }
+
+  let retryDelay = 100;
+  const maxDelay = 30000;
+
+  while (true) {
+    try {
+      await consumer?.connect();
+      console.log("Successfully connected to Kafka");
+      break;
+    } catch (error: any) {
+      console.error(`Failed to connect to Kafka: ${error.message}`);
+      console.log(`Retrying in ${retryDelay}ms...`);
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      retryDelay = Math.min(retryDelay * 2, maxDelay); // Exponential backoff with a cap
+    }
+  }
+
+  await consumer?.connect();
+  await consumer?.subscribe({
+    topic: "helicone-feedback-prod",
+    fromBeginning: true,
+  });
+
+  await consumer?.run({
+    eachBatchAutoResolve: false,
+    eachBatch: async ({
+      batch,
+      resolveOffset,
+      heartbeat,
+      commitOffsetsIfNecessary,
+    }) => {
+      console.log(`Received batch with ${batch.messages.length} messages.`);
+
+      try {
+        let i = 0;
+
+        while (i < batch.messages.length) {
+          const messagesPerMiniBatchSetting = await settingsManager.getSetting(
+            "kafka:log"
+          );
+
+          const miniBatchSize =
+            messagesPerMiniBatchSetting?.miniBatchSize ??
+            MESSAGES_PER_MINI_BATCH;
+
+          if (miniBatchSize <= 0) {
+            return;
+          }
+
+          const miniBatch = batch.messages.slice(i, miniBatchSize + i);
+
+          const firstOffset = miniBatch?.[0]?.offset;
+          const lastOffset = miniBatch?.[miniBatch.length - 1]?.offset;
+          const miniBatchId = `${batch.partition}-${firstOffset}-${lastOffset}`;
+          console.log(
+            `Processing mini batch with ${
+              miniBatch.length
+            } messages. Mini batch ID: ${miniBatchId}. Handling ${i}-${
+              i + miniBatchSize
+            } of ${batch.messages.length} messages.`
+          );
+
+          i += miniBatchSize;
+          try {
+            const mappedMessages = mapKafkaMessageToFeedbackMessage(miniBatch);
+            if (mappedMessages.error || !mappedMessages.data) {
+              console.error("Failed to map messages", mappedMessages.error);
+              return;
+            }
+
+            const consumeResult = await consumeMiniBatchFeedback(
+              mappedMessages.data,
+              firstOffset,
+              lastOffset,
+              miniBatchId,
+              batch.partition,
+              "helicone-feedback-prod"
+            );
+
+            if (consumeResult.error) {
+              console.error("Failed to consume batch", consumeResult.error);
+            }
+          } catch (error) {
+            console.error("Failed to consume batch", error);
+          } finally {
+            resolveOffset(lastOffset);
+            await heartbeat();
+            await commitOffsetsIfNecessary();
+          }
+        }
+      } catch (error) {
+        console.error("Failed to consume batch", error);
+      } finally {
+        await commitOffsetsIfNecessary();
+      }
+    },
+  });
+};
+
 function mapDlqKafkaMessageToMessage(
   kafkaMessage: KafkaMessage[]
 ): GenericResult<Message[]> {
@@ -308,6 +441,49 @@ async function consumeMiniBatch(
       lastOffset: lastOffset,
       messageCount: messages.length,
     });
+    return ok(miniBatchId);
+  } catch (error) {
+    // TODO: Should we skip or fail the batch?
+    Sentry.captureException(error, {
+      tags: {
+        type: "ConsumeError",
+        topic: topic,
+      },
+      extra: {
+        batchId: batchPartition,
+        partition: batchPartition,
+        offset: firstOffset,
+        messageCount: messages.length,
+      },
+    });
+    return err(`Failed to process batch ${miniBatchId}, error: ${error}`);
+  }
+}
+
+async function consumeMiniBatchFeedback(
+  messages: HeliconeFeedbackMessage[],
+  firstOffset: string,
+  lastOffset: string,
+  miniBatchId: string,
+  batchPartition: number,
+  topic: Topics
+): PromiseGenericResult<string> {
+  console.log(
+    `Received mini batch with ${messages.length} messages. Mini batch ID: ${miniBatchId}. Topic: ${topic}`
+  );
+
+  const feedbackManager = new FeedbackManager();
+
+  try {
+    await feedbackManager.handleFeedback(
+      {
+        batchId: miniBatchId,
+        partition: batchPartition,
+        lastOffset: lastOffset,
+        messageCount: messages.length,
+      },
+      messages
+    );
     return ok(miniBatchId);
   } catch (error) {
     // TODO: Should we skip or fail the batch?

@@ -1,5 +1,7 @@
 // src/users/usersService.ts
+import { KafkaMessage } from "kafkajs";
 import { RequestQueryParams } from "../../controllers/public/requestController";
+import { KafkaProducer } from "../../lib/clients/KafkaProducer";
 import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
@@ -17,6 +19,8 @@ import {
 import { costOfPrompt } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";
+import { HeliconeFeedbackMessage } from "../../lib/handlers/HandlerContext";
+import { FeedbackManager } from "../feedback/FeedbackManager";
 
 export class RequestManager extends BaseManager {
   private versionedRequestStore: VersionedRequestStore;
@@ -115,55 +119,40 @@ export class RequestManager extends BaseManager {
     requestId: string,
     feedback: boolean
   ): Promise<Result<null, string>> {
-    const requestResponse = await this.waitForRequestAndResponse(
-      requestId,
-      this.authParams.organizationId
-    );
-
-    if (requestResponse.error || !requestResponse.data) {
-      return err("Request not found");
-    }
-
-    const feedbackResult = await this.queryTimer.withTiming(
-      supabaseServer.client
-        .from("feedback")
-        .upsert(
+    const kafkaProducer = new KafkaProducer();
+    if (!kafkaProducer.isKafkaEnabled) {
+      const feedbackManager = new FeedbackManager(this.queryTimer);
+      return await feedbackManager.handleFeedback(
+        {
+          batchId: "",
+          partition: 0,
+          lastOffset: "",
+          messageCount: 1,
+        },
+        [
           {
-            response_id: requestResponse.data.responseId,
-            rating: feedback,
-            created_at: new Date().toISOString(),
+            requestId,
+            organizationId: this.authParams.organizationId,
+            feedback,
           },
-          { onConflict: "response_id" }
-        )
-        .select("*")
-        .single(),
-      {
-        queryName: "upsert_feedback_by_response_id",
-        percentLogging: FREQUENT_PRECENT_LOGGING,
-      }
+        ]
+      );
+    }
+    const feedbackMessage: HeliconeFeedbackMessage = {
+      requestId: requestId,
+      organizationId: this.authParams.organizationId,
+      feedback: feedback,
+    };
+
+    const res = await kafkaProducer.sendFeedbackMessage(
+      [feedbackMessage],
+      "helicone-feedback-prod"
     );
 
-    if (feedbackResult.error) {
-      console.error("Error upserting feedback:", feedbackResult.error);
-      return err(feedbackResult.error.message);
+    if (res.error) {
+      console.error();
+      return err(res.error);
     }
-
-    const scoreManager = new ScoreManager(this.authParams);
-    // const feedbackScoreResult = await scoreManager.addScoresToClickhouse(
-    //   requestId,
-    //   [
-    //     {
-    //       score_attribute_key: "helicone-score-feedback",
-    //       score_attribute_type: "number",
-    //       score_attribute_value: feedback ? 1 : 0,
-    //     },
-    //   ]
-    // );
-
-    // if (feedbackScoreResult.error) {
-    //   console.error("Error upserting feedback:", feedbackScoreResult.error);
-    //   return err(feedbackScoreResult.error);
-    // }
 
     return ok(null);
   }

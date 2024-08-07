@@ -99,6 +99,12 @@ export type Message = {
   log: Log;
 };
 
+export type HeliconeFeedbackMessage = {
+  requestId: string;
+  organizationId: string;
+  feedback: boolean;
+};
+
 export type PromptRecord = {
   promptId: string;
   promptVersion: string;

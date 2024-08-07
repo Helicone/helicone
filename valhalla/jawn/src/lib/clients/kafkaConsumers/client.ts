@@ -44,7 +44,7 @@ export function getKafka() {
 }
 
 export function generateKafkaConsumer(
-  groupId: "jawn-consumer-local-01" | "jawn-consumer"
+  groupId: "jawn-consumer-local-01" | "jawn-consumer" | "jawn-consumer-feedback"
 ) {
   const kafka = getKafka();
   const consumer = kafka?.consumer({
