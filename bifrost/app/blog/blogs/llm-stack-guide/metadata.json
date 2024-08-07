@@ -1,10 +1,10 @@
 {
-  "title": "The LLM Stack Guide",
-  "title1": "LLM Stack Guide - Helicone",
-  "title2": "LLM Stack Guide - Helicone",
-  "description": "Discover the ultimate guide for building LLM applications. Learn about the components of the LLM Stack, including LLMs, prompting, tooling, and observability. Explore how to build, monitor, and scale your LLM-powered solutions effectively.",
+  "title": "The LLM Stack: A New Paradigm in Tech Architecture",
+  "title1": "The LLM Stack: A Comprehensive Guide for Developers - Helicone",
+  "title2": "The LLM Stack: From Hobbyist Projects to Enterprise-Scale Applications - Helicone",
+  "description": "Explore the emerging LLM Stack, designed for building and scaling LLM applications. Learn about its components, including observability, gateways, and experiments, and how it adapts from hobbyist projects to enterprise-scale solutions.",
   "images": "https://www.helicone.ai/static/blog/llm-stack-guide/cover.webp",
-  "time": "4 minute read",
-  "author": "Helicone Team",
-  "date": "July 15, 2024"
+  "time": "7 minute read",
+  "author": "Justin Torre",
+  "date": "August 5, 2024"
 }

@@ -1,5 +1,5 @@
 import { ArrowPathIcon, HomeIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
@@ -46,6 +46,7 @@ import {
   UIFilterRowNode,
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
+import Link from "next/link";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -260,8 +261,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const {
     count,
     isDataLoading,
+    isBodyLoading,
     isCountLoading,
-    requests,
+    normalizedRequests,
     properties,
     refetch,
     filterMap,
@@ -281,7 +283,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isLive
   );
 
-  const requestWithoutStream = requests.find((r) => {
+  const requestWithoutStream = normalizedRequests.find((r) => {
     return (
       (r.requestBody as any)?.stream &&
       !(r.requestBody as any)?.stream_options?.include_usage &&
@@ -763,9 +765,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         <div className="flex flex-col space-y-4">
           <ThemedTable
             id="requests-table"
-            defaultData={requests || []}
+            defaultData={normalizedRequests}
             defaultColumns={columnsWithProperties}
-            dataLoading={isDataLoading}
+            skeletonLoading={isDataLoading}
+            dataLoading={isBodyLoading}
             sortable={sort}
             advancedFilters={{
               filterMap: filterMap,
@@ -790,7 +793,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   }
                 : undefined
             }
-            exportData={requests.map((request) => {
+            exportData={normalizedRequests.map((request) => {
               const flattenedRequest: any = {};
               Object.entries(request).forEach(([key, value]) => {
                 // key is properties and value is not null
@@ -854,23 +857,29 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         hasPrevious={selectedDataIndex !== undefined && selectedDataIndex > 0}
         hasNext={
           selectedDataIndex !== undefined &&
-          selectedDataIndex < requests.length - 1
+          selectedDataIndex < normalizedRequests.length - 1
         }
         onPrevHandler={() => {
           if (selectedDataIndex !== undefined && selectedDataIndex > 0) {
             setSelectedDataIndex(selectedDataIndex - 1);
-            setSelectedData(requests[selectedDataIndex - 1]);
-            searchParams.set("requestId", requests[selectedDataIndex - 1].id);
+            setSelectedData(normalizedRequests[selectedDataIndex - 1]);
+            searchParams.set(
+              "requestId",
+              normalizedRequests[selectedDataIndex - 1].id
+            );
           }
         }}
         onNextHandler={() => {
           if (
             selectedDataIndex !== undefined &&
-            selectedDataIndex < requests.length - 1
+            selectedDataIndex < normalizedRequests.length - 1
           ) {
             setSelectedDataIndex(selectedDataIndex + 1);
-            setSelectedData(requests[selectedDataIndex + 1]);
-            searchParams.set("requestId", requests[selectedDataIndex + 1].id);
+            setSelectedData(normalizedRequests[selectedDataIndex + 1]);
+            searchParams.set(
+              "requestId",
+              normalizedRequests[selectedDataIndex + 1].id
+            );
           }
         }}
       />

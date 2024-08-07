@@ -6,6 +6,7 @@ import { PromiseGenericResult, ok, err } from "../shared/result";
 import { Database } from "../db/database.types";
 
 import { shouldBumpVersion } from "@helicone/prompts";
+import { sanitizeObject } from "../../utils/sanitize";
 
 const pgp = pgPromise();
 const db = pgp({
@@ -298,7 +299,7 @@ export class LogStore {
         RETURNING id`;
 
         const insertResult = await t.one(updateQuery, [
-          heliconeTemplate.template,
+          sanitizeObject(heliconeTemplate.template),
           versionId,
         ]);
 

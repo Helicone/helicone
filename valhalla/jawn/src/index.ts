@@ -21,6 +21,8 @@ import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
 import { unauthorizedCacheMiddleware } from "./middleware/unauthorizedCache";
+import { postHogClient } from "./lib/clients/postHogClient";
+import { uuid } from "uuidv4";
 
 export const ENVIRONMENT: "production" | "development" = (process.env
   .VERCEL_ENV ?? "development") as any;

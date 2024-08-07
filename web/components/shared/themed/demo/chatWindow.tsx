@@ -14,7 +14,6 @@ export const ChatWindow = ({
   onFinish,
   movieTitle,
   movieCharacter,
-  isLoading,
   gameSessionId,
 }: {
   chatHistory: ChatHistory[];
@@ -94,7 +93,7 @@ Response: "true"
             content: hpf`You are ${{ movieCharacter }} from the movie ${{
               movieTitle,
             }}. Answer the questions as if you are ${{ movieCharacter }}.
-            
+
 DO NOT GIVE AWAY YOUR IDENTITY. THE USER IS TRYING TO GUESS THE CHARACTER.
             `,
           },

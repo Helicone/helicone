@@ -1,6 +1,9 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
-import { useGetRequests } from "../../../services/hooks/requests";
+import {
+  useGetFullRequest,
+  useGetRequests,
+} from "../../../services/hooks/requests";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   getPropertyFiltersV2,
@@ -18,6 +21,7 @@ import {
   filterUITreeToFilterNode,
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
+import { HeliconeRequest } from "../../../lib/api/request/request";
 
 const useRequestsPageV2 = (
   currentPage: number,
@@ -86,20 +90,15 @@ const useRequestsPageV2 = (
   );
 
   const isDataLoading = requests.isLoading || isPropertiesLoading;
-
-  const getNormalizedRequests = useCallback(() => {
-    const rawRequests = requests.data?.data || [];
-    return rawRequests.map((request) => {
-      return getNormalizedRequest(request);
-    });
-  }, [requests]);
-
-  const normalizedRequests = getNormalizedRequests();
+  const { requestBodies } = useGetFullRequest(requests.data?.data || []);
 
   return {
-    requests: normalizedRequests,
+    normalizedRequests: requestBodies.isLoading
+      ? getNormalizedRequests(requests.data?.data || [])
+      : requestBodies.data?.data || [],
     count: count.data?.data,
     isDataLoading,
+    isBodyLoading: requestBodies.isLoading,
     isCountLoading: count.isLoading,
     properties,
     refetch: requests.refetch,
@@ -109,5 +108,9 @@ const useRequestsPageV2 = (
     filter,
   };
 };
+
+export function getNormalizedRequests(requests: HeliconeRequest[]) {
+  return requests.map(getNormalizedRequest);
+}
 
 export default useRequestsPageV2;
