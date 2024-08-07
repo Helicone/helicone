@@ -47,7 +47,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
         isCached: false,
       }),
     });
-    const count = await res.json() as Result<number, string>;
+    const count = (await res.json()) as Result<number, string>;
     if (count.data && count.data > 0) {
       skipOnboarding();
     }
@@ -137,7 +137,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
             </button>
             <button
               className="text-xs underline"
-              onClick={() => skipOnboarding( )}
+              onClick={() => skipOnboarding()}
             >
               Skip Onboarding
             </button>
