@@ -7,7 +7,6 @@ import Typewriter from "./typewriter";
 import { useState, useEffect, useRef } from "react";
 import { hpf } from "@helicone/prompts";
 import { useUser } from "@supabase/auth-helpers-react";
-import React from "react";
 
 export const ChatWindow = ({
   chatHistory,

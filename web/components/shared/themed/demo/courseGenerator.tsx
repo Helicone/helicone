@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Select, SelectItem, TextInput, Button } from "@tremor/react";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import { Col } from "../../../layout/common";

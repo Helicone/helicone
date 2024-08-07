@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Lottie from "react-lottie";
 import * as guesswho from "../../../../public/lottie/guesswho.json";
 import * as notebook from "../../../../public/lottie/notebook.json";
