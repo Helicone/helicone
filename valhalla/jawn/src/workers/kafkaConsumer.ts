@@ -2,6 +2,7 @@ import { parentPort } from "worker_threads";
 import {
   consume,
   consumeDlq,
+  consumeFeedback,
 } from "../lib/clients/kafkaConsumers/KafkaConsumer";
 
 parentPort?.once("message", (message) => {
@@ -11,5 +12,8 @@ parentPort?.once("message", (message) => {
   } else if (message === "start-dlq") {
     console.log("Kafka DLQ consumer thread started!");
     consumeDlq();
+  } else if (message === "start-feedback") {
+    console.log("Kafka feedback consumer thread started!");
+    consumeFeedback();
   }
 });
