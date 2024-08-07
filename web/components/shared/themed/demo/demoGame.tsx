@@ -1,41 +1,16 @@
 import StartPage from "./startPage";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { useEffect, useRef, useState } from "react";
+import { Resizable } from "react-resizable";
 
-import { useLocalStorage } from "../../../../services/hooks/localStorage";
-import { Col } from "../../../layout/common";
-import { ChatWindow } from "./chatWindow";
-
-const FAMOUS_MOVIES = [
-  {
-    title: "The Dark Knight",
-    leadCharacters: [
-      "Batman / Bruce Wayne",
-      "Robin",
-      "Alfred",
-      "Joker",
-      "Rachel",
-      "Harvey Dent",
-    ],
-  },
-
-  {
-    title: "Twilight",
-    leadCharacters: [
-      "Bella Swan",
-      "Edward Cullen",
-      "Jacob Black",
-      "Rory Sullivan",
-    ],
-  },
-  {
-    title: "Pirates of the Caribbean",
-    leadCharacters: [
-      "Jack Sparrow",
-      "Will Turner",
-      "Davy Jones",
-      "Elizabeth Swann",
-    ],
-  },
-];
+const calculateInitialPosition = () => {
+  if (typeof window === "undefined") return { x: 20, y: 20 }; // Default for SSR
+  const padding = 20; // Distance from the edges
+  return {
+    x: window.innerWidth - 500 - padding, // Assuming max width of 500px
+    y: window.innerHeight - 600 - padding, // Assuming max height of 600px
+  };
+};
 
 export interface ChatHistory {
   role: "user" | "assistant";
@@ -47,97 +22,90 @@ export const DemoGame = ({
 }: {
   setOpenDemo: (open: boolean) => void;
 }) => {
-  const [gameState, setGameState] = useLocalStorage<
-    "start" | "playing" | "finished"
-  >("gameState", "playing");
-  const [gameSessionId, setGameSessionId] = useLocalStorage<string | null>(
-    "gameSessionId",
-    null
-  );
+  const [position, setPosition] = useState({ x: 20, y: 20 });
+  const [size, setSize] = useState({ width: 360, height: 600 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef<HTMLDivElement>(null);
 
-  const [chatHistory, setChatHistory] = useLocalStorage<ChatHistory[]>(
-    "chatHistory",
-    [{ role: "assistant", content: "Hello, type a message to begin..." }]
-  );
-  const [selectedMovie, setSelectedMovie] = useLocalStorage<
-    (typeof FAMOUS_MOVIES)[number]
-  >("selectedMovie", FAMOUS_MOVIES[0]);
-  const [selectedCharacter, setSelectedCharacter] = useLocalStorage<
-    (typeof selectedMovie.leadCharacters)[number]
-  >("selectedCharacter", selectedMovie.leadCharacters[0]);
-
-  const onReset = () => {
-    setGameState("start");
-    setChatHistory([
-      { role: "assistant", content: "Hello, type a message to begin..." },
-    ]);
-    setGameSessionId(null);
+  const onMouseDown = (e: React.MouseEvent) => {
+    if (dragRef.current && dragRef.current.contains(e.target as Node)) {
+      setIsDragging(true);
+    }
   };
 
-  const onPlay = () => {
-    const randomMovie =
-      FAMOUS_MOVIES[Math.floor(Math.random() * FAMOUS_MOVIES.length)];
-    setSelectedMovie(randomMovie);
-    const randomCharacter =
-      randomMovie.leadCharacters[
-        Math.floor(Math.random() * randomMovie.leadCharacters.length)
-      ];
-    setSelectedCharacter(randomCharacter);
-    setGameState("playing");
-    setGameSessionId(crypto.randomUUID());
+  const onMouseMove = (e: MouseEvent) => {
+    if (isDragging) {
+      setPosition((prev) => ({
+        x: prev.x + e.movementX,
+        y: prev.y + e.movementY,
+      }));
+    }
   };
+
+  const onMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+    return () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+  }, [isDragging]);
+
+  useEffect(() => {
+    setPosition(calculateInitialPosition());
+  }, []);
+
+  const onResize = (
+    event: React.SyntheticEvent,
+    { size }: { size: { width: number; height: number } }
+  ) => {
+    setSize({ width: size.width, height: size.height });
+  };
+
+  useEffect(() => {
+    setPosition(calculateInitialPosition());
+  }, []);
 
   return (
-    <div className="border-2 flex flex-col items-center justify-between bg-white h-[80vh] max-h-[80vh] w-[500px] rounded-lg relative overflow-hidden">
-      {gameState === "start" && (
-        <StartPage setOpenDemo={setOpenDemo} onPlay={onPlay} />
-      )}
-      {gameState !== "start" && (
-        <Col className="w-full px-5 py-10 justify-between items-center h-full">
-          <button
-            className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer absolute top-4 left-4"
-            onClick={onReset}
-          >
-            Reset
-          </button>
-          {gameState === "playing" && (
-            <div className="h-full w-full">
-              <ChatWindow
-                onFinish={() => setGameState("finished")}
-                chatHistory={chatHistory}
-                setChatHistory={setChatHistory}
-                movieTitle={selectedMovie.title}
-                isLoading={false}
-                movieCharacter={selectedCharacter}
-                gameSessionId={gameSessionId}
-              />
-            </div>
-          )}
-          {gameState === "finished" && (
-            <Col className="h-full flex items-center justify-center gap-5">
-              <h1 className="text-2xl font-bold">🎉 You won! 🎉</h1>
-              <p className="text-sm">
-                You found the character in{" "}
-                {chatHistory.length - 2 > 1 ? `${chatHistory.length - 2}` : "1"}{" "}
-                {chatHistory.length - 2 > 1 ? "messages" : "message"}!
-              </p>
-              <button
-                className="bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600 transition-colors"
-                onClick={() => onReset()}
-              >
-                Play again
-              </button>
-            </Col>
-          )}
-        </Col>
-      )}
-
-      <button
-        className="absolute top-2 right-2 h-8 w-8 bg-red-500 flex items-center justify-center rounded-full text-white font-bold hover:bg-red-600 transition-colors"
-        onClick={() => setOpenDemo(false)}
+    <Resizable
+      width={size.width}
+      height={size.height}
+      onResize={onResize}
+      minConstraints={[300, 400]}
+      maxConstraints={[800, 800]}
+      handle={<div className="react-resizable-handle resize-handle" />}
+    >
+      <div
+        style={{
+          position: "fixed",
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          width: `${size.width}px`,
+          height: `${size.height}px`,
+        }}
+        className="bg-white shadow-2xl rounded-lg overflow-hidden flex flex-col relative"
       >
-        ×
-      </button>
-    </div>
+        <div
+          ref={dragRef}
+          onMouseDown={onMouseDown}
+          className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-4 flex justify-between items-center cursor-move"
+        >
+          <h1 className="text-xl font-bold">Helicone Demos</h1>
+          <button
+            onClick={() => setOpenDemo(false)}
+            className="text-white hover:text-gray-200 transition-colors"
+          >
+            <XMarkIcon className="h-6 w-6" />
+          </button>
+        </div>
+        <div className="flex-grow overflow-y-auto">
+          <StartPage />
+        </div>
+      </div>
+    </Resizable>
   );
 };
