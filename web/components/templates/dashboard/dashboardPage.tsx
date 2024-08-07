@@ -22,27 +22,19 @@ import {
   getTimeMap,
 } from "../../../lib/timeCalculations/constants";
 import {
-  TimeInterval,
   getTimeInterval,
   getTimeIntervalAgo,
+  TimeInterval,
 } from "../../../lib/timeCalculations/time";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
-import AuthHeader from "../../shared/authHeader";
-import { clsx } from "../../shared/clsx";
+import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import {
-  MetricsPanel,
-  MetricsPanelProps,
-} from "../../shared/metrics/metricsPanel";
-import ThemedTableHeader from "../../shared/themed/themedHeader";
-import UpgradeProModal from "../../shared/upgradeProModal";
-import useSearchParams from "../../shared/utils/useSearchParams";
-import { formatNumber } from "../users/initialColumns";
-import StyledAreaChart from "./styledAreaChart";
-import SuggestionModal from "./suggestionsModal";
-import { useDashboardPage } from "./useDashboardPage";
-import { QuantilesGraph } from "./quantilesGraph";
-import LoadingAnimation from "../../shared/loadingAnimation";
+  filterUITreeToFilterNode,
+  getRootFilterNode,
+  isFilterRowNode,
+  UIFilterRowTree,
+} from "../../../services/lib/filters/uiFilterRowTree";
 import {
   OrganizationFilter,
   OrganizationLayout,
@@ -50,16 +42,23 @@ import {
   transformOrganizationLayoutFilters,
 } from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/organizationContext";
-import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
-import CountryPanel from "./panels/countryPanel";
-import useNotification from "../../shared/notification/useNotification";
-import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
+import AuthHeader from "../../shared/authHeader";
+import { clsx } from "../../shared/clsx";
+import LoadingAnimation from "../../shared/loadingAnimation";
 import {
-  filterUITreeToFilterNode,
-  getRootFilterNode,
-  isFilterRowNode,
-  UIFilterRowTree,
-} from "../../../services/lib/filters/uiFilterRowTree";
+  MetricsPanel,
+  MetricsPanelProps,
+} from "../../shared/metrics/metricsPanel";
+import useNotification from "../../shared/notification/useNotification";
+import ThemedTableHeader from "../../shared/themed/themedHeader";
+import UpgradeProModal from "../../shared/upgradeProModal";
+import useSearchParams from "../../shared/utils/useSearchParams";
+import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
+import CountryPanel from "./panels/countryPanel";
+import { QuantilesGraph } from "./quantilesGraph";
+import StyledAreaChart from "./styledAreaChart";
+import SuggestionModal from "./suggestionsModal";
+import { useDashboardPage } from "./useDashboardPage";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
