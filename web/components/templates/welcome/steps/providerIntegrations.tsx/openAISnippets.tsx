@@ -158,7 +158,7 @@ export default function OpenAISnippets(props: OpenAISnippetsProps) {
 
       <DiffHighlight
         code={CODE_CONVERTS[lang](apiKey)}
-        language="bash"
+        language={lang}
         newLines={DIFF_LINES[lang]}
         oldLines={[]}
         minHeight={false}
