@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   useGetFullRequest,
@@ -89,16 +89,24 @@ const useRequestsPageV2 = (
     isLive
   );
 
-  const isDataLoading = requests.isLoading || isPropertiesLoading;
+  const isDataLoading = requests.isInitialLoading || isPropertiesLoading;
   const { requestBodies } = useGetFullRequest(requests.data?.data || []);
 
+  const normalizedRequests = useMemo(() => {
+    return (requestBodies.data?.data?.length ?? 0) > 0
+      ? requestBodies.data?.data || []
+      : getNormalizedRequests(requests.data?.data || []);
+  }, [requestBodies.data?.data, requests.data?.data]);
+
   return {
-    normalizedRequests: requestBodies.isLoading
-      ? getNormalizedRequests(requests.data?.data || [])
-      : requestBodies.data?.data || [],
+    normalizedRequests:
+      (requestBodies.data?.data?.length ?? 0) > 0
+        ? requestBodies.data?.data || []
+        : normalizedRequests,
     count: count.data?.data,
     isDataLoading,
-    isBodyLoading: requestBodies.isLoading,
+    isBodyLoading:
+      requestBodies.isLoading || requestBodies.data?.data?.length === 0,
     isCountLoading: count.isLoading,
     properties,
     refetch: requests.refetch,
