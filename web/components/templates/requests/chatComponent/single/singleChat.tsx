@@ -50,23 +50,24 @@ export const SingleChat: React.FC<SingleChatProps> = ({
   return (
     <div
       className={clsx(
-        getBgColor(),
-        "items-start p-4 text-left flex flex-row space-x-4 text-black dark:text-white",
+        // getBgColor(),
+        "items-start p-4 text-left flex flex-row space-x-4 text-black dark:text-white ",
         isSystem && "font-semibold",
         isLast && "rounded-b-md"
       )}
       key={index}
     >
       <MessageHeader role={message.role} />
-
-      <MessageContent
-        message={message}
-        expandedProps={expandedProps}
-        selectedProperties={selectedProperties}
-        isHeliconeTemplate={isHeliconeTemplate}
-        autoInputs={autoInputs}
-        mode={mode}
-      />
+      <div className="overflow-auto w-full">
+        <MessageContent
+          message={message}
+          expandedProps={expandedProps}
+          selectedProperties={selectedProperties}
+          isHeliconeTemplate={isHeliconeTemplate}
+          autoInputs={autoInputs}
+          mode={mode}
+        />
+      </div>
     </div>
   );
 };
