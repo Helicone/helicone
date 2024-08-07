@@ -8,11 +8,15 @@ import "prismjs/components/prism-clike";
 import "prismjs/components/prism-javascript";
 import "prismjs/components/prism-json";
 import { Course } from "./courseGenerator";
+import Link from "next/link";
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
+import { useRouter } from "next/router";
 
 interface TextbookCourseProps {
   course: Partial<Course>;
   isGenerating: boolean;
   currentStep: string;
+  sessionId: string;
 }
 
 type QuizAnswers = Record<number, Record<number, number>>;
@@ -22,11 +26,13 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
   course,
   isGenerating,
   currentStep,
+  sessionId,
 }) => {
   const [activeSection, setActiveSection] = useState<number | null>(null);
   const [quizAnswers, setQuizAnswers] = useState<QuizAnswers>({});
   const [quizSubmitted, setQuizSubmitted] = useState<QuizSubmitted>({});
   const [isOverviewExpanded, setIsOverviewExpanded] = useState<boolean>(false);
+  const router = useRouter();
 
   useEffect(() => {
     const renderer = new marked.Renderer();
@@ -61,7 +67,6 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
       },
     }));
   };
-
   const submitQuiz = (sectionIndex: number): void => {
     setQuizSubmitted((prev) => ({ ...prev, [sectionIndex]: true }));
   };
@@ -86,62 +91,82 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
 
   return (
     <div className="w-full h-full flex flex-col overflow-hidden bg-gray-50">
-      <div className="p-6 bg-white border-b">
-        <h1 className="text-3xl font-bold text-indigo-900">
+      <div className="p-3 bg-white border-b">
+        <h1 className="text-lg font-bold text-indigo-900 mb-2">
           {course.overview?.title || "Generating course..."}
         </h1>
-        <div className="mt-2">
+        <div className="flex flex-wrap gap-2 items-center">
+          {sessionId && (
+            <Link
+              href={`http://localhost:3000/sessions/${sessionId}`}
+              className="text-xs px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+            >
+              View Session
+            </Link>
+          )}
+
+          <Link
+            href="http://localhost:3000/prompts"
+            className="text-xs px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
+          >
+            View Prompts
+          </Link>
           <button
             onClick={toggleOverview}
-            className="text-sm text-indigo-600 hover:text-indigo-800 focus:outline-none"
+            className="text-xs px-2 py-1 border border-gray-300 rounded text-gray-700 bg-white hover:bg-gray-50 flex items-center"
           >
-            {isOverviewExpanded ? "Hide Description" : "Show Description"}
+            {isOverviewExpanded ? "Hide" : "Show"} Description
+            {isOverviewExpanded ? (
+              <ChevronUpIcon className="ml-1 h-3 w-3" />
+            ) : (
+              <ChevronDownIcon className="ml-1 h-3 w-3" />
+            )}
           </button>
-          {isOverviewExpanded && (
-            <p className="text-sm text-gray-600 mt-2">
-              {course.overview?.description ||
-                "Please wait while we create your course."}
-            </p>
-          )}
         </div>
+        {isOverviewExpanded && (
+          <p className="text-xs text-gray-600 mt-2">
+            {course.overview?.description ||
+              "Please wait while we create your course."}
+          </p>
+        )}
       </div>
 
       {isGenerating && (
-        <div className="p-3 bg-blue-100 text-blue-700 text-sm font-medium">
+        <div className="p-2 bg-blue-100 text-blue-700 text-xs">
           <p>{currentStep}</p>
         </div>
       )}
 
-      <div className="flex-grow overflow-y-auto p-6 space-y-6">
+      <div className="flex-grow overflow-y-auto p-3 space-y-3">
         {course.sections?.map((section, index) => (
           <div
             key={index}
-            className="bg-white rounded-lg shadow-md overflow-hidden"
+            className="bg-white rounded shadow-sm overflow-hidden"
           >
             <button
-              className="w-full text-left p-4 bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
+              className="w-full text-left p-2 bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
               onClick={() =>
                 setActiveSection(activeSection === index ? null : index)
               }
             >
-              <h2 className="text-xl font-semibold text-indigo-900">
+              <h2 className="text-sm font-medium text-indigo-900">
                 {index + 1}. {section.title}
               </h2>
             </button>
             {activeSection === index && (
-              <div className="p-4 space-y-4">
+              <div className="p-2 text-xs">
                 {renderMarkdown(section.content)}
 
                 {course.quizzes && course.quizzes[index] && (
-                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                    <h3 className="text-xl font-semibold mb-4 text-indigo-900">
+                  <div className="mt-3 p-2 bg-gray-50 rounded">
+                    <h3 className="text-sm font-medium mb-2 text-indigo-900">
                       Quiz
                     </h3>
                     {course.quizzes[index].questions.map((q, qIndex) => (
-                      <div key={qIndex} className="mb-6">
-                        <p className="font-medium mb-2">{q.question}</p>
+                      <div key={qIndex} className="mb-3">
+                        <p className="font-medium mb-1">{q.question}</p>
                         {q.options.map((option, oIndex) => (
-                          <div key={oIndex} className="flex items-center mb-2">
+                          <div key={oIndex} className="flex items-center mb-1">
                             <input
                               type="radio"
                               id={`q${qIndex}-o${oIndex}`}
@@ -152,20 +177,23 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
                                 handleQuizAnswer(index, qIndex, oIndex)
                               }
                               disabled={quizSubmitted[index]}
-                              className="mr-2"
+                              className="mr-1"
                             />
-                            <label htmlFor={`q${qIndex}-o${oIndex}`}>
+                            <label
+                              htmlFor={`q${qIndex}-o${oIndex}`}
+                              className="text-xs"
+                            >
                               {option}
                             </label>
                           </div>
                         ))}
                         {quizSubmitted[index] && (
                           <p
-                            className={
+                            className={`text-xs ${
                               quizAnswers[index]?.[qIndex] === q.correctAnswer
                                 ? "text-green-600"
                                 : "text-red-600"
-                            }
+                            }`}
                           >
                             {quizAnswers[index]?.[qIndex] === q.correctAnswer
                               ? "Correct!"
@@ -179,7 +207,7 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
                     {!quizSubmitted[index] && (
                       <button
                         onClick={() => submitQuiz(index)}
-                        className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors duration-200"
+                        className="mt-2 px-3 py-1 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors duration-200"
                       >
                         Submit Quiz
                       </button>

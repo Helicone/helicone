@@ -63,6 +63,7 @@ export const CourseGenerator: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState("");
   const [expandedSection, setExpandedSection] = useState<number | null>(null);
+  const [sessionId, setSessionId] = useState<string>("");
 
   const toggleSection = (index: number) => {
     setExpandedSection(expandedSection === index ? null : index);
@@ -73,6 +74,7 @@ export const CourseGenerator: React.FC = () => {
     setShowTextbook(true);
     setCourse({});
     const sessionId = crypto.randomUUID();
+    setSessionId(sessionId);
 
     try {
       // Generate overview
@@ -148,6 +150,7 @@ export const CourseGenerator: React.FC = () => {
         course={course}
         isGenerating={isGenerating}
         currentStep={currentStep}
+        sessionId={sessionId}
       />
     );
   }
@@ -171,7 +174,7 @@ export const CourseGenerator: React.FC = () => {
       case "overview":
         messages.push({
           role: "user",
-          content: hpf`Generate an overview for a ${args.difficulty} level course on ${args.topic} for ${args.audience}, lasting 5 sessions.`,
+          content: hpf`Generate a 1 sentence overview for a ${args.difficulty} level course on ${args.topic} for ${args.audience}, lasting 5 sessions.`,
         });
         toolName = "generateOverview";
         toolDescription = "Generate the course overview";
@@ -199,7 +202,7 @@ export const CourseGenerator: React.FC = () => {
       case "sectionContent":
         messages.push({
           role: "user",
-          content: hpf`Generate detailed content for the section titled "${args.sectionTitle}" for a ${args.difficulty} level course on ${args.topic} for ${args.audience}.`,
+          content: hpf`Generate content that covers the section titled "${args.sectionTitle}" for a ${args.difficulty} level course on ${args.topic} for ${args.audience}. Not overly lengthy but detailed enough to be useful.`,
         });
         toolName = "generateSectionContent";
         toolDescription = "Generate content for a course section";
@@ -207,7 +210,7 @@ export const CourseGenerator: React.FC = () => {
           content: { type: "string" },
         };
         maxTokens = 500;
-        sessionPath = `/${args.sectionTitle}/content`;
+        sessionPath = `/sections/${args.sectionTitle}/content`;
         break;
       case "quiz":
         messages.push({
@@ -235,7 +238,7 @@ export const CourseGenerator: React.FC = () => {
             },
           },
         };
-        sessionPath = `/${args.sectionTitle}/quiz`;
+        sessionPath = `/sections/${args.sectionTitle}/quiz`;
         break;
     }
 
@@ -262,6 +265,7 @@ export const CourseGenerator: React.FC = () => {
           userEmail: user?.email ?? "no-email",
           sessionId,
           sessionName: "Course Generator",
+          sessionPath,
           tools,
           tool_choice: {
             type: "function",

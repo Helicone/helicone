@@ -5,63 +5,6 @@ import * as Pacman from "../../../../public/lottie/Pacman.json";
 import React from "react";
 import { Resizable } from "react-resizable";
 
-const DEMO_GAMES = [
-  {
-    id: "1",
-    name: "Guess Who Game",
-    type: "Game",
-    animation: Pacman,
-    component: StartPage,
-  },
-  {
-    id: "2",
-    name: "Course Generator",
-    type: "Tool",
-    animation: Pacman,
-    component: StartPage,
-  },
-  {
-    id: "3",
-    name: "Chat Support Bot",
-    type: "Bot",
-    animation: Pacman,
-    component: StartPage,
-  },
-];
-
-const FAMOUS_MOVIES = [
-  {
-    title: "The Dark Knight",
-    leadCharacters: [
-      "Batman / Bruce Wayne",
-      "Robin",
-      "Alfred",
-      "Joker",
-      "Rachel",
-      "Harvey Dent",
-    ],
-  },
-
-  {
-    title: "Twilight",
-    leadCharacters: [
-      "Bella Swan",
-      "Edward Cullen",
-      "Jacob Black",
-      "Rory Sullivan",
-    ],
-  },
-  {
-    title: "Pirates of the Caribbean",
-    leadCharacters: [
-      "Jack Sparrow",
-      "Will Turner",
-      "Davy Jones",
-      "Elizabeth Swann",
-    ],
-  },
-];
-
 const calculateInitialPosition = () => {
   if (typeof window === "undefined") return { x: 20, y: 20 }; // Default for SSR
   const padding = 20; // Distance from the edges
@@ -81,7 +24,6 @@ export const DemoGame = ({
 }: {
   setOpenDemo: (open: boolean) => void;
 }) => {
-  const [currentDemo, setCurrentDemo] = useState<string | null>(null);
   const [position, setPosition] = useState({ x: 20, y: 20 });
   const [size, setSize] = useState({ width: 360, height: 600 });
   const [isDragging, setIsDragging] = useState(false);

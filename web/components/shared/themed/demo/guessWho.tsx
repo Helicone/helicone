@@ -49,10 +49,10 @@ const GuessWhoGame = () => {
     },
   ]);
   const [selectedMovie, setSelectedMovie] = useState<
-    (typeof FAMOUS_MOVIES)[number]
-  >(FAMOUS_MOVIES[0]);
-  const [selectedCharacter, setSelectedCharacter] = useState<string>(
-    selectedMovie.leadCharacters[0]
+    (typeof FAMOUS_MOVIES)[number] | null
+  >(null);
+  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(
+    null
   );
 
   useEffect(() => {
@@ -62,11 +62,11 @@ const GuessWhoGame = () => {
   const startNewGame = () => {
     const randomMovie =
       FAMOUS_MOVIES[Math.floor(Math.random() * FAMOUS_MOVIES.length)];
-    setSelectedMovie(randomMovie);
     const randomCharacter =
       randomMovie.leadCharacters[
         Math.floor(Math.random() * randomMovie.leadCharacters.length)
       ];
+    setSelectedMovie(randomMovie);
     setSelectedCharacter(randomCharacter);
     setGameState("playing");
     setGameSessionId(crypto.randomUUID());
@@ -85,7 +85,7 @@ const GuessWhoGame = () => {
 
   return (
     <div className="flex flex-col h-full w-full">
-      {gameState === "playing" && (
+      {gameState === "playing" && selectedMovie && selectedCharacter && (
         <div className="h-full">
           <ChatWindow
             onFinish={handleFinish}
@@ -98,6 +98,7 @@ const GuessWhoGame = () => {
           />
         </div>
       )}
+
       {gameState === "finished" && (
         <div className="h-full flex flex-col items-center justify-center gap-5 p-6 text-center">
           <h1 className="text-2xl font-bold text-indigo-600">🎉 You won! 🎉</h1>
@@ -109,7 +110,7 @@ const GuessWhoGame = () => {
           <p className="text-sm">
             The character was{" "}
             <span className="font-semibold">{selectedCharacter}</span> from the
-            movie <span className="font-semibold">{selectedMovie.title}</span>.
+            movie <span className="font-semibold">{selectedMovie?.title}</span>.
           </p>
           <button
             className="bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600 transition-colors text-sm mt-4"

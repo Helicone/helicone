@@ -31,13 +31,6 @@ const DEMO_GAMES = [
     animation: notebook,
     component: CourseGenerator,
   },
-  {
-    id: "3",
-    name: "Chat Support Bot",
-    type: "Bot",
-    animation: chatbot,
-    component: ChatSupportBot,
-  },
 ];
 
 const StartPage = () => {
