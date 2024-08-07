@@ -5,16 +5,6 @@ import * as notebook from "../../../../public/lottie/notebook.json";
 import GuessWhoGame from "./guessWho";
 import { CourseGenerator } from "./courseGenerator";
 
-const ChatSupportBot = () => {
-  // Implement the Chat Support Bot logic here
-  return (
-    <div>
-      <h2>Chat Support Bot</h2>
-      {/* Add your chat support bot components */}
-    </div>
-  );
-};
-
 const DEMO_GAMES = [
   {
     id: "1",
