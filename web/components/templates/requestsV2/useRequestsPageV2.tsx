@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   useGetFullRequest,
@@ -99,12 +99,14 @@ const useRequestsPageV2 = (
   }, [requestBodies.data?.data, requests.data?.data]);
 
   return {
-    normalizedRequests: (requestBodies.data?.data?.length ?? 0) > 0
-      ? requestBodies.data?.data || []
-      : normalizedRequests,
+    normalizedRequests:
+      (requestBodies.data?.data?.length ?? 0) > 0
+        ? requestBodies.data?.data || []
+        : normalizedRequests,
     count: count.data?.data,
     isDataLoading,
-    isBodyLoading: requestBodies.isLoading || requestBodies.data?.data?.length === 0,
+    isBodyLoading:
+      requestBodies.isLoading || requestBodies.data?.data?.length === 0,
     isCountLoading: count.isLoading,
     properties,
     refetch: requests.refetch,
