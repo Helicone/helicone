@@ -78,7 +78,11 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
       previousStep={function (): void {
         handleStepChange(4);
       }}
-      nextStep={function (): void {
+      nextStep={async function () {
+        const jawn = getJawnClient(orgContext?.currentOrg?.id ?? "");
+        await jawn.POST("/v1/organization/onboard", {
+          body: {},
+        });
         router.push("/dashboard");
       }}
     />,
