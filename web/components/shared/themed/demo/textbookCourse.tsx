@@ -98,7 +98,7 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
         <div className="flex flex-wrap gap-2 items-center">
           {sessionId && (
             <Link
-              href={`http://localhost:3000/sessions/${sessionId}`}
+              href={`https://us.helicone.ai/sessions/${sessionId}`}
               className="text-xs px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
             >
               View Session
@@ -106,7 +106,7 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
           )}
 
           <Link
-            href="http://localhost:3000/prompts"
+            href="https://us.helicone.ai/prompts"
             className="text-xs px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
           >
             View Prompts
