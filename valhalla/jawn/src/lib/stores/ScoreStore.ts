@@ -94,7 +94,8 @@ export class ScoreStore extends BaseStore {
         `
       SELECT *
       FROM request_response_versioned
-      WHERE request_id = {val_0: UUID}
+      WHERE 
+      request_id = {val_0: UUID}
       AND version = {val_1: UInt64}
       AND organization_id = {val_2: String}
       AND provider = {val_3: String}

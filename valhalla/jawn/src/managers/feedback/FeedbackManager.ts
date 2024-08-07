@@ -7,7 +7,6 @@ import {
 import * as Sentry from "@sentry/node";
 import { supabaseServer } from "../../lib/db/supabase";
 import { HeliconeFeedbackMessage } from "../../lib/handlers/HandlerContext";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { err, ok, Result } from "../../lib/shared/result";
 import { ScoreManager } from "../score/ScoreManager";
 
@@ -27,21 +26,12 @@ export class FeedbackManager {
     try {
       await Promise.all(
         feedbackMessages.map(async (feedbackMessage) => {
-          const requestResponse = await this.waitForRequestAndResponse(
-            feedbackMessage.requestId,
-            feedbackMessage.organizationId
-          );
-
-          if (requestResponse.error || !requestResponse.data) {
-            return err("Request not found");
-          }
-
           const feedbackResult = await this.queryTimer.withTiming(
             supabaseServer.client
               .from("feedback")
               .upsert(
                 {
-                  response_id: requestResponse.data.responseId,
+                  response_id: feedbackMessage.responseId,
                   rating: feedbackMessage.feedback,
                   created_at: new Date().toISOString(),
                 },
@@ -155,56 +145,7 @@ export class FeedbackManager {
       }
       return err(result.error);
     }
+    console.log("Successfully processed feedback messages");
     return ok(null);
-  }
-
-  private async waitForRequestAndResponse(
-    heliconeId: string,
-    organizationId: string
-  ): Promise<
-    Result<
-      {
-        requestId: string;
-        responseId: string;
-      },
-      string
-    >
-  > {
-    const maxRetries = 3;
-
-    let sleepDuration = 30_000; // 30 seconds
-    for (let i = 0; i < maxRetries; i++) {
-      const { data: response, error: responseError } = await dbExecute<{
-        request: string;
-        response: string;
-      }>(
-        `
-        SELECT
-          request.id as request,
-          response.id as response
-        FROM request inner join response on request.id = response.request
-        WHERE request.helicone_org_id = $1
-        AND request.id = $2
-        `,
-        [organizationId, heliconeId]
-      );
-
-      if (responseError) {
-        console.error("Error fetching response:", responseError);
-        return err(responseError);
-      }
-
-      if (response && response.length > 0) {
-        return ok({
-          requestId: response[0].request,
-          responseId: response[0].response,
-        });
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, sleepDuration));
-      sleepDuration *= 2.5; // 30s, 75s, 187.5s
-    }
-
-    return { error: "Request not found.", data: null };
   }
 }

@@ -19,7 +19,7 @@ export function startConsumers({
     workerDlq.postMessage("start-dlq");
   }
 
-  for (let i = 0; i < dlqCount; i++) {
+  for (let i = 0; i < feedbackCount; i++) {
     const workerFeedback = new Worker(`${__dirname}/kafkaConsumer.js`);
     workerFeedback.postMessage("start-feedback");
   }

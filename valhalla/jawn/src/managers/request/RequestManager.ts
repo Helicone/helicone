@@ -120,7 +120,22 @@ export class RequestManager extends BaseManager {
     feedback: boolean
   ): Promise<Result<null, string>> {
     const kafkaProducer = new KafkaProducer();
+    const requestResponse = await this.waitForRequestAndResponse(
+      requestId,
+      this.authParams.organizationId
+    );
+
+    if (requestResponse.error || !requestResponse.data) {
+      return err("Request not found");
+    }
+    const feedbackMessage: HeliconeFeedbackMessage = {
+      requestId: requestId,
+      responseId: requestResponse.data.responseId,
+      organizationId: this.authParams.organizationId,
+      feedback: feedback,
+    };
     if (!kafkaProducer.isKafkaEnabled) {
+      console.log("Kafka is not enabled. Using feedback manager");
       const feedbackManager = new FeedbackManager(this.queryTimer);
       return await feedbackManager.handleFeedback(
         {
@@ -129,20 +144,10 @@ export class RequestManager extends BaseManager {
           lastOffset: "",
           messageCount: 1,
         },
-        [
-          {
-            requestId,
-            organizationId: this.authParams.organizationId,
-            feedback,
-          },
-        ]
+        [feedbackMessage]
       );
     }
-    const feedbackMessage: HeliconeFeedbackMessage = {
-      requestId: requestId,
-      organizationId: this.authParams.organizationId,
-      feedback: feedback,
-    };
+    console.log("Sending feedback message to Kafka");
 
     const res = await kafkaProducer.sendFeedbackMessage(
       [feedbackMessage],
