@@ -10,7 +10,6 @@ import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequest
 import {
   HeliconeRequest,
   HeliconeRequestAsset,
-  HeliconeRequestV2,
   getRequestAsset,
   getRequests,
   getRequestsCached,

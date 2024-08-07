@@ -17,7 +17,6 @@ import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import {
   HeliconeRequest,
   HeliconeRequestAsset,
-  HeliconeRequestV2,
 } from "../../lib/stores/request/request";
 import { RequestManager } from "../../managers/request/RequestManager";
 import { JawnAuthenticatedRequest } from "../../types/request";

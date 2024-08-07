@@ -16,8 +16,7 @@ import {
   printRunnableQuery,
 } from "../../shared/db/dbExecute";
 import { LlmSchema } from "../../shared/requestResponseModel";
-import { Json } from "../../db/database.types";
-import { mapGeminiPro, mapGeminiProV2 } from "./mappers";
+import { mapGeminiPro } from "./mappers";
 import { S3Client } from "../../shared/db/s3Client";
 
 export type Provider =
@@ -78,33 +77,6 @@ export interface HeliconeRequest {
   properties: Record<string, string>;
   assets: Array<string>;
   target_url: string;
-}
-
-export interface HeliconeRequestV2 {
-  response_id: string | null;
-  response_body?: any;
-  response_created_at: string | null;
-  response_status: number;
-  request_id: string;
-  request_body: any;
-  request_created_at: string;
-  request_user_id: string;
-  request_properties: Record<string, string>;
-  provider: string;
-  delay_ms: number | null;
-  target_url: string;
-  request_model: string;
-  signed_body_url?: string | null;
-  time_to_first_token: number | null;
-  total_tokens: number;
-  completion_tokens: number | null;
-  prompt_tokens: number | null;
-  country_code: string | null;
-  scores: Record<string, number>;
-  properties: Record<string, string>;
-  llmSchema: LlmSchema | null;
-  assets: Array<string>;
-  asset_urls: Record<string, string> | null;
 }
 
 function addJoinQueries(joinQuery: string, filter: FilterNode): string {
