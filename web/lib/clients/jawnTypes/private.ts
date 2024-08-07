@@ -751,6 +751,78 @@ Json: JsonObject;
       role: "function";
     };
     ChatCompletionMessageParam: components["schemas"]["ChatCompletionSystemMessageParam"] | components["schemas"]["ChatCompletionUserMessageParam"] | components["schemas"]["ChatCompletionAssistantMessageParam"] | components["schemas"]["ChatCompletionToolMessageParam"] | components["schemas"]["ChatCompletionFunctionMessageParam"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.unknown_": {
+      [key: string]: unknown;
+    };
+    /**
+     * @description The parameters the functions accepts, described as a JSON Schema object. See the
+     * [guide](https://platform.openai.com/docs/guides/function-calling) for examples,
+     * and the
+     * [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for
+     * documentation about the format.
+     *
+     * Omitting `parameters` defines a function with an empty parameter list.
+     */
+    FunctionParameters: components["schemas"]["Record_string.unknown_"];
+    FunctionDefinition: {
+      /**
+       * @description The name of the function to be called. Must be a-z, A-Z, 0-9, or contain
+       * underscores and dashes, with a maximum length of 64.
+       */
+      name: string;
+      /**
+       * @description A description of what the function does, used by the model to choose when and
+       * how to call the function.
+       */
+      description?: string;
+      /**
+       * @description The parameters the functions accepts, described as a JSON Schema object. See the
+       * [guide](https://platform.openai.com/docs/guides/function-calling) for examples,
+       * and the
+       * [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for
+       * documentation about the format.
+       *
+       * Omitting `parameters` defines a function with an empty parameter list.
+       */
+      parameters?: components["schemas"]["FunctionParameters"];
+    };
+    ChatCompletionTool: {
+      function: components["schemas"]["FunctionDefinition"];
+      /**
+       * @description The type of the tool. Currently, only `function` is supported.
+       * @enum {string}
+       */
+      type: "function";
+    };
+    "ChatCompletionNamedToolChoice.Function": {
+      /** @description The name of the function to call. */
+      name: string;
+    };
+    /**
+     * @description Specifies a tool the model should use. Use to force the model to call a specific
+     * function.
+     */
+    ChatCompletionNamedToolChoice: {
+      function: components["schemas"]["ChatCompletionNamedToolChoice.Function"];
+      /**
+       * @description The type of the tool. Currently, only `function` is supported.
+       * @enum {string}
+       */
+      type: "function";
+    };
+    /**
+     * @description Controls which (if any) tool is called by the model. `none` means the model will
+     * not call any tool and instead generates a message. `auto` means the model can
+     * pick between generating a message or calling one or more tools. `required` means
+     * the model must call one or more tools. Specifying a particular tool via
+     * `{"type": "function", "function": {"name": "my_function"}}` forces the model to
+     * call that tool.
+     *
+     * `none` is the default when no tools are present. `auto` is the default if tools
+     * are present.
+     */
+    ChatCompletionToolChoiceOption: components["schemas"]["ChatCompletionNamedToolChoice"] | ("none" | "auto" | "required");
     KafkaSettings: {
       /** Format: double */
       miniBatchSize: number;
@@ -1235,6 +1307,12 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          cache_enabled?: boolean;
+          /** Format: double */
+          max_tokens?: number;
+          tool_choice?: components["schemas"]["ChatCompletionToolChoiceOption"];
+          tools?: components["schemas"]["ChatCompletionTool"][];
+          sessionPath?: string;
           sessionName?: string;
           sessionId?: string;
           userEmail?: string;
