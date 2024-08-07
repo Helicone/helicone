@@ -152,6 +152,7 @@ export const useGetFullRequest = (result: HeliconeRequest[]) => {
       },
       refetchOnWindowFocus: false,
       retry: false,
+      keepPreviousData: true,
     }),
   };
 };
