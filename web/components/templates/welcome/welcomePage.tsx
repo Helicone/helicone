@@ -11,6 +11,8 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useOrg } from "../../layout/organizationContext";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import { InfoBanner } from "../../shared/themed/themedDemoBanner";
+import { useQuery } from "@tanstack/react-query";
+import { Result } from "../../../lib/result";
 
 interface WelcomePageV2Props {
   currentStep: number;
@@ -25,6 +27,36 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
   const [isDemo, setIsDemo] = useState<boolean>(false);
   const supabaseClient = useSupabaseClient();
   const orgContext = useOrg();
+
+  async function skipOnboarding() {
+    const jawn = getJawnClient(orgContext?.currentOrg?.id ?? "");
+    jawn.POST("/v1/organization/onboard", {
+      body: {},
+    });
+    router.push("/dashboard");
+  }
+
+  async function shouldDemo() {
+    const res = await fetch("/api/request/count", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        filter: "all",
+        isCached: false,
+      }),
+    });
+    const count = await res.json() as Result<number, string>;
+    if (count.data && count.data > 0) {
+      skipOnboarding();
+    }
+  }
+
+  useQuery({
+    queryKey: ["shouldDemo"],
+    queryFn: shouldDemo,
+  });
 
   useEffect(() => {
     const demoState = localStorage.getItem("openDemo");
@@ -105,13 +137,7 @@ const WelcomePageV2 = (props: WelcomePageV2Props) => {
             </button>
             <button
               className="text-xs underline"
-              onClick={async () => {
-                const jawn = getJawnClient(orgContext?.currentOrg?.id ?? "");
-                jawn.POST("/v1/organization/onboard", {
-                  body: {},
-                });
-                router.push("/dashboard");
-              }}
+              onClick={() => skipOnboarding( )}
             >
               Skip Onboarding
             </button>
