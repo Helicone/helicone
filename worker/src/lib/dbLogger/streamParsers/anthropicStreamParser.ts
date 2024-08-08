@@ -112,7 +112,6 @@ export async function anthropicAIStream(
     if (getModel(requestBody ?? "{}").includes("claude-3")) {
       return ok({
         ...recursivelyConsolidateAnthropicListForClaude3(lines),
-        streamed_data: result,
       });
     } else {
       const claudeData = {
@@ -125,7 +124,6 @@ export async function anthropicAIStream(
       );
       return ok({
         ...consolidateTextFields(lines),
-        streamed_data: result,
         usage: {
           total_tokens: completionTokens + promptTokens,
           prompt_tokens: promptTokens,
