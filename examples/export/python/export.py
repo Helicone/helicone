@@ -65,24 +65,39 @@ class APIResponse:
 
 
 def make_request(start_time, end_time, offset) -> APIResponse:
-    payload = {
-        "filter": {
-            "left": {
-                "request": {
-                    "created_at": {
-                        "gte": start_time
-                    }
+
+    timeFilter = {
+        "left": {
+            "request": {
+                "created_at": {
+                    "gte": start_time
                 }
-            },
-            "right": {
-                "request": {
-                    "created_at": {
-                        "lt": end_time
-                    }
-                }
-            },
-            "operator": "and"
+            }
         },
+        "right": {
+            "request": {
+                "created_at": {
+                    "lt": end_time
+                }
+            }
+        },
+        "operator": "and"
+    }
+
+    payload = {
+        "filter": timeFilter,
+        # "filter": {
+        #     "left": timeFilter,
+        #     "right":
+        #     {
+        #         "response": {
+        #             "model": {
+        #                 "contains": "meta-llama/Meta-Llama-3.1-40"
+        #             }
+        #         }
+        #     },
+        #     "operator": "and"
+        # },
         "isCached": False,
         "limit": 100,  # Increase limit to get more data per request
         "offset": offset,
@@ -141,6 +156,7 @@ async def fetch_all_signed_bodies(data: List[ResponseData]):
             except Exception as e:
                 print(
                     f"Failed to fetch or decode signed_body_url for response_id {d.response_id}: {e}")
+                raise e
 
 
 def write_data_to_csv(data: List[ResponseData], file_name: str):
@@ -205,11 +221,19 @@ def get_all_data(start_time, end_time: str, step_hours: int, file_name: str) -> 
     return all_data
 
 
-# Example usage
-start_time_input = "2024-06-01 00:00:00"
-end_time_input = "2024-07-11 00:00:00"
-step_hours = 1  # Configurable step size in hours
-file_name = f'output_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
-all_data = get_all_data(
-    start_time_input, end_time_input, step_hours, file_name)
-print(f"Data written to {file_name}")
+dates = [
+    ["2024-08-02 00:00:00", "2024-08-03 00:00:00"],
+    ["2024-08-03 00:00:00", "2024-08-04 00:00:00"],
+    ["2024-08-04 00:00:00", "2024-08-05 00:00:00"],
+    ["2024-08-05 00:00:00", "2024-08-06 00:00:00"],
+    ["2024-08-06 00:00:00", "2024-08-07 00:00:00"],
+]
+
+for date_range in dates:
+    start_time_input = date_range[0]
+    end_time_input = date_range[1]
+    step_hours = 1  # Configurable step size in hours
+    file_name = f'output_{start_time_input}_{end_time_input}.csv'
+    all_data = get_all_data(
+        start_time_input, end_time_input, step_hours, file_name)
+    print(f"Data written to {file_name}")
