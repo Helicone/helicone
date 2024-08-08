@@ -4,7 +4,6 @@ import {
   getModelFromPath,
   mapGeminiPro,
 } from "../../components/templates/requestsV2/builder/mappers/geminiMapper";
-import { getNormalizedRequests } from "../../components/templates/requestsV2/useRequestsPageV2";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { getJawnClient } from "../../lib/clients/jawn";
 import { ok, Result } from "../../lib/result";
