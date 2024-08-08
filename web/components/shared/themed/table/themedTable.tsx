@@ -260,8 +260,11 @@ export default function ThemedTable<T>(props: ThemedTableV5Props<T>) {
                           },
                         }}
                       >
-                        <span
-                          className={clsx(
+                        {dataLoading &&
+                          (cell.column.id == "requestText" ||
+                            cell.column.id == "responseText") ? (
+                            <span
+                              className={clsx(
                             "w-full flex flex-grow",
                             (cell.column.id == "requestText" ||
                               cell.column.id == "responseText") &&
@@ -272,10 +275,11 @@ export default function ThemedTable<T>(props: ThemedTableV5Props<T>) {
                         >
                           &nbsp;
                         </span>
-
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
+                        ) : (
+                          flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )
                         )}
                       </td>
                     ))}
