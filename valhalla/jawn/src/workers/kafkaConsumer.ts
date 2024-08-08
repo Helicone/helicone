@@ -12,7 +12,7 @@ parentPort?.once("message", (message) => {
   } else if (message === "start-dlq") {
     console.log("Kafka DLQ consumer thread started!");
     consumeDlq();
-  } else if (message === "start-feedback") {
+  } else if (message === "start-scores") {
     console.log("Kafka feedback consumer thread started!");
     consumeFeedback();
   }

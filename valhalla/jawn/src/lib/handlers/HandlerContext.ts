@@ -101,9 +101,9 @@ export type Message = {
 
 export type HeliconeFeedbackMessage = {
   requestId: string;
-  responseId: string;
   organizationId: string;
   feedback: boolean;
+  createdAt: Date;
 };
 
 export type PromptRecord = {

@@ -1,78 +1,72 @@
 import { dataDogClient } from "../../lib/clients/DataDogClient";
 import { KafkaProducer } from "../../lib/clients/KafkaProducer";
-import {
-  DBQueryTimer,
-  FREQUENT_PRECENT_LOGGING,
-} from "../../lib/db/DBQueryTimer";
 import * as Sentry from "@sentry/node";
-import { supabaseServer } from "../../lib/db/supabase";
 import { HeliconeFeedbackMessage } from "../../lib/handlers/HandlerContext";
 import { err, ok, Result } from "../../lib/shared/result";
-import { ScoreManager } from "../score/ScoreManager";
+import { ScoreStore } from "../../lib/stores/ScoreStore";
 
 export class FeedbackManager {
-  private queryTimer: DBQueryTimer;
-  constructor(queryTimer: DBQueryTimer | null = null) {
-    this.queryTimer =
-      queryTimer ??
-      new DBQueryTimer({
-        enabled: true,
-        apiKey: process.env.DATADOG_API_KEY ?? "",
-        endpoint: process.env.DATADOG_ENDPOINT ?? "",
-      });
+  private scoreStore: ScoreStore;
+  constructor() {
+    this.scoreStore = new ScoreStore("");
   }
-
   private async processFeedback(feedbackMessages: HeliconeFeedbackMessage[]) {
     try {
-      await Promise.all(
-        feedbackMessages.map(async (feedbackMessage) => {
-          const feedbackResult = await this.queryTimer.withTiming(
-            supabaseServer.client
-              .from("feedback")
-              .upsert(
-                {
-                  response_id: feedbackMessage.responseId,
-                  rating: feedbackMessage.feedback,
-                  created_at: new Date().toISOString(),
-                },
-                { onConflict: "response_id" }
-              )
-              .select("*")
-              .single(),
-            {
-              queryName: "upsert_feedback_by_response_id",
-              percentLogging: FREQUENT_PRECENT_LOGGING,
+      // Filter out duplicate feedback messages and only keep the latest one
+      const filteredMessages = Array.from(
+        feedbackMessages
+          .reduce((map, message) => {
+            const existingMessage = map.get(message.requestId);
+            if (
+              !existingMessage ||
+              existingMessage.createdAt < message.createdAt
+            ) {
+              map.set(message.requestId, message);
             }
-          );
+            return map;
+          }, new Map<string, HeliconeFeedbackMessage>())
+          .values()
+      );
+      const bumpedVersions = await this.scoreStore.bumpRequestVersion(
+        filteredMessages.map((feedbackMessage) => ({
+          id: feedbackMessage.requestId,
+          organizationId: feedbackMessage.organizationId,
+        }))
+      );
 
-          if (feedbackResult.error) {
-            console.error("Error upserting feedback:", feedbackResult.error);
-            return err(feedbackResult.error.message);
-          }
-
-          const scoreManager = new ScoreManager({
+      if (bumpedVersions.error || !bumpedVersions.data) {
+        return err(bumpedVersions.error);
+      }
+      const feedbackScoreResult = await this.scoreStore.putScoresIntoClickhouse(
+        filteredMessages.map((feedbackMessage) => {
+          return {
+            requestId: feedbackMessage.requestId,
             organizationId: feedbackMessage.organizationId,
-          });
-          const feedbackScoreResult = await scoreManager.addScoresToClickhouse(
-            feedbackMessage.requestId,
-            [
+            provider:
+              bumpedVersions.data.find(
+                (bumpedVersion) =>
+                  bumpedVersion.id === feedbackMessage.requestId
+              )?.provider ?? "",
+            version:
+              bumpedVersions.data.find(
+                (bumpedVersion) =>
+                  bumpedVersion.id === feedbackMessage.requestId
+              )?.version ?? 0,
+            mappedScores: [
               {
                 score_attribute_key: "helicone-score-feedback",
                 score_attribute_type: "number",
                 score_attribute_value: feedbackMessage.feedback ? 1 : 0,
               },
-            ]
-          );
-
-          if (feedbackScoreResult.error) {
-            console.error(
-              "Error upserting feedback:",
-              feedbackScoreResult.error
-            );
-            return err(feedbackScoreResult.error);
-          }
+            ],
+          };
         })
       );
+
+      if (feedbackScoreResult.error) {
+        console.error("Error upserting feedback:", feedbackScoreResult.error);
+        return err(feedbackScoreResult.error);
+      }
       return ok(null);
     } catch (error: any) {
       console.error("Error processing feedback message:", error.message);

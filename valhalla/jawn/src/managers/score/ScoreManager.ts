@@ -1,7 +1,7 @@
 import { err, ok, Result } from "../../lib/shared/result";
 import { BaseManager } from "../BaseManager";
 import { AuthParams } from "../../lib/db/supabase";
-import { Score, ScoreStore } from "../../lib/stores/ScoreStore";
+import { BatchScores, Score, ScoreStore } from "../../lib/stores/ScoreStore";
 
 type Scores = Record<string, number | boolean>;
 
@@ -61,7 +61,12 @@ export class ScoreManager extends BaseManager {
     mappedScores: Score[]
   ): Promise<Result<string, string>> {
     try {
-      const request = await this.scoreStore.bumpRequestVersion(requestId);
+      const request = await this.scoreStore.bumpRequestVersion([
+        {
+          id: requestId,
+          organizationId: this.authParams.organizationId,
+        },
+      ]);
 
       if (request.error || !request.data) {
         return err(request.error);
@@ -72,10 +77,15 @@ export class ScoreManager extends BaseManager {
       }
 
       const requestInClickhouse = await this.scoreStore.putScoresIntoClickhouse(
-        {
-          ...request.data[0],
-          scores: mappedScores,
-        }
+        [
+          {
+            requestId: request.data[0].id,
+            organizationId: this.authParams.organizationId,
+            provider: request.data[0].provider,
+            version: request.data[0].version,
+            mappedScores,
+          },
+        ]
       );
 
       if (requestInClickhouse.error || !requestInClickhouse.data) {

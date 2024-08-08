@@ -128,15 +128,38 @@ export class RequestManager extends BaseManager {
     if (requestResponse.error || !requestResponse.data) {
       return err("Request not found");
     }
+    const feedbackResult = await this.queryTimer.withTiming(
+      supabaseServer.client
+        .from("feedback")
+        .upsert(
+          {
+            response_id: requestResponse.data.responseId,
+            rating: feedback,
+            created_at: new Date().toISOString(),
+          },
+          { onConflict: "response_id" }
+        )
+        .select("*")
+        .single(),
+      {
+        queryName: "upsert_feedback_by_response_id",
+        percentLogging: FREQUENT_PRECENT_LOGGING,
+      }
+    );
+
+    if (feedbackResult.error) {
+      console.error("Error upserting feedback:", feedbackResult.error);
+      return err(feedbackResult.error.message);
+    }
     const feedbackMessage: HeliconeFeedbackMessage = {
       requestId: requestId,
-      responseId: requestResponse.data.responseId,
       organizationId: this.authParams.organizationId,
       feedback: feedback,
+      createdAt: new Date(),
     };
-    if (!kafkaProducer.isKafkaEnabled) {
+    if (!kafkaProducer.isKafkaEnabled()) {
       console.log("Kafka is not enabled. Using feedback manager");
-      const feedbackManager = new FeedbackManager(this.queryTimer);
+      const feedbackManager = new FeedbackManager();
       return await feedbackManager.handleFeedback(
         {
           batchId: "",
