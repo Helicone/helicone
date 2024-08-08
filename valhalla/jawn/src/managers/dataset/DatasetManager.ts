@@ -41,7 +41,7 @@ export class DatasetManager extends BaseManager {
       name,
       created_at,
       meta
-    FROM experiment_dataset_v2
+    FROM helicone_dataset
     WHERE organization = $1 ${
       promptVersionId ? "AND meta->>'promptVersionId' = $2" : ""
     }
@@ -56,7 +56,7 @@ export class DatasetManager extends BaseManager {
 
   async addDataset(params: NewDatasetParams): Promise<Result<string, string>> {
     const dataset = await supabaseServer.client
-      .from("experiment_dataset_v2")
+      .from("helicone_dataset")
       .insert({
         name: params.datasetName,
         organization: this.authParams.organizationId,
@@ -95,7 +95,7 @@ export class DatasetManager extends BaseManager {
     >
   > {
     const dataset = await supabaseServer.client
-      .from("experiment_dataset_v2")
+      .from("helicone_dataset")
       .insert({
         name: params.datasetName,
         organization: this.authParams.organizationId,

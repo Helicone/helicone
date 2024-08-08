@@ -283,6 +283,36 @@ export type Database = {
         }
         Relationships: []
       }
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+      experiment_dataset: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_dataset_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+>>>>>>> Stashed changes
       experiment_dataset_v2: {
         Row: {
           created_at: string | null
@@ -318,6 +348,8 @@ export type Database = {
           },
         ]
       }
+=======
+>>>>>>> Stashed changes
       experiment_dataset_v2_row: {
         Row: {
           created_at: string
@@ -342,7 +374,7 @@ export type Database = {
             foreignKeyName: "fk_dataset_id"
             columns: ["dataset_id"]
             isOneToOne: false
-            referencedRelation: "experiment_dataset_v2"
+            referencedRelation: "helicone_dataset"
             referencedColumns: ["id"]
           },
           {
@@ -381,7 +413,7 @@ export type Database = {
             foreignKeyName: "fk_dataset"
             columns: ["dataset"]
             isOneToOne: false
-            referencedRelation: "experiment_dataset_v2"
+            referencedRelation: "helicone_dataset"
             referencedColumns: ["id"]
           },
         ]
@@ -737,6 +769,41 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helicone_dataset: {
+        Row: {
+          created_at: string | null
+          dataset_type: string
+          id: string
+          meta: Json | null
+          name: string | null
+          organization: string
+        }
+        Insert: {
+          created_at?: string | null
+          dataset_type?: string
+          id?: string
+          meta?: Json | null
+          name?: string | null
+          organization: string
+        }
+        Update: {
+          created_at?: string | null
+          dataset_type?: string
+          id?: string
+          meta?: Json | null
+          name?: string | null
+          organization?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_organization"
+            columns: ["organization"]
+            isOneToOne: false
+            referencedRelation: "organization"
             referencedColumns: ["id"]
           },
         ]
