@@ -14,6 +14,7 @@ import TabSelector from "./TabSelector";
 import ChatSession from "./Chat/ChatSession";
 import RequestRow from "../../requestsV2/requestRow";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import RequestDrawerV2 from "../../requestsV2/requestDrawerV2";
 
 interface SessionContentProps {
   session: Session;
@@ -174,6 +175,21 @@ const SessionContent: React.FC<SessionContentProps> = ({
       )}
 
       {currentTopView === "chat" && <ChatSession requests={requests} />}
+      <RequestDrawerV2
+        request={
+          requests.requests.data?.data?.find(
+            (r) => r.request_id === selectedRequestId
+          ) &&
+          getNormalizedRequest(
+            requests.requests.data?.data?.find(
+              (r) => r.request_id === selectedRequestId
+            )!
+          )
+        }
+        open={selectedRequestId !== ""}
+        setOpen={(open) => setSelectedRequestId("")}
+        properties={[]}
+      />
     </Col>
   );
 };
