@@ -95,7 +95,7 @@ export class KafkaProducer {
   }
 
   async sendScoresMessage(
-    feedbackMessages: HeliconeScoresMessage[],
+    scoresMessages: HeliconeScoresMessage[],
     topic: Topics
   ): PromiseGenericResult<string> {
     if (!this.kafka) {
@@ -110,7 +110,7 @@ export class KafkaProducer {
 
     while (attempts < maxAttempts) {
       try {
-        const data = feedbackMessages.map((msg) => {
+        const data = scoresMessages.map((msg) => {
           return {
             value: JSON.stringify({ value: JSON.stringify(msg) }),
             topic: topic,
@@ -120,7 +120,7 @@ export class KafkaProducer {
 
         const res = await p.produceMany(data);
 
-        console.log(`Produced ${feedbackMessages.length} messages to ${topic}`);
+        console.log(`Produced ${scoresMessages.length} messages to ${topic}`);
         return ok(`Produced ${res.length} messages`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
