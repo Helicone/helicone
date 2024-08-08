@@ -9,21 +9,6 @@ import { OpenAPIRouterType } from "@cloudflare/itty-router-openapi";
 import { Route } from "itty-router";
 import { logAsync } from "../../lib/managers/AsyncLogManager";
 import { createAPIClient } from "../../api/lib/apiClient";
-import { PromptsGet } from "../../api/routes/prompts/get";
-
-function getOpenAPIRouter(
-  router: OpenAPIRouterType<
-    Route,
-    [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
-  >
-) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  router.get(
-    "/v1/prompts",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    PromptsGet as any
-  );
-}
 
 function getAPIRouterV1(
   router: OpenAPIRouterType<
@@ -490,7 +475,7 @@ export const getAPIRouter = (
   >
 ) => {
   getAPIRouterV1(router);
-  getOpenAPIRouter(router);
+
   // Proxy only + proxy forwarder
   router.all(
     "*",
