@@ -1,10 +1,7 @@
 import * as Sentry from "@sentry/node";
 import { KafkaMessage } from "kafkajs";
 import { LogManager } from "../../../managers/LogManager";
-import {
-  HeliconeFeedbackMessage,
-  Message,
-} from "../../handlers/HandlerContext";
+import { HeliconeScoresMessage, Message } from "../../handlers/HandlerContext";
 import {
   GenericResult,
   PromiseGenericResult,
@@ -19,8 +16,7 @@ import {
   MESSAGES_PER_MINI_BATCH,
 } from "./constant";
 import { SettingsManager } from "../../../utils/settings";
-import { RequestManager } from "../../../managers/request/RequestManager";
-import { FeedbackManager } from "../../../managers/feedback/FeedbackManager";
+import { ScoreManager } from "../../../managers/score/ScoreManager";
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
@@ -154,17 +150,15 @@ function mapKafkaMessageToMessage(
   return ok(messages);
 }
 
-function mapKafkaMessageToFeedbackMessage(
+function mapKafkaMessageToScoresMessage(
   kafkaMessage: KafkaMessage[]
-): GenericResult<HeliconeFeedbackMessage[]> {
-  const messages: HeliconeFeedbackMessage[] = [];
+): GenericResult<HeliconeScoresMessage[]> {
+  const messages: HeliconeScoresMessage[] = [];
   for (const message of kafkaMessage) {
     if (message.value) {
       try {
         const kafkaValue = JSON.parse(message.value.toString());
-        const parsedMsg = JSON.parse(
-          kafkaValue.value
-        ) as HeliconeFeedbackMessage;
+        const parsedMsg = JSON.parse(kafkaValue.value) as HeliconeScoresMessage;
         messages.push(parsedMsg);
       } catch (error) {
         return err(`Failed to parse message: ${error}`);
@@ -295,7 +289,7 @@ export const consumeDlq = async () => {
   });
 };
 
-export const consumeFeedback = async () => {
+export const consumeScores = async () => {
   const consumer = generateKafkaConsumer("jawn-consumer-feedback");
   if (KAFKA_ENABLED && !consumer) {
     console.error("Failed to create Kafka consumer");
@@ -365,13 +359,13 @@ export const consumeFeedback = async () => {
 
           i += miniBatchSize;
           try {
-            const mappedMessages = mapKafkaMessageToFeedbackMessage(miniBatch);
+            const mappedMessages = mapKafkaMessageToScoresMessage(miniBatch);
             if (mappedMessages.error || !mappedMessages.data) {
               console.error("Failed to map messages", mappedMessages.error);
               return;
             }
 
-            const consumeResult = await consumeMiniBatchFeedback(
+            const consumeResult = await consumeMiniBatchScores(
               mappedMessages.data,
               firstOffset,
               lastOffset,
@@ -461,8 +455,8 @@ async function consumeMiniBatch(
   }
 }
 
-async function consumeMiniBatchFeedback(
-  messages: HeliconeFeedbackMessage[],
+async function consumeMiniBatchScores(
+  messages: HeliconeScoresMessage[],
   firstOffset: string,
   lastOffset: string,
   miniBatchId: string,
@@ -473,10 +467,12 @@ async function consumeMiniBatchFeedback(
     `Received mini batch with ${messages.length} messages. Mini batch ID: ${miniBatchId}. Topic: ${topic}`
   );
 
-  const feedbackManager = new FeedbackManager();
+  const scoresManager = new ScoreManager({
+    organizationId: "mocked-organization-id",
+  });
 
   try {
-    await feedbackManager.handleFeedback(
+    await scoresManager.handleScores(
       {
         batchId: miniBatchId,
         partition: batchPartition,

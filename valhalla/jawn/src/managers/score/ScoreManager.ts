@@ -2,6 +2,10 @@ import { err, ok, Result } from "../../lib/shared/result";
 import { BaseManager } from "../BaseManager";
 import { AuthParams } from "../../lib/db/supabase";
 import { BatchScores, Score, ScoreStore } from "../../lib/stores/ScoreStore";
+import { dataDogClient } from "../../lib/clients/DataDogClient";
+import { KafkaProducer } from "../../lib/clients/KafkaProducer";
+import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
+import * as Sentry from "@sentry/node";
 
 type Scores = Record<string, number | boolean>;
 
@@ -95,6 +99,132 @@ export class ScoreManager extends BaseManager {
     } catch {
       return err("Error adding scores to Clickhouse");
     }
+  }
+
+  private async processscores(scoresMessages: HeliconeScoresMessage[]) {
+    try {
+      // Filter out duplicate scores messages and only keep the latest one
+      const filteredMessages = Array.from(
+        scoresMessages
+          .reduce((map, message) => {
+            const key = `${message.requestId}-${message.organizationId}`;
+            const existingMessage = map.get(key);
+            if (
+              !existingMessage ||
+              existingMessage.createdAt < message.createdAt
+            ) {
+              map.set(key, message);
+            }
+            return map;
+          }, new Map<string, HeliconeScoresMessage>())
+          .values()
+      );
+      const bumpedVersions = await this.scoreStore.bumpRequestVersion(
+        filteredMessages.map((scoresMessage) => ({
+          id: scoresMessage.requestId,
+          organizationId: scoresMessage.organizationId,
+        }))
+      );
+
+      if (bumpedVersions.error || !bumpedVersions.data) {
+        return err(bumpedVersions.error);
+      }
+      const scoresScoreResult = await this.scoreStore.putScoresIntoClickhouse(
+        filteredMessages.map((scoresMessage) => {
+          return {
+            requestId: scoresMessage.requestId,
+            organizationId: scoresMessage.organizationId,
+            provider:
+              bumpedVersions.data.find(
+                (bumpedVersion) => bumpedVersion.id === scoresMessage.requestId
+              )?.provider ?? "",
+            version:
+              bumpedVersions.data.find(
+                (bumpedVersion) => bumpedVersion.id === scoresMessage.requestId
+              )?.version ?? 0,
+            mappedScores: scoresMessage.scores,
+          };
+        })
+      );
+
+      if (scoresScoreResult.error) {
+        console.error("Error upserting scores:", scoresScoreResult.error);
+        return err(scoresScoreResult.error);
+      }
+      return ok(null);
+    } catch (error: any) {
+      console.error("Error processing scores message:", error.message);
+      return err(error.message);
+    }
+  }
+
+  public async handleScores(
+    batchContext: {
+      batchId: string;
+      partition: number;
+      lastOffset: string;
+      messageCount: number;
+    },
+    scoresMessages: HeliconeScoresMessage[]
+  ): Promise<Result<null, string>> {
+    console.log(`Handling scores for batch ${batchContext.batchId}`);
+    const start = performance.now();
+    const result = await this.processscores(scoresMessages);
+    const end = performance.now();
+    const executionTimeMs = end - start;
+
+    dataDogClient.logHandleResults({
+      executionTimeMs,
+      handlerName: "scoresHandler",
+      methodName: "handlescores",
+      messageCount: batchContext.messageCount,
+      message: "scores",
+    });
+
+    if (result.error) {
+      Sentry.captureException(new Error(JSON.stringify(result.error)), {
+        tags: {
+          type: "HandlescoresError",
+          topic: "helicone-scores-prod",
+        },
+        extra: {
+          batchId: batchContext.batchId,
+          partition: batchContext.partition,
+          offset: batchContext.lastOffset,
+          messageCount: batchContext.messageCount,
+        },
+      });
+
+      console.error(
+        `Error inserting logs: ${JSON.stringify(result.error)} for batch ${
+          batchContext.batchId
+        }`
+      );
+
+      const kafkaProducer = new KafkaProducer();
+      const kafkaResult = await kafkaProducer.sendScoresMessage(
+        scoresMessages,
+        "helicone-scores-prod"
+      );
+
+      if (kafkaResult.error) {
+        Sentry.captureException(new Error(kafkaResult.error), {
+          tags: {
+            type: "KafkaError",
+            topic: "helicone-scores-prod",
+          },
+          extra: {
+            batchId: batchContext.batchId,
+            partition: batchContext.partition,
+            offset: batchContext.lastOffset,
+            messageCount: batchContext.messageCount,
+          },
+        });
+      }
+      return err(result.error);
+    }
+    console.log("Successfully processed scores messages");
+    return ok(null);
   }
 
   private mapScores(scores: Scores): Score[] {

@@ -11,4 +11,4 @@ export const DLQ_MESSAGES_PER_MINI_BATCH = +(
 
 export const DLQ_WORKER_COUNT = +(process.env.DLQ_WORKER_COUNT ?? 1);
 export const NORMAL_WORKER_COUNT = +(process.env.NORMAL_WORKER_COUNT ?? 3);
-export const FEEDBACK_WORKER_COUNT = +(process.env.FEEDBACK_WORKER_COUNT ?? 1);
+export const SCORES_WORKER_COUNT = +(process.env.SCORES_WORKER_COUNT ?? 1);

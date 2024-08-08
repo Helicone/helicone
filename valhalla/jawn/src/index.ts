@@ -8,7 +8,7 @@ import swaggerUi from "swagger-ui-express";
 import { proxyRouter } from "./controllers/public/proxyController";
 import {
   DLQ_WORKER_COUNT,
-  FEEDBACK_WORKER_COUNT,
+  SCORES_WORKER_COUNT,
   NORMAL_WORKER_COUNT,
 } from "./lib/clients/kafkaConsumers/constant";
 import { tokenRouter } from "./lib/routers/tokenRouter";
@@ -66,7 +66,7 @@ if (KAFKA_ENABLED) {
   startConsumers({
     dlqCount: DLQ_WORKER_COUNT,
     normalCount: NORMAL_WORKER_COUNT,
-    feedbackCount: FEEDBACK_WORKER_COUNT,
+    scoresCount: SCORES_WORKER_COUNT,
   });
 }
 

@@ -2,7 +2,7 @@ import { parentPort } from "worker_threads";
 import {
   consume,
   consumeDlq,
-  consumeFeedback,
+  consumeScores,
 } from "../lib/clients/kafkaConsumers/KafkaConsumer";
 
 parentPort?.once("message", (message) => {
@@ -14,6 +14,6 @@ parentPort?.once("message", (message) => {
     consumeDlq();
   } else if (message === "start-scores") {
     console.log("Kafka feedback consumer thread started!");
-    consumeFeedback();
+    consumeScores();
   }
 });

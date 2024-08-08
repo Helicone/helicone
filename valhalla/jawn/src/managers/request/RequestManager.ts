@@ -19,8 +19,7 @@ import {
 import { costOfPrompt } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";
-import { HeliconeFeedbackMessage } from "../../lib/handlers/HandlerContext";
-import { FeedbackManager } from "../feedback/FeedbackManager";
+import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 
 export class RequestManager extends BaseManager {
   private versionedRequestStore: VersionedRequestStore;
@@ -151,16 +150,24 @@ export class RequestManager extends BaseManager {
       console.error("Error upserting feedback:", feedbackResult.error);
       return err(feedbackResult.error.message);
     }
-    const feedbackMessage: HeliconeFeedbackMessage = {
+    const feedbackMessage: HeliconeScoresMessage = {
       requestId: requestId,
       organizationId: this.authParams.organizationId,
-      feedback: feedback,
+      scores: [
+        {
+          score_attribute_key: "helicone-score-feedback",
+          score_attribute_type: "number",
+          score_attribute_value: feedback ? 1 : 0,
+        },
+      ],
       createdAt: new Date(),
     };
     if (!kafkaProducer.isKafkaEnabled()) {
       console.log("Kafka is not enabled. Using feedback manager");
-      const feedbackManager = new FeedbackManager();
-      return await feedbackManager.handleFeedback(
+      const scoreManager = new ScoreManager({
+        organizationId: this.authParams.organizationId,
+      });
+      return await scoreManager.handleScores(
         {
           batchId: "",
           partition: 0,
@@ -172,7 +179,7 @@ export class RequestManager extends BaseManager {
     }
     console.log("Sending feedback message to Kafka");
 
-    const res = await kafkaProducer.sendFeedbackMessage(
+    const res = await kafkaProducer.sendScoresMessage(
       [feedbackMessage],
       "helicone-scores-prod"
     );

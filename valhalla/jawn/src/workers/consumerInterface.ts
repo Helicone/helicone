@@ -3,11 +3,11 @@ import { Worker } from "worker_threads";
 export function startConsumers({
   normalCount,
   dlqCount,
-  feedbackCount,
+  scoresCount: feedbackCount,
 }: {
   normalCount: number;
   dlqCount: number;
-  feedbackCount: number;
+  scoresCount: number;
 }) {
   for (let i = 0; i < normalCount; i++) {
     const worker = new Worker(`${__dirname}/kafkaConsumer.js`);

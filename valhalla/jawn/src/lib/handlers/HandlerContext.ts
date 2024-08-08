@@ -99,10 +99,14 @@ export type Message = {
   log: Log;
 };
 
-export type HeliconeFeedbackMessage = {
+export type HeliconeScoresMessage = {
   requestId: string;
   organizationId: string;
-  feedback: boolean;
+  scores: {
+    score_attribute_key: string;
+    score_attribute_type: string;
+    score_attribute_value: number;
+  }[];
   createdAt: Date;
 };
 

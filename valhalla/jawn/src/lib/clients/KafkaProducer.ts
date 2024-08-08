@@ -1,5 +1,5 @@
 import { Kafka } from "@upstash/kafka";
-import { HeliconeFeedbackMessage, Message } from "../handlers/HandlerContext";
+import { HeliconeScoresMessage, Message } from "../handlers/HandlerContext";
 import { PromiseGenericResult, err, ok } from "../shared/result";
 import { LogManager } from "../../managers/LogManager";
 
@@ -94,8 +94,8 @@ export class KafkaProducer {
     return err(`Failed to produce messages after ${maxAttempts} attempts`);
   }
 
-  async sendFeedbackMessage(
-    feedbackMessages: HeliconeFeedbackMessage[],
+  async sendScoresMessage(
+    feedbackMessages: HeliconeScoresMessage[],
     topic: Topics
   ): PromiseGenericResult<string> {
     if (!this.kafka) {
@@ -129,13 +129,13 @@ export class KafkaProducer {
         if (attempts < maxAttempts) {
           await new Promise((resolve) => setTimeout(resolve, timeout));
         } else {
-          return err("Failed to produce feedback message");
+          return err("Failed to produce scores message");
         }
       }
     }
 
     return err(
-      `Failed to produce feedback message after ${maxAttempts} attempts`
+      `Failed to produce scores message after ${maxAttempts} attempts`
     );
   }
 
