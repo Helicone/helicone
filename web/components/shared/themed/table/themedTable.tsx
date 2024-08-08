@@ -260,22 +260,26 @@ export default function ThemedTable<T>(props: ThemedTableV5Props<T>) {
                           },
                         }}
                       >
-                        <span
-                          className={clsx(
-                            "w-full flex flex-grow",
-                            (cell.column.id == "requestText" ||
-                              cell.column.id == "responseText") &&
-                              dataLoading
-                              ? "animate-pulse bg-gray-200 rounded-md"
-                              : "hidden"
-                          )}
-                        >
-                          &nbsp;
-                        </span>
-
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
+                        {dataLoading &&
+                        (cell.column.id == "requestText" ||
+                          cell.column.id == "responseText") ? (
+                          <span
+                            className={clsx(
+                              "w-full flex flex-grow",
+                              (cell.column.id == "requestText" ||
+                                cell.column.id == "responseText") &&
+                                dataLoading
+                                ? "animate-pulse bg-gray-200 rounded-md"
+                                : "hidden"
+                            )}
+                          >
+                            &nbsp;
+                          </span>
+                        ) : (
+                          flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )
                         )}
                       </td>
                     ))}
