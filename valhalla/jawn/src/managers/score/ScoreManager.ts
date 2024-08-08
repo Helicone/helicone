@@ -101,7 +101,7 @@ export class ScoreManager extends BaseManager {
     }
   }
 
-  private async processscores(scoresMessages: HeliconeScoresMessage[]) {
+  private async procesScores(scoresMessages: HeliconeScoresMessage[]) {
     try {
       // Filter out duplicate scores messages and only keep the latest one
       const filteredMessages = Array.from(
@@ -169,7 +169,7 @@ export class ScoreManager extends BaseManager {
   ): Promise<Result<null, string>> {
     console.log(`Handling scores for batch ${batchContext.batchId}`);
     const start = performance.now();
-    const result = await this.processscores(scoresMessages);
+    const result = await this.procesScores(scoresMessages);
     const end = performance.now();
     const executionTimeMs = end - start;
 
@@ -196,31 +196,31 @@ export class ScoreManager extends BaseManager {
       });
 
       console.error(
-        `Error inserting logs: ${JSON.stringify(result.error)} for batch ${
+        `Error inserting scores: ${JSON.stringify(result.error)} for batch ${
           batchContext.batchId
         }`
       );
 
-      const kafkaProducer = new KafkaProducer();
-      const kafkaResult = await kafkaProducer.sendScoresMessage(
-        scoresMessages,
-        "helicone-scores-prod"
-      );
+      // const kafkaProducer = new KafkaProducer();
+      // const kafkaResult = await kafkaProducer.sendScoresMessage(
+      //   scoresMessages,
+      //   "helicone-scores-prod"
+      // );
 
-      if (kafkaResult.error) {
-        Sentry.captureException(new Error(kafkaResult.error), {
-          tags: {
-            type: "KafkaError",
-            topic: "helicone-scores-prod",
-          },
-          extra: {
-            batchId: batchContext.batchId,
-            partition: batchContext.partition,
-            offset: batchContext.lastOffset,
-            messageCount: batchContext.messageCount,
-          },
-        });
-      }
+      // if (kafkaResult.error) {
+      //   Sentry.captureException(new Error(kafkaResult.error), {
+      //     tags: {
+      //       type: "KafkaError",
+      //       topic: "helicone-scores-prod",
+      //     },
+      //     extra: {
+      //       batchId: batchContext.batchId,
+      //       partition: batchContext.partition,
+      //       offset: batchContext.lastOffset,
+      //       messageCount: batchContext.messageCount,
+      //     },
+      //   });
+      // }
       return err(result.error);
     }
     console.log("Successfully processed scores messages");
