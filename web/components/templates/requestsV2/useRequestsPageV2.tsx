@@ -80,7 +80,7 @@ const useRequestsPageV2 = (
     operator: "and",
   };
 
-  const { requests, count } = useGetRequests(
+  const { requests, count, isBodyLoading } = useGetRequests(
     currentPage,
     currentPageSize,
     filter,
@@ -90,23 +90,15 @@ const useRequestsPageV2 = (
   );
 
   const isDataLoading = requests.isInitialLoading || isPropertiesLoading;
-  const { requestBodies } = useGetFullRequest(requests.data?.data || []);
 
   const normalizedRequests = useMemo(() => {
-    return (requestBodies.data?.data?.length ?? 0) > 0
-      ? requestBodies.data?.data || []
-      : getNormalizedRequests(requests.data?.data || []);
-  }, [requestBodies.data?.data, requests.data?.data]);
+    return getNormalizedRequests(requests.data?.data || []);
+  }, [requests.data?.data]);
 
   return {
-    normalizedRequests:
-      (requestBodies.data?.data?.length ?? 0) > 0
-        ? requestBodies.data?.data || []
-        : normalizedRequests,
-    count: count.data?.data,
+    normalizedRequests: normalizedRequests,
     isDataLoading,
-    isBodyLoading:
-      requestBodies.isLoading || requestBodies.data?.data?.length === 0,
+    isBodyLoading: isBodyLoading,
     isCountLoading: count.isLoading,
     properties,
     refetch: requests.refetch,
