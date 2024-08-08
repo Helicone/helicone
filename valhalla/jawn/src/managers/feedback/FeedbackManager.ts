@@ -16,12 +16,13 @@ export class FeedbackManager {
       const filteredMessages = Array.from(
         feedbackMessages
           .reduce((map, message) => {
-            const existingMessage = map.get(message.requestId);
+            const key = `${message.requestId}-${message.organizationId}`;
+            const existingMessage = map.get(key);
             if (
               !existingMessage ||
               existingMessage.createdAt < message.createdAt
             ) {
-              map.set(message.requestId, message);
+              map.set(key, message);
             }
             return map;
           }, new Map<string, HeliconeFeedbackMessage>())
