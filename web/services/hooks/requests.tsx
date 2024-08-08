@@ -10,6 +10,30 @@ import {
   getModelFromPath,
   mapGeminiPro,
 } from "../../components/templates/requestsV2/builder/mappers/geminiMapper";
+
+function formatDateForClickHouse(date: Date): string {
+  return date.toISOString().slice(0, 19).replace("T", " ");
+}
+
+function processFilter(filter: any): any {
+  if (typeof filter !== "object" || filter === null) {
+    return filter;
+  }
+
+  const result: any = Array.isArray(filter) ? [] : {};
+
+  for (const key in filter) {
+    if (key === "gte" || key === "lte") {
+      result[key] = formatDateForClickHouse(new Date(filter[key]));
+    } else if (typeof filter[key] === "object") {
+      result[key] = processFilter(filter[key]);
+    } else {
+      result[key] = filter[key];
+    }
+  }
+
+  return result;
+}
 import { getNormalizedRequests } from "../../components/templates/requestsV2/useRequestsPageV2";
 
 const useGetRequests = (
@@ -40,7 +64,7 @@ const useGetRequests = (
         const isCached = query.queryKey[5];
         const orgId = query.queryKey[6] as string;
         const jawn = getJawnClient(orgId);
-        const response = await jawn.POST("/v1/request/query", {
+        const response = await jawn.POST("/v1/request/queryV2", {
           body: {
             filter: advancedFilter as any,
             offset: (currentPage - 1) * currentPageSize,
@@ -50,7 +74,55 @@ const useGetRequests = (
           },
         });
 
-        return response.data as Result<HeliconeRequest[], string>;
+        const result = response.data as Result<HeliconeRequest[], string>;
+
+        const requests = await Promise.all(
+          result.data?.map(async (request: HeliconeRequest) => {
+            if (request.signed_body_url) {
+              try {
+                const contentResponse = await fetch(request.signed_body_url);
+                if (contentResponse.ok) {
+                  const text = await contentResponse.text();
+
+                  let content = JSON.parse(text);
+
+                  if (request.asset_urls) {
+                    content = placeAssetIdValues(request.asset_urls, content);
+                  }
+
+                  request.request_body = content.request;
+                  request.response_body = content.response;
+
+                  const model =
+                    request.model_override ||
+                    request.response_model ||
+                    request.request_model ||
+                    content.response?.model ||
+                    content.request?.model ||
+                    content.response?.body?.model || // anthropic
+                    getModelFromPath(request.request_path) ||
+                    "";
+
+                  if (
+                    request.provider === "GOOGLE" &&
+                    model.toLowerCase().includes("gemini")
+                  ) {
+                    request.llmSchema = mapGeminiPro(
+                      request as HeliconeRequest,
+                      model
+                    );
+                  }
+                }
+              } catch (error) {
+                console.log(`Error fetching content: ${error}`);
+                return request;
+              }
+            }
+            return request; // Return request if no signed_body_url
+          }) ?? []
+        );
+
+        return { data: requests, error: null };
       },
       refetchOnWindowFocus: false,
       retry: false,
@@ -69,14 +141,14 @@ const useGetRequests = (
       queryFn: async (query) => {
         const advancedFilter = query.queryKey[3];
         const isCached = query.queryKey[5];
-
+        const processedFilter = processFilter(advancedFilter);
         return await fetch("/api/request/count", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            filter: advancedFilter,
+            filter: processedFilter,
             isCached,
           }),
         }).then((res) => res.json() as Promise<Result<number, string>>);

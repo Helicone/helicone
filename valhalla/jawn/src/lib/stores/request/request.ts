@@ -7,6 +7,7 @@ import {
 import {
   SortLeafRequest,
   buildRequestSort,
+  buildRequestSortV2,
 } from "../../shared/sorts/requests/sorts";
 import { Result, resultMap, ok, err } from "../../shared/result";
 import {
@@ -15,7 +16,6 @@ import {
   printRunnableQuery,
 } from "../../shared/db/dbExecute";
 import { LlmSchema } from "../../shared/requestResponseModel";
-import { Json } from "../../db/database.types";
 import { mapGeminiPro } from "./mappers";
 import { S3Client } from "../../shared/db/s3Client";
 
@@ -43,35 +43,26 @@ export interface HeliconeRequest {
   /**
    * @example "Happy"
    */
-  response_id: string;
-  response_created_at: string;
+  response_id: string | null;
+  response_created_at: string | null;
   response_body?: any;
   response_status: number;
   response_model: string | null;
   request_id: string;
-  request_model: string | null;
-  model_override: string | null;
   request_created_at: string;
   request_body: any;
   request_path: string;
   request_user_id: string | null;
-  request_properties: {
-    [key: string]: Json;
-  } | null;
-  request_feedback: {
-    [key: string]: Json;
-  } | null;
+  request_properties: Record<string, string> | null;
+  request_model: string | null;
+  model_override: string | null;
   helicone_user: string | null;
-  prompt_name: string | null;
-  prompt_regex: string | null;
-  key_name: string;
+  provider: Provider;
   delay_ms: number | null;
   time_to_first_token: number | null;
   total_tokens: number | null;
   prompt_tokens: number | null;
   completion_tokens: number | null;
-  provider: Provider;
-  node_id: string | null;
   prompt_id: string | null;
   feedback_created_at?: string | null;
   feedback_id?: string | null;
@@ -83,6 +74,9 @@ export interface HeliconeRequest {
   asset_urls: Record<string, string> | null;
   scores: Record<string, number> | null;
   costUSD?: number | null;
+  properties: Record<string, string>;
+  assets: Array<string>;
+  target_url: string;
 }
 
 function addJoinQueries(joinQuery: string, filter: FilterNode): string {
@@ -202,6 +196,163 @@ export async function getRequests(
     (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
   );
   const results = await mapLLMCalls(requests.data, s3Client, orgId);
+  return resultMap(results, (data) => {
+    return data;
+  });
+}
+
+export async function getRequestsV2(
+  orgId: string,
+  filter: FilterNode,
+  offset: number,
+  limit: number,
+  sort: SortLeafRequest
+): Promise<Result<HeliconeRequest[], string>> {
+  if (isNaN(offset) || isNaN(limit)) {
+    return { data: null, error: "Invalid offset or limit" };
+  }
+
+  const sortSQL = buildRequestSortV2(sort);
+
+  if (limit < 0 || limit > 1_000) {
+    return err("invalid limit");
+  }
+  const builtFilter = await buildFilterWithAuthClickHouse({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+
+  const query = `
+    SELECT response_id,
+      map('helicone_message', 'Response body no longer supported. To retrieve response body, please contact engineering@helicone.ai') as response_body,
+      response_created_at,
+      toInt32(status) AS response_status,
+      request_id,
+      map('helicone_message', 'Request body no longer supported. To retrieve request body, please contact engineering@helicone.ai') as request_body,
+      request_created_at,
+      user_id AS request_user_id,
+      properties AS request_properties,
+      provider,
+      toInt32(latency) AS delay_ms,
+      model AS request_model,
+      time_to_first_token,
+      (prompt_tokens + completion_tokens) AS total_tokens,
+      completion_tokens,
+      prompt_tokens,
+      country_code,
+      scores,
+      properties,
+      assets,
+      target_url,
+    FROM request_response_versioned FINAL
+    WHERE (
+      (${builtFilter.filter})
+    )
+    ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `;
+
+  const requests = await dbQueryClickhouse<HeliconeRequest>(
+    query,
+    builtFilter.argsAcc
+  );
+
+  const s3Client = new S3Client(
+    process.env.S3_ACCESS_KEY ?? "",
+    process.env.S3_SECRET_KEY ?? "",
+    process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
+    process.env.S3_BUCKET_NAME ?? "",
+    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+  );
+
+  const mappedRequests = await mapLLMCalls(requests.data, s3Client, orgId);
+
+  return mappedRequests;
+}
+
+export async function getRequestsCachedV2(
+  orgId: string,
+  filter: FilterNode,
+  offset: number,
+  limit: number,
+  sort: SortLeafRequest,
+  isPartOfExperiment?: boolean,
+  isScored?: boolean
+): Promise<Result<HeliconeRequest[], string>> {
+  if (isNaN(offset) || isNaN(limit)) {
+    return { data: null, error: "Invalid offset or limit" };
+  }
+
+  if (offset > 10_000 || offset < 0) {
+    return err("unsupported offset value");
+  }
+
+  if (limit < 0 || limit > 1_000) {
+    return err("invalid limit");
+  }
+
+  const builtFilter = await buildFilterWithAuthClickHouse({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+
+  const sortSQL = buildRequestSortV2(sort);
+
+  const query = `
+  SELECT
+    rrv.response_id,
+    rrv.response_body,
+    rrv.response_created_at,
+    rrv.status AS response_status,
+    rrv.request_id,
+    rrv.request_body,
+    rrv.request_created_at,
+    rrv.user_id AS request_user_id,
+    rrv.properties AS request_properties,
+    rrv.provider,
+    rrv.target_url,
+    rrv.model AS request_model,
+    rrv.time_to_first_token,
+    rrv.prompt_tokens + rrv.completion_tokens AS total_tokens,
+    rrv.completion_tokens,
+    rrv.prompt_tokens,
+    rrv.country_code,
+    rrv.scores,
+    rrv.properties,
+    rrv.assets,
+    ch.created_at AS cache_hit_created_at,
+    ch.latency AS cache_hit_latency
+  FROM request_response_versioned rrv
+  INNER JOIN cache_hits ch ON rrv.request_id = ch.request_id
+  WHERE rrv.organization_id = '${orgId}'
+    AND (${builtFilter.filter})
+  ${
+    sortSQL !== undefined
+      ? `ORDER BY ${sortSQL}`
+      : "ORDER BY rrv.request_created_at DESC"
+  }
+  LIMIT ${limit}
+  OFFSET ${offset}
+  `;
+
+  const requests = await dbQueryClickhouse<HeliconeRequest>(
+    query,
+    builtFilter.argsAcc
+  );
+
+  const s3Client = new S3Client(
+    process.env.S3_ACCESS_KEY ?? "",
+    process.env.S3_SECRET_KEY ?? "",
+    process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
+    process.env.S3_BUCKET_NAME ?? "",
+    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+  );
+
+  const results = await mapLLMCalls(requests.data, s3Client, orgId);
+
   return resultMap(results, (data) => {
     return data;
   });

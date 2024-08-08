@@ -289,7 +289,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   }, [searchParams, filterMap]);
 
   useEffect(() => {
-    if (initialLoadRef.current && filterMap.length > 0) {
+    if (initialLoadRef.current && filterMap.length > 0 && !isAnyLoading) {
       console.log("load");
       const loadedFilters = getAdvancedFilters();
       setAdvancedFilters(loadedFilters);

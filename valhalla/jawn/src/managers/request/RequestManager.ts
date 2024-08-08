@@ -13,6 +13,8 @@ import {
   getRequestAsset,
   getRequests,
   getRequestsCached,
+  getRequestsCachedV2,
+  getRequestsV2,
 } from "../../lib/stores/request/request";
 import { costOfPrompt } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
@@ -277,6 +279,64 @@ export class RequestManager extends BaseManager {
           costUSD: costOfPrompt({
             model:
               r.model_override ?? r.response_model ?? r.request_model ?? "",
+            provider: r.provider ?? "",
+            completionTokens: r.completion_tokens ?? 0,
+            promptTokens: r.prompt_tokens ?? 0,
+          }),
+        };
+      });
+    });
+  }
+
+  async getRequestsV2(
+    params: RequestQueryParams
+  ): Promise<Result<HeliconeRequest[], string>> {
+    const {
+      filter,
+      offset = 0,
+      limit = 10,
+      sort = {
+        created_at: "desc",
+      },
+      isCached,
+      isPartOfExperiment,
+      isScored,
+    } = params;
+
+    let newFilter = filter;
+
+    if (isScored !== undefined) {
+      newFilter = this.addScoreFilter(isScored, newFilter);
+    }
+
+    if (isPartOfExperiment !== undefined) {
+      newFilter = this.addPartOfExperimentFilter(isPartOfExperiment, newFilter);
+    }
+
+    const requests = isCached
+      ? await getRequestsCachedV2(
+          this.authParams.organizationId,
+          filter,
+          offset,
+          limit,
+          sort,
+          isPartOfExperiment,
+          isScored
+        )
+      : await getRequestsV2(
+          this.authParams.organizationId,
+          newFilter,
+          offset,
+          limit,
+          sort
+        );
+
+    return resultMap(requests, (req) => {
+      return req.map((r) => {
+        return {
+          ...r,
+          costUSD: costOfPrompt({
+            model: r.request_model ?? "",
             provider: r.provider ?? "",
             completionTokens: r.completion_tokens ?? 0,
             promptTokens: r.prompt_tokens ?? 0,

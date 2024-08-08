@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import {
-  getRequestCount,
-  getRequestCountCached,
+  getRequestCachedCountClickhouse,
+  getRequestCountClickhouse,
 } from "../../../lib/api/request/request";
 
 import {
@@ -20,8 +20,8 @@ async function handler({
     isCached: boolean;
   };
   const metrics = isCached
-    ? await getRequestCountCached(orgId, filter)
-    : await getRequestCount(orgId, filter);
+    ? await getRequestCachedCountClickhouse(orgId, filter)
+    : await getRequestCountClickhouse(orgId, filter);
   res.status(metrics.error === null ? 200 : 500).json(metrics);
 }
 

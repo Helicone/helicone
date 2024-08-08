@@ -62,7 +62,13 @@ const RequestCard = (props: RequestCardProps) => {
           </div>
           <FeedbackButtons
             requestId={request.id}
-            defaultValue={request.feedback.rating}
+            defaultValue={
+              request.scores && request.scores["helicone-score-feedback"]
+                ? Number(request.scores["helicone-score-feedback"] === 1)
+                  ? true
+                  : false
+                : null
+            }
           />
         </div>
 

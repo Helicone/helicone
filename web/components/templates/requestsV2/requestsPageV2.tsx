@@ -3,10 +3,7 @@ import { ArrowPathIcon, HomeIcon } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
-import {
-  TimeInterval,
-  getTimeIntervalAgo,
-} from "../../../lib/timeCalculations/time";
+import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
@@ -68,6 +65,31 @@ interface RequestsPageV2Props {
   organizationLayoutAvailable: boolean;
 }
 
+function formatDateForClickHouse(date: Date): string {
+  return date.toISOString();
+}
+
+function getTimeIntervalAgo(interval: TimeInterval): Date {
+  const now = new Date();
+
+  switch (interval) {
+    case "3m":
+      return new Date(now.getTime() - 3 * 30 * 24 * 60 * 60 * 1000);
+    case "1m":
+      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    case "7d":
+      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    case "24h":
+      return new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    case "1h":
+      return new Date(now.getTime() - 60 * 60 * 1000);
+    case "all":
+      return new Date(0);
+    default:
+      return new Date(now.getTime() - 24 * 60 * 60 * 1000); // Default to 24h
+  }
+}
+
 function getSortLeaf(
   sortKey: string | null,
   sortDirection: SortDirection | null,
@@ -99,7 +121,11 @@ function getSortLeaf(
 }
 
 function getTableName(isCached: boolean): string {
-  return isCached ? "cache_hits" : "request";
+  return isCached ? "cache_hits" : "request_response_versioned";
+}
+
+function getCreatedAtColumn(isCached: boolean): string {
+  return isCached ? "created_at" : "request_created_at";
 }
 
 const RequestsPageV2 = (props: RequestsPageV2Props) => {
@@ -157,6 +183,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
     const tableName = getTableName(isCached);
+    const createdAtColumn = getCreatedAtColumn(isCached);
 
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
       const [_, start, end] = currentTimeFilter.split("_");
@@ -164,28 +191,29 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       const filter: FilterNode = {
         left: {
           [tableName]: {
-            created_at: {
-              gte: new Date(start).toISOString(),
+            [createdAtColumn]: {
+              gte: formatDateForClickHouse(new Date(start)),
             },
           },
         },
         operator: "and",
         right: {
           [tableName]: {
-            created_at: {
-              lte: new Date(end).toISOString(),
+            [createdAtColumn]: {
+              lte: formatDateForClickHouse(new Date(end)),
             },
           },
         },
       };
       return filter;
     } else {
+      const timeIntervalDate = getTimeIntervalAgo(
+        (currentTimeFilter as TimeInterval) || "24h"
+      );
       return {
         [tableName]: {
-          created_at: {
-            gte: getTimeIntervalAgo(
-              (searchParams.get("t") as TimeInterval) || "24h"
-            ).toISOString(),
+          [createdAtColumn]: {
+            gte: formatDateForClickHouse(timeIntervalDate),
           },
         },
       };
@@ -271,7 +299,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   useEffect(() => {
     if (initialRequestId && selectedData === undefined) {
       const fetchRequest = async () => {
-        const response = await jawn.POST("/v1/request/query", {
+        const response = await jawn.POST("/v1/request/queryV2", {
           body: {
             filter: {
               left: {
@@ -409,7 +437,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   }, [searchParams, filterMap]);
 
   useEffect(() => {
-    if (initialLoadRef.current && filterMap.length > 0) {
+    if (initialLoadRef.current && filterMap.length > 0 && !isDataLoading) {
       const loadedFilters = getAdvancedFilters();
       setAdvancedFilters(loadedFilters);
       initialLoadRef.current = false;
@@ -500,21 +528,22 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   const onTimeSelectHandler = (key: TimeInterval, value: string) => {
     const tableName = getTableName(isCached);
+    const createdAtColumn = getCreatedAtColumn(isCached);
     if (key === "custom") {
       const [start, end] = value.split("_");
       const filter: FilterNode = {
         left: {
           [tableName]: {
-            created_at: {
-              gte: new Date(start).toISOString(),
+            [createdAtColumn]: {
+              gte: formatDateForClickHouse(new Date(start)),
             },
           },
         },
         operator: "and",
         right: {
           [tableName]: {
-            created_at: {
-              lte: new Date(end).toISOString(),
+            [createdAtColumn]: {
+              lte: formatDateForClickHouse(new Date(end)),
             },
           },
         },
@@ -522,10 +551,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       setTimeFilter(filter);
       return;
     }
+
     setTimeFilter({
       [tableName]: {
-        created_at: {
-          gte: getTimeIntervalAgo(key).toISOString(),
+        [createdAtColumn]: {
+          gte: formatDateForClickHouse(getTimeIntervalAgo(key)),
         },
       },
     });
