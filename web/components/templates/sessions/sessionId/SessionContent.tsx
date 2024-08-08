@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { tracesToTreeNodeData } from "../../../../lib/sessions/helpers";
 import { Session } from "../../../../lib/sessions/sessionTypes";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
@@ -43,6 +43,24 @@ const SessionContent: React.FC<SessionContentProps> = ({
     (view as (typeof TABS)[number]) ?? "tree"
   );
 
+  const startTime = useMemo(() => {
+    const dates =
+      requests.requests.data?.data?.map(
+        (r) => new Date(r.request_created_at)
+      ) ?? [];
+
+    return dates.sort((a, b) => a.getTime() - b.getTime())?.[0] ?? new Date(0);
+  }, [requests.requests.data?.data]);
+
+  const endTime = useMemo(() => {
+    const dates =
+      requests.requests.data?.data?.map(
+        (r) => new Date(r.request_created_at)
+      ) ?? [];
+
+    return dates.sort((a, b) => b.getTime() - a.getTime())?.[0] ?? new Date(0);
+  }, [requests.requests.data?.data]);
+
   return (
     <Col className="gap-[12px]">
       <BreadCrumb
@@ -62,22 +80,8 @@ const SessionContent: React.FC<SessionContentProps> = ({
         sessionId={session_id as string}
         numTraces={session.traces.length}
         sessionCost={session.session_cost_usd}
-        startTime={
-          requests.requests.data?.data
-            ? new Date(
-                requests.requests.data?.data?.[
-                  (requests.requests.data?.data?.length ?? 0) - 1
-                ]?.request_created_at
-              )
-            : new Date(0)
-        }
-        endTime={
-          requests.requests.data?.data
-            ? new Date(
-                requests.requests.data?.data?.[0]?.request_created_at ?? 0
-              )
-            : new Date(0)
-        }
+        startTime={startTime}
+        endTime={endTime}
       />
       <TabSelector
         tabs={TABS}

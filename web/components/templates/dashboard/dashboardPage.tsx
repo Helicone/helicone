@@ -59,6 +59,7 @@ import { QuantilesGraph } from "./quantilesGraph";
 import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
+import { formatLargeNumber } from "../../shared/utils/numberFormat";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -91,17 +92,6 @@ export function formatNumberString(
   } else {
     return num.toLocaleString("en-US");
   }
-}
-
-function formatLargeNumber(value: number): string {
-  if (value >= 1000) {
-    return value.toLocaleString("en-US", { maximumFractionDigits: 0 });
-  } else if (value >= 1000) {
-    return value.toLocaleString("en-US", { maximumFractionDigits: 0 });
-  } else if (value >= 0.01) {
-    return value.toLocaleString("en-US");
-  }
-  return value.toFixed(2);
 }
 
 export type Loading<T> = T | "loading";
