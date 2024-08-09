@@ -67,7 +67,7 @@ export class ScoreManager extends BaseManager {
     );
 
     if (res.error) {
-      console.error();
+      console.error(`Error sending scores message to Kafka: ${res.error}`);
       return err(res.error);
     }
     return ok(null);
