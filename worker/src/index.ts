@@ -233,6 +233,14 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         };
       }
     } else if (hostParts[0].includes("qstash")) {
+      const pathname = new URL(request.url).pathname;
+      if (!pathname.startsWith("/llm")) {
+        return {
+          ...env,
+          WORKER_TYPE: "GATEWAY_API",
+          GATEWAY_TARGET: "https://qstash.upstash.io/llm",
+        };
+      }
       return {
         ...env,
         WORKER_TYPE: "GATEWAY_API",
