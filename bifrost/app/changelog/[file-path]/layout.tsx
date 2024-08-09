@@ -14,7 +14,7 @@ const readMetaData = async (filePath: string) => {
     "changes",
     filePath
   );
-  const jsonPath = path.join(basePath, "metaData.json");
+  const jsonPath = path.join(basePath, "meta.json");
   const jsonContent = await fs.readFile(jsonPath, "utf8");
   try {
     return JSON.parse(jsonContent) as {
