@@ -101,7 +101,7 @@ export class ScoreManager extends BaseManager {
     }
   }
 
-  private async procesScores(scoresMessages: HeliconeScoresMessage[]) {
+  private async procesScores(scoresMessages: HeliconeScoresMessage[]): Promise<Result<null, string>> {
     try {
       // Filter out duplicate scores messages and only keep the latest one
       const filteredMessages = Array.from(

@@ -22,12 +22,12 @@ export function startConsumers({
   }
 
   for (let i = 0; i < scoresCount; i++) {
-    const workerFeedback = new Worker(`${__dirname}/kafkaConsumer.js`);
-    workerFeedback.postMessage("start-scores");
+    const workerScores = new Worker(`${__dirname}/kafkaConsumer.js`);
+    workerScores.postMessage("start-scores");
   }
 
   for (let i = 0; i < scoresDlqCount; i++) {
-    const workerFeedbackDlq = new Worker(`${__dirname}/kafkaConsumer.js`);
-    workerFeedbackDlq.postMessage("start-scores-dlq");
+    const workerScoresDlq = new Worker(`${__dirname}/kafkaConsumer.js`);
+    workerScoresDlq.postMessage("start-scores-dlq");
   }
 }
