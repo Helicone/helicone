@@ -45,7 +45,7 @@ export class ScoreManager extends BaseManager {
     scoresMessage: HeliconeScoresMessage[]
   ): Promise<Result<null, string>> {
     if (!this.kafkaProducer.isKafkaEnabled()) {
-      console.log("Kafka is not enabled. Using feedback manager");
+      console.log("Kafka is not enabled. Using score manager");
       const scoreManager = new ScoreManager({
         organizationId: this.authParams.organizationId,
       });
@@ -59,7 +59,7 @@ export class ScoreManager extends BaseManager {
         scoresMessage
       );
     }
-    console.log("Sending feedback message to Kafka");
+    console.log("Sending scores message to Kafka");
 
     const res = await this.kafkaProducer.sendScoresMessage(
       scoresMessage,
