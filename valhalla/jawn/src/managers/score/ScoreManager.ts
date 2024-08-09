@@ -130,19 +130,15 @@ export class ScoreManager extends BaseManager {
         return err(bumpedVersions.error);
       }
       const scoresScoreResult = await this.scoreStore.putScoresIntoClickhouse(
-        filteredMessages.map((scoresMessage) => {
+        bumpedVersions.data.map((scoresMessage) => {
           return {
-            requestId: scoresMessage.requestId,
-            organizationId: scoresMessage.organizationId,
-            provider:
-              bumpedVersions.data.find(
-                (bumpedVersion) => bumpedVersion.id === scoresMessage.requestId
-              )?.provider ?? "",
-            version:
-              bumpedVersions.data.find(
-                (bumpedVersion) => bumpedVersion.id === scoresMessage.requestId
-              )?.version ?? 0,
-            mappedScores: scoresMessage.scores,
+            requestId: scoresMessage.id,
+            organizationId: scoresMessage.helicone_org_id,
+            provider: scoresMessage.provider,
+            version: scoresMessage.version,
+            mappedScores:
+              filteredMessages.find((x) => x.requestId === scoresMessage.id)
+                ?.scores ?? [],
           };
         })
       );

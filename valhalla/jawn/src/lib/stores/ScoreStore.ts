@@ -24,6 +24,7 @@ export interface UpdatedRequestVersion {
   id: string;
   version: number;
   provider: string;
+  helicone_org_id: string;
 }
 
 export class ScoreStore extends BaseStore {
@@ -250,7 +251,7 @@ export class ScoreStore extends BaseStore {
       SET version = r.version + 1
       FROM (VALUES ${placeholders}) AS v(org_id, req_id)
       WHERE r.helicone_org_id = v.org_id AND r.id = v.req_id
-      RETURNING r.id, r.version, r.provider
+      RETURNING r.id, r.version, r.provider, r.helicone_org_id
     `;
 
     const result = await dbExecute<UpdatedRequestVersion>(query, values);
