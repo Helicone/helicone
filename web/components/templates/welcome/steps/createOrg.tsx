@@ -1,13 +1,12 @@
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useUser } from "@supabase/auth-helpers-react";
+import { PostgrestError } from "@supabase/supabase-js";
+import { Select, SelectItem, TextInput } from "@tremor/react";
 import { useState } from "react";
-import { Database } from "../../../../supabase/database.types";
+import { useTranslation } from "react-i18next";
+import { getJawnClient } from "../../../../lib/clients/jawn";
 import { useOrg } from "../../../layout/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
-import { PostgrestError } from "@supabase/supabase-js";
 import HcButton from "../../../ui/hcButton";
-import { Select, SelectItem, TextInput } from "@tremor/react";
-import { getJawnClient } from "../../../../lib/clients/jawn";
-import { useTranslation } from "react-i18next";
 
 export const COMPANY_SIZES = ["Just me", "2-5", "5-25", "25-100", "100+"];
 
