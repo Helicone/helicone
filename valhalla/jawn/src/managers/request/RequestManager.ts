@@ -1,5 +1,7 @@
 // src/users/usersService.ts
+import { KafkaMessage } from "kafkajs";
 import { RequestQueryParams } from "../../controllers/public/requestController";
+import { KafkaProducer } from "../../lib/clients/KafkaProducer";
 import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
@@ -17,6 +19,7 @@ import {
 import { costOfPrompt } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";
+import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 
 export class RequestManager extends BaseManager {
   private versionedRequestStore: VersionedRequestStore;
@@ -115,6 +118,7 @@ export class RequestManager extends BaseManager {
     requestId: string,
     feedback: boolean
   ): Promise<Result<null, string>> {
+    const kafkaProducer = new KafkaProducer();
     const requestResponse = await this.waitForRequestAndResponse(
       requestId,
       this.authParams.organizationId
@@ -123,7 +127,6 @@ export class RequestManager extends BaseManager {
     if (requestResponse.error || !requestResponse.data) {
       return err("Request not found");
     }
-
     const feedbackResult = await this.queryTimer.withTiming(
       supabaseServer.client
         .from("feedback")
@@ -147,23 +150,44 @@ export class RequestManager extends BaseManager {
       console.error("Error upserting feedback:", feedbackResult.error);
       return err(feedbackResult.error.message);
     }
+    const feedbackMessage: HeliconeScoresMessage = {
+      requestId: requestId,
+      organizationId: this.authParams.organizationId,
+      scores: [
+        {
+          score_attribute_key: "helicone-score-feedback",
+          score_attribute_type: "number",
+          score_attribute_value: feedback ? 1 : 0,
+        },
+      ],
+      createdAt: new Date(),
+    };
+    if (!kafkaProducer.isKafkaEnabled()) {
+      console.log("Kafka is not enabled. Using feedback manager");
+      const scoreManager = new ScoreManager({
+        organizationId: this.authParams.organizationId,
+      });
+      return await scoreManager.handleScores(
+        {
+          batchId: "",
+          partition: 0,
+          lastOffset: "",
+          messageCount: 1,
+        },
+        [feedbackMessage]
+      );
+    }
+    console.log("Sending feedback message to Kafka");
 
-    const scoreManager = new ScoreManager(this.authParams);
-    // const feedbackScoreResult = await scoreManager.addScoresToClickhouse(
-    //   requestId,
-    //   [
-    //     {
-    //       score_attribute_key: "helicone-score-feedback",
-    //       score_attribute_type: "number",
-    //       score_attribute_value: feedback ? 1 : 0,
-    //     },
-    //   ]
-    // );
+    const res = await kafkaProducer.sendScoresMessage(
+      [feedbackMessage],
+      "helicone-scores-prod"
+    );
 
-    // if (feedbackScoreResult.error) {
-    //   console.error("Error upserting feedback:", feedbackScoreResult.error);
-    //   return err(feedbackScoreResult.error);
-    // }
+    if (res.error) {
+      console.error();
+      return err(res.error);
+    }
 
     return ok(null);
   }
