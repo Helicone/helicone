@@ -7,6 +7,7 @@ import { PostgrestError } from "@supabase/supabase-js";
 import HcButton from "../../../ui/hcButton";
 import { Select, SelectItem, TextInput } from "@tremor/react";
 import { getJawnClient } from "../../../../lib/clients/jawn";
+import { useTranslation } from "react-i18next";
 
 export const COMPANY_SIZES = ["Just me", "2-5", "5-25", "25-100", "100+"];
 
@@ -30,9 +31,19 @@ const CreateOrg = (props: CreateOrgProps) => {
     orgContext?.currentOrg?.size ?? ""
   );
   const [referralCode, setReferralCode] = useState<string>("");
-  const supabaseClient = useSupabaseClient<Database>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useNotification();
+  const { t } = useTranslation();
+
+  const referralOptions = [
+    { value: "friend_referral", label: t("Friend (referral)") },
+    { value: "google", label: t("Google") },
+    { value: "twitter", label: t("Twitter") },
+    { value: "linkedin", label: t("LinkedIn") },
+    { value: "microsoft_startups", label: t("Microsoft for Startups") },
+    { value: "other", label: t("Other") },
+    { value: "product_hunt", label: t("Product Hunt") },
+  ];
 
   const handleOrgCreate = async () => {
     if (!user) return;
@@ -187,26 +198,19 @@ const CreateOrg = (props: CreateOrgProps) => {
                   id="org-referral"
                   name="org-referral"
                   required
-                  placeholder="Select referral source"
+                  placeholder={t("Select referral source")}
                   value={referralType}
                   onValueChange={(value) => setReferralType(value)}
                 >
-                  {[
-                    "Friend (referral)",
-                    "Google",
-                    "Twitter",
-                    "LinkedIn",
-                    "Microsoft for Startups",
-                    "Other",
-                  ].map((o) => (
-                    <SelectItem key={o} value={o}>
-                      {o}
+                  {referralOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
                     </SelectItem>
                   ))}
                 </Select>
               </div>
             </div>
-            {referralType === "Friend (referral)" && (
+            {referralType === "friend_referral" && (
               <div className="flex flex-col space-y-2">
                 <label
                   htmlFor="referral-code"
