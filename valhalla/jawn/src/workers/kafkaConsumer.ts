@@ -3,6 +3,7 @@ import {
   consume,
   consumeDlq,
   consumeScores,
+  consumeScoresDlq,
 } from "../lib/clients/kafkaConsumers/KafkaConsumer";
 
 parentPort?.once("message", (message) => {
@@ -17,6 +18,6 @@ parentPort?.once("message", (message) => {
     consumeScores();
   } else if (message === "start-scores-dlq") {
     console.log("Kafka scores DLQ consumer thread started!");
-    consumeScores(tue);
+    consumeScoresDlq();
   }
 });

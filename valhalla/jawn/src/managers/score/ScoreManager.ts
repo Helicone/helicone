@@ -101,7 +101,9 @@ export class ScoreManager extends BaseManager {
     }
   }
 
-  private async procesScores(scoresMessages: HeliconeScoresMessage[]): Promise<Result<null, string>> {
+  private async procesScores(
+    scoresMessages: HeliconeScoresMessage[]
+  ): Promise<Result<null, string>> {
     try {
       // Filter out duplicate scores messages and only keep the latest one
       const filteredMessages = Array.from(
@@ -130,6 +132,7 @@ export class ScoreManager extends BaseManager {
         return err(bumpedVersions.error);
       }
       const scoresScoreResult = await this.scoreStore.putScoresIntoClickhouse(
+        //@ts-ignore
         bumpedVersions.data.map((scoresMessage) => {
           return {
             requestId: scoresMessage.id,
