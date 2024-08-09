@@ -12,7 +12,7 @@ import { Topics } from "../KafkaProducer";
 import { generateKafkaConsumer } from "./client";
 import {
   DLQ_MESSAGES_PER_MINI_BATCH,
-  FEEDBACK_MESSAGES_PER_MINI_BATCH,
+  SCORES_MESSAGES_PER_MINI_BATCH,
   MESSAGES_PER_MINI_BATCH,
 } from "./constant";
 import { SettingsManager } from "../../../utils/settings";
@@ -338,7 +338,7 @@ export const consumeScores = async () => {
 
           const miniBatchSize =
             messagesPerMiniBatchSetting?.miniBatchSize ??
-            FEEDBACK_MESSAGES_PER_MINI_BATCH;
+            SCORES_MESSAGES_PER_MINI_BATCH;
 
           if (miniBatchSize <= 0) {
             return;
