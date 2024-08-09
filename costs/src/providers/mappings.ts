@@ -13,6 +13,7 @@ import { costs as openRouterCosts } from "./openrouter";
 import { costs as fireworksAICosts } from "./fireworks";
 import { costs as groqCosts } from "./groq";
 import { ModelRow } from "../interfaces/Cost";
+import { costs as qstashCosts } from "./qstash";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
@@ -175,6 +176,7 @@ export const providers: {
   {
     pattern: qstash,
     provider: "QSTASH",
+    costs: qstashCosts,
   },
 ];
 

@@ -8,7 +8,7 @@ import { buildRouter } from "./routers/routerFactory";
 import { AlertManager } from "./lib/managers/AlertManager";
 import { AlertStore } from "./lib/db/AlertStore";
 import { ClickhouseClientWrapper } from "./lib/db/ClickhouseWrapper";
-import { ProviderName } from "./packages/cost/providers/mappings";
+import { ProviderName, providers } from "./packages/cost/providers/mappings";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
