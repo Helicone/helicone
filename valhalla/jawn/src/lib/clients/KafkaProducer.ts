@@ -12,7 +12,8 @@ const KAFKA_PASSWORD = KAFKA_CREDS?.UPSTASH_KAFKA_PASSWORD;
 export type Topics =
   | "request-response-logs-prod-dlq"
   | "request-response-logs-prod"
-  | "helicone-scores-prod";
+  | "helicone-scores-prod"
+  | "helicone-scores-prod-dlq";
 
 export class KafkaProducer {
   private kafka: Kafka | null = null;

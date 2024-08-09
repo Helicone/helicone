@@ -197,26 +197,26 @@ export class ScoreManager extends BaseManager {
         }`
       );
 
-      // const kafkaProducer = new KafkaProducer();
-      // const kafkaResult = await kafkaProducer.sendScoresMessage(
-      //   scoresMessages,
-      //   "helicone-scores-prod"
-      // );
+      const kafkaProducer = new KafkaProducer();
+      const kafkaResult = await kafkaProducer.sendScoresMessage(
+        scoresMessages,
+        "helicone-scores-prod"
+      );
 
-      // if (kafkaResult.error) {
-      //   Sentry.captureException(new Error(kafkaResult.error), {
-      //     tags: {
-      //       type: "KafkaError",
-      //       topic: "helicone-scores-prod",
-      //     },
-      //     extra: {
-      //       batchId: batchContext.batchId,
-      //       partition: batchContext.partition,
-      //       offset: batchContext.lastOffset,
-      //       messageCount: batchContext.messageCount,
-      //     },
-      //   });
-      // }
+      if (kafkaResult.error) {
+        Sentry.captureException(new Error(kafkaResult.error), {
+          tags: {
+            type: "KafkaError",
+            topic: "helicone-scores-prod-dlq",
+          },
+          extra: {
+            batchId: batchContext.batchId,
+            partition: batchContext.partition,
+            offset: batchContext.lastOffset,
+            messageCount: batchContext.messageCount,
+          },
+        });
+      }
       return err(result.error);
     }
     console.log("Successfully processed scores messages");
