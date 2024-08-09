@@ -77,7 +77,7 @@ const useRequestsPageV2 = (
     operator: "and",
   };
 
-  const { requests, count, isBodyLoading } = useGetRequests(
+  const { requests, count, isBodyLoading, refetch, remove } = useGetRequests(
     currentPage,
     currentPageSize,
     filter,
@@ -99,8 +99,8 @@ const useRequestsPageV2 = (
     isBodyLoading: isBodyLoading,
     isCountLoading: count.isLoading,
     properties,
-    refetch: requests.refetch,
-    remove: requests.remove,
+    refetch: refetch,
+    remove: remove,
     searchPropertyFilters,
     filterMap,
     filter,

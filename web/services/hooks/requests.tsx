@@ -62,6 +62,8 @@ const useGetRequests = (
   return {
     requests:
       (requestBodies.data?.data?.length ?? 0) > 0 ? requestBodies : requests,
+    refetch: requests.refetch,
+    remove: requests.remove,
     isBodyLoading:
       requestBodies.isLoading || (requestBodies.data?.data?.length ?? 0) === 0,
     count: useQuery({
