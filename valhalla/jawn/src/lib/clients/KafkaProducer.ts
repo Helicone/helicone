@@ -60,7 +60,7 @@ export class KafkaProducer {
       return ok("Kafka is not initialized");
     }
 
-    const p = this.kafka.producer();
+    const producer = this.kafka.producer();
 
     let attempts = 0;
     const maxAttempts = 3;
@@ -76,7 +76,7 @@ export class KafkaProducer {
           };
         });
 
-        const res = await p.produceMany(data);
+        const res = await producer.produceMany(data);
 
         console.log(`Produced ${msgs.length} messages to ${topic}`);
         return ok(`Produced ${res.length} messages`);
@@ -103,7 +103,7 @@ export class KafkaProducer {
       return ok("Kafka is not initialized");
     }
 
-    const p = this.kafka.producer();
+    const producer = this.kafka.producer();
 
     let attempts = 0;
     const maxAttempts = 3;
@@ -119,7 +119,7 @@ export class KafkaProducer {
           };
         });
 
-        const res = await p.produceMany(data);
+        const res = await producer.produceMany(data);
 
         console.log(`Produced ${scoresMessages.length} messages to ${topic}`);
         return ok(`Produced ${res.length} messages`);

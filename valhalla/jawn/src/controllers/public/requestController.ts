@@ -175,7 +175,7 @@ export class RequestController extends Controller {
     const scoreManager = new ScoreManager(request.authParams);
 
     const result = await scoreManager.addScores(requestId, requestBody.scores);
-    if (result.error || !result.data) {
+    if (result.error) {
       this.setStatus(500);
       return err("Error adding scores to request.");
     } else {

@@ -15,90 +15,62 @@ export interface ScoreRequest {
 
 export class ScoreManager extends BaseManager {
   private scoreStore: ScoreStore;
+  private kafkaProducer: KafkaProducer;
   constructor(authParams: AuthParams) {
     super(authParams);
     this.scoreStore = new ScoreStore(authParams.organizationId);
+    this.kafkaProducer = new KafkaProducer();
   }
   public async addScores(
     requestId: string,
     scores: Scores
-  ): Promise<Result<string, string>> {
-    const res = await this.addScoresToRequest(requestId, scores);
-    if (res.error || !res.data) {
+  ): Promise<Result<null, string>> {
+    const mappedScores = this.mapScores(scores);
+    await this.scoreStore.putScoresIntoSupabase(requestId, mappedScores);
+    const res = await this.addBatchScores([
+      {
+        requestId,
+        scores: mappedScores,
+        organizationId: this.authParams.organizationId,
+        createdAt: new Date(),
+      },
+    ]);
+    if (res.error) {
       return err(`Error adding scores: ${res.error}`);
     }
-    return ok(res.data);
+    return ok(null);
   }
 
-  private async addScoresToRequest(
-    requestId: string,
-    scores: Scores
-  ): Promise<Result<string, string>> {
-    try {
-      const mappedScores = this.mapScores(scores);
-      const supabaseRequest = await this.scoreStore.putScoresIntoSupabase(
-        requestId,
-        mappedScores
-      );
-
-      if (supabaseRequest.error || !supabaseRequest.data) {
-        return err(supabaseRequest.error);
-      }
-
-      const requestInClickhouse = await this.addScoresToClickhouse(
-        requestId,
-        mappedScores
-      );
-
-      if (requestInClickhouse.error || !requestInClickhouse.data) {
-        return requestInClickhouse;
-      }
-
-      return { data: "Scores added to Clickhouse successfully", error: null };
-    } catch (error: any) {
-      return err(error.message);
-    }
-  }
-
-  public async addScoresToClickhouse(
-    requestId: string,
-    mappedScores: Score[]
-  ): Promise<Result<string, string>> {
-    try {
-      const request = await this.scoreStore.bumpRequestVersion([
+  public async addBatchScores(
+    scoresMessage: HeliconeScoresMessage[]
+  ): Promise<Result<null, string>> {
+    if (!this.kafkaProducer.isKafkaEnabled()) {
+      console.log("Kafka is not enabled. Using feedback manager");
+      const scoreManager = new ScoreManager({
+        organizationId: this.authParams.organizationId,
+      });
+      return await scoreManager.handleScores(
         {
-          id: requestId,
-          organizationId: this.authParams.organizationId,
+          batchId: "",
+          partition: 0,
+          lastOffset: "",
+          messageCount: 1,
         },
-      ]);
-
-      if (request.error || !request.data) {
-        return err(request.error);
-      }
-
-      if (request.data.length === 0) {
-        return err(`Request not found: ${requestId}`);
-      }
-
-      const requestInClickhouse = await this.scoreStore.putScoresIntoClickhouse(
-        [
-          {
-            requestId: request.data[0].id,
-            organizationId: this.authParams.organizationId,
-            provider: request.data[0].provider,
-            version: request.data[0].version,
-            mappedScores,
-          },
-        ]
+        scoresMessage
       );
-
-      if (requestInClickhouse.error || !requestInClickhouse.data) {
-        return requestInClickhouse;
-      }
-      return { data: "Scores added to Clickhouse successfully", error: null };
-    } catch {
-      return err("Error adding scores to Clickhouse");
     }
+    console.log("Sending feedback message to Kafka");
+
+    const res = await this.kafkaProducer.sendScoresMessage(
+      scoresMessage,
+      "helicone-scores-prod"
+    );
+
+    if (res.error) {
+      console.error();
+      return err(res.error);
+    }
+    return ok(null);
   }
 
   private async procesScores(
@@ -203,7 +175,7 @@ export class ScoreManager extends BaseManager {
       const kafkaProducer = new KafkaProducer();
       const kafkaResult = await kafkaProducer.sendScoresMessage(
         scoresMessages,
-        "helicone-scores-prod"
+        "helicone-scores-prod-dlq"
       );
 
       if (kafkaResult.error) {

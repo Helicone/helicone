@@ -162,34 +162,11 @@ export class RequestManager extends BaseManager {
       ],
       createdAt: new Date(),
     };
-    if (!kafkaProducer.isKafkaEnabled()) {
-      console.log("Kafka is not enabled. Using feedback manager");
-      const scoreManager = new ScoreManager({
-        organizationId: this.authParams.organizationId,
-      });
-      return await scoreManager.handleScores(
-        {
-          batchId: "",
-          partition: 0,
-          lastOffset: "",
-          messageCount: 1,
-        },
-        [feedbackMessage]
-      );
-    }
-    console.log("Sending feedback message to Kafka");
+    const scoreManager = new ScoreManager({
+      organizationId: this.authParams.organizationId,
+    });
 
-    const res = await kafkaProducer.sendScoresMessage(
-      [feedbackMessage],
-      "helicone-scores-prod"
-    );
-
-    if (res.error) {
-      console.error();
-      return err(res.error);
-    }
-
-    return ok(null);
+    return await scoreManager.addBatchScores([feedbackMessage]);
   }
 
   private addScoreFilter(isScored: boolean, filter: FilterNode): FilterNode {
