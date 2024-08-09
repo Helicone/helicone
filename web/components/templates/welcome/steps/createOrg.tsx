@@ -40,8 +40,8 @@ const CreateOrg = (props: CreateOrgProps) => {
     { value: "twitter", label: t("Twitter") },
     { value: "linkedin", label: t("LinkedIn") },
     { value: "microsoft_startups", label: t("Microsoft for Startups") },
-    { value: "other", label: t("Other") },
     { value: "product_hunt", label: t("Product Hunt") },
+    { value: "other", label: t("Other") },
   ];
 
   const handleOrgCreate = async () => {
