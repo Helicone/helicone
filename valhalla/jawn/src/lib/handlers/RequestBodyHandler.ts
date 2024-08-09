@@ -65,7 +65,11 @@ export class RequestBodyHandler extends AbstractLogHandler {
       console.log("No request body found");
       return {
         body: {},
-        model: getModelFromRequest("{}", log.request.path),
+        model: getModelFromRequest(
+          "{}",
+          log.request.path,
+          log.request.targetUrl
+        ),
       };
     }
 
@@ -73,7 +77,8 @@ export class RequestBodyHandler extends AbstractLogHandler {
 
     const requestModel = getModelFromRequest(
       parsedRequestBody,
-      log.request.path
+      log.request.path,
+      log.request.targetUrl
     );
 
     parsedRequestBody = context.message.heliconeMeta.omitRequestLog

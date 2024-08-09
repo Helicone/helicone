@@ -988,7 +988,8 @@
 					"COHERE",
 					"MISTRAL",
 					"DEEPINFRA",
-					"QSTASH"
+					"QSTASH",
+					"FIRECRAWL"
 				]
 			},
 			"Provider": {
