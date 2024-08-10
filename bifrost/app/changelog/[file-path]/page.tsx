@@ -37,7 +37,8 @@ export default async function Home({
   }
 
   const { content, frontmatter } = contentResult;
-  const date = filePath.split("-")[0];
+  // ex: c20240723-helicone-api-v1-release.mdx
+  const date = filePath.slice(1, 9);
   // 20240723
   const dateObject = new Date(
     Number(date.slice(0, 4)),
