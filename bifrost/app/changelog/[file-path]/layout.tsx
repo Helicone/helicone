@@ -21,11 +21,15 @@ const readMetaData = async (
   );
   const jsonPath = path.join(basePath, "metadata.json");
 
+  console.log(`Attempting to read metadata from: ${jsonPath}`);
+
   try {
     const jsonContent = await fs.readFile(jsonPath, "utf8");
-    return JSON.parse(jsonContent) as ChangelogMetaData;
+    const parsedContent = JSON.parse(jsonContent) as ChangelogMetaData;
+    console.log(`Successfully read metadata: ${JSON.stringify(parsedContent)}`);
+    return parsedContent;
   } catch (error) {
-    console.error("Error loading metadata:", error);
+    console.error(`Error loading metadata for ${filePath}:`, error);
     return null;
   }
 };
@@ -36,32 +40,43 @@ export async function generateMetadata({
   params: { "file-path": string };
 }): Promise<Metadata> {
   const filePath = params["file-path"];
-  const heliconMetaData = await readMetaData(filePath);
+  console.log(`Generating metadata for file path: ${filePath}`);
 
-  if (!heliconMetaData) {
+  try {
+    const heliconMetaData = await readMetaData(filePath);
+
+    if (!heliconMetaData) {
+      console.warn(`No metadata found for ${filePath}`);
+      return {};
+    }
+
+    const metadata: Metadata = {
+      title: heliconMetaData.title,
+      description: heliconMetaData.description,
+      icons: "https://www.helicone.ai/static/logo.webp",
+      openGraph: {
+        type: "website",
+        siteName: "Helicone.ai",
+        title: heliconMetaData.title ?? "",
+        url: `https://www.helicone.ai/changelog/${filePath}`,
+        description: heliconMetaData.description ?? "",
+        images: `https://www.helicone.ai/static/changelog/images/${filePath}.webp`,
+        locale: "en_US",
+      },
+      twitter: {
+        title: heliconMetaData.title ?? "",
+        description: heliconMetaData.description ?? "",
+        card: "summary_large_image",
+        images: `https://www.helicone.ai/static/changelog/images/${filePath}.webp`,
+      },
+    };
+
+    console.log(`Generated metadata: ${JSON.stringify(metadata)}`);
+    return metadata;
+  } catch (error) {
+    console.error(`Error in generateMetadata for ${filePath}:`, error);
     return {};
   }
-
-  return {
-    title: heliconMetaData.title,
-    description: heliconMetaData.description,
-    icons: "https://www.helicone.ai/static/logo.webp",
-    openGraph: {
-      type: "website",
-      siteName: "Helicone.ai",
-      title: heliconMetaData.title ?? "",
-      url: `https://www.helicone.ai/changelog/${filePath}`,
-      description: heliconMetaData.description ?? "",
-      images: `https://www.helicone.ai/static/changelog/images/${filePath}.webp`,
-      locale: "en_US",
-    },
-    twitter: {
-      title: heliconMetaData.title ?? "",
-      description: heliconMetaData.description ?? "",
-      card: "summary_large_image",
-      images: `https://www.helicone.ai/static/changelog/images/${filePath}.webp`,
-    },
-  };
 }
 
 export default function RootLayout({
