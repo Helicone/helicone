@@ -1,4 +1,4 @@
-import { getMetadata } from "@/components/templates/changelog/getMetaData";
+import { getMetadata } from "../../../components/templates/changelog/getMetaData";
 import "@mintlify/mdx/dist/styles.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
