@@ -283,7 +283,7 @@ const blogContent: BlogStructure[] = [
       "Achieving high performance requires robust observability practices. In this blog, we will explore the key challenges of building with AI and the best practices to help you advance your AI development.",
     badgeText: "guide",
     date: "June 20, 2024",
-    href: "/blog/ai-best-practices",
+    href: "/blog/20240620-ai-best-practices",
     imageUrl: "/static/blog/ai-best-practices/cover.webp",
     authors: [
       {
