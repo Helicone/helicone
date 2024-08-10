@@ -3,10 +3,7 @@ import path from "path";
 import fs from "fs";
 import Link from "next/link";
 import { ChevronLeftIcon } from "@heroicons/react/20/solid";
-import { notFound } from "next/navigation";
-
 import "@mintlify/mdx/dist/styles.css";
-import { getMetadata } from "@/components/templates/blog/getMetaData";
 
 function getContent(filePath: string) {
   try {
@@ -29,19 +26,17 @@ export default async function Home({
   const changelogFolder = path.join(
     process.cwd(),
     "app",
-    "blog-2",
-    "blogs",
-    params["file-path"],
+    "changelog",
+    "changes",
+    filePath,
     "src.mdx"
   );
   const contentResult = await getContent(changelogFolder);
   if (!contentResult) {
-    notFound();
+    return <h1>Not found</h1>; // TODO RENDER 404
   }
 
-  const metadata = await getMetadata(filePath, "blog-2");
-
-  const { content } = contentResult;
+  const { content, frontmatter } = contentResult;
   const date = filePath.split("-")[0];
   // 20240723
   const dateObject = new Date(
@@ -62,7 +57,7 @@ export default async function Home({
             </div>
             <article className="prose w-full h-full">
               <h1 className="text-bold text-sky-500 mt-16 md:mt-0">
-                {String(metadata?.title)}
+                {String(frontmatter.title)}
               </h1>
               <h3 className="text-sm font-semibold text-gray-500">
                 {dateObject.toLocaleDateString("en-US", {
