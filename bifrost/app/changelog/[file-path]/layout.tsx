@@ -1,9 +1,7 @@
+import { getMetadata } from "@/components/templates/changelog/getMetaData";
 import "@mintlify/mdx/dist/styles.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { promises as fs } from "fs";
-import path from "path";
-import { getMetadata } from "@/components/templates/changelog/getMetaData";
 
 const inter = Inter({ subsets: ["latin"] });
 
