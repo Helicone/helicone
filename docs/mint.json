@@ -1,27 +1,9 @@
 {
   "name": "Helicone OSS LLM Observability",
-  "theme": "venus",
   "logo": {
     "light": "/logo/light.png",
     "dark": "/logo/dark.svg"
   },
-  "anchors": [
-    {
-      "name": "API References",
-      "icon": "code",
-      "url": "api-references"
-    },
-    {
-      "name": "Content",
-      "icon": "pencil",
-      "url": "content"
-    },
-    {
-      "name": "Contact us",
-      "icon": "envelope",
-      "url": "https://mintlify.com/contact-us"
-    }
-  ],
   "analytics": {
     "koala": {
       "publicApiKey": "pk_28dd6b0bb95629a42e92bd526a1234a9fc79"
@@ -43,7 +25,7 @@
     "default": "light"
   },
   "topbarCtaButton": {
-    "name": "Console",
+    "name": "Sign In",
     "url": "https://us.helicone.ai/#:~:text=Discord-,Sign,-In"
   },
   "tabs": [
@@ -101,21 +83,17 @@
             "integrations/anthropic/python",
             "integrations/anthropic/langchain",
             "integrations/anthropic/curl"
-          ],
-          "icon": "alicorn",
-          "iconType": "solid"
+          ]
         },
         {
           "group": "Ollama",
-          "pages": ["integrations/ollama/javascript"],
-          "icon": "alicorn",
-          "iconType": "solid"
+          "pages": [
+            "integrations/ollama/javascript"
+          ]
         },
         {
           "group": "AWS Bedrock",
-          "pages": ["integrations/bedrock/javascript"],
-          "icon": "aws",
-          "iconType": "solid"
+          "pages": ["integrations/bedrock/javascript"]
         },
         {
           "group": "Gemini",
@@ -134,9 +112,7 @@
                 "integrations/gemini/vertex/curl"
               ]
             }
-          ],
-          "icon": "google",
-          "iconType": "solid"
+          ]
         },
         "getting-started/integration-method/vercelai",
         "getting-started/integration-method/anyscale",
@@ -172,7 +148,6 @@
     {
       "group": "Other Integrations",
       "pages": [
-        "other-integrations/ragas",
         "other-integrations/open-webui",
         "other-integrations/meta-gpt",
         "other-integrations/open-devin",
