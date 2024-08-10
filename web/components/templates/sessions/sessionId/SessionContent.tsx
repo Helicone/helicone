@@ -190,7 +190,7 @@ const SessionContent: React.FC<SessionContentProps> = ({
             )!
           )
         }
-        open={selectedRequestId !== ""}
+        open={selectedRequestId !== "" && currentTopView === "span"}
         setOpen={(open) => setSelectedRequestId("")}
         properties={[]}
       />
