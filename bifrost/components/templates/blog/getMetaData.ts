@@ -15,9 +15,16 @@ interface BlogStructureMetaData {
 }
 
 export async function getMetadata(
-  filePath: string
+  filePath: string,
+  blogFolder: string = "blog"
 ): Promise<BlogStructureMetaData | null> {
-  const basePath = path.join(process.cwd(), "app", "blog", "blogs", filePath);
+  const basePath = path.join(
+    process.cwd(),
+    "app",
+    blogFolder,
+    "blogs",
+    filePath
+  );
   const jsonPath = path.join(basePath, "metadata.json");
 
   console.log(`[Blog] Attempting to read metadata from: ${jsonPath}`);
