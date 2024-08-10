@@ -1,7 +1,7 @@
+import { getMetadata } from "../../../components/templates/changelog/getMetaData";
 import "@mintlify/mdx/dist/styles.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { getMetadata } from "@/components/templates/changelog/getMetaData";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,24 +18,25 @@ export async function generateMetadata({
 
     if (!heliconMetaData) {
       console.warn(`No metadata found for ${filePath}`);
+      return {};
     }
 
     const metadata: Metadata = {
-      title: heliconMetaData?.title,
-      description: heliconMetaData?.description,
+      title: heliconMetaData.title,
+      description: heliconMetaData.description,
       icons: "https://www.helicone.ai/static/logo.webp",
       openGraph: {
         type: "website",
         siteName: "Helicone.ai",
-        title: heliconMetaData?.title ?? "",
+        title: heliconMetaData.title ?? "",
         url: `https://www.helicone.ai/changelog/${filePath}`,
-        description: heliconMetaData?.description ?? "",
+        description: heliconMetaData.description ?? "",
         images: `https://www.helicone.ai/static/changelog/images/${filePath}.webp`,
         locale: "en_US",
       },
       twitter: {
-        title: heliconMetaData?.title ?? "",
-        description: heliconMetaData?.description ?? "",
+        title: heliconMetaData.title ?? "",
+        description: heliconMetaData.description ?? "",
         card: "summary_large_image",
         images: `https://www.helicone.ai/static/changelog/images/${filePath}.webp`,
       },
