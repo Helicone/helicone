@@ -29,7 +29,7 @@ export default async function Home({
   const changelogFolder = path.join(
     process.cwd(),
     "app",
-    "blog-2",
+    "changelog",
     "changes",
     params["file-path"],
     "src.mdx"
