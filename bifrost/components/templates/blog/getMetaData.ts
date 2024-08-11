@@ -16,13 +16,14 @@ interface BlogStructureMetaData {
 
 export async function getMetadata(
   filePath: string,
-  blogFolder: string = "blog"
+  blogFolder: string = "blog",
+  blogSubFolder: string = "blogs"
 ): Promise<BlogStructureMetaData | null> {
   const basePath = path.join(
     process.cwd(),
     "app",
     blogFolder,
-    "blogs",
+    blogSubFolder,
     filePath
   );
   const jsonPath = path.join(basePath, "metadata.json");
