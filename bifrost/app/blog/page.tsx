@@ -40,10 +40,10 @@ function metaDataToBlogStructure(
     title: metadata.title,
     description: metadata.description,
     badgeText: "insight",
-    date: metadata.date,
+    date: metadata?.date ?? "",
     href: `/blog/${folderName}`,
-    imageUrl: metadata.images,
-    time: metadata.time,
+    imageUrl: metadata?.images ?? "",
+    time: metadata?.time ?? "",
   };
 }
 
