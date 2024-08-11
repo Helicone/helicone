@@ -192,6 +192,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "redeem-promo-code",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "llm-stack-guide",
     },
   },
