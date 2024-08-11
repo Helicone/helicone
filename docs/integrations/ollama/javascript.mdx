@@ -3,6 +3,8 @@ title: "Ollama Javascript Integration"
 sidebarTitle: "JavaScript"
 description: "Use Helicone's JavaScript SDK to log your Ollama usage."
 "twitter:title": "Anthropic JavaScript SDK Integration - Helicone OSS LLM Observability"
+icon: "js"
+iconType: "solid"
 ---
 
 # Using the Helicone SDK (recommended)
@@ -56,18 +58,20 @@ description: "Use Helicone's JavaScript SDK to log your Ollama usage."
 
      <Step title="Go to the Helicone Requests pgae and see your request!">
      </Step>
+
 </Steps>
 
 ## Example: logging completion request
 
 The above example uses `phi3:mini` model and the `Chat Completion` interface. The same can be done with a regular `completion` request:
+
 ```typescript
 // ...
 const reqBody = {
-  "model": "llama3.1",
-  "prompt": "Why is the sky blue?",
-  "stream": false
-}
+  model: "llama3.1",
+  prompt: "Why is the sky blue?",
+  stream: false,
+};
 
 logger.registerRequest(reqBody);
 
@@ -76,12 +80,13 @@ const r = await fetch("http://localhost:11434/api/generate", {
   headers: {
     "Content-Type": "application/json",
   },
-  body: JSON.stringify(reqBody)
-})
+  body: JSON.stringify(reqBody),
+});
 
 logger.sendLog(res);
 ```
 
 # Resources
+
 - See [Logging Custom Models](/getting-started/integration-method/custom) to learn how to log _any_ model.
 - [Ollama API Reference](https://github.com/ollama/ollama/blob/main/docs/api.md)
