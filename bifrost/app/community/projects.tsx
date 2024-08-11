@@ -37,7 +37,7 @@ const TAGS: Record<string, ProjectTag> = {
     href: "",
   },
   customersupport: {
-    name: "Customer Support",
+    name: "Cgustomer Support",
     href: "",
   },
 };
@@ -117,7 +117,7 @@ const projects: Project[] = [
   {
     title: "Charm",
     description:
-      "Charm doubles your MQLs! It's an AI Sales Chatbot for B2B Growth & Marketing Teams. 1 line of code — 2x your conversion rate!",
+      "AI Sales Chatbot for B2B Growth & Marketing Teams. 1 line of code, double conversion rate.",
     usage:
       "Helicone has solved LLM observability for us. Integration was painless and now we can quickly see what's happening under the hood for requests & embeddings across all of our LLMs. Totally recommend.",
     creators: [
@@ -137,7 +137,7 @@ const projects: Project[] = [
   {
     title: "Dating Studio",
     description:
-      "Copilot for Dating Apps. Get a second opinion, ice breakers, funny lines, writing ideas and more right in your chats. Designed to elevate your chats, not replace them. Grow your skills, not your dependency. ",
+      "Copilot for Dating Apps. Designed to elevate your chats, not replace them.",
     usage:
       "Logging AI requests to unlock insights into how models are performing to optimize the experience and pick the best match for users' tasks.",
     creators: [
@@ -153,7 +153,7 @@ const projects: Project[] = [
   {
     title: "Open Council Network",
     description:
-      "Open Council Network exists to make the decision making process of local government accessible to citizens. We listen to all of the meetings and decisions made by UK local councillors and send out easy-to-read emails each week explaining what they're doing, and how you can make your voice heard.",
+      "Make the decision making process of local government accessible to citizens.",
     usage:
       "We use LLMs to transcribe council meetings, extract data from them, and generate summaries and email updates. Helicone has been invaluable to monitor, track and optimise those queries, and to allow us to compare performance across different LLM providers, so that we don't feel locked in to any provider and can make effective decisions to optimise costs and performance.",
     creators: [
@@ -169,7 +169,7 @@ const projects: Project[] = [
   {
     title: "Haema",
     description:
-      "An AI mobile app to help people with diabetes learn how food and exercise affects their blood sugar.",
+      "Help people with diabetes learn how food and exercise affects their blood sugar.",
     usage:
       "We use Helicone to log all of the requests to our AI and we're using the logged data to directly improve our product.",
     creators: [
@@ -185,7 +185,7 @@ const projects: Project[] = [
   {
     title: "DemoFox",
     description:
-      "Instantly translates jargon and articulates business value, making inter-department communication hassle-free.",
+      "Translate jargon instantly, articulate business value, and make inter-department communication hassle-free.",
     usage:
       "We use Helicone to understand why a prompt fails to return valid data.",
     creators: [
@@ -270,7 +270,7 @@ const projects: Project[] = [
   {
     title: "PitchGhost",
     description:
-      "Help companies automatically find customers on social media by scanning and scraping Twitter, Reddit, LinkedIn, etc for posts and content that would make perfect sense for your brand or business to engage with.",
+      "Find customers on social media that your brand or business should engage with.",
     usage:
       "Our platform involves tons of calls to LLMs to read and digest all of the social media posts we scan through. Helicone has been invaluable to us in checking in and monitoring these systems and especially debugging LLM calls through the playground.",
     creators: [
@@ -287,7 +287,7 @@ const projects: Project[] = [
   {
     title: "mangosqueezy",
     description:
-      "An affiliate marketing platform where businesses connect with affiliates to grow their sales or audience. It's the first crypto-based affiliate marketing platform, which facilitates cross-border payments, real-time settlement in seconds, and zero processing fees.",
+      "The first crypto-based affiliate marketing platform to connect businesses with affiliates and grow their sales or audience.",
     usage:
       "We are using Helicone to monitor our LLM usage so we know how many tokens we have used and which countries the usage is coming from. Additionally, we plan to implement a user rate limiting feature soon.",
     creators: [
@@ -332,7 +332,7 @@ const projects: Project[] = [
   {
     title: "LinkedInFy",
     description:
-      "Automate your LinkedIn, there is no need to waste hrs on your LinkedIn to think about what to post AI will do it for you.",
+      "Automate your LinkedIn posts, free up your time.",
     usage: "To monitor different LLM model results and see prompts result.",
     creators: [
       {
