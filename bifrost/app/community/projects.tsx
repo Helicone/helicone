@@ -37,7 +37,7 @@ const TAGS: Record<string, ProjectTag> = {
     href: "",
   },
   customersupport: {
-    name: "Cgustomer Support",
+    name: "Customer Support",
     href: "",
   },
 };
@@ -77,7 +77,7 @@ const projects: Project[] = [
   {
     title: "DeAP Learning",
     description:
-      "AI personal tutors to help students feel excited and supported at every step in their educational journey.",
+      "An AI personal tutor that helps students feel excited and supported at every step on their educational journey.",
     usage:
       "Helicone is the perfect one-stop-shop for us to monitor all our our LLM queries. The observability & speed is unmatched for the price point.",
     creators: [
@@ -221,7 +221,7 @@ const projects: Project[] = [
   {
     title: "Reworkd",
     description: "The simplest way to extract structured web data.",
-    usage: "API logging and cost analysis.",
+    usage: "We are using Helicone for API logging and cost analysis.",
     creators: [
       {
         name: "Asim Shrestha",
@@ -237,7 +237,7 @@ const projects: Project[] = [
     title: "Jsonify",
     description:
       "Use AI to turn websites and documents into useful structured data. ",
-    usage: "Keep track of OpenAI metrics -- cost, latency, failures, etc.",
+    usage: "Helicone helps us keep track of OpenAI metrics -- cost, latency, failures, etc.",
     creators: [
       {
         name: "Paul Hunkin",
@@ -255,7 +255,7 @@ const projects: Project[] = [
   {
     title: "assistant-ui",
     description: "React components for AI chat.",
-    usage: "Get a detailed token cost breakdown per user.",
+    usage: "We use Helicone to get a detailed token cost breakdown per user.",
     creators: [
       {
         name: "Simon Farshid",
@@ -309,7 +309,7 @@ const projects: Project[] = [
     title: "Greptile",
     description: "AI expert on any codebase, as an API.",
     usage:
-      "Tracing and logging LLM calls to debug, track usage, manage costs, and prepare datasets for finetuning.",
+      "We use Helicone for tracing and logging LLM calls to debug, track usage, manage costs, and prepare datasets for finetuning.",
     creators: [
       {
         name: "Daksh Gupta",
@@ -333,7 +333,7 @@ const projects: Project[] = [
     title: "LinkedInFy",
     description:
       "Automate your LinkedIn posts, free up your time.",
-    usage: "To monitor different LLM model results and see prompts result.",
+    usage: "Helicone helps us monitor different LLM model results and see prompts result.",
     creators: [
       {
         name: "Abhishek",
@@ -447,6 +447,8 @@ export function Projects() {
                     {project.title}
                   </h2>
                   <p className="text-gray-500 text-sm">{project.description}</p>
+                  <br></br>
+                  <p className="text-sky-500 text-sm font-medium">"{project.usage}"</p>
                 </div>
               </Link>
 
