@@ -11,7 +11,7 @@ export async function generateMetadata({
   params: { "file-path": string };
 }): Promise<Metadata> {
   const filePath = params["file-path"];
-  const metadata = await getMetadata(filePath, "blog-2");
+  const metadata = await getMetadata(filePath, "blog-2", "changes");
   if (!metadata) {
     return {};
   }

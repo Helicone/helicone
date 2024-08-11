@@ -30,7 +30,7 @@ export default async function Home({
     process.cwd(),
     "app",
     "blog-2",
-    "blogs",
+    "changes",
     params["file-path"],
     "src.mdx"
   );
