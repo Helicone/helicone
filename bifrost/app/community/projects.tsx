@@ -32,6 +32,14 @@ const TAGS: Record<string, ProjectTag> = {
     name: "Civic Technology",
     href: "",
   },
+  automotive: {
+    name: "Automotive",
+    href: "",
+  },
+  customersupport: {
+    name: "Customer Support",
+    href: "",
+  },
 };
 
 interface Project {
@@ -50,6 +58,62 @@ interface Project {
 }
 
 const projects: Project[] = [
+  {
+    title: "Chatwith",
+    description:
+      "Instantly answer questions with your custom no-code AI chatbot.",
+    usage:
+      "I love the extra insight Helicone gives me into my LLM usage. I appreciate both the big picture overview and the opportunity to drill into every request. It helps me keep my product stable & performant and optimize the costs.",
+    creators: [
+      {
+        name: "Rafal Zawadzki",
+        href: "https://x.com/rafal_makes",
+      },
+    ],
+    imageHref: "/static/community/projects/chatwith.webp", // <- change this
+    tags: [TAGS.customersupport],
+    href: "https://chatwith.tools",
+  },
+  {
+    title: "DeAP Learning",
+    description:
+      "AI personal tutors to help students feel excited and supported at every step in their educational journey.",
+    usage:
+      "Helicone is the perfect one-stop-shop for us to monitor all our our LLM queries. The observability & speed is unmatched for the price point.",
+    creators: [
+      {
+        name: "Anish Anne",
+        href: "https://www.linkedin.com/in/anish-anne",
+      },
+      {
+        name: "Neil Shah",
+        href: "https://www.linkedin.com/in/n-shah/",
+      },
+      {
+        name: "Harry Fazzone",
+        href: "https://www.linkedin.com/in/harry-fazzone-6ab0a0240/",
+      },
+    ],
+    imageHref: "/static/community/projects/deaplearning.webp", // <- change this
+    tags: [TAGS.education],
+    href: "https://deaplearning.com",
+  },
+  {
+    title: "elcerokm",
+    description:
+      "Connect car dealerships with car buyers.",
+    usage:
+      "We built a chatbot to capture leads and help users find the best car in the market. Helicone helps us monitor the expenses.",
+    creators: [
+      {
+        name: "Maria Bernardez",
+        href: "https://www.linkedin.com/in/angelesbernardez/",
+      },
+    ],
+    imageHref: "/static/community/projects/elcerokm.webp", // <- change this
+    tags: [TAGS.automotive],
+    href: "https://elcerokm.com",
+  },
   {
     title: "Charm",
     description:
