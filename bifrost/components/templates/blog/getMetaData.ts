@@ -7,9 +7,9 @@ interface BlogStructureMetaData {
   title2?: string;
   description: string;
   shortDescription?: string;
-  images: string;
-  time: string;
-  date: string;
+  images?: string;
+  time?: string;
+  date?: string;
   author?: string;
   authors?: string[];
 }
