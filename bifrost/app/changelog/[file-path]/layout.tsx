@@ -17,13 +17,13 @@ export async function generateMetadata({
   }
 
   return {
-    title: metadata?.title1 ?? "",
+    title: metadata?.title ?? "",
     description: metadata?.description ?? "",
     icons: "https://www.helicone.ai/static/logo.webp",
     openGraph: {
       type: "website",
       siteName: "Helicone.ai",
-      title: metadata.title2 ?? "",
+      title: metadata.title ?? "",
       url: `https://www.helicone.ai/changelog/${filePath}`,
       description: metadata.description ?? "",
       images:

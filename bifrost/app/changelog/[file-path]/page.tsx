@@ -39,7 +39,7 @@ export default async function Home({
     notFound();
   }
 
-  const metadata = await getMetadata(filePath, "blog-2");
+  const metadata = await getMetadata(filePath, "changelog", "changes");
 
   const { content } = contentResult;
   const date = filePath.split("-")[0];
