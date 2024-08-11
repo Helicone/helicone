@@ -17,7 +17,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: metadata?.title ?? "",
+    title: metadata?.title2 ?? metadata.title ?? "",
     description: metadata?.description ?? "",
     icons: "https://www.helicone.ai/static/logo.webp",
     openGraph: {

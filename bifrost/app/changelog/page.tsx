@@ -1,3 +1,4 @@
+import { getMetadata } from "@/components/templates/blog/getMetaData";
 import { getCompiledServerMdx } from "@mintlify/mdx";
 import "@mintlify/mdx/dist/styles.css";
 import fs from "fs";
@@ -43,10 +44,11 @@ const getChangeMdxs = async () => {
           path.join(process.cwd(), "public", imagePath)
         );
       }
+      const metadata = await getMetadata(folder, "changelog", "changes");
 
       return {
         path: fullPath,
-        frontmatter,
+        title: metadata?.title ?? "",
         link: path.join("/changelog", folder),
         folder,
         content,
@@ -69,7 +71,7 @@ export default async function Home() {
           .map(
             (
               {
-                frontmatter,
+                title,
                 date,
                 path,
                 link,
@@ -110,7 +112,7 @@ export default async function Home() {
                       </div>
                     )}
                     <h1 className="text-sky-500 mt-16 md:mt-0 font-semibold">
-                      {String(frontmatter.title)}
+                      {String(title)}
                     </h1>
                   </Link>
                   <p>{content}</p>
