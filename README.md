@@ -46,7 +46,7 @@
 
 1. Get your `write-only` API key by signing up [here](helicone.ai/signup).
 
-2. Add the following to your code:
+2. Update only the `baseURL` in your code:
 
    ```typescript
    import OpenAI from "openai";
