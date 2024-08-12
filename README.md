@@ -71,6 +71,8 @@ The fastest and most reliable way to get started with Helicone. Get started for 
 
 ### Self-Hosting Open Source LLM Observability with Helicone
 
+#### Docker
+
 Helicone is simple to self-host and update. To get started locally, just use our [docker-compose](https://docs.helicone.ai/getting-started/self-deploy-docker) file.
 
 ```bash
@@ -83,7 +85,15 @@ cp .env.example .env
 docker compose up
 ```
 
+#### Helm
+
 For Enterprise workloads, we also have a production-ready Helm chart available. To access, contact us at enterprise@helicone.ai.
+
+#### Manual (Not Recommended)
+
+Manual deployment is not recommended. Please use Docker or Helm. If you must, follow the instructions [here](https://docs.helicone.ai/getting-started/self-deploy).
+
+#### Architecture
 
 Helicone is comprised of five services:
 
@@ -144,108 +154,6 @@ If you have any questions, contact help@helicone.ai or join [discord](https://di
 | [Dify](https://docs.helicone.ai/other-integrations/dify)                       | LLMOps platform for AI-native application development   |
 
 > This list may be out of date. Don't see your provider or framework? Check out the latest integrations in our [docs](https://docs.helicone.ai/getting-started/quick-start). If not found there, request a new integration by contacting help@helicone.ai.
-
-<!-- ## Install Wrangler and Yarn
-
-```bash
-nvm install 18.18.0
-nvm use 18.18.0
-npm install -g wrangler
-npm install -g yarn
-```
-
-## Install [Supabase CLI](https://supabase.com/docs/guides/cli)
-
-```bash
-brew install supabase/tap/supabase
-```
-
-## Install and setup ClickHouse
-
-```bash
-# This will start clickhouse locally
-python3 clickhouse/ch_hcone.py --start
-```
-
-## Install and setup MinIO
-
-```bash
-# Install minio globally
-python3 -m pip install minio
-
-# Start minio
-python3 minio_hcone.py --restart
-
-# Minio Dashboard will be available at http://localhost:9001
-# Default credentials:
-# Username: minioadmin
-# Password: minioadmin
-```
-
-## Run all services
-
-```bash
-cd web
-
-# start supabase to collect logs metadata
-supabase start
-
-# start frontend
-yarn
-yarn dev:local
-
-# start workers for proxying requests
-# in another terminal
-cd worker
-yarn
-chmod +x run_all_workers.sh
-./run_all_workers.sh
-
-# start jawn (for serving the FE, collecting logs and handling API requests)
-cd valhalla/jawn
-cp .env.example .env
-yarn && yarn dev
-
-# Make your request to local host
-curl --request POST \
-  --url http://127.0.0.1:8787/v1/chat/completions \
-  --header 'Authorization: Bearer <KEY>' \
-  --data '{
-	"model": "gpt-4o-mini",
-	"messages": [
-		{
-			"role": "user",
-			"content": "What is the UNIX Epoch?"
-		}
-	],
-	"temperature": 1,
-	"max_tokens": 7
-}'
-
-# Now you can go to localhost:3000 and create an account and see your request.
-# When creating an account on localhost, you will automatically be signed in.
-```
-
-## Setup `.env` file
-
-Make sure your .env file is in `web/.env`. Here is an example:
-
-```bash
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=""
-STRIPE_SECRET_KEY=""
-NEXT_PUBLIC_HELICONE_BILLING_PORTAL_LINK=""
-NEXT_PUBLIC_HELICONE_CONTACT_LINK="https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call"
-STRIPE_PRICE_ID=""
-STRIPE_STARTER_PRICE_ID=""
-STRIPE_ENTERPRISE_PRODUCT_ID=""
-STRIPE_STARTER_PRODUCT_ID=""
-DATABASE_URL="postgresql://postgres:postgres@localhost:54322/postgres"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
-NEXT_PUBLIC_SUPABASE_URL="http://localhost:54321"
-SUPABASE_URL="http://localhost:54321"
-SUPABASE_SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
-NEXT_PUBLIC_HELICONE_JAWN_SERVICE="http://localhost:8585"
-``` -->
 
 ## Community 🌍
 
