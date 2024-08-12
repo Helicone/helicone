@@ -20,7 +20,7 @@ export const logInPostHog = (
   const start = Date.now();
   const postHogClient = newPostHogClient();
   postHogClient?.capture({
-    distinctId: uuid(),
+    distinctId: authParams?.organizationId ?? "unknown",
     event: "jawn_http_request",
   });
 
@@ -29,7 +29,7 @@ export const logInPostHog = (
 
     try {
       postHogClient?.capture({
-        distinctId: uuid(),
+        distinctId: authParams?.organizationId ?? "unknown",
         event: "jawn_http_request",
         properties: {
           method: reqParams.method,
