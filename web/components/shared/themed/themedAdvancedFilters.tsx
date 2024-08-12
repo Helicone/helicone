@@ -328,11 +328,19 @@ export function AdvancedFilterRow({
           )}
         </div>
         {(filterMap[filter.filterMapIdx]?.column === "request_body" ||
-          filterMap[filter.filterMapIdx]?.column === "response_body" ||
-          filterMap[filter.filterMapIdx]?.column ===
-            "helicone-score-feedback") && (
+          filterMap[filter.filterMapIdx]?.column === "response_body") && (
           <BlackTooltip
-            title="Data for this filter is available since Aug 5, 2024 due to DB migration"
+            title="Data for this filter is available from August 5, 2024"
+            placement="top"
+            arrow
+          >
+            <InformationCircleIcon className="h-8 w-8 text-gray-500 inline" />
+          </BlackTooltip>
+        )}
+        {filterMap[filter.filterMapIdx]?.column ===
+          "helicone-score-feedback" && (
+          <BlackTooltip
+            title="Data for this filter is available from August 12, 2024"
             placement="top"
             arrow
           >
