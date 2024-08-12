@@ -100,8 +100,7 @@ const projects: Project[] = [
   },
   {
     title: "elcerokm",
-    description:
-      "Connect car dealerships with car buyers.",
+    description: "Connect car dealerships with car buyers.",
     usage:
       "We built a chatbot to capture leads and help users find the best car in the market. Helicone helps us monitor the expenses.",
     creators: [
@@ -146,7 +145,7 @@ const projects: Project[] = [
         href: "",
       },
     ],
-    imageHref: "/static/community/projects/dating-studio.webp", 
+    imageHref: "/static/community/projects/dating-studio.webp",
     tags: [TAGS.tech],
     href: "https://about.dating.studio/extension",
   },
@@ -237,7 +236,8 @@ const projects: Project[] = [
     title: "Jsonify",
     description:
       "Use AI to turn websites and documents into useful structured data. ",
-    usage: "Helicone helps us keep track of OpenAI metrics -- cost, latency, failures, etc.",
+    usage:
+      "Helicone helps us keep track of OpenAI metrics -- cost, latency, failures, etc.",
     creators: [
       {
         name: "Paul Hunkin",
@@ -331,9 +331,9 @@ const projects: Project[] = [
   },
   {
     title: "LinkedInFy",
-    description:
-      "Automate your LinkedIn posts, free up your time.",
-    usage: "Helicone helps us monitor different LLM model results and see prompts result.",
+    description: "Automate your LinkedIn posts, free up your time.",
+    usage:
+      "Helicone helps us monitor different LLM model results and see prompts result.",
     creators: [
       {
         name: "Abhishek",
@@ -448,24 +448,27 @@ export function Projects() {
                   </h2>
                   <p className="text-gray-500 text-sm">{project.description}</p>
                   <br></br>
-                  <p className="text-sky-500 text-sm font-medium">"{project.usage}"</p>
+                  <p className="text-sky-500 text-sm font-medium">
+                    {'"'}
+                    {project.usage}
+                    {'"'}
+                  </p>
                 </div>
               </Link>
 
               {/* Creators tag */}
               <div className={clsx("flex items-center")}>
                 {project.creators.map((creator, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center px-4 py-1"
-                  >
+                  <div key={i} className="flex items-center px-4 py-1">
                     <a
                       href={creator.href || undefined}
                       target={creator.href ? "_blank" : undefined}
                       rel={creator.href ? "noopener noreferrer" : undefined}
                       className={clsx(
                         "text-xs font-medium",
-                        creator.href ? "text-sky-500 hover:underline" : "text-gray-500"
+                        creator.href
+                          ? "text-sky-500 hover:underline"
+                          : "text-gray-500"
                       )}
                     >
                       {creator.name}
