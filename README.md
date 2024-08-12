@@ -1,27 +1,49 @@
-# Helicone
+<p align="center">
+  <img alt="heliconelogo" src="https://github.com/user-attachments/assets/895f1a0d-6eea-4b5c-81fa-10cab5855812" width="400">
+</p>
+<div align="center">
+  <table>
+    <tr>
+      <td align="center"><strong>🔍 Observability</strong></td>
+      <td align="center"><strong>🕸️ Agent Tracing</strong></td>
+      <td align="center"><strong>💬 Prompt Management</strong></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>📊 Evaluations</strong></td>
+      <td align="center"><strong>📚 Datasets</strong></td>
+      <td align="center"><strong>🎛️ Fine-tuning</strong></td>
+    </tr>
+  </table>
+</div>
+<p align="center">
+  <a href="https://docs.helicone.ai/">Docs</a> • <a href="https://discord.gg/zsSTcH2qhG">Discord</a> • <a href="https://us.helicone.ai/roadmap">Roadmap</a> • <a href="https://www.helicone.ai/changelog">Changelog</a> • <a href="https://github.com/helicone/helicone/issues">Bug reports</a>
+</p>
+<p align="center">
+<img src="https://github.com/user-attachments/assets/e16332e9-d642-427e-b3ce-1a74a17f7b2c" alt="Open Source">
+</a>
+<p align="center">
+  <em><a href="https://helicone.ai/demo">See Helicone in Action!</a></em>
+</p>
 
-[![](https://img.shields.io/badge/Visit%20Us-Helicone.ai-brightgreen)](https://helicone.ai)
-[![](https://img.shields.io/badge/View%20Documentation-Docs-yellow)](https://docs.helicone.ai/)
-[![](https://img.shields.io/badge/Join%20our%20community-Discord-blue)](https://discord.gg/zsSTcH2qhG)
-[![Twitter](https://img.shields.io/twitter/follow/Helicone_ai?style=social)](https://twitter.com/helicone_ai)
+<p align="center">
+  <a href='https://github.com/helicone/helicone/graphs/contributors'><img src='https://img.shields.io/github/contributors/helicone/helicone?style=flat-square' alt='Contributors' /></a>
+  <a href='https://github.com/helicone/helicone/stargazers'><img alt="GitHub stars" src="https://img.shields.io/github/stars/helicone/helicone?style=flat-square"/></a>
+  <a href='https://github.com/helicone/helicone/pulse'><img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/helicone/helicone?style=flat-square"/></a>
+  <a href='https://github.com/helicone/helicone/issues?q=is%3Aissue+is%3Aclosed'><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/helicone/helicone?style=flat-square"/></a>
+  <a href='https://www.ycombinator.com/companies/helicone'><img alt="Y Combinator" src="https://img.shields.io/badge/Y%20Combinator-Helicone-orange?style=flat-square"/></a>
+</p>
 
-## Open-source observability platform for LLMs
+## Helicone is the all-in-one, open-source LLM developer platform to build better LLM applications
 
-Helicone is an open-source observability platform for Language Learning Models (LLMs). It offers the following features:
-
-- 📝 Logs all of your requests to OpenAI (and other providers) in a user-friendly UI
-
-- 💾 Caching, custom rate limits, and retries
-
-- 📊 Track costs and latencies by users and custom properties
-
-- 🎮 Every log is a playground: iterate on prompts and chat conversations in a UI
-
-- 🚀 Share results and collaborate with your friends or teammates
-
-- 👍👎 APIs to log feedback and evaluate results
-
-- 📲 Sessions to group and visualize multi-step LLM interactions.
+- 🔌 **Integrate**: One-line of code to log all your requests to [OpenAI](https://docs.helicone.ai/integrations/openai/javascript), [Anthropic](https://docs.helicone.ai/integrations/anthropic/javascript), [LangChain](https://docs.helicone.ai/integrations/openai/langchain), [Gemini](https://docs.helicone.ai/integrations/gemini/api/javascript), [TogetherAI](https://docs.helicone.ai/getting-started/integration-method/together), [LlamaIndex](https://docs.helicone.ai/integrations/openai/llamaindex), [LiteLLM](https://docs.helicone.ai/getting-started/integration-method/litellm), [OpenRouter](https://docs.helicone.ai/getting-started/integration-method/openrouter), and [more](https://docs.helicone.ai/getting-started/quick-start)
+- 📊 **Observe**: Inspect and debug traces & [sessions](https://docs.helicone.ai/features/sessions) for agents, chatbots, document processing pipelines, and more
+- 📈 **Analyze**: Track metrics like [cost](https://docs.helicone.ai/faq/how-we-calculate-cost#developer), latency, quality, and more. Export to [PostHog](https://docs.helicone.ai/getting-started/integration-method/posthog) in one-line for custom dashboards
+- 🎮 **Playground**: Rapidly test and iterate on prompts, sessions and traces in our UI
+- 🧠 **Prompt Management**: [Version and experiment with prompts](https://docs.helicone.ai/features/prompts) using production data. Your prompts remain under your control, always accessible.
+- 🔍 **Evaluate**: Automatically run evals on traces or sessions using the latest platforms: [LastMile](https://lastmileai.dev/) or [Ragas](https://ragas.io/) (more coming soon)
+- 🎛️ **Fine-tune**: Fine-tune with one of our fine-tuning partners: [OpenPipe](https://openpipe.ai/) or [Autonomi](https://www.autonomi.ai/) (more coming soon)
+- 🛜 **Gateway**: [Caching](https://docs.helicone.ai/features/advanced-usage/caching), [custom rate limits](https://docs.helicone.ai/features/advanced-usage/custom-rate-limits), [LLM security](https://docs.helicone.ai/features/advanced-usage/llm-security), and more with our gateway
+- 🛡️ **Enterprise Ready**: SOC 2 and GDPR compliant
 
 # Quick Start ⚡️ Just add a Header
 
