@@ -106,8 +106,6 @@ Helicone is comprised of five services:
 - **ClickHouse**: Analytics Database
 - **Minio**: Object Storage for logs.
 
-If you have any questions, contact help@helicone.ai or join [discord](https://discord.gg/zsSTcH2qhG).
-
 ### LLM Observability Integrations
 
 ### Main Integrations
