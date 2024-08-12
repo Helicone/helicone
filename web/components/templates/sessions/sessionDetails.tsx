@@ -1,5 +1,10 @@
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { TextInput } from "@tremor/react";
+import {
+  ArrowPathIcon,
+  ChartPieIcon,
+  ListBulletIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
+import { BarChart, TextInput } from "@tremor/react";
 import { useRouter } from "next/router";
 import {
   getTimeIntervalAgo,
@@ -11,6 +16,23 @@ import ThemedTable from "../../shared/themed/table/themedTable";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { getTimeAgo } from "../../../lib/sql/timeHelpers";
 import { useEffect, useState } from "react";
+import { Row } from "../../layout/common";
+import ThemedTabSelector from "../../shared/themed/themedTabSelector";
+import { useSessionMetrics } from "../../../services/hooks/sessions";
+import { formatLargeNumber } from "../../shared/utils/numberFormat";
+
+const TABS = [
+  {
+    id: "sessions",
+    label: "Sessions",
+    icon: <ListBulletIcon className="w-4 h-4" />,
+  },
+  {
+    id: "metrics",
+    label: "Metrics",
+    icon: <ChartPieIcon className="w-4 h-4" />,
+  },
+];
 
 type TSessions = {
   created_at: string;
@@ -88,6 +110,11 @@ const SessionDetails = ({
     calculateMetadata();
   }, [sessions]);
 
+  const [currentTab, setCurrentTab] =
+    useState<(typeof TABS)[number]["id"]>("sessions");
+
+  const metrics = useSessionMetrics(selectedName);
+
   return (
     <Col className="space-y-4 min-w-0">
       <div>
@@ -100,7 +127,9 @@ const SessionDetails = ({
             <span className="font-semibold text-sky-500">
               {getTimeAgo(
                 new Date(
-                  lastUsedSession?.latest_request_created_at ?? Date.now()
+                  lastUsedSession?.latest_request_created_at
+                    ? lastUsedSession?.latest_request_created_at + "z"
+                    : Date.now()
                 )
               )}
             </span>
@@ -117,46 +146,103 @@ const SessionDetails = ({
           </li>
         </ul>
       </div>
-      <TextInput
-        icon={MagnifyingGlassIcon}
-        value={sessionIdSearch}
-        onValueChange={(value) => setSessionIdSearch(value)}
-        placeholder="Search session id..."
-      />
-      <ThemedTable
-        id="session-table"
-        defaultData={sessions || []}
-        defaultColumns={INITIAL_COLUMNS}
-        skeletonLoading={isLoading}
-        dataLoading={false}
-        sortable={sort}
-        timeFilter={{
-          currentTimeFilter: timeFilter,
-          defaultValue: "all",
-          onTimeSelectHandler: (key: TimeInterval, value: string) => {
-            if ((key as string) === "custom") {
-              const [startDate, endDate] = value.split("_");
 
-              const start = new Date(startDate);
-              const end = new Date(endDate);
-              setInterval(key);
-              setTimeFilter({
-                start,
-                end,
-              });
-            } else {
-              setInterval(key);
-              setTimeFilter({
-                start: getTimeIntervalAgo(key),
-                end: new Date(),
-              });
-            }
-          },
-        }}
-        onRowSelect={(row) => {
-          router.push(`/sessions/${row.session}`);
-        }}
-      />
+      <Row className="items-center justify-between gap-10">
+        <ThemedTabSelector
+          tabs={TABS}
+          currentTab={currentTab}
+          onTabChange={(tabId) =>
+            setCurrentTab(tabId as (typeof TABS)[number]["id"])
+          }
+        />
+        <TextInput
+          icon={MagnifyingGlassIcon}
+          value={sessionIdSearch}
+          onValueChange={(value) => setSessionIdSearch(value)}
+          placeholder="Search session id..."
+        />
+      </Row>
+      {currentTab === "sessions" ? (
+        <ThemedTable
+          id="session-table"
+          defaultData={sessions || []}
+          defaultColumns={INITIAL_COLUMNS}
+          skeletonLoading={isLoading}
+          dataLoading={false}
+          sortable={sort}
+          timeFilter={{
+            currentTimeFilter: timeFilter,
+            defaultValue: "all",
+            onTimeSelectHandler: (key: TimeInterval, value: string) => {
+              if ((key as string) === "custom") {
+                const [startDate, endDate] = value.split("_");
+
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                setInterval(key);
+                setTimeFilter({
+                  start,
+                  end,
+                });
+              } else {
+                setInterval(key);
+                setTimeFilter({
+                  start: getTimeIntervalAgo(key),
+                  end: new Date(),
+                });
+              }
+            },
+          }}
+          onRowSelect={(row) => {
+            router.push(`/sessions/${row.session}`);
+          }}
+        />
+      ) : (
+        <Col>
+          <BarChart
+            data={metrics.metrics.session_count.map((sessionCount) => ({
+              range: `${sessionCount.range_start}-${sessionCount.range_end}`,
+              count: sessionCount.value,
+            }))}
+            index="range"
+            categories={["count"]}
+            colors={["blue"]}
+            valueFormatter={(value) => `${value} Sessions`}
+            yAxisWidth={48}
+            showLegend={false}
+          />
+          <BarChart
+            data={metrics.metrics.session_cost.map((sessionCost) => ({
+              range: `$${formatLargeNumber(
+                sessionCost.range_start ?? 0
+              )}-$${formatLargeNumber(sessionCost.range_end ?? 0)}`,
+              count: sessionCost.value,
+            }))}
+            index="range"
+            categories={["count"]}
+            colors={["blue"]}
+            valueFormatter={(value) => `$${value}`}
+            yAxisWidth={48}
+            showLegend={false}
+          />
+          <BarChart
+            data={metrics.metrics.session_duration.map((sessionDuration) => ({
+              range: `${formatLargeNumber(
+                (sessionDuration.range_start ?? 0) / 1000
+              )}s-${formatLargeNumber(
+                (sessionDuration.range_end ?? 0) / 1000
+              )}s`,
+              count: sessionDuration.value,
+            }))}
+            index="range"
+            categories={["count"]}
+            colors={["blue"]}
+            valueFormatter={(value) => `${value}s`}
+            yAxisWidth={48}
+            showLegend={false}
+          />
+        </Col>
+      )}
     </Col>
   );
 };

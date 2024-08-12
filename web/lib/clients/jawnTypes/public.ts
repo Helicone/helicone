@@ -15,6 +15,9 @@ export interface paths {
   "/v1/session/name/query": {
     post: operations["GetNames"];
   };
+  "/v1/session/metrics/query": {
+    post: operations["GetMetrics"];
+  };
   "/v1/user/metrics/query": {
     post: operations["GetUserMetrics"];
   };
@@ -175,6 +178,23 @@ export interface components {
       /** Format: double */
       timezoneDifference: number;
     };
+    HistogramRow: {
+      range_start: string;
+      range_end: string;
+      /** Format: double */
+      value: number;
+    };
+    SessionMetrics: {
+      session_count: components["schemas"]["HistogramRow"][];
+      session_duration: components["schemas"]["HistogramRow"][];
+      session_cost: components["schemas"]["HistogramRow"][];
+    };
+    ResultSuccess_SessionMetrics_: {
+      data: components["schemas"]["SessionMetrics"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SessionMetrics.string_": components["schemas"]["ResultSuccess_SessionMetrics_"] | components["schemas"]["ResultError_string_"];
     UserMetricsResult: {
       user_id: string;
       /** Format: double */
@@ -1092,6 +1112,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_SessionNameResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetMetrics: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SessionNameQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SessionMetrics.string_"];
         };
       };
     };

@@ -1,15 +1,20 @@
+import {
+  ArrowTurnDownRightIcon,
+  Bars3BottomRightIcon,
+  ChatBubbleLeftIcon,
+} from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { Session } from "../../../../lib/sessions/sessionTypes";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { useGetRequests } from "../../../../services/hooks/requests";
 import { Col } from "../../../layout/common/col";
+import ThemedTabSelector from "../../../shared/themed/themedTabSelector";
 import getNormalizedRequest from "../../requestsV2/builder/requestBuilder";
 import RequestDrawerV2 from "../../requestsV2/requestDrawerV2";
 import { BreadCrumb } from "./breadCrumb";
 import ChatSession from "./Chat/ChatSession";
 import { TraceSpan } from "./Span";
-import TabSelector from "./TabSelector";
 import TreeView from "./Tree/TreeView";
 
 interface SessionContentProps {
@@ -18,7 +23,23 @@ interface SessionContentProps {
   requests: ReturnType<typeof useGetRequests>;
 }
 
-const TABS = ["span", "tree", "chat"] as const;
+const TABS = [
+  {
+    id: "span",
+    label: "Span",
+    icon: <Bars3BottomRightIcon className="size-5" />,
+  },
+  {
+    id: "tree",
+    label: "Tree",
+    icon: <ArrowTurnDownRightIcon className="size-5" />,
+  },
+  {
+    id: "chat",
+    label: "Chat",
+    icon: <ChatBubbleLeftIcon className="size-5" />,
+  },
+] as const;
 
 const SessionContent: React.FC<SessionContentProps> = ({
   session,
@@ -33,7 +54,7 @@ const SessionContent: React.FC<SessionContentProps> = ({
 
   const [currentTopView, setCurrentTopView] = useLocalStorage(
     "currentTopView",
-    (view as (typeof TABS)[number]) ?? "tree"
+    (view as (typeof TABS)[number]["id"]) ?? "tree"
   );
 
   const startTime = useMemo(() => {
@@ -76,10 +97,12 @@ const SessionContent: React.FC<SessionContentProps> = ({
         startTime={startTime}
         endTime={endTime}
       />
-      <TabSelector
-        tabs={TABS}
-        currentTopView={currentTopView}
-        setCurrentTopView={setCurrentTopView}
+      <ThemedTabSelector
+        tabs={TABS as any}
+        currentTab={currentTopView}
+        onTabChange={(tabId) =>
+          setCurrentTopView(tabId as (typeof TABS)[number]["id"])
+        }
       />
 
       {currentTopView === "span" && (

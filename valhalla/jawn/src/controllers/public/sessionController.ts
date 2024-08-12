@@ -58,4 +58,21 @@ export class SessionController extends Controller {
     }
     return result;
   }
+
+  @Post("metrics/query")
+  public async getMetrics(
+    @Body()
+    requestBody: SessionNameQueryParams,
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    const sessionManager = new SessionManager(request.authParams);
+
+    const result = await sessionManager.getMetrics(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
 }

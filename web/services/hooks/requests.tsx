@@ -103,6 +103,7 @@ export const useGetFullRequest = (result: HeliconeRequest[]) => {
     requestBodies: useQuery({
       queryKey: ["requestsBodies", result],
       queryFn: async (query) => {
+        const result = query.queryKey[1] as HeliconeRequest[];
         const requests = await Promise.all(
           result.map(async (request: HeliconeRequest) => {
             if (request.signed_body_url) {
