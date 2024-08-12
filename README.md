@@ -264,3 +264,13 @@ We ❤️ our contributors! We warmly welcome contributions for documentation, i
 ## License
 
 Helicone is licensed under the [Apache v2.0 License](LICENSE).
+
+## Additional Resources
+
+- **Data Management**: Manage and export your Helicone data with our [API](https://docs.helicone.ai/rest/user/post-v1userquery).
+
+  - Guides: [ETL](https://docs.helicone.ai/use-cases/etl), [Request Exporting](https://docs.helicone.ai/use-cases/getting-user-requests)
+
+- **Data Ownership**: Learn about [Data Ownership and Autonomy](https://docs.helicone.ai/use-cases/data-autonomy)
+
+For more information, visit our [documentation](https://docs.helicone.ai/).
