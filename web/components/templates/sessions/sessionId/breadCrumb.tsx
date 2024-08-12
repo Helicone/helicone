@@ -1,6 +1,25 @@
 import { useState } from "react";
 import { getTimeAgo } from "../../../../lib/sql/timeHelpers";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
+import { formatLargeNumber } from "../../../shared/utils/numberFormat";
+
+function timeDiff(startTime: Date, endTime: Date): string {
+  const diff = endTime.getTime() - startTime.getTime();
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const milliseconds = diff % 1000;
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m ${seconds}s`;
+  } else if (hours == 0 && minutes > 0) {
+    return `${minutes}m ${seconds}s`;
+  } else if (hours == 0 && minutes == 0 && seconds == 0) {
+    return `${milliseconds}ms`;
+  } else {
+    return `${seconds}.${milliseconds}s`;
+  }
+}
 
 export const BreadCrumb = ({
   sessionId,
@@ -25,7 +44,6 @@ export const BreadCrumb = ({
 }) => {
   const [expanded, setExpanded] = useState(false);
 
-  console.log(startTime.getMilliseconds(), endTime.getMilliseconds());
   return (
     <div className="w-full h-full flex flex-col space-y-8">
       <div className="flex flex-row items-center justify-between">
@@ -69,12 +87,15 @@ export const BreadCrumb = ({
               {numTraces == 1 ? "" : "s"}
             </li>
             <li>
-              Total Cost: <span className="font-semibold">${sessionCost}</span>
+              Total Cost:{" "}
+              <span className="font-semibold">
+                ${formatLargeNumber(sessionCost)}
+              </span>
             </li>
             <li>
               Total Latency:{" "}
               <span className="font-semibold">
-                {endTime.getMilliseconds() - startTime.getMilliseconds()} ms
+                {timeDiff(startTime, endTime)}
               </span>
             </li>
 

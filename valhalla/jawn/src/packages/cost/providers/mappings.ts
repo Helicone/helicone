@@ -41,6 +41,8 @@ const cohere = /^https:\/\/api\.cohere\.ai/;
 const mistral = /^https:\/\/api\.mistral\.ai/;
 // https://api.deepinfra.com
 const deepinfra = /^https:\/\/api\.deepinfra\.com/;
+//https://qstash.upstash.io/llm
+const qstash = /^https:\/\/qstash\.upstash\.io/;
 
 export const providersNames = [
   "OPENAI",
@@ -63,6 +65,7 @@ export const providersNames = [
   "COHERE",
   "MISTRAL",
   "DEEPINFRA",
+  "QSTASH",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -168,6 +171,10 @@ export const providers: {
   {
     pattern: deepinfra,
     provider: "DEEPINFRA",
+  },
+  {
+    pattern: qstash,
+    provider: "QSTASH",
   },
 ];
 

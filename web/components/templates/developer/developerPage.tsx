@@ -1,21 +1,19 @@
 import {
-  LockClosedIcon,
   GlobeAltIcon,
-  CodeBracketSquareIcon,
   KeyIcon,
+  LockClosedIcon,
 } from "@heroicons/react/24/outline";
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react";
-import { useOrg } from "../../layout/organizationContext";
-import KeyPage from "../keys/keyPage";
-import GraphQLPage from "../graphql/graphqlPage";
-import WebhooksPage from "../webhooks/webhooksPage";
 import { useUser } from "@supabase/auth-helpers-react";
-import VaultPage from "../vault/vaultPage";
-import { useFeatureFlags } from "../../../services/hooks/featureFlags";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react";
 import Link from "next/link";
-import { ElementType } from "react";
 import { useRouter } from "next/router";
+import { ElementType } from "react";
+import { useFeatureFlags } from "../../../services/hooks/featureFlags";
+import { useOrg } from "../../layout/organizationContext";
 import AuthHeader from "../../shared/authHeader";
+import KeyPage from "../keys/keyPage";
+import VaultPage from "../vault/vaultPage";
+import WebhooksPage from "../webhooks/webhooksPage";
 
 interface DeveloperPageProps {
   defaultIndex?: number;
@@ -33,16 +31,11 @@ const tabs: {
   },
   {
     id: 1,
-    title: "GraphQL",
-    icon: CodeBracketSquareIcon,
-  },
-  {
-    id: 2,
     title: "Webhooks",
     icon: GlobeAltIcon,
   },
   {
-    id: 3,
+    id: 2,
     title: "Vault",
     icon: LockClosedIcon,
   },
@@ -92,11 +85,6 @@ const DeveloperPage = (props: DeveloperPageProps) => {
         <TabPanels>
           <TabPanel>
             <KeyPage />
-          </TabPanel>
-          <TabPanel>
-            <div className="p-4">
-              <GraphQLPage />
-            </div>
           </TabPanel>
           <TabPanel>
             <div className="p-4">

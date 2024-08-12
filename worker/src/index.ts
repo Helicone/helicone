@@ -232,6 +232,16 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
           GATEWAY_TARGET: "https://api.app.predibase.com",
         };
       }
+    } else if (hostParts[0].includes("qstash")) {
+      const pathname = new URL(request.url).pathname;
+      if (!pathname.startsWith("/llm")) {
+        throw new Error("QStash only accepts routes that start with /llm");
+      }
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://qstash.upstash.io",
+      };
     }
   }
 

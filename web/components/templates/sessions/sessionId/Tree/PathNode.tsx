@@ -60,7 +60,7 @@ export function PathNode(props: {
       <div className="flex items-center gap-2">
         {!closeChildren ? <MinusSign /> : <PlusSign />}
 
-        <div className="font-bold">/{node.name}</div>
+        <div className="font-bold">{node.name}</div>
         <div className="font-thin text-xs">{node.duration}</div>
       </div>
     </div>

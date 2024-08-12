@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../components/layout/organizationContext";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { getJawnClient } from "../../lib/clients/jawn";
-import { Result } from "../../lib/result";
+import { ok, Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
@@ -34,7 +34,6 @@ function processFilter(filter: any): any {
 
   return result;
 }
-import { getNormalizedRequests } from "../../components/templates/requestsV2/useRequestsPageV2";
 
 const useGetRequests = (
   currentPage: number,
@@ -45,90 +44,100 @@ const useGetRequests = (
   isLive: boolean = false
 ) => {
   const org = useOrg();
-  return {
-    requests: useQuery({
-      queryKey: [
-        "requestsData",
-        currentPage,
-        currentPageSize,
-        advancedFilter,
-        sortLeaf,
-        isCached,
-        org?.currentOrg?.id,
-      ],
-      queryFn: async (query) => {
-        const currentPage = query.queryKey[1] as number;
-        const currentPageSize = query.queryKey[2] as number;
-        const advancedFilter = query.queryKey[3];
-        const sortLeaf = query.queryKey[4];
-        const isCached = query.queryKey[5];
-        const orgId = query.queryKey[6] as string;
-        const jawn = getJawnClient(orgId);
-        const response = await jawn.POST("/v1/request/queryV2", {
-          body: {
-            filter: advancedFilter as any,
-            offset: (currentPage - 1) * currentPageSize,
-            limit: currentPageSize,
-            sort: sortLeaf as any,
-            isCached: isCached as any,
-          },
-        });
 
-        const result = response.data as Result<HeliconeRequest[], string>;
+  const requests = useQuery({
+    queryKey: [
+      "requestsData",
+      currentPage,
+      currentPageSize,
+      advancedFilter,
+      sortLeaf,
+      isCached,
+      org?.currentOrg?.id,
+    ],
+    queryFn: async (query) => {
+      const currentPage = query.queryKey[1] as number;
+      const currentPageSize = query.queryKey[2] as number;
+      const advancedFilter = query.queryKey[3];
+      const sortLeaf = query.queryKey[4];
+      const isCached = query.queryKey[5];
+      const orgId = query.queryKey[6] as string;
+      const jawn = getJawnClient(orgId);
+      const response = await jawn.POST("/v1/request/queryV2", {
+        body: {
+          filter: advancedFilter as any,
+          offset: (currentPage - 1) * currentPageSize,
+          limit: currentPageSize,
+          sort: sortLeaf as any,
+          isCached: isCached as any,
+        },
+      });
 
-        const requests = await Promise.all(
-          result.data?.map(async (request: HeliconeRequest) => {
-            if (request.signed_body_url) {
-              try {
-                const contentResponse = await fetch(request.signed_body_url);
-                if (contentResponse.ok) {
-                  const text = await contentResponse.text();
+      const result = response.data as Result<HeliconeRequest[], string>;
 
-                  let content = JSON.parse(text);
+      const requests = await Promise.all(
+        result.data?.map(async (request: HeliconeRequest) => {
+          if (request.signed_body_url) {
+            try {
+              const contentResponse = await fetch(request.signed_body_url);
+              if (contentResponse.ok) {
+                const text = await contentResponse.text();
 
-                  if (request.asset_urls) {
-                    content = placeAssetIdValues(request.asset_urls, content);
-                  }
+                let content = JSON.parse(text);
 
-                  request.request_body = content.request;
-                  request.response_body = content.response;
-
-                  const model =
-                    request.model_override ||
-                    request.response_model ||
-                    request.request_model ||
-                    content.response?.model ||
-                    content.request?.model ||
-                    content.response?.body?.model || // anthropic
-                    getModelFromPath(request.request_path) ||
-                    "";
-
-                  if (
-                    request.provider === "GOOGLE" &&
-                    model.toLowerCase().includes("gemini")
-                  ) {
-                    request.llmSchema = mapGeminiPro(
-                      request as HeliconeRequest,
-                      model
-                    );
-                  }
+                if (request.asset_urls) {
+                  content = placeAssetIdValues(request.asset_urls, content);
                 }
-              } catch (error) {
-                console.log(`Error fetching content: ${error}`);
-                return request;
-              }
-            }
-            return request; // Return request if no signed_body_url
-          }) ?? []
-        );
 
-        return { data: requests, error: null };
-      },
-      refetchOnWindowFocus: false,
-      retry: false,
-      refetchIntervalInBackground: false,
-      refetchInterval: isLive ? 2_000 : false,
-    }),
+                request.request_body = content.request;
+                request.response_body = content.response;
+
+                const model =
+                  request.model_override ||
+                  request.response_model ||
+                  request.request_model ||
+                  content.response?.model ||
+                  content.request?.model ||
+                  content.response?.body?.model || // anthropic
+                  getModelFromPath(request.request_path) ||
+                  "";
+
+                if (
+                  request.provider === "GOOGLE" &&
+                  model.toLowerCase().includes("gemini")
+                ) {
+                  request.llmSchema = mapGeminiPro(
+                    request as HeliconeRequest,
+                    model
+                  );
+                }
+              }
+            } catch (error) {
+              console.log(`Error fetching content: ${error}`);
+              return request;
+            }
+          }
+          return request; // Return request if no signed_body_url
+        }) ?? []
+      );
+
+      return { data: requests, error: null };
+    },
+    refetchOnWindowFocus: false,
+    retry: false,
+    refetchIntervalInBackground: false,
+    refetchInterval: isLive ? 2_000 : false,
+  });
+
+  const { requestBodies } = useGetFullRequest(requests.data?.data || []);
+
+  return {
+    requests:
+      (requestBodies.data?.data?.length ?? 0) > 0 ? requestBodies : requests,
+    refetch: requests.refetch,
+    remove: requests.remove,
+    isBodyLoading:
+      requestBodies.isLoading || (requestBodies.data?.data?.length ?? 0) === 0,
     count: useQuery({
       queryKey: [
         "requestsCount",
@@ -164,10 +173,7 @@ const useGetRequests = (
 export const useGetFullRequest = (result: HeliconeRequest[]) => {
   return {
     requestBodies: useQuery({
-      queryKey: [
-        "requestsBodies",
-        result,
-      ],
+      queryKey: ["requestsBodies", result],
       queryFn: async (query) => {
         const requests = await Promise.all(
           result.map(async (request: HeliconeRequest) => {
@@ -182,7 +188,6 @@ export const useGetFullRequest = (result: HeliconeRequest[]) => {
                   if (request.asset_urls) {
                     content = placeAssetIdValues(request.asset_urls, content);
                   }
-
 
                   const model =
                     request.model_override ||
@@ -205,9 +210,9 @@ export const useGetFullRequest = (result: HeliconeRequest[]) => {
                   }
 
                   return {
-                      ...request,
-                      request_body: content.request,
-                      response_body: content.response,
+                    ...request,
+                    request_body: content.request,
+                    response_body: content.response,
                   };
                 }
               } catch (error) {
@@ -215,15 +220,15 @@ export const useGetFullRequest = (result: HeliconeRequest[]) => {
                 return request;
               }
             }
-            console.log("no url");
             return request; // Return request if no signed_body_url
           }) ?? []
         );
 
-        return { data: getNormalizedRequests(requests), error: null };
+        return ok(requests);
       },
       refetchOnWindowFocus: false,
       retry: false,
+      keepPreviousData: true,
     }),
   };
 };
