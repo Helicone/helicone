@@ -182,3 +182,9 @@ Helicone is licensed under the [Apache v2.0 License](LICENSE).
 - **Data Ownership**: Learn about [Data Ownership and Autonomy](https://docs.helicone.ai/use-cases/data-autonomy)
 
 For more information, visit our [documentation](https://docs.helicone.ai/).
+
+# Contributors
+
+<a href="https://github.com/Helicone/helicone/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Helicone/helicone" />
+</a>
