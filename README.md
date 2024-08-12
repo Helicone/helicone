@@ -28,7 +28,7 @@
   <a href='https://www.ycombinator.com/companies/helicone'><img alt="Y Combinator" src="https://img.shields.io/badge/Y%20Combinator-Helicone-orange?style=flat-square"/></a>
 </p>
 
-## Helicone is the all-in-one, open-source LLM developer platform to build better LLM applications
+## Helicone is the all-in-one, open-source LLM developer platform
 
 - 🔌 **Integrate**: One-line of code to log all your requests to [OpenAI](https://docs.helicone.ai/integrations/openai/javascript), [Anthropic](https://docs.helicone.ai/integrations/anthropic/javascript), [LangChain](https://docs.helicone.ai/integrations/openai/langchain), [Gemini](https://docs.helicone.ai/integrations/gemini/api/javascript), [TogetherAI](https://docs.helicone.ai/getting-started/integration-method/together), [LlamaIndex](https://docs.helicone.ai/integrations/openai/llamaindex), [LiteLLM](https://docs.helicone.ai/getting-started/integration-method/litellm), [OpenRouter](https://docs.helicone.ai/getting-started/integration-method/openrouter), and [more](https://docs.helicone.ai/getting-started/quick-start)
 - 📊 **Observe**: Inspect and debug traces & [sessions](https://docs.helicone.ai/features/sessions) for agents, chatbots, document processing pipelines, and more
@@ -40,48 +40,110 @@
 - 🛜 **Gateway**: [Caching](https://docs.helicone.ai/features/advanced-usage/caching), [custom rate limits](https://docs.helicone.ai/features/advanced-usage/custom-rate-limits), [LLM security](https://docs.helicone.ai/features/advanced-usage/llm-security), and more with our gateway
 - 🛡️ **Enterprise Ready**: SOC 2 and GDPR compliant
 
-# Quick Start ⚡️ Just add a Header
+> 🎁 Generous monthly [free tier](https://www.helicone.ai/pricing) (100k requests/month) - No credit card required!
 
-Get your API key by signing up [here](https://helicone.ai).
+## Quick Start ⚡️ One line of code
 
-```typescript
-import OpenAI from "openai";
+1. Get your `write-only` API key by signing up [here](helicone.ai/signup).
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://oai.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-  },
-});
+2. Add the following to your code:
+
+   ```typescript
+   import OpenAI from "openai";
+
+   const openai = new OpenAI({
+     apiKey: process.env.OPENAI_API_KEY,
+     baseURL: `https://oai.helicone.ai/v1/${process.env.HELICONE_API_KEY}`,
+   });
+   ```
+
+3. 🎉 You're all set! View your logs at [Helicone](https://www.helicone.ai).
+
+> This quick start uses Helicone Cloud with OpenAI. For other providers or self-hosted options, see below.
+
+## Get Started For Free
+
+### Helicone Cloud (Recommended)
+
+The fastest and most reliable way to get started with Helicone. Get started for free at [Helicone US](https://us.helicone.ai/signup) or [Helicone EU](https://eu.helicone.ai/signup). Your first 100k requests are free every month, after which you'll [pay based on usage](https://www.helicone.ai/pricing). Try our [demo](https://helicone.ai/demo) to see Helicone in action!
+
+**Latency concerns?** [Helicone's Cloud offering](https://www.helicone.ai) is deployed on Cloudflare workers and ensures the lowest latency (~10ms) add-on to your API requests. View our [latency benchmarks](https://docs.helicone.ai/faq/latency-affect#latency-impact).
+
+### Self-Hosting Open Source LLM Observability with Helicone
+
+Helicone is simple to self-host and update. To get started locally, just use our [docker-compose](https://docs.helicone.ai/getting-started/self-deploy-docker) file.
+
+```bash
+# Clone the repository
+git clone https://github.com/Helicone/helicone.git
+cd docker
+cp .env.example .env
+
+# Start the services
+docker compose up
 ```
 
-👉 Then view your logs at [Helicone](https://www.helicone.ai).
+For Enterprise workloads, we also have a production-ready Helm chart available. To access, contact us at enterprise@helicone.ai.
 
-## Resources
+Helicone is comprised of five services:
 
-- [Langchain integration](https://python.langchain.com/docs/integrations/providers/helicone)
-- [LangchainJS integration](https://js.langchain.com/docs/ecosystem/integrations/helicone)
-- [Python package](https://github.com/Helicone/helicone/tree/main/helicone-python)
-- [Node.JS support](https://docs.helicone.ai/quickstart/integrate-in-less-than-a-minute)
-- [Developer docs](https://docs.helicone.ai/quickstart/integrate-in-less-than-a-minute)
-
-# Local Setup 💻
-
-Helicone's [cloud offering](https://www.helicone.ai) is deployed on Cloudflare and ensures the lowest latency add-on to your API requests.
-
-To get started locally, Helicone is comprised of five services:
-
-- Web: Frontend Platform (NextJS)
-- Worker: Proxy Logging (Cloudflare Workers)
-- Jawn: Dedicated Server for serving collecting logs (Express + Tsoa)
-- Supabase: Application Database and Auth
-- ClickHouse: Analytics Database
-- Minio: Object Storage for logs.
+- **Web**: Frontend Platform (NextJS)
+- **Worker**: Proxy Logging (Cloudflare Workers)
+- **Jawn**: Dedicated Server for serving collecting logs (Express + Tsoa)
+- **Supabase**: Application Database and Auth
+- **ClickHouse**: Analytics Database
+- **Minio**: Object Storage for logs.
 
 If you have any questions, contact help@helicone.ai or join [discord](https://discord.gg/zsSTcH2qhG).
 
-## Install Wrangler and Yarn
+### LLM Observability Integrations
+
+### Main Integrations
+
+| Integration                                                                                            | Supports                                                                                                                              | Description                                                                                                    |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| [Generic Gateway](https://docs.helicone.ai/getting-started/integration-method/gateway)                 | Python, Node.js, Python w/package, LangChain JS, LangChain, cURL                                                                      | Gateway for generic integration                                                                                |
+| [Async Logging (OpenLLMetry)](https://docs.helicone.ai/getting-started/integration-method/openllmetry) | JS/TS, Python                                                                                                                         | Asynchronous logging supporting OpenAI, Anthropic, Azure OpenAI, Cohere, Bedrock, Google AI Platform, and more |
+| OpenAI                                                                                                 | [JS/TS](https://docs.helicone.ai/integrations/openai/javascript), [Python](https://docs.helicone.ai/integrations/openai/python)       | Integration with OpenAI                                                                                        |
+| Azure OpenAI                                                                                           | [JS/TS](https://docs.helicone.ai/integrations/azure/javascript), [Python](https://docs.helicone.ai/integrations/azure/python)         | Integration with Azure OpenAI                                                                                  |
+| Anthropic                                                                                              | [JS/TS](https://docs.helicone.ai/integrations/anthropic/javascript), [Python](https://docs.helicone.ai/integrations/anthropic/python) | Integration with Anthropic                                                                                     |
+| Ollama                                                                                                 | [JS/TS](https://docs.helicone.ai/integrations/ollama/javascript)                                                                      | Integration with Ollama                                                                                        |
+| AWS Bedrock                                                                                            | [JS/TS](https://docs.helicone.ai/integrations/bedrock/javascript)                                                                     | Integration with AWS Bedrock                                                                                   |
+| Gemini API                                                                                             | [JS/TS](https://docs.helicone.ai/integrations/gemini/api/javascript)                                                                  | Integration with Gemini API                                                                                    |
+| Gemini Vertex AI                                                                                       | [JS/TS](https://docs.helicone.ai/integrations/gemini/vertex/javascript)                                                               | Integration with Gemini Vertex AI                                                                              |
+| Vercel AI                                                                                              | [JS/TS](https://docs.helicone.ai/integrations/vercelai/javascript)                                                                    | Integration with Vercel AI                                                                                     |
+| [Anyscale](https://docs.helicone.ai/getting-started/integration-method/anyscale)                       | JS/TS, Python                                                                                                                         | Integration with Anyscale                                                                                      |
+| [TogetherAI](https://docs.helicone.ai/getting-started/integration-method/together)                     | JS/TS, Python                                                                                                                         | Integration with Together                                                                                      |
+| [Hyperbolic](https://docs.helicone.ai/getting-started/integration-method/hyperbolic)                   | JS/TS, Python                                                                                                                         | Integration with Hyperbolic                                                                                    |
+| Groq                                                                                                   | [JS/TS](https://docs.helicone.ai/integrations/groq/javascript), [Python](https://docs.helicone.ai/integrations/groq/python)           | Integration with Groq                                                                                          |
+| [DeepInfra](https://docs.helicone.ai/getting-started/integration-method/deepinfra)                     | JS/TS, Python                                                                                                                         | Integration with DeepInfra                                                                                     |
+| [OpenRouter](https://docs.helicone.ai/getting-started/integration-method/openrouter)                   | JS/TS, Python                                                                                                                         | Integration with OpenRouter                                                                                    |
+| [LiteLLM](https://docs.helicone.ai/getting-started/integration-method/litellm)                         | JS/TS, Python                                                                                                                         | Integration with LiteLLM                                                                                       |
+| [Fireworks AI](https://docs.helicone.ai/getting-started/integration-method/fireworks)                  | JS/TS, Python                                                                                                                         | Integration with Fireworks                                                                                     |
+
+### Supported Frameworks
+
+| Framework                                                             | Supports      | Description                 |
+| --------------------------------------------------------------------- | ------------- | --------------------------- |
+| [LangChain](https://docs.helicone.ai/integrations/openai/langchain)   | JS/TS, Python | Integration with LangChain  |
+| [LlamaIndex](https://docs.helicone.ai/integrations/openai/llamaindex) | Python        | Integration with LlamaIndex |
+| [CrewAI](https://docs.helicone.ai/integrations/openai/crewai)         | -             | Integration with CrewAI     |
+
+### Other Integrations
+
+| Integration                                                                    | Description                 |
+| ------------------------------------------------------------------------------ | --------------------------- |
+| [PostHog](https://docs.helicone.ai/getting-started/integration-method/posthog) | Integration with PostHog    |
+| [RAGAS](https://docs.helicone.ai/other-integrations/ragas)                     | Integration with RAGAS      |
+| [Open WebUI](https://docs.helicone.ai/other-integrations/open-webui)           | Integration with Open WebUI |
+| [MetaGPT](https://docs.helicone.ai/other-integrations/meta-gpt)                | Integration with MetaGPT    |
+| [Open Devin](https://docs.helicone.ai/other-integrations/open-devin)           | Integration with Open Devin |
+| [Mem0 EmbedChain](https://docs.helicone.ai/other-integrations/embedchain)      | Integration with EmbedChain |
+| [Dify](https://docs.helicone.ai/other-integrations/dify)                       | Integration with Dify       |
+
+> Don't see your provider or framework? Check out the latest integrations in our [docs](https://docs.helicone.ai/getting-started/quick-start). If not found there, request a new integration by contacting help@helicone.ai.
+
+<!-- ## Install Wrangler and Yarn
 
 ```bash
 nvm install 18.18.0
@@ -181,7 +243,7 @@ NEXT_PUBLIC_SUPABASE_URL="http://localhost:54321"
 SUPABASE_URL="http://localhost:54321"
 SUPABASE_SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
 NEXT_PUBLIC_HELICONE_JAWN_SERVICE="http://localhost:8585"
-```
+``` -->
 
 # Community 🌍
 
