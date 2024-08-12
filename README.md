@@ -1,19 +1,13 @@
 <p align="center">
   <img alt="heliconelogo" src="https://github.com/user-attachments/assets/895f1a0d-6eea-4b5c-81fa-10cab5855812" width="400">
 </p>
+
 <div align="center">
-  <table>
-    <tr>
-      <td align="center"><strong>🔍 Observability</strong></td>
-      <td align="center"><strong>🕸️ Agent Tracing</strong></td>
-      <td align="center"><strong>💬 Prompt Management</strong></td>
-    </tr>
-    <tr>
-      <td align="center"><strong>📊 Evaluations</strong></td>
-      <td align="center"><strong>📚 Datasets</strong></td>
-      <td align="center"><strong>🎛️ Fine-tuning</strong></td>
-    </tr>
-  </table>
+
+| 🔍 Observability | 🕸️ Agent Tracing | 💬 Prompt Management |
+| :--------------: | :--------------: | :------------------: |
+|  📊 Evaluations  |   📚 Datasets    |    🎛️ Fine-tuning    |
+
 </div>
 
 <p align="center">
