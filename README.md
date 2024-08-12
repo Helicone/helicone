@@ -1,4 +1,6 @@
-![Helicone Logo](https://github.com/user-attachments/assets/895f1a0d-6eea-4b5c-81fa-10cab5855812)
+<p align="center" style="margin: 0; padding: 0;">
+  <img alt="helicone logo" src="https://github.com/user-attachments/assets/71c5896d-85e1-44fd-a966-0ac27170e343" width="400" style="display: block; margin: 0; padding: 0;">
+</p>
 
 <div align="center">
 
