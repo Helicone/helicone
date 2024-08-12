@@ -67,7 +67,9 @@
 
 The fastest and most reliable way to get started with Helicone. Get started for free at [Helicone US](https://us.helicone.ai/signup) or [Helicone EU](https://eu.helicone.ai/signup). Your first 100k requests are free every month, after which you'll [pay based on usage](https://www.helicone.ai/pricing). Try our [demo](https://helicone.ai/demo) to see Helicone in action!
 
-**Latency concerns?** [Helicone's Cloud offering](https://www.helicone.ai) is deployed on Cloudflare workers and ensures the lowest latency (~10ms) add-on to your API requests. View our [latency benchmarks](https://docs.helicone.ai/faq/latency-affect#latency-impact).
+**Integrations:** View our supported [integrations](#main-integrations).
+
+**Latency Concerns:** [Helicone's Cloud offering](https://www.helicone.ai) is deployed on Cloudflare workers and ensures the lowest latency (~10ms) add-on to your API requests. View our [latency benchmarks](https://docs.helicone.ai/faq/latency-affect#latency-impact).
 
 ### Self-Hosting Open Source LLM Observability with Helicone
 
