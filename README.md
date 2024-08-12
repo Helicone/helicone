@@ -123,11 +123,13 @@ If you have any questions, contact help@helicone.ai or join [discord](https://di
 
 ### Supported Frameworks
 
-| Framework                                                             | Supports      | Description                                          |
-| --------------------------------------------------------------------- | ------------- | ---------------------------------------------------- |
-| [LangChain](https://docs.helicone.ai/integrations/openai/langchain)   | JS/TS, Python | -                                                    |
-| [LlamaIndex](https://docs.helicone.ai/integrations/openai/llamaindex) | Python        | Framework for building LLM-powered data applications |
-| [CrewAI](https://docs.helicone.ai/integrations/openai/crewai)         | -             | Framework for orchestrating role-playing AI agents   |
+| Framework                                                             | Supports                                                            | Description                                                                             |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [LangChain](https://docs.helicone.ai/integrations/openai/langchain)   | JS/TS, Python                                                       | -                                                                                       |
+| [LlamaIndex](https://docs.helicone.ai/integrations/openai/llamaindex) | Python                                                              | Framework for building LLM-powered data applications                                    |
+| [CrewAI](https://docs.helicone.ai/integrations/openai/crewai)         | -                                                                   | Framework for orchestrating role-playing AI agents                                      |
+| Big-AGI                                                               | [JS/TS](https://github.com/enricoros/nextjs-chatgpt-app)            | Generative AI suite                                                                     |
+| [ModelFusion](https://modelfusion.dev)                                | [JS/TS](https://modelfusion.dev/integration/observability/helicone) | Abstraction layer for integrating AI models into JavaScript and TypeScript applications |
 
 ### Other Integrations
 
@@ -245,97 +247,19 @@ SUPABASE_SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 NEXT_PUBLIC_HELICONE_JAWN_SERVICE="http://localhost:8585"
 ``` -->
 
-# Community 🌍
+## Community 🌍
 
-## Learn this repo with Onboard AI
+### Learn this repo with Greptile
 
-[learnthisrepo.com/helicone](learnthisrepo.com/helicone)
+[learnthisrepo.com/helicone](https://learnthisrepo.com/helicone) |
 
-## Supported Projects
+### Contributing
 
-| Name                                                               | Docs                                                                                      |
-| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| [nextjs-chat-app](https://github.com/enricoros/nextjs-chatgpt-app) | [Docs](https://github.com/enricoros/nextjs-chatgpt-app/issues/32)                         |
-| [langchain](https://github.com/hwchase17/langchain)                | [Docs](https://python.langchain.com/en/latest/ecosystem/helicone.html?highlight=helicone) |
-| [langchainjs](https://github.com/hwchase17/langchainjs)            | [Docs](https://js.langchain.com/docs/ecosystem/helicone)                                  |
-| [ModelFusion](https://modelfusion.dev)                             | [Docs](https://modelfusion.dev/integration/observability/helicone)                        |
-
-## Contributing
-
-We are extremely open to contributors on documentation, integrations, and feature requests.
+We ❤️ our contributors! We warmly welcome contributions for documentation, integrations, costs, and feature requests.
 
 - If you have an idea for how Helicone can be better, create a [GitHub issue](https://github.com/Helicone/helicone/issues) or vote on the [roadmap](https://github.com/Helicone/helicone/labels/roadmap)
+- Update costs instructions in [costs/README.md](https://github.com/Helicone/helicone/blob/main/costs/README.md)
 - Join [discord](https://discord.gg/zsSTcH2qhG) to ask questions
-
-### Update Cost Data
-
-1. Add new cost data to the `costs/src/` directory. If provider folder exists, add to its index.ts. If not, create a new folder with the provider name and an index.ts and export a cost object
-
-   Example:
-
-   File name: `costs/src/anthropic/index.ts`
-
-   ```typescript
-   export const costs: ModelRow[] = [
-     {
-       model: {
-         operator: "equals",
-         value: "claude-instant-1",
-       },
-       cost: {
-         prompt_token: 0.00000163,
-         completion_token: 0.0000551,
-       },
-     },
-   ];
-   ```
-
-   We can match in 3 ways:
-
-   - `equals`: The model name must be exactly the same as the value
-   - `startsWith`: The model name must start with the value
-   - `includes`: The model name must include the value
-
-   Use what is most appropriate for the model
-
-   cost object is the cost per token for prompt and completion
-
-2. Import the new cost data into `src/providers/mappings.ts` and add it to the `providers` array
-
-   Example:
-
-   File name: `src/providers/mappings.ts`
-
-   ```typescript
-   import { costs as anthropicCosts } from "./providers/anthropic";
-
-   // 1. Add the pattern for the API so it is a valid gateway.
-   const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
-
-   // 2. Add Anthropic pattern, provider tag, and costs array from the generated list
-   export const providers: {
-     pattern: RegExp;
-     provider: string;
-     costs?: ModelRow[];
-   }[] = [
-     // ...
-     {
-       pattern: anthropicPattern,
-       provider: "ANTHROPIC",
-       costs: anthropicCosts,
-     },
-     // ...
-   ];
-   ```
-
-3. Run `yarn test -- -u` in the `cost/` directory to update the snapshot tests
-4. Run `yarn copy` in the `cost/` directory to copy the cost data into other directories
-
-# Contributors
-
-<a href="https://github.com/Helicone/helicone/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=Helicone/helicone" />
-</a>
 
 ## License
 
