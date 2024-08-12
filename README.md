@@ -1,6 +1,4 @@
-<p align="center">
-  <img alt="heliconelogo" src="https://github.com/user-attachments/assets/895f1a0d-6eea-4b5c-81fa-10cab5855812" width="400">
-</p>
+![Helicone Logo](https://github.com/user-attachments/assets/895f1a0d-6eea-4b5c-81fa-10cab5855812)
 
 <div align="center">
 
