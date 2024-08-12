@@ -17,7 +17,7 @@
   <a href="https://docs.helicone.ai/">Docs</a> • <a href="https://discord.gg/zsSTcH2qhG">Discord</a> • <a href="https://us.helicone.ai/roadmap">Roadmap</a> • <a href="https://www.helicone.ai/changelog">Changelog</a> • <a href="https://github.com/helicone/helicone/issues">Bug reports</a>
 </p>
 <p align="center">
-  <em><a href="https://helicone.ai/demo">See Helicone in Action!</a></em>
+  <em><a href="https://helicone.ai/demo">See Helicone in Action! (Free)</a></em>
 </p>
 
 <p align="center">
