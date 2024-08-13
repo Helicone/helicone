@@ -46,6 +46,7 @@ export interface PromptsQueryParams {
 }
 export interface PromptVersionsQueryParamsV2 {
   filter: PromptVersionsFilterNode;
+  inputs: Record<string, string>;
 }
 
 export interface PromptsResult {
@@ -79,13 +80,21 @@ export interface PromptResult {
 
 export interface PromptVersionQueryParams {}
 
-export interface PromptVersionResult {
+interface PromptVersionResultBase {
   id: string;
   minor_version: number;
   major_version: number;
-  helicone_template: string;
+
   prompt_v2: string;
   model: string;
+}
+
+export interface PromptVersionResult extends PromptVersionResultBase {
+  helicone_template: string;
+}
+
+export interface PromptVersionResultCompiled extends PromptVersionResultBase {
+  prompt_compiled: any;
 }
 
 export interface PromptCreateSubversionParams {
@@ -226,6 +235,36 @@ export class PromptController extends Controller {
         },
       },
     });
+    if (result.error || !result.data) {
+      console.error(result.error);
+      this.setStatus(500);
+    } else {
+      this.setStatus(200); // set return status 201
+    }
+    return result;
+  }
+  @Post("{promptId}/compile")
+  public async getPromptVersionsCompiled(
+    @Body()
+    requestBody: PromptVersionsQueryParamsV2,
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() promptId: string
+  ): Promise<Result<PromptVersionResultCompiled[], string>> {
+    const promptManager = new PromptManager(request.authParams);
+    const result = await promptManager.getCompiledPromptVersions(
+      {
+        left: requestBody.filter,
+        operator: "and",
+        right: {
+          prompt_v2: {
+            id: {
+              equals: promptId,
+            },
+          },
+        },
+      },
+      requestBody.inputs
+    );
     if (result.error || !result.data) {
       console.error(result.error);
       this.setStatus(500);
