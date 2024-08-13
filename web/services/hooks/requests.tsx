@@ -132,7 +132,11 @@ export const useGetFullRequest = (result: HeliconeRequest[]) => {
                     model.toLowerCase().includes("gemini")
                   ) {
                     request.llmSchema = mapGeminiPro(
-                      request as HeliconeRequest,
+                      {
+                        ...request,
+                        request_body: content.request,
+                        response_body: content.response,
+                      } as HeliconeRequest,
                       model
                     );
                   }
