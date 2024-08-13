@@ -24,13 +24,28 @@ export type PromptsFilterBranch = {
   operator: "or" | "and";
   right: PromptsFilterNode;
 };
+
+export type PromptVersionsFilterBranch = {
+  left: PromptVersionsFilterNode;
+  operator: "or" | "and";
+  right: PromptVersionsFilterNode;
+};
+
 type PromptsFilterNode =
   | FilterLeafSubset<"prompt_v2">
   | PromptsFilterBranch
   | "all";
 
+type PromptVersionsFilterNode =
+  | FilterLeafSubset<"prompts_versions">
+  | PromptVersionsFilterBranch
+  | "all";
+
 export interface PromptsQueryParams {
   filter: PromptsFilterNode;
+}
+export interface PromptVersionsQueryParamsV2 {
+  filter: PromptVersionsFilterNode;
 }
 
 export interface PromptsResult {
@@ -195,16 +210,19 @@ export class PromptController extends Controller {
   @Post("{promptId}/versions/query")
   public async getPromptVersions(
     @Body()
-    requestBody: {},
+    requestBody: PromptVersionsQueryParamsV2,
     @Request() request: JawnAuthenticatedRequest,
     @Path() promptId: string
   ): Promise<Result<PromptVersionResult[], string>> {
     const promptManager = new PromptManager(request.authParams);
-
     const result = await promptManager.getPromptVersions({
-      prompts_versions: {
+      left: requestBody.filter,
+      operator: "and",
+      right: {
         prompt_v2: {
-          equals: promptId,
+          id: {
+            equals: promptId,
+          },
         },
       },
     });

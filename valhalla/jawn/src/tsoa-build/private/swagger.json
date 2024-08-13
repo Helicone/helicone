@@ -483,6 +483,117 @@
 					}
 				]
 			},
+			"Partial_NumberOperators_": {
+				"properties": {
+					"not-equals": {
+						"type": "number",
+						"format": "double"
+					},
+					"equals": {
+						"type": "number",
+						"format": "double"
+					},
+					"gte": {
+						"type": "number",
+						"format": "double"
+					},
+					"lte": {
+						"type": "number",
+						"format": "double"
+					},
+					"lt": {
+						"type": "number",
+						"format": "double"
+					},
+					"gt": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_PromptVersionsToOperators_": {
+				"properties": {
+					"minor_version": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"major_version": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"prompt_v2": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Pick_FilterLeaf.prompts_versions_": {
+				"properties": {
+					"prompts_versions": {
+						"$ref": "#/components/schemas/Partial_PromptVersionsToOperators_"
+					}
+				},
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"FilterLeafSubset_prompts_versions_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.prompts_versions_"
+			},
+			"PromptVersionsFilterNode": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/FilterLeafSubset_prompts_versions_"
+					},
+					{
+						"$ref": "#/components/schemas/PromptVersionsFilterBranch"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
+					}
+				]
+			},
+			"PromptVersionsFilterBranch": {
+				"properties": {
+					"right": {
+						"$ref": "#/components/schemas/PromptVersionsFilterNode"
+					},
+					"operator": {
+						"type": "string",
+						"enum": [
+							"or",
+							"and"
+						]
+					},
+					"left": {
+						"$ref": "#/components/schemas/PromptVersionsFilterNode"
+					}
+				},
+				"required": [
+					"right",
+					"operator",
+					"left"
+				],
+				"type": "object"
+			},
+			"PromptVersionsQueryParamsV2": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/PromptVersionsFilterNode"
+					}
+				},
+				"required": [
+					"filter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ResultSuccess_null_": {
 				"properties": {
 					"data": {
@@ -2309,8 +2420,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {},
-								"type": "object"
+								"$ref": "#/components/schemas/PromptVersionsQueryParamsV2"
 							}
 						}
 					}
