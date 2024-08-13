@@ -187,11 +187,7 @@ export class ScoreStore extends BaseStore {
       }
     }
 
-    if (
-      rowContents.error ||
-      !rowContents.data ||
-      rowContents.data.length !== newVersions.length
-    ) {
+    if (rowContents.error || !rowContents.data) {
       return err("Could not find previous versions of all requests");
     }
 
