@@ -188,7 +188,11 @@ export class ScoreStore extends BaseStore {
     }
 
     if (rowContents.error || !rowContents.data) {
-      return err("Could not find previous versions of all requests");
+      return err(
+        `Could not find previous versions of all requests, requestId-orgId: ${newVersions
+          .map((v) => `${v.requestId}-${v.organizationId}`)
+          .join(", ")}`
+      );
     }
 
     const res = await clickhouseDb.dbInsertClickhouse(
