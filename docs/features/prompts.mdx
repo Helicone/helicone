@@ -72,6 +72,40 @@ Compose a movie scene involving ${{ character }}, set in ${{ location }}
 `;
 ```
 
+### Static Prompts with hpstatic
+
+In addition to `hpf`, Helicone provides `hpstatic` for creating static prompts that don't change between requests. This is useful for system prompts or other constant text that you don't want to be treated as variable input.
+
+To use `hpstatic`, import it along with `hpf`:
+
+```typescript
+import { hpf, hpstatic } from "@helicone/prompts";
+```
+
+Then, you can use it like this:
+
+```typescript
+const systemPrompt = hpstatic`You are a helpful assistant.`;
+const userPrompt = hpf`Write a story about ${{ character }}`;
+
+const chatCompletion = await openai.chat.completions.create(
+  {
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
+    model: "gpt-3.5-turbo",
+  },
+  {
+    headers: {
+      "Helicone-Prompt-Id": "prompt_story",
+    },
+  }
+);
+```
+
+The `hpstatic` function wraps the entire text in `<helicone-prompt-static>` tags, indicating to Helicone that this part of the prompt should not be treated as variable input.
+
 ### For other users:
 
 Currently, we only support packages for TypeScript and JavaScript for easy integration. For other users, we are utilizing an adapted version of JSX to manage prompts and their input variables.
@@ -103,11 +137,20 @@ Only the following will be sent to your LLM:
 }
 ```
 
+For static prompts, you can manually wrap static parts of your prompt in `<helicone-prompt-static>` tags:
+
+```
+<helicone-prompt-static>You are a helpful assistant.</helicone-prompt-static>
+Write a story about <helicone-prompt-input key="character">a secret agent</helicone-prompt-input>
+```
+
+This tells Helicone that the first part of the prompt is static and should not be treated as variable input.
+
 </Accordion>
 
 ### Example
 
-Let's say we have an app that generates a short story, where users are able to input their own `character`. For example, the prompt is “Write a story about a secret agent”, where the `character` is “a secret agent”.
+Let's say we have an app that generates a short story, where users are able to input their own `character`. For example, the prompt is "Write a story about a secret agent", where the `character` is "a secret agent".
 
 <Tabs>
   <Tab title="Typescript / Javascript">
@@ -192,7 +235,7 @@ Let's say we have an app that generates a short story, where users are able to i
       </Step>
 
       <Step title="Add helicone-prompt-input tags">
-      Add `<helicone-prompt-input key="<INPUT_ID>">` before your input variable, and `</helicone-prompt-input>` after, where `INPUT_ID` is your key name. In this example, `key=”character”`:
+      Add `<helicone-prompt-input key="<INPUT_ID>">` before your input variable, and `</helicone-prompt-input>` after, where `INPUT_ID` is your key name. In this example, `key="character"`:
 
       ```tsx
       Write a story about <helicone-prompt-input key="character" >a secret agent</helicone-prompt-input>
@@ -257,3 +300,6 @@ headers: {
 ```
 
 <QuestionsSection />
+```
+
+This updated version includes the new section about `hpstatic` within the "Get a deep dive of the feature" accordion, maintaining the structure of the original document while adding the new information.
