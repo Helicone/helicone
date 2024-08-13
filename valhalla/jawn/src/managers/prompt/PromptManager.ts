@@ -115,7 +115,7 @@ export class PromptManager extends BaseManager {
   async getCompiledPromptVersions(
     filter: FilterNode,
     inputs: Record<string, string>
-  ): Promise<Result<PromptVersionResultCompiled[], string>> {
+  ): Promise<Result<PromptVersionResultCompiled, string>> {
     const filterWithAuth = buildFilterPostgres({
       filter,
       argsAcc: [this.authParams.organizationId],
@@ -149,26 +149,24 @@ export class PromptManager extends BaseManager {
       filterWithAuth.argsAcc
     );
 
-    if (result.error || !result.data) {
+    if (result.error || !result.data || result.data.length === 0) {
       return err("Failed to get compiled prompt versions");
     }
 
-    return ok(
-      result.data.map((data) => {
-        return {
-          id: data.id,
-          minor_version: data.minor_version,
-          major_version: data.major_version,
-          prompt_v2: data.prompt_v2,
-          model: data.model,
-          prompt_compiled: autoFillInputs({
-            inputs: inputs,
-            autoInputs: data.auto_prompt_inputs,
-            template: data.helicone_template,
-          }),
-        };
-      })
-    );
+    const lastVersion = result.data[result.data.length - 1];
+
+    return ok({
+      id: lastVersion.id,
+      minor_version: lastVersion.minor_version,
+      major_version: lastVersion.major_version,
+      prompt_v2: lastVersion.prompt_v2,
+      model: lastVersion.model,
+      prompt_compiled: autoFillInputs({
+        inputs: inputs,
+        autoInputs: lastVersion.auto_prompt_inputs,
+        template: lastVersion.helicone_template,
+      }),
+    });
   }
 
   async getPrompts(

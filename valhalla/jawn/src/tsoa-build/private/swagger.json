@@ -586,15 +586,8 @@
 				"properties": {
 					"filter": {
 						"$ref": "#/components/schemas/PromptVersionsFilterNode"
-					},
-					"inputs": {
-						"$ref": "#/components/schemas/Record_string.string_"
 					}
 				},
-				"required": [
-					"filter",
-					"inputs"
-				],
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -630,13 +623,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultSuccess_PromptVersionResultCompiled-Array_": {
+			"ResultSuccess_PromptVersionResultCompiled_": {
 				"properties": {
 					"data": {
-						"items": {
-							"$ref": "#/components/schemas/PromptVersionResultCompiled"
-						},
-						"type": "array"
+						"$ref": "#/components/schemas/PromptVersionResultCompiled"
 					},
 					"error": {
 						"type": "number",
@@ -653,15 +643,30 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result_PromptVersionResultCompiled-Array.string_": {
+			"Result_PromptVersionResultCompiled.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess_PromptVersionResultCompiled-Array_"
+						"$ref": "#/components/schemas/ResultSuccess_PromptVersionResultCompiled_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
+			},
+			"PromptVersiosQueryParamsCompiled": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/PromptVersionsFilterNode"
+					},
+					"inputs": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					}
+				},
+				"required": [
+					"inputs"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"ResultSuccess_null_": {
 				"properties": {
@@ -2496,7 +2501,7 @@
 				}
 			}
 		},
-		"/v1/prompt/{promptId}/compile": {
+		"/v1/prompt/{user_defined_id}/compile": {
 			"post": {
 				"operationId": "GetPromptVersionsCompiled",
 				"responses": {
@@ -2505,7 +2510,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_PromptVersionResultCompiled-Array.string_"
+									"$ref": "#/components/schemas/Result_PromptVersionResultCompiled.string_"
 								}
 							}
 						}
@@ -2522,7 +2527,7 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "promptId",
+						"name": "user_defined_id",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -2534,7 +2539,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/PromptVersionsQueryParamsV2"
+								"$ref": "#/components/schemas/PromptVersiosQueryParamsCompiled"
 							}
 						}
 					}

@@ -45,7 +45,11 @@ export interface PromptsQueryParams {
   filter: PromptsFilterNode;
 }
 export interface PromptVersionsQueryParamsV2 {
-  filter: PromptVersionsFilterNode;
+  filter?: PromptVersionsFilterNode;
+}
+
+export interface PromptVersiosQueryParamsCompiled
+  extends PromptVersionsQueryParamsV2 {
   inputs: Record<string, string>;
 }
 
@@ -225,7 +229,7 @@ export class PromptController extends Controller {
   ): Promise<Result<PromptVersionResult[], string>> {
     const promptManager = new PromptManager(request.authParams);
     const result = await promptManager.getPromptVersions({
-      left: requestBody.filter,
+      left: requestBody.filter ?? "all",
       operator: "and",
       right: {
         prompt_v2: {
@@ -243,22 +247,22 @@ export class PromptController extends Controller {
     }
     return result;
   }
-  @Post("{promptId}/compile")
+  @Post("{user_defined_id}/compile")
   public async getPromptVersionsCompiled(
     @Body()
-    requestBody: PromptVersionsQueryParamsV2,
+    requestBody: PromptVersiosQueryParamsCompiled,
     @Request() request: JawnAuthenticatedRequest,
-    @Path() promptId: string
-  ): Promise<Result<PromptVersionResultCompiled[], string>> {
+    @Path() user_defined_id: string
+  ): Promise<Result<PromptVersionResultCompiled, string>> {
     const promptManager = new PromptManager(request.authParams);
     const result = await promptManager.getCompiledPromptVersions(
       {
-        left: requestBody.filter,
+        left: requestBody.filter ?? "all",
         operator: "and",
         right: {
           prompt_v2: {
-            id: {
-              equals: promptId,
+            user_defined_id: {
+              equals: user_defined_id,
             },
           },
         },

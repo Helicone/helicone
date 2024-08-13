@@ -27,7 +27,7 @@ export interface paths {
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
   };
-  "/v1/prompt/{promptId}/compile": {
+  "/v1/prompt/{user_defined_id}/compile": {
     post: operations["GetPromptVersionsCompiled"];
   };
   "/v1/settings/query": {
@@ -274,8 +274,7 @@ export interface components {
       left: components["schemas"]["PromptVersionsFilterNode"];
     };
     PromptVersionsQueryParamsV2: {
-      filter: components["schemas"]["PromptVersionsFilterNode"];
-      inputs: components["schemas"]["Record_string.string_"];
+      filter?: components["schemas"]["PromptVersionsFilterNode"];
     };
     PromptVersionResultCompiled: {
       id: string;
@@ -287,12 +286,16 @@ export interface components {
       model: string;
       prompt_compiled: unknown;
     };
-    "ResultSuccess_PromptVersionResultCompiled-Array_": {
-      data: components["schemas"]["PromptVersionResultCompiled"][];
+    ResultSuccess_PromptVersionResultCompiled_: {
+      data: components["schemas"]["PromptVersionResultCompiled"];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_PromptVersionResultCompiled-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResultCompiled-Array_"] | components["schemas"]["ResultError_string_"];
+    "Result_PromptVersionResultCompiled.string_": components["schemas"]["ResultSuccess_PromptVersionResultCompiled_"] | components["schemas"]["ResultError_string_"];
+    PromptVersiosQueryParamsCompiled: {
+      filter?: components["schemas"]["PromptVersionsFilterNode"];
+      inputs: components["schemas"]["Record_string.string_"];
+    };
     ResultSuccess_null_: {
       /** @enum {number|null} */
       data: null;
@@ -1034,19 +1037,19 @@ export interface operations {
   GetPromptVersionsCompiled: {
     parameters: {
       path: {
-        promptId: string;
+        user_defined_id: string;
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["PromptVersionsQueryParamsV2"];
+        "application/json": components["schemas"]["PromptVersiosQueryParamsCompiled"];
       };
     };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_PromptVersionResultCompiled-Array.string_"];
+          "application/json": components["schemas"]["Result_PromptVersionResultCompiled.string_"];
         };
       };
     };
