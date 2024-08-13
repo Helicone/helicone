@@ -177,7 +177,8 @@
         "other-integrations/meta-gpt",
         "other-integrations/open-devin",
         "other-integrations/embedchain",
-        "other-integrations/dify"
+        "other-integrations/dify",
+        "other-integrations/upstash"
       ]
     },
     {
