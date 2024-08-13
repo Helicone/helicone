@@ -177,7 +177,11 @@ export class ScoreStore extends BaseStore {
         );
 
         if (missingRowContents.error || !missingRowContents.data) {
-          return err("Could not find previous versions of some requests");
+          return err(
+            `Could not find previous versions of some requests, requestId-orgId: ${missingVersions
+              .map((v) => `${v.requestId}-${v.organizationId}`)
+              .join(", ")}`
+          );
         }
 
         rowContents.data = [
