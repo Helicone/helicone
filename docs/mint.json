@@ -185,7 +185,13 @@
         "other-integrations/open-devin",
         "other-integrations/embedchain",
         "other-integrations/dify",
-        "other-integrations/upstash"
+        {
+          "group": "Upstash",
+          "pages": [
+            "other-integrations/upstash-qstash",
+            "other-integrations/upstash-rag"
+          ]
+        }
       ]
     },
     {
