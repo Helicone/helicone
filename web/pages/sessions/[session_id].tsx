@@ -25,9 +25,7 @@ const SessionDetail = ({ session_id }: { session_id: string }) => {
     false
   );
 
-  const session = sessionFromHeliconeRequests(
-    requests.requests.data?.data ?? []
-  );
+  const session = sessionFromHeliconeRequests(requests.requests.requests ?? []);
 
   return (
     <SessionContent

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
@@ -89,7 +89,7 @@ const useRequestsPageV2 = (
   const isDataLoading = requests.isLoading || isPropertiesLoading;
 
   return {
-    normalizedRequests: requests.requests,
+    normalizedRequests: getNormalizedRequests(requests.requests),
     count: count.data?.data,
     isDataLoading,
     isBodyLoading: false,

@@ -5,7 +5,6 @@ import {
   getModelFromPath,
   mapGeminiPro,
 } from "../../components/templates/requestsV2/builder/mappers/geminiMapper";
-import { getNormalizedRequests } from "../../components/templates/requestsV2/useRequestsPageV2";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { getJawnClient } from "../../lib/clients/jawn";
 import { Result } from "../../lib/result";
@@ -137,7 +136,7 @@ const useGetRequestsWithBodies = (
     isLoading: isLoading,
     refetch,
     isRefetching: isRefetching || isUrlsFetching,
-    requests: getNormalizedRequests(requests),
+    requests: requests,
     completedQueries: urlQueries.filter((query) => query.isSuccess).length,
     totalQueries: requestsWithSignedUrls.length,
     remove: () => {
