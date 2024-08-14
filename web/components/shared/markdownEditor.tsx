@@ -7,6 +7,7 @@ import "prismjs/themes/prism.css";
 import "prismjs/components/prism-clike";
 import "prismjs/components/prism-javascript";
 import "prismjs/components/prism-json";
+import { clsx } from "./clsx";
 
 interface MarkdownEditorProps {
   text: string;

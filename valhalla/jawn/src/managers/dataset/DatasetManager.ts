@@ -12,7 +12,7 @@ import {
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
-import { supabaseServer } from "../../lib/db/supabase";
+import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { Result, err, ok } from "../../lib/shared/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
@@ -21,11 +21,18 @@ import { resultMap } from "../../lib/shared/result";
 import { User } from "../../models/user";
 import { BaseManager } from "../BaseManager";
 import { Json } from "../../lib/db/database.types";
+import { HeliconeDatasetManager } from "./HeliconeDatasetManager";
 
 // A post request should not contain an id.
 export type UserCreationParams = Pick<User, "email" | "name" | "phoneNumbers">;
 
 export class DatasetManager extends BaseManager {
+  readonly helicone: HeliconeDatasetManager;
+  constructor(authParams: AuthParams) {
+    super(authParams);
+    this.helicone = new HeliconeDatasetManager(authParams);
+  }
+
   async getDatasets(
     promptVersionId?: string
   ): Promise<Result<DatasetResult[], string>> {
@@ -61,6 +68,7 @@ export class DatasetManager extends BaseManager {
         name: params.datasetName,
         organization: this.authParams.organizationId,
         meta: (params.meta ?? null) as Json,
+        dataset_type: params.datasetType,
       })
       .select("*")
       .single();

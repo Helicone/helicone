@@ -92,10 +92,7 @@ const useGetRequests = (
 export const useGetFullRequest = (result: HeliconeRequest[]) => {
   return {
     requestBodies: useQuery({
-      queryKey: [
-        "requestsBodies",
-        result,
-      ],
+      queryKey: ["requestsBodies", result],
       queryFn: async (query) => {
         const requests = await Promise.all(
           result.map(async (request: HeliconeRequest) => {
@@ -110,7 +107,6 @@ export const useGetFullRequest = (result: HeliconeRequest[]) => {
                   if (request.asset_urls) {
                     content = placeAssetIdValues(request.asset_urls, content);
                   }
-
 
                   const model =
                     request.model_override ||
@@ -133,9 +129,9 @@ export const useGetFullRequest = (result: HeliconeRequest[]) => {
                   }
 
                   return {
-                      ...request,
-                      request_body: content.request,
-                      response_body: content.response,
+                    ...request,
+                    request_body: content.request,
+                    response_body: content.response,
                   };
                 }
               } catch (error) {
