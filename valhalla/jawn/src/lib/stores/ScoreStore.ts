@@ -30,9 +30,8 @@ export interface UpdatedRequestVersion {
 export interface UpdatedFeedback {
   id: string;
   response_id: string;
-  rating: number;
+  rating: boolean;
   created_at: string;
-  organization_id: string;
 }
 
 export class ScoreStore extends BaseStore {
@@ -272,21 +271,22 @@ export class ScoreStore extends BaseStore {
   }
 
   public async bulkUpsertFeedback(
-    feedbacks: { responseId: string; rating: number; organizationId: string }[]
+    feedbacks: { responseId: string; rating: boolean }[]
   ): Promise<Result<UpdatedFeedback[], string>> {
     console.log(
       `Upserting feedback for ${
         feedbacks.length
-      } responses, responseId-orgId: ${feedbacks
-        .map((f) => `${f.responseId}-${f.organizationId}`)
+      } responses, responseIds: ${feedbacks
+        .map((f) => f.responseId)
         .join(", ")}`
     );
+
     const placeholders = feedbacks
       .map(
         (_, index) =>
-          `($${index * 4 + 1}::uuid, $${index * 4 + 2}::int, $${
-            index * 4 + 3
-          }::timestamp, $${index * 4 + 4}::uuid)`
+          `($${index * 3 + 1}::uuid, $${index * 3 + 2}::boolean, $${
+            index * 3 + 3
+          }::timestamp)`
       )
       .join(", ");
 
@@ -294,17 +294,16 @@ export class ScoreStore extends BaseStore {
       feedback.responseId,
       feedback.rating,
       new Date().toISOString(),
-      feedback.organizationId,
     ]);
 
     const query = `
-    INSERT INTO feedback (response_id, rating, created_at, organization_id)
+    INSERT INTO feedback (response_id, rating, created_at)
     VALUES ${placeholders}
     ON CONFLICT (response_id)
     DO UPDATE SET
       rating = EXCLUDED.rating,
       created_at = EXCLUDED.created_at
-    RETURNING id, response_id, rating, created_at, organization_id
+    RETURNING id, response_id, rating, created_at
   `;
 
     return await dbExecute<UpdatedFeedback>(query, values);

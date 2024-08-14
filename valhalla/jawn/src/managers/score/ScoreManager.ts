@@ -124,22 +124,18 @@ export class ScoreManager extends BaseManager {
       }
 
       const feedbackResult = await this.scoreStore.bulkUpsertFeedback(
-        scoresMessages
-          .filter((scoresMessage) =>
-            scoresMessage.scores.some(
-              (score) => score.score_attribute_key === "helicone-score-feedback"
-            )
+        scoresScoreResult.data
+          .filter(
+            (requestResponseRow) =>
+              "helicone-score-feedback" in requestResponseRow.scores &&
+              requestResponseRow.response_id !== null
           )
-          .map((scoresMessage) => {
-            const feedbackScore = scoresMessage.scores.find(
-              (score) => score.score_attribute_key === "helicone-score-feedback"
-            );
-            return {
-              responseId: scoresMessage.requestId,
-              rating: Number(feedbackScore?.score_attribute_value) || 0,
-              organizationId: scoresMessage.organizationId,
-            };
-          })
+          .map((requestResponseRow) => ({
+            responseId: requestResponseRow.response_id!,
+            rating: Boolean(
+              requestResponseRow.scores["helicone-score-feedback"]
+            ),
+          }))
       );
       if (feedbackResult.error) {
         console.error("Error upserting feedback:", feedbackResult.error);
