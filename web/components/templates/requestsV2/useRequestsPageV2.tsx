@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
@@ -77,7 +77,7 @@ const useRequestsPageV2 = (
     operator: "and",
   };
 
-  const { requests, count, isBodyLoading, refetch, remove } = useGetRequests(
+  const { requests, count } = useGetRequests(
     currentPage,
     currentPageSize,
     filter,
@@ -86,21 +86,17 @@ const useRequestsPageV2 = (
     isLive
   );
 
-  const isDataLoading = requests.isInitialLoading || isPropertiesLoading;
-
-  const normalizedRequests = useMemo(() => {
-    return getNormalizedRequests(requests.data?.data || []);
-  }, [requests.data?.data]);
+  const isDataLoading = requests.isLoading || isPropertiesLoading;
 
   return {
-    normalizedRequests: normalizedRequests,
+    normalizedRequests: getNormalizedRequests(requests.requests),
     count: count.data?.data,
     isDataLoading,
-    isBodyLoading: isBodyLoading,
+    isBodyLoading: requests.isRefetching,
     isCountLoading: count.isLoading,
     properties,
-    refetch: refetch,
-    remove: remove,
+    refetch: requests.refetch,
+    remove: requests.remove,
     searchPropertyFilters,
     filterMap,
     filter,
