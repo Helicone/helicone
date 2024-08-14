@@ -677,6 +677,13 @@ WHEN (request_response_versioned.model ILIKE 'mistral-embed') THEN 100 * request
   ELSE 0
 END
 )
+WHEN (request_response_versioned.provider = 'QSTASH') THEN (
+  CASE
+  WHEN (request_response_versioned.model ILIKE '%llama%') THEN 300 * request_response_versioned.prompt_tokens + 300 * request_response_versioned.completion_tokens
+WHEN (request_response_versioned.model ILIKE '%mistral%') THEN 300 * request_response_versioned.prompt_tokens + 300 * request_response_versioned.completion_tokens
+  ELSE 0
+END
+)
     ELSE 
   CASE
   WHEN (request_response_versioned.model ILIKE 'ada') THEN 400 * request_response_versioned.prompt_tokens + 400 * request_response_versioned.completion_tokens
