@@ -8,6 +8,7 @@ import { Result } from "../../result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
 export interface ModelMetric {
+  id?: string;
   model: string;
   total_requests: number;
   total_completion_tokens: number;

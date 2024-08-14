@@ -1,5 +1,14 @@
 // src/users/usersController.ts
-import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
+import {
+  Body,
+  Controller,
+  Path,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+} from "tsoa";
 import { Result, err, ok } from "../../lib/shared/result";
 import {
   FilterLeafSubset,
@@ -7,6 +16,11 @@ import {
 } from "../../lib/shared/filters/filterDefs";
 import { DatasetManager } from "../../managers/dataset/DatasetManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
+import {
+  HeliconeDataset,
+  HeliconeDatasetRow,
+  MutateParams,
+} from "../../managers/dataset/HeliconeDatasetManager";
 
 export type DatasetFilterBranch = {
   left: DatasetFilterNode;
@@ -18,40 +32,32 @@ type DatasetFilterNode =
   | DatasetFilterBranch
   | "all";
 
-export interface DatasetMetadata {
+export interface HeliconeDatasetMetadata {
   promptVersionId?: string;
   inputRecordsIds?: string[];
 }
 
-export interface NewDatasetParams {
+export interface NewHeliconeDatasetParams {
   datasetName: string;
   requestIds: string[];
-  datasetType: "experiment" | "helicone";
-  meta?: DatasetMetadata;
+  meta?: HeliconeDatasetMetadata;
 }
 
 export interface DatasetResult {
   id: string;
   name: string;
   created_at: string;
-  meta?: DatasetMetadata;
+  meta?: HeliconeDatasetMetadata;
 }
 
-export interface RandomDatasetParams {
-  datasetName: string;
-  filter: DatasetFilterNode;
-  offset?: number;
-  limit?: number;
-}
-
-@Route("v1/experiment/dataset")
+@Route("v1/helicone-dataset")
 @Tags("Dataset")
 @Security("api_key")
-export class ExperimentDatasetController extends Controller {
+export class HeliconeDatasetController extends Controller {
   @Post("/")
-  public async addDataset(
+  public async addHeliconeDataset(
     @Body()
-    requestBody: NewDatasetParams,
+    requestBody: NewHeliconeDatasetParams,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<
     Result<
@@ -63,11 +69,15 @@ export class ExperimentDatasetController extends Controller {
   > {
     const datasetManager = new DatasetManager(request.authParams);
 
-    const result = await datasetManager.addDataset(requestBody);
+    const result = await datasetManager.addDataset({
+      ...requestBody,
+      datasetType: "helicone",
+    });
     // const result = await promptManager.getPrompts(requestBody);
     if (result.error || !result.data) {
+      console.log(result.error);
       this.setStatus(500);
-      return err("Not implemented");
+      return err(result.error ?? "");
     } else {
       this.setStatus(200); // set return status 201
       return ok({
@@ -76,27 +86,38 @@ export class ExperimentDatasetController extends Controller {
     }
   }
 
-  @Post("/random")
-  public async addRandomDataset(
+  @Post("/{datasetId}/mutate")
+  public async mutateHeliconeDataset(
+    @Path()
+    datasetId: string,
     @Body()
-    requestBody: RandomDatasetParams,
+    requestBody: MutateParams,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<
-    Result<
-      {
-        datasetId: string;
-      },
-      string
-    >
-  > {
+  ): Promise<Result<null, string>> {
     const datasetManager = new DatasetManager(request.authParams);
-
-    const result = await datasetManager.addRandomDataset(requestBody);
-    // const result = await promptManager.getPrompts(requestBody);
+    const result = await datasetManager.helicone.mutate(datasetId, requestBody);
     if (result.error) {
       this.setStatus(500);
-      console.error(result.error);
-      return err("Not implemented");
+      return err(result.error);
+    } else {
+      this.setStatus(200); // set return status 201
+      return ok(null);
+    }
+  }
+
+  @Post("/{datasetId}/query")
+  public async queryHeliconeDatasetRows(
+    @Path()
+    datasetId: string,
+    @Body()
+    requestBody: {},
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<HeliconeDatasetRow[], string>> {
+    const datasetManager = new DatasetManager(request.authParams);
+    const result = await datasetManager.helicone.query(datasetId, requestBody);
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error);
     } else {
       this.setStatus(200); // set return status 201
       return ok(result.data!);
@@ -104,43 +125,22 @@ export class ExperimentDatasetController extends Controller {
   }
 
   @Post("/query")
-  public async getDatasets(
+  public async queryHeliconeDataset(
     @Body()
     requestBody: {
-      promptVersionId?: string;
+      datasetIds?: string[];
     },
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<DatasetResult[], string>> {
+  ): Promise<Result<HeliconeDataset[], string>> {
     const datasetManager = new DatasetManager(request.authParams);
-    const result = await datasetManager.getDatasets(
-      requestBody.promptVersionId
-    );
+
+    const result = await datasetManager.helicone.getDatasets(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);
+      return err(result.error);
     } else {
       this.setStatus(200); // set return status 201
+      return ok(result.data);
     }
-    return result;
-  }
-
-  @Post("/{datasetId}/query")
-  public async getDataset(
-    @Body()
-    requestBody: {},
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<{}[], string>> {
-    return err("Not implemented");
-  }
-
-  @Post("/{datasetId}/mutate")
-  public async mutateDataset(
-    @Body()
-    requestBody: {
-      addRequests: string[];
-      removeRequests: string[];
-    },
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<{}[], string>> {
-    return err("Not implemented");
   }
 }

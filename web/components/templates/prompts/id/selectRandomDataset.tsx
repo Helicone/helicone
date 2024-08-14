@@ -131,6 +131,7 @@ const SelectRandomDataset = (props: SelectRandomDatasetProps) => {
                   meta: {
                     promptVersionId: props.meta?.promptVersionId,
                   },
+                  datasetType: "experiment",
                 },
               });
               if (dataset.data?.error !== null) {
