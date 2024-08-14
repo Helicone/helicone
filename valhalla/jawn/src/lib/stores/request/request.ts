@@ -376,19 +376,6 @@ async function mapLLMCalls(
         getModelFromPath(heliconeRequest.request_path) ||
         "";
 
-      try {
-        if (
-          model.toLowerCase().includes("gemini") &&
-          heliconeRequest.provider === "GOOGLE"
-        ) {
-          const mappedSchema = mapGeminiPro(heliconeRequest, model);
-          heliconeRequest.llmSchema = mappedSchema;
-          return heliconeRequest;
-        }
-      } catch (error: any) {
-        // Do nothing, FE will fall back to existing mappers
-      }
-
       return heliconeRequest;
     }) ?? [];
 
