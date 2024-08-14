@@ -130,7 +130,7 @@ async function getProvider(
   }
 
   return ok({
-    provider: getProviderFromTargetUrl(targetBaseUrl),
+    provider,
   });
 }
 
