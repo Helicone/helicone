@@ -80,7 +80,6 @@ export default function NewDataset({
                 } else {
                   setNotification("Failed to create dataset", "error");
                 }
-                setModalOpen(false);
               } else {
                 setOpenCreateDataset(true);
               }
