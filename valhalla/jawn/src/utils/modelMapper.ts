@@ -52,6 +52,7 @@ const requestModels = new Set<string>([
   "claude-3-opus-20240229",
   "claude-3-sonnet-20240229",
   "claude-3-haiku-20240307",
+  "gpt-4o-2024-08-06",
 ]);
 
 const responseModels = new Set<string>(["dall-e-3", "dall-e-2"]);
