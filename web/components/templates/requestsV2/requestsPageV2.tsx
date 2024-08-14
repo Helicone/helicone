@@ -235,7 +235,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isDataLoading,
     isBodyLoading,
     isCountLoading,
-    isRefetching, 
+    isRefetching,
     normalizedRequests,
     properties,
     refetch,
