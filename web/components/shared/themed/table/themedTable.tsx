@@ -73,6 +73,7 @@ interface ThemedTableV5Props<T extends { id?: string }> {
   };
   highlightedIds?: string[];
   customButtons?: React.ReactNode[];
+  children?: React.ReactNode;
 }
 
 export type RequestViews = "table" | "card" | "row";
@@ -99,6 +100,7 @@ export default function ThemedTable<T extends { id?: string }>(
     savedFilters,
     highlightedIds,
     customButtons,
+    children,
   } = props;
 
   const [view, setView] = useLocalStorage<RequestViews>("view", "table");
@@ -181,6 +183,7 @@ export default function ThemedTable<T extends { id?: string }>(
         rows={exportData}
         customButtons={customButtons}
       />
+      {children}
 
       {skeletonLoading ? (
         <LoadingAnimation title="Loading Data..." />
