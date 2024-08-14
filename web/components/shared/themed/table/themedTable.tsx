@@ -29,7 +29,7 @@ import RequestRowView from "./requestRowView";
 import ThemedTableHeader from "./themedTableHeader";
 import { UIFilterRowTree } from "../../../../services/lib/filters/uiFilterRowTree";
 
-interface ThemedTableV5Props<T> {
+interface ThemedTableV5Props<T extends { id?: string }> {
   id: string;
   defaultData: T[];
   defaultColumns: ColumnDef<T>[];
@@ -71,11 +71,15 @@ interface ThemedTableV5Props<T> {
     onSaveFilterCallback?: () => void;
     layoutPage: "dashboard" | "requests";
   };
+  highlightedIds?: string[];
+  customButtons?: React.ReactNode[];
 }
 
 export type RequestViews = "table" | "card" | "row";
 
-export default function ThemedTable<T>(props: ThemedTableV5Props<T>) {
+export default function ThemedTable<T extends { id?: string }>(
+  props: ThemedTableV5Props<T>
+) {
   const {
     id,
     defaultData,
@@ -93,6 +97,8 @@ export default function ThemedTable<T>(props: ThemedTableV5Props<T>) {
     noDataCTA,
     onDataSet: onDataSet,
     savedFilters,
+    highlightedIds,
+    customButtons,
   } = props;
 
   const [view, setView] = useLocalStorage<RequestViews>("view", "table");
@@ -173,6 +179,7 @@ export default function ThemedTable<T>(props: ThemedTableV5Props<T>) {
             : undefined
         }
         rows={exportData}
+        customButtons={customButtons}
       />
 
       {skeletonLoading ? (
@@ -200,7 +207,7 @@ export default function ThemedTable<T>(props: ThemedTableV5Props<T>) {
         </ul>
       ) : makeRow && view === "row" ? (
         <RequestRowView
-          rows={rows.map((row) => row.original as NormalizedRequest)}
+          rows={rows.map((row) => row.original as unknown as NormalizedRequest)}
           properties={makeRow.properties}
         />
       ) : (
@@ -240,7 +247,11 @@ export default function ThemedTable<T>(props: ThemedTableV5Props<T>) {
                 {rows.map((row, index) => (
                   <tr
                     key={row.id}
-                    className="hover:bg-gray-100 dark:hover:bg-gray-900 hover:cursor-pointer"
+                    className={clsx(
+                      "hover:bg-gray-100 dark:hover:bg-gray-900 hover:cursor-pointer",
+                      highlightedIds?.includes(row.original?.id ?? "") &&
+                        "bg-blue-100 border-l border-blue-500 pl-2"
+                    )}
                     onClick={
                       onRowSelect && (() => onRowSelect(row.original, index))
                     }

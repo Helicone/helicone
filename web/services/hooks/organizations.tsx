@@ -227,6 +227,7 @@ const useOrgsContextManager = () => {
   }, [org?.organization_type, org?.reseller_id, orgs]);
 
   let orgContextValue: OrgContextValue | null = null;
+
   orgContextValue = {
     allOrgs: orgs ?? [],
     currentOrg: org ?? undefined,
