@@ -549,7 +549,6 @@ const RequestRow = (props: {
               }
             />
           </div>
-          <div>{requestFeedback.rating}</div>
 
           <div className="flex flex-col space-y-2">{request.render()}</div>
         </div>

@@ -2630,6 +2630,34 @@
 					}
 				]
 			},
+			"Json": {
+				"anyOf": [
+					{
+						"type": "string"
+					},
+					{
+						"type": "number",
+						"format": "double"
+					},
+					{
+						"type": "boolean"
+					},
+					{
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Json"
+						},
+						"type": "object"
+					},
+					{
+						"items": {
+							"$ref": "#/components/schemas/Json"
+						},
+						"type": "array"
+					}
+				],
+				"nullable": true
+			},
 			"HeliconeDataset": {
 				"properties": {
 					"created_at": {

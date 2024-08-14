@@ -856,6 +856,7 @@ export interface components {
       error: null;
     };
     "Result_HeliconeDatasetRow-Array.string_": components["schemas"]["ResultSuccess_HeliconeDatasetRow-Array_"] | components["schemas"]["ResultError_string_"];
+Json: JsonObject;
     HeliconeDataset: {
       created_at: string | null;
       dataset_type: string;
