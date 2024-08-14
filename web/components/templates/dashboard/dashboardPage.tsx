@@ -879,6 +879,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     <a
                       href="https://docs.helicone.ai/getting-started/integration-method/posthog"
                       target="_blank"
+                      rel="noreferrer"
                       className="text-blue-500 underline"
                     >
                       PostHog integration
