@@ -1,5 +1,5 @@
 import { Kafka } from "@upstash/kafka";
-import { Message } from "../handlers/HandlerContext";
+import { HeliconeScoresMessage, Message } from "../handlers/HandlerContext";
 import { PromiseGenericResult, err, ok } from "../shared/result";
 import { LogManager } from "../../managers/LogManager";
 
@@ -11,7 +11,9 @@ const KAFKA_PASSWORD = KAFKA_CREDS?.UPSTASH_KAFKA_PASSWORD;
 
 export type Topics =
   | "request-response-logs-prod-dlq"
-  | "request-response-logs-prod";
+  | "request-response-logs-prod"
+  | "helicone-scores-prod"
+  | "helicone-scores-prod-dlq";
 
 export class KafkaProducer {
   private kafka: Kafka | null = null;
@@ -58,7 +60,7 @@ export class KafkaProducer {
       return ok("Kafka is not initialized");
     }
 
-    const p = this.kafka.producer();
+    const producer = this.kafka.producer();
 
     let attempts = 0;
     const maxAttempts = 3;
@@ -74,7 +76,7 @@ export class KafkaProducer {
           };
         });
 
-        const res = await p.produceMany(data);
+        const res = await producer.produceMany(data);
 
         console.log(`Produced ${msgs.length} messages to ${topic}`);
         return ok(`Produced ${res.length} messages`);
@@ -92,4 +94,51 @@ export class KafkaProducer {
 
     return err(`Failed to produce messages after ${maxAttempts} attempts`);
   }
+
+  async sendScoresMessage(
+    scoresMessages: HeliconeScoresMessage[],
+    topic: Topics
+  ): PromiseGenericResult<string> {
+    if (!this.kafka) {
+      return ok("Kafka is not initialized");
+    }
+
+    const producer = this.kafka.producer();
+
+    let attempts = 0;
+    const maxAttempts = 3;
+    const timeout = 1000;
+
+    while (attempts < maxAttempts) {
+      try {
+        const data = scoresMessages.map((msg) => {
+          return {
+            value: JSON.stringify({ value: JSON.stringify(msg) }),
+            topic: topic,
+            key: msg.requestId,
+          };
+        });
+
+        const res = await producer.produceMany(data);
+
+        console.log(`Produced ${scoresMessages.length} messages to ${topic}`);
+        return ok(`Produced ${res.length} messages`);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        console.log(`Attempt ${attempts + 1} failed: ${error.message}`);
+        attempts++;
+        if (attempts < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, timeout));
+        } else {
+          return err("Failed to produce scores message");
+        }
+      }
+    }
+
+    return err(
+      `Failed to produce scores message after ${maxAttempts} attempts`
+    );
+  }
+
+  public isKafkaEnabled = (): boolean => this.kafka !== null;
 }

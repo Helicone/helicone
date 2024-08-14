@@ -1205,10 +1205,10 @@
     "@hapi/bourne" "^3.0.0"
     "@hapi/hoek" "^11.0.2"
 
-"@helicone/prompts@^1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@helicone/prompts/-/prompts-1.0.7.tgz#50cdff24d2e52b413b1cef9e8ab0e274625d3523"
-  integrity sha512-j6pZfYl46hBqkFeKXJh69KOFCfgaix6hS5wnstHHqU/Ciq31fGh/NKl4S6/KWw5Za08h/gOeNRXuVlMU1beuuQ==
+"@helicone/prompts@^1.0.10":
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/@helicone/prompts/-/prompts-1.0.10.tgz#b75032748240b26210a78e60d15f65612fc9f35c"
+  integrity sha512-yaiYp6idDIckR9NATuMfmTtHBhS4xkd0MknD2A4egZ7EWhsHq0ns5q98fWzL6KMrokl35fnr2FVhGgFaRKvbGg==
   dependencies:
     "@types/node" "^20.14.11"
     typescript "^5.5.3"

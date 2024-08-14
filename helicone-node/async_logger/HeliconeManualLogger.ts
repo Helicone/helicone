@@ -19,7 +19,7 @@ export class HeliconeManualLogger {
     this.request = request;
   }
 
-  public sendLog(response: ILogResponse | any, meta: Record<string, string>): void {
+  public sendLog(response: ILogResponse | any, meta?: Record<string, string>): void {
     if (this.request === null) {
       console.error("Request is not registered.");
       return;

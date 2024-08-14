@@ -1,9 +1,23 @@
 {
   "name": "Helicone OSS LLM Observability",
+  "theme": "venus",
   "logo": {
     "light": "/logo/light.png",
     "dark": "/logo/dark.svg"
   },
+
+  "anchors": [
+    {
+      "name": "API References",
+      "icon": "code",
+      "url": "rest"
+    },
+    {
+      "name": "Use Cases",
+      "icon": "list-ul",
+      "url": "use-cases"
+    }
+  ],
   "analytics": {
     "koala": {
       "publicApiKey": "pk_28dd6b0bb95629a42e92bd526a1234a9fc79"
@@ -25,19 +39,10 @@
     "default": "light"
   },
   "topbarCtaButton": {
-    "name": "Sign In",
+    "name": "Console",
     "url": "https://us.helicone.ai/#:~:text=Discord-,Sign,-In"
   },
-  "tabs": [
-    {
-      "name": "Use Cases",
-      "url": "use-cases"
-    },
-    {
-      "name": "API",
-      "url": "rest"
-    }
-  ],
+
   "feedback": {
     "suggestEdit": true,
     "raiseIssue": true
@@ -56,6 +61,21 @@
       "group": "Dev Integrations",
       "pages": [
         {
+          "group": "Generic Gateway",
+          "pages": [
+            "getting-started/integration-method/gateway",
+            "getting-started/integration-method/custom"
+          ],
+          "icon": "chart-network",
+          "iconType": "solid"
+        },
+        {
+          "group": "Async Logging",
+          "pages": ["getting-started/integration-method/openllmetry"],
+          "icon": "arrows-rotate",
+          "iconType": "solid"
+        },
+        {
           "group": "OpenAI",
           "pages": [
             "integrations/openai/javascript",
@@ -65,7 +85,9 @@
             "integrations/openai/crewai",
             "integrations/openai/async",
             "integrations/openai/curl"
-          ]
+          ],
+          "icon": "dice-d20",
+          "iconType": "solid"
         },
         {
           "group": "Azure OpenAI",
@@ -74,7 +96,9 @@
             "integrations/azure/python",
             "integrations/azure/langchain",
             "integrations/azure/curl"
-          ]
+          ],
+          "icon": "microsoft",
+          "iconType": "solid"
         },
         {
           "group": "Anthropic",
@@ -83,17 +107,21 @@
             "integrations/anthropic/python",
             "integrations/anthropic/langchain",
             "integrations/anthropic/curl"
-          ]
+          ],
+          "icon": "burst",
+          "iconType": "solid"
         },
         {
           "group": "Ollama",
-          "pages": [
-            "integrations/ollama/javascript"
-          ]
+          "pages": ["integrations/ollama/javascript"],
+          "icon": "alicorn",
+          "iconType": "solid"
         },
         {
           "group": "AWS Bedrock",
-          "pages": ["integrations/bedrock/javascript"]
+          "pages": ["integrations/bedrock/javascript"],
+          "icon": "aws",
+          "iconType": "solid"
         },
         {
           "group": "Gemini",
@@ -103,16 +131,22 @@
               "pages": [
                 "integrations/gemini/api/javascript",
                 "integrations/gemini/api/curl"
-              ]
+              ],
+              "icon": "code",
+              "iconType": "solid"
             },
             {
               "group": "Vertex AI (Enterprise)",
               "pages": [
                 "integrations/gemini/vertex/javascript",
                 "integrations/gemini/vertex/curl"
-              ]
+              ],
+              "icon": "code",
+              "iconType": "solid"
             }
-          ]
+          ],
+          "icon": "google",
+          "iconType": "solid"
         },
         "getting-started/integration-method/vercelai",
         "getting-started/integration-method/anyscale",
@@ -124,35 +158,27 @@
             "integrations/groq/javascript",
             "integrations/groq/python",
             "integrations/groq/curl"
-          ]
+          ],
+          "icon": "cloud",
+          "iconType": "solid"
         },
         "getting-started/integration-method/deepinfra",
         "getting-started/integration-method/openrouter",
         "getting-started/integration-method/litellm",
-        "getting-started/integration-method/fireworks",
-        "getting-started/integration-method/posthog",
-
-        {
-          "group": "Generic Gateway",
-          "pages": [
-            "getting-started/integration-method/gateway",
-            "getting-started/integration-method/custom"
-          ]
-        },
-        {
-          "group": "Async Logging",
-          "pages": ["getting-started/integration-method/openllmetry"]
-        }
+        "getting-started/integration-method/fireworks"
       ]
     },
     {
       "group": "Other Integrations",
       "pages": [
+        "getting-started/integration-method/posthog",
+        "other-integrations/ragas",
         "other-integrations/open-webui",
         "other-integrations/meta-gpt",
         "other-integrations/open-devin",
         "other-integrations/embedchain",
-        "other-integrations/dify"
+        "other-integrations/dify",
+        "other-integrations/upstash"
       ]
     },
     {
