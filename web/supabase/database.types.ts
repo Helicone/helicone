@@ -283,6 +283,44 @@ export type Database = {
         }
         Relationships: []
       }
+<<<<<<< HEAD
+=======
+      experiment_dataset_v2: {
+        Row: {
+          created_at: string | null
+          dataset_type: string
+          id: string
+          meta: Json | null
+          name: string | null
+          organization: string
+        }
+        Insert: {
+          created_at?: string | null
+          dataset_type?: string
+          id?: string
+          meta?: Json | null
+          name?: string | null
+          organization: string
+        }
+        Update: {
+          created_at?: string | null
+          dataset_type?: string
+          id?: string
+          meta?: Json | null
+          name?: string | null
+          organization?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_organization"
+            columns: ["organization"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+>>>>>>> main
       experiment_dataset_v2_row: {
         Row: {
           created_at: string

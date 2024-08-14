@@ -987,7 +987,8 @@
 					"GROQ",
 					"COHERE",
 					"MISTRAL",
-					"DEEPINFRA"
+					"DEEPINFRA",
+					"QSTASH"
 				]
 			},
 			"Provider": {

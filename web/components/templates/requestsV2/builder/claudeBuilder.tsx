@@ -50,7 +50,7 @@ class ClaudeBuilder extends AbstractRequestBuilder {
         this.response.request_body.tooLarge
           ? "Helicone Message: Input too large"
           : this.response.request_body.prompt ||
-              this.response.request_body.messages.slice(-1)[0].content ||
+              this.response.request_body.messages?.slice(-1)?.[0]?.content ||
               ""
       ),
       responseText: getResponseText(),
@@ -62,7 +62,7 @@ class ClaudeBuilder extends AbstractRequestBuilder {
           <Completion
             request={
               this.response.request_body.prompt ||
-              this.response.request_body.messages.slice(-1)[0].content ||
+              this.response.request_body.messages?.slice(-1)?.[0]?.content ||
               ""
             }
             response={{

@@ -1,5 +1,8 @@
 import { Menu, Transition } from "@headlessui/react";
-import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
+import {
+  AdjustmentsHorizontalIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/outline";
 import { Column } from "@tanstack/react-table";
 import { Fragment, useState } from "react";
 import { Col } from "../../../../layout/common/col";
@@ -10,6 +13,9 @@ import {
   DragColumnItem,
   DragList,
 } from "./DragList";
+import { Divider } from "@mui/material";
+import Tooltip, { TooltipProps, tooltipClasses } from "@mui/material/Tooltip";
+import { styled } from "@mui/material/styles";
 
 interface ViewColumnsProps<T> {
   columns: Column<T, unknown>[];
@@ -28,12 +34,24 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
       }
       return acc;
     },
-    ["all", "Default"] as string[]
+    ["All columns", "Default"] as string[]
   );
 
   const [selectedCategory, setSelectedCategory] = useState<
-    string | undefined | "all"
+    string | undefined | "All columns"
   >(categories[0]);
+
+  const BlackTooltip = styled(({ className, ...props }: TooltipProps) => (
+    <Tooltip {...props} classes={{ popper: className }} />
+  ))(({ theme }) => ({
+    [`& .${tooltipClasses.arrow}`]: {
+      color: theme.palette.common.black,
+    },
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: theme.palette.common.black,
+      fontSize: "0.8rem",
+    },
+  }));
 
   return (
     <Menu as="div" className="relative inline-block text-left">
@@ -57,58 +75,73 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="border border-gray-300 dark:border-gray-700 absolute z-10 right-0 mt-2 w-[800px] origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <Row className="p-4  gap-4">
-            <Col className="relative flex-1 max-h-[calc(100vh-500px)]  divide-y space-y-2 divide-gray-200">
-              <h3 className="text-xs text-black dark:text-white font-medium">
-                Columns (Drag to reorder)
-              </h3>
-              <div className="overflow-y-auto h-full">
+        <Menu.Items className="border border-gray-300 dark:border-gray-700 absolute z-10 right-0 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden">
+          <Row className="h-full">
+            <Col className="relative flex-1 h-full p-4">
+              <div className="flex flex-row items-center justify-start space-x-2 mb-4">
+                <h3 className="text-xs text-black dark:text-white font-medium">
+                  Column Reorder
+                </h3>
+                <BlackTooltip
+                  title="The ordering only affects your Requests table"
+                  placement="top"
+                  arrow
+                >
+                  <InformationCircleIcon className="h-5 w-5 text-gray-500 inline" />
+                </BlackTooltip>
+              </div>
+
+              <div className="overflow-y-auto h-[calc(100%-6rem)]">
                 <DragList items={activeColumns} setItems={setActiveColumns} />
               </div>
               <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white dark:from-black to-transparent pointer-events-none"></div>
             </Col>
-            <Col className="space-y-2 divide-y divide-gray-200 flex-1">
-              <ColumnOptions
-                categories={categories}
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-                columns={columns}
-                activeColumns={activeColumns}
-                setActiveColumns={setActiveColumns}
-              />
-              <Row className="flex justify-between items-center pt-2 gap-2">
-                <button
-                  onClick={() =>
-                    setActiveColumns(columnDefsToDragColumnItems(columns))
-                  }
-                  className="text-xs flex items-center justify-center gap-x-2.5 px-2 py-1 font-medium text-gray-500 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg"
-                >
-                  Reset
-                </button>
-                <Row>
+            <Divider orientation="vertical" flexItem />
+            <Col className="flex-1 flex flex-col h-full">
+              <div className="flex-grow overflow-hidden p-4">
+                <ColumnOptions
+                  categories={categories}
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
+                  columns={columns}
+                  activeColumns={activeColumns}
+                  setActiveColumns={setActiveColumns}
+                />
+              </div>
+              <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+                <Row className="flex justify-between items-center gap-2">
                   <button
                     onClick={() =>
-                      setActiveColumns(
-                        activeColumns.map((c) => ({ ...c, shown: false }))
-                      )
+                      setActiveColumns(columnDefsToDragColumnItems(columns))
                     }
                     className="text-xs flex items-center justify-center gap-x-2.5 px-2 py-1 font-medium text-gray-500 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg"
                   >
-                    Deselect All
+                    Back to preset
                   </button>
-                  <button
-                    onClick={() =>
-                      setActiveColumns(
-                        activeColumns.map((c) => ({ ...c, shown: true }))
-                      )
-                    }
-                    className="text-xs flex items-center justify-center gap-x-2.5 px-2 py-1 font-medium text-gray-500 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg"
-                  >
-                    Select All
-                  </button>
+                  <Row>
+                    <button
+                      onClick={() =>
+                        setActiveColumns(
+                          activeColumns.map((c) => ({ ...c, shown: false }))
+                        )
+                      }
+                      className="text-xs flex items-center justify-center gap-x-2.5 px-2 py-1 font-medium text-gray-500 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg"
+                    >
+                      Deselect All
+                    </button>
+                    <button
+                      onClick={() =>
+                        setActiveColumns(
+                          activeColumns.map((c) => ({ ...c, shown: true }))
+                        )
+                      }
+                      className="text-xs flex items-center justify-center gap-x-2.5 px-2 py-1 font-medium text-gray-500 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg"
+                    >
+                      Select All
+                    </button>
+                  </Row>
                 </Row>
-              </Row>
+              </div>
             </Col>
           </Row>
         </Menu.Items>
