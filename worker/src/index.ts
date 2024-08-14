@@ -2,13 +2,13 @@
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
 import { InMemoryRateLimiter } from "./lib/clients/InMemoryRateLimiter";
-import { RequestWrapper } from "./lib/RequestWrapper";
-import { updateLoopUsers } from "./lib/managers/LoopsManager";
-import { buildRouter } from "./routers/routerFactory";
-import { AlertManager } from "./lib/managers/AlertManager";
 import { AlertStore } from "./lib/db/AlertStore";
 import { ClickhouseClientWrapper } from "./lib/db/ClickhouseWrapper";
+import { AlertManager } from "./lib/managers/AlertManager";
+import { updateLoopUsers } from "./lib/managers/LoopsManager";
+import { RequestWrapper } from "./lib/RequestWrapper";
 import { ProviderName } from "./packages/cost/providers/mappings";
+import { buildRouter } from "./routers/routerFactory";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
