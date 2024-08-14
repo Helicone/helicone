@@ -2,13 +2,13 @@
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
 import { InMemoryRateLimiter } from "./lib/clients/InMemoryRateLimiter";
-import { RequestWrapper } from "./lib/RequestWrapper";
-import { updateLoopUsers } from "./lib/managers/LoopsManager";
-import { buildRouter } from "./routers/routerFactory";
-import { AlertManager } from "./lib/managers/AlertManager";
 import { AlertStore } from "./lib/db/AlertStore";
 import { ClickhouseClientWrapper } from "./lib/db/ClickhouseWrapper";
+import { AlertManager } from "./lib/managers/AlertManager";
+import { updateLoopUsers } from "./lib/managers/LoopsManager";
+import { RequestWrapper } from "./lib/RequestWrapper";
 import { ProviderName } from "./packages/cost/providers/mappings";
+import { buildRouter } from "./routers/routerFactory";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -232,6 +232,16 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
           GATEWAY_TARGET: "https://api.app.predibase.com",
         };
       }
+    } else if (hostParts[0].includes("qstash")) {
+      const pathname = new URL(request.url).pathname;
+      if (!pathname.startsWith("/llm")) {
+        throw new Error("QStash only accepts routes that start with /llm");
+      }
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://qstash.upstash.io",
+      };
     }
   }
 

@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 
-import {
-  useGetFullRequest,
-  useGetRequests,
-} from "../../../services/hooks/requests";
+import { HeliconeRequest } from "../../../lib/api/request/request";
+import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
+import { useModels } from "../../../services/hooks/models";
+import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
+import { useGetRequests } from "../../../services/hooks/requests";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   getPropertyFilters,
@@ -11,17 +12,13 @@ import {
   SingleFilterDef,
   textWithSuggestions,
 } from "../../../services/lib/filters/frontendFilterDefs";
-import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
-import getNormalizedRequest from "./builder/requestBuilder";
-import { useModels } from "../../../services/hooks/models";
-import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
-import { TimeFilter } from "../dashboard/dashboardPage";
-import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import {
   filterUITreeToFilterNode,
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
-import { HeliconeRequest } from "../../../lib/api/request/request";
+import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
+import { TimeFilter } from "../dashboard/dashboardPage";
+import getNormalizedRequest from "./builder/requestBuilder";
 
 const useRequestsPageV2 = (
   currentPage: number,
@@ -80,7 +77,7 @@ const useRequestsPageV2 = (
     operator: "and",
   };
 
-  const { requests, count } = useGetRequests(
+  const { requests, count, isBodyLoading, refetch, remove } = useGetRequests(
     currentPage,
     currentPageSize,
     filter,
@@ -90,27 +87,20 @@ const useRequestsPageV2 = (
   );
 
   const isDataLoading = requests.isInitialLoading || isPropertiesLoading;
-  const { requestBodies } = useGetFullRequest(requests.data?.data || []);
 
   const normalizedRequests = useMemo(() => {
-    return (requestBodies.data?.data?.length ?? 0) > 0
-      ? requestBodies.data?.data || []
-      : getNormalizedRequests(requests.data?.data || []);
-  }, [requestBodies.data?.data, requests.data?.data]);
+    return getNormalizedRequests(requests.data?.data || []);
+  }, [requests.data?.data]);
 
   return {
-    normalizedRequests:
-      (requestBodies.data?.data?.length ?? 0) > 0
-        ? requestBodies.data?.data || []
-        : normalizedRequests,
+    normalizedRequests: normalizedRequests,
     count: count.data?.data,
     isDataLoading,
-    isBodyLoading:
-      requestBodies.isLoading || requestBodies.data?.data?.length === 0,
+    isBodyLoading: isBodyLoading,
     isCountLoading: count.isLoading,
     properties,
-    refetch: requests.refetch,
-    remove: requests.remove,
+    refetch: refetch,
+    remove: remove,
     searchPropertyFilters,
     filterMap,
     filter,

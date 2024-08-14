@@ -1,4 +1,5 @@
 import getNormalizedRequest from "../../components/templates/requestsV2/builder/requestBuilder";
+import { modelCost } from "../api/metrics/costCalc";
 import { HeliconeRequest } from "../api/request/request";
 import { Session, Trace } from "./sessionTypes";
 
@@ -30,7 +31,17 @@ export function sessionFromHeliconeRequests(
       "Helicone-Session-Id"
     ] as string,
     session_tags: [],
-    session_cost_usd: 0,
+    session_cost_usd: requests
+      .map((r) =>
+        modelCost({
+          model: r.model_override ?? r.request_model ?? r.response_model ?? "",
+          provider: r.provider,
+          sum_completion_tokens: r.completion_tokens ?? 0,
+          sum_prompt_tokens: r.prompt_tokens ?? 0,
+          sum_tokens: r.completion_tokens ?? 0 + (r.prompt_tokens ?? 0),
+        })
+      )
+      .reduce((a, b) => a + b, 0),
     traces: requests
       .map((request) => {
         const x: Trace = {

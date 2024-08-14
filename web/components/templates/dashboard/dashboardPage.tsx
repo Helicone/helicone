@@ -59,6 +59,7 @@ import { QuantilesGraph } from "./quantilesGraph";
 import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
+import { formatLargeNumber } from "../../shared/utils/numberFormat";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -91,17 +92,6 @@ export function formatNumberString(
   } else {
     return num.toLocaleString("en-US");
   }
-}
-
-function formatLargeNumber(value: number): string {
-  if (value >= 1000) {
-    return value.toLocaleString("en-US", { maximumFractionDigits: 0 });
-  } else if (value >= 1000) {
-    return value.toLocaleString("en-US", { maximumFractionDigits: 0 });
-  } else if (value >= 0.01) {
-    return value.toLocaleString("en-US");
-  }
-  return value.toFixed(2);
 }
 
 export type Loading<T> = T | "loading";
@@ -884,6 +874,19 @@ const DashboardPage = (props: DashboardPageProps) => {
                   >
                     Request a new graph
                   </button>
+                  <div className="text-sm text-gray-500 text-center max-w-xs">
+                    Or use our{" "}
+                    <a
+                      href="https://docs.helicone.ai/getting-started/integration-method/posthog"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-500 underline"
+                    >
+                      PostHog integration
+                    </a>{" "}
+                    to create custom graphs or get started with our pre-built
+                    template.
+                  </div>
                 </div>
               </div>
 

@@ -97,10 +97,14 @@ export const Tree: React.FC<TreeProps> = ({
       className
     )}
   >
-    <TreeNode
-      node={data}
-      selectedRequestIdDispatch={selectedRequestIdDispatch}
-      isLastChild={true}
-    />
+    {data.children &&
+      data.children.map((child, index) => (
+        <TreeNode
+          key={index}
+          node={child}
+          selectedRequestIdDispatch={selectedRequestIdDispatch}
+          isLastChild={!!data.children && index === data.children.length - 1}
+        />
+      ))}
   </div>
 );

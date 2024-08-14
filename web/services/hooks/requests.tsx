@@ -1,16 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../components/layout/organizationContext";
-import { HeliconeRequest } from "../../lib/api/request/request";
-import { getJawnClient } from "../../lib/clients/jawn";
-import { Result } from "../../lib/result";
-import { FilterNode } from "../lib/filters/filterDefs";
-import { placeAssetIdValues } from "../lib/requestTraverseHelper";
-import { SortLeafRequest } from "../lib/sorts/requests/sorts";
 import {
   getModelFromPath,
   mapGeminiPro,
 } from "../../components/templates/requestsV2/builder/mappers/geminiMapper";
-import { getNormalizedRequests } from "../../components/templates/requestsV2/useRequestsPageV2";
+import { HeliconeRequest } from "../../lib/api/request/request";
+import { getJawnClient } from "../../lib/clients/jawn";
+import { ok, Result } from "../../lib/result";
+import { FilterNode } from "../lib/filters/filterDefs";
+import { placeAssetIdValues } from "../lib/requestTraverseHelper";
+import { SortLeafRequest } from "../lib/sorts/requests/sorts";
 
 const useGetRequests = (
   currentPage: number,
@@ -21,42 +20,52 @@ const useGetRequests = (
   isLive: boolean = false
 ) => {
   const org = useOrg();
-  return {
-    requests: useQuery({
-      queryKey: [
-        "requestsData",
-        currentPage,
-        currentPageSize,
-        advancedFilter,
-        sortLeaf,
-        isCached,
-        org?.currentOrg?.id,
-      ],
-      queryFn: async (query) => {
-        const currentPage = query.queryKey[1] as number;
-        const currentPageSize = query.queryKey[2] as number;
-        const advancedFilter = query.queryKey[3];
-        const sortLeaf = query.queryKey[4];
-        const isCached = query.queryKey[5];
-        const orgId = query.queryKey[6] as string;
-        const jawn = getJawnClient(orgId);
-        const response = await jawn.POST("/v1/request/query", {
-          body: {
-            filter: advancedFilter as any,
-            offset: (currentPage - 1) * currentPageSize,
-            limit: currentPageSize,
-            sort: sortLeaf as any,
-            isCached: isCached as any,
-          },
-        });
 
-        return response.data as Result<HeliconeRequest[], string>;
-      },
-      refetchOnWindowFocus: false,
-      retry: false,
-      refetchIntervalInBackground: false,
-      refetchInterval: isLive ? 2_000 : false,
-    }),
+  const requests = useQuery({
+    queryKey: [
+      "requestsData",
+      currentPage,
+      currentPageSize,
+      advancedFilter,
+      sortLeaf,
+      isCached,
+      org?.currentOrg?.id,
+    ],
+    queryFn: async (query) => {
+      const currentPage = query.queryKey[1] as number;
+      const currentPageSize = query.queryKey[2] as number;
+      const advancedFilter = query.queryKey[3];
+      const sortLeaf = query.queryKey[4];
+      const isCached = query.queryKey[5];
+      const orgId = query.queryKey[6] as string;
+      const jawn = getJawnClient(orgId);
+      const response = await jawn.POST("/v1/request/query", {
+        body: {
+          filter: advancedFilter as any,
+          offset: (currentPage - 1) * currentPageSize,
+          limit: currentPageSize,
+          sort: sortLeaf as any,
+          isCached: isCached as any,
+        },
+      });
+
+      return response.data as Result<HeliconeRequest[], string>;
+    },
+    refetchOnWindowFocus: false,
+    retry: false,
+    refetchIntervalInBackground: false,
+    refetchInterval: isLive ? 2_000 : false,
+  });
+
+  const { requestBodies } = useGetFullRequest(requests.data?.data || []);
+
+  return {
+    requests:
+      (requestBodies.data?.data?.length ?? 0) > 0 ? requestBodies : requests,
+    refetch: requests.refetch,
+    remove: requests.remove,
+    isBodyLoading:
+      requestBodies.isLoading || (requestBodies.data?.data?.length ?? 0) === 0,
     count: useQuery({
       queryKey: [
         "requestsCount",
@@ -92,10 +101,7 @@ const useGetRequests = (
 export const useGetFullRequest = (result: HeliconeRequest[]) => {
   return {
     requestBodies: useQuery({
-      queryKey: [
-        "requestsBodies",
-        result,
-      ],
+      queryKey: ["requestsBodies", result],
       queryFn: async (query) => {
         const requests = await Promise.all(
           result.map(async (request: HeliconeRequest) => {
@@ -110,7 +116,6 @@ export const useGetFullRequest = (result: HeliconeRequest[]) => {
                   if (request.asset_urls) {
                     content = placeAssetIdValues(request.asset_urls, content);
                   }
-
 
                   const model =
                     request.model_override ||
@@ -133,9 +138,9 @@ export const useGetFullRequest = (result: HeliconeRequest[]) => {
                   }
 
                   return {
-                      ...request,
-                      request_body: content.request,
-                      response_body: content.response,
+                    ...request,
+                    request_body: content.request,
+                    response_body: content.response,
                   };
                 }
               } catch (error) {
@@ -143,12 +148,11 @@ export const useGetFullRequest = (result: HeliconeRequest[]) => {
                 return request;
               }
             }
-            console.log("no url");
             return request; // Return request if no signed_body_url
           }) ?? []
         );
 
-        return { data: getNormalizedRequests(requests), error: null };
+        return ok(requests);
       },
       refetchOnWindowFocus: false,
       retry: false,

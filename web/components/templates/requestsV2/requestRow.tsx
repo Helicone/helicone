@@ -209,7 +209,7 @@ const RequestRow = (props: {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-8">
+    <div className="flex flex-col h-full space-y-8 pb-72">
       <div className="flex flex-row items-center">
         <ul
           className={clsx(
