@@ -9,14 +9,10 @@ import { useGetHeliconeDatasets } from "../../../services/hooks/dataset/helicone
 
 interface NewDatasetProps {
   requests: NormalizedRequest[];
-
-  setModalOpen: (open: boolean) => void;
+  onComplete: () => void;
 }
 
-export default function NewDataset({
-  requests,
-  setModalOpen,
-}: NewDatasetProps) {
+export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
   const [openCreateDataset, setOpenCreateDataset] = useState(false);
   const [newDatasetName, setNewDatasetName] = useState("");
   const [selectedDataset, setSelectedDataset] = useState<string | null>(null);
@@ -100,7 +96,7 @@ export default function NewDataset({
         <Row className="justify-end gap-5">
           <button
             className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900"
-            onClick={() => setModalOpen(false)}
+            onClick={onComplete}
           >
             Cancel
           </button>
@@ -128,7 +124,7 @@ export default function NewDataset({
                 if (res.data && !res.data.error) {
                   setNotification("Requests added to dataset", "success");
 
-                  setModalOpen(false);
+                  onComplete();
                 } else {
                   setNotification("Failed to add requests to dataset", "error");
                 }
