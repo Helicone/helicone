@@ -92,7 +92,7 @@ const useRequestsPageV2 = (
     normalizedRequests: getNormalizedRequests(requests.requests),
     count: count.data?.data,
     isDataLoading,
-    isBodyLoading: false,
+    isBodyLoading: requests.isRefetching,
     isCountLoading: count.isLoading,
     properties,
     refetch: requests.refetch,

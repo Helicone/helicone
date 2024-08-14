@@ -57,6 +57,7 @@ const useGetRequestsWithBodies = (
     },
     refetchOnWindowFocus: false,
     refetchInterval: isLive ? 1_000 : false,
+    keepPreviousData: true,
   });
 
   const requestsWithSignedUrls = useMemo(() => data?.data ?? [], [data]);
