@@ -235,6 +235,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isDataLoading,
     isBodyLoading,
     isCountLoading,
+    isRefetching, 
     normalizedRequests,
     properties,
     refetch,
@@ -710,8 +711,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
               >
                 <ArrowPathIcon
                   className={clsx(
-                    isBodyLoading ? "animate-spin" : "",
-                    "h-5 w-5 inline"
+                    isDataLoading || isRefetching ? "animate-spin" : "",
+                    "h-5 w-5 inline duration-500 ease-in-out"
                   )}
                 />
               </button>
