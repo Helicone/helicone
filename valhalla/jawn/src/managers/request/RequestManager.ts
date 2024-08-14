@@ -1,7 +1,5 @@
 // src/users/usersService.ts
-import { KafkaMessage } from "kafkajs";
 import { RequestQueryParams } from "../../controllers/public/requestController";
-import { KafkaProducer } from "../../lib/clients/KafkaProducer";
 import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
@@ -118,7 +116,6 @@ export class RequestManager extends BaseManager {
     requestId: string,
     feedback: boolean
   ): Promise<Result<null, string>> {
-    const kafkaProducer = new KafkaProducer();
     const requestResponse = await this.waitForRequestAndResponse(
       requestId,
       this.authParams.organizationId
