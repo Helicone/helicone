@@ -16,4 +16,14 @@ export const costs: ModelRow[] = [
       completion_token: 3e-7,
     },
   },
+  {
+    model: {
+      operator: "includes",
+      value: "mistral",
+    },
+    cost: {
+      prompt_token: 3e-7,
+      completion_token: 3e-7,
+    },
+  },
 ];

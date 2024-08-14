@@ -680,6 +680,7 @@ END
 WHEN (request_response_versioned.provider = 'QSTASH') THEN (
   CASE
   WHEN (request_response_versioned.model ILIKE '%llama%') THEN 300 * request_response_versioned.prompt_tokens + 300 * request_response_versioned.completion_tokens
+WHEN (request_response_versioned.model ILIKE '%mistral%') THEN 300 * request_response_versioned.prompt_tokens + 300 * request_response_versioned.completion_tokens
   ELSE 0
 END
 )
