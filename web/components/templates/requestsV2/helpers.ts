@@ -43,7 +43,7 @@ export function getGenericRequestText(requestBody: any): string {
     Array.isArray(requestBody.messages)
   ) {
     return `${requestBody.system}\n\n${requestBody.messages
-      .map((m) => m.content)
+      .map((m: any) => m?.content ?? "")
       .join("\n")}`;
   }
 
