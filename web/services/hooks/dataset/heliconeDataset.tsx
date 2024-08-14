@@ -121,7 +121,11 @@ const useGetHeliconeDatasetRows = (id: string) => {
     isLoading: isLoading || isUrlsFetching,
     refetch,
     isRefetching: isRefetching || isUrlsFetching,
-    rows,
+    rows: rows.map((r) => ({
+      ...r,
+      request_body: r.request_response_body?.request,
+      response_body: r.request_response_body?.response,
+    })),
     completedQueries: urlQueries.filter((query) => query.isSuccess).length,
     totalQueries: rowsWithSignedUrls.length,
   };

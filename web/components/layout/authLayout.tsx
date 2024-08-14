@@ -3,6 +3,7 @@ import Image from "next/image";
 
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
+  ArchiveBoxIcon,
   Bars3BottomLeftIcon,
   BeakerIcon,
   BellIcon,
@@ -85,6 +86,16 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: TableCellsIcon,
       current: pathname.includes("/requests"),
     },
+    ...(!user?.email?.includes("@helicone.ai")
+      ? []
+      : [
+          {
+            name: "Datasets",
+            href: "/datasets",
+            icon: CircleStackIcon,
+            current: pathname.includes("/datasets"),
+          },
+        ]),
     {
       name: "Sessions",
       href: "/sessions",
@@ -138,7 +149,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     {
       name: "Cache",
       href: "/cache",
-      icon: CircleStackIcon,
+      icon: ArchiveBoxIcon,
       current: pathname.includes("/cache"),
     },
     {

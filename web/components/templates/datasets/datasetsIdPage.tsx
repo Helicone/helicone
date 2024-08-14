@@ -10,6 +10,14 @@ import HcButton from "../../ui/hcButton";
 import { Col, Row } from "../../layout/common";
 import RequestCard from "../requestsV2/requestCard";
 import ThemedTable from "../../shared/themed/table/themedTable";
+import {
+  getGenericRequestText,
+  getGenericResponseText,
+} from "../requestsV2/helpers";
+import { useState } from "react";
+import ThemedDrawer from "../../shared/themed/themedDrawer";
+import MarkdownEditor from "../../shared/markdownEditor";
+import EditDataset from "./EditDataset";
 
 interface DatasetIdPageProps {
   id: string;
@@ -17,12 +25,19 @@ interface DatasetIdPageProps {
   pageSize: number;
 }
 
+export type DatasetRow =
+  | ReturnType<typeof useGetHeliconeDatasetRows>["rows"][number]
+  | null;
 const DatasetIdPage = (props: DatasetIdPageProps) => {
   const { id, currentPage, pageSize } = props;
   const { rows, isLoading } = useGetHeliconeDatasetRows(id);
   const { datasets, isLoading: isLoadingDataset } = useGetHeliconeDatasets([
     id,
   ]);
+
+  const [selectedRow, setSelectedRow] = useState<DatasetRow>(null);
+
+  const [open, setOpen] = useState(false);
 
   return (
     <>
@@ -63,10 +78,31 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
             },
             {
               header: "Request Body",
-              accessorKey: "request_response_body",
+              accessorKey: "request_body",
               cell: ({ row }) => {
-                return JSON.stringify(
+                return getGenericRequestText(
                   row.original.request_response_body?.request
+                );
+              },
+              size: 500,
+            },
+            {
+              header: "Response Body",
+              accessorKey: "response_body",
+              size: 500,
+              cell: ({ row }) => {
+                const responseText = getGenericResponseText(
+                  row.original.request_response_body?.response,
+                  200
+                );
+                return (
+                  <div
+                    onClick={() => navigator.clipboard.writeText(responseText)}
+                    className="cursor-pointer"
+                    title="Click to copy"
+                  >
+                    {responseText}
+                  </div>
                 );
               },
             },
@@ -76,21 +112,19 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           id="datasets"
           skeletonLoading={false}
           onRowSelect={(row) => {
-            router.push(`/datasets/${row.id}`);
+            setSelectedRow(row);
+            setOpen(true);
           }}
         />
-        <Row className="">
-          <div className="flex flex-col space-y-4 w-1/5">
-            <h2 className="text-2xl font-semibold">Dataset</h2>
-            <Col className="flex flex-col space-y-4">
-              {rows?.map((row) => (
-                <div key={row.id}>{row.id}</div>
-              ))}
-            </Col>
-          </div>
-          <div className="flex flex-col space-y-4 w-4/5">Hello</div>
-        </Row>
       </div>
+      <ThemedDrawer
+        open={!!selectedRow}
+        setOpen={(open) => setSelectedRow(open ? selectedRow : null)}
+        defaultWidth="w-[80vw]"
+        defaultExpanded={true}
+      >
+        <EditDataset selectedRow={selectedRow} />
+      </ThemedDrawer>
     </>
   );
 };

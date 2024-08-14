@@ -5,6 +5,7 @@ import { Row } from "../../../layout/common";
 import ThemedModal from "../../../shared/themed/themedModal";
 import NewDataset from "../../datasets/NewDataset";
 import { NormalizedRequest } from "../builder/abstractRequestBuilder";
+import { useUser } from "@supabase/auth-helpers-react";
 
 interface SortButtonProps<T> {
   datasetMode: boolean;
@@ -15,6 +16,9 @@ interface SortButtonProps<T> {
 export default function DatasetButton<T>(props: SortButtonProps<T>) {
   const { datasetMode, setDatasetMode, requests } = props;
   const [modalOpen, setModalOpen] = useState(false);
+  const user = useUser();
+
+  if (!user?.email?.includes("@helicone.ai")) return null;
 
   return (
     <>
