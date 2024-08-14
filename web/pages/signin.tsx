@@ -34,11 +34,15 @@ const SignIn = ({
   const { unauthorized } = router.query;
   useEffect(() => {
     if (unauthorized === "true") {
-      supabase.auth.signOut().then(() => {
-        setNotification(
-          "You have been logged out due to unauthorized access.",
-          "error"
-        );
+      supabase.auth.refreshSession().then((session) => {
+        if (!session.data.session?.user) {
+          supabase.auth.signOut().then(() => {
+            setNotification(
+              "You have been logged out due to unauthorized access.",
+              "error"
+            );
+          });
+        }
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
