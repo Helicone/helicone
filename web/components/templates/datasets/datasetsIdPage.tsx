@@ -51,15 +51,6 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
             </div>
           </div>
         </div>
-        {/* {
-    id: string;
-    origin_request_id: string;
-    dataset_id: string;
-    created_at: string;
-    signed_url: components["schemas"]["Result_string.string_"];
-} & {
-    request_response_body?: any;
-} */}
         <ThemedTable
           defaultColumns={[
             {
