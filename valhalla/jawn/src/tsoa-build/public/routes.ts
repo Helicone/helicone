@@ -15,6 +15,8 @@ import { PromptController } from './../../controllers/public/promptController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ExperimentDatasetController } from './../../controllers/public/experimentDatasetController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { HeliconeDatasetController } from './../../controllers/public/heliconeDatasetController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ExperimentController } from './../../controllers/public/experimentController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { DataIsBeautifulRouter } from './../../controllers/public/dataIsBeautifulController';
@@ -746,6 +748,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "datasetName": {"dataType":"string","required":true},
             "requestIds": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "datasetType": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["experiment"]},{"dataType":"enum","enums":["helicone"]}],"required":true},
             "meta": {"ref":"DatasetMetadata"},
         },
         "additionalProperties": false,
@@ -824,6 +827,101 @@ const models: TsoaRoute.Models = {
     "Result___-Array.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess___-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "HeliconeDatasetMetadata": {
+        "dataType": "refObject",
+        "properties": {
+            "promptVersionId": {"dataType":"string"},
+            "inputRecordsIds": {"dataType":"array","array":{"dataType":"string"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "NewHeliconeDatasetParams": {
+        "dataType": "refObject",
+        "properties": {
+            "datasetName": {"dataType":"string","required":true},
+            "requestIds": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "meta": {"ref":"HeliconeDatasetMetadata"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "MutateParams": {
+        "dataType": "refObject",
+        "properties": {
+            "addRequests": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "removeRequests": {"dataType":"array","array":{"dataType":"string"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_string_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"string","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_string.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_string_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "HeliconeDatasetRow": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "origin_request_id": {"dataType":"string","required":true},
+            "dataset_id": {"dataType":"string","required":true},
+            "created_at": {"dataType":"string","required":true},
+            "signed_url": {"ref":"Result_string.string_","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_HeliconeDatasetRow-Array_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"array","array":{"dataType":"refObject","ref":"HeliconeDatasetRow"},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_HeliconeDatasetRow-Array.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_HeliconeDatasetRow-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "HeliconeDataset": {
+        "dataType": "refObject",
+        "properties": {
+            "created_at": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "dataset_type": {"dataType":"string","required":true},
+            "id": {"dataType":"string","required":true},
+            "meta": {"dataType":"union","subSchemas":[{"ref":"Json"},{"dataType":"enum","enums":[null]}],"required":true},
+            "name": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "organization": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_HeliconeDataset-Array_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"array","array":{"dataType":"refObject","ref":"HeliconeDataset"},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_HeliconeDataset-Array.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_HeliconeDataset-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess__experimentId-string__": {
@@ -1880,6 +1978,136 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'mutateDataset',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/helicone-dataset',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(HeliconeDatasetController)),
+            ...(fetchMiddlewares<RequestHandler>(HeliconeDatasetController.prototype.addHeliconeDataset)),
+
+            async function HeliconeDatasetController_addHeliconeDataset(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"NewHeliconeDatasetParams"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new HeliconeDatasetController();
+
+              await templateService.apiHandler({
+                methodName: 'addHeliconeDataset',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/helicone-dataset/:datasetId/mutate',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(HeliconeDatasetController)),
+            ...(fetchMiddlewares<RequestHandler>(HeliconeDatasetController.prototype.mutateHeliconeDataset)),
+
+            async function HeliconeDatasetController_mutateHeliconeDataset(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    datasetId: {"in":"path","name":"datasetId","required":true,"dataType":"string"},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"MutateParams"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new HeliconeDatasetController();
+
+              await templateService.apiHandler({
+                methodName: 'mutateHeliconeDataset',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/helicone-dataset/:datasetId/query',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(HeliconeDatasetController)),
+            ...(fetchMiddlewares<RequestHandler>(HeliconeDatasetController.prototype.queryHeliconeDatasetRows)),
+
+            async function HeliconeDatasetController_queryHeliconeDatasetRows(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    datasetId: {"in":"path","name":"datasetId","required":true,"dataType":"string"},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{}},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new HeliconeDatasetController();
+
+              await templateService.apiHandler({
+                methodName: 'queryHeliconeDatasetRows',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/helicone-dataset/query',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(HeliconeDatasetController)),
+            ...(fetchMiddlewares<RequestHandler>(HeliconeDatasetController.prototype.queryHeliconeDataset)),
+
+            async function HeliconeDatasetController_queryHeliconeDataset(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"datasetIds":{"dataType":"array","array":{"dataType":"string"}}}},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new HeliconeDatasetController();
+
+              await templateService.apiHandler({
+                methodName: 'queryHeliconeDataset',
                 controller,
                 response,
                 next,

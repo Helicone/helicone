@@ -18,6 +18,8 @@ import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
+import ThemedModal from "../../shared/themed/themedModal";
+import NewDataset from "../datasets/NewDataset";
 
 function getPathName(url: string) {
   try {
@@ -41,11 +43,6 @@ const RequestRow = (props: {
     wFull = false,
     displayPreview = true,
   } = props;
-  const [requestFeedback, setRequestFeedback] = useState<{
-    createdAt: string | null;
-    id: string | null;
-    rating: boolean | null;
-  }>(request.feedback);
 
   const org = useOrg();
 
@@ -201,6 +198,8 @@ const RequestRow = (props: {
     }
   };
 
+  const [newDatasetModalOpen, setNewDatasetModalOpen] = useState(false);
+
   return (
     <div className="flex flex-col h-full space-y-8 pb-72">
       <div className="flex flex-row items-center">
@@ -323,7 +322,22 @@ const RequestRow = (props: {
         </ul>
       </div>
 
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-5">
+        <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
+          <button className="flex flex-row items-center space-x-1">
+            Add to Dataset
+            <Tooltip title="Add to Dataset" placement="top">
+              <button
+                onClick={() => {
+                  setNewDatasetModalOpen(true);
+                }}
+                className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
+              >
+                <PlusIcon className="h-3 w-3 text-gray-500" />
+              </button>
+            </Tooltip>
+          </button>
+        </div>
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           Custom Properties{" "}
           <Tooltip title="Add a new label" placement="top">
@@ -540,6 +554,12 @@ const RequestRow = (props: {
           <div className="flex flex-col space-y-2">{request.render()}</div>
         </div>
       )}
+      <ThemedModal open={newDatasetModalOpen} setOpen={setNewDatasetModalOpen}>
+        <NewDataset
+          requests={[request]}
+          setModalOpen={setNewDatasetModalOpen}
+        />
+      </ThemedModal>
     </div>
   );
 };

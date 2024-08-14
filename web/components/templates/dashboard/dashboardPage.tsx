@@ -874,6 +874,19 @@ const DashboardPage = (props: DashboardPageProps) => {
                   >
                     Request a new graph
                   </button>
+                  <div className="text-sm text-gray-500 text-center max-w-xs">
+                    Or use our{" "}
+                    <a
+                      href="https://docs.helicone.ai/getting-started/integration-method/posthog"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-500 underline"
+                    >
+                      PostHog integration
+                    </a>{" "}
+                    to create custom graphs or get started with our pre-built
+                    template.
+                  </div>
                 </div>
               </div>
 

@@ -110,11 +110,11 @@ const TreeView: React.FC<TreeViewProps> = ({
 
           <div className="flex-grow">
             {requestIdToShow &&
-              requests.requests.data?.data?.find(
+              requests.requests.requests?.find(
                 (r) => r.request_id === requestIdToShow
               ) &&
               getNormalizedRequest(
-                requests.requests.data?.data?.find(
+                requests.requests.requests?.find(
                   (r) => r.request_id === requestIdToShow
                 )!
               ).render()}

@@ -57,6 +57,7 @@ interface ThemedTableHeaderProps<T> {
   };
   activeColumns: DragColumnItem[];
   setActiveColumns: (columns: DragColumnItem[]) => void;
+  customButtons?: React.ReactNode[];
 }
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
@@ -69,6 +70,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
     savedFilters,
     activeColumns,
     setActiveColumns,
+    customButtons,
   } = props;
 
   const searchParams = useSearchParams();
@@ -157,7 +159,10 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               setActiveColumns={setActiveColumns}
             />
           )}
-          {columns && <SortButton columns={columns} />}
+
+          {columns &&
+            columns.filter((column) => column.columnDef.meta?.sortKey).length >
+              0 && <SortButton columns={columns} />}
           {rows && <ExportButton rows={rows} />}
 
           {viewToggle && (
@@ -185,6 +190,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               </p>
             </button>
           )}
+          {customButtons && customButtons.map((button) => button)}
         </div>
       </div>
 

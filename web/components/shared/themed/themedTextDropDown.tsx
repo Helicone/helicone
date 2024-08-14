@@ -60,7 +60,7 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
   }, [query, parentOptions]);
 
   const handleValueChange = (value: string) => {
-    setSelected(value);
+    setQuery(value);
     onChange(value);
     if (!filteredOptions.includes(value)) {
       setFilteredOptions((prevOptions) => [...prevOptions, value]);
@@ -99,13 +99,12 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
       )}
       {tabMode === "smart" ? (
         <SearchSelect
-          key={`search-select-${selected}`}
-          searchValue={selected}
+          key={`search-select-${value}`}
+          searchValue={query}
           onSearchValueChange={(value) => {
             setQuery(value);
-            handleValueChange(value);
           }}
-          value={selected}
+          value={value}
           onValueChange={(value) => {
             handleValueChange(value);
           }}

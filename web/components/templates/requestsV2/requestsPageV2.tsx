@@ -47,6 +47,7 @@ import {
   UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
 import Link from "next/link";
+import DatasetButton from "./buttons/datasetButton";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -263,6 +264,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isDataLoading,
     isBodyLoading,
     isCountLoading,
+    isRefetching,
     normalizedRequests,
     properties,
     refetch,
@@ -569,7 +571,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           const value = row.customProperties
             ? row.customProperties[property]
             : "";
-          console.log("value", value);
           return value;
         },
         header: property,
@@ -584,11 +585,22 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     })
   );
 
+  const [datasetMode, setDatasetMode] = useState<boolean>(false);
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+
   const onRowSelectHandler = (row: NormalizedRequest, index: number) => {
-    setSelectedDataIndex(index);
-    setSelectedData(row);
-    setOpen(true);
-    searchParams.set("requestId", row.id);
+    if (datasetMode) {
+      if (selectedRows.includes(row.id)) {
+        setSelectedRows(selectedRows.filter((id) => id !== row.id));
+      } else {
+        setSelectedRows([...selectedRows, row.id]);
+      }
+    } else {
+      setSelectedDataIndex(index);
+      setSelectedData(row);
+      setOpen(true);
+      searchParams.set("requestId", row.id);
+    }
   };
 
   const onSetAdvancedFiltersHandler = useCallback(
@@ -734,15 +746,14 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             <div className="flex flex-row gap-2">
               <button
                 onClick={() => {
-                  remove();
                   refetch();
                 }}
                 className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
               >
                 <ArrowPathIcon
                   className={clsx(
-                    isDataLoading ? "animate-spin" : "",
-                    "h-5 w-5 inline"
+                    isDataLoading || isRefetching ? "animate-spin" : "",
+                    "h-5 w-5 inline duration-500 ease-in-out"
                   )}
                 />
               </button>
@@ -765,6 +776,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         <div className="flex flex-col space-y-4">
           <ThemedTable
             id="requests-table"
+            highlightedIds={selectedRows}
             defaultData={normalizedRequests}
             defaultColumns={columnsWithProperties}
             skeletonLoading={isDataLoading}
@@ -837,6 +849,22 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                     properties: properties,
                   }
             }
+            customButtons={[
+              <div key={"dataset-button"}>
+                <DatasetButton
+                  datasetMode={datasetMode}
+                  setDatasetMode={(datasetMode) => {
+                    if (!datasetMode) {
+                      setSelectedRows([]);
+                    }
+                    setDatasetMode(datasetMode);
+                  }}
+                  requests={normalizedRequests.filter((request) =>
+                    selectedRows.includes(request.id)
+                  )}
+                />
+              </div>,
+            ]}
           />
           <TableFooter
             currentPage={currentPage}

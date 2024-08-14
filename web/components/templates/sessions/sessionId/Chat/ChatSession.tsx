@@ -15,7 +15,7 @@ interface ChatSessionProps {
 }
 
 const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
-  const sortedRequests = [...(requests.requests.data?.data ?? [])].sort(
+  const sortedRequests = [...(requests.requests.requests ?? [])].sort(
     (a, b) =>
       new Date(a.request_created_at).getTime() -
       new Date(b.request_created_at).getTime()

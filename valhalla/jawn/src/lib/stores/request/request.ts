@@ -527,19 +527,6 @@ async function mapLLMCalls(
         getModelFromPath(heliconeRequest.request_path) ||
         "";
 
-      try {
-        if (
-          model.toLowerCase().includes("gemini") &&
-          heliconeRequest.provider === "GOOGLE"
-        ) {
-          const mappedSchema = mapGeminiPro(heliconeRequest, model);
-          heliconeRequest.llmSchema = mappedSchema;
-          return heliconeRequest;
-        }
-      } catch (error: any) {
-        // Do nothing, FE will fall back to existing mappers
-      }
-
       return heliconeRequest;
     }) ?? [];
 
@@ -608,7 +595,6 @@ export async function getRequestCountCached(
   FROM cache_hits
     left join request on cache_hits.request_id = request.id
     left join response on request.id = response.request
-    left join prompt on request.formatted_prompt_id = prompt.id
   WHERE (
     (${builtFilter.filter})
   )
@@ -637,7 +623,6 @@ export async function getRequestCount(
   SELECT count(request.id)::bigint as count
   FROM request
     left join response on request.id = response.request
-    left join prompt on request.formatted_prompt_id = prompt.id
     left join feedback on response.id = feedback.response_id
     left join job_node_request on request.id = job_node_request.request_id
   WHERE (

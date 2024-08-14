@@ -1,7 +1,5 @@
 // src/users/usersService.ts
-import { KafkaMessage } from "kafkajs";
 import { RequestQueryParams } from "../../controllers/public/requestController";
-import { KafkaProducer } from "../../lib/clients/KafkaProducer";
 import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
@@ -120,38 +118,6 @@ export class RequestManager extends BaseManager {
     requestId: string,
     feedback: boolean
   ): Promise<Result<null, string>> {
-    const kafkaProducer = new KafkaProducer();
-    const requestResponse = await this.waitForRequestAndResponse(
-      requestId,
-      this.authParams.organizationId
-    );
-
-    if (requestResponse.error || !requestResponse.data) {
-      return err("Request not found");
-    }
-    const feedbackResult = await this.queryTimer.withTiming(
-      supabaseServer.client
-        .from("feedback")
-        .upsert(
-          {
-            response_id: requestResponse.data.responseId,
-            rating: feedback,
-            created_at: new Date().toISOString(),
-          },
-          { onConflict: "response_id" }
-        )
-        .select("*")
-        .single(),
-      {
-        queryName: "upsert_feedback_by_response_id",
-        percentLogging: FREQUENT_PRECENT_LOGGING,
-      }
-    );
-
-    if (feedbackResult.error) {
-      console.error("Error upserting feedback:", feedbackResult.error);
-      return err(feedbackResult.error.message);
-    }
     const feedbackMessage: HeliconeScoresMessage = {
       requestId: requestId,
       organizationId: this.authParams.organizationId,

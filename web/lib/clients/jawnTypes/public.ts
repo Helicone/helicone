@@ -75,6 +75,18 @@ export interface paths {
   "/v1/experiment/dataset/{datasetId}/mutate": {
     post: operations["MutateDataset"];
   };
+  "/v1/helicone-dataset": {
+    post: operations["AddHeliconeDataset"];
+  };
+  "/v1/helicone-dataset/{datasetId}/mutate": {
+    post: operations["MutateHeliconeDataset"];
+  };
+  "/v1/helicone-dataset/{datasetId}/query": {
+    post: operations["QueryHeliconeDatasetRows"];
+  };
+  "/v1/helicone-dataset/query": {
+    post: operations["QueryHeliconeDataset"];
+  };
   "/v1/experiment": {
     post: operations["CreateNewExperiment"];
   };
@@ -762,6 +774,8 @@ export interface components {
     NewDatasetParams: {
       datasetName: string;
       requestIds: string[];
+      /** @enum {string} */
+      datasetType: "experiment" | "helicone";
       meta?: components["schemas"]["DatasetMetadata"];
     };
     /** @description Make all properties in T optional */
@@ -810,6 +824,52 @@ export interface components {
       error: null;
     };
     "Result___-Array.string_": components["schemas"]["ResultSuccess___-Array_"] | components["schemas"]["ResultError_string_"];
+    HeliconeDatasetMetadata: {
+      promptVersionId?: string;
+      inputRecordsIds?: string[];
+    };
+    NewHeliconeDatasetParams: {
+      datasetName: string;
+      requestIds: string[];
+      meta?: components["schemas"]["HeliconeDatasetMetadata"];
+    };
+    MutateParams: {
+      addRequests: string[];
+      removeRequests: string[];
+    };
+    ResultSuccess_string_: {
+      data: string;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
+    HeliconeDatasetRow: {
+      id: string;
+      origin_request_id: string;
+      dataset_id: string;
+      created_at: string;
+      signed_url: components["schemas"]["Result_string.string_"];
+    };
+    "ResultSuccess_HeliconeDatasetRow-Array_": {
+      data: components["schemas"]["HeliconeDatasetRow"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HeliconeDatasetRow-Array.string_": components["schemas"]["ResultSuccess_HeliconeDatasetRow-Array_"] | components["schemas"]["ResultError_string_"];
+    HeliconeDataset: {
+      created_at: string | null;
+      dataset_type: string;
+      id: string;
+      meta: components["schemas"]["Json"] | null;
+      name: string | null;
+      organization: string;
+    };
+    "ResultSuccess_HeliconeDataset-Array_": {
+      data: components["schemas"]["HeliconeDataset"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HeliconeDataset-Array.string_": components["schemas"]["ResultSuccess_HeliconeDataset-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__experimentId-string__": {
       data: {
         experimentId: string;
@@ -1491,6 +1551,78 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result___-Array.string_"];
+        };
+      };
+    };
+  };
+  AddHeliconeDataset: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NewHeliconeDatasetParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
+        };
+      };
+    };
+  };
+  MutateHeliconeDataset: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MutateParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  QueryHeliconeDatasetRows: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeDatasetRow-Array.string_"];
+        };
+      };
+    };
+  };
+  QueryHeliconeDataset: {
+    requestBody: {
+      content: {
+        "application/json": {
+          datasetIds?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeDataset-Array.string_"];
         };
       };
     };

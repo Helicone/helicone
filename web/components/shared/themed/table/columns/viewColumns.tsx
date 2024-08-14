@@ -3,6 +3,9 @@ import {
   AdjustmentsHorizontalIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
+import { Divider } from "@mui/material";
+import Tooltip, { tooltipClasses, TooltipProps } from "@mui/material/Tooltip";
+import { styled } from "@mui/material/styles";
 import { Column } from "@tanstack/react-table";
 import { Fragment, useState } from "react";
 import { Col } from "../../../../layout/common/col";
@@ -13,9 +16,6 @@ import {
   DragColumnItem,
   DragList,
 } from "./DragList";
-import { Divider } from "@mui/material";
-import Tooltip, { TooltipProps, tooltipClasses } from "@mui/material/Tooltip";
-import { styled } from "@mui/material/styles";
 
 interface ViewColumnsProps<T> {
   columns: Column<T, unknown>[];
@@ -59,7 +59,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
         <Menu.Button className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2">
           <AdjustmentsHorizontalIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
           <div className="text-sm font-medium items-center text-gray-900 dark:text-gray-100 hidden sm:flex gap-1">
-            Reorder columns
+            Columns
             <span className="text-gray-500 text-xs">{`( ${
               activeColumns.filter((c) => c.shown).length
             } / ${columns.length} )`}</span>

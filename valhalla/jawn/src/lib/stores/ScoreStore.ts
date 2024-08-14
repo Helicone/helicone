@@ -27,6 +27,13 @@ export interface UpdatedRequestVersion {
   helicone_org_id: string;
 }
 
+export interface UpdatedFeedback {
+  id: string;
+  response_id: string;
+  rating: boolean;
+  created_at: string;
+}
+
 export class ScoreStore extends BaseStore {
   constructor(organizationId: string) {
     super(organizationId);
@@ -177,7 +184,11 @@ export class ScoreStore extends BaseStore {
         );
 
         if (missingRowContents.error || !missingRowContents.data) {
-          return err("Could not find previous versions of some requests");
+          return err(
+            `Could not find previous versions of some requests, requestId-orgId: ${missingVersions
+              .map((v) => `${v.requestId}-${v.organizationId}`)
+              .join(", ")}`
+          );
         }
 
         rowContents.data = [
@@ -187,12 +198,12 @@ export class ScoreStore extends BaseStore {
       }
     }
 
-    if (
-      rowContents.error ||
-      !rowContents.data ||
-      rowContents.data.length !== newVersions.length
-    ) {
-      return err("Could not find previous versions of all requests");
+    if (rowContents.error || !rowContents.data) {
+      return err(
+        `Could not find previous versions of all requests, requestId-orgId: ${newVersions
+          .map((v) => `${v.requestId}-${v.organizationId}`)
+          .join(", ")}`
+      );
     }
 
     const res = await clickhouseDb.dbInsertClickhouse(
@@ -257,5 +268,44 @@ export class ScoreStore extends BaseStore {
     const result = await dbExecute<UpdatedRequestVersion>(query, values);
 
     return result;
+  }
+
+  public async bulkUpsertFeedback(
+    feedbacks: { responseId: string; rating: boolean }[]
+  ): Promise<Result<UpdatedFeedback[], string>> {
+    console.log(
+      `Upserting feedback for ${
+        feedbacks.length
+      } responses, responseIds: ${feedbacks
+        .map((f) => f.responseId)
+        .join(", ")}`
+    );
+
+    const placeholders = feedbacks
+      .map(
+        (_, index) =>
+          `($${index * 3 + 1}::uuid, $${index * 3 + 2}::boolean, $${
+            index * 3 + 3
+          }::timestamp)`
+      )
+      .join(", ");
+
+    const values = feedbacks.flatMap((feedback) => [
+      feedback.responseId,
+      feedback.rating,
+      new Date().toISOString(),
+    ]);
+
+    const query = `
+    INSERT INTO feedback (response_id, rating, created_at)
+    VALUES ${placeholders}
+    ON CONFLICT (response_id)
+    DO UPDATE SET
+      rating = EXCLUDED.rating,
+      created_at = EXCLUDED.created_at
+    RETURNING id, response_id, rating, created_at
+  `;
+
+    return await dbExecute<UpdatedFeedback>(query, values);
   }
 }
