@@ -177,7 +177,11 @@ export class ScoreStore extends BaseStore {
         );
 
         if (missingRowContents.error || !missingRowContents.data) {
-          return err("Could not find previous versions of some requests");
+          return err(
+            `Could not find previous versions of some requests, requestId-orgId: ${missingVersions
+              .map((v) => `${v.requestId}-${v.organizationId}`)
+              .join(", ")}`
+          );
         }
 
         rowContents.data = [
@@ -187,12 +191,12 @@ export class ScoreStore extends BaseStore {
       }
     }
 
-    if (
-      rowContents.error ||
-      !rowContents.data ||
-      rowContents.data.length !== newVersions.length
-    ) {
-      return err("Could not find previous versions of all requests");
+    if (rowContents.error || !rowContents.data) {
+      return err(
+        `Could not find previous versions of all requests, requestId-orgId: ${newVersions
+          .map((v) => `${v.requestId}-${v.organizationId}`)
+          .join(", ")}`
+      );
     }
 
     const res = await clickhouseDb.dbInsertClickhouse(
