@@ -3,6 +3,9 @@ import {
   AdjustmentsHorizontalIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
+import { Divider } from "@mui/material";
+import Tooltip, { tooltipClasses, TooltipProps } from "@mui/material/Tooltip";
+import { styled } from "@mui/material/styles";
 import { Column } from "@tanstack/react-table";
 import { Fragment, useState } from "react";
 import { Col } from "../../../../layout/common/col";
@@ -13,9 +16,6 @@ import {
   DragColumnItem,
   DragList,
 } from "./DragList";
-import { Divider } from "@mui/material";
-import Tooltip, { TooltipProps, tooltipClasses } from "@mui/material/Tooltip";
-import { styled } from "@mui/material/styles";
 
 interface ViewColumnsProps<T> {
   columns: Column<T, unknown>[];

@@ -1,12 +1,7 @@
-import { User } from "@supabase/auth-helpers-react";
-import { GetServerSidePropsContext } from "next";
-
 import { ReactElement } from "react";
 import AuthLayout from "../../../components/layout/authLayout";
-import PromptIdPage from "../../../components/templates/prompts/id/promptIdPage";
-import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
-import { withAuthSSR } from "../../../lib/api/handlerWrappers";
 import DatasetIdPage from "../../../components/templates/datasets/datasetsIdPage";
+import { withAuthSSR } from "../../../lib/api/handlerWrappers";
 
 interface DatasetProps {
   id: string;

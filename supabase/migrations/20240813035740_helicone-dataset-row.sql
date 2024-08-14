@@ -6,10 +6,6 @@ REVOKE ALL PRIVILEGES ON TABLE "public"."experiment_v2" FROM public;
 -- Rename experiment_dataset_v2 to helicone_dataset
 ALTER TABLE "public"."experiment_dataset_v2" RENAME TO "helicone_dataset";
 
--- Add dataset_type column to helicone_dataset
-ALTER TABLE "public"."helicone_dataset"
-ADD COLUMN "dataset_type" text NOT NULL DEFAULT 'experiment';
-
 -- Add soft delete column to helicone_dataset
 ALTER TABLE "public"."helicone_dataset"
 ADD COLUMN "deleted_at" timestamp with time zone;
@@ -39,12 +35,6 @@ ADD CONSTRAINT "public_helicone_dataset_row_organization_id_fkey" FOREIGN KEY (o
 
 ALTER TABLE "public"."helicone_dataset_row" 
 ADD CONSTRAINT "public_helicone_dataset_row_dataset_id_fkey" FOREIGN KEY (dataset_id) REFERENCES helicone_dataset(id) ON UPDATE CASCADE;
-
-ALTER TABLE "public"."experiment_dataset_v2_row" 
-ADD CONSTRAINT "fk_dataset_id" FOREIGN KEY (dataset_id) REFERENCES helicone_dataset(id);
-
-ALTER TABLE "public"."experiment_v2" 
-ADD CONSTRAINT "fk_dataset" FOREIGN KEY (dataset) REFERENCES helicone_dataset(id);
 
 -- Revoke privileges for new tables
 REVOKE ALL PRIVILEGES ON TABLE "public"."helicone_dataset" FROM public;
