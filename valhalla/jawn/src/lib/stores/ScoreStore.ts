@@ -27,6 +27,14 @@ export interface UpdatedRequestVersion {
   helicone_org_id: string;
 }
 
+export interface UpdatedFeedback {
+  id: string;
+  response_id: string;
+  rating: number;
+  created_at: string;
+  organization_id: string;
+}
+
 export class ScoreStore extends BaseStore {
   constructor(organizationId: string) {
     super(organizationId);
@@ -261,5 +269,44 @@ export class ScoreStore extends BaseStore {
     const result = await dbExecute<UpdatedRequestVersion>(query, values);
 
     return result;
+  }
+
+  public async bulkUpsertFeedback(
+    feedbacks: { responseId: string; rating: number; organizationId: string }[]
+  ): Promise<Result<UpdatedFeedback[], string>> {
+    console.log(
+      `Upserting feedback for ${
+        feedbacks.length
+      } responses, responseId-orgId: ${feedbacks
+        .map((f) => `${f.responseId}-${f.organizationId}`)
+        .join(", ")}`
+    );
+    const placeholders = feedbacks
+      .map(
+        (_, index) =>
+          `($${index * 4 + 1}::uuid, $${index * 4 + 2}::int, $${
+            index * 4 + 3
+          }::timestamp, $${index * 4 + 4}::uuid)`
+      )
+      .join(", ");
+
+    const values = feedbacks.flatMap((feedback) => [
+      feedback.responseId,
+      feedback.rating,
+      new Date().toISOString(),
+      feedback.organizationId,
+    ]);
+
+    const query = `
+    INSERT INTO feedback (response_id, rating, created_at, organization_id)
+    VALUES ${placeholders}
+    ON CONFLICT (response_id)
+    DO UPDATE SET
+      rating = EXCLUDED.rating,
+      created_at = EXCLUDED.created_at
+    RETURNING id, response_id, rating, created_at, organization_id
+  `;
+
+    return await dbExecute<UpdatedFeedback>(query, values);
   }
 }

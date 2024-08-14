@@ -118,9 +118,32 @@ export class ScoreManager extends BaseManager {
         })
       );
 
-      if (scoresScoreResult.error) {
+      if (scoresScoreResult.error || !scoresScoreResult.data) {
         console.error("Error upserting scores:", scoresScoreResult.error);
         return err(scoresScoreResult.error);
+      }
+
+      const feedbackResult = await this.scoreStore.bulkUpsertFeedback(
+        scoresMessages
+          .filter((scoresMessage) =>
+            scoresMessage.scores.some(
+              (score) => score.score_attribute_key === "helicone-score-feedback"
+            )
+          )
+          .map((scoresMessage) => {
+            const feedbackScore = scoresMessage.scores.find(
+              (score) => score.score_attribute_key === "helicone-score-feedback"
+            );
+            return {
+              responseId: scoresMessage.requestId,
+              rating: Number(feedbackScore?.score_attribute_value) || 0,
+              organizationId: scoresMessage.organizationId,
+            };
+          })
+      );
+      if (feedbackResult.error) {
+        console.error("Error upserting feedback:", feedbackResult.error);
+        return err(feedbackResult.error);
       }
       return ok(null);
     } catch (error: any) {

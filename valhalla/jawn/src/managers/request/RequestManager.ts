@@ -116,37 +116,6 @@ export class RequestManager extends BaseManager {
     requestId: string,
     feedback: boolean
   ): Promise<Result<null, string>> {
-    const requestResponse = await this.waitForRequestAndResponse(
-      requestId,
-      this.authParams.organizationId
-    );
-
-    if (requestResponse.error || !requestResponse.data) {
-      return err("Request not found");
-    }
-    const feedbackResult = await this.queryTimer.withTiming(
-      supabaseServer.client
-        .from("feedback")
-        .upsert(
-          {
-            response_id: requestResponse.data.responseId,
-            rating: feedback,
-            created_at: new Date().toISOString(),
-          },
-          { onConflict: "response_id" }
-        )
-        .select("*")
-        .single(),
-      {
-        queryName: "upsert_feedback_by_response_id",
-        percentLogging: FREQUENT_PRECENT_LOGGING,
-      }
-    );
-
-    if (feedbackResult.error) {
-      console.error("Error upserting feedback:", feedbackResult.error);
-      return err(feedbackResult.error.message);
-    }
     const feedbackMessage: HeliconeScoresMessage = {
       requestId: requestId,
       organizationId: this.authParams.organizationId,
