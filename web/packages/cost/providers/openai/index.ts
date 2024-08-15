@@ -278,7 +278,7 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.000005,
-      completion_token: 0.000025,
+      completion_token: 0.000015,
     },
     showInPlayground: true,
   },
