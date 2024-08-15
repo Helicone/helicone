@@ -77,6 +77,9 @@ export class ScoreManager extends BaseManager {
     scoresMessages: HeliconeScoresMessage[]
   ): Promise<Result<null, string>> {
     try {
+      if (scoresMessages.length === 0) {
+        return ok(null);
+      }
       // Filter out duplicate scores messages and only keep the latest one
       const filteredMessages = Array.from(
         scoresMessages
@@ -100,7 +103,11 @@ export class ScoreManager extends BaseManager {
         }))
       );
 
-      if (bumpedVersions.error || !bumpedVersions.data) {
+      if (
+        bumpedVersions.error ||
+        !bumpedVersions.data ||
+        bumpedVersions.data.length === 0
+      ) {
         return err(bumpedVersions.error);
       }
       const scoresScoreResult = await this.scoreStore.putScoresIntoClickhouse(
@@ -123,7 +130,11 @@ export class ScoreManager extends BaseManager {
         })
       );
 
-      if (scoresScoreResult.error || !scoresScoreResult.data) {
+      if (
+        scoresScoreResult.error ||
+        !scoresScoreResult.data ||
+        scoresScoreResult.data.length === 0
+      ) {
         console.error("Error upserting scores:", scoresScoreResult.error);
         return err(scoresScoreResult.error);
       }
