@@ -1,8 +1,30 @@
-export function getModelFromRequest(requestBody: string, path: string) {
+export function getModelFromRequest(
+  requestBody: string,
+  path: string,
+  targetUrl: string | null = null
+) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (requestBody && (requestBody as any).model) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (requestBody as any).model;
+  }
+
+  if (targetUrl && targetUrl.toLowerCase().includes("firecrawl")) {
+    try {
+      const parsedUrl = new URL(targetUrl);
+
+      const path = parsedUrl.pathname;
+
+      const trimmedPath = path.replace(/\/$/, "");
+
+      const pathParts = trimmedPath.split("/").filter(Boolean);
+
+      const model =
+        pathParts.length > 0 ? pathParts[pathParts.length - 1] : null;
+      return `firecrawl/${model}`;
+    } catch (error) {
+      console.error("Error parsing URL:", targetUrl);
+    }
   }
 
   const modelFromPath = getModelFromPath(path);
@@ -14,6 +36,7 @@ export function getModelFromRequest(requestBody: string, path: string) {
 }
 
 function getModelFromPath(path: string) {
+  console.log("path", path);
   const regex1 = /\/engines\/([^/]+)/;
   const regex2 = /models\/([^/:]+)/;
 
