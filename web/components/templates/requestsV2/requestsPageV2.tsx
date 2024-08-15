@@ -1,17 +1,26 @@
 import { ArrowPathIcon, HomeIcon } from "@heroicons/react/24/outline";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import {
-  TimeInterval,
   getTimeIntervalAgo,
+  TimeInterval,
 } from "../../../lib/timeCalculations/time";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
+import useShiftKeyPress from "../../../services/hooks/isShiftPressed";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import {
+  getRootFilterNode,
+  isFilterRowNode,
+  isUIFilterRow,
+  UIFilterRowNode,
+  UIFilterRowTree,
+} from "../../../services/lib/filters/uiFilterRowTree";
 import {
   OrganizationFilter,
   OrganizationLayout,
@@ -23,6 +32,8 @@ import {
   SortDirection,
   SortLeafRequest,
 } from "../../../services/lib/sorts/requests/sorts";
+import { Row } from "../../layout/common";
+import GenericButton from "../../layout/common/button";
 import { useOrg } from "../../layout/organizationContext";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
@@ -37,23 +48,12 @@ import {
   mapGeminiProJawn,
 } from "./builder/mappers/geminiMapper";
 import getNormalizedRequest from "./builder/requestBuilder";
+import DatasetButton from "./buttons/datasetButton";
 import { getInitialColumns } from "./initialColumns";
 import RequestCard from "./requestCard";
 import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
 import useRequestsPageV2 from "./useRequestsPageV2";
-import {
-  getRootFilterNode,
-  isFilterRowNode,
-  isUIFilterRow,
-  UIFilterRowNode,
-  UIFilterRowTree,
-} from "../../../services/lib/filters/uiFilterRowTree";
-import Link from "next/link";
-import DatasetButton from "./buttons/datasetButton";
-import { Row } from "../../layout/common";
-import GenericButton from "../../layout/common/button";
-import useShiftKeyPress from "../../../services/hooks/isShiftPressed";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -778,6 +778,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           <ThemedTable
             id="requests-table"
             highlightedIds={selectedRows}
+            showCheckboxes={datasetMode}
             defaultData={normalizedRequests}
             defaultColumns={columnsWithProperties}
             skeletonLoading={isDataLoading}
