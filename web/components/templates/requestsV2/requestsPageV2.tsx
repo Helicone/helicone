@@ -66,10 +66,6 @@ interface RequestsPageV2Props {
   organizationLayoutAvailable: boolean;
 }
 
-function formatDateForClickHouse(date: Date): string {
-  return date.toISOString();
-}
-
 function getTimeIntervalAgo(interval: TimeInterval): Date {
   const now = new Date();
 
