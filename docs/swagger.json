@@ -4050,7 +4050,7 @@
 				}
 			}
 		},
-		"/v1/request/queryClickhouse": {
+		"/v1/request/query-clickhouse": {
 			"post": {
 				"operationId": "GetRequestsClickhouse",
 				"responses": {
