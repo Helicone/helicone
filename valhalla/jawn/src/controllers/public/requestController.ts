@@ -118,7 +118,7 @@ export class RequestController extends Controller {
    * @param request
    * @returns
    */
-  @Post("queryV2")
+  @Post("queryClickhouse")
   @Example<RequestQueryParams>({
     filter: "all",
     isCached: false,
@@ -130,13 +130,13 @@ export class RequestController extends Controller {
     isScored: false,
     isPartOfExperiment: false,
   })
-  public async getRequestsV2(
+  public async getRequestsClickhouse(
     @Body()
     requestBody: RequestQueryParams,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<HeliconeRequest[], string>> {
     const reqManager = new RequestManager(request.authParams);
-    const requests = await reqManager.getRequestsV2(requestBody);
+    const requests = await reqManager.getRequestsClickhouse(requestBody);
     if (requests.error || !requests.data) {
       this.setStatus(500);
     } else {

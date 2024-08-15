@@ -13,8 +13,8 @@ import {
   getRequestAsset,
   getRequests,
   getRequestsCached,
-  getRequestsCachedV2,
-  getRequestsV2,
+  getRequestsCachedClickhouse,
+  getRequestsClickhouse,
 } from "../../lib/stores/request/request";
 import { costOfPrompt } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
@@ -255,7 +255,7 @@ export class RequestManager extends BaseManager {
     });
   }
 
-  async getRequestsV2(
+  async getRequestsClickhouse(
     params: RequestQueryParams
   ): Promise<Result<HeliconeRequest[], string>> {
     const {
@@ -281,7 +281,7 @@ export class RequestManager extends BaseManager {
     }
 
     const requests = isCached
-      ? await getRequestsCachedV2(
+      ? await getRequestsCachedClickhouse(
           this.authParams.organizationId,
           filter,
           offset,
@@ -290,7 +290,7 @@ export class RequestManager extends BaseManager {
           isPartOfExperiment,
           isScored
         )
-      : await getRequestsV2(
+      : await getRequestsClickhouse(
           this.authParams.organizationId,
           newFilter,
           offset,

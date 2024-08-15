@@ -4050,9 +4050,9 @@
 				}
 			}
 		},
-		"/v1/request/queryV2": {
+		"/v1/request/queryClickhouse": {
 			"post": {
-				"operationId": "GetRequestsV2",
+				"operationId": "GetRequestsClickhouse",
 				"responses": {
 					"200": {
 						"description": "Ok",

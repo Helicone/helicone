@@ -1474,12 +1474,12 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/v1/request/queryV2',
+        app.post('/v1/request/queryClickhouse',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(RequestController)),
-            ...(fetchMiddlewares<RequestHandler>(RequestController.prototype.getRequestsV2)),
+            ...(fetchMiddlewares<RequestHandler>(RequestController.prototype.getRequestsClickhouse)),
 
-            async function RequestController_getRequestsV2(request: ExRequest, response: ExResponse, next: any) {
+            async function RequestController_getRequestsClickhouse(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     requestBody: {"in":"body","name":"requestBody","required":true,"ref":"RequestQueryParams"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -1494,7 +1494,7 @@ export function RegisterRoutes(app: Router) {
                 const controller = new RequestController();
 
               await templateService.apiHandler({
-                methodName: 'getRequestsV2',
+                methodName: 'getRequestsClickhouse',
                 controller,
                 response,
                 next,

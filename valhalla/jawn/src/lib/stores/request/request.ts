@@ -201,7 +201,7 @@ export async function getRequests(
   });
 }
 
-export async function getRequestsV2(
+export async function getRequestsClickhouse(
   orgId: string,
   filter: FilterNode,
   offset: number,
@@ -272,7 +272,7 @@ export async function getRequestsV2(
   return mappedRequests;
 }
 
-export async function getRequestsCachedV2(
+export async function getRequestsCachedClickhouse(
   orgId: string,
   filter: FilterNode,
   offset: number,

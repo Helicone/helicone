@@ -301,7 +301,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   useEffect(() => {
     if (initialRequestId && selectedData === undefined) {
       const fetchRequest = async () => {
-        const response = await jawn.POST("/v1/request/queryV2", {
+        const response = await jawn.POST("/v1/request/queryClickhouse", {
           body: {
             filter: {
               left: {

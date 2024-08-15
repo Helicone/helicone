@@ -27,8 +27,8 @@ export interface paths {
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
-  "/v1/request/queryV2": {
-    post: operations["GetRequestsV2"];
+  "/v1/request/queryClickhouse": {
+    post: operations["GetRequestsClickhouse"];
   };
   "/v1/request/{requestId}/feedback": {
     post: operations["FeedbackRequest"];
@@ -1254,7 +1254,7 @@ export interface operations {
       };
     };
   };
-  GetRequestsV2: {
+  GetRequestsClickhouse: {
     /** @description Request query filters */
     requestBody: {
       content: {
