@@ -125,7 +125,11 @@ export class ScoreManager extends BaseManager {
         })
       );
 
-      if (scoresScoreResult.error || !scoresScoreResult.data) {
+      if (
+        scoresScoreResult.error ||
+        !scoresScoreResult.data ||
+        scoresScoreResult.data.length === 0
+      ) {
         console.error("Error upserting scores:", scoresScoreResult.error);
         return err(scoresScoreResult.error);
       }
