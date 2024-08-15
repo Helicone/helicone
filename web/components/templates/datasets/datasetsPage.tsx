@@ -37,8 +37,10 @@ const DatasetsPage = (props: DatasetsPageProps) => {
             <p className="text-xl text-black dark:text-white font-semibold mt-6">
               No Datasets
             </p>
+
             <p className="text-sm text-gray-500 max-w-sm mt-2 text-center">
-              Create your first dataset to get started. Here's a quick tutorial:
+              Create your first dataset to get started. Here&apos;s a quick
+              tutorial:
             </p>
             <div className="mt-4 w-full">
               <video
