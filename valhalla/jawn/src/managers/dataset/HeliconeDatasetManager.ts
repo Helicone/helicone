@@ -1,27 +1,10 @@
 // src/users/usersService.ts
-import {
-  DatasetMetadata,
-  DatasetResult,
-  NewDatasetParams,
-  RandomDatasetParams,
-} from "../../controllers/public/experimentDatasetController";
-import {
-  PromptQueryParams,
-  PromptResult,
-  PromptVersionResult,
-  PromptsQueryParams,
-  PromptsResult,
-} from "../../controllers/public/promptController";
-import { AuthParams, supabaseServer } from "../../lib/db/supabase";
-import { Result, err, ok, promiseResultMap } from "../../lib/shared/result";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
-import { buildFilterPostgres } from "../../lib/shared/filters/filters";
-import { resultMap } from "../../lib/shared/result";
-import { User } from "../../models/user";
-import { BaseManager } from "../BaseManager";
 import { Json } from "../../lib/db/database.types";
+import { AuthParams, supabaseServer } from "../../lib/db/supabase";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { S3Client } from "../../lib/shared/db/s3Client";
+import { Result, err, ok, promiseResultMap } from "../../lib/shared/result";
+import { BaseManager } from "../BaseManager";
 
 export interface MutateParams {
   addRequests: string[];

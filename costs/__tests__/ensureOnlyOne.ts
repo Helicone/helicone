@@ -306,7 +306,7 @@ WHEN (request_response_versioned.model ILIKE 'gpt-4-0125-preview') THEN 10000 * 
 WHEN (request_response_versioned.model ILIKE 'gpt-4-1106-preview') THEN 10000 * request_response_versioned.prompt_tokens + 30000 * request_response_versioned.completion_tokens
 WHEN (request_response_versioned.model ILIKE 'gpt-4-1106-vision-preview') THEN 10000 * request_response_versioned.prompt_tokens + 30000 * request_response_versioned.completion_tokens
 WHEN (request_response_versioned.model ILIKE 'gpt-4o') THEN 5000 * request_response_versioned.prompt_tokens + 15000 * request_response_versioned.completion_tokens
-WHEN (request_response_versioned.model ILIKE 'gpt-4o-2024-05-13') THEN 5000 * request_response_versioned.prompt_tokens + 15000 * request_response_versioned.completion_tokens
+WHEN (request_response_versioned.model ILIKE 'gpt-4o-2024-05-13') THEN 5000 * request_response_versioned.prompt_tokens + 25000 * request_response_versioned.completion_tokens
 WHEN (request_response_versioned.model ILIKE 'gpt-4o-mini') THEN 150 * request_response_versioned.prompt_tokens + 600 * request_response_versioned.completion_tokens
 WHEN (request_response_versioned.model ILIKE 'gpt-4o-mini-2024-07-18') THEN 150 * request_response_versioned.prompt_tokens + 600 * request_response_versioned.completion_tokens
 WHEN (request_response_versioned.model ILIKE 'gpt-3.5-turbo-0613') THEN 1500 * request_response_versioned.prompt_tokens + 2000 * request_response_versioned.completion_tokens
@@ -323,6 +323,7 @@ WHEN (request_response_versioned.model ILIKE 'text-embedding-3-small') THEN 20 *
 WHEN (request_response_versioned.model ILIKE 'text-embedding-3-large') THEN 130 * request_response_versioned.prompt_tokens + 0 * request_response_versioned.completion_tokens
 WHEN (request_response_versioned.model ILIKE 'gpt-4-vision-preview') THEN 10000 * request_response_versioned.prompt_tokens + 30000 * request_response_versioned.completion_tokens
 WHEN (request_response_versioned.model ILIKE 'gpt-35-turbo-16k-0613') THEN 3000 * request_response_versioned.prompt_tokens + 4000 * request_response_versioned.completion_tokens
+WHEN (request_response_versioned.model ILIKE 'gpt-4o-2024-08-06') THEN 2500 * request_response_versioned.prompt_tokens + 12500 * request_response_versioned.completion_tokens
   ELSE 0
 END
 )
@@ -711,7 +712,7 @@ WHEN (request_response_versioned.model ILIKE 'gpt-4-0125-preview') THEN 10000 * 
 WHEN (request_response_versioned.model ILIKE 'gpt-4-1106-preview') THEN 10000 * request_response_versioned.prompt_tokens + 30000 * request_response_versioned.completion_tokens
 WHEN (request_response_versioned.model ILIKE 'gpt-4-1106-vision-preview') THEN 10000 * request_response_versioned.prompt_tokens + 30000 * request_response_versioned.completion_tokens
 WHEN (request_response_versioned.model ILIKE 'gpt-4o') THEN 5000 * request_response_versioned.prompt_tokens + 15000 * request_response_versioned.completion_tokens
-WHEN (request_response_versioned.model ILIKE 'gpt-4o-2024-05-13') THEN 5000 * request_response_versioned.prompt_tokens + 15000 * request_response_versioned.completion_tokens
+WHEN (request_response_versioned.model ILIKE 'gpt-4o-2024-05-13') THEN 5000 * request_response_versioned.prompt_tokens + 25000 * request_response_versioned.completion_tokens
 WHEN (request_response_versioned.model ILIKE 'gpt-4o-mini') THEN 150 * request_response_versioned.prompt_tokens + 600 * request_response_versioned.completion_tokens
 WHEN (request_response_versioned.model ILIKE 'gpt-4o-mini-2024-07-18') THEN 150 * request_response_versioned.prompt_tokens + 600 * request_response_versioned.completion_tokens
 WHEN (request_response_versioned.model ILIKE 'gpt-3.5-turbo-0613') THEN 1500 * request_response_versioned.prompt_tokens + 2000 * request_response_versioned.completion_tokens
@@ -728,6 +729,7 @@ WHEN (request_response_versioned.model ILIKE 'text-embedding-3-small') THEN 20 *
 WHEN (request_response_versioned.model ILIKE 'text-embedding-3-large') THEN 130 * request_response_versioned.prompt_tokens + 0 * request_response_versioned.completion_tokens
 WHEN (request_response_versioned.model ILIKE 'gpt-4-vision-preview') THEN 10000 * request_response_versioned.prompt_tokens + 30000 * request_response_versioned.completion_tokens
 WHEN (request_response_versioned.model ILIKE 'gpt-35-turbo-16k-0613') THEN 3000 * request_response_versioned.prompt_tokens + 4000 * request_response_versioned.completion_tokens
+WHEN (request_response_versioned.model ILIKE 'gpt-4o-2024-08-06') THEN 2500 * request_response_versioned.prompt_tokens + 12500 * request_response_versioned.completion_tokens
 WHEN (request_response_versioned.model LIKE 'ft:gpt-3.5-turbo-%') THEN 3000 * request_response_versioned.prompt_tokens + 6000 * request_response_versioned.completion_tokens
   ELSE 0
 END

@@ -5,7 +5,6 @@ import { getJawnClient } from "../../../lib/clients/jawn";
 
 const useGetHeliconeDatasets = (datasetIds?: string[]) => {
   const org = useOrg();
-  const [datasets, setDatasets] = useState<any[]>([]);
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["helicone-datasets", org?.currentOrg?.id],
@@ -21,37 +20,15 @@ const useGetHeliconeDatasets = (datasetIds?: string[]) => {
     refetchOnWindowFocus: false,
   });
 
-  const signedUrls =
-    data?.data?.data?.map((dataset: any) => dataset.signed_url) ?? [];
-
-  const urlQueries = useQueries({
-    queries: signedUrls.map((url: string, index: number) => ({
-      queryKey: ["dataset-content", url],
-      queryFn: () => fetch(url).then((res) => res.json()),
-      enabled: !!url,
-      onSuccess: (data: any) => {
-        setDatasets((prev) => {
-          const newDatasets = [...prev];
-          newDatasets[index] = { ...newDatasets[index], content: data };
-          return newDatasets;
-        });
-      },
-    })),
-  });
-
-  useEffect(() => {
-    if (data?.data?.data) {
-      setDatasets(data.data.data);
-    }
-  }, [data]);
-
-  const isUrlsFetching = urlQueries.some((query) => query.isFetching);
-
   return {
-    isLoading: isLoading || isUrlsFetching,
+    isLoading: isLoading,
     refetch,
-    isRefetching: isRefetching || isUrlsFetching,
-    datasets,
+    isRefetching: isRefetching,
+    datasets:
+      data?.data?.data?.map((dataset) => ({
+        ...dataset,
+        promptVersionId: dataset.meta?.["promptVersionId"],
+      })) ?? [],
   };
 };
 
