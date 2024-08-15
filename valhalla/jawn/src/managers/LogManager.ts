@@ -263,7 +263,6 @@ export class LogManager {
       messageCount: number;
     }
   ): Promise<void> {
-    console.log("Logging Lytix events");
     const start = performance.now();
     await handler.handleResults();
     const end = performance.now();
