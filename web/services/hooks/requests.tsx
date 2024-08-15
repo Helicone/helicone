@@ -67,7 +67,7 @@ const useGetRequestsWithBodies = (
       const isCached = query.queryKey[5];
       const orgId = query.queryKey[6] as string;
       const jawn = getJawnClient(orgId);
-      const response = await jawn.POST("/v1/request/query", {
+      const response = await jawn.POST("/v1/request/queryClickhouse", {
         body: {
           filter: advancedFilter as any,
           offset: (currentPage - 1) * currentPageSize,
