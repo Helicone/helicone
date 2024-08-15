@@ -282,6 +282,7 @@ export const costs: ModelRow[] = [
     },
     showInPlayground: true,
   },
+
   {
     model: {
       operator: "equals",
@@ -457,7 +458,7 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.0000025,
-      completion_token: 0.0000125,
+      completion_token: 0.00001,
     },
   },
 ];
