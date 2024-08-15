@@ -77,6 +77,9 @@ export class ScoreManager extends BaseManager {
     scoresMessages: HeliconeScoresMessage[]
   ): Promise<Result<null, string>> {
     try {
+      if (scoresMessages.length === 0) {
+        return ok(null);
+      }
       // Filter out duplicate scores messages and only keep the latest one
       const filteredMessages = Array.from(
         scoresMessages
