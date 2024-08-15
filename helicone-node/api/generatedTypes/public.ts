@@ -57,6 +57,9 @@ export interface paths {
   "/v1/prompt/{promptId}/versions/query": {
     post: operations["GetPromptVersions"];
   };
+  "/v1/prompt/{user_defined_id}/compile": {
+    post: operations["GetPromptVersionsCompiled"];
+  };
   "/v1/experiment/dataset": {
     post: operations["AddDataset"];
   };
@@ -700,9 +703,9 @@ Json: JsonObject;
       minor_version: number;
       /** Format: double */
       major_version: number;
-      helicone_template: string;
       prompt_v2: string;
       model: string;
+      helicone_template: string;
     };
     ResultSuccess_PromptVersionResult_: {
       data: components["schemas"]["PromptVersionResult"];
@@ -734,6 +737,48 @@ Json: JsonObject;
       error: null;
     };
     "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_PromptVersionsToOperators_: {
+      minor_version?: components["schemas"]["Partial_NumberOperators_"];
+      major_version?: components["schemas"]["Partial_NumberOperators_"];
+      id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.prompts_versions_": {
+      prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
+    };
+    FilterLeafSubset_prompts_versions_: components["schemas"]["Pick_FilterLeaf.prompts_versions_"];
+    PromptVersionsFilterNode: components["schemas"]["FilterLeafSubset_prompts_versions_"] | components["schemas"]["PromptVersionsFilterBranch"] | "all";
+    PromptVersionsFilterBranch: {
+      right: components["schemas"]["PromptVersionsFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["PromptVersionsFilterNode"];
+    };
+    PromptVersionsQueryParams: {
+      filter?: components["schemas"]["PromptVersionsFilterNode"];
+    };
+    PromptVersionResultCompiled: {
+      id: string;
+      /** Format: double */
+      minor_version: number;
+      /** Format: double */
+      major_version: number;
+      prompt_v2: string;
+      model: string;
+      prompt_compiled: unknown;
+    };
+    ResultSuccess_PromptVersionResultCompiled_: {
+      data: components["schemas"]["PromptVersionResultCompiled"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResultCompiled.string_": components["schemas"]["ResultSuccess_PromptVersionResultCompiled_"] | components["schemas"]["ResultError_string_"];
+    PromptVersiosQueryParamsCompiled: {
+      filter?: components["schemas"]["PromptVersionsFilterNode"];
+      inputs: components["schemas"]["Record_string.string_"];
+    };
     "ResultSuccess__datasetId-string__": {
       data: {
         datasetId: string;
@@ -752,13 +797,6 @@ Json: JsonObject;
       /** @enum {string} */
       datasetType: "experiment" | "helicone";
       meta?: components["schemas"]["DatasetMetadata"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_PromptVersionsToOperators_: {
-      minor_version?: components["schemas"]["Partial_NumberOperators_"];
-      major_version?: components["schemas"]["Partial_NumberOperators_"];
-      id?: components["schemas"]["Partial_TextOperators_"];
-      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.request-or-prompts_versions_": {
@@ -1409,7 +1447,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": Record<string, never>;
+        "application/json": components["schemas"]["PromptVersionsQueryParams"];
       };
     };
     responses: {
@@ -1417,6 +1455,26 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersionsCompiled: {
+    parameters: {
+      path: {
+        user_defined_id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptVersiosQueryParamsCompiled"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResultCompiled.string_"];
         };
       };
     };
