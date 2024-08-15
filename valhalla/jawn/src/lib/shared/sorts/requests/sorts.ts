@@ -106,7 +106,7 @@ export function buildRequestSort(sort: SortLeafRequest) {
   }
 }
 
-export function buildRequestSortV2(sort: SortLeafRequest): string {
+export function buildRequestSortClickhouse(sort: SortLeafRequest): string {
   if (sort.random) {
     return "rand()";
   }

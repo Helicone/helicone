@@ -193,7 +193,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         left: {
           [tableName]: {
             [createdAtColumn]: {
-              gte: formatDateForClickHouse(new Date(start)),
+              gte: new Date(`${start}Z`).toISOString(),
             },
           },
         },
@@ -201,7 +201,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         right: {
           [tableName]: {
             [createdAtColumn]: {
-              lte: formatDateForClickHouse(new Date(end)),
+              lte: new Date(`${end}Z`).toISOString(),
             },
           },
         },
@@ -214,7 +214,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       return {
         [tableName]: {
           [createdAtColumn]: {
-            gte: formatDateForClickHouse(timeIntervalDate),
+            gte: new Date(`${timeIntervalDate}Z`).toISOString(),
           },
         },
       };
@@ -537,7 +537,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         left: {
           [tableName]: {
             [createdAtColumn]: {
-              gte: formatDateForClickHouse(new Date(start)),
+              gte: new Date(`${start}Z`).toISOString(),
             },
           },
         },
@@ -545,7 +545,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         right: {
           [tableName]: {
             [createdAtColumn]: {
-              lte: formatDateForClickHouse(new Date(end)),
+              lte: new Date(`${end}Z`).toISOString(),
             },
           },
         },
@@ -557,7 +557,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     setTimeFilter({
       [tableName]: {
         [createdAtColumn]: {
-          gte: formatDateForClickHouse(getTimeIntervalAgo(key)),
+          gte: new Date(`${getTimeIntervalAgo(key)}Z`).toISOString(),
         },
       },
     });
