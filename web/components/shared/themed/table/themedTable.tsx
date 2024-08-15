@@ -13,6 +13,7 @@ import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
+import { UIFilterRowTree } from "../../../../services/lib/filters/uiFilterRowTree";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
 import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
@@ -27,7 +28,8 @@ import {
 import DraggableColumnHeader from "./columns/draggableColumnHeader";
 import RequestRowView from "./requestRowView";
 import ThemedTableHeader from "./themedTableHeader";
-import { UIFilterRowTree } from "../../../../services/lib/filters/uiFilterRowTree";
+
+import { Checkbox } from "@mui/material";
 
 interface ThemedTableV5Props<T extends { id?: string }> {
   id: string;
@@ -72,6 +74,7 @@ interface ThemedTableV5Props<T extends { id?: string }> {
     layoutPage: "dashboard" | "requests";
   };
   highlightedIds?: string[];
+  showCheckboxes?: boolean;
   customButtons?: React.ReactNode[];
   children?: React.ReactNode;
 }
@@ -98,7 +101,9 @@ export default function ThemedTable<T extends { id?: string }>(
     noDataCTA,
     onDataSet: onDataSet,
     savedFilters,
-    highlightedIds,
+    highlightedIds: checkedIds,
+    showCheckboxes,
+
     customButtons,
     children,
   } = props;
@@ -236,6 +241,9 @@ export default function ThemedTable<T extends { id?: string }>(
                     key={headerGroup.id}
                     className="border-b border-gray-300 dark:border-gray-700"
                   >
+                    {showCheckboxes && (
+                      <th className="w-8 px-2"></th> /* Checkbox header */
+                    )}
                     {headerGroup.headers.map((header) => (
                       <DraggableColumnHeader
                         key={header.id}
@@ -252,13 +260,22 @@ export default function ThemedTable<T extends { id?: string }>(
                     key={row.id}
                     className={clsx(
                       "hover:bg-gray-100 dark:hover:bg-gray-900 hover:cursor-pointer",
-                      highlightedIds?.includes(row.original?.id ?? "") &&
+                      checkedIds?.includes(row.original?.id ?? "") &&
                         "bg-blue-100 border-l border-blue-500 pl-2"
                     )}
                     onClick={
                       onRowSelect && (() => onRowSelect(row.original, index))
                     }
                   >
+                    {showCheckboxes && (
+                      <td className="w-8 px-2">
+                        <Checkbox
+                          id={`row-${row.id}`}
+                          onChange={(id, checked) => {}}
+                          checked={checkedIds?.includes(row.original?.id ?? "")}
+                        />
+                      </td>
+                    )}
                     {row.getVisibleCells().map((cell, i) => (
                       <td
                         key={i}
