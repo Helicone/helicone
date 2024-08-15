@@ -242,6 +242,33 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://qstash.upstash.io",
       };
+    } else if (hostParts[0].includes("firecrawl")) {
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://www.firecrawl.dev/",
+        };
+      } else {
+        if (url.pathname.includes("scrape")) {
+          return {
+            ...env,
+            WORKER_TYPE: "GATEWAY_API",
+            GATEWAY_TARGET: "https://api.firecrawl.dev/v0/scrape",
+          };
+        }
+        if (url.pathname.includes("search")) {
+          return {
+            ...env,
+            WORKER_TYPE: "GATEWAY_API",
+            GATEWAY_TARGET: "https://api.firecrawl.dev/v0/search",
+          };
+        }
+        return {
+          ...env,
+          WORKER_TYPE: "GATEWAY_API",
+          GATEWAY_TARGET: "https://api.firecrawl.dev/v0/crawl",
+        };
+      }
     }
   }
 
