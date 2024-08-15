@@ -281,6 +281,10 @@ export class ScoreStore extends BaseStore {
   public async bulkUpsertFeedback(
     feedbacks: { responseId: string; rating: boolean }[]
   ): Promise<Result<UpdatedFeedback[], string>> {
+    if (feedbacks.length === 0) {
+      return ok([]);
+    }
+
     console.log(
       `Upserting feedback for ${
         feedbacks.length
