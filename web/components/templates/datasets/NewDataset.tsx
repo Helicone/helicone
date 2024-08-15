@@ -6,17 +6,16 @@ import { useJawnClient } from "../../../lib/clients/jawnHook";
 import useNotification from "../../shared/notification/useNotification";
 import { NormalizedRequest } from "../requestsV2/builder/abstractRequestBuilder";
 import { useGetHeliconeDatasets } from "../../../services/hooks/dataset/heliconeDataset";
+import { Checkbox } from "@mui/material";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
+import { useRouter } from "next/router";
 
 interface NewDatasetProps {
   requests: NormalizedRequest[];
-
-  setModalOpen: (open: boolean) => void;
+  onComplete: () => void;
 }
 
-export default function NewDataset({
-  requests,
-  setModalOpen,
-}: NewDatasetProps) {
+export default function NewDataset({ requests, onComplete }: NewDatasetProps) {
   const [openCreateDataset, setOpenCreateDataset] = useState(false);
   const [newDatasetName, setNewDatasetName] = useState("");
   const [selectedDataset, setSelectedDataset] = useState<string | null>(null);
@@ -26,6 +25,12 @@ export default function NewDataset({
 
   const [addingRequests, setAddingRequests] = useState(false);
 
+  const [openDatasetOnAdd, setOpenDatasetOnAdd] = useLocalStorage(
+    "openDatasetOnAdd",
+    false
+  );
+
+  const router = useRouter();
   return (
     <Col className="h-[500px] w-[500px] justify-between">
       <Col className="gap-5">
@@ -80,7 +85,6 @@ export default function NewDataset({
                 } else {
                   setNotification("Failed to create dataset", "error");
                 }
-                setModalOpen(false);
               } else {
                 setOpenCreateDataset(true);
               }
@@ -98,49 +102,74 @@ export default function NewDataset({
               }" dataset.`
             : `Please select a dataset or create a new one.`}
         </div>
-        <Row className="justify-end gap-5">
-          <button
-            className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900"
-            onClick={() => setModalOpen(false)}
-          >
-            Cancel
-          </button>
-          {selectedDataset && (
-            <button
-              className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900"
-              disabled={addingRequests}
-              onClick={async () => {
-                setAddingRequests(true);
-                const res = await jawn.POST(
-                  "/v1/helicone-dataset/{datasetId}/mutate",
-                  {
-                    params: {
-                      path: {
-                        datasetId: selectedDataset,
-                      },
-                    },
-                    body: {
-                      addRequests: requests.map((r) => r.id),
-                      removeRequests: [],
-                    },
-                  }
-                );
+        <Row className="justify-end">
+          <Col className="items-end gap-3">
+            <Row className="justify-end gap-5">
+              <button
+                className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900"
+                onClick={onComplete}
+              >
+                Cancel
+              </button>
+              {selectedDataset && (
+                <button
+                  className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900"
+                  disabled={addingRequests}
+                  onClick={async () => {
+                    setAddingRequests(true);
+                    const res = await jawn.POST(
+                      "/v1/helicone-dataset/{datasetId}/mutate",
+                      {
+                        params: {
+                          path: {
+                            datasetId: selectedDataset,
+                          },
+                        },
+                        body: {
+                          addRequests: requests.map((r) => r.id),
+                          removeRequests: [],
+                        },
+                      }
+                    );
 
-                if (res.data && !res.data.error) {
-                  setNotification("Requests added to dataset", "success");
+                    if (res.data && !res.data.error) {
+                      setNotification("Requests added to dataset", "success");
 
-                  setModalOpen(false);
-                } else {
-                  setNotification("Failed to add requests to dataset", "error");
-                }
-                setAddingRequests(false);
-              }}
-            >
-              {addingRequests
-                ? "Adding..."
-                : "Add " + requests.length + " requests"}
-            </button>
-          )}
+                      if (openDatasetOnAdd) {
+                        router.push(`/datasets/${selectedDataset}`);
+                      }
+                      onComplete();
+                    } else {
+                      setNotification(
+                        "Failed to add requests to dataset",
+                        "error"
+                      );
+                    }
+                    setAddingRequests(false);
+                  }}
+                >
+                  {addingRequests
+                    ? "Adding..."
+                    : "Add " + requests.length + " requests"}
+                </button>
+              )}
+            </Row>
+            {selectedDataset && (
+              <Row>
+                <button
+                  className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                  onClick={() => setOpenDatasetOnAdd(!openDatasetOnAdd)}
+                >
+                  <i>open dataset</i>
+                  <Checkbox
+                    checked={openDatasetOnAdd}
+                    onChange={(e) => setOpenDatasetOnAdd(e.target.checked)}
+                    size="small"
+                  />
+                </button>
+              </Row>
+            )}
+          </Col>
         </Row>
       </Col>
     </Col>

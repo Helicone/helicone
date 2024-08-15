@@ -1,14 +1,27 @@
 import { ArrowPathIcon, HomeIcon } from "@heroicons/react/24/outline";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
+import {
+  getTimeIntervalAgo,
+  TimeInterval,
+} from "../../../lib/timeCalculations/time";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
+import useShiftKeyPress from "../../../services/hooks/isShiftPressed";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import {
+  getRootFilterNode,
+  isFilterRowNode,
+  isUIFilterRow,
+  UIFilterRowNode,
+  UIFilterRowTree,
+} from "../../../services/lib/filters/uiFilterRowTree";
 import {
   OrganizationFilter,
   OrganizationLayout,
@@ -20,6 +33,8 @@ import {
   SortDirection,
   SortLeafRequest,
 } from "../../../services/lib/sorts/requests/sorts";
+import { Row } from "../../layout/common";
+import GenericButton from "../../layout/common/button";
 import { useOrg } from "../../layout/organizationContext";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
@@ -34,20 +49,12 @@ import {
   mapGeminiProJawn,
 } from "./builder/mappers/geminiMapper";
 import getNormalizedRequest from "./builder/requestBuilder";
+import DatasetButton from "./buttons/datasetButton";
 import { getInitialColumns } from "./initialColumns";
 import RequestCard from "./requestCard";
 import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
 import useRequestsPageV2 from "./useRequestsPageV2";
-import {
-  getRootFilterNode,
-  isFilterRowNode,
-  isUIFilterRow,
-  UIFilterRowNode,
-  UIFilterRowTree,
-} from "../../../services/lib/filters/uiFilterRowTree";
-import Link from "next/link";
-import DatasetButton from "./buttons/datasetButton";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -589,7 +596,25 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       if (selectedRows.includes(row.id)) {
         setSelectedRows(selectedRows.filter((id) => id !== row.id));
       } else {
-        setSelectedRows([...selectedRows, row.id]);
+        if (isShiftPressed && lastSelectedRow) {
+          const startIndex = normalizedRequests.findIndex(
+            (request) => request.id === lastSelectedRow.id
+          );
+          const endIndex = normalizedRequests.findIndex(
+            (request) => request.id === row.id
+          );
+          const selectedIds = normalizedRequests
+            .slice(startIndex, endIndex + 1)
+            .map((request) => request.id);
+          setSelectedRows(
+            [...selectedRows, ...selectedIds].filter(
+              (id, index, self) => self.indexOf(id) === index
+            )
+          );
+        } else {
+          setSelectedRows([...selectedRows, row.id]);
+        }
+        setLastSelectedRow(row);
       }
     } else {
       setSelectedDataIndex(index);
@@ -704,6 +729,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   };
 
+  const [lastSelectedRow, setLastSelectedRow] =
+    useState<NormalizedRequest | null>(null);
+
+  const isShiftPressed = useShiftKeyPress();
+
   return (
     <div>
       {requestWithoutStream && !isWarningHidden && (
@@ -769,10 +799,16 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       {unauthorized ? (
         <>{renderUnauthorized()}</>
       ) : (
-        <div className="flex flex-col space-y-4">
+        <div
+          className={clsx(
+            isShiftPressed && "no-select",
+            "flex flex-col space-y-4"
+          )}
+        >
           <ThemedTable
             id="requests-table"
             highlightedIds={selectedRows}
+            showCheckboxes={datasetMode}
             defaultData={normalizedRequests}
             defaultColumns={columnsWithProperties}
             skeletonLoading={isDataLoading}
@@ -858,10 +894,49 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   requests={normalizedRequests.filter((request) =>
                     selectedRows.includes(request.id)
                   )}
+                  onComplete={() => {
+                    setSelectedRows([]);
+                    setDatasetMode(false);
+                  }}
                 />
               </div>,
             ]}
-          />
+          >
+            {datasetMode && (
+              <Row className="gap-5 items-center w-full bg-white dark:bg-black rounded-lg p-5 border border-gray-300 dark:border-gray-700">
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                  Select Mode:
+                </span>
+                {isShiftPressed && "hello"}
+                {isShiftPressed && lastSelectedRow && (
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                    {lastSelectedRow.id} -{" "}
+                    {selectedRows[selectedRows.length - 1]}
+                  </span>
+                )}
+
+                <GenericButton
+                  onClick={() => {
+                    if (selectedRows.length > 0) {
+                      setSelectedRows([]);
+                    } else {
+                      setSelectedRows(
+                        normalizedRequests.map((request) => request.id)
+                      );
+                    }
+                  }}
+                  text={selectedRows.length > 0 ? "Deselect All" : "Select All"}
+                />
+                <GenericButton
+                  onClick={() => {
+                    setSelectedRows([]);
+                    setDatasetMode(false);
+                  }}
+                  text="Cancel"
+                />
+              </Row>
+            )}
+          </ThemedTable>
           <TableFooter
             currentPage={currentPage}
             pageSize={pageSize}
@@ -869,7 +944,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             count={count || 0}
             onPageChange={onPageChangeHandler}
             onPageSizeChange={onPageSizeChangeHandler}
-            pageSizeOptions={[25, 50, 100]}
+            pageSizeOptions={[25, 50, 100, 250, 500]}
           />
         </div>
       )}

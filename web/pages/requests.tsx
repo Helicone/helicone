@@ -125,7 +125,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
   } = context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
-  const pageSize = parseInt(page_size as string, 10) || 25;
+  const pageSize = parseInt(page_size as string, 10) || 100;
 
   const { data: orgLayout, error: organizationLayoutError } =
     await supabaseServer
