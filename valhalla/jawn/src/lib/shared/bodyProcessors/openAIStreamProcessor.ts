@@ -68,23 +68,21 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
       const usage =
         "usage" in consolidatedData
           ? consolidatedData.usage
-          : await getUsage(
-              data,
-              requestBody,
-              consolidatedData?.model ?? tryModel(requestBody ?? "{}") ?? ""
-            );
+          : {
+              total_tokens: -1,
+              completion_tokens: -1,
+              prompt_tokens: -1,
+              helicone_calculated: true,
+              helicone_error:
+                "counting tokens not supported, please see https://docs.helicone.ai/use-cases/enable-stream-usage",
+            };
 
       return ok({
         processedBody: {
           ...consolidatedData,
           streamed_data: data,
         },
-        usage: {
-          totalTokens: usage?.total_tokens,
-          completionTokens: usage?.completion_tokens,
-          promptTokens: usage?.prompt_tokens,
-          heliconeCalculated: usage?.helicone_calculated ?? false,
-        },
+        usage: usage,
       });
     } catch (e) {
       console.error(`Error parsing OpenAI stream response: ${e}`);
@@ -95,102 +93,5 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
         usage: undefined,
       });
     }
-  }
-}
-
-export async function getUsage(
-  streamedData: any[],
-  requestBody: any,
-  model: string
-): Promise<{
-  total_tokens: number;
-  completion_tokens: number;
-  prompt_tokens: number;
-  helicone_calculated: boolean;
-}> {
-  try {
-    const responseTokenCount = await getTokenCountGPT3(
-      streamedData
-        .filter((d) => "id" in d)
-        .map((d) => getResponseText(d))
-        .join(""),
-      model
-    );
-    const requestTokenCount = await getRequestTokenCount(
-      JSON.parse(requestBody),
-      model
-    );
-    const totalTokens = requestTokenCount + responseTokenCount;
-    return {
-      total_tokens: totalTokens,
-      completion_tokens: responseTokenCount,
-      prompt_tokens: requestTokenCount,
-      helicone_calculated: true,
-    };
-  } catch (e) {
-    console.error("Error getting usage", e);
-    return {
-      total_tokens: -1,
-      completion_tokens: -1,
-      prompt_tokens: -1,
-      helicone_calculated: false,
-    };
-  }
-}
-
-function getResponseText(responseBody: any): string {
-  type Choice =
-    | {
-        delta: {
-          content: string;
-        };
-      }
-    | {
-        text: string;
-      };
-  if (responseBody.choices !== undefined) {
-    const choices = responseBody.choices;
-    return (choices as Choice[])
-      .map((c) => {
-        if ("delta" in c) {
-          return c.delta.content;
-        } else if ("text" in c) {
-          return c.text;
-        } else {
-          throw new Error("Invalid choice type");
-        }
-      })
-      .join("");
-  } else {
-    throw new Error(`Invalid response body:\n${JSON.stringify(responseBody)}`);
-  }
-}
-
-async function getRequestTokenCount(
-  requestBody: any,
-  model: string
-): Promise<number> {
-  if (requestBody.prompt !== undefined) {
-    const prompt = requestBody.prompt;
-    if (typeof prompt === "string") {
-      return getTokenCountGPT3(requestBody.prompt, model);
-    } else if ("length" in prompt) {
-      return getTokenCountGPT3((prompt as string[]).join(""), model);
-    } else {
-      throw new Error("Invalid prompt type");
-    }
-  } else if (requestBody.messages !== undefined) {
-    const messages = requestBody.messages as { content: string }[];
-
-    let totalTokenCount = 0;
-
-    for (const message of messages) {
-      const tokenCount = await getTokenCountGPT3(message.content, model);
-      totalTokenCount += tokenCount;
-    }
-
-    return totalTokenCount + 3 + messages.length * 5;
-  } else {
-    throw new Error(`Invalid request body:\n${JSON.stringify(requestBody)}`);
   }
 }
