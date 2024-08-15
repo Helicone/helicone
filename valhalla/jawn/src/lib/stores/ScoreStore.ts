@@ -117,6 +117,10 @@ export class ScoreStore extends BaseStore {
       })
       .join(",\n    ");
 
+    if (queryPlaceholders.length === 0) {
+      return err("No query placeholders");
+    }
+
     const queryParams: (string | number | boolean | Date)[] =
       newVersions.flatMap((v) => [
         v.requestId,
@@ -124,6 +128,10 @@ export class ScoreStore extends BaseStore {
         v.provider,
         v.version - 1,
       ]);
+
+    if (queryParams.length === 0) {
+      return err("No query params");
+    }
 
     let rowContents = resultMap(
       await clickhouseDb.dbQuery<InsertRequestResponseVersioned>(
