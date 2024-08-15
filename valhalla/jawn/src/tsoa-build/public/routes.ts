@@ -745,7 +745,7 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"right":{"ref":"PromptVersionsFilterNode","required":true},"operator":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["or"]},{"dataType":"enum","enums":["and"]}],"required":true},"left":{"ref":"PromptVersionsFilterNode","required":true}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PromptVersionsQueryParamsV2": {
+    "PromptVersionsQueryParams": {
         "dataType": "refObject",
         "properties": {
             "filter": {"ref":"PromptVersionsFilterNode"},
@@ -1739,7 +1739,7 @@ export function RegisterRoutes(app: Router) {
 
             async function PromptController_getPromptVersions(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"PromptVersionsQueryParamsV2"},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"PromptVersionsQueryParams"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
                     promptId: {"in":"path","name":"promptId","required":true,"dataType":"string"},
             };

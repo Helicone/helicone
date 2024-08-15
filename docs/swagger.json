@@ -2241,7 +2241,7 @@
 				],
 				"type": "object"
 			},
-			"PromptVersionsQueryParamsV2": {
+			"PromptVersionsQueryParams": {
 				"properties": {
 					"filter": {
 						"$ref": "#/components/schemas/PromptVersionsFilterNode"
@@ -4337,7 +4337,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/PromptVersionsQueryParamsV2"
+								"$ref": "#/components/schemas/PromptVersionsQueryParams"
 							}
 						}
 					}

@@ -76,13 +76,10 @@ export class PromptManager extends BaseManager {
   async getPromptVersions(
     filter: FilterNode
   ): Promise<Result<PromptVersionResult[], string>> {
-    console.log("filter", JSON.stringify(filter));
     const filterWithAuth = buildFilterPostgres({
       filter,
       argsAcc: [this.authParams.organizationId],
     });
-
-    console.log("filterWithAuth", JSON.stringify(filterWithAuth));
 
     const result = dbExecute<{
       id: string;

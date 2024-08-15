@@ -273,7 +273,7 @@ export interface components {
       operator: "or" | "and";
       left: components["schemas"]["PromptVersionsFilterNode"];
     };
-    PromptVersionsQueryParamsV2: {
+    PromptVersionsQueryParams: {
       filter?: components["schemas"]["PromptVersionsFilterNode"];
     };
     PromptVersionResultCompiled: {
@@ -1022,7 +1022,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["PromptVersionsQueryParamsV2"];
+        "application/json": components["schemas"]["PromptVersionsQueryParams"];
       };
     };
     responses: {

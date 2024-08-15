@@ -44,12 +44,12 @@ type PromptVersionsFilterNode =
 export interface PromptsQueryParams {
   filter: PromptsFilterNode;
 }
-export interface PromptVersionsQueryParamsV2 {
+export interface PromptVersionsQueryParams {
   filter?: PromptVersionsFilterNode;
 }
 
 export interface PromptVersiosQueryParamsCompiled
-  extends PromptVersionsQueryParamsV2 {
+  extends PromptVersionsQueryParams {
   inputs: Record<string, string>;
 }
 
@@ -223,7 +223,7 @@ export class PromptController extends Controller {
   @Post("{promptId}/versions/query")
   public async getPromptVersions(
     @Body()
-    requestBody: PromptVersionsQueryParamsV2,
+    requestBody: PromptVersionsQueryParams,
     @Request() request: JawnAuthenticatedRequest,
     @Path() promptId: string
   ): Promise<Result<PromptVersionResult[], string>> {
