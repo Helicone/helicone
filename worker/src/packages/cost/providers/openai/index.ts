@@ -278,7 +278,7 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.000005,
-      completion_token: 0.000015,
+      completion_token: 0.000025,
     },
     showInPlayground: true,
   },
@@ -448,6 +448,16 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.000003,
       completion_token: 0.000004,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-4o-2024-08-06",
+    },
+    cost: {
+      prompt_token: 0.0000025,
+      completion_token: 0.0000125,
     },
   },
 ];
