@@ -100,7 +100,11 @@ export class ScoreManager extends BaseManager {
         }))
       );
 
-      if (bumpedVersions.error || !bumpedVersions.data) {
+      if (
+        bumpedVersions.error ||
+        !bumpedVersions.data ||
+        bumpedVersions.data.length === 0
+      ) {
         return err(bumpedVersions.error);
       }
       const scoresScoreResult = await this.scoreStore.putScoresIntoClickhouse(
