@@ -225,11 +225,11 @@ export async function getRequestsClickhouse(
 
   const query = `
     SELECT response_id,
-      map('helicone_message', 'Response body no longer supported. To retrieve response body, please contact engineering@helicone.ai') as response_body,
+      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body,
       response_created_at,
       toInt32(status) AS response_status,
       request_id,
-      map('helicone_message', 'Request body no longer supported. To retrieve request body, please contact engineering@helicone.ai') as request_body,
+      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body,
       request_created_at,
       user_id AS request_user_id,
       properties AS request_properties,
@@ -304,11 +304,11 @@ export async function getRequestsCachedClickhouse(
   const query = `
   SELECT
     rrv.response_id,
-    rrv.response_body,
+          map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body,
     rrv.response_created_at,
     rrv.status AS response_status,
     rrv.request_id,
-    rrv.request_body,
+          map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body,
     rrv.request_created_at,
     rrv.user_id AS request_user_id,
     rrv.properties AS request_properties,

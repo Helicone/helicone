@@ -67,7 +67,7 @@ const useGetRequestsWithBodies = (
       const isCached = query.queryKey[5];
       const orgId = query.queryKey[6] as string;
       const jawn = getJawnClient(orgId);
-      const response = await jawn.POST("/v1/request/queryClickhouse", {
+      const response = await jawn.POST("/v1/request/query", {
         body: {
           filter: advancedFilter as any,
           offset: (currentPage - 1) * currentPageSize,
@@ -77,55 +77,7 @@ const useGetRequestsWithBodies = (
         },
       });
 
-      const result = response.data as Result<HeliconeRequest[], string>;
-
-      const requests = await Promise.all(
-        result.data?.map(async (request: HeliconeRequest) => {
-          if (request.signed_body_url) {
-            try {
-              const contentResponse = await fetch(request.signed_body_url);
-              if (contentResponse.ok) {
-                const text = await contentResponse.text();
-
-                let content = JSON.parse(text);
-
-                if (request.asset_urls) {
-                  content = placeAssetIdValues(request.asset_urls, content);
-                }
-
-                request.request_body = content.request;
-                request.response_body = content.response;
-
-                const model =
-                  request.model_override ||
-                  request.response_model ||
-                  request.request_model ||
-                  content.response?.model ||
-                  content.request?.model ||
-                  content.response?.body?.model || // anthropic
-                  getModelFromPath(request.request_path) ||
-                  "";
-
-                if (
-                  request.provider === "GOOGLE" &&
-                  model.toLowerCase().includes("gemini")
-                ) {
-                  request.llmSchema = mapGeminiPro(
-                    request as HeliconeRequest,
-                    model
-                  );
-                }
-              }
-            } catch (error) {
-              console.log(`Error fetching content: ${error}`);
-              return request;
-            }
-          }
-          return request; // Return request if no signed_body_url
-        }) ?? []
-      );
-
-      return { data: requests, error: null };
+      return response.data as Result<HeliconeRequest[], string>;
     },
     refetchOnWindowFocus: false,
     refetchInterval: isLive ? 1_000 : false,
