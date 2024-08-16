@@ -20,11 +20,40 @@ export class VersionedRequestStore {
   constructor(private orgId: string) {}
 
   async insertRequestResponseVersioned(
-    requestResponseLog: ClickhouseDB["Tables"]["request_response_versioned"][]
+    requestResponseLog: InsertRequestResponseVersioned[]
   ): PromiseGenericResult<string> {
     const result = await clickhouseDb.dbInsertClickhouse(
       "request_response_versioned",
       requestResponseLog
+    );
+
+    const result2 = await clickhouseDb.dbInsertClickhouse(
+      "request_response_rmt",
+      requestResponseLog.map((row) => ({
+        response_id: row.response_id,
+        response_created_at: row.response_created_at,
+        latency: row.latency,
+        status: row.status,
+        completion_tokens: row.completion_tokens,
+        prompt_tokens: row.prompt_tokens,
+        model: row.model,
+        request_id: row.request_id,
+        request_created_at: row.request_created_at,
+        user_id: row.user_id,
+        organization_id: row.organization_id,
+        proxy_key_id: row.proxy_key_id,
+        threat: row.threat,
+        time_to_first_token: row.time_to_first_token,
+        provider: row.provider,
+        country_code: row.country_code,
+        target_url: row.target_url,
+        properties: row.properties,
+        request_body: row.request_body,
+        response_body: row.response_body,
+        assets: row.assets,
+        scores: row.scores,
+        updated_at: new Date().toISOString(),
+      }))
     );
 
     if (result.error || !result.data) {
@@ -133,6 +162,39 @@ export class VersionedRequestStore {
 
     if (res.error) {
       return err(res.error);
+    }
+
+    const row = rowContents.data;
+    const res2 = await clickhouseDb.dbInsertClickhouse("request_response_rmt", [
+      {
+        response_id: row.response_id,
+        response_created_at: row.response_created_at,
+        latency: row.latency,
+        status: row.status,
+        completion_tokens: row.completion_tokens,
+        prompt_tokens: row.prompt_tokens,
+        model: row.model,
+        request_id: row.request_id,
+        request_created_at: row.request_created_at,
+        user_id: row.user_id,
+        organization_id: row.organization_id,
+        proxy_key_id: row.proxy_key_id,
+        threat: row.threat,
+        time_to_first_token: row.time_to_first_token,
+        provider: row.provider,
+        country_code: row.country_code,
+        target_url: row.target_url,
+        request_body: row.request_body,
+        response_body: row.response_body,
+        assets: row.assets,
+        updated_at: new Date().toISOString(),
+        scores: row.scores,
+        properties: newVersion.properties,
+      },
+    ]);
+
+    if (res2.error) {
+      return err(res2.error);
     }
 
     return ok(rowContents.data);

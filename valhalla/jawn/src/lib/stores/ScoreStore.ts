@@ -250,6 +250,51 @@ export class ScoreStore extends BaseStore {
       return err(res.error);
     }
 
+    const res2 = await clickhouseDb.dbInsertClickhouse(
+      "request_response_rmt",
+      rowContents.data.flatMap((row, index) => {
+        const newVersion = newVersions[index];
+        return [
+          // Insert the new version
+          {
+            response_id: row.response_id,
+            response_created_at: row.response_created_at,
+            latency: row.latency,
+            status: row.status,
+            completion_tokens: row.completion_tokens,
+            prompt_tokens: row.prompt_tokens,
+            model: row.model,
+            request_id: row.request_id,
+            request_created_at: row.request_created_at,
+            user_id: row.user_id,
+            organization_id: row.organization_id,
+            proxy_key_id: row.proxy_key_id,
+            threat: row.threat,
+            time_to_first_token: row.time_to_first_token,
+            provider: row.provider,
+            country_code: row.country_code,
+            target_url: row.target_url,
+            properties: row.properties,
+            request_body: row.request_body,
+            response_body: row.response_body,
+            assets: row.assets,
+            updated_at: new Date().toISOString(),
+            scores: {
+              ...row.scores,
+              ...newVersion.mappedScores.reduce((acc, score) => {
+                acc[score.score_attribute_key] = score.score_attribute_value;
+                return acc;
+              }, {} as Record<string, number>),
+            },
+          },
+        ];
+      })
+    );
+
+    if (res2.error) {
+      return err(res2.error);
+    }
+
     return ok(rowContents.data);
   }
 
