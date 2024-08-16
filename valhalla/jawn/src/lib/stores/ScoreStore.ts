@@ -1,7 +1,4 @@
-import {
-  InsertRequestResponseVersioned,
-  clickhouseDb,
-} from "../db/ClickhouseWrapper";
+import { RequestResponseRMT, clickhouseDb } from "../db/ClickhouseWrapper";
 import { dbExecute } from "../shared/db/dbExecute";
 import { err, resultMap, ok, Result } from "../shared/result";
 import { BaseStore } from "./baseStore";
@@ -107,7 +104,7 @@ export class ScoreStore extends BaseStore {
 
   public async putScoresIntoClickhouse(
     newVersions: BatchScores[]
-  ): Promise<Result<InsertRequestResponseVersioned[], string>> {
+  ): Promise<Result<RequestResponseRMT[], string>> {
     const queryPlaceholders = newVersions
       .map((_, index) => {
         const base = index * 4;
@@ -134,10 +131,10 @@ export class ScoreStore extends BaseStore {
     }
 
     let rowContents = resultMap(
-      await clickhouseDb.dbQuery<InsertRequestResponseVersioned>(
+      await clickhouseDb.dbQuery<RequestResponseRMT>(
         `
         SELECT *
-        FROM request_response_versioned
+        FROM request_response_rmt
         WHERE (request_id, organization_id, provider, version) IN (${queryPlaceholders})
         `,
         queryParams
@@ -178,10 +175,10 @@ export class ScoreStore extends BaseStore {
         ]);
 
         const missingRowContents = resultMap(
-          await clickhouseDb.dbQuery<InsertRequestResponseVersioned>(
+          await clickhouseDb.dbQuery<RequestResponseRMT>(
             `
             SELECT *
-            FROM request_response_versioned
+            FROM request_response_rmt
             WHERE (request_id, organization_id, provider) IN (${missingQueryPlaceholders})
             ORDER BY version DESC
             LIMIT ${missingVersions.length}
@@ -215,42 +212,6 @@ export class ScoreStore extends BaseStore {
     }
 
     const res = await clickhouseDb.dbInsertClickhouse(
-      "request_response_versioned",
-      rowContents.data.flatMap((row, index) => {
-        const newVersion = newVersions[index];
-        return [
-          // Delete the previous version
-          {
-            sign: -1,
-            version: row.version,
-            request_id: newVersion.requestId,
-            organization_id: newVersion.organizationId,
-            provider: newVersion.provider,
-            model: row.model,
-            request_created_at: row.request_created_at,
-          },
-          // Insert the new version
-          {
-            ...row,
-            sign: 1,
-            version: newVersion.version,
-            scores: {
-              ...row.scores,
-              ...newVersion.mappedScores.reduce((acc, score) => {
-                acc[score.score_attribute_key] = score.score_attribute_value;
-                return acc;
-              }, {} as Record<string, number>),
-            },
-          },
-        ];
-      })
-    );
-
-    if (res.error) {
-      return err(res.error);
-    }
-
-    const res2 = await clickhouseDb.dbInsertClickhouse(
       "request_response_rmt",
       rowContents.data.flatMap((row, index) => {
         const newVersion = newVersions[index];
@@ -290,8 +251,8 @@ export class ScoreStore extends BaseStore {
       })
     );
 
-    if (res2.error) {
-      return err(res2.error);
+    if (res.error) {
+      return err(res.error);
     }
 
     return ok(rowContents.data);

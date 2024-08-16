@@ -18,7 +18,7 @@ export class RequestResponseStore {
   ): Promise<Result<number, string>> {
     const query = `SELECT
       COUNT() AS count
-    FROM request_response_versioned
+    FROM request_response_rmt
     WHERE 
       organization_id = {val_0: UUID} AND
       request_created_at > {val_1: DateTime} AND

@@ -31,7 +31,7 @@ async function handler(
       dbIncrement: dbIncrement ?? "hour",
       timeZoneDifference,
     },
-    ["request_response_versioned.status as status"]
+    ["request_response_rmt.status as status"]
   );
 
   res.status(200).json(totalRequests);

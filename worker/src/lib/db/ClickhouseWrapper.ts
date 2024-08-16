@@ -230,6 +230,6 @@ export interface ClickhouseDB {
     cache_hits: CacheHits;
     rate_limit_log: RateLimitLog;
     rate_limit_log_v2: RateLimitLogV2;
-    request_response_versioned: RequestResponseVersioned;
+    request_response_rmt: RequestResponseVersioned;
   };
 }

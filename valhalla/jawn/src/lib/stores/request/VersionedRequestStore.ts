@@ -23,7 +23,7 @@ export class VersionedRequestStore {
     requestResponseLog: InsertRequestResponseVersioned[]
   ): PromiseGenericResult<string> {
     const result = await clickhouseDb.dbInsertClickhouse(
-      "request_response_versioned",
+      "request_response_rmt",
       requestResponseLog
     );
 
@@ -88,7 +88,7 @@ export class VersionedRequestStore {
     );
   }
 
-  // Updates the request_response_versioned table in Clickhouse
+  // Updates the request_response_rmt table in Clickhouse
   // We must include all of the primary keys in the delete statement and then insert the new row
   private async putPropertyIntoClickhouse(newVersion: {
     id: string;
@@ -100,7 +100,7 @@ export class VersionedRequestStore {
       await clickhouseDb.dbQuery<InsertRequestResponseVersioned>(
         `
       SELECT *
-      FROM request_response_versioned
+      FROM request_response_rmt
       WHERE request_id = {val_0: UUID}
       AND version = {val_1: UInt64}
       AND organization_id = {val_2: String}
@@ -119,7 +119,7 @@ export class VersionedRequestStore {
         await clickhouseDb.dbQuery<InsertRequestResponseVersioned>(
           `
         SELECT *
-        FROM request_response_versioned
+        FROM request_response_rmt
         WHERE request_id = {val_0: UUID}
         AND organization_id = {val_1: String}
         AND provider = {val_2: String}
@@ -136,35 +136,8 @@ export class VersionedRequestStore {
       return err("Could not find previous version of request");
     }
 
-    const res = await clickhouseDb.dbInsertClickhouse(
-      "request_response_versioned",
-      [
-        // Delete the previous version
-        {
-          sign: -1,
-          version: rowContents.data.version,
-          request_id: newVersion.id,
-          organization_id: this.orgId,
-          provider: newVersion.provider,
-          model: rowContents.data.model,
-          request_created_at: rowContents.data.request_created_at,
-        },
-        // Insert the new version
-        {
-          ...rowContents.data,
-          sign: 1,
-          version: newVersion.version,
-          properties: newVersion.properties,
-        },
-      ]
-    );
-
-    if (res.error) {
-      return err(res.error);
-    }
-
     const row = rowContents.data;
-    const res2 = await clickhouseDb.dbInsertClickhouse("request_response_rmt", [
+    const res = await clickhouseDb.dbInsertClickhouse("request_response_rmt", [
       {
         response_id: row.response_id,
         response_created_at: row.response_created_at,
@@ -191,8 +164,8 @@ export class VersionedRequestStore {
       },
     ]);
 
-    if (res2.error) {
-      return err(res2.error);
+    if (res.error) {
+      return err(res.error);
     }
 
     return ok(rowContents.data);

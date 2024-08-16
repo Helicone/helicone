@@ -18,7 +18,7 @@ export async function getActiveUsers(
     {
       org_id,
       filter: {
-        left: timeFilterToFilterNode(timeFilter, "request_response_versioned"),
+        left: timeFilterToFilterNode(timeFilter, "request_response_rmt"),
         right: filter,
         operator: "and",
       },
@@ -27,8 +27,8 @@ export async function getActiveUsers(
   );
   const query = `
     SELECT 
-        count(DISTINCT request_response_versioned.user_id) AS users
-    FROM request_response_versioned
+        count(DISTINCT request_response_rmt.user_id) AS users
+    FROM request_response_rmt
     WHERE (
         ${filterString}
     )

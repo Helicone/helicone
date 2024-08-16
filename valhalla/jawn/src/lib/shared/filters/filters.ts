@@ -186,7 +186,7 @@ const whereKeyMappings: KeyMappings = {
     job_id: "request_response_log.job_id",
     threat: "request_response_log.threat",
   }),
-  request_response_versioned: (filter, placeValueSafely) => {
+  request_response_rmt: (filter, placeValueSafely) => {
     if ("properties" in filter && filter.properties) {
       const key = Object.keys(filter.properties)[0];
       const { operator, value } = extractOperatorAndValueFromAnOperator(
@@ -209,17 +209,17 @@ const whereKeyMappings: KeyMappings = {
         value: value,
       };
     }
-    return easyKeyMappings<"request_response_versioned">({
-      latency: "request_response_versioned.latency",
-      status: "request_response_versioned.status",
-      request_created_at: "request_response_versioned.request_created_at",
-      response_created_at: "request_response_versioned.response_created_at",
-      model: "request_response_versioned.model",
-      user_id: "request_response_versioned.user_id",
-      organization_id: "request_response_versioned.organization_id",
-      node_id: "request_response_versioned.node_id",
-      job_id: "request_response_versioned.job_id",
-      threat: "request_response_versioned.threat",
+    return easyKeyMappings<"request_response_rmt">({
+      latency: "request_response_rmt.latency",
+      status: "request_response_rmt.status",
+      request_created_at: "request_response_rmt.request_created_at",
+      response_created_at: "request_response_rmt.response_created_at",
+      model: "request_response_rmt.model",
+      user_id: "request_response_rmt.user_id",
+      organization_id: "request_response_rmt.organization_id",
+      node_id: "request_response_rmt.node_id",
+      job_id: "request_response_rmt.job_id",
+      threat: "request_response_rmt.threat",
     })(filter, placeValueSafely);
   },
   request_response_search: (filter, placeValueSafely) => {
@@ -302,7 +302,7 @@ const havingKeyMappings: KeyMappings = {
   response: NOT_IMPLEMENTED,
   properties_table: NOT_IMPLEMENTED,
   request_response_log: NOT_IMPLEMENTED,
-  request_response_versioned: NOT_IMPLEMENTED,
+  request_response_rmt: NOT_IMPLEMENTED,
   properties_v3: NOT_IMPLEMENTED,
   property_with_response_v1: NOT_IMPLEMENTED,
   feedback: NOT_IMPLEMENTED,
@@ -540,7 +540,7 @@ export async function buildFilterWithAuthClickHouse(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
-    request_response_versioned: {
+    request_response_rmt: {
       organization_id: {
         equals: orgId,
       },

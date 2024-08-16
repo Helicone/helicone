@@ -54,7 +54,7 @@ export async function logInClickhouse(
   const model =
     request.model_override ?? response.model ?? request.model ?? "not-found";
   return Promise.all([
-    clickhouseDb.dbInsertClickhouse("request_response_versioned", [
+    clickhouseDb.dbInsertClickhouse("request_response_rmt", [
       {
         user_id: request.user_id ?? "",
         request_id: request.id,

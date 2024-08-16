@@ -114,12 +114,10 @@ export class AdminController extends Controller {
     SELECT
       organization_id,
       count(*) as ct
-    FROM request_response_versioned
+    FROM request_response_rmt 
     WHERE 
-      request_response_versioned.request_created_at > toDateTime('${
-        body.startDate
-      }')
-      and request_response_versioned.request_created_at < toDateTime('${
+      request_response_rmt.request_created_at > toDateTime('${body.startDate}')
+      and request_response_rmt.request_created_at < toDateTime('${
         body.endDate
       }')
     AND organization_id in (
@@ -201,18 +199,18 @@ export class AdminController extends Controller {
       select
         count(*) as count,
         date_trunc('${timeGrain}', request_created_at) AS dt,
-        request_response_versioned.organization_id as organization_id
-      from request_response_versioned
-      where request_response_versioned.organization_id in (
+        request_response_rmt.organization_id as organization_id
+      from request_response_rmt
+      where request_response_rmt.organization_id in (
         ${orgs.data
           ?.map((org) => `'${org.organization_id}'`)
           .slice(0, 30)
           .join(",")}
       )
-      and request_response_versioned.request_created_at > toDateTime('${
+      and request_response_rmt.request_created_at > toDateTime('${
         body.startDate
       }')
-      and request_response_versioned.request_created_at < toDateTime('${
+      and request_response_rmt.request_created_at < toDateTime('${
         body.endDate
       }')
       group by dt, organization_id
