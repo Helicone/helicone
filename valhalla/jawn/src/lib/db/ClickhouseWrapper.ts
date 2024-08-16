@@ -218,11 +218,10 @@ export interface RequestResponseRMT {
   target_url: Nullable<string>;
   properties: Record<string, string>;
   scores: Record<string, number>;
-  assets: Array<string>;
   request_body: string;
   response_body: string;
-
-  updated_at: string;
+  assets: Array<string>;
+  updated_at?: string;
 }
 
 export interface ClickhouseDB {

@@ -278,7 +278,6 @@ export class ScoreStore extends BaseStore {
             request_body: row.request_body,
             response_body: row.response_body,
             assets: row.assets,
-            updated_at: new Date().toISOString(),
             scores: {
               ...row.scores,
               ...newVersion.mappedScores.reduce((acc, score) => {

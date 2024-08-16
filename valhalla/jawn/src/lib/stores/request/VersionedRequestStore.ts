@@ -52,7 +52,6 @@ export class VersionedRequestStore {
         response_body: row.response_body,
         assets: row.assets,
         scores: row.scores,
-        updated_at: new Date().toISOString(),
       }))
     );
 
@@ -187,7 +186,6 @@ export class VersionedRequestStore {
         request_body: row.request_body,
         response_body: row.response_body,
         assets: row.assets,
-        updated_at: new Date().toISOString(),
         scores: row.scores,
         properties: newVersion.properties,
       },
