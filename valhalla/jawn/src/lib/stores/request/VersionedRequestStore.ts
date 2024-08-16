@@ -102,35 +102,15 @@ export class VersionedRequestStore {
       SELECT *
       FROM request_response_rmt
       WHERE request_id = {val_0: UUID}
-      AND version = {val_1: UInt64}
-      AND organization_id = {val_2: String}
-      AND provider = {val_3: String}
+      AND organization_id = {val_1: String}
+      AND provider = {val_2: String}
+      ORDER BY updated_at DESC
+      LIMIT 1
     `,
-        [newVersion.id, newVersion.version - 1, this.orgId, newVersion.provider]
+        [newVersion.id, this.orgId, newVersion.provider]
       ),
       (x) => x[0]
     );
-
-    if (rowContents.error) {
-      return rowContents;
-    }
-    if (!rowContents.data) {
-      rowContents = resultMap(
-        await clickhouseDb.dbQuery<RequestResponseRMT>(
-          `
-        SELECT *
-        FROM request_response_rmt
-        WHERE request_id = {val_0: UUID}
-        AND organization_id = {val_1: String}
-        AND provider = {val_2: String}
-        ORDER BY version DESC
-        LIMIT 1
-      `,
-          [newVersion.id, this.orgId, newVersion.provider]
-        ),
-        (x) => x[0]
-      );
-    }
 
     if (rowContents.error || !rowContents.data) {
       return err("Could not find previous version of request");

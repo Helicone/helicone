@@ -110,7 +110,7 @@ export class ScoreStore extends BaseStore {
         const base = index * 4;
         return `({val_${base} : String}, {val_${base + 1} : String}, {val_${
           base + 2
-        } : String}, {val_${base + 3} : UInt64})`;
+        } : String})`;
       })
       .join(",\n    ");
 
@@ -119,12 +119,7 @@ export class ScoreStore extends BaseStore {
     }
 
     const queryParams: (string | number | boolean | Date)[] =
-      newVersions.flatMap((v) => [
-        v.requestId,
-        v.organizationId,
-        v.provider,
-        v.version - 1,
-      ]);
+      newVersions.flatMap((v) => [v.requestId, v.organizationId, v.provider]);
 
     if (queryParams.length === 0) {
       return err("No query params");
@@ -135,73 +130,12 @@ export class ScoreStore extends BaseStore {
         `
         SELECT *
         FROM request_response_rmt
-        WHERE (request_id, organization_id, provider, version) IN (${queryPlaceholders})
+        WHERE (request_id, organization_id, provider) IN (${queryPlaceholders})
         `,
         queryParams
       ),
       (x) => x
     );
-
-    if (
-      rowContents.error ||
-      !rowContents.data ||
-      rowContents.data.length !== newVersions.length
-    ) {
-      // Fetch the latest versions for missing rows
-      const missingVersions = newVersions.filter(
-        (v) =>
-          !rowContents.data?.some(
-            (row) =>
-              row.request_id === v.requestId &&
-              row.organization_id === v.organizationId &&
-              row.provider === v.provider
-          )
-      );
-
-      if (missingVersions.length > 0) {
-        const missingQueryPlaceholders = missingVersions
-          .map((_, index) => {
-            const base = index * 3;
-            return `({val_${base} : String}, {val_${base + 1} : String}, {val_${
-              base + 2
-            } : String})`;
-          })
-          .join(", ");
-
-        const missingQueryParams = missingVersions.flatMap((v) => [
-          v.requestId,
-          v.organizationId,
-          v.provider,
-        ]);
-
-        const missingRowContents = resultMap(
-          await clickhouseDb.dbQuery<RequestResponseRMT>(
-            `
-            SELECT *
-            FROM request_response_rmt
-            WHERE (request_id, organization_id, provider) IN (${missingQueryPlaceholders})
-            ORDER BY version DESC
-            LIMIT ${missingVersions.length}
-            `,
-            missingQueryParams
-          ),
-          (x) => x
-        );
-
-        if (missingRowContents.error || !missingRowContents.data) {
-          return err(
-            `Could not find previous versions of some requests, requestId-orgId: ${missingVersions
-              .map((v) => `${v.requestId}-${v.organizationId}`)
-              .join(", ")}`
-          );
-        }
-
-        rowContents.data = [
-          ...(rowContents.data || []),
-          ...missingRowContents.data,
-        ];
-      }
-    }
 
     if (rowContents.error || !rowContents.data) {
       return err(
