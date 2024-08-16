@@ -199,7 +199,7 @@ export interface RateLimitLogV2 {
   tier: Nullable<string>;
 }
 
-export interface RequestResponseVersioned {
+export interface RequestResponseRMT {
   response_id: Nullable<string>;
   response_created_at: Nullable<string>;
   latency: Nullable<number>;
@@ -217,8 +217,6 @@ export interface RequestResponseVersioned {
   provider: Nullable<string>;
   country_code: Nullable<string>;
   created_at?: string;
-  sign: number;
-  version: number;
   properties: Record<string, string>;
 }
 
@@ -230,6 +228,6 @@ export interface ClickhouseDB {
     cache_hits: CacheHits;
     rate_limit_log: RateLimitLog;
     rate_limit_log_v2: RateLimitLogV2;
-    request_response_rmt: RequestResponseVersioned;
+    request_response_rmt: RequestResponseRMT;
   };
 }
