@@ -275,7 +275,7 @@ const havingKeyMappings: KeyMappings = {
       };
     }
     return easyKeyMappings<"request_response_rmt">({
-      latency: "request_response_rmt
+      latency: "request_response_rmt",
       status: "request_response_rmt.status",
       request_created_at: "request_response_rmt.request_created_at",
       response_created_at: "request_response_rmt.response_created_at",

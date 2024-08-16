@@ -1,6 +1,6 @@
 import {
   ClickhouseDB,
-  InsertRequestResponseVersioned,
+  RequestResponseRMT,
   clickhouseDb,
 } from "../../db/ClickhouseWrapper";
 import { dbExecute } from "../../shared/db/dbExecute";
@@ -20,7 +20,7 @@ export class VersionedRequestStore {
   constructor(private orgId: string) {}
 
   async insertRequestResponseVersioned(
-    requestResponseLog: InsertRequestResponseVersioned[]
+    requestResponseLog: RequestResponseRMT[]
   ): PromiseGenericResult<string> {
     const result = await clickhouseDb.dbInsertClickhouse(
       "request_response_rmt",
@@ -95,9 +95,9 @@ export class VersionedRequestStore {
     version: number;
     provider: string;
     properties: Record<string, string>;
-  }): Promise<Result<InsertRequestResponseVersioned, string>> {
+  }): Promise<Result<RequestResponseRMT, string>> {
     let rowContents = resultMap(
-      await clickhouseDb.dbQuery<InsertRequestResponseVersioned>(
+      await clickhouseDb.dbQuery<RequestResponseRMT>(
         `
       SELECT *
       FROM request_response_rmt
@@ -116,7 +116,7 @@ export class VersionedRequestStore {
     }
     if (!rowContents.data) {
       rowContents = resultMap(
-        await clickhouseDb.dbQuery<InsertRequestResponseVersioned>(
+        await clickhouseDb.dbQuery<RequestResponseRMT>(
           `
         SELECT *
         FROM request_response_rmt
@@ -172,7 +172,7 @@ export class VersionedRequestStore {
   }
 
   private async addPropertiesToLegacyTables(
-    request: InsertRequestResponseVersioned,
+    request: RequestResponseRMT,
     newProperties: { key: string; value: string }[]
   ): Promise<Result<null, string>> {
     const { error: e } = await clickhouseDb.dbInsertClickhouse(
