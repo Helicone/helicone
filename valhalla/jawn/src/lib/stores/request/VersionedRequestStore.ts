@@ -27,8 +27,9 @@ export class VersionedRequestStore {
       requestResponseLog
     );
 
-    const result2 = await clickhouseDb.dbInsertClickhouse(
-      "request_response_rmt",
+    // DELETE THIS
+    const legacy = await clickhouseDb.dbInsertClickhouse(
+      "request_response_versioned",
       requestResponseLog.map((row) => ({
         response_id: row.response_id,
         response_created_at: row.response_created_at,
@@ -52,6 +53,8 @@ export class VersionedRequestStore {
         response_body: row.response_body,
         assets: row.assets,
         scores: row.scores,
+        sign: 1,
+        version: 1,
       }))
     );
 
