@@ -176,7 +176,7 @@ const whereKeyMappings: KeyMappings = {
     return easyKeyMappings<"request_response_rmt">({
       latency: "request_response_rmt.latency",
       status: "request_response_rmt.status",
-      request_created_at: "request_response_rmtst_created_at",
+      request_created_at: "request_response_rmt.request_created_at",
       response_created_at: "request_response_rmt.response_created_at",
       model: "request_response_rmt.model",
       user_id: "request_response_rmt.user_id",
