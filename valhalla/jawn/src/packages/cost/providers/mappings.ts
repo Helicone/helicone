@@ -44,6 +44,8 @@ const mistral = /^https:\/\/api\.mistral\.ai/;
 const deepinfra = /^https:\/\/api\.deepinfra\.com/;
 //https://qstash.upstash.io/llm
 const qstash = /^https:\/\/qstash\.upstash\.io/;
+//https://www.firecrawl.dev/
+const firecrawl = /^https:\/\/api\.firecrawl\.dev/;
 
 export const providersNames = [
   "OPENAI",
@@ -67,6 +69,7 @@ export const providersNames = [
   "MISTRAL",
   "DEEPINFRA",
   "QSTASH",
+  "FIRECRAWL",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -177,6 +180,10 @@ export const providers: {
     pattern: qstash,
     provider: "QSTASH",
     costs: qstashCosts,
+  },
+  {
+    pattern: firecrawl,
+    provider: "FIRECRAWL",
   },
 ];
 

@@ -311,13 +311,13 @@
 						"type": "number",
 						"format": "double"
 					},
-					"helicone_template": {
-						"type": "string"
-					},
 					"prompt_v2": {
 						"type": "string"
 					},
 					"model": {
+						"type": "string"
+					},
+					"helicone_template": {
 						"type": "string"
 					}
 				},
@@ -325,9 +325,9 @@
 					"id",
 					"minor_version",
 					"major_version",
-					"helicone_template",
 					"prompt_v2",
-					"model"
+					"model",
+					"helicone_template"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -482,6 +482,191 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
+			},
+			"Partial_NumberOperators_": {
+				"properties": {
+					"not-equals": {
+						"type": "number",
+						"format": "double"
+					},
+					"equals": {
+						"type": "number",
+						"format": "double"
+					},
+					"gte": {
+						"type": "number",
+						"format": "double"
+					},
+					"lte": {
+						"type": "number",
+						"format": "double"
+					},
+					"lt": {
+						"type": "number",
+						"format": "double"
+					},
+					"gt": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_PromptVersionsToOperators_": {
+				"properties": {
+					"minor_version": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"major_version": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"prompt_v2": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Pick_FilterLeaf.prompts_versions_": {
+				"properties": {
+					"prompts_versions": {
+						"$ref": "#/components/schemas/Partial_PromptVersionsToOperators_"
+					}
+				},
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"FilterLeafSubset_prompts_versions_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.prompts_versions_"
+			},
+			"PromptVersionsFilterNode": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/FilterLeafSubset_prompts_versions_"
+					},
+					{
+						"$ref": "#/components/schemas/PromptVersionsFilterBranch"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
+					}
+				]
+			},
+			"PromptVersionsFilterBranch": {
+				"properties": {
+					"right": {
+						"$ref": "#/components/schemas/PromptVersionsFilterNode"
+					},
+					"operator": {
+						"type": "string",
+						"enum": [
+							"or",
+							"and"
+						]
+					},
+					"left": {
+						"$ref": "#/components/schemas/PromptVersionsFilterNode"
+					}
+				},
+				"required": [
+					"right",
+					"operator",
+					"left"
+				],
+				"type": "object"
+			},
+			"PromptVersionsQueryParams": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/PromptVersionsFilterNode"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PromptVersionResultCompiled": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"minor_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"major_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"prompt_v2": {
+						"type": "string"
+					},
+					"model": {
+						"type": "string"
+					},
+					"prompt_compiled": {}
+				},
+				"required": [
+					"id",
+					"minor_version",
+					"major_version",
+					"prompt_v2",
+					"model",
+					"prompt_compiled"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PromptVersionResultCompiled_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/PromptVersionResultCompiled"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptVersionResultCompiled.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptVersionResultCompiled_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"PromptVersiosQueryParamsCompiled": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/PromptVersionsFilterNode"
+					},
+					"inputs": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					}
+				},
+				"required": [
+					"inputs"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"ResultSuccess_null_": {
 				"properties": {
@@ -988,7 +1173,8 @@
 					"COHERE",
 					"MISTRAL",
 					"DEEPINFRA",
-					"QSTASH"
+					"QSTASH",
+					"FIRECRAWL"
 				]
 			},
 			"Provider": {
@@ -2309,8 +2495,52 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {},
-								"type": "object"
+								"$ref": "#/components/schemas/PromptVersionsQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt/{user_defined_id}/compile": {
+			"post": {
+				"operationId": "GetPromptVersionsCompiled",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResultCompiled.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "user_defined_id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PromptVersiosQueryParamsCompiled"
 							}
 						}
 					}
