@@ -26,12 +26,14 @@ const settingsManager = new SettingsManager();
 export const consume = async ({
   startTimestamp,
   endTimestamp,
+  miniBatchSizeOverride,
   filter,
   consumerName,
 }:
   | {
       startTimestamp?: number;
       endTimestamp?: number;
+      miniBatchSizeOverride?: number;
       filter?: {
         stream?: "only-stream";
       };
@@ -40,6 +42,7 @@ export const consume = async ({
   | {
       startTimestamp: undefined;
       endTimestamp: undefined;
+      miniBatchSizeOverride?: number;
       filter: undefined;
       consumerName: "jawn-consumer";
     }) => {
@@ -100,6 +103,7 @@ export const consume = async ({
           );
 
           const miniBatchSize =
+            miniBatchSizeOverride ??
             messagesPerMiniBatchSetting?.miniBatchSize ??
             MESSAGES_PER_MINI_BATCH;
 
