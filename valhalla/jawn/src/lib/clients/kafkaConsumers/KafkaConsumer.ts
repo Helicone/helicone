@@ -103,6 +103,13 @@ export const consume = async ({
           const firstOffset = miniBatch?.[0]?.offset;
           const lastOffset = miniBatch?.[miniBatch.length - 1]?.offset;
           const miniBatchId = `${batch.partition}-${firstOffset}-${lastOffset}`;
+          console.log(
+            `Processing mini batch with ${
+              miniBatch.length
+            } messages. Mini batch ID: ${miniBatchId}. Handling ${i}-${
+              i + miniBatchSize
+            } of ${batch.messages.length} messages.`
+          );
 
           i += miniBatchSize;
           try {
