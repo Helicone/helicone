@@ -5,11 +5,13 @@ export function startConsumers({
   dlqCount,
   scoresCount,
   scoresDlqCount,
+  backFillCount,
 }: {
   normalCount: number;
   dlqCount: number;
   scoresCount: number;
   scoresDlqCount: number;
+  backFillCount: number;
 }) {
   for (let i = 0; i < normalCount; i++) {
     const worker = new Worker(`${__dirname}/kafkaConsumer.js`);
@@ -29,5 +31,10 @@ export function startConsumers({
   for (let i = 0; i < scoresDlqCount; i++) {
     const workerScoresDlq = new Worker(`${__dirname}/kafkaConsumer.js`);
     workerScoresDlq.postMessage("start-scores-dlq");
+  }
+
+  for (let i = 0; i < backFillCount; i++) {
+    const workerBackFill = new Worker(`${__dirname}/kafkaConsumer.js`);
+    workerBackFill.postMessage("start-backfill");
   }
 }
