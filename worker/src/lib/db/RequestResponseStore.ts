@@ -378,7 +378,7 @@ export class RequestResponseStore {
 
     const query = `
         SELECT * 
-        FROM request_response_versioned
+        FROM request_response_rmt
         WHERE (
           request_id={val_0: UUID} AND
           organization_id={val_1: UUID}

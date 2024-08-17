@@ -125,7 +125,7 @@ export const useDashboardPage = ({
           })) || []
       ),
       category: "request",
-      table: "request_response_versioned",
+      table: "request_response_rmt",
       column: "model",
     };
   }

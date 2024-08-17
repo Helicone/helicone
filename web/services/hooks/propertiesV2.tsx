@@ -7,9 +7,7 @@ import { getPropertiesV2 } from "../lib/propertiesV2";
 import { getPropertyParamsV2 } from "../lib/propertyParamsV2";
 import { useDebounce } from "./debounce";
 
-function useGetPropertiesV2<
-  T extends "properties" | "request_response_versioned"
->(
+function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
   getPropertyFilters: (
     properties: string[],
     inputParams: InputParam[]

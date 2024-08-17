@@ -25,8 +25,8 @@ export async function getTotalCostRaw(
 
   const query = `
   WITH total_cost AS (
-    SELECT ${clickhousePriceCalc("request_response_versioned")} as cost
-    FROM request_response_versioned
+    SELECT ${clickhousePriceCalc("request_response_rmt")} as cost
+    FROM request_response_rmt
     ARRAY JOIN mapKeys(properties) AS key
     WHERE (
       (${filterString})
@@ -51,7 +51,7 @@ export async function getTotalCost(
 ): Promise<Result<number, string>> {
   return getTotalCostRaw(
     {
-      left: timeFilterToFilterNode(timeFilter, "request_response_versioned"),
+      left: timeFilterToFilterNode(timeFilter, "request_response_rmt"),
       right: filter,
       operator: "and",
     },
