@@ -9,7 +9,7 @@ import {
   ok,
 } from "../../shared/result";
 import { Topics } from "../KafkaProducer";
-import { generateKafkaConsumer } from "./client";
+import { generateKafkaAdmin, generateKafkaConsumer } from "./client";
 import {
   DLQ_MESSAGES_PER_MINI_BATCH,
   SCORES_MESSAGES_PER_MINI_BATCH,
@@ -23,8 +23,17 @@ const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
 const settingsManager = new SettingsManager();
 
 // Average message is 1kB, so we can set minBytes to 1kB and maxBytes to 10kB
-
-export const consume = async () => {
+export const consume = async ({
+  startTimestamp,
+  endTimestamp,
+  filter,
+}: {
+  startTimestamp?: number;
+  endTimestamp?: number;
+  filter?: {
+    stream?: "only-stream";
+  };
+}) => {
   const consumer = generateKafkaConsumer("jawn-consumer");
   if (KAFKA_ENABLED && !consumer) {
     console.error("Failed to create Kafka consumer");
@@ -43,15 +52,25 @@ export const consume = async () => {
       console.error(`Failed to connect to Kafka: ${error.message}`);
       console.log(`Retrying in ${retryDelay}ms...`);
       await new Promise((resolve) => setTimeout(resolve, retryDelay));
-      retryDelay = Math.min(retryDelay * 2, maxDelay); // Exponential backoff with a cap
+      retryDelay = Math.min(retryDelay * 2, maxDelay);
     }
   }
 
-  await consumer?.connect();
-  await consumer?.subscribe({
-    topic: "request-response-logs-prod",
-    fromBeginning: true,
-  });
+  const topic = "request-response-logs-prod";
+  await consumer?.subscribe({ topic });
+
+  if (startTimestamp) {
+    const admin = generateKafkaAdmin();
+    await admin?.connect();
+    const result = await admin?.fetchTopicOffsetsByTimestamp(
+      topic,
+      startTimestamp
+    );
+
+    for (const { partition, offset } of result ?? []) {
+      await consumer?.seek({ topic, partition, offset });
+    }
+  }
 
   await consumer?.run({
     eachBatchAutoResolve: false,
@@ -84,29 +103,51 @@ export const consume = async () => {
           const firstOffset = miniBatch?.[0]?.offset;
           const lastOffset = miniBatch?.[miniBatch.length - 1]?.offset;
           const miniBatchId = `${batch.partition}-${firstOffset}-${lastOffset}`;
-          console.log(
-            `Processing mini batch with ${
-              miniBatch.length
-            } messages. Mini batch ID: ${miniBatchId}. Handling ${i}-${
-              i + miniBatchSize
-            } of ${batch.messages.length} messages.`
-          );
 
           i += miniBatchSize;
           try {
             const mappedMessages = mapKafkaMessageToMessage(miniBatch);
+
             if (mappedMessages.error || !mappedMessages.data) {
               console.error("Failed to map messages", mappedMessages.error);
               return;
             }
 
+            // Filter messages based on timestamp if endTimestamp is provided
+            let filteredMessages = endTimestamp
+              ? mappedMessages.data.filter(
+                  (msg) =>
+                    new Date(msg.log.request.requestCreatedAt).getTime() <=
+                    endTimestamp
+                )
+              : mappedMessages.data;
+
+            filteredMessages =
+              filter?.stream === "only-stream"
+                ? mappedMessages.data.filter((msg) => msg.log.request.isStream)
+                : mappedMessages.data;
+
+            if (filteredMessages.length === 0) {
+              // If all messages are beyond the end timestamp, stop consuming
+              if (
+                endTimestamp &&
+                mappedMessages.data[0].log.request.requestCreatedAt.getTime() >
+                  endTimestamp
+              ) {
+                console.log("Reached end timestamp, stopping consumption");
+                await consumer?.stop();
+                return;
+              }
+              continue;
+            }
+
             const consumeResult = await consumeMiniBatch(
-              mappedMessages.data,
+              filteredMessages,
               firstOffset,
               lastOffset,
               miniBatchId,
               batch.partition,
-              "request-response-logs-prod"
+              topic
             );
 
             if (consumeResult.error) {
@@ -128,7 +169,6 @@ export const consume = async () => {
     },
   });
 };
-
 function mapKafkaMessageToMessage(
   kafkaMessage: KafkaMessage[]
 ): GenericResult<Message[]> {
