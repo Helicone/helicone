@@ -40,10 +40,10 @@ export const consume = async ({
       consumerName: "jawn-consumer-backfill";
     }
   | {
-      startTimestamp: undefined;
-      endTimestamp: undefined;
+      startTimestamp?: number;
+      endTimestamp?: number;
       miniBatchSizeOverride?: number;
-      filter: undefined;
+      filter?: undefined;
       consumerName: "jawn-consumer";
     }) => {
   const consumer = generateKafkaConsumer(consumerName);
@@ -71,27 +71,39 @@ export const consume = async ({
   const topic = "request-response-logs-prod";
   await consumer?.subscribe({ topic });
 
-  if (startTimestamp) {
-    const admin = generateKafkaAdmin();
-    await admin?.connect();
-    const result = await admin?.fetchTopicOffsetsByTimestamp(
-      topic,
-      startTimestamp
-    );
-
-    for (const { partition, offset } of result ?? []) {
-      await consumer?.seek({ topic, partition, offset });
-    }
-  }
-
+  let hasPerformedInitialSeek = false;
   await consumer?.run({
     eachBatchAutoResolve: false,
+
     eachBatch: async ({
       batch,
       resolveOffset,
       heartbeat,
       commitOffsetsIfNecessary,
     }) => {
+      // Perform seek operation only once, at the beginning
+      if (startTimestamp && !hasPerformedInitialSeek) {
+        try {
+          const admin = generateKafkaAdmin();
+          await admin?.connect();
+          const result = await admin?.fetchTopicOffsetsByTimestamp(
+            topic,
+            startTimestamp
+          );
+
+          for (const { partition, offset } of result ?? []) {
+            await consumer?.seek({ topic, partition, offset });
+          }
+
+          await admin?.disconnect();
+          hasPerformedInitialSeek = true;
+          return;
+        } catch (error) {
+          console.error("Failed to seek to start timestamp:", error);
+          // Decide whether to continue or throw an error based on your requirements
+        }
+      }
+
       console.log(`Received batch with ${batch.messages.length} messages.`);
 
       try {
@@ -155,7 +167,7 @@ export const consume = async ({
                   endTimestamp
               ) {
                 console.log("Reached end timestamp, stopping consumption");
-                await consumer?.stop();
+
                 return;
               }
               continue;

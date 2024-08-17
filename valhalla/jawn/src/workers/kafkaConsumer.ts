@@ -9,7 +9,9 @@ import {
 parentPort?.once("message", (message) => {
   if (message === "start") {
     console.log("Kafka consumer thread started!");
-    consume();
+    consume({
+      consumerName: "jawn-consumer",
+    });
   } else if (message === "start-dlq") {
     console.log("Kafka DLQ consumer thread started!");
     consumeDlq();
