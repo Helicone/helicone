@@ -67,7 +67,13 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
 
       const usage =
         "usage" in consolidatedData
-          ? consolidatedData.usage
+          ? {
+              totalTokens: consolidatedData.usage?.total_tokens,
+              completionTokens: consolidatedData.usage?.completion_tokens,
+              promptTokens: consolidatedData.usage?.prompt_tokens,
+              heliconeCalculated:
+                consolidatedData.usage?.helicone_calculated ?? false,
+            }
           : {
               total_tokens: -1,
               completion_tokens: -1,
