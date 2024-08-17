@@ -27,14 +27,23 @@ export const consume = async ({
   startTimestamp,
   endTimestamp,
   filter,
-}: {
-  startTimestamp?: number;
-  endTimestamp?: number;
-  filter?: {
-    stream?: "only-stream";
-  };
-}) => {
-  const consumer = generateKafkaConsumer("jawn-consumer");
+  consumerName,
+}:
+  | {
+      startTimestamp?: number;
+      endTimestamp?: number;
+      filter?: {
+        stream?: "only-stream";
+      };
+      consumerName: "jawn-consumer-backfill";
+    }
+  | {
+      startTimestamp: undefined;
+      endTimestamp: undefined;
+      filter: undefined;
+      consumerName: "jawn-consumer";
+    }) => {
+  const consumer = generateKafkaConsumer(consumerName);
   if (KAFKA_ENABLED && !consumer) {
     console.error("Failed to create Kafka consumer");
     return;

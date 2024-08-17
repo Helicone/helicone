@@ -27,6 +27,7 @@ parentPort?.once("message", (message) => {
       filter: {
         stream: "only-stream",
       },
+      consumerName: "jawn-consumer-backfill",
     });
   }
 });

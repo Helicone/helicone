@@ -52,6 +52,7 @@ export function generateKafkaConsumer(
   groupId:
     | "jawn-consumer-local-01"
     | "jawn-consumer"
+    | "jawn-consumer-backfill"
     | "jawn-consumer-scores"
     | "jawn-consumer-scores-dlq"
 ) {
