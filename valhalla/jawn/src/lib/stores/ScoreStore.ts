@@ -11,7 +11,6 @@ export type Score = {
 
 export interface BatchScores {
   requestId: string;
-  version: number;
   provider: string;
   organizationId: string;
   mappedScores: Score[];
@@ -129,7 +128,7 @@ export class ScoreStore extends BaseStore {
       await clickhouseDb.dbQuery<RequestResponseRMT>(
         `
         SELECT *
-        FROM request_response_rmt
+        FROM request_response_rmt FINAL
         WHERE (request_id, organization_id, provider) IN (${queryPlaceholders})
         `,
         queryParams
