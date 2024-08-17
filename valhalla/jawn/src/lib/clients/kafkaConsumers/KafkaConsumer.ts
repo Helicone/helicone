@@ -69,7 +69,10 @@ export const consume = async ({
   }
 
   const topic = "request-response-logs-prod";
-  await consumer?.subscribe({ topic });
+  await consumer?.subscribe({
+    topic: "request-response-logs-prod",
+    fromBeginning: true,
+  });
 
   let hasPerformedInitialSeek = false;
   await consumer?.run({
