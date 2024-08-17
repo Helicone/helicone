@@ -11,7 +11,6 @@ export type Score = {
 
 export interface BatchScores {
   requestId: string;
-  version: number;
   provider: string;
   organizationId: string;
   mappedScores: Score[];
@@ -144,10 +143,24 @@ export class ScoreStore extends BaseStore {
           .join(", ")}`
       );
     }
+    const uniqueRequestResponseLogs = rowContents.data.reduce((acc, row) => {
+      const key = `${row.request_id}-${row.organization_id}`;
+      if (
+        !acc[key] ||
+        (row.updated_at &&
+          (!acc[key].updated_at ||
+            new Date(row.updated_at) > new Date(acc[key].updated_at)))
+      ) {
+        acc[key] = row;
+      }
+      return acc;
+    }, {} as Record<string, RequestResponseRMT>);
+
+    const filteredRequestResponseLogs = Object.values(uniqueRequestResponseLogs);
 
     const res = await clickhouseDb.dbInsertClickhouse(
       "request_response_rmt",
-      rowContents.data.flatMap((row, index) => {
+      filteredRequestResponseLogs.flatMap((row, index) => {
         const newVersion = newVersions[index];
         return [
           // Insert the new version
@@ -189,7 +202,7 @@ export class ScoreStore extends BaseStore {
       return err(res.error);
     }
 
-    return ok(rowContents.data);
+    return ok(filteredRequestResponseLogs);
   }
 
   public async bumpRequestVersion(
