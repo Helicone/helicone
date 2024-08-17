@@ -189,37 +189,37 @@ const STATUS_OPS = numberWithSuggestions([
 ]);
 
 export const DASHBOARD_PAGE_TABLE_FILTERS: [
-  SingleFilterDef<"request_response_versioned">,
-  SingleFilterDef<"request_response_versioned">,
-  SingleFilterDef<"request_response_versioned">,
-  SingleFilterDef<"request_response_versioned">
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">
 ] = [
   {
     label: "Model",
     operators: textOperators,
     category: "request",
-    table: "request_response_versioned",
+    table: "request_response_rmt",
     column: "model",
   },
   {
     label: "Status",
     operators: STATUS_OPS,
     category: "request",
-    table: "request_response_versioned",
+    table: "request_response_rmt",
     column: "status",
   },
   {
     label: "Latency",
     operators: numberOperators,
     category: "request",
-    table: "request_response_versioned",
+    table: "request_response_rmt",
     column: "latency",
   },
   {
     label: "User",
     operators: textOperators,
     category: "request",
-    table: "request_response_versioned",
+    table: "request_response_rmt",
     column: "user_id",
   },
 ];
@@ -481,11 +481,11 @@ export function getPropertyFilters(
 export function getPropertyFiltersV2(
   properties: string[],
   inputParams: InputParam[]
-): SingleFilterDef<"request_response_versioned">[] {
+): SingleFilterDef<"request_response_rmt">[] {
   return properties.map((p) => ({
     label: p,
     operators: textWithSuggestions(inputParams),
-    table: "request_response_versioned",
+    table: "request_response_rmt",
     column: p as keyof FilterLeafRequestResponseVersioned,
     category: "properties",
     isCustomProperty: true,

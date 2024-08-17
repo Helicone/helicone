@@ -19,7 +19,7 @@ export async function requestOverLimit(
       { data: userSettings, error: userSettingsError },
     ] = await Promise.all([
       await getRequestCountClickhouse(orgId, {
-        request_response_versioned: {
+        request_response_rmt: {
           request_created_at: {
             gte: startOfThisMonth,
           },

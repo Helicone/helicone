@@ -1,11 +1,7 @@
-import {
-  ClickhouseDB,
-  formatTimeString,
-  InsertRequestResponseVersioned,
-} from "../db/ClickhouseWrapper";
+import { formatTimeString, RequestResponseRMT } from "../db/ClickhouseWrapper";
 import { Database } from "../db/database.types";
 import { S3Client } from "../shared/db/s3Client";
-import { PromiseGenericResult, Result, err, ok } from "../shared/result";
+import { err, ok, PromiseGenericResult, Result } from "../shared/result";
 import { LogStore } from "../stores/LogStore";
 import { VersionedRequestStore } from "../stores/request/VersionedRequestStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
@@ -33,7 +29,7 @@ export type BatchPayload = {
   prompts: PromptRecord[];
   assets: Database["public"]["Tables"]["asset"]["Insert"][];
   s3Records: S3Record[];
-  requestResponseVersionedCH: InsertRequestResponseVersioned[];
+  requestResponseVersionedCH: RequestResponseRMT[];
   searchRecords: Database["public"]["Tables"]["request_response_search"]["Insert"][];
 };
 
@@ -367,15 +363,13 @@ export class LoggingHandler extends AbstractLogHandler {
     return promptRecord;
   }
 
-  mapRequestResponseVersionedCH(
-    context: HandlerContext
-  ): InsertRequestResponseVersioned {
+  mapRequestResponseVersionedCH(context: HandlerContext): RequestResponseRMT {
     const request = context.message.log.request;
     const response = context.message.log.response;
     const usage = context.usage;
     const orgParams = context.orgParams;
 
-    const requestResponseLog: InsertRequestResponseVersioned = {
+    const requestResponseLog: RequestResponseRMT = {
       user_id: request.userId,
       request_id: request.id,
       completion_tokens: usage.completionTokens ?? null,
@@ -407,8 +401,6 @@ export class LoggingHandler extends AbstractLogHandler {
       response_body:
         this.extractResponseBodyMessage(context.processedLog.response.body) ??
         "",
-      sign: 1,
-      version: 1,
     };
 
     return requestResponseLog;

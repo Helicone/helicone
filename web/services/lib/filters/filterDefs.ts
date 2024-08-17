@@ -269,7 +269,7 @@ export type TablesAndViews = {
   request_response_search: FilterLeafRequestResponseSearch;
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
-  request_response_versioned: FilterLeafRequestResponseVersioned;
+  request_response_rmt: FilterLeafRequestResponseVersioned;
   users_view: FilterLeafUserView;
   properties_v3: FilterLeafPropertiesCopyV2;
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
@@ -300,17 +300,17 @@ export function timeFilterToFilterNode(
   filter: TimeFilter,
   table: keyof TablesAndViews
 ): FilterNode {
-  if (table === "request_response_versioned") {
+  if (table === "request_response_rmt") {
     return {
       left: {
-        request_response_versioned: {
+        request_response_rmt: {
           request_created_at: {
             gte: filter.start,
           },
         },
       },
       right: {
-        request_response_versioned: {
+        request_response_rmt: {
           request_created_at: {
             lte: filter.end,
           },
@@ -384,7 +384,7 @@ export function uiFilterRowToFilterLeaf(
 
   if (filterDef?.isCustomProperty) {
     return {
-      request_response_versioned: {
+      request_response_rmt: {
         properties: {
           [filterDef.column]: {
             [operator]: filter.value,
