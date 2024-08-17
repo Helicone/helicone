@@ -113,7 +113,6 @@ export class ScoreStore extends BaseStore {
       })
       .join(",\n    ");
 
-    console.log("queryPlaceholders", queryPlaceholders);
     if (queryPlaceholders.length === 0) {
       return err("No query placeholders");
     }
