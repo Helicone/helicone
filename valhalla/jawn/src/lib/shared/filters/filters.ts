@@ -268,7 +268,7 @@ const whereKeyMappings: KeyMappings = {
   values: NOT_IMPLEMENTED,
   job: NOT_IMPLEMENTED,
   job_node: NOT_IMPLEMENTED,
-  user_metrics: NOT_IMPLEMENTED,
+  user_metrics: easyKeyMappings<"user_metrics">({}),
 };
 
 const havingKeyMappings: KeyMappings = {
@@ -295,6 +295,7 @@ const havingKeyMappings: KeyMappings = {
     total_prompt_token: "total_prompt_token",
     cost: "cost",
   }),
+  request_response_rmt: easyKeyMappings<"request_response_rmt">({}),
   request_response_search: NOT_IMPLEMENTED,
   score_value: NOT_IMPLEMENTED,
   experiment_hypothesis_run: NOT_IMPLEMENTED,
@@ -304,7 +305,7 @@ const havingKeyMappings: KeyMappings = {
   response: NOT_IMPLEMENTED,
   properties_table: NOT_IMPLEMENTED,
   request_response_log: NOT_IMPLEMENTED,
-  request_response_rmt: NOT_IMPLEMENTED,
+
   properties_v3: NOT_IMPLEMENTED,
   property_with_response_v1: NOT_IMPLEMENTED,
   feedback: NOT_IMPLEMENTED,
@@ -369,39 +370,32 @@ export function buildFilterLeaf(
     const tableKey = _tableKey as keyof typeof filter;
     const table = filter[tableKey];
     const mapper = keyMappings[tableKey] as KeyMapper<typeof table>;
-    try {
-      const {
-        column,
-        operator: operatorKey,
-        value,
-      } = mapper(table, placeValueSafely);
 
-      if (!column) {
-        continue;
-      }
+    const {
+      column,
+      operator: operatorKey,
+      value,
+    } = mapper(table, placeValueSafely);
 
-      const sqlOperator = operatorToSql(operatorKey);
+    if (!column) {
+      continue;
+    }
 
-      if (operatorKey === "not-equals" && value === "null") {
-        filters.push(`${column} is not null`);
-      } else if (operatorKey === "equals" && value === "null") {
-        filters.push(`${column} is null`);
+    const sqlOperator = operatorToSql(operatorKey);
+
+    if (operatorKey === "not-equals" && value === "null") {
+      filters.push(`${column} is not null`);
+    } else if (operatorKey === "equals" && value === "null") {
+      filters.push(`${column} is null`);
+    } else {
+      if (operatorKey === "contains" || operatorKey === "not-contains") {
+        filters.push(`${column} ${sqlOperator} '%' || ${value}::text || '%'`);
+      } else if (operatorKey === "vector-contains") {
+        filters.push(
+          `${column} ${sqlOperator} plainto_tsquery('helicone_search_config', ${value}::text)`
+        );
       } else {
-        if (operatorKey === "contains" || operatorKey === "not-contains") {
-          filters.push(`${column} ${sqlOperator} '%' || ${value}::text || '%'`);
-        } else if (operatorKey === "vector-contains") {
-          filters.push(
-            `${column} ${sqlOperator} plainto_tsquery('helicone_search_config', ${value}::text)`
-          );
-        } else {
-          filters.push(`${column} ${sqlOperator} ${value}`);
-        }
-      }
-    } catch (e) {
-      if (e instanceof FilterNotImplemented) {
-        console.warn(e);
-      } else {
-        throw e;
+        filters.push(`${column} ${sqlOperator} ${value}`);
       }
     }
   }
