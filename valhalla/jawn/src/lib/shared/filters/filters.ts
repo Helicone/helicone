@@ -305,7 +305,6 @@ const havingKeyMappings: KeyMappings = {
   response: NOT_IMPLEMENTED,
   properties_table: NOT_IMPLEMENTED,
   request_response_log: NOT_IMPLEMENTED,
-
   properties_v3: NOT_IMPLEMENTED,
   property_with_response_v1: NOT_IMPLEMENTED,
   feedback: NOT_IMPLEMENTED,
