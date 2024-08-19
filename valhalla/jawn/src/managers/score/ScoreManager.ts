@@ -119,8 +119,13 @@ export class ScoreManager extends BaseManager {
             provider: scoresMessage.provider,
             version: scoresMessage.version,
             mappedScores:
-              filteredMessages.find((x) => x.requestId === scoresMessage.id)
-                ?.scores ?? [],
+              filteredMessages
+                .find((x) => x.requestId === scoresMessage.id)
+                ?.scores.forEach((score) => {
+                  if (score.score_attribute_type === "boolean") {
+                    score.score_attribute_key = `${score.score_attribute_key}-hcone-bool`;
+                  }
+                }) ?? [],
           };
         })
       );

@@ -1,4 +1,8 @@
-import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import {
+  InformationCircleIcon,
+  PlusIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import { Result } from "../../../lib/result";
 import {
   ColumnType,
@@ -15,8 +19,9 @@ import {
 } from "@tremor/react";
 import ThemedNumberDropdown from "./themedNumberDropdown";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
-
+import { styled } from "@mui/material/styles";
 import FilterTreeEditor from "./FilterTreeEditor";
+import Tooltip, { TooltipProps, tooltipClasses } from "@mui/material/Tooltip";
 
 interface UIFilterRowNode {
   operator: "and" | "or";
@@ -210,6 +215,17 @@ export function AdvancedFilterRow({
   onAddFilter: () => void;
   showAddFilter?: boolean;
 }) {
+  const BlackTooltip = styled(({ className, ...props }: TooltipProps) => (
+    <Tooltip {...props} classes={{ popper: className }} />
+  ))(({ theme }) => ({
+    [`& .${tooltipClasses.arrow}`]: {
+      color: theme.palette.common.black,
+    },
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: theme.palette.common.black,
+      fontSize: "0.8rem",
+    },
+  }));
   return (
     <div className="w-full flex flex-col lg:flex-row gap-3 items-left lg:items-end ml-4">
       <div className="w-full max-w-[12.5rem]">
@@ -289,25 +305,47 @@ export function AdvancedFilterRow({
           }
         />
       </div>
-      <div className="flex flex-row  justify-start items-center w-full pr-4 h-full">
-        <div className="w-full lg:w-fit mr-4 pb-1">
-          <button
-            onClick={onDeleteHandler}
-            className="bg-red-700  text-white rounded-md p-1 hover:bg-red-500"
-          >
-            <TrashIcon className="h-4" />
-          </button>
+      <div className="flex flex-row w-full justify-between pr-4 items-center">
+        <div className="flex flex-row  justify-start items-center w-full pr-4 h-full">
+          <div className="w-full lg:w-fit mr-4 pb-1">
+            <button
+              onClick={onDeleteHandler}
+              className="bg-red-700  text-white rounded-md p-1 hover:bg-red-500"
+            >
+              <TrashIcon className="h-4" />
+            </button>
+          </div>
+          {showAddFilter && showAddFilter === true && (
+            <button
+              onClick={() => onAddFilter()}
+              className="border bg-gray-100 dark:bg-black border-gray-300 dark:border-gray-700 flex flex-row w-fit font-normal text-sm text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100 px-4 py-2 rounded-lg -mt-2 items-center justify-center"
+            >
+              <PlusIcon
+                className=" h-3.5 flex-none text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100"
+                aria-hidden="true"
+              />
+            </button>
+          )}
         </div>
-        {showAddFilter && showAddFilter === true && (
-          <button
-            onClick={() => onAddFilter()}
-            className="border bg-gray-100 dark:bg-black border-gray-300 dark:border-gray-700 flex flex-row w-fit font-normal text-sm text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100 px-4 py-2 rounded-lg -mt-2 items-center justify-center"
+        {(filterMap[filter.filterMapIdx]?.column === "request_body" ||
+          filterMap[filter.filterMapIdx]?.column === "response_body") && (
+          <BlackTooltip
+            title="Data for this filter is available from August 5, 2024"
+            placement="top"
+            arrow
           >
-            <PlusIcon
-              className=" h-3.5 flex-none text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100"
-              aria-hidden="true"
-            />
-          </button>
+            <InformationCircleIcon className="h-8 w-8 text-gray-500 inline" />
+          </BlackTooltip>
+        )}
+        {filterMap[filter.filterMapIdx]?.column ===
+          "helicone-score-feedback" && (
+          <BlackTooltip
+            title="Data for this filter is available from August 12, 2024"
+            placement="top"
+            arrow
+          >
+            <InformationCircleIcon className="h-8 w-8 text-gray-500 inline" />
+          </BlackTooltip>
         )}
       </div>
     </div>
