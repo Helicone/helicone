@@ -448,6 +448,15 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
+			"Partial_VectorOperators_": {
+				"properties": {
+					"contains": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
 			"Partial_RequestResponseRMTToOperators_": {
 				"properties": {
 					"latency": {
@@ -480,6 +489,18 @@
 					"threat": {
 						"$ref": "#/components/schemas/Partial_BooleanOperators_"
 					},
+					"request_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"prompt_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"completion_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"target_url": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
 					"properties": {
 						"properties": {},
 						"additionalProperties": {
@@ -493,6 +514,19 @@
 							"$ref": "#/components/schemas/Partial_TextOperators_"
 						},
 						"type": "object"
+					},
+					"scores": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Partial_TextOperators_"
+						},
+						"type": "object"
+					},
+					"request_body": {
+						"$ref": "#/components/schemas/Partial_VectorOperators_"
+					},
+					"response_body": {
+						"$ref": "#/components/schemas/Partial_VectorOperators_"
 					}
 				},
 				"type": "object",
@@ -895,33 +929,13 @@
 				],
 				"type": "object"
 			},
-			"Json": {
-				"anyOf": [
-					{
-						"type": "string"
-					},
-					{
-						"type": "number",
-						"format": "double"
-					},
-					{
-						"type": "boolean"
-					},
-					{
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/Json"
-						},
-						"type": "object"
-					},
-					{
-						"items": {
-							"$ref": "#/components/schemas/Json"
-						},
-						"type": "array"
-					}
-				],
-				"nullable": true
+			"Record_string.string_": {
+				"properties": {},
+				"additionalProperties": {
+					"type": "string"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
 			},
 			"Provider": {
 				"type": "string",
@@ -1140,14 +1154,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Record_string.string_": {
-				"properties": {},
-				"additionalProperties": {
-					"type": "string"
-				},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
-			},
 			"Record_string.number_": {
 				"properties": {},
 				"additionalProperties": {
@@ -1161,10 +1167,12 @@
 				"properties": {
 					"response_id": {
 						"type": "string",
+						"nullable": true,
 						"example": "Happy"
 					},
 					"response_created_at": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
 					},
 					"response_body": {},
 					"response_status": {
@@ -1178,14 +1186,6 @@
 					"request_id": {
 						"type": "string"
 					},
-					"request_model": {
-						"type": "string",
-						"nullable": true
-					},
-					"model_override": {
-						"type": "string",
-						"nullable": true
-					},
 					"request_created_at": {
 						"type": "string"
 					},
@@ -1198,35 +1198,27 @@
 						"nullable": true
 					},
 					"request_properties": {
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/Json"
-						},
-						"type": "object",
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						],
 						"nullable": true
 					},
-					"request_feedback": {
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/Json"
-						},
-						"type": "object",
+					"request_model": {
+						"type": "string",
+						"nullable": true
+					},
+					"model_override": {
+						"type": "string",
 						"nullable": true
 					},
 					"helicone_user": {
 						"type": "string",
 						"nullable": true
 					},
-					"prompt_name": {
-						"type": "string",
-						"nullable": true
-					},
-					"prompt_regex": {
-						"type": "string",
-						"nullable": true
-					},
-					"key_name": {
-						"type": "string"
+					"provider": {
+						"$ref": "#/components/schemas/Provider"
 					},
 					"delay_ms": {
 						"type": "number",
@@ -1251,13 +1243,6 @@
 					"completion_tokens": {
 						"type": "number",
 						"format": "double",
-						"nullable": true
-					},
-					"provider": {
-						"$ref": "#/components/schemas/Provider"
-					},
-					"node_id": {
-						"type": "string",
 						"nullable": true
 					},
 					"prompt_id": {
@@ -1319,6 +1304,18 @@
 						"type": "number",
 						"format": "double",
 						"nullable": true
+					},
+					"properties": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					},
+					"assets": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"target_url": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -1327,31 +1324,29 @@
 					"response_status",
 					"response_model",
 					"request_id",
-					"request_model",
-					"model_override",
 					"request_created_at",
 					"request_body",
 					"request_path",
 					"request_user_id",
 					"request_properties",
-					"request_feedback",
+					"request_model",
+					"model_override",
 					"helicone_user",
-					"prompt_name",
-					"prompt_regex",
-					"key_name",
+					"provider",
 					"delay_ms",
 					"time_to_first_token",
 					"total_tokens",
 					"prompt_tokens",
 					"completion_tokens",
-					"provider",
-					"node_id",
 					"prompt_id",
 					"llmSchema",
 					"country_code",
 					"asset_ids",
 					"asset_urls",
-					"scores"
+					"scores",
+					"properties",
+					"assets",
+					"target_url"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1467,15 +1462,6 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Partial_VectorOperators_": {
-				"properties": {
-					"contains": {
-						"type": "string"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
 			"Partial_RequestResponseSearchToOperators_": {
 				"properties": {
 					"request_body_vector": {
@@ -1512,8 +1498,11 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_": {
+			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt_": {
 				"properties": {
+					"request_response_rmt": {
+						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
+					},
 					"response": {
 						"$ref": "#/components/schemas/Partial_ResponseTableToOperators_"
 					},
@@ -1547,13 +1536,13 @@
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
-			"FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_"
+			"FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt_"
 			},
 			"RequestFilterNode": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_"
+						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt_"
 					},
 					{
 						"$ref": "#/components/schemas/RequestFilterBranch"
@@ -2780,6 +2769,34 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
+			},
+			"Json": {
+				"anyOf": [
+					{
+						"type": "string"
+					},
+					{
+						"type": "number",
+						"format": "double"
+					},
+					{
+						"type": "boolean"
+					},
+					{
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Json"
+						},
+						"type": "object"
+					},
+					{
+						"items": {
+							"$ref": "#/components/schemas/Json"
+						},
+						"type": "array"
+					}
+				],
+				"nullable": true
 			},
 			"HeliconeDataset": {
 				"properties": {
@@ -4112,6 +4129,70 @@
 		"/v1/request/query": {
 			"post": {
 				"operationId": "GetRequests",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HeliconeRequest-Array.string_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"filter": "all",
+											"isCached": false,
+											"limit": 10,
+											"offset": 0,
+											"sort": {
+												"created_at": "desc"
+											},
+											"isScored": false,
+											"isPartOfExperiment": false
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "Request query filters",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RequestQueryParams",
+								"description": "Request query filters"
+							},
+							"example": {
+								"filter": "all",
+								"isCached": false,
+								"limit": 10,
+								"offset": 0,
+								"sort": {
+									"created_at": "desc"
+								},
+								"isScored": false,
+								"isPartOfExperiment": false
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/request/query-clickhouse": {
+			"post": {
+				"operationId": "GetRequestsClickhouse",
 				"responses": {
 					"200": {
 						"description": "Ok",

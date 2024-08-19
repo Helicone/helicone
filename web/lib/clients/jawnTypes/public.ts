@@ -27,6 +27,9 @@ export interface paths {
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
+  "/v1/request/query-clickhouse": {
+    post: operations["GetRequestsClickhouse"];
+  };
   "/v1/request/{requestId}/feedback": {
     post: operations["FeedbackRequest"];
   };
@@ -274,6 +277,10 @@ export interface components {
       equals?: boolean;
     };
     /** @description Make all properties in T optional */
+    Partial_VectorOperators_: {
+      contains?: string;
+    };
+    /** @description Make all properties in T optional */
     Partial_RequestResponseRMTToOperators_: {
       latency?: components["schemas"]["Partial_NumberOperators_"];
       status?: components["schemas"]["Partial_NumberOperators_"];
@@ -285,12 +292,21 @@ export interface components {
       node_id?: components["schemas"]["Partial_TextOperators_"];
       job_id?: components["schemas"]["Partial_TextOperators_"];
       threat?: components["schemas"]["Partial_BooleanOperators_"];
+      request_id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      target_url?: components["schemas"]["Partial_TextOperators_"];
       properties?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
       search_properties?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
+      scores?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      request_body?: components["schemas"]["Partial_VectorOperators_"];
+      response_body?: components["schemas"]["Partial_VectorOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
@@ -401,7 +417,10 @@ export interface components {
           };
         }[];
     };
-Json: JsonObject;
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.string_": {
+      [key: string]: string;
+    };
     /** @enum {string} */
     Provider: "OPENAI" | "ANTHROPIC" | "TOGETHERAI" | "GROQ" | "GOOGLE" | "CUSTOM";
     /** @enum {string} */
@@ -465,38 +484,27 @@ Json: JsonObject;
       response?: components["schemas"]["Response"] | null;
     };
     /** @description Construct a type with a set of properties K of type T */
-    "Record_string.string_": {
-      [key: string]: string;
-    };
-    /** @description Construct a type with a set of properties K of type T */
     "Record_string.number_": {
       [key: string]: number;
     };
     HeliconeRequest: {
       /** @example Happy */
-      response_id: string;
-      response_created_at: string;
+      response_id: string | null;
+      response_created_at: string | null;
       response_body?: unknown;
       /** Format: double */
       response_status: number;
       response_model: string | null;
       request_id: string;
-      request_model: string | null;
-      model_override: string | null;
       request_created_at: string;
       request_body: unknown;
       request_path: string;
       request_user_id: string | null;
-      request_properties: {
-        [key: string]: components["schemas"]["Json"];
-      } | null;
-      request_feedback: {
-        [key: string]: components["schemas"]["Json"];
-      } | null;
+      request_properties: components["schemas"]["Record_string.string_"] | null;
+      request_model: string | null;
+      model_override: string | null;
       helicone_user: string | null;
-      prompt_name: string | null;
-      prompt_regex: string | null;
-      key_name: string;
+      provider: components["schemas"]["Provider"];
       /** Format: double */
       delay_ms: number | null;
       /** Format: double */
@@ -507,8 +515,6 @@ Json: JsonObject;
       prompt_tokens: number | null;
       /** Format: double */
       completion_tokens: number | null;
-      provider: components["schemas"]["Provider"];
-      node_id: string | null;
       prompt_id: string | null;
       feedback_created_at?: string | null;
       feedback_id?: string | null;
@@ -521,6 +527,9 @@ Json: JsonObject;
       scores: components["schemas"]["Record_string.number_"] | null;
       /** Format: double */
       costUSD?: number | null;
+      properties: components["schemas"]["Record_string.string_"];
+      assets: string[];
+      target_url: string;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -558,10 +567,6 @@ Json: JsonObject;
       response_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
-    Partial_VectorOperators_: {
-      contains?: string;
-    };
-    /** @description Make all properties in T optional */
     Partial_RequestResponseSearchToOperators_: {
       request_body_vector?: components["schemas"]["Partial_VectorOperators_"];
       response_body_vector?: components["schemas"]["Partial_VectorOperators_"];
@@ -576,7 +581,8 @@ Json: JsonObject;
       created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_": {
+    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt_": {
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
       response?: components["schemas"]["Partial_ResponseTableToOperators_"];
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
       feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
@@ -589,8 +595,8 @@ Json: JsonObject;
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
     };
-    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_"];
-    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
     RequestFilterBranch: {
       right: components["schemas"]["RequestFilterNode"];
       /** @enum {string} */
@@ -889,6 +895,7 @@ Json: JsonObject;
       error: null;
     };
     "Result_HeliconeDatasetRow-Array.string_": components["schemas"]["ResultSuccess_HeliconeDatasetRow-Array_"] | components["schemas"]["ResultError_string_"];
+Json: JsonObject;
     HeliconeDataset: {
       created_at: string | null;
       dataset_type: string;
@@ -1258,6 +1265,35 @@ export interface operations {
     };
   };
   GetRequests: {
+    /** @description Request query filters */
+    requestBody: {
+      content: {
+        /**
+         * @example {
+         *   "filter": "all",
+         *   "isCached": false,
+         *   "limit": 10,
+         *   "offset": 0,
+         *   "sort": {
+         *     "created_at": "desc"
+         *   },
+         *   "isScored": false,
+         *   "isPartOfExperiment": false
+         * }
+         */
+        "application/json": components["schemas"]["RequestQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
+        };
+      };
+    };
+  };
+  GetRequestsClickhouse: {
     /** @description Request query filters */
     requestBody: {
       content: {

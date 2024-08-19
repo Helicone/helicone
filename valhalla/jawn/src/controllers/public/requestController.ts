@@ -37,6 +37,7 @@ type RequestFilterNode =
       | "values"
       | "request_response_search"
       | "cache_hits"
+      | "request_response_rmt"
     >
   | RequestFilterBranch
   | "all";
@@ -92,6 +93,50 @@ export class RequestController extends Controller {
   ): Promise<Result<HeliconeRequest[], string>> {
     const reqManager = new RequestManager(request.authParams);
     const requests = await reqManager.getRequests(requestBody);
+    if (requests.error || !requests.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200); // set return status 201
+    }
+    return requests;
+  }
+
+  /**
+   *
+   * @param requestBody Request query filters
+   * @example requestBody {
+   *  "filter": "all",
+   *  "isCached": false,
+   *  "limit": 10,
+   *  "offset": 0,
+   *  "sort": {
+   *    "created_at": "desc"
+   *  },
+   *  "isScored": false,
+   *  "isPartOfExperiment": false
+   * }
+   * @param request
+   * @returns
+   */
+  @Post("query-clickhouse")
+  @Example<RequestQueryParams>({
+    filter: "all",
+    isCached: false,
+    limit: 10,
+    offset: 0,
+    sort: {
+      created_at: "desc",
+    },
+    isScored: false,
+    isPartOfExperiment: false,
+  })
+  public async getRequestsClickhouse(
+    @Body()
+    requestBody: RequestQueryParams,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<HeliconeRequest[], string>> {
+    const reqManager = new RequestManager(request.authParams);
+    const requests = await reqManager.getRequestsClickhouse(requestBody);
     if (requests.error || !requests.data) {
       this.setStatus(500);
     } else {
