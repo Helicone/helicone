@@ -18,7 +18,7 @@ export default function OpenSource() {
         <div className="flex flex-col items-start justify-evenly border-2 rounded-2xl pt-6 min-w-[350px] md:min-w-[500px]">
           <div className="flex flex-col items-start px-6 gap-2">
             <h3 className="text-lg font-bold">Join our community on Discord</h3>
-            <p className="text-sm text-gray-400">We appreciate all of Helicon's contributors. You are welcome to join our community on <a href="https://discord.com/invite/2TkeWdXNPQ" target="_blank" className="text-sky-500 font-bold">Discord</a> and become a contributor.</p>
+            <p className="text-sm text-gray-400">We appreciate all of Helicone&apos;s contributors. You are welcome to join our community on <a href="https://discord.com/invite/2TkeWdXNPQ" target="_blank" className="text-sky-500 font-bold">Discord</a> and become a contributor.</p>
 
             <a href="https://github.com/helicon/helicone" target="_blank" className="text-gray-500 font-bold border-2 rounded-lg mt-2 p-1 px-2 flex items-center gap-1">
               Fork Helicone
