@@ -417,22 +417,140 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Pick_FilterLeaf.user_metrics_": {
+			"Partial_TimestampOperatorsTyped_": {
+				"properties": {
+					"gte": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"lte": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"lt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"gt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_BooleanOperators_": {
+				"properties": {
+					"equals": {
+						"type": "boolean"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_VectorOperators_": {
+				"properties": {
+					"contains": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_RequestResponseRMTToOperators_": {
+				"properties": {
+					"latency": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"status": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"request_created_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
+					},
+					"response_created_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
+					},
+					"model": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"user_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"organization_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"node_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"job_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"threat": {
+						"$ref": "#/components/schemas/Partial_BooleanOperators_"
+					},
+					"request_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"prompt_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"completion_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"target_url": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"properties": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Partial_TextOperators_"
+						},
+						"type": "object"
+					},
+					"search_properties": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Partial_TextOperators_"
+						},
+						"type": "object"
+					},
+					"scores": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Partial_TextOperators_"
+						},
+						"type": "object"
+					},
+					"request_body": {
+						"$ref": "#/components/schemas/Partial_VectorOperators_"
+					},
+					"response_body": {
+						"$ref": "#/components/schemas/Partial_VectorOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
 				"properties": {
 					"user_metrics": {
 						"$ref": "#/components/schemas/Partial_UserMetricsToOperators_"
+					},
+					"request_response_rmt": {
+						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
 					}
 				},
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
-			"FilterLeafSubset_user_metrics_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.user_metrics_"
+			"FilterLeafSubset_user_metrics-or-request_response_rmt_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.user_metrics-or-request_response_rmt_"
 			},
 			"UserFilterNode": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/FilterLeafSubset_user_metrics_"
+						"$ref": "#/components/schemas/FilterLeafSubset_user_metrics-or-request_response_rmt_"
 					},
 					{
 						"$ref": "#/components/schemas/UserFilterBranch"
@@ -1326,15 +1444,6 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Partial_BooleanOperators_": {
-				"properties": {
-					"equals": {
-						"type": "boolean"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
 			"Partial_FeedbackTableToOperators_": {
 				"properties": {
 					"id": {
@@ -1353,118 +1462,12 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Partial_VectorOperators_": {
-				"properties": {
-					"contains": {
-						"type": "string"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
 			"Partial_RequestResponseSearchToOperators_": {
 				"properties": {
 					"request_body_vector": {
 						"$ref": "#/components/schemas/Partial_VectorOperators_"
 					},
 					"response_body_vector": {
-						"$ref": "#/components/schemas/Partial_VectorOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_TimestampOperatorsTyped_": {
-				"properties": {
-					"gte": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"lte": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"lt": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"gt": {
-						"type": "string",
-						"format": "date-time"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_RequestResponseRMTToOperators_": {
-				"properties": {
-					"latency": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"status": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"request_created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
-					},
-					"response_created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
-					},
-					"model": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"user_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"organization_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"node_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"job_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"threat": {
-						"$ref": "#/components/schemas/Partial_BooleanOperators_"
-					},
-					"request_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"prompt_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"completion_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"target_url": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"properties": {
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/Partial_TextOperators_"
-						},
-						"type": "object"
-					},
-					"search_properties": {
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/Partial_TextOperators_"
-						},
-						"type": "object"
-					},
-					"scores": {
-						"properties": {},
-						"additionalProperties": {
-							"$ref": "#/components/schemas/Partial_TextOperators_"
-						},
-						"type": "object"
-					},
-					"request_body": {
-						"$ref": "#/components/schemas/Partial_VectorOperators_"
-					},
-					"response_body": {
 						"$ref": "#/components/schemas/Partial_VectorOperators_"
 					}
 				},
@@ -1497,6 +1500,9 @@
 			},
 			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt_": {
 				"properties": {
+					"request_response_rmt": {
+						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
+					},
 					"response": {
 						"$ref": "#/components/schemas/Partial_ResponseTableToOperators_"
 					},
@@ -1508,9 +1514,6 @@
 					},
 					"request_response_search": {
 						"$ref": "#/components/schemas/Partial_RequestResponseSearchToOperators_"
-					},
-					"request_response_rmt": {
-						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
 					},
 					"cache_hits": {
 						"$ref": "#/components/schemas/Partial_CacheHitsTableToOperators_"
