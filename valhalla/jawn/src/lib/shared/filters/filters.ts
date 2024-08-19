@@ -193,9 +193,7 @@ const whereKeyMappings: KeyMappings = {
         filter.properties[key as keyof typeof filter.properties]
       );
       return {
-        column: `request_response_versioned.properties[${placeValueSafely(
-          key
-        )}]`,
+        column: `request_response_rmt.properties[${placeValueSafely(key)}]`,
         operator: operator,
         value: `'${value}'`,
       };
