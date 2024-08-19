@@ -289,6 +289,17 @@ const havingKeyMappings: KeyMappings = {
         value: placeValueSafely(value),
       };
     }
+    if ("scores" in filter && filter.scores) {
+      const key = Object.keys(filter.scores)[0];
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.scores[key as keyof typeof filter.scores]
+      );
+      return {
+        column: `scores[${placeValueSafely(key)}]`,
+        operator: operator,
+        value: value,
+      };
+    }
     return easyKeyMappings<"request_response_rmt">({
       latency: "request_response_rmt",
       status: "request_response_rmt.status",

@@ -245,7 +245,7 @@ export async function getRequestsClickhouse(
       properties,
       assets,
       target_url,
-    FROM request_response_versioned FINAL
+    FROM request_response_rmt FINAL
     WHERE (
       (${builtFilter.filter})
     )
@@ -303,36 +303,36 @@ export async function getRequestsCachedClickhouse(
 
   const query = `
   SELECT
-    rrv.response_id,
+    rmt.response_id,
           map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body,
-    rrv.response_created_at,
-    rrv.status AS response_status,
-    rrv.request_id,
+    rmt.response_created_at,
+    rmt.status AS response_status,
+    rmt.request_id,
           map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body,
-    rrv.request_created_at,
-    rrv.user_id AS request_user_id,
-    rrv.properties AS request_properties,
-    rrv.provider,
-    rrv.target_url,
-    rrv.model AS request_model,
-    rrv.time_to_first_token,
-    rrv.prompt_tokens + rrv.completion_tokens AS total_tokens,
-    rrv.completion_tokens,
-    rrv.prompt_tokens,
-    rrv.country_code,
-    rrv.scores,
-    rrv.properties,
-    rrv.assets,
+    rmt.request_created_at,
+    rmt.user_id AS request_user_id,
+    rmt.properties AS request_properties,
+    rmt.provider,
+    rmt.target_url,
+    rmt.model AS request_model,
+    rmt.time_to_first_token,
+    rmt.prompt_tokens + rmt.completion_tokens AS total_tokens,
+    rmt.completion_tokens,
+    rmt.prompt_tokens,
+    rmt.country_code,
+    rmt.scores,
+    rmt.properties,
+    rmt.assets,
     ch.created_at AS cache_hit_created_at,
     ch.latency AS cache_hit_latency
-  FROM request_response_versioned rrv
-  INNER JOIN cache_hits ch ON rrv.request_id = ch.request_id
-  WHERE rrv.organization_id = '${orgId}'
+  FROM request_response_rmt rmt
+  INNER JOIN cache_hits ch ON rmt.request_id = ch.request_id
+  WHERE rmt.organization_id = '${orgId}'
     AND (${builtFilter.filter})
   ${
     sortSQL !== undefined
       ? `ORDER BY ${sortSQL}`
-      : "ORDER BY rrv.request_created_at DESC"
+      : "ORDER BY rmt.request_created_at DESC"
   }
   LIMIT ${limit}
   OFFSET ${offset}

@@ -62,7 +62,7 @@ const useRequestsPageV2 = (
             param: model.model,
           })) || []
       ),
-      table: "request_response_versioned",
+      table: "request_response_rmt",
       column: "model",
       category: "request",
     };

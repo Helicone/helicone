@@ -37,7 +37,7 @@ type RequestFilterNode =
       | "values"
       | "request_response_search"
       | "cache_hits"
-      | "request_response_versioned"
+      | "request_response_rmt"
     >
   | RequestFilterBranch
   | "all";

@@ -406,11 +406,11 @@ export function uiFilterRowToFilterLeaf(
 
   if (
     filterDef?.column === "helicone-score-feedback" &&
-    filterDef?.table === "request_response_versioned" &&
+    filterDef?.table === "request_response_rmt" &&
     filterDef?.category === "feedback"
   ) {
     return {
-      request_response_versioned: {
+      request_response_rmt: {
         scores: {
           [filterDef.column]: {
             [operator]: filter.value === "true" ? "1" : "0",

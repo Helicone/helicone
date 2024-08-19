@@ -121,7 +121,7 @@ function getSortLeaf(
 }
 
 function getTableName(isCached: boolean): string {
-  return isCached ? "cache_hits" : "request_response_versioned";
+  return isCached ? "cache_hits" : "request_response_rmt";
 }
 
 function getCreatedAtColumn(isCached: boolean): string {
