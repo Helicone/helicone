@@ -304,8 +304,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           body: {
             filter: {
               left: {
-                request_response_rmt: {
-                  request_id: {
+                request: {
+                  id: {
                     equals: initialRequestId,
                   },
                 },
@@ -341,7 +341,12 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 request.response_body = content.response;
 
                 const model =
+                  request.model_override ||
+                  request.response_model ||
                   request.request_model ||
+                  content.response?.model ||
+                  content.request?.model ||
+                  content.response?.body?.model || // anthropic
                   getModelFromPath(request.target_url) ||
                   "";
 
