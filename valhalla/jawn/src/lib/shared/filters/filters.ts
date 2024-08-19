@@ -235,10 +235,10 @@ const whereKeyMappings: KeyMappings = {
       node_id: "request_response_rmt.node_id",
       job_id: "request_response_rmt.job_id",
       threat: "request_response_rmt.threat",
-      prompt_tokens: "request_response_versioned.prompt_tokens",
-      completion_tokens: "request_response_versioned.completion_tokens",
-      request_body: "request_response_versioned.request_body",
-      response_body: "request_response_versioned.response_body",
+      prompt_tokens: "request_response_rmt.prompt_tokens",
+      completion_tokens: "request_response_rmt.completion_tokens",
+      request_body: "request_response_rmt.request_body",
+      response_body: "request_response_rmt.response_body",
     })(filter, placeValueSafely);
   },
   request_response_search: (filter, placeValueSafely) => {
