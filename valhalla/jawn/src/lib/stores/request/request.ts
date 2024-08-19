@@ -254,9 +254,6 @@ export async function getRequestsClickhouse(
     OFFSET ${offset}
   `;
 
-  console.log("query", query);
-  console.log("builtFilter.argsAcc", builtFilter.argsAcc);
-
   const requests = await dbQueryClickhouse<HeliconeRequest>(
     query,
     builtFilter.argsAcc
