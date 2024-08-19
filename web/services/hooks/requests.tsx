@@ -126,10 +126,10 @@ const useGetRequestsWithBodies = (
   });
 
   useEffect(() => {
-    if (requestsWithSignedUrls.length > 0) {
+    if (!isLoading) {
       setRequests(requestsWithSignedUrls);
     }
-  }, [requestsWithSignedUrls]);
+  }, [requestsWithSignedUrls, isLoading]);
 
   const isUrlsFetching = urlQueries.some((query) => query.isFetching);
 
