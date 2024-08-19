@@ -29,7 +29,7 @@ function getFilterSearchFilterNodeV2(
   }
   const searchFilter: FilterLeaf = {
     request_response_rmt: {
-      search_properties: {
+      properties: {
         [property]: {
           contains: search,
         },
