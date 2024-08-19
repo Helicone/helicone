@@ -1,7 +1,4 @@
-import {
-  InsertRequestResponseVersioned,
-  clickhouseDb,
-} from "../db/ClickhouseWrapper";
+import { RequestResponseRMT, clickhouseDb } from "../db/ClickhouseWrapper";
 import { dbExecute } from "../shared/db/dbExecute";
 import { err, resultMap, ok, Result } from "../shared/result";
 import { BaseStore } from "./baseStore";
@@ -14,7 +11,6 @@ export type Score = {
 
 export interface BatchScores {
   requestId: string;
-  version: number;
   provider: string;
   organizationId: string;
   mappedScores: Score[];
@@ -107,13 +103,13 @@ export class ScoreStore extends BaseStore {
 
   public async putScoresIntoClickhouse(
     newVersions: BatchScores[]
-  ): Promise<Result<InsertRequestResponseVersioned[], string>> {
+  ): Promise<Result<RequestResponseRMT[], string>> {
     const queryPlaceholders = newVersions
       .map((_, index) => {
-        const base = index * 4;
+        const base = index * 3;
         return `({val_${base} : String}, {val_${base + 1} : String}, {val_${
           base + 2
-        } : String}, {val_${base + 3} : UInt64})`;
+        } : String})`;
       })
       .join(",\n    ");
 
@@ -122,89 +118,23 @@ export class ScoreStore extends BaseStore {
     }
 
     const queryParams: (string | number | boolean | Date)[] =
-      newVersions.flatMap((v) => [
-        v.requestId,
-        v.organizationId,
-        v.provider,
-        v.version - 1,
-      ]);
+      newVersions.flatMap((v) => [v.requestId, v.organizationId, v.provider]);
 
     if (queryParams.length === 0) {
       return err("No query params");
     }
 
     let rowContents = resultMap(
-      await clickhouseDb.dbQuery<InsertRequestResponseVersioned>(
+      await clickhouseDb.dbQuery<RequestResponseRMT>(
         `
         SELECT *
-        FROM request_response_versioned
-        WHERE (request_id, organization_id, provider, version) IN (${queryPlaceholders})
+        FROM request_response_rmt
+        WHERE (request_id, organization_id, provider) IN (${queryPlaceholders})
         `,
         queryParams
       ),
       (x) => x
     );
-
-    if (
-      rowContents.error ||
-      !rowContents.data ||
-      rowContents.data.length !== newVersions.length
-    ) {
-      // Fetch the latest versions for missing rows
-      const missingVersions = newVersions.filter(
-        (v) =>
-          !rowContents.data?.some(
-            (row) =>
-              row.request_id === v.requestId &&
-              row.organization_id === v.organizationId &&
-              row.provider === v.provider
-          )
-      );
-
-      if (missingVersions.length > 0) {
-        const missingQueryPlaceholders = missingVersions
-          .map((_, index) => {
-            const base = index * 3;
-            return `({val_${base} : String}, {val_${base + 1} : String}, {val_${
-              base + 2
-            } : String})`;
-          })
-          .join(", ");
-
-        const missingQueryParams = missingVersions.flatMap((v) => [
-          v.requestId,
-          v.organizationId,
-          v.provider,
-        ]);
-
-        const missingRowContents = resultMap(
-          await clickhouseDb.dbQuery<InsertRequestResponseVersioned>(
-            `
-            SELECT *
-            FROM request_response_versioned
-            WHERE (request_id, organization_id, provider) IN (${missingQueryPlaceholders})
-            ORDER BY version DESC
-            LIMIT ${missingVersions.length}
-            `,
-            missingQueryParams
-          ),
-          (x) => x
-        );
-
-        if (missingRowContents.error || !missingRowContents.data) {
-          return err(
-            `Could not find previous versions of some requests, requestId-orgId: ${missingVersions
-              .map((v) => `${v.requestId}-${v.organizationId}`)
-              .join(", ")}`
-          );
-        }
-
-        rowContents.data = [
-          ...(rowContents.data || []),
-          ...missingRowContents.data,
-        ];
-      }
-    }
 
     if (rowContents.error || !rowContents.data) {
       return err(
@@ -213,46 +143,26 @@ export class ScoreStore extends BaseStore {
           .join(", ")}`
       );
     }
+    const uniqueRequestResponseLogs = rowContents.data.reduce((acc, row) => {
+      const key = `${row.request_id}-${row.organization_id}`;
+      if (
+        !acc[key] ||
+        (row.updated_at &&
+          (!acc[key].updated_at ||
+            new Date(row.updated_at) > new Date(acc[key].updated_at)))
+      ) {
+        acc[key] = row;
+      }
+      return acc;
+    }, {} as Record<string, RequestResponseRMT>);
 
-    const res = await clickhouseDb.dbInsertClickhouse(
-      "request_response_versioned",
-      rowContents.data.flatMap((row, index) => {
-        const newVersion = newVersions[index];
-        return [
-          // Delete the previous version
-          {
-            sign: -1,
-            version: row.version,
-            request_id: newVersion.requestId,
-            organization_id: newVersion.organizationId,
-            provider: newVersion.provider,
-            model: row.model,
-            request_created_at: row.request_created_at,
-          },
-          // Insert the new version
-          {
-            ...row,
-            sign: 1,
-            version: newVersion.version,
-            scores: {
-              ...row.scores,
-              ...newVersion.mappedScores.reduce((acc, score) => {
-                acc[score.score_attribute_key] = score.score_attribute_value;
-                return acc;
-              }, {} as Record<string, number>),
-            },
-          },
-        ];
-      })
+    const filteredRequestResponseLogs = Object.values(
+      uniqueRequestResponseLogs
     );
 
-    if (res.error) {
-      return err(res.error);
-    }
-
-    const res2 = await clickhouseDb.dbInsertClickhouse(
+    const res = await clickhouseDb.dbInsertClickhouse(
       "request_response_rmt",
-      rowContents.data.flatMap((row, index) => {
+      filteredRequestResponseLogs.flatMap((row, index) => {
         const newVersion = newVersions[index];
         return [
           // Insert the new version
@@ -290,11 +200,11 @@ export class ScoreStore extends BaseStore {
       })
     );
 
-    if (res2.error) {
-      return err(res2.error);
+    if (res.error) {
+      return err(res.error);
     }
 
-    return ok(rowContents.data);
+    return ok(filteredRequestResponseLogs);
   }
 
   public async bumpRequestVersion(

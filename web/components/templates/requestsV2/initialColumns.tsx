@@ -68,8 +68,13 @@ export const getInitialColumns: (
     accessorKey: "status",
     header: "Status",
     cell: (info) => {
-      const { code, statusType } =
-        info.getValue() as NormalizedRequest["status"];
+      const status = info.getValue() as NormalizedRequest["status"];
+
+      if (!status) {
+        return <span>{JSON.stringify(status)}</span>;
+      }
+
+      const { code, statusType } = status;
       return (
         <StatusBadge
           statusType={isCached ? "cached" : statusType}

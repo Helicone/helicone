@@ -639,32 +639,6 @@ export async function getRequestCount(
   return { data: +data[0].count, error: null };
 }
 
-export async function getRequestCountClickhouse(
-  org_id: string,
-  filter: FilterNode
-): Promise<Result<number, string>> {
-  const builtFilter = await buildFilterWithAuthClickHouse({
-    org_id,
-    argsAcc: [],
-    filter,
-  });
-
-  const query = `
-SELECT
-  count(DISTINCT r.request_id) as count
-from request_response_versioned r
-WHERE (${builtFilter.filter})
-  `;
-  const { data, error } = await dbQueryClickhouse<{ count: number }>(
-    query,
-    builtFilter.argsAcc
-  );
-  if (error !== null) {
-    return { data: null, error: error };
-  }
-  return { data: data[0].count, error: null };
-}
-
 export async function getRequestAsset(
   assetId: string,
   requestId: string,

@@ -24,7 +24,7 @@ export interface PropertyPageData {
 export const usePropertyCard = (props: PropertyPageData) => {
   const { timeFilter, property, limit = 10 } = props;
   const propertyFilterLeaf: FilterLeaf = {
-    request_response_versioned: {
+    request_response_rmt: {
       search_properties: {
         [property]: {
           equals: property,

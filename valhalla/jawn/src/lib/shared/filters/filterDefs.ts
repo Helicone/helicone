@@ -167,7 +167,7 @@ interface RequestResponseLogToOperators {
   threat: SingleKey<BooleanOperators>;
 }
 
-interface RequestResponseVersionedToOperators {
+interface RequestResponseRMTToOperators {
   latency: SingleKey<NumberOperators>;
   status: SingleKey<NumberOperators>;
   request_created_at: SingleKey<TimestampOperatorsTyped>;
@@ -198,8 +198,8 @@ interface RequestResponseVersionedToOperators {
 export type FilterLeafRequestResponseLog =
   SingleKey<RequestResponseLogToOperators>;
 
-export type FilterLeafRequestResponseVersioned =
-  SingleKey<RequestResponseVersionedToOperators>;
+export type FilterLeafRequestResponseRMT =
+  SingleKey<RequestResponseRMTToOperators>;
 
 type PropertiesCopyV2ToOperators = {
   key: SingleKey<TextOperators>;
@@ -330,7 +330,7 @@ export type TablesAndViews = {
 
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
-  request_response_versioned: FilterLeafRequestResponseVersioned;
+  request_response_rmt: FilterLeafRequestResponseRMT;
   users_view: FilterLeafUserView;
   properties_v3: FilterLeafPropertiesV3;
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
@@ -381,17 +381,17 @@ export function timeFilterToFilterNode(
   filter: TimeFilter,
   table: keyof TablesAndViews
 ): FilterNode {
-  if (table === "request_response_versioned") {
+  if (table === "request_response_rmt") {
     return {
       left: {
-        request_response_versioned: {
+        request_response_rmt: {
           request_created_at: {
             gte: filter.start,
           },
         },
       },
       right: {
-        request_response_versioned: {
+        request_response_rmt: {
           request_created_at: {
             lte: filter.end,
           },
@@ -452,7 +452,7 @@ export function filterUIToFilterLeafs(
         filterMap[filter.filterMapIdx].isCustomProperty === true
       ) {
         return {
-          request_response_versioned: {
+          request_response_rmt: {
             properties: {
               [filterMap[filter.filterMapIdx]?.column]: {
                 [filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx]

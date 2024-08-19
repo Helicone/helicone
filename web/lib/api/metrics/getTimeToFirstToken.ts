@@ -8,7 +8,7 @@ export async function getTimeToFirstToken(
 ): Promise<Result<TimeToFirstToken[], string>> {
   const res = await getXOverTime<{
     ttft: number;
-  }>(data, "avg(request_response_versioned.time_to_first_token) AS ttft");
+  }>(data, "avg(request_response_rmt.time_to_first_token) AS ttft");
   return resultMap(res, (resData) =>
     resData.map((d) => ({
       time: new Date(new Date(d.created_at_trunc).getTime()),
