@@ -48,30 +48,39 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
 
+  const { data: propertyFiltersData, isLoading: propertyFiltersLoading } =
+    useQuery({
+      queryKey: ["propertiesV2Search", debouncedPropertySearch],
+      queryFn: async ({ queryKey }) => {
+        const [, { property, search }] = queryKey as [
+          string,
+          typeof debouncedPropertySearch
+        ];
+        if (property === "") {
+          return getPropertyFilters(allProperties, []);
+        }
+        const values = await getPropertyParamsV2(property, search);
+        if (values.error !== null) {
+          console.error(values.error);
+          return getPropertyFilters(allProperties, []);
+        }
+        return getPropertyFilters(
+          allProperties,
+          values.data?.map((v: any) => ({
+            param: v.property_param,
+            key: v.property_key,
+          })) || []
+        );
+      },
+      enabled: debouncedPropertySearch.property !== "",
+      keepPreviousData: true,
+    });
+
   useEffect(() => {
-    const { property, search } = debouncedPropertySearch;
-    async function doSearch() {
-      const values = await getPropertyParamsV2(property, search);
-      if (values.error !== null) {
-        console.error(values.error);
-        return;
-      }
-      const propertyFilters = getPropertyFilters(
-        allProperties,
-        values.data?.map((v: any) => ({
-          param: v.property_param,
-          key: v.property_key,
-        }))
-      );
-
-      setPropertyFilters(propertyFilters);
-    }
-
-    if (property !== "") {
-      doSearch();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedPropertySearch]);
+    setPropertyFilters(
+      propertyFiltersData || getPropertyFilters(allProperties, [])
+    );
+  }, [propertyFiltersData, allProperties]);
 
   async function searchPropertyFilters(
     property: string,
@@ -80,7 +89,6 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
     setPropertySearch({ property, search });
     return ok(undefined);
   }
-
   return {
     properties: allProperties || [],
     isLoading,

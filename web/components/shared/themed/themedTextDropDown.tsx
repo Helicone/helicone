@@ -9,6 +9,7 @@ import {
   TextInput,
 } from "@tremor/react";
 import React from "react";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
 
 interface ThemedTextDropDownProps {
   options: string[];
@@ -26,45 +27,14 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
     onSearchHandler,
     hideTabModes = false,
   } = props;
-  const [selected, setSelected] = useState(value);
+
   const [query, setQuery] = useState("");
   const [tabMode, setTabMode] = useState<"smart" | "raw">("smart");
 
-  const [filteredOptions, setFilteredOptions] =
-    useState<string[]>(parentOptions);
-
-  useEffect(() => {
-    onSearchHandler?.(query);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
-
-  useEffect(() => {
-    setSelected(value); // Update selected state when value prop changes
-  }, [value]);
-
-  useEffect(() => {
-    const filterOptions = query
-      ? parentOptions.filter((option) =>
-          option
-            .toLowerCase()
-            .replace(/\s+/g, "")
-            .includes(query.toLowerCase().replace(/\s+/g, ""))
-        )
-      : parentOptions;
-
-    if (query && !filterOptions.includes(query)) {
-      filterOptions.push(query);
-    }
-
-    setFilteredOptions(filterOptions);
-  }, [query, parentOptions]);
-
   const handleValueChange = (value: string) => {
     setQuery(value);
+
     onChange(value);
-    if (!filteredOptions.includes(value)) {
-      setFilteredOptions((prevOptions) => [...prevOptions, value]);
-    }
   };
 
   return (
@@ -104,20 +74,23 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
           onSearchValueChange={(value) => {
             setQuery(value);
           }}
-          value={value}
+          value={query}
           onValueChange={(value) => {
-            handleValueChange(value);
+            handleValueChange(value || query);
           }}
+          enableClear={true}
+          placeholder="Select or enter a value"
           onSelect={async () => {
             await onSearchHandler?.(query);
           }}
-          enableClear={true}
         >
-          {filteredOptions.map((option, i) => (
-            <SearchSelectItem value={option} key={`${i}-${option}`}>
-              {option}
-            </SearchSelectItem>
-          ))}
+          {(query ? [query] : [])
+            .concat(parentOptions.sort())
+            .map((option, i) => (
+              <SearchSelectItem value={option} key={`${i}-${option}`}>
+                {option}
+              </SearchSelectItem>
+            ))}
         </SearchSelect>
       ) : (
         <TextInput
