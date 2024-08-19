@@ -534,7 +534,6 @@ const RequestRow = (props: {
               ))}
         </div>
       </div>
-
       {displayPreview && (
         <div className="flex flex-col space-y-8">
           <div className="flex w-full justify-end">
@@ -542,7 +541,7 @@ const RequestRow = (props: {
               requestId={request.id}
               defaultValue={
                 request.scores && request.scores["helicone-score-feedback"]
-                  ? Number(request.scores["helicone-score-feedback"] === 1)
+                  ? Number(request.scores["helicone-score-feedback"]) === 1
                     ? true
                     : false
                   : null

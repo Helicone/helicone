@@ -58,10 +58,8 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
                         normalizeRequest.scores &&
                         normalizeRequest.scores["helicone-score-feedback"]
                           ? Number(
-                              normalizeRequest.scores[
-                                "helicone-score-feedback"
-                              ] === 1
-                            )
+                              normalizeRequest.scores["helicone-score-feedback"]
+                            ) === 1
                             ? true
                             : false
                           : null

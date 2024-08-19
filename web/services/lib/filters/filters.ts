@@ -179,7 +179,9 @@ const whereKeyMappings: KeyMappings = {
         filter.scores[key as keyof typeof filter.scores]
       );
       return {
-        column: `scores[${placeValueSafely(key)}]`,
+        column: `has(scores, ${placeValueSafely(
+          key
+        )}) AND scores[${placeValueSafely(key)}]`,
         operator: operator,
         value: value,
       };
@@ -295,7 +297,9 @@ const havingKeyMappings: KeyMappings = {
         filter.scores[key as keyof typeof filter.scores]
       );
       return {
-        column: `scores[${placeValueSafely(key)}]`,
+        column: `has(scores, ${placeValueSafely(
+          key
+        )}) AND scores[${placeValueSafely(key)}]`,
         operator: operator,
         value: value,
       };

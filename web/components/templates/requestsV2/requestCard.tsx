@@ -64,7 +64,7 @@ const RequestCard = (props: RequestCardProps) => {
             requestId={request.id}
             defaultValue={
               request.scores && request.scores["helicone-score-feedback"]
-                ? Number(request.scores["helicone-score-feedback"] === 1)
+                ? Number(request.scores["helicone-score-feedback"]) === 1
                   ? true
                   : false
                 : null
