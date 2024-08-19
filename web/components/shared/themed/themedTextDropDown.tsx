@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import { Result } from "../../../lib/result";
 import {
   SearchSelect,
   SearchSelectItem,
@@ -8,8 +6,8 @@ import {
   TabList,
   TextInput,
 } from "@tremor/react";
-import React from "react";
-import { useLocalStorage } from "../../../services/hooks/localStorage";
+import { useState } from "react";
+import { Result } from "../../../lib/result";
 
 interface ThemedTextDropDownProps {
   options: string[];
