@@ -111,7 +111,6 @@ export class ScoreManager extends BaseManager {
         return err(bumpedVersions.error);
       }
       const scoresScoreResult = await this.scoreStore.putScoresIntoClickhouse(
-        //@ts-ignore
         bumpedVersions.data.map((scoresMessage) => {
           return {
             requestId: scoresMessage.id,
@@ -121,10 +120,14 @@ export class ScoreManager extends BaseManager {
             mappedScores:
               filteredMessages
                 .find((x) => x.requestId === scoresMessage.id)
-                ?.scores.forEach((score) => {
+                ?.scores.map((score) => {
                   if (score.score_attribute_type === "boolean") {
-                    score.score_attribute_key = `${score.score_attribute_key}-hcone-bool`;
+                    return {
+                      ...score,
+                      score_attribute_key: `${score.score_attribute_key}-hcone-bool`,
+                    };
                   }
+                  return score;
                 }) ?? [],
           };
         })
