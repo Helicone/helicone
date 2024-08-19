@@ -54,7 +54,16 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
                     />
                     <FeedbackButtons
                       requestId={normalizeRequest.id}
-                      defaultValue={normalizeRequest.feedback.rating}
+                      defaultValue={
+                        normalizeRequest.scores &&
+                        normalizeRequest.scores["helicone-score-feedback"]
+                          ? Number(
+                              normalizeRequest.scores["helicone-score-feedback"]
+                            ) === 1
+                            ? true
+                            : false
+                          : null
+                      }
                     />
                   </Row>
 

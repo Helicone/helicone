@@ -1,16 +1,40 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useOrg } from "../../components/layout/organizationContext";
-import {
-  getModelFromPath,
-  mapGeminiPro,
-} from "../../components/templates/requestsV2/builder/mappers/geminiMapper";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { getJawnClient } from "../../lib/clients/jawn";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+import {
+  getModelFromPath,
+  mapGeminiPro,
+} from "../../components/templates/requestsV2/builder/mappers/geminiMapper";
+
+function formatDateForClickHouse(date: Date): string {
+  return date.toISOString().slice(0, 19).replace("T", " ");
+}
+
+function processFilter(filter: any): any {
+  if (typeof filter !== "object" || filter === null) {
+    return filter;
+  }
+
+  const result: any = Array.isArray(filter) ? [] : {};
+
+  for (const key in filter) {
+    if (key === "gte" || key === "lte") {
+      result[key] = formatDateForClickHouse(new Date(filter[key]));
+    } else if (typeof filter[key] === "object") {
+      result[key] = processFilter(filter[key]);
+    } else {
+      result[key] = filter[key];
+    }
+  }
+
+  return result;
+}
 
 const requestBodyCache = new Map<string, HeliconeRequest>();
 
@@ -43,7 +67,7 @@ const useGetRequestsWithBodies = (
       const isCached = query.queryKey[5];
       const orgId = query.queryKey[6] as string;
       const jawn = getJawnClient(orgId);
-      const response = await jawn.POST("/v1/request/query", {
+      const response = await jawn.POST("/v1/request/query-clickhouse", {
         body: {
           filter: advancedFilter as any,
           offset: (currentPage - 1) * currentPageSize,
@@ -175,14 +199,14 @@ const useGetRequests = (
       queryFn: async (query) => {
         const advancedFilter = query.queryKey[3];
         const isCached = query.queryKey[5];
-
+        const processedFilter = processFilter(advancedFilter);
         return await fetch("/api/request/count", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            filter: advancedFilter,
+            filter: processedFilter,
             isCached,
           }),
         }).then((res) => res.json() as Promise<Result<number, string>>);

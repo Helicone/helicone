@@ -193,9 +193,11 @@ const whereKeyMappings: KeyMappings = {
         filter.properties[key as keyof typeof filter.properties]
       );
       return {
-        column: `properties[${placeValueSafely(key)}]`,
+        column: `request_response_versioned.properties[${placeValueSafely(
+          key
+        )}]`,
         operator: operator,
-        value: value,
+        value: `'${value}'`,
       };
     }
     if ("search_properties" in filter && filter.search_properties) {
@@ -205,6 +207,19 @@ const whereKeyMappings: KeyMappings = {
       );
       return {
         column: `key`,
+        operator: operator,
+        value: value,
+      };
+    }
+    if ("scores" in filter && filter.scores) {
+      const key = Object.keys(filter.scores)[0];
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.scores[key as keyof typeof filter.scores]
+      );
+      return {
+        column: `has(scores, ${placeValueSafely(
+          key
+        )}) AND scores[${placeValueSafely(key)}]`,
         operator: operator,
         value: value,
       };
@@ -220,6 +235,10 @@ const whereKeyMappings: KeyMappings = {
       node_id: "request_response_rmt.node_id",
       job_id: "request_response_rmt.job_id",
       threat: "request_response_rmt.threat",
+      prompt_tokens: "request_response_versioned.prompt_tokens",
+      completion_tokens: "request_response_versioned.completion_tokens",
+      request_body: "request_response_versioned.request_body",
+      response_body: "request_response_versioned.response_body",
     })(filter, placeValueSafely);
   },
   request_response_search: (filter, placeValueSafely) => {

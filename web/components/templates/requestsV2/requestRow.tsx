@@ -56,8 +56,7 @@ const RequestRow = (props: {
     }[]
   >();
 
-  const [currentScores, setCurrentScores] =
-    useState<Record<string, { value: number; valueType: string }>>();
+  const [currentScores, setCurrentScores] = useState<Record<string, number>>();
 
   const { setNotification } = useNotification();
 
@@ -79,8 +78,8 @@ const RequestRow = (props: {
     });
 
     setCurrentProperties(currentProperties);
-    const currentScores: Record<string, { value: number; valueType: string }> =
-      request.scores || {};
+    const currentScores: Record<string, number> =
+      (request.scores as Record<string, number>) || {};
     setCurrentScores(currentScores);
   }, [properties, request.customProperties, request.scores]);
 
@@ -179,16 +178,10 @@ const RequestRow = (props: {
           currentScores
             ? {
                 ...currentScores,
-                [key]: {
-                  value: value,
-                  valueType: valueType,
-                },
+                [key]: value,
               }
             : {
-                [key]: {
-                  value: value,
-                  valueType: valueType,
-                },
+                [key]: value,
               }
         );
 
@@ -520,32 +513,39 @@ const RequestRow = (props: {
 
         <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
           {currentScores &&
-            Object.entries(currentScores).map(([key, scoreValue]) => (
-              <li
-                className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
-                key={key}
-              >
-                <p className="font-semibold text-gray-900 dark:text-gray-100">
-                  {key}
-                </p>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {scoreValue.valueType === "boolean"
-                    ? scoreValue.value === 1
-                      ? "true"
-                      : "false"
-                    : Number(scoreValue.value)}
-                </p>
-              </li>
-            ))}
+            Object.entries(currentScores)
+              .filter((x) => x[0] !== "helicone-score-feedback")
+              .map(([key, value]) => (
+                <li
+                  className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
+                  key={key}
+                >
+                  <p className="font-semibold text-gray-900 dark:text-gray-100">
+                    {key.replace("-hcone-bool", "")}
+                  </p>
+                  <p className="text-gray-700 dark:text-gray-300">
+                    {key.endsWith("-hcone-bool")
+                      ? value === 1
+                        ? "true"
+                        : "false"
+                      : Number(value)}
+                  </p>
+                </li>
+              ))}
         </div>
       </div>
-
       {displayPreview && (
         <div className="flex flex-col space-y-8">
           <div className="flex w-full justify-end">
             <FeedbackButtons
               requestId={request.id}
-              defaultValue={request.feedback.rating}
+              defaultValue={
+                request.scores && request.scores["helicone-score-feedback"]
+                  ? Number(request.scores["helicone-score-feedback"]) === 1
+                    ? true
+                    : false
+                  : null
+              }
             />
           </div>
 
