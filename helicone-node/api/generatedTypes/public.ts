@@ -258,12 +258,47 @@ export interface components {
       total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
       cost?: components["schemas"]["Partial_NumberOperators_"];
     };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.user_metrics_": {
-      user_metrics?: components["schemas"]["Partial_UserMetricsToOperators_"];
+    /** @description Make all properties in T optional */
+    Partial_TimestampOperatorsTyped_: {
+      /** Format: date-time */
+      gte?: string;
+      /** Format: date-time */
+      lte?: string;
+      /** Format: date-time */
+      lt?: string;
+      /** Format: date-time */
+      gt?: string;
     };
-    FilterLeafSubset_user_metrics_: components["schemas"]["Pick_FilterLeaf.user_metrics_"];
-    UserFilterNode: components["schemas"]["FilterLeafSubset_user_metrics_"] | components["schemas"]["UserFilterBranch"] | "all";
+    /** @description Make all properties in T optional */
+    Partial_BooleanOperators_: {
+      equals?: boolean;
+    };
+    /** @description Make all properties in T optional */
+    Partial_RequestResponseRMTToOperators_: {
+      latency?: components["schemas"]["Partial_NumberOperators_"];
+      status?: components["schemas"]["Partial_NumberOperators_"];
+      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      node_id?: components["schemas"]["Partial_TextOperators_"];
+      job_id?: components["schemas"]["Partial_TextOperators_"];
+      threat?: components["schemas"]["Partial_BooleanOperators_"];
+      properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      search_properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
+      user_metrics?: components["schemas"]["Partial_UserMetricsToOperators_"];
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+    };
+    "FilterLeafSubset_user_metrics-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.user_metrics-or-request_response_rmt_"];
+    UserFilterNode: components["schemas"]["FilterLeafSubset_user_metrics-or-request_response_rmt_"] | components["schemas"]["UserFilterBranch"] | "all";
     UserFilterBranch: {
       right: components["schemas"]["UserFilterNode"];
       /** @enum {string} */
@@ -516,10 +551,6 @@ Json: JsonObject;
       prompt_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
-    Partial_BooleanOperators_: {
-      equals?: boolean;
-    };
-    /** @description Make all properties in T optional */
     Partial_FeedbackTableToOperators_: {
       id?: components["schemas"]["Partial_NumberOperators_"];
       created_at?: components["schemas"]["Partial_TimestampOperators_"];
@@ -534,17 +565,6 @@ Json: JsonObject;
     Partial_RequestResponseSearchToOperators_: {
       request_body_vector?: components["schemas"]["Partial_VectorOperators_"];
       response_body_vector?: components["schemas"]["Partial_VectorOperators_"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_TimestampOperatorsTyped_: {
-      /** Format: date-time */
-      gte?: string;
-      /** Format: date-time */
-      lte?: string;
-      /** Format: date-time */
-      lt?: string;
-      /** Format: date-time */
-      gt?: string;
     };
     /** @description Make all properties in T optional */
     Partial_CacheHitsTableToOperators_: {

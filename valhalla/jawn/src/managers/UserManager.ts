@@ -34,25 +34,29 @@ export class UserManager extends BaseManager {
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: organizationId,
       argsAcc: [],
-      filter: timeFilter
-        ? {
-            left: {
-              request_response_rmt: {
-                request_created_at: {
-                  gt: new Date(timeFilter.startTimeUnixSeconds * 1000),
+      filter: {
+        left: timeFilter
+          ? {
+              left: {
+                request_response_rmt: {
+                  request_created_at: {
+                    gt: new Date(timeFilter.startTimeUnixSeconds * 1000),
+                  },
                 },
               },
-            },
-            operator: "and",
-            right: {
-              request_response_rmt: {
-                request_created_at: {
-                  lt: new Date(timeFilter.endTimeUnixSeconds * 1000),
+              operator: "and",
+              right: {
+                request_response_rmt: {
+                  request_created_at: {
+                    lt: new Date(timeFilter.endTimeUnixSeconds * 1000),
+                  },
                 },
               },
-            },
-          }
-        : "all",
+            }
+          : "all",
+        operator: "and",
+        right: filter,
+      },
     });
 
     const havingFilter = buildFilterClickHouse({

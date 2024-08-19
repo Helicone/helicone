@@ -71,19 +71,18 @@ function easyKeyMappings<T extends keyof TablesAndViews>(
   };
 }
 
+export class FilterNotImplemented extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "FilterNotImplemented";
+  }
+}
+
 const NOT_IMPLEMENTED = () => {
-  throw new Error("Not implemented");
+  throw new FilterNotImplemented("This filter is not implemented");
 };
 
 const whereKeyMappings: KeyMappings = {
-  user_metrics: easyKeyMappings(
-    {
-      user_id: "user_id",
-      last_active: "last_active",
-      total_requests: "total_requests",
-    },
-    "user_metrics"
-  ),
   user_api_keys: easyKeyMappings(
     {
       api_key_hash: "api_key_hash",
@@ -269,18 +268,21 @@ const whereKeyMappings: KeyMappings = {
   values: NOT_IMPLEMENTED,
   job: NOT_IMPLEMENTED,
   job_node: NOT_IMPLEMENTED,
+  user_metrics: NOT_IMPLEMENTED,
 };
 
 const havingKeyMappings: KeyMappings = {
   user_metrics: easyKeyMappings<"user_metrics">({
-    last_active: "max(request.created_at)",
-    total_requests: "count(request.id)",
-    active_for: "active_for",
-    average_requests_per_day_active: "average_requests_per_day_active",
-    average_tokens_per_request: "average_tokens_per_request",
-    total_completion_tokens: "total_completion_tokens",
-    total_prompt_tokens: "total_prompt_tokens",
-    cost: "cost",
+    last_active: "request_response_rmt.last_active",
+    total_requests: "request_response_rmt.total_requests",
+    active_for: "request_response_rmt.active_for",
+    average_requests_per_day_active:
+      "request_response_rmt.average_requests_per_day_active",
+    average_tokens_per_request:
+      "request_response_rmt.average_tokens_per_request",
+    total_completion_tokens: "request_response_rmt.total_completion_tokens",
+    total_prompt_tokens: "request_response_rmt.total_prompt_tokens",
+    cost: "request_response_rmt.cost",
   }),
   users_view: easyKeyMappings<"users_view">({
     active_for: "active_for",
@@ -367,31 +369,39 @@ export function buildFilterLeaf(
     const tableKey = _tableKey as keyof typeof filter;
     const table = filter[tableKey];
     const mapper = keyMappings[tableKey] as KeyMapper<typeof table>;
-    const {
-      column,
-      operator: operatorKey,
-      value,
-    } = mapper(table, placeValueSafely);
+    try {
+      const {
+        column,
+        operator: operatorKey,
+        value,
+      } = mapper(table, placeValueSafely);
 
-    if (!column) {
-      continue;
-    }
+      if (!column) {
+        continue;
+      }
 
-    const sqlOperator = operatorToSql(operatorKey);
+      const sqlOperator = operatorToSql(operatorKey);
 
-    if (operatorKey === "not-equals" && value === "null") {
-      filters.push(`${column} is not null`);
-    } else if (operatorKey === "equals" && value === "null") {
-      filters.push(`${column} is null`);
-    } else {
-      if (operatorKey === "contains" || operatorKey === "not-contains") {
-        filters.push(`${column} ${sqlOperator} '%' || ${value}::text || '%'`);
-      } else if (operatorKey === "vector-contains") {
-        filters.push(
-          `${column} ${sqlOperator} plainto_tsquery('helicone_search_config', ${value}::text)`
-        );
+      if (operatorKey === "not-equals" && value === "null") {
+        filters.push(`${column} is not null`);
+      } else if (operatorKey === "equals" && value === "null") {
+        filters.push(`${column} is null`);
       } else {
-        filters.push(`${column} ${sqlOperator} ${value}`);
+        if (operatorKey === "contains" || operatorKey === "not-contains") {
+          filters.push(`${column} ${sqlOperator} '%' || ${value}::text || '%'`);
+        } else if (operatorKey === "vector-contains") {
+          filters.push(
+            `${column} ${sqlOperator} plainto_tsquery('helicone_search_config', ${value}::text)`
+          );
+        } else {
+          filters.push(`${column} ${sqlOperator} ${value}`);
+        }
+      }
+    } catch (e) {
+      if (e instanceof FilterNotImplemented) {
+        console.warn(e);
+      } else {
+        throw e;
       }
     }
   }
