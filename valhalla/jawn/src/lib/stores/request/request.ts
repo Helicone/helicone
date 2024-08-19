@@ -515,18 +515,6 @@ async function mapLLMCalls(
         }
       }
 
-      // Next map to standardized schema
-      // Extract the model from various possible locations.
-      const model =
-        heliconeRequest.model_override ||
-        heliconeRequest.response_model ||
-        heliconeRequest.request_model ||
-        heliconeRequest.response_body?.model ||
-        heliconeRequest.request_body?.model ||
-        heliconeRequest.response_body?.body?.model || // anthropic
-        getModelFromPath(heliconeRequest.request_path) ||
-        "";
-
       return heliconeRequest;
     }) ?? [];
 
