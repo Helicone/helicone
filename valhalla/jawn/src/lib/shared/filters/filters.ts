@@ -229,6 +229,7 @@ const whereKeyMappings: KeyMappings = {
       status: "request_response_rmt.status",
       request_created_at: "request_response_rmt.request_created_at",
       response_created_at: "request_response_rmt.response_created_at",
+      request_id: "request_response_rmt.request_id",
       model: "request_response_rmt.model",
       user_id: "request_response_rmt.user_id",
       organization_id: "request_response_rmt.organization_id",
