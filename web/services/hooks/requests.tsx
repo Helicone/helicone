@@ -122,7 +122,7 @@ const useGetRequestsWithBodies = (
               content.response?.model ||
               content.request?.model ||
               content.response?.body?.model ||
-              getModelFromPath(request.request_path) ||
+              getModelFromPath(request.target_url) ||
               "";
 
             let updatedRequest = {

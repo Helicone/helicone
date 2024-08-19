@@ -347,7 +347,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   content.response?.model ||
                   content.request?.model ||
                   content.response?.body?.model || // anthropic
-                  getModelFromPath(request.request_path) ||
+                  getModelFromPath(request.target_url) ||
                   "";
 
                 if (
