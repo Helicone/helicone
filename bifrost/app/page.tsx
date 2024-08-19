@@ -1,5 +1,9 @@
 import Enterprise from "@/components/templates/landing/enterprise";
+import Faqs from "@/components/templates/landing/faqs";
+import Features from "@/components/templates/landing/features";
+import LandingFooterGraphic from "@/components/templates/landing/footer";
 import Integrations from "@/components/templates/landing/integrations";
+import OpenSource from "@/components/templates/landing/opensource";
 import Platform from "@/components/templates/landing/platform";
 import {
   CheckCircleIcon,
@@ -7,6 +11,7 @@ import {
   CodeBracketSquareIcon,
   ShieldCheckIcon,
   UserGroupIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
@@ -121,7 +126,8 @@ export default function Home() {
               />
             </a>
           </div>
-          <ul className="flex flex-col md:flex-row gap-4 md:gap-16 md:justify-center px-4 pt-16 text-sm">
+
+          <ul className="flex flex-col md:flex-row gap-4 md:gap-16 md:justify-center px-4 pt-16 text-sm hidden md:flex">
             <li className="flex items-center space-x-2">
               <CheckCircleIcon className="h-6 w-6 text-sky-500" />
               <span className="text-gray-600">
@@ -150,38 +156,34 @@ export default function Home() {
             />
           </div>
         </header>
+
+        <ul className="flex flex-col md:flex-row gap-4 md:gap-16 md:justify-center px-4 pt-16 text-sm md:hidden">
+          <li className="flex items-center space-x-2">
+            <CheckCircleIcon className="h-6 w-6 text-sky-500" />
+            <span className="text-gray-600">
+              Sub-millisecond latency impact
+            </span>
+          </li>
+          <li className="flex items-center space-x-2">
+            <CheckCircleIcon className="h-6 w-6 text-sky-500" />
+            <span className="text-gray-600">100% log coverage</span>
+          </li>
+          <li className="flex items-center space-x-2">
+            <CheckCircleIcon className="h-6 w-6 text-sky-500" />
+            <span className="text-gray-600">
+              Industry-leading query times
+            </span>
+          </li>
+        </ul>
+
         <section
           id="logos"
           className="text-center flex flex-col space-y-4 pt-16 pb-32 max-w-6xl mx-auto w-full"
         >
           <h2 className="text-gray-600 text-lg md:text-xl">
-            Ready for real production workloads
+            Trusted by the thousands of companies and developers.
           </h2>
-          <ul className="flex flex-col md:flex-row items-center gap-16 md:gap-0 w-full justify-between px-16 pt-4">
-            <li>
-              <dl className="flex flex-col space-y-2">
-                <dt className="font-bold text-5xl">{"1,000"}</dt>
-                <dd className="text-sm text-gray-600 font-light">
-                  Requests processed per second
-                </dd>
-              </dl>
-            </li>
-            <li>
-              <dl className="flex flex-col space-y-2">
-                <dt className="font-bold text-5xl">{"1.2 Billion"}</dt>
-                <dd className="text-sm text-gray-600 font-light">
-                  Total Requests Logged
-                </dd>
-              </dl>
-            </li>
-            <li>
-              <dl className="flex flex-col space-y-2">
-                <dt className="font-bold text-5xl">99.99%</dt>
-                <dd className="text-sm text-gray-600 font-light">Uptime</dd>
-              </dl>
-            </li>
-          </ul>
-          <ul className="flex flex-wrap md:flex-row items-center w-full justify-center gap-10 md:gap-32 px-0 md:px-8 pt-16">
+          <ul className="flex flex-wrap md:flex-row items-center w-full justify-center gap-10 md:gap-32 px-0 md:px-8 pt-16 grayscale opacity-80">
             <li className="w-32">
               <Image
                 src={"/static/filevine.webp"}
@@ -208,10 +210,46 @@ export default function Home() {
             </li>
             <li className="w-32">
               <Image
-                src={"/static/greptile.webp"}
+                src={"/static/greptile.png"}
                 alt={"Greptile"}
                 width={300}
                 height={77}
+                quality={100}
+              />
+            </li>
+          </ul>
+          <ul className="flex flex-wrap md:flex-row items-center w-full justify-center gap-10 md:gap-32 px-0 md:px-8 pt-16">
+            <li className="w-32">
+              <Image
+                src={"/static/reworkd.svg"}
+                alt={"Reworkd"}
+                width={300}
+                height={77}
+              />
+            </li>
+            <li className="w-32">
+              <Image
+                src={"/static/codegen.png"}
+                alt={"Codegen"}
+                width={640}
+                height={156}
+              />
+            </li>
+            <li className="w-32">
+              <Image
+                src={"/static/sunrun.png"}
+                alt={"Sunrun"}
+                width={300}
+                height={77}
+              />
+            </li>
+            <li className="w-32">
+              <Image
+                src={"/static/lex.png"}
+                alt={"Lex"}
+                width={48}
+                height={20}
+                className="m-auto"
               />
             </li>
           </ul>
@@ -232,13 +270,15 @@ export default function Home() {
           </div>
           <Integrations />
         </section>
+
         <section className="w-full flex flex-col max-w-6xl mx-auto space-y-4 py-32 px-4">
           <h2 className="sr-only">
-            One observability platform,{" "}
-            <span className="text-sky-500">everything you need</span>
+            One platform,{" "}
+            <span className="text-sky-500">with all the essentials tools.</span>
           </h2>
           <Platform />
         </section>
+
         <section id="enterprise" className="py-36">
           <h2 className="sr-only">
             Get to production-quality{" "}
@@ -248,81 +288,43 @@ export default function Home() {
             <Enterprise />
           </div>
         </section>
-        <section className="w-full bg-[#0b1c2d] relative isolate py-36 overflow-hidden">
-          <div className="flex flex-col space-y-16 w-full">
-            <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
-              <div className="flex items-start w-full">
-                <div className="flex flex-col space-y-4 w-full md:w-2/3 text-center md:text-left">
-                  <p className="text-lg font-bold text-cyan-500">Developer</p>
-                  <h2 className="text-3xl sm:text-5xl font-bold sm:leading-[1.15] text-white">
-                    Fully <span className="text-cyan-400">Open-Source</span>
-                  </h2>
-                  <p className="text-md md:text-lg text-gray-300 leading-7">
-                    We believe in the power of community and the importance of
-                    transparency. Helicone is fully open-source and available
-                    for anyone to use.
-                  </p>
-                  <ul className="py-4 flex flex-col space-y-8">
-                    <li className="flex items-start space-x-2">
-                      <div>
-                        <ShieldCheckIcon className="w-6 h-6 text-cyan-400" />
-                      </div>
-                      <div className="flex flex-col space-y-1 -mt-0.5">
-                        <p className="text-sm md:text-lg font-bold text-white">
-                          Interested in deploying Helicone on-prem?
-                        </p>
-                        <Link
-                          className="text-sm md:text-md text-gray-500 font-medium flex items-center space-x-1"
-                          href={"/contact"}
-                        >
-                          <span>Get in touch</span>
-                          <ChevronRightIcon className="w-4 h-4" />
-                        </Link>
-                      </div>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <div>
-                        <UserGroupIcon className="w-6 h-6 text-cyan-400" />
-                      </div>
-                      <div className="flex flex-col space-y-1 -mt-0.5">
-                        <p className="text-sm md:text-lg font-bold text-white">
-                          Want to ask the team a question?
-                        </p>
-                        <Link
-                          className="text-sm md:text-md text-gray-500 font-medium flex items-center space-x-1"
-                          href={"https://discord.gg/HwUbV3Q8qz"}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <span>Join our discord server</span>
-                          <ChevronRightIcon className="w-4 h-4" />
-                        </Link>
-                      </div>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <div>
-                        <CodeBracketSquareIcon className="w-6 h-6 text-cyan-400" />
-                      </div>
-                      <div className="flex flex-col space-y-1 -mt-0.5">
-                        <p className="text-sm md:text-lg font-bold text-white">
-                          Want to contribute or star us on Github?
-                        </p>
-                        <Link
-                          className="text-sm md:text-md text-gray-500 font-medium flex items-center space-x-1"
-                          href={"https://github.com/Helicone/helicone"}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <span>Check us out</span>
-                          <ChevronRightIcon className="w-4 h-4" />
-                        </Link>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+
+        <section className="flex flex-col space-y-4 pb-2 w-full items-center">
+          <Features />
+        </section>
+        
+        <section className="flex flex-col space-y-4 pb-2 w-full items-center">
+          <OpenSource />
+        </section>
+
+        <section className="flex flex-col py-2 items-center mt-32">
+          <div className="flex flex-row pb-2 justify-between gap-2 w-fit items-center border-2 border-gray-200 rounded-full p-1.5 py-1">
+            <Image src="/static/greptile-clear.svg" alt="Greptile Logo" width={30} height={30} />
+            <XMarkIcon className="w-4 h-4" />
+            <Image src="/static/logo-clear.svg" alt="Helicone Logo" width={30} height={30} />
           </div>
+
+          <p className="text-gray-500 italic md:w-1/3 w-5/6 mx-auto mt-8 text-lg">
+            “We're spending the weekend combing through logs to improve our core system and slowly realizing just how unbelievably powerful Helicone is.
+
+            Without it, this would take 10-12X longer and be much more draining. It's so, so good.”
+          </p>
+          <div className="w-1/3 mt-6">
+            <p className="text-black font-bold">
+              Daksh Gupta
+            </p>
+            <p className="text-gray-500 text-gray-500">
+              Founder, Greptile
+            </p>
+          </div>
+        </section>
+
+        <section className="flex flex-col md:mt-32 my-32 md:my-0 w-full items-center">
+          <Faqs />
+        </section>
+
+        <section className="flex flex-col mt-32 w-full items-center hidden md:block">
+          <LandingFooterGraphic />
         </section>
       </main>
     </>
