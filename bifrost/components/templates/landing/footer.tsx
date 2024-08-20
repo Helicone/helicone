@@ -12,17 +12,17 @@ export default function LandingFooterGraphic() {
 
           <div className="flex flex-col items-center gap-8 xl:gap-4 mx-auto my-12 xl:my-0">
             <h2 className="text-lg md:text-2xl lg:text-3xl font-bold">
-              Getting Started with Helicone is simple and fun.
+              Getting started with Helicone is simple and fun.
             </h2>
             <p className="text-xs md:text-sm lg:text-lg text-[#D0DEE8] font-light">
               Join users from all over the planet that used Helicone to supercharge their AI workflow. 
             </p>
 
             <div className="flex flex-row items-center gap-4 font-bold mt-6">
-              <a href="https://us.helicone.ai/signup?demo=true" className="text-xs md:text-sm lg:text-lg px-4 py-1 rounded-lg border hover:text-[#D0DEE8] border-white hover:border-[#D0DEE8] transition-colors duration-200">
+              <a href="https://us.helicone.ai/signup?demo=true" className="text-xs md:text-sm lg:text-lg text-[#2B3AC7] pl-4 pr-2 py-1 rounded-lg border border-white hover:border-[#D0DEE8] transition-colors duration-200 bg-white hover:bg-[#D0DEE8]">
                 Get a Demo
               </a>
-              <a href="https://us.helicone.ai/signup" className="flex flex-row items-center gap-1 text-xs md:text-sm lg:text-lg text-[#2B3AC7] pl-4 pr-2 py-1 rounded-lg border border-white hover:border-[#D0DEE8] transition-colors duration-200 bg-white hover:bg-[#D0DEE8]">
+              <a href="https://us.helicone.ai/signup" className="flex flex-row items-center gap-1 text-xs md:text-sm lg:text-lg px-4 py-1 rounded-lg border hover:text-[#D0DEE8] border-white hover:border-[#D0DEE8] transition-colors duration-200">
                 <p>Start for Free</p>
                 <ChevronRightIcon className="w-4 h-4 font-bold stroke-2" />
               </a>

@@ -7,8 +7,8 @@ export default function Faqs() {
   const [open, setOpen] = useState(-1);
 
   return (
-    <div className="flex flex-col pb-2 mt-32 w-full items-center">
-      <h2 className="text-2xl md:text-4xl self-center font-bold mx-auto">
+    <div className="flex flex-col pb-2 mt-32 w-full md:items-center items-start md:text-center text-start md:ml-0 ml-12">
+      <h2 className="text-2xl md:text-4xl font-bold md:self-center text-start">
         Frequently Asked Questions
       </h2>
 

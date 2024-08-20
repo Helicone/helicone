@@ -238,11 +238,12 @@ const NavBar = (props: NavBarProps) => {
         </div>
         <div className="w-full mt-4 md:mt-0 flex gap-x-1 items-center text-sm col-span-8 md:col-span-6 order-3 md:order-2 justify-between">
           <NavLinks />
-          <div className={path === "/" ? "hidden" : "flex items-center gap-x-2"}>
+          <div className="flex items-center gap-x-2">
             <a
               href="https://www.producthunt.com/posts/helicone-ai?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-helicone&#0045;ai"
               target="_blank"
               rel="noopener noreferrer"
+              className={path === "/" ? "hidden" : "block"}
             >
               <img
                 src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=475050&theme=light"
@@ -260,7 +261,7 @@ const NavBar = (props: NavBarProps) => {
             href="https://us.helicone.ai/signin"
             className="bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
           >
-            Sign In
+            Log In
           </Link>
         </div>
       </nav>

@@ -4,16 +4,17 @@ import Link from "next/link";
 
 export default function OpenSource() {
   return (
-    <div className="flex flex-col space-y-4 pb-2 mt-32 w-full items-center">
-      <h2 className="text-3xl md:text-4xl font-bold text-black text-center tracking-tight leading-tight">
-        Proudly,{" "}
+    <div className="flex flex-col md:space-y-4 pb-2 mt-32 w-full md:items-center items-start md:text-center text-start">
+
+      <h2 className="text-3xl md:text-4xl font-bold text-black text-center tracking-tight leading-tight ml-7">
+        Proudly{" "}
         <span className="text-sky-500">open source</span>
       </h2>
-      <p className="text-sm md:text-md text-gray-500 max-w-4xl text-center">
+      <p className="text-sm md:text-md text-gray-500 max-w-4xl text-center ml-7">
         We value transparency and the power of community.
       </p>
       
-      <div className="flex flex-col md:flex-row items-center pt-12 gap-16 w-min">
+      <div className="flex flex-col md:flex-row items-center self-center md:pt-12 pt-4 md:gap-16 gap-4 w-min">
 
         <div className="flex flex-col items-start justify-evenly border-2 rounded-2xl pt-6 min-w-[350px] md:min-w-[500px]">
           <div className="flex flex-col items-start px-6 gap-2">

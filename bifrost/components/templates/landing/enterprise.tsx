@@ -156,13 +156,13 @@ const ENTERPRISE_TABS: {
 const Enterprise = (props: EnterpriseProps) => {
 
   return (
-    <div className="flex flex-col gap-8 w-full items-center">
+    <div className="flex flex-col gap-8 w-full md:items-center items-start md:text-center text-start">
 
       <div>
         <p className="text-blue-600 text-sm font-bold mb-4">Enterprise</p>
-        <h2 className="text-3xl md:text-4xl font-bold text-black text-center tracking-tight leading-tight">
+        <h2 className="text-3xl md:text-4xl font-bold text-black md:text-center text-start tracking-tight leading-tight">
           Get to production-quality{" "}
-          <span className="text-blue-600">faster</span>
+          <span className="text-blue-600 md:text-center text-start">faster</span>
         </h2>
       </div>
 
@@ -170,7 +170,7 @@ const Enterprise = (props: EnterpriseProps) => {
         Get a Demo
       </a>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-24 w-full text-start text-gray-500">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-24 w-full text-start text-gray-500 pl-3 pr-5">
         <div className="space-y-2">
           <h3 className="font-bold text-black tracking-tight leading-tight">
             Scalability and Reliability
@@ -194,17 +194,17 @@ const Enterprise = (props: EnterpriseProps) => {
 
       </div>
 
-      <div className="md:flex hidden flex flex-col gap-1">
+      <div className="md:flex hidden flex flex-col w-full">
         <a href="https://docs.helicone.ai/features/prompts#prompts-and-experiments" target="_blank">
-          <Image src={enterpriseTileExperiments} alt="enterprise experiments graphic" />
+          <Image src={enterpriseTileExperiments} alt="enterprise experiments graphic" className="w-11/12 pr-5" />
         </a>
-        <div className="flex flex-row gap-1">
+        <div className="flex flex-row w-full">
           <a href="https://docs.helicone.ai/features/customer-portal#customer-portal" target="_blank" className="ml-2">
-            <Image src={enterpriseTileAnalytics} alt="enterprise analytics graphic" width={650} height={40} />
+            <Image src={enterpriseTileAnalytics} alt="enterprise analytics graphic" className="w-full" />
           </a>
 
           <a href="https://docs.helicone.ai/use-cases/etl#etl-data-extraction" target="_blank">
-            <Image src={enterpriseTileEtl} alt="enterprise etl graphic" width={500} height={40} />
+            <Image src={enterpriseTileEtl} alt="enterprise etl graphic" className="w-full" />
           </a>
         </div>
       </div>

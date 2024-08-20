@@ -6,7 +6,7 @@ export default function PhHeader() {
   const [time, setTime] = useState(0);
   useEffect(() => {
     setInterval(() => {
-      setTime(Math.abs(new Date("2024-08-22").getTime() - new Date().getTime()));
+      setTime(Math.abs(new Date("2024-08-23").getTime() - new Date().getTime()));
     }, 1000);
   }, []);
 
@@ -33,12 +33,12 @@ export default function PhHeader() {
       <div>
         <h1 className="text-xl text-start font-semibold">We are launching on Product Hunt soon!</h1>
         <p className="text-sm text-start font-light">Sign up / upgrade to Growth today and get $500 in credit. Here&apos;s how to{' '}
-          <a href="#" className="underline">Redeam</a>
+          <a href="/blog/redeem-promo-code" className="underline">Redeam</a>
         </p>
       </div>
 
       <div className="flex flex-row gap-2 items-center h-full">
-        <a href="#" className="text-white p-1.5 px-3 rounded-lg bg-[#FF6154]">Sign up</a>
+        <a href="https://us.helicone.ai/signup" className="text-white p-1.5 px-3 rounded-lg bg-[#FF6154]">Sign up</a>
         <a
           href="https://www.producthunt.com/posts/helicone-ai?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-helicone&#0045;ai"
           target="_blank"

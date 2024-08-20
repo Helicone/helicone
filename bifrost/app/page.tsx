@@ -22,7 +22,9 @@ export default function Home() {
     <>
       <main className="flex min-h-screen flex-col items-center justify-between text-black">
         <header className="text-center flex flex-col space-y-4 pb-10 md:pb-32 max-w-6xl mx-auto">
-          <PhHeader />
+          {
+            PhDate.getDate() == new Date().getDate() ? <PhHeader /> : null
+          }
           <Link
             href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
             target="_blank"
@@ -93,29 +95,43 @@ export default function Home() {
             </svg>{" "}
             Combinator
           </Link>
-          <h1 className="text-4xl md:text-5xl font-bold md:pt-4 px-2">
+          <h1 className="text-4xl md:text-5xl font-bold md:pt-4 px-2 md:text-center md:mx-0 text-start ml-5">
             LLM-Observability for{" "}
             <span className="text-sky-500">Developers</span>
           </h1>
-          <p className="text-lg md:text-xl text-gray-600">
+          <p className="text-lg md:text-xl text-gray-600 md:w-1/2 md:text-center text-start md:self-center ml-6">
             The open-source platform for logging, monitoring, and debugging.
           </p>
-          <div className="flex items-center gap-4 pt-4 w-full justify-center flex-col md:flex-row">
-            <Link
-              href="https://us.helicone.ai/signup?demo=true"
-              className="hidden md:flex bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 rounded-lg px-6 py-2 font-bold shadow-lg items-center gap-1 w-fit"
-            >
-              Get a demo
-            </Link>
-            <Link
-              href="https://us.helicone.ai/signup"
-              className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 text-white border-[3px] border-sky-700 rounded-lg pl-6 pr-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
-            >
-              Start Building
-              <ChevronRightIcon className="w-5 h-5 inline text-white" />
-            </Link>
-          </div>
 
+          {
+            PhDate.getDate() == new Date().getDate() ? (
+              <div className="flex items-center gap-4 pt-4 w-full justify-center flex-col md:flex-row items-start md:items-center">
+                <Link
+                  href="https://us.helicone.ai/signup?demo=true"
+                  className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 text-white border-[3px] border-sky-700 rounded-lg pl-6 pr-4 py-2 ml-6 md:ml-0 font-bold shadow-lg flex w-fit items-center gap-1 self-start md:self-center"
+                >
+                  Try Demo
+                  <ChevronRightIcon className="w-5 h-5 inline text-white" />
+                </Link>
+              </div>
+            ) : (
+              <div className="flex items-center gap-4 pt-4 w-full justify-center flex-col md:flex-row">
+                <Link
+                  href="https://us.helicone.ai/signup?demo=true"
+                  className="hidden md:flex bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 rounded-lg px-6 py-2 font-bold shadow-lg items-center gap-1 w-fit"
+                >
+                  Get a demo
+                </Link>
+                <Link
+                  href="https://us.helicone.ai/signup"
+                  className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 text-white border-[3px] border-sky-700 rounded-lg pl-6 pr-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
+                >
+                  Start Building
+                  <ChevronRightIcon className="w-5 h-5 inline text-white" />
+                </Link>
+              </div>
+            )
+          }
           <ul className="flex flex-col md:flex-row gap-4 md:gap-16 md:justify-center px-4 pt-16 text-sm hidden md:flex">
             <li className="flex items-center space-x-2">
               <CheckCircleIcon className="h-6 w-6 text-sky-500" />
@@ -167,7 +183,7 @@ export default function Home() {
 
         <section
           id="logos"
-          className="text-center flex flex-col space-y-4 pt-16 pb-32 max-w-6xl mx-auto w-full"
+          className="text-center flex flex-col space-y-4 pt-16 pb-16 max-w-6xl mx-auto w-full"
         >
           <h2 className="text-gray-600 text-lg md:text-xl">
             Trusted by the thousands of companies and developers.
@@ -244,11 +260,12 @@ export default function Home() {
           </ul>
           <div className="grid grid-cols-4 gap-8"></div>
         </section>
+
         <section
           id="integrations"
-          className="flex flex-col space-y-4 py-32 max-w-6xl mx-auto w-full"
+          className="flex flex-col space-y-4 mt-32 mb-8 max-w-6xl mx-auto w-full"
         >
-          <div className="flex flex-col space-y-2 text-center">
+          <div className="flex flex-col space-y-2 md:text-center text-start ml-5">
             <h1 className="text-3xl md:text-4xl font-bold">
               Send your first event in{" "}
               <span className="text-sky-500">seconds</span>
@@ -268,7 +285,7 @@ export default function Home() {
           <Platform />
         </section>
 
-        <section id="enterprise" className="py-36">
+        <section id="enterprise" className="mb-16">
           <h2 className="sr-only">
             Get to production-quality{" "}
             <span className="text-violet-800">faster</span>
@@ -278,7 +295,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="flex flex-col space-y-4 pb-2 w-full items-center">
+        <section className="flex flex-col space-y-4 my-16 pb-2 w-1/2 items-center">
           <Features />
         </section>
         
@@ -319,3 +336,5 @@ export default function Home() {
     </>
   );
 }
+
+const PhDate = new Date("2024-08-20");

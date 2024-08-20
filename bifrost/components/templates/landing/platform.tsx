@@ -86,17 +86,17 @@ export default function Platform() {
   >("monitoring");
   return (
     <div className="flex flex-col w-full items-center">
-      <h2 className="text-3xl md:text-4xl font-bold text-black text-center tracking-tight leading-tight">
-        One platform,{" "}
-        <span className="text-sky-500">with all the essentials tools.</span>
+      <h2 className="text-3xl md:text-4xl font-bold text-black md:text-center text-start tracking-tight leading-tight">
+        One platform with{" "}
+        <span className="text-sky-500">all the essentials tools.</span>
       </h2>
 
-      <div className="flex flex-col md:flex-row items-start gap-4 mt-16 min-h-[500px]">
+      <div className="flex flex-col md:flex-row items-start gap-4 md:mt-16 mt-4 min-h-[500px]">
 
-        <div className="flex flex-col h-min items-start border border-gray-200 rounded-xl md:py-8 pt-2 px-4 bg-gradient-to-t from-white to-sky-50">
-          <div className="flex flex-row items-center gap-2 text-sm pl-4">
+        <div className="flex flex-col h-min border border-gray-200 rounded-xl md:py-8 pt-2 md:px-4 pl-1 pr-3 bg-gradient-to-t from-white to-sky-50">
+          <div className="flex flex-row items-center justify-between gap-2 text-sm pl-4">
             <p className="font-bold text-xs text-blue-500 bg-blue-100 rounded-xl p-2">POST</p>
-            <input disabled={true} type="text" className="text-sm border border-gray-200  bg-white rounded-xl p-2 placeholder:text-black" placeholder=" / v1 / chat / completions" />
+            <input disabled={true} type="text" className="text-sm border border-gray-200 w-full bg-white rounded-xl p-2 placeholder:text-black" placeholder=" / v1 / chat / completions / query " />
             <button className="bg-blue-500 text-xs text-white rounded-xl p-2">SEND</button>
           </div>
 
