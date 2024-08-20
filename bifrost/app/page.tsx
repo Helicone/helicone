@@ -4,6 +4,7 @@ import Features from "@/components/templates/landing/features";
 import LandingFooterGraphic from "@/components/templates/landing/footer";
 import Integrations from "@/components/templates/landing/integrations";
 import OpenSource from "@/components/templates/landing/opensource";
+import PhHeader from "@/components/templates/landing/phheader";
 import Platform from "@/components/templates/landing/platform";
 import {
   CheckCircleIcon,
@@ -20,7 +21,8 @@ export default function Home() {
   return (
     <>
       <main className="flex min-h-screen flex-col items-center justify-between text-black">
-        <header className="text-center flex flex-col space-y-4 py-10 md:py-32 max-w-6xl mx-auto">
+        <header className="text-center flex flex-col space-y-4 pb-10 md:pb-32 max-w-6xl mx-auto">
+          <PhHeader />
           <Link
             href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
             target="_blank"
@@ -112,19 +114,6 @@ export default function Home() {
               Start Building
               <ChevronRightIcon className="w-5 h-5 inline text-white" />
             </Link>
-            <a
-              href="https://www.producthunt.com/posts/helicone-ai?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-helicone&#0045;ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="md:hidden flex justify-center"
-            >
-              <img
-                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=475050&theme=light"
-                alt="Helicone&#0032;AI - Open&#0045;source&#0032;LLM&#0032;Observability&#0032;for&#0032;Developers | Product Hunt"
-                width="180"
-                height="54"
-              />
-            </a>
           </div>
 
           <ul className="flex flex-col md:flex-row gap-4 md:gap-16 md:justify-center px-4 pt-16 text-sm hidden md:flex">

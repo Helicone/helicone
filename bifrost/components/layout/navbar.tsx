@@ -202,6 +202,7 @@ const MobileNav = () => {
 
 const NavBar = (props: NavBarProps) => {
   const {} = props;
+  const path = usePathname();
 
   return (
     <div className="bg-inherit top-0 sticky z-30 border-b border-gray-200">
@@ -237,7 +238,7 @@ const NavBar = (props: NavBarProps) => {
         </div>
         <div className="w-full mt-4 md:mt-0 flex gap-x-1 items-center text-sm col-span-8 md:col-span-6 order-3 md:order-2 justify-between">
           <NavLinks />
-          <div className="flex items-center gap-x-2">
+          <div className={path === "/" ? "hidden" : "flex items-center gap-x-2"}>
             <a
               href="https://www.producthunt.com/posts/helicone-ai?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-helicone&#0045;ai"
               target="_blank"
