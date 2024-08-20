@@ -407,7 +407,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         return {
           filterMapIdx,
           operatorIdx,
-          value: decodeURIComponent(value),
+          value: value,
         };
       }
     };
