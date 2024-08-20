@@ -324,8 +324,8 @@ const RequestRow = (props: {
 
       <div className="flex flex-col gap-5">
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
-          <button className="flex flex-row items-center space-x-1">
-            Add to Dataset
+          <div className="flex flex-row items-center space-x-1">
+            <span>Add to Dataset</span>
             <Tooltip title="Add to Dataset" placement="top">
               <button
                 onClick={() => {
@@ -336,7 +336,7 @@ const RequestRow = (props: {
                 <PlusIcon className="h-3 w-3 text-gray-500" />
               </button>
             </Tooltip>
-          </button>
+          </div>
         </div>
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           Custom Properties{" "}

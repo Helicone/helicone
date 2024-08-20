@@ -5,9 +5,9 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
-import { clsx } from "../../shared/clsx";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useDebounce } from "../../../services/hooks/debounce";
+import { clsx } from "../../shared/clsx";
 
 interface TableFooterProps {
   currentPage: number;
@@ -32,40 +32,28 @@ const TableFooter = (props: TableFooterProps) => {
     showCount = false,
   } = props;
 
-  const router = useRouter();
-
   const totalPages = Math.ceil(count / pageSize);
 
   const [page, setPage] = useState<number>(currentPage);
 
   const debouncedPage = useDebounce(page, 1200);
 
-  const updatePage = useCallback(
-    (newPage: number) => {
-      setPage(newPage);
-      onPageChange(newPage);
+  const router = useRouter();
+
+  // the page should always match the currentPage
+  useEffect(() => {
+    if (page === debouncedPage) {
+      onPageChange(page);
       router.push(
         {
-          query: { ...router.query, page: newPage.toString() },
+          pathname: router.pathname,
+          query: { ...router.query, page: page.toString() },
         },
         undefined,
         { shallow: true }
       );
-    },
-    [onPageChange, router]
-  );
-
-  useEffect(() => {
-    if (currentPage !== page) {
-      setPage(currentPage);
     }
-  }, [currentPage, page]);
-
-  useEffect(() => {
-    if (debouncedPage !== currentPage) {
-      updatePage(debouncedPage);
-    }
-  }, [debouncedPage, currentPage, updatePage]);
+  }, [currentPage, debouncedPage, router, page, onPageChange]);
 
   return (
     <div className="flex flex-row justify-between text-sm items-center">
@@ -80,9 +68,12 @@ const TableFooter = (props: TableFooterProps) => {
             className="text-gray-700 dark:text-gray-300 bg-white dark:bg-black block w-fit rounded-md border-gray-300 dark:border-gray-700 py-1.5 pl-3 pr-6 text-base focus:border-sky-500 hover:cursor-pointer focus:outline-none focus:ring-sky-500 sm:text-sm"
             defaultValue={pageSize}
             onChange={(e) => {
-              router.query.page_size = e.target.value;
-              router.push(router);
-              onPageSizeChange(parseInt(e.target.value, 10));
+              const newPageSize = e.target.value;
+              router.push({
+                pathname: router.pathname,
+                query: { ...router.query, page_size: newPageSize },
+              });
+              onPageSizeChange(parseInt(newPageSize, 10));
             }}
             value={router.query.page_size}
           >
@@ -140,8 +131,10 @@ const TableFooter = (props: TableFooterProps) => {
           <button
             disabled={!isCountLoading && currentPage <= 1}
             onClick={() => {
-              router.query.page = "1";
-              router.push(router);
+              router.push({
+                pathname: router.pathname,
+                query: { ...router.query, page: "1" },
+              });
               onPageChange(1);
             }}
             className={clsx(
@@ -156,8 +149,11 @@ const TableFooter = (props: TableFooterProps) => {
           <button
             disabled={!isCountLoading && currentPage <= 1}
             onClick={() => {
-              router.query.page = (currentPage - 1).toString();
-              router.push(router);
+              const newPage = (currentPage - 1).toString();
+              router.push({
+                pathname: router.pathname,
+                query: { ...router.query, page: newPage },
+              });
               onPageChange(currentPage - 1);
             }}
             className={clsx(
@@ -172,8 +168,11 @@ const TableFooter = (props: TableFooterProps) => {
           <button
             disabled={!isCountLoading && currentPage >= totalPages}
             onClick={() => {
-              router.query.page = (currentPage + 1).toString();
-              router.push(router);
+              const newPage = (currentPage + 1).toString();
+              router.push({
+                pathname: router.pathname,
+                query: { ...router.query, page: newPage },
+              });
               onPageChange(currentPage + 1);
             }}
             className={clsx(
@@ -188,10 +187,13 @@ const TableFooter = (props: TableFooterProps) => {
           <button
             disabled={!isCountLoading && currentPage >= totalPages}
             onClick={() => {
-              router.query.page = Math.ceil(
+              const newPage = Math.ceil(
                 (count as number) / Number(pageSize || 10)
               ).toString();
-              router.push(router);
+              router.push({
+                pathname: router.pathname,
+                query: { ...router.query, page: newPage },
+              });
               onPageChange(
                 Math.ceil((count as number) / Number(pageSize || 10))
               );
