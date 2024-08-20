@@ -98,7 +98,7 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
     return ok(undefined);
   }
   return {
-    properties: allProperties || [],
+    properties: (allProperties || []) as string[],
     isLoading,
     error,
     propertyFilters,
