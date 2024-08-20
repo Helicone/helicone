@@ -372,25 +372,25 @@ export class LoggingHandler extends AbstractLogHandler {
     const requestResponseLog: RequestResponseRMT = {
       user_id: request.userId,
       request_id: request.id,
-      completion_tokens: usage.completionTokens ?? null,
-      latency: response.delayMs ?? null,
+      completion_tokens: usage.completionTokens ?? 0,
+      latency: response.delayMs ?? 0,
       model: context.processedLog.model ?? "",
-      prompt_tokens: usage.promptTokens ?? null,
+      prompt_tokens: usage.promptTokens ?? 0,
       request_created_at: formatTimeString(
         request.requestCreatedAt.toISOString()
       ),
       response_created_at: response.responseCreatedAt
         ? formatTimeString(response.responseCreatedAt.toISOString())
-        : null,
-      response_id: response.id ?? null,
-      status: response.status ?? null,
+        : "",
+      response_id: response.id ?? "",
+      status: response.status ?? 0,
       organization_id: orgParams?.id ?? "00000000-0000-0000-0000-000000000000",
-      proxy_key_id: request.heliconeProxyKeyId ?? null,
-      threat: request.threat ?? null,
-      time_to_first_token: response.timeToFirstToken ?? null,
-      target_url: request.targetUrl ?? null,
-      provider: request.provider ?? null,
-      country_code: request.countryCode ?? null,
+      proxy_key_id: request.heliconeProxyKeyId ?? "",
+      threat: request.threat ?? false,
+      time_to_first_token: response.timeToFirstToken ?? 0,
+      target_url: request.targetUrl ?? "",
+      provider: request.provider ?? "",
+      country_code: request.countryCode ?? "",
       properties: context.processedLog.request.properties ?? {},
       assets: context.processedLog.assets
         ? Array.from(context.processedLog.assets.keys())
