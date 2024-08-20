@@ -42,6 +42,9 @@ export interface paths {
   "/v1/request/{requestId}/score": {
     post: operations["AddScores"];
   };
+  "/v1/property/query": {
+    post: operations["GetProperties"];
+  };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];
   };
@@ -663,6 +666,15 @@ export interface components {
     ScoreRequest: {
       scores: components["schemas"]["Scores"];
     };
+    Property: {
+      property: string;
+    };
+    "ResultSuccess_Property-Array_": {
+      data: components["schemas"]["Property"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Property-Array.string_": components["schemas"]["ResultSuccess_Property-Array_"] | components["schemas"]["ResultError_string_"];
     PromptsResult: {
       id: string;
       user_defined_id: string;
@@ -1399,6 +1411,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetProperties: {
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Property-Array.string_"];
         };
       };
     };
