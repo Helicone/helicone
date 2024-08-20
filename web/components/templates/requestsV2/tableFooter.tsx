@@ -4,10 +4,9 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/20/solid";
-import { useRouter } from "next/router";
+import { clsx } from "../../shared/clsx";
 import { useEffect, useState } from "react";
 import { useDebounce } from "../../../services/hooks/debounce";
-import { clsx } from "../../shared/clsx";
 
 interface TableFooterProps {
   currentPage: number;
@@ -33,28 +32,15 @@ const TableFooter = (props: TableFooterProps) => {
   } = props;
 
   const totalPages = Math.ceil(count / pageSize);
-
   const [page, setPage] = useState<number>(currentPage);
 
   const debouncedPage = useDebounce(page, 1200);
 
-  const router = useRouter();
-
-  // the page should always match the currentPage
   useEffect(() => {
-    if (page === debouncedPage) {
-      onPageChange(page);
-      router.push(
-        {
-          pathname: router.pathname,
-          query: { ...router.query, page: page.toString() },
-        },
-        undefined,
-        { shallow: true }
-      );
+    if (debouncedPage !== currentPage) {
+      onPageChange(debouncedPage);
     }
-  }, [currentPage, debouncedPage, router, page, onPageChange]);
-
+  }, [debouncedPage, currentPage, onPageChange]);
   return (
     <div className="flex flex-row justify-between text-sm items-center">
       <div className="flex flex-row gap-16 items-center justify-between w-full">
@@ -69,13 +55,9 @@ const TableFooter = (props: TableFooterProps) => {
             defaultValue={pageSize}
             onChange={(e) => {
               const newPageSize = e.target.value;
-              router.push({
-                pathname: router.pathname,
-                query: { ...router.query, page_size: newPageSize },
-              });
               onPageSizeChange(parseInt(newPageSize, 10));
             }}
-            value={router.query.page_size}
+            value={pageSize}
           >
             {pageSizeOptions?.map((o) => (
               <option key={o}>{o}</option>
@@ -131,11 +113,7 @@ const TableFooter = (props: TableFooterProps) => {
           <button
             disabled={!isCountLoading && currentPage <= 1}
             onClick={() => {
-              router.push({
-                pathname: router.pathname,
-                query: { ...router.query, page: "1" },
-              });
-              onPageChange(1);
+              setPage(1);
             }}
             className={clsx(
               !isCountLoading && currentPage <= 1
@@ -149,12 +127,7 @@ const TableFooter = (props: TableFooterProps) => {
           <button
             disabled={!isCountLoading && currentPage <= 1}
             onClick={() => {
-              const newPage = (currentPage - 1).toString();
-              router.push({
-                pathname: router.pathname,
-                query: { ...router.query, page: newPage },
-              });
-              onPageChange(currentPage - 1);
+              setPage(currentPage - 1);
             }}
             className={clsx(
               !isCountLoading && currentPage <= 1
@@ -168,12 +141,7 @@ const TableFooter = (props: TableFooterProps) => {
           <button
             disabled={!isCountLoading && currentPage >= totalPages}
             onClick={() => {
-              const newPage = (currentPage + 1).toString();
-              router.push({
-                pathname: router.pathname,
-                query: { ...router.query, page: newPage },
-              });
-              onPageChange(currentPage + 1);
+              setPage(currentPage + 1);
             }}
             className={clsx(
               !isCountLoading && currentPage >= totalPages
@@ -187,16 +155,7 @@ const TableFooter = (props: TableFooterProps) => {
           <button
             disabled={!isCountLoading && currentPage >= totalPages}
             onClick={() => {
-              const newPage = Math.ceil(
-                (count as number) / Number(pageSize || 10)
-              ).toString();
-              router.push({
-                pathname: router.pathname,
-                query: { ...router.query, page: newPage },
-              });
-              onPageChange(
-                Math.ceil((count as number) / Number(pageSize || 10))
-              );
+              setPage(Math.ceil((count as number) / Number(pageSize || 10)));
             }}
             className={clsx(
               !isCountLoading && currentPage >= totalPages
