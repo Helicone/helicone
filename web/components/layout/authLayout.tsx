@@ -28,7 +28,7 @@ import {
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import { clsx } from "../shared/clsx";
 import ThemedDropdown from "../shared/themed/themedDropdown";
 import OrgContext, { useOrg } from "./organizationContext";
@@ -37,15 +37,15 @@ import UpgradeProModal from "../shared/upgradeProModal";
 import OrgDropdown from "./orgDropdown";
 
 import { useAlertBanners } from "../../services/hooks/admin";
+import { useLocalStorage } from "../../services/hooks/localStorage";
 import { Database } from "../../supabase/database.types";
 import ReferralModal from "../shared/referralModal";
 import { useTheme } from "../shared/theme/themeContext";
+import { DemoGame } from "../shared/themed/demo/demoGame";
+import ThemedBubbleModal from "../shared/themed/themedBubbleModal";
 import { ThemedSwitch } from "../shared/themed/themedSwitch";
 import { getUSDate, signOut } from "../shared/utils/utils";
 import MetaData from "./public/authMetaData";
-import ThemedBubbleModal from "../shared/themed/themedBubbleModal";
-import { DemoGame } from "../shared/themed/demo/demoGame";
-import { useLocalStorage } from "../../services/hooks/localStorage";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
