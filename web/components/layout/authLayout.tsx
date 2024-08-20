@@ -28,7 +28,7 @@ import {
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { clsx } from "../shared/clsx";
 import ThemedDropdown from "../shared/themed/themedDropdown";
 import OrgContext, { useOrg } from "./organizationContext";
@@ -634,7 +634,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
               <OrgContext.Provider value={org}>
                 <div
                   className="py-4 sm:py-8 mr-auto w-full max-w-[100rem]"
-                  key={org?.renderKey}
+                  key={`${pathname}-${org?.renderKey}`}
                 >
                   {children}
                 </div>

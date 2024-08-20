@@ -15,7 +15,10 @@ const useOrganizationLayout = (
     queryFn: async (query) => {
       const orgId = query.queryKey[1];
       const filterType = query.queryKey[2];
-      console.log(orgId, "orgId");
+      if (!orgId) {
+        return { data: null };
+      }
+
       const { data: layout, error } = await jawn.GET(
         // I dont have time figuring out why we need to do this... sorry future devs <3
         `/v1/organization/${orgId}/layout` as "/v1/organization/{organizationId}/layout",

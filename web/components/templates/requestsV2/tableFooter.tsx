@@ -6,7 +6,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { clsx } from "../../shared/clsx";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useDebounce } from "../../../services/hooks/debounce";
 
 interface TableFooterProps {
@@ -40,20 +40,32 @@ const TableFooter = (props: TableFooterProps) => {
 
   const debouncedPage = useDebounce(page, 1200);
 
-  // the page should always match the currentPage
+  const updatePage = useCallback(
+    (newPage: number) => {
+      setPage(newPage);
+      onPageChange(newPage);
+      router.push(
+        {
+          query: { ...router.query, page: newPage.toString() },
+        },
+        undefined,
+        { shallow: true }
+      );
+    },
+    [onPageChange, router]
+  );
+
   useEffect(() => {
     if (currentPage !== page) {
       setPage(currentPage);
     }
-  }, [currentPage]);
+  }, [currentPage, page]);
 
-  // once the debouncedPage changes, update the page using onPageChange and update the router
   useEffect(() => {
-    onPageChange(debouncedPage);
-    router.query.page = debouncedPage.toString();
-    // update the url, but don't trigger a new fetch
-    router.replace(router);
-  }, [debouncedPage]);
+    if (debouncedPage !== currentPage) {
+      updatePage(debouncedPage);
+    }
+  }, [debouncedPage, currentPage, updatePage]);
 
   return (
     <div className="flex flex-row justify-between text-sm items-center">

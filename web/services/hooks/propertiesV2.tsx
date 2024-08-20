@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { Property } from "../../lib/api/properties/properties";
 import { ok, Result } from "../../lib/result";
 import { InputParam, SingleFilterDef } from "../lib/filters/frontendFilterDefs";
@@ -21,20 +21,26 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
     refetchOnWindowFocus: false,
   });
 
-  const allProperties: string[] =
-    data?.data
-      ?.map((property: Property) => {
-        return property.property;
-      })
-      ?.filter(
-        (property: string) =>
-          "helicone-sent-to-posthog" !== property.toLowerCase()
-      )
-      // sort by property alphabetically
-      .sort() ?? [];
+  const allProperties = useMemo(
+    () =>
+      data?.data
+        ?.map((property: Property) => property.property)
+        ?.filter(
+          (property: string) =>
+            "helicone-sent-to-posthog" !== property.toLowerCase()
+        )
+        .sort() ?? [],
+    [data]
+  );
+
+  const memoizedGetPropertyFilters = useCallback(
+    (properties: string[], inputParams: InputParam[]) =>
+      getPropertyFilters(properties, inputParams),
+    [getPropertyFilters]
+  );
 
   const [propertyFilters, setPropertyFilters] = useState<SingleFilterDef<T>[]>(
-    getPropertyFilters(allProperties, [])
+    memoizedGetPropertyFilters(allProperties, [])
   );
 
   const [propertySearch, setPropertySearch] = useState({
@@ -44,7 +50,7 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
   const debouncedPropertySearch = useDebounce(propertySearch, 300);
 
   useEffect(() => {
-    setPropertyFilters(getPropertyFilters(allProperties, []));
+    setPropertyFilters(memoizedGetPropertyFilters(allProperties, []));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
 
@@ -57,14 +63,14 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
           typeof debouncedPropertySearch
         ];
         if (property === "") {
-          return getPropertyFilters(allProperties, []);
+          return memoizedGetPropertyFilters(allProperties, []);
         }
         const values = await getPropertyParamsV2(property, search);
         if (values.error !== null) {
           console.error(values.error);
-          return getPropertyFilters(allProperties, []);
+          return memoizedGetPropertyFilters(allProperties, []);
         }
-        return getPropertyFilters(
+        return memoizedGetPropertyFilters(
           allProperties,
           values.data?.map((v: any) => ({
             param: v.property_param,
@@ -77,10 +83,12 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
     });
 
   useEffect(() => {
-    setPropertyFilters(
-      propertyFiltersData || getPropertyFilters(allProperties, [])
-    );
-  }, [propertyFiltersData, allProperties]);
+    if (propertyFiltersData || allProperties.length > 0) {
+      setPropertyFilters(
+        propertyFiltersData || memoizedGetPropertyFilters(allProperties, [])
+      );
+    }
+  }, [propertyFiltersData, allProperties, memoizedGetPropertyFilters]);
 
   async function searchPropertyFilters(
     property: string,
