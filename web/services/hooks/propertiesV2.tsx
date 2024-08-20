@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useOrg } from "../../components/layout/organizationContext";
 import { Property } from "../../lib/api/properties/properties";
+import { getJawnClient } from "../../lib/clients/jawn";
 import { ok, Result } from "../../lib/result";
 import { InputParam, SingleFilterDef } from "../lib/filters/frontendFilterDefs";
-import { getPropertiesV2 } from "../lib/propertiesV2";
 import { getPropertyParamsV2 } from "../lib/propertyParamsV2";
 import { useDebounce } from "./debounce";
 
@@ -13,10 +14,15 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
     inputParams: InputParam[]
   ) => SingleFilterDef<T>[]
 ) {
+  const orgId = useOrg();
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["propertiesV2"],
-    queryFn: async () => {
-      return getPropertiesV2().then((res) => res);
+    queryKey: ["propertiesV2", orgId?.currentOrg?.id],
+    queryFn: async (query) => {
+      const jawn = getJawnClient(query.queryKey[1]);
+      const res = await jawn.POST("/v1/property/query", {
+        body: {},
+      });
+      return res.data;
     },
     refetchOnWindowFocus: false,
   });
