@@ -199,23 +199,23 @@ export type RequestResponseVersioned =
   | DeleteRequestResponseVersioned;
 
 export interface RequestResponseRMT {
-  response_id: Nullable<string>;
-  response_created_at: Nullable<string>;
-  latency: Nullable<number>;
+  response_id: string;
+  response_created_at: string;
+  latency: number;
   status: number;
-  completion_tokens: Nullable<number>;
-  prompt_tokens: Nullable<number>;
+  completion_tokens: number;
+  prompt_tokens: number;
   model: string;
   request_id: string;
   request_created_at: string;
   user_id: string;
   organization_id: string;
-  proxy_key_id: Nullable<string>;
-  threat: Nullable<boolean>;
-  time_to_first_token: Nullable<number>;
-  provider: Nullable<string>;
-  country_code: Nullable<string>;
-  target_url: Nullable<string>;
+  proxy_key_id: string;
+  threat: boolean;
+  time_to_first_token: number;
+  provider: string;
+  country_code: string;
+  target_url: string;
   properties: Record<string, string>;
   scores: Record<string, number>;
   request_body: string;

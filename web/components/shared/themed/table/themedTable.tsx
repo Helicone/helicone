@@ -244,9 +244,9 @@ export default function ThemedTable<T extends { id?: string }>(
                     {showCheckboxes && (
                       <th className="w-8 px-2"></th> /* Checkbox header */
                     )}
-                    {headerGroup.headers.map((header) => (
+                    {headerGroup.headers.map((header, index) => (
                       <DraggableColumnHeader
-                        key={header.id}
+                        key={`header-${index}`}
                         header={header}
                         sortable={sortable}
                       />

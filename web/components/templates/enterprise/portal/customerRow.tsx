@@ -108,7 +108,7 @@ const CustomerRow = (props: CustomerRowProps) => {
           </Badge>
         </TableCell>
         <TableCell>
-          <Text>{isLoading ? "..." : members?.data?.length}</Text>
+          <Text>{isLoading ? "..." : members?.length}</Text>
         </TableCell>
         <TableCell>
           <div>

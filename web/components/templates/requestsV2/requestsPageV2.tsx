@@ -51,6 +51,7 @@ import RequestCard from "./requestCard";
 import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
 import useRequestsPageV2 from "./useRequestsPageV2";
+import { useRouter } from "next/router";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -512,15 +513,34 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       });
     }
   }, [userFilterMapIndex, rateLimited, setAdvancedFilters]);
-  const onPageSizeChangeHandler = async (newPageSize: number) => {
-    setCurrentPageSize(newPageSize);
-    refetch();
-  };
 
-  const onPageChangeHandler = async (newPageNumber: number) => {
-    setPage(newPageNumber);
-    refetch();
-  };
+  const router = useRouter();
+
+  // Update the page state and router query when the page changes
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, page: newPage.toString() },
+        },
+        undefined,
+        { shallow: true }
+      );
+    },
+    [router]
+  );
+
+  // Sync the page state with the router query on component mount
+  useEffect(() => {
+    const pageFromQuery = router.query.page;
+    if (pageFromQuery && !Array.isArray(pageFromQuery)) {
+      const parsedPage = parseInt(pageFromQuery, 10);
+      if (!isNaN(parsedPage) && parsedPage !== page) {
+        setPage(parsedPage);
+      }
+    }
+  }, [router.query.page, page]);
 
   const onTimeSelectHandler = (key: TimeInterval, value: string) => {
     const tableName = getTableName(isCached);
@@ -928,13 +948,14 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
               </Row>
             )}
           </ThemedTable>
+
           <TableFooter
-            currentPage={currentPage}
+            currentPage={page}
             pageSize={pageSize}
             isCountLoading={isCountLoading}
             count={count || 0}
-            onPageChange={onPageChangeHandler}
-            onPageSizeChange={onPageSizeChangeHandler}
+            onPageChange={(n) => handlePageChange(n)}
+            onPageSizeChange={(n) => setCurrentPageSize(n)}
             pageSizeOptions={[25, 50, 100, 250, 500]}
           />
         </div>
