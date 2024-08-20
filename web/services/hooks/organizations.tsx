@@ -34,7 +34,7 @@ const useGetOrgMembers = (orgId: string) => {
           return [];
         }
 
-        return orgMembers || [];
+        return orgMembers.data || [];
       } catch (error) {
         console.error("Error in useGetOrgMembers:", error);
         return [];
