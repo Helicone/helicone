@@ -25,8 +25,6 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
       return res.data;
     },
     refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 30 * 60 * 1000, // 30 minutes
   });
 
   const allProperties = useMemo(
