@@ -126,7 +126,7 @@ export class SessionManager {
         request_response_rmt: {
           properties: {
             "Helicone-Session-Name": {
-              ilike: `'%${sessionName}%'`,
+              equals: sessionName,
             },
           },
         },
@@ -138,7 +138,7 @@ export class SessionManager {
         request_response_rmt: {
           properties: {
             "Helicone-Session-Id": {
-              ilike: `'%${sessionIdContains}%'`,
+              ilike: `%${sessionIdContains}%`,
             },
           },
         },
