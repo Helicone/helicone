@@ -3,9 +3,10 @@ import { useCallback, useMemo, useState } from "react";
 import { Property } from "../../lib/api/properties/properties";
 import { ok, Result } from "../../lib/result";
 import { InputParam, SingleFilterDef } from "../lib/filters/frontendFilterDefs";
-import { getPropertiesV2 } from "../lib/propertiesV2";
 import { getPropertyParamsV2 } from "../lib/propertyParamsV2";
 import { useDebounce } from "./debounce";
+import { getJawnClient } from "../../lib/clients/jawn";
+import { useOrg } from "../../components/layout/organizationContext";
 
 function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
   getPropertyFilters: (
@@ -18,10 +19,16 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
     search: "",
   });
   const debouncedPropertySearch = useDebounce(propertySearch, 300);
-
+  const orgId = useOrg();
   const propertiesQuery = useQuery({
-    queryKey: ["propertiesV2"],
-    queryFn: getPropertiesV2,
+    queryKey: ["propertiesV2", orgId?.currentOrg?.id],
+    queryFn: async (query) => {
+      const jawn = getJawnClient(query.queryKey[1]);
+      const res = await jawn.POST("/v1/property/query", {
+        body: {},
+      });
+      return res.data;
+    },
     refetchOnWindowFocus: false,
   });
 
