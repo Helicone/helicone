@@ -299,17 +299,26 @@ export class RequestManager extends BaseManager {
         );
 
     return resultMap(requests, (req) => {
-      return req.map((r) => {
-        return {
-          ...r,
-          costUSD: costOfPrompt({
-            model: r.request_model ?? "",
-            provider: r.provider ?? "",
-            completionTokens: r.completion_tokens ?? 0,
-            promptTokens: r.prompt_tokens ?? 0,
-          }),
-        };
-      });
+      const seen = new Set();
+      return req
+        .map((r) => {
+          return {
+            ...r,
+            costUSD: costOfPrompt({
+              model: r.request_model ?? "",
+              provider: r.provider ?? "",
+              completionTokens: r.completion_tokens ?? 0,
+              promptTokens: r.prompt_tokens ?? 0,
+            }),
+          };
+        })
+        .filter((r) => {
+          if (seen.has(r.request_id)) {
+            return false;
+          }
+          seen.add(r.request_id);
+          return true;
+        });
     });
   }
 
