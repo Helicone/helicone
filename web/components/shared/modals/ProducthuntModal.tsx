@@ -101,6 +101,7 @@ const UpgradeOfferModal: React.FC<ProducthuntModalProps> = ({
 
         <button
           onClick={handleUpgradeClick}
+          tabIndex={-1}
           className="bg-[#FF6154] text-white px-6 py-3 rounded-md hover:bg-[#E55A4D] transition-colors"
         >
           Upgrade
