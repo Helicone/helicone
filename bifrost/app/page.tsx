@@ -10,9 +10,6 @@ import Platform from "@/components/templates/landing/platform";
 import {
   CheckCircleIcon,
   ChevronRightIcon,
-  CodeBracketSquareIcon,
-  ShieldCheckIcon,
-  UserGroupIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";

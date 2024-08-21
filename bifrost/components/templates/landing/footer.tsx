@@ -8,14 +8,14 @@ export default function LandingFooterGraphic() {
   return (
     <div className="flex flex-col w-full items-center bg-[#2B3AC7] text-white text-center">
       <div className="flex flex-row w-full items-center justify-between">
-          <Image src={leftGraphic} alt="Helicone" className="hidden md:block md:size-1/2 lg:size-4/6 xl:size-8/12 2xl:size-max" />
+          <Image src={leftGraphic} alt="Helicone" className="hidden md:block w-1/3" />
 
           <div className="flex flex-col items-center gap-8 xl:gap-4 mx-auto my-12 xl:my-0">
             <h2 className="text-lg md:text-2xl lg:text-3xl font-bold">
-              Getting started with Helicone is simple and fun.
+              Getting started with Helicone is simple and fun
             </h2>
             <p className="text-xs md:text-sm lg:text-lg text-[#D0DEE8] font-light">
-              Join users from all over the planet that used Helicone to supercharge their AI workflow. 
+              Join users from all over the world that use Helicone to supercharge their AI workflow. 
             </p>
 
             <div className="flex flex-row items-center gap-4 font-bold mt-6">
@@ -29,7 +29,7 @@ export default function LandingFooterGraphic() {
             </div>
           </div>
 
-          <Image src={rightGraphic} alt="Helicone" className="hidden md:block md:size-1/2 lg:size-5/6 xl:size-7/8 2xl:size-max" />
+          <Image src={rightGraphic} alt="Helicone" className="hidden md:block w-1/3" />
       </div>
     </div>
   );
