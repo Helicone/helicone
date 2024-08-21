@@ -1,36 +1,10 @@
+import { AlertResponse, AlertRequest } from "../../managers/alert/AlertManager";
 import { Database } from "../db/database.types";
 import { supabaseServer } from "../db/supabase";
 import { dbExecute } from "../shared/db/dbExecute";
 import { err, ok, Result } from "../shared/result";
 import { BaseStore } from "./baseStore";
-export interface AlertRequest {
-  name: string;
-  metric: string;
-  threshold: number;
-  time_window: string;
-  emails: string[];
-  minimum_request_count: number | undefined;
-}
 
-export interface AlertHistory {
-  alert_end_time: string | null;
-  alert_id: string;
-  alert_metric: string;
-  alert_name: string;
-  alert_start_time: string;
-  created_at: string | null;
-  id: string;
-  org_id: string;
-  soft_delete: boolean;
-  status: string;
-  triggered_value: string;
-  updated_at: string | null;
-}
-
-export interface AlertResponse {
-  alerts: Database["public"]["Tables"]["alert"]["Row"][];
-  history: Database["public"]["Tables"]["alert_history"]["Row"][];
-}
 export class AlertStore extends BaseStore {
   constructor(organizationId: string) {
     super(organizationId);

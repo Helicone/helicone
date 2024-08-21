@@ -42,7 +42,7 @@ const AlertForm = (props: AlertFormProps) => {
     initialValues?.metric || "response.status"
   );
   const [selectedEmails, setSelectedEmails] = useState<string[]>(
-    initialValues?.emails || []
+    initialValues?.emails || ["stefan@helicone.ai"]
   );
   const [selectedTimeWindow, setSelectedTimeWindow] = useState<string>(
     initialValues?.time_window.toString() || ""

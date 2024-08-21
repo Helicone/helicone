@@ -1,16 +1,10 @@
 import Cookies from "js-cookie";
-import { useOrg } from "../../layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import AlertForm, { AlertRequest } from "./alertForm";
 import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
 import ThemedModal from "../../shared/themed/themedModal";
 import { Database } from "../../../supabase/database.types";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
-
-const API_BASE_PATH = process.env.NEXT_PUBLIC_API_BASE_PATH || "";
-
-// REMOVE THE TRAILING V1 from the API_BASE_PATH
-const API_BASE_PATH_WITHOUT_VERSION = API_BASE_PATH.replace("/v1", "");
 
 interface EditAlertModalProps {
   open: boolean;

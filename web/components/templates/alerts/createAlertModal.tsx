@@ -23,7 +23,7 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
       return;
     }
 
-    const { data, error } = await jawn.POST("/v1/alert/create", {
+    const { error } = await jawn.POST("/v1/alert/create", {
       body: {
         name: req.name,
         metric: req.metric,
@@ -42,33 +42,6 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
     setNotification("Successfully created alert", "success");
     setOpen(false);
     onSuccess();
-
-    // fetch(`${API_BASE_PATH_WITHOUT_VERSION}/alerts`, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     "helicone-jwt": authFromCookie.data.jwtToken,
-    //     "helicone-org-id": orgContext?.currentOrg?.id || "",
-    //   },
-    //   body: JSON.stringify({
-    //     name: req.name,
-    //     metric: req.metric,
-    //     threshold: req.threshold,
-    //     time_window: req.time_window,
-    //     emails: req.emails,
-    //     org_id: orgContext?.currentOrg?.id,
-    //     minimum_request_count: req.minimum_request_count,
-    //   }),
-    // })
-    //   .then((res) => res.json())
-    //   .then((data) => {
-    //     setNotification("Successfully created alert", "success");
-    //     setOpen(false);
-    //     onSuccess();
-    //   })
-    //   .catch((err) => {
-    //     setNotification(`Failed to create alert ${err}`, "error");
-    //   });
   };
 
   return (

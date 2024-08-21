@@ -11,19 +11,24 @@ import {
   Tags,
 } from "tsoa";
 import { JawnAuthenticatedRequest } from "../../types/request";
-import { Message } from "../../lib/handlers/HandlerContext";
-import { LogManager } from "../../managers/LogManager";
-import { AlertRequest } from "../../lib/stores/AlertStore";
-import { AlertManager } from "../../managers/alert/AlertManager";
+import {
+  AlertManager,
+  AlertRequest,
+  AlertResponse,
+} from "../../managers/alert/AlertManager";
+import { Result } from "../../lib/shared/result";
 
 @Route("v1/alert")
 @Tags("Alert")
 @Security("api_key")
 export class AlertController extends Controller {
   @Get("/query")
-  public async getAlerts(@Request() request: JawnAuthenticatedRequest) {
+  public async getAlerts(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<AlertResponse, string>> {
     const manager = new AlertManager(request.authParams);
-    return manager.getAlerts();
+    const result = await manager.getAlerts();
+    return result;
   }
 
   @Post("/create")
@@ -31,17 +36,19 @@ export class AlertController extends Controller {
     @Body()
     alert: AlertRequest,
     @Request() request: JawnAuthenticatedRequest
-  ) {
+  ): Promise<Result<string, string>> {
     const manager = new AlertManager(request.authParams);
-    return manager.createAlert(alert);
+    const result = await manager.createAlert(alert);
+    return result;
   }
 
   @Delete("/{alertId}")
   public async deleteAlert(
     @Path() alertId: string,
     @Request() request: JawnAuthenticatedRequest
-  ) {
+  ): Promise<Result<null, string>> {
     const manager = new AlertManager(request.authParams);
-    return manager.deleteAlert(alertId);
+    const result = await manager.deleteAlert(alertId);
+    return result;
   }
 }
