@@ -69,6 +69,7 @@ export interface DashboardPageData {
   apiKeyFilter: string | null;
   timeZoneDifference: number;
   dbIncrement: TimeIncrement;
+  isLive: boolean;
 }
 
 export const useDashboardPage = ({
@@ -76,6 +77,7 @@ export const useDashboardPage = ({
   uiFilters,
   timeZoneDifference,
   dbIncrement,
+  isLive,
 }: DashboardPageData) => {
   const {
     properties,
@@ -144,6 +146,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/tokensOverTime",
       key: "errorOverTime",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({
@@ -158,6 +161,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/errorOverTime",
       key: "errorOverTime",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
@@ -168,6 +172,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/requestOverTime",
       key: "requestOverTime",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
@@ -180,6 +185,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/requestStatusOverTime",
       key: "requestStatusOverTime",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({
@@ -194,6 +200,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/costOverTime",
       key: "costOverTime",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({ cost: +d.cost, time: new Date(d.time) }))
@@ -204,6 +211,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/latencyOverTime",
       key: "latencyOverTime",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({ duration: +d.duration, time: new Date(d.time) }))
@@ -214,6 +222,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/usersOverTime",
       key: "usersOverTime",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
@@ -224,6 +233,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/timeToFirstToken",
       key: "timeToFirstToken",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({ ttft: +d.ttft, time: new Date(d.time) }))
@@ -234,6 +244,7 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/threatsOverTime",
       key: "threatsOverTime",
+      isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
@@ -246,32 +257,39 @@ export const useDashboardPage = ({
     totalCost: useBackendMetricCall<Result<number, string>>({
       params,
       endpoint: "/api/metrics/totalCost",
+      isLive,
     }),
     totalRequests: useBackendMetricCall<Result<number, string>>({
       params,
       endpoint: "/api/metrics/totalRequests",
+      isLive,
     }),
     averageLatency: useBackendMetricCall<Result<number, string>>({
       params,
       endpoint: "/api/metrics/averageLatency",
+      isLive,
     }),
     averageTokensPerRequest: useBackendMetricCall<
       UnPromise<ReturnType<typeof getTokensPerRequest>>
     >({
       params,
       endpoint: "/api/metrics/averageTokensPerRequest",
+      isLive,
     }),
     activeUsers: useBackendMetricCall<Result<number, string>>({
       params,
       endpoint: "/api/metrics/activeUsers",
+      isLive,
     }),
     averageTimeToFirstToken: useBackendMetricCall<Result<number, string>>({
       params,
       endpoint: "/api/metrics/averageTimeToFirstToken",
+      isLive,
     }),
     totalThreats: useBackendMetricCall<Result<number, string>>({
       params,
       endpoint: "/api/metrics/totalThreats",
+      isLive,
     }),
   };
 

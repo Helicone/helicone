@@ -798,11 +798,18 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           }
           actions={
             <>
-              <ThemedSwitch
-                checked={isLive}
-                onChange={setIsLive}
-                label="Live"
-              />
+              <div>
+                <ThemedSwitch
+                  checked={isLive}
+                  onChange={setIsLive}
+                  label="Live"
+                />
+                {isLive && (
+                  <span className="text-sm text-gray-500 hover:text-gray-700">
+                    3s interval
+                  </span>
+                )}
+              </div>
             </>
           }
         />
