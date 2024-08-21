@@ -16,6 +16,10 @@ import {
 } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import Image from "next/image";
+import miniRequestsPage from "@/public/static/mini-requests-page.png";
+import costsGraph from "@/public/static/costs-graph.png";
+import promptManagementCard from "@/public/static/prompt-management-card.png";
+import uptimeCard from "@/public/static/uptime-card.png";
 
 const features = [
   {
@@ -85,49 +89,49 @@ export default function Platform() {
     "monitoring" | "logs" | "templates"
   >("monitoring");
   return (
-    <div className="flex flex-col w-full items-center">
+    <div className="flex flex-col w-full items-center px-2">
       <h2 className="text-3xl md:text-4xl font-bold text-black md:text-center text-start tracking-tight leading-tight">
         One platform with{" "}
         <span className="text-sky-500">all the essentials tools.</span>
       </h2>
 
-      <div className="flex flex-col md:flex-row items-start gap-4 md:mt-16 mt-4 min-h-[500px]">
+      <div className="flex flex-col md:justify-stretch md:flex-row items-start gap-4 md:mt-16 mt-4 ">
 
-        <div className="flex flex-col h-min border border-gray-200 rounded-xl md:py-8 pt-2 md:px-4 pl-1 pr-3 bg-gradient-to-t from-white to-sky-50">
+        <div className="flex flex-col h-min border border-gray-200 rounded-xl md:py-8 pt-2 px-4 pl-1 pr-3 bg-gradient-to-t from-white to-sky-50 h-fit">
           <div className="flex flex-row items-center justify-between gap-2 text-sm pl-4">
             <p className="font-bold text-xs text-blue-500 bg-blue-100 rounded-xl p-2">POST</p>
             <input disabled={true} type="text" className="text-sm border border-gray-200 w-full bg-white rounded-xl p-2 placeholder:text-black" placeholder=" / v1 / chat / completions / query " />
             <button className="bg-blue-500 text-xs text-white rounded-xl p-2">SEND</button>
           </div>
 
-          <Image src="/static/mini-requests-page.png" alt="Requests table" width={400} height={300} />
+          <Image src={miniRequestsPage} alt="Requests table" />
           <h3 className="text-xl font-bold text-blue-500 relative top-[-2em] bg-gradient-to-t from-white via-white self-start w-full pt-8 md:pt-2 px-4 pb-0">Send requests in seconds</h3>
-          <p className="relative top-[-3em] pt-2 left-[1em] text-gray-500 bg-gradient-to-t from-white">Filter, segment, and analyze your requests</p>
+          <p className="relative top-[-3em] md:mb-[-3em] pt-2 left-[1em] text-gray-500 bg-gradient-to-t from-white">Filter, segment, and analyze your requests</p>
         </div>
 
-        <div className="flex flex-col items-auto border border-gray-200 rounded-xl md:py-8 py-2 px-4 bg-gradient-to-t from-white to-sky-50" dir="rtl">
+        <div className="flex flex-col items-auto border border-gray-200 rounded-xl md:py-8 py-2 px-4 bg-gradient-to-t from-white to-sky-50 h-full" dir="rtl">
           <div className="flex flex-row items-center gap-2 text-sm ml-4 bg-white border border-gray-200 rounded-xl p-2 w-fit self-center">
             <p className="font-bold text-xs text-blue-500 bg-blue-100 rounded-lg p-2">Costs</p>
             <p className="font-bold text-xs text-black rounded-lg p-2">Requests</p>
           </div>
 
-          <Image src="/static/costs-graph.png" alt="Requests table" width={700} height={300} />
-          <h3 className="text-xl font-bold text-blue-500 relative md:top-[-4em] top-[-2em] bg-gradient-to-t from-white via-white/90 pt-8 md:mr-5 mr-3 pr-1 pb-0 w-full">Instant Analytics</h3>
-          <p className="relative md:top-[-5em] top-[-3em] md:mr-5 mr-3 pt-1 pr-1 bg-gradient-to-t from-white via-white/90 md:bg-white text-gray-500 w-full">Get detailed metrics such as latency, cost, time to first tokens</p>
+          <Image src={costsGraph} alt="Costs graph" />
+          <h3 className="text-xl font-bold text-blue-500 relative md:top-[-1em] top-[-2em] bg-gradient-to-t from-white via-white/90 pt-8 md:mr-5 mr-3 pr-1 pb-0 w-full">Instant Analytics</h3>
+          <p className="relative md:top-[-2em] md:mb-[-2em] top-[-3em] md:mr-5 mr-3 pt-3 pr-1 bg-gradient-to-t from-white via-white/90 text-gray-500 w-full">Get detailed metrics such as latency, cost, time to first tokens</p>
         </div>
 
       </div>
 
-      <div className="flex flex-col md:flex-row items-start gap-4 mt-16 min-h-[500px]">
+      <div className="flex flex-col md:flex-row items-start justify-stretch gap-4 mt-4 md:mt-6">
 
         <div className="flex flex-col border border-gray-200 rounded-xl py-4 px-4 bg-gradient-to-t from-white to-sky-50">
-          <Image src="/static/prompt-management-card.png" alt="Requests table" width={550} height={300} />
+          <Image src={promptManagementCard} alt="Prompt management card" />
           <h3 className="text-xl font-bold text-blue-500 bg-gradient-to-t from-white via-white/90 ml-4 w-full">Prompt Management</h3>
           <p className="bg-gradient-to-t from-white via-white/90 md:bg-white text-gray-500 w-full ml-4">Access features such as prompt versioning, prompt testing and prompt templates</p>
         </div>
 
-        <div className="flex flex-col justify-between h-full border border-gray-200 rounded-xl py-4 pt-2 pr-4 bg-gradient-to-t from-white to-sky-50">
-          <Image src="/static/uptime-card.png" alt="Requests table" width={350} height={300} />
+        <div className="flex flex-col justify-self-stretch justify-between h-full border border-gray-200 rounded-xl py-4 pt-2 pr-4 bg-gradient-to-t from-white to-sky-50 h-full">
+          <Image src={uptimeCard} alt="Uptime card" />
           <h3 className="text-xl font-bold text-blue-500 bg-gradient-to-t from-white w-full ml-4">99.99% Uptime</h3>
           <p className="bg-gradient-to-t from-white text-gray-500 w-full ml-4">Helicone leverages Cloudflare Workers to maintain low latency and high reliability</p>
         </div>

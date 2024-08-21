@@ -5,6 +5,7 @@ import LandingFooterGraphic from "@/components/templates/landing/footer";
 import Integrations from "@/components/templates/landing/integrations";
 import OpenSource from "@/components/templates/landing/opensource";
 import PhHeader from "@/components/templates/landing/phheader";
+import PhNotifHeader from "@/components/templates/landing/phnotifheader";
 import Platform from "@/components/templates/landing/platform";
 import {
   CheckCircleIcon,
@@ -23,7 +24,10 @@ export default function Home() {
       <main className="flex min-h-screen flex-col items-center justify-between text-black">
         <header className="text-center flex flex-col space-y-4 pb-10 md:pb-32 max-w-6xl mx-auto">
           {
-            PhDate.getDate() == new Date().getDate() ? <PhHeader /> : null
+            new Date().getDate() == PhDate.getDate() ?
+              <PhHeader />
+              :
+              <PhNotifHeader />
           }
           <Link
             href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
@@ -104,18 +108,18 @@ export default function Home() {
           </p>
 
           {
-            PhDate.getDate() == new Date().getDate() ? (
-              <div className="flex items-center gap-4 pt-4 w-full justify-center flex-col md:flex-row items-start md:items-center">
+            PhDate.getDate() != new Date().getDate() ? (
+              <div className="pt-4 w-fit md:mx-auto self-start md:self-center">
                 <Link
                   href="https://us.helicone.ai/signup?demo=true"
-                  className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 text-white border-[3px] border-sky-700 rounded-lg pl-6 pr-4 py-2 ml-6 md:ml-0 font-bold shadow-lg flex w-fit items-center gap-1 self-start md:self-center"
+                  className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 text-white border-[3px] border-sky-700 rounded-lg pl-6 pr-4 py-2 ml-6 md:ml-0 font-bold shadow-lg flex flex-row w-fit items-center gap-1 self-start md:self-center"
                 >
                   Try Demo
                   <ChevronRightIcon className="w-5 h-5 inline text-white" />
                 </Link>
               </div>
             ) : (
-              <div className="flex items-center gap-4 pt-4 w-full justify-center flex-col md:flex-row">
+              <div className="flex gap-4 pt-4 w-full justify-center flex-col md:flex-row items-start md:items-center ml-6">
                 <Link
                   href="https://us.helicone.ai/signup?demo=true"
                   className="hidden md:flex bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 rounded-lg px-6 py-2 font-bold shadow-lg items-center gap-1 w-fit"
@@ -132,7 +136,8 @@ export default function Home() {
               </div>
             )
           }
-          <ul className="flex flex-col md:flex-row gap-4 md:gap-16 md:justify-center px-4 pt-16 text-sm hidden md:flex">
+
+          <ul className="self-center md:flex-row md:gap-16 md:justify-center px-4 pt-16 text-sm hidden md:flex w-fit">
             <li className="flex items-center space-x-2">
               <CheckCircleIcon className="h-6 w-6 text-sky-500" />
               <span className="text-gray-600">
@@ -151,7 +156,7 @@ export default function Home() {
             </li>
           </ul>
 
-          <div className="pt-8 md:pt-0">
+          <div className="mx-2 pt-8 md:pt-0">
             <Image
               src={"/static/dashboard.webp"}
               alt={"Helicone Dashboard"}
@@ -162,30 +167,45 @@ export default function Home() {
           </div>
         </header>
 
-        <ul className="flex flex-col md:flex-row gap-4 md:gap-16 md:justify-center px-4 pt-16 text-sm md:hidden">
-          <li className="flex items-center space-x-2">
-            <CheckCircleIcon className="h-6 w-6 text-sky-500" />
-            <span className="text-gray-600">
-              Sub-millisecond latency impact
+        <ul className="flex md:hidden flex-col gap-14 md:gap-16 self-start ml-6 pt-16">
+          <li className="text-gray-600 text-xl font-semibold">
+            Ready for production level workloads
+          </li>
+
+          <li className="flex flex-col items-start justify-start space-y-3">
+            <span className="text-gray-600 border-l-2 border-sky-500 pl-2 py-1 font-bold text-2xl">
+              1,000
+            </span>
+            <span className="text-gray-600 ml-3 font-light">
+              Requests processed per second
             </span>
           </li>
-          <li className="flex items-center space-x-2">
-            <CheckCircleIcon className="h-6 w-6 text-sky-500" />
-            <span className="text-gray-600">100% log coverage</span>
-          </li>
-          <li className="flex items-center space-x-2">
-            <CheckCircleIcon className="h-6 w-6 text-sky-500" />
-            <span className="text-gray-600">
-              Industry-leading query times
+
+          <li className="flex flex-col items-start justify-start space-y-3">
+            <span className="text-gray-600 border-l-2 border-sky-500 pl-2 py-1 font-bold text-2xl">
+              1.2 billion
+            </span>
+            <span className="text-gray-600 ml-3 font-light">
+              Total requests logged
             </span>
           </li>
+
+          <li className="flex flex-col items-start justify-start space-y-3">
+            <span className="text-gray-600 border-l-2 border-sky-500 pl-2 py-1 font-bold text-2xl">
+              99.99%
+            </span>
+            <span className="text-gray-600 ml-3 font-light">
+              Uptime
+            </span>
+          </li>
+
         </ul>
 
         <section
           id="logos"
           className="text-center flex flex-col space-y-4 pt-16 pb-16 max-w-6xl mx-auto w-full"
         >
-          <h2 className="text-gray-600 text-lg md:text-xl">
+          <h2 className="text-gray-600 text-lg md:text-xl text-start md:text-center ml-6 md:ml-0">
             Trusted by the thousands of companies and developers.
           </h2>
           <ul className="flex flex-wrap md:flex-row items-center w-full justify-center gap-10 md:gap-32 px-0 md:px-8 pt-16 grayscale opacity-80">
@@ -295,7 +315,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="flex flex-col space-y-4 my-16 pb-2 w-1/2 items-center">
+        <section className="flex flex-col space-y-4 my-16 pb-2 md:w-1/2 w-full items-center" >
           <Features />
         </section>
         

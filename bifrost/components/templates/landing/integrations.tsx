@@ -382,7 +382,7 @@ client.messages.create(
           />
         </div>
       </div>
-        <div className="flex items-center justify-center mt-4">
+        <div className="flex items-center justify-center mt-4 mx-5">
           <p className="text-gray-400 text-sm m-auto">
             Don&apos;t see your model? Let us know by creating a Github <a href="https://github.com/helicone/helicone/issues" target="_blank" className="text-sky-500">Issue.</a>
           </p>

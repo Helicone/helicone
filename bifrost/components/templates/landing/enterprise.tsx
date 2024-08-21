@@ -156,7 +156,7 @@ const ENTERPRISE_TABS: {
 const Enterprise = (props: EnterpriseProps) => {
 
   return (
-    <div className="flex flex-col gap-8 w-full md:items-center items-start md:text-center text-start">
+    <div className="flex flex-col gap-8 px-2 w-full md:items-center items-start md:text-center text-start">
 
       <div>
         <p className="text-blue-600 text-sm font-bold mb-4">Enterprise</p>
@@ -194,8 +194,8 @@ const Enterprise = (props: EnterpriseProps) => {
 
       </div>
 
-      <div className="md:flex hidden flex flex-col w-full">
-        <a href="https://docs.helicone.ai/features/prompts#prompts-and-experiments" target="_blank">
+      <div className="self-center md:flex hidden flex flex-col w-full">
+        <a href="https://docs.helicone.ai/features/prompts#prompts-and-experiments" target="_blank" className="w-fit">
           <Image src={enterpriseTileExperiments} alt="enterprise experiments graphic" className="w-11/12 pr-5" />
         </a>
         <div className="flex flex-row w-full">
