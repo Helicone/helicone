@@ -199,7 +199,7 @@ const Enterprise = (props: EnterpriseProps) => {
           <Image src={enterpriseTileExperiments} alt="enterprise experiments graphic" className="w-11/12 pr-5" />
         </a>
         <div className="flex flex-row w-full">
-          <a href="https://docs.helicone.ai/features/customer-portal#customer-portal" target="_blank" className="ml-2">
+          <a href="https://docs.helicone.ai/features/customer-portal#customer-portal" target="_blank" className="pl-2">
             <Image src={enterpriseTileAnalytics} alt="enterprise analytics graphic" className="w-full" />
           </a>
 

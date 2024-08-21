@@ -39,7 +39,7 @@ export default function Home() {
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="mr-1 ml-2"
+              className="mr-1 pl-2"
             >
               <g clipPath="url(#clip0_24_57)">
                 <rect width="24" height="24" rx="5.4" fill="#FF5100"></rect>
@@ -96,11 +96,11 @@ export default function Home() {
             </svg>{" "}
             Combinator
           </Link>
-          <h1 className="text-4xl md:text-5xl font-bold md:pt-4 px-2 md:text-center md:mx-0 text-start ml-5">
+          <h1 className="text-4xl md:text-5xl font-bold md:pt-4 px-2 md:text-center md:mx-0 text-start pl-5">
             LLM-Observability for{" "}
             <span className="text-sky-500">Developers</span>
           </h1>
-          <p className="text-lg md:text-xl text-gray-600 md:w-1/2 md:text-center text-start md:self-center ml-6">
+          <p className="text-lg md:text-xl text-gray-600 md:w-1/2 md:text-center text-start md:self-center pl-6">
             The open-source platform for logging, monitoring, and debugging.
           </p>
 
@@ -116,7 +116,7 @@ export default function Home() {
                 </Link>
               </div>
             ) : (
-              <div className="flex gap-4 pt-4 w-full justify-center flex-col md:flex-row items-start md:items-center ml-6">
+              <div className="flex gap-4 pt-4 w-full justify-center flex-col md:flex-row items-start md:items-center pl-6">
                 <Link
                   href="https://us.helicone.ai/signup?demo=true"
                   className="hidden md:flex bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 rounded-lg px-6 py-2 font-bold shadow-lg items-center gap-1 w-fit"
@@ -164,7 +164,7 @@ export default function Home() {
           </div>
         </header>
 
-        <ul className="flex md:hidden flex-col gap-14 md:gap-16 self-start ml-6 pt-16">
+        <ul className="flex md:hidden flex-col gap-14 md:gap-16 self-start pl-6 pt-16">
           <li className="text-gray-600 text-xl font-semibold">
             Ready for production level workloads
           </li>
@@ -173,7 +173,7 @@ export default function Home() {
             <span className="text-gray-600 border-l-2 border-sky-500 pl-2 py-1 font-bold text-2xl">
               1,000
             </span>
-            <span className="text-gray-600 ml-3 font-light">
+            <span className="text-gray-600 pl-3 font-light">
               Requests processed per second
             </span>
           </li>
@@ -182,7 +182,7 @@ export default function Home() {
             <span className="text-gray-600 border-l-2 border-sky-500 pl-2 py-1 font-bold text-2xl">
               1.2 billion
             </span>
-            <span className="text-gray-600 ml-3 font-light">
+            <span className="text-gray-600 pl-3 font-light">
               Total requests logged
             </span>
           </li>
@@ -191,7 +191,7 @@ export default function Home() {
             <span className="text-gray-600 border-l-2 border-sky-500 pl-2 py-1 font-bold text-2xl">
               99.99%
             </span>
-            <span className="text-gray-600 ml-3 font-light">
+            <span className="text-gray-600 pl-3 font-light">
               Uptime
             </span>
           </li>
@@ -202,7 +202,7 @@ export default function Home() {
           id="logos"
           className="text-center flex flex-col space-y-4 pt-16 pb-16 max-w-6xl mx-auto w-full"
         >
-          <h2 className="text-gray-600 text-lg md:text-xl text-start md:text-center ml-6 md:ml-0">
+          <h2 className="text-gray-600 text-lg md:text-xl text-start md:text-center pl-6 md:pl-0">
             Trusted by the thousands of companies and developers.
           </h2>
           <ul className="flex flex-wrap md:flex-row items-center w-full justify-center gap-10 md:gap-32 px-0 md:px-8 pt-16 grayscale opacity-80">
@@ -282,7 +282,7 @@ export default function Home() {
           id="integrations"
           className="flex flex-col space-y-4 mt-32 mb-8 max-w-6xl mx-auto w-full"
         >
-          <div className="flex flex-col space-y-2 md:text-center text-start ml-5">
+          <div className="flex flex-col space-y-2 md:text-center text-start pl-5">
             <h1 className="text-3xl md:text-4xl font-bold">
               Send your first event in{" "}
               <span className="text-sky-500">seconds</span>

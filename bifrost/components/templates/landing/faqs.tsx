@@ -7,7 +7,7 @@ export default function Faqs() {
   const [open, setOpen] = useState(-1);
 
   return (
-    <div className="flex flex-col pb-2 mt-32 w-full md:items-center items-start md:text-center text-start md:ml-0 ml-12">
+    <div className="flex flex-col pb-2 mt-32 w-full md:items-center items-start text-center text-start md:pl-0 pl-12">
       <h2 className="text-2xl md:text-4xl font-bold md:self-center text-start">
         Frequently Asked Questions
       </h2>
@@ -19,7 +19,7 @@ export default function Faqs() {
               <ChevronRightIcon className={`w-5 h-5 ${open === index ? "rotate-90" : ""}`} />
               {faq.question}
             </h3>
-            <p className={`text-gray-500 ${open === index ? "block mt-2 ml-6" : "hidden"}`}>{faq.answer}</p>
+            <p className={`text-gray-500 ${open === index ? "block mt-2 pl-6" : "hidden"}`}>{faq.answer}</p>
           </div>
         ))}
       </div>

@@ -6,11 +6,11 @@ export default function OpenSource() {
   return (
     <div className="flex flex-col md:space-y-4 pb-2 mt-32 w-full md:items-center items-start md:text-center text-start">
 
-      <h2 className="text-3xl md:text-4xl font-bold text-black text-center tracking-tight leading-tight ml-7">
+      <h2 className="text-3xl md:text-4xl font-bold text-black text-center tracking-tight leading-tight pl-7">
         Proudly{" "}
         <span className="text-sky-500">open source</span>
       </h2>
-      <p className="text-sm md:text-md text-gray-500 max-w-4xl text-center ml-7">
+      <p className="text-sm md:text-md text-gray-500 max-w-4xl text-center pl-7">
         We value transparency and the power of community.
       </p>
       

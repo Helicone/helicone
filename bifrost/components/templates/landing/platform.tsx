@@ -125,7 +125,7 @@ export default function Platform() {
           className="flex flex-col items-auto border border-gray-200 rounded-xl md:py-8 py-2 px-4 bg-gradient-to-t from-white to-sky-50 h-full"
           dir="rtl"
         >
-          <div className="flex flex-row items-center gap-2 text-sm ml-4 bg-white border border-gray-200 rounded-xl p-2 w-fit self-center">
+          <div className="flex flex-row items-center gap-2 text-sm pl-4 bg-white border border-gray-200 rounded-xl p-2 w-fit self-center">
             <p className="font-bold text-xs text-blue-500 bg-blue-100 rounded-lg p-2">
               Costs
             </p>
@@ -148,10 +148,10 @@ export default function Platform() {
         <div className="flex flex-col border border-gray-200 rounded-xl py-4 px-4 bg-gradient-to-t from-white to-sky-50">
           <Image src={promptManagementCard} alt="Prompt management card" />
           <div className="flex flex-col justify-end flex-grow">
-            <h3 className="text-xl font-bold text-blue-500 bg-gradient-to-t from-white via-white/90 ml-4 w-full">
+            <h3 className="text-xl font-bold text-blue-500 bg-gradient-to-t from-white via-white/90 pl-4 w-full">
               Prompt Management
             </h3>
-            <p className="bg-gradient-to-t from-white via-white/90 md:bg-white text-gray-500 w-full ml-4">
+            <p className="bg-gradient-to-t from-white via-white/90 md:bg-white text-gray-500 w-full pl-4">
               Access features such as prompt versioning, prompt testing and
               prompt templates
             </p>
@@ -161,10 +161,10 @@ export default function Platform() {
         <div className="flex flex-col justify-between border border-gray-200 rounded-xl py-4 pt-2 pr-4 bg-gradient-to-t from-white to-sky-50">
           <Image src={uptimeCard} alt="Uptime card" />
           <div>
-            <h3 className="text-xl font-bold text-blue-500 bg-gradient-to-t from-white w-full ml-4">
+            <h3 className="text-xl font-bold text-blue-500 bg-gradient-to-t from-white w-full pl-4">
               99.99% Uptime
             </h3>
-            <p className="bg-gradient-to-t from-white text-gray-500 w-full ml-4">
+            <p className="bg-gradient-to-t from-white text-gray-500 w-full pl-4">
               Helicone leverages Cloudflare Workers to maintain low latency and
               high reliability
             </p>
