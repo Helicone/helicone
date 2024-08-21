@@ -191,7 +191,8 @@
             "other-integrations/upstash-qstash",
             "other-integrations/upstash-rag"
           ]
-        }
+        },
+        "other-integrations/firecrawl"
       ]
     },
     {
