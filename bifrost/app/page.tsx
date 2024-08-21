@@ -302,7 +302,7 @@ export default function Home() {
           <Platform />
         </section>
 
-        <section id="enterprise" className="mb-16">
+        <section id="enterprise" className="mb-16 hidden">
           <h2 className="sr-only">
             Get to production-quality{" "}
             <span className="text-violet-800">faster</span>

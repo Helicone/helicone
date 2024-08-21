@@ -23,7 +23,7 @@ export default function OpenSource() {
             <h3 className="text-lg font-bold">Join our community on Discord</h3>
             <p className="text-sm text-gray-400">We appreciate all of Helicone&apos;s contributors. You are welcome to join our community on <a href="https://discord.com/invite/2TkeWdXNPQ" target="_blank" className="text-sky-500 font-bold">Discord</a> and become a contributor.</p>
 
-            <a href="https://github.com/helicon/helicone" target="_blank" className="text-gray-500 font-bold border-2 rounded-lg mt-2 p-1 px-2 flex items-center gap-1">
+            <a href="https://github.com/helicone/helicone" target="_blank" className="text-gray-500 font-bold border-2 rounded-lg mt-2 p-1 px-2 flex items-center gap-1">
               Fork Helicone
               <ChevronRightIcon className="w-5 h-5" />
             </a>
