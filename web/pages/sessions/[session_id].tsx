@@ -12,9 +12,11 @@ const SessionDetail = ({ session_id }: { session_id: string }) => {
     1,
     100,
     {
-      properties: {
-        "Helicone-Session-Id": {
-          equals: session_id as string,
+      request_response_rmt: {
+        properties: {
+          "Helicone-Session-Id": {
+            equals: session_id as string,
+          },
         },
       },
     },

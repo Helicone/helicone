@@ -385,7 +385,8 @@ export class LoggingHandler extends AbstractLogHandler {
       response_id: response.id ?? "",
       status: response.status ?? 0,
       organization_id: orgParams?.id ?? "00000000-0000-0000-0000-000000000000",
-      proxy_key_id: request.heliconeProxyKeyId ?? "",
+      proxy_key_id:
+        request.heliconeProxyKeyId ?? "00000000-0000-0000-0000-000000000000",
       threat: request.threat ?? false,
       time_to_first_token: response.timeToFirstToken ?? 0,
       target_url: request.targetUrl ?? "",

@@ -193,7 +193,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         left: {
           [tableName]: {
             [createdAtColumn]: {
-              gte: new Date(`${start}Z`).toISOString(),
+              gte: new Date(start).toISOString(),
             },
           },
         },
@@ -201,7 +201,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         right: {
           [tableName]: {
             [createdAtColumn]: {
-              lte: new Date(`${end}Z`).toISOString(),
+              lte: new Date(end).toISOString(),
             },
           },
         },
@@ -551,7 +551,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         left: {
           [tableName]: {
             [createdAtColumn]: {
-              gte: new Date(`${start}Z`).toISOString(),
+              gte: new Date(start).toISOString(),
             },
           },
         },
@@ -559,7 +559,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         right: {
           [tableName]: {
             [createdAtColumn]: {
-              lte: new Date(`${end}Z`).toISOString(),
+              lte: new Date(end).toISOString(),
             },
           },
         },
