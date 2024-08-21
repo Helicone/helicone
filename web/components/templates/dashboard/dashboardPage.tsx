@@ -61,6 +61,7 @@ import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -203,7 +204,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     return JSON.stringify(encode(filters));
   };
 
-  const [isLive, setIsLive] = useState(false);
+  const [isLive, setIsLive] = useLocalStorage("isLive-DashboardPage", false);
 
   const {
     metrics,

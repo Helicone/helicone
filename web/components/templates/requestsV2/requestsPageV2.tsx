@@ -143,7 +143,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     organizationLayoutAvailable,
   } = props;
   const initialLoadRef = useRef(true);
-  const [isLive, setIsLive] = useLocalStorage("isLive", false);
+  const [isLive, setIsLive] = useLocalStorage("isLive-RequestPage", false);
   const jawn = useJawnClient();
   const orgContext = useOrg();
   const searchParams = useSearchParams();
