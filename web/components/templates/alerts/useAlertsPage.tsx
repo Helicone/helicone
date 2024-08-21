@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Database } from "../../../supabase/database.types";
 
 import { getJawnClient } from "../../../lib/clients/jawn";
 
