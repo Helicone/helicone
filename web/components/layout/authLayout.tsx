@@ -327,10 +327,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
         </Transition.Root>
 
         {/* Static sidebar for desktop */}
-        <div className="hidden fixed md:inset-y-0 md:flex md:w-56 md:flex-col z-30">
+        <div className="hidden fixed md:inset-y-0 md:flex md:w-56 md:flex-col z-30 bg-white dark:bg-black">
           {/* Sidebar component, swap this element with another sidebar if you like */}
           <div className="w-full flex flex-grow flex-col overflow-y-auto border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
-            <div className="p-2 flex items-center gap-4 h-14 border-b border-gray-300 dark:border-gray-700 absolute w-full">
+            <div className="p-2 flex items-center gap-4 h-14 border-b border-gray-300 dark:border-gray-700 absolute w-full bg-white dark:bg-black">
               <OrgDropdown />
               <Menu as="div" className="relative">
                 <Menu.Button className="px-[7px] py-0.5 mr-2 text-sm bg-gray-900 dark:bg-gray-500 dark:text-gray-900 text-gray-50 rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
