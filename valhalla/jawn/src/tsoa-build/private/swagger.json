@@ -2165,6 +2165,245 @@
 				],
 				"description": "Controls which (if any) tool is called by the model. `none` means the model will\nnot call any tool and instead generates a message. `auto` means the model can\npick between generating a message or calling one or more tools. `required` means\nthe model must call one or more tools. Specifying a particular tool via\n`{\"type\": \"function\", \"function\": {\"name\": \"my_function\"}}` forces the model to\ncall that tool.\n\n`none` is the default when no tools are present. `auto` is the default if tools\nare present."
 			},
+			"AlertResponse": {
+				"properties": {
+					"alerts": {
+						"items": {
+							"properties": {
+								"updated_at": {
+									"type": "string",
+									"nullable": true
+								},
+								"time_window": {
+									"type": "number",
+									"format": "double"
+								},
+								"time_block_duration": {
+									"type": "number",
+									"format": "double"
+								},
+								"threshold": {
+									"type": "number",
+									"format": "double"
+								},
+								"status": {
+									"type": "string"
+								},
+								"soft_delete": {
+									"type": "boolean"
+								},
+								"org_id": {
+									"type": "string"
+								},
+								"name": {
+									"type": "string"
+								},
+								"minimum_request_count": {
+									"type": "number",
+									"format": "double",
+									"nullable": true
+								},
+								"metric": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								},
+								"emails": {
+									"items": {
+										"type": "string"
+									},
+									"type": "array"
+								},
+								"created_at": {
+									"type": "string",
+									"nullable": true
+								}
+							},
+							"required": [
+								"updated_at",
+								"time_window",
+								"time_block_duration",
+								"threshold",
+								"status",
+								"soft_delete",
+								"org_id",
+								"name",
+								"minimum_request_count",
+								"metric",
+								"id",
+								"emails",
+								"created_at"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"history": {
+						"items": {
+							"properties": {
+								"updated_at": {
+									"type": "string",
+									"nullable": true
+								},
+								"triggered_value": {
+									"type": "string"
+								},
+								"status": {
+									"type": "string"
+								},
+								"soft_delete": {
+									"type": "boolean"
+								},
+								"org_id": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								},
+								"created_at": {
+									"type": "string",
+									"nullable": true
+								},
+								"alert_start_time": {
+									"type": "string"
+								},
+								"alert_name": {
+									"type": "string"
+								},
+								"alert_metric": {
+									"type": "string"
+								},
+								"alert_id": {
+									"type": "string"
+								},
+								"alert_end_time": {
+									"type": "string",
+									"nullable": true
+								}
+							},
+							"required": [
+								"updated_at",
+								"triggered_value",
+								"status",
+								"soft_delete",
+								"org_id",
+								"id",
+								"created_at",
+								"alert_start_time",
+								"alert_name",
+								"alert_metric",
+								"alert_id",
+								"alert_end_time"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"alerts",
+					"history"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_AlertResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/AlertResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_AlertResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_AlertResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_string_": {
+				"properties": {
+					"data": {
+						"type": "string"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_string.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_string_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"AlertRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"metric": {
+						"type": "string"
+					},
+					"threshold": {
+						"type": "number",
+						"format": "double"
+					},
+					"time_window": {
+						"type": "string"
+					},
+					"emails": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"minimum_request_count": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"name",
+					"metric",
+					"threshold",
+					"time_window",
+					"emails"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"KafkaSettings": {
 				"properties": {
 					"miniBatchSize": {
@@ -3459,6 +3698,103 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/alert/query": {
+			"get": {
+				"operationId": "GetAlerts",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_AlertResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Alert"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/alert/create": {
+			"post": {
+				"operationId": "CreateAlert",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Alert"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AlertRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/alert/{alertId}": {
+			"delete": {
+				"operationId": "DeleteAlert",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Alert"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "alertId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/admin/orgs/top": {
