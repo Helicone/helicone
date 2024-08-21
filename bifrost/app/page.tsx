@@ -328,9 +328,9 @@ export default function Home() {
           </div>
 
           <p className="text-gray-500 italic md:w-1/3 w-5/6 mx-auto mt-8 text-lg">
-            "We&apos;re spending the weekend combing through logs to improve our core system and slowly realizing just how unbelievably powerful Helicone is.
+            {'"'}We&apos;re spending the weekend combing through logs to improve our core system and slowly realizing just how unbelievably powerful Helicone is.
 
-            Without it, this would take 10-12X longer and be much more draining. It&apos;s so, so good."
+            Without it, this would take 10-12X longer and be much more draining. It&apos;s so, so good.{'"'}
           </p>
           <div className="w-1/3 mt-6">
             <p className="text-black font-bold">
