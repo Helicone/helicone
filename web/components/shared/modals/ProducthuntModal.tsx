@@ -146,12 +146,24 @@ export const ProducthuntLaunchPromoCard: React.FC<{
         />
       </div>
 
-      <p className="text-gray-600  text-xs">
+      <p className="text-gray-600  mb-4 text-xs">
         Get $500 in credit when you upgrade to Growth today. Use code{" "}
         <span className="font-semibold text-[#FF6154] dark:text-white">
           PHUNT500
         </span>{" "}
       </p>
+      <a
+        href="https://www.producthunt.com/posts/helicone-ai"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img
+          src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=475050&theme=light"
+          alt="Helicone&#0032;AI - Open&#0045;source&#0032;LLM&#0032;Observability&#0032;for&#0032;Developers | Product Hunt"
+          width="180"
+          height="54"
+        />
+      </a>
     </div>
   );
 };
