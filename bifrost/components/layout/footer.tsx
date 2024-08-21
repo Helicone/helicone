@@ -85,7 +85,7 @@ const Footer = () => {
       </div>
 
       <div className="">
-        <p className="font-bold text-sm tracking-wide mb-2">Learn More</p>
+        <p className="font-bold text-sm tracking-wide mb-2">LEARN MORE</p>
         <div className="flex flex-col items-start font-light text-sm tracking-wide gap-2">
           <a className="hover:underline" href="https://docs.helicone.ai" target="_blank">Docs</a>
           <a className="hover:underline" href="/blog" target="_blank">Blog</a>
@@ -97,7 +97,7 @@ const Footer = () => {
       </div>
 
       <div className="">
-        <p className="font-bold mb-2 text-sm tracking-wide">Connect</p>
+        <p className="font-bold mb-2 text-sm tracking-wide">CONNECT</p>
         <div className="flex flex-col items-start font-light text-sm tracking-wide gap-2">
           <a className="hover:underline" href="https://twitter.com/helicone_ai" target="_blank">Twitter</a>
           <a className="hover:underline" href="https://www.linkedin.com/company/helicone/" target="_blank">LinkedIn</a>
