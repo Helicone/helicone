@@ -4,7 +4,7 @@ export default function Features() {
     <div className="flex flex-col space-y-4 pb-2 w-full md:items-center items-start text-start md:pl-0 pl-5">
       <h2 className="text-3xl md:text-4xl font-bold text-black text-center tracking-tight leading-tight">
         No packages,{" "}
-        <span className="text-sky-500">just </span>
+        <span className="text-sky-500">just headers</span>
       </h2>
       <p className="text-sm md:text-md text-gray-500 max-w-4xl md:text-center text-start">
         Access every Helicone feature by just adding headers, no SDKs required.
