@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import {
   BeakerIcon,
@@ -16,6 +14,12 @@ import {
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import { clsx } from "@/components/shared/utils";
+import enterpriseTileExperiments from "@/public/static/enterprise-tile-exp.png";
+import enterpriseTileAnalytics from "@/public/static/enterprise-tile-analytics.png";
+import enterpriseTileEtl from "@/public/static/enterprise-tile-etl.png";
+import enterpriseExpMobile from "@/public/static/enterprise-exp-mobile.png";
+import enterpriseAnalyticsMobile from "@/public/static/enterprise-analytics-mobile.png";
+import enterpriseEtlMobile from "@/public/static/enterprise-etl-mobile.png";
 
 interface EnterpriseProps {}
 
@@ -150,193 +154,74 @@ const ENTERPRISE_TABS: {
 ];
 
 const Enterprise = (props: EnterpriseProps) => {
-  const {} = props;
-
-  const [activeTab, setActiveTab] = useState(ENTERPRISE_TABS[0].id);
-
-  const currentTab = ENTERPRISE_TABS.find((tab) => tab.id === activeTab);
 
   return (
-    <div className="flex flex-col space-y-16 w-full">
-      <div className="flex items-start w-full">
-        <div className="flex flex-col space-y-4 w-full lg:w-2/3 text-center lg:text-left">
-          <p className="text-lg font-bold text-violet-700">Enterprise</p>
-          <h2 className="text-3xl sm:text-5xl font-bold sm:leading-[1.15]">
-            Get to production-quality{" "}
-            <span className="text-violet-800">faster</span>
-          </h2>
-          <p className="text-md lg:text-lg text-gray-500 leading-7">
-            Helicone makes it easy for companies to innovate faster and smarter,
-            ensuring your team can stay ahead of the competition.
-          </p>
+    <div className="flex flex-col gap-8 px-2 w-full md:items-center items-start md:text-center text-start">
+
+      <div>
+        <p className="text-blue-600 text-sm font-bold mb-4">Enterprise</p>
+        <h2 className="text-3xl md:text-4xl font-bold text-black md:text-center text-start tracking-tight leading-tight">
+          Get to production-quality{" "}
+          <span className="text-blue-600 md:text-center text-start">faster</span>
+        </h2>
+      </div>
+
+      <a href="/contact" target="_blank" className="hover:bg-blue-100 ease-in-out duration-500 text-blue-600 border-2 border-blue-600 rounded-lg px-4 py-2 font-bold flex w-fit items-center gap-1">
+        Get a Demo
+      </a>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-24 w-full text-start text-gray-500 pl-3 pr-5">
+        <div className="space-y-2">
+          <h3 className="font-bold text-black tracking-tight leading-tight">
+            Scalability and Reliability
+          </h3>
+          <p>Helicone is 100x more scalable than competitors, offering read and write abilities for millions of logs.</p>
         </div>
-        <div className="w-full h-full hidden lg:flex items-center justify-center py-12">
-          <Image
-            src={"/static/enterprise/enterprise-graphic.webp"}
-            alt={"enterprise-graphic"}
-            width={550}
-            height={550}
-          />
+
+        <div className="space-y-2">
+          <h3 className="font-bold text-black tracking-tight leading-tight">
+            Sub-millisecond latency
+          </h3>
+          <p>As a Gateway, we deploy using Cloudflare Workers to minimize response time while bringing smart analytics and convenience to you.</p>
+        </div>
+
+        <div className="space-y-2">
+          <h3 className="font-bold text-black tracking-tight leading-tight">
+            Risk free experimentation
+          </h3>
+          <p>Evaluate the outputs of your new prompt without impacting production data (and have stats to back you up).</p>
+        </div>
+
+      </div>
+
+      <div className="self-center md:flex hidden flex flex-col w-full">
+        <a href="https://docs.helicone.ai/features/prompts#prompts-and-experiments" target="_blank" className="w-fit">
+          <Image src={enterpriseTileExperiments} alt="enterprise experiments graphic" className="w-11/12 pr-5" />
+        </a>
+        <div className="flex flex-row w-full">
+          <a href="https://docs.helicone.ai/features/customer-portal#customer-portal" target="_blank" className="pl-2">
+            <Image src={enterpriseTileAnalytics} alt="enterprise analytics graphic" className="w-full" />
+          </a>
+
+          <a href="https://docs.helicone.ai/use-cases/etl#etl-data-extraction" target="_blank">
+            <Image src={enterpriseTileEtl} alt="enterprise etl graphic" className="w-full" />
+          </a>
         </div>
       </div>
-      <ul className="w-full hidden lg:flex justify-between items-center gap-8">
-        <li className="flex items-center justify-center w-full">
-          <button
-            onClick={() => {
-              // go the previous tab, skipping the evaluation tab, which is the last tab in the list
-              const currentIndex = ENTERPRISE_TABS.findIndex(
-                (tab) => tab.id === activeTab
-              );
-              const previousTab = ENTERPRISE_TABS[currentIndex - 1];
-              setActiveTab(
-                previousTab
-                  ? previousTab.id
-                  : ENTERPRISE_TABS[ENTERPRISE_TABS.length - 2].id
-              );
-            }}
-          >
-            <ChevronLeftIcon className="h-6 w-6 text-gray-500" />
-          </button>
-        </li>
-        {ENTERPRISE_TABS.map((tab) => (
-          <li key={tab.id} className="w-full z-10 relative">
-            <button
-              onClick={() => setActiveTab(tab.id)}
-              className={clsx(
-                tab.id === activeTab
-                  ? "border-violet-700 bg-violet-50"
-                  : "border-gray-300",
-                tab.id === "evaluations"
-                  ? "bg-gray-200 hover:cursor-not-allowed"
-                  : "border-gray-300",
-                "w-48 h-40 justify-center text-md border-2 px-8 py-4 rounded-lg font-semibold flex flex-col items-center gap-2"
-              )}
-              disabled={tab.id === "evaluations"}
-            >
-              <Image src={tab.src} alt={tab.name} width={60} height={60} />
-              {tab.name}
-            </button>
-            {tab.new && (
-              <div className="absolute -top-2 -right-4 bg-violet-800 text-white px-2 py-1 text-sm rounded-lg rotate-12">
-                Coming Soon
-              </div>
-            )}
-          </li>
-        ))}
-        <li className="flex items-center justify-center w-full">
-          <button
-            onClick={() => {
-              // if the current tab is one before the evaluations tab, go to the first tab, otherwise go to the next tab
-              const currentIndex = ENTERPRISE_TABS.findIndex(
-                (tab) => tab.id === activeTab
-              );
-              const nextTab = ENTERPRISE_TABS[currentIndex + 1];
-              if (nextTab?.id === "evaluations") {
-                setActiveTab(ENTERPRISE_TABS[0].id);
-              } else {
-                setActiveTab(nextTab ? nextTab.id : ENTERPRISE_TABS[0].id);
-              }
-            }}
-          >
-            <ChevronRightIcon className="h-6 w-6 text-gray-500" />
-          </button>
-        </li>
-      </ul>
-      <div className="h-full w-full border border-gray-300 rounded-lg hidden lg:flex items-center justify-center">
-        <div className="w-full grid grid-cols-1 lg:grid-cols-2 h-full bg-sky-50 rounded-lg">
-          <div className="col-span-1 h-full w-full flex flex-col items-start p-8 text-left space-y-2">
-            <div className="flex items-center space-x-4">
-              <Image
-                src={
-                  currentTab?.src ||
-                  "/static/enterprise/enterprise-graphic.webp"
-                }
-                alt={currentTab?.name || "enterprise-graphic"}
-                width={25}
-                height={25}
-              />
-              <h2 className="text-3xl font-semibold">{currentTab?.name}</h2>
-            </div>
+      
+      <div className="md:hidden flex flex-col gap-4">
+        <a href="https://docs.helicone.ai/features/prompts#prompts-and-experiments" target="_blank">
+          <Image src={enterpriseExpMobile} alt="enterprise experiments graphic" />
+        </a>
 
-            <p className="text-lg text-gray-500">{currentTab?.description}</p>
-            <ul className="pt-4 flex flex-col space-y-6">
-              {currentTab?.bullets?.map((bullet) => (
-                <li key={bullet.text} className="flex items-center space-x-2">
-                  <bullet.icon className="h-6 w-6 text-violet-700" />
-                  <span className="font-semibold">{bullet.text}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="pt-4">{currentTab?.cta}</div>
-          </div>
-          <div className="col-span-1 h-full w-full rounded-lg p-4 flex justify-center items-center">
-            <Image
-              src={
-                currentTab?.graphic ||
-                "/static/enterprise/experiments-example.webp"
-              }
-              alt={"123"}
-              width={500}
-              height={500}
-              className="rounded-lg shadow-xl"
-            />
-          </div>
-        </div>
+        <a href="https://docs.helicone.ai/features/customer-portal#customer-portal" target="_blank">
+          <Image src={enterpriseAnalyticsMobile} alt="enterprise analytics graphic" />
+        </a>
+
+        <a href="https://docs.helicone.ai/use-cases/etl#etl-data-extraction" target="_blank">
+          <Image src={enterpriseEtlMobile} alt="enterprise etl graphic" />
+        </a>
       </div>
-      <ul className="flex flex-col lg:hidden space-y-8">
-        {ENTERPRISE_TABS.filter((tab) => tab.id !== "evaluations").map(
-          (tab) => (
-            <div
-              key={tab.id}
-              className="h-full w-full border border-gray-300 rounded-lg flex items-center justify-center"
-            >
-              <div className="w-full grid grid-cols-1 lg:grid-cols-2 h-full bg-sky-50 rounded-lg">
-                <div className="col-span-1 h-full w-full flex flex-col items-start p-8 text-left space-y-2">
-                  <div className="flex items-center space-x-4">
-                    <Image
-                      src={
-                        tab?.src || "/static/enterprise/enterprise-graphic.webp"
-                      }
-                      alt={tab?.name || "enterprise-graphic"}
-                      width={20}
-                      height={20}
-                    />
-                    <h2 className="text-2xl font-semibold">{tab?.name}</h2>
-                  </div>
-
-                  <p className="text-sm text-gray-500">{tab?.description}</p>
-                  <ul className="pt-8 pb-4 flex flex-col space-y-6">
-                    {tab?.bullets?.map((bullet) => (
-                      <li
-                        key={bullet.text}
-                        className="flex items-center space-x-2"
-                      >
-                        <bullet.icon className="h-6 w-6 text-violet-700" />
-                        <span className="font-semibold text-sm">
-                          {bullet.text}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="pt-4">{tab?.cta}</div>
-                </div>
-                <div className="col-span-1 h-full w-full rounded-lg p-4 hidden lg:flex justify-center items-center">
-                  <Image
-                    src={
-                      currentTab?.graphic ||
-                      "/static/enterprise/experiments-example.webp"
-                    }
-                    alt={"123"}
-                    width={700}
-                    height={700}
-                    className="rounded-lg shadow-xl"
-                  />
-                </div>
-              </div>
-            </div>
-          )
-        )}
-      </ul>
     </div>
   );
 };
