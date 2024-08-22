@@ -7,7 +7,7 @@ export default function Faqs() {
 
   return (
     <div className="flex flex-col pb-2 w-full md:items-center items-start text-start md:pl-0 w-full">
-      <h2 className="text-[32px] md:text-4xl font-bold md:self-center text-start">
+      <h2 className="text-[32px] md:text-4xl font-bold md:self-center md:text-center">
         Frequently Asked <br /> Questions
       </h2>
 

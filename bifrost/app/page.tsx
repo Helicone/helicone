@@ -285,8 +285,8 @@ export default function Home() {
             <OpenSource />
           </section>
 
-          <section className="flex flex-col py-2 items-start px-[12px] pb-[24px] w-full mditems-center md:max-w-[1000px]">
-            <div className="flex flex-row pb-2 justify-between gap-2 w-fit items-center border-2 border-gray-200 rounded-full p-1.5 py-1">
+          <section className="flex flex-col py-2 items-start px-[12px] pb-[24px] w-full mt-32 mditems-center md:max-w-[1000px]">
+            <div className="flex flex-row pb-2 justify-between gap-2 w-fit  self-center items-center border-2 border-gray-200 rounded-full p-1.5 py-1">
               <Image
                 src="/static/greptile-clear.svg"
                 alt="Greptile Logo"
@@ -316,7 +316,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="flex flex-col md:mt-32 md:my-0 w-full items-center px-[12px] pt-[24px] pb-[24px]">
+          <section className="flex flex-col md:mt-32 md:my-0 w-full items-center px-[0px] pt-[24px] pb-[24px]">
             <Faqs />
           </section>
         </div>

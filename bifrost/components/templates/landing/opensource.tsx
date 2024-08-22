@@ -7,7 +7,7 @@ import DeployImg from "@/public/static/deploy-cube.png";
 export default function OpenSource() {
   return (
     <div className="flex flex-col md:space-y-4 pb-2 md:items-center items-start md:text-center text-start w-full ">
-      <div className="flex flex-col items-start gap-[12px]">
+      <div className="flex flex-col items-start md:items-center gap-[12px] md:text-center">
         <h2 className="text-3xl md:text-4xl font-bold text-black text-start tracking-tight leading-tight">
           Proudly <span className="text-sky-500">open source</span>
         </h2>
