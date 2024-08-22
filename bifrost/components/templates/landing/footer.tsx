@@ -13,7 +13,7 @@ export default function LandingFooterGraphic() {
           className="hidden md:block w-1/3"
         />
 
-        <div className="flex flex-col items-center gap-8 xl:gap-4 mx-auto my-12 xl:my-0">
+        <div className="flex flex-col items-center gap-8 xl:gap-4 mx-auto my-12 xl:my-0 ">
           <h2 className="text-lg md:text-2xl lg:text-5xl font-bold">
             Getting started with Helicone is simple and fun
           </h2>
