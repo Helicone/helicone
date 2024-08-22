@@ -267,7 +267,7 @@ export default function Home() {
             <Platform />
           </section>
 
-          <section id="enterprise" className="mb-16 hidden">
+          <section id="enterprise" className="mb-16 hidden ">
             <h2 className="sr-only">
               Get to production-quality{" "}
               <span className="text-violet-800">faster</span>
@@ -277,11 +277,11 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="flex flex-col space-y-4 w-full items-center md:pt-[100px] md:mb-[60px]">
+          <section className="flex flex-col space-y-4 w-full items-center  mt-[48px] mb-[48px] md:pt-[100px] md:mb-[60px]">
             <Features />
           </section>
 
-          <section className="flex flex-col space-y-4 pb-2 w-full items-center px-[12px]">
+          <section className="flex flex-col space-y-4 pb-2 w-full items-center">
             <OpenSource />
           </section>
 
@@ -321,7 +321,7 @@ export default function Home() {
           </section>
         </div>
       </main>
-      <div>
+      <div className="hidden md:block">
         <LandingFooterGraphic />
       </div>
     </>
