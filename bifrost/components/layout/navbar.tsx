@@ -240,7 +240,7 @@ const NavBar = (props: NavBarProps) => {
           <NavLinks />
           <div className="flex items-center gap-x-2">
             <a
-              href="https://www.producthunt.com/posts/helicone-ai?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-helicone&#0045;ai"
+              href="https://www.producthunt.com/leaderboard/daily/2024/8/22?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-helicone&#0045;ai"
               target="_blank"
               rel="noopener noreferrer"
               className={path === "/" ? "hidden" : "block"}
@@ -259,7 +259,12 @@ const NavBar = (props: NavBarProps) => {
         <div className="flex items-center justify-end gap-x-2 col-span-1 order-2 md:order-3">
           <Link
             href="https://us.helicone.ai/signin"
-            className={(path === "/" ? "text-gray-500" : "bg-sky-500 text-white hover:bg-sky-600 border-2 border-sky-700 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 px-4 py-1.5") + " whitespace-nowrap rounded-md text-sm font-semibold  focus-visible:outline-sky-500"}
+            className={
+              (path === "/"
+                ? "text-gray-500"
+                : "bg-sky-500 text-white hover:bg-sky-600 border-2 border-sky-700 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 px-4 py-1.5") +
+              " whitespace-nowrap rounded-md text-sm font-semibold  focus-visible:outline-sky-500"
+            }
           >
             Log In
           </Link>
