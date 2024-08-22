@@ -258,7 +258,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         return {
           filterMapIdx,
           operatorIdx,
-          value: decodeURIComponent(value),
+          value: value,
         };
       }
     };
