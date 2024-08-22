@@ -1,10 +1,8 @@
-
 export default function Features() {
   return (
     <div className="flex flex-col space-y-4 pb-2 w-full md:items-center items-start text-start md:pl-0 pl-5">
-      <h2 className="text-3xl md:text-4xl font-bold text-black text-center tracking-tight leading-tight">
-        No packages,{" "}
-        <span className="text-sky-500">just headers</span>
+      <h2 className="text-3xl md:text-4xl font-bold text-black text-start tracking-tight leading-tight">
+        No packages, <span className="text-sky-500">just headers</span>
       </h2>
       <p className="text-sm md:text-md text-gray-500 max-w-4xl md:text-center text-start">
         Access every Helicone feature by just adding headers, no SDKs required.
@@ -12,10 +10,19 @@ export default function Features() {
 
       <div className="w-full pr-16 grid md:pt-16 grid-cols-2 gap-8 md:grid-cols-4 md:gap-x-18 md:gap-y-10">
         {FEATURES.map((feature) => (
-          <a key={feature.title} href={feature.href} target="_blank" className="flex flex-col items-start md:hover:bg-sky-100 rounded-md p-2 md:p-4">
+          <a
+            key={feature.title}
+            href={feature.href}
+            target="_blank"
+            className="flex flex-col items-start md:hover:bg-sky-100 rounded-md p-2 md:p-4"
+          >
             <div>
-              <h3 className="text-md md:text-lg font-bold text-sky-500">{feature.title}</h3>
-              <p className="text-sm md:text-md text-gray-400 max-w-[24ch]">{feature.description}</p>
+              <h3 className="text-md md:text-lg font-bold text-sky-500">
+                {feature.title}
+              </h3>
+              <p className="text-sm md:text-md text-gray-400 max-w-[24ch]">
+                {feature.description}
+              </p>
             </div>
           </a>
         ))}

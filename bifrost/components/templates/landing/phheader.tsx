@@ -59,11 +59,12 @@ export default function PhHeader() {
         </p>
       </div>
 
-      <div className="flex md:flex-row gap-2 md:items-center h-full flex-col-reverse ">
+      <div className="flex md:flex-row gap-2 md:items-center h-full flex-col-reverse">
         <a
           href="https://www.producthunt.com/posts/helicone-ai?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-helicone&#0045;ai"
           target="_blank"
           rel="noopener noreferrer"
+          className="min-w-[180px]"
         >
           <img
             src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=475050&theme=light"
@@ -74,7 +75,7 @@ export default function PhHeader() {
         </a>
         <a
           href="https://us.helicone.ai/signup"
-          className="text-white p-1.5 px-3 rounded-lg bg-[#FF6154] w-fit"
+          className="text-white p-1.5 px-3 rounded-lg bg-[#FF6154] w-fit whitespace-nowrap"
         >
           Sign up
         </a>
