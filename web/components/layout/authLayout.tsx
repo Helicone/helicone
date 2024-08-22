@@ -659,7 +659,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
       </div>
       <ReferralModal open={referOpen} setOpen={setReferOpen} />
       <UpgradeProModal open={open} setOpen={setOpen} />
-      {tier === "free" && <ProducthuntModal />}
+      {tier === "free" && <ProducthuntModal setUpgradeOpen={setOpen} />}
     </MetaData>
   );
 };
