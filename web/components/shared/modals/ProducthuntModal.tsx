@@ -17,7 +17,10 @@ const ProducthuntSupportModal: React.FC<ProducthuntModalProps> = ({
 }) => {
   const handleProductHuntClick = () => {
     Cookies.set("visitedProductHunt", "true", { expires: 1 });
-    window.open("https://www.producthunt.com/posts/helicone-ai", "_blank");
+    window.open(
+      "https://www.producthunt.com/leaderboard/daily/2024/8/22",
+      "_blank"
+    );
     setOpen(false);
   };
 
@@ -123,7 +126,7 @@ export const ProducthuntLaunchCard: React.FC = () => {
         We just launched today and would love your support! 🙏
       </p>
       <a
-        href="https://www.producthunt.com/posts/helicone-ai"
+        href="https://www.producthunt.com/leaderboard/daily/2024/8/22"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -158,7 +161,7 @@ export const ProducthuntLaunchPromoCard: React.FC<{
         </span>{" "}
       </p>
       <a
-        href="https://www.producthunt.com/posts/helicone-ai"
+        href="https://www.producthunt.com/leaderboard/daily/2024/8/22"
         target="_blank"
         rel="noopener noreferrer"
       >

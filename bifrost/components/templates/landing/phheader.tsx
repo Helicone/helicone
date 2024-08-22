@@ -61,7 +61,7 @@ export default function PhHeader() {
 
       <div className="flex md:flex-row gap-2 md:items-center h-full flex-col-reverse">
         <a
-          href="https://www.producthunt.com/posts/helicone-ai?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-helicone&#0045;ai"
+          href="https://www.producthunt.com/leaderboard/daily/2024/8/22?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-helicone&#0045;ai"
           target="_blank"
           rel="noopener noreferrer"
           className="min-w-[180px]"
