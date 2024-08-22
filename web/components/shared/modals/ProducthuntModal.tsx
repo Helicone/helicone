@@ -7,11 +7,13 @@ import Cookies from "js-cookie";
 interface ProducthuntModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
+  upgradeOpen: (open: boolean) => void;
 }
 
 const ProducthuntSupportModal: React.FC<ProducthuntModalProps> = ({
   open,
   setOpen,
+  upgradeOpen,
 }) => {
   const handleProductHuntClick = () => {
     Cookies.set("visitedProductHunt", "true", { expires: 1 });
@@ -66,12 +68,14 @@ const ProducthuntSupportModal: React.FC<ProducthuntModalProps> = ({
 const UpgradeOfferModal: React.FC<ProducthuntModalProps> = ({
   open,
   setOpen,
+  upgradeOpen,
 }) => {
   const handleUpgradeClick = () => {
     // Implement your upgrade logic here
     console.log("Upgrade clicked");
     Cookies.set("closedProductHuntPromo", "true", { expires: 365 });
     setOpen(false);
+    upgradeOpen(true);
   };
 
   return (
@@ -169,7 +173,9 @@ export const ProducthuntLaunchPromoCard: React.FC<{
   );
 };
 
-const ProducthuntModal: React.FC = () => {
+const ProducthuntModal: React.FC<{
+  setUpgradeOpen: (open: boolean) => void;
+}> = ({ setUpgradeOpen }) => {
   const [open, setOpen] = useState(false);
   const [visitedProductHunt, setVisitedProductHunt] = useState(false);
   const [closedPromo, setClosedPromo] = useState(false);
@@ -208,9 +214,14 @@ const ProducthuntModal: React.FC = () => {
         <ProducthuntSupportModal
           open={open}
           setOpen={handleSupportModalClose}
+          upgradeOpen={setUpgradeOpen}
         />
       ) : (
-        <UpgradeOfferModal open={open} setOpen={handlePromoModalClose} />
+        <UpgradeOfferModal
+          open={open}
+          setOpen={handlePromoModalClose}
+          upgradeOpen={setUpgradeOpen}
+        />
       )}
     </>
   );
