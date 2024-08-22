@@ -72,7 +72,7 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
           onSearchValueChange={(value) => {
             setQuery(value);
           }}
-          value={query}
+          value={value}
           onValueChange={(value) => {
             handleValueChange(value || query);
           }}
@@ -82,8 +82,9 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
             await onSearchHandler?.(query);
           }}
         >
-          {(query ? [query] : [])
-            .concat(parentOptions.sort())
+          {[value, ...Array.from(new Set([...parentOptions, query]))]
+            .filter(Boolean)
+            .sort()
             .map((option, i) => (
               <SearchSelectItem value={option} key={`${i}-${option}`}>
                 {option}
