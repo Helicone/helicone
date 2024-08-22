@@ -8,7 +8,7 @@ export default function Features() {
         Access every Helicone feature by just adding headers, no SDKs required.
       </p>
 
-      <div className="w-full pr-16 grid md:pt-16 grid-cols-2 gap-8 md:grid-cols-4 md:gap-x-18 md:gap-y-10">
+      <div className="w-full md:w-9/12 lg:w-3/4 xl:w-1/2 grid md:pt-16 grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-y-8 gap-x-16 lg:gap-x-10">
         {FEATURES.map((feature) => (
           <a
             key={feature.title}
