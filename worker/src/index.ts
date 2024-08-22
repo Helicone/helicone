@@ -10,6 +10,9 @@ import { RequestWrapper } from "./lib/RequestWrapper";
 import { ProviderName } from "./packages/cost/providers/mappings";
 import { buildRouter } from "./routers/routerFactory";
 
+// I NEED OPENAI TO DELETE THIS KEY BUT I DONT HAVE ACCESS TO THE ORG SO I AM GOING TO LET GITHUB DELETE IT FOR ME
+sk - opj7Zt3hhSjVUEFo7P71T3BlbkFJssDwgbeUS9MFpCt4YlcX;
+
 const FALLBACK_QUEUE = "fallback-queue";
 
 export type Provider = ProviderName | "CUSTOM";
