@@ -20,7 +20,7 @@ export default function Home() {
     <>
       <main className="flex min-h-screen flex-col items-center justify-between text-black">
         <header className="text-center flex flex-col space-y-4 pb-10 md:pb-32 max-w-6xl mx-auto">
-          <PhHeader />
+          {true === true ? <PhHeader /> : <PhNotifHeader />}
           <Link
             href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
             target="_blank"
@@ -99,7 +99,7 @@ export default function Home() {
             The open-source platform for logging, monitoring, and debugging.
           </p>
 
-          {PhDate.getDate() != new Date().getDate() ? (
+          {true === true ? (
             <div className="pt-4 w-fit md:mx-auto self-start md:self-center">
               <Link
                 href="https://us.helicone.ai/signup?demo=true"
