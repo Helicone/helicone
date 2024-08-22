@@ -10,7 +10,6 @@ import { PHProvider } from "./providers";
 import dynamic from "next/dynamic";
 import Script from "next/script";
 import Head from "next/head";
-
 const PostHogPageView = dynamic(() => import("./PostHogPageView"), {
   ssr: false,
 });

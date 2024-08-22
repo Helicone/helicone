@@ -202,6 +202,7 @@ const MobileNav = () => {
 
 const NavBar = (props: NavBarProps) => {
   const {} = props;
+  const path = usePathname();
 
   return (
     <div className="bg-inherit top-0 sticky z-30 border-b border-gray-200">
@@ -242,6 +243,7 @@ const NavBar = (props: NavBarProps) => {
               href="https://www.producthunt.com/posts/helicone-ai?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-helicone&#0045;ai"
               target="_blank"
               rel="noopener noreferrer"
+              className={path === "/" ? "hidden" : "block"}
             >
               <img
                 src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=475050&theme=light"
@@ -257,9 +259,9 @@ const NavBar = (props: NavBarProps) => {
         <div className="flex items-center justify-end gap-x-2 col-span-1 order-2 md:order-3">
           <Link
             href="https://us.helicone.ai/signin"
-            className="bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+            className={(path === "/" ? "text-gray-500" : "bg-sky-500 text-white hover:bg-sky-600 border-2 border-sky-700 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 px-4 py-1.5") + " whitespace-nowrap rounded-md text-sm font-semibold  focus-visible:outline-sky-500"}
           >
-            Sign In
+            Log In
           </Link>
         </div>
       </nav>

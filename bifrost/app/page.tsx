@@ -1,12 +1,16 @@
 import Enterprise from "@/components/templates/landing/enterprise";
+import Faqs from "@/components/templates/landing/faqs";
+import Features from "@/components/templates/landing/features";
+import LandingFooterGraphic from "@/components/templates/landing/footer";
 import Integrations from "@/components/templates/landing/integrations";
+import OpenSource from "@/components/templates/landing/opensource";
+import PhHeader from "@/components/templates/landing/phheader";
+import PhNotifHeader from "@/components/templates/landing/phnotifheader";
 import Platform from "@/components/templates/landing/platform";
 import {
   CheckCircleIcon,
   ChevronRightIcon,
-  CodeBracketSquareIcon,
-  ShieldCheckIcon,
-  UserGroupIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,7 +19,13 @@ export default function Home() {
   return (
     <>
       <main className="flex min-h-screen flex-col items-center justify-between text-black">
-        <header className="text-center flex flex-col space-y-4 py-10 md:py-32 max-w-6xl mx-auto">
+        <header className="text-center flex flex-col space-y-4 pb-10 md:pb-32 max-w-6xl mx-auto">
+          {
+            new Date().getDate() == PhDate.getDate() ?
+              <PhHeader />
+              :
+              <PhNotifHeader />
+          }
           <Link
             href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
             target="_blank"
@@ -29,7 +39,7 @@ export default function Home() {
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="mr-1 ml-2"
+              className="mr-1 pl-2"
             >
               <g clipPath="url(#clip0_24_57)">
                 <rect width="24" height="24" rx="5.4" fill="#FF5100"></rect>
@@ -86,42 +96,45 @@ export default function Home() {
             </svg>{" "}
             Combinator
           </Link>
-          <h1 className="text-4xl md:text-5xl font-bold md:pt-4 px-2">
+          <h1 className="text-4xl md:text-5xl font-bold md:pt-4 px-2 md:text-center md:mx-0 text-start pl-5">
             LLM-Observability for{" "}
             <span className="text-sky-500">Developers</span>
           </h1>
-          <p className="text-lg md:text-xl text-gray-600">
+          <p className="text-lg md:text-xl text-gray-600 md:w-1/2 md:text-center text-start md:self-center pl-6">
             The open-source platform for logging, monitoring, and debugging.
           </p>
-          <div className="flex items-center gap-4 pt-4 w-full justify-center flex-col md:flex-row">
-            <Link
-              href="https://us.helicone.ai/signup?demo=true"
-              className="hidden md:flex bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 rounded-lg px-6 py-2 font-bold shadow-lg items-center gap-1 w-fit"
-            >
-              Get a demo
-            </Link>
-            <Link
-              href="https://us.helicone.ai/signup"
-              className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 text-white border-[3px] border-sky-700 rounded-lg pl-6 pr-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
-            >
-              Start Building
-              <ChevronRightIcon className="w-5 h-5 inline text-white" />
-            </Link>
-            <a
-              href="https://www.producthunt.com/posts/helicone-ai?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-helicone&#0045;ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="md:hidden flex justify-center"
-            >
-              <img
-                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=475050&theme=light"
-                alt="Helicone&#0032;AI - Open&#0045;source&#0032;LLM&#0032;Observability&#0032;for&#0032;Developers | Product Hunt"
-                width="180"
-                height="54"
-              />
-            </a>
-          </div>
-          <ul className="flex flex-col md:flex-row gap-4 md:gap-16 md:justify-center px-4 pt-16 text-sm">
+
+          {
+            PhDate.getDate() != new Date().getDate() ? (
+              <div className="pt-4 w-fit md:mx-auto self-start md:self-center">
+                <Link
+                  href="https://us.helicone.ai/signup?demo=true"
+                  className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 text-white border-[3px] border-sky-700 rounded-lg pl-6 pr-4 py-2 ml-6 md:ml-0 font-bold shadow-lg flex flex-row w-fit items-center gap-1 self-start md:self-center"
+                >
+                  Try Demo
+                  <ChevronRightIcon className="w-5 h-5 inline text-white" />
+                </Link>
+              </div>
+            ) : (
+              <div className="flex gap-4 pt-4 w-full justify-center flex-col md:flex-row items-start md:items-center pl-6">
+                <Link
+                  href="https://us.helicone.ai/signup?demo=true"
+                  className="hidden md:flex bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 rounded-lg px-6 py-2 font-bold shadow-lg items-center gap-1 w-fit"
+                >
+                  Get a demo
+                </Link>
+                <Link
+                  href="https://us.helicone.ai/signup"
+                  className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 text-white border-[3px] border-sky-700 rounded-lg pl-6 pr-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
+                >
+                  Start Building
+                  <ChevronRightIcon className="w-5 h-5 inline text-white" />
+                </Link>
+              </div>
+            )
+          }
+
+          <ul className="self-center md:flex-row md:gap-16 md:justify-center px-4 pt-16 text-sm hidden md:flex w-fit">
             <li className="flex items-center space-x-2">
               <CheckCircleIcon className="h-6 w-6 text-sky-500" />
               <span className="text-gray-600">
@@ -140,7 +153,7 @@ export default function Home() {
             </li>
           </ul>
 
-          <div className="pt-8 md:pt-0">
+          <div className="mx-2 pt-8 md:pt-0">
             <Image
               src={"/static/dashboard.webp"}
               alt={"Helicone Dashboard"}
@@ -150,38 +163,49 @@ export default function Home() {
             />
           </div>
         </header>
+
+        <ul className="flex md:hidden flex-col gap-14 md:gap-16 self-start pl-6 pt-16">
+          <li className="text-gray-600 text-xl font-semibold">
+            Ready for production level workloads
+          </li>
+
+          <li className="flex flex-col items-start justify-start space-y-3">
+            <span className="text-gray-600 border-l-2 border-sky-500 pl-2 py-1 font-bold text-2xl">
+              1,000
+            </span>
+            <span className="text-gray-600 pl-3 font-light">
+              Requests processed per second
+            </span>
+          </li>
+
+          <li className="flex flex-col items-start justify-start space-y-3">
+            <span className="text-gray-600 border-l-2 border-sky-500 pl-2 py-1 font-bold text-2xl">
+              1.2 billion
+            </span>
+            <span className="text-gray-600 pl-3 font-light">
+              Total requests logged
+            </span>
+          </li>
+
+          <li className="flex flex-col items-start justify-start space-y-3">
+            <span className="text-gray-600 border-l-2 border-sky-500 pl-2 py-1 font-bold text-2xl">
+              99.99%
+            </span>
+            <span className="text-gray-600 pl-3 font-light">
+              Uptime
+            </span>
+          </li>
+
+        </ul>
+
         <section
           id="logos"
-          className="text-center flex flex-col space-y-4 pt-16 pb-32 max-w-6xl mx-auto w-full"
+          className="text-center flex flex-col space-y-4 pt-16 pb-16 max-w-6xl mx-auto w-full"
         >
-          <h2 className="text-gray-600 text-lg md:text-xl">
-            Ready for real production workloads
+          <h2 className="text-gray-600 text-lg md:text-xl text-start md:text-center pl-6 md:pl-0">
+            Trusted by the thousands of companies and developers.
           </h2>
-          <ul className="flex flex-col md:flex-row items-center gap-16 md:gap-0 w-full justify-between px-16 pt-4">
-            <li>
-              <dl className="flex flex-col space-y-2">
-                <dt className="font-bold text-5xl">{"1,000"}</dt>
-                <dd className="text-sm text-gray-600 font-light">
-                  Requests processed per second
-                </dd>
-              </dl>
-            </li>
-            <li>
-              <dl className="flex flex-col space-y-2">
-                <dt className="font-bold text-5xl">{"1.2 Billion"}</dt>
-                <dd className="text-sm text-gray-600 font-light">
-                  Total Requests Logged
-                </dd>
-              </dl>
-            </li>
-            <li>
-              <dl className="flex flex-col space-y-2">
-                <dt className="font-bold text-5xl">99.99%</dt>
-                <dd className="text-sm text-gray-600 font-light">Uptime</dd>
-              </dl>
-            </li>
-          </ul>
-          <ul className="flex flex-wrap md:flex-row items-center w-full justify-center gap-10 md:gap-32 px-0 md:px-8 pt-16">
+          <ul className="flex flex-wrap md:flex-row items-center w-full justify-center gap-10 md:gap-32 px-0 md:px-8 pt-16 grayscale opacity-80">
             <li className="w-32">
               <Image
                 src={"/static/filevine.webp"}
@@ -208,20 +232,57 @@ export default function Home() {
             </li>
             <li className="w-32">
               <Image
-                src={"/static/greptile.webp"}
+                src={"/static/greptile.png"}
                 alt={"Greptile"}
                 width={300}
                 height={77}
+                quality={100}
+              />
+            </li>
+          </ul>
+          <ul className="flex flex-wrap md:flex-row items-center w-full justify-center gap-10 md:gap-32 px-0 md:px-8 pt-16">
+            <li className="w-32">
+              <Image
+                src={"/static/reworkd.svg"}
+                alt={"Reworkd"}
+                width={300}
+                height={77}
+              />
+            </li>
+            <li className="w-32">
+              <Image
+                src={"/static/codegen.png"}
+                alt={"Codegen"}
+                width={640}
+                height={156}
+              />
+            </li>
+            <li className="w-32">
+              <Image
+                src={"/static/sunrun.png"}
+                alt={"Sunrun"}
+                width={300}
+                height={77}
+              />
+            </li>
+            <li className="w-32">
+              <Image
+                src={"/static/lex.png"}
+                alt={"Lex"}
+                width={48}
+                height={20}
+                className="m-auto"
               />
             </li>
           </ul>
           <div className="grid grid-cols-4 gap-8"></div>
         </section>
+
         <section
           id="integrations"
-          className="flex flex-col space-y-4 py-32 max-w-6xl mx-auto w-full"
+          className="flex flex-col space-y-4 mt-32 mb-8 max-w-6xl mx-auto w-full"
         >
-          <div className="flex flex-col space-y-2 text-center">
+          <div className="flex flex-col space-y-2 md:text-center text-start pl-5">
             <h1 className="text-3xl md:text-4xl font-bold">
               Send your first event in{" "}
               <span className="text-sky-500">seconds</span>
@@ -232,14 +293,16 @@ export default function Home() {
           </div>
           <Integrations />
         </section>
+
         <section className="w-full flex flex-col max-w-6xl mx-auto space-y-4 py-32 px-4">
           <h2 className="sr-only">
-            One observability platform,{" "}
-            <span className="text-sky-500">everything you need</span>
+            One platform,{" "}
+            <span className="text-sky-500">with all the essentials tools.</span>
           </h2>
           <Platform />
         </section>
-        <section id="enterprise" className="py-36">
+
+        <section id="enterprise" className="mb-16 hidden">
           <h2 className="sr-only">
             Get to production-quality{" "}
             <span className="text-violet-800">faster</span>
@@ -248,83 +311,47 @@ export default function Home() {
             <Enterprise />
           </div>
         </section>
-        <section className="w-full bg-[#0b1c2d] relative isolate py-36 overflow-hidden">
-          <div className="flex flex-col space-y-16 w-full">
-            <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
-              <div className="flex items-start w-full">
-                <div className="flex flex-col space-y-4 w-full md:w-2/3 text-center md:text-left">
-                  <p className="text-lg font-bold text-cyan-500">Developer</p>
-                  <h2 className="text-3xl sm:text-5xl font-bold sm:leading-[1.15] text-white">
-                    Fully <span className="text-cyan-400">Open-Source</span>
-                  </h2>
-                  <p className="text-md md:text-lg text-gray-300 leading-7">
-                    We believe in the power of community and the importance of
-                    transparency. Helicone is fully open-source and available
-                    for anyone to use.
-                  </p>
-                  <ul className="py-4 flex flex-col space-y-8">
-                    <li className="flex items-start space-x-2">
-                      <div>
-                        <ShieldCheckIcon className="w-6 h-6 text-cyan-400" />
-                      </div>
-                      <div className="flex flex-col space-y-1 -mt-0.5">
-                        <p className="text-sm md:text-lg font-bold text-white">
-                          Interested in deploying Helicone on-prem?
-                        </p>
-                        <Link
-                          className="text-sm md:text-md text-gray-500 font-medium flex items-center space-x-1"
-                          href={"/contact"}
-                        >
-                          <span>Get in touch</span>
-                          <ChevronRightIcon className="w-4 h-4" />
-                        </Link>
-                      </div>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <div>
-                        <UserGroupIcon className="w-6 h-6 text-cyan-400" />
-                      </div>
-                      <div className="flex flex-col space-y-1 -mt-0.5">
-                        <p className="text-sm md:text-lg font-bold text-white">
-                          Want to ask the team a question?
-                        </p>
-                        <Link
-                          className="text-sm md:text-md text-gray-500 font-medium flex items-center space-x-1"
-                          href={"https://discord.gg/HwUbV3Q8qz"}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <span>Join our discord server</span>
-                          <ChevronRightIcon className="w-4 h-4" />
-                        </Link>
-                      </div>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <div>
-                        <CodeBracketSquareIcon className="w-6 h-6 text-cyan-400" />
-                      </div>
-                      <div className="flex flex-col space-y-1 -mt-0.5">
-                        <p className="text-sm md:text-lg font-bold text-white">
-                          Want to contribute or star us on Github?
-                        </p>
-                        <Link
-                          className="text-sm md:text-md text-gray-500 font-medium flex items-center space-x-1"
-                          href={"https://github.com/Helicone/helicone"}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <span>Check us out</span>
-                          <ChevronRightIcon className="w-4 h-4" />
-                        </Link>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+
+        <section className="flex flex-col space-y-4 my-16 pb-2 md:w-1/2 w-full items-center" >
+          <Features />
+        </section>
+        
+        <section className="flex flex-col space-y-4 pb-2 w-full items-center">
+          <OpenSource />
+        </section>
+
+        <section className="flex flex-col py-2 items-center mt-32">
+          <div className="flex flex-row pb-2 justify-between gap-2 w-fit items-center border-2 border-gray-200 rounded-full p-1.5 py-1">
+            <Image src="/static/greptile-clear.svg" alt="Greptile Logo" width={30} height={30} />
+            <XMarkIcon className="w-4 h-4" />
+            <Image src="/static/logo-clear.svg" alt="Helicone Logo" width={30} height={30} />
           </div>
+
+          <p className="text-gray-500 italic md:w-1/3 w-5/6 mx-auto mt-8 text-lg">
+            {'"'}We&apos;re spending the weekend combing through logs to improve our core system and slowly realizing just how unbelievably powerful Helicone is.
+
+            Without it, this would take 10-12X longer and be much more draining. It&apos;s so, so good.{'"'}
+          </p>
+          <div className="w-1/3 mt-6">
+            <p className="text-black font-bold">
+              Daksh Gupta
+            </p>
+            <p className="text-gray-500 text-gray-500">
+              Founder, Greptile
+            </p>
+          </div>
+        </section>
+
+        <section className="flex flex-col md:mt-32 my-32 md:my-0 w-full items-center">
+          <Faqs />
+        </section>
+
+        <section className="flex flex-col mt-32 w-full items-center hidden md:block">
+          <LandingFooterGraphic />
         </section>
       </main>
     </>
   );
 }
+
+const PhDate = new Date("2024-08-20T07:00:00.000Z");
