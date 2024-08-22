@@ -87,6 +87,15 @@ export interface paths {
   "/v1/demo/completion": {
     post: operations["DemoCompletion"];
   };
+  "/v1/alert/query": {
+    get: operations["GetAlerts"];
+  };
+  "/v1/alert/create": {
+    post: operations["CreateAlert"];
+  };
+  "/v1/alert/{alertId}": {
+    delete: operations["DeleteAlert"];
+  };
   "/v1/admin/orgs/top": {
     post: operations["GetTopOrgs"];
   };
@@ -883,6 +892,63 @@ Json: JsonObject;
      * are present.
      */
     ChatCompletionToolChoiceOption: components["schemas"]["ChatCompletionNamedToolChoice"] | ("none" | "auto" | "required");
+    AlertResponse: {
+      alerts: ({
+          updated_at: string | null;
+          /** Format: double */
+          time_window: number;
+          /** Format: double */
+          time_block_duration: number;
+          /** Format: double */
+          threshold: number;
+          status: string;
+          soft_delete: boolean;
+          org_id: string;
+          name: string;
+          /** Format: double */
+          minimum_request_count: number | null;
+          metric: string;
+          id: string;
+          emails: string[];
+          created_at: string | null;
+        })[];
+      history: ({
+          updated_at: string | null;
+          triggered_value: string;
+          status: string;
+          soft_delete: boolean;
+          org_id: string;
+          id: string;
+          created_at: string | null;
+          alert_start_time: string;
+          alert_name: string;
+          alert_metric: string;
+          alert_id: string;
+          alert_end_time: string | null;
+        })[];
+    };
+    ResultSuccess_AlertResponse_: {
+      data: components["schemas"]["AlertResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_AlertResponse.string_": components["schemas"]["ResultSuccess_AlertResponse_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_string_: {
+      data: string;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
+    AlertRequest: {
+      name: string;
+      metric: string;
+      /** Format: double */
+      threshold: number;
+      time_window: string;
+      emails: string[];
+      /** Format: double */
+      minimum_request_count?: number;
+    };
     KafkaSettings: {
       /** Format: double */
       miniBatchSize: number;
@@ -1406,6 +1472,46 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ChatCompletion.string_"];
+        };
+      };
+    };
+  };
+  GetAlerts: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_AlertResponse.string_"];
+        };
+      };
+    };
+  };
+  CreateAlert: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AlertRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  DeleteAlert: {
+    parameters: {
+      path: {
+        alertId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
