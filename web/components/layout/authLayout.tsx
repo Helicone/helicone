@@ -46,6 +46,10 @@ import ThemedBubbleModal from "../shared/themed/themedBubbleModal";
 import { ThemedSwitch } from "../shared/themed/themedSwitch";
 import { getUSDate, signOut } from "../shared/utils/utils";
 import MetaData from "./public/authMetaData";
+import ProducthuntModal, {
+  ProducthuntLaunchCard,
+  ProducthuntLaunchPromoCard,
+} from "../shared/modals/ProducthuntModal";
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
@@ -477,6 +481,15 @@ const AuthLayout = (props: AuthLayoutProps) => {
               </nav>
             </div>
             <div>
+              <div className="p-4 flex w-full justify-center">
+                <div className="bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 dark:text-white text-black text-sm font-medium w-full rounded-md py-2 px-2.5 flex flex-row justify-between items-center">
+                  {tier === "growth" ? (
+                    <ProducthuntLaunchCard />
+                  ) : (
+                    <ProducthuntLaunchPromoCard setOpen={setOpen} />
+                  )}
+                </div>
+              </div>
               <Link
                 className="px-4 py-2 text-xs text-gray-500 dark:hover:text-gray-100 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
                 href={"https://docs.helicone.ai/introduction"}
@@ -646,6 +659,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
       </div>
       <ReferralModal open={referOpen} setOpen={setReferOpen} />
       <UpgradeProModal open={open} setOpen={setOpen} />
+      {tier === "free" && <ProducthuntModal />}
     </MetaData>
   );
 };
