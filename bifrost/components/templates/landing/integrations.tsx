@@ -316,14 +316,17 @@ client.messages.create(
 
   return (
     <div className="flex flex-col mx-auto max-w-5xl w-full">
-      <ul className="grid grid-cols-4 md:grid-cols-8 gap-8 md:gap-4 px-4 md:px-16 pt-12 pb-4">
+      <ul className="grid grid-cols-3 md:grid-cols-8 gap-8 md:gap-4 px-4 md:px-16 pb-4">
         {PROVIDERS.map((provider, index) => (
-          <li key={index} className="hover:bg-sky-100 group m-auto p-1 rounded-lg transition-colors ease-in-out duration-200">
+          <li
+            key={index}
+            className="hover:bg-sky-100 group m-auto p-1 rounded-lg transition-colors ease-in-out duration-200"
+          >
             <button
               onClick={() => {
                 if (
                   Object.keys(provider.integrations).length == 0 ||
-                  window.matchMedia('(max-width: 768px)').matches
+                  window.matchMedia("(max-width: 768px)").matches
                 ) {
                   window.open(provider.href, "_blank");
                   return;
@@ -346,7 +349,13 @@ client.messages.create(
                 }`}
               >
                 {provider.name}
-                <ArrowUpRightIcon className={`h-4 w-4 hidden transition-all duration-200 ease-in-out ${Object.keys(provider.integrations).length > 0 ? "" : "group-hover:flex"}`} />
+                <ArrowUpRightIcon
+                  className={`h-4 w-4 hidden transition-all duration-200 ease-in-out ${
+                    Object.keys(provider.integrations).length > 0
+                      ? ""
+                      : "group-hover:flex"
+                  }`}
+                />
               </span>
             </button>
           </li>
@@ -382,11 +391,18 @@ client.messages.create(
           />
         </div>
       </div>
-        <div className="flex items-center justify-center mt-4 mx-5">
-          <p className="text-gray-400 text-sm m-auto">
-            Don&apos;t see your model? Let us know by creating a Github <a href="https://github.com/helicone/helicone/issues" target="_blank" className="text-sky-500">Issue.</a>
-          </p>
-        </div>
+      <div className="flex items-center justify-center mt-4 mx-5">
+        <p className="text-gray-400 text-sm m-auto">
+          Don&apos;t see your model? Let us know by creating a Github{" "}
+          <a
+            href="https://github.com/helicone/helicone/issues"
+            target="_blank"
+            className="text-sky-500"
+          >
+            Issue.
+          </a>
+        </p>
+      </div>
     </div>
   );
 };
