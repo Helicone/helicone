@@ -72,22 +72,30 @@ interface RequestsPageV2Props {
 
 function getTimeIntervalAgo(interval: TimeInterval): Date {
   const now = new Date();
+  const utcNow = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate(),
+    now.getUTCHours(),
+    now.getUTCMinutes(),
+    now.getUTCSeconds()
+  );
 
   switch (interval) {
     case "3m":
-      return new Date(now.getTime() - 3 * 30 * 24 * 60 * 60 * 1000);
+      return new Date(utcNow - 3 * 30 * 24 * 60 * 60 * 1000);
     case "1m":
-      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      return new Date(utcNow - 30 * 24 * 60 * 60 * 1000);
     case "7d":
-      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      return new Date(utcNow - 7 * 24 * 60 * 60 * 1000);
     case "24h":
-      return new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      return new Date(utcNow - 24 * 60 * 60 * 1000);
     case "1h":
-      return new Date(now.getTime() - 60 * 60 * 1000);
+      return new Date(utcNow - 60 * 60 * 1000);
     case "all":
       return new Date(0);
     default:
-      return new Date(now.getTime() - 24 * 60 * 60 * 1000); // Default to 24h
+      return new Date(utcNow - 24 * 60 * 60 * 1000); // Default to 24h
   }
 }
 
@@ -214,7 +222,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       return {
         [tableName]: {
           [createdAtColumn]: {
-            gte: new Date(`${timeIntervalDate}Z`).toISOString(),
+            gte: new Date(timeIntervalDate).toISOString(),
           },
         },
       };
@@ -571,7 +579,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     setTimeFilter({
       [tableName]: {
         [createdAtColumn]: {
-          gte: new Date(`${getTimeIntervalAgo(key)}Z`).toISOString(),
+          gte: new Date(getTimeIntervalAgo(key)).toISOString(),
         },
       },
     });
