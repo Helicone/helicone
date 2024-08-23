@@ -70,6 +70,10 @@ interface RequestsPageV2Props {
   organizationLayoutAvailable: boolean;
 }
 
+function formatDateForClickHouse(date: Date): string {
+  return date.toISOString();
+}
+
 function getTimeIntervalAgo(interval: TimeInterval): Date {
   const now = new Date();
 
@@ -193,7 +197,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         left: {
           [tableName]: {
             [createdAtColumn]: {
-              gte: new Date(start).toISOString(),
+              gte: formatDateForClickHouse(new Date(start)),
             },
           },
         },
@@ -201,7 +205,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         right: {
           [tableName]: {
             [createdAtColumn]: {
-              lte: new Date(end).toISOString(),
+              lte: formatDateForClickHouse(new Date(end)),
             },
           },
         },
@@ -214,7 +218,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       return {
         [tableName]: {
           [createdAtColumn]: {
-            gte: new Date(`${timeIntervalDate}Z`).toISOString(),
+            gte: formatDateForClickHouse(timeIntervalDate),
           },
         },
       };
@@ -551,7 +555,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         left: {
           [tableName]: {
             [createdAtColumn]: {
-              gte: new Date(start).toISOString(),
+              gte: formatDateForClickHouse(new Date(start)),
             },
           },
         },
@@ -559,7 +563,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         right: {
           [tableName]: {
             [createdAtColumn]: {
-              lte: new Date(end).toISOString(),
+              lte: formatDateForClickHouse(new Date(end)),
             },
           },
         },
@@ -571,7 +575,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     setTimeFilter({
       [tableName]: {
         [createdAtColumn]: {
-          gte: new Date(`${getTimeIntervalAgo(key)}Z`).toISOString(),
+          gte: formatDateForClickHouse(new Date(getTimeIntervalAgo(key))),
         },
       },
     });

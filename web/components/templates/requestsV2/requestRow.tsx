@@ -28,6 +28,26 @@ function getPathName(url: string) {
     return url;
   }
 }
+const convertToUSDateFormat = (date: string) => {
+  const dateObj = new Date(date);
+  const tzOffset = dateObj.getTimezoneOffset() * 60000;
+
+  const localDateObj = new Date(dateObj.getTime() - tzOffset);
+  const formattedDate =
+    [
+      ("0" + (localDateObj.getMonth() + 1)).slice(-2),
+      ("0" + localDateObj.getDate()).slice(-2),
+      localDateObj.getFullYear(),
+    ].join("/") +
+    " " +
+    [
+      ("0" + localDateObj.getHours()).slice(-2),
+      ("0" + localDateObj.getMinutes()).slice(-2),
+      ("0" + localDateObj.getSeconds()).slice(-2),
+    ].join(":");
+
+  return formattedDate;
+};
 
 const RequestRow = (props: {
   request: NormalizedRequest;
@@ -214,7 +234,7 @@ const RequestRow = (props: {
               Created At
             </p>
             <p className="text-gray-700 dark:text-gray-300 truncate">
-              {new Date(request.createdAt).toLocaleString("en-US")}
+              {convertToUSDateFormat(request.createdAt)}
             </p>
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
