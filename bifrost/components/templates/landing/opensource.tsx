@@ -50,8 +50,8 @@ export default function OpenSource() {
           <div className="flex flex-col self-start items-start px-6 gap-2 text-left">
             <h3 className="text-lg font-bold">Deploy on-prem</h3>
             <p className="text-sm text-gray-400">
-              Cloud-host or deploy on-prem with our production-ready HELM chart
-              for maximum security. Chat with us about other options.
+              Cloud-host or deploy on-premises with our production-ready HELM chart
+              for maximum security. Contact us for more options.
             </p>
 
             <Link
