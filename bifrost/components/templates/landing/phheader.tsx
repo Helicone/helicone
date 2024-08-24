@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Col, Row } from "@/components/common/col";
+import { Col, Row } from "@/components/common";
 
 export default function PhHeader() {
   const [time, setTime] = useState(0);
@@ -84,4 +84,3 @@ export default function PhHeader() {
     </Col>
   );
 }
-

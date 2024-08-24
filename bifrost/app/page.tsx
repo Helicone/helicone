@@ -108,7 +108,8 @@ export default function Home() {
               </Col>
 
               <h1 className="text-4xl md:text-5xl font-bold md:pt-8 text-center tracking-tight leading-tight">
-                LLM-Observability for <span className="text-sky-500">Developers</span>
+                LLM-Observability for{" "}
+                <span className="text-sky-500">Developers</span>
               </h1>
               <p className="text-lg md:text-xl text-gray-600 text-center self-center">
                 The open-source platform for logging, monitoring, and debugging.
@@ -139,11 +140,11 @@ export default function Home() {
                     Start Building
                     <ChevronRightIcon className="w-5 h-5 inline text-white" />
                   </Link>
-                </Row>
+                </div>
               )}
             </Col>
           </Col>
-          
+
           <ul className="self-center md:flex-row md:gap-16 md:justify-center px-4 pt-24 text-sm hidden md:flex w-fit">
             <li className="flex items-center space-x-2">
               <CheckCircleIcon className="h-6 w-6 text-sky-500" />
@@ -177,7 +178,10 @@ export default function Home() {
             <Features />
           </section>
 
-          <section id="integrations" className="flex flex-col space-y-4 mt-[24px] mb-8 max-w-6xl mx-auto w-full">
+          <section
+            id="integrations"
+            className="flex flex-col space-y-4 mt-[24px] mb-8 max-w-6xl mx-auto w-full"
+          >
             <div className="flex flex-col space-y-2 md:text-center text-start p-[12px]">
               <h1 className="text-3xl md:text-4xl font-bold">
                 Send your first event in{" "}
@@ -199,7 +203,7 @@ export default function Home() {
             </h2>
             <Platform />
           </section>
-          
+
           <section className="flex flex-col space-y-4 pb-2 w-full items-center">
             <OpenSource />
           </section>
@@ -248,4 +252,3 @@ export default function Home() {
 }
 
 const PhDate = new Date("2024-08-20T07:00:00.000Z");
-
