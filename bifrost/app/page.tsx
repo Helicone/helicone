@@ -14,20 +14,22 @@ import {
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
+import { Col } from "@/components/common/col";
+import { Row } from "@/components/common/row";
 
 export default function Home() {
   return (
     <>
       <main className="flex min-h-screen flex-col items-center justify-between text-black px-[12px] pb-[24px]">
         <div className="flex flex-col items-center justify-between max-w-6xl mx-auto">
-          <header className="text-center flex flex-col space-y-4 pb-[24px] md:pb-32 max-w-6xl mx-auto ">
-            <div className="flex flex-col space-y-4 mx-[12px]">
-              <div className="flex flex-col space-y-4 w-full md:items-center items-start">
+          <Col className="text-center space-y-6 pb-[32px] md:pb-40 max-w-6xl mx-auto">
+            <Col className="space-y-6 mx-[16px] md:mx-auto max-w-4xl">
+              <Col className="space-y-4 w-full items-center mt-6 md:mt-8">
                 <Link
                   href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm inline-flex space-x-6 font-light text-gray-600 items-center"
+                  className="text-sm inline-flex space-x-6 font-light text-gray-600 items-center bg-gray-100 rounded-full px-4 py-2 border-b-2 border-red-500"
                 >
                   Backed by{" "}
                   <svg
@@ -103,21 +105,20 @@ export default function Home() {
                   </svg>{" "}
                   Combinator
                 </Link>
-              </div>
+              </Col>
 
-              <h1 className="text-4xl md:text-5xl font-bold md:pt-4 md:text-center md:mx-0 text-start">
-                LLM-Observability for{" "}
-                <span className="text-sky-500">Developers</span>
+              <h1 className="text-4xl md:text-5xl font-bold md:pt-8 text-center tracking-tight leading-tight">
+                LLM-Observability for <span className="text-sky-500">Developers</span>
               </h1>
-              <p className="text-lg md:text-xl text-gray-600 md:text-center text-start md:self-center ">
+              <p className="text-lg md:text-xl text-gray-600 text-center self-center">
                 The open-source platform for logging, monitoring, and debugging.
               </p>
 
               {PhDate.getDate() != new Date().getDate() ? (
-                <div className="pt-4 w-fit md:mx-auto self-start md:self-center ">
+                <div className="pt-4 w-fit md:mx-auto self-start md:self-center">
                   <Link
                     href="https://us.helicone.ai/signup?demo=true"
-                    className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 text-white border-[3px] border-sky-700 rounded-lg pl-6 pr-4 py-2  font-bold shadow-lg flex flex-row w-fit items-center gap-1 self-start md:self-center"
+                    className="bg-sky-500 hover:bg-sky-600 ease-in-out duration-500 text-white border-[3px] border-sky-700 rounded-lg pl-6 pr-4 py-2 font-bold shadow-lg flex flex-row w-fit items-center gap-1 self-start md:self-center"
                   >
                     Try Demo
                     <ChevronRightIcon className="w-5 h-5 inline text-white" />
@@ -138,111 +139,45 @@ export default function Home() {
                     Start Building
                     <ChevronRightIcon className="w-5 h-5 inline text-white" />
                   </Link>
-                </div>
+                </Row>
               )}
-            </div>
-
-            <ul className="self-center md:flex-row md:gap-16 md:justify-center px-4 pt-16 text-sm hidden md:flex w-fit">
-              <li className="flex items-center space-x-2">
-                <CheckCircleIcon className="h-6 w-6 text-sky-500" />
-                <span className="text-gray-600">
-                  Sub-millisecond latency impact
-                </span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <CheckCircleIcon className="h-6 w-6 text-sky-500" />
-                <span className="text-gray-600">100% log coverage</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <CheckCircleIcon className="h-6 w-6 text-sky-500" />
-                <span className="text-gray-600">
-                  Industry-leading query times
-                </span>
-              </li>
-            </ul>
-
-            <div className="pt-8 md:pt-0">
-              <Image
-                src={"/static/dashboard.webp"}
-                alt={"Helicone Dashboard"}
-                width={4733}
-                height={2365}
-                priority
-              />
-            </div>
-          </header>
-
-          <ul className="flex md:hidden flex-col gap-[26px] md:gap-16 self-start pl-[12px] pt-[24px] ">
-            <li className="text-gray-600 text-xl font-semibold">
-              Ready for production level workloads
-            </li>
-
-            <li className="flex flex-col items-start justify-start space-y-3">
-              <span className="text-gray-600 border-l-2 border-sky-500 pl-2 py-1 font-bold text-2xl">
-                1,000
-              </span>
-              <span className="text-gray-600 pl-3 font-light">
-                Requests processed per second
+            </Col>
+          </Col>
+          
+          <ul className="self-center md:flex-row md:gap-16 md:justify-center px-4 pt-24 text-sm hidden md:flex w-fit">
+            <li className="flex items-center space-x-2">
+              <CheckCircleIcon className="h-6 w-6 text-sky-500" />
+              <span className="text-gray-600">
+                Sub-millisecond latency impact
               </span>
             </li>
-
-            <li className="flex flex-col items-start justify-start space-y-3">
-              <span className="text-gray-600 border-l-2 border-sky-500 pl-2 py-1 font-bold text-2xl">
-                1.2 billion
-              </span>
-              <span className="text-gray-600 pl-3 font-light">
-                Total requests logged
-              </span>
+            <li className="flex items-center space-x-2">
+              <CheckCircleIcon className="h-6 w-6 text-sky-500" />
+              <span className="text-gray-600">100% log coverage</span>
             </li>
-
-            <li className="flex flex-col items-start justify-start space-y-3">
-              <span className="text-gray-600 border-l-2 border-sky-500 pl-2 py-1 font-bold text-2xl">
-                99.99%
+            <li className="flex items-center space-x-2">
+              <CheckCircleIcon className="h-6 w-6 text-sky-500" />
+              <span className="text-gray-600">
+                Industry-leading query times
               </span>
-              <span className="text-gray-600 pl-3 font-light">Uptime</span>
             </li>
           </ul>
 
-          <section
-            id="logos"
-            className="text-center flex flex-col space-y-4 pt-[24px] pb-[48px] max-w-6xl mx-auto w-full"
-          >
-            <h2 className="hidden md:block text-gray-600 text-lg md:text-xl text-start md:text-center">
-              Trusted by the thousands of companies and developers.
-            </h2>
-            <ul className="grid grid-cols-2 md:grid-cols-4 gap-[12px] md:gap-20 px-0 md:px-8 grayscale opacity-80 items-center">
-              {(
-                [
-                  ["/static/filevine.webp", "filevine", 150, 150],
-                  ["/static/qawolf.webp", "qawolf", 150, 150],
-                  ["/static/mintlify.svg", "mintlify", 150, 150],
-                  ["/static/greptile.png", "greptile", 150, 150],
-                  ["/static/reworkd.svg", "reworkd", 150, 150],
-                  ["/static/codegen.png", "codegen", 150, 150],
-                  ["/static/sunrun.png", "sunrun", 150, 150],
-                  ["/static/lex.png", "lex", 50, 70],
-                ] as const
-              ).map((src, index) => (
-                <li
-                  className="flex items-center justify-center p-[24px]"
-                  key={index}
-                >
-                  <Image
-                    src={src[0]}
-                    alt={src[1]}
-                    width={src[2]}
-                    height={src[3]}
-                  />
-                </li>
-              ))}
-            </ul>
-            <div className="grid grid-cols-4 gap-8"></div>
+          <div className="pt-16 md:pt-8">
+            <Image
+              src={"/static/dashboard.webp"}
+              alt={"Helicone Dashboard"}
+              width={4733}
+              height={2365}
+              priority
+            />
+          </div>
+
+          <section className="flex flex-col space-y-4 w-full items-center mt-[48px] mb-[48px] md:pt-[100px] md:mb-[60px] px-[12px] md:px-0">
+            <Features />
           </section>
 
-          <section
-            id="integrations"
-            className="flex flex-col space-y-4 mt-[24px] mb-8 max-w-6xl mx-auto w-full"
-          >
+          <section id="integrations" className="flex flex-col space-y-4 mt-[24px] mb-8 max-w-6xl mx-auto w-full">
             <div className="flex flex-col space-y-2 md:text-center text-start p-[12px]">
               <h1 className="text-3xl md:text-4xl font-bold">
                 Send your first event in{" "}
@@ -255,7 +190,7 @@ export default function Home() {
             <Integrations />
           </section>
 
-          <section className="w-full flex flex-col max-w-6xl mx-auto space-y-4  pt-[24px] px-4">
+          <section className="w-full flex flex-col max-w-6xl mx-auto space-y-4 pt-[24px] px-4">
             <h2 className="sr-only">
               One platform,{" "}
               <span className="text-sky-500">
@@ -264,21 +199,7 @@ export default function Home() {
             </h2>
             <Platform />
           </section>
-
-          <section id="enterprise" className="mb-16 hidden ">
-            <h2 className="sr-only">
-              Get to production-quality{" "}
-              <span className="text-violet-800">faster</span>
-            </h2>
-            <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-left sm:text-center flex flex-col mx-auto w-full space-y-8">
-              <Enterprise />
-            </div>
-          </section>
-
-          <section className="flex flex-col space-y-4 w-full items-center  mt-[48px] mb-[48px] md:pt-[100px] md:mb-[60px]">
-            <Features />
-          </section>
-
+          
           <section className="flex flex-col space-y-4 pb-2 w-full items-center">
             <OpenSource />
           </section>
@@ -307,8 +228,8 @@ export default function Home() {
               and be much more draining. It&apos;s so, so good.{'"'}
             </p>
             <div className="w-1/3 mt-6">
-              <p className="text-black font-bold">Daksh Gupta </p>
-              <p className=" text-gray-500 whitespace-nowrap">
+              <p className="text-black font-bold">Daksh Gupta</p>
+              <p className="text-gray-500 whitespace-nowrap">
                 Founder, Greptile
               </p>
             </div>
@@ -327,3 +248,4 @@ export default function Home() {
 }
 
 const PhDate = new Date("2024-08-20T07:00:00.000Z");
+

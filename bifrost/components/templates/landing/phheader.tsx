@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { Col, Row } from "@/components/common/col";
 
 export default function PhHeader() {
   const [time, setTime] = useState(0);
@@ -17,8 +18,8 @@ export default function PhHeader() {
   }, []);
 
   return (
-    <div className="bg-[#FF6154]/10 rounded-lg w-full border-l-4 border-l-[#FF6154] text-[#FF6154] flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:items-center items-start p-4 mt-2 mb-8">
-      <div className="flex flex-row gap-1 items-baseline">
+    <Col className="bg-[#FF6154]/10 rounded-lg w-full border-l-4 border-l-[#FF6154] text-[#FF6154] md:flex-row md:gap-4 gap-4 justify-between md:items-center items-start p-6 my-8 mx-[16px] md:mx-0">
+      <Row className="sm:flex-col mx-auto px-4 sm:px-0 gap-6 sm:gap-4 w-full">
         <div className="space-y-2">
           <p className="text-xl font-mono px-[10px] py-[3px] text-[#FF6154] bg-white border-2 border-[#FF6154]/50 rounded-full">
             {Math.trunc(time / (1000 * 60 * 60))}
@@ -41,7 +42,7 @@ export default function PhHeader() {
           </p>
           <p className="text-xs font-bold">SECS</p>
         </div>
-      </div>
+      </Row>
 
       <div>
         <h1 className="text-lg text-start font-semibold">
@@ -59,7 +60,7 @@ export default function PhHeader() {
         </p>
       </div>
 
-      <div className="flex md:flex-row gap-2 md:items-center h-full flex-col-reverse">
+      <Row className="md:flex-row gap-2 md:items-center h-full flex-col-reverse w-full md:w-auto">
         <a
           href="https://www.producthunt.com/leaderboard/daily/2024/8/22?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-helicone&#0045;ai"
           target="_blank"
@@ -75,11 +76,12 @@ export default function PhHeader() {
         </a>
         <a
           href="https://us.helicone.ai/signup"
-          className="text-white p-1.5 px-3 rounded-lg bg-[#FF6154] w-fit whitespace-nowrap"
+          className="text-white p-2 px-4 rounded-lg bg-[#FF6154] w-full md:w-auto text-center whitespace-nowrap"
         >
           Sign up
         </a>
-      </div>
-    </div>
+      </Row>
+    </Col>
   );
 }
+

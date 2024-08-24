@@ -10,6 +10,9 @@ import {
   UsersIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { Row } from "@/components/common/row";
+import { Col } from "@/components/common/col";
+import { Dialog } from "@headlessui/react";
 
 interface NavBarProps {}
 
@@ -103,12 +106,12 @@ const NavLinks = () => {
     },
   ];
   return (
-    <div className="flex gap-x-2 flex-col md:flex-row">
+    <Row className="gap-x-4 md:gap-x-8 flex-col md:flex-row">
       {links.map((link, i) => (
         <Link
           href={link.href}
           className={
-            "flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none " +
+            "flex flex-row items-center font-medium hover:text-black rounded-md px-4 py-2 focus:outline-none " +
             " " +
             (path === link.href
               ? "text-black font-bold"
@@ -119,7 +122,7 @@ const NavLinks = () => {
           {link.label}
         </Link>
       ))}
-    </div>
+    </Row>
   );
 };
 
@@ -174,28 +177,54 @@ const MobileNav = () => {
   }, [path]);
   return (
     <nav className="md:hidden" aria-label="Global">
-      <MobileHeader menuDispatch={[menuOpen, setMenuOpen]} className="px-10" />
-      {menuOpen && (
-        <div className="absolute top-0 right-0 bottom-0 left-0 z-10 h-screen w-full flex flex-col px-10 bg-white gap-5 ">
-          <MobileHeader menuDispatch={[menuOpen, setMenuOpen]} />
-          <div className="flex flex-col gap-3 w-full mt-2">
-            <Link
-              href="https://us.helicone.ai/signin"
-              className="text-center py-3 bg-slate-100 whitespace-nowrap rounded-md px-4 text-sm font-semibold text-black shadow-sm"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="https://us.helicone.ai/signup"
-              className="text-center py-3 bg-sky-500 hover:bg-sky-600 border-2 whitespace-nowrap rounded-md px-4 text-sm font-semibold text-white shadow-sm"
-            >
-              Sign up for free
-            </Link>
-          </div>
-          <NavLinks />
-          <NavIcons />
-        </div>
-      )}
+      <MobileHeader menuDispatch={[menuOpen, setMenuOpen]} className="px-6 md:px-12" />
+      <Dialog
+        as="div"
+        className="md:hidden"
+        open={menuOpen}
+        onClose={setMenuOpen}
+      >
+        <div className="fixed inset-0 z-10" />
+        <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-gray-50 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+          <Col className="gap-10 h-full">
+            <div className="flex items-center justify-between">
+              <Link href="/" className="-m-1.5 p-1.5">
+                <span className="sr-only">Helicone</span>
+                <Image
+                  src={"/static/logo.svg"}
+                  alt="Helicone"
+                  height={150}
+                  width={150}
+                  priority={true}
+                />
+              </Link>
+              <button
+                type="button"
+                className="-m-2.5 rounded-md p-2.5 text-gray-700"
+                onClick={() => setMenuOpen(false)}
+              >
+                <span className="sr-only">Close menu</span>
+                <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+              </button>
+            </div>
+            <div className="mt-6 flow-root">
+              <div className="-my-6 divide-y divide-gray-500/10">
+                <div className="space-y-2 py-6">
+                  <NavLinks />
+                </div>
+                <div className="py-6">
+                  <Link
+                    href="https://us.helicone.ai/signin"
+                    className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                  >
+                    Log in
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </Col>
+        </Dialog.Panel>
+      </Dialog>
     </nav>
   );
 };
@@ -208,7 +237,7 @@ const NavBar = (props: NavBarProps) => {
     <div className="bg-inherit top-0 sticky z-30 border-b border-gray-200">
       <MobileNav />
       <nav
-        className="gap-x-3 mx-auto md:flex max-w-6xl items-center py-3 hidden px-3 justify-between"
+        className="gap-x-6 mx-auto md:flex max-w-6xl items-center py-4 hidden px-6 justify-between"
         aria-label="Global"
       >
         <div className="flex items-center md:col-span-1 order-1">
