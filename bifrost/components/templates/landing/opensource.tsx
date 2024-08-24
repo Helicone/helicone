@@ -51,7 +51,7 @@ export default function OpenSource() {
             <h3 className="text-lg font-bold">Deploy on-prem</h3>
             <p className="text-sm text-gray-400">
               Cloud-host or deploy on-prem with our production-ready HELM chart
-              for maximum security. Chat with us about other options.
+              for maximum security. Contact us for more options.
             </p>
 
             <Link
