@@ -92,7 +92,7 @@ export default function Platform() {
     <div className="flex flex-col w-full items-center px-2">
       <h2 className="text-3xl md:text-4xl font-bold text-black md:text-center text-start tracking-tight leading-tight">
         One platform with{" "}
-        <span className="text-sky-500">all the essentials tools.</span>
+        <span className="text-sky-500">all the essential tools.</span>
       </h2>
 
       <div className="flex flex-col md:justify-stretch md:flex-row items-start gap-4 md:mt-16 mt-4 ">
@@ -139,7 +139,7 @@ export default function Platform() {
             Instant Analytics
           </h3>
           <p className="relative md:top-[-2em] md:mb-[-2em] top-[-3em] md:mr-5 mr-3 pt-3 pr-1 bg-gradient-to-t from-white via-white/90 text-gray-500 w-full">
-            Get detailed metrics such as latency, cost, time to first tokens
+            Get detailed metrics such as latency, cost, time to first token
           </p>
         </div>
       </div>

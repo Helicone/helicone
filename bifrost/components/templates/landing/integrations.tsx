@@ -5,7 +5,6 @@ import { ArrowUpRightIcon, ClipboardIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { text } from "stream/consumers";
 
 interface IntegrationsProps {}
 

@@ -34,7 +34,7 @@ export default function Features() {
 const FEATURES = [
   {
     title: "Prompts",
-    description: "Moniter prompt versioning.",
+    description: "Monitor prompt versioning.",
     href: "https://docs.helicone.ai/features/prompts#prompts-and-experiments",
   },
   {
@@ -79,7 +79,7 @@ const FEATURES = [
   },
   {
     title: "Rate Limiting",
-    description: "Easyily rate limit your users.",
+    description: "Easily rate limit your users.",
     href: "https://docs.helicone.ai/features/advanced-usage/custom-rate-limits",
   },
   {
