@@ -56,6 +56,19 @@
      baseURL: `https://oai.helicone.ai/v1/${process.env.HELICONE_API_KEY}`,
    });
    ```
+  or - use headers for more secure environments
+
+   ```typescript
+   import OpenAI from "openai";
+
+   const openai = new OpenAI({
+     apiKey: process.env.OPENAI_API_KEY,
+     baseURL: `https://oai.helicone.ai/v1`,
+     defaultHeaders: {
+      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+     },
+   });
+   ```
 
 3. 🎉 You're all set! View your logs at [Helicone](https://www.helicone.ai).
 
