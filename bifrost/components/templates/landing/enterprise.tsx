@@ -154,10 +154,8 @@ const ENTERPRISE_TABS: {
 ];
 
 const Enterprise = (props: EnterpriseProps) => {
-
   return (
-    <div className="flex flex-col gap-8 px-2 w-full md:items-center items-start md:text-center text-start">
-
+    <div className="flex flex-col gap-8 px-2 w-full md:items-center items-start md:text-center text-start pt-8 md:pt-12">
       <div>
         <p className="text-blue-600 text-sm font-bold mb-4">Enterprise</p>
         <h2 className="text-3xl md:text-4xl font-bold text-black md:text-center text-start tracking-tight leading-tight">
@@ -166,11 +164,11 @@ const Enterprise = (props: EnterpriseProps) => {
         </h2>
       </div>
 
-      <a href="/contact" target="_blank" className="hover:bg-blue-100 ease-in-out duration-500 text-blue-600 border-2 border-blue-600 rounded-lg px-4 py-2 font-bold flex w-fit items-center gap-1">
+      <a href="/contact" target="_blank" className="hover:bg-blue-100 ease-in-out duration-500 text-blue-600 border-2 border-blue-600 rounded-lg px-4 py-2 font-bold flex w-fit items-center gap-1 mt-4">
         Get a Demo
       </a>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-24 w-full text-start text-gray-500 pl-3 pr-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-24 w-full text-start text-gray-500 pl-3 pr-5 pt-8 md:pt-12">
         <div className="space-y-2">
           <h3 className="font-bold text-black tracking-tight leading-tight">
             Scalability and Reliability
@@ -194,7 +192,7 @@ const Enterprise = (props: EnterpriseProps) => {
 
       </div>
 
-      <div className="self-center md:flex hidden flex flex-col w-full">
+      <div className="self-center md:flex hidden flex flex-col w-full pt-8">
         <a href="https://docs.helicone.ai/features/prompts#prompts-and-experiments" target="_blank" className="w-fit">
           <Image src={enterpriseTileExperiments} alt="enterprise experiments graphic" className="w-11/12 pr-5" />
         </a>
@@ -209,7 +207,7 @@ const Enterprise = (props: EnterpriseProps) => {
         </div>
       </div>
       
-      <div className="md:hidden flex flex-col gap-4">
+      <div className="md:hidden flex flex-col gap-4 pt-8">
         <a href="https://docs.helicone.ai/features/prompts#prompts-and-experiments" target="_blank">
           <Image src={enterpriseExpMobile} alt="enterprise experiments graphic" />
         </a>

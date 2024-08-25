@@ -21,7 +21,7 @@ const MobileHeader = (props: {
   return (
     <div
       className={
-        "w-full grid grid-cols-8 max-w-6xl items-center py-3 " + props.className
+        "w-full grid grid-cols-8 max-w-6xl items-center py-4 md:py-5 " + props.className
       }
     >
       <div className="flex items-center col-span-7 md:col-span-1 order-1">
@@ -103,7 +103,7 @@ const NavLinks = () => {
     },
   ];
   return (
-    <div className="flex gap-x-2 flex-col md:flex-row">
+    <div className="flex gap-x-2 flex-col md:flex-row pt-1">
       {links.map((link, i) => (
         <Link
           href={link.href}
@@ -146,7 +146,7 @@ const NavIcons = () => {
     },
   ];
   return (
-    <div className="flex flex-row gap-x-3">
+    <div className="flex flex-row gap-x-3 pt-1">
       {links.map((link, i) => (
         <Link
           href={link.href}
@@ -181,13 +181,13 @@ const MobileNav = () => {
           <div className="flex flex-col gap-3 w-full mt-2">
             <Link
               href="https://us.helicone.ai/signin"
-              className="text-center py-3 bg-slate-100 whitespace-nowrap rounded-md px-4 text-sm font-semibold text-black shadow-sm"
+              className="text-center py-4 bg-slate-100 whitespace-nowrap rounded-md px-4 text-sm font-semibold text-black shadow-sm"
             >
               Sign in
             </Link>
             <Link
               href="https://us.helicone.ai/signup"
-              className="text-center py-3 bg-sky-500 hover:bg-sky-600 border-2 whitespace-nowrap rounded-md px-4 text-sm font-semibold text-white shadow-sm"
+              className="text-center py-4 bg-sky-500 hover:bg-sky-600 border-2 whitespace-nowrap rounded-md px-4 text-sm font-semibold text-white shadow-sm"
             >
               Sign up for free
             </Link>
@@ -208,7 +208,7 @@ const NavBar = (props: NavBarProps) => {
     <div className="bg-inherit top-0 sticky z-30 border-b border-gray-200">
       <MobileNav />
       <nav
-        className="gap-x-3 mx-auto md:flex max-w-6xl items-center py-3 hidden px-3 justify-between"
+        className="gap-x-3 mx-auto md:flex max-w-6xl items-center py-4 md:py-5 hidden px-3 justify-between"
         aria-label="Global"
       >
         <div className="flex items-center md:col-span-1 order-1">

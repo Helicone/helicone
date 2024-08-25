@@ -314,8 +314,8 @@ client.messages.create(
   const currentCodeBlock = selectedProvider?.integrations[currentIntegration];
 
   return (
-    <div className="flex flex-col mx-auto max-w-5xl w-full">
-      <ul className="grid grid-cols-3 md:grid-cols-8 gap-8 md:gap-4 px-4 md:px-16 pb-4">
+    <div className="flex flex-col mx-auto max-w-5xl w-full pt-8 md:pt-12">
+      <ul className="grid grid-cols-3 md:grid-cols-8 gap-6 md:gap-4 px-4 md:px-16 pb-6">
         {PROVIDERS.map((provider, index) => (
           <li
             key={index}
@@ -360,8 +360,8 @@ client.messages.create(
           </li>
         ))}
       </ul>
-      <div className="border rounded-2xl hidden md:flex flex-col divide-y divide-gray-700 mx-8 mt-4 hidden md:flex">
-        <div className="flex items-center justify-between py-2 px-8 bg-gray-900 rounded-t-2xl">
+      <div className="border rounded-2xl hidden md:flex flex-col divide-y divide-gray-700 mx-8 mt-8 md:mt-12">
+        <div className="flex items-center justify-between py-3 px-8 bg-gray-900 rounded-t-2xl">
           <ul className="flex items-center space-x-0">
             {Object.keys(selectedProvider?.integrations || {}).map(
               (integration) => (
@@ -390,7 +390,7 @@ client.messages.create(
           />
         </div>
       </div>
-      <div className="flex items-center justify-center mt-4 mx-5">
+      <div className="flex items-center justify-center mt-6 mx-5">
         <p className="text-gray-400 text-sm m-auto">
           Don&apos;t see your model? Let us know by creating a Github{" "}
           <a

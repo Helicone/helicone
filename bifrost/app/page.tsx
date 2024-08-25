@@ -18,11 +18,11 @@ import Link from "next/link";
 export default function Home() {
   return (
     <>
-      <main className="flex min-h-screen flex-col items-center justify-between text-black px-[12px] pb-[24px]">
+      <main className="flex min-h-screen flex-col items-center justify-between text-black px-[12px] pt-[24px] pb-[24px]">
         <div className="flex flex-col items-center justify-between max-w-6xl mx-auto">
-          <header className="text-center flex flex-col space-y-4 pb-[24px] md:pb-32 max-w-6xl mx-auto ">
+          <header className="text-center flex flex-col space-y-4 pb-[32px] md:pb-40 pt-8 md:pt-12 max-w-6xl mx-auto ">
             <div className="flex flex-col space-y-4 mx-[12px]">
-              <div className="flex flex-col space-y-4 w-full md:items-center items-start">
+              <div className="flex flex-col space-y-4 w-full md:items-center items-start mt-4 md:mt-6">
                 <Link
                   href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
                   target="_blank"
@@ -105,11 +105,11 @@ export default function Home() {
                 </Link>
               </div>
 
-              <h1 className="text-4xl md:text-5xl font-bold md:pt-4 md:text-center md:mx-0 text-start">
+              <h1 className="text-4xl md:text-5xl font-bold md:pt-6 md:text-center md:mx-0 text-start mb-4">
                 LLM-Observability for{" "}
                 <span className="text-sky-500">Developers</span>
               </h1>
-              <p className="text-lg md:text-xl text-gray-600 md:text-center text-start md:self-center ">
+              <p className="text-lg md:text-xl text-gray-600 md:text-center text-start md:self-center mt-2 mb-4">
                 The open-source platform for logging, monitoring, and debugging.
               </p>
 
@@ -124,7 +124,7 @@ export default function Home() {
                   </Link>
                 </div>
               ) : (
-                <div className="flex gap-4 pt-4 w-full justify-center flex-col md:flex-row items-start md:items-center pl-6">
+                <div className="flex gap-4 pt-6 w-full justify-center flex-col md:flex-row items-start md:items-center pl-6">
                   <Link
                     href="https://us.helicone.ai/signup?demo=true"
                     className="hidden md:flex bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 rounded-lg px-6 py-2 font-bold shadow-lg items-center gap-1 w-fit"
@@ -142,7 +142,7 @@ export default function Home() {
               )}
             </div>
 
-            <ul className="self-center md:flex-row md:gap-16 md:justify-center px-4 pt-16 text-sm hidden md:flex w-fit">
+            <ul className="self-center md:flex-row md:gap-16 md:justify-center px-4 pt-20 text-sm hidden md:flex w-fit">
               <li className="flex items-center space-x-2">
                 <CheckCircleIcon className="h-6 w-6 text-sky-500" />
                 <span className="text-gray-600">
@@ -161,7 +161,7 @@ export default function Home() {
               </li>
             </ul>
 
-            <div className="pt-8 md:pt-0">
+            <div className="pt-12 md:pt-16">
               <Image
                 src={"/static/dashboard.webp"}
                 alt={"Helicone Dashboard"}
@@ -202,10 +202,9 @@ export default function Home() {
               <span className="text-gray-600 pl-3 font-light">Uptime</span>
             </li>
           </ul>
-
           <section
             id="logos"
-            className="text-center flex flex-col space-y-4 pt-[24px] pb-[48px] max-w-6xl mx-auto w-full"
+            className="text-center flex flex-col space-y-4 pt-[32px] pb-[56px] max-w-6xl mx-auto w-full"
           >
             <h2 className="hidden md:block text-gray-600 text-lg md:text-xl text-start md:text-center">
               Trusted by the thousands of companies and developers.
@@ -241,7 +240,7 @@ export default function Home() {
 
           <section
             id="integrations"
-            className="flex flex-col space-y-4 mt-[24px] mb-8 max-w-6xl mx-auto w-full"
+            className="flex flex-col space-y-4 mt-[32px] mb-12 max-w-6xl mx-auto w-full"
           >
             <div className="flex flex-col space-y-2 md:text-center text-start p-[12px]">
               <h1 className="text-3xl md:text-4xl font-bold">
@@ -255,7 +254,7 @@ export default function Home() {
             <Integrations />
           </section>
 
-          <section className="w-full flex flex-col max-w-6xl mx-auto space-y-4  pt-[24px] px-4">
+          <section className="w-full flex flex-col max-w-6xl mx-auto space-y-4  pt-[32px] px-4">
             <h2 className="sr-only">
               One platform,{" "}
               <span className="text-sky-500">
@@ -275,7 +274,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="flex flex-col space-y-4 w-full items-center  mt-[48px] mb-[48px] md:pt-[100px] md:mb-[60px]">
+          <section className="flex flex-col space-y-4 w-full items-center  mt-[56px] mb-[56px] md:pt-[120px] md:mb-[72px]">
             <Features />
           </section>
 
