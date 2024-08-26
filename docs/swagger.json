@@ -3428,25 +3428,6 @@
 						"type": "number",
 						"format": "double"
 					},
-					"distribution": {
-						"items": {
-							"properties": {
-								"count": {
-									"type": "number",
-									"format": "double"
-								},
-								"range": {
-									"type": "string"
-								}
-							},
-							"required": [
-								"count",
-								"range"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					},
 					"overTime": {
 						"items": {
 							"properties": {
@@ -3465,6 +3446,25 @@
 							"type": "object"
 						},
 						"type": "array"
+					},
+					"averageOverTime": {
+						"items": {
+							"properties": {
+								"value": {
+									"type": "number",
+									"format": "double"
+								},
+								"date": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"value",
+								"date"
+							],
+							"type": "object"
+						},
+						"type": "array"
 					}
 				},
 				"required": [
@@ -3473,8 +3473,8 @@
 					"minScore",
 					"maxScore",
 					"count",
-					"distribution",
-					"overTime"
+					"overTime",
+					"averageOverTime"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -3512,14 +3512,76 @@
 					}
 				]
 			},
-			"EvalQueryParams": {
+			"Pick_FilterLeaf.request_response_rmt_": {
 				"properties": {
-					"filter": {
+					"request_response_rmt": {
+						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
+					}
+				},
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"FilterLeafSubset_request_response_rmt_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.request_response_rmt_"
+			},
+			"EvalFilterNode": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/FilterLeafSubset_request_response_rmt_"
+					},
+					{
+						"$ref": "#/components/schemas/EvalFilterBranch"
+					},
+					{
 						"type": "string",
 						"enum": [
 							"all"
+						]
+					}
+				]
+			},
+			"EvalFilterBranch": {
+				"properties": {
+					"right": {
+						"$ref": "#/components/schemas/EvalFilterNode"
+					},
+					"operator": {
+						"type": "string",
+						"enum": [
+							"or",
+							"and"
+						]
+					},
+					"left": {
+						"$ref": "#/components/schemas/EvalFilterNode"
+					}
+				},
+				"required": [
+					"right",
+					"operator",
+					"left"
+				],
+				"type": "object"
+			},
+			"EvalQueryParams": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/EvalFilterNode"
+					},
+					"timeFilter": {
+						"properties": {
+							"end": {
+								"type": "string"
+							},
+							"start": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"end",
+							"start"
 						],
-						"nullable": false
+						"type": "object"
 					},
 					"offset": {
 						"type": "number",
@@ -3531,7 +3593,8 @@
 					}
 				},
 				"required": [
-					"filter"
+					"filter",
+					"timeFilter"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -3563,6 +3626,77 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess_string-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ScoreDistribution": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"distribution": {
+						"items": {
+							"properties": {
+								"value": {
+									"type": "number",
+									"format": "double"
+								},
+								"upper": {
+									"type": "number",
+									"format": "double"
+								},
+								"lower": {
+									"type": "number",
+									"format": "double"
+								}
+							},
+							"required": [
+								"value",
+								"upper",
+								"lower"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"name",
+					"distribution"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ScoreDistribution-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ScoreDistribution"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ScoreDistribution-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ScoreDistribution-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -5569,6 +5703,42 @@
 									"name"
 								],
 								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/evals/score-distributions/query": {
+			"post": {
+				"operationId": "QueryScoreDistributions",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ScoreDistribution-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evals"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/EvalQueryParams"
 							}
 						}
 					}
