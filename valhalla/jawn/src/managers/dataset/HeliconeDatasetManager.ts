@@ -113,11 +113,25 @@ export class HeliconeDatasetManager extends BaseManager {
   ): Promise<Result<null, string>> {
     const { addRequests, removeRequests } = params;
 
-    const { data: existingRows, error: checkError } = await supabaseServer.client
+    const { count, error: countError } = await supabaseServer.client
       .from("helicone_dataset_row")
-      .select("origin_request_id")
-      .eq("dataset_id", datasetId)
-      .in("origin_request_id", addRequests);
+      .select("*", { count: "exact", head: true })
+      .eq("dataset_id", datasetId);
+
+    if (countError) {
+      return err(countError.message);
+    }
+
+    if (count !== null && count + addRequests.length > 500) {
+      return err("Datasets are limited to 500 rows.");
+    }
+
+    const { data: existingRows, error: checkError } =
+      await supabaseServer.client
+        .from("helicone_dataset_row")
+        .select("origin_request_id")
+        .eq("dataset_id", datasetId)
+        .in("origin_request_id", addRequests);
 
     if (checkError) {
       return err(checkError.message);
