@@ -3407,6 +3407,302 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"Eval": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"averageScore": {
+						"type": "number",
+						"format": "double"
+					},
+					"minScore": {
+						"type": "number",
+						"format": "double"
+					},
+					"maxScore": {
+						"type": "number",
+						"format": "double"
+					},
+					"count": {
+						"type": "number",
+						"format": "double"
+					},
+					"overTime": {
+						"items": {
+							"properties": {
+								"count": {
+									"type": "number",
+									"format": "double"
+								},
+								"date": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"count",
+								"date"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"averageOverTime": {
+						"items": {
+							"properties": {
+								"value": {
+									"type": "number",
+									"format": "double"
+								},
+								"date": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"value",
+								"date"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"name",
+					"averageScore",
+					"minScore",
+					"maxScore",
+					"count",
+					"overTime",
+					"averageOverTime"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_Eval-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/Eval"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Eval-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Eval-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"Pick_FilterLeaf.request_response_rmt_": {
+				"properties": {
+					"request_response_rmt": {
+						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
+					}
+				},
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"FilterLeafSubset_request_response_rmt_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.request_response_rmt_"
+			},
+			"EvalFilterNode": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/FilterLeafSubset_request_response_rmt_"
+					},
+					{
+						"$ref": "#/components/schemas/EvalFilterBranch"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
+					}
+				]
+			},
+			"EvalFilterBranch": {
+				"properties": {
+					"right": {
+						"$ref": "#/components/schemas/EvalFilterNode"
+					},
+					"operator": {
+						"type": "string",
+						"enum": [
+							"or",
+							"and"
+						]
+					},
+					"left": {
+						"$ref": "#/components/schemas/EvalFilterNode"
+					}
+				},
+				"required": [
+					"right",
+					"operator",
+					"left"
+				],
+				"type": "object"
+			},
+			"EvalQueryParams": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/EvalFilterNode"
+					},
+					"timeFilter": {
+						"properties": {
+							"end": {
+								"type": "string"
+							},
+							"start": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"end",
+							"start"
+						],
+						"type": "object"
+					},
+					"offset": {
+						"type": "number",
+						"format": "double"
+					},
+					"limit": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"filter",
+					"timeFilter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_string-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_string-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_string-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ScoreDistribution": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"distribution": {
+						"items": {
+							"properties": {
+								"value": {
+									"type": "number",
+									"format": "double"
+								},
+								"upper": {
+									"type": "number",
+									"format": "double"
+								},
+								"lower": {
+									"type": "number",
+									"format": "double"
+								}
+							},
+							"required": [
+								"value",
+								"upper",
+								"lower"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"name",
+					"distribution"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ScoreDistribution-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ScoreDistribution"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ScoreDistribution-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ScoreDistribution-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"TotalValuesForAllOfTime": {
 				"properties": {
 					"total_cost": {
@@ -5287,6 +5583,162 @@
 									"filter"
 								],
 								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/evals/query": {
+			"post": {
+				"operationId": "QueryEvals",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Eval-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evals"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/EvalQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/evals/scores": {
+			"get": {
+				"operationId": "GetEvalScores",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evals"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/evals/{requestId}": {
+			"post": {
+				"operationId": "AddEval",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evals"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"score": {
+										"type": "number",
+										"format": "double"
+									},
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"score",
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/evals/score-distributions/query": {
+			"post": {
+				"operationId": "QueryScoreDistributions",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ScoreDistribution-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evals"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/EvalQueryParams"
 							}
 						}
 					}

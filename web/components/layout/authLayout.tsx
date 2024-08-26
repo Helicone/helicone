@@ -8,6 +8,7 @@ import {
   BeakerIcon,
   BellIcon,
   BookOpenIcon,
+  ChartBarIcon,
   CircleStackIcon,
   CloudArrowUpIcon,
   CodeBracketIcon,
@@ -94,6 +95,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
             href: "/datasets",
             icon: CircleStackIcon,
             current: pathname.includes("/datasets"),
+          },
+          {
+            name: "Evals",
+            href: "/evals",
+            icon: ChartBarIcon,
+            current: pathname.includes("/evals"),
           },
         ]),
     {
