@@ -99,6 +99,15 @@ export interface paths {
   "/v1/experiment/query": {
     post: operations["GetExperiments"];
   };
+  "/v1/evals/query": {
+    post: operations["QueryEvals"];
+  };
+  "/v1/evals/scores": {
+    get: operations["GetEvalScores"];
+  };
+  "/v1/evals/{requestId}": {
+    post: operations["AddEval"];
+  };
   "/v1/public/dataisbeautiful/total-values": {
     post: operations["GetTotalValues"];
   };
@@ -1045,6 +1054,47 @@ Json: JsonObject;
       /** @enum {boolean} */
       score?: true;
     };
+    Eval: {
+      name: string;
+      /** Format: double */
+      averageScore: number;
+      /** Format: double */
+      minScore: number;
+      /** Format: double */
+      maxScore: number;
+      /** Format: double */
+      count: number;
+      distribution: {
+          /** Format: double */
+          count: number;
+          range: string;
+        }[];
+      overTime: {
+          /** Format: double */
+          count: number;
+          date: string;
+        }[];
+    };
+    "ResultSuccess_Eval-Array_": {
+      data: components["schemas"]["Eval"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Eval-Array.string_": components["schemas"]["ResultSuccess_Eval-Array_"] | components["schemas"]["ResultError_string_"];
+    EvalQueryParams: {
+      /** @enum {string} */
+      filter: "all";
+      /** Format: double */
+      offset?: number;
+      /** Format: double */
+      limit?: number;
+    };
+    "ResultSuccess_string-Array_": {
+      data: string[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
     TotalValuesForAllOfTime: {
       /** Format: double */
       total_cost: number;
@@ -1743,6 +1793,55 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Experiment-Array.string_"];
+        };
+      };
+    };
+  };
+  QueryEvals: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EvalQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Eval-Array.string_"];
+        };
+      };
+    };
+  };
+  GetEvalScores: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
+        };
+      };
+    };
+  };
+  AddEval: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          score: number;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
