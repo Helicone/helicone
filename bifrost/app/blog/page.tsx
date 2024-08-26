@@ -197,11 +197,6 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "best-arize-alternatives",
-    },
-  },
-  {
-    dynmaicEntry: {
       folderName: "redeem-promo-code",
     },
   },
