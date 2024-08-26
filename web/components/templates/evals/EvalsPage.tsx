@@ -264,6 +264,9 @@ const EvalsPage = () => {
                         </button>
                       </Col>
                       <Col className="w-[300px]">
+                        <span className="text-sm font-semibold">
+                          Score Distribution
+                        </span>
                         <Card>
                           <BarChart
                             data={
@@ -282,6 +285,7 @@ const EvalsPage = () => {
                         </Card>
                       </Col>
                       <Col className="w-[600px]">
+                        <span className="text-sm font-semibold">Traces</span>
                         <Card>
                           <LineChart
                             data={evalRow.overTime.map((o) => ({
@@ -290,6 +294,26 @@ const EvalsPage = () => {
                             }))}
                             index="date"
                             categories={["count"]}
+                            colors={["blue"]}
+                            className="min-h-max"
+                            yAxisWidth={40}
+                            animationDuration={1000}
+                            showAnimation={true}
+                          />
+                        </Card>
+                      </Col>
+                      <Col className="w-[600px]">
+                        <span className="text-sm font-semibold">
+                          Average Score
+                        </span>
+                        <Card>
+                          <LineChart
+                            data={evalRow.averageOverTime.map((o) => ({
+                              date: new Date(o.date).toLocaleDateString(),
+                              value: o.value,
+                            }))}
+                            index="date"
+                            categories={["value"]}
                             colors={["blue"]}
                             className="min-h-max"
                             yAxisWidth={40}
