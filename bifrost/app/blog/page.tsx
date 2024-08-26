@@ -192,6 +192,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "best-arize-alternatives",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "llm-stack-guide",
     },
   },
