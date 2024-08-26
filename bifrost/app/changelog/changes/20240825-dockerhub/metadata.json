@@ -1,4 +1,4 @@
 {
   "title": "Docker images on Docker Hub",
-  "description": "Langfuse now publishes Docker images on Docker Hub and GitHub Container Registry, making deployment easier across various platforms, including those that don't natively support GitHub Container Registry."
+  "description": "Helicone now publishes Docker images on Docker Hub, simplifying deployment on platforms that don't natively support the Google Container Registry. This makes Helicone deployment easier across various platforms."
 }
