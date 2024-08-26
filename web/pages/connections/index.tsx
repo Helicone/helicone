@@ -1,32 +1,18 @@
-import { User } from "@supabase/auth-helpers-react";
 import { ReactElement } from "react";
 import AuthLayout from "../../components/layout/authLayout";
-import EvalsPage from "../../components/templates/evals/EvalsPage";
+import IntegrationsPage from "../../components/templates/integrations/IntegrationsPage";
 import { withAuthSSR } from "../../lib/api/handlerWrappers";
 import { SortDirection } from "../../services/lib/sorts/requests/sorts";
 
-interface EvalsProps {
-  user: User;
-  currentPage: number;
-  pageSize: number;
-  sort: {
-    sortKey: string | null;
-    sortDirection: SortDirection | null;
-    isCustomProperty: boolean;
-  };
-  defaultIndex: number;
-}
-
-const Evals = (props: EvalsProps) => {
-  const { currentPage, pageSize, sort, defaultIndex } = props;
-  return <EvalsPage />;
+const Integrations = () => {
+  return <IntegrationsPage />;
 };
 
-Evals.getLayout = function getLayout(page: ReactElement) {
+Integrations.getLayout = function getLayout(page: ReactElement) {
   return <AuthLayout>{page}</AuthLayout>;
 };
 
-export default Evals;
+export default Integrations;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
   const { page, page_size, sortKey, sortDirection, isCustomProperty, tab } =
