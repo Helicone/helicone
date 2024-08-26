@@ -126,25 +126,6 @@ export class HeliconeDatasetManager extends BaseManager {
       return err("Datasets are limited to 500 rows.");
     }
 
-    const { data: existingRows, error: checkError } =
-      await supabaseServer.client
-        .from("helicone_dataset_row")
-        .select("origin_request_id")
-        .eq("dataset_id", datasetId)
-        .in("origin_request_id", addRequests);
-
-    if (checkError) {
-      return err(checkError.message);
-    }
-
-    if (existingRows && existingRows.length > 0) {
-      return err(
-        `Some requests already exist in this dataset: ${existingRows
-          .map((row) => row.origin_request_id)
-          .join(", ")}`
-      );
-    }
-
     const { data, error } = await supabaseServer.client
       .from("helicone_dataset_row")
       .insert([
