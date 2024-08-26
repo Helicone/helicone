@@ -1,34 +1,33 @@
-import { useState, useMemo } from "react";
+import { ChartBarIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
-import { useOrg } from "../../layout/organizationContext";
-import { getJawnClient } from "../../../lib/clients/jawn";
-import AuthHeader from "../../shared/authHeader";
 import {
   BarChart,
   Card,
   LineChart,
   MultiSelect,
   MultiSelectItem,
-  Button,
 } from "@tremor/react";
-import LoadingAnimation from "../../shared/loadingAnimation";
 import Link from "next/link";
-import { ChartBarIcon, PlusIcon } from "@heroicons/react/24/outline";
-import { Col, Row } from "../../layout/common";
-import ThemedTableHeader from "../../shared/themed/themedHeader";
+import { useState } from "react";
+import { getJawnClient } from "../../../lib/clients/jawn";
 import {
   TimeInterval,
   getTimeIntervalAgo,
 } from "../../../lib/timeCalculations/time";
+import { useDebounce } from "../../../services/hooks/debounce";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   UIFilterRowTree,
   getRootFilterNode,
 } from "../../../services/lib/filters/uiFilterRowTree";
-import { useDebounce } from "../../../services/hooks/debounce";
+import { Col, Row } from "../../layout/common";
+import { useOrg } from "../../layout/organizationContext";
+import AuthHeader from "../../shared/authHeader";
+import LoadingAnimation from "../../shared/loadingAnimation";
+import ThemedTableHeader from "../../shared/themed/themedHeader";
 import useSearchParams from "../../shared/utils/useSearchParams";
-import { useUIFilterConvert } from "../dashboard/useDashboardPage";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { TimeFilter } from "../dashboard/dashboardPage";
+import { useUIFilterConvert } from "../dashboard/useDashboardPage";
 
 const EvalsPage = () => {
   const org = useOrg();
