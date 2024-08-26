@@ -6,21 +6,29 @@ import {
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { Row } from "../../../layout/common";
-import ThemedModal from "../../../shared/themed/themedModal";
-import NewDataset from "../../datasets/NewDataset";
-import { NormalizedRequest } from "../builder/abstractRequestBuilder";
 import { useUser } from "@supabase/auth-helpers-react";
 import GenericButton from "../../../layout/common/button";
 
-interface SortButtonProps<T> {
+interface DatasetButtonProps<T> {
   datasetMode: boolean;
   setDatasetMode: (datasetMode: boolean) => void;
-  requests: NormalizedRequest[];
-  onComplete: () => void;
+  items: T[];
+  onAddToDataset: () => void;
+  renderModal?: (isOpen: boolean, onClose: () => void) => React.ReactNode;
+  customButtons?: React.ReactNode;
+  isDatasetPage?: boolean;
 }
 
-export default function DatasetButton<T>(props: SortButtonProps<T>) {
-  const { datasetMode, setDatasetMode, requests, onComplete } = props;
+export default function DatasetButton<T>(props: DatasetButtonProps<T>) {
+  const {
+    datasetMode,
+    setDatasetMode,
+    items,
+    onAddToDataset,
+    renderModal,
+    customButtons,
+    isDatasetPage = false,
+  } = props;
   const [modalOpen, setModalOpen] = useState(false);
   const user = useUser();
 
@@ -30,7 +38,7 @@ export default function DatasetButton<T>(props: SortButtonProps<T>) {
     <>
       <Menu as="div" className="relative inline-block text-left">
         <Row className="gap-2">
-          {!datasetMode || requests.length === 0 ? (
+          {!datasetMode || items.length === 0 ? (
             <GenericButton
               onClick={() => setDatasetMode(!datasetMode)}
               icon={
@@ -44,14 +52,24 @@ export default function DatasetButton<T>(props: SortButtonProps<T>) {
             />
           ) : (
             <>
-              <GenericButton
-                onClick={() => setModalOpen(true)}
-                icon={
-                  <PlusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-                }
-                text="Add to dataset"
-                count={requests.length}
-              />
+              {isDatasetPage ? (
+                customButtons
+              ) : (
+                <GenericButton
+                  onClick={() => {
+                    if (renderModal) {
+                      setModalOpen(true);
+                    } else {
+                      onAddToDataset();
+                    }
+                  }}
+                  icon={
+                    <PlusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                  }
+                  text="Add to dataset"
+                  count={items.length}
+                />
+              )}
               <button
                 className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg p-1.5 hover:bg-sky-50 dark:hover:bg-sky-900"
                 onClick={() => setDatasetMode(false)}
@@ -62,15 +80,7 @@ export default function DatasetButton<T>(props: SortButtonProps<T>) {
           )}
         </Row>
       </Menu>
-      <ThemedModal open={modalOpen} setOpen={setModalOpen}>
-        <NewDataset
-          requests={requests}
-          onComplete={() => {
-            setModalOpen(false);
-            onComplete();
-          }}
-        />
-      </ThemedModal>
+      {renderModal && renderModal(modalOpen, () => setModalOpen(false))}
     </>
   );
 }

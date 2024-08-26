@@ -52,6 +52,8 @@ import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
 import useRequestsPageV2 from "./useRequestsPageV2";
 import { useRouter } from "next/router";
+import ThemedModal from "../../shared/themed/themedModal";
+import NewDataset from "../datasets/NewDataset";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -912,13 +914,26 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                     }
                     setDatasetMode(datasetMode);
                   }}
-                  requests={normalizedRequests.filter((request) =>
+                  items={normalizedRequests.filter((request) =>
                     selectedRows.includes(request.id)
                   )}
-                  onComplete={() => {
-                    setSelectedRows([]);
-                    setDatasetMode(false);
+                  onAddToDataset={() => {
+                    // Handle adding to dataset without modal
                   }}
+                  renderModal={(isOpen, onClose) => (
+                    <ThemedModal open={isOpen} setOpen={onClose}>
+                      <NewDataset
+                        requests={normalizedRequests.filter((request) =>
+                          selectedRows.includes(request.id)
+                        )}
+                        onComplete={() => {
+                          onClose();
+                          setSelectedRows([]);
+                          setDatasetMode(false);
+                        }}
+                      />
+                    </ThemedModal>
+                  )}
                 />
               </div>,
             ]}
