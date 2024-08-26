@@ -192,6 +192,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "best-langfuse-alternatives",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "redeem-promo-code",
     },
   },
