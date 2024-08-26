@@ -20,9 +20,7 @@ export default function Home() {
     <>
       <main className="flex min-h-screen flex-col items-center justify-between text-black px-[12px] pb-[24px]">
         <div className="flex flex-col items-center justify-between max-w-6xl mx-auto">
-          <header className="text-center flex flex-col space-y-4 pb-[24px] md:pb-32 max-w-6xl mx-auto ">
-            <PhHeader />
-
+          <header className="text-center flex flex-col space-y-4 pb-[24px] md:pb-32 max-w-6xl mx-auto mt-16">
             <div className="flex flex-col space-y-4 mx-[12px]">
               <div className="flex flex-col space-y-4 w-full md:items-center items-start">
                 <Link
