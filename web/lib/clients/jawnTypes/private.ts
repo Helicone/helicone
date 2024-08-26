@@ -1671,6 +1671,10 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            usersOverTime: {
+                day: string;
+                count: string;
+              }[];
             newUsersOvertime: {
                 day: string;
                 count: string;

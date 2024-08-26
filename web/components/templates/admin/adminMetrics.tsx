@@ -93,10 +93,26 @@ const AdminMetrics = (props: AdminStatsProps) => {
           />
         </li>
         <li className="w-full h-full rounded-lg flex flex-col bg-gray-5000 p-4 space-y-4">
-          <h2 className="text-xl font-semibold">Users Over Time</h2>
+          <h2 className="text-xl font-semibold">
+            New Users/{groupBy} (Since {timeFilter} ago)
+          </h2>
           <BarChart
             data={
               metricsOverTime.data?.newUsersOvertime.map((ot) => ({
+                day: ot.day,
+                count: +ot.count,
+              })) ?? []
+            }
+            categories={["count"]}
+            index={"day"}
+            showYAxis={true}
+          />
+        </li>
+        <li className="w-full h-full rounded-lg flex flex-col bg-gray-5000 p-4 space-y-4">
+          <h2 className="text-xl font-semibold">Users Over Time</h2>
+          <BarChart
+            data={
+              metricsOverTime.data?.usersOverTime.map((ot) => ({
                 day: ot.day,
                 count: +ot.count,
               })) ?? []

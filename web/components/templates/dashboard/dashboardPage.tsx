@@ -669,6 +669,8 @@ const DashboardPage = (props: DashboardPageProps) => {
                         colors={["green", "red"]}
                         showYAxis={false}
                         curveType="monotone"
+                        animationDuration={1000}
+                        showAnimation={true}
                       />
                     )}
                   </div>
@@ -699,6 +701,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   title={`Top Models`}
                   value={undefined}
                   isDataOverTimeLoading={isModelsLoading}
+                  withAnimation={true}
                 >
                   <div className="flex flex-row justify-between items-center pb-2">
                     <p className="text-xs font-semibold text-gray-700">Name</p>
@@ -716,6 +719,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                         ) ?? []
                     }
                     className="overflow-auto h-full"
+                    showAnimation={true}
                   />
                 </StyledAreaChart>
               </div>
