@@ -18,25 +18,25 @@ import Link from "next/link";
 export default function Home() {
   return (
     <>
-      <main className="flex min-h-screen flex-col items-center justify-between text-black px-[12px] pb-[24px]">
+      <main className="flex min-h-screen flex-col items-center justify-between text-black px-[12px] pt-[24px] pb-[24px]">
         <div className="flex flex-col items-center justify-between max-w-6xl mx-auto">
-          <header className="text-center flex flex-col space-y-4 pb-[24px] md:pb-32 max-w-6xl mx-auto ">
+          <header className="text-center flex flex-col space-y-4 pb-[32px] md:pb-40 pt-8 md:pt-12 max-w-6xl mx-auto ">
             <div className="flex flex-col space-y-4 mx-[12px]">
               <div className="flex flex-col space-y-4 w-full md:items-center items-start">
                 <Link
                   href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm inline-flex space-x-6 font-light text-gray-600 items-center"
+                  className="inline-flex items-center space-x-2.5 bg-gray-50 rounded-md px-3.5 py-2 text-sm font-medium text-gray-600"
                 >
-                  Backed by{" "}
+                  <span>Backed by</span>
                   <svg
                     width="20"
                     height="20"
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    className="mr-1 pl-2"
+                    className="mr-1.5"
                   >
                     <g clipPath="url(#clip0_24_57)">
                       <rect
@@ -100,8 +100,8 @@ export default function Home() {
                         ></rect>
                       </clipPath>
                     </defs>
-                  </svg>{" "}
-                  Combinator
+                  </svg>
+                  <span>Combinator</span>
                 </Link>
               </div>
 
